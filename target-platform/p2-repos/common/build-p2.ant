@@ -19,7 +19,6 @@
     	<!-- will be moved to Orbit -->
     	<checkedin bundle="org.tigris.mtoolkit.iagent.rpc"/>
     	
-    	<localized bundle="com.gwt.user" version="0.2.0"/>
     	<localized bundle="com.gwt.user" version="1.0.0"/>
     	
     	<localized bundle="org.usb4java"/>

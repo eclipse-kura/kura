@@ -263,7 +263,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>get-web-classic-bundle</id>
+						<id>get-web-bundle</id>
 						<phase>generate-resources</phase>
 						<goals>
 							<goal>copy</goal>
@@ -275,25 +275,6 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.web</artifactId>
 									<version>${org.eclipse.kura.web.version}</version>
-								</artifactItem>
-							</artifactItems>
-							<stripVersion>true</stripVersion>
-							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
-						</configuration>
-					</execution>
-					<execution>
-						<id>get-web2-bundle</id>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<skip>${org.eclipse.kura.web2.skip}</skip>
-							<artifactItems>
-								<artifactItem>
-									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.web2</artifactId>
-									<version>${org.eclipse.kura.web2.version}</version>
 								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
@@ -378,8 +359,7 @@
 							    <move file="target/plugins/org.eclipse.kura.net.admin.jar" tofile="target/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.protocol.modbus.jar" tofile="target/plugins/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar" failonerror="false"/>
 							    <move file="target/plugins/org.eclipse.kura.protocol.can.jar" tofile="target/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar" failonerror="false"/>
-							    <move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" failonerror="false" />
-  								<move file="target/plugins/org.eclipse.kura.web2.jar" tofile="target/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" failonerror="false" />
+  								<move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web.version}.jar" failonerror="false" />
 								<move file="target/plugins/org.eclipse.kura.linux.gpio.jar" tofile="target/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" failonerror="false"/>
   								<move file="target/plugins/org.eclipse.kura.emulator.jar" tofile="target/plugins/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar"/>
   								<move file="target/plugins/org.eclipse.kura.emulator.clock.jar" tofile="target/plugins/org.eclipse.kura.emulator.clock_${org.eclipse.kura.emulator.clock.version}.jar"/>
@@ -1934,10 +1914,6 @@
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
-											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"
-											failonerror="false" />
-										<copy
-											file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"
 											failonerror="false" />
 									</target>

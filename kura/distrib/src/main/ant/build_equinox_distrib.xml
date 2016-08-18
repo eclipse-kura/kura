@@ -120,9 +120,6 @@
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
 		<antcall target="web-config" />
 
-		<available file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" property="web2.jar.present" />
-		<antcall target="web2-config" />
-
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" property="linux.gpio.jar.present" />
 		<antcall target="gpio-config" />
 		<antcall target="emulator-gpio-config" />
@@ -485,7 +482,6 @@ fi
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web-jar" />
-		<antcall target="web2-jar" />
 		<antcall target="gpio-jar" />
 		<antcall target="emulator-gpio-jar" />
 		<antcall target="emulator-jars" />
@@ -829,18 +825,9 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<target name="web-config" if="web.jar.present">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
-				   value=", reference:file:${kura.install.dir}/kura/plugins/com.gwt.user_0.2.0.jar@3" />
+				   value=", reference:file:${kura.install.dir}/kura/plugins/com.gwt.user_${com.gwt.user.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 	               value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar@6:start" />
-		</propertyfile>
-	</target>
-
-	<target name="web2-config" if="web2.jar.present">
-		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
-			<entry key="osgi.bundles" operation="+"
-				   value=", reference:file:${kura.install.dir}/kura/plugins/com.gwt.user_1.0.0.jar@3" />
-			<entry key="osgi.bundles" operation="+"
-	               value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar@6:start" />
 		</propertyfile>
 	</target>
 
@@ -892,16 +879,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
-			<zipfileset file="../target-definition/common/repository/plugins/com.gwt.user_0.2.0.jar"
-                        prefix="${build.output.name}/plugins" />
-		</zip>
-	</target>
-
-	<target name="web2-jar" if="web2.jar.present">
-		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
-			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
-                        prefix="${build.output.name}/kura/plugins" />
-			<zipfileset file="../target-definition/common/repository/plugins/com.gwt.user_1.0.0.jar"
+			<zipfileset file="../target-definition/common/repository/plugins/com.gwt.user_${com.gwt.user.version}.jar"
                         prefix="${build.output.name}/plugins" />
 		</zip>
 	</target>

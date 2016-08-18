@@ -22,15 +22,12 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<tycho-version>0.18.1</tycho-version>
+		<tycho-version>0.25.0</tycho-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8
-		</project.reporting.outputEncoding>
-		<maven.build.timestamp.format>yyyyMMddHHmm
-		</maven.build.timestamp.format>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
 		<kura.basedir>${project.basedir}</kura.basedir>
 		<org.eclipse.kura.web.skip>true</org.eclipse.kura.web.skip>
-		<org.eclipse.kura.web2.skip>true</org.eclipse.kura.web2.skip>
 		<org.eclipse.kura.can.skip>true</org.eclipse.kura.can.skip>
 		<org.eclipse.kura.dio.skip>false</org.eclipse.kura.dio.skip>
 		<org.eclipse.kura.dio.include>true</org.eclipse.kura.dio.include>
@@ -63,7 +60,7 @@
 		<profile>
 			<id>web</id>
 			<properties>
-				<org.eclipse.kura.web2.skip>false</org.eclipse.kura.web2.skip>
+				<org.eclipse.kura.web.skip>false</org.eclipse.kura.web.skip>
 			</properties>
 			<activation>
 				<activeByDefault>false</activeByDefault>
@@ -71,19 +68,6 @@
 			<modules>
 				<module>distrib</module>
 				<module>tools</module>
-			</modules>
-		</profile>
-		<profile>
-			<id>web-classic</id>
-			<properties>
-				<org.eclipse.kura.web.skip>false</org.eclipse.kura.web.skip>
-			</properties>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<modules>
-				<module>org.eclipse.kura.web</module>
-				<module>distrib</module>
 			</modules>
 		</profile>
 		<profile>

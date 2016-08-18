@@ -24,6 +24,11 @@
 			<artifactId>gwt-user</artifactId>
 			<version>2.7.0</version>
 		</dependency>
+        <dependency>
+			<groupId>org.gwtbootstrap3</groupId>
+			<artifactId>gwtbootstrap3</artifactId>
+			<version>0.9.1</version>
+		</dependency>
 	</dependencies>
 	
 	<build>
@@ -58,7 +63,7 @@
 							javax.servlet;
 							version="2.6.0", *
 						</Import-Package>
-						<_exportcontents>com.google.*, javax.validation.*</_exportcontents>
+						<_exportcontents>com.google.*, org.gwtbootstrap3.*, javax.validation.*</_exportcontents>
 					</instructions>
 				</configuration>
 			</plugin>

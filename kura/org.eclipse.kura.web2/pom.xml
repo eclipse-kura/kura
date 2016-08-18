@@ -11,14 +11,15 @@
     Contributors:
       Eurotech
       Red Hat Inc - remove dependency on slf4j:logj12
-         - Fix build warning
+          - Fix build warning
+      		- convert to tycho build
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<!-- POM file generated with GWT webAppCreator -->
 	<modelVersion>4.0.0</modelVersion>
+	
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
@@ -26,102 +27,21 @@
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
-	<artifactId>org.eclipse.kura.web2</artifactId>
+	<artifactId>org.eclipse.kura.web</artifactId>
 	<version>2.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>eclipse-plugin</packaging>
 	<name>org.eclipse.kura.web2</name>
 
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
 		<!-- Convenience property to set the GWT version -->
 		<gwtVersion>2.7.0</gwtVersion>
-		<!-- GWT needs at least java 1.5 -->
 		<webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
-	<dependencies>
-		<!-- <dependency> <groupId>com.google.gwt</groupId> <artifactId>gwt-osgi</artifactId>
-			<version>${gwtVersion}</version> <scope>runtime</scope> </dependency> <dependency>
-			<groupId>com.google.gwt</groupId> <artifactId>gwt-servlet</artifactId> <version>${gwtVersion}</version>
-			<scope>runtime</scope> </dependency> -->
-		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-user</artifactId>
-			<version>${gwtVersion}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.kura</groupId>
-			<artifactId>org.eclipse.kura.api</artifactId>
-			<version>[1.0,2.0)</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.kura</groupId>
-			<artifactId>org.eclipse.kura.core</artifactId>
-			<version>[1.0,2.0)</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.kura</groupId>
-			<artifactId>org.eclipse.kura.core.configuration</artifactId>
-			<version>[1.0,2.0)</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.kura</groupId>
-			<artifactId>org.eclipse.kura.core.net</artifactId>
-			<version>[1.0,2.0)</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.kura</groupId>
-			<artifactId>org.eclipse.kura.deployment.agent</artifactId>
-			<version>[1.0,2.0)</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<version>5.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-			<version>4.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.7</version>
-			<scope>provided</scope>
-		</dependency>
-	        <dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.6.4</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-fileupload</groupId>
-			<artifactId>commons-fileupload</artifactId>
-			<version>1.2.2</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.1</version>
-		</dependency>
-        <dependency>
-			<groupId>org.gwtbootstrap3</groupId>
-			<artifactId>gwtbootstrap3</artifactId>
-			<version>0.9.1</version>
-		</dependency>
-	</dependencies>
-
 	<build>
 		<!-- Generate compiled stuff in the folder used for developing mode -->
-		<outputDirectory>src/main/webapp/WEB-INF/classes</outputDirectory>
 		<extensions>
 			<extension>
 				<groupId>org.apache.maven.wagon</groupId>
@@ -165,14 +85,6 @@
 							 </execution>
 					</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<version>2.9</version>
-				<configuration>
-					<skip>false</skip>
-				</configuration>
-			</plugin>
 			<!-- Remove CSS on clean -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -182,11 +94,6 @@
 					<filesets>
 						<fileset>
 							<directory>src/main/webapp/denali</directory>
-							<excludes>
-								<exclude>blank.html</exclude>
-								<exclude>clear.gif</exclude>
-								<exclude>hosted.html</exclude>
-							</excludes>
 						</fileset>
 						<fileset>
 							<directory>src/main/webapp/WEB-INF</directory>
@@ -219,89 +126,28 @@
 					<failOnError>true</failOnError>
 					<extraJvmArgs>-Xmx768M -Xss1024k</extraJvmArgs>
 					<runTarget>denali.html</runTarget>
-					<hostedWebapp>${webappDirectory}</hostedWebapp>
 					<i18nMessagesBundle>org.eclipse.kura.web.client.messages.Messages</i18nMessagesBundle>
 					<i18nConstantsWithLookupBundle>org.eclipse.kura.web.client.messages.ValidationMessages</i18nConstantsWithLookupBundle>
-                    <webappDirectory>src/main/webapp</webappDirectory>
+					<outputDirectory>src/main/webapp</outputDirectory>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-packaging-plugin</artifactId>
+				<configuration>
+					<additionalFileSets>
+						<fileSet>
+							<directory>www</directory>
+							<prefix>www/</prefix>
+							<excludes>
+								<exclude>**/WEB-INF/**</exclude>
+							</excludes>
+						</fileSet>
+					</additionalFileSets>
 				</configuration>
 			</plugin>
 
-			<!-- Copy static web files before executing gwt:run -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>2.1.1</version>
-				<executions>
-					<execution>
-						<phase>compile</phase>
-						<goals>
-							<goal>exploded</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<webappDirectory>${webappDirectory}</webappDirectory>
-					<archive>
-						<compress>false</compress>
-						<manifestFile>META-INF/MANIFEST.MF</manifestFile>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.3</version>
-				<configuration>
-					<source>1.6</source>
-					<target>1.7</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.4</version>
-				<executions>
-					<execution>
-						<id>buid-version-jar</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<appendAssemblyId>false</appendAssemblyId>
-							<archive>
-								<manifestFile>META-INF/MANIFEST.MF</manifestFile>
-							</archive>
-							<descriptors>
-								<descriptor>src/main/assembly/bundle.xml</descriptor>
-							</descriptors>
-							<archiverConfig>
-            					<compress>false</compress>
-        					</archiverConfig>
-						</configuration>
-					</execution>
-					<execution>
-						<id>standard-jar</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<finalName>${project.artifactId}-${project.version}</finalName>
-							<appendAssemblyId>false</appendAssemblyId>
-							<archive>
-								<manifestFile>META-INF/MANIFEST.MF</manifestFile>
-							</archive>
-							<descriptors>
-								<descriptor>src/main/assembly/bundle.xml</descriptor>
-							</descriptors>
-							<archiverConfig>
-            					<compress>false</compress>
-        					</archiverConfig>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
@@ -467,6 +313,25 @@
 										</versionRange>
 										<goals>
 											<goal>regex-property</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-war-plugin
+										</artifactId>
+										<versionRange>
+											[2.1.1,)
+										</versionRange>
+										<goals>
+											<goal>exploded</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>

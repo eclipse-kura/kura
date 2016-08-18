@@ -147,6 +147,7 @@
 			<modules>
 				<module>org.eclipse.kura.protocol.can</module>
 				<module>org.eclipse.kura.protocol.can.test</module>
+				<module>org.eclipse.kura.protocol.can.feature</module>
 			</modules>
 		</profile>
 	</profiles>
@@ -407,6 +408,14 @@
 		</plugins>
 		<pluginManagement>
 			<plugins>
+	             <plugin>
+	                <groupId>de.dentrassi.maven</groupId>
+	                <artifactId>osgi-dp</artifactId>
+					<version>0.0.2</version>
+					<configuration>
+						<useQualifiedFilename>false</useQualifiedFilename>
+					</configuration>
+	            </plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>

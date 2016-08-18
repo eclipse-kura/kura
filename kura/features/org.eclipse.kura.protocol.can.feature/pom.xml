@@ -11,7 +11,7 @@
 	</parent>
 
 	<groupId>org.eclipse.kura.features</groupId>
-	<artifactId>org.eclipse.kura.protocol.modbus</artifactId>
+	<artifactId>org.eclipse.kura.protocol.can</artifactId>
 	<packaging>eclipse-feature</packaging>
 
 	<properties>

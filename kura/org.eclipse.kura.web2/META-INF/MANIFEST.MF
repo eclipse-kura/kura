@@ -6,6 +6,7 @@ Bundle-Version: 2.0.1.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
+Bundle-ActivationPolicy: lazy
 Import-Package: javax.crypto,
  javax.crypto.spec,
  javax.security.auth,

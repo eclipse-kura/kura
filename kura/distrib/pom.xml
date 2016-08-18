@@ -359,7 +359,7 @@
 							    <move file="target/plugins/org.eclipse.kura.net.admin.jar" tofile="target/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.protocol.modbus.jar" tofile="target/plugins/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar" failonerror="false"/>
 							    <move file="target/plugins/org.eclipse.kura.protocol.can.jar" tofile="target/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar" failonerror="false"/>
-  								<move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web.version}.jar" failonerror="false" />
+  								<move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" failonerror="false" />
 								<move file="target/plugins/org.eclipse.kura.linux.gpio.jar" tofile="target/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" failonerror="false"/>
   								<move file="target/plugins/org.eclipse.kura.emulator.jar" tofile="target/plugins/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar"/>
   								<move file="target/plugins/org.eclipse.kura.emulator.clock.jar" tofile="target/plugins/org.eclipse.kura.emulator.clock_${org.eclipse.kura.emulator.clock.version}.jar"/>

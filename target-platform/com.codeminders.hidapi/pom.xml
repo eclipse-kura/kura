@@ -94,7 +94,6 @@
 				<manifestLocation>META-INF</manifestLocation>
 				<instructions>
 					<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-					<Bundle-Name>%bundle.name</Bundle-Name>
 					<Bundle-Version>${project.version}</Bundle-Version>
 					<Include-Resource>
 						lib=${project.basedir}/src/main/lib,

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,7 +8,8 @@
  *
  * Contributors:
  *     Eurotech
- *     Jens Reimann <jreimann@redhat.com> Fix possible NPE, fix loading error
+ *     Red Hat Inc - Fix possible NPE, fix loading error
+ *       - Clean up kura.properties handling
  *******************************************************************************/
 package org.eclipse.kura.core.crypto;
 
@@ -36,6 +37,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.system.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -326,7 +328,7 @@ public class CryptoServiceImpl implements CryptoService {
 	}
 
 	private static void initKeystorePasswordPath() {
-		final String uriSpec = System.getProperty("kura.configuration");
+		final String uriSpec = System.getProperty(SystemService.KURA_CONFIG);
 		if (uriSpec == null || uriSpec.isEmpty()) {
 			logger.error("Unable to initialize keystore password. 'kura.configuration' is not set.");
 			return;

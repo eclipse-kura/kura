@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix build warnigns
  *******************************************************************************/
 package org.eclipse.kura.demo.modbus;
 
@@ -16,13 +17,11 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.protocol.modbus.ModbusProtocolDeviceService;
+import org.eclipse.kura.protocol.modbus.ModbusProtocolException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.eclipse.kura.protocol.modbus.ModbusProtocolDeviceService;
-import org.eclipse.kura.protocol.modbus.ModbusProtocolException;
-import org.eclipse.kura.protocol.modbus.ModbusTransmissionMode;
 
 public class ModbusExample implements ConfigurableComponent {
 	private static final Logger s_logger = LoggerFactory.getLogger(ModbusExample.class);

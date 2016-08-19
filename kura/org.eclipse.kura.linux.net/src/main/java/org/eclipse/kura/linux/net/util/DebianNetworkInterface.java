@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix build warnings
  *******************************************************************************/
 package org.eclipse.kura.linux.net.util;
 
@@ -36,7 +37,7 @@ import org.slf4j.LoggerFactory;
 public class DebianNetworkInterface extends GenericNetworkInterface {
 	private static final Logger s_logger = LoggerFactory.getLogger(DebianNetworkInterface.class);
 	
-	public static NetInterfaceConfig getCurrentConfiguration(
+	public static NetInterfaceConfig<?> getCurrentConfiguration(
 			String interfaceName, NetInterfaceType type,
 			NetInterfaceStatus status, boolean dhcpServerEnabled,
 			boolean passDns)
@@ -44,7 +45,7 @@ public class DebianNetworkInterface extends GenericNetworkInterface {
 		NET_CONFIGURATION_DIRECTORY = "/etc/network/";
 		
 		try {
-		    NetInterfaceConfig netInterfaceConfig = null;
+		    NetInterfaceConfig<?> netInterfaceConfig = null;
 		    
 			//build up the configuration
 			Properties kuraProps = new Properties();
@@ -127,7 +128,7 @@ public class DebianNetworkInterface extends GenericNetworkInterface {
 		}
 	}
 
-	public static void writeNewConfig(NetInterfaceConfig netInterfaceConfig) throws KuraException {
+	public static void writeNewConfig(NetInterfaceConfig<?> netInterfaceConfig) throws KuraException {
 		Scanner scanner = null;
 		try {
 			StringBuffer sb = new StringBuffer();

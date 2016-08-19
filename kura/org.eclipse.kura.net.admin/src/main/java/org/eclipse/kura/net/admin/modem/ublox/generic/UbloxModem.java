@@ -8,32 +8,19 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix warnings
  *******************************************************************************/
 
 package org.eclipse.kura.net.admin.modem.ublox.generic;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.List;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
-import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.linux.net.modem.ModemDriver;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemInfo;
-import org.eclipse.kura.linux.net.modem.SupportedSerialModemsInfo;
-import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
-import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
-import org.eclipse.kura.linux.net.modem.UsbModemDriver;
-import org.eclipse.kura.net.NetConfig;
-import org.eclipse.kura.net.admin.modem.HspaCellularModem;
 import org.eclipse.kura.net.admin.modem.hspa.HspaModem;
 import org.eclipse.kura.net.modem.ModemDevice;
-import org.eclipse.kura.net.modem.ModemRegistrationStatus;
-import org.eclipse.kura.net.modem.ModemTechnologyType;
-import org.eclipse.kura.net.modem.SerialModemDevice;
-import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

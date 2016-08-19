@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Jens Reimann <jreimann@redhat.com> Fix possible NPE
+ *     Jens Reimann <jreimann@redhat.com> Fix possible NPE, fix loading error
  *******************************************************************************/
 package org.eclipse.kura.core.crypto;
 
@@ -17,10 +17,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.MessageDigest;
@@ -333,27 +333,22 @@ public class CryptoServiceImpl implements CryptoService {
 		}
 		
 		Properties props = new Properties();
-		FileInputStream fis = null;
+		InputStream in = null;
 		try {
-			URI uri = new URI(uriSpec);
-			fis = new FileInputStream(new File(uri));
-			props.load(fis);
+			in = new URL(uriSpec).openStream();
+			props.load(in);
 			Object value = props.get("kura.data");
 			if (value != null) {
 				s_keystorePasswordPath = (String) value + File.separator + "store.save"; 
 			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			logger.error("Failed to load keystore password", e);
 		} finally {
-			if (fis != null) {
+			if (in != null) {
 				try {
-					fis.close();
+					in.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.warn("Failed to close configuration file", e);
 				}
 			}
 		}

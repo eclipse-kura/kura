@@ -8,43 +8,16 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> - upgrade to Camel 2.17.2
  *******************************************************************************/
 package org.eclipse.kura.camel.router;
 
 import java.io.ByteArrayInputStream;
-import java.lang.reflect.Field;
 import java.util.Map;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.component.bean.BeanComponent;
-import org.apache.camel.component.beanclass.ClassComponent;
-import org.apache.camel.component.binding.BindingNameComponent;
-import org.apache.camel.component.browse.BrowseComponent;
-import org.apache.camel.component.controlbus.ControlBusComponent;
-import org.apache.camel.component.dataformat.DataFormatComponent;
-import org.apache.camel.component.dataset.DataSetComponent;
-import org.apache.camel.component.direct.DirectComponent;
-import org.apache.camel.component.directvm.DirectVmComponent;
-import org.apache.camel.component.file.FileComponent;
-import org.apache.camel.component.language.LanguageComponent;
-import org.apache.camel.component.log.LogComponent;
-import org.apache.camel.component.mock.MockComponent;
-import org.apache.camel.component.properties.PropertiesComponent;
-import org.apache.camel.component.ref.RefComponent;
-import org.apache.camel.component.rest.RestComponent;
-import org.apache.camel.component.scheduler.SchedulerComponent;
-import org.apache.camel.component.seda.SedaComponent;
-import org.apache.camel.component.stub.StubComponent;
-import org.apache.camel.component.test.TestComponent;
-import org.apache.camel.component.timer.TimerComponent;
-import org.apache.camel.component.validator.ValidatorComponent;
-import org.apache.camel.component.vm.VmComponent;
-import org.apache.camel.component.xslt.XsltComponent;
-import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.camel.language.simple.SimpleLanguage;
-import org.apache.camel.model.RoutesDefinition;
-import org.apache.camel.spi.Language;
 import org.apache.camel.component.kura.KuraRouter;
+import org.apache.camel.model.RoutesDefinition;
 import org.eclipse.kura.camel.RouterConstants;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.osgi.framework.BundleContext;
@@ -52,11 +25,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * TODO: is this base class an API? If so please add Javadoc.
- * Base class for Camel routers deployable into Eclipse Kura.
- * All CamelRouters are configurable components.
- */
 public abstract class CamelRouter extends KuraRouter implements ConfigurableComponent {
 	private static final Logger s_logger = LoggerFactory.getLogger(CamelRouter.class);
 
@@ -133,63 +101,12 @@ public abstract class CamelRouter extends KuraRouter implements ConfigurableComp
 	protected void beforeStart(CamelContext camelContext) {
 		camelContext.getShutdownStrategy().setTimeout(5);
 		camelContext.disableJMX();
-		registerComponents();
 		super.beforeStart(camelContext);
 	}
 
 	protected void modified(Map<String, Object> properties) {
 		m_properties = properties;
 		updated(m_properties);
-	}
-
-	// Components registration
-
-	protected void registerComponents() {
-		camelContext.addComponent("bean", new BeanComponent());
-		camelContext.addComponent("binding", new BindingNameComponent());
-		camelContext.addComponent("browse", new BrowseComponent());
-		camelContext.addComponent("class", new ClassComponent());
-		camelContext.addComponent("controlbus", new ControlBusComponent());
-		camelContext.addComponent("dataformat", new DataFormatComponent());
-		camelContext.addComponent("dataset", new DataSetComponent());
-		camelContext.addComponent("direct", new DirectComponent());
-		camelContext.addComponent("direct-vm", new DirectVmComponent());
-		camelContext.addComponent("file", new FileComponent());
-		camelContext.addComponent("language", new LanguageComponent());
-		camelContext.addComponent("log", new LogComponent());
-		camelContext.addComponent("mock", new MockComponent());
-		camelContext.addComponent("properties", new PropertiesComponent());
-		camelContext.addComponent("ref", new RefComponent());
-		camelContext.addComponent("rest", new RestComponent());
-		camelContext.addComponent("seda", new SedaComponent());
-		camelContext.addComponent("scheduler", new SchedulerComponent());
-		camelContext.addComponent("stub", new StubComponent());
-		camelContext.addComponent("test", new TestComponent());
-		camelContext.addComponent("timer", new TimerComponent());
-		camelContext.addComponent("validator", new ValidatorComponent());
-		camelContext.addComponent("vm", new VmComponent());
-		camelContext.addComponent("xlst", new XsltComponent());
-
-		registerLanguage("simple", new SimpleLanguage());
-	}
-
-	protected void registerLanguage(String languageName, Language language) {
-		try {
-			Field field = DefaultCamelContext.class.getDeclaredField("languages");
-			boolean accessible = field.isAccessible();
-			field.setAccessible(true);
-			try {
-				Map<String, Language> languages = (Map<String, Language>) field.get(camelContext);
-				languages.put(languageName, language);
-			}
-			finally {
-				field.setAccessible(accessible);
-			}
-		} catch (NoSuchFieldException e) {
-			throw new RuntimeException(e);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 }

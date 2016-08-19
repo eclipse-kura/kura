@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - allow opting-out of System.exit()
  *******************************************************************************/
 package org.eclipse.kura.core.system;
 
@@ -47,9 +48,6 @@ import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-/**
- */
 public class SystemServiceImpl implements SystemService 
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(SystemServiceImpl.class);
@@ -1133,13 +1131,15 @@ public class SystemServiceImpl implements SystemService
 	}
 
 
-	private static void createDirIfNotExists(String fileName) 
-	{
-		// Make sure the configuration directory exists - create it if not		
-		File file = new File(fileName);
-		if(!file.exists() && !file.mkdirs()) {
-			s_logger.error("Failed to create the temporary configuration directory: " + fileName);
-			System.exit(-1);
-		}
-	}	
+    private static void createDirIfNotExists(String fileName) {
+        // Make sure the configuration directory exists - create it if not		
+        File file = new File(fileName);
+        if (!file.exists() && !file.mkdirs()) {
+            s_logger.error("Failed to create the temporary configuration directory: {}", fileName);
+            if (Boolean.getBoolean("org.eclipse.kura.core.dontExitOnFailure")) {
+                throw new RuntimeException(String.format("Failed to create the temporary configuration directory: %s", fileName));
+            }
+            System.exit(-1);
+        }
+    }	
 }

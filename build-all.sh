@@ -12,6 +12,14 @@
 #     Red Hat - Initial API and implementation
 #
 
+# call this script with KURA_BUILD_CACHE set to an existing directory
+# in order to use a local cache for downloaded dependencies
+# Call it like:
+#   KURA_BUILD_CACHE=/tmp/kura.build ./build-all.sh
+
+test -z "$KURA_BUILD_CACHE" && echo "Consider setting KURA_BUILD_CACHE to enable the local build cache"
+
 mvn "$@" -f target-platform/pom.xml clean install &&
-mvn "$@" -f kura/manifest_pom.xml clean install -Dmaven.test.skip=true &&
+mvn "$@" -f kura/manifest_pom.xml clean install -Dmaven.test.skip=true -Pcan &&
 mvn "$@" -f kura/pom_pom.xml clean install -Dmaven.test.skip=true -Pweb
+

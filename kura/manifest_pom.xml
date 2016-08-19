@@ -147,7 +147,7 @@
 			<modules>
 				<module>org.eclipse.kura.protocol.can</module>
 				<module>org.eclipse.kura.protocol.can.test</module>
-				<module>org.eclipse.kura.protocol.can.feature</module>
+				<module>features/org.eclipse.kura.protocol.can.feature</module>
 			</modules>
 		</profile>
 	</profiles>

@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> - Clean up kura properties handling
  *******************************************************************************/
 package org.eclipse.kura.deployment.rp.sh.impl;
 
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentException;
@@ -41,7 +43,7 @@ import org.slf4j.LoggerFactory;
 public class ShellScriptResourceProcessorImpl implements ResourceProcessor {
 	private static Logger s_logger = LoggerFactory.getLogger(ShellScriptResourceProcessorImpl.class);
 	
-	private static final String KURA_CONF_URL_PROPNAME = "kura.configuration";
+	private static final String KURA_CONF_URL_PROPNAME = SystemService.KURA_CONFIG;
 	private static final String PACKAGES_PATH_PROPNAME = "kura.packages";
 	
 	private static final String INSTALL_ACTION = "install";

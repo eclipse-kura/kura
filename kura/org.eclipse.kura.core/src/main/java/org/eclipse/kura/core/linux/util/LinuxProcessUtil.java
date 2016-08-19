@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> - Clean up kura properties handling
  *******************************************************************************/
 package org.eclipse.kura.core.linux.util;
 
@@ -24,6 +25,7 @@ import java.util.StringTokenizer;
 
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.system.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +36,7 @@ public class LinuxProcessUtil {
 	private static String s_platform = null;
 
 	static {
-		String uriSpec = System.getProperty("kura.configuration");
+		String uriSpec = System.getProperty(SystemService.KURA_CONFIG);
 		Properties props = new Properties();
 		FileInputStream fis = null;
 		try {

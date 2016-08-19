@@ -19,3 +19,4 @@ Import-Package: junit.framework,
  org.osgi.util.tracker;version="1.5.1",
  org.slf4j;version="1.6.4"
 Export-Package: org.eclipse.kura.test.annotation; version="1.0.0"
+Bundle-ActivationPolicy: lazy

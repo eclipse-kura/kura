@@ -400,7 +400,7 @@
 					<artifactId>maven-javadoc-plugin</artifactId>
 					<version>2.9</version>
 					<configuration>
-						<doctitle>Kura ${project.version}</doctitle>
+						<doctitle>Eclipse Kura ${project.version}</doctitle>
 						<!-- Default configuration for all reports -->
 						<skip>false</skip>
 						<links>

@@ -9,10 +9,12 @@
  * Contributors:
  *     Eurotech
  *     Jens Reimann <jreimann@redhat.com> - Fix logging calls
+ *          - Fix possible NPE
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.kura.KuraConnectException;
@@ -170,6 +172,10 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
         try {
             List<GwtNetInterfaceConfig> gwtNetInterfaceConfigs = gwtNetworkService.findNetInterfaceConfigurations();
+            if (gwtNetInterfaceConfigs == null) {
+            	return Collections.emptyList();	
+            }
+            
             for (GwtNetInterfaceConfig gwtNetInterfaceConfig : gwtNetInterfaceConfigs) {
 
                 String currentAddress    = gwtNetInterfaceConfig.getIpAddress();

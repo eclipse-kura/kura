@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix build warnings
  *******************************************************************************/
 package org.eclipse.kura.emulator.position;
 
@@ -24,7 +25,7 @@ public class GpsXmlHandler extends DefaultHandler {
 	private static final String TAG_ELEVATION = "ele";
 	private static final String TAG_TIME = "time";
 	
-	private ArrayList gpsPoints;
+	private final ArrayList<GpsPoint> gpsPoints;
 	private String latitude;
 	private String longitude;
 	private String elevation;
@@ -35,7 +36,7 @@ public class GpsXmlHandler extends DefaultHandler {
 	private boolean foundTime = false;
 	
 	public GpsXmlHandler() {
-		gpsPoints = new ArrayList();
+		gpsPoints = new ArrayList<GpsPoint>();
 		latitude = null;
 		longitude = null;
 		elevation = null;
@@ -78,7 +79,7 @@ public class GpsXmlHandler extends DefaultHandler {
 			if(latitude != null && longitude != null && elevation != null && time != null) {
 				this.gpsPoints.add(new GpsPoint(Double.parseDouble(latitude), Double.parseDouble(longitude), Double.parseDouble(elevation), time));
 			} else {
-				System.out.println(LABEL + "the XML file is malformted");
+				System.out.println(LABEL + "the XML file is malformed");
 			}
 		} else if(TAG_ELEVATION.equals(elementName)) {
 			foundElevation = false;

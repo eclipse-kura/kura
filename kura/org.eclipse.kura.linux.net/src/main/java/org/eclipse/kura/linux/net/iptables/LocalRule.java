@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix build warnings
  *******************************************************************************/
 package org.eclipse.kura.linux.net.iptables;
 
@@ -305,9 +306,9 @@ public class LocalRule {
 		try {
 			if(m_permittedNetworkString != null) {
 				String[] split = m_permittedNetworkString.split("/");
-				return new NetworkPair(IPAddress.parseHostAddress(split[0]), Short.parseShort(split[1]));
+				return new NetworkPair<IP4Address>((IP4Address)IPAddress.parseHostAddress(split[0]), Short.parseShort(split[1]));
 			} else {
-				return new NetworkPair(IPAddress.parseHostAddress("0.0.0.0"), (short)0);
+				return new NetworkPair<IP4Address>((IP4Address)IPAddress.parseHostAddress("0.0.0.0"), (short)0);
 			}
 		} catch(Exception e) {
 			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);

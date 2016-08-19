@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix build warnings
  *******************************************************************************/
 package org.eclipse.kura.protocol.modbus;
 
@@ -53,7 +54,6 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 	public static final String SERIAL_232 = "RS232";
 	public static final String SERIAL_485 = "RS485";
 	public static final String PROTOCOL_CONNECTION_TYPE_ETHER_TCP = "ETHERTCP";
-	private String unitName = 	PROTOCOL_NAME;
 	private int 				m_respTout;
 	private int 				m_txMode;
 	private boolean				m_serial485 = false;

@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix build warnings
  *******************************************************************************/
 package org.eclipse.kura.test;
 
@@ -44,7 +45,7 @@ public class RemoteTargetTest {
 	private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
 	private ConfigurationAdmin m_configAdmin;
-	private BundleTracker bundleTracker;
+	private BundleTracker<?> bundleTracker;
 	private TestExtender testExtender;
 
 	public void setSystemService(SystemService systemService) {
@@ -96,7 +97,7 @@ public class RemoteTargetTest {
 		s_logger.debug("m_systemService.getPlatform(): " + m_systemService.getPlatform());
 		testExtender = new TestExtender(m_systemService.getPlatform(), componentContext.getBundleContext());
 
-		bundleTracker = new BundleTracker(componentContext.getBundleContext(), Bundle.RESOLVED|Bundle.ACTIVE|Bundle.INSTALLED, testExtender);
+		bundleTracker = new BundleTracker<Object>(componentContext.getBundleContext(), Bundle.RESOLVED|Bundle.ACTIVE|Bundle.INSTALLED, testExtender);
 		bundleTracker.open();
 
 		Bundle[] currentBundles = bundleTracker.getBundles();

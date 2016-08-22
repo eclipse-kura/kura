@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #
 # Copyright (c) 2016 Red Hat and/or its affiliates
 #
@@ -6,9 +8,10 @@
 #  which accompanies this distribution, and is available at
 #  http://www.eclipse.org/legal/epl-v10.html
 #
+#  Contributors:
+#     Red Hat - Initial API and implementation
+#
 
-#!/usr/bin/env bash
-
-mvn -f target-platform/pom.xml clean install &&
-mvn -f kura/manifest_pom.xml clean install -Dmaven.test.skip=true &&
-mvn -f kura/pom_pom.xml clean install -Dmaven.test.skip=true -Pweb
+mvn "$@" -f target-platform/pom.xml clean install &&
+mvn "$@" -f kura/manifest_pom.xml clean install -Dmaven.test.skip=true &&
+mvn "$@" -f kura/pom_pom.xml clean install -Dmaven.test.skip=true -Pweb

@@ -56,6 +56,14 @@ public class CamelFactory implements ConfigurableComponent {
     }
 
     public void deactivate() {
+        if (this.service != null) {
+            try {
+                this.service.stop();
+            } catch (Exception e) {
+                logger.warn("Failed to stop", e);
+            }
+            this.service = null;
+        }
     }
 
     private void setXml(String pid, String xml) throws Exception {
@@ -63,7 +71,7 @@ public class CamelFactory implements ConfigurableComponent {
             // null to null
             return;
         }
-        if (this.xml != null && !this.xml.equals(xml)) {
+        if (this.xml != null && this.xml.equals(xml)) {
             // no change
             return;
         }

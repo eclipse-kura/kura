@@ -10,27 +10,33 @@
  *******************************************************************************/
 package org.eclipse.kura.camel.cloud.factory.internal;
 
+import static org.apache.camel.ServiceStatus.Started;
+
 import java.io.ByteArrayInputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.apache.camel.CamelContext;
-import org.apache.camel.component.kura.KuraRouter;
+import org.apache.camel.ServiceStatus;
+import org.apache.camel.core.osgi.OsgiDefaultCamelContext;
 import org.apache.camel.model.RoutesDefinition;
 import org.eclipse.kura.camel.camelcloud.DefaultCamelCloudService;
 import org.eclipse.kura.camel.cloud.KuraCloudComponent;
 import org.eclipse.kura.cloud.CloudService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class XmlCamelCloudService {
+    private static final Logger logger = LoggerFactory.getLogger(XmlCamelCloudService.class);
+
     private BundleContext context;
 
     private String xml;
 
     private DefaultCamelCloudService service;
 
-    private KuraRouter router;
+    private OsgiDefaultCamelContext router;
 
     private String pid;
 
@@ -41,25 +47,32 @@ public class XmlCamelCloudService {
     }
 
     public void start() throws Exception {
-        this.router = new KuraRouter() {
-            protected void beforeStart(CamelContext camelContext) {
-                camelContext.getShutdownStrategy().setTimeout(5);
-                camelContext.disableJMX();
-            };
-        };
 
-        this.service = new DefaultCamelCloudService(this.router.getContext());
+        // new router
 
-        KuraCloudComponent cloudComponent = new KuraCloudComponent(this.router.getContext());
+        this.router = new OsgiDefaultCamelContext(this.context);
+
+        // new cloud service
+        
+        this.service = new DefaultCamelCloudService(this.router);
+        
+        // set up
+
+        final KuraCloudComponent cloudComponent = new KuraCloudComponent(this.router);
         cloudComponent.setCloudService(this.service);
-        this.router.getContext().addComponent("kura-cloud", cloudComponent);
+        this.router.addComponent("kura-cloud", cloudComponent);
+        
+        final RoutesDefinition routesDefinition = this.router.loadRoutesDefinition(new ByteArrayInputStream(this.xml.getBytes()));
+        this.router.addRouteDefinitions(routesDefinition.getRoutes());
 
-        final RoutesDefinition routesDefinition = this.router.getContext().loadRoutesDefinition(new ByteArrayInputStream(this.xml.getBytes()));
-        this.router.getContext().addRouteDefinitions(routesDefinition.getRoutes());
+        // start
+
+        logger.debug("Starting router...");
+        this.router.start();
+        final ServiceStatus status = this.router.getStatus();
+        logger.debug("Starting router... {} ({}, {})", status, status == Started, this.service.isConnected());
 
         // register
-
-        this.router.start(this.context);
 
         final Dictionary<String, Object> props = new Hashtable<>();
         props.put("cloud.service.pid", this.pid);
@@ -74,7 +87,7 @@ public class XmlCamelCloudService {
             this.service = null;
         }
         if (this.router != null) {
-            this.router.stop(context);
+            this.router.stop();
             this.router = null;
         }
 

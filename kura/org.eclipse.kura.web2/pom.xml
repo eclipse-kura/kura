@@ -12,7 +12,7 @@
       Eurotech
       Red Hat Inc - remove dependency on slf4j:logj12
           - Fix build warning
-      		- convert to tycho build
+          - convert to tycho build
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -120,65 +120,6 @@
 					</additionalFileSets>
 				</configuration>
 			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.8</version>
-				<executions>
-					<execution>
-						<id>verify-jdeps</id>
-						<phase>package</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<exportAntProperties>true</exportAntProperties>
-							<target name="verify.jdeps">
-    							<available file="jdeps" filepath="${env.PATH}" property="jdeps.present"/> 		
-    						</target>
-						</configuration>
-					</execution>
-					<execution>
-						<id>verify-compact2-compliance</id>
-						<phase>package</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-  								<target name="exec.jdeps" if="jdeps.present">
-  								<echo message="Executing exec.jdeps step"/>
-    							<apply executable="jdeps">
-  									<arg value="-P"/>
-  									<arg value="-dotoutput"/>
-  									<arg value="${project.build.directory}/logfiles"/>
-  									<fileset dir="${project.build.directory}">
-  										<include name="*.jar"/>
-  									</fileset>
-								</apply>
-								
-								<fileset id="compact3.file" dir="${project.build.directory}/logfiles" includes="*.dot" erroronmissingdir="false">
-    								<contains text="compact3"/>
-								</fileset>
-								<fail message="Compact3 profile not allowed!">
-    								<condition>
-        								<resourcecount when="greater" count="0" refid="compact3.file" />
-    								</condition>
-								</fail>
-								
-								<fileset id="fulljre.file" dir="${project.build.directory}/logfiles" includes="*.dot" erroronmissingdir="false">
-    								<contains text="Full JRE"/>
-								</fileset>
-								<fail message="Full JRE profile not allowed!">
-    								<condition>
-        								<resourcecount when="greater" count="0" refid="fulljre.file" />
-    								</condition>
-								</fail>
-								</target>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -231,27 +172,6 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
-
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-antrun-plugin
-										</artifactId>
-										<versionRange>
-											[1.0-beta-3,)
-										</versionRange>
-										<goals>
-											<goal>run</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>

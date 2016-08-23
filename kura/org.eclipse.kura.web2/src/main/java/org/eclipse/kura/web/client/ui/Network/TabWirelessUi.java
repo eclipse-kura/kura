@@ -12,6 +12,7 @@
 package org.eclipse.kura.web.client.ui.Network;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -31,8 +32,8 @@ import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiRadioMode;
-import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
 import org.eclipse.kura.web.shared.model.GwtWifiSecurity;
+import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
@@ -1353,7 +1354,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
 				@Override
 				public void onSuccess(GwtXSRFToken token) {
-					gwtNetworkService.findWifiHotspots(token, selectedNetIfConfig.getName(), new AsyncCallback<ArrayList<GwtWifiHotspotEntry>>() {
+					gwtNetworkService.findWifiHotspots(token, selectedNetIfConfig.getName(), new AsyncCallback<List<GwtWifiHotspotEntry>>() {
 						@Override
 						public void onFailure(Throwable caught) {
 							//EntryClassUi.hideWaitModal();
@@ -1365,7 +1366,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 						}
 
 						@Override
-						public void onSuccess(ArrayList<GwtWifiHotspotEntry> result) {
+						public void onSuccess(List<GwtWifiHotspotEntry> result) {
 							for (GwtWifiHotspotEntry pair : result) {
 								ssidDataProvider.getList().add(pair);
 							}

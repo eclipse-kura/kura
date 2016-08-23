@@ -133,7 +133,7 @@ public class OpenPortsTabUi extends Composite implements Tab {
 
 			@Override
 			public void onSuccess(GwtXSRFToken token) {
-				gwtNetworkService.findDeviceFirewallOpenPorts(token, new AsyncCallback<ArrayList<GwtFirewallOpenPortEntry>>() {
+				gwtNetworkService.findDeviceFirewallOpenPorts(token, new AsyncCallback<List<GwtFirewallOpenPortEntry>>() {
 					@Override
 					public void onFailure(Throwable caught) {
 						EntryClassUi.hideWaitModal();
@@ -141,7 +141,7 @@ public class OpenPortsTabUi extends Composite implements Tab {
 					}
 
 					@Override
-					public void onSuccess(ArrayList<GwtFirewallOpenPortEntry> result) {
+					public void onSuccess(List<GwtFirewallOpenPortEntry> result) {
 						for (GwtFirewallOpenPortEntry pair : result) {
 							openPortsDataProvider.getList().add(pair);
 						}

@@ -12,6 +12,7 @@
 
 	<groupId>org.eclipse.kura.features</groupId>
 	<artifactId>org.eclipse.kura.web</artifactId>
+	<name>Feature :: org.eclipse.kura.web</name>
 	<packaging>eclipse-feature</packaging>
 
 	<properties>

@@ -419,7 +419,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.9</version>
+					<version>2.10.4</version>
 					<configuration>
 						<doctitle>Eclipse Kura ${project.version}</doctitle>
 						<!-- Default configuration for all reports -->
@@ -440,7 +440,7 @@
 						<execution>
 							<id>javadoc</id>
 							<goals>
-								<goal>javadoc</goal>
+								<goal>jar</goal>
 							</goals>
 							<phase>package</phase>
 							<configuration>
@@ -450,13 +450,13 @@
 						<execution>
 							<id>aggregate</id>
 							<goals>
-								<goal>aggregate</goal>
+								<goal>aggregate-jar</goal>
 							</goals>
 							<phase>package</phase>
 							<configuration>
 								<!-- Specific configuration for the aggregate report -->
 								<skip>false</skip>
-								<doctitle>Kura ${project.version}</doctitle>
+								<doctitle>Eclipse Kura ${project.version}</doctitle>
 							</configuration>
 						</execution>
 					</executions>

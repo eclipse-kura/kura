@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.eclipse.kura.example.camel.quickstart
+Bundle-Version: 1.1.0.qualifier
+Bundle-Name: Camel Quickstart
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Service-Component: OSGI-INF/*.xml
+Import-Package: org.apache.camel;version="[2.16.0,3.0.0)",
+ org.apache.camel.builder;version="[2.16.0,3.0.0)",
+ org.apache.camel.component.kura;version="[2.16.0,3.0.0)",
+ org.apache.camel.model;version="[2.16.0,3.0.0)",
+ org.eclipse.kura.camel.camelcloud;version="[1.0.0,2.0.0)",
+ org.eclipse.kura.camel.cloud;version="[1.0.0,2.0.0)",
+ org.eclipse.kura.camel.router;version="[1.0.0,2.0.0)",
+ org.eclipse.kura.message;version="[1.0.0,2.0.0)",
+ org.osgi.framework;version="1.7.0",
+ org.slf4j;version="[1.6.4,2.0.0)"
+Bundle-ActivationPolicy: lazy
+Bundle-Vendor: Eclipse Kura
+

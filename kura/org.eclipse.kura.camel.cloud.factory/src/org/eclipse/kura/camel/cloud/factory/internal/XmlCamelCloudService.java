@@ -24,6 +24,7 @@ import org.eclipse.kura.camel.cloud.KuraCloudComponent;
 import org.eclipse.kura.cloud.CloudService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,18 +33,20 @@ public class XmlCamelCloudService {
 
     private BundleContext context;
 
-    private String xml;
+    private String pid;
+
+    private ServiceConfiguration configuration;
 
     private DefaultCamelCloudService service;
 
     private OsgiDefaultCamelContext router;
 
-    private String pid;
+    private ServiceRegistration<CloudService> handle;
 
-    public XmlCamelCloudService(final BundleContext context, final String xml, String pid) {
+    public XmlCamelCloudService(final BundleContext context, final String pid, final ServiceConfiguration configuration) {
         this.context = context;
-        this.xml = xml;
         this.pid = pid;
+        this.configuration = configuration;
     }
 
     public void start() throws Exception {
@@ -53,16 +56,16 @@ public class XmlCamelCloudService {
         this.router = new OsgiDefaultCamelContext(this.context);
 
         // new cloud service
-        
+
         this.service = new DefaultCamelCloudService(this.router);
-        
+
         // set up
 
         final KuraCloudComponent cloudComponent = new KuraCloudComponent(this.router);
         cloudComponent.setCloudService(this.service);
         this.router.addComponent("kura-cloud", cloudComponent);
-        
-        final RoutesDefinition routesDefinition = this.router.loadRoutesDefinition(new ByteArrayInputStream(this.xml.getBytes()));
+
+        final RoutesDefinition routesDefinition = this.router.loadRoutesDefinition(new ByteArrayInputStream(this.configuration.getXml().getBytes()));
         this.router.addRouteDefinitions(routesDefinition.getRoutes());
 
         // start
@@ -78,10 +81,18 @@ public class XmlCamelCloudService {
         props.put("cloud.service.pid", this.pid);
         props.put(Constants.SERVICE_PID, this.pid + "-CloudService");
         props.put("kura.service.pid", this.pid + "-CloudService");
-        this.context.registerService(CloudService.class, this.service, props);
+
+        if (this.configuration.getServiceRanking() != null) {
+            props.put(Constants.SERVICE_RANKING, this.configuration.getServiceRanking());
+        }
+        this.handle = this.context.registerService(CloudService.class, this.service, props);
     }
 
     public void stop() throws Exception {
+        if (this.handle != null) {
+            this.handle.unregister();
+            this.handle = null;
+        }
         if (this.service != null) {
             this.service.dispose();
             this.service = null;

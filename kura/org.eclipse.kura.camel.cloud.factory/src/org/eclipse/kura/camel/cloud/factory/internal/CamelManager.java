@@ -46,7 +46,7 @@ public class CamelManager implements SelfConfiguringComponent {
 
         tocd.setName("Camel Cloud Factory");
         tocd.setId(PID);
-        tocd.setDescription("Camel Cloud Factory Manager");
+        tocd.setDescription("Create a new Apache Camel™ cloud service");
 
         {
             final Tad tad = objectFactory.createTad();
@@ -55,7 +55,29 @@ public class CamelManager implements SelfConfiguringComponent {
             tad.setType(Tscalar.STRING);
             tad.setCardinality(0);
             tad.setRequired(Boolean.FALSE);
-            tad.setDescription("New configuration");
+            tad.setDescription("PID for the new configuration");
+            tocd.addAD(tad);
+        }
+
+        {
+            final Tad tad = objectFactory.createTad();
+            tad.setId("xml");
+            tad.setName("xml");
+            tad.setType(Tscalar.STRING);
+            tad.setCardinality(0);
+            tad.setRequired(Boolean.FALSE);
+            tad.setDescription("Initial XML configuration");
+            tocd.addAD(tad);
+        }
+
+        {
+            final Tad tad = objectFactory.createTad();
+            tad.setId("serviceRanking");
+            tad.setName("serviceRanking");
+            tad.setType(Tscalar.INTEGER);
+            tad.setCardinality(0);
+            tad.setRequired(Boolean.FALSE);
+            tad.setDescription("The initial service ranking of the new cloud service. A higher number will have more priority.");
             tocd.addAD(tad);
         }
 
@@ -70,15 +92,27 @@ public class CamelManager implements SelfConfiguringComponent {
         final String add = asString(properties.get("add"));
 
         if (add != null && !add.isEmpty()) {
-            add(add);
+            add(add, properties);
         }
     }
 
-    protected void add(String pid) throws KuraException {
+    protected void add(String pid, Map<String, Object> properties) throws KuraException {
         logger.info("Add: {}", pid);
 
-        final Map<String, Object> props = new HashMap<>();
-        props.put("xml", "<routes xmlns=\"http://camel.apache.org/schema/spring\"></routes>");
+        final Map<String, Object> props = new HashMap<>();        
+        
+        String xml = Properties.asString(properties, "xml");
+        if (xml == null || xml.trim().isEmpty()) {
+            xml = "<routes xmlns=\"http://camel.apache.org/schema/spring\"></routes>";
+        }
+        
+        props.put("xml", xml);
+
+        final Integer serviceRanking = Properties.asInteger(properties, "serviceRanking");
+        if (serviceRanking != null) {
+            props.put("serviceRanking", serviceRanking);
+        }
+
         this.configurationService.createFactoryConfiguration(FACTORY_ID, FACTORY_ID + "-" + pid, props, true);
     }
 

@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.kura.camel.cloud.factory.internal;
 
+import static org.eclipse.kura.camel.cloud.factory.internal.Properties.asInteger;
+import static org.eclipse.kura.camel.cloud.factory.internal.Properties.asString;
+
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
@@ -29,16 +32,14 @@ public class CamelFactory implements ConfigurableComponent {
 
     private XmlCamelCloudService service;
 
-    private String xml;
+    private ServiceConfiguration configuration;
 
     public void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
 
     public void activate(ComponentContext context, Map<String, Object> properties) throws Exception {
-        final String pid = asString(properties.get("kura.service.pid"));
-        final String xml = asString(properties.get("xml"));
-        setXml(pid, xml);
+        setFromProperties(properties);
     }
 
     public void modified(ComponentContext context, Map<String, Object> properties) throws Exception {
@@ -49,10 +50,18 @@ public class CamelFactory implements ConfigurableComponent {
             }
             return;
         } else {
-            final String pid = asString(properties.get("kura.service.pid"));
-            final String xml = asString(properties.get("xml"));
-            setXml(pid, xml);
+            setFromProperties(properties);
         }
+    }
+
+    private void setFromProperties(Map<String, Object> properties) throws Exception {
+        final String pid = asString(properties, "kura.service.pid");
+
+        final ServiceConfiguration configuration = new ServiceConfiguration();
+        configuration.setXml(asString(properties, "xml"));
+        configuration.setServiceRanking(asInteger(properties, "serviceRanking"));
+
+        createService(pid, configuration);
     }
 
     public void deactivate() {
@@ -66,12 +75,16 @@ public class CamelFactory implements ConfigurableComponent {
         }
     }
 
-    private void setXml(String pid, String xml) throws Exception {
-        if (this.xml == xml) {
-            // null to null
+    private void createService(final String pid, final ServiceConfiguration configuration) throws Exception {
+        if (pid == null) {
             return;
         }
-        if (this.xml != null && this.xml.equals(xml)) {
+
+        if (this.configuration == configuration) {
+            // null to null?
+            return;
+        }
+        if (this.configuration != null && this.configuration.equals(configuration)) {
             // no change
             return;
         }
@@ -84,12 +97,12 @@ public class CamelFactory implements ConfigurableComponent {
         }
 
         // start new service
-        if (xml != null && !xml.trim().isEmpty()) {
-            this.service = new XmlCamelCloudService(FrameworkUtil.getBundle(CamelFactory.class).getBundleContext(), xml, pid);
+        if (configuration.isValid()) {
+            this.service = new XmlCamelCloudService(FrameworkUtil.getBundle(CamelFactory.class).getBundleContext(), pid, configuration);
             this.service.start();
         }
 
-        this.xml = xml;
+        this.configuration = configuration;
     }
 
     private void triggerDelete(String pid) {
@@ -109,13 +122,6 @@ public class CamelFactory implements ConfigurableComponent {
         if (value == null)
             return false;
         return "true".equals(value.toString());
-    }
-
-    private static String asString(Object value) {
-        if (value instanceof String) {
-            return (String) value;
-        }
-        return null;
     }
 
 }

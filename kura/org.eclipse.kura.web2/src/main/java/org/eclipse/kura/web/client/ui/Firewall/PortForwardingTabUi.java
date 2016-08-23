@@ -147,7 +147,7 @@ public class PortForwardingTabUi extends Composite implements Tab {
 
 			@Override
 			public void onSuccess(GwtXSRFToken token) {
-				gwtNetworkService.findDeviceFirewallPortForwards(token, new AsyncCallback<ArrayList<GwtFirewallPortForwardEntry>>() {
+				gwtNetworkService.findDeviceFirewallPortForwards(token, new AsyncCallback<List<GwtFirewallPortForwardEntry>>() {
 
 					@Override
 					public void onFailure(Throwable caught) {
@@ -156,7 +156,7 @@ public class PortForwardingTabUi extends Composite implements Tab {
 					}
 
 					@Override
-					public void onSuccess(ArrayList<GwtFirewallPortForwardEntry> result) {
+					public void onSuccess(List<GwtFirewallPortForwardEntry> result) {
 						for (GwtFirewallPortForwardEntry pair : result) {
 							portForwardDataProvider.getList().add(pair);
 						}

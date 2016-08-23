@@ -11,7 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.Network;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -361,7 +361,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 				// changed to WAN
 				if (isWanEnabled()) {
 					EntryClassUi.showWaitModal();
-					gwtNetworkService.findNetInterfaceConfigurations(new AsyncCallback<ArrayList<GwtNetInterfaceConfig>>() {
+					gwtNetworkService.findNetInterfaceConfigurations(new AsyncCallback<List<GwtNetInterfaceConfig>>() {
 						@Override
 						public void onFailure(Throwable caught) {
 							EntryClassUi.hideWaitModal();
@@ -369,7 +369,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 						}
 
 						@Override
-						public void onSuccess(ArrayList<GwtNetInterfaceConfig> result) {
+						public void onSuccess(List<GwtNetInterfaceConfig> result) {
 							EntryClassUi.hideWaitModal();
 							for (GwtNetInterfaceConfig config : result) {
 								if (config.getStatusEnum().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN) && !config.getName().equals(selectedNetIfConfig.getName())) {

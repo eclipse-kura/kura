@@ -11,8 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.Network;
 
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
@@ -191,7 +191,7 @@ public class NetworkInterfacesTableUi extends Composite {
 	private void loadData() {
 		EntryClassUi.showWaitModal();
 		interfacesProvider.getList().clear();
-		gwtNetworkService.findNetInterfaceConfigurations(new AsyncCallback<ArrayList<GwtNetInterfaceConfig>>() {
+		gwtNetworkService.findNetInterfaceConfigurations(new AsyncCallback<List<GwtNetInterfaceConfig>>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
@@ -200,7 +200,7 @@ public class NetworkInterfacesTableUi extends Composite {
 			}
 
 			@Override
-			public void onSuccess(ArrayList<GwtNetInterfaceConfig> result) {
+			public void onSuccess(List<GwtNetInterfaceConfig> result) {
 				ListHandler<GwtNetInterfaceConfig> columnSortHandler = new ListHandler<GwtNetInterfaceConfig>(interfacesProvider.getList());
 			    columnSortHandler.setComparator(col1, new Comparator<GwtNetInterfaceConfig>() {
 			          public int compare(GwtNetInterfaceConfig o1, GwtNetInterfaceConfig o2) {

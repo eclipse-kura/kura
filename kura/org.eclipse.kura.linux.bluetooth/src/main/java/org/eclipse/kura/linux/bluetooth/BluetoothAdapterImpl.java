@@ -23,6 +23,7 @@ import org.eclipse.kura.bluetooth.BluetoothBeaconCommandListener;
 import org.eclipse.kura.bluetooth.BluetoothBeaconScanListener;
 import org.eclipse.kura.bluetooth.BluetoothDevice;
 import org.eclipse.kura.bluetooth.BluetoothLeScanListener;
+import org.eclipse.kura.bluetooth.listener.BluetoothAdvertisementScanListener;
 import org.eclipse.kura.linux.bluetooth.le.BluetoothLeScanner;
 import org.eclipse.kura.linux.bluetooth.le.beacon.BluetoothAdvertisingData;
 import org.eclipse.kura.linux.bluetooth.le.beacon.BluetoothConfigurationProcessListener;
@@ -125,6 +126,13 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 		killLeScan();
 		m_bls = new BluetoothLeScanner();
 		m_bls.startScan(m_name, listener);
+	}
+	
+	@Override
+	public void startAdvertisementScan(String companyName, BluetoothAdvertisementScanListener listener) {
+		killLeScan();
+		m_bls = new BluetoothLeScanner();
+		m_bls.startAdvertisementScan(m_name, companyName, listener);
 	}
 	
 	@Override

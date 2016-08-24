@@ -3,8 +3,20 @@ language: java
 sudo: false
 
 jdk:
-  - oraclejdk8
+ - oraclejdk8
+
+before_install:
+ - wget -O maven.tar.gz http://www-eu.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
+ - mkdir maven
+ - cd maven ; tar --strip-components 1 -xzf ../maven.tar.gz ; cd ..
+ - chmod a+x maven/bin/mvn
+ - export M2_HOME=$PWD/maven
+ - export PATH=$PWD/maven/bin:${PATH}
+ - hash -r
+
+before_script:
+ - export M2_HOME=$PWD/maven
+ - export PATH=$PWD/maven/bin:${PATH}
+ - hash -r
 
 script: ./build-all.sh
-
-

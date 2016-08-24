@@ -17,7 +17,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
@@ -25,12 +27,19 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtWiresConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtWireService;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireConfiguration;
+import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireHelperService;
+import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +48,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implements GwtWireService {
 
+	private static final String SERVICE_PID = "service.pid";
 	/**
 	 * Different property related constants
 	 */
@@ -72,7 +82,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 
 		final ConfigurationService configService = ServiceLocator.getInstance().getService(ConfigurationService.class);
 		final WireService wireService = ServiceLocator.getInstance().getService(WireService.class);
-		final WireHelperService wireHelperService = ServiceLocator.getInstance().getService(WireHelperService.class);
+		ServiceLocator.getInstance().getService(WireHelperService.class);
 		final List<WireConfiguration> wireConfigurations = wireService.getWireConfigurations();
 		final List<String> wireEmitterFactoryPids = new ArrayList<String>();
 		final List<String> wireReceiverFactoryPids = new ArrayList<String>();
@@ -87,6 +97,16 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 		} catch (final KuraException exception) {
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
 		}
+		final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+		final ServiceReference<WireComponent>[] wireComps = getServiceReferences(context, WireComponent.class, null);
+		for (final ServiceReference<WireComponent> wc : wireComps) {
+			if (wc instanceof WireEmitter) {
+				wireEmitterFactoryPids.add(String.valueOf(wc.getProperty(SERVICE_PID)));
+			}
+			if (wc instanceof WireReceiver) {
+				wireReceiverFactoryPids.add(String.valueOf(wc.getProperty(SERVICE_PID)));
+			}
+		}
 
 		// create the JSON for the Wires Configuration
 		final JSONObject wireConfig = new JSONObject();
@@ -94,11 +114,6 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 		for (final WireConfiguration wireConfiguration : wireConfigurations) {
 			final String emitterPid = wireConfiguration.getEmitterPid();
 			final String receiverPid = wireConfiguration.getReceiverPid();
-			final String emitterFactoryPid = wireHelperService.getServicePid(emitterPid);
-			final String receiverFactoryPid = wireHelperService.getServicePid(receiverPid);
-
-			wireEmitterFactoryPids.add(emitterFactoryPid);
-			wireReceiverFactoryPids.add(receiverFactoryPid);
 			wireComponents.add(emitterPid);
 			wireComponents.add(receiverPid);
 
@@ -199,6 +214,18 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
 		}
 		return this.getWiresConfiguration(xsrfToken);
+	}
+
+	public static <T> ServiceReference<T>[] getServiceReferences(final BundleContext bundleContext,
+			final Class<T> clazz, final String filter) {
+		try {
+			final ServiceReference<?>[] refs = bundleContext.getServiceReferences(clazz.getName(), filter);
+			@SuppressWarnings("unchecked")
+			final ServiceReference<T>[] reference = (refs == null ? new ServiceReference[0] : refs);
+			return reference;
+		} catch (final InvalidSyntaxException ise) {
+			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, ise);
+		}
 	}
 
 }

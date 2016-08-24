@@ -28,7 +28,6 @@ public final class GwtWiresConfiguration extends GwtBaseModel implements Seriali
 	private static final long serialVersionUID = 2059113769531098096L;
 
 	/** Wires Configuration for Graph in JSON. */
-	@Nullable
 	private String graph;
 
 	/** Wire Component Instances. */
@@ -49,6 +48,7 @@ public final class GwtWiresConfiguration extends GwtBaseModel implements Seriali
 		this.wireComponents = new ArrayList<String>();
 		this.wireEmitterFactoryPids = new ArrayList<String>();
 		this.wireReceiverFactoryPids = new ArrayList<String>();
+		this.graph = "{}";
 	}
 
 	/**
@@ -103,6 +103,9 @@ public final class GwtWiresConfiguration extends GwtBaseModel implements Seriali
 	 *            the new graph
 	 */
 	public void setGraph(final String graph) {
+		if (graph == null) {
+			this.graph = "{}";
+		}
 		this.graph = graph;
 	}
 

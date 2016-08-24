@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.eclipse.kura.runtime.common_2.1.0.qualifier.jar" id="org.eclipse.kura.runtime.common" version="2.1.0.qualifier"/>
+   <feature url="features/org.eclipse.kura.runtime.equinox_3.8.1.qualifier.jar" id="org.eclipse.kura.runtime.equinox" version="3.8.1.qualifier"/>
+   <feature url="features/org.eclipse.kura.protocol.modbus_2.1.0.qualifier.jar" id="org.eclipse.kura.protocol.modbus" version="2.1.0.qualifier"/>
+   <feature url="features/org.eclipse.kura.web_2.1.0.qualifier.jar" id="org.eclipse.kura.web" version="2.1.0.qualifier"/>
+</site>

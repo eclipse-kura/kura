@@ -7,6 +7,7 @@
     xmlns:jdt="http://www.eclipse.org/oomph/setup/jdt/1.0"
     xmlns:launching="http://www.eclipse.org/oomph/setup/launching/1.0"
     xmlns:maven="http://www.eclipse.org/oomph/setup/maven/1.0"
+    xmlns:pde="http://www.eclipse.org/oomph/setup/pde/1.0"
     xmlns:predicates="http://www.eclipse.org/oomph/predicates/1.0"
     xmlns:projects="http://www.eclipse.org/oomph/setup/projects/1.0"
     xmlns:resources="http://www.eclipse.org/oomph/resources/1.0"
@@ -14,13 +15,21 @@
     xmlns:setup.p2="http://www.eclipse.org/oomph/setup/p2/1.0"
     xmlns:setup.targlets="http://www.eclipse.org/oomph/setup/targlets/1.0"
     xmlns:setup.workingsets="http://www.eclipse.org/oomph/setup/workingsets/1.0"
-    xsi:schemaLocation="http://www.eclipse.org/oomph/setup/git/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/Git.ecore http://www.eclipse.org/oomph/setup/jdt/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/JDT.ecore http://www.eclipse.org/oomph/setup/launching/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/Launching.ecore http://www.eclipse.org/oomph/setup/maven/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/Maven.ecore http://www.eclipse.org/oomph/predicates/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/Predicates.ecore http://www.eclipse.org/oomph/setup/projects/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/Projects.ecore http://www.eclipse.org/oomph/resources/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/Resources.ecore http://www.eclipse.org/oomph/setup/targlets/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/SetupTarglets.ecore http://www.eclipse.org/oomph/setup/workingsets/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/SetupWorkingSets.ecore"
+    xsi:schemaLocation="http://www.eclipse.org/oomph/setup/git/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/Git.ecore http://www.eclipse.org/oomph/setup/jdt/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/JDT.ecore http://www.eclipse.org/oomph/setup/launching/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/Launching.ecore http://www.eclipse.org/oomph/setup/maven/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/Maven.ecore http://www.eclipse.org/oomph/setup/pde/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/PDE.ecore http://www.eclipse.org/oomph/predicates/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/Predicates.ecore http://www.eclipse.org/oomph/setup/projects/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/Projects.ecore http://www.eclipse.org/oomph/resources/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/Resources.ecore http://www.eclipse.org/oomph/setup/targlets/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/SetupTarglets.ecore http://www.eclipse.org/oomph/setup/workingsets/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/SetupWorkingSets.ecore"
     name="iot.kura"
     label="Eclipse Kura">
   <setupTask
       xsi:type="setup:VariableTask"
       name="eclipse.target.platform"
       value="Mars"/>
+  <setupTask
+      xsi:type="setup:VariableTask"
+      name="kura.branch"
+      defaultValue="${scope.project.stream.name}"
+      storageURI="scope://Workspace"
+      label="Branch">
+    <description></description>
+  </setupTask>
   <setupTask
       xsi:type="setup:CompoundTask"
       name="Choose developer type">
@@ -30,11 +39,11 @@
         storageURI="scope://Workspace"
         label="Developer Type">
       <choice
-          value="user"
-          label="User"/>
-      <choice
           value="developer"
           label="Developer"/>
+      <choice
+          value="user"
+          label="User"/>
       <description>Select which type of developer for Kura you are</description>
     </setupTask>
     <setupTask
@@ -45,8 +54,8 @@
   </setupTask>
   <setupTask
       xsi:type="jdt:JRETask"
-      version="JavaSE-1.7"
-      location="${jre.location-1.7}">
+      version="JavaSE-1.8"
+      location="${jre.location-1.8}">
     <description>Define the JRE needed to compile and run the Java projects of ${scope.project.label}</description>
   </setupTask>
   <setupTask
@@ -86,7 +95,8 @@
   <setupTask
       xsi:type="git:GitCloneTask"
       id="git.clone"
-      remoteURI="eclipse/kura">
+      remoteURI="eclipse/kura"
+      checkoutBranch="${kura.branch}">
     <annotation
         source="http://www.eclipse.org/oomph/setup/InducedChoices">
       <detail
@@ -133,8 +143,11 @@
           <predicate
               xsi:type="predicates:NotPredicate">
             <operand
-                xsi:type="predicates:NamePredicate"
-                pattern="org.eclipse.soda.dk.comm"/>
+                xsi:type="predicates:OrPredicate">
+              <operand
+                  xsi:type="predicates:NamePredicate"
+                  pattern="(manifest|common|equinox.*|com\.gwt\.user)"/>
+            </operand>
           </predicate>
         </sourceLocator>
       </setupTask>
@@ -145,6 +158,7 @@
   </setupTask>
   <setupTask
       xsi:type="setup.targlets:TargletTask"
+      disabled="true"
       filter="">
     <targlet
         name="${scope.project.label}"
@@ -174,8 +188,26 @@
       <predicate
           xsi:type="predicates:OrPredicate">
         <operand
+            xsi:type="predicates:AndPredicate">
+          <operand
+              xsi:type="predicates:NamePredicate"
+              pattern="org.eclipse.kura.*"/>
+          <operand
+              xsi:type="predicates:NotPredicate">
+            <operand
+                xsi:type="predicates:NamePredicate"
+                pattern=".*\.feature$"/>
+          </operand>
+        </operand>
+      </predicate>
+    </workingSet>
+    <workingSet
+        name="Features">
+      <predicate
+          xsi:type="predicates:OrPredicate">
+        <operand
             xsi:type="predicates:NamePredicate"
-            pattern="org.eclipse.kura.*"/>
+            pattern=".*\.feature$"/>
       </predicate>
     </workingSet>
     <description>The dynamic working sets for ${scope.project.label}</description>
@@ -226,6 +258,10 @@
       </setupTask>
     </setupTask>
   </setupTask>
+  <setupTask
+      xsi:type="pde:TargetPlatformTask"
+      filter=""
+      name="Kura Target Platform Equinox 3.8.1"/>
   <stream name="develop"
       label="Development"/>
   <logicalProjectContainer

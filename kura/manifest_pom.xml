@@ -59,10 +59,26 @@
 		<!--<module>org.eclipse.kura.emulator.gpio</module>-->
 		<module>org.eclipse.kura.core.test</module>
 		<module>examples</module>
+		
+		<!-- web UI -->
+		
+		<module>org.eclipse.kura.web2</module>
+		
+		<!-- P2 features -->
+		
+		<module>features/org.eclipse.kura.runtime.common.feature</module>
+		<module>features/org.eclipse.kura.runtime.equinox_3.8.1.feature</module>
+		<module>features/org.eclipse.kura.protocol.modbus.feature</module>
+		<module>features/org.eclipse.kura.web.feature</module>
+		
+		<!-- aggregating P2 repository -->
+		
+		<module>org.eclipse.kura-p2</module>
+		
 	</modules>
 
 	<properties>
-		<tycho-version>0.20.0</tycho-version>
+		<tycho-version>0.25.0</tycho-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
@@ -131,6 +147,7 @@
 			<modules>
 				<module>org.eclipse.kura.protocol.can</module>
 				<module>org.eclipse.kura.protocol.can.test</module>
+				<module>features/org.eclipse.kura.protocol.can.feature</module>
 			</modules>
 		</profile>
 	</profiles>
@@ -141,15 +158,11 @@
 			<layout>p2</layout>
 			<url>file:///${kura.basedir}/target-definition/common/repository/</url>
 		</repository>
-		<repository>
-			<id>kura_addons</id>
-			<name>Kura Addons Maven Repository</name>
-			<url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</url>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-			</snapshots>
-		</repository>
+	    <repository>
+	      <id>license-feature</id>
+	      <url>http://download.eclipse.org/cbi/updates/license/</url>
+	      <layout>p2</layout>
+	    </repository>
 	</repositories>
 
 	<build>
@@ -395,10 +408,18 @@
 		</plugins>
 		<pluginManagement>
 			<plugins>
+	             <plugin>
+	                <groupId>de.dentrassi.maven</groupId>
+	                <artifactId>osgi-dp</artifactId>
+					<version>0.0.3</version>
+					<configuration>
+						<useQualifiedFilename>false</useQualifiedFilename>
+					</configuration>
+	            </plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.9</version>
+					<version>2.10.4</version>
 					<configuration>
 						<doctitle>Eclipse Kura ${project.version}</doctitle>
 						<!-- Default configuration for all reports -->
@@ -419,7 +440,7 @@
 						<execution>
 							<id>javadoc</id>
 							<goals>
-								<goal>javadoc</goal>
+								<goal>jar</goal>
 							</goals>
 							<phase>package</phase>
 							<configuration>
@@ -429,13 +450,13 @@
 						<execution>
 							<id>aggregate</id>
 							<goals>
-								<goal>aggregate</goal>
+								<goal>aggregate-jar</goal>
 							</goals>
 							<phase>package</phase>
 							<configuration>
 								<!-- Specific configuration for the aggregate report -->
 								<skip>false</skip>
-								<doctitle>Kura ${project.version}</doctitle>
+								<doctitle>Eclipse Kura ${project.version}</doctitle>
 							</configuration>
 						</execution>
 					</executions>

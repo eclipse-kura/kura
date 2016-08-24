@@ -6,22 +6,8 @@ Bundle-Version: 2.0.1.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
-Import-Package: com.google.gwt.http.client,
- com.google.gwt.safehtml.shared,
- com.google.gwt.user.client,
- com.google.gwt.user.client.rpc,
- com.google.gwt.user.client.rpc.core.java.lang,
- com.google.gwt.user.client.rpc.core.java.math,
- com.google.gwt.user.client.rpc.core.java.sql,
- com.google.gwt.user.client.rpc.core.java.util,
- com.google.gwt.user.client.rpc.core.java.util.logging,
- com.google.gwt.user.client.rpc.impl,
- com.google.gwt.user.client.ui,
- com.google.gwt.user.linker.rpc,
- com.google.gwt.user.rebind.rpc,
- com.google.gwt.user.server.rpc,
- com.google.gwt.user.server.rpc.impl,
- javax.crypto,
+Bundle-ActivationPolicy: lazy
+Import-Package: javax.crypto,
  javax.crypto.spec,
  javax.security.auth,
  javax.servlet;version="2.6.0",
@@ -70,3 +56,4 @@ Import-Package: com.google.gwt.http.client,
  org.w3c.dom,
  org.xml.sax
 Bundle-ClassPath: .
+Require-Bundle: com.gwt.user;bundle-version="1.0.0"

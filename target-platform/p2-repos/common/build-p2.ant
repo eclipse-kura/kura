@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="build">
+	
+	<import file="../lib.ant"/>
+	
+	<property name="orbit.release" value="R20140114142710"/>
+	
+	<!-- ================================= 
+          target: build
+         ================================= -->
+    <target name="build" depends="init">
+    	<localized bundle="com.codeminders.hidapi"/>
+    	<orbit bundle="org.apache.commons.net"/>
+    	<maven groupId="com/google/protobuf" artifactId="protobuf-java" version="${com.google.protobuf.version}"/>
+    	<maven groupId="org/eclipse/paho" artifactId="org.eclipse.paho.client.mqttv3" />
+    	<localized bundle="org.eclipse.kura.camel.sun.misc"/>
+    	<localized bundle="org.eclipse.kura.sun.misc"/>
+    	
+    	<!-- will be moved to Orbit -->
+    	<checkedin bundle="org.tigris.mtoolkit.iagent.rpc"/>
+    	
+    	<localized bundle="com.gwt.user" version="1.0.0"/>
+    	
+    	<localized bundle="org.usb4java"/>
+    	
+    	<maven groupid="org/slf4j" artifactid="slf4j-api"/>
+    	<maven groupid="org/slf4j" artifactid="slf4j-jdk14"/>
+    	<maven groupid="org/slf4j" artifactid="slf4j-log4j12"/>
+    	<maven groupid="log4j" artifactid="log4j"/>
+    	
+    	<!--
+    	<maven groupid="log4j" artifactid="apache-log4j-extras"/>
+    	-->
+    	<checkedin bundle="apache-log4j-extras"/>
+    	
+    	<orbit bundle="org.apache.commons.fileupload"/>
+    	
+    	<localized bundle="usb4java-javax"/>
+    	<maven groupid="commons-io" artifactid="commons-io"/>
+    	<maven groupid="org/apache/commons" artifactid="commons-lang3"/>
+    	
+    	<maven groupId="org/apache/camel" artifactid="camel-core"/>
+    	<maven groupId="org/apache/camel" artifactid="camel-core-osgi"/>
+    	<maven groupId="org/apache/camel" artifactid="camel-kura"/>
+    	<maven groupId="org/apache/camel" artifactid="camel-stream"/>
+    	
+    	<maven groupid="org/hsqldb" artifactid="hsqldb"/>
+    	<maven groupid="org/hsqldb" artifactid="hsqldb"/>
+    	
+    	<localized bundle="org.eclipse.soda.dk.comm"/>
+    	
+    	<orbit bundle="org.json"/>
+    	
+    	<checkedin bundle="jdk.dio"/>
+    		
+		<orbit bundle="org.junit"/>
+		<orbit bundle="org.hamcrest.core"/>
+    </target>
+	
+</project>

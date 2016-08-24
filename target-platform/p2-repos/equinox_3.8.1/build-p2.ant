@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="build">
+	<import file="../lib.ant"/>
+	
+	<property name="orbit.release" value="R20140114142710"/>
+	
+	<!-- ================================= 
+          target: build
+         ================================= -->
+    <target name="build" depends="init">
+    	<fetch src="http://archive.eclipse.org/equinox/drops/R-3.8.1-201209141800/equinox-SDK-3.8.1.zip" dest="${target}/download/equinox-SDK.zip"/>
+    	<unzip src="${target}/download/equinox-SDK.zip" dest="${target}/unpack/equinox-SDK" />
+    	
+    	<!--
+    	<orbit orbit="${orbit1} bundle="javax.servlet"/>
+    	-->
+    	
+    	<unzipped package="equinox-SDK" bundle="javax.servlet"/>
+    	<unzipped package="equinox-SDK" bundle="org.apache.felix.gogo.command"/>
+		<unzipped package="equinox-SDK" bundle="org.apache.felix.gogo.runtime"/>
+		<unzipped package="equinox-SDK" bundle="org.apache.felix.gogo.shell"/>
+    	
+    	<unzipped package="equinox-SDK" bundle="org.eclipse.core.contenttype"/>
+    	<unzipped package="equinox-SDK" bundle="org.eclipse.core.jobs"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.core.runtime"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.equinox.app"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.equinox.cm"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.equinox.common"/>
+    	
+    	<unzipped package="equinox-SDK" bundle="org.eclipse.equinox.console"/>
+    	<unzipped package="equinox-SDK" bundle="org.eclipse.equinox.ds"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.equinox.event"/>
+    	
+		<unzipped package="equinox-SDK" bundle="org.eclipse.equinox.http.jetty"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.equinox.http.registry"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.equinox.http.servlet"/>
+    	<unzipped package="equinox-SDK" bundle="org.eclipse.equinox.io"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.equinox.launcher"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.equinox.metatype"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.equinox.preferences"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.equinox.registry"/>
+    	<unzipped package="equinox-SDK" bundle="org.eclipse.equinox.util"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.jetty.continuation"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.jetty.http"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.jetty.io"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.jetty.security"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.jetty.server"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.jetty.servlet"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.jetty.util"/>
+    	
+    	<unzipped package="equinox-SDK" bundle="org.eclipse.osgi.services"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.osgi.util"/>
+		<unzipped package="equinox-SDK" bundle="org.eclipse.osgi"/>
+    	
+    	<maven groupId="org/knowhowlab/osgi" artifactId="monitoradmin" version="${org.knowhowlab.osgi.monitoradmin.version}"/>
+    	<maven groupId="org/osgi" artifactId="org.osgi.compendium"/>
+    	<maven groupId="org/apache/felix" artifactId="org.apache.felix.dependencymanager"/>
+    	<maven groupId="org/apache/felix" artifactId="org.apache.felix.deploymentadmin"/>
+    </target>
+	
+</project>

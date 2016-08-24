@@ -23,9 +23,10 @@
 	</parent>
 
 	<artifactId>distrib</artifactId>
+	<packaging>pom</packaging>
 
 	<name>distrib</name>
-	<url>http://maven.apache.org</url>
+
 	<properties>
 		<kura.basedir>${project.parent.basedir}</kura.basedir>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -67,7 +68,7 @@
 							<files>
 								<file>${basedir}/build.properties</file>
 								<file>${basedir}/config/kura.build.properties</file>
-								<file>${kura.basedir}/../target-platform/config/kura.target-platform.build.properties</file>
+								<file>${kura.basedir}/target-definition/config/kura.target-platform.build.properties</file>
 							</files>
 						</configuration>
 					</execution>
@@ -95,11 +96,6 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.camel</artifactId>
 									<version>${org.eclipse.kura.camel.version}</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.camel.sun.misc</artifactId>
-									<version>${org.eclipse.kura.camel.sun.misc.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
@@ -267,7 +263,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>get-web-classic-bundle</id>
+						<id>get-web-bundle</id>
 						<phase>generate-resources</phase>
 						<goals>
 							<goal>copy</goal>
@@ -279,25 +275,6 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.web</artifactId>
 									<version>${org.eclipse.kura.web.version}</version>
-								</artifactItem>
-							</artifactItems>
-							<stripVersion>true</stripVersion>
-							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
-						</configuration>
-					</execution>
-					<execution>
-						<id>get-web2-bundle</id>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<skip>${org.eclipse.kura.web2.skip}</skip>
-							<artifactItems>
-								<artifactItem>
-									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.web2</artifactId>
-									<version>${org.eclipse.kura.web2.version}</version>
 								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
@@ -357,8 +334,7 @@
 						<configuration>
 							<tasks>
 							    <move file="target/plugins/org.eclipse.kura.api.jar" tofile="target/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"/>
-								<move file="target/plugins/org.eclipse.kura.camel.jar" tofile="target/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"/>
-								<move file="target/plugins/org.eclipse.kura.camel.sun.misc.jar" tofile="target/plugins/org.eclipse.kura.camel.sun.misc_${org.eclipse.kura.camel.sun.misc.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.camel.jar" tofile="target/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"/>
 								<move file="target/plugins/org.eclipse.kura.core.jar" tofile="target/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.certificates.jar" tofile="target/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.cloud.jar" tofile="target/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"/>
@@ -383,8 +359,7 @@
 							    <move file="target/plugins/org.eclipse.kura.net.admin.jar" tofile="target/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.protocol.modbus.jar" tofile="target/plugins/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar" failonerror="false"/>
 							    <move file="target/plugins/org.eclipse.kura.protocol.can.jar" tofile="target/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar" failonerror="false"/>
-							    <move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" failonerror="false" />
-  								<move file="target/plugins/org.eclipse.kura.web2.jar" tofile="target/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" failonerror="false" />
+  								<move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" failonerror="false" />
 								<move file="target/plugins/org.eclipse.kura.linux.gpio.jar" tofile="target/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" failonerror="false"/>
   								<move file="target/plugins/org.eclipse.kura.emulator.jar" tofile="target/plugins/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar"/>
   								<move file="target/plugins/org.eclipse.kura.emulator.clock.jar" tofile="target/plugins/org.eclipse.kura.emulator.clock_${org.eclipse.kura.emulator.clock.version}.jar"/>
@@ -430,9 +405,9 @@
 									todir="RELEASE_INFO/${project.version}/config"
 									overwrite="true" />
 
-                				<!-- Copy target-platform/config/kura.target-platform.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
+                				<!-- Copy target-definition/config/kura.target-platform.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
 								<copy
-									file="${kura.basedir}/../../../target-platform/config/kura.target-platform.build.properties"
+									file="${kura.basedir}/../../target-definition/config/kura.target-platform.build.properties"
 									todir="RELEASE_INFO/${project.version}/config"
 									overwrite="true" />
 
@@ -1899,7 +1874,7 @@
 										<copy
 											file="src/main/resources/common/projects/target_definition.project"
 											tofile="${project.build.directory}/staging/target-definition/.project" />
-										<copy file="src/main/resources/common/kura-equinox_3.8.1.target"
+										<copy file="../target-definition/kura-equinox_3.8.1.target"
 											todir="${project.build.directory}/staging/target-definition" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"
@@ -1939,10 +1914,6 @@
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
-											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"
-											failonerror="false" />
-										<copy
-											file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins"
 											failonerror="false" />
 									</target>

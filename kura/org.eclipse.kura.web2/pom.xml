@@ -76,6 +76,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
+			<artifactId>org.eclipse.kura.util</artifactId>
+			<version>[1.0,2.0)</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.deployment.agent</artifactId>
 			<version>[1.0,2.0)</version>
 			<scope>provided</scope>

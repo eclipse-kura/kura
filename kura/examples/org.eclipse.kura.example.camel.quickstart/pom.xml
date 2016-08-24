@@ -12,8 +12,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<tycho-version>0.20.0</tycho-version>
-		<tycho-extras-version>0.20.0</tycho-extras-version>
+		<tycho-version>0.25.0</tycho-version>
+		<tycho-extras-version>0.25.0</tycho-extras-version>
 	</properties>
 
 	<repositories>

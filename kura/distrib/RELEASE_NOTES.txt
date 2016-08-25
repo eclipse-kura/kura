@@ -3,14 +3,17 @@ Eclipse Kura - 2.0.1
   
 Bug Fixes :
   * Fixed github issues:
+    * #473: org.eclipse.kura.linux.net.modem.ModemDriver uses Java 7 API but has BREE of Java 6
     * #340: [Configuration] Metatype not updated in the Web UI
     * #393: [NN] NN profiles are broken in Kura 2.0.0
     * #373: Kura 2.0.0 distribution for Raspberry-Pi includes emulator.gpio instead of linux.gpio
     * #338: [Web2]: String input forced to a maximum length of 255
     * #316: Debian package should declare dependency on java
     * #296: [Web UI] Status | Connection: if the connection username is not set, "null" is shown
+    * #290: [Web UI] Refresh button in network configuration deselects the currently selected interface 
     * #289: [Web UI] Wireless Password disappears after verification 
     * #275: [Dev Env] Add org.eclipse.kura.linux.bluetooth to the target-platform.
+    * #242: [Web UI] Help is not always visible in the new web ui
     
   * Merged no issue-related Pull Requests:
     * #441: JDK DIO: disable verbose logging from armv5_sf and x86_64 libraries.

@@ -49,8 +49,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 			Collections.sort(configs, new Comparator<ComponentConfiguration>() {
 				public int compare(ComponentConfiguration arg0,
 						ComponentConfiguration arg1) {
-					String name0 = arg0.getPid().substring(arg0.getPid().lastIndexOf(".")); 
-					String name1 = arg1.getPid().substring(arg1.getPid().lastIndexOf(".")); 
+					String name0 = stripPidPrefix(arg0.getPid()); 
+					String name1 = stripPidPrefix(arg1.getPid()); 
 					return name0.compareTo(name1);
 				}});
 			for (ComponentConfiguration config : configs) {

@@ -19,22 +19,51 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
 	<ui:style>
-	
-	.important { font-weight: bold;	}
-	.center-panel {	padding: 0px; border: none; }
+
+	.factory-select-modal-header { display: none; }
+	.factory-select-modal-body { padding-bottom: 105px; }
 	
 	</ui:style>
 
 	<b:Container fluid="true">
-		<b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="wires-modal" ui:field="wiresModal">
-		  <b:ModalBody b:id="wires-modal-body">
-		    <b:Row>
-		    	<b:Column size="MD_3" b:id="wires-modal-stencil"></b:Column>
-		    	<b:Column size="MD_7" b:id="wires-modal-graph"></b:Column>
-		    </b:Row>
-		  </b:ModalBody>
+		<b:Column size="MD_12">
+			<b:Row>
+				<b:Panel>
+					<b:ButtonGroup size="SMALL">
+	    				<b:Button dataTarget="#factory-select-modal" dataToggle="MODAL">New Wire Component</b:Button>
+	    				<b:Button b:id="btn-config-save">Save</b:Button>
+					</b:ButtonGroup>
+				</b:Panel>
+			</b:Row>
+			<b:Row>
+				<b:Column size="MD_12" b:id="wires-graph"></b:Column>
+			</b:Row>
+		</b:Column>
+		<b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="factory-select-modal"
+					ui:field="factorySelectModal">
+			<b:ModalHeader addStyleNames="{style.factory-select-modal-header}">
+			</b:ModalHeader>
+			<b:ModalBody addStyleNames="{style.factory-select-modal-body}">
+				<b:Form>
+					<b:FormGroup>
+						<b:FormLabel for="form-factory-pid" addStyleNames="col-md-4">Factory PID</b:FormLabel>
+						<g:FlowPanel addStyleNames="col-md-8">
+							<b:ListBox ui:field="formFactoryPid" b:id="form-factory-pid">
+							</b:ListBox>
+						</g:FlowPanel>
+					</b:FormGroup>
+					<b:FormGroup>
+						<b:FormLabel for="form-factory-name" addStyleNames="col-md-4">Component Name</b:FormLabel>
+						<g:FlowPanel addStyleNames="col-md-8">
+							<b:TextBox b:id="form-factory-name"></b:TextBox>
+						</g:FlowPanel>
+					</b:FormGroup>
+				</b:Form>
+		  	</b:ModalBody>
+		  	<b:ModalFooter>
+		  		<b:Button type="PRIMARY" b:id="btn-create-comp">Create</b:Button>
+    			<b:Button type="PRIMARY" dataDismiss="MODAL">Cancel</b:Button>
+		  	</b:ModalFooter>
 		</b:Modal>
-		
-		<b:Button dataTarget="#wires-modal" dataToggle="MODAL" type="PRIMARY" size="SMALL" ui:field="wiresButton">Click to show modal</b:Button>
 	</b:Container>
 </ui:UiBinder> 

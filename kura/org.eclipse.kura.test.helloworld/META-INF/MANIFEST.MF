@@ -6,5 +6,8 @@ Bundle-Version: 1.0.1.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
-Import-Package: org.osgi.service.component;version="1.2.0",
+Import-Package: org.eclipse.kura.core.configuration;version="1.0.2",
+ org.eclipse.kura.core.configuration.metatype;version="1.0.0",
+ org.osgi.service.component;version="1.2.0",
  org.slf4j;version="1.6.4"
+Require-Bundle: org.eclipse.kura.api

@@ -47,6 +47,7 @@ import org.eclipse.kura.asset.AssetRecord;
 import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
@@ -279,7 +280,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	@SuppressWarnings("unchecked")
 	@Override
 	public ComponentConfiguration getConfiguration() throws KuraException {
-		final String componentName = this.m_context.getProperties().get(SERVICE_PID).toString();
+		final String componentName = this.m_context.getProperties().get(ConfigurationService.KURA_SERVICE_PID).toString();
 
 		final Tocd mainOcd = new Tocd();
 		mainOcd.setId(CONF_PID);

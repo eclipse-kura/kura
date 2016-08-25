@@ -86,7 +86,7 @@ public class ConfigurableComponentTracker extends ServiceTracker
 								m_confService.registerComponentConfiguration(pid, servicePid, factoryPid);
 							} else if (obj instanceof SelfConfiguringComponent) {
 								s_logger.info("Adding SelfConfiguringComponent with pid {} and service pid {}", pid, servicePid);
-								m_confService.registerSelfConfiguringComponent(servicePid);
+								m_confService.registerSelfConfiguringComponent(pid, servicePid, factoryPid);
 							}
 						}
 						finally {
@@ -111,14 +111,14 @@ public class ConfigurableComponentTracker extends ServiceTracker
 		String servicePid = (String)ref.getProperty(Constants.SERVICE_PID);
 		String pid = (String)ref.getProperty(ConfigurationService.KURA_SERVICE_PID);
 		String factoryPid = (String) ref.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID);
-		
+
 		if (servicePid != null) {
 			if (service instanceof ConfigurableComponent) {
 				s_logger.info("Adding ConfigurableComponent with pid {}, service pid {} and factory pid "+factoryPid, pid, servicePid);
 				m_confService.registerComponentConfiguration(pid, servicePid, factoryPid);
 			} else if (service instanceof SelfConfiguringComponent) {
 				s_logger.info("Adding SelfConfiguringComponent with pid {} and service pid {}", pid, servicePid);
-				m_confService.registerSelfConfiguringComponent(servicePid);
+				m_confService.registerSelfConfiguringComponent(pid, servicePid, factoryPid);
 			}
 		}
 

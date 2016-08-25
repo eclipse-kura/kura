@@ -74,11 +74,18 @@
 			<version>[1.0,2.0)</version>
 			<scope>provided</scope>
 		</dependency>
+		<!-- 
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.util</artifactId>
 			<version>[1.0,2.0)</version>
 			<scope>provided</scope>
+		</dependency>
+		-->
+		<dependency>
+			<groupId>org.eclipse</groupId>
+			<artifactId>org.eclipse.core.runtime</artifactId>
+			<version>[3.8,4.0)</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>

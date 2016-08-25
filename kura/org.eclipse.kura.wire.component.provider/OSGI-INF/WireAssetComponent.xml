@@ -19,6 +19,7 @@
 	configuration-policy="require">
    <implementation class="org.eclipse.kura.internal.wire.asset.WireAsset"/>
    <property name="service.pid" type="String" value="org.eclipse.kura.wire.WireAsset"/>
+   <property name="service.factoryPid" type="String" value="org.eclipse.kura.wire.WireAsset"/>
    <service>
       <provide interface="org.eclipse.kura.wire.WireComponent"/>
       <provide interface="org.eclipse.kura.wire.WireEmitter"/>

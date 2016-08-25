@@ -23,7 +23,7 @@
             type="Integer"
             cardinality="0"
             required="true"
-            default="2"
+            default="10"
             description="Interval of the timer ticks, in seconds"
             min="1"/>
 

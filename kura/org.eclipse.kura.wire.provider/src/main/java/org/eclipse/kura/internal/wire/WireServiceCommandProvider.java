@@ -14,6 +14,7 @@ package org.eclipse.kura.internal.wire;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.Preconditions;
@@ -99,7 +100,7 @@ public final class WireServiceCommandProvider implements CommandProvider {
 	 */
 	public void _listWires(final CommandInterpreter ci) {
 		ci.println("=================== Wire Configurations ===================");
-		final List<WireConfiguration> configs = this.m_wireService.getWireConfigurations();
+		final Set<WireConfiguration> configs = this.m_wireService.getWireConfigurations();
 		int i = 0;
 		for (final WireConfiguration config : configs) {
 			ci.println(new StringBuilder().append(i++).append(".").append(" ").append("Emitter PID ===>").append(" ")

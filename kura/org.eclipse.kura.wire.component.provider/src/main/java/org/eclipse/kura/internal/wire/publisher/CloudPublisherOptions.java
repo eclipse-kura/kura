@@ -31,11 +31,11 @@ final class CloudPublisherOptions {
 	enum AutoConnectMode {
 
 		/** The autoconnect mode off. */
-		AUTOCONNECT_MODE_OFF(-2),
+		AUTOCONNECT_MODE_OFF(0),
 		/** The autoconnect mode on and off. */
 		AUTOCONNECT_MODE_ON_AND_OFF(0),
 		/** The autoconnect mode on and stay. */
-		AUTOCONNECT_MODE_ON_AND_STAY(-1),
+		AUTOCONNECT_MODE_ON_AND_STAY(0),
 		/** The AUTOCONNECT ON and STAY for 1 min. */
 		AUTOCONNECT_MODE_ON_AND_STAY_1_MIN(1),
 		/** The AUTOCONNECT ON and STAY for 10 min. */

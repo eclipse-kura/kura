@@ -718,8 +718,13 @@ public class OpenPortsTabUi extends Composite implements Tab {
 		List<GwtFirewallOpenPortEntry> entries = openPortsDataProvider.getList();
 		if (entries != null && openPortEntry != null) {
 			for (GwtFirewallOpenPortEntry entry : entries) {
-				if (entry.getPortRange().equals(openPortEntry.getPortRange()) && 
-						entry.getPermittedNetwork().equals(openPortEntry.getPermittedNetwork())) {
+				if (entry.getPortRange().equals(openPortEntry.getPortRange()) &&
+						entry.getProtocol().equals(openPortEntry.getProtocol()) &&
+						entry.getPermittedNetwork().equals(openPortEntry.getPermittedNetwork()) &&
+						entry.getPermittedInterfaceName().equals(openPortEntry.getPermittedInterfaceName()) &&
+						entry.getUnpermittedInterfaceName().equals(openPortEntry.getUnpermittedInterfaceName()) &&
+						entry.getPermittedMAC().equals(openPortEntry.getPermittedMAC()) &&
+						entry.getSourcePortRange().equals(openPortEntry.getSourcePortRange())) {
 					return true;
 				}
 			}

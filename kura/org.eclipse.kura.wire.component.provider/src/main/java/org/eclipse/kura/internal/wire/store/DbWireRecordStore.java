@@ -475,7 +475,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 					s_logger.error(s_message.errorStoring() + ee);
 				}
 			}
-		} while (!inserted && (retryCount < 2));
+		} while (!inserted || (retryCount < 2));
 	}
 
 	/**

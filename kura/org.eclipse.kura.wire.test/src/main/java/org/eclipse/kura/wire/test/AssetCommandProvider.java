@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
@@ -56,6 +57,60 @@ public final class AssetCommandProvider implements CommandProvider {
 		map.put(i + ".CH.type", prop.get(2));
 		map.put(i + ".CH.value.type", prop.get(3));
 		map.put(i + ".CH.DRIVER.unit.id", Integer.valueOf(prop.get(4)));
+		this.m_configService.updateConfiguration(prop.get(0), map);
+	}
+
+	/**
+	 * The command {@code addModbusChannel} creates a Modbus channel and
+	 * associates it with the provided asset name
+	 *
+	 * @param ci
+	 *            the console interpreter
+	 * @throws KuraException
+	 *             if configuration service encounters any exception condition
+	 *             while updating
+	 */
+	public void _addModbusChannel(final CommandInterpreter ci) throws KuraException {
+		final String argument = ci.nextArgument();
+		if (argument == null) {
+			ci.println(
+					"Usage: addModbusChannel <assetName>#<channelName>#<type>#<valueType>#<unit.id>#<memory.address>#<primary.table> - Creates a Modbus Channel");
+			return;
+		}
+		final List<String> prop = Arrays.asList(argument.split("#"));
+		final Map<String, Object> map = CollectionUtil.newHashMap();
+		map.put(++i + ".CH.name", prop.get(1));
+		map.put(i + ".CH.type", prop.get(2));
+		DataType dataType = null;
+		final String valueType = prop.get(3);
+		if ("INTEGER".equalsIgnoreCase(valueType)) {
+			dataType = DataType.INTEGER;
+		}
+		if ("LONG".equalsIgnoreCase(valueType)) {
+			dataType = DataType.LONG;
+		}
+		if ("DOUBLE".equalsIgnoreCase(valueType)) {
+			dataType = DataType.DOUBLE;
+		}
+		if ("SHORT".equalsIgnoreCase(valueType)) {
+			dataType = DataType.SHORT;
+		}
+		if ("BYTE".equalsIgnoreCase(valueType)) {
+			dataType = DataType.BYTE;
+		}
+		if ("BOOLEAN".equalsIgnoreCase(valueType)) {
+			dataType = DataType.BOOLEAN;
+		}
+		if ("BYTE_ARRAY".equalsIgnoreCase(valueType)) {
+			dataType = DataType.BYTE_ARRAY;
+		}
+		if ("STRING".equalsIgnoreCase(valueType)) {
+			dataType = DataType.STRING;
+		}
+		map.put(i + ".CH.value.type", dataType);
+		map.put(i + ".CH.DRIVER.unit.id", Integer.valueOf(prop.get(4)));
+		map.put(i + ".CH.DRIVER.memory.address", Integer.valueOf(prop.get(5)));
+		map.put(i + ".CH.DRIVER.primary.table", Integer.valueOf(prop.get(6)));
 		this.m_configService.updateConfiguration(prop.get(0), map);
 	}
 

@@ -16,7 +16,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -92,10 +92,10 @@ public final class WireServiceTest {
 		assertNotNull(configuration.getWire());
 		assertEquals(configuration.getEmitterPid(), emitterPid);
 		assertEquals(configuration.getReceiverPid(), receiverPid);
-		final List<WireConfiguration> list = s_wireService.getWireConfigurations();
-		assertEquals(1, list.size());
+		final Set<WireConfiguration> configs = s_wireService.getWireConfigurations();
+		assertEquals(1, configs.size());
 		s_wireService.deleteWireConfiguration(configuration);
-		assertEquals(0, list.size());
+		assertEquals(0, configs.size());
 	}
 
 	/**

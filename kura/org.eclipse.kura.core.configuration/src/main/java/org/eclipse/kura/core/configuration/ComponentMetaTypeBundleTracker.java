@@ -11,19 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.equinox.internal.ds.model.DeclarationParser;
 import org.eclipse.kura.configuration.metatype.Designate;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.core.configuration.metatype.Tmetadata;
@@ -36,11 +25,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.util.tracker.BundleTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * BundleTracker to track all the Service which have defaults in MetaType.
@@ -50,8 +34,6 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle>
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(ComponentMetaTypeBundleTracker.class);
 
-	private static final String PATTERN_CONFIGURATION_REQUIRE = "configuration-policy=\"require\"";
-	private static final String PATTERN_SERVICE_PROVIDE	= "provide interface=\"org.eclipse.kura.configuration.SelfConfiguringComponent\"";
 	private BundleContext m_context;
 	private ConfigurationServiceImpl m_configurationService;
 
@@ -145,46 +127,5 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle>
 				s_logger.error("Error seeding configuration for pid: "+metatypePid, e);
 			}
 		}
-		
-		Enumeration<URL> enumeration = bundle.findEntries("OSGI-INF", "*.xml", false);
-		if(enumeration != null){
-			while(enumeration.hasMoreElements()){
-				URL entry = enumeration.nextElement();
-				s_logger.info(entry.getPath());
-				BufferedReader reader = null;
-				try{
-					URL fileUrl = FileLocator.toFileURL(entry);
-					reader = new BufferedReader(new FileReader(fileUrl.getFile()));
-					StringBuilder contents = new StringBuilder();
-					String line;
-					while((line = reader.readLine()) != null){
-						contents.append(line);
-					}
-					if(contents.toString().contains(PATTERN_SERVICE_PROVIDE) && contents.toString().contains(PATTERN_CONFIGURATION_REQUIRE)){
-						Document dom = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(fileUrl.getFile());
-						NodeList nl = dom.getElementsByTagName("property");
-						for(int i=0; i<nl.getLength(); i++){
-							Node n = nl.item(i);
-							if(n instanceof Element){
-								if( (((Element)n).getAttribute("name")).equals("service.pid")
-									&& (((Element)n).getAttribute("type")).equals("String")){
-									m_configurationService.addFacoryPid(((Element)n).getAttribute("value"));			
-								}
-							}
-						}
-						
-					}
-				}catch(Exception ex){
-					s_logger.error("Error while reading Component Definition file {}", entry.getPath());
-				}finally{
-					try {
-						reader.close();
-					} catch (IOException e) {
-						s_logger.error("Error closing File Reader!");
-					}
-				}
-			}
-		}
-		
 	}
 }

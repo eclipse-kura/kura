@@ -221,9 +221,9 @@ var kuraWires = (function() {
  		   defaults: joint.util.deepSupplement({
  			   type: 'html.Element',
  			   attrs: {
- 				   rect: { stroke: 'none', 'fill-opacity': 0 },
- 				   '.inPorts circle': { fill: '#16A085', magnet: 'passive', type: 'input' },
- 				   '.outPorts circle': { fill: '#E74C3C', type: 'output' }
+ 				  rect: { rx: 5, ry: 5, fill: "#2ECC71", stroke: '#27AE60', 'stroke-width': 1 },
+ 		          '.inPorts circle': { fill: '#16A085', magnet: 'passive', type: 'input', r: 5 },
+ 		          '.outPorts circle': { fill: '#E74C3C', type: 'output', r: 5 }
  			   }
  		   }, joint.shapes.devs.Model.prototype.defaults)
  	   });

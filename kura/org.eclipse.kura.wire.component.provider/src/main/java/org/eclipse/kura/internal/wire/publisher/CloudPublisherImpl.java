@@ -370,7 +370,7 @@ public final class CloudPublisherImpl implements WireReceiver, DataServiceListen
 
 	/**
 	 * Publishes the list of provided Wire Records
-	 * 
+	 *
 	 * @param wireRecords
 	 *            the provided list of Wire Records
 	 */
@@ -378,8 +378,8 @@ public final class CloudPublisherImpl implements WireReceiver, DataServiceListen
 		checkNull(this.m_cloudClient, s_message.cloudClientNonNull());
 		checkNull(wireRecords, s_message.wireRecordsNonNull());
 
-		if (AUTOCONNECT_MODE_OFF != this.m_options.getAutoConnectMode()
-				&& !this.m_dataService.isAutoConnectEnabled() && !this.m_dataService.isConnected()) {
+		if ((AUTOCONNECT_MODE_OFF != this.m_options.getAutoConnectMode()) && !this.m_dataService.isAutoConnectEnabled()
+				&& !this.m_dataService.isConnected()) {
 			try {
 				if (!this.m_dataService.isConnected()) {
 					this.m_dataService.connect();
@@ -497,7 +497,7 @@ public final class CloudPublisherImpl implements WireReceiver, DataServiceListen
 			if (s_disconnectManager != null) {
 				s_disconnectManager.setQuiesceTimeout(this.m_options.getAutoConnectQuiesceTimeout());
 				final int minDelay = this.m_options.getAutoConnectMode().getDisconnectDelay();
-				if(minDelay > 0){
+				if (minDelay > 0) {
 					s_disconnectManager.disconnectInMinutes(minDelay);
 				}
 			}

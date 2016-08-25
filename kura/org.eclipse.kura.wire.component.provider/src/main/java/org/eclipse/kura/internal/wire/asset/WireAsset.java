@@ -29,7 +29,6 @@ import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
 import static org.eclipse.kura.asset.ChannelType.WRITE;
 import static org.eclipse.kura.wire.SeverityLevel.ERROR;
 import static org.eclipse.kura.wire.SeverityLevel.INFO;
-import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -280,7 +279,8 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	@SuppressWarnings("unchecked")
 	@Override
 	public ComponentConfiguration getConfiguration() throws KuraException {
-		final String componentName = this.m_context.getProperties().get(ConfigurationService.KURA_SERVICE_PID).toString();
+		final String componentName = this.m_context.getProperties().get(ConfigurationService.KURA_SERVICE_PID)
+				.toString();
 
 		final Tocd mainOcd = new Tocd();
 		mainOcd.setId(CONF_PID);

@@ -30,14 +30,14 @@ import org.eclipse.kura.wire.WireConfiguration;
  */
 final class WireServiceOptions {
 
+	/** Regular Expression pattern used for checking wire configurations */
+	private static final String PATTERN = "%s.";
+
 	/** Localization Resource */
 	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
 	/** The list of wire configurations. */
 	private final List<WireConfiguration> m_wireConfigurations;
-	
-	/** Regular Expression pattern used for checking wire configurations*/
-	private static final String s_pattern ="%s.";
 
 	/**
 	 * Instantiates a new wire service options.
@@ -87,27 +87,25 @@ final class WireServiceOptions {
 		final String separator = ".";
 		for (final Map.Entry<String, Object> entry : properties.entrySet()) {
 			final String key = entry.getKey();
-			if (key.contains(separator)) {
-				if (Character.isDigit(key.charAt(0))) {
-					final Long wireConfId = Long.parseLong(key.substring(0, key.indexOf(separator)));
-					wireIds.add(wireConfId);
-				}
+			if (key.contains(separator) && Character.isDigit(key.charAt(0))) {
+				final Long wireConfId = Long.parseLong(key.substring(0, key.indexOf(separator)));
+				wireIds.add(wireConfId);
 			}
 		}
 		final Iterator<Long> it = wireIds.iterator();
 		while (it.hasNext()) {
-			String wireConfId = String.valueOf(it.next());
+			final String wireConfId = String.valueOf(it.next());
 			String emitterPid = null;
 			String receiverPid = null;
 			String filter = null;
 			for (final Map.Entry<String, Object> entry : properties.entrySet()) {
 				final String key = entry.getKey();
 				final String value = String.valueOf(entry.getValue());
-				
-				if(!key.contains(separator)){
+
+				if (!key.contains(separator)) {
 					continue;
 				}
-				if ((key.startsWith(String.format(s_pattern, wireConfId)))) {
+				if ((key.startsWith(String.format(PATTERN, wireConfId)))) {
 					if (key.contains("emitter")) {
 						emitterPid = value;
 					}

@@ -34,6 +34,7 @@ import org.eclipse.kura.web.server.GwtSettingServiceImpl;
 import org.eclipse.kura.web.server.GwtSnapshotServiceImpl;
 import org.eclipse.kura.web.server.GwtSslServiceImpl;
 import org.eclipse.kura.web.server.GwtStatusServiceImpl;
+import org.eclipse.kura.web.server.GwtWireServiceImpl;
 import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.server.servlet.FileServlet;
 import org.eclipse.kura.web.server.servlet.SkinServlet;
@@ -238,6 +239,7 @@ public class Console implements ConfigurableComponent {
 		m_httpService.unregister(servletRoot + "/file");
 		m_httpService.unregister(servletRoot + "/device_snapshots");
 		m_httpService.unregister(servletRoot + "/skin");
+		m_httpService.unregister(servletRoot + "/wires");
 
 	}
 
@@ -275,5 +277,7 @@ public class Console implements ConfigurableComponent {
 		m_httpService.registerServlet(servletRoot + "/device_snapshots", new DeviceSnapshotsServlet(), null, httpCtx);
 		m_httpService.registerServlet(servletRoot + "/skin", new SkinServlet(), null, httpCtx);
 		m_httpService.registerServlet(servletRoot + "/ssl", new GwtSslServiceImpl(), null, httpCtx);
+		m_httpService.registerServlet(servletRoot + "/wires", new GwtWireServiceImpl(), null, httpCtx);
+		
 	}
 }

@@ -134,9 +134,7 @@ public final class WireConfiguration {
 		final int prime = 31;
 		int result = 1;
 		result = (prime * result) + ((this.emitterPid == null) ? 0 : this.emitterPid.hashCode());
-		result = (prime * result) + ((this.filter == null) ? 0 : this.filter.hashCode());
 		result = (prime * result) + ((this.receiverPid == null) ? 0 : this.receiverPid.hashCode());
-		result = (prime * result) + ((this.wire == null) ? 0 : this.wire.hashCode());
 		return result;
 	}
 

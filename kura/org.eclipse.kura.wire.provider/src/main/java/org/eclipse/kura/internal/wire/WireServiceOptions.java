@@ -14,6 +14,7 @@ package org.eclipse.kura.internal.wire;
 
 import static org.eclipse.kura.Preconditions.checkNull;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +35,9 @@ final class WireServiceOptions {
 
 	/** The list of wire configurations. */
 	private final List<WireConfiguration> m_wireConfigurations;
+	
+	/** Regular Expression pattern used for checking wire configurations*/
+	private static final String s_pattern ="%s.";
 
 	/**
 	 * Instantiates a new wire service options.
@@ -90,15 +94,20 @@ final class WireServiceOptions {
 				}
 			}
 		}
-		for (int i = 0; i < wireIds.size(); i++) {
+		final Iterator<Long> it = wireIds.iterator();
+		while (it.hasNext()) {
+			String wireConfId = String.valueOf(it.next());
 			String emitterPid = null;
 			String receiverPid = null;
 			String filter = null;
 			for (final Map.Entry<String, Object> entry : properties.entrySet()) {
 				final String key = entry.getKey();
 				final String value = String.valueOf(entry.getValue());
-
-				if ((key.substring(0, key.indexOf(separator)).matches("[\\d+]"))) {
+				
+				if(!key.contains(separator)){
+					continue;
+				}
+				if ((key.startsWith(String.format(s_pattern, wireConfId)))) {
 					if (key.contains("emitter")) {
 						emitterPid = value;
 					}

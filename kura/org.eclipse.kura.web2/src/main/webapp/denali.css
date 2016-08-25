@@ -61,9 +61,90 @@ img.x-tree3-node-icon {
 
 /******************************
 ***
+*** Kura Wires
+***
+*******************************/
+#factory-select-modal .modal-dialog { margin-top: 15%; }
+#wires-graph {
+   position: relative;
+   border: 1px solid gray;
+   display: inline-block;
+   background: transparent;
+   overflow: hidden;
+   padding: 0px;
+}
+#wires-graph svg {
+   background: transparent;
+}
+#wires-graph svg .link {
+   z-index: 2;
+}
+.html-element {
+   position: absolute;
+   background: #3498DB;
+   /* Make sure events are propagated to the JointJS element so, e.g. dragging works.*/
+   pointer-events: none;
+   -webkit-user-select: none;
+   border-radius: 4px;
+   border: 2px solid #2980B9;
+   box-shadow: inset 0 0 5px black, 2px 2px 1px gray;
+   padding: 5px;
+   box-sizing: border-box;
+   z-index: 2;
+}
+
+.html-element select,
+.html-element input,
+.html-element button {
+   /* Enable interacting with inputs only. */
+   pointer-events: auto;
+}
+.html-element button.delete {
+   color: white;
+   border: none;
+   background-color: #C0392B;
+   border-radius: 20px;
+   width: 15px;
+   height: 15px;
+   line-height: 15px;
+   text-align: middle;
+   position: absolute;
+   top: -15px;
+   left: -15px;
+   padding: 0;
+   margin: 0;
+   font-weight: bold;
+   cursor: pointer;
+}
+.html-element button.delete:hover {
+   width: 20px;
+   height: 20px;
+   line-height: 20px;
+}
+.html-element label {
+   color: #333;
+   text-shadow: 1px 0 0 lightgray;
+   font-weight: bold;
+   display: block;
+   text-align: center;
+}
+.html-element span {
+   position: absolute;
+   top: 2px;
+   right: 9px;
+   color: white;
+   font-size: 10px;
+}
+
+/******************************
+***
 *** gwtbootstrap3 CSS rules 
 ***
 *******************************/
+#wires-modal .modal-dialog { width: 80%; height: 90%; }
+#wires-modal .modal-content { height: 90%; }
+#wires-modal-stencil { border: 1px solid; margin-left: 5px; }
+
 .gwt-PopupPanelGlass { width: 100%; background-color: #009AE0; opacity: 0.3; }
 
 .btn { background-color: #009AE0 !important; color: white !important; }

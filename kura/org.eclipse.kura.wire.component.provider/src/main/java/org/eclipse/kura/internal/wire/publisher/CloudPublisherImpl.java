@@ -497,7 +497,9 @@ public final class CloudPublisherImpl implements WireReceiver, DataServiceListen
 			if (s_disconnectManager != null) {
 				s_disconnectManager.setQuiesceTimeout(this.m_options.getAutoConnectQuiesceTimeout());
 				final int minDelay = this.m_options.getAutoConnectMode().getDisconnectDelay();
-				s_disconnectManager.disconnectInMinutes(minDelay);
+				if(minDelay > 0){
+					s_disconnectManager.disconnectInMinutes(minDelay);
+				}
 			}
 		} finally {
 			this.m_monitor.unlock();

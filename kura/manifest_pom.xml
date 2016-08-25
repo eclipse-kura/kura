@@ -44,7 +44,7 @@
 		<module>org.eclipse.kura.deployment.customizer.upgrade</module>
 		<module>org.eclipse.kura.deployment.update</module>
 		<module>org.eclipse.kura.driver.modbus.provider</module>
-		<module>org.eclipse.kura.driver.opcua.provider</module>
+		<!--<module>org.eclipse.kura.driver.opcua.provider</module>-->
 		<module>org.eclipse.kura.driver.s7plc.provider</module>
 		<module>org.eclipse.kura.linux.bluetooth</module>
 		<module>org.eclipse.kura.linux.clock</module>

@@ -15,9 +15,16 @@
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
 	name="org.eclipse.kura.test.helloworld.HelloWorld"
 	activate="activate"
-	deactivate="deactivate" 
+	deactivate="deactivate"
+	modified="update" 
 	enabled="true"
-    immediate="true">
+    immediate="true"
+    configuration-policy="require">
    <implementation class="org.eclipse.kura.test.helloworld.HelloWorld"/>
    <property name="service.pid" type="String" value="org.eclipse.kura.test.helloworld.HelloWorld"/>
+   <property name="service.factoryPid" type="String" value="org.eclipse.kura.test.helloworld.HelloWorld"/>
+   
+   <service>
+       <provide interface="org.eclipse.kura.configuration.SelfConfiguringComponent"/>
+   </service>
 </scr:component>

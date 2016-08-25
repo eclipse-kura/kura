@@ -425,14 +425,14 @@ public class IptablesConfig {
 					String source = natPostroutingChainRule.getSrcNetwork();
 					String destination = natPostroutingChainRule.getDstNetwork();
 					if (destination != null) {
-						StringBuilder sbDestination = new StringBuilder().append(destination).append(':').append(natPostroutingChainRule.getDstMask());
+						StringBuilder sbDestination = new StringBuilder().append(destination).append('/').append(natPostroutingChainRule.getDstMask());
 						destination = sbDestination.toString();
 					} else {
 						isNATrule = true;
 					}
 					if (source != null) {
 						isNATrule = true;
-						StringBuilder sbSource = new StringBuilder().append(source).append(':').append(natPostroutingChainRule.getSrcMask());
+						StringBuilder sbSource = new StringBuilder().append(source).append('/').append(natPostroutingChainRule.getSrcMask());
 						source = sbSource.toString();
 					} else {
 						if (!isNATrule) {

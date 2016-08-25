@@ -154,7 +154,8 @@ public final class AssetCommandProvider implements CommandProvider {
 	public String getHelp() {
 		return "---Wire Asset Service---\n"
 				+ "\tcreateWireAsset <factoryPid>#<pid>#<assetName>#<assetDescription>#<driverId> - Creates a Wire Asset\n"
-				+ "\taddChannel <assetName>#<channelName>#<type>#<valueType> - Creates a Channel\n";
+				+ "\taddChannel <assetName>#<channelName>#<type>#<valueType> - Creates a Channel\n"
+				+ "\taddModbusChannel <assetName>#<channelName>#<type>#<valueType>#<unit.id>#<memory.address>#<primary.table> - Creates a Modbus Channel\n";
 	}
 
 	/**

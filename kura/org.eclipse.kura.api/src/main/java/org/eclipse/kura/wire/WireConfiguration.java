@@ -82,25 +82,11 @@ public final class WireConfiguration {
 		} else if (!this.emitterPid.equals(other.emitterPid)) {
 			return false;
 		}
-		if (this.filter == null) {
-			if (other.filter != null) {
-				return false;
-			}
-		} else if (!this.filter.equals(other.filter)) {
-			return false;
-		}
 		if (this.receiverPid == null) {
 			if (other.receiverPid != null) {
 				return false;
 			}
 		} else if (!this.receiverPid.equals(other.receiverPid)) {
-			return false;
-		}
-		if (this.wire == null) {
-			if (other.wire != null) {
-				return false;
-			}
-		} else if (!this.wire.equals(other.wire)) {
 			return false;
 		}
 		return true;

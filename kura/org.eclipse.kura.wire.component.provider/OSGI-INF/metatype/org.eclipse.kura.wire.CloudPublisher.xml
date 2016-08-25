@@ -23,7 +23,7 @@
             type="String"
             cardinality="0"
             required="true"
-            default="AUTOCONNECT_MODE_ON_AND_STAY_5_MIN"
+            default="AUTOCONNECT_MODE_OFF"
             description="Option to control whether the a Cloud Connection should be started if an event occurs in order to publish the DataRecords; it also controls for how long such connection should be kept open after the last message is published.">
             <Option label="Do not connect on event." value="AUTOCONNECT_MODE_OFF" />
             <Option label="Connect on event and disconnect immediately." value="AUTOCONNECT_MODE_ON_AND_OFF" />

@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -76,16 +77,16 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 	/** The Wire Admin dependency. */
 	private volatile WireAdmin m_wireAdmin;
 
-	/** The list of wire configurations */
-	private final List<WireConfiguration> m_wireConfigs;
+	/** The set of wire configurations */
+	private final Set<WireConfiguration> m_wireConfigs;
 
 	/** The Wire Helper Service. */
 	private volatile WireHelperService m_wireHelperService;
 
 	/** Constructor */
 	public WireServiceImpl() {
-		final List<WireConfiguration> list = CollectionUtil.newArrayList();
-		this.m_wireConfigs = Collections.synchronizedList(list);
+		final Set<WireConfiguration> set = CollectionUtil.newHashSet();
+		this.m_wireConfigs = Collections.synchronizedSet(set);
 	}
 
 	/**
@@ -230,7 +231,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 						// just to make sure the deletion does not incur
 						// ConcurrentModification exception
 						synchronized (this.m_wireConfigs) {
-							for (final Iterator<WireConfiguration> iter = this.m_wireConfigs.listIterator(); iter
+							for (final Iterator<WireConfiguration> iter = this.m_wireConfigs.iterator(); iter
 									.hasNext();) {
 								final WireConfiguration configuration = iter.next();
 								if (configuration.equals(wireConfiguration)) {
@@ -300,7 +301,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
 	/** {@inheritDoc} */
 	@Override
-	public List<WireConfiguration> getWireConfigurations() {
+	public Set<WireConfiguration> getWireConfigurations() {
 		return this.m_wireConfigs;
 	}
 

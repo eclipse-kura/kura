@@ -12,7 +12,7 @@
  */
 package org.eclipse.kura.wire;
 
-import java.util.List;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
@@ -59,10 +59,10 @@ public interface WireService {
 	public void deleteWireConfiguration(WireConfiguration wireConfiguration);
 
 	/**
-	 * Retrieves the list of already created Wire Configurations
+	 * Retrieves the set of already created Wire Configurations
 	 *
-	 * @return the list of wire configurations
+	 * @return the set of wire configurations
 	 */
-	public List<WireConfiguration> getWireConfigurations();
+	public Set<WireConfiguration> getWireConfigurations();
 
 }

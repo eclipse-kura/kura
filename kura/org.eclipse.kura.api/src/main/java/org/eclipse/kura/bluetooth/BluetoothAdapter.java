@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.bluetooth;
 
+import org.eclipse.kura.bluetooth.listener.BluetoothAdvertisementScanListener;
+
 /**
  * BluetoothAdapter represents the physical Bluetooth adapter on the host machine (ex: hci0).
  *
@@ -70,6 +72,17 @@ public interface BluetoothAdapter {
 	 */
 	public void startLeScan(BluetoothLeScanListener listener);
 	
+	/**
+	* Starts an asynchronous scan for Bluetooth LE advertisements. Advertisement
+	* data is relayed through the {@link org.eclipse.kura.bluetooth.listener.BluetoothAdvertisementScanListener} as it arrives.
+	*
+	* @param companyName Hexadecimal string representing the company code
+	* @param listener Interface for collecting beacon data.
+	* 
+	* @since {@link org.eclipse.kura.bluetooth} 1.3.0
+	* 
+	*/
+	public void startAdvertisementScan(String companyName, BluetoothAdvertisementScanListener listener);
 
 	/**
 	* Starts an asynchronous scan for Bluetooth LE beacons. Beacon data is

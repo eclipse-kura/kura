@@ -46,9 +46,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -202,17 +205,34 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 					s_logger.info("Service Pid for Producer: {}", wireHelperService.getServicePid(prod));
 					s_logger.info("Service Pid for Consumer: {}", wireHelperService.getServicePid(cons));
 
+					// Another possible way
+					// track for the producer
+					final String pPid = wireHelperService.getServicePid(prod);
+					final BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+					String filterString = "(objectClass=" + pPid + ")";
+					Filter filter = bundleContext.createFilter(filterString);
+					ServiceTracker<WireComponent, WireComponent> tracker = new ServiceTracker<WireComponent, WireComponent>(
+							bundleContext, filter, null);
+					tracker.waitForService(100);
+
+					// track for the consumer
+					final String cPid = wireHelperService.getServicePid(cons);
+					filterString = "(objectClass=" + cPid + ")";
+					filter = bundleContext.createFilter(filterString);
+					tracker = new ServiceTracker<WireComponent, WireComponent>(bundleContext, filter, null);
+					tracker.waitForService(100);
+
 					// TODO: Think of a cleaner solution
-					String pPid = wireHelperService.getServicePid(prod);
-					String cPid = wireHelperService.getServicePid(cons);
-					while ((cPid == null) || (pPid == null)) {
-						try {
-							Thread.sleep(100);
-						} catch (final InterruptedException e) {
-						}
-						cPid = wireHelperService.getServicePid(cons);
-						pPid = wireHelperService.getServicePid(prod);
-					}
+					// String pPid = wireHelperService.getServicePid(prod);
+					// String cPid = wireHelperService.getServicePid(cons);
+					// while ((cPid == null) || (pPid == null)) {
+					// try {
+					// Thread.sleep(100);
+					// } catch (final InterruptedException e) {
+					// }
+					// cPid = wireHelperService.getServicePid(cons);
+					// pPid = wireHelperService.getServicePid(prod);
+					// }
 
 					wireService.createWireConfiguration(prod, cons);
 					jCells.getJSONObject(i).put(NEW_WIRE, false);
@@ -245,6 +265,10 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 		} catch (final JSONException exception) {
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
 		} catch (final KuraException exception) {
+			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
+		} catch (final InterruptedException exception) {
+			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
+		} catch (final InvalidSyntaxException exception) {
 			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
 		}
 		return this.getWiresConfigurationInternal();

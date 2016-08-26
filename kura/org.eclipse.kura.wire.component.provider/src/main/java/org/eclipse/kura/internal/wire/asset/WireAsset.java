@@ -14,16 +14,6 @@ package org.eclipse.kura.internal.wire.asset;
 
 import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
-import static org.eclipse.kura.asset.AssetConstants.ASSET_DESC_PROP;
-import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
-import static org.eclipse.kura.asset.AssetConstants.ASSET_NAME_PROP;
-import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_POSTFIX;
-import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_PREFIX;
-import static org.eclipse.kura.asset.AssetConstants.DRIVER_PROPERTY_POSTFIX;
-import static org.eclipse.kura.asset.AssetConstants.NAME;
-import static org.eclipse.kura.asset.AssetConstants.SEVERITY_LEVEL;
-import static org.eclipse.kura.asset.AssetConstants.TYPE;
-import static org.eclipse.kura.asset.AssetConstants.VALUE_TYPE;
 import static org.eclipse.kura.asset.ChannelType.READ;
 import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
 import static org.eclipse.kura.asset.ChannelType.WRITE;
@@ -35,7 +25,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
@@ -43,19 +32,9 @@ import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.AssetFlag;
 import org.eclipse.kura.asset.AssetRecord;
-import org.eclipse.kura.asset.AssetService;
+import org.eclipse.kura.asset.AssetStatus;
 import org.eclipse.kura.asset.Channel;
-import org.eclipse.kura.configuration.ComponentConfiguration;
-import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.configuration.SelfConfiguringComponent;
-import org.eclipse.kura.configuration.metatype.Option;
-import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
-import org.eclipse.kura.core.configuration.metatype.Tad;
-import org.eclipse.kura.core.configuration.metatype.Tocd;
-import org.eclipse.kura.core.configuration.metatype.Toption;
-import org.eclipse.kura.core.configuration.metatype.Tscalar;
-import org.eclipse.kura.driver.ChannelDescriptor;
-import org.eclipse.kura.driver.Driver;
+import org.eclipse.kura.asset.provider.BaseAsset;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.TypedValue;
@@ -96,9 +75,10 @@ import org.slf4j.LoggerFactory;
  *
  * @see Asset
  */
-public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguringComponent {
+public final class WireAsset extends BaseAsset implements WireEmitter, WireReceiver {
 
 	/** Configuration PID Property. */
+	@SuppressWarnings("unused")
 	private static final String CONF_PID = "org.eclipse.kura.wire.WireAsset";
 
 	/** The Logger instance. */
@@ -107,20 +87,8 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	/** Localization Resource. */
 	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
-	/** Asset Implementation. */
-	private Asset m_asset;
-
 	/** The provided asset configuration wrapper instance. */
 	private AssetConfiguration m_assetConfiguration;
-
-	/** The Asset Service instance. */
-	private volatile AssetService m_assetService;
-
-	/** The service component context. */
-	private ComponentContext m_context;
-
-	/** The configurable properties of this asset. */
-	private Map<String, Object> m_properties;
 
 	/** The Wire Helper Service. */
 	private volatile WireHelperService m_wireHelperService;
@@ -136,28 +104,13 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	 * @param properties
 	 *            the service properties
 	 */
+	@Override
 	protected synchronized void activate(final ComponentContext componentContext,
 			final Map<String, Object> properties) {
 		s_logger.debug(s_message.activatingWireAsset());
-		this.m_asset = this.m_assetService.newAsset();
-		this.m_asset.initialize(properties);
-		this.m_assetConfiguration = this.m_asset.getAssetConfiguration();
-		this.m_context = componentContext;
-		this.m_properties = properties;
+		super.activate(componentContext, properties);
 		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
 		s_logger.debug(s_message.activatingWireAssetDone());
-	}
-
-	/**
-	 * Binds the Asset Service.
-	 *
-	 * @param assetService
-	 *            the Asset Service
-	 */
-	public synchronized void bindAssetService(final AssetService assetService) {
-		if (this.m_assetService == null) {
-			this.m_assetService = assetService;
-		}
 	}
 
 	/**
@@ -172,52 +125,6 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		}
 	}
 
-	/**
-	 * Clones provided Attribute Definition by prepending the provided prefix.
-	 *
-	 * @param oldAd
-	 *            the old Attribute Definition
-	 * @param prefix
-	 *            the prefix to be prepended (this will be in the format of
-	 *            {@code x.CH.} or {@code x.CH.DRIVER.} where {@code x} is
-	 *            channel identifier number. {@code x.CH.} will be used for the
-	 *            channel specific properties except the driver specific
-	 *            properties. The driver specific properties in the channel will
-	 *            use the {@code x.CH.DRIVER.} prefix)
-	 * @return the new attribute definition
-	 * @throws KuraRuntimeException
-	 *             if any of the provided arguments is null
-	 */
-	private Tad cloneAd(final Tad oldAd, final String prefix) {
-		checkNull(oldAd, s_message.oldAdNonNull());
-		checkNull(prefix, s_message.adPrefixNonNull());
-
-		String pref = prefix;
-		final String oldAdId = oldAd.getId();
-		if ((oldAdId != ASSET_DESC_PROP.value()) && (oldAdId != ASSET_DRIVER_PROP.value())
-				&& (oldAdId != ASSET_NAME_PROP.value()) && (oldAdId != NAME.value()) && (oldAdId != TYPE.value())
-				&& (oldAdId != VALUE_TYPE.value()) && (oldAdId != SEVERITY_LEVEL.value())) {
-			pref = prefix + DRIVER_PROPERTY_POSTFIX.value() + CHANNEL_PROPERTY_POSTFIX.value();
-		}
-		final Tad result = new Tad();
-		result.setId(pref + oldAdId);
-		result.setName(pref + oldAd.getName());
-		result.setCardinality(oldAd.getCardinality());
-		result.setType(Tscalar.fromValue(oldAd.getType().value()));
-		result.setDescription(oldAd.getDescription());
-		result.setDefault(oldAd.getDefault());
-		result.setMax(oldAd.getMax());
-		result.setMin(oldAd.getMin());
-		result.setRequired(oldAd.isRequired());
-		for (final Option option : oldAd.getOption()) {
-			final Toption newOption = new Toption();
-			newOption.setLabel(option.getLabel());
-			newOption.setValue(option.getValue());
-			result.getOption().add(newOption);
-		}
-		return result;
-	}
-
 	/** {@inheritDoc} */
 	@Override
 	public void consumersConnected(final Wire[] wires) {
@@ -230,9 +137,10 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	 * @param context
 	 *            the context
 	 */
+	@Override
 	protected synchronized void deactivate(final ComponentContext context) {
 		s_logger.debug(s_message.deactivatingWireAsset());
-		this.m_asset.release();
+		super.deactivate(context);
 		s_logger.debug(s_message.deactivatingWireAssetDone());
 	}
 
@@ -251,7 +159,8 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 
 		final List<WireRecord> wireRecords = CollectionUtil.newArrayList();
 		for (final AssetRecord assetRecord : assetRecords) {
-			final AssetFlag assetFlag = assetRecord.getAssetFlag();
+			final AssetStatus assetStatus = assetRecord.getAssetStatus();
+			final AssetFlag assetFlag = assetStatus.getAssetFlag();
 			final SeverityLevel level = (assetFlag == AssetFlag.FAILURE) ? ERROR : INFO;
 			final WireField channelIdWireField = new WireField(s_message.channelId(),
 					TypedValues.newLongValue(assetRecord.getChannelId()), level);
@@ -263,7 +172,17 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 			WireRecord wireRecord;
 			WireField errorField;
 			if (level == ERROR) {
-				errorField = new WireField(s_message.error(), TypedValues.newStringValue("ERROR"), level);
+				String errorMessage = "ERROR NOT SPECIFIED";
+				final Exception exception = assetStatus.getException();
+				final String exceptionMsg = assetStatus.getExceptionMessage();
+				if ((exception != null) && (exceptionMsg != null)) {
+					errorMessage = exceptionMsg + " " + ThrowableUtil.stackTraceAsString(exception);
+				} else if ((exception == null) && (exceptionMsg != null)) {
+					errorMessage = exceptionMsg;
+				} else if ((exception != null) && (exceptionMsg == null)) {
+					errorMessage = ThrowableUtil.stackTraceAsString(exception);
+				}
+				errorField = new WireField(s_message.error(), TypedValues.newStringValue(errorMessage), level);
 				wireRecord = new WireRecord(new Timestamp(new Date().getTime()), Arrays.asList(channelIdWireField,
 						assetFlagWireField, timestampWireField, valueWireField, errorField));
 			} else {
@@ -276,105 +195,9 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	}
 
 	/** {@inheritDoc} */
-	@SuppressWarnings("unchecked")
 	@Override
-	public ComponentConfiguration getConfiguration() throws KuraException {
-		final String componentName = this.m_context.getProperties().get(ConfigurationService.KURA_SERVICE_PID)
-				.toString();
-
-		final Tocd mainOcd = new Tocd();
-		mainOcd.setId(CONF_PID);
-		mainOcd.setName(s_message.ocdName());
-		mainOcd.setDescription(s_message.ocdDescription());
-
-		final Tad assetNameAd = new Tad();
-		assetNameAd.setId(ASSET_NAME_PROP.value());
-		assetNameAd.setName(ASSET_NAME_PROP.value());
-		assetNameAd.setCardinality(0);
-		assetNameAd.setType(Tscalar.STRING);
-		assetNameAd.setDescription(s_message.name());
-		assetNameAd.setRequired(true);
-
-		final Tad assetDescriptionAd = new Tad();
-		assetDescriptionAd.setId(ASSET_DESC_PROP.value());
-		assetDescriptionAd.setName(ASSET_DESC_PROP.value());
-		assetDescriptionAd.setCardinality(0);
-		assetDescriptionAd.setType(Tscalar.STRING);
-		assetDescriptionAd.setDescription(s_message.description());
-		assetDescriptionAd.setRequired(true);
-
-		final Tad driverNameAd = new Tad();
-		driverNameAd.setId(ASSET_DRIVER_PROP.value());
-		driverNameAd.setName(ASSET_DRIVER_PROP.value());
-		driverNameAd.setCardinality(0);
-		driverNameAd.setType(Tscalar.STRING);
-		driverNameAd.setDescription(s_message.driverName());
-		driverNameAd.setRequired(true);
-
-		final Tad severityLevelAd = new Tad();
-		severityLevelAd.setId(SEVERITY_LEVEL.value());
-		severityLevelAd.setName(SEVERITY_LEVEL.value());
-		// default severity level is ERROR
-		severityLevelAd.setDefault(s_message.error());
-		severityLevelAd.setCardinality(0);
-		severityLevelAd.setType(Tscalar.STRING);
-		severityLevelAd.setDescription(s_message.driverName());
-		severityLevelAd.setRequired(true);
-
-		final Toption infoLevel = new Toption();
-		infoLevel.setValue(s_message.info());
-		infoLevel.setLabel(s_message.info());
-		severityLevelAd.getOption().add(infoLevel);
-
-		final Toption configLevel = new Toption();
-		configLevel.setValue(s_message.error());
-		configLevel.setLabel(s_message.error());
-		severityLevelAd.getOption().add(configLevel);
-
-		final Toption errorLevel = new Toption();
-		errorLevel.setValue(s_message.config());
-		errorLevel.setLabel(s_message.config());
-		severityLevelAd.getOption().add(errorLevel);
-
-		mainOcd.addAD(assetDescriptionAd);
-		mainOcd.addAD(assetNameAd);
-		mainOcd.addAD(severityLevelAd);
-
-		final Map<String, Object> props = CollectionUtil.newHashMap();
-		for (final Map.Entry<String, Object> entry : this.m_properties.entrySet()) {
-			props.put(entry.getKey(), entry.getValue());
-		}
-		ChannelDescriptor channelDescriptor = null;
-		final Driver driver = this.m_asset.getDriver();
-		if (driver != null) {
-			channelDescriptor = driver.getChannelDescriptor();
-		}
-		if (channelDescriptor != null) {
-			List<Tad> driverSpecificChannelConfiguration = null;
-			final Object descriptor = channelDescriptor.getDescriptor();
-			if (descriptor instanceof List<?>) {
-				driverSpecificChannelConfiguration = (List<Tad>) descriptor;
-			}
-			if (driverSpecificChannelConfiguration != null) {
-				final ChannelDescriptor basicChanneldescriptor = new BaseChannelDescriptor();
-				List<Tad> channelConfiguration = null;
-				final Object baseChannelDescriptor = basicChanneldescriptor.getDescriptor();
-				if (baseChannelDescriptor instanceof List<?>) {
-					channelConfiguration = (List<Tad>) baseChannelDescriptor;
-				}
-				if (channelConfiguration != null) {
-					channelConfiguration.addAll(driverSpecificChannelConfiguration);
-				}
-				for (final Tad attribute : channelConfiguration) {
-					for (final String prefix : this
-							.retrieveChannelPrefixes(this.m_assetConfiguration.getAssetChannels())) {
-						final Tad newAttribute = this.cloneAd(attribute, prefix);
-						mainOcd.addAD(newAttribute);
-					}
-				}
-			}
-		}
-		return new ComponentConfigurationImpl(componentName, mainOcd, props);
+	protected String getFactoryPid() {
+		return CONF_PID;
 	}
 
 	/**
@@ -416,7 +239,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		if (field instanceof TimerWireField) {
 			// perform the read operation on timer event receive
 			try {
-				final List<AssetRecord> recentlyReadRecords = this.m_asset.read(channelsToRead);
+				final List<AssetRecord> recentlyReadRecords = this.read(channelsToRead);
 				this.emitAssetRecords(recentlyReadRecords);
 			} catch (final KuraException e) {
 				s_logger.error(s_message.errorPerformingRead() + ThrowableUtil.stackTraceAsString(e));
@@ -442,7 +265,7 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		}
 		// perform the write operation
 		try {
-			this.m_asset.write(assetRecordsToWriteChannels);
+			this.write(assetRecordsToWriteChannels);
 		} catch (final KuraException e) {
 			s_logger.error(s_message.errorPerformingWrite() + ThrowableUtil.stackTraceAsString(e));
 		}
@@ -481,39 +304,6 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 	}
 
 	/**
-	 * Retrieves the set of prefixes of the channels from the map of channels.
-	 *
-	 * @param channels
-	 *            the properties to parse
-	 * @return the list of channel IDs
-	 * @throws KuraRuntimeException
-	 *             if the argument is null
-	 */
-	private Set<String> retrieveChannelPrefixes(final Map<Long, Channel> channels) {
-		checkNull(channels, s_message.propertiesNonNull());
-		final Set<String> channelPrefixes = CollectionUtil.newHashSet();
-		for (final Map.Entry<Long, Channel> entry : channels.entrySet()) {
-			final Long key = entry.getKey();
-			final String prefix = key + CHANNEL_PROPERTY_POSTFIX.value() + CHANNEL_PROPERTY_PREFIX.value()
-					+ CHANNEL_PROPERTY_POSTFIX.value();
-			channelPrefixes.add(prefix);
-		}
-		return channelPrefixes;
-	}
-
-	/**
-	 * Unbinds the Asset Service.
-	 *
-	 * @param assetService
-	 *            the Asset Service
-	 */
-	public synchronized void unbindAssetService(final AssetService assetService) {
-		if (this.m_assetService == assetService) {
-			this.m_assetService = null;
-		}
-	}
-
-	/**
 	 * Unbinds the Wire Helper Service.
 	 *
 	 * @param wireHelperService
@@ -525,10 +315,16 @@ public final class WireAsset implements WireEmitter, WireReceiver, SelfConfiguri
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * OSGi service component callback while updation.
+	 *
+	 * @param properties
+	 *            the service properties
+	 */
+	@Override
 	public synchronized void updated(final Map<String, Object> properties) {
 		s_logger.debug(s_message.updatingWireAsset());
-		this.m_asset.initialize(properties);
+		super.updated(properties);
 		s_logger.debug(s_message.updatingWireAssetDone());
 	}
 

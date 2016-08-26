@@ -22,6 +22,12 @@
    		name="CloudService" 
    		policy="static" 
    		unbind="unbindCloudService"/>
+   	<reference bind="bindAssetService" 
+   		cardinality="1..1" 
+   		interface="org.eclipse.kura.asset.AssetService" 
+   		name="AssetService" 
+   		policy="static" 
+   		unbind="unbindAssetService"/>
    <service>
       <provide interface="org.eclipse.kura.cloud.CloudClientListener"/>
    </service>

@@ -24,7 +24,7 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.AssetRecord;
-import org.eclipse.kura.asset.BaseAsset;
+import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudService;
@@ -44,21 +44,21 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The Class AssetCloudlet is used to provide MQTT read/write operations on the
- * asset. The application id is configured as {@code Assetlet}.
+ * asset. The application id is configured as {@code AssetCloudlet}.
  *
  * The available {@code GET} commands are as follows
  * <ul>
  * <li>/assets</li> : to retrieve all the assets
- * <li>/assets/asset_name</li> : to retrieve all the channels of the provided
- * asset name
- * <li>/assets/asset_name/channel_id</li> : to retrieve the value of the
- * specified channel from the provided asset name
+ * <li>/assets/asset_pid</li> : to retrieve all the channels of the provided
+ * asset PID
+ * <li>/assets/asset_pid/channel_id</li> : to retrieve the value of the
+ * specified channel from the provided asset PID
  * </ul>
  *
  * The available {@code PUT} commands are as follows
  * <ul>
- * <li>/assets/asset_name/channel_id</li> : to write the provided {@code value}
- * in the payload to the specified channel of the provided asset name. The
+ * <li>/assets/asset_pid/channel_id</li> : to write the provided {@code value}
+ * in the payload to the specified channel of the provided asset PID. The
  * payload must also include the {@code type} of the {@code value} provided.
  * </ul>
  *
@@ -84,7 +84,7 @@ import org.slf4j.LoggerFactory;
 public final class AssetCloudlet extends Cloudlet {
 
 	/** Application Identifier for Cloudlet. */
-	private static final String APP_ID = "Assetlet";
+	private static final String APP_ID = "AssetCloudlet";
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(AssetCloudlet.class);
@@ -94,6 +94,9 @@ public final class AssetCloudlet extends Cloudlet {
 
 	/** The map of assets present in the OSGi service registry. */
 	private Map<String, Asset> m_assets;
+
+	/** The Asset Service dependency. */
+	private volatile AssetService m_assetService;
 
 	/** Asset Tracker Customizer */
 	private AssetTrackerCustomizer m_assetTrackerCustomizer;
@@ -114,7 +117,8 @@ public final class AssetCloudlet extends Cloudlet {
 		s_logger.debug(s_message.activating());
 		super.activate(componentContext);
 		try {
-			this.m_assetTrackerCustomizer = new AssetTrackerCustomizer(componentContext.getBundleContext());
+			this.m_assetTrackerCustomizer = new AssetTrackerCustomizer(componentContext.getBundleContext(),
+					this.m_assetService);
 			this.m_serviceTracker = new ServiceTracker<Asset, Asset>(componentContext.getBundleContext(),
 					Asset.class.getName(), this.m_assetTrackerCustomizer);
 			this.m_serviceTracker.open();
@@ -122,6 +126,18 @@ public final class AssetCloudlet extends Cloudlet {
 			s_logger.error(s_message.activationFailed(e));
 		}
 		s_logger.debug(s_message.activatingDone());
+	}
+
+	/**
+	 * Asset Service registration callback
+	 *
+	 * @param assetService
+	 *            the asset service dependency
+	 */
+	protected synchronized void bindAssetService(final AssetService assetService) {
+		if (this.m_assetService == null) {
+			this.m_assetService = assetService;
+		}
 	}
 
 	/**
@@ -156,7 +172,7 @@ public final class AssetCloudlet extends Cloudlet {
 
 		for (final Map.Entry<Long, Channel> channel : channels.entrySet()) {
 			final long chId = channel.getValue().getId();
-			final long providedChannelId = Long.valueOf(channelId);
+			final long providedChannelId = Long.parseLong(channelId);
 			if (providedChannelId == chId) {
 				return channel.getKey();
 			}
@@ -183,15 +199,14 @@ public final class AssetCloudlet extends Cloudlet {
 			this.findAssets();
 			if (reqTopic.getResources().length == 1) {
 				for (final Map.Entry<String, Asset> assetEntry : this.m_assets.entrySet()) {
-					final Asset asset = assetEntry.getValue();
-					respPayload.addMetric("name", asset.getAssetConfiguration().getAssetName());
+					respPayload.addMetric("pid", assetEntry.getKey());
 				}
 			}
 			// Checks if the name of the asset is provided
 			if (reqTopic.getResources().length == 2) {
-				final String assetName = reqTopic.getResources()[1];
-				final BaseAsset asset = this.m_assets.get(assetName);
-				final AssetConfiguration configuration = ((Asset) asset).getAssetConfiguration();
+				final String assetPid = reqTopic.getResources()[1];
+				final Asset asset = this.m_assets.get(assetPid);
+				final AssetConfiguration configuration = asset.getAssetConfiguration();
 				final Map<Long, Channel> assetConfiguredChannels = configuration.getAssetChannels();
 				for (final Map.Entry<Long, Channel> entry : assetConfiguredChannels.entrySet()) {
 					final Channel channel = entry.getValue();
@@ -201,9 +216,9 @@ public final class AssetCloudlet extends Cloudlet {
 			// Checks if the name of the asset and the name of the channel are
 			// provided
 			if (reqTopic.getResources().length == 3) {
-				final String assetName = reqTopic.getResources()[1];
+				final String assetPid = reqTopic.getResources()[1];
 				final String channelId = reqTopic.getResources()[2];
-				final Asset asset = this.m_assets.get(assetName);
+				final Asset asset = this.m_assets.get(assetPid);
 				final AssetConfiguration configuration = asset.getAssetConfiguration();
 				final Map<Long, Channel> assetConfiguredChannels = configuration.getAssetChannels();
 				final long id = this.checkChannelAvailability(channelId, assetConfiguredChannels);
@@ -226,9 +241,9 @@ public final class AssetCloudlet extends Cloudlet {
 		if ("assets".equals(reqTopic.getResources()[0]) && (reqTopic.getResources().length > 2)) {
 			// perform a search operation at the beginning
 			this.findAssets();
-			final String assetName = reqTopic.getResources()[1];
+			final String assetPid = reqTopic.getResources()[1];
 			final String channelId = reqTopic.getResources()[2];
-			final Asset asset = this.m_assets.get(assetName);
+			final Asset asset = this.m_assets.get(assetPid);
 			final AssetConfiguration configuration = asset.getAssetConfiguration();
 			final Map<Long, Channel> assetConfiguredChannels = configuration.getAssetChannels();
 			final long id = this.checkChannelAvailability(channelId, assetConfiguredChannels);
@@ -266,10 +281,22 @@ public final class AssetCloudlet extends Cloudlet {
 		checkNull(assetRecords, s_message.assetRecordsNonNull());
 
 		for (final AssetRecord assetRecord : assetRecords) {
-			respPayload.addMetric(s_message.flag(), assetRecord.getAssetFlag());
+			respPayload.addMetric(s_message.flag(), assetRecord.getAssetStatus().getAssetFlag());
 			respPayload.addMetric(s_message.timestamp(), assetRecord.getTimestamp());
 			respPayload.addMetric(s_message.value(), assetRecord.getValue());
 			respPayload.addMetric(s_message.channel(), assetRecord.getChannelId());
+		}
+	}
+
+	/**
+	 * Asset Service deregistration callback
+	 *
+	 * @param assetService
+	 *            the asset service dependency
+	 */
+	protected synchronized void unbindAssetService(final AssetService assetService) {
+		if (this.m_assetService == assetService) {
+			this.m_assetService = null;
 		}
 	}
 

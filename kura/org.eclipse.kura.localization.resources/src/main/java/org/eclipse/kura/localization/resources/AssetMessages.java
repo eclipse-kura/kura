@@ -22,11 +22,14 @@ import com.github.rodionmoiseev.c10n.annotations.En;
  */
 public interface AssetMessages {
 
-	@En("Activating Base Asset...")
+	@En("Activating Asset...")
 	public String activating();
 
-	@En("Activating Base Asset...Done")
+	@En("Activating Asset...Done")
 	public String activatingDone();
+
+	@En("Attribute Definition Prefix cannot be null")
+	public String adPrefixNonNull();
 
 	@En("asset_flag")
 	public String assetFlag();
@@ -36,6 +39,9 @@ public interface AssetMessages {
 
 	@En("Asset cannot be null")
 	public String assetNonNull();
+
+	@En("Asset PID cannot be null")
+	public String assetPidNonNull();
 
 	@En("Asset Record cannot be null")
 	public String assetRecordNonNull();
@@ -82,6 +88,9 @@ public interface AssetMessages {
 	@En("Channel not available")
 	public String channelUnavailable();
 
+	@En("CONFIG")
+	public String config();
+
 	@En("Asset Configuration")
 	public String configuration();
 
@@ -112,20 +121,23 @@ public interface AssetMessages {
 	@En("Driver has been found by the driver tracker....==> open")
 	public String driverFoundOpen();
 
-	@En("Driver ID cannot be null")
-	public String driverIdNonNull();
-
 	@En("Driver Name")
 	public String driverName();
 
 	@En("Driver cannot be null")
 	public String driverNonNull();
 
+	@En("Driver PID cannot be null")
+	public String driverPidNonNull();
+
 	@En("Driver Record cannot be null")
 	public String driverRecordNonNull();
 
 	@En("Driver has been removed by the driver tracker...")
 	public String driverRemoved();
+
+	@En("ERROR")
+	public String error();
 
 	@En("Error in disconnecting driver...")
 	public String errorDriverDisconnection();
@@ -142,11 +154,23 @@ public interface AssetMessages {
 	@En("Provided indices cannot be null")
 	public String indicesNonNull();
 
+	@En("INFO")
+	public String info();
+
 	@En("Asset Listener cannot be null")
 	public String listenerNonNull();
 
 	@En("Asset Name")
 	public String name();
+
+	@En("Configure Wire Asset Instance")
+	public String ocdDescription();
+
+	@En("WireAsset")
+	public String ocdName();
+
+	@En("Old Attribute Definition cannot be null")
+	public String oldAdNonNull();
 
 	@En("Prefix cannot be null")
 	public String prefixNonNull();

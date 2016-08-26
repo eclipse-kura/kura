@@ -12,17 +12,39 @@
  */
 package org.eclipse.kura.asset;
 
+import java.util.List;
+
 /**
  * The interface AssetService is an utility service API to provide useful
- * methods for assets
+ * methods for assets.
  */
 public interface AssetService {
 
 	/**
-	 * Prepares the new asset instance
+	 * Gets the asset instance by the provided asset PID
+	 * ({@code kura.service.pid}).
 	 *
-	 * @return the newly created Asset instance
+	 * @param assetPid
+	 *            the asset PID to check
+	 * @return the asset instance
 	 */
-	public Asset newAsset();
+	public Asset getAsset(String assetPid);
+
+	/**
+	 * Gets the asset PID. ({@code kura.service.pid}) by the provided asset
+	 * instance
+	 *
+	 * @param asset
+	 *            the asset instance to check
+	 * @return the asset PID
+	 */
+	public String getAssetPid(Asset asset);
+
+	/**
+	 * Returns the list containing all the available asset instances
+	 *
+	 * @return the list of asset available in service registry
+	 */
+	public List<Asset> listAssets();
 
 }

@@ -63,9 +63,6 @@ public interface WireMessages {
 	@En("Adding Wire Components....Done")
 	public String addingWireComponentDone();
 
-	@En("Attribute Definition Prefix cannot be null")
-	public String adPrefixNonNull();
-
 	@En("altitude")
 	public String altitude();
 
@@ -137,9 +134,6 @@ public interface WireMessages {
 
 	@En("Unable to retrieve Factory PIDs of one of the provided Wire Components because of null")
 	public String componentPidsNull();
-
-	@En("CONFIG")
-	public String config();
 
 	@En("Configurations cannot be null")
 	public String configurationNonNull();
@@ -300,9 +294,6 @@ public interface WireMessages {
 	@En("incoming_wires")
 	public String incomingWires();
 
-	@En("INFO")
-	public String info();
-
 	@En("Insertion failed. Reconciling Table and Columns...")
 	public String insertionFailed();
 
@@ -338,15 +329,6 @@ public interface WireMessages {
 
 	@En("No new instance")
 	public String noNewInstance();
-
-	@En("Configure Wire Asset Instance")
-	public String ocdDescription();
-
-	@En("WireAsset")
-	public String ocdName();
-
-	@En("Old Attribute Definition cannot be null")
-	public String oldAdNonNull();
 
 	@En("outgoing_wires")
 	public String outgoingWires();

@@ -87,6 +87,9 @@ public interface AssetCloudletMessages {
 	@En("Deactivating Asset Cloudlet...Done")
 	public String deactivatingDone();
 
+	@En("error")
+	public String errorMessage();
+
 	@En("flag")
 	public String flag();
 

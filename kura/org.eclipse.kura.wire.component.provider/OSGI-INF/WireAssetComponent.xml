@@ -19,7 +19,6 @@
 	configuration-policy="require">
    <implementation class="org.eclipse.kura.internal.wire.asset.WireAsset"/>
    <property name="service.pid" type="String" value="org.eclipse.kura.wire.WireAsset"/>
-   <property name="service.factoryPid" type="String" value="org.eclipse.kura.wire.WireAsset"/>
    <service>
       <provide interface="org.eclipse.kura.wire.WireComponent"/>
       <provide interface="org.eclipse.kura.wire.WireEmitter"/>
@@ -34,10 +33,4 @@
    	          name="WireHelperService" 
    	          policy="static" 
    	          unbind="unbindWireHelperService"/>
-   <reference bind="bindAssetService" 
-   	          cardinality="1..1" 
-   	          interface="org.eclipse.kura.asset.AssetService" 
-   	          name="AssetService" 
-   	          policy="static" 
-   	          unbind="unbindAssetService"/>
 </scr:component>

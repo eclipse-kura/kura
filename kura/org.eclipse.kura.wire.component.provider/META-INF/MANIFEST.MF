@@ -7,11 +7,9 @@ Bundle-Vendor: EUROTECH
 Bundle-License: Eclipse Public License v1.0
 Import-Package: org.eclipse.kura;version="[1.1,2.0)",
  org.eclipse.kura.asset;version="[1.0,2.0)",
+ org.eclipse.kura.asset.provider;version="[1.0,2.0)",
  org.eclipse.kura.cloud;version="[1.0,2.0)",
  org.eclipse.kura.configuration;version="[1.0,2.0)",
- org.eclipse.kura.configuration.metatype;version="[1.0,2.0)",
- org.eclipse.kura.core.configuration;version="[1.0,2.0)",
- org.eclipse.kura.core.configuration.metatype;version="[1.0,2.0)",
  org.eclipse.kura.data;version="[1.0,2.0)",
  org.eclipse.kura.data.listener;version="[1.0,2.0)",
  org.eclipse.kura.db;version="[1.0,2.0)",

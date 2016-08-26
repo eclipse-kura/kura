@@ -30,10 +30,10 @@ import org.eclipse.kura.asset.AssetConstants;
 import org.eclipse.kura.asset.AssetEvent;
 import org.eclipse.kura.asset.AssetFlag;
 import org.eclipse.kura.asset.AssetRecord;
-import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.asset.listener.AssetListener;
+import org.eclipse.kura.asset.provider.BaseAsset;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValues;
@@ -54,9 +54,6 @@ public final class AssetTest {
 	/** A latch to be initialized with the no of OSGi dependencies it needs */
 	private static CountDownLatch dependencyLatch = new CountDownLatch(2);
 
-	/** The Asset Service instance. */
-	private static volatile AssetService s_assetService;
-
 	/** Logger */
 	private static final Logger s_logger = LoggerFactory.getLogger(AssetTest.class);
 
@@ -70,19 +67,6 @@ public final class AssetTest {
 	public Map<String, Object> m_sampleChannelConfig;
 
 	/**
-	 * Binds the Asset Service.
-	 *
-	 * @param assetService
-	 *            the new Asset Helper Service
-	 */
-	public synchronized void bindAssetService(final AssetService assetService) {
-		if (s_assetService == null) {
-			s_assetService = assetService;
-			dependencyLatch.countDown();
-		}
-	}
-
-	/**
 	 * Test generic asset properties.
 	 */
 	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
@@ -90,9 +74,8 @@ public final class AssetTest {
 	public void testBasicProperties() {
 		final AssetConfiguration assetConfiguration = asset.getAssetConfiguration();
 		assertNotNull(assetConfiguration);
-		assertEquals("org.eclipse.kura.asset.stub.driver", assetConfiguration.getDriverId());
+		assertEquals("org.eclipse.kura.asset.stub.driver", assetConfiguration.getDriverPid());
 		assertEquals("sample.asset.desc", assetConfiguration.getAssetDescription());
-		assertEquals("sample.asset.name", assetConfiguration.getAssetName());
 	}
 
 	/**
@@ -166,7 +149,7 @@ public final class AssetTest {
 		assetRecord.setValue(TypedValues.newBooleanValue(true));
 		final List<AssetRecord> records = asset.write(Arrays.asList(assetRecord));
 		assertEquals(1, records.size());
-		assertEquals(AssetFlag.WRITE_SUCCESSFUL, records.get(0).getAssetFlag());
+		assertEquals(AssetFlag.WRITE_SUCCESSFUL, records.get(0).getAssetStatus().getAssetFlag());
 	}
 
 	/**
@@ -180,24 +163,11 @@ public final class AssetTest {
 	}
 
 	/**
-	 * Unbinds the Asset Service.
-	 *
-	 * @param assetService
-	 *            the Asset Service
-	 */
-	public synchronized void unbindAssetService(final AssetService assetService) {
-		if (s_assetService == assetService) {
-			s_assetService = null;
-		}
-	}
-
-	/**
 	 * Initializes asset data
 	 */
 	private static void init() {
 		final Map<String, Object> channels = CollectionUtil.newHashMap();
 		channels.put(AssetConstants.ASSET_DESC_PROP.value(), "sample.asset.desc");
-		channels.put(AssetConstants.ASSET_NAME_PROP.value(), "sample.asset.name");
 		channels.put(AssetConstants.ASSET_DRIVER_PROP.value(), "org.eclipse.kura.asset.stub.driver");
 		channels.put("1.CH.name", "sample.channel1.name");
 		channels.put("1.CH.type", "READ");
@@ -209,7 +179,7 @@ public final class AssetTest {
 		channels.put("2.CH.value.type", "BOOLEAN");
 		channels.put("2.CH.DRIVER.modbus.register", "sample.channel2.modbus.register");
 		channels.put("2.CH.DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
-		asset.initialize(channels);
+		((BaseAsset) asset).updated(channels);
 	}
 
 	/**
@@ -227,7 +197,7 @@ public final class AssetTest {
 		} catch (final InterruptedException e) {
 			fail("OSGi dependencies unfulfilled");
 		}
-		asset = s_assetService.newAsset();
+		asset = new BaseAsset();
 		init();
 	}
 

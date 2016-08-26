@@ -18,7 +18,7 @@ import java.util.Map;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
-import org.eclipse.kura.asset.AssetConfiguration;
+import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.AssetCloudletMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;
@@ -44,6 +44,9 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
 	/** The map of assets present in the OSGi service registry. */
 	private final Map<String, Asset> m_assets;
 
+	/** The Asset Service dependency. */
+	private final AssetService m_assetService;
+
 	/** Bundle Context */
 	private final BundleContext m_context;
 
@@ -57,10 +60,13 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 */
-	AssetTrackerCustomizer(final BundleContext context) throws InvalidSyntaxException {
+	AssetTrackerCustomizer(final BundleContext context, final AssetService assetService) throws InvalidSyntaxException {
 		checkNull(context, s_message.bundleContextNonNull());
+		checkNull(context, s_message.assetServiceNonNull());
+
 		this.m_assets = CollectionUtil.newConcurrentHashMap();
 		this.m_context = context;
+		this.m_assetService = assetService;
 	}
 
 	/** {@inheritDoc} */
@@ -85,11 +91,8 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
 	 */
 	private Asset addService(final Asset service) {
 		checkNull(service, s_message.assetServiceNonNull());
-		final AssetConfiguration assetConfiguration = service.getAssetConfiguration();
-		if (assetConfiguration != null) {
-			final String assetName = assetConfiguration.getAssetName();
-			this.m_assets.put(assetName, service);
-		}
+		final String assetPid = this.m_assetService.getAssetPid(service);
+		this.m_assets.put(assetPid, service);
 		return service;
 	}
 
@@ -113,12 +116,9 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
 	@Override
 	public void removedService(final ServiceReference<Asset> reference, final Asset service) {
 		this.m_context.ungetService(reference);
-		final AssetConfiguration assetConfiguration = service.getAssetConfiguration();
-		if (assetConfiguration != null) {
-			final String assetName = assetConfiguration.getAssetName();
-			if (this.m_assets.containsKey(assetName)) {
-				this.m_assets.remove(assetName);
-			}
+		final String assetPid = this.m_assetService.getAssetPid(service);
+		if (this.m_assets.containsKey(assetPid)) {
+			this.m_assets.remove(assetPid);
 		}
 		s_logger.info(s_message.assetRemoved() + service);
 	}

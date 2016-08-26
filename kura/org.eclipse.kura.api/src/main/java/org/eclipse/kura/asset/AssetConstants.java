@@ -21,11 +21,11 @@ public enum AssetConstants {
 	/** Asset Description Property to be used in the configuration. */
 	ASSET_DESC_PROP("asset.desc"),
 
-	/** Driver ID Property to be used in the configuration. */
-	ASSET_DRIVER_PROP("driver.id"),
+	/** Driver PID Property to be used in the configuration. */
+	ASSET_DRIVER_PROP("driver.pid"),
 
-	/** Asset Name Property to be used in the configuration. */
-	ASSET_NAME_PROP("asset.name"),
+	/** Asset Identifier */
+	ASSET_PID("kura.service.pid"),
 
 	/** String denoting a postfix for channel configuration property. */
 	CHANNEL_PROPERTY_POSTFIX("."),

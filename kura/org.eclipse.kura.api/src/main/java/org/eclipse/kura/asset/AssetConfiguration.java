@@ -17,7 +17,8 @@ import static org.eclipse.kura.Preconditions.checkNull;
 import java.util.Map;
 
 import org.eclipse.kura.KuraRuntimeException;
-import org.eclipse.kura.annotation.NotThreadSafe;
+import org.eclipse.kura.annotation.Immutable;
+import org.eclipse.kura.annotation.ThreadSafe;
 import org.eclipse.kura.type.DataType;
 
 /**
@@ -31,10 +32,8 @@ import org.eclipse.kura.type.DataType;
  * <br/>
  *
  * <ul>
- * <li>the value associated with <b><i>driver.id</i></b> key in the map denotes
- * the driver instance name to be consumed by this asset</li>
- * <li>A value associated with key <b><i>asset.name</i></b> must be present to
- * denote the asset name</li>
+ * <li>the value associated with <b><i>driver.pid</i></b> key in the map denotes
+ * the driver instance PID (kura.service.pid) to be consumed by this asset</li>
  * <li>A value associated with <b><i>asset.desc</i></b> key denotes the asset
  * description</li>
  * <li>x.CH.[property]</li> where x is any number denoting the channel's unique
@@ -78,7 +77,8 @@ import org.eclipse.kura.type.DataType;
  * @see ChannelType
  * @see DataType
  */
-@NotThreadSafe
+@Immutable
+@ThreadSafe
 public final class AssetConfiguration {
 
 	/**
@@ -90,36 +90,28 @@ public final class AssetConfiguration {
 	/** the asset description. */
 	private String assetDescription;
 
-	/** the name of the asset. */
-	private String assetName;
-
-	/** the driver ID as associated with this asset. */
-	private final String driverId;
+	/** the driver PID as associated with this asset. */
+	private final String driverPid;
 
 	/**
 	 * Instantiates a new asset configuration.
 	 *
-	 * @param name
-	 *            the name of the asset
 	 * @param description
 	 *            the description of the asset
-	 * @param driverId
-	 *            the driver id
+	 * @param driverPid
+	 *            the driver PID
 	 * @param channels
 	 *            the map of all channel configurations
 	 * @throws KuraRuntimeException
 	 *             if any of the arguments is null
 	 */
-	public AssetConfiguration(final String name, final String description, final String driverId,
-			final Map<Long, Channel> channels) {
-		checkNull(description, "Asset name cannot be null");
+	public AssetConfiguration(final String description, final String driverPid, final Map<Long, Channel> channels) {
 		checkNull(description, "Asset description cannot be null");
-		checkNull(description, "Asset driver ID cannot be null");
+		checkNull(description, "Asset driver PID cannot be null");
 		checkNull(description, "Asset channel configurations cannot be null");
 
 		this.assetDescription = description;
-		this.driverId = driverId;
-		this.assetName = name;
+		this.driverPid = driverPid;
 		this.assetChannels = channels;
 	}
 
@@ -142,21 +134,12 @@ public final class AssetConfiguration {
 	}
 
 	/**
-	 * Gets the Asset name.
+	 * Gets the driver PID.
 	 *
-	 * @return the asset name
+	 * @return the driver PID
 	 */
-	public String getAssetName() {
-		return this.assetName;
-	}
-
-	/**
-	 * Gets the driver ID.
-	 *
-	 * @return the driver ID
-	 */
-	public String getDriverId() {
-		return this.driverId;
+	public String getDriverPid() {
+		return this.driverPid;
 	}
 
 	/**
@@ -172,23 +155,10 @@ public final class AssetConfiguration {
 		this.assetDescription = description;
 	}
 
-	/**
-	 * Sets the asset name.
-	 *
-	 * @param assetName
-	 *            the new asset name
-	 * @throws KuraRuntimeException
-	 *             if the argument is null
-	 */
-	public void setAssetName(final String assetName) {
-		checkNull(this.assetDescription, "Asset name cannot be null");
-		this.assetName = assetName;
-	}
-
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		return "AssetConfiguration [channels=" + this.assetChannels + ", description=" + this.assetDescription
-				+ ", driverId=" + this.driverId + ", name=" + this.assetName + "]";
+				+ ", driverId=" + this.driverPid + "]";
 	}
 }

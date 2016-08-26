@@ -14,7 +14,7 @@ package org.eclipse.kura.internal.asset;
 
 import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
-import static org.eclipse.kura.driver.DriverConstants.DRIVER_ID;
+import static org.eclipse.kura.driver.DriverConstants.DRIVER_PID;
 
 import java.util.List;
 
@@ -40,11 +40,11 @@ public final class DriverServiceImpl implements DriverService {
 	/** {@inheritDoc} */
 	@Override
 	public Driver getDriver(final String driverId) {
-		checkNull(driverId, s_message.driverIdNonNull());
+		checkNull(driverId, s_message.driverPidNonNull());
 		final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 		final ServiceReference<Driver>[] refs = ServiceUtil.getServiceReferences(context, Driver.class, null);
 		for (final ServiceReference<Driver> ref : refs) {
-			if (ref.getProperty(DRIVER_ID.value()).equals(driverId)) {
+			if (ref.getProperty(DRIVER_PID.value()).equals(driverId)) {
 				return context.getService(ref);
 			}
 		}
@@ -53,7 +53,7 @@ public final class DriverServiceImpl implements DriverService {
 
 	/** {@inheritDoc} */
 	@Override
-	public String getDriverId(final Driver driver) {
+	public String getDriverPid(final Driver driver) {
 		checkNull(driver, s_message.driverNonNull());
 		final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 		final ServiceReference<Driver>[] refs = ServiceUtil.getServiceReferences(context, Driver.class, null);
@@ -68,7 +68,7 @@ public final class DriverServiceImpl implements DriverService {
 
 	/** {@inheritDoc} */
 	@Override
-	public List<Driver> listAvailableDrivers() {
+	public List<Driver> listDrivers() {
 		final List<Driver> drivers = CollectionUtil.newArrayList();
 		final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 		final ServiceReference<Driver>[] refs = ServiceUtil.getServiceReferences(context, Driver.class, null);

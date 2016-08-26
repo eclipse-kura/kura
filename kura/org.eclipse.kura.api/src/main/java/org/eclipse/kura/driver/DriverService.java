@@ -21,30 +21,30 @@ import java.util.List;
 public interface DriverService {
 
 	/**
-	 * Gets the driver instance by the provided driver ID
+	 * Gets the driver instance by the provided driver PID
 	 * ({@code kura.service.pid}).
 	 *
-	 * @param driverId
-	 *            the driver ID to check
+	 * @param driverPid
+	 *            the driver PID to check
 	 * @return the driver instance
 	 */
-	public Driver getDriver(String driverId);
+	public Driver getDriver(String driverPid);
 
 	/**
-	 * Gets the driver ID. ({@code kura.service.pid}) by the provided driver
+	 * Gets the driver PID. ({@code kura.service.pid}) by the provided driver
 	 * instance
 	 *
 	 * @param driver
 	 *            the driver instance to check
-	 * @return the driver ID
+	 * @return the driver PID
 	 */
-	public String getDriverId(Driver driver);
+	public String getDriverPid(Driver driver);
 
 	/**
 	 * Returns the list containing all the available driver instances
 	 *
 	 * @return the list of drivers available in service registry
 	 */
-	public List<Driver> listAvailableDrivers();
+	public List<Driver> listDrivers();
 
 }

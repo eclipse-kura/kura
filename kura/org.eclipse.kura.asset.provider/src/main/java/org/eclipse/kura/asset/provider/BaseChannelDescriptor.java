@@ -10,7 +10,7 @@
  *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
-package org.eclipse.kura.internal.wire.asset;
+package org.eclipse.kura.asset.provider;
 
 import static org.eclipse.kura.asset.AssetConstants.NAME;
 import static org.eclipse.kura.asset.AssetConstants.TYPE;

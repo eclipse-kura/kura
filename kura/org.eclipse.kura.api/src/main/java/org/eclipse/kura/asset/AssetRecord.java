@@ -26,8 +26,8 @@ import org.eclipse.kura.type.TypedValue;
 @NotThreadSafe
 public final class AssetRecord {
 
-	/** The asset flag. */
-	private AssetFlag assetFlag;
+	/** The asset status. */
+	private AssetStatus assetStatus;
 
 	/**
 	 * The associated channel identifier. The channel identifier for any asset
@@ -71,7 +71,7 @@ public final class AssetRecord {
 			return false;
 		}
 		final AssetRecord other = (AssetRecord) obj;
-		if (this.assetFlag != other.assetFlag) {
+		if (this.assetStatus != other.assetStatus) {
 			return false;
 		}
 		if (this.channelId != other.channelId) {
@@ -91,12 +91,12 @@ public final class AssetRecord {
 	}
 
 	/**
-	 * Gets the asset flag.
+	 * Gets the asset status.
 	 *
-	 * @return the asset flag
+	 * @return the asset status
 	 */
-	public AssetFlag getAssetFlag() {
-		return this.assetFlag;
+	public AssetStatus getAssetStatus() {
+		return this.assetStatus;
 	}
 
 	/**
@@ -131,7 +131,7 @@ public final class AssetRecord {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = (prime * result) + ((this.assetFlag == null) ? 0 : this.assetFlag.hashCode());
+		result = (prime * result) + ((this.assetStatus == null) ? 0 : this.assetStatus.hashCode());
 		result = (prime * result) + (int) (this.channelId ^ (this.channelId >>> 32));
 		result = (prime * result) + (int) (this.timestamp ^ (this.timestamp >>> 32));
 		result = (prime * result) + ((this.value == null) ? 0 : this.value.hashCode());
@@ -139,16 +139,16 @@ public final class AssetRecord {
 	}
 
 	/**
-	 * Sets the asset flag as provided.
+	 * Sets the asset status as provided.
 	 *
-	 * @param assetFlag
-	 *            the new asset flag
+	 * @param assetStatus
+	 *            the new asset status
 	 * @throws KuraRuntimeException
 	 *             if the argument is null
 	 */
-	public void setAssetFlag(final AssetFlag assetFlag) {
-		checkNull(assetFlag, "Asset flag cannot be null");
-		this.assetFlag = assetFlag;
+	public void setAssetStatus(final AssetStatus assetStatus) {
+		checkNull(assetStatus, "Asset status cannot be null");
+		this.assetStatus = assetStatus;
 	}
 
 	/**
@@ -177,7 +177,7 @@ public final class AssetRecord {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return "AssetRecord [assetFlag=" + this.assetFlag + ", channelId=" + this.channelId + ", timestamp="
+		return "AssetRecord [assetStatus=" + this.assetStatus + ", channelId=" + this.channelId + ", timestamp="
 				+ this.timestamp + ", value=" + this.value + "]";
 	}
 

@@ -16,7 +16,6 @@ import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DESC_PROP;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
-import static org.eclipse.kura.asset.AssetConstants.ASSET_NAME_PROP;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_POSTFIX;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_PREFIX;
 import static org.eclipse.kura.asset.AssetConstants.DRIVER_PROPERTY_POSTFIX;
@@ -58,7 +57,7 @@ import org.slf4j.LoggerFactory;
  *
  * @see AssetConfiguration
  */
-final class AssetOptions {
+public final class AssetOptions {
 
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(AssetOptions.class);
@@ -68,9 +67,6 @@ final class AssetOptions {
 
 	/** The asset description. */
 	private String m_assetDescription;
-
-	/** The asset name. */
-	private String m_assetName;
 
 	/** The list of channels associated with this asset. */
 	private final Map<Long, Channel> m_channels = CollectionUtil.newConcurrentHashMap();
@@ -86,7 +82,7 @@ final class AssetOptions {
 	 * @throws KuraRuntimeException
 	 *             if the argument is null
 	 */
-	AssetOptions(final Map<String, Object> properties) {
+	public AssetOptions(final Map<String, Object> properties) {
 		checkNull(properties, s_message.propertiesNonNull());
 		this.extractProperties(properties);
 	}
@@ -136,9 +132,6 @@ final class AssetOptions {
 			if (properties.containsKey(ASSET_DRIVER_PROP.value())) {
 				this.m_driverId = (String) properties.get(ASSET_DRIVER_PROP.value());
 			}
-			if (properties.containsKey(ASSET_NAME_PROP.value())) {
-				this.m_assetName = (String) properties.get(ASSET_NAME_PROP.value());
-			}
 			if (properties.containsKey(ASSET_DESC_PROP.value())) {
 				this.m_assetDescription = (String) properties.get(ASSET_DESC_PROP.value());
 			}
@@ -153,8 +146,8 @@ final class AssetOptions {
 	 *
 	 * @return the asset configuration
 	 */
-	AssetConfiguration getAssetConfiguration() {
-		return new AssetConfiguration(this.m_assetName, this.m_assetDescription, this.m_driverId, this.m_channels);
+	public AssetConfiguration getAssetConfiguration() {
+		return new AssetConfiguration(this.m_assetDescription, this.m_driverId, this.m_channels);
 	}
 
 	/**
@@ -279,8 +272,8 @@ final class AssetOptions {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return "AssetOptions [Asset Description=" + this.m_assetDescription + ", Asset Name=" + this.m_assetName
-				+ ", Channels=" + this.m_channels + ", Driver ID=" + this.m_driverId + "]";
+		return "AssetOptions [Asset Description=" + this.m_assetDescription + ", Channels=" + this.m_channels
+				+ ", Driver ID=" + this.m_driverId + "]";
 	}
 
 	/**

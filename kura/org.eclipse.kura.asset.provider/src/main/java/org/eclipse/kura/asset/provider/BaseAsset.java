@@ -95,7 +95,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 	private static final AssetMessages s_message = LocalizationAdapter.adapt(AssetMessages.class);
 
 	/** The provided asset configuration wrapper instance. */
-	private AssetConfiguration m_assetConfiguration;
+	protected AssetConfiguration m_assetConfiguration;
 
 	/** Container of mapped asset listeners and drivers listener. */
 	private final Map<AssetListener, DriverListener> m_assetListeners;

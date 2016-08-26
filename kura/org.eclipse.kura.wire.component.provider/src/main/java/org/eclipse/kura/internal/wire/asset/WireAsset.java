@@ -29,7 +29,6 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
-import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.AssetFlag;
 import org.eclipse.kura.asset.AssetRecord;
 import org.eclipse.kura.asset.AssetStatus;
@@ -78,7 +77,6 @@ import org.slf4j.LoggerFactory;
 public final class WireAsset extends BaseAsset implements WireEmitter, WireReceiver {
 
 	/** Configuration PID Property. */
-	@SuppressWarnings("unused")
 	private static final String CONF_PID = "org.eclipse.kura.wire.WireAsset";
 
 	/** The Logger instance. */
@@ -86,9 +84,6 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
 	/** Localization Resource. */
 	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
-
-	/** The provided asset configuration wrapper instance. */
-	private AssetConfiguration m_assetConfiguration;
 
 	/** The Wire Helper Service. */
 	private volatile WireHelperService m_wireHelperService;

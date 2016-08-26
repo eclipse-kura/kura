@@ -159,6 +159,6 @@ public final class AssetConfiguration {
 	@Override
 	public String toString() {
 		return "AssetConfiguration [channels=" + this.assetChannels + ", description=" + this.assetDescription
-				+ ", driverId=" + this.driverPid + "]";
+				+ ", driverPId=" + this.driverPid + "]";
 	}
 }

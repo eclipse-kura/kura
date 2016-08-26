@@ -106,7 +106,7 @@ public final class AssetCommandProvider implements CommandProvider {
 		final Map<String, Object> map = CollectionUtil.newHashMap();
 		map.put("asset.name", prop.get(2));
 		map.put("asset.desc", prop.get(3));
-		map.put("driver.id", prop.get(4));
+		map.put("driver.pid", prop.get(4));
 		this.m_configService.createFactoryConfiguration(prop.get(0), prop.get(1), map, false);
 	}
 

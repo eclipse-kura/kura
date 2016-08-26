@@ -430,22 +430,21 @@ public class IptablesConfig {
 					} else {
 						isNATrule = true;
 					}
+					
 					if (source != null) {
-						isNATrule = true;
 						StringBuilder sbSource = new StringBuilder().append(source).append('/').append(natPostroutingChainRule.getSrcMask());
 						source = sbSource.toString();
-					} else {
-						if (!isNATrule) {
-							boolean matchFound = false;
-							for (NatPreroutingChainRule natPreroutingChainRule : natPreroutingChain) {
-								if (natPreroutingChainRule.getDstIpAddress().equals(natPostroutingChainRule.getDstNetwork())) {
-									matchFound = true;
-									break;
-								}
+					}
+					if (!isNATrule) {
+						boolean matchFound = false;
+						for (NatPreroutingChainRule natPreroutingChainRule : natPreroutingChain) {
+							if (natPreroutingChainRule.getDstIpAddress().equals(natPostroutingChainRule.getDstNetwork())) {
+								matchFound = true;
+								break;
 							}
-							if (!matchFound) {
-								isNATrule = true;
-							}
+						}
+						if (!matchFound) {
+							isNATrule = true;
 						}
 					}
 					if (isNATrule) {

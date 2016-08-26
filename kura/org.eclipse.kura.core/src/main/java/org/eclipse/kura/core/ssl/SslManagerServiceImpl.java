@@ -63,166 +63,160 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SslManagerServiceImpl implements SslManagerService, ConfigurableComponent
-{
-	private static final Logger s_logger = LoggerFactory.getLogger(SslManagerServiceImpl.class);
+public class SslManagerServiceImpl implements SslManagerService, ConfigurableComponent {
+    private static final Logger s_logger = LoggerFactory.getLogger(SslManagerServiceImpl.class);
 
-	private SslServiceListeners		 m_sslServiceListeners;
+    private SslServiceListeners m_sslServiceListeners;
 
-	private ComponentContext         m_ctx;
-	private Map<String,Object>       m_properties;
-	private SslManagerServiceOptions m_options;
+    private ComponentContext         m_ctx;
+    private Map<String, Object>      m_properties;
+    private SslManagerServiceOptions m_options;
 
-	private CryptoService            m_cryptoService;
-	private ConfigurationService     m_configurationService;
+    private CryptoService        m_cryptoService;
+    private ConfigurationService m_configurationService;
 
-	private Timer                    m_timer;
+    private Timer m_timer;
 
-	private Map<ConnectionSslOptions, SSLSocketFactory> m_sslSocketFactories;
+    private Map<ConnectionSslOptions, SSLSocketFactory> m_sslSocketFactories;
 
-	private SystemService 			 m_systemService;
+    private SystemService m_systemService;
 
+    // ----------------------------------------------------------------
+    //
+    // Dependencies
+    //
+    // ----------------------------------------------------------------
 
-	// ----------------------------------------------------------------
-	//
-	//   Dependencies
-	//
-	// ----------------------------------------------------------------
+    public void setCryptoService(CryptoService cryptoService) {
+        this.m_cryptoService = cryptoService;
+    }
 
-	public void setCryptoService(CryptoService cryptoService) {
-		this.m_cryptoService = cryptoService;
-	}
+    public void unsetCryptoService(CryptoService cryptoService) {
+        this.m_cryptoService = null;
+    }
 
-	public void unsetCryptoService(CryptoService cryptoService) {
-		this.m_cryptoService = null;
-	}
+    public void setConfigurationService(ConfigurationService configurationService) {
+        this.m_configurationService = configurationService;
+    }
 
-	public void setConfigurationService(ConfigurationService configurationService) {
-		this.m_configurationService = configurationService;
-	}
+    public void unsetConfigurationService(ConfigurationService configurationService) {
+        this.m_configurationService = null;
+    }
 
-	public void unsetConfigurationService(ConfigurationService configurationService) {
-		this.m_configurationService = null;
-	}
+    public void setSystemService(SystemService systemService) {
+        this.m_systemService = systemService;
+    }
 
-	public void setSystemService(SystemService systemService) {
-		this.m_systemService = systemService;
-	}
+    public void unsetSystemService(SystemService systemService) {
+        this.m_systemService = null;
+    }
 
-	public void unsetSystemService(SystemService systemService) {
-		this.m_systemService = null;
-	}
+    // ----------------------------------------------------------------
+    //
+    // Activation APIs
+    //
+    // ----------------------------------------------------------------
 
-	// ----------------------------------------------------------------
-	//
-	//   Activation APIs
-	//
-	// ----------------------------------------------------------------
+    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
+        s_logger.info("activate...");
 
-	protected void activate(ComponentContext componentContext, Map<String,Object> properties)
-	{
-		s_logger.info("activate...");
+        //
+        // save the bundle context and the properties
+        m_ctx = componentContext;
+        m_properties = properties;
+        m_options = new SslManagerServiceOptions(properties);
+        m_sslSocketFactories = new ConcurrentHashMap<ConnectionSslOptions, SSLSocketFactory>();
 
-		//
-		// save the bundle context and the properties
-		m_ctx = componentContext;
-		m_properties = properties;
-		m_options = new SslManagerServiceOptions(properties);
-		m_sslSocketFactories = new ConcurrentHashMap<ConnectionSslOptions, SSLSocketFactory>();
+        ServiceTracker<SslServiceListener, SslServiceListener> listenersTracker = new ServiceTracker<SslServiceListener, SslServiceListener>(
+                componentContext.getBundleContext(),
+                SslServiceListener.class, null);
 
-		ServiceTracker<SslServiceListener, SslServiceListener> listenersTracker = new ServiceTracker<SslServiceListener, SslServiceListener>(
-				componentContext.getBundleContext(),
-				SslServiceListener.class, null);
+        // Deferred open of tracker to prevent
+        // java.lang.Exception: Recursive invocation of
+        // ServiceFactory.getService
+        // on ProSyst
+        m_sslServiceListeners = new SslServiceListeners(listenersTracker);
 
-		// Deferred open of tracker to prevent
-		// java.lang.Exception: Recursive invocation of ServiceFactory.getService
-		// on ProSyst
-		m_sslServiceListeners = new SslServiceListeners(listenersTracker);
+        // 1. If the framework is running in secure mode automatically
+        // change the default keystore password with a randomly generated one.
+        // Then self-update our configuration to reflect the password change.
+        if (!changeDefaultKeystorePassword()) {
+            // 2. If the password saved in the snapshot and the password hold by
+            // the CryptoService do not match change the keystore password
+            // to the password in the snapshot.
+            changeKeyStorePassword();
+        }
+    }
 
-		// 1. If the framework is running in secure mode automatically
-		// change the default keystore password with a randomly generated one.
-		// Then self-update our configuration to reflect the password change.
-		if (!changeDefaultKeystorePassword()) {
-			// 2. If the password saved in the snapshot and the password hold by
-			// the CryptoService do not match change the keystore password
-			// to the password in the snapshot.
-			changeKeyStorePassword();
-		}
-	}
+    public void updated(Map<String, Object> properties) {
+        s_logger.info("updated...");
 
-	public void updated(Map<String,Object> properties)
-	{
-		s_logger.info("updated...");
+        m_properties = properties;
+        m_options = new SslManagerServiceOptions(properties);
 
-		m_properties = properties;
-		m_options = new SslManagerServiceOptions(properties);
+        changeKeyStorePassword();
 
-		changeKeyStorePassword();
+        // Notify listeners that service has been updated
+        m_sslServiceListeners.onConfigurationUpdated();
+    }
 
-		// Notify listeners that service has been updated
-		m_sslServiceListeners.onConfigurationUpdated();
-	}
+    protected void deactivate(ComponentContext componentContext) {
+        s_logger.info("deactivate...");
+        m_timer.cancel();
+        m_sslServiceListeners.close();
+    }
 
-	protected void deactivate(ComponentContext componentContext)
-	{
-		s_logger.info("deactivate...");
-		m_timer.cancel();
-		m_sslServiceListeners.close();
-	}
+    // ----------------------------------------------------------------
+    //
+    // Service APIs
+    //
+    // ----------------------------------------------------------------
 
+    @Override
+    public SSLSocketFactory getSSLSocketFactory()
+            throws GeneralSecurityException, IOException {
+        return getSSLSocketFactory("");
+    }
 
-	// ----------------------------------------------------------------
-	//
-	//   Service APIs
-	//
-	// ----------------------------------------------------------------
+    @Override
+    public SSLSocketFactory getSSLSocketFactory(String keyAlias)
+            throws GeneralSecurityException, IOException {
+        String protocol = m_options.getSslProtocol();
+        String ciphers = m_options.getSslCiphers();
+        String trustStore = m_options.getSslKeyStore();
+        char[] keyStorePassword = getKeyStorePassword();
+        boolean hostnameVerifcation = m_options.isSslHostnameVerification();
 
-	@Override
-	public SSLSocketFactory getSSLSocketFactory()
-			throws GeneralSecurityException, IOException
-	{
-		return getSSLSocketFactory("");
-	}
+        // Note that the SslManagerService configuration now uses a single
+        // trust/keystore.
+        // FIXME: we should be consistent and have a getSslKeyStore() instead of
+        // getSslTrustStore().
+        // Also the metatype property ssl.default.trustStore should be changed
+        // accordingly.
+        return getSSLSocketFactory(protocol, ciphers, trustStore, trustStore,
+                keyStorePassword, keyAlias, hostnameVerifcation);
+    }
 
+    @Override
+    public SSLSocketFactory getSSLSocketFactory(String protocol,
+            String ciphers,
+            String trustStore,
+            String keyStore,
+            char[] keyStorePassword,
+            String keyAlias) throws GeneralSecurityException, IOException {
+        return getSSLSocketFactory(protocol, ciphers, trustStore, keyStore, keyStorePassword, keyAlias, m_options.isSslHostnameVerification());
+    }
 
-	@Override
-	public SSLSocketFactory getSSLSocketFactory(String keyAlias)
-			throws GeneralSecurityException, IOException
-	{
-		String protocol = m_options.getSslProtocol();
-		String ciphers  = m_options.getSslCiphers();
-		String trustStore = m_options.getSslKeyStore();
-		char[] keyStorePassword = getKeyStorePassword();
-		boolean hostnameVerifcation = m_options.isSslHostnameVerification();
-
-		// Note that the SslManagerService configuration now uses a single trust/keystore.
-		// FIXME: we should be consistent and have a getSslKeyStore() instead of getSslTrustStore().
-		// Also the metatype property ssl.default.trustStore should be changed accordingly.
-		return getSSLSocketFactory(protocol, ciphers, trustStore, trustStore,
-				keyStorePassword, keyAlias, hostnameVerifcation);
-	}
-
-	@Override
-	public SSLSocketFactory getSSLSocketFactory(String protocol,
-			String ciphers,
-			String trustStore,
-			String keyStore,
-			char[] keyStorePassword,
-			String keyAlias) throws GeneralSecurityException, IOException {   
-		return getSSLSocketFactory(protocol, ciphers, trustStore, keyStore, keyStorePassword, keyAlias, m_options.isSslHostnameVerification());
-	}
-
-	@Override
-	public SSLSocketFactory getSSLSocketFactory(String protocol,
-			String ciphers,
-			String trustStore,
-			String keyStore,
-			char[] keyStorePassword,
-			String keyAlias,
-			boolean hostnameVerification)
-					throws GeneralSecurityException, IOException
-	{
-	    ConnectionSslOptions connSslOpts= new ConnectionSslOptions(m_options);
+    @Override
+    public SSLSocketFactory getSSLSocketFactory(String protocol,
+            String ciphers,
+            String trustStore,
+            String keyStore,
+            char[] keyStorePassword,
+            String keyAlias,
+            boolean hostnameVerification)
+                    throws GeneralSecurityException, IOException {
+        ConnectionSslOptions connSslOpts = new ConnectionSslOptions(m_options);
         connSslOpts.setProtocol(protocol);
         connSslOpts.setCiphers(ciphers);
         connSslOpts.setTrustStore(trustStore);
@@ -234,173 +228,168 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         }
         connSslOpts.setAlias(keyAlias);
         connSslOpts.setHostnameVerification(hostnameVerification);
-        
+
         return getSSLSocketFactoryInternal(connSslOpts);
-	}
+    }
 
+    @Override
+    public X509Certificate[] getTrustCertificates()
+            throws GeneralSecurityException, IOException {
+        // trust store
+        X509Certificate[] cacerts = null;
+        String trustStore = m_options.getSslKeyStore();
+        TrustManager[] tms = getTrustManagers(trustStore);
+        for (TrustManager tm : tms) {
+            if (tm instanceof X509TrustManager) {
+                X509TrustManager x509tm = (X509TrustManager) tm;
+                cacerts = x509tm.getAcceptedIssuers();
+                break;
+                // for (X509Certificate x509cert : x509certs) {
+                // System.err.println("TS DN: "+x509cert.getSubjectDN());
+                // System.err.println("TS DN:
+                // "+x509cert.getSubjectX500Principal().getName());
+                // System.err.println("TS CANONICAL:
+                // "+x509cert.getSubjectX500Principal().getName(X500Principal.CANONICAL));
+                // System.err.println("TS RFC1779:
+                // "+x509cert.getSubjectX500Principal().getName(X500Principal.RFC1779));
+                // System.err.println("TS RFC2253:
+                // "+x509cert.getSubjectX500Principal().getName(X500Principal.RFC2253));
+                // System.err.println("TS alt:
+                // "+x509cert.getSubjectAlternativeNames());
+                // System.err.println("TS not before date:
+                // "+x509cert.getNotBefore());
+                // System.err.println("TS not after date:
+                // "+x509cert.getNotAfter());
+                // }
+            }
+        }
+        return cacerts;
+    }
 
-	@Override
-	public X509Certificate[] getTrustCertificates()
-			throws GeneralSecurityException, IOException
-	{
-		// trust store
-		X509Certificate[] cacerts = null;
-		String  trustStore = m_options.getSslKeyStore();
-		TrustManager[] tms = getTrustManagers(trustStore);
-		for (TrustManager tm : tms) {
-			if (tm instanceof X509TrustManager) {
-				X509TrustManager x509tm = (X509TrustManager) tm;
-				cacerts = x509tm.getAcceptedIssuers();
-				break;
-				//                for (X509Certificate x509cert : x509certs) {
-				//                    System.err.println("TS DN:        "+x509cert.getSubjectDN());
-				//                    System.err.println("TS DN:        "+x509cert.getSubjectX500Principal().getName());
-				//                    System.err.println("TS CANONICAL: "+x509cert.getSubjectX500Principal().getName(X500Principal.CANONICAL));
-				//                    System.err.println("TS RFC1779:   "+x509cert.getSubjectX500Principal().getName(X500Principal.RFC1779));
-				//                    System.err.println("TS RFC2253:   "+x509cert.getSubjectX500Principal().getName(X500Principal.RFC2253));
-				//                    System.err.println("TS alt:       "+x509cert.getSubjectAlternativeNames());
-				//                    System.err.println("TS not before date: "+x509cert.getNotBefore());
-				//                    System.err.println("TS not after  date: "+x509cert.getNotAfter());
-				//                }
-			}
-		}
-		return cacerts;
-	}
+    @Override
+    public void installTrustCertificate(String alias, X509Certificate x509crt)
+            throws GeneralSecurityException, IOException {
+        InputStream tsReadStream = null;
+        FileOutputStream tsOutStream = null;
 
+        try {
+            // load the trust store
+            String trustStore = m_options.getSslKeyStore();
+            KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
+            File fTrustStore = new File(trustStore);
+            char[] trustStorePassword = getKeyStorePassword();
+            if (fTrustStore.exists()) {
+                tsReadStream = new FileInputStream(trustStore);
+                ts.load(tsReadStream, trustStorePassword);
+            } else {
+                ts.load(null, null);
+            }
 
-	@Override
-	public void installTrustCertificate(String alias, X509Certificate x509crt)
-			throws GeneralSecurityException, IOException
-	{
-		InputStream tsReadStream = null;
-		FileOutputStream tsOutStream = null;
+            // add the certificate
+            ts.setCertificateEntry(alias, x509crt);
 
-		try{
-			// load the trust store
-			String trustStore = m_options.getSslKeyStore();
-			KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
-			File fTrustStore = new File(trustStore);
-			char[] trustStorePassword = getKeyStorePassword();
-			if (fTrustStore.exists()) {
-				tsReadStream = new FileInputStream(trustStore);
-				ts.load(tsReadStream, trustStorePassword);
-			}
-			else {
-				ts.load(null, null);
-			}
+            // save it
+            tsOutStream = new FileOutputStream(trustStore);
+            ts.store(tsOutStream, trustStorePassword);
+        } finally {
+            close(tsReadStream);
+            close(tsOutStream);
+        }
+    }
 
-			// add the certificate
-			ts.setCertificateEntry(alias, x509crt);
+    @Override
+    public void deleteTrustCertificate(String alias)
+            throws GeneralSecurityException, IOException {
+        InputStream tsReadStream = null;
 
-			// save it
-			tsOutStream = new FileOutputStream(trustStore);
-			ts.store(tsOutStream, trustStorePassword);
-		}
-		finally{
-			close(tsReadStream);
-			close(tsOutStream);
-		}
-	}
+        try {
+            // load the trust store
+            String trustStore = m_options.getSslKeyStore();
+            KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
+            tsReadStream = new FileInputStream(trustStore);
+            char[] trustStorePassword = getKeyStorePassword();
+            ts.load(tsReadStream, trustStorePassword);
 
+            // delete the entry
+            ts.deleteEntry(alias);
 
-	@Override
-	public void deleteTrustCertificate(String alias)
-			throws GeneralSecurityException, IOException
-	{
-		InputStream tsReadStream = null;
+            // save it
+            ts.store(new LoadStoreParameter() {
+                @Override
+                public ProtectionParameter getProtectionParameter() {
+                    PasswordProtection passwordProtection = null;
+                    char[] trustStorePassword = getKeyStorePassword();
+                    if (trustStorePassword != null) {
+                        passwordProtection = new PasswordProtection(trustStorePassword);
+                    }
+                    return passwordProtection;
+                }
+            });
+        } finally {
+            close(tsReadStream);
+        }
+    }
 
-		try{
-			// load the trust store
-			String trustStore = m_options.getSslKeyStore();
-			KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
-			tsReadStream = new FileInputStream(trustStore);
-			char[] trustStorePassword = getKeyStorePassword();
-			ts.load(tsReadStream, trustStorePassword);
+    @Override
+    public void installPrivateKey(String alias, PrivateKey privateKey, char[] password,
+            Certificate[] publicCerts)
+                    throws GeneralSecurityException, IOException {
+        // Note that password parameter is unused
 
-			// delete the entry
-			ts.deleteEntry(alias);
+        InputStream tsReadStream = null;
+        FileOutputStream tsOutStream = null;
 
-			// save it
-			ts.store(new LoadStoreParameter() {
-				@Override
-				public ProtectionParameter getProtectionParameter() {
-					PasswordProtection passwordProtection = null;
-					char[] trustStorePassword = getKeyStorePassword();
-					if (trustStorePassword != null) {
-						passwordProtection = new PasswordProtection(trustStorePassword);
-					}
-					return passwordProtection;
-				}
-			});
-		}
-		finally{
-			close(tsReadStream);
-		}
-	}
+        try {
+            // load the key store
+            String keyStore = m_options.getSslKeyStore();
+            KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+            File fKeyStore = new File(keyStore);
+            char[] keyStorePassword = getKeyStorePassword();
+            if (fKeyStore.exists()) {
+                tsReadStream = new FileInputStream(keyStore);
+                ks.load(tsReadStream, keyStorePassword);
+            } else {
+                ks.load(null, null);
+            }
 
-	@Override
-	public void installPrivateKey(String alias, PrivateKey privateKey, char[] password,
-			Certificate[] publicCerts)
-					throws GeneralSecurityException, IOException
-	{
-		// Note that password parameter is unused
+            char[] trustStorePwd = getKeyStorePassword();
+            // add the certificate
+            ks.setKeyEntry(alias, privateKey, trustStorePwd, publicCerts);
 
-		InputStream tsReadStream = null;
-		FileOutputStream tsOutStream = null;
+            // save it
+            tsOutStream = new FileOutputStream(keyStore);
+            ks.store(tsOutStream, keyStorePassword);
+        } finally {
+            close(tsReadStream);
+            close(tsOutStream);
+        }
+    }
 
-		try{
-			// load the key store
-			String keyStore = m_options.getSslKeyStore();
-			KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-			File fKeyStore = new File(keyStore);
-			char[] keyStorePassword = getKeyStorePassword();
-			if (fKeyStore.exists()) {
-				tsReadStream = new FileInputStream(keyStore);
-				ks.load(tsReadStream, keyStorePassword);
-			}
-			else {
-				ks.load(null, null);
-			}
+    @Override
+    public SslManagerServiceOptions getConfigurationOptions() throws GeneralSecurityException, IOException {
+        return m_options;
+    }
 
-			char[] trustStorePwd = getKeyStorePassword(); 
-			// add the certificate
-			ks.setKeyEntry(alias, privateKey, trustStorePwd, publicCerts);
+    // ----------------------------------------------------------------
+    //
+    // Private methods
+    //
+    // ----------------------------------------------------------------
 
-			// save it
-			tsOutStream = new FileOutputStream(keyStore);
-			ks.store(tsOutStream, keyStorePassword);
-		}
-		finally{
-			close(tsReadStream);
-			close(tsOutStream);
-		}
-	}
-
-	@Override
-	public SslManagerServiceOptions getConfigurationOptions() throws GeneralSecurityException, IOException {
-		return m_options;
-	}
-
-	// ----------------------------------------------------------------
-	//
-	//   Private methods
-	//
-	// ----------------------------------------------------------------
-
-	private SSLSocketFactory getSSLSocketFactoryInternal(ConnectionSslOptions options)
-                    throws GeneralSecurityException, IOException
-    {
-        // Only create a new SSLSocketFactory instance if the configuration has changed or
+    private SSLSocketFactory getSSLSocketFactoryInternal(ConnectionSslOptions options)
+            throws GeneralSecurityException, IOException {
+        // Only create a new SSLSocketFactory instance if the configuration has
+        // changed or
         // for a new alias.
         // This allows for SSL Context Resumption and abbreviated SSL handshake
         // in case of reconnects to the same host.
-	    SSLSocketFactory factory= m_sslSocketFactories.get(options);
+        SSLSocketFactory factory = m_sslSocketFactories.get(options);
         if (factory == null) {
             s_logger.info("Creating a new SSLSocketFactory instance");
 
             TrustManager[] tms = getTrustManagers(options.getTrustStore());
 
-            if(tms == null){
+            if (tms == null) {
                 throw new GeneralSecurityException("SSL keystore tampered!");
             }
 
@@ -409,319 +398,303 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
             factory = createSSLSocketFactory(options.getProtocol(), options.getCiphers(), kms, tms, options.getHostnameVerification());
             m_sslSocketFactories.put(options, factory);
         }
-        
+
         return factory;
     }
-	
-	private static SSLSocketFactory createSSLSocketFactory(String protocol,
-			String ciphers,
-			KeyManager[] kms,
-			TrustManager[] tms,
-			boolean hostnameVerification)
-					throws NoSuchAlgorithmException, KeyManagementException
-	{
-		// inits the SSL context
-		SSLContext sslCtx;
-		if (protocol == null) {
-			sslCtx = SSLContext.getDefault();
-		}
-		else {
-			sslCtx = SSLContext.getInstance(protocol);
-			sslCtx.init(kms, tms, null);
-		}
 
-		// get the SSLSocketFactory
-		SSLSocketFactory sslSocketFactory = sslCtx.getSocketFactory();
+    private static SSLSocketFactory createSSLSocketFactory(String protocol,
+            String ciphers,
+            KeyManager[] kms,
+            TrustManager[] tms,
+            boolean hostnameVerification)
+                    throws NoSuchAlgorithmException, KeyManagementException {
+        // inits the SSL context
+        SSLContext sslCtx;
+        if (protocol == null) {
+            sslCtx = SSLContext.getDefault();
+        } else {
+            sslCtx = SSLContext.getInstance(protocol);
+            sslCtx.init(kms, tms, null);
+        }
 
-		// wrap it
-		return new SSLSocketFactoryWrapper(sslSocketFactory, ciphers, hostnameVerification);
-	}
+        // get the SSLSocketFactory
+        SSLSocketFactory sslSocketFactory = sslCtx.getSocketFactory();
 
-	private static TrustManager[] getTrustManagers(String trustStore)
-			throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException
-	{
-		TrustManagerFactory tmf = null;
-		if (trustStore != null) {
+        // wrap it
+        return new SSLSocketFactoryWrapper(sslSocketFactory, ciphers, hostnameVerification);
+    }
 
-			// Load the configured the Trust Store
-			File fTrustStore = new File(trustStore);
-			if (fTrustStore.exists()) {
+    private static TrustManager[] getTrustManagers(String trustStore)
+            throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+        TrustManagerFactory tmf = null;
+        if (trustStore != null) {
 
-				KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
-				InputStream tsReadStream = new FileInputStream(trustStore);
-				ts.load(tsReadStream, null);
-				tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-				tmf.init(ts);
-				tsReadStream.close();
-			}
-			else {
-				s_logger.info("Could not find trust store at {}. Using Java default.", trustStore);
-			}
-		}
+            // Load the configured the Trust Store
+            File fTrustStore = new File(trustStore);
+            if (fTrustStore.exists()) {
 
-		if (tmf == null) {
-			// Load the default Java VM Trust Store
-			tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-			tmf.init((KeyStore) null);
-		}
-		return tmf.getTrustManagers();
-	}
+                KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
+                InputStream tsReadStream = new FileInputStream(trustStore);
+                ts.load(tsReadStream, null);
+                tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                tmf.init(ts);
+                tsReadStream.close();
+            } else {
+                s_logger.info("Could not find trust store at {}. Using Java default.", trustStore);
+            }
+        }
 
-	private KeyManager[] getKeyManagers(String keyStore,
-			char[] keyStorePassword,
-			String keyAlias)
-					throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, UnrecoverableEntryException
-	{
-		KeyStore ks = getKeyStore(keyStore, keyStorePassword, keyAlias);
-		KeyManager[] kms = null;
-		if (ks != null) {
-			KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-			kmf.init(ks, keyStorePassword);
-			kms = kmf.getKeyManagers();
-		}
-		return kms;
-	}
+        if (tmf == null) {
+            // Load the default Java VM Trust Store
+            tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init((KeyStore) null);
+        }
+        return tmf.getTrustManagers();
+    }
 
-	private KeyStore getKeyStore(String keyStore,
-			char[] keyStorePassword,
-			String keyAlias)
-					throws KeyStoreException, FileNotFoundException,
-					IOException, NoSuchAlgorithmException,
-					CertificateException, UnrecoverableEntryException
-	{
-		KeyStore ks = null;
-		if (keyStore != null) {
+    private KeyManager[] getKeyManagers(String keyStore,
+            char[] keyStorePassword,
+            String keyAlias)
+                    throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, UnrecoverableEntryException {
+        KeyStore ks = getKeyStore(keyStore, keyStorePassword, keyAlias);
+        KeyManager[] kms = null;
+        if (ks != null) {
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            kmf.init(ks, keyStorePassword);
+            kms = kmf.getKeyManagers();
+        }
+        return kms;
+    }
 
-			// Load the configured the Key Store
-			File fKeyStore = new File(keyStore);
-			if (fKeyStore.exists()) {
+    private KeyStore getKeyStore(String keyStore,
+            char[] keyStorePassword,
+            String keyAlias)
+                    throws KeyStoreException, FileNotFoundException,
+                    IOException, NoSuchAlgorithmException,
+                    CertificateException, UnrecoverableEntryException {
+        KeyStore ks = null;
+        if (keyStore != null) {
 
-				ks = KeyStore.getInstance(KeyStore.getDefaultType());
-				InputStream ksReadStream = new FileInputStream(keyStore);
-				ks.load(ksReadStream, keyStorePassword);
+            // Load the configured the Key Store
+            File fKeyStore = new File(keyStore);
+            if (fKeyStore.exists()) {
 
+                ks = KeyStore.getInstance(KeyStore.getDefaultType());
+                InputStream ksReadStream = new FileInputStream(keyStore);
+                ks.load(ksReadStream, keyStorePassword);
 
-				// if we have an alias, then build KeyStore with such key
-				if (keyAlias != null) {
-					if (ks.containsAlias(keyAlias) && ks.isKeyEntry(keyAlias)) {
-						if (ks.size() > 1) {
-							PasswordProtection pp = new PasswordProtection(keyStorePassword);
-							Entry entry = ks.getEntry(keyAlias, pp);
-							ks = KeyStore.getInstance(KeyStore.getDefaultType());
-							ks.load(null, null);
-							ks.setEntry(keyAlias, entry, pp);
-						}
-					}
-					else {
-						s_logger.info("Could not find alias {} in key store at {}. Using Java default.", keyAlias, keyStore);
-						ks = null;
-					}
-				}
+                // if we have an alias, then build KeyStore with such key
+                if (keyAlias != null) {
+                    if (ks.containsAlias(keyAlias) && ks.isKeyEntry(keyAlias)) {
+                        if (ks.size() > 1) {
+                            PasswordProtection pp = new PasswordProtection(keyStorePassword);
+                            Entry entry = ks.getEntry(keyAlias, pp);
+                            ks = KeyStore.getInstance(KeyStore.getDefaultType());
+                            ks.load(null, null);
+                            ks.setEntry(keyAlias, entry, pp);
+                        }
+                    } else {
+                        s_logger.info("Could not find alias {} in key store at {}. Using Java default.", keyAlias, keyStore);
+                        ks = null;
+                    }
+                }
 
-				ksReadStream.close();
-			}
-			else {
-				s_logger.info("Could not find key store at {}. Using Java default.", keyStore);
-			}
-		}
+                ksReadStream.close();
+            } else {
+                s_logger.info("Could not find key store at {}. Using Java default.", keyStore);
+            }
+        }
 
-		if (m_cryptoService.isFrameworkSecure()) {
-			if (keyStore == null) {
-				s_logger.warn("The environment is secured but the provided keystore is null");
-				throw new KeyStoreException("The environment is secured but the provided keystore is null");
-			}
-			else if (!isKeyStoreAccessible(keyStore, keyStorePassword)) {
-				s_logger.warn("The environment is secured but the provided keystore is not accessible");
-				throw new KeyStoreException("The environment is secured but the provided keystore is not accessible");
-			}
-		}
+        if (m_cryptoService.isFrameworkSecure()) {
+            if (keyStore == null) {
+                s_logger.warn("The environment is secured but the provided keystore is null");
+                throw new KeyStoreException("The environment is secured but the provided keystore is null");
+            } else if (!isKeyStoreAccessible(keyStore, keyStorePassword)) {
+                s_logger.warn("The environment is secured but the provided keystore is not accessible");
+                throw new KeyStoreException("The environment is secured but the provided keystore is not accessible");
+            }
+        }
 
-		return ks;
-	}
+        return ks;
+    }
 
-	private char[] getKeyStorePassword()
-	{
-		return m_cryptoService.getKeyStorePassword(m_options.getSslKeyStore());
-	}
+    private char[] getKeyStorePassword() {
+        return m_cryptoService.getKeyStorePassword(m_options.getSslKeyStore());
+    }
 
-	private static boolean isKeyStoreAccessible(String location, char[] password)
-	{
-		try {
-			loadKeyStore(location, password);
-			return true;
-		}
-		catch (Exception e) {
-			return false;
-		}
-	}
+    private static boolean isKeyStoreAccessible(String location, char[] password) {
+        try {
+            loadKeyStore(location, password);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
-	private static KeyStore loadKeyStore(String location, char[] password)
-			throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException
-	{
-		FileInputStream is = null;
-		try {
-			is = new FileInputStream(location);
-			KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-			keystore.load(is, password);
-			return keystore;
-		}
-		finally{
-			close(is);
-		}
-	}
+    private static KeyStore loadKeyStore(String location, char[] password)
+            throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
+        FileInputStream is = null;
+        try {
+            is = new FileInputStream(location);
+            KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keystore.load(is, password);
+            return keystore;
+        } finally {
+            close(is);
+        }
+    }
 
-	private static void saveKeyStore(KeyStore keystore, String location, char[] password)
-			throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException
-	{
-		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream(location);
-			keystore.store(fos, password);
-		}
-		finally{
-			close(fos);
-		}
-	}
+    private static void saveKeyStore(KeyStore keystore, String location, char[] password)
+            throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(location);
+            keystore.store(fos, password);
+        } finally {
+            close(fos);
+        }
+    }
 
-	private static void close(Closeable c)
-	{
-		if (c != null) {
-			try {
-				c.close();
-			}
-			catch (IOException e) {
-				s_logger.warn("Failed to close Closeable", e);
-			}
-		}
-	}
+    private static void close(Closeable c) {
+        if (c != null) {
+            try {
+                c.close();
+            } catch (IOException e) {
+                s_logger.warn("Failed to close Closeable", e);
+            }
+        }
+    }
 
-	private boolean isDefaultPassword(char[] password)
-	{
-		try {
-			char[] keystorePassword= m_systemService.getJavaKeyStorePassword();
-			boolean isDefaultFromInstaller= Arrays.equals(password, SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.toCharArray());
-			boolean isDefaultFromUser= Arrays.equals(password, keystorePassword);
-			return isDefaultFromInstaller || isDefaultFromUser;
-		} catch (Exception e) {
-			s_logger.error("Exception while evaluating isDefaultPassword!", e);
-		} 
+    private boolean isDefaultPassword() {
+        try {
+            boolean isDefaultFromInstaller = isKeyStoreAccessible(m_options.getSslKeyStore(), SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.toCharArray());
 
-		return false;
-	}
+            char[] kuraPropertiesKeystorePassword = m_systemService.getJavaKeyStorePassword();
+            boolean isDefaultFromUser = false;
+            if (kuraPropertiesKeystorePassword != null) {
+                isDefaultFromUser = isKeyStoreAccessible(m_options.getSslKeyStore(), kuraPropertiesKeystorePassword);
+            }
 
-	private boolean changeDefaultKeystorePassword()
-	{
-		boolean result = false;
+            char[] cryptoPassword = m_cryptoService.getKeyStorePassword(m_options.getSslKeyStore());
+            boolean isDefaultFromCrypto = false;
+            if (SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.equals(m_options.getSslKeystorePassword())) {
+                isDefaultFromCrypto = isKeyStoreAccessible(m_options.getSslKeyStore(), cryptoPassword);
+            }
 
-		m_timer = new Timer(true);
-		char[] snapshotPassword = null;
-		boolean needsPasswordChange = true;
-		try {
-			snapshotPassword = m_cryptoService.decryptAes(m_options.getSslKeystorePassword().toCharArray());
-			needsPasswordChange = isDefaultPassword(snapshotPassword);
-		} catch (KuraException e) {
-		}
+            return isDefaultFromInstaller || isDefaultFromUser || isDefaultFromCrypto;
+        } catch (Exception e) {
+            s_logger.error("Exception while evaluating isDefaultPassword!", e);
+        }
 
-		// The password in the snapshot is the default password (or cannot be decrypted).
-		// If the framework is running in secure mode we must change the
-		// password.
-		// The keystore must be accessible with the old/default password.
-		char[] oldPassword = m_cryptoService.getKeyStorePassword(m_options.getSslKeyStore());
-		if(needsPasswordChange && snapshotPassword != null && isKeyStoreAccessible(m_options.getSslKeyStore(), snapshotPassword)){
-			oldPassword = snapshotPassword;
-		}
-		if(     m_cryptoService.isFrameworkSecure() && 
-				needsPasswordChange &&
-				oldPassword != null && 
-				isKeyStoreAccessible(m_options.getSslKeyStore(), oldPassword)
-				){
-			try {
-				// generate a new random password
-				char[] newPassword = new BigInteger(160, new SecureRandom()).toString(32).toCharArray();
+        return false;
+    }
 
-				// change the password to the keystore
-				changeKeyStorePassword(m_options.getSslKeyStore(),
-						oldPassword, newPassword);
+    private boolean changeDefaultKeystorePassword() {
+        boolean result = false;
 
-				// change the CryptoService SSL keystore password
-				m_cryptoService.setKeyStorePassword(m_options.getSslKeyStore(), newPassword);
+        m_timer = new Timer(true);
+        char[] snapshotPassword = null;
+        boolean needsPasswordChange = true;
+        try {
+            snapshotPassword = m_cryptoService.decryptAes(m_options.getSslKeystorePassword().toCharArray());
+            needsPasswordChange = isDefaultPassword();
+        } catch (KuraException e) {}
 
-				// update our configuration with the newly generated password
-				final String pid = (String) m_properties.get("service.pid");
+        // The password in the snapshot is the default password (or cannot be
+        // decrypted).
+        // If the framework is running in secure mode we must change the
+        // password.
+        // The keystore must be accessible with the old/default password.
+        char[] oldPassword = m_cryptoService.getKeyStorePassword(m_options.getSslKeyStore());
+        if (needsPasswordChange && snapshotPassword != null && isKeyStoreAccessible(m_options.getSslKeyStore(), snapshotPassword)) {
+            oldPassword = snapshotPassword;
+        }
+        if (m_cryptoService.isFrameworkSecure() &&
+                needsPasswordChange &&
+                oldPassword != null &&
+                isKeyStoreAccessible(m_options.getSslKeyStore(), oldPassword)) {
+            try {
+                // generate a new random password
+                char[] newPassword = new BigInteger(160, new SecureRandom()).toString(32).toCharArray();
 
-				Map<String, Object> props = new HashMap<String, Object>(m_properties);
-				props.put(SslManagerServiceOptions.PROP_TRUST_PASSWORD, new Password(newPassword));
-				final Map<String, Object> theProperties = props;
+                // change the password to the keystore
+                changeKeyStorePassword(m_options.getSslKeyStore(), oldPassword, newPassword);
 
-				m_timer.scheduleAtFixedRate(new TimerTask() {
-					@Override
-					public void run() {
-						try {
-							if(m_ctx.getServiceReference() != null &&
-									m_configurationService.getComponentConfiguration(pid) != null) {
-								m_configurationService.updateConfiguration(pid, theProperties);
-								m_timer.cancel();
-							} else {
-								s_logger.info("No service or configuration available yet. Sleeping...");
-							}
-						} catch (KuraException e) {
-							s_logger.warn("Cannot get/update configuration for pid: {}", pid, e);
-						}
-					}
-				},
-				1000, 1000);
+                // change the CryptoService SSL keystore password
+                m_cryptoService.setKeyStorePassword(m_options.getSslKeyStore(), newPassword);
 
-				result = true;
-			} catch (Exception e) {
-				s_logger.warn("Keystore password change failed");
-			}
-		}
+                // update our configuration with the newly generated password
+                final String pid = (String) m_properties.get("service.pid");
 
-		return result;
-	}
+                Map<String, Object> props = new HashMap<String, Object>(m_properties);
+                props.put(SslManagerServiceOptions.PROP_TRUST_PASSWORD, new Password(newPassword));
+                final Map<String, Object> theProperties = props;
 
-	private boolean changeKeyStorePassword()
-	{
-		boolean result = false;
+                m_timer.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        try {
+                            if (m_ctx.getServiceReference() != null &&
+                                    m_configurationService.getComponentConfiguration(pid) != null) {
+                                m_configurationService.updateConfiguration(pid, theProperties);
+                                m_timer.cancel();
+                            } else {
+                                s_logger.info("No service or configuration available yet. Sleeping...");
+                            }
+                        } catch (KuraException e) {
+                            s_logger.warn("Cannot get/update configuration for pid: {}", pid, e);
+                        }
+                    }
+                }, 1000, 1000);
 
-		String password = m_options.getSslKeystorePassword();
-		char[] oldPassword = m_cryptoService.getKeyStorePassword(m_options.getSslKeyStore());
-		char[] newPassword = oldPassword;
-		if (password != null) {
-			try {
-				newPassword = m_cryptoService.decryptAes(password.toCharArray());
-			} catch (KuraException e) {
-				s_logger.warn("Failed to decrypt keystore password");
-			}
-		}
+                result = true;
+            } catch (Exception e) {
+                s_logger.warn("Keystore password change failed");
+            }
+        }
 
-		if (oldPassword == null) {
-			s_logger.warn("null old password");
-		} else {
-			if (!Arrays.equals(oldPassword, newPassword)) {
-				try {
-					changeKeyStorePassword(m_options.getSslKeyStore(), oldPassword, newPassword);
-					m_cryptoService.setKeyStorePassword(m_options.getSslKeyStore(), newPassword);
-					result = true;
-				} catch (Exception e) {
-					s_logger.warn("Failed to change keystore password");
-				}
-			}
-		}
+        return result;
+    }
 
-		return result;
-	}
-	
-	private void changeKeyStorePassword(String location, char[] oldPassword, char[] newPassword)
-			throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException
-	{
-		KeyStore keystore;
-		if(isDefaultPassword(oldPassword) && !m_cryptoService.isFrameworkSecure()){
-			keystore= loadKeyStore(location, newPassword);
-		} else {
-			keystore= loadKeyStore(location, oldPassword);
-		}
+    private boolean changeKeyStorePassword() {
+        String password = m_options.getSslKeystorePassword();
+        char[] oldPassword = m_cryptoService.getKeyStorePassword(m_options.getSslKeyStore());
+        char[] newPassword = oldPassword;
+        if (password != null) {
+            try {
+                newPassword = m_cryptoService.decryptAes(password.toCharArray());
+            } catch (KuraException e) {
+                s_logger.warn("Failed to decrypt keystore password");
+            }
+        }
 
-		saveKeyStore(keystore, location, newPassword);
-	}
+        if (oldPassword == null) {
+            s_logger.warn("null old password");
+            return false;
+        }
+
+        if (!Arrays.equals(oldPassword, newPassword)) {
+            try {
+                if (isKeyStoreAccessible(m_options.getSslKeyStore(), oldPassword)) {
+                    changeKeyStorePassword(m_options.getSslKeyStore(), oldPassword, newPassword);
+                } else if (isKeyStoreAccessible(m_options.getSslKeyStore(), newPassword)) {
+                    changeKeyStorePassword(m_options.getSslKeyStore(), newPassword, newPassword);
+                } else {
+                    return false;
+                }
+                m_cryptoService.setKeyStorePassword(m_options.getSslKeyStore(), newPassword);
+                return true;
+            } catch (Exception e) {
+                s_logger.warn("Failed to change keystore password");
+            }
+        }
+        return false;
+    }
+
+    private void changeKeyStorePassword(String location, char[] oldPassword, char[] newPassword)
+            throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
+        KeyStore keystore = loadKeyStore(location, oldPassword);
+
+        saveKeyStore(keystore, location, newPassword);
+    }
 }

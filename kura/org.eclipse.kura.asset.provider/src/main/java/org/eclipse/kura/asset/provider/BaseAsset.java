@@ -141,6 +141,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 			final Map<String, Object> properties) {
 		s_logger.debug(s_message.activating());
 		this.m_context = componentContext;
+		this.m_properties = properties;
 		this.retrieveConfigurationsFromProperties(properties);
 		this.attachDriver(this.m_assetConfiguration.getDriverPid());
 		s_logger.debug(s_message.activatingDone());

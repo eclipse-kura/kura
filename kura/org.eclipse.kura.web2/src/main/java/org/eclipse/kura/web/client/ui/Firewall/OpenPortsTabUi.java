@@ -428,6 +428,7 @@ public class OpenPortsTabUi extends Composite implements Tab {
 						openPortsDataProvider.getList().add(editOpenPortEntry);
 						openPortsDataProvider.flush();
 						apply.setEnabled(true);
+						editOpenPortEntry = null;
 						setVisibility();
 					} else {	//end duplicate
 						openPortsDataProvider.getList().add(oldEntry);

@@ -16,8 +16,10 @@ import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
@@ -36,6 +38,7 @@ import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
+import org.eclipse.kura.util.collection.CollectionUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -53,6 +56,10 @@ import org.slf4j.LoggerFactory;
  * asset PID
  * <li>/assets/asset_pid/channel_id</li> : to retrieve the value of the
  * specified channel from the provided asset PID
+ * <li>/assets/asset_pid/channel_id1,channel_id2,channel_id3</li> : to retrieve
+ * the value of the several channels from the provided asset PID. Any number of
+ * channels can be provided as well. Also note that {@code ","} delimiter must
+ * be used to separate the channel IDs.
  * </ul>
  *
  * The available {@code PUT} commands are as follows
@@ -218,12 +225,33 @@ public final class AssetCloudlet extends Cloudlet {
 			if (reqTopic.getResources().length == 3) {
 				final String assetPid = reqTopic.getResources()[1];
 				final String channelId = reqTopic.getResources()[2];
+				final String channelDelim = ",";
+				Set<String> channelIds = null;
+				if (channelId.contains(channelDelim)) {
+					channelIds = CollectionUtil.newHashSet(Arrays.asList(channelId.split(channelDelim)));
+					channelIds.removeAll(Collections.singleton(""));
+				}
 				final Asset asset = this.m_assets.get(assetPid);
 				final AssetConfiguration configuration = asset.getAssetConfiguration();
 				final Map<Long, Channel> assetConfiguredChannels = configuration.getAssetChannels();
-				final long id = this.checkChannelAvailability(channelId, assetConfiguredChannels);
-				if ((assetConfiguredChannels != null) && (id != 0)) {
-					final List<AssetRecord> assetRecords = asset.read(Arrays.asList(id));
+
+				final List<Long> channelIdsToRead = CollectionUtil.newArrayList();
+				long id;
+				if (channelIds == null) {
+					id = this.checkChannelAvailability(channelId, assetConfiguredChannels);
+					if (id != 0) {
+						channelIdsToRead.add(id);
+					}
+				} else {
+					for (final String chId : channelIds) {
+						id = this.checkChannelAvailability(chId, assetConfiguredChannels);
+						if (id != 0) {
+							channelIdsToRead.add(id);
+						}
+					}
+				}
+				if (assetConfiguredChannels != null) {
+					final List<AssetRecord> assetRecords = asset.read(channelIdsToRead);
 					this.prepareResponse(respPayload, assetRecords);
 				}
 			}

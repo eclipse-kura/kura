@@ -16,6 +16,7 @@ import static org.eclipse.kura.Preconditions.checkCondition;
 import static org.eclipse.kura.Preconditions.checkNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -181,6 +182,20 @@ public final class CollectionUtil {
 	 */
 	public static <E> Set<E> newHashSet() {
 		return new HashSet<E>();
+	}
+
+	/**
+	 * Creates a <i>mutable</i>, {@code HashSet} instance containing the
+	 * provided collection of values.
+	 *
+	 * @param collection
+	 *            the collection of values to wrap
+	 * @param <E>
+	 *            the element type
+	 * @return a new, empty {@code HashSet}
+	 */
+	public static <E> Set<E> newHashSet(final Collection<? extends E> collection) {
+		return new HashSet<E>(collection);
 	}
 
 	/**

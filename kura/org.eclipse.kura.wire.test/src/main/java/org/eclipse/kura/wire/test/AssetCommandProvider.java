@@ -47,7 +47,7 @@ public final class AssetCommandProvider implements CommandProvider {
 	public void _addChannel(final CommandInterpreter ci) throws KuraException {
 		final String argument = ci.nextArgument();
 		if (argument == null) {
-			ci.println("Usage: addChannel <assetName>#<channelName>#<type>#<valueType>#<unit.id> - Creates a Channel");
+			ci.println("Usage: addChannel <assetPid>#<channelName>#<type>#<valueType>#<unit.id> - Creates a Channel");
 			return;
 		}
 		final List<String> prop = Arrays.asList(argument.split("#"));
@@ -73,7 +73,7 @@ public final class AssetCommandProvider implements CommandProvider {
 		final String argument = ci.nextArgument();
 		if (argument == null) {
 			ci.println(
-					"Usage: addModbusChannel <assetName>#<channelName>#<type>#<valueType>#<unit.id>#<memory.address>#<primary.table> - Creates a Modbus Channel");
+					"Usage: addModbusChannel <assetPid>#<channelName>#<type>#<valueType>#<unit.id>#<memory.address>#<primary.table> - Creates a Modbus Channel");
 			return;
 		}
 		final List<String> prop = Arrays.asList(argument.split("#"));
@@ -99,14 +99,14 @@ public final class AssetCommandProvider implements CommandProvider {
 	public void _createWireAsset(final CommandInterpreter ci) throws KuraException {
 		final String argument = ci.nextArgument();
 		if (argument == null) {
-			ci.println("Usage: createWireAsset <assetName>#<assetDescription>#<driverId> - Creates a Wire Asset");
+			ci.println(
+					"Usage: createWireAsset <assetFactoryPid>#<assetPid>#<assetDescription>#<driverPid> - Creates a Wire Asset");
 			return;
 		}
 		final List<String> prop = Arrays.asList(argument.split("#"));
 		final Map<String, Object> map = CollectionUtil.newHashMap();
-		map.put("asset.name", prop.get(2));
-		map.put("asset.desc", prop.get(3));
-		map.put("driver.pid", prop.get(4));
+		map.put("asset.desc", prop.get(2));
+		map.put("driver.pid", prop.get(3));
 		this.m_configService.createFactoryConfiguration(prop.get(0), prop.get(1), map, false);
 	}
 
@@ -126,9 +126,9 @@ public final class AssetCommandProvider implements CommandProvider {
 	@Override
 	public String getHelp() {
 		return "---Wire Asset Service---\n"
-				+ "\tcreateWireAsset <factoryPid>#<pid>#<assetName>#<assetDescription>#<driverId> - Creates a Wire Asset\n"
-				+ "\taddChannel <assetName>#<channelName>#<type>#<valueType> - Creates a Channel\n"
-				+ "\taddModbusChannel <assetName>#<channelName>#<type>#<valueType>#<unit.id>#<memory.address>#<primary.table> - Creates a Modbus Channel\n";
+				+ "\tcreateWireAsset <assetFactoryPid>#<assetPid>#<assetDescription>#<driverPid> - Creates a Wire Asset\n"
+				+ "\taddChannel <assetPid>#<channelName>#<type>#<valueType> - Creates a Channel\n"
+				+ "\taddModbusChannel <assetPid>#<channelName>#<type>#<valueType>#<unit.id>#<memory.address>#<primary.table> - Creates a Modbus Channel\n";
 	}
 
 	/**

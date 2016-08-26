@@ -72,7 +72,7 @@ public final class AssetOptions {
 	private final Map<Long, Channel> m_channels = CollectionUtil.newConcurrentHashMap();
 
 	/** Name of the driver to be associated with. */
-	private String m_driverId;
+	private String m_driverPid;
 
 	/**
 	 * Instantiates a new asset configuration.
@@ -130,7 +130,7 @@ public final class AssetOptions {
 		checkNull(properties, s_message.propertiesNonNull());
 		try {
 			if (properties.containsKey(ASSET_DRIVER_PROP.value())) {
-				this.m_driverId = (String) properties.get(ASSET_DRIVER_PROP.value());
+				this.m_driverPid = (String) properties.get(ASSET_DRIVER_PROP.value());
 			}
 			if (properties.containsKey(ASSET_DESC_PROP.value())) {
 				this.m_assetDescription = (String) properties.get(ASSET_DESC_PROP.value());
@@ -147,7 +147,7 @@ public final class AssetOptions {
 	 * @return the asset configuration
 	 */
 	public AssetConfiguration getAssetConfiguration() {
-		return new AssetConfiguration(this.m_assetDescription, this.m_driverId, this.m_channels);
+		return new AssetConfiguration(this.m_assetDescription, this.m_driverPid, this.m_channels);
 	}
 
 	/**
@@ -273,7 +273,7 @@ public final class AssetOptions {
 	@Override
 	public String toString() {
 		return "AssetOptions [Asset Description=" + this.m_assetDescription + ", Channels=" + this.m_channels
-				+ ", Driver ID=" + this.m_driverId + "]";
+				+ ", Driver ID=" + this.m_driverPid + "]";
 	}
 
 	/**

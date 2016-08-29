@@ -87,7 +87,7 @@ public class NatPreroutingChainRule {
 	public String toString() {
 		StringBuilder sb = new StringBuilder("-A PREROUTING");
 		if ((m_permittedNetwork != null) && !m_permittedNetwork.equals("0.0.0.0")) {
-			sb.append(" -s ").append(m_permittedNetwork);
+			sb.append(" -s ").append(m_permittedNetwork).append('/').append(m_permittedNetworkMask);
 		}
 		sb.append(" -i ").append(m_inputInterface).append(" -p ").append(m_protocol);
 		if (m_permittedMacAddress != null) {

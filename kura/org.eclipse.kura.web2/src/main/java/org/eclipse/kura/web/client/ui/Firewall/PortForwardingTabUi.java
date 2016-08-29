@@ -535,6 +535,7 @@ public class PortForwardingTabUi extends Composite implements Tab {
 					portForwardEntry.setPermittedNetwork("0.0.0.0/0");
 				}
 				if (permittedMac.getText() != null && !"".equals(permittedMac.getText().trim())) {
+					confirmFooter.clear();
 					confirmFooter.add(new Button(MSGS.okButton(), new ClickHandler() {
 						@Override
 						public void onClick(ClickEvent event) {

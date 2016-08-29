@@ -35,6 +35,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -544,12 +545,12 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         }
     }
 
-    private static void saveKeyStore(KeyStore keystore, String location, char[] password)
-            throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+    private static void saveKeyStore(KeyStore keystore, String location, char[] newPassword)
+            throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(location);
-            keystore.store(fos, password);
+            keystore.store(fos, newPassword);
         } finally {
             close(fos);
         }
@@ -692,9 +693,24 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     }
 
     private void changeKeyStorePassword(String location, char[] oldPassword, char[] newPassword)
-            throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
+            throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableEntryException {
         KeyStore keystore = loadKeyStore(location, oldPassword);
 
+        updateKeyEntiesPasswords(keystore, oldPassword, newPassword);
         saveKeyStore(keystore, location, newPassword);
+    }
+
+    private static void updateKeyEntiesPasswords(KeyStore keystore, char[] oldPassword, char[] newPassword)
+            throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException {
+        Enumeration<String> aliases = keystore.aliases();
+        while (aliases.hasMoreElements()) {
+            String alias = aliases.nextElement();
+            if (keystore.isKeyEntry(alias)) {
+                PasswordProtection oldPP = new PasswordProtection(oldPassword);
+                Entry entry = keystore.getEntry(alias, oldPP);
+                PasswordProtection newPP = new PasswordProtection(newPassword);
+                keystore.setEntry(alias, entry, newPP);
+            }
+        }
     }
 }

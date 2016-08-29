@@ -552,7 +552,7 @@
                 <esf:value>true</esf:value>
             </esf:property>
             <esf:property name="ssl.default.trustStore" array="false" encrypted="false" type="String">
-                <esf:value>/home/root/eclipse/esf/security/cacerts.ks</esf:value>
+                <esf:value>/home/root/eclipse/kura/security/cacerts.ks</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

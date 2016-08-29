@@ -18,6 +18,7 @@ Bug Fixes :
     * #242: [Web UI] Help is not always visible in the new web ui
     
   * Merged no issue-related Pull Requests:
+    * #480: Fix firewall issues
     * #475: Hotfix ble fixes
     * #441: JDK DIO: disable verbose logging from armv5_sf and x86_64 libraries.
     * #440: Modified the configuration service to prevent the generation of empty snapshots.

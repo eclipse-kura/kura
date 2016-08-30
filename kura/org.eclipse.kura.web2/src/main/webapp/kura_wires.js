@@ -96,7 +96,7 @@ var kuraWires = (function() {
 									} else {
 										cType = "consumer";
 									}
-									if (logicalBlockName !== null) {
+									if (logicalBlockName !== null && logicalBlockName !== "") {
 										newComp = {
 											fPid : factoryPid,
 											pid : "none",
@@ -133,7 +133,7 @@ var kuraWires = (function() {
 								+ '<div class="form-group"> '
 								+ '<label class="col-md-4 control-label" for="driver">Driver Instance</label> '
 								+ '<div class="col-md-4"> <div class="driver"> '
-								+ '<select name="driver" id="driver-0" checked="checked">'
+								+ '<select name="driver" id="driver-0">'
 								+ optionHtmlElement + '</select> ' + '</div>'
 								+ '</div> </div>' + '</form> </div>  </div>',
 						buttons : {
@@ -154,7 +154,7 @@ var kuraWires = (function() {
 									} else {
 										cType = "consumer";
 									}
-									if (logicalBlockName !== null) {
+									if (logicalBlockName !== null && logicalBlockName !== "") {
 										newComp = {
 											fPid : factoryPid,
 											pid : "none",

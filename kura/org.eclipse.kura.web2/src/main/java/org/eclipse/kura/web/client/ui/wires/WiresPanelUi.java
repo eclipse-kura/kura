@@ -97,9 +97,6 @@ public class WiresPanelUi extends Composite {
 		if (m_components != null) {
 			m_components.clear();
 		}
-		if ((m_drivers != null)) {
-			m_drivers.clear();
-		}
 
 		logger.info(config.getWiresConfigurationJson());
 		for (final String emitter : config.getWireEmitterFactoryPids()) {
@@ -112,32 +109,6 @@ public class WiresPanelUi extends Composite {
 				m_receivers.add(receiver);
 			}
 		}
-
-		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-			@Override
-			public void onFailure(final Throwable ex) {
-				EntryClassUi.hideWaitModal();
-				FailureHandler.handle(ex);
-			}
-
-			@Override
-			public void onSuccess(final GwtXSRFToken token) {
-				gwtWireService.getDriverInstances(token, new AsyncCallback<List<String>>() {
-					@Override
-					public void onFailure(final Throwable caught) {
-						EntryClassUi.hideWaitModal();
-						FailureHandler.handle(caught);
-					}
-
-					@Override
-					public void onSuccess(final List<String> result) {
-						m_drivers.addAll(result);
-						EntryClassUi.hideWaitModal();
-					}
-
-				});
-			}
-		});
 
 		m_components = config.getWireComponents();
 		m_wires = config.getWiresConfigurationJson();
@@ -210,13 +181,10 @@ public class WiresPanelUi extends Composite {
 
 					@Override
 					public void onSuccess(final GwtWiresConfiguration result) {
-						internalLoad(result);
-						EntryClassUi.hideWaitModal();
+						requestDriverInstances(result);
 					}
-
 				});
 			}
-
 		});
 	}
 
@@ -250,6 +218,38 @@ public class WiresPanelUi extends Composite {
 		obj.put("pGraph", JSONParser.parseStrict(m_graph));
 
 		wiresOpen(obj.toString());
+	}
+
+	private static void requestDriverInstances(final GwtWiresConfiguration configuration) {
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+			@Override
+			public void onFailure(final Throwable ex) {
+				EntryClassUi.hideWaitModal();
+				FailureHandler.handle(ex);
+			}
+
+			@Override
+			public void onSuccess(final GwtXSRFToken token) {
+				// load the drivers
+				gwtWireService.getDriverInstances(token, new AsyncCallback<List<String>>() {
+					@Override
+					public void onFailure(final Throwable caught) {
+						EntryClassUi.hideWaitModal();
+						FailureHandler.handle(caught);
+					}
+
+					@Override
+					public void onSuccess(final List<String> result) {
+						m_drivers.clear();
+						m_drivers.addAll(result);
+						internalLoad(configuration);
+						EntryClassUi.hideWaitModal();
+					}
+
+				});
+			}
+		});
 	}
 
 	public static native void wiresOpen(String obj) /*-{

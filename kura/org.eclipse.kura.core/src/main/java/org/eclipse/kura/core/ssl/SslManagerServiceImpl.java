@@ -570,15 +570,16 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         try {
             boolean isDefaultFromInstaller = isKeyStoreAccessible(m_options.getSslKeyStore(), SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.toCharArray());
 
-            char[] kuraPropertiesKeystorePassword = m_systemService.getJavaKeyStorePassword();
             boolean isDefaultFromUser = false;
+            char[] kuraPropertiesKeystorePassword = m_systemService.getJavaKeyStorePassword();
             if (kuraPropertiesKeystorePassword != null) {
                 isDefaultFromUser = isKeyStoreAccessible(m_options.getSslKeyStore(), kuraPropertiesKeystorePassword);
             }
 
-            char[] cryptoPassword = m_cryptoService.getKeyStorePassword(m_options.getSslKeyStore());
             boolean isDefaultFromCrypto = false;
-            if (SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.equals(m_options.getSslKeystorePassword())) {
+            char[] cryptoPassword = m_cryptoService.getKeyStorePassword(m_options.getSslKeyStore());
+            char[] snapshotPassword = m_cryptoService.decryptAes(m_options.getSslKeystorePassword().toCharArray());
+            if (Arrays.equals(SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.toCharArray(), snapshotPassword)) {
                 isDefaultFromCrypto = isKeyStoreAccessible(m_options.getSslKeyStore(), cryptoPassword);
             }
 

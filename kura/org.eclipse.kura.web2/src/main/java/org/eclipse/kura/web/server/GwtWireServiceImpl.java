@@ -22,13 +22,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -76,12 +75,10 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 	private static final String GRAPH = "graph";
 	private static final String HTML_ELEMENT = "html.Element";
 	private static final String JOINT_JS = "jointJs";
-	private static final Lock lock = new ReentrantLock();
 	private static final String NEW_WIRE = "newWire";
 	private static final String PATTERN_CONFIGURATION_REQUIRE = "configuration-policy=\"require\"";
 	private static final String PATTERN_SERVICE_PROVIDE_CONFIGURABLE_COMP = "provide interface=\"org.eclipse.kura.configuration.ConfigurableComponent\"";
 	private static final String PATTERN_SERVICE_PROVIDE_EMITTER = "provide interface=\"org.eclipse.kura.wire.WireEmitter\"";
-
 	private static final String PATTERN_SERVICE_PROVIDE_RECEIVER = "provide interface=\"org.eclipse.kura.wire.WireReceiver\"";
 	private static final String PATTERN_SERVICE_PROVIDE_SELF_CONFIGURING_COMP = "provide interface=\"org.eclipse.kura.configuration.SelfConfiguringComponent\"";
 	private static final String PID = "pid";
@@ -93,12 +90,22 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 	/** Serial Version */
 	private static final long serialVersionUID = -6577843865830245755L;
 
-	private static final String SERVICE_PID = "service.pid";
-
 	private static final String TYPE = "type";
 
 	/** Wire Service PID Property */
 	private static final String WIRE_SERVICE_PID = "org.eclipse.kura.wire.WireService";
+
+	/** {@inheritDoc} */
+	@Override
+	public List<String> getDriverInstances(final GwtXSRFToken xsrfToken) throws GwtKuraException {
+		this.checkXSRFToken(xsrfToken);
+		final ServiceReference[] refs = ServiceLocator.getInstance().getServiceReferences(Driver.class, null);
+		final List<String> drivers = new ArrayList<String>();
+		for (final ServiceReference ref : refs) {
+			drivers.add(String.valueOf(ref.getProperty("kura.service.pid")));
+		}
+		return drivers;
+	}
 
 	/** {@inheritDoc} */
 	@Override
@@ -141,7 +148,6 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 			try {
 				wireConf.put("p", emitterPid);
 				wireConf.put("c", receiverPid);
-				// wireConf.put("f", wireConfiguration.getFilter());
 				wireConfig.put(String.valueOf(++i), wireConf);
 			} catch (final JSONException exception) {
 				throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
@@ -206,21 +212,20 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 					s_logger.info("Service Pid for Producer: {}", wireHelperService.getServicePid(prod));
 					s_logger.info("Service Pid for Consumer: {}", wireHelperService.getServicePid(cons));
 
-					// Another possible way
-					// track for the producer
+					// track and wait for the producer
 					final String pPid = wireHelperService.getServicePid(prod);
 					final BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 					String filterString = "(" + Constants.SERVICE_PID + "=" + pPid + ")";
 					Filter filter = bundleContext.createFilter(filterString);
-					ServiceTracker tracker = new ServiceTracker<WireComponent, WireComponent>(bundleContext, filter, null);
+					ServiceTracker tracker = new ServiceTracker(bundleContext, filter, null);
 					tracker.open();
 					tracker.waitForService(5000);
 
-					// track for the consumer
+					// track and wait for the consumer
 					final String cPid = wireHelperService.getServicePid(cons);
 					filterString = "(" + Constants.SERVICE_PID + "=" + cPid + ")";
 					filter = bundleContext.createFilter(filterString);
-					tracker = new ServiceTracker<WireComponent, WireComponent>(bundleContext, filter, null);
+					tracker = new ServiceTracker(bundleContext, filter, null);
 					tracker.waitForService(5000);
 
 					wireService.createWireConfiguration(prod, cons);

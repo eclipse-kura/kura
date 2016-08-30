@@ -11,48 +11,49 @@
  */
 /** Add css rules here for your application. */
 
-
 /** Example rules used by the template application (remove for your app) */
-body { background-color: #009AE0 !important; }
+body {
+	background-color: #009AE0 !important;
+}
 
 h1 {
-  font-size: 2em;
-  font-weight: bold;
-  color: #777777;
-  margin: 40px 0px 70px;
-  text-align: center;
+	font-size: 2em;
+	font-weight: bold;
+	color: #777777;
+	margin: 40px 0px 70px;
+	text-align: center;
 }
 
 .sendButton {
-  display: block;
-  font-size: 16pt;
+	display: block;
+	font-size: 16pt;
 }
 
 /** Most GWT widgets already have a style name defined */
 .gwt-DialogBox {
-  width: 400px;
+	width: 400px;
 }
 
 .dialogVPanel {
-  margin: 5px;
+	margin: 5px;
 }
 
 .serverResponseLabelError {
-  color: red;
+	color: red;
 }
 
 /** Set ids using widget.getElement().setId("idOfElement") */
 #closeButton {
-  margin: 15px 6px 6px;
+	margin: 15px 6px 6px;
 }
 
 .x-tree3-node-icon {
-    margin-top: 2px;    
+	margin-top: 2px;
 }
 
-fieldset#configuration-form > div.x-form-label-left > div.x-component {
-    padding-bottom: 10px;   
-    padding-right: 25px;   
+fieldset#configuration-form>div.x-form-label-left>div.x-component {
+	padding-bottom: 10px;
+	padding-right: 25px;
 }
 
 img.x-tree3-node-icon {
@@ -64,76 +65,131 @@ img.x-tree3-node-icon {
 *** Kura Wires
 ***
 *******************************/
-#factory-select-modal .modal-dialog { margin-top: 15%; }
-#wires-graph {
-   position: relative;
-   border: 1px solid gray;
-   display: inline-block;
-   background: transparent;
-   overflow: hidden;
-   padding: 0px;
-}
-#wires-graph svg {
-   background: transparent;
-}
-#wires-graph svg .link {
-   z-index: 2;
-}
-.html-element {
-   position: absolute;
-   background: #3498DB;
-   /* Make sure events are propagated to the JointJS element so, e.g. dragging works.*/
-   pointer-events: none;
-   -webkit-user-select: none;
-   border-radius: 4px;
-   border: 2px solid #2980B9;
-   box-shadow: inset 0 0 5px black, 2px 2px 1px gray;
-   padding: 5px;
-   box-sizing: border-box;
-   z-index: 2;
+.centered {
+	vertical-align: middle;
+	text-align: center;
+	padding-left: 15px;
+	padding-right: 15px;
+	padding-bottom: 15px;
+	padding-top: 1px; '
+	font-size: 12;
+	font-weight: bold;
+	font-variant: small-caps;
+	text-transform: capitalize;
 }
 
-.html-element select,
-.html-element input,
-.html-element button {
-   /* Enable interacting with inputs only. */
-   pointer-events: auto;
+.centeredImg {
+	vertical-align: middle;
+	text-align: center;
+	padding-left: 15px;
+	padding-right: 15px;
+	padding-bottom: 0px;
+	padding-top: 2px;
 }
+
+.centeredImg img {
+	display: block;
+	margin: 0 auto;
+}
+
+.centeredImg img:hover {
+	cursor: hand;
+	cursor: pointer;
+}
+
+#factory-select-modal .modal-dialog {
+	margin-top: 15%;
+}
+
+#wires-graph {
+	position: relative;
+	border: 1px solid gray;
+	display: inline-block;
+	background: transparent;
+	overflow: hidden;
+	padding: 0px;
+}
+
+#wires-graph svg {
+	background: transparent;
+}
+
+#wires-graph svg .link {
+	z-index: 2;
+}
+
+#wireCompsTableContainer {
+	height: 460px;
+	width: 160px;
+	overflow: auto;
+}
+
+#wire-components-panel {
+	position: relative;
+	border: 1px solid gray;
+	background: transparent;
+	display: inline-block;
+	overflow: auto;
+	padding: 5px;
+}
+
+.html-element {
+	position: absolute;
+	background: #3498DB;
+	/* Make sure events are propagated to the JointJS element so, e.g. dragging works.*/
+	pointer-events: none;
+	-webkit-user-select: none;
+	border-radius: 4px;
+	border: 2px solid #2980B9;
+	box-shadow: inset 0 0 5px black, 2px 2px 1px gray;
+	padding: 5px;
+	box-sizing: border-box;
+	z-index: 2;
+}
+
+.html-element select, .html-element input, .html-element button {
+	/* Enable interacting with inputs only. */
+	pointer-events: auto;
+}
+
 .html-element button.delete {
-   color: white;
-   border: none;
-   background-color: #C0392B;
-   border-radius: 20px;
-   width: 15px;
-   height: 15px;
-   line-height: 15px;
-   text-align: middle;
-   position: absolute;
-   top: -15px;
-   left: -15px;
-   padding: 0;
-   margin: 0;
-   font-weight: bold;
-   cursor: pointer;
+	color: white;
+	border: none;
+	background-color: #C0392B;
+	border-radius: 20px;
+	width: 15px;
+	height: 15px;
+	line-height: 15px;
+	text-align: middle;
+	position: absolute;
+	top: -15px;
+	left: -15px;
+	padding: 0;
+	margin: 0;
+	font-weight: bold;
+	cursor: pointer;
 }
+
 .html-element button.delete:hover {
-   width: 20px;
-   height: 20px;
-   line-height: 20px;
+	width: 20px;
+	height: 20px;
+	line-height: 20px;
 }
+
 .html-element label {
-   color: #333;
-   text-shadow: 1px 0 0 lightgray;
-   font-weight: bold;
-   display: block;
-   text-align: center;
+	color: #333;
+	text-shadow: 1px 0 0 lightgray;
+	font-weight: bold;
+	display: block;
+	text-align: center;
 }
+
 .html-element span {
-   position: absolute;
-   top: 2px;
-   right: 9px;
-   color: white;
-   font-size: 10px;
+	position: absolute;
+	top: 2px;
+	right: 9px;
+	color: white;
+	font-size: 10px;
 }
 
 /******************************
@@ -141,35 +197,103 @@ img.x-tree3-node-icon {
 *** gwtbootstrap3 CSS rules 
 ***
 *******************************/
-#wires-modal .modal-dialog { width: 80%; height: 90%; }
-#wires-modal .modal-content { height: 90%; }
-#wires-modal-stencil { border: 1px solid; margin-left: 5px; }
+#wires-modal .modal-dialog {
+	width: 80%;
+	height: 90%;
+}
 
-.gwt-PopupPanelGlass { width: 100%; background-color: #009AE0; opacity: 0.3; }
+#wires-modal .modal-content {
+	height: 90%;
+}
 
-.btn { background-color: #009AE0 !important; color: white !important; }
+#wires-modal-stencil {
+	border: 1px solid;
+	margin-left: 5px;
+}
 
-.form-control { font-size: 11px !important; width: 95% !important; }
+.gwt-PopupPanelGlass {
+	width: 100%;
+	background-color: #009AE0;
+	opacity: 0.3;
+}
 
-.well div { cursor: default; }
+.btn {
+	background-color: #009AE0 !important;
+	color: white !important;
+}
 
-.table { font-size: 12px; }
-.rowHeader { background-color: #009AE0 !important; font-size: 14px !important; color: white !important; pointer-events: none !important;  }
+.form-control {
+	font-size: 11px !important;
+	width: 95% !important;
+}
 
-.connection-table-row { padding: 10px 0px 10px 0px; border: 1px solid #ddd; }
+.well div {
+	cursor: default;
+}
 
-.fa-refresh:before { margin-right: 5px; }
-.fa-toggle-on:before { margin-right: 5px; }
-.fa-toggle-off:before { margin-right: 5px; }
-.fa-download:before { margin-right: 5px; }
-.fa-reply:before { margin-right: 5px; }
-.fa-share:before { margin-right: 5px; }
-.fa-check:before { margin-right: 5px; }
-.fa-times:before { margin-right: 6px; }
-.fa-plus:before { margin-right: 6px; }
-.fa-minus:before { margin-right: 6px; }
-.fa-pencil:before { margin-right: 6px; }
-.fa-trash:before { margin-right: 6px; }
+.table {
+	font-size: 12px;
+}
+
+.rowHeader {
+	background-color: #009AE0 !important;
+	font-size: 14px !important;
+	color: white !important;
+	pointer-events: none !important;
+}
+
+.connection-table-row {
+	padding: 10px 0px 10px 0px;
+	border: 1px solid #ddd;
+}
+
+.fa-refresh:before {
+	margin-right: 5px;
+}
+
+.fa-toggle-on:before {
+	margin-right: 5px;
+}
+
+.fa-toggle-off:before {
+	margin-right: 5px;
+}
+
+.fa-download:before {
+	margin-right: 5px;
+}
+
+.fa-reply:before {
+	margin-right: 5px;
+}
+
+.fa-share:before {
+	margin-right: 5px;
+}
+
+.fa-check:before {
+	margin-right: 5px;
+}
+
+.fa-times:before {
+	margin-right: 6px;
+}
+
+.fa-plus:before {
+	margin-right: 6px;
+}
+
+.fa-minus:before {
+	margin-right: 6px;
+}
+
+.fa-pencil:before {
+	margin-right: 6px;
+}
+
+.fa-trash:before {
+	margin-right: 6px;
+}
 
 /******************************
 ***
@@ -178,7 +302,7 @@ img.x-tree3-node-icon {
 *******************************/
 /** Fix for unwanted vertical scrollbars in Chrome */
 .x-grid3-scroller {
-	overflow-x:			hidden;
+	overflow-x: hidden;
 }
 
 /** Prevent input boxes from resizing after changing input */
@@ -194,7 +318,7 @@ img.x-tree3-node-icon {
 	width: 242px !important;
 }
 
-.kura-textfield + img {
+.kura-textfield+img {
 	left: 426px !important;
 }
 
@@ -207,27 +331,30 @@ img.x-tree3-node-icon {
 }
 
 div.copyright:after {
-	content: ' Eurotech Inc., and others. Made available under the terms of the Eclipse Public License v1.0';
+	content:
+		' Eurotech Inc., and others. Made available under the terms of the Eclipse Public License v1.0';
 }
 
-div.headerLogo { 
-	height: 			38px;
-	width: 				127px;
-	margin: 			5px 0px 5px 15px;
-	vertical-align: 	baseline;
-	background: 		url(eclipse/kura/icons/kura_logo_small.png);
-	background-repeat: 	no-repeat;
-	background-size: 	contain;
+div.headerLogo {
+	height: 38px;
+	width: 127px;
+	margin: 5px 0px 5px 15px;
+	vertical-align: baseline;
+	background: url(eclipse/kura/icons/kura_logo_small.png);
+	background-repeat: no-repeat;
+	background-size: contain;
 }
 
 div.headerLogo-ie8 {
-	height:	           38px;
-	width:             127px;
-	margin:	           5px 0px 5px 15px;
-	vertical-align:    baseline;
+	height: 38px;
+	width: 127px;
+	margin: 5px 0px 5px 15px;
+	vertical-align: baseline;
 	background-repeat: no-repeat;
-	background-size:   contain;
+	background-size: contain;
 	/* IE 8 Hack */
-	filter:            progid:DXImageTransform.Microsoft.AlphaImageLoader(src='kura/org/eclipse/kura/images/kura_logo_small.png',sizingMethod='scale');
-	-ms-filter:        "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='kura/org/eclipse/kura/images/kura_logo_small.png',sizingMethod='scale')";
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='kura/org/eclipse/kura/images/kura_logo_small.png',
+		sizingMethod='scale');
+	-ms-filter:
+		"progid:DXImageTransform.Microsoft.AlphaImageLoader(src='kura/org/eclipse/kura/images/kura_logo_small.png',sizingMethod='scale')";
 }

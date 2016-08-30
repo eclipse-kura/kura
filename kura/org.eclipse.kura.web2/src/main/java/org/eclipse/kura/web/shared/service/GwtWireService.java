@@ -12,6 +12,8 @@
  */
 package org.eclipse.kura.web.shared.service;
 
+import java.util.List;
+
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtWiresConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -25,6 +27,18 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  */
 @RemoteServiceRelativePath("wires")
 public interface GwtWireService extends RemoteService {
+
+	/**
+	 * Retrieves all the registered driver instances
+	 *
+	 * @param xsrfToken
+	 *            the XSRF token
+	 * @return the list of driver instances
+	 * @throws GwtKuraException
+	 *             if GWT encounters exception while retrieving the driver
+	 *             instances
+	 */
+	public List<String> getDriverInstances(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
 	/**
 	 * Returns the {@link GwtWiresConfiguration} instance associated

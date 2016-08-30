@@ -8,17 +8,19 @@
  *
  * Contributors:
  *     Eurotech
- *     Amit Kumar Mondal (admin@amitinside.com)
  *******************************************************************************/
+package org.eclipse.kura.wire.provider.test;
+
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+
 /**
- *
+ * WireTestsSuite is a JUnit Test Suite containing a list of test cases to
+ * execute
  */
-/**
- * Contains the necessary classes for the following framework related operations
- * <ul>
- * <li>Management of Exceptions</li>
- * <li>Preconditions for Defensive Programming - @since 1.0.9</li>
- * </ul>
- *
- */
-package org.eclipse.kura;
+@RunWith(Suite.class)
+@SuiteClasses({ WireServiceTest.class })
+public final class WireTestsSuite {
+
+}

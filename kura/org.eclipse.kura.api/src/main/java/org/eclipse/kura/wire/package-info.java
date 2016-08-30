@@ -11,14 +11,9 @@
  *     Amit Kumar Mondal (admin@amitinside.com)
  *******************************************************************************/
 /**
+ * Provides all necessary APIs and all utility classes comprising necessary
+ * static factory methods to manipulate Kura Wires topology
  *
+ * @since 1.0.9
  */
-/**
- * Contains the necessary classes for the following framework related operations
- * <ul>
- * <li>Management of Exceptions</li>
- * <li>Preconditions for Defensive Programming - @since 1.0.9</li>
- * </ul>
- *
- */
-package org.eclipse.kura;
+package org.eclipse.kura.wire;

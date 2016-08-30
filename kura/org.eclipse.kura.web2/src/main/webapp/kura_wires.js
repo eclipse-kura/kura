@@ -24,23 +24,30 @@ var kuraWires = (function() {
 	var removeCellFunction = function(cell) {
 		removeCell(cell);
 	};
-	
-	function funcCallback(factory) {
+
+	function funcCallback(factory) {
 		return function() {
 			createNewWireComponent(factory);
 		};
 	}
-	
+
 	var fillWireComponentsPanel = function() {
-		$('#wire-components-panel').append(
-				"<div id='wireCompsTableContainer'></div>");
-		$('#wireCompsTableContainer').append(
-				"<table id='wireCompsTable' width='160'></table>");
-		table = $('#wire-components-panel').children();
-		fillWireComponentsTableRows();
-		allBlocks = both.concat(producers).concat(consumers);
-		for (var i = 0; i < allBlocks.length; i++) {
-			document.getElementsByName(allBlocks[i])[0].addEventListener('click', funcCallback(allBlocks[i]));
+		// if the div is already present then no need to append as it will
+		// append a new div
+		if ($('#wireCompsTableContainer').length) {
+			// do nothing
+		} else {
+			$('#wire-components-panel').append(
+					"<div id='wireCompsTableContainer'></div>");
+			$('#wireCompsTableContainer').append(
+					"<table id='wireCompsTable' width='160'></table>");
+			table = $('#wire-components-panel').children();
+			fillWireComponentsTableRows();
+			allBlocks = both.concat(producers).concat(consumers);
+			for (var i = 0; i < allBlocks.length; i++) {
+				document.getElementsByName(allBlocks[i])[0].addEventListener(
+						'click', funcCallback(allBlocks[i]));
+			}
 		}
 	};
 
@@ -58,31 +65,119 @@ var kuraWires = (function() {
 	};
 
 	var createNewWireComponent = function(factoryPid) {
-		var logicalBlockName = prompt("Please enter logical block name", "");
-		// Determine whether component can be producer, consumer, or both
 		var cType, newComp, cId;
-		if ($.inArray(factoryPid, clientConfig.pFactories) !== -1
-				&& $.inArray(factoryPid, clientConfig.cFactories) !== -1) {
-			cType = "both";
-		} else if ($.inArray(factoryPid, clientConfig.pFactories) !== -1) {
-			cType = "producer";
+		if (factoryPid !== "org.eclipse.kura.wire.WireAsset") {
+			bootbox
+					.dialog({
+						title : "Logical Block Initial Configuration",
+						message : '<div class="row">  '
+								+ '<div class="col-md-12"> '
+								+ '<form class="form-horizontal"> '
+								+ '<div class="form-group"> '
+								+ '<label class="col-md-4 control-label" for="name">Name</label> '
+								+ '<div class="col-md-4"> '
+								+ '<input id="name" name="name" type="text" placeholder="Logical Block Name" class="form-control input-md"> '
+								+ '<span class="help-block">User-friendly logical block name</span> </div> '
+								+ '</div> ' + '</form> </div>  </div>',
+						buttons : {
+							success : {
+								label : "Save",
+								className : "btn-success",
+								callback : function() {
+									var logicalBlockName = $('#name').val();
+									if ($.inArray(factoryPid,
+											clientConfig.pFactories) !== -1
+											&& $.inArray(factoryPid,
+													clientConfig.cFactories) !== -1) {
+										cType = "both";
+									} else if ($.inArray(factoryPid,
+											clientConfig.pFactories) !== -1) {
+										cType = "producer";
+									} else {
+										cType = "consumer";
+									}
+									if (logicalBlockName !== null) {
+										newComp = {
+											fPid : factoryPid,
+											pid : "none",
+											name : logicalBlockName,
+											type : cType
+										};
+										// Create the new component and store
+										// information in array
+										cId = createComponent(newComp);
+									}
+								}
+							}
+						}
+					});
 		} else {
-			cType = "consumer";
+			var drivers = clientConfig.drivers;
+			var optionHtmlElement;
+			for (var i = 0; i < drivers.length; i++) {
+				optionHtmlElement += "<option value=" + drivers[i] + ">"
+						+ drivers[i] + "</option>";
+			}
+			bootbox
+					.dialog({
+						title : "Asset Initial Configuration",
+						message : '<div class="row">  '
+								+ '<div class="col-md-12"> '
+								+ '<form class="form-horizontal"> '
+								+ '<div class="form-group"> '
+								+ '<label class="col-md-4 control-label" for="name">Name</label> '
+								+ '<div class="col-md-4"> '
+								+ '<input id="name" name="name" type="text" placeholder="Asset name" class="form-control input-md"> '
+								+ '<span class="help-block">User-friendly asset name</span> </div> '
+								+ '</div> '
+								+ '<div class="form-group"> '
+								+ '<label class="col-md-4 control-label" for="driver">Driver Instance</label> '
+								+ '<div class="col-md-4"> <div class="driver"> '
+								+ '<select name="driver" id="driver-0" checked="checked">'
+								+ optionHtmlElement + '</select> ' + '</div>'
+								+ '</div> </div>' + '</form> </div>  </div>',
+						buttons : {
+							success : {
+								label : "Save",
+								className : "btn-success",
+								callback : function() {
+									var logicalBlockName = $('#name').val();
+									var driverInstance = $('#driver-0').val();
+									if ($.inArray(factoryPid,
+											clientConfig.pFactories) !== -1
+											&& $.inArray(factoryPid,
+													clientConfig.cFactories) !== -1) {
+										cType = "both";
+									} else if ($.inArray(factoryPid,
+											clientConfig.pFactories) !== -1) {
+										cType = "producer";
+									} else {
+										cType = "consumer";
+									}
+									if (logicalBlockName !== null) {
+										newComp = {
+											fPid : factoryPid,
+											pid : "none",
+											name : logicalBlockName,
+											type : cType,
+											driver : driverInstance
+										};
+										// Create the new component and store
+										// information in array
+										cId = createComponent(newComp);
+									}
+								}
+							}
+						}
+					});
 		}
-		if (logicalBlockName !== null) {
-			newComp = {
-				fPid : factoryPid,
-				pid : "none",
-				name : logicalBlockName,
-				type : cType
-			};
-			// Create the new component and store information in array
-			cId = createComponent(newComp);
-		}
+		// Determine whether component can be producer, consumer, or both
 		return cId;
 	};
 
 	var fillWireComponentsTableRows = function() {
+		// delete all existing rows first to append new rows
+		$("#wireCompsTable tr").remove();
 		if (typeof clientConfig.cFactories != 'undefined'
 				&& typeof clientConfig.pFactories != 'undefined') {
 			both = intersect(clientConfig.cFactories, clientConfig.pFactories);
@@ -105,19 +200,30 @@ var kuraWires = (function() {
 			for (i = 0; i < both.length; i++) {
 				var factoryPid = both[i];
 				name = splitFactoryName(factoryPid);
-				table.append("<tr class='wirecomponent'><td class=centeredImg><img name=" + factoryPid + " src='both.png' alt='' draggable='false' style='width:120px; height:40px;'></td></tr>");
-				table.append("<tr class='wirecomponent'><td class=centered>" + name + "<td></tr>");
+				table
+						.append("<tr class='wirecomponent'><td class=centeredImg><img name="
+								+ factoryPid
+								+ " src='both.png' alt='' draggable='false' style='width:120px; height:40px;'></td></tr>");
+				table.append("<tr class='wirecomponent'><td class=centered>"
+						+ name + "<td></tr>");
 			}
 			for (i = 0; i < producers.length; i++) {
 				name = splitFactoryName(producers[i]);
-				table.append("<tr class='wirecomponent'><td class=centeredImg><img name=" + producers[i] + " src='emitter.png' draggable='false' style='width:120px; height:40px;'></td></tr>");
+				table
+						.append("<tr class='wirecomponent'><td class=centeredImg><img name="
+								+ producers[i]
+								+ " src='emitter.png' draggable='false' style='width:120px; height:40px;'></td></tr>");
 				table.append("<tr class='wirecomponent'><td class=centered>"
 						+ name + "<td></tr>");
 			}
 			for (i = 0; i < consumers.length; i++) {
 				name = splitFactoryName(consumers[i]);
-				table.append("<tr class='wirecomponent'><td class=centeredImg><img name=" + consumers[i] + " src='receiver.png' draggable='false' style='width:120px; height:40px;'></td></tr>");
-				table.append("<tr class='wirecomponent'><td class=centered>"+ name + "<td></tr>");
+				table
+						.append("<tr class='wirecomponent'><td class=centeredImg><img name="
+								+ consumers[i]
+								+ " src='receiver.png' draggable='false' style='width:120px; height:40px;'></td></tr>");
+				table.append("<tr class='wirecomponent'><td class=centered>"
+						+ name + "<td></tr>");
 			}
 		}
 	};
@@ -151,7 +257,6 @@ var kuraWires = (function() {
 
 		// Instantiate JointJS graph and paper
 		if (!initialized) {
-			$("#btn-create-comp").on("click", createNewComponent2);
 			$("#btn-config-save").on("click", saveConfig);
 
 			initialized = true;
@@ -229,13 +334,13 @@ var kuraWires = (function() {
 
 		// Setup allowed ports based on type
 		if (comp.type === 'both') {
-			inputPorts = [ 'in' ];
-			outputPorts = [ 'out' ];
+			inputPorts = [ '' ];
+			outputPorts = [ '' ];
 		} else if (comp.type === 'producer') {
 			inputPorts = [];
-			outputPorts = [ 'out' ];
+			outputPorts = [ '' ];
 		} else {
-			inputPorts = [ 'in' ];
+			inputPorts = [ '' ];
 			outputPorts = [];
 		}
 
@@ -287,30 +392,6 @@ var kuraWires = (function() {
 			link.set("newWire", true);
 			console.log(JSON.stringify(graph));
 		}
-	}
-
-	function createNewComponent2() {
-		// Determine whether component can be producer, consumer, or both
-		var cType, fPid;
-		fPid = $("#form-factory-pid").val();
-		if ($.inArray(fPid, clientConfig.pFactories) !== -1
-				&& $.inArray(fPid, clientConfig.cFactories) !== -1) {
-			cType = "both";
-		} else if ($.inArray(fPid, clientConfig.pFactories) !== -1) {
-			cType = "producer";
-		} else {
-			cType = "consumer";
-		}
-		var newComp = {
-			fPid : $("#form-factory-pid").val(),
-			pid : "none",
-			name : $("#form-factory-name").val(),
-			type : cType
-		};
-		// Create the new component and store information in array
-		cId = createComponent(newComp);
-		$("#form-factory-name").val('');
-		$("#factory-select-modal").modal('hide');
 	}
 
 	function removeCell(cell) {

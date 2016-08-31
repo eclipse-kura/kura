@@ -11,8 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.Network;
 
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
@@ -53,6 +53,7 @@ public class NetworkInterfacesTableUi extends Composite {
 	}
 
 	private static final Messages MSGS = GWT.create(Messages.class);
+	private static final String SELECTED_INTERFACE = "ui.selected.interface";
 	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
 
 	GwtSession session;
@@ -69,9 +70,9 @@ public class NetworkInterfacesTableUi extends Composite {
 	final SingleSelectionModel<GwtNetInterfaceConfig> selectionModel = new SingleSelectionModel<GwtNetInterfaceConfig>();
 	TextColumn<GwtNetInterfaceConfig> col1;
 
-	public NetworkInterfacesTableUi(GwtSession session,	NetworkTabsUi tabsPanel) {
+	public NetworkInterfacesTableUi(GwtSession s,	NetworkTabsUi tabsPanel) {
 		initWidget(uiBinder.createAndBindUi(this));
-		this.session = session;
+		this.session = s;
 		this.tabs = tabsPanel;
 		initTable();
 		loadData();
@@ -96,6 +97,7 @@ public class NetworkInterfacesTableUi extends Composite {
 							confirm.hide();
 							selection = selectionModel.getSelectedObject();
 							if (selection != null) {
+								session.set(SELECTED_INTERFACE, selection.getName());
 								tabs.setNetInterface(selection);
 								tabs.setDirty(false);
 							}
@@ -117,6 +119,7 @@ public class NetworkInterfacesTableUi extends Composite {
 					// no unsaved changes
 					selection = selectionModel.getSelectedObject();
 					if (selection != null) {
+						session.set(SELECTED_INTERFACE, selection.getName());
 						tabs.setNetInterface(selection);
 					}
 				}
@@ -188,7 +191,7 @@ public class NetworkInterfacesTableUi extends Composite {
 	private void loadData() {
 		EntryClassUi.showWaitModal();
 		interfacesProvider.getList().clear();
-		gwtNetworkService.findNetInterfaceConfigurations(new AsyncCallback<ArrayList<GwtNetInterfaceConfig>>() {
+		gwtNetworkService.findNetInterfaceConfigurations(new AsyncCallback<List<GwtNetInterfaceConfig>>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
@@ -197,7 +200,7 @@ public class NetworkInterfacesTableUi extends Composite {
 			}
 
 			@Override
-			public void onSuccess(ArrayList<GwtNetInterfaceConfig> result) {
+			public void onSuccess(List<GwtNetInterfaceConfig> result) {
 				ListHandler<GwtNetInterfaceConfig> columnSortHandler = new ListHandler<GwtNetInterfaceConfig>(interfacesProvider.getList());
 			    columnSortHandler.setComparator(col1, new Comparator<GwtNetInterfaceConfig>() {
 			          public int compare(GwtNetInterfaceConfig o1, GwtNetInterfaceConfig o2) {
@@ -221,8 +224,21 @@ public class NetworkInterfacesTableUi extends Composite {
 				if (!interfacesProvider.getList().isEmpty()) {
 					interfacesGrid.setVisible(true);
 					notification.setVisible(false);
-					selectionModel.setSelected(interfacesProvider.getList().get(0),	true);
-					interfacesGrid.getSelectionModel().setSelected(interfacesProvider.getList().get(0), true);
+					
+					// Check session to see if interface was already chosen
+					// Must select based on name, as keys in SelectionModel change across RPC calls
+					String sessionSelection = (String) session.get(SELECTED_INTERFACE);
+					if (sessionSelection != null) {
+						for (GwtNetInterfaceConfig gc : interfacesProvider.getList()) {
+							if (gc.getName().equals(sessionSelection)) {
+								selectionModel.setSelected(gc, true);
+								break;
+							}							
+						}
+					}
+					else {
+						selectionModel.setSelected(interfacesProvider.getList().get(0),	true);						
+					}
 
 				} else {
 					interfacesGrid.setVisible(false);

@@ -454,32 +454,32 @@ public class ServicesUi extends Composite {
 		String formattedValue= new String();
 		switch (param.getType()) {  //TODO: Probably this formatting step has no sense. But it seems that, if not in debug, all the browsers are able to display the double value as expected
 		case LONG:
-			if (param.getValue() != null) {
+			if (param.getValue() != null && !"".equals(param.getValue().trim())) {
 				formattedValue= String.valueOf(Long.parseLong(param.getValue()));
 			}
 			break;
 		case DOUBLE:
-			if (param.getValue() != null) {
+			if (param.getValue() != null && !"".equals(param.getValue().trim())) {
 				formattedValue= String.valueOf(Double.parseDouble(param.getValue()));
 			}
 			break;
 		case FLOAT:
-			if (param.getValue() != null) {
+			if (param.getValue() != null && !"".equals(param.getValue().trim())) {
 				formattedValue= String.valueOf(Float.parseFloat(param.getValue()));
 			}
 			break;
 		case SHORT:
-			if (param.getValue() != null) {
+			if (param.getValue() != null && !"".equals(param.getValue().trim())) {
 				formattedValue= String.valueOf(Short.parseShort(param.getValue()));
 			}
 			break;
 		case BYTE:
-			if (param.getValue() != null) {
+			if (param.getValue() != null && !"".equals(param.getValue().trim())) {
 				formattedValue= String.valueOf(Byte.parseByte(param.getValue()));
 			}
 			break;
 		case INTEGER:
-			if (param.getValue() != null) {
+			if (param.getValue() != null && !"".equals(param.getValue().trim())) {
 				formattedValue= String.valueOf(Integer.parseInt(param.getValue()));
 			}
 			break;
@@ -714,12 +714,14 @@ public class ServicesUi extends Composite {
 
 	//Validates all the entered values
 	private boolean validate(GwtConfigParameter param, TextBox box, FormGroup group){  //TODO: validation should be done like in the old web ui: cleaner approach
-		if(param.isRequired() && (box.getText().trim() == null || "".equals(box.getText().trim()))) {
+	    if(param.isRequired() && (box.getText().trim() == null || "".equals(box.getText().trim()))) {
 			group.setValidationState(ValidationState.ERROR);
 			valid.put(param.getName(), false);
 			box.setPlaceholder(MSGS.formRequiredParameter());
 			return false;
-		} else if (box.getText().trim() != null && !"".equals(box.getText().trim())){
+		} 
+	    
+	    if (box.getText().trim() != null && !"".equals(box.getText().trim())){
 			if (param.getType().equals(GwtConfigParameterType.CHAR)) {
 				if (box.getText().trim().length() > 1) {
 					group.setValidationState(ValidationState.ERROR);
@@ -744,18 +746,29 @@ public class ServicesUi extends Composite {
 					}
 				}
 			} else if (param.getType().equals(GwtConfigParameterType.STRING)) {
-				int configMinValue= Integer.parseInt(param.getMin());
-				int configMaxValue= Integer.parseInt(param.getMax());
-				if ((String.valueOf(box.getText().trim()).length()) < Math.max(configMinValue, 0)) {
+			    int configMinValue= 0;
+                int configMaxValue= 255;
+			    try {
+			        configMinValue = Integer.parseInt(param.getMin());
+                } catch (NumberFormatException nfe) {
+                    errorLogger.log(Level.SEVERE, "Configuration min value error! Applying UI defaults...");
+                }
+			    try {
+			        configMaxValue = Integer.parseInt(param.getMax());
+                } catch (NumberFormatException nfe) {
+                    errorLogger.log(Level.SEVERE, "Configuration max value error! Applying UI defaults...");
+                }
+			    
+				if ((String.valueOf(box.getText().trim()).length()) < configMinValue) {
 					group.setValidationState(ValidationState.ERROR);
 					valid.put(param.getName(), false);
-					box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, Math.max(configMinValue, 0)));
+					box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, configMinValue));
 					return false;
 				}				
-				if ((String.valueOf(box.getText().trim()).length()) > Math.min(configMaxValue, 255)) {
+				if ((String.valueOf(box.getText().trim()).length()) > configMaxValue) {
 					group.setValidationState(ValidationState.ERROR);
 					valid.put(param.getName(), false);
-					box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, Math.min(configMaxValue, 255)));
+					box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, configMaxValue));
 					return false;
 				}	
 			} else {

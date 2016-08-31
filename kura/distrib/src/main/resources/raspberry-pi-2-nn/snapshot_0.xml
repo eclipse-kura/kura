@@ -72,7 +72,7 @@
                 <esf:value>false</esf:value>
             </esf:property>
             <esf:property name="in-flight.persistence" array="false" encrypted="false" type="String">
-                <esf:value>file</esf:value>
+                <esf:value>memory</esf:value>
             </esf:property>
             <esf:property name="lwt.topic" array="false" encrypted="false" type="String">
                 <esf:value>$EDC/#account-name/#client-id/MQTT/LWT</esf:value>
@@ -163,6 +163,19 @@
             </esf:property>
             <esf:property name="device.display-name" array="false" encrypted="false" type="String">
                 <esf:value>Raspberry Pi 2</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.ssl.SslManagerService">
+        <esf:properties>
+            <esf:property name="ssl.default.protocol" array="false" encrypted="false" type="String">
+                <esf:value>TLSv1</esf:value>
+            </esf:property>
+            <esf:property name="ssl.hostname.verification" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="ssl.default.trustStore" array="false" encrypted="false" type="String">
+                <esf:value>/opt/eclipse/kura/security/cacerts.ks</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

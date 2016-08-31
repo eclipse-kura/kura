@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> - Fix logging calls
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
@@ -24,14 +25,10 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtSnapshot;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSnapshotService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements GwtSnapshotService
 {
 	private static final long serialVersionUID = 8804372718146289179L;
-
-	private static final Logger s_logger = LoggerFactory.getLogger(GwtSnapshotServiceImpl.class);
 
 	public ArrayList<GwtSnapshot> findDeviceSnapshots(GwtXSRFToken xsrfToken) 
 		throws GwtKuraException

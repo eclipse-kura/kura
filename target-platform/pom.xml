@@ -4,11 +4,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eclipse.kura</groupId>
 	<artifactId>target-platform</artifactId>
-	<version>2.0.0</version>
+	<version>2.0.1</version>
 
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>org.eclipse.kura.camel.sun.misc</module>
+		<module>org.eclipse.kura.sun.misc</module>
 		<module>com.codeminders.hidapi</module>
 		<module>org.usb4java</module>
 		<module>usb4java-javax</module>

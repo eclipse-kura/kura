@@ -19,7 +19,7 @@
 
     <groupId>org.eclipse.kura</groupId>
     <artifactId>org.eclipse.kura.example.camel.aggregation</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1</version>
     <packaging>bundle</packaging>
 
     <properties>
@@ -31,7 +31,15 @@
         <slf4j.version>1.6.6</slf4j.version>
     </properties>
 
-    <dependencies>
+    <repositories>
+        <repository>
+          <id>kura-release-repo</id>
+          <name>Kura Release Reposository</name>
+          <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+    </repositories> 
+	
+	<dependencies>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.camel</artifactId>

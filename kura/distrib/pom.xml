@@ -18,7 +18,7 @@
 	<parent>
 		<artifactId>kura</artifactId>
 		<groupId>org.eclipse.kura</groupId>
-		<version>2.0.0</version>
+		<version>2.0.1</version>
 		<relativePath>../pom_pom.xml</relativePath>
 	</parent>
 
@@ -98,6 +98,11 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.camel.sun.misc</artifactId>
+									<version>${org.eclipse.kura.camel.sun.misc.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.core</artifactId>
 									<version>${org.eclipse.kura.core.version}</version>
 								</artifactItem>
@@ -160,6 +165,11 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.deployment.update</artifactId>
 									<version>${org.eclipse.kura.deployment.update.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.emulator</artifactId>
+									<version>${org.eclipse.kura.emulator.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
@@ -240,6 +250,16 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.protocol.modbus</artifactId>
 									<version>${org.eclipse.kura.protocol.modbus.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.example.camel.aggregation</artifactId>
+									<version>${org.eclipse.kura.example.camel.aggregation.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.example.camel.quickstart</artifactId>
+									<version>${org.eclipse.kura.example.camel.quickstart.version}</version>
 								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
@@ -338,6 +358,7 @@
 							<tasks>
 							    <move file="target/plugins/org.eclipse.kura.api.jar" tofile="target/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"/>
 								<move file="target/plugins/org.eclipse.kura.camel.jar" tofile="target/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"/>
+								<move file="target/plugins/org.eclipse.kura.camel.sun.misc.jar" tofile="target/plugins/org.eclipse.kura.camel.sun.misc_${org.eclipse.kura.camel.sun.misc.version}.jar"/>
 								<move file="target/plugins/org.eclipse.kura.core.jar" tofile="target/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.certificates.jar" tofile="target/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.cloud.jar" tofile="target/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"/>
@@ -365,12 +386,16 @@
 							    <move file="target/plugins/org.eclipse.kura.web.jar" tofile="target/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" failonerror="false" />
   								<move file="target/plugins/org.eclipse.kura.web2.jar" tofile="target/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" failonerror="false" />
 								<move file="target/plugins/org.eclipse.kura.linux.gpio.jar" tofile="target/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" failonerror="false"/>
+  								<move file="target/plugins/org.eclipse.kura.emulator.jar" tofile="target/plugins/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar"/>
   								<move file="target/plugins/org.eclipse.kura.emulator.clock.jar" tofile="target/plugins/org.eclipse.kura.emulator.clock_${org.eclipse.kura.emulator.clock.version}.jar"/>
   								<move file="target/plugins/org.eclipse.kura.emulator.gpio.jar" tofile="target/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.net.jar" tofile="target/plugins/org.eclipse.kura.emulator.net_${org.eclipse.kura.emulator.net.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.position.jar" tofile="target/plugins/org.eclipse.kura.emulator.position_${org.eclipse.kura.emulator.position.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.usb.jar" tofile="target/plugins/org.eclipse.kura.emulator.usb_${org.eclipse.kura.emulator.usb.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.watchdog.jar" tofile="target/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar" />
+  								
+  								<move file="target/plugins/org.eclipse.kura.example.camel.aggregation.jar" tofile="target/plugins/org.eclipse.kura.example.camel.aggregation_${org.eclipse.kura.example.camel.aggregation.version}.jar" failonerror="false"/>
+								<move file="target/plugins/org.eclipse.kura.example.camel.quickstart.jar" tofile="target/plugins/org.eclipse.kura.example.camel.quickstart_${org.eclipse.kura.example.camel.quickstart.version}.jar" failonerror="false"/>
 							</tasks>
 						</configuration>
 					</execution>
@@ -753,7 +778,7 @@
 			<id>beaglebone</id>
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
-					dos2unix, bind9, unzip, ethtool, telnet, wireless-tools</project.raspbian.dependencies>
+					dos2unix, bind9, unzip, ethtool, telnet, wireless-tools, default-jre-headless | java7-runtime-headless</project.raspbian.dependencies>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->
@@ -896,7 +921,7 @@
 		<profile>
 			<id>beaglebone-nn</id>
 			<properties>
-				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet, default-jre-headless | java7-runtime-headless</project.raspbian.dependencies.nn>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->
@@ -1020,7 +1045,7 @@
 			<id>raspberry-pi</id>
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
-					dos2unix, bind9, unzip, ethtool, telnet, wireless-tools</project.raspbian.dependencies>
+					dos2unix, bind9, unzip, ethtool, telnet, wireless-tools, default-jre-headless | java7-runtime-headless</project.raspbian.dependencies>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->
@@ -1152,7 +1177,7 @@
 		<profile>
 			<id>raspberry-pi-nn</id>
 			<properties>
-				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet, default-jre-headless | java7-runtime-headless</project.raspbian.dependencies.nn>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->
@@ -1274,7 +1299,7 @@
 			<id>raspberry-pi-bplus</id>
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw,
-					dos2unix, bind9, unzip, ethtool, telnet, wireless-tools</project.raspbian.dependencies>
+					dos2unix, bind9, unzip, ethtool, telnet, wireless-tools, default-jre-headless | java7-runtime-headless</project.raspbian.dependencies>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->
@@ -1406,7 +1431,7 @@
 		<profile>
 			<id>raspberry-pi-bplus-nn</id>
 			<properties>
-				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet, default-jre-headless | java7-runtime-headless</project.raspbian.dependencies.nn>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->
@@ -1528,7 +1553,7 @@
 		<profile>
 			<id>raspberry-pi-2</id>
 			<properties>
-				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, wireless-tools</project.raspbian.dependencies>
+				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, wireless-tools, default-jre-headless | java7-runtime-headless</project.raspbian.dependencies>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->
@@ -1651,7 +1676,7 @@
 		<profile>
 			<id>raspberry-pi-2-nn</id>
 			<properties>
-				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet</project.raspbian.dependencies.nn>
+				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet, default-jre-headless | java7-runtime-headless</project.raspbian.dependencies.nn>
 <!--
 				<kura.install.dir>/opt/eclipse</kura.install.dir>
 -->
@@ -1889,6 +1914,9 @@
 											file="${project.build.directory}/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
+											file="${project.build.directory}/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
@@ -1905,6 +1933,9 @@
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+										<copy
+											file="${project.build.directory}/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
@@ -2100,7 +2131,7 @@
 			</build>
 		</profile>
 		<profile>
-			<id>extra-dps</id>
+			<id>extra-dps</id> <!-- To be redistributed only in release phase. In snapshot phase them will not work.-->
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
@@ -2118,9 +2149,7 @@
 									<goal>run</goal>
 								</goals>
 								<configuration>
-									<target>
-										<property name="deployment.package.version" value="${deployment.package.version}" />
-										<property name="kura.build.version" value="${kura.build.version}" />
+									<target if="${is.not.snapshot}">
 										<ant antfile="${basedir}/src/main/ant/build_modbus_dp.xml"
 											target="build-dp" />
 									</target>
@@ -2135,7 +2164,7 @@
 								</goals>
 								<configuration>
 									<exportAntProperties>true</exportAntProperties>
-									<target name="verify-can">
+									<target name="verify-can" if="${is.not.snapshot}">
 										<available file="target/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar" property="can.jar.present" />
 									</target>
 								</configuration>
@@ -2149,9 +2178,35 @@
 								</goals>
 								<configuration>
 									<target name="dp-can" if="can.jar.present">
-										<property name="deployment.package.version" value="${deployment.package.version}" />
-										<property name="kura.build.version" value="${kura.build.version}" />
 										<ant antfile="${basedir}/src/main/ant/build_can_dp.xml" target="build-dp" />
+									</target>
+								</configuration>
+							</execution>
+							
+							<execution>
+								<id>camel-aggregation-dp</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target if="${is.not.snapshot}">
+										<ant antfile="${basedir}/src/main/ant/build_camel-aggregation_dp.xml"
+											target="build-dp" />
+									</target>
+								</configuration>
+							</execution>
+							
+							<execution>
+								<id>camel-quickstart-dp</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target if="${is.not.snapshot}">
+										<ant antfile="${basedir}/src/main/ant/build_camel-quickstart_dp.xml"
+											target="build-dp" />
 									</target>
 								</configuration>
 							</execution>

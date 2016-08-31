@@ -264,6 +264,9 @@ public interface WireMessages {
 	@En("Error during Wire Service Component update! Something went wrong...")
 	public String errorUpdatingWireService();
 
+	@En("Event Admin cannot be null")
+	public String eventAdminNonNull();
+
 	@En("exception")
 	public String exceptionWireField();
 

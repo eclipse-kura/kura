@@ -20,7 +20,9 @@ import static org.eclipse.kura.wire.SeverityLevel.INFO;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;
@@ -37,6 +39,8 @@ import org.eclipse.kura.wire.WireSupport;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.service.wireadmin.Wire;
 
 /**
@@ -46,6 +50,9 @@ final class WireSupportImpl implements WireSupport {
 
 	/** Localization Resource */
 	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
+
+	/** Event Admin Service */
+	private final EventAdmin m_eventAdmin;
 
 	/** The incoming wires. */
 	private List<Wire> m_incomingWires;
@@ -66,15 +73,22 @@ final class WireSupportImpl implements WireSupport {
 	 *            the wire supporter
 	 * @param wireHelperService
 	 *            the Wire Helper service
+	 * @param eventAdmin
+	 *            the Event Admin service
+	 * @throws KuraRuntimeException
+	 *             if any of the arguments is null
 	 */
-	WireSupportImpl(final WireComponent wireSupporter, final WireHelperService wireHelperService) {
+	WireSupportImpl(final WireComponent wireSupporter, final WireHelperService wireHelperService,
+			final EventAdmin eventAdmin) {
 		checkNull(wireSupporter, s_message.wireSupportedComponentNonNull());
 		checkNull(wireHelperService, s_message.wireHelperServiceNonNull());
+		checkNull(eventAdmin, s_message.eventAdminNonNull());
 
 		this.m_outgoingWires = CollectionUtil.newArrayList();
 		this.m_incomingWires = CollectionUtil.newArrayList();
 		this.m_wireSupporter = wireSupporter;
 		this.m_wireHelperService = wireHelperService;
+		this.m_eventAdmin = eventAdmin;
 	}
 
 	/** {@inheritDoc} */
@@ -93,6 +107,9 @@ final class WireSupportImpl implements WireSupport {
 			for (final Wire wire : this.m_outgoingWires) {
 				wire.update(wei);
 			}
+			final Map<String, Object> properties = CollectionUtil.newHashMap();
+			properties.put("emitter", this.m_wireHelperService.getPid(this.m_wireSupporter));
+			this.m_eventAdmin.sendEvent(new Event(WireSupport.EMIT_EVENT_TOPIC, properties));
 		}
 	}
 

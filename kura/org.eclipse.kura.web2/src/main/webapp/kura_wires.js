@@ -1,17 +1,11 @@
 var kuraWires = (function() {
 	var client = {}; // Holds accessible elements of JS library
 	var clientConfig = {}; // Configuration passed from Kura OSGi
-	var delCells = []; // Components and Wires to be deleted from OSGi
-	// framework on save
+	var delCells = []; // Components and Wires to be deleted from OSGi framework on save
 	var graph, paper; // JointJS objects
 	var initialized = false;
 	var xPos = 10;
 	var yPos = 10;
-	var table;
-	var both = {};
-	var producers = {};
-	var consumers = {};
-	var allBlocks = {};
 
 	/*
 	 * / Public functions
@@ -20,243 +14,21 @@ var kuraWires = (function() {
 		clientConfig = JSON.parse(obj);
 		setup();
 	};
-
-	var removeCellFunction = function(cell) {
+	
+	var removeCellFunc = function(cell) {
 		removeCell(cell);
-	};
-
-	function funcCallback(factory) {
-		return function() {
-			createNewWireComponent(factory);
-		};
-	}
-
-	var fillWireComponentsPanel = function() {
-		// if the div is already present then no need to append as it will
-		// append a new div
-		if ($('#wireCompsTableContainer').length) {
-			// do nothing
-		} else {
-			$('#wire-components-panel').append(
-					"<div id='wireCompsTableContainer'></div>");
-			$('#wireCompsTableContainer').append(
-					"<table id='wireCompsTable' width='160'></table>");
-			table = $('#wire-components-panel').children();
-			fillWireComponentsTableRows();
-			allBlocks = both.concat(producers).concat(consumers);
-			for (var i = 0; i < allBlocks.length; i++) {
-				document.getElementsByName(allBlocks[i])[0].addEventListener(
-						'click', funcCallback(allBlocks[i]));
-			}
-		}
-	};
-
-	var intersect = function(a, b) {
-		var d = {};
-		var results = [];
-		for (var i = 0; i < b.length; i++) {
-			d[b[i]] = true;
-		}
-		for (var j = 0; j < a.length; j++) {
-			if (d[a[j]])
-				results.push(a[j]);
-		}
-		return results;
-	};
-
-	var createNewWireComponent = function(factoryPid) {
-		var cType, newComp, cId;
-		if (factoryPid !== "org.eclipse.kura.wire.WireAsset") {
-			bootbox
-					.dialog({
-						title : "Logical Block Initial Configuration",
-						message : '<div class="row">  '
-								+ '<div class="col-md-12"> '
-								+ '<form class="form-horizontal"> '
-								+ '<div class="form-group"> '
-								+ '<label class="col-md-4 control-label" for="name">Name</label> '
-								+ '<div class="col-md-4"> '
-								+ '<input id="name" name="name" type="text" placeholder="Logical Block Name" class="form-control input-md"> '
-								+ '<span class="help-block">User-friendly logical block name</span> </div> '
-								+ '</div> ' + '</form> </div>  </div>',
-						buttons : {
-							success : {
-								label : "Save",
-								className : "btn-success",
-								callback : function() {
-									var logicalBlockName = $('#name').val();
-									if ($.inArray(factoryPid,
-											clientConfig.pFactories) !== -1
-											&& $.inArray(factoryPid,
-													clientConfig.cFactories) !== -1) {
-										cType = "both";
-									} else if ($.inArray(factoryPid,
-											clientConfig.pFactories) !== -1) {
-										cType = "producer";
-									} else {
-										cType = "consumer";
-									}
-									if (logicalBlockName !== null && logicalBlockName !== "") {
-										newComp = {
-											fPid : factoryPid,
-											pid : "none",
-											name : logicalBlockName,
-											type : cType
-										};
-										// Create the new component and store
-										// information in array
-										cId = createComponent(newComp);
-									}
-								}
-							}
-						}
-					});
-		} else {
-			var drivers = clientConfig.drivers;
-			var optionHtmlElement;
-			for (var i = 0; i < drivers.length; i++) {
-				optionHtmlElement += "<option value=" + drivers[i] + ">"
-						+ drivers[i] + "</option>";
-			}
-			bootbox
-					.dialog({
-						title : "Asset Initial Configuration",
-						message : '<div class="row">  '
-								+ '<div class="col-md-12"> '
-								+ '<form class="form-horizontal"> '
-								+ '<div class="form-group"> '
-								+ '<label class="col-md-4 control-label" for="name">Name</label> '
-								+ '<div class="col-md-4"> '
-								+ '<input id="name" name="name" type="text" placeholder="Asset name" class="form-control input-md"> '
-								+ '<span class="help-block">User-friendly asset name</span> </div> '
-								+ '</div> '
-								+ '<div class="form-group"> '
-								+ '<label class="col-md-4 control-label" for="driver">Driver Instance</label> '
-								+ '<div class="col-md-4"> <div class="driver"> '
-								+ '<select name="driver" id="driver-0">'
-								+ optionHtmlElement + '</select> ' + '</div>'
-								+ '</div> </div>' + '</form> </div>  </div>',
-						buttons : {
-							success : {
-								label : "Save",
-								className : "btn-success",
-								callback : function() {
-									var logicalBlockName = $('#name').val();
-									var driverInstance = $('#driver-0').val();
-									if ($.inArray(factoryPid,
-											clientConfig.pFactories) !== -1
-											&& $.inArray(factoryPid,
-													clientConfig.cFactories) !== -1) {
-										cType = "both";
-									} else if ($.inArray(factoryPid,
-											clientConfig.pFactories) !== -1) {
-										cType = "producer";
-									} else {
-										cType = "consumer";
-									}
-									if (logicalBlockName !== null && logicalBlockName !== "") {
-										newComp = {
-											fPid : factoryPid,
-											pid : "none",
-											name : logicalBlockName,
-											type : cType,
-											driver : driverInstance
-										};
-										// Create the new component and store
-										// information in array
-										cId = createComponent(newComp);
-									}
-								}
-							}
-						}
-					});
-		}
-		// Determine whether component can be producer, consumer, or both
-		return cId;
-	};
-
-	var fillWireComponentsTableRows = function() {
-		// delete all existing rows first to append new rows
-		$("#wireCompsTable tr").remove();
-		if (typeof clientConfig.cFactories != 'undefined'
-				&& typeof clientConfig.pFactories != 'undefined') {
-			both = intersect(clientConfig.cFactories, clientConfig.pFactories);
-			producers = clientConfig.pFactories.slice(0);
-			consumers = clientConfig.cFactories.slice(0);
-			var index, name;
-
-			for (var i = 0; i < both.length; i++) {
-				index = producers.indexOf(both[i]);
-				if (index > -1) {
-					producers.splice(index, 1);
-				}
-			}
-			for (i = 0; i < both.length; i++) {
-				index = consumers.indexOf(both[i]);
-				if (index > -1) {
-					consumers.splice(index, 1);
-				}
-			}
-			for (i = 0; i < both.length; i++) {
-				var factoryPid = both[i];
-				name = splitFactoryName(factoryPid);
-				table
-						.append("<tr class='wirecomponent'><td class=centeredImg><img name="
-								+ factoryPid
-								+ " src='both.png' alt='' draggable='false' style='width:120px; height:40px;'></td></tr>");
-				table.append("<tr class='wirecomponent'><td class=centered>"
-						+ name + "<td></tr>");
-			}
-			for (i = 0; i < producers.length; i++) {
-				name = splitFactoryName(producers[i]);
-				table
-						.append("<tr class='wirecomponent'><td class=centeredImg><img name="
-								+ producers[i]
-								+ " src='emitter.png' draggable='false' style='width:120px; height:40px;'></td></tr>");
-				table.append("<tr class='wirecomponent'><td class=centered>"
-						+ name + "<td></tr>");
-			}
-			for (i = 0; i < consumers.length; i++) {
-				name = splitFactoryName(consumers[i]);
-				table
-						.append("<tr class='wirecomponent'><td class=centeredImg><img name="
-								+ consumers[i]
-								+ " src='receiver.png' draggable='false' style='width:120px; height:40px;'></td></tr>");
-				table.append("<tr class='wirecomponent'><td class=centered>"
-						+ name + "<td></tr>");
-			}
-		}
-	};
-
-	var splitFactoryName = function(name) {
-		var res = name.split(".");
-		name = res[res.length - 1];
-		if (name === "DbWireRecordStore") {
-			name = "Db Store";
-		}
-		if (name === "DbWireRecordFilter") {
-			name = "Db Filter";
-		}
-		if (name === "WireAsset") {
-			name = "Asset";
-		}
-		if (name === "CloudPublisher") {
-			name = "Cloud Publisher";
-		}
-		return name;
 	};
 
 	/*
 	 * / Initiate JointJS graph
 	 */
 	function setup() {
-		// fill the wire components panel with list of available wire components
-		fillWireComponentsPanel();
 		// Setup element events. Cannot be done in ready as we need to wait for
 		// GWT entry point to be called
 
 		// Instantiate JointJS graph and paper
 		if (!initialized) {
+			$("#btn-create-comp").on("click", createNewComponent);
 			$("#btn-config-save").on("click", saveConfig);
 
 			initialized = true;
@@ -265,16 +37,16 @@ var kuraWires = (function() {
 			setupElements();
 
 			// Setup graph and paper
-			graph = new joint.dia.Graph();
-
+			graph = new joint.dia.Graph;
+			
 			paper = new joint.dia.Paper({
 				el : $('#wires-graph'),
 				width : 850,
 				height : 400,
 				model : graph,
-				gridSize : 20,
+				gridSize : 1,
 				snapLinks : true,
-				defaultLink : new joint.shapes.customLink.Element(),
+				defaultLink : new joint.shapes.customLink.Element,
 				validateConnection : function(cellViewS, magnetS, cellViewT,
 						magnetT, end, linkView) {
 					// Prevent linking from input ports.
@@ -290,8 +62,7 @@ var kuraWires = (function() {
 			});
 		}
 
-		graph.off('remove', removeCellFunction);
-
+		graph.off('remove', removeCellFunc);
 		// Load a graph if it exists
 		if (!$.isEmptyObject(clientConfig.pGraph)) {
 			graph.clear();
@@ -317,13 +88,12 @@ var kuraWires = (function() {
 				}
 			});
 		}
-
 		graph.on('change:source change:target', function(link) {
 			createWire(link);
 		});
-		graph.on('remove', removeCellFunction);
+		graph.on('remove', removeCellFunc);
 	}
-
+	
 	/*
 	 * / Create a new component
 	 */
@@ -350,17 +120,34 @@ var kuraWires = (function() {
 				y : yPos
 			},
 			size : {
-				width : 170,
-				height : 50
+				width : 120,
+				height : 40
 			},
 			inPorts : inputPorts,
 			outPorts : outputPorts,
 			label : comp.name,
 			factoryPid : comp.fPid,
 			pid : comp.pid,
-			cType : comp.type
+			cType : comp.type,
+			driver : comp.driver
 		});
-
+		
+		paper.on('cell:pointerdown', 
+			    function(cellView, evt, x, y) {
+					var pid = cellView.model.attributes.label;
+			        $("#selectedWireComponent").val(pid);
+			        $("#selectedWireComponent").change();
+			        console.log('cell view ' + cellView.model.id + ' was clicked'); 
+			    }
+			);
+		
+		paper.on('blank:pointerdown', 
+				function(cellView, evt, x, y) {
+					$("#selectedWireComponent").val('');
+					$("#selectedWireComponent").change();
+				}
+			);
+		
 		graph.addCells([ rect ]);
 		xPos = xPos + 212;
 		if (xPos > 500) {
@@ -375,12 +162,11 @@ var kuraWires = (function() {
 	 * / Event Functions
 	 */
 	function saveConfig() {
-		var newConfig = {
+		newConfig = {
 			jointJs : graph,
 			deleteCells : delCells
-		};
+		}
 		top.jsniUpdateWireConfig(JSON.stringify(newConfig));
-		delCells = [];
 	}
 
 	function createWire(link) {
@@ -391,6 +177,49 @@ var kuraWires = (function() {
 			link.set("consumer", link.attributes.target.id);
 			link.set("newWire", true);
 			console.log(JSON.stringify(graph));
+		}
+	}
+
+	function createNewComponent() {
+		var newComp;
+		// Determine whether component can be producer, consumer, or both
+		fPid = $("#factoryPid").val();
+		driverPid = $("#driverPids").val();
+		name = $("#componentName").val();
+		if ($.inArray(fPid, clientConfig.pFactories) !== -1
+				&& $.inArray(fPid, clientConfig.cFactories) !== -1) {
+			cType = "both";
+		} else if ($.inArray(fPid, clientConfig.pFactories) !== -1) {
+			cType = "producer";
+		} else {
+			cType = "consumer";
+		}
+		if (name !== '') {
+			if (fPid === "org.eclipse.kura.wire.WireAsset") {
+				if (driverPid === "--- Select Driver ---") {
+					return;
+				}
+				newComp = {
+					fPid : fPid,
+					pid : "none",
+					name : name,
+					driver : driverPid,
+					type : cType
+				}
+			} else {
+				newComp = {
+					fPid : fPid,
+					pid : "none",
+					name : name,
+					type : cType
+				}
+			}
+			// Create the new component and store information in array
+			createComponent(newComp);
+			$("#componentName").val('');
+			$("#driverPids").val('--- Select Driver ---');
+			$("#factoryPid").val('');
+			$("#asset-comp-modal").modal('hide');
 		}
 	}
 
@@ -423,8 +252,6 @@ var kuraWires = (function() {
 	 */
 	function setupElements() {
 
-		delCells = [];
-
 		joint.shapes.customLink = {};
 		joint.shapes.customLink.Element = joint.dia.Link.extend({
 			defaults : joint.util.deepSupplement({
@@ -451,22 +278,17 @@ var kuraWires = (function() {
 				type : 'html.Element',
 				attrs : {
 					rect : {
-						rx : 5,
-						ry : 5,
-						fill : "#2ECC71",
-						stroke : '#27AE60',
-						'stroke-width' : 1
+						stroke : 'none',
+						'fill-opacity' : 0
 					},
 					'.inPorts circle' : {
 						fill : '#16A085',
 						magnet : 'passive',
-						type : 'input',
-						r : 5
+						type : 'input'
 					},
 					'.outPorts circle' : {
 						fill : '#E74C3C',
-						type : 'output',
-						r : 5
+						type : 'output'
 					}
 				}
 			}, joint.shapes.devs.Model.prototype.defaults)

@@ -74,7 +74,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 	private static final String FACTORY_PID = "factoryPid";
 	private static final String GRAPH = "graph";
 	private static final String HTML_ELEMENT = "html.Element";
+	private static final String ID = "id";
 	private static final String JOINT_JS = "jointJs";
+	private static final String LABEL = "label";
 	private static final String NEW_WIRE = "newWire";
 	private static final String PATTERN_CONFIGURATION_REQUIRE = "configuration-policy=\"require\"";
 	private static final String PATTERN_SERVICE_PROVIDE_CONFIGURABLE_COMP = "provide interface=\"org.eclipse.kura.configuration.ConfigurableComponent\"";
@@ -82,6 +84,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 	private static final String PATTERN_SERVICE_PROVIDE_RECEIVER = "provide interface=\"org.eclipse.kura.wire.WireReceiver\"";
 	private static final String PATTERN_SERVICE_PROVIDE_SELF_CONFIGURING_COMP = "provide interface=\"org.eclipse.kura.configuration.SelfConfiguringComponent\"";
 	private static final String PID = "pid";
+
 	private static final String PRODUCER = "producer";
 
 	/** The Logger instance. */
@@ -168,15 +171,15 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 			final String newJsonConfiguration) throws GwtKuraException {
 		this.checkXSRFToken(xsrfToken);
 
+		final Map<String, String> idToPid = new HashMap<String, String>();
+
 		JSONObject jObj = null; // JSON object containing wires configuration
 		JSONObject jGraph = null; // JSON object containing graph configuration
 		JSONArray jCells = null; // JSON array of cells within JointJS graph
 		JSONArray jDelCells = null; // JSON array of cells to be deleted
-		final Map<String, String> idToPid = new HashMap<String, String>();
+
 		final WireService wireService = ServiceLocator.getInstance().getService(WireService.class);
-
 		final WireHelperService wireHelperService = ServiceLocator.getInstance().getService(WireHelperService.class);
-
 		final ConfigurationService configService = ServiceLocator.getInstance().getService(ConfigurationService.class);
 
 		try {
@@ -187,17 +190,32 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 
 			// Create new Wire Component instances
 			for (int i = 0; i < jCells.length(); i++) {
-				if (HTML_ELEMENT.equalsIgnoreCase(jCells.getJSONObject(i).getString(TYPE))) {
-					if ("none".equalsIgnoreCase(jCells.getJSONObject(i).getString(PID))) {
-						s_logger.info("Creating new component: Factory PID -> "
-								+ jCells.getJSONObject(i).getString(FACTORY_PID) + " | Instance Name -> "
-								+ jCells.getJSONObject(i).getString("label"));
-						final String pid = jCells.getJSONObject(i).getString("label");
-						configService.createFactoryConfiguration(jCells.getJSONObject(i).getString(FACTORY_PID), pid,
-								null, false);
-						jCells.getJSONObject(i).put(PID, pid);
+				final JSONObject jsonObject = jCells.getJSONObject(i);
+				if (HTML_ELEMENT.equalsIgnoreCase(jsonObject.getString(TYPE))) {
+					String elementPid = jsonObject.getString(PID);
+					if ("none".equalsIgnoreCase(elementPid)) {
+						final String elementFactoryPid = jsonObject.getString(FACTORY_PID);
+						final String elementLabel = jsonObject.getString(LABEL);
+						s_logger.info("Creating new component: Factory PID -> " + elementFactoryPid + " | PID -> "
+								+ elementLabel);
+						elementPid = elementLabel;
+						Map<String, Object> properties = null;
+						String driver = null;
+						try {
+							driver = jsonObject.getString("driver");
+						} catch (final JSONException ex) {
+							// do nothing
+						}
+						if (driver != null) {
+							properties = new HashMap<String, Object>();
+							properties.put("asset.desc", "Sample Asset");
+							properties.put("driver.pid", driver);
+						}
+						configService.createFactoryConfiguration(elementFactoryPid, elementPid, properties, false);
+						jsonObject.put(PID, elementPid);
 					}
-					idToPid.put(jCells.getJSONObject(i).getString("id"), jCells.getJSONObject(i).getString(PID));
+					final String elementId = jsonObject.getString(ID);
+					idToPid.put(elementId, elementPid);
 				}
 			}
 			jGraph.put(CELLS, jCells);
@@ -217,16 +235,19 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 					final BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 					String filterString = "(" + Constants.SERVICE_PID + "=" + pPid + ")";
 					Filter filter = bundleContext.createFilter(filterString);
-					ServiceTracker tracker = new ServiceTracker(bundleContext, filter, null);
-					tracker.open();
-					tracker.waitForService(5000);
+					final ServiceTracker producerTracker = new ServiceTracker(bundleContext, filter, null);
+					producerTracker.open();
+					producerTracker.waitForService(5000);
+					producerTracker.close();
 
 					// track and wait for the consumer
 					final String cPid = wireHelperService.getServicePid(cons);
 					filterString = "(" + Constants.SERVICE_PID + "=" + cPid + ")";
 					filter = bundleContext.createFilter(filterString);
-					tracker = new ServiceTracker(bundleContext, filter, null);
-					tracker.waitForService(5000);
+					final ServiceTracker consumerTracker = new ServiceTracker(bundleContext, filter, null);
+					consumerTracker.open();
+					consumerTracker.waitForService(5000);
+					consumerTracker.close();
 
 					wireService.createWireConfiguration(prod, cons);
 					jCells.getJSONObject(i).put(NEW_WIRE, false);
@@ -235,23 +256,52 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 
 			// Delete wires
 			for (int i = 0; i < jDelCells.length(); i++) {
-				if ("wire".equalsIgnoreCase(jDelCells.getJSONObject(i).getString(CELL_TYPE))) {
-					final String prod = idToPid.get(jDelCells.getJSONObject(i).getString("p"));
-					final String cons = idToPid.get(jDelCells.getJSONObject(i).getString("c"));
-					s_logger.info("Deleting wire: Producer PID -> " + prod + " | Consumer PID -> " + cons);
-					final WireConfiguration wireConfiguration = new WireConfiguration(prod, cons, null);
+				final JSONObject jsonObject = jDelCells.getJSONObject(i);
+				final String deleteCells = jsonObject.getString(CELL_TYPE);
+				String producerPid = null;
+				String consumerPid = null;
+				if ("wire".equalsIgnoreCase(deleteCells)) {
+					// delete wires must rely on the previous config saved in
+					// the Wire Service properties
+					try {
+						final Map<String, Object> wsProps = configService.getComponentConfiguration(WIRE_SERVICE_PID)
+								.getConfigurationProperties();
+						final String graph = (String) wsProps.get(GRAPH);
+
+						if (graph != null) {
+							final JSONObject oldGraph = new JSONObject(graph);
+							final JSONArray oldArray = oldGraph.getJSONArray("cells");
+							for (int k = 0; k < oldArray.length(); k++) {
+								final JSONObject oldJson = oldArray.getJSONObject(k);
+								if (jsonObject.getString("p").equalsIgnoreCase(oldJson.getString(ID))) {
+									producerPid = oldJson.getString(PID);
+								}
+								if (jsonObject.getString("c").equalsIgnoreCase(oldJson.getString(ID))) {
+									consumerPid = oldJson.getString(PID);
+								}
+							}
+						}
+					} catch (final KuraException exception) {
+						throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
+					} catch (final JSONException exception) {
+						throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
+					}
+					s_logger.info(
+							"Deleting Wire: Producer PID -> " + producerPid + " | Consumer PID -> " + consumerPid);
+					final WireConfiguration wireConfiguration = new WireConfiguration(producerPid, consumerPid, null);
 					wireService.deleteWireConfiguration(wireConfiguration);
 				}
 			}
 
 			// Delete Wire Component instances
 			for (int i = 0; i < jDelCells.length(); i++) {
-				if ("instance".equalsIgnoreCase(jDelCells.getJSONObject(i).getString(CELL_TYPE))) {
-					s_logger.info("Deleting instance: PID -> " + jDelCells.getJSONObject(i).getString(PID));
-					configService.deleteFactoryConfiguration(jDelCells.getJSONObject(i).getString(PID), false);
+				final JSONObject jsonObject = jDelCells.getJSONObject(i);
+				if ("instance".equalsIgnoreCase(jsonObject.getString(CELL_TYPE))) {
+					final String componentPid = jsonObject.getString(PID);
+					s_logger.info("Deleting Wire Component: PID -> " + componentPid);
+					configService.deleteFactoryConfiguration(componentPid, false);
 				}
 			}
-
 			final Map<String, Object> props = configService.getComponentConfiguration(WIRE_SERVICE_PID)
 					.getConfigurationProperties();
 			props.put(GRAPH, jGraph.toString());

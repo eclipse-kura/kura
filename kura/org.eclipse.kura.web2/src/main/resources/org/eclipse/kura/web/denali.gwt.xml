@@ -37,6 +37,7 @@
   <inherits name='org.gwtbootstrap3.GwtBootstrap3'/>
   <inherits name="com.google.gwt.i18n.I18N"/>
   <inherits name="com.google.gwt.http.HTTP" />
+  <inherits name="com.google.gwt.json.JSON"/>
 
   <!-- Locales: English language, independent of country -->
   <extend-property name="locale" values="en"/>

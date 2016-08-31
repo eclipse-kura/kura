@@ -28,6 +28,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.EventAdmin;
 
 /**
  * The Class WireHelperServiceImpl is the implementation of
@@ -37,6 +38,21 @@ public final class WireHelperServiceImpl implements WireHelperService {
 
 	/** Localization Resource */
 	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
+
+	/** Event Admin Service */
+	private volatile EventAdmin m_eventAdmin;
+
+	/**
+	 * Binds the Event Admin Service.
+	 *
+	 * @param wireHelperService
+	 *            the new Wire Helper Service
+	 */
+	public synchronized void bindEventAdmin(final EventAdmin eventAdmin) {
+		if (this.m_eventAdmin == null) {
+			this.m_eventAdmin = eventAdmin;
+		}
+	}
 
 	/** {@inheritDoc} */
 	@Override
@@ -113,7 +129,19 @@ public final class WireHelperServiceImpl implements WireHelperService {
 	/** {@inheritDoc} */
 	@Override
 	public WireSupport newWireSupport(final WireComponent wireComponent) {
-		return new WireSupportImpl(wireComponent, this);
+		return new WireSupportImpl(wireComponent, this, this.m_eventAdmin);
+	}
+
+	/**
+	 * Unbinds the Event Admin Service.
+	 *
+	 * @param wireHelperService
+	 *            the new Wire Helper Service
+	 */
+	public synchronized void unbindEventAdmin(final EventAdmin eventAdmin) {
+		if (this.m_eventAdmin == eventAdmin) {
+			this.m_eventAdmin = null;
+		}
 	}
 
 }

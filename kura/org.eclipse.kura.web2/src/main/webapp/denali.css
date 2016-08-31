@@ -8,6 +8,7 @@
  *
  * Contributors:
  *   Eurotech
+ *   Amit Kumar Mondal (admin@amitinside.com)
  */
 /** Add css rules here for your application. */
 
@@ -65,39 +66,7 @@ img.x-tree3-node-icon {
 *** Kura Wires
 ***
 *******************************/
-.centered {
-	vertical-align: middle;
-	text-align: center;
-	padding-left: 15px;
-	padding-right: 15px;
-	padding-bottom: 15px;
-	padding-top: 1px; '
-	font-size: 12;
-	font-weight: bold;
-	font-variant: small-caps;
-	text-transform: capitalize;
-}
-
-.centeredImg {
-	vertical-align: middle;
-	text-align: center;
-	padding-left: 15px;
-	padding-right: 15px;
-	padding-bottom: 0px;
-	padding-top: 2px;
-}
-
-.centeredImg img {
-	display: block;
-	margin: 0 auto;
-}
-
-.centeredImg img:hover {
-	cursor: hand;
-	cursor: pointer;
-}
-
-#factory-select-modal .modal-dialog {
+#asset-comp-modal .modal-dialog {
 	margin-top: 15%;
 }
 
@@ -116,21 +85,6 @@ img.x-tree3-node-icon {
 
 #wires-graph svg .link {
 	z-index: 2;
-}
-
-#wireCompsTableContainer {
-	height: 460px;
-	width: 160px;
-	overflow: auto;
-}
-
-#wire-components-panel {
-	position: relative;
-	border: 1px solid gray;
-	background: transparent;
-	display: inline-block;
-	overflow: auto;
-	padding: 5px;
 }
 
 .html-element {

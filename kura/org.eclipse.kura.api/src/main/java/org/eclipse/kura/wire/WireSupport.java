@@ -25,6 +25,11 @@ import org.osgi.service.wireadmin.Producer;
 public interface WireSupport extends Producer, Consumer {
 
 	/**
+	 * The topic to be used for publishing and receiving the emit trigger events
+	 */
+	public static final String EMIT_EVENT_TOPIC = "org/eclipse/kura/wires/emit";
+
+	/**
 	 * Emit the provided wire records
 	 *
 	 * @param wireRecords

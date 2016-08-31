@@ -691,6 +691,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<antcall target="deployment.agent-config" />
 
 		<antcall target="linux.position-config" />
+		<antcall target="windows.system-config" />
 		<antcall target="windows.clock-config" />
 		<antcall target="windows.command-config" />
 		<antcall target="emulator.usb-config" />
@@ -1176,7 +1177,14 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar@4:start" />
 		</propertyfile>
 	</target>
-	
+
+	<target name="windows.system-config">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.kura.windows.system_${org.eclipse.kura.windows.system.version}.jar@4" />
+		</propertyfile>
+	</target>
+
 	<target name="windows.clock-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"

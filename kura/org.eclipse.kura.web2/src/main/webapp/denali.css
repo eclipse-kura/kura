@@ -87,63 +87,78 @@ img.x-tree3-node-icon {
 	z-index: 2;
 }
 
-.html-element {
-	position: absolute;
-	background: #3498DB;
-	/* Make sure events are propagated to the JointJS element so, e.g. dragging works.*/
-	pointer-events: none;
-	-webkit-user-select: none;
-	border-radius: 4px;
-	border: 2px solid #2980B9;
-	box-shadow: inset 0 0 5px black, 2px 2px 1px gray;
-	padding: 5px;
-	box-sizing: border-box;
-	z-index: 2;
+/* elements */
+.devs text {
+	text-transform: uppercase;
+	font-weight: 800;
 }
 
-.html-element select, .html-element input, .html-element button {
-	/* Enable interacting with inputs only. */
-	pointer-events: auto;
+.devs .body {
+	fill: #ffffff;
+	stroke: #31d0c6;
+	stroke-width: 4px;
 }
 
-.html-element button.delete {
-	color: white;
-	border: none;
-	background-color: #C0392B;
-	border-radius: 20px;
-	width: 15px;
-	height: 15px;
-	line-height: 15px;
-	text-align: middle;
-	position: absolute;
-	top: -15px;
-	left: -15px;
-	padding: 0;
-	margin: 0;
-	font-weight: bold;
-	cursor: pointer;
+.devs .label {
+	fill: #31d0c6;
+	font-size: 15px;
 }
 
-.html-element button.delete:hover {
-	width: 20px;
-	height: 20px;
-	line-height: 20px;
+.devs .port-body {
+	stroke: #ffffff;
+	stroke-width: 3px;
+	fill: #7c68fc;
 }
 
-.html-element label {
-	color: #333;
-	text-shadow: 1px 0 0 lightgray;
-	font-weight: bold;
-	display: block;
-	text-align: center;
+.devs .port-body:hover {
+	opacity: 1;
+	fill: #ff7e5d;
 }
 
-.html-element span {
-	position: absolute;
-	top: 2px;
-	right: 9px;
-	color: white;
-	font-size: 10px;
+.devs .port-label {
+	fill: #7c68fc;
+}
+
+.devs.Atomic .body1 {
+	stroke: #feb663;
+}
+
+.devs.Atomic .body2 {
+	stroke: #31d0c6;
+}
+
+.devs.Atomic .label {
+	fill: #feb663;
+}
+
+/* links */
+.link .connection {
+	stroke: #4B4F6A;
+	stroke-width: 4px;
+}
+
+.link .marker-arrowhead, .link .marker-vertex {
+	fill: #31D0C6;
+}
+
+.link .marker-arrowhead:hover {
+	fill: #F39C12;
+}
+
+.link-tools .tool-remove circle {
+	fill: #fe854f;
+}
+
+/* highlighting */
+.devs.highlighted-parent .body {
+	stroke: #fe854f;
+	transition: stroke 1s;
+}
+
+.devs.highlighted-parent .label {
+	fill: #fe854f;
+	transition: fill 1s;
+	text-decoration: underline;
 }
 
 /******************************

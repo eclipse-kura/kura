@@ -1,11 +1,25 @@
+/**
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors: 
+ * 	Eurotech 
+ * 	Amit Kumar Mondal (admin@amitinside.com)
+ */
 var kuraWires = (function() {
 	var client = {}; // Holds accessible elements of JS library
 	var clientConfig = {}; // Configuration passed from Kura OSGi
-	var delCells = []; // Components and Wires to be deleted from OSGi framework on save
+	var delCells = []; // Components and Wires to be deleted from OSGi
+	// framework on save
 	var graph, paper; // JointJS objects
 	var initialized = false;
 	var xPos = 10;
 	var yPos = 10;
+	var selectedElement;
 
 	/*
 	 * / Public functions
@@ -14,7 +28,7 @@ var kuraWires = (function() {
 		clientConfig = JSON.parse(obj);
 		setup();
 	};
-	
+
 	var removeCellFunc = function(cell) {
 		removeCell(cell);
 	};
@@ -30,6 +44,7 @@ var kuraWires = (function() {
 		if (!initialized) {
 			$("#btn-create-comp").on("click", createNewComponent);
 			$("#btn-config-save").on("click", saveConfig);
+			$("#btn-config-delete").on("click", deleteComponent);
 
 			initialized = true;
 
@@ -38,7 +53,7 @@ var kuraWires = (function() {
 
 			// Setup graph and paper
 			graph = new joint.dia.Graph;
-			
+
 			paper = new joint.dia.Paper({
 				el : $('#wires-graph'),
 				width : 850,
@@ -46,7 +61,13 @@ var kuraWires = (function() {
 				model : graph,
 				gridSize : 1,
 				snapLinks : true,
+				linkPinning : false,
+				markAvailable : true,
 				defaultLink : new joint.shapes.customLink.Element,
+				restrictTranslate: function(elementView) {
+				    var parentId = elementView.model.get('parent');
+				    return parentId && this.model.getCell(parentId).getBBox();
+				},
 				validateConnection : function(cellViewS, magnetS, cellViewT,
 						magnetT, end, linkView) {
 					// Prevent linking from input ports.
@@ -77,7 +98,7 @@ var kuraWires = (function() {
 		// elements
 		if (typeof clientConfig.components != 'undefined') {
 			$.each(clientConfig.components, function(index, component) {
-				exists = false;
+				var exists = false;
 				$.each(graph.getCells(), function(index, cell) {
 					if (cell.attributes.pid === component.pid) {
 						exists = true;
@@ -93,7 +114,7 @@ var kuraWires = (function() {
 		});
 		graph.on('remove', removeCellFunc);
 	}
-	
+
 	/*
 	 * / Create a new component
 	 */
@@ -106,23 +127,49 @@ var kuraWires = (function() {
 		if (comp.type === 'both') {
 			inputPorts = [ '' ];
 			outputPorts = [ '' ];
+			body = 'salmon';
+			attrib = {
+				'.body1' : {
+					fill : body
+				},
+				'.label' : {
+					text : comp.name,
+					fill : body
+				}
+			};
 		} else if (comp.type === 'producer') {
 			inputPorts = [];
 			outputPorts = [ '' ];
+			body = 'seaGreen';
+			attrib = {
+				'.body2' : {
+					fill : body
+				},
+				'.label' : {
+					text : comp.name,
+					fill : body
+				}
+			};
 		} else {
 			inputPorts = [ '' ];
 			outputPorts = [];
+			body = 'PaleGreen';
+			attrib = {
+				'.body1' : {
+					fill : body
+				},
+				'.label' : {
+					text : comp.name
+				}
+			};
 		}
 
-		var rect = new joint.shapes.html.Element({
+		var rect = new joint.shapes.devs.Atomic({
 			position : {
 				x : xPos,
 				y : yPos
 			},
-			size : {
-				width : 120,
-				height : 40
-			},
+			attrs : attrib,
 			inPorts : inputPorts,
 			outPorts : outputPorts,
 			label : comp.name,
@@ -131,22 +178,63 @@ var kuraWires = (function() {
 			cType : comp.type,
 			driver : comp.driver
 		});
-		
-		paper.on('cell:pointerdown', 
-			    function(cellView, evt, x, y) {
-					var pid = cellView.model.attributes.label;
-			        $("#selectedWireComponent").val(pid).change();
-			        console.log('cell view ' + cellView.model.id + ' was clicked'); 
-			    }
-			);
-		
-		paper.on('blank:pointerdown', 
-				function(cellView, evt, x, y) {
-					$("#selectedWireComponent").val('').change();
-				}
-			);
-		
+
+		paper.on('cell:pointerdown', function(cellView, evt, x, y) {
+			var pid = cellView.model.attributes.label;
+			top.jsniUpdateDeleteButton(pid);
+			selectedElement = cellView.model;
+		});
+
+		paper.on('blank:pointerdown', function(cellView, evt, x, y) {
+			top.jsniUpdateDeleteButton("");
+			selectedElement = "";
+		});
+
 		graph.addCells([ rect ]);
+
+		/* rounded corners */
+		rect.attr({
+			'.body' : {
+				'rx' : 6,
+				'ry' : 6
+			}
+		});
+
+		/* custom highlighting */
+		var highlighter = V('circle', {
+			'r' : 14,
+			'stroke' : '#ff7e5d',
+			'stroke-width' : '6px',
+			'fill' : 'transparent',
+			'pointer-events' : 'none'
+		});
+
+		paper.off('cell:highlight cell:unhighlight').on({
+			'cell:highlight' : function(cellView, el, opt) {
+				if (opt.embedding) {
+					V(el).addClass('highlighted-parent');
+				}
+
+				if (opt.connecting) {
+					var bbox = V(el).bbox(false, paper.viewport);
+					highlighter.translate(bbox.x + 10, bbox.y + 10, {
+						absolute : true
+					});
+					V(paper.viewport).append(highlighter);
+				}
+			},
+
+			'cell:unhighlight' : function(cellView, el, opt) {
+				if (opt.embedding) {
+					V(el).removeClass('highlighted-parent');
+				}
+
+				if (opt.connecting) {
+					highlighter.remove();
+				}
+			}
+		});
+
 		xPos = xPos + 212;
 		if (xPos > 500) {
 			xPos = 300;
@@ -170,12 +258,15 @@ var kuraWires = (function() {
 	function createWire(link) {
 		if ((typeof link.attributes.source.id != 'undefined')
 				&& (typeof link.attributes.target.id != 'undefined')) {
-			console.log("Creating new wire");
 			link.set("producer", link.attributes.source.id);
 			link.set("consumer", link.attributes.target.id);
 			link.set("newWire", true);
-			console.log(JSON.stringify(graph));
 		}
+	}
+
+	function deleteComponent() {
+		if (selectedElement !== "")
+			selectedElement.remove();
 	}
 
 	function createNewComponent() {
@@ -184,6 +275,7 @@ var kuraWires = (function() {
 		fPid = $("#factoryPid").val();
 		driverPid = $("#driverPids").val();
 		name = $("#componentName").val();
+
 		if ($.inArray(fPid, clientConfig.pFactories) !== -1
 				&& $.inArray(fPid, clientConfig.cFactories) !== -1) {
 			cType = "both";
@@ -234,15 +326,13 @@ var kuraWires = (function() {
 				p : cell.attributes.producer,
 				c : cell.attributes.consumer
 			});
-		} else if (cell.attributes.type === 'html.Element'
+		} else if (cell.attributes.type === 'devs.Model'
 				&& cell.attributes.pid !== 'none') {
 			delCells.push({
 				cellType : 'instance',
 				pid : cell.attributes.pid
 			});
 		}
-
-		console.log(JSON.stringify(delCells));
 	}
 
 	/*
@@ -254,99 +344,28 @@ var kuraWires = (function() {
 		joint.shapes.customLink.Element = joint.dia.Link.extend({
 			defaults : joint.util.deepSupplement({
 				type : 'customLink.Element',
+				router : {
+					name : 'metro',
+					args : {
+						startDirections : [ 'right' ],
+						endDirections : [ 'left' ]
+					}
+				},
+				connector : {
+					name : 'rounded'
+				},
 				attrs : {
 					'.connection' : {
-						'stroke-width' : 2
+						'stroke-width' : 4
 					},
 					'.marker-target' : {
 						d : 'M 10 0 L 0 5 L 10 10 z'
-					}
+					},
 				},
 				producer : 'producer',
 				consumer : 'consumer',
 				newWire : false
 			}, joint.dia.Link.prototype.defaults)
-		});
-
-		// Create a custom element.
-		// ------------------------
-		joint.shapes.html = {};
-		joint.shapes.html.Element = joint.shapes.devs.Model.extend({
-			defaults : joint.util.deepSupplement({
-				type : 'html.Element',
-				attrs : {
-					rect : {
-						stroke : 'none',
-						'fill-opacity' : 0
-					},
-					'.inPorts circle' : {
-						fill : '#16A085',
-						magnet : 'passive',
-						type : 'input'
-					},
-					'.outPorts circle' : {
-						fill : '#E74C3C',
-						type : 'output'
-					}
-				}
-			}, joint.shapes.devs.Model.prototype.defaults)
-		});
-		// Create a custom view for that element that displays an HTML div above
-		// it.
-		// -------------------------------------------------------------------------
-		joint.shapes.html.ElementView = joint.shapes.devs.ModelView.extend({
-
-			template : [ '<div class="html-element">',
-					'<button class="delete">x</button>', '<label></label>',
-					'</div>' ].join(''),
-
-			initialize : function() {
-				_.bindAll(this, 'updateBox');
-				joint.dia.ElementView.prototype.initialize.apply(this,
-						arguments);
-
-				this.$box = $(_.template(this.template)());
-				// Prevent paper from handling pointerdown.
-				this.$box.find('input,select').on('mousedown click',
-						function(evt) {
-							evt.stopPropagation();
-						});
-				this.$box.find('select').val(this.model.get('select'));
-				this.$box.find('.delete').on('click',
-						_.bind(this.model.remove, this.model));
-				// Update the box position whenever the underlying model
-				// changes.
-				this.model.on('change', this.updateBox, this);
-				// Remove the box when the model gets removed from the graph.
-				this.model.on('remove', this.removeBox, this);
-
-				this.updateBox();
-			},
-			render : function() {
-				joint.dia.ElementView.prototype.render.apply(this, arguments);
-				this.paper.$el.prepend(this.$box);
-				this.updateBox();
-				return this;
-			},
-			updateBox : function() {
-				// Set the position and dimension of the box so that it covers
-				// the JointJS element.
-				var bbox = this.model.getBBox();
-				// Example of updating the HTML with a data stored in the cell
-				// model.
-				this.$box.find('label').text(this.model.get('label'));
-				this.$box.css({
-					width : bbox.width,
-					height : bbox.height,
-					left : bbox.x,
-					top : bbox.y,
-					transform : 'rotate(' + (this.model.get('angle') || 0)
-							+ 'deg)'
-				});
-			},
-			removeBox : function(evt) {
-				this.$box.remove();
-			}
 		});
 	}
 

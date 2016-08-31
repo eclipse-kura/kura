@@ -71,9 +71,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 	private static final String CELLS = "cells";
 	private static final String CONSUMER = "consumer";
 	private static final String DELETE_CELLS = "deleteCells";
+	private static final String DEVS_MODEL_ELEMENT = "devs.Atomic";
 	private static final String FACTORY_PID = "factoryPid";
 	private static final String GRAPH = "graph";
-	private static final String HTML_ELEMENT = "html.Element";
 	private static final String ID = "id";
 	private static final String JOINT_JS = "jointJs";
 	private static final String LABEL = "label";
@@ -191,7 +191,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 			// Create new Wire Component instances
 			for (int i = 0; i < jCells.length(); i++) {
 				final JSONObject jsonObject = jCells.getJSONObject(i);
-				if (HTML_ELEMENT.equalsIgnoreCase(jsonObject.getString(TYPE))) {
+				if (DEVS_MODEL_ELEMENT.equalsIgnoreCase(jsonObject.getString(TYPE))) {
 					String elementPid = jsonObject.getString(PID);
 					if ("none".equalsIgnoreCase(elementPid)) {
 						final String elementFactoryPid = jsonObject.getString(FACTORY_PID);

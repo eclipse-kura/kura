@@ -40,12 +40,11 @@
 			<b:Row>
 				<b:Panel>
 					<b:ButtonGroup size="SMALL">
-						<b:Button b:id="btn-config-save">Save</b:Button>
+						<b:Button icon="SAVE" b:id="btn-config-save">Save</b:Button>
 					</b:ButtonGroup>
 					<b:ButtonGroup size="SMALL" addStyleNames="pull-right">
-						<b:Button b:id="btn-config-delete" ui:field="btnDelete">Delete</b:Button>
+						<b:Button icon="TRASH" b:id="btn-config-delete" ui:field="btnDelete">Delete</b:Button>
 					</b:ButtonGroup>
-					<b:TextBox ui:field="selectedWireComponent" b:id="selectedWireComponent"></b:TextBox>
 				</b:Panel>
 			</b:Row>
 			<b:Row>

@@ -15,7 +15,6 @@ package org.eclipse.kura.web.client.ui.wires;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.ui.EntryClassUi;
@@ -35,8 +34,6 @@ import org.gwtbootstrap3.client.ui.NavPills;
 import org.gwtbootstrap3.client.ui.TextBox;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -76,9 +73,6 @@ public class WiresPanelUi extends Composite {
 	private static List<String> m_receivers;
 
 	private static String m_wires;
-
-	@UiField
-	public static TextBox selectedWireComponent;
 
 	private static WiresPanelUiUiBinder uiBinder = GWT.create(WiresPanelUiUiBinder.class);
 
@@ -121,21 +115,12 @@ public class WiresPanelUi extends Composite {
 		return components;
 	}
 
-	private static void disableDeleteButtonOnStartup() {
-		btnDelete.setEnabled(false);
-		selectedWireComponent.addValueChangeHandler(new ValueChangeHandler<String>() {
-
-			@Override
-			public void onValueChange(final ValueChangeEvent<String> event) {
-				logger.log(Level.SEVERE, "Event ===>" + event.getValue());
-				if ((event.getValue() != null) || !"".equals(event.getValue())) {
-					btnDelete.setEnabled(true);
-					return;
-				}
-				btnDelete.setEnabled(false);
-			}
-		});
-	}
+	public static native void exportJSNIUpdateDeleteButton()
+	/*-{
+	$wnd.jsniUpdateDeleteButton = $entry(
+	@org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniUpdateDeleteButton(Ljava/lang/String;)
+	);
+	}-*/;
 
 	public static native void exportJSNIUpdateWireConfig()
 	/*-{
@@ -171,19 +156,19 @@ public class WiresPanelUi extends Composite {
 		m_wires = config.getWiresConfigurationJson();
 		m_graph = config.getGraph();
 
-		selectedWireComponent.setVisible(false);
 		factoryPid.setVisible(false);
+		btnDelete.setEnabled(false);
 		populateDrivers();
 		populateComponentsPanel();
 		loadGraph();
 		exportJSNIUpdateWireConfig();
-		disableDeleteButtonOnStartup();
+		exportJSNIUpdateDeleteButton();
 	}
 
-	private static List<String> intersect(final List<String> A, final List<String> B) {
+	private static List<String> intersect(final List<String> firstArray, final List<String> secondArray) {
 		final List<String> rtnList = new LinkedList<String>();
-		for (final String dto : A) {
-			if (B.contains(dto)) {
+		for (final String dto : firstArray) {
+			if (secondArray.contains(dto)) {
 				rtnList.add(dto);
 			}
 		}
@@ -195,6 +180,14 @@ public class WiresPanelUi extends Composite {
 	// JSNI
 	//
 	// ----------------------------------------------------------------
+	public static void jsniUpdateDeleteButton(final String value) {
+		if ("".equals(value)) {
+			btnDelete.setEnabled(false);
+			return;
+		}
+		btnDelete.setEnabled(true);
+	}
+
 	public static int jsniUpdateWireConfig(final String obj) {
 
 		EntryClassUi.showWaitModal();

@@ -18,6 +18,10 @@ Bug Fixes :
     * #242: [Web UI] Help is not always visible in the new web ui
     
   * Merged no issue-related Pull Requests:
+    * #489: Modified check for crypto value in isDefaultPassword.
+    * #484: Modified wrong references in some snapshots, modified sslManager service to perform a 
+            different check for the default password and the password change.
+    * #483: Modified launch configurations.
     * #480: Fix firewall issues
     * #475: Hotfix ble fixes
     * #441: JDK DIO: disable verbose logging from armv5_sf and x86_64 libraries.

@@ -135,16 +135,14 @@ var kuraWires = (function() {
 		paper.on('cell:pointerdown', 
 			    function(cellView, evt, x, y) {
 					var pid = cellView.model.attributes.label;
-			        $("#selectedWireComponent").val(pid);
-			        $("#selectedWireComponent").change();
+			        $("#selectedWireComponent").val(pid).change();
 			        console.log('cell view ' + cellView.model.id + ' was clicked'); 
 			    }
 			);
 		
 		paper.on('blank:pointerdown', 
 				function(cellView, evt, x, y) {
-					$("#selectedWireComponent").val('');
-					$("#selectedWireComponent").change();
+					$("#selectedWireComponent").val('').change();
 				}
 			);
 		

@@ -30,11 +30,13 @@ public interface GwtComponentService extends RemoteService
 	 */
 	public List<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException;
 	
-	public List<GwtConfigComponent> findComponentConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
-	
 	public void updateComponentConfiguration(GwtXSRFToken xsrfToken, GwtConfigComponent configComponent) throws GwtKuraException;
 	
 	public List<String> getFactoryComponents(GwtXSRFToken xsrfToken) throws GwtKuraException;
 	
 	public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid) throws GwtKuraException;
+	
+	public void deleteFactoryConfiguration(GwtXSRFToken xsrfToken, String pid) throws GwtKuraException;
+	
+	public GwtConfigComponent findComponentConfigurationFromPid(GwtXSRFToken xsrfToken, String pid) throws GwtKuraException;
 }

@@ -101,12 +101,12 @@ joint.shapes.devs.Atomic = joint.shapes.devs.Model.extend({
 
 		type : 'devs.Atomic',
 		size : {
-			width : 90,
-			height : 50
+			width : 120,
+			height : 40
 		},
 		attrs : {
 			'.body' : {
-				fill : 'seaGreen'
+				fill : '#009ae0'
 			},
 			'.inPorts .port-body' : {
 				fill : 'PaleGreen',

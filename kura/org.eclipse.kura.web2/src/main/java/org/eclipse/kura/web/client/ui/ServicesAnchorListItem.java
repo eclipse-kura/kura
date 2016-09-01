@@ -19,6 +19,7 @@ import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.ModalHeader;
+import org.gwtbootstrap3.client.ui.constants.ButtonSize;
 import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.client.ui.html.Span;
 
@@ -59,6 +60,15 @@ public class ServicesAnchorListItem extends AnchorListItem {
 		} else {
 			super.setIcon(icon);
 			super.setText(item.getComponentName());
+		}
+		
+		Button button;
+		button = new Button();
+		button.setIcon(IconType.MINUS);
+		button.setSize(ButtonSize.EXTRA_SMALL);
+		super.anchor.add(button);
+		if(!service.isFactoryComponent()){
+			button.setVisible(false);
 		}
 		
 		super.addClickHandler(new ClickHandler() {

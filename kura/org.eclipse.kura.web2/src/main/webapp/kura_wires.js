@@ -20,6 +20,7 @@ var kuraWires = (function() {
 	var xPos = 10;
 	var yPos = 10;
 	var selectedElement;
+	var oldCellView;
 
 	/*
 	 * / Public functions
@@ -32,6 +33,14 @@ var kuraWires = (function() {
 	var removeCellFunc = function(cell) {
 		removeCell(cell);
 	};
+
+	// a highlighter definition
+	var myHighlighter = {
+	    name: 'addClass',
+	    options: {
+	        className: 'highlighted'
+	    }
+	}
 	
 	client.osgiEvent = function(obj){
 		console.log(obj);
@@ -60,10 +69,10 @@ var kuraWires = (function() {
 
 			paper = new joint.dia.Paper({
 				el : $('#wires-graph'),
-				width : 850,
+				width : '100%',
 				height : 400,
 				model : graph,
-				gridSize : 1,
+				gridSize : 20,
 				snapLinks : true,
 				linkPinning : false,
 				defaultLink : new joint.shapes.customLink.Element,
@@ -169,25 +178,37 @@ var kuraWires = (function() {
 			driver : comp.driver
 		});
 
-		var oldCellView;
 		paper.on('cell:pointerdown', function(cellView, evt, x, y) {
 			var pid = cellView.model.attributes.label;
 			top.jsniUpdateDeleteButton(pid);
 			selectedElement = cellView.model;
+			if(oldCellView){
+				oldCellView.unhighlight();
+				oldCellView = null;
+			}
+			cellView.highlight(null, myHighlighter);
+			oldCellView = cellView;
+			/*
+			var view = selectedElement.findView(paper);
+			view.resize(200, 200);
 			// Emulation of Highlight
-			// cellView.model.attr('stroke', '#ff7e5d');
-			// cellView.model.attr({
-			// '.body' : {
-			// fill : 'red'
-			// }
-			// });
-			// oldCellView = cellView;
+			var attributes = cellView.model.attributes.attrs['.body'];
+			if(attributes){
+				attributes.stroke = 'red';
+				attributes.fill = 'red';
+				cellView.model.attributes.attrs['.body']=attributes;
+				oldCellView = cellView;
+			}
+			*/
 		});
 
 		paper.on('blank:pointerdown', function(cellView, evt, x, y) {
 			top.jsniUpdateDeleteButton("");
 			selectedElement = "";
-			// oldCellView.model.attr('stroke', '#31d0c6');
+			if(oldCellView){
+				oldCellView.unhighlight();
+				oldCellView = null;
+			}
 		});
 
 		graph.addCells([ rect ]);

@@ -8,7 +8,7 @@
   </parent>
   <groupId>org.eclipse.kura</groupId>
   <artifactId>org.eclipse.kura.windows.system</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.0</version>
   <packaging>bundle</packaging>
   <name>Native Windows support for Kura</name>
   <properties>

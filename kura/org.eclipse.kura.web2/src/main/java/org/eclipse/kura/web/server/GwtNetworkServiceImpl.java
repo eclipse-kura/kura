@@ -104,10 +104,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     private static final Logger s_logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
 
     @Override
-    public ArrayList<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException {
-        ArrayList<GwtNetInterfaceConfig> result= privateFindNetInterfaceConfigurations();
+    public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException {
+        List<GwtNetInterfaceConfig> result= privateFindNetInterfaceConfigurations();
 
-        //List<GwtNetInterfaceConfig> listResult= result.
         for(GwtNetInterfaceConfig netConfig: result){
             if(netConfig instanceof GwtWifiNetInterfaceConfig){
                 GwtWifiNetInterfaceConfig wifiConfig= (GwtWifiNetInterfaceConfig) netConfig;
@@ -129,15 +128,16 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private ArrayList<GwtNetInterfaceConfig> privateFindNetInterfaceConfigurations() throws GwtKuraException {
+    private List<GwtNetInterfaceConfig> privateFindNetInterfaceConfigurations() throws GwtKuraException {
         s_logger.debug("Starting");
 
+        List<GwtNetInterfaceConfig> gwtNetConfigs = new ArrayList<GwtNetInterfaceConfig>();
         NetworkAdminService nas = null;
         try {
             nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         } catch (Throwable t) {
             s_logger.warn("Exception", t);
-            return null;
+            return gwtNetConfigs;
         }
 
         ModemManagerService modemManagerService = null;
@@ -154,7 +154,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             s_logger.warn("{WifiClientMonitorService} Exception", t);
         }
 
-        List<GwtNetInterfaceConfig> gwtNetConfigs = new ArrayList<GwtNetInterfaceConfig>();
         try {
 
             GwtNetInterfaceConfig gwtNetConfig = null;		
@@ -680,7 +679,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         }
 
         s_logger.debug("Returning");
-        return new ArrayList<GwtNetInterfaceConfig>(gwtNetConfigs);
+        return gwtNetConfigs;
     }
 
     @Override
@@ -803,7 +802,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                         String passKey= new String(wifiConfig.getPasskey().getPassword());
                         if (passKey != null && passKey.equals(PLACEHOLDER)){
 
-                            ArrayList<GwtNetInterfaceConfig> result= privateFindNetInterfaceConfigurations();
+                            List<GwtNetInterfaceConfig> result= privateFindNetInterfaceConfigurations();
                             for (GwtNetInterfaceConfig netConfig: result){
                                 if (netConfig instanceof GwtWifiNetInterfaceConfig && 
                                         config.getName().equals(((GwtWifiNetInterfaceConfig) netConfig).getName())){
@@ -852,7 +851,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
                     String passKey= new String(gwtModemConfig.getPassword());
                     if (passKey != null && passKey.equals(PLACEHOLDER)){
-                        ArrayList<GwtNetInterfaceConfig> result= privateFindNetInterfaceConfigurations();
+                        List<GwtNetInterfaceConfig> result= privateFindNetInterfaceConfigurations();
                         for (GwtNetInterfaceConfig netConfig: result){
                             if (netConfig instanceof GwtModemInterfaceConfig){
                                 GwtModemInterfaceConfig oldModemConfig= (GwtModemInterfaceConfig) netConfig;

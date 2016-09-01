@@ -414,6 +414,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 								if (!disableModemGps(modem)) {
 									s_logger.error("processNetworkConfigurationChangeEvent() :: Failed to disable modem GPS");
 									modem.reset();
+									m_resetTimerStart = System.currentTimeMillis();
 								}
 							}
 
@@ -660,6 +661,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 									}
 									modem.reset();
 									pppState = PppState.NOT_CONNECTED;
+									m_resetTimerStart = System.currentTimeMillis();
 								} else {
 									int timeTillReset = (int)(modemResetTout - timeElapsed) / 1000;
 									s_logger.info("monitor() :: PPP connection in progress. Modem will be reset in {} sec if not connected", timeTillReset);
@@ -713,6 +715,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 					try {
 						s_logger.info("monitor() :: Exception :: modem reset");
 						modem.reset();
+						m_resetTimerStart = System.currentTimeMillis();
 					} catch (KuraException e1) {
 						s_logger.error("monitor() :: Exception modem.reset", e1);
 					}
@@ -831,6 +834,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 							if (!disableModemGps(modem)) {
 								s_logger.error("trackModem() :: Failed to disable modem GPS, resetting modem ...");
 								modem.reset();
+								m_resetTimerStart = System.currentTimeMillis();
 							}
 						}
 

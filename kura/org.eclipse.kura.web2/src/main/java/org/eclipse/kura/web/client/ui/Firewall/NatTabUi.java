@@ -127,7 +127,7 @@ public class NatTabUi extends Composite implements Tab {
 
 			@Override
 			public void onSuccess(GwtXSRFToken token) {
-				gwtNetworkService.findDeviceFirewallNATs(token, new AsyncCallback<ArrayList<GwtFirewallNatEntry>>() {
+				gwtNetworkService.findDeviceFirewallNATs(token, new AsyncCallback<List<GwtFirewallNatEntry>>() {
 					@Override
 					public void onFailure(Throwable caught) {
 						EntryClassUi.hideWaitModal();
@@ -135,7 +135,7 @@ public class NatTabUi extends Composite implements Tab {
 					}
 
 					@Override
-					public void onSuccess(ArrayList<GwtFirewallNatEntry> result) {
+					public void onSuccess(List<GwtFirewallNatEntry> result) {
 						for (GwtFirewallNatEntry pair : result) {
 							natDataProvider.getList().add(pair);
 						}

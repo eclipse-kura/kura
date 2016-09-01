@@ -16,3 +16,4 @@ Export-Package: org.eclipse.kura.raspberrypi.sensehat;version="1.0.1",
  org.eclipse.kura.raspberrypi.sensehat.ledmatrix;version="1.0.1",
  org.eclipse.kura.raspberrypi.sensehat.sensors;version="1.0.1",
  org.eclipse.kura.raspsberrypi.sensehat.joystick;version="1.0.1"
+Bundle-ActivationPolicy: lazy

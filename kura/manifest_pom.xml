@@ -70,6 +70,8 @@
 		<module>org.eclipse.kura.core.test</module>
 		<module>org.eclipse.kura.asset.provider.test</module>
 		<module>org.eclipse.kura.wire.provider.test</module>
+		<module>org.eclipse.kura.windows.command</module>
+		<module>org.eclipse.kura.windows.clock</module>
 		<module>examples</module>
 	</modules>
 
@@ -412,7 +414,7 @@
 					<artifactId>maven-javadoc-plugin</artifactId>
 					<version>2.9</version>
 					<configuration>
-						<doctitle>Kura ${project.version}</doctitle>
+						<doctitle>Eclipse Kura ${project.version}</doctitle>
 						<!-- Default configuration for all reports -->
 						<skip>false</skip>
 						<links>
@@ -423,7 +425,7 @@
 						<!-- Remove packages from the list to have them included in the aggregate
 							javadocs -->
 						<excludePackageNames>
-							*.ermes:*.demo*:*.example:*.core:*.cloud.app:*.net.admin:*.deployment:*.emulator:*.linux:*.qa:*.web:*.service.io:*.test
+							*.ermes:*.demo*:*.example:*.core:*.cloud.app:*.net.admin:*.deployment:*.emulator:*.linux:*.qa:*.web:*.service.io:*.test:*.internal.*
 						</excludePackageNames>
 						<!-- Add URLs for open source javadocs below -->
 					</configuration>

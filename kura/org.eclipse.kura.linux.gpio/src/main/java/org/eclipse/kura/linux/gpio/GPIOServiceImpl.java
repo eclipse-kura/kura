@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> - Clean up kura properties handling
  *******************************************************************************/
 package org.eclipse.kura.linux.gpio;
 
@@ -58,7 +59,7 @@ public class GPIOServiceImpl implements GPIOService {
 			String configFile = System.getProperty("jdk.dio.registry");
 			if(configFile == null){
 				//Emulator?
-				configFile = m_SystemService.getProperties().getProperty("kura.configuration").replace("kura.properties", "jdk.dio.properties");
+				configFile = m_SystemService.getProperties().getProperty(SystemService.KURA_CONFIG).replace("kura.properties", "jdk.dio.properties");
 			}else{
 				configFile = "file:"+configFile;
 			}

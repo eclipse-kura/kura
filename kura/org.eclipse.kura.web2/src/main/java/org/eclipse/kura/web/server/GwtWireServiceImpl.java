@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -102,9 +103,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 	@Override
 	public List<String> getDriverInstances(final GwtXSRFToken xsrfToken) throws GwtKuraException {
 		this.checkXSRFToken(xsrfToken);
-		final ServiceReference[] refs = ServiceLocator.getInstance().getServiceReferences(Driver.class, null);
+		final Collection<ServiceReference<Driver>> refs = ServiceLocator.getInstance().getServiceReferences(Driver.class, null);
 		final List<String> drivers = new ArrayList<String>();
-		for (final ServiceReference ref : refs) {
+		for (final ServiceReference<Driver> ref : refs) {
 			drivers.add(String.valueOf(ref.getProperty("kura.service.pid")));
 		}
 		return drivers;
@@ -397,8 +398,8 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 		final StringBuilder result = new StringBuilder();
 
 		final BundleContext ctx = FrameworkUtil.getBundle(GwtWireServiceImpl.class).getBundleContext();
-		final ServiceReference[] refs = ServiceLocator.getInstance().getServiceReferences(WireComponent.class, null);
-		for (final ServiceReference ref : refs) {
+		final Collection<ServiceReference<WireComponent>> refs = ServiceLocator.getInstance().getServiceReferences(WireComponent.class, null);
+		for (final ServiceReference<WireComponent> ref : refs) {
 			if (ref.getProperty(ConfigurationService.KURA_SERVICE_PID).equals(pid)) {
 				final String fPid = (String) ref.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID);
 				final WireComponent comp = (WireComponent) ctx.getService(ref);

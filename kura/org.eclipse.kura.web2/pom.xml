@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2016 Eurotech and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -10,7 +10,8 @@
 
     Contributors:
       Eurotech
-      Jens Reimann <jreimann@redhat.com> - remove dependency on slf4j:logj12
+      Red Hat Inc - remove dependency on slf4j:logj12
+         - Fix build warning
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -96,7 +97,7 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
-			<version>4.3.0</version>
+			<version>5.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
@@ -384,6 +385,27 @@
 					<configuration>
 						<lifecycleMappingMetadata>
 							<pluginExecutions>
+							
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-war-plugin
+										</artifactId>
+										<versionRange>
+											[2.1.1,)
+										</versionRange>
+										<goals>
+											<goal>exploded</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>

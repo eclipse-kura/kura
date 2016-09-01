@@ -8,14 +8,13 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> - Fix possible NPE, cleanup
  *******************************************************************************/
 package org.eclipse.kura.web;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.servlet.ServletException;
 
@@ -64,8 +63,6 @@ public class Console implements ConfigurableComponent {
 
 	private HttpService m_httpService;
 
-	private ExecutorService m_worker;
-
 	private SystemService m_systemService;
 	private CryptoService m_cryptoService;
 
@@ -79,11 +76,6 @@ public class Console implements ConfigurableComponent {
 	// Dependencies
 	//
 	// ----------------------------------------------------------------
-
-	public Console() {
-		super();
-		m_worker = Executors.newSingleThreadExecutor();
-	}
 
 	public void setHttpService(HttpService httpService) {
 		this.m_httpService = httpService;
@@ -126,7 +118,7 @@ public class Console implements ConfigurableComponent {
 	protected void activate(ComponentContext context, Map<String, Object> properties) {
 		try {
 			// Check if web interface is enabled.
-			Boolean webEnabled = Boolean.valueOf(m_systemService.getKuraWebEnabled());
+			boolean webEnabled = Boolean.parseBoolean((m_systemService.getKuraWebEnabled()));
 
 			if (webEnabled) {
 				s_logger.info("activate...");
@@ -136,7 +128,7 @@ public class Console implements ConfigurableComponent {
 				s_appRoot = (String) properties.get(APP_ROOT);
 				String servletRoot = s_aliasRoot;
 
-				m_properties= new HashMap<String, Object>();
+				m_properties = new HashMap<String, Object>();
 				Iterator<String> keys = properties.keySet().iterator();
 				while (keys.hasNext()) {
 					String key = keys.next();
@@ -146,7 +138,7 @@ public class Console implements ConfigurableComponent {
 
 				Object pwdProp = properties.get(CONSOLE_PASSWORD);
 				char[] propertyPassword = null;
-				if(pwdProp instanceof char[]){
+				if (pwdProp instanceof char[]) {
 					propertyPassword = (char[]) properties.get(CONSOLE_PASSWORD);
 				} else {
 					propertyPassword = properties.get(CONSOLE_PASSWORD).toString().toCharArray();
@@ -166,7 +158,7 @@ public class Console implements ConfigurableComponent {
 				}
 				propertyPassword = m_cryptoService.sha1Hash(new String(decryptedPassword)).toCharArray();
 
-				String registeredUsername= (String) properties.get(CONSOLE_USERNAME);
+				String registeredUsername = (String) properties.get(CONSOLE_USERNAME);
 				authMgr = new AuthenticationManager(registeredUsername, propertyPassword);
 				initHTTPService(authMgr, servletRoot);
 
@@ -186,9 +178,14 @@ public class Console implements ConfigurableComponent {
 
 	protected void updated(Map<String, Object> properties) {
 
+		boolean webEnabled = Boolean.parseBoolean((m_systemService.getKuraWebEnabled()));
+		if (!webEnabled) {
+			return;
+		}
+
 		char[] propertyPassword = null;
 
-		String registeredUsername= (String) properties.get(CONSOLE_USERNAME);
+		String registeredUsername = (String) properties.get(CONSOLE_USERNAME);
 		authMgr.updateUsername(registeredUsername);
 
 		try {
@@ -199,9 +196,9 @@ public class Console implements ConfigurableComponent {
 			} catch (Exception e) {
 				decryptedPassword = value.toString().toCharArray();
 			}
-			
+
 			propertyPassword = m_cryptoService.sha1Hash(new String(decryptedPassword)).toCharArray();
-			
+
 			authMgr.updatePassword(propertyPassword);
 		} catch (Exception e) {
 			s_logger.warn("Error Updating Web properties", e);
@@ -213,7 +210,6 @@ public class Console implements ConfigurableComponent {
 		s_logger.info("deactivate...");
 
 		s_context = null;
-		m_worker.shutdown();
 
 		unregisterServlet();
 	}
@@ -255,7 +251,8 @@ public class Console implements ConfigurableComponent {
 		return s_aliasRoot;
 	}
 
-	private void initHTTPService(AuthenticationManager authMgr, String servletRoot) throws NamespaceException, ServletException {
+	private void initHTTPService(AuthenticationManager authMgr, String servletRoot)
+			throws NamespaceException, ServletException {
 		// Initialize HttpService
 
 		HttpContext httpCtx = new SecureBasicHttpContext(m_httpService.createDefaultHttpContext(), authMgr);

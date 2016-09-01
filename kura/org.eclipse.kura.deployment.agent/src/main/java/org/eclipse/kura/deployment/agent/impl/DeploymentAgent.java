@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> - Clean up kura properties handling
  *******************************************************************************/
 package org.eclipse.kura.deployment.agent.impl;
 
@@ -35,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.Version;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
@@ -72,7 +74,7 @@ public class DeploymentAgent implements DeploymentAgentService {
 	private static Logger s_logger = LoggerFactory.getLogger(DeploymentAgent.class);
 
 	private static final String DPA_CONF_PATH_PROPNAME = "dpa.configuration";
-	private static final String KURA_CONF_URL_PROPNAME  = "kura.configuration";
+	private static final String KURA_CONF_URL_PROPNAME  = SystemService.KURA_CONFIG;
 	private static final String PACKAGES_PATH_PROPNAME = "kura.packages";
 
 	private static final String CONN_TIMEOUT_PROPNAME = "dpa.connection.timeout";

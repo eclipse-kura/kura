@@ -189,13 +189,18 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.camel</groupId>
+									<artifactId>camel-stream</artifactId>
+									<version>${org.apache.camel.camel-stream.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.camel</groupId>
 									<artifactId>camel-kura</artifactId>
 									<version>${org.apache.camel.camel-kura.version}</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>com.google.guava</groupId>
-									<artifactId>guava</artifactId>
-									<version>19.0</version>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.system</artifactId>
+									<version>1.0.1</version>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

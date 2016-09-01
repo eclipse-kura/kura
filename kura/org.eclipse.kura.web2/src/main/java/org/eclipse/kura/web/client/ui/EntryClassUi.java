@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix build warnings
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
@@ -199,9 +200,6 @@ public class EntryClassUi extends Composite {
 						if (modal != null) {
 							modal.hide();
 						}
-						if (servicesUi != null) {
-							servicesUi.renderForm();
-						}
 						contentPanel.setVisible(true);
 						contentPanelHeader.setText("Status");
 						contentPanelBody.clear();
@@ -228,9 +226,6 @@ public class EntryClassUi extends Composite {
 						if (modal != null ) {
 							modal.hide();
 						}
-						if (servicesUi != null) {
-							servicesUi.renderForm();
-						}
 						contentPanel.setVisible(true);
 						contentPanelHeader.setText(MSGS.device());
 						contentPanelBody.clear();
@@ -254,9 +249,6 @@ public class EntryClassUi extends Composite {
 							forceTabsCleaning();
 							if (modal != null ) {
 								modal.hide();
-							}
-							if (servicesUi != null) {
-								servicesUi.renderForm();
 							}
 							contentPanel.setVisible(true);
 							contentPanelHeader.setText(MSGS.network());
@@ -283,9 +275,6 @@ public class EntryClassUi extends Composite {
 							if (modal != null ) {
 								modal.hide();
 							}
-							if (servicesUi != null) {
-								servicesUi.renderForm();
-							}
 							contentPanel.setVisible(true);
 							contentPanelHeader.setText(MSGS.firewall());
 							contentPanelBody.clear();
@@ -308,9 +297,6 @@ public class EntryClassUi extends Composite {
 						forceTabsCleaning();
 						if (modal != null ) {
 							modal.hide();
-						}
-						if (servicesUi != null) {
-							servicesUi.renderForm();
 						}
 						contentPanel.setVisible(true);
 						contentPanelHeader.setText(MSGS.packages());
@@ -335,9 +321,6 @@ public class EntryClassUi extends Composite {
 						forceTabsCleaning();
 						if (modal != null ) {
 							modal.hide();
-						}
-						if (servicesUi != null) {
-							servicesUi.renderForm();
 						}
 						contentPanel.setVisible(true);
 						contentPanelHeader.setText(MSGS.settings());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,7 +8,8 @@
  *
  * Contributors:
  *     Eurotech
- *     Jens Reimann <jreimann@redhat.com> Fix possible NPE
+ *     Red Hat Inc - Fix possible NPE, fix loading error
+ *       - Clean up kura.properties handling
  *******************************************************************************/
 package org.eclipse.kura.core.crypto;
 
@@ -17,10 +18,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.MessageDigest;
@@ -36,6 +37,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.system.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -326,34 +328,29 @@ public class CryptoServiceImpl implements CryptoService {
 	}
 
 	private static void initKeystorePasswordPath() {
-		final String uriSpec = System.getProperty("kura.configuration");
+		final String uriSpec = System.getProperty(SystemService.KURA_CONFIG);
 		if (uriSpec == null || uriSpec.isEmpty()) {
 			logger.error("Unable to initialize keystore password. 'kura.configuration' is not set.");
 			return;
 		}
 		
 		Properties props = new Properties();
-		FileInputStream fis = null;
+		InputStream in = null;
 		try {
-			URI uri = new URI(uriSpec);
-			fis = new FileInputStream(new File(uri));
-			props.load(fis);
+			in = new URL(uriSpec).openStream();
+			props.load(in);
 			Object value = props.get("kura.data");
 			if (value != null) {
 				s_keystorePasswordPath = (String) value + File.separator + "store.save"; 
 			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			logger.error("Failed to load keystore password", e);
 		} finally {
-			if (fis != null) {
+			if (in != null) {
 				try {
-					fis.close();
+					in.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.warn("Failed to close configuration file", e);
 				}
 			}
 		}

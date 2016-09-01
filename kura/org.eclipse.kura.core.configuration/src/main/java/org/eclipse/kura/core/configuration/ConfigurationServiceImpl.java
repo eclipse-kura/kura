@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,15 +8,19 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix issue #462
+ *         - Fix build warnings
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -480,10 +484,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     synchronized void registerComponentOCD(String metatypePid, Tocd ocd, boolean isFactory) throws KuraException {
         // metatypePid is either the 'pid' or 'factoryPid' attribute of the MetaType Designate element
         // 'pid' matches a service.pid, not a kura.service.pid
-        if (!m_ocds.containsKey(metatypePid)) {
-            s_logger.info("Registering metatype pid: {} with ocd: {} ...", metatypePid, ocd);
-            m_ocds.put(metatypePid, ocd);
-        }
+        s_logger.info("Registering metatype pid: {} with ocd: {} ...", metatypePid, ocd);
+        m_ocds.put(metatypePid, ocd);
+            
         if (isFactory) {
             registerFactoryComponentOCD(metatypePid, ocd);
         } else {
@@ -610,7 +613,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             }
         }
 
-        if (takeSnapshot) {
+        if (takeSnapshot && (configs != null && !configs.isEmpty())) {
             saveSnapshot(configs);
         }
 
@@ -682,11 +685,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     
     private void registerFactoryComponentOCD(String metatypePid, Tocd ocd) throws KuraException {
         m_factoryPids.add(metatypePid);
-        s_logger.error("********** REGISTERING OCD FOR {} *************", metatypePid);
 
         for (Map.Entry<String, String> entry : m_factoryPidByPid.entrySet()) {
             if (entry.getValue().equals(metatypePid) && m_servicePidByPid.get(entry.getKey()) != null) {
-            	s_logger.error("********** UPDATING OCD FOR {} *************", metatypePid);
                 try {
                     updateWithDefaultConfiguration(entry.getKey(), ocd);
                 } catch (IOException e) {
@@ -735,7 +736,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private boolean allSnapshotsUnencrypted() {
         try {
             Set<Long> snapshotIDs = getSnapshots();
-            if (snapshotIDs == null || snapshotIDs.size() == 0) {
+            if (snapshotIDs == null || snapshotIDs.isEmpty()) {
                 return false;
             }
             Long[] snapshots = snapshotIDs.toArray(new Long[] {});
@@ -816,7 +817,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         // Do not save the snapshot in the past
         Set<Long> snapshotIDs = getSnapshots();
-        if (snapshotIDs != null && snapshotIDs.size() > 0) {
+        if (snapshotIDs != null && !snapshotIDs.isEmpty()) {
             Long[] snapshots = snapshotIDs.toArray(new Long[] {});
             Long lastestID = snapshots[snapshotIDs.size() - 1];
 
@@ -837,21 +838,38 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private void writeSnapshot(long sid, XmlComponentConfigurations conf) throws KuraException {
         File fSnapshot = getSnapshotFile(sid);
 
+        // Marshall the configuration into an XML
+        String xmlResult;
+        try {
+            xmlResult = XmlUtil.marshal(conf);
+            if (xmlResult.trim().isEmpty()) {
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, conf);
+            }
+        } catch (Exception e1) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e1);
+        }
+        
+        // Encrypt the XML
+        char[] encryptedXML = m_cryptoService.encryptAes(xmlResult.toCharArray());
+
+        // Write the snapshot
         FileOutputStream fos = null;
         OutputStreamWriter osw = null;
         try {
             s_logger.info("Writing snapshot - Saving {}...", fSnapshot.getAbsolutePath());
             fos = new FileOutputStream(fSnapshot);
             osw = new OutputStreamWriter(fos, "UTF-8");
-            String xmlResult = XmlUtil.marshal(conf);
-            char[] encryptedXML = m_cryptoService.encryptAes(xmlResult.toCharArray());
             osw.append(new String(encryptedXML));
             osw.flush();
             fos.flush();
             fos.getFD().sync();
             s_logger.info("Writing snapshot - Saving {}... Done.", fSnapshot.getAbsolutePath());
-        } catch (Throwable t) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, t);
+        } catch (FileNotFoundException e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        } catch (UnsupportedEncodingException e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         } finally {
             if (osw != null){
                 try {
@@ -931,9 +949,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
                                                 Map<String, Object> props = cc.getConfigurationProperties();
                                                 if (props != null) {
-                                                    Object value = props.get(adId);
+                                                    final Object value = props.get(adId);
                                                     if (value != null) {
-                                                        String propType = value.getClass().getSimpleName();
+                                                        final String propType;
+                                                        if ( !value.getClass().isArray() ) {
+                                                            propType = value.getClass().getSimpleName();
+                                                        } else {
+                                                            propType = value.getClass().getComponentType().getSimpleName();
+                                                        }
+                                                         
                                                         try {
                                                             s_logger.debug("pid: {}, property name: {}, type: {}, value: {}", new Object[] {pid, adId, propType, value});
                                                             Scalar.fromValue(propType);

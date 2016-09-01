@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> - Clean up kura properties handling
  *******************************************************************************/
 
 package org.eclipse.kura.core.deployment;
@@ -48,6 +49,7 @@ import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.ssl.SslManagerService;
+import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -65,7 +67,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 	public static final String APP_ID = "DEPLOY-V2";
 
 	private static final String DPA_CONF_PATH_PROPNAME = "dpa.configuration";
-	private static final String KURA_CONF_URL_PROPNAME = "kura.configuration";
+	private static final String KURA_CONF_URL_PROPNAME = SystemService.KURA_CONFIG;
 	private static final String PACKAGES_PATH_PROPNAME = "kura.packages";
 	private static final String KURA_DATA_DIR = "kura.data";
 

@@ -8,6 +8,8 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> - Fix logging calls
+ *         - Fix possible NPE
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
@@ -99,7 +101,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 {
     private static final long serialVersionUID = -4188750359099902616L;
 
-    private static Logger s_logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
+    private static final Logger s_logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
 
     @Override
     public ArrayList<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException {
@@ -134,7 +136,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         try {
             nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         } catch (Throwable t) {
-            s_logger.warn("Exception: {}", t.toString());
+            s_logger.warn("Exception", t);
             return null;
         }
 
@@ -142,14 +144,14 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         try {
             modemManagerService = ServiceLocator.getInstance().getService(ModemManagerService.class);
         } catch (Throwable t) {
-            s_logger.warn("{ModemManagerService} Exception: {}", t.toString());
+            s_logger.warn("{ModemManagerService} Exception", t);
         }
 
         WifiClientMonitorService wifiClientMonitorService = null;
         try {
             wifiClientMonitorService = ServiceLocator.getInstance().getService(WifiClientMonitorService.class);
         } catch (Throwable t) {
-            s_logger.warn("{WifiClientMonitorService} Exception: {}", t.toString());
+            s_logger.warn("{WifiClientMonitorService} Exception", t);
         }
 
         List<GwtNetInterfaceConfig> gwtNetConfigs = new ArrayList<GwtNetInterfaceConfig>();
@@ -270,7 +272,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                                 sep = "\n";
                                             }
 
-                                            s_logger.debug("DNS Servers: {}", sb.toString());
+                                            s_logger.debug("DNS Servers: {}", sb);
                                             gwtNetConfig.setReadOnlyDnsServers(sb.toString());
                                         } else {
                                             s_logger.debug("DNS Servers: [empty String]");
@@ -311,7 +313,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                             }
                                         }
 
-                                        s_logger.debug("DNS Servers: {}", sb.toString());
+                                        s_logger.debug("DNS Servers: {}", sb);
                                         gwtNetConfig.setDnsServers(sb.toString());
                                     } else {
                                         s_logger.debug("DNS Servers: [empty String]");
@@ -327,7 +329,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                             sb.append("\n");
                                         }
 
-                                        s_logger.debug("Search Domains: {}", sb.toString());
+                                        s_logger.debug("Search Domains: {}", sb);
                                         gwtNetConfig.setSearchDomains(sb.toString());
                                     } else {
                                         s_logger.debug("Search Domains: [empty String]");
@@ -477,7 +479,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                                         s_logger.debug("Setting Received Signal Strength to {}", rssi);
                                                         gwtNetConfig.setHwRssi(Integer.toString(rssi));
                                                     } catch (KuraException e) {
-                                                        s_logger.warn(e.getMessage());
+                                                        s_logger.warn("Failed", e);
                                                     }
                                                 }
                                             }
@@ -730,16 +732,16 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     netConfig4.setDhcp(false);
 
                     if (config.getIpAddress() != null && !config.getIpAddress().isEmpty()) {
-                        s_logger.debug("setting address: " + config.getIpAddress());
+                        s_logger.debug("setting address: {}", config.getIpAddress());
                         netConfig4.setAddress((IP4Address) IPAddress.parseHostAddress(config.getIpAddress()));
                     }
 
                     if (config.getSubnetMask() != null && !config.getSubnetMask().isEmpty()) {
-                        s_logger.debug("setting subnet mask: " + config.getSubnetMask());
+                        s_logger.debug("setting subnet mask: {}", config.getSubnetMask());
                         netConfig4.setSubnetMask((IP4Address) IPAddress.parseHostAddress(config.getSubnetMask()));
                     }
                     if (config.getGateway() != null && !config.getGateway().isEmpty()) {
-                        s_logger.debug("setting gateway: " + config.getGateway());
+                        s_logger.debug("setting gateway: {}", config.getGateway());
                         netConfig4.setGateway((IP4Address) IPAddress.parseHostAddress(config.getGateway()));
                     }
 
@@ -749,7 +751,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                         List<IP4Address> dnsServers = new ArrayList<IP4Address>();
                         for (String winsEntry : winServersString) {
                             if(!winsEntry.trim().isEmpty()) {
-                                s_logger.debug("setting WINs: " + winsEntry);
+                                s_logger.debug("setting WINs: {}", winsEntry);
                                 winServer = (IP4Address) IPAddress.parseHostAddress(winsEntry);
                                 dnsServers.add(winServer);
                             }
@@ -764,7 +766,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     List<IP4Address> dnsServers = new ArrayList<IP4Address>();
                     for (String dnsEntry : dnsServersString) {
                         if(!dnsEntry.trim().isEmpty()) {
-                            s_logger.debug("setting DNS: " + dnsEntry);
+                            s_logger.debug("setting DNS: {}", dnsEntry);
                             dnsServer = (IP4Address) IPAddress.parseHostAddress(dnsEntry);
                             dnsServers.add(dnsServer);
                         }
@@ -910,7 +912,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
 
         } catch(Exception e) {
-            s_logger.warn(e.getMessage());
+            s_logger.warn("Failed", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
@@ -927,7 +929,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             if (firewallConfigs != null && !firewallConfigs.isEmpty()) {
                 for (NetConfig netConfig : firewallConfigs) {
                     if (netConfig instanceof FirewallOpenPortConfigIP4) {
-                        s_logger.debug("findDeviceFirewallOpenPorts() :: adding new Open Port Entry: " + ((FirewallOpenPortConfigIP4) netConfig).getPort());
+                        s_logger.debug("findDeviceFirewallOpenPorts() :: adding new Open Port Entry: {}", ((FirewallOpenPortConfigIP4) netConfig).getPort());
                         GwtFirewallOpenPortEntry entry = new GwtFirewallOpenPortEntry();
                         if (((FirewallOpenPortConfigIP4) netConfig).getPortRange() != null) {
                             entry.setPortRange(((FirewallOpenPortConfigIP4) netConfig).getPortRange());
@@ -1051,7 +1053,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 }
             }
         } catch (Throwable t) {
-            s_logger.error(t.getMessage());
+            s_logger.error("Failed", t);
             KuraExceptionHandler.handle(t);
         }
 
@@ -1101,7 +1103,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             return new ArrayList<GwtFirewallPortForwardEntry>(gwtPortForwardEntries);
 
         } catch (KuraException e) {
-            s_logger.warn(e.getMessage());
+            s_logger.warn("Failed", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
@@ -1135,7 +1137,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             return new ArrayList<GwtFirewallNatEntry>(gwtNatEntries);
 
         } catch (KuraException e) {
-            s_logger.warn(e.getMessage());
+            s_logger.warn("Failed", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
@@ -1173,7 +1175,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     List<IP4Address> dnsServers = new ArrayList<IP4Address>();
                     dnsServers.add((IP4Address) IPAddress.parseHostAddress(config.getIpAddress()));
 
-                    s_logger.debug("DhcpServerConfigIP4 - start:" + rangeStart.getHostAddress() + ", end:" + rangeEnd.getHostAddress() + ", prefix:" + prefix + ", subnet:" + subnet.getHostAddress() + ", subnetMask:" + subnetMask.getHostAddress());
+                    s_logger.debug("DhcpServerConfigIP4 - start: {}, end: {}, prefix: {}, subnet: {}, subnetMask: {}", new Object[]{rangeStart.getHostAddress(), rangeEnd.getHostAddress(), prefix, subnet.getHostAddress(), subnetMask.getHostAddress()});
                     DhcpServerConfigIP4 dhcpServerConfigIP4 = new DhcpServerConfigIP4(config.getName(), true, subnet, routerAddress, subnetMask, defaultLeaseTime, maximumLeaseTime,
                             prefix, rangeStart, rangeEnd, passDns, dnsServers);
 
@@ -1203,7 +1205,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
             }
         } else {
-            s_logger.error("Unsupported routerMode: " + routerMode);
+            s_logger.error("Unsupported routerMode: {}", routerMode);
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "Unsupported routerMode: " + routerMode);
         }
     }
@@ -1249,13 +1251,13 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
             nas.setFirewallOpenPortConfiguration(firewallOpenPortConfigIPs);
         } catch (KuraException e) {
-            s_logger.warn("Exception while updating firewall open ports: {}", e.getMessage());
+            s_logger.warn("Exception while updating firewall open ports", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         } catch (NumberFormatException e) {
-            s_logger.warn("Exception while updating firewall open ports: {}", e.getMessage());
+            s_logger.warn("Exception while updating firewall open ports", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         } catch (UnknownHostException e) {
-            s_logger.warn("Exception while updating firewall open ports: {}", e.getMessage());
+            s_logger.warn("Exception while updating firewall open ports", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
@@ -1300,13 +1302,13 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
             nas.setFirewallPortForwardingConfiguration(firewallPortForwardConfigIPs);
         } catch (KuraException e) {
-            s_logger.warn("Exception while updating firewall port forwards: {}", e.getMessage());
+            s_logger.warn("Exception while updating firewall port forwards", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         } catch (NumberFormatException e) {
-            s_logger.warn("Exception while updating firewall port forwards: {}", e.getMessage());
+            s_logger.warn("Exception while updating firewall port forwards", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         } catch (UnknownHostException e) {
-            s_logger.warn("Exception while updating firewall port forwards: {}", e.getMessage());
+            s_logger.warn("Exception while updating firewall port forwards", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
@@ -1369,12 +1371,11 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     nas.rollbackDefaultConfiguration();
                     s_logger.debug("ESF is set to default configuration.");
                 } catch (KuraException e) {
-                    e.printStackTrace();
                     throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
                 }
             }
         } catch (GwtKuraException e) {
-            s_logger.warn("Failed to obtain the NetworkAdminService. This is ok if running the 'No-Network' version.");
+            s_logger.warn("Failed to obtain the NetworkAdminService. This is ok if running the 'No-Network' version.", e);
         }
     }
 

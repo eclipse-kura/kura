@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,26 +8,18 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix build warnings
  *******************************************************************************/
 package org.eclipse.kura.linux.test.net;
 
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import junit.framework.TestCase;
-
-import org.eclipse.kura.net.NetInterface;
-import org.eclipse.kura.net.NetInterfaceAddress;
-import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
-import org.eclipse.kura.net.NetworkState;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.test.annotation.TestTarget;
-import org.eclipse.kura.usb.UsbDevice;
 import org.eclipse.kura.usb.UsbDeviceAddedEvent;
 import org.eclipse.kura.usb.UsbDeviceRemovedEvent;
 import org.junit.BeforeClass;
@@ -38,6 +30,8 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+
+import junit.framework.TestCase;
 
 public class NetworkTest extends TestCase implements EventHandler {
 

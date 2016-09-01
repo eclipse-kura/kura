@@ -73,7 +73,7 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle>
 			}
 		}
 		s_logger.debug("open(): done");
-	};
+	}
 	
 	@Override
 	public Bundle addingBundle(Bundle bundle, BundleEvent event) 

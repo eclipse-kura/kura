@@ -62,11 +62,11 @@ var kuraWires = (function() {
 				gridSize : 1,
 				snapLinks : true,
 				linkPinning : false,
-				markAvailable : true,
 				defaultLink : new joint.shapes.customLink.Element,
-				restrictTranslate: function(elementView) {
-				    var parentId = elementView.model.get('parent');
-				    return parentId && this.model.getCell(parentId).getBBox();
+				multiLinks : false,
+				restrictTranslate : function(elementView) {
+					var parentId = elementView.model.get('parent');
+					return parentId && this.model.getCell(parentId).getBBox();
 				},
 				validateConnection : function(cellViewS, magnetS, cellViewT,
 						magnetT, end, linkView) {
@@ -127,37 +127,23 @@ var kuraWires = (function() {
 		if (comp.type === 'both') {
 			inputPorts = [ '' ];
 			outputPorts = [ '' ];
-			body = 'salmon';
 			attrib = {
-				'.body1' : {
-					fill : body
-				},
 				'.label' : {
 					text : comp.name,
-					fill : body
 				}
 			};
 		} else if (comp.type === 'producer') {
 			inputPorts = [];
 			outputPorts = [ '' ];
-			body = 'seaGreen';
 			attrib = {
-				'.body2' : {
-					fill : body
-				},
 				'.label' : {
 					text : comp.name,
-					fill : body
 				}
 			};
 		} else {
 			inputPorts = [ '' ];
 			outputPorts = [];
-			body = 'PaleGreen';
 			attrib = {
-				'.body1' : {
-					fill : body
-				},
 				'.label' : {
 					text : comp.name
 				}
@@ -179,15 +165,25 @@ var kuraWires = (function() {
 			driver : comp.driver
 		});
 
+		var oldCellView;
 		paper.on('cell:pointerdown', function(cellView, evt, x, y) {
 			var pid = cellView.model.attributes.label;
 			top.jsniUpdateDeleteButton(pid);
 			selectedElement = cellView.model;
+			// Emulation of Highlight
+			// cellView.model.attr('stroke', '#ff7e5d');
+			// cellView.model.attr({
+			// '.body' : {
+			// fill : 'red'
+			// }
+			// });
+			// oldCellView = cellView;
 		});
 
 		paper.on('blank:pointerdown', function(cellView, evt, x, y) {
 			top.jsniUpdateDeleteButton("");
 			selectedElement = "";
+			// oldCellView.model.attr('stroke', '#31d0c6');
 		});
 
 		graph.addCells([ rect ]);
@@ -200,8 +196,17 @@ var kuraWires = (function() {
 			}
 		});
 
-		/* custom highlighting */
-		var highlighter = V('circle', {
+		/* custom highlighting for ports */
+		/*
+		 * Custom Highlighting doesn't work efficiently for logical blocks as
+		 * the custom highlighting functionality in jointJS creates an overlay
+		 * element on top of the selected one. So, such extra element on the
+		 * paper which makes us feel that the item is selected is not what we
+		 * need. As it creates a problem while dragging the item after select.
+		 * The newly created element which is used for highlighting remains at
+		 * the same position but the element can be dragged anywhere.
+		 */
+		var portHighlighter = V('circle', {
 			'r' : 14,
 			'stroke' : '#ff7e5d',
 			'stroke-width' : '6px',
@@ -211,26 +216,21 @@ var kuraWires = (function() {
 
 		paper.off('cell:highlight cell:unhighlight').on({
 			'cell:highlight' : function(cellView, el, opt) {
-				if (opt.embedding) {
-					V(el).addClass('highlighted-parent');
-				}
+				var bbox = V(el).bbox(false, paper.viewport);
 
 				if (opt.connecting) {
-					var bbox = V(el).bbox(false, paper.viewport);
-					highlighter.translate(bbox.x + 10, bbox.y + 10, {
+					portHighlighter.attr(bbox);
+					portHighlighter.translate(bbox.x + 10, bbox.y + 10, {
 						absolute : true
 					});
-					V(paper.viewport).append(highlighter);
+					V(paper.viewport).append(portHighlighter);
 				}
 			},
 
 			'cell:unhighlight' : function(cellView, el, opt) {
-				if (opt.embedding) {
-					V(el).removeClass('highlighted-parent');
-				}
 
 				if (opt.connecting) {
-					highlighter.remove();
+					portHighlighter.remove();
 				}
 			}
 		});
@@ -326,7 +326,7 @@ var kuraWires = (function() {
 				p : cell.attributes.producer,
 				c : cell.attributes.consumer
 			});
-		} else if (cell.attributes.type === 'devs.Model'
+		} else if (cell.attributes.type === 'devs.Atomic'
 				&& cell.attributes.pid !== 'none') {
 			delCells.push({
 				cellType : 'instance',

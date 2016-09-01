@@ -105,6 +105,9 @@ joint.shapes.devs.Atomic = joint.shapes.devs.Model.extend({
 			height : 50
 		},
 		attrs : {
+			'.body' : {
+				fill : 'seaGreen'
+			},
 			'.inPorts .port-body' : {
 				fill : 'PaleGreen',
 				magnet : 'passive',

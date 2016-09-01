@@ -98,6 +98,10 @@ img.x-tree3-node-icon {
 	stroke: #31d0c6;
 	stroke-width: 4px;
 }
+.devs .body:hover {
+	opacity: 1;
+	stroke: #ff7e5d;
+}
 
 .devs .label {
 	fill: #31d0c6;
@@ -119,11 +123,7 @@ img.x-tree3-node-icon {
 	fill: #7c68fc;
 }
 
-.devs.Atomic .body1 {
-	stroke: #feb663;
-}
-
-.devs.Atomic .body2 {
+.devs.Atomic .body {
 	stroke: #31d0c6;
 }
 

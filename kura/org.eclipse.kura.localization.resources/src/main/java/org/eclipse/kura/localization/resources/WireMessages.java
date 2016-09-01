@@ -141,7 +141,7 @@ public interface WireMessages {
 	@En("Connection instance cannnot be null")
 	public String connectionNonNull();
 
-	@En("Creating table DR_{0}...")
+	@En("Creating table {0}...")
 	public String creatingTable(String tableName);
 
 	@En("Creating wire between {0} and {1}....")

@@ -233,7 +233,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 * @throws SQLException
 	 *             the SQL exception
 	 * @throws KuraRuntimeException
-	 *             if any of the provided argument is null
+	 *             if any of the provided arguments is null
 	 */
 	private void insertDataRecord(final String tableName, final WireRecord wireRecord) throws SQLException {
 		checkNull(tableName, s_message.tableNameNonNull());
@@ -254,7 +254,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 			sbVals.append(", ?");
 		}
 
-		s_logger.info(s_message.storingRecord(tableName, sqlTableName));
+		s_logger.info(s_message.storingRecord(sqlTableName));
 		final String sqlInsert = MessageFormat.format(SQL_INSERT_RECORD, sqlTableName, sbCols.toString(),
 				sbVals.toString());
 		Connection conn = null;
@@ -453,6 +453,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 	 *
 	 * @param wireRecord
 	 *            the wire record to be stored
+	 * @throws KuraRuntimeException
+	 *             if the provided argument is null
 	 */
 	private void store(final WireRecord wireRecord) {
 		checkNull(wireRecord, s_message.wireRecordNonNull());
@@ -461,21 +463,21 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 		final String tableName = this.m_options.getTableName();
 		do {
 			try {
-				this.insertDataRecord(this.m_options.getTableName(), wireRecord);
+				this.insertDataRecord(tableName, wireRecord);
 				inserted = true;
 			} catch (final SQLException e) {
-				s_logger.debug(s_message.insertionFailed() + ThrowableUtil.stackTraceAsString(e));
+				s_logger.error(s_message.insertionFailed() + ThrowableUtil.stackTraceAsString(e));
 				try {
-					if ((tableName != null) && (tableName.isEmpty())) {
+					if ((tableName != null) && (!tableName.isEmpty())) {
+						retryCount++;
 						this.reconcileTable(tableName);
 						this.reconcileColumns(tableName, wireRecord);
-						retryCount++;
 					}
 				} catch (final SQLException ee) {
 					s_logger.error(s_message.errorStoring() + ee);
 				}
 			}
-		} while (!inserted || (retryCount < 2));
+		} while (!inserted && (retryCount < 2));
 	}
 
 	/**

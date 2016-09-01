@@ -33,7 +33,7 @@ public interface WireSupport extends Producer, Consumer {
 	 * Emit the provided wire records
 	 *
 	 * @param wireRecords
-	 *            the wire records
+	 *            the Wire Records to emit
 	 */
 	public void emit(List<WireRecord> wireRecords);
 

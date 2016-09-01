@@ -133,7 +133,7 @@ public class OpenPortsTabUi extends Composite implements Tab {
 
 			@Override
 			public void onSuccess(GwtXSRFToken token) {
-				gwtNetworkService.findDeviceFirewallOpenPorts(token, new AsyncCallback<ArrayList<GwtFirewallOpenPortEntry>>() {
+				gwtNetworkService.findDeviceFirewallOpenPorts(token, new AsyncCallback<List<GwtFirewallOpenPortEntry>>() {
 					@Override
 					public void onFailure(Throwable caught) {
 						EntryClassUi.hideWaitModal();
@@ -141,7 +141,7 @@ public class OpenPortsTabUi extends Composite implements Tab {
 					}
 
 					@Override
-					public void onSuccess(ArrayList<GwtFirewallOpenPortEntry> result) {
+					public void onSuccess(List<GwtFirewallOpenPortEntry> result) {
 						for (GwtFirewallOpenPortEntry pair : result) {
 							openPortsDataProvider.getList().add(pair);
 						}
@@ -428,6 +428,7 @@ public class OpenPortsTabUi extends Composite implements Tab {
 						openPortsDataProvider.getList().add(editOpenPortEntry);
 						openPortsDataProvider.flush();
 						apply.setEnabled(true);
+						editOpenPortEntry = null;
 						setVisibility();
 					} else {	//end duplicate
 						openPortsDataProvider.getList().add(oldEntry);
@@ -718,8 +719,13 @@ public class OpenPortsTabUi extends Composite implements Tab {
 		List<GwtFirewallOpenPortEntry> entries = openPortsDataProvider.getList();
 		if (entries != null && openPortEntry != null) {
 			for (GwtFirewallOpenPortEntry entry : entries) {
-				if (entry.getPortRange().equals(openPortEntry.getPortRange()) && 
-						entry.getPermittedNetwork().equals(openPortEntry.getPermittedNetwork())) {
+				if (entry.getPortRange().equals(openPortEntry.getPortRange()) &&
+						entry.getProtocol().equals(openPortEntry.getProtocol()) &&
+						entry.getPermittedNetwork().equals(openPortEntry.getPermittedNetwork()) &&
+						entry.getPermittedInterfaceName().equals(openPortEntry.getPermittedInterfaceName()) &&
+						entry.getUnpermittedInterfaceName().equals(openPortEntry.getUnpermittedInterfaceName()) &&
+						entry.getPermittedMAC().equals(openPortEntry.getPermittedMAC()) &&
+						entry.getSourcePortRange().equals(openPortEntry.getSourcePortRange())) {
 					return true;
 				}
 			}

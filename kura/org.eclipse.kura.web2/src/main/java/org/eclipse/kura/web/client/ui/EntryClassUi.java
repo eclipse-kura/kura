@@ -397,8 +397,8 @@ public class EntryClassUi extends Composite {
 					public void onSuccess(List<GwtConfigComponent> result) {
 						servicesMenu.clear();
 						for (GwtConfigComponent pair : result) {
-							//servicesMenu.add(new ServicesAnchorListItem(pair, ui));
-							servicesMenu.add(new ServicesCompositeListItem(pair, ui));
+							servicesMenu.add(new ServicesAnchorListItem(pair, ui));
+							//servicesMenu.add(new ServicesCompositeListItem(pair, ui));
 						}
 					}
 				});
@@ -434,7 +434,8 @@ public class EntryClassUi extends Composite {
 
 							@Override
 							public void onSuccess(Void result) {
-								changeHandler.onValueChange(null);
+								ValueChangeEvent event = new SelectValueChangeEvent(textSearch.getValue());
+								changeHandler.onValueChange(event);
 							}
 						});
 					}
@@ -502,11 +503,11 @@ public class EntryClassUi extends Composite {
 						public void onSuccess(List<GwtConfigComponent> result) {
 							servicesMenu.clear();
 							for (GwtConfigComponent pair : result) {
-								String filter = textSearch.getValue(); 
+								String filter = event.getValue().toString(); 
 								String compName = pair.getComponentName();
 								if(compName.toLowerCase().contains(filter)){
-									//servicesMenu.add(new ServicesAnchorListItem(pair, ui));
-									servicesMenu.add(new ServicesCompositeListItem(pair, ui));
+									servicesMenu.add(new ServicesAnchorListItem(pair, ui));
+									//servicesMenu.add(new ServicesCompositeListItem(pair, ui));
 								}
 							}
 						}
@@ -769,6 +770,34 @@ public class EntryClassUi extends Composite {
 		});
 	}
 	
+	public void deleteFactoryConfiguration(final GwtConfigComponent component){
+		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+			@Override
+			public void onFailure(Throwable ex) {
+				FailureHandler.handle(ex, EntryClassUi.class.getName());
+			}
+
+			@Override
+			public void onSuccess(GwtXSRFToken token) {
+				String pid = component.getComponentId();
+				gwtComponentService.deleteFactoryConfiguration(token, pid, new AsyncCallback<Void>() {
+
+							@Override
+							public void onFailure(Throwable ex) {
+								logger.log(Level.SEVERE, ex.getMessage(), ex);
+								FailureHandler.handle(ex, EntryClassUi.class.getName());
+							}
+
+							@Override
+							public void onSuccess(Void result) {
+								changeHandler.onValueChange(new SelectValueChangeEvent(textSearch.getValue()));								
+							}
+				});
+			}
+		});	
+	}
+	
 	public static native void dragDropInit(EntryClassUi ecu) /*-{
 		$wnd.$("html").on("dragover", function(event) {
 		    event.preventDefault();  
@@ -789,4 +818,12 @@ public class EntryClassUi extends Composite {
 		    }
 		});
 	}-*/;
+	
+	private class SelectValueChangeEvent extends ValueChangeEvent<String>{
+
+		protected SelectValueChangeEvent(String value) {
+			super(value);
+		}
+		
+	}
 }

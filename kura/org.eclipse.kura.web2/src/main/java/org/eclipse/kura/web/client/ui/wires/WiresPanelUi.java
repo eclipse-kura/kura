@@ -13,15 +13,22 @@
 package org.eclipse.kura.web.client.ui.wires;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.WireComponentsAnchorListItem;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtWiresConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtComponentService;
+import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtWireService;
@@ -62,6 +69,7 @@ public class WiresPanelUi extends Composite {
 	public static TextBox factoryPid;
 	private static final GwtWireServiceAsync gwtWireService = GWT.create(GwtWireService.class);
 	private static final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+	private static final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
 	private static final Logger logger = Logger.getLogger(WiresPanelUi.class.getSimpleName());
 	private static List<String> m_components;
 	private static List<String> m_drivers;
@@ -73,6 +81,8 @@ public class WiresPanelUi extends Composite {
 	private static List<String> m_receivers;
 
 	private static String m_wires;
+	
+	private static Map<String, GwtConfigComponent> m_configs = new HashMap<String, GwtConfigComponent>();
 
 	private static WiresPanelUiUiBinder uiBinder = GWT.create(WiresPanelUiUiBinder.class);
 
@@ -186,6 +196,45 @@ public class WiresPanelUi extends Composite {
 			return;
 		}
 		btnDelete.setEnabled(true);
+		
+		// Selection change on JointJs
+		
+		// Retrieve GwtComponentConfiguration to use for manipulating the properties.
+		// If it is already present in the map, it means the component has already been
+		// accessed by the graph, and its configuration has already been gathered from the
+		// ConfigurationService.
+		if(m_configs.get(value)!=null){
+			// populateProperties(m_config.get(value));
+		}else{
+			// else we get the GwtComponentConfiguration from the ConfigurationService
+			gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+	
+				@Override
+				public void onFailure(final Throwable ex) {
+					EntryClassUi.hideWaitModal();
+					FailureHandler.handle(ex);
+				}
+	
+				@Override
+				public void onSuccess(final GwtXSRFToken token) {
+					gwtComponentService.findComponentConfigurationFromPid(token, value, new AsyncCallback<GwtConfigComponent>() {
+	
+						@Override
+						public void onFailure(Throwable caught) {
+							EntryClassUi.hideWaitModal();
+							FailureHandler.handle(caught);
+						}
+	
+						@Override
+						public void onSuccess(GwtConfigComponent result) {
+							//Component configuration retrieved from the Configuration Service
+							m_configs.put(value, result);
+							//populateProperties(result);
+						}
+					});
+				}
+			});
+		}
 	}
 
 	public static int jsniUpdateWireConfig(final String obj) {

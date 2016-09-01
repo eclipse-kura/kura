@@ -105,7 +105,7 @@ img.x-tree3-node-icon {
 
 .devs .label {
 	fill: #31d0c6;
-	font-size: 15px;
+	font-size: 12px;
 }
 
 .devs .port-body {
@@ -116,19 +116,19 @@ img.x-tree3-node-icon {
 
 .devs .port-body:hover {
 	opacity: 1;
-	fill: #ff7e5d;
-}
-
-.devs .port-label {
 	fill: #7c68fc;
 }
 
+.devs .port-label {
+	fill: #ff7e5d;
+}
+
 .devs.Atomic .body {
-	stroke: #31d0c6;
+	stroke: #009ae0;
 }
 
 .devs.Atomic .label {
-	fill: #feb663;
+	fill: #F39C12;
 }
 
 /* links */
@@ -138,7 +138,7 @@ img.x-tree3-node-icon {
 }
 
 .link .marker-arrowhead, .link .marker-vertex {
-	fill: #31D0C6;
+	fill: #009ae0;
 }
 
 .link .marker-arrowhead:hover {
@@ -146,17 +146,22 @@ img.x-tree3-node-icon {
 }
 
 .link-tools .tool-remove circle {
-	fill: #fe854f;
+	fill: #F39C12;
 }
 
 /* highlighting */
+.elelemt.highlighted rect {
+	fill: red;
+	stroke: red;	
+}
+
 .devs.highlighted-parent .body {
-	stroke: #fe854f;
+	stroke: #ff0000;
 	transition: stroke 1s;
 }
 
 .devs.highlighted-parent .label {
-	fill: #fe854f;
+	fill: #ff0000;
 	transition: fill 1s;
 	text-decoration: underline;
 }

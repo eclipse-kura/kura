@@ -167,6 +167,7 @@ public class Console implements ConfigurableComponent {
 				EventProperties eventProps = new EventProperties(props);
 				s_logger.info("postInstalledEvent() :: posting KuraConfigReadyEvent");
 				m_eventAdmin.postEvent(new Event(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC, eventProps));
+				
 			} else {
 				s_logger.info("Web interface disabled in Kura properties file.");
 			}
@@ -277,4 +278,5 @@ public class Console implements ConfigurableComponent {
 		m_httpService.registerServlet(servletRoot + "/wires", new GwtWireServiceImpl(), null, httpCtx);
 		
 	}
+
 }

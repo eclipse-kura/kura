@@ -88,6 +88,8 @@ public final class ModbusChannelDescriptor implements ChannelDescriptor {
 		holdingRegister.setLabel(s_message.holdingRegs());
 		primaryTable.getOption().add(holdingRegister);
 
+		this.m_elements.add(primaryTable);
+		
 		final Tad address = new Tad();
 		address.setName(s_message.memoryAddr());
 		address.setId("memory.address");

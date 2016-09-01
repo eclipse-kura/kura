@@ -83,7 +83,7 @@ public final class AssetCommandProvider implements CommandProvider {
 		map.put(i + ".CH.value.type", prop.get(3));
 		map.put(i + ".CH.DRIVER.unit.id", Integer.valueOf(prop.get(4)));
 		map.put(i + ".CH.DRIVER.memory.address", Integer.valueOf(prop.get(5)));
-		map.put(i + ".CH.DRIVER.primary.table", Integer.valueOf(prop.get(6)));
+		map.put(i + ".CH.DRIVER.primary.table", prop.get(6));
 		this.m_configService.updateConfiguration(prop.get(0), map);
 	}
 

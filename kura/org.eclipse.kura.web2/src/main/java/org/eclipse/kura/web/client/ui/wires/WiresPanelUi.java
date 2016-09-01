@@ -128,7 +128,7 @@ public class WiresPanelUi extends Composite {
 	@org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniUpdateWireConfig(Ljava/lang/String;)
 	);
 	}-*/;
-
+	
 	private static void internalLoad(final GwtWiresConfiguration config) {
 		if (m_emitters != null) {
 			m_emitters.clear();

@@ -60,7 +60,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
 			super.setIcon(icon);
 			super.setText(item.getComponentName());
 		}
-
+		
 		super.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {

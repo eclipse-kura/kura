@@ -18,6 +18,22 @@
 	xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
+<!-- 	<ui:style> -->
+	
+<!-- 	.important { font-weight: bold; } -->
+<!-- 	.column { border: 1px solid #000000; text-align: center; } -->
+<!-- 	.image { text-align: left; height: 38px; width: 127px; vertical-align: baseline; background-repeat: no-repeat; background-size: contain; } -->
+<!-- 	.center-panel {	} -->
+<!-- 	.top-row-padding { margin-right: 30px; margin-top: 20px; margin-bottom: -10px; } -->
+<!-- 	.bottom-row-padding { margin-top: -10px; margin-bottom: -30px; } -->
+<!-- 	.outer-column {	margin-bottom: -20px; } -->
+<!-- 	.system-list { padding-left: 5px; padding-right: 0px; } -->
+<!-- 	.services-list { padding-left: 5px; padding-right: 0px; } -->
+<!-- 	.content-panel-body { padding: 1px; } -->
+<!-- 	.modal-wait {background-color: black; border: solid 1px red; } -->
+<!-- 	.red { color: red; } -->
+	
+<!-- 	</ui:style> -->
 	<ui:style>
 	
 	.important { font-weight: bold; }
@@ -27,8 +43,8 @@
 	.top-row-padding { margin-right: 30px; margin-top: 20px; margin-bottom: -10px; }
 	.bottom-row-padding { margin-top: -10px; margin-bottom: -30px; }
 	.outer-column {	margin-bottom: -20px; }
-	.system-list { padding-left: 10px; padding-right: 0px; }
-	.services-list { padding-left: 10px; padding-right: 0px; }
+	.system-list { padding-left: 5px; padding-right: 0px; }
+	.services-list { padding-left: 5px; padding-right: 0px; }
 	.content-panel-body { padding: 1px; }
 	.modal-wait {background-color: black; border: solid 1px red; }
 	.red { color: red; }
@@ -101,9 +117,21 @@
 												<b:Heading size="H3" text="Services" />
 											</b:PanelHeader>
 											<b:PanelBody>
-												<g:ScrollPanel ui:field="servicesPanel">
+												<b:Form type="INLINE">
+												  <b:FieldSet>
+												    <b:FormGroup>
+												      <b:TextBox placeholder="Search by name or factory..." ui:field="textSearch"/>
+												    </b:FormGroup>
+												    <b:FormGroup>
+												        <b:Tooltip title="Create a new factory component" placement="RIGHT">
+												    		<b:Button icon="PLUS" size="SMALL" dataTarget="#myModal" dataToggle="MODAL" ui:field="factoriesButton"/>
+												    	</b:Tooltip>
+												    </b:FormGroup>
+												  </b:FieldSet>
+												 </b:Form>
+												 <g:ScrollPanel ui:field="servicesPanel">
 													<b:NavPills stacked="true" ui:field="servicesMenu" />
-												</g:ScrollPanel>
+												 </g:ScrollPanel>
 											</b:PanelBody>
 										</b:Panel>
 									</b:Column>
@@ -152,5 +180,29 @@
 				</b:Column>
 			</b:Row>
 		</b:Column>
+		<b:Modal title="New Factory Component" closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="myModal">
+		    <b:ModalBody>
+		        <b:Form type="HORIZONTAL">
+				  <b:FieldSet>
+				    <b:FormGroup>
+				      <b:FormLabel for="formFactory" addStyleNames="col-lg-2">Factory</b:FormLabel>
+				      <g:FlowPanel addStyleNames="col-lg-10">
+				        <b:ListBox b:id="formFactory" ui:field="factoriesList"/>
+				      </g:FlowPanel>
+				    </b:FormGroup>
+					<b:FormGroup>
+				      <b:FormLabel for="formName" addStyleNames="col-lg-2">Name</b:FormLabel>
+				      <g:FlowPanel addStyleNames="col-lg-10">
+				        <b:TextBox placeholder="Component name" b:id="formName" ui:field="componentName"/>
+				      </g:FlowPanel>
+				    </b:FormGroup>
+				  </b:FieldSet>
+				</b:Form>
+		    </b:ModalBody>
+		    <b:ModalFooter>
+		        <b:Button type="PRIMARY" dataDismiss="MODAL" ui:field="buttonNewComponent">Create</b:Button>
+		        <b:Button type="DANGER" dataDismiss="MODAL">Close</b:Button>
+		    </b:ModalFooter>
+		</b:Modal>
 	</b:Container>
 </ui:UiBinder> 

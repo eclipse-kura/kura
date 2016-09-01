@@ -167,6 +167,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 	}
 
 	/** {@inheritDoc} */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public GwtWiresConfiguration updateWireConfiguration(final GwtXSRFToken xsrfToken,
 			final String newJsonConfiguration) throws GwtKuraException {
@@ -228,8 +229,8 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 					final String prod = idToPid.get(jCells.getJSONObject(i).getString(PRODUCER));
 					final String cons = idToPid.get(jCells.getJSONObject(i).getString(CONSUMER));
 					s_logger.info("Creating new wire: Producer PID -> " + prod + " | Consumer PID -> " + cons);
-					s_logger.info("Service Pid for Producer: {}", wireHelperService.getServicePid(prod));
-					s_logger.info("Service Pid for Consumer: {}", wireHelperService.getServicePid(cons));
+					s_logger.info("Service Pid for Producer before tracker: {}", wireHelperService.getServicePid(prod));
+					s_logger.info("Service Pid for Consumer before tracker: {}", wireHelperService.getServicePid(cons));
 
 					// track and wait for the producer
 					final String pPid = wireHelperService.getServicePid(prod);

@@ -18,20 +18,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Icon;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Option;
-import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.web.server.util.KuraExceptionHandler;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
 
 public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements GwtComponentService 
@@ -75,8 +77,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 					if (props != null && props.get("service.factoryPid") != null){
 						String pid = stripPidPrefix(config.getPid());
 						gwtConfig.setComponentName(pid);
+						gwtConfig.setFactoryComponent(true);
 					}else{
 						gwtConfig.setComponentName(ocd.getName());
+						gwtConfig.setFactoryComponent(false);
 					}
 					
 					gwtConfig.setComponentDescription(ocd.getDescription());
@@ -442,6 +446,26 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 			} else {
 				return pid;
 			}
+		}
+	}
+
+	@Override
+	public List<String> getFactoryComponents(GwtXSRFToken xsrfToken) throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
+		ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
+		ArrayList<String> result =new ArrayList<String>();
+		result.addAll(cs.getFactoryComponentPids());
+		return result;
+	}
+
+	@Override
+	public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid) throws GwtKuraException {
+		checkXSRFToken(xsrfToken);
+		ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
+		try {
+			cs.createFactoryConfiguration(factoryPid, pid, null, true);
+		} catch (KuraException e) {
+			throw new GwtKuraException("A component with the same name already exists!");
 		}
 	}
 }

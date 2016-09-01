@@ -471,8 +471,8 @@ public interface WireMessages {
 	@En("Storing string of value {0}")
 	public String storeString(String value);
 
-	@En("Storing data record from emitter {0} into table {1}...")
-	public String storingRecord(String emitterName, String tableName);
+	@En("Storing data into table {0}...")
+	public String storingRecord(String emitterName);
 
 	@En("STRING")
 	public String string();

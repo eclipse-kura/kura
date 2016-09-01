@@ -181,6 +181,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 		for (final WireConfiguration conf : cloned) {
 			final String emitterPid = conf.getEmitterPid();
 			final String receiverPid = conf.getReceiverPid();
+
 			final boolean emitterFound = this.m_trackerCustomizer.getWireEmitters().contains(emitterPid);
 			final boolean receiverFound = this.m_trackerCustomizer.getWireReceivers().contains(receiverPid);
 			if (emitterFound && receiverFound) {
@@ -191,8 +192,8 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 					if (conf.getWire() == null) {
 						try {
 							final Wire[] wires = this.m_wireAdmin.getWires(null);
+							boolean found = false;
 							if (wires != null) {
-								boolean found = false;
 								for (final Wire w : wires) {
 									if (w.getProperties().get(WIREADMIN_PRODUCER_PID).equals(emitterServicePid) && w
 											.getProperties().get(WIREADMIN_CONSUMER_PID).equals(receiverServicePid)) {
@@ -200,11 +201,11 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 										break;
 									}
 								}
-								if (!found) {
-									final Wire wire = this.m_wireAdmin.createWire(emitterServicePid, receiverServicePid,
-											null);
-									conf.setWire(wire);
-								}
+							}
+							if (!found) {
+								final Wire wire = this.m_wireAdmin.createWire(emitterServicePid, receiverServicePid,
+										null);
+								conf.setWire(wire);
 							}
 						} catch (final InvalidSyntaxException e) {
 							s_logger.error(ThrowableUtil.stackTraceAsString(e));

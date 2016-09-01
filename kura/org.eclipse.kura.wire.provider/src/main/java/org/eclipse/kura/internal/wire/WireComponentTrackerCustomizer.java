@@ -17,13 +17,13 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 
 import java.util.List;
 
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.util.collection.CollectionUtil;
+import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireEmitter;
@@ -88,54 +88,22 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
 	public WireComponent addingService(final ServiceReference<WireComponent> reference) {
 		final WireComponent service = this.m_context.getService(reference);
 		s_logger.debug(s_message.addingWireComponent());
-		boolean flag = false;
 		final String property = (String) reference.getProperty(KURA_SERVICE_PID);
 		if (service instanceof WireEmitter) {
 			this.m_wireEmitters.add(property);
 			s_logger.debug(s_message.registeringEmitter(property));
-			flag = true;
 		}
 		if (service instanceof WireReceiver) {
 			this.m_wireReceivers.add(property);
 			s_logger.debug(s_message.registeringReceiver(property));
-			flag = true;
 		}
-		if (flag) {
-			try {
-				this.m_wireService.createWires();
-			} catch (final KuraException e) {
-				s_logger.error(s_message.errorCreatingWires() + ThrowableUtil.stackTraceAsString(e));
-			}
+		try {
+			this.m_wireService.createWires();
+		} catch (final KuraException e) {
+			s_logger.error(s_message.errorCreatingWires() + ThrowableUtil.stackTraceAsString(e));
 		}
 		s_logger.debug(s_message.addingWireComponentDone());
 		return service;
-	}
-
-	/**
-	 * Returns references to <em>all</em> services matching the given class name
-	 * and OSGi filter.
-	 *
-	 * @param bundleContext
-	 *            OSGi bundle context
-	 * @param clazz
-	 *            fully qualified class name (can be <code>null</code>)
-	 * @param filter
-	 *            valid OSGi filter (can be <code>null</code>)
-	 * @return non-<code>null</code> array of references to matching services
-	 * @throws KuraRuntimeException
-	 *             if the filter syntax is wrong, even though filter can be null
-	 */
-	private ServiceReference<?>[] getServiceReferences(final BundleContext bundleContext, final String clazz,
-			final String filter) {
-		checkNull(bundleContext, s_message.bundleContextNonNull());
-		checkNull(bundleContext, s_message.filterNonNull());
-
-		try {
-			final ServiceReference<?>[] refs = bundleContext.getServiceReferences(clazz, filter);
-			return refs == null ? new ServiceReference[0] : refs;
-		} catch (final InvalidSyntaxException ise) {
-			throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, ThrowableUtil.stackTraceAsString(ise));
-		}
 	}
 
 	/**
@@ -205,8 +173,8 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
 	 * Searches for the service instances of type Wire Components
 	 */
 	private void searchPreExistingWireComponents() {
-		final ServiceReference<?>[] refs = this.getServiceReferences(this.m_context, WireComponent.class.getName(),
-				null);
+		final ServiceReference<WireComponent>[] refs = ServiceUtil.getServiceReferences(this.m_context,
+				WireComponent.class, null);
 		for (final ServiceReference<?> ref : refs) {
 			final WireComponent wc = (WireComponent) this.m_context.getService(ref);
 			if (wc instanceof WireEmitter) {

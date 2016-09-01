@@ -990,7 +990,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/com.codeminders.hidapi_${com.codeminders.hidapi.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.soda.dk.comm_1.2.2.SNAPSHOT.jar@3:start" /> <!-- ${org.eclipse.soda.dk.comm.version} -->
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.soda.dk.comm_${org.eclipse.soda.dk.comm.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.commons.lang3_${org.apache.commons.lang3.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"

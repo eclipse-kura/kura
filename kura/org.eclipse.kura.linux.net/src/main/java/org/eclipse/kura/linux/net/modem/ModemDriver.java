@@ -556,8 +556,7 @@ public class ModemDriver {
 
                     if (fileContent != null && fileContent.contains("eth-cortex-usb")) {
                         String baseValue = readFile(gpioChipBaseFile);
-                        String[] splittedVals = baseValue.split("\n");
-                        return Integer.parseInt(splittedVals[0]);
+                        return Integer.parseInt(baseValue);
                     }
                 } catch (IOException e) {
                     s_logger.warn("Exception while opening gpiochip file.", e);
@@ -578,12 +577,10 @@ public class ModemDriver {
             fr = new FileReader(gpioChipFile);
             br = new BufferedReader(fr);
             StringBuilder sb = new StringBuilder();
-            String line = br.readLine();
-
-            while (line != null) {
+            
+            String line;
+            while ((line = br.readLine()) != null)   {
                 sb.append(line);
-                sb.append(System.lineSeparator());
-                line = br.readLine();
             }
             return sb.toString();
         } finally {

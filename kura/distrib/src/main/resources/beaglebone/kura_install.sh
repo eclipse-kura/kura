@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+# Copyright (c) 2011, 2016 Eurotech and/or its affiliates
 #
 #  All rights reserved. This program and the accompanying materials
 #  are made available under the terms of the Eclipse Public License v1.0
@@ -24,6 +24,11 @@ chmod +x ${INSTALL_DIR}/kura/bin/*.sh
 # setup snapshot_0 recovery folder
 if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
     mkdir ${INSTALL_DIR}/kura/.data
+fi
+
+# setup /etc/sysconfig folder for iptables configuration file
+if [ ! -d /etc/sysconfig ]; then
+    mkdir /etc/sysconfig
 fi
 
 #set up default networking file

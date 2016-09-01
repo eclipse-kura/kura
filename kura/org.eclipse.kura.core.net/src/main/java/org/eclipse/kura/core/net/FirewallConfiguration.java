@@ -152,14 +152,14 @@ public class FirewallConfiguration {
 						String dstIface = sa[1];
 						String protocol = sa[2];
 						String src = null;
-						if (!sa[4].isEmpty()) {
-							src = sa[4];
+						if (!sa[3].isEmpty()) {
+							src = sa[3];
 						}
 						String dst = null;
-						if (!sa[5].isEmpty()) {
-							dst = sa[5];
+						if (!sa[4].isEmpty()) {
+							dst = sa[4];
 						}
-						boolean masquerade = Boolean.parseBoolean(sa[6]);
+						boolean masquerade = Boolean.parseBoolean(sa[5]);
 						FirewallNatConfig natEntry = new FirewallNatConfig(srcIface, dstIface, protocol, src, dst, masquerade);
 						m_natConfigs.add(natEntry);
 					}

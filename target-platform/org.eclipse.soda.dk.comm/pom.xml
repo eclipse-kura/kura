@@ -11,7 +11,7 @@
 
     <groupId>org.eclipse</groupId>
     <artifactId>org.eclipse.soda.dk.comm</artifactId>
-    <version>1.2.2-SNAPSHOT</version>
+    <version>1.2.2</version>
     <packaging>bundle</packaging>
 
     <name>Serial Device based on SODA DK comm</name>
@@ -105,6 +105,7 @@ Import-Package: org.osgi.framework;version="1.4.0"
                         	lib/linux/armv5_sf/libdkcomm.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv6_sf))",
                         	lib/linux/armv5_sf/libdkcomm.so; osname=Linux; processor=ARM; selection-filter="(&amp;(kura.arch=armv5_sf))",
                         	lib/mac/x86/libdkcomm.jnilib; osname=macosx; processor=x86_64,
+                        	lib/win32/x86/dkcomm.lib; osname=win32; processor=x86_64,
                         	*
                         </Bundle-NativeCode>
                         <Import-Package>

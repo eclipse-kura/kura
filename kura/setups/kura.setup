@@ -68,8 +68,6 @@
   <setupTask
       xsi:type="setup.p2:P2Task">
     <requirement
-        name="org.tigris.mtoolkit.feature.group"/>
-    <requirement
         name="org.eclipse.m2e.feature.feature.group"/>
     <requirement
         name="org.sonatype.tycho.m2e.feature.feature.group"/>
@@ -77,8 +75,6 @@
         name="org.eclipse.m2e.wtp.feature.feature.group"/>
     <requirement
         name="org.eclipse.oomph.setup.projects.feature.group"/>
-    <repository
-        url="http://mtoolkit.tigris.org/updates/stable"/>
     <repository
         url="http://repo1.maven.org/maven2/.m2e/connectors/m2eclipse-tycho/0.8.0/N/0.8.0.201409231215/"/>
     <description>Install the tools needed in the IDE to work with the source code for ${scope.project.label}</description>

@@ -25,7 +25,7 @@
 
 	<artifactId>org.eclipse.kura.core.test</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
-	<version>1.0.5-SNAPSHOT</version>
+	<version>1.0.6-SNAPSHOT</version>
 
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>

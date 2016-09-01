@@ -51,22 +51,34 @@ public class PppLinux {
 	public static void disconnect(String iface, String port) throws KuraException {
 		
 		int pid = getPid(iface, port);
-		if(pid >= 0) {
-    		s_logger.info("killing {}  pid={}", iface, pid);
-    		if (!LinuxProcessUtil.stop(pid)) {
-    			LinuxProcessUtil.kill(pid);
+		if (pid >= 0) {
+    		s_logger.info("stopping {} pid={}", iface, pid);
+    		
+    		boolean exists = LinuxProcessUtil.stop(pid);
+    		if (!exists) {
+    			s_logger.warn("stopping {} pid={} failed", iface, pid);
+    		} else {
+    			exists = waitProcess(pid, 500, 5000);
     		}
-    		if (port.startsWith("/dev/")) {
-    			port = port.substring("/dev/".length());
+    		
+    		if (exists) {
+    			s_logger.info("killing {} pid={}", iface, pid);
+    			exists = LinuxProcessUtil.kill(pid);
+    			if (!exists) {
+    				s_logger.warn("killing {} pid={} failed", iface, pid);
+    			} else {
+    				exists = waitProcess(pid, 500, 5000);
+    			}
     		}
-    		File fLock = new File("/var/lock/LCK.."+port);
-    		if (fLock.exists()) {
-    			s_logger.warn("disconnect() :: deleting stale lock file {}", port);
-    			fLock.delete();
+    		
+    		if (exists) {
+    			s_logger.warn("Failed to disconnect {}", iface);
+    		} else {
+    			deleteLock(port);
     		}
 		}
 	}
-	
+		
 	public static boolean isPppProcessRunning(String iface, String port) throws KuraException {
 	    
 		return (getPid(iface, port) > 0)? true : false; 
@@ -131,6 +143,40 @@ public class PppLinux {
 			}
 		}
 		return pid;
+	}
+	
+	// Only call this method after a call to stop or kill.
+	// FIXME: this is an utility method that should be moved in a suitable package.
+	private static boolean waitProcess(int pid, long poll, long timeout) {
+		boolean exists = true;
+		try {
+			final long startTime = System.currentTimeMillis();
+			long now;
+			do {
+				Thread.sleep(poll);
+				exists = LinuxProcessUtil.stop(pid);
+				now = System.currentTimeMillis();
+			} while (exists && (now - startTime) < timeout);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			s_logger.warn("Interrupted waiting for pid {} to exit", pid);
+		}
+		
+		return exists;
+	}
+	
+	private static void deleteLock(String port) {
+		String portName = port;
+		if (portName.startsWith("/dev/")) {
+			portName = portName.substring("/dev/".length());
+		}
+		File fLock = new File("/var/lock/LCK.."+portName);
+		if (fLock.exists()) {
+			s_logger.warn("Deleting stale lock file {}", portName);
+			if (!fLock.delete()) {
+				s_logger.warn("Failed to delete {}", fLock);
+			}
+		}
 	}
 	
 	private static String formConnectCommand(String peer, String port) 

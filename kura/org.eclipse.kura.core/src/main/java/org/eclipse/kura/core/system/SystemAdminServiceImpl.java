@@ -16,6 +16,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
@@ -24,14 +27,13 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class SystemAdminServiceImpl implements SystemAdminService 
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(SystemAdminServiceImpl.class);
 
 	private static final String OS_LINUX    = "Linux";
 	private static final String OS_MAC_OSX  = "Mac OS X";
-	private static final String OS_WINDOWS  = "Windows";
+	private static final String OS_WINDOWS  = "windows";
 	private static final String UNKNOWN     = "UNKNOWN";
 
 	@SuppressWarnings("unused")
@@ -77,7 +79,23 @@ public class SystemAdminServiceImpl implements SystemAdminService
 		String uptimeStr = UNKNOWN;
 		long uptime = 0;
 
-		if(OS_LINUX.equals(this.getOsName())) {
+		if(this.getOsName().toLowerCase().contains(OS_WINDOWS)) {
+			try {
+			    	String[] lastBootUpTime = runSystemCommand("wmic os get LastBootUpTime ").split("\n");
+			    	if(lastBootUpTime[0].toLowerCase().startsWith("lastbootuptime")) {
+			    		String lastBoot = lastBootUpTime[2];
+			    		DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+					Date bootDate =  df.parse(lastBoot);
+					uptime = System.currentTimeMillis() - bootDate.getTime();
+					uptimeStr = Long.toString(uptime);
+				}
+			}
+			catch(Exception e) {
+				uptimeStr = "0";
+				s_logger.error("Could not read uptime", e);
+			}
+		}
+		else if(OS_LINUX.equals(this.getOsName())) {
 			File file;
 			FileReader fr = null;
 			BufferedReader br = null;

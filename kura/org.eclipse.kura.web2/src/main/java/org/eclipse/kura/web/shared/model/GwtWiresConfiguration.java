@@ -25,7 +25,7 @@ import org.eclipse.kura.annotation.Nullable;
 public final class GwtWiresConfiguration extends GwtBaseModel implements Serializable {
 
 	/** Serial Version */
-	private static final long serialVersionUID = 2059113769531098096L;
+	private static final long serialVersionUID = 50782654510063453L;
 
 	/** Wires Configuration for Graph in JSON. */
 	private String graph;

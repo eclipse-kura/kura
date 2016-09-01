@@ -41,6 +41,7 @@ import org.gwtbootstrap3.client.shared.event.ModalHideHandler;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Icon;
+import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
@@ -50,6 +51,7 @@ import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.TabListItem;
+import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.IconSize;
 import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.client.ui.html.Span;
@@ -57,6 +59,8 @@ import org.gwtbootstrap3.client.ui.html.Span;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -131,12 +135,21 @@ public class EntryClassUi extends Composite {
 	@UiField
 	ScrollPanel servicesPanel;
 	@UiField
+	TextBox textSearch;
+	@UiField
 	NavPills servicesMenu;
 	@UiField
 	VerticalPanel errorLogArea;
 	@UiField
 	Modal errorPopup;
-
+	@UiField
+	Button buttonNewComponent;
+	@UiField
+	ListBox factoriesList;
+	@UiField
+	Button factoriesButton;
+	@UiField
+	TextBox componentName;
 
 	public EntryClassUi() {
 		logger.log(Level.FINER, "Initiating UiBinder");
@@ -361,6 +374,7 @@ public class EntryClassUi extends Composite {
 		});
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void initServicesTree() {
 		// (Re)Fetch Available Services
 		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
@@ -383,14 +397,124 @@ public class EntryClassUi extends Composite {
 					public void onSuccess(List<GwtConfigComponent> result) {
 						servicesMenu.clear();
 						for (GwtConfigComponent pair : result) {
-							servicesMenu.add(new ServicesAnchorListItem(pair, ui));
+							//servicesMenu.add(new ServicesAnchorListItem(pair, ui));
+							servicesMenu.add(new ServicesCompositeListItem(pair, ui));
 						}
 					}
 				});
 			}
 		});
+		
+		// Keypress handler
+		textSearch.addValueChangeHandler(changeHandler);
+		
+		// New factory configuration handler
+		buttonNewComponent.addClickHandler(new ClickHandler(){
 
+			@Override
+			public void onClick(ClickEvent event) {
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex, EntryClassUi.class.getName());
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {
+						String factoryPid = factoriesList.getSelectedValue();
+						String pid = componentName.getValue();
+						gwtComponentService.createFactoryComponent(token, factoryPid, pid, new AsyncCallback<Void>() {
+
+							@Override
+							public void onFailure(Throwable ex) {
+								logger.log(Level.SEVERE, ex.getMessage(), ex);
+								FailureHandler.handle(ex, EntryClassUi.class.getName());
+							}
+
+							@Override
+							public void onSuccess(Void result) {
+								changeHandler.onValueChange(null);
+							}
+						});
+					}
+				});
+			}
+		});
+		
+		factoriesButton.addClickHandler(new ClickHandler(){
+
+			@Override
+			public void onClick(ClickEvent event) {
+				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+					@Override
+					public void onFailure(Throwable ex) {
+						FailureHandler.handle(ex, EntryClassUi.class.getName());
+					}
+
+					@Override
+					public void onSuccess(GwtXSRFToken token) {
+						gwtComponentService.getFactoryComponents(token, new AsyncCallback<List<String>>() {
+
+							@Override
+							public void onFailure(Throwable ex) {
+								logger.log(Level.SEVERE, ex.getMessage(), ex);
+								FailureHandler.handle(ex, EntryClassUi.class.getName());
+							}
+
+							@Override
+							public void onSuccess(List<String> result) {
+								factoriesList.clear();
+								for(String s : result){
+									factoriesList.addItem(s);
+								}
+							}
+						});
+					}
+				});
+			}
+		});
+		
 	}
+		
+	private ValueChangeHandler changeHandler = new ValueChangeHandler(){
+		@Override
+		public void onValueChange(final ValueChangeEvent event) {
+			
+			gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+				@Override
+				public void onFailure(Throwable ex) {
+					FailureHandler.handle(ex, EntryClassUi.class.getName());
+				}
+
+				@Override
+				public void onSuccess(GwtXSRFToken token) {
+					gwtComponentService.findComponentConfigurations(token, new AsyncCallback<List<GwtConfigComponent>>() {
+						@Override
+						public void onFailure(Throwable ex) {
+							logger.log(Level.SEVERE, ex.getMessage(), ex);
+							FailureHandler.handle(ex, EntryClassUi.class.getName());
+						}
+
+						@Override
+						public void onSuccess(List<GwtConfigComponent> result) {
+							servicesMenu.clear();
+							for (GwtConfigComponent pair : result) {
+								String filter = textSearch.getValue(); 
+								String compName = pair.getComponentName();
+								if(compName.toLowerCase().contains(filter)){
+									//servicesMenu.add(new ServicesAnchorListItem(pair, ui));
+									servicesMenu.add(new ServicesCompositeListItem(pair, ui));
+								}
+							}
+						}
+					});
+				}
+			});
+		}
+	};	
 
 	public void render(GwtConfigComponent item) {
 		// Do everything Content Panel related in ServicesUi

@@ -32,6 +32,10 @@ var kuraWires = (function() {
 	var removeCellFunc = function(cell) {
 		removeCell(cell);
 	};
+	
+	client.osgiEvent = function(obj){
+		console.log(obj);
+	}
 
 	/*
 	 * / Initiate JointJS graph
@@ -106,7 +110,7 @@ var kuraWires = (function() {
 				});
 				if (!exists) {
 					createComponent(component);
-				}
+				}'blah'
 			});
 		}
 		graph.on('change:source change:target', function(link) {
@@ -372,3 +376,4 @@ var kuraWires = (function() {
 	return client;
 
 }());
+

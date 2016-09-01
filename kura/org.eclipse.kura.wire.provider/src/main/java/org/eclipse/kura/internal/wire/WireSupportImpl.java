@@ -109,7 +109,7 @@ final class WireSupportImpl implements WireSupport {
 			}
 			final Map<String, Object> properties = CollectionUtil.newHashMap();
 			properties.put("emitter", this.m_wireHelperService.getPid(this.m_wireSupporter));
-			this.m_eventAdmin.sendEvent(new Event(WireSupport.EMIT_EVENT_TOPIC, properties));
+			this.m_eventAdmin.postEvent(new Event(WireSupport.EMIT_EVENT_TOPIC, properties));
 		}
 	}
 

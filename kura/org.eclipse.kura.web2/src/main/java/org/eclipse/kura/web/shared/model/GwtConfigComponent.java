@@ -58,6 +58,14 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
     public void setComponentIcon(String componentIcon) {
         set("componentIcon", componentIcon);
     }
+    
+    public void setFactoryComponent(boolean isFactory){
+    	set("factoryComponent", isFactory);
+    }
+    
+    public boolean isFactoryComponent(){
+    	return get("factoryComponent");
+    }
 
 	public List<GwtConfigParameter> getParameters() {
 		return m_parameters;

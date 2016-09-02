@@ -251,9 +251,11 @@
 								<move file="target/source/plugins/org.apache.commons.lang3.jar" tofile="target/source/plugins/org.apache.commons.lang3_${org.apache.commons.lang3.version}.jar"/>
 								<move file="target/source/plugins/org.eclipse.soda.dk.comm.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm_${org.eclipse.soda.dk.comm.version}.jar"/>
 								<move file="target/source/plugins/camel-core.jar" tofile="target/source/plugins/org.apache.camel.camel-core_${org.apache.camel.camel-core.version}.jar"/>
+								<move file="target/source/plugins/camel-stream.jar" tofile="target/source/plugins/org.apache.camel.camel-stream_${org.apache.camel.camel-stream.version}.jar"/>
 								<move file="target/source/plugins/camel-core-osgi.jar" tofile="target/source/plugins/org.apache.camel.camel-core-osgi_${org.apache.camel.camel-core-osgi.version}.jar"/>
 								<move file="target/source/plugins/camel-kura.jar" tofile="target/source/plugins/org.apache.camel.camel-kura_${org.apache.camel.camel-kura.version}.jar"/>
-									
+								<move file="target/source/plugins/org.eclipse.kura.windows.system.jar" tofile="target/source/plugins/org.eclipse.kura.windows.system_${org.eclipse.kura.windows.system.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.kura.windows.launcher.jar" tofile="target/source/plugins/org.eclipse.kura.windows.launcher_${org.eclipse.kura.windows.launcher.version}.jar"/>
 							</tasks>
 						</configuration>
 					</execution>

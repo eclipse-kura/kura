@@ -13,12 +13,14 @@ package org.eclipse.kura.camel.cloud.factory.internal;
 import static org.eclipse.kura.camel.cloud.factory.internal.CamelFactory.FACTORY_ID;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloud.factory.CloudServiceFactory;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
@@ -33,14 +35,14 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CamelManager implements SelfConfiguringComponent {
+public class CamelManager implements SelfConfiguringComponent, CloudServiceFactory {
     private static final Logger logger = LoggerFactory.getLogger(CamelManager.class);
 
     private static final String PID = "org.eclipse.kura.camel.cloud.factory.CamelManager";
 
     private ConfigurationService configurationService;
 
-    private OCD makeModel() {
+    private static OCD makeModel() {
         final ObjectFactory objectFactory = new ObjectFactory();
         final Tocd tocd = objectFactory.createTocd();
 
@@ -96,16 +98,22 @@ public class CamelManager implements SelfConfiguringComponent {
         }
     }
 
-    protected void add(String pid, Map<String, Object> properties) throws KuraException {
-        logger.info("Add: {}", pid);
+    /**
+     * Add a new CamelFactory
+     * @param userPid the PID as entered by the user
+     * @param properties the provided configuration properties
+     * @throws KuraException if anything goes wrong
+     */
+    protected void add(String userPid, Map<String, Object> properties) throws KuraException {
+        logger.info("Add: {}", userPid);
 
-        final Map<String, Object> props = new HashMap<>();        
-        
+        final Map<String, Object> props = new HashMap<>();
+
         String xml = Properties.asString(properties, "xml");
         if (xml == null || xml.trim().isEmpty()) {
             xml = "<routes xmlns=\"http://camel.apache.org/schema/spring\"></routes>";
         }
-        
+
         props.put("xml", xml);
 
         final Integer serviceRanking = Properties.asInteger(properties, "serviceRanking");
@@ -113,7 +121,16 @@ public class CamelManager implements SelfConfiguringComponent {
             props.put("serviceRanking", serviceRanking);
         }
 
-        this.configurationService.createFactoryConfiguration(FACTORY_ID, FACTORY_ID + "-" + pid, props, true);
+        this.configurationService.createFactoryConfiguration(FACTORY_ID, makePid(userPid), props, true);
+    }
+
+    /**
+     * Convert the user entered PID into a PID which does not cause troubles in the Web UI
+     * @param userPid the user PID
+     * @return the modified PID
+     */
+    private String makePid(String userPid) {
+        return FACTORY_ID + "-" + userPid;
     }
 
     private static String asString(Object object) {
@@ -149,6 +166,10 @@ public class CamelManager implements SelfConfiguringComponent {
         return result;
     }
 
+    /**
+     * Enumerate all registered CamelFactory instances
+     * @return a PID (<code>kura.service.pid</code>) set of all registered CamelFactory instances
+     */
     public static Set<String> lookupIds() {
         final Set<String> ids = new TreeSet<>();
         try {
@@ -170,4 +191,36 @@ public class CamelManager implements SelfConfiguringComponent {
             ids.add((String) kpid);
         }
     }
+
+    /**
+     * Provide a common way to delete camel factory configurations
+     * <p>
+     * Right now this is a rather slim implementation used by CamelFactory and the CamelManager 
+     * </p>
+     * @param configurationService the configuration service to use
+     * @param pid the PID to delete
+     */
+    static void delete(ConfigurationService configurationService, String pid) {
+        try {
+            configurationService.deleteFactoryConfiguration(pid, true);
+        } catch (KuraException e) {
+            logger.warn("Failed to delete: {}", pid, e);
+        }
+    }
+
+    @Override
+    public void createConfiguration(String pid) throws KuraException {
+        add(pid, Collections.<String, Object>emptyMap());
+    }
+
+    @Override
+    public void deleteConfiguration(String pid) throws KuraException {
+        delete(this.configurationService, makePid(pid));
+    }
+
+    @Override
+    public String getFactoryPid() {
+        return FACTORY_ID;
+    }
+
 }

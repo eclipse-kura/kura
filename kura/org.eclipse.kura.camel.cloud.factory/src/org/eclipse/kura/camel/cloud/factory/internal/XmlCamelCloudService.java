@@ -73,7 +73,7 @@ public class XmlCamelCloudService {
         logger.debug("Starting router...");
         this.router.start();
         final ServiceStatus status = this.router.getStatus();
-        logger.debug("Starting router... {} ({}, {})", status, status == Started, this.service.isConnected());
+        logger.debug("Starting router... {} ({}, {})", new Object[] { status, status == Started, this.service.isConnected() });
 
         // register
 

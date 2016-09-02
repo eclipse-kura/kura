@@ -15,7 +15,6 @@ import static org.eclipse.kura.camel.cloud.factory.internal.Properties.asString;
 
 import java.util.Map;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.osgi.framework.FrameworkUtil;
@@ -110,11 +109,7 @@ public class CamelFactory implements ConfigurableComponent {
     }
 
     private void performDelete(String pid) {
-        try {
-            this.configurationService.deleteFactoryConfiguration(pid, true);
-        } catch (KuraException e) {
-            logger.warn("Failed to delete: {}", pid, e);
-        }
+        CamelManager.delete(this.configurationService, pid);
     }
 
     private static boolean shouldDelete(Map<String, Object> properties) {

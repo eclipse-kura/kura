@@ -48,11 +48,11 @@ public final class EmitJob implements Job {
 		SchedulerContext schedulerContext = null;
 		try {
 			schedulerContext = context.getScheduler().getContext();
+			final WireSupport wireSupport = (WireSupport) schedulerContext.get("wireSupport");
+			wireSupport.emit(Arrays.asList(new WireRecord(new TimerWireField())));
 		} catch (final SchedulerException ex) {
 			s_logger.error(ThrowableUtil.stackTraceAsString(ex));
 		}
-		final WireSupport wireSupport = (WireSupport) schedulerContext.get("wireSupport");
-		wireSupport.emit(Arrays.asList(new WireRecord(new TimerWireField())));
 	}
 
 }

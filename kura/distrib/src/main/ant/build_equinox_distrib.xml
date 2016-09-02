@@ -1330,10 +1330,10 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	</target>
 
 	<target name="copy-installer-win-x64" if="is.x64">
-		<copy file="${build.install.dir}/${build.output.name}_x64.exe" todir="${project.build.directory}" />
+		<copy file="${build.install.dir}/${build.output.name}_x64.exe" todir="${project.build.directory}" failonerror="false" />
 	</target>
 	<target name="copy-installer-win-x32" unless="is.x64">
-		<copy file="${build.install.dir}/${build.output.name}_x86.exe" todir="${project.build.directory}" />
+		<copy file="${build.install.dir}/${build.output.name}_x86.exe" todir="${project.build.directory}" failonerror="false" />
 	</target>
 
 </project>

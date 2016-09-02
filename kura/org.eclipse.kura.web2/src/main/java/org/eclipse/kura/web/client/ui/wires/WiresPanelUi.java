@@ -19,12 +19,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.WireComponentsAnchorListItem;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtWiresConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
@@ -125,10 +127,10 @@ public class WiresPanelUi extends Composite {
 		return components;
 	}
 
-	public static native void exportJSNIUpdateDeleteButton()
+	public static native void exportJSNIUpdateSelection()
 	/*-{
-	$wnd.jsniUpdateDeleteButton = $entry(
-	@org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniUpdateDeleteButton(Ljava/lang/String;)
+	$wnd.jsniUpdateSelection = $entry(
+	@org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniUpdateSelection(Ljava/lang/String;Ljava/lang/String;)
 	);
 	}-*/;
 
@@ -172,7 +174,7 @@ public class WiresPanelUi extends Composite {
 		populateComponentsPanel();
 		loadGraph();
 		exportJSNIUpdateWireConfig();
-		exportJSNIUpdateDeleteButton();
+		exportJSNIUpdateSelection();
 	}
 
 	private static List<String> intersect(final List<String> firstArray, final List<String> secondArray) {
@@ -190,8 +192,8 @@ public class WiresPanelUi extends Composite {
 	// JSNI
 	//
 	// ----------------------------------------------------------------
-	public static void jsniUpdateDeleteButton(final String value) {
-		if ("".equals(value)) {
+	public static void jsniUpdateSelection(final String pid, final String factoryPid) {
+		if ("".equals(pid)) {
 			btnDelete.setEnabled(false);
 			return;
 		}
@@ -203,8 +205,9 @@ public class WiresPanelUi extends Composite {
 		// If it is already present in the map, it means the component has already been
 		// accessed by the graph, and its configuration has already been gathered from the
 		// ConfigurationService.
-		if(m_configs.get(value)!=null){
-			// populateProperties(m_config.get(value));
+		if(m_configs.get(pid)!=null){
+			// populateProperties(m_config.get(pid));
+			logProperties(m_configs.get(pid));
 		}else{
 			// else we get the GwtComponentConfiguration from the ConfigurationService
 			gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
@@ -217,7 +220,7 @@ public class WiresPanelUi extends Composite {
 	
 				@Override
 				public void onSuccess(final GwtXSRFToken token) {
-					gwtComponentService.findComponentConfigurationFromPid(token, value, new AsyncCallback<GwtConfigComponent>() {
+					gwtComponentService.findComponentConfigurationFromPid(token, pid, factoryPid, new AsyncCallback<GwtConfigComponent>() {
 	
 						@Override
 						public void onFailure(Throwable caught) {
@@ -228,14 +231,18 @@ public class WiresPanelUi extends Composite {
 						@Override
 						public void onSuccess(GwtConfigComponent result) {
 							//Component configuration retrieved from the Configuration Service
-							m_configs.put(value, result);
+							m_configs.put(pid, result);
 							//populateProperties(result);
+							logProperties(result);
+							EntryClassUi.hideWaitModal();
 						}
 					});
 				}
 			});
 		}
 	}
+	
+	
 
 	public static int jsniUpdateWireConfig(final String obj) {
 
@@ -390,6 +397,15 @@ public class WiresPanelUi extends Composite {
 		});
 	}
 
+	private static void logProperties(GwtConfigComponent config){
+		if(config != null){
+			logger.log(Level.SEVERE, config.getComponentName());
+			for(GwtConfigParameter p : config.getParameters()){
+				logger.log(Level.INFO, p.getName());
+			}
+		}
+	}
+	
 	public static native void wiresOpen(String obj)
 	/*-{
 	$wnd.kuraWires.render(obj);

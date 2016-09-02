@@ -309,14 +309,14 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 	}
 
 	@Override
-	public GwtConfigComponent findComponentConfigurationFromPid(GwtXSRFToken xsrfToken, String pid) throws GwtKuraException {
+	public GwtConfigComponent findComponentConfigurationFromPid(GwtXSRFToken xsrfToken, String pid, String factoryPid) throws GwtKuraException {
 		checkXSRFToken(xsrfToken);
 		ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
 		
 		try {
 			ComponentConfiguration conf = cs.getComponentConfiguration(pid);
-			if(conf.getDefinition() == null){
-				conf = cs.getDefaultComponentConfiguration(pid);
+			if(conf == null){
+				conf = cs.getDefaultComponentConfiguration(factoryPid);
 			}
 			GwtConfigComponent comp = createConfigFromConfiguration(conf); 
 					

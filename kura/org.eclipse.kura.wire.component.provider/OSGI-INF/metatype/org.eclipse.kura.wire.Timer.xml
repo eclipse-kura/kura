@@ -18,14 +18,33 @@
 
         <Icon resource="Timer" size="32"/>
                 
-        <AD id="interval"
-            name="interval"
+        <AD id="type"
+            name="type"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="SIMPLE"
+            description="The type specifier for the interval">
+            <Option label="SIMPLE" value="SIMPLE" />
+            <Option label="CRON" value="CRON" />
+        </AD>
+        
+        <AD id="simple.interval"
+            name="simple.interval"
             type="Integer"
             cardinality="0"
             required="true"
             default="10"
-            description="Interval of the timer ticks, in seconds"
+            description="Interval of the timer ticks, in seconds (Needs to be set if SIMPLE type is selected)"
             min="1"/>
+            
+        <AD id="cron.interval"
+            name="cron.interval"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="0/10 * * * * ?"
+            description="Interval in CRON expression (day-of-week AND a day-of-month cron parameter is not implemented) (Needs to be set if CRON type is selected)"/>
 
     </OCD>
     

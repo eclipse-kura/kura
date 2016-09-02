@@ -159,6 +159,9 @@ public interface WireMessages {
 	@En("Creating wires.....Done")
 	public String creatingWiresDone();
 
+	@En("Cron Expression cannot be null")
+	public String cronExpressionNonNull();
+
 	@En("Data Service cannot be null")
 	public String dataServiceNonNull();
 
@@ -305,6 +308,9 @@ public interface WireMessages {
 
 	@En("Interface class cannot be null")
 	public String interfaceClassNonNull();
+
+	@En("Interval cannot be less than or equal to zero")
+	public String intervalNonLessThanEqualToZero();
 
 	@En("latitude")
 	public String latitude();

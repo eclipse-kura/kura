@@ -12,23 +12,30 @@
  */
 package org.eclipse.kura.internal.wire.timer;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import static org.eclipse.kura.Preconditions.checkCondition;
+import static org.eclipse.kura.Preconditions.checkNull;
 
+import java.util.Map;
+
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
-import org.eclipse.kura.wire.TimerWireField;
+import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireHelperService;
-import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,39 +45,23 @@ import org.slf4j.LoggerFactory;
  */
 public final class Timer implements WireEmitter, ConfigurableComponent {
 
-	/** The Constant denoting the interval property from the metatype */
-	private static final String PROP_INTERVAL = "interval";
-
 	/** The Logger instance. */
 	private static final Logger s_logger = LoggerFactory.getLogger(Timer.class);
 
 	/** Localization Resource */
 	private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
-	/** Schedule Executor Service **/
-	private final ScheduledExecutorService m_executorService;
+	/** Scheduler instance */
+	private Scheduler m_scheduler;
 
-	/** The interval time (in seconds). */
-	private int m_interval;
-
-	/** The properties as provided by configuration admin. */
-	private Map<String, Object> m_properties;
-
-	/** The future handle of the thread pool executor service. */
-	private ScheduledFuture<?> m_tickHandle;
+	/** The configured options */
+	private TimerOptions m_timerOptions;
 
 	/** The Wire Helper Service. */
 	private volatile WireHelperService m_wireHelperService;
 
 	/** The wire supporter component. */
 	private WireSupport m_wireSupport;
-
-	/**
-	 * Instantiates a new timer.
-	 */
-	public Timer() {
-		this.m_executorService = Executors.newSingleThreadScheduledExecutor();
-	}
 
 	/**
 	 * OSGi service component activation callback
@@ -83,7 +74,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	protected synchronized void activate(final ComponentContext ctx, final Map<String, Object> properties) {
 		s_logger.debug(s_message.activatingTimer());
 		this.m_wireSupport = this.m_wireHelperService.newWireSupport(this);
-		this.m_properties = properties;
+		this.m_timerOptions = new TimerOptions(properties);
 		this.doUpdate();
 		s_logger.debug(s_message.activatingTimerDone());
 	}
@@ -114,11 +105,12 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 */
 	protected synchronized void deactivate(final ComponentContext ctx) {
 		s_logger.debug(s_message.deactivatingTimer());
-		if (this.m_tickHandle != null) {
-			this.m_tickHandle.cancel(true);
-		}
-		if (this.m_executorService != null) {
-			this.m_executorService.shutdown();
+		if (this.m_scheduler != null) {
+			try {
+				this.m_scheduler.shutdown();
+			} catch (final SchedulerException e) {
+				s_logger.error(ThrowableUtil.stackTraceAsString(e));
+			}
 		}
 		s_logger.debug(s_message.deactivatingTimerDone());
 	}
@@ -128,23 +120,77 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 * interval
 	 */
 	private void doUpdate() {
-		this.m_interval = (Integer) this.m_properties.get(PROP_INTERVAL);
-		if (this.m_tickHandle != null) {
-			this.m_tickHandle.cancel(true);
-		}
-		this.m_tickHandle = this.m_executorService.scheduleAtFixedRate(new Runnable() {
-			/** {@inheritDoc} */
-			@Override
-			public void run() {
-				m_wireSupport.emit(Arrays.asList(new WireRecord(new TimerWireField())));
+		int interval;
+		if ("SIMPLE".equalsIgnoreCase(this.m_timerOptions.getType())) {
+			interval = this.m_timerOptions.getSimpleInterval();
+			try {
+				this.scheduleSimpleInterval(interval);
+			} catch (final SchedulerException e) {
+				s_logger.error(ThrowableUtil.stackTraceAsString(e));
 			}
-		}, 0, this.m_interval, TimeUnit.SECONDS);
+			return;
+		}
+		final String cronExpression = this.m_timerOptions.getCronExpression();
+		try {
+			this.scheduleCronInterval(cronExpression);
+		} catch (final SchedulerException e) {
+			s_logger.error(ThrowableUtil.stackTraceAsString(e));
+		}
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public Object polled(final Wire wire) {
 		return this.m_wireSupport.polled(wire);
+	}
+
+	/**
+	 * Creates a cron trigger based on the provided interval
+	 *
+	 * @param expression
+	 *            the CRON expression
+	 * @throws SchedulerException
+	 *             if scheduling fails
+	 * @throws KuraRuntimeException
+	 *             if the argument is null
+	 */
+	private void scheduleCronInterval(final String expression) throws SchedulerException {
+		checkNull(expression, s_message.cronExpressionNonNull());
+		final Trigger trigger = TriggerBuilder.newTrigger().withIdentity("emittrigger", "wires")
+				.withSchedule(CronScheduleBuilder.cronSchedule(expression)).build();
+
+		final JobDetail job = JobBuilder.newJob(EmitJob.class).withIdentity("emitjob", "wires").build();
+
+		this.m_scheduler = new StdSchedulerFactory().getScheduler();
+		this.m_scheduler.getContext().put("wireSupport", this.m_wireSupport);
+		this.m_scheduler.start();
+
+		this.m_scheduler.scheduleJob(job, trigger);
+	}
+
+	/**
+	 * Creates a trigger based on the provided interval
+	 *
+	 * @param interval
+	 *            the interval
+	 * @throws SchedulerException
+	 *             if scheduling fails
+	 * @throws KuraRuntimeException
+	 *             if the interval is less than or equal to zero
+	 */
+	private void scheduleSimpleInterval(final int interval) throws SchedulerException {
+		checkCondition(interval <= 0, s_message.intervalNonLessThanEqualToZero());
+		final Trigger trigger = TriggerBuilder.newTrigger().withIdentity("emittrigger", "wires")
+				.withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(interval).repeatForever())
+				.build();
+
+		final JobDetail job = JobBuilder.newJob(EmitJob.class).withIdentity("emitjob", "wires").build();
+
+		this.m_scheduler = new StdSchedulerFactory().getScheduler();
+		this.m_scheduler.getContext().put("wireSupport", this.m_wireSupport);
+		this.m_scheduler.start();
+
+		this.m_scheduler.scheduleJob(job, trigger);
 	}
 
 	/**
@@ -167,7 +213,14 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
 	 */
 	protected synchronized void updated(final Map<String, Object> properties) {
 		s_logger.debug(s_message.updatingTimer());
-		this.m_properties = properties;
+		this.m_timerOptions = new TimerOptions(properties);
+		if (this.m_scheduler != null) {
+			try {
+				this.m_scheduler.shutdown();
+			} catch (final SchedulerException e) {
+				s_logger.error(ThrowableUtil.stackTraceAsString(e));
+			}
+		}
 		this.doUpdate();
 		s_logger.debug(s_message.updatingTimerDone());
 	}

@@ -11,14 +11,14 @@ ${StrRep} # Supportable for Install Sections and Functions
 Name "Kura for Windows"
 
 ; The output file, actual name set by ANT build file
-OutFile {build.output.name}_x64.exe
+OutFile {build.output.name}_x86.exe
 
 ;!ifdef MAKE_64BIT
-  !define BITS 64
-  !define NAMESUFFIX " (64 bit)"
+;  !define BITS 64
+;  !define NAMESUFFIX " (64 bit)"
 ;!else
-;  !define BITS 32
-;  !define NAMESUFFIX ""
+  !define BITS 32
+  !define NAMESUFFIX ""
 ;!endif
 
 ; The default installation directory
@@ -124,7 +124,7 @@ FunctionEnd
 ;--------------------------------
 
 ; Oracle binary files can't be download now, they require accepting of license, so we have to point to the page
-;!define JRE_URL "http://download.oracle.com/otn-pub/java/jdk/8u65-b17/jre-8u65-windows-x64.exe"
+;!define JRE_URL "http://download.oracle.com/otn-pub/java/jdk/8u65-b17/jre-8u65-windows-x86.exe"
 !define JRE_URL "http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html"
 
 Function GetJRE
@@ -221,7 +221,7 @@ Section "kura (required)"
   ClearErrors
   Exec 'java -version'
   ${If} ${Errors}
-    MessageBox MB_ICONEXCLAMATION|MB_YESNO "Error: Java Runtime Engine (JRE) is not installed. Please install a JRE and make sure it's in the path before starting the setup. Recommended JRE is Oracle Java SE JRE 8u60 for Windows x64. Please note, that installing the Oracle JRE might be subject to licensing fees - please consult the License Terms. Click Yes to open the recommended download page." IDNO +2
+    MessageBox MB_ICONEXCLAMATION|MB_YESNO "Error: Java Runtime Engine (JRE) is not installed. Please install a JRE and make sure it's in the path before starting the setup. Recommended JRE is Oracle Java SE JRE 8u60 for Windows x86. Please note, that installing the Oracle JRE might be subject to licensing fees - please consult the License Terms. Click Yes to open the recommended download page." IDNO +2
     Call GetJRE
     Abort
   ${EndIf}
@@ -254,8 +254,8 @@ Section "kura (required)"
 
   Delete '$TEMP\java_ver.txt'
 
-  ${If} JREx64 == ""
-    MessageBox MB_ICONEXCLAMATION|MB_YESNO "Error: This is a 64-bit system, but installed Java Runtime is not a 64-bit version. Please install a 64-bit Java JRE and make sure it's in path before starting the setup. Click Yes to open the recommended download page." IDNO +2
+  ${If} $JREx64 != 0
+    MessageBox MB_ICONEXCLAMATION|MB_YESNO "Error: This is a 32-bit version of Kura, but installed Java Runtime is a 64-bit version. Please install a 32-bit Java JRE and make sure it's in path before starting the setup. Click Yes to open the recommended download page." IDNO +2
     Call GetJRE
     Abort
   ${EndIf}
@@ -265,9 +265,9 @@ Section "kura (required)"
 	; If reinstalling first make sure to stop the service and/or stop+delete the Kura task, so we can overwrite it
 
 	DetailPrint "Terminating Kura..."
-	ExecWait '$WINDIR\Sysnative\sc stop KURAService'		; Issue stop
+	ExecWait 'sc stop KURAService'		; Issue stop
 	Sleep 2000												; Small delay to wait for it to stop
-	ExecWait '$WINDIR\Sysnative\sc delete KURAService'		; Delete the service from the system
+	ExecWait 'sc delete KURAService'		; Delete the service from the system
 
 	; In case of auto-run install, stop and delete the task
 	ExecWait 'schtasks /End /TN "Kura"'
@@ -291,13 +291,10 @@ Section "kura (required)"
 	File KuraFiles\kura\*
 
 	;==========================================================================================================================
-	; Copy the supporting system .dll and .exe files. These need to go in $WINDIR\System32 but take care here. We are running
-	; 32 bit so file system redirection is on. For the dlls we must define LIBRARY_X64 to disable it, for .exe use Sysnative
-	; rather than System32
+	; Copy the supporting system .dll and .exe files.
 
-	!define LIBRARY_X64
-	!insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED system\x64\dkcomm.dll $SYSDIR\dkcomm.dll $SYSDIR
-	!insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED system\x64\KuraNativeWin.dll $SYSDIR\KuraNativeWin.dll $SYSDIR
+	!insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED system\x86\dkcomm.dll $SYSDIR\dkcomm.dll $SYSDIR
+	!insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED system\x86\KuraNativeWin.dll $SYSDIR\KuraNativeWin.dll $SYSDIR
 
 	;==========================================================================================================================
 	; Now replace fixed paths in startup and config files
@@ -345,21 +342,19 @@ Section "kura (required)"
 		DetailPrint "Installing Kura service..."
 
 		; Copy the Service helper
-		SetOutPath $WINDIR\Sysnative
-		File system\x64\KURAService.exe
+		SetOutPath $WINDIR\system32
+		File system\x86\KURAService.exe
 
 		;=============================================================================================================
-		; Now setup the service that will run Kura using the service manager sc. NB: the installer will be running as
-		; a 32 bit process but we want a 64 bit service so we must call sc with it's full path using Sysnative. The
-		; Sysnative directory is only available to 32 bit processes and is the real System32 directory not SysWOW64
+		; Now setup the service that will run Kura using the service manager sc.
 
-		ExecWait '$WINDIR\Sysnative\sc create KURAService binpath= $SYSDIR\KURAService.exe'
-		ExecWait '$WINDIR\Sysnative\sc config KURAService start= auto displayname= "KURA Service"'
-		ExecWait '$WINDIR\Sysnative\sc description KURAService "KURA MQTT communitaction service for IOT devices."'
+		ExecWait 'sc create KURAService binpath= $SYSDIR\KURAService.exe'
+		ExecWait 'sc config KURAService start= auto displayname= "KURA Service"'
+		ExecWait 'sc description KURAService "KURA MQTT communitaction service for IOT devices."'
 
 		; Add a registry entry with the command that actually starts KURA then start the service
 		;WriteRegStr HKLM System\CurrentControlSet\Services\KURAService "ServiceCommand" 'cmd /C "$INSTDIR\start_kura.bat"'
-		ExecWait '$WINDIR\Sysnative\sc start KURAService'
+		ExecWait 'sc start KURAService'
 	${Else}
 
 		;=============================================================================================================
@@ -394,14 +389,13 @@ SectionEnd
 Section "Uninstall"
 
 	;=================================================================================================
-	; First we stop and then delete the KURA service. Take care here we must run the 64 bit version
-	; of sc so must use the full path with sysnative not system32
+	; First we stop and then delete the KURA service.
 
 	DetailPrint "Terminating Kura..."
 
-	ExecWait '$WINDIR\Sysnative\sc stop KURAService'		; Issue stop
+	ExecWait 'sc stop KURAService'		; Issue stop
 	Sleep 2000												; Small delay to wait for it to stop
-	ExecWait '$WINDIR\Sysnative\sc delete KURAService'		; Delete the service from the system
+	ExecWait 'sc delete KURAService'		; Delete the service from the system
 
 	; In case of auto-run install, stop and delete the task
 	ExecWait 'schtasks /End /TN "Kura"'

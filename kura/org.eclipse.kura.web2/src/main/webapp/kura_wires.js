@@ -201,6 +201,39 @@ var kuraWires = (function() {
 			driver : comp.driver
 		});
 
+		paper.on('cell:pointerdown', function(cellView, evt, x, y) {
+			var pid = cellView.model.attributes.label;
+			top.jsniUpdateDeleteButton(pid);
+			selectedElement = cellView.model;
+			if(oldCellView){
+				oldCellView.unhighlight();
+				oldCellView = null;
+			}
+			cellView.highlight(null, myHighlighter);
+			oldCellView = cellView;
+			/*
+			var view = selectedElement.findView(paper);
+			view.resize(200, 200);
+			// Emulation of Highlight
+			var attributes = cellView.model.attributes.attrs['.body'];
+			if(attributes){
+				attributes.stroke = 'red';
+				attributes.fill = 'red';
+				cellView.model.attributes.attrs['.body']=attributes;
+				oldCellView = cellView;
+			}
+			*/
+		});
+
+		paper.on('blank:pointerdown', function(cellView, evt, x, y) {
+			top.jsniUpdateDeleteButton("");
+			selectedElement = "";
+			if(oldCellView){
+				oldCellView.unhighlight();
+				oldCellView = null;
+			}
+		});
+
 		graph.addCells([ rect ]);
 
 		/* rounded corners */

@@ -24,7 +24,6 @@ import org.eclipse.kura.web.client.ui.Network.NetworkPanelUi;
 import org.eclipse.kura.web.client.ui.Packages.PackagesPanelUi;
 import org.eclipse.kura.web.client.ui.Settings.SettingsPanelUi;
 import org.eclipse.kura.web.client.ui.Status.StatusPanelUi;
-import org.eclipse.kura.web.client.ui.resources.Resources;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtSession;
@@ -68,7 +67,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -390,26 +388,27 @@ public class EntryClassUi extends Composite {
 
     public void updateConnectionStatusImage(boolean isConnected) {
 
-        Image img;
+        String imgColor;
         String statusMessage;
 
         if (isConnected) {
-            img = new Image(Resources.INSTANCE.greenPlug32().getSafeUri());
+            imgColor = "background-color: #007f00";
             statusMessage = MSGS.connectionStatusConnected();
         } else {
-            img = new Image(Resources.INSTANCE.redPlug32().getSafeUri());
+            imgColor = "background-color: #eb3d00";
             statusMessage = MSGS.connectionStatusDisconnected();
         }
 
         StringBuilder imageSB = new StringBuilder();
-        imageSB.append("<image src=\"");
-        imageSB.append(img.getUrl());
-        imageSB.append("\" ");
-        imageSB.append("width=\"23\" height=\"23\" style=\"vertical-align: middle; float: right;\" title=\"");
+        imageSB.append("<i class=\"fa fa-plug fa-fw\" ");
+        imageSB.append("style=\"float: right; width: 23px; height: 23px; line-height: 23px; color: white; border-radius: 23px; ");
+        imageSB.append(imgColor + "\"");
+        imageSB.append("\" title=\"");
         imageSB.append(statusMessage);
         imageSB.append("\"/>");
 
-        String baseStatusHTML = this.status.getHTML().split("<im")[0];
+        String html = this.status.getHTML();
+        String baseStatusHTML = html.substring(0, html.indexOf("Status") + "Status".length());
         StringBuilder statusHTML = new StringBuilder(baseStatusHTML);
         statusHTML.append(imageSB.toString());
         this.status.setHTML(statusHTML.toString());

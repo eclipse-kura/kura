@@ -40,10 +40,9 @@ public class KuraCloudComponent extends UriEndpointComponent {
         final CloudService cloudService = getCloudService();
 
         if (cloudService == null) {
-            throw new IllegalStateException(
-                    "'cloudService' is not set and not found in Camel context service registry");
+            throw new IllegalStateException("'cloudService' is not set and not found in Camel context service registry");
         }
-        
+
         this.cache = new CloudClientCacheImpl(cloudService);
 
         super.doStart();
@@ -52,10 +51,9 @@ public class KuraCloudComponent extends UriEndpointComponent {
     @Override
     protected void doStop() throws Exception {
         super.doStop();
-        if ( cache != null ) 
-        {
-            cache.close ();
-            cache = null;
+        if (this.cache != null) {
+            this.cache.close();
+            this.cache = null;
         }
     }
 
@@ -65,7 +63,7 @@ public class KuraCloudComponent extends UriEndpointComponent {
     protected Endpoint createEndpoint(String uri, String remain, Map<String, Object> parameters) throws Exception {
         final KuraCloudEndpoint kuraCloudEndpoint = new KuraCloudEndpoint(uri, this, this.cache);
 
-        String[] res = remain.split("/", 2);
+        final String[] res = remain.split("/", 2);
         if (res.length < 2) {
             throw new IllegalArgumentException("Wrong kura-cloud URI format. Should be: kura-cloud:app/topic");
         }
@@ -78,10 +76,10 @@ public class KuraCloudComponent extends UriEndpointComponent {
     }
 
     private CloudService getCloudService() {
-        if(cloudService == null) {
-            cloudService = retrieveService(CloudService.class, getCamelContext().getRegistry());
+        if (this.cloudService == null) {
+            this.cloudService = retrieveService(CloudService.class, getCamelContext().getRegistry());
         }
-        return cloudService;
+        return this.cloudService;
     }
 
     public void setCloudService(CloudService cloudService) {

@@ -129,7 +129,7 @@ public class CloudClientCacheImpl implements CloudClientCache {
 	@Override
 	public void close() {
 		/*
-		 * TODO: This process cloud be more performance by tracking a list of
+		 * TODO: This process cloud be more performant by tracking a list of
 		 * all created clients
 		 */
 

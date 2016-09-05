@@ -62,6 +62,8 @@ import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -202,7 +204,7 @@ public class ServicesUi extends Composite {
             footer.add(group);
             modal.add(footer);
             modal.show();
-        }      // end is dirty
+        }                              // end is dirty
     }
 
     // TODO: Separate render methods for each type (ex: Boolean, String,
@@ -303,11 +305,11 @@ public class ServicesUi extends Composite {
 
                 // ----
 
-            }      // end isDirty()
+            }                              // end isDirty()
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");
             incompleteFieldsModal.show();
-        }      // end else isValid
+        }                              // end else isValid
     }
 
     // Get updated parameters
@@ -511,9 +513,9 @@ public class ServicesUi extends Composite {
 
         formGroup.add(textBox);
 
-        textBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+        textBox.addBlurHandler(new BlurHandler() {
             @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
+            public void onBlur(BlurEvent event) {
                 setDirty(true);
                 TextBox box = (TextBox) event.getSource();
                 FormGroup group = (FormGroup) box.getParent();
@@ -722,19 +724,8 @@ public class ServicesUi extends Composite {
     }
 
     // Validates all the entered values
-    private boolean validate(GwtConfigParameter param, TextBox box, FormGroup group) {  // TODO:
-        // validation
-        // should
-        // be
-        // done
-        // like
-        // in
-        // the
-        // old
-        // web
-        // ui:
-        // cleaner
-        // approach
+    // TODO: validation should be done like in the old web ui: cleaner approach
+    private boolean validate(GwtConfigParameter param, TextBox box, FormGroup group) {
         if (param.isRequired() && (box.getText().trim() == null || "".equals(box.getText().trim()))) {
             group.setValidationState(ValidationState.ERROR);
             valid.put(param.getName(), false);
@@ -750,25 +741,17 @@ public class ServicesUi extends Composite {
                     box.setPlaceholder(MessageUtils.get(Integer.toString(box.getText().trim().length()), box.getText()));
                     return false;
                 }
-                if (param.getMin() != null) {
-                    if (Character.valueOf(param.getMin().charAt(0)).charValue() > Character.valueOf(box.getText().trim().charAt(0)).charValue()) {  // TODO:
-                        // why
-                        // this
-                        // character
-                        // boxing?
-                        group.setValidationState(ValidationState.ERROR);
-                        valid.put(param.getName(), false);
-                        box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, Character.valueOf(param.getMin().charAt(0)).charValue()));
-                        return false;
-                    }
+                if (param.getMin() != null && Character.valueOf(param.getMin().charAt(0)).charValue() > Character.valueOf(box.getText().trim().charAt(0)).charValue()) {
+                    group.setValidationState(ValidationState.ERROR);
+                    valid.put(param.getName(), false);
+                    box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, Character.valueOf(param.getMin().charAt(0)).charValue()));
+                    return false;
                 }
-                if (param.getMax() != null) {
-                    if (Character.valueOf(param.getMax().charAt(0)).charValue() < Character.valueOf(box.getText().trim().charAt(0)).charValue()) {
-                        group.setValidationState(ValidationState.ERROR);
-                        valid.put(param.getName(), false);
-                        box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, Character.valueOf(param.getMax().charAt(0)).charValue()));
-                        return false;
-                    }
+                if (param.getMax() != null && Character.valueOf(param.getMax().charAt(0)).charValue() < Character.valueOf(box.getText().trim().charAt(0)).charValue()) {
+                    group.setValidationState(ValidationState.ERROR);
+                    valid.put(param.getName(), false);
+                    box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, Character.valueOf(param.getMax().charAt(0)).charValue()));
+                    return false;
                 }
             } else if (param.getType().equals(GwtConfigParameterType.STRING)) {
                 int configMinValue = 0;
@@ -800,106 +783,89 @@ public class ServicesUi extends Composite {
                 try {
                     // numeric value
                     if (param.getType().equals(GwtConfigParameterType.FLOAT)) {
-                        if (param.getMin() != null) {
-                            if (Float.valueOf(param.getMin()).floatValue() > Float.valueOf(box.getText().trim()).floatValue()) {
-                                group.setValidationState(ValidationState.ERROR);
-                                valid.put(param.getName(), false);
-                                box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
-                                return false;
-                            }
+                        Float uiValue = Float.parseFloat(box.getText().trim());
+                        if (param.getMin() != null && Float.parseFloat(param.getMin()) > uiValue) {
+                            group.setValidationState(ValidationState.ERROR);
+                            valid.put(param.getName(), false);
+                            box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
+                            return false;
+
                         }
-                        if (param.getMax() != null) {
-                            if (Float.valueOf(param.getMax()).floatValue() < Float.valueOf(box.getText().trim()).floatValue()) {
-                                group.setValidationState(ValidationState.ERROR);
-                                valid.put(param.getName(), false);
-                                box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
-                                return false;
-                            }
+                        if (param.getMax() != null && Float.parseFloat(param.getMax()) < uiValue) {
+                            group.setValidationState(ValidationState.ERROR);
+                            valid.put(param.getName(), false);
+                            box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
+                            return false;
                         }
                     } else if (param.getType().equals(GwtConfigParameterType.INTEGER)) {
-                        if (param.getMin() != null) {
-                            if (Integer.valueOf(param.getMin()).intValue() > Integer.valueOf(box.getText().trim()).intValue()) {
-                                group.setValidationState(ValidationState.ERROR);
-                                valid.put(param.getName(), false);
-                                box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
-                                return false;
-                            }
+                        Integer uiValue = Integer.parseInt(box.getText().trim());
+                        if (param.getMin() != null && Integer.parseInt(param.getMin()) > uiValue) {
+                            group.setValidationState(ValidationState.ERROR);
+                            valid.put(param.getName(), false);
+                            box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
+                            return false;
                         }
-                        if (param.getMax() != null) {
-                            if (Integer.valueOf(param.getMax()).intValue() < Integer.valueOf(box.getText().trim()).intValue()) {
-                                group.setValidationState(ValidationState.ERROR);
-                                valid.put(param.getName(), false);
-                                box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
-                                return false;
-                            }
+                        if (param.getMax() != null && Integer.parseInt(param.getMax()) < uiValue) {
+                            group.setValidationState(ValidationState.ERROR);
+                            valid.put(param.getName(), false);
+                            box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
+                            return false;
                         }
                     } else if (param.getType().equals(GwtConfigParameterType.SHORT)) {
-                        if (param.getMin() != null) {
-                            if (Short.valueOf(param.getMin()).shortValue() > Short.valueOf(box.getText().trim()).shortValue()) {
-                                group.setValidationState(ValidationState.ERROR);
-                                valid.put(param.getName(), false);
-                                box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
-                                return false;
-                            }
+                        Short uiValue = Short.parseShort(box.getText().trim());
+                        if (param.getMin() != null && Short.parseShort(param.getMin()) > uiValue) {
+                            group.setValidationState(ValidationState.ERROR);
+                            valid.put(param.getName(), false);
+                            box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
+                            return false;
                         }
-                        if (param.getMax() != null) {
-                            if (Short.valueOf(param.getMax()).shortValue() < Short.valueOf(box.getText().trim()).shortValue()) {
-                                group.setValidationState(ValidationState.ERROR);
-                                valid.put(param.getName(), false);
-                                box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
-                                return false;
-                            }
+                        if (param.getMax() != null && Short.parseShort(param.getMax()) < uiValue) {
+                            group.setValidationState(ValidationState.ERROR);
+                            valid.put(param.getName(), false);
+                            box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
+                            return false;
                         }
                     } else if (param.getType().equals(GwtConfigParameterType.BYTE)) {
-                        if (param.getMin() != null) {
-                            if (Byte.valueOf(param.getMin()).byteValue() > Byte.valueOf(box.getText().trim()).byteValue()) {
-                                group.setValidationState(ValidationState.ERROR);
-                                valid.put(param.getName(), false);
-                                box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
-                                return false;
-                            }
+                        Byte uiValue = Byte.parseByte(box.getText().trim());
+                        if (param.getMin() != null && Byte.parseByte(param.getMin()) > uiValue) {
+                            group.setValidationState(ValidationState.ERROR);
+                            valid.put(param.getName(), false);
+                            box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
+                            return false;
                         }
-                        if (param.getMax() != null) {
-                            if (Byte.valueOf(param.getMax()).byteValue() < Byte.valueOf(box.getText().trim()).byteValue()) {
-                                group.setValidationState(ValidationState.ERROR);
-                                valid.put(param.getName(), false);
-                                box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
-                                return false;
-                            }
+                        if (param.getMax() != null && Byte.parseByte(param.getMax()) < uiValue) {
+                            group.setValidationState(ValidationState.ERROR);
+                            valid.put(param.getName(), false);
+                            box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
+                            return false;
                         }
                     } else if (param.getType().equals(GwtConfigParameterType.LONG)) {
-                        if (param.getMin() != null) {
-                            if (Long.valueOf(param.getMin()).longValue() > Long.valueOf(box.getText().trim()).longValue()) {
-                                group.setValidationState(ValidationState.ERROR);
-                                valid.put(param.getName(), false);
-                                box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
-                                return false;
-                            }
+                        Long uiValue = Long.parseLong(box.getText().trim());
+                        if (param.getMin() != null && Long.parseLong(param.getMin()) > uiValue) {
+                            group.setValidationState(ValidationState.ERROR);
+                            valid.put(param.getName(), false);
+                            box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
+                            return false;
                         }
-                        if (param.getMax() != null) {
-                            if (Long.valueOf(param.getMax()).longValue() < Long.valueOf(box.getText().trim()).longValue()) {
-                                group.setValidationState(ValidationState.ERROR);
-                                valid.put(param.getName(), false);
-                                box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
-                                return false;
-                            }
+                        if (param.getMax() != null && Long.parseLong(param.getMax()) < uiValue) {
+                            group.setValidationState(ValidationState.ERROR);
+                            valid.put(param.getName(), false);
+                            box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
+                            return false;
                         }
                     } else if (param.getType().equals(GwtConfigParameterType.DOUBLE)) {
-                        if (param.getMin() != null) {
-                            if (Double.valueOf(param.getMin()).doubleValue() > Double.valueOf(box.getText().trim()).doubleValue()) {
-                                group.setValidationState(ValidationState.ERROR);
-                                valid.put(param.getName(), false);
-                                box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
-                                return false;
-                            }
+                        Double uiValue = Double.parseDouble(box.getText().trim());
+                        if (param.getMin() != null && Double.parseDouble(param.getMin()) > uiValue) {
+                            group.setValidationState(ValidationState.ERROR);
+                            valid.put(param.getName(), false);
+                            box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin()));
+                            return false;
                         }
-                        if (param.getMax() != null) {
-                            if (Double.valueOf(param.getMax()).doubleValue() < Double.valueOf(box.getText().trim()).doubleValue()) {
-                                group.setValidationState(ValidationState.ERROR);
-                                valid.put(param.getName(), false);
-                                box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
-                                return false;
-                            }
+                        if (param.getMax() != null && Double.parseDouble(param.getMax()) < uiValue) {
+                            group.setValidationState(ValidationState.ERROR);
+                            valid.put(param.getName(), false);
+                            box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, param.getMax()));
+                            return false;
                         }
                     }
                 } catch (NumberFormatException e) {

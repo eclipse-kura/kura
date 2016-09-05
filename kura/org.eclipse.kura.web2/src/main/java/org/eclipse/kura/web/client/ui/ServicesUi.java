@@ -204,7 +204,7 @@ public class ServicesUi extends Composite {
             footer.add(group);
             modal.add(footer);
             modal.show();
-        }                              // end is dirty
+        }                                 // end is dirty
     }
 
     // TODO: Separate render methods for each type (ex: Boolean, String,
@@ -305,11 +305,11 @@ public class ServicesUi extends Composite {
 
                 // ----
 
-            }                              // end isDirty()
+            }                                 // end isDirty()
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");
             incompleteFieldsModal.show();
-        }                              // end else isValid
+        }                                 // end else isValid
     }
 
     // Get updated parameters
@@ -524,6 +524,7 @@ public class ServicesUi extends Composite {
         });
 
         fields.add(formGroup);
+        validate(param, textBox, formGroup);
     }
 
     private void renderPasswordField(final GwtConfigParameter param, boolean isFirstInstance, FormGroup formGroup) {
@@ -582,7 +583,6 @@ public class ServicesUi extends Composite {
 
         formGroup.add(input);
         fields.add(formGroup);
-
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

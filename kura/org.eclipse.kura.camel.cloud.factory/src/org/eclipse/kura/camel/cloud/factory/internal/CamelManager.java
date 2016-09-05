@@ -100,12 +100,16 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
 
     /**
      * Add a new CamelFactory
-     * @param userPid the PID as entered by the user
-     * @param properties the provided configuration properties
-     * @throws KuraException if anything goes wrong
+     * 
+     * @param userPid
+     *            the PID as entered by the user
+     * @param properties
+     *            the provided configuration properties
+     * @throws KuraException
+     *             if anything goes wrong
      */
-    protected void add(String userPid, Map<String, Object> properties) throws KuraException {
-        logger.info("Add: {}", userPid);
+    protected void add(final String pid, final Map<String, Object> properties) throws KuraException {
+        logger.info("Add: {}", pid);
 
         final Map<String, Object> props = new HashMap<>();
 
@@ -121,16 +125,13 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
             props.put("serviceRanking", serviceRanking);
         }
 
-        this.configurationService.createFactoryConfiguration(FACTORY_ID, makePid(userPid), props, true);
+        props.put("cloud.service.pid", pid);
+
+        this.configurationService.createFactoryConfiguration(FACTORY_ID, fromUserPid(pid), props, true);
     }
 
-    /**
-     * Convert the user entered PID into a PID which does not cause troubles in the Web UI
-     * @param userPid the user PID
-     * @return the modified PID
-     */
-    private String makePid(String userPid) {
-        return FACTORY_ID + "-" + userPid;
+    private static String fromUserPid(String pid) {
+        return pid + "-CloudFactory";
     }
 
     private static String asString(Object object) {
@@ -168,6 +169,7 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
 
     /**
      * Enumerate all registered CamelFactory instances
+     * 
      * @return a PID (<code>kura.service.pid</code>) set of all registered CamelFactory instances
      */
     public static Set<String> lookupIds() {
@@ -195,10 +197,13 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
     /**
      * Provide a common way to delete camel factory configurations
      * <p>
-     * Right now this is a rather slim implementation used by CamelFactory and the CamelManager 
+     * Right now this is a rather slim implementation used by CamelFactory and the CamelManager
      * </p>
-     * @param configurationService the configuration service to use
-     * @param pid the PID to delete
+     * 
+     * @param configurationService
+     *            the configuration service to use
+     * @param pid
+     *            the PID to delete
      */
     static void delete(ConfigurationService configurationService, String pid) {
         try {
@@ -215,7 +220,7 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
 
     @Override
     public void deleteConfiguration(String pid) throws KuraException {
-        delete(this.configurationService, makePid(pid));
+        delete(this.configurationService, fromUserPid(pid));
     }
 
     @Override

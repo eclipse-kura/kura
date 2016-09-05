@@ -54,7 +54,7 @@ public class CamelFactory implements ConfigurableComponent {
     }
 
     private void setFromProperties(Map<String, Object> properties) throws Exception {
-        final String pid = asString(properties, "kura.service.pid");
+        final String pid = asString(properties, "cloud.service.pid");
 
         final ServiceConfiguration configuration = new ServiceConfiguration();
         configuration.setXml(asString(properties, "xml"));

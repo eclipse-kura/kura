@@ -78,13 +78,13 @@ public class XmlCamelCloudService {
         // register
 
         final Dictionary<String, Object> props = new Hashtable<>();
-        props.put("cloud.service.pid", this.pid);
-        props.put(Constants.SERVICE_PID, this.pid + "-CloudService");
-        props.put("kura.service.pid", this.pid + "-CloudService");
+        props.put(Constants.SERVICE_PID, this.pid);
+        props.put("kura.service.pid", this.pid);
 
         if (this.configuration.getServiceRanking() != null) {
             props.put(Constants.SERVICE_RANKING, this.configuration.getServiceRanking());
         }
+        
         this.handle = this.context.registerService(CloudService.class, this.service, props);
     }
 

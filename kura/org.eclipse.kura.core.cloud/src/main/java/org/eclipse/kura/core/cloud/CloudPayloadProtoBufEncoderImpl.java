@@ -63,11 +63,13 @@ public class CloudPayloadProtoBufEncoderImpl implements CloudPayloadEncoder {
                 KuraPayloadProto.KuraPayload.KuraMetric.Builder metricB = KuraPayloadProto.KuraPayload.KuraMetric.newBuilder();
                 metricB.setName(name);
 
-                setProtoKuraMetricValue(metricB, value);
-                metricB.build();
+                boolean result = setProtoKuraMetricValue(metricB, value);
+                if (result) {
+                    metricB.build();
 
-                // add it to the message
-                protoMsg.addMetric(metricB);
+                    // add it to the message
+                    protoMsg.addMetric(metricB);
+                }
             } catch (KuraInvalidMetricTypeException eihte) {
                 try {
                     s_logger.error("During serialization, ignoring metric named: {}. Unrecognized value type: {}.", name, value.getClass().getName());
@@ -123,7 +125,7 @@ public class CloudPayloadProtoBufEncoderImpl implements CloudPayloadEncoder {
         return protoPos.build();
     }
 
-    private static void setProtoKuraMetricValue(KuraPayloadProto.KuraPayload.KuraMetric.Builder metric, Object o)
+    private static boolean setProtoKuraMetricValue(KuraPayloadProto.KuraPayload.KuraMetric.Builder metric, Object o)
             throws KuraInvalidMetricTypeException {
 
         if (o instanceof String) {
@@ -149,8 +151,10 @@ public class CloudPayloadProtoBufEncoderImpl implements CloudPayloadEncoder {
             metric.setBytesValue(ByteString.copyFrom((byte[]) o));
         } else if (o == null) {
             s_logger.warn("Received a metric with a null value!");
+            return false;
         } else {
             throw new KuraInvalidMetricTypeException(o.getClass().getName());
         }
+        return true;
     }
 }

@@ -68,7 +68,7 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
             tad.setType(Tscalar.STRING);
             tad.setCardinality(0);
             tad.setRequired(Boolean.FALSE);
-            tad.setDescription("Initial XML configuration");
+            tad.setDescription("Initial XML configuration|TextArea");
             tocd.addAD(tad);
         }
 

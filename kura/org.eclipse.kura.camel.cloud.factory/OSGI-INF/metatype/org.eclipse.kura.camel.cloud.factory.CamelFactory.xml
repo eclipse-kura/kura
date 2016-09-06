@@ -22,7 +22,7 @@
             type="String"
             cardinality="1"
             required="true"
-            description="The camel XML router configuration"/>
+            description="The camel XML router configuration|TextArea"/>
             
          <AD id="serviceRanking"
             name="serviceRanking"

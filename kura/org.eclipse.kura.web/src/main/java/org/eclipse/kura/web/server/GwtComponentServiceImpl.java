@@ -34,13 +34,12 @@ import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
 
-public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements GwtComponentService 
-{
+public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements GwtComponentService {
     private static final long serialVersionUID = -4176701819112753800L;
 
     public List<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-        ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);		
+        ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         List<GwtConfigComponent> gwtConfigs = new ArrayList<GwtConfigComponent>();
         try {
 
@@ -48,19 +47,35 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
             // sort the list alphabetically by service name
             Collections.sort(configs, new Comparator<ComponentConfiguration>() {
-                public int compare(ComponentConfiguration arg0,
-                        ComponentConfiguration arg1) {
-                    String name0 = arg0.getPid().substring(arg0.getPid().lastIndexOf(".")); 
-                    String name1 = arg1.getPid().substring(arg1.getPid().lastIndexOf(".")); 
+                @Override
+                public int compare(ComponentConfiguration arg0, ComponentConfiguration arg1) {
+                    String name0;
+                    int start = arg0.getPid().lastIndexOf('.');
+                    int substringIndex = start + 1;
+                    if (start != -1 && substringIndex < arg0.getPid().length()) {
+                        name0 = arg0.getPid().substring(substringIndex);
+                    } else {
+                        name0 = arg0.getPid();
+                    }
+
+                    String name1;
+                    start = arg1.getPid().lastIndexOf('.');
+                    substringIndex = start + 1;
+                    if (start != -1 && substringIndex < arg1.getPid().length()) {
+                        name1 = arg1.getPid().substring(substringIndex);
+                    } else {
+                        name1 = arg1.getPid();
+                    }
                     return name0.compareTo(name1);
-                }});
+                }
+            });
             for (ComponentConfiguration config : configs) {
-                
+
                 // ignore items we want to hide
-                if (config.getPid().endsWith("SystemPropertiesService") || 
+                if (config.getPid().endsWith("SystemPropertiesService") ||
                         config.getPid().endsWith("NetworkAdminService") ||
                         config.getPid().endsWith("NetworkConfigurationService") ||
-                        config.getPid().endsWith("SslManagerService")   ||
+                        config.getPid().endsWith("SslManagerService") ||
                         config.getPid().endsWith("FirewallConfigurationService")) {
                     continue;
                 }
@@ -99,32 +114,32 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                         gwtParam.setMax(ad.getMax());
                         if (config.getConfigurationProperties() != null) {
 
-                            // handle the value based on the cardinality of the attribute
+                            // handle the value based on the cardinality of the
+                            // attribute
                             int cardinality = ad.getCardinality();
                             Object value = config.getConfigurationProperties().get(ad.getId());
                             if (value != null) {
                                 if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
-                                    if(gwtParam.getType().equals(GwtConfigParameterType.PASSWORD)){
+                                    if (gwtParam.getType().equals(GwtConfigParameterType.PASSWORD)) {
                                         gwtParam.setValue(PLACEHOLDER);
                                     } else {
                                         gwtParam.setValue(value.toString());
                                     }
-                                }
-                                else {
+                                } else {
                                     // this could be an array value
                                     if (value instanceof Object[]) {
                                         Object[] objValues = (Object[]) value;
                                         List<String> strValues = new ArrayList<String>();
                                         for (Object v : objValues) {
                                             if (v != null) {
-                                                if(gwtParam.getType().equals(GwtConfigParameterType.PASSWORD)){
+                                                if (gwtParam.getType().equals(GwtConfigParameterType.PASSWORD)) {
                                                     strValues.add(PLACEHOLDER);
                                                 } else {
                                                     strValues.add(v.toString());
                                                 }
                                             }
                                         }
-                                        gwtParam.setValues(strValues.toArray( new String[]{}));
+                                        gwtParam.setValues(strValues.toArray(new String[] {}));
                                     }
                                 }
                             }
@@ -134,8 +149,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                     gwtConfigs.add(gwtConfig);
                 }
             }
-        } 
-        catch (Throwable t) {
+        } catch (Throwable t) {
             KuraExceptionHandler.handle(t);
         }
         return gwtConfigs;
@@ -143,23 +157,38 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
     public List<GwtConfigComponent> findComponentConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-        ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);		
+        ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         List<GwtConfigComponent> gwtConfigs = new ArrayList<GwtConfigComponent>();
         try {
 
             List<ComponentConfiguration> configs = cs.getComponentConfigurations();
 
-
             // sort the list alphabetically by service name
             Collections.sort(configs, new Comparator<ComponentConfiguration>() {
-                public int compare(ComponentConfiguration arg0,
-                        ComponentConfiguration arg1) {
-                    String name0 = arg0.getPid().substring(arg0.getPid().lastIndexOf(".")); 
-                    String name1 = arg1.getPid().substring(arg1.getPid().lastIndexOf(".")); 
+                @Override
+                public int compare(ComponentConfiguration arg0, ComponentConfiguration arg1) {
+                    String name0;
+                    int start = arg0.getPid().lastIndexOf('.');
+                    int substringIndex = start + 1;
+                    if (start != -1 && substringIndex < arg0.getPid().length()) {
+                        name0 = arg0.getPid().substring(substringIndex);
+                    } else {
+                        name0 = arg0.getPid();
+                    }
+
+                    String name1;
+                    start = arg1.getPid().lastIndexOf('.');
+                    substringIndex = start + 1;
+                    if (start != -1 && substringIndex < arg1.getPid().length()) {
+                        name1 = arg1.getPid().substring(substringIndex);
+                    } else {
+                        name1 = arg1.getPid();
+                    }
                     return name0.compareTo(name1);
-                }});
+                }
+            });
             for (ComponentConfiguration config : configs) {
-                
+
                 // ignore items we want to hide
                 if (!config.getPid().endsWith("CommandCloudApp")) {
                     continue;
@@ -199,14 +228,14 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                         gwtParam.setMax(ad.getMax());
                         if (config.getConfigurationProperties() != null) {
 
-                            // handle the value based on the cardinality of the attribute
+                            // handle the value based on the cardinality of the
+                            // attribute
                             int cardinality = ad.getCardinality();
                             Object value = config.getConfigurationProperties().get(ad.getId());
                             if (value != null) {
                                 if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
                                     gwtParam.setValue(value.toString());
-                                }
-                                else {
+                                } else {
                                     // this could be an array value
                                     if (value instanceof Object[]) {
                                         Object[] objValues = (Object[]) value;
@@ -216,7 +245,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                                                 strValues.add(v.toString());
                                             }
                                         }
-                                        gwtParam.setValues(strValues.toArray( new String[]{}));
+                                        gwtParam.setValues(strValues.toArray(new String[] {}));
                                     }
                                 }
                             }
@@ -226,13 +255,11 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                     gwtConfigs.add(gwtConfig);
                 }
             }
-        } 
-        catch (Throwable t) {
+        } catch (Throwable t) {
             KuraExceptionHandler.handle(t);
         }
         return gwtConfigs;
     }
-
 
     public void updateComponentConfiguration(GwtXSRFToken xsrfToken, GwtConfigComponent gwtCompConfig) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
@@ -240,36 +267,35 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         try {
 
             // Build the new properties
-            Map<String,Object> properties = new HashMap<String,Object>();
+            Map<String, Object> properties = new HashMap<String, Object>();
             for (GwtConfigParameter gwtConfigParam : gwtCompConfig.getParameters()) {
 
                 Object objValue = null;
 
-                ComponentConfiguration currentCC= cs.getComponentConfiguration(gwtCompConfig.getComponentId());
+                ComponentConfiguration currentCC = cs.getComponentConfiguration(gwtCompConfig.getComponentId());
 
-                Map<String,Object> currentConfigProp= currentCC.getConfigurationProperties();
+                Map<String, Object> currentConfigProp = currentCC.getConfigurationProperties();
                 Object currentObjValue = currentConfigProp.get(gwtConfigParam.getName());
 
-                int cardinality = gwtConfigParam.getCardinality();	        	
-                if (cardinality == 0 || cardinality == 1 || cardinality == -1) {	        	
+                int cardinality = gwtConfigParam.getCardinality();
+                if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
 
                     String strValue = gwtConfigParam.getValue();
 
-                    if((currentObjValue instanceof Password) && PLACEHOLDER.equals(strValue)){
+                    if ((currentObjValue instanceof Password) && PLACEHOLDER.equals(strValue)) {
                         objValue = currentConfigProp.get(gwtConfigParam.getName());
                     } else {
                         objValue = getObjectValue(gwtConfigParam, strValue);
                     }
-                }
-                else {
+                } else {
 
                     String[] strValues = gwtConfigParam.getValues();
 
-                    if(currentObjValue instanceof Password[]) {
-                        Password[] currentPasswordValue= (Password[]) currentObjValue;
-                        for(int i=0; i<strValues.length; i++){
-                            if(PLACEHOLDER.equals(strValues[i])){
-                                strValues[i]= new String(currentPasswordValue[i].getPassword());
+                    if (currentObjValue instanceof Password[]) {
+                        Password[] currentPasswordValue = (Password[]) currentObjValue;
+                        for (int i = 0; i < strValues.length; i++) {
+                            if (PLACEHOLDER.equals(strValues[i])) {
+                                strValues[i] = new String(currentPasswordValue[i].getPassword());
                             }
                         }
                     }
@@ -282,18 +308,16 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             //
             // apply them
             cs.updateConfiguration(gwtCompConfig.getComponentId(), properties);
-        } 
-        catch (Throwable t) {
+        } catch (Throwable t) {
             KuraExceptionHandler.handle(t);
         }
     }
 
-
     private Object getObjectValue(GwtConfigParameter gwtConfigParam, String strValue) {
         Object objValue = null;
-        if (strValue != null) {		        
+        if (strValue != null) {
             GwtConfigParameterType gwtType = gwtConfigParam.getType();
-            switch (gwtType) {			
+            switch (gwtType) {
                 case LONG:
                     objValue = Long.parseLong(strValue);
                     break;
@@ -311,11 +335,11 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                     break;
                 case BYTE:
                     objValue = Byte.parseByte(strValue);
-                    break;				
+                    break;
 
                 case BOOLEAN:
                     objValue = Boolean.parseBoolean(strValue);
-                    break;				
+                    break;
 
                 case PASSWORD:
                     objValue = new Password(strValue);
@@ -327,71 +351,69 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
                 case STRING:
                     objValue = strValue;
-                    break;			        
+                    break;
             }
         }
         return objValue;
     }
 
-
-
-    private Object[] getObjectValue(GwtConfigParameter gwtConfigParam, String[] defaultValues) {		
+    private Object[] getObjectValue(GwtConfigParameter gwtConfigParam, String[] defaultValues) {
         List<Object> values = new ArrayList<Object>();
         GwtConfigParameterType type = gwtConfigParam.getType();
         switch (type) {
             case BOOLEAN:
                 for (String value : defaultValues) {
-                    values.add(Boolean.valueOf(value));				
+                    values.add(Boolean.valueOf(value));
                 }
-                return values.toArray( new Boolean[]{});
+                return values.toArray(new Boolean[] {});
 
-            case BYTE: 
+            case BYTE:
                 for (String value : defaultValues) {
-                    values.add(Byte.valueOf(value));				
+                    values.add(Byte.valueOf(value));
                 }
-                return values.toArray( new Byte[]{});
+                return values.toArray(new Byte[] {});
 
-            case CHAR: 
+            case CHAR:
                 for (String value : defaultValues) {
-                    values.add( new Character(value.charAt(0)));		
+                    values.add(new Character(value.charAt(0)));
                 }
-                return values.toArray( new Character[]{});
+                return values.toArray(new Character[] {});
 
-            case DOUBLE: 
+            case DOUBLE:
                 for (String value : defaultValues) {
-                    values.add(Double.valueOf(value));		
+                    values.add(Double.valueOf(value));
                 }
-                return values.toArray( new Double[]{});
+                return values.toArray(new Double[] {});
 
-            case FLOAT: 
+            case FLOAT:
                 for (String value : defaultValues) {
                     values.add(Float.valueOf(value));
                 }
-                return values.toArray( new Float[]{});
+                return values.toArray(new Float[] {});
 
-            case INTEGER: 
+            case INTEGER:
                 for (String value : defaultValues) {
-                    values.add(Integer.valueOf(value));		
+                    values.add(Integer.valueOf(value));
                 }
-                return values.toArray( new Integer[]{});
+                return values.toArray(new Integer[] {});
 
-            case LONG: 
+            case LONG:
                 for (String value : defaultValues) {
-                    values.add(Long.valueOf(value));		
+                    values.add(Long.valueOf(value));
                 }
-                return values.toArray( new Long[]{});
+                return values.toArray(new Long[] {});
 
-            case SHORT: 
+            case SHORT:
                 for (String value : defaultValues) {
-                    values.add(Short.valueOf(value));		
+                    values.add(Short.valueOf(value));
                 }
-                return values.toArray( new Short[]{});
+                return values.toArray(new Short[] {});
 
-            case PASSWORD: 
+            case PASSWORD:
                 for (String value : defaultValues) {
-                    values.add( new Password(value));		
+                    values.add(new Password(value));
                 }
-                return values.toArray( new Password[]{});
+                return values.toArray(new Password[] {});
 
             case STRING:
                 return defaultValues;

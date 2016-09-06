@@ -50,15 +50,19 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                 @Override
                 public int compare(ComponentConfiguration arg0, ComponentConfiguration arg1) {
                     String name0;
-                    if (arg0.getPid().lastIndexOf('.') != -1) {
-                        name0 = arg0.getPid().substring(arg0.getPid().lastIndexOf('.'));
+                    int start = arg0.getPid().lastIndexOf('.');
+                    int substringIndex = start + 1;
+                    if (start != -1 && substringIndex < arg0.getPid().length()) {
+                        name0 = arg0.getPid().substring(substringIndex);
                     } else {
                         name0 = arg0.getPid();
                     }
 
                     String name1;
-                    if (arg1.getPid().lastIndexOf('.') != -1) {
-                        name1 = arg1.getPid().substring(arg1.getPid().lastIndexOf('.'));
+                    start = arg1.getPid().lastIndexOf('.');
+                    substringIndex = start + 1;
+                    if (start != -1 && substringIndex < arg1.getPid().length()) {
+                        name1 = arg1.getPid().substring(substringIndex);
                     } else {
                         name1 = arg1.getPid();
                     }
@@ -164,15 +168,19 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                 @Override
                 public int compare(ComponentConfiguration arg0, ComponentConfiguration arg1) {
                     String name0;
-                    if (arg0.getPid().lastIndexOf('.') != -1) {
-                        name0 = arg0.getPid().substring(arg0.getPid().lastIndexOf('.'));
+                    int start = arg0.getPid().lastIndexOf('.');
+                    int substringIndex = start + 1;
+                    if (start != -1 && substringIndex < arg0.getPid().length()) {
+                        name0 = arg0.getPid().substring(substringIndex);
                     } else {
                         name0 = arg0.getPid();
                     }
 
                     String name1;
-                    if (arg1.getPid().lastIndexOf('.') != -1) {
-                        name1 = arg1.getPid().substring(arg1.getPid().lastIndexOf('.'));
+                    start = arg1.getPid().lastIndexOf('.');
+                    substringIndex = start + 1;
+                    if (start != -1 && substringIndex < arg1.getPid().length()) {
+                        name1 = arg1.getPid().substring(substringIndex);
                     } else {
                         name1 = arg1.getPid();
                     }

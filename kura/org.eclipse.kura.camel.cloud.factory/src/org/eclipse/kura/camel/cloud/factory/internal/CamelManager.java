@@ -53,7 +53,7 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
         {
             final Tad tad = objectFactory.createTad();
             tad.setId("add");
-            tad.setName("add");
+            tad.setName("PID to add");
             tad.setType(Tscalar.STRING);
             tad.setCardinality(0);
             tad.setRequired(Boolean.FALSE);
@@ -64,7 +64,7 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
         {
             final Tad tad = objectFactory.createTad();
             tad.setId("xml");
-            tad.setName("xml");
+            tad.setName("Router XML");
             tad.setType(Tscalar.STRING);
             tad.setCardinality(0);
             tad.setRequired(Boolean.FALSE);
@@ -75,7 +75,7 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
         {
             final Tad tad = objectFactory.createTad();
             tad.setId("serviceRanking");
-            tad.setName("serviceRanking");
+            tad.setName("Service Ranking");
             tad.setType(Tscalar.INTEGER);
             tad.setCardinality(0);
             tad.setRequired(Boolean.FALSE);

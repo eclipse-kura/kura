@@ -18,21 +18,21 @@
          description="Camel Cloud Client factory">
         
          <AD id="xml"
-            name="xml"
+            name="Router XML"
             type="String"
             cardinality="1"
             required="true"
             description="The camel XML router configuration|TextArea"/>
             
          <AD id="serviceRanking"
-            name="serviceRanking"
+            name="Service Ranking"
             type="Integer"
             cardinality="0"
             required="false"
             description="The service ranking. A higher number will have more priority."/>
         
 		 <AD id="delete"
-            name="delete"
+            name="Delete"
             type="Boolean"
             cardinality="1"
             required="true"

@@ -27,7 +27,8 @@ import org.osgi.framework.FrameworkUtil;
  */
 public abstract class AbstractRouterTest {
 
-    protected CamelRouter router;
+    private static final String XML_PROPERTY = "xml.data";
+    protected AbstractXmlCamelComponent router;
 
     @Before
     public void before() throws Exception {
@@ -45,11 +46,11 @@ public abstract class AbstractRouterTest {
     }
 
     protected static Map<String, Object> xmlProperties(String resourceName) {
-        return Collections.<String, Object>singletonMap("camel.route.xml", readStringResource(resourceName));
+        return Collections.<String, Object>singletonMap(XML_PROPERTY, readStringResource(resourceName));
     }
 
-    protected static CamelRouter createRouter() {
-        return new CamelRouter() {
+    protected static AbstractXmlCamelComponent createRouter() {
+        return new AbstractXmlCamelComponent(XML_PROPERTY) {
         };
     }
 

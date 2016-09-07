@@ -98,8 +98,8 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.camel.sun.misc</artifactId>
-									<version>${org.eclipse.kura.camel.sun.misc.version}</version>
+									<artifactId>org.eclipse.kura.camel.xml</artifactId>
+									<version>${org.eclipse.kura.camel.xml.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
@@ -368,7 +368,7 @@
 							<tasks>
 							    <move file="target/plugins/org.eclipse.kura.api.jar" tofile="target/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"/>
 								<move file="target/plugins/org.eclipse.kura.camel.jar" tofile="target/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"/>
-								<move file="target/plugins/org.eclipse.kura.camel.sun.misc.jar" tofile="target/plugins/org.eclipse.kura.camel.sun.misc_${org.eclipse.kura.camel.sun.misc.version}.jar"/>
+								<move file="target/plugins/org.eclipse.kura.camel.xml.jar" tofile="target/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar"/>
 								<move file="target/plugins/org.eclipse.kura.core.jar" tofile="target/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.certificates.jar" tofile="target/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.cloud.jar" tofile="target/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"/>
@@ -1996,6 +1996,9 @@
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+										<copy
+											file="${project.build.directory}/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"

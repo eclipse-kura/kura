@@ -1215,6 +1215,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                    value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.camel.camel-stream_${org.apache.camel.camel-stream.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
                    value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar@4:start" />
 		</propertyfile>
 	</target>
 	
@@ -1224,6 +1226,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<target name="camel-jar">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>
@@ -1320,6 +1324,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 
 	<target name="camel-jar-win">
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"
+			todir="${build.install.dir.kura}/kura/plugins" />
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar"
 			todir="${build.install.dir.kura}/kura/plugins" />
 	</target>
 

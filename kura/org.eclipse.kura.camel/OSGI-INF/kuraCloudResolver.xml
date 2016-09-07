@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.kura.camel.KuraCloudComponentResolver">
+   <implementation class="org.eclipse.kura.camel.cloud.KuraCloudComponentResolver"/>
+   <service>
+      <provide interface="org.apache.camel.spi.ComponentResolver"/>
+   </service>
+   <properties entry="OSGI-INF/kuraCloudResolver.properties"/>
+   <reference bind="setCloudService" cardinality="1..1" interface="org.eclipse.kura.cloud.CloudService" name="CloudService" policy="static"/>
+</scr:component>

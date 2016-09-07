@@ -14,6 +14,7 @@ import org.eclipse.kura.message.KuraPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public class EmptyCloudClientListener implements CloudClientListener {
 
     private final static Logger s_logger = LoggerFactory.getLogger(EmptyCloudClientListener.class);

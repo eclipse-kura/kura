@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.kura.example.camel.quickstart;
 
+import java.util.Random;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.eclipse.kura.camel.camelcloud.DefaultCamelCloudService;
@@ -17,11 +19,10 @@ import org.eclipse.kura.camel.cloud.KuraCloudComponent;
 import org.eclipse.kura.camel.router.CamelRouter;
 import org.eclipse.kura.message.KuraPayload;
 
-import java.util.Random;
-
 /**
  * Example of the Kura Camel application.
  */
+@SuppressWarnings("deprecation")
 public class GatewayRouter extends CamelRouter {
 
     @Override

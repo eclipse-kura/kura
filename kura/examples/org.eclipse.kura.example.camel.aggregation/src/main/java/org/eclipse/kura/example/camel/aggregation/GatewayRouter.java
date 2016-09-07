@@ -20,6 +20,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 /**
  * Example of the Kura Camel application.
  */
+@SuppressWarnings("deprecation")
 public class GatewayRouter extends CamelRouter {
 
     @Override

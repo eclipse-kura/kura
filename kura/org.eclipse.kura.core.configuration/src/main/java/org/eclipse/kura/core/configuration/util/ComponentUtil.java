@@ -9,6 +9,7 @@
  * Contributors:
  *     Eurotech
  *     Red Hat Inc - Fix service leak
+ *         - fix default value lookup
  *******************************************************************************/
 package org.eclipse.kura.core.configuration.util;
 
@@ -339,10 +340,10 @@ public class ComponentUtil
 
 				for (AD attrDef : attrDefs) {
 
-					String name = attrDef.getName();
+					String id = attrDef.getId();
 					Object   defaultValue = getDefaultValue(attrDef, ctx);
-					if (defaults.get(name) == null && defaultValue != null) {
-						defaults.put(name, defaultValue);
+					if (defaults.get(id) == null && defaultValue != null) {
+						defaults.put(id, defaultValue);
 					}
 				}
 			}

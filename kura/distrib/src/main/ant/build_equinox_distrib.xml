@@ -914,7 +914,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			<entry key="osgi.bundles" operation="+"
 				value="reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.cm_${org.eclipse.equinox.cm.version}.jar@1:start" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.kura.sun.misc_1.0.0.SNAPSHOT.jar@1" /> <!-- org.eclipse.kura.sun.misc.version -->
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.kura.sun.misc_${org.eclipse.kura.sun.misc.version}.jar@1" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.common_${org.eclipse.equinox.common.version}.jar@1:start" />
 			<entry key="osgi.bundles" operation="+"
@@ -1204,7 +1204,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<target name="camel-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
-				   value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.kura.camel.sun.misc_1.0.0.SNAPSHOT.jar@3" />  <!-- ${org.eclipse.kura.camel.sun.misc.version} -->
+				   value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.kura.camel.sun.misc_${org.eclipse.kura.camel.sun.misc.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				   value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.camel.camel-core_${org.apache.camel.camel-core.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"

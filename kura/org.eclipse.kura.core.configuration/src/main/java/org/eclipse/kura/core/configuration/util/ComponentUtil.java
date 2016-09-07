@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix service leak
  *******************************************************************************/
 package org.eclipse.kura.core.configuration.util;
 
@@ -61,33 +62,40 @@ public class ComponentUtil
 	 */
 	public static Map<String,Tmetadata> getMetadata(BundleContext ctx, Bundle bnd)
 	{
-		Map<String,Tmetadata> bundleMetadata = new HashMap<String,Tmetadata>();
+		final Map<String,Tmetadata> bundleMetadata = new HashMap<String,Tmetadata>();
 
-		ServiceReference<MetaTypeService> ref = ctx.getServiceReference(MetaTypeService.class);
-		MetaTypeService metaTypeService = ctx.getService(ref);
-		MetaTypeInformation mti = metaTypeService.getMetaTypeInformation(bnd);
-		if (mti != null) {
-
-			List<String> pids = new ArrayList<String>();
-			pids.addAll(Arrays.asList(mti.getPids()));
-			pids.addAll(Arrays.asList(mti.getFactoryPids()));
-			if (pids != null) {				
-				for (String pid : pids) {
-					
-					Tmetadata metadata = null;
-					try {
-						metadata =  readMetadata(bnd, pid);
-						if (metadata != null) {
-							bundleMetadata.put(pid, metadata);
-						}
-					}
-					catch (Exception e) {
-						// ignore: Metadata for the specified pid is not found
-						s_logger.warn("Error loading Metadata for pid "+pid, e);
-					}
-				}
-			}
+		final ServiceReference<MetaTypeService> ref = ctx.getServiceReference(MetaTypeService.class);
+		final MetaTypeService metaTypeService = ctx.getService(ref);
+		
+		try {
+    		final MetaTypeInformation mti = metaTypeService.getMetaTypeInformation(bnd);
+    		if (mti != null) {
+    
+    			final List<String> pids = new ArrayList<String>();
+    			pids.addAll(Arrays.asList(mti.getPids()));
+    			pids.addAll(Arrays.asList(mti.getFactoryPids()));
+    			if (pids != null) {				
+    				for (String pid : pids) {
+    					
+    					final Tmetadata metadata;
+    					try {
+    						metadata = readMetadata(bnd, pid);
+    						if (metadata != null) {
+    							bundleMetadata.put(pid, metadata);
+    						}
+    					}
+    					catch (Exception e) {
+    						// ignore: Metadata for the specified pid is not found
+    						s_logger.warn("Error loading Metadata for pid "+pid, e);
+    					}
+    				}
+    			}
+    		}
 		}
+		finally {
+		    ctx.ungetService(ref);
+		}
+		
 		return bundleMetadata;
 	}
 	

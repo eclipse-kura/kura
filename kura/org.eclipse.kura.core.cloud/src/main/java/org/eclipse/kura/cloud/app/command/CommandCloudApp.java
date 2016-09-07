@@ -31,389 +31,380 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
-PasswordCommandService {
-	private static final Logger s_logger = LoggerFactory.getLogger(CommandCloudApp.class);
-	private static final String EDC_PASSWORD_METRIC_NAME = "command.password";
-	private static final String COMMAND_ENABLED_ID = "command.enable";
-	private static final String COMMAND_PASSWORD_ID = "command.password.value";
-	private static final String COMMAND_WORKDIR_ID = "command.working.directory";
-	private static final String COMMAND_TIMEOUT_ID = "command.timeout";
-	private static final String COMMAND_ENVIRONMENT_ID = "command.environment";
+        PasswordCommandService {
+    private static final Logger s_logger                 = LoggerFactory.getLogger(CommandCloudApp.class);
+    private static final String EDC_PASSWORD_METRIC_NAME = "command.password";
+    private static final String COMMAND_ENABLED_ID       = "command.enable";
+    private static final String COMMAND_PASSWORD_ID      = "command.password.value";
+    private static final String COMMAND_WORKDIR_ID       = "command.working.directory";
+    private static final String COMMAND_TIMEOUT_ID       = "command.timeout";
+    private static final String COMMAND_ENVIRONMENT_ID   = "command.environment";
 
+    public static final String APP_ID = "CMD-V1";
 
-	public static final String APP_ID = "CMD-V1";
+    private Map<String, Object> properties;
 
-	private Map<String, Object> properties;
+    private ComponentContext compCtx;
+    private CryptoService    m_cryptoService;
 
-	private ComponentContext compCtx;
-	private CryptoService m_cryptoService;
+    private boolean currentStatus;
 
-	private boolean currentStatus;
+    /* EXEC */
+    public static final String RESOURCE_COMMAND = "command";
 
-	/* EXEC */
-	public static final String RESOURCE_COMMAND = "command";
+    public CommandCloudApp() {
+        super(APP_ID);
+    }
 
-	public CommandCloudApp() {
-		super(APP_ID);
-	}
+    // ----------------------------------------------------------------
+    //
+    // Dependencies
+    //
+    // ----------------------------------------------------------------
 
-	// ----------------------------------------------------------------
-	//
-	// Dependencies
-	//
-	// ----------------------------------------------------------------
+    // This component inherits the required dependencies from the parent
+    // class CloudApp.
 
-	// This component inherits the required dependencies from the parent
-	// class CloudApp.
+    public void setCryptoService(CryptoService cryptoService) {
+        this.m_cryptoService = cryptoService;
+    }
 
-	public void setCryptoService(CryptoService cryptoService) {
-		this.m_cryptoService = cryptoService;
-	}
+    public void unsetCryptoService(CryptoService cryptoService) {
+        this.m_cryptoService = null;
+    }
 
-	public void unsetCryptoService(CryptoService cryptoService) {
-		this.m_cryptoService = null;
-	}
+    // ----------------------------------------------------------------
+    //
+    // Activation APIs
+    //
+    // ----------------------------------------------------------------
 
-	// ----------------------------------------------------------------
-	//
-	// Activation APIs
-	//
-	// ----------------------------------------------------------------
+    // This component inherits the activation methods from the parent
+    // class CloudApp.
+    protected void activate(ComponentContext componentContext,
+            Map<String, Object> properties) {
+        s_logger.info("Bundle " + APP_ID + " has started with config!");
+        this.compCtx = componentContext;
+        currentStatus = (Boolean) properties.get(COMMAND_ENABLED_ID);
+        if (currentStatus) {
+            super.activate(compCtx);
+        }
+        updated(properties);
+    }
 
-	// This component inherits the activation methods from the parent
-	// class CloudApp.
-	protected void activate(ComponentContext componentContext,
-			Map<String, Object> properties) {
-		s_logger.info("Bundle " + APP_ID + " has started with config!");
-		this.compCtx = componentContext;
-		currentStatus = (Boolean) properties.get(COMMAND_ENABLED_ID);
-		if (currentStatus) {
-			super.activate(compCtx);
-		}
-		updated(properties);
-	}
+    public void updated(Map<String, Object> properties) {
+        s_logger.info("updated...: " + properties);
 
-	public void updated(Map<String, Object> properties) {
-		s_logger.info("updated...: " + properties);
+        this.properties = new HashMap<String, Object>();
 
-		this.properties= new HashMap<String, Object>();
+        for (Map.Entry<String, Object> entry : properties.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (key.equals(COMMAND_PASSWORD_ID)) {
+                try {
+                    Password decryptedPassword = new Password(m_cryptoService.decryptAes(value.toString().toCharArray()));
+                    this.properties.put(key, decryptedPassword);
+                } catch (Exception e) {
+                    this.properties.put(key, new Password((String) value));
+                }
+            } else {
+                this.properties.put(key, value);
+            }
+        }
 
-		for (Map.Entry<String, Object> entry : properties.entrySet()) {
-			String key = entry.getKey();
-			Object value = entry.getValue();
-			if (key.equals(COMMAND_PASSWORD_ID)) {
-				try {
-					Password decryptedPassword= new Password(m_cryptoService.decryptAes(value.toString().toCharArray()));
-					this.properties.put(key, decryptedPassword);
-				} catch (Exception e) {
-					this.properties.put(key, new Password((String) value));
-				} 
-			}else{
-				this.properties.put(key, value);
-			}
-		}
+        boolean newStatus = (Boolean) properties.get(COMMAND_ENABLED_ID);
+        boolean stateChanged = currentStatus != newStatus;
+        if (stateChanged) {
+            currentStatus = newStatus;
+            if (!currentStatus && getCloudApplicationClient() != null) {
+                super.deactivate(compCtx);
+            }
+            if (currentStatus) {
+                super.activate(compCtx);
+            }
+        }
+    }
 
-		boolean newStatus = (Boolean) properties.get(COMMAND_ENABLED_ID);
-		boolean stateChanged= currentStatus != newStatus;
-		if(stateChanged){
-			currentStatus= newStatus;
-			if (!currentStatus && getCloudApplicationClient() != null) {
-				super.deactivate(compCtx);
-			}
-			if (currentStatus) {
-				super.activate(compCtx);
-			}
-		}
-	}
+    protected void deactivate(ComponentContext componentContext) {
+        s_logger.info("Bundle " + APP_ID + " is deactivating!");
+        if (getCloudApplicationClient() != null) {
+            super.deactivate(compCtx);
+        }
+    }
 
-	protected void deactivate(ComponentContext componentContext) {
-		s_logger.info("Bundle " + APP_ID + " is deactivating!");
-		if (getCloudApplicationClient() != null) {
-			super.deactivate(compCtx);
-		}
-	}
+    @Override
+    protected void doExec(CloudletTopic reqTopic, KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
+            throws KuraException {
 
-	@Override
-	protected void doExec(CloudletTopic reqTopic,
-			KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
-					throws KuraException {
+        String[] resources = reqTopic.getResources();
 
-		String[] resources = reqTopic.getResources();
+        if (resources == null || resources.length != 1) {
+            s_logger.error("Bad request topic: {}", reqTopic.toString());
+            s_logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
+            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
+            return;
+        }
 
-		if (resources == null || resources.length != 1) {
-			s_logger.error("Bad request topic: {}", reqTopic.toString());
-			s_logger.error("Expected one resource but found {}",
-					resources != null ? resources.length : "none");
-			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-			return;
-		}
+        if (!resources[0].equals(RESOURCE_COMMAND)) {
+            s_logger.error("Bad request topic: {}", reqTopic.toString());
+            s_logger.error("Cannot find resource with name: {}", resources[0]);
+            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
+            return;
+        }
 
-		if (!resources[0].equals(RESOURCE_COMMAND)) {
-			s_logger.error("Bad request topic: {}", reqTopic.toString());
-			s_logger.error("Cannot find resource with name: {}", resources[0]);
-			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
-			return;
-		}
+        s_logger.info("EXECuting resource: {}", RESOURCE_COMMAND);
 
-		s_logger.info("EXECuting resource: {}", RESOURCE_COMMAND);
+        KuraCommandResponsePayload commandResp = execute(reqPayload);
 
-		KuraCommandResponsePayload commandResp = execute(reqPayload);
+        for (String name : commandResp.metricNames()) {
+            Object value = commandResp.getMetric(name);
+            respPayload.addMetric(name, value);
+        }
+        respPayload.setBody(commandResp.getBody());
+    }
 
-		for (String name : commandResp.metricNames()) {
-			Object value = commandResp.getMetric(name);
-			respPayload.addMetric(name, value);
-		}
-		respPayload.setBody(commandResp.getBody());
-	}
+    @Override
+    public KuraCommandResponsePayload execute(KuraRequestPayload reqPayload) {
+        KuraCommandRequestPayload commandReq = new KuraCommandRequestPayload(reqPayload);
 
-	@Override
-	public KuraCommandResponsePayload execute(KuraRequestPayload reqPayload) {
-		KuraCommandRequestPayload commandReq = new KuraCommandRequestPayload(reqPayload);
+        // String receivedPassword= (String)
+        // reqPayload.getMetric(EDC_PASSWORD_METRIC_NAME);
+        String receivedPassword = (String) commandReq.getMetric(EDC_PASSWORD_METRIC_NAME);
+        Password commandPassword = (Password) properties.get(COMMAND_PASSWORD_ID);
 
-		// String receivedPassword= (String)
-		// reqPayload.getMetric(EDC_PASSWORD_METRIC_NAME);
-		String receivedPassword = (String) commandReq.getMetric(EDC_PASSWORD_METRIC_NAME);
-		Password commandPassword = (Password) properties.get(COMMAND_PASSWORD_ID);
+        KuraCommandResponsePayload commandResp = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
-		KuraCommandResponsePayload commandResp = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+        boolean isExecutionAllowed = verifyPasswords(commandPassword, receivedPassword);
+        if (isExecutionAllowed) {
 
-		boolean isExecutionAllowed = verifyPasswords(commandPassword, receivedPassword);
-		if (isExecutionAllowed) {
+            String command = commandReq.getCommand();
+            if (command == null || command.trim().isEmpty()) {
+                s_logger.error("null command");
+                commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
+                return commandResp;
+            }
 
-			String command = commandReq.getCommand();
-			if (command == null) {
-				s_logger.error("null command");
-				commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
-			}
+            String[] cmdarray = prepareCommandArray(commandReq, command);
 
-			String[] cmdarray = prepareCommandArray(commandReq, command);
+            // String dir = getDir(commandReq);
+            String dir = getDefaultWorkDir();
+            String[] envp = getEnvironment(commandReq);
 
-//			String dir = getDir(commandReq);
-			String dir = getDefaultWorkDir();
-			String[] envp = getEnvironment(commandReq);
+            byte[] zipBytes = commandReq.getZipBytes();
+            if (zipBytes != null) {
+                try {
+                    UnZip.unZipBytes(zipBytes, dir);
+                } catch (IOException e) {
+                    s_logger.error("Error unzipping command zip bytes", e);
+                    commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+                    commandResp.setException(e);
+                    return commandResp;
+                }
+            }
 
-			byte[] zipBytes = commandReq.getZipBytes();
-			if (zipBytes != null) {
-				try {
-					UnZip.unZipBytes(zipBytes, dir);
-				} catch (IOException e) {
-					s_logger.error("Error unzipping command zip bytes", e);
-					commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-					commandResp.setException(e);
-					return commandResp;
-				}
-			}
+            Process proc = null;
+            try {
+                proc = createExecutionProcess(dir, cmdarray, envp);
+            } catch (Throwable t) {
+                s_logger.error("Error executing command {}", t);
+                commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+                commandResp.setException(t);
+                return commandResp;
+            }
 
-			Process proc = null;
-			try {
-				proc = createExecutionProcess(dir, cmdarray, envp);
-			} catch (Throwable t) {
-				s_logger.error("Error executing command {}", t);
-				commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-				commandResp.setException(t);
-				return commandResp;
-			}
+            boolean runAsync = commandReq.isRunAsync() != null ? commandReq.isRunAsync() : false;
+            int timeout = getTimeout(commandReq);
 
-			boolean runAsync = commandReq.isRunAsync() != null ? commandReq
-					.isRunAsync() : false;
-					int timeout = getTimeout(commandReq);
+            ProcessMonitorThread pmt = new ProcessMonitorThread(proc, commandReq.getStdin(), timeout);
+            pmt.start();
 
-					ProcessMonitorThread pmt = new ProcessMonitorThread(proc, commandReq.getStdin(), timeout);
-					pmt.start();
+            if (!runAsync) {
+                try {
+                    pmt.join();
+                    prepareResponseNoTimeout(commandResp, pmt);
+                } catch (InterruptedException e) {
+                    Thread.interrupted();
+                    pmt.interrupt();
+                    prepareTimeoutResponse(commandResp, pmt);
+                }
+            }
 
-					if (!runAsync) {
-						try {
-							pmt.join();
-							prepareResponseNoTimeout(commandResp, pmt);
-						} catch (InterruptedException e) {
-							Thread.interrupted();
-							pmt.interrupt();
-							prepareTimeoutResponse(commandResp, pmt);
-						}
-					}
+        } else {
+            s_logger.error("Password required but not correct and/or missing");
+            commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+            commandResp.setExceptionMessage("Password missing or not correct");
+        }
 
-		} else {
-			s_logger.error("Password required but not correct and/or missing");
-			commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-			commandResp.setExceptionMessage("Password missing or not correct");
-		}
+        return commandResp;
+    }
 
-		return commandResp;
+    @Override
+    public String execute(String cmd, String password) throws KuraException {
+        boolean verificationEnabled = (Boolean) properties.get(COMMAND_ENABLED_ID);
+        if (verificationEnabled) {
 
-	}
+            Password commandPassword = (Password) properties.get(COMMAND_PASSWORD_ID);
+            boolean isExecutionAllowed = verifyPasswords(commandPassword, password);
+            if (isExecutionAllowed) {
 
-	@Override
-	public String execute(String cmd, String password) throws KuraException {
-		// TODO Auto-generated method stub
-		boolean verificationEnabled = (Boolean) properties.get(COMMAND_ENABLED_ID);
-		if (verificationEnabled) {
+                String[] cmdArray = cmd.split(" ");
+                String defaultDir = getDefaultWorkDir();
+                String[] environment = getDefaultEnvironment();
+                try {
+                    Process proc = createExecutionProcess(defaultDir, cmdArray, environment);
 
-			Password commandPassword = (Password) properties.get(COMMAND_PASSWORD_ID);
-			boolean isExecutionAllowed = verifyPasswords(commandPassword, password);
-			if (isExecutionAllowed) {
+                    int timeout = getDefaultTimeout();
+                    ProcessMonitorThread pmt = null;
+                    pmt = new ProcessMonitorThread(proc, null, timeout);
+                    pmt.start();
 
-				String[] cmdArray = cmd.split(" ");
-				String defaultDir = getDefaultWorkDir();
-				String[] environment = getDefaultEnvironment();
-				try {
-					Process proc = createExecutionProcess(defaultDir, cmdArray, environment);
+                    try {
+                        pmt.join();
+                        if (pmt.getExitValue() == 0) {
+                            return pmt.getStdout();
+                        } else {
+                            return pmt.getStderr();
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.interrupted();
+                        pmt.interrupt();
+                        throw KuraException.internalError(e);
+                    }
+                } catch (IOException ex) {
+                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
+                }
+            } else {
+                throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+            }
+        } else {
+            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        }
+    }
 
-					int timeout = getDefaultTimeout();
-					ProcessMonitorThread pmt = null;
-					pmt = new ProcessMonitorThread(proc, null, timeout);
-					pmt.start();
+    // command service defaults getters
+    private String getDefaultWorkDir() {
 
-					try {
-						pmt.join();
-						if (pmt.getExitValue() == 0) {
-							return pmt.getStdout();
-						} else {
-							return pmt.getStderr();
-						}
-					} catch (InterruptedException e) {
-						Thread.interrupted();
-						pmt.interrupt();
-						throw KuraException.internalError(e);
-					}
-				} catch (IOException ex) {
-					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
-				}
-			} else {
-				throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
-			}
-		} else {
-			throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
-		}
+        String workDir = (String) properties.get(COMMAND_WORKDIR_ID);
+        if (workDir != null) {
+            if (!workDir.isEmpty()) {
+                return workDir;
+            }
+        }
+        return System.getProperty("java.io.tmpdir");
+    }
 
-	}
+    private int getDefaultTimeout() {
+        return (Integer) properties.get(COMMAND_TIMEOUT_ID);
+    }
 
-	// command service defaults getters
-	private String getDefaultWorkDir() {
+    private String[] getDefaultEnvironment() {
+        String envString = (String) properties.get(COMMAND_ENVIRONMENT_ID);
+        if (envString != null) {
+            return envString.split(" ");
+        }
+        return null;
+    }
 
-		String workDir = (String)properties.get(COMMAND_WORKDIR_ID);
-		if(workDir != null)
-		{
-			if(!workDir.isEmpty())
-			{
-				return workDir;
-			}
-		}
-		return System.getProperty("java.io.tmpdir");
-	}
+    private String getDir(KuraCommandRequestPayload req) {
+        String dir = req.getWorkingDir();
+        String defaultDir = getDefaultWorkDir();
+        if (dir != null && !dir.isEmpty()) {
+            return dir;
+        }
+        return defaultDir;
+    }
 
-	private int getDefaultTimeout() {
-		return (Integer) properties.get(COMMAND_TIMEOUT_ID);
-	}
+    private int getTimeout(KuraCommandRequestPayload req) {
+        Integer timeout = req.getTimeout();
+        int defaultTimeout = getDefaultTimeout();
+        if (timeout != null) {
+            return timeout;
+        }
+        return defaultTimeout;
+    }
 
-	private String[] getDefaultEnvironment() {
-		String envString = (String) properties.get(COMMAND_ENVIRONMENT_ID);
-		if (envString != null) {
-			return envString.split(" ");
-		}
-		return null;
-	}
+    private String[] getEnvironment(KuraCommandRequestPayload req) {
+        String[] envp = req.getEnvironmentPairs();
+        String[] defaultEnv = getDefaultEnvironment();
+        if (envp != null && envp.length != 0) {
+            return envp;
+        }
+        return defaultEnv;
+    }
 
-	private String getDir(KuraCommandRequestPayload req) {
-		String dir = req.getWorkingDir();
-		String defaultDir = getDefaultWorkDir();
-		if (dir != null && !dir.isEmpty()) {
-			return dir;
-		}
-		return defaultDir;
-	}
+    private boolean verifyPasswords(Password commandPassword, String receivedPassword) {
+        if (commandPassword == null && receivedPassword == null) {
+            return true;
+        }
+        if (commandPassword == null && "".equals(receivedPassword)) {
+            return true;
+        }
+        if (commandPassword == null) {
+            return false;
+        }
 
-	private int getTimeout(KuraCommandRequestPayload req) {
-		Integer timeout = req.getTimeout();
-		int defaultTimeout = getDefaultTimeout();
-		if (timeout != null) {
-			return timeout;
-		}
-		return defaultTimeout;
-	}
-
-	private String[] getEnvironment(KuraCommandRequestPayload req) {
-		String[] envp = req.getEnvironmentPairs();
-		String[] defaultEnv = getDefaultEnvironment();
-		if (envp != null && envp.length != 0) {
-			return envp;
-		}
-		return defaultEnv;
-	}
-
-	private boolean verifyPasswords(Password commandPassword, String receivedPassword) {
-		if (commandPassword == null && receivedPassword == null) {
-			return true;
-		}
-		if (commandPassword == null && "".equals(receivedPassword)) {
-			return true;
-		}
-		if(commandPassword == null){
-			return false;
-		}
-		
-		if ("".equals(commandPassword.toString()) && receivedPassword == null) {
+        if ("".equals(commandPassword.toString()) && receivedPassword == null) {
             return true;
         }
         if ("".equals(commandPassword.toString()) && "".equals(receivedPassword)) {
             return true;
         }
-		
-		String pwd = commandPassword.toString();
-		return pwd.equals(receivedPassword);
-	}
 
-	private Process createExecutionProcess(String dir, String[] cmdarray,
-			String[] envp) throws IOException {
-		Runtime rt = Runtime.getRuntime();
-		Process proc = null;
-		File fileDir = dir == null ? null : new File(dir);
-		proc = rt.exec(cmdarray, envp, fileDir);
-		return proc;
-	}
+        String pwd = commandPassword.toString();
+        return pwd.equals(receivedPassword);
+    }
 
-	private String[] prepareCommandArray(KuraCommandRequestPayload req,
-			String command) {
-		String[] args = req.getArguments();
-		int argsCount = args != null ? args.length : 0;
-		String[] cmdarray = new String[1 + argsCount];
+    private Process createExecutionProcess(String dir, String[] cmdarray, String[] envp) throws IOException {
+        Runtime rt = Runtime.getRuntime();
+        Process proc = null;
+        File fileDir = dir == null ? null : new File(dir);
+        proc = rt.exec(cmdarray, envp, fileDir);
+        return proc;
+    }
 
-		cmdarray[0] = command;
-		for (int i = 0; i < argsCount; i++) {
-			cmdarray[1 + i] = args[i];
-		}
+    private String[] prepareCommandArray(KuraCommandRequestPayload req,
+            String command) {
+        String[] args = req.getArguments();
+        int argsCount = args != null ? args.length : 0;
+        String[] cmdarray = new String[1 + argsCount];
 
-		for (int i = 0; i < cmdarray.length; i++) {
-			s_logger.debug("cmdarray: {}", cmdarray[i]);
-		}
+        cmdarray[0] = command;
+        for (int i = 0; i < argsCount; i++) {
+            cmdarray[1 + i] = args[i];
+        }
 
-		return cmdarray;
-	}
+        for (int i = 0; i < cmdarray.length; i++) {
+            s_logger.debug("cmdarray: {}", cmdarray[i]);
+        }
 
-	private void prepareResponseNoTimeout(KuraCommandResponsePayload resp,
-			ProcessMonitorThread pmt) {
+        return cmdarray;
+    }
 
-		if (pmt.getException() != null) {
-			resp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
-			resp.setException(pmt.getException());
-			resp.setStderr(pmt.getStderr());
-			resp.setStdout(pmt.getStdout());
-		} else {
-			resp.setStderr(pmt.getStderr());
-			resp.setStdout(pmt.getStdout());
-			resp.setTimedout(pmt.isTimedOut());
+    private void prepareResponseNoTimeout(KuraCommandResponsePayload resp,
+            ProcessMonitorThread pmt) {
 
-			if (!pmt.isTimedOut()) {
-				resp.setExitCode(pmt.getExitValue());
-			}
-		}
+        if (pmt.getException() != null) {
+            resp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+            resp.setException(pmt.getException());
+            resp.setStderr(pmt.getStderr());
+            resp.setStdout(pmt.getStdout());
+        } else {
+            resp.setStderr(pmt.getStderr());
+            resp.setStdout(pmt.getStdout());
+            resp.setTimedout(pmt.isTimedOut());
 
-	}
+            if (!pmt.isTimedOut()) {
+                resp.setExitCode(pmt.getExitValue());
+            }
+        }
 
-	private void prepareTimeoutResponse(KuraCommandResponsePayload resp,
-			ProcessMonitorThread pmt) {
-		resp.setStderr(pmt.getStderr());
-		resp.setStdout(pmt.getStdout());
-		resp.setTimedout(true);
-	}
+    }
+
+    private void prepareTimeoutResponse(KuraCommandResponsePayload resp,
+            ProcessMonitorThread pmt) {
+        resp.setStderr(pmt.getStderr());
+        resp.setStdout(pmt.getStdout());
+        resp.setTimedout(true);
+    }
 
 }

@@ -925,7 +925,7 @@
   								<fileSet>
     								<directory>${basedir}/target</directory>
     								<includes>
-      									<include>*.deb</include>
+      									<include>kura_${project.version}_beaglebone_debian_installer.deb</include>
     								</includes>
   								</fileSet>
 							</fileSets>
@@ -1048,7 +1048,7 @@
   								<fileSet>
     								<directory>${basedir}/target</directory>
     								<includes>
-      									<include>*.deb</include>
+      									<include>kura_${project.version}_beaglebone-nn_debian_installer.deb</include>
     								</includes>
   								</fileSet>
 							</fileSets>
@@ -1181,7 +1181,7 @@
   								<fileSet>
     								<directory>${basedir}/target</directory>
     								<includes>
-      									<include>*.deb</include>
+      									<include>kura_${project.version}_raspberry-pi_installer.deb</include>
     								</includes>
   								</fileSet>
 							</fileSets>
@@ -1302,7 +1302,7 @@
   								<fileSet>
     								<directory>${basedir}/target</directory>
     								<includes>
-      									<include>*.deb</include>
+      									<include>kura_${project.version}_raspberry-pi-nn_installer.deb</include>
     								</includes>
   								</fileSet>
 							</fileSets>
@@ -1435,7 +1435,7 @@
   								<fileSet>
     								<directory>${basedir}/target</directory>
     								<includes>
-      									<include>*.deb</include>
+      									<include>kura_${project.version}_raspberry-pi-bplus_installer.deb</include>
     								</includes>
   								</fileSet>
 							</fileSets>
@@ -1556,7 +1556,7 @@
   								<fileSet>
     								<directory>${basedir}/target</directory>
     								<includes>
-      									<include>*.deb</include>
+      									<include>kura_${project.version}_raspberry-pi-bplus-nn_installer.deb</include>
     								</includes>
   								</fileSet>
 							</fileSets>
@@ -1679,7 +1679,7 @@
   								<fileSet>
     								<directory>${basedir}/target</directory>
     								<includes>
-      									<include>*.deb</include>
+      									<include>kura_${project.version}_raspberry-pi-2_installer.deb</include>
     								</includes>
   								</fileSet>
 							</fileSets>
@@ -1802,7 +1802,7 @@
   								<fileSet>
     								<directory>${basedir}/target</directory>
     								<includes>
-      									<include>*.deb</include>
+      									<include>kura_${project.version}_raspberry-pi-2-nn_installer.deb</include>
     								</includes>
   								</fileSet>
 							</fileSets>

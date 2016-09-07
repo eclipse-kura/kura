@@ -83,19 +83,6 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 	</properties>
 
-	<distributionManagement>
-			<repository>
-				<id>repo.eclipse.org</id>
-				<name>Eclipse Kura Repository - Releases</name>
-				<url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
-			</repository>
-			<snapshotRepository>
-				<id>repo.eclipse.org</id>
-				<name>Eclipse Kura Repository - Snapshots</name>
-				<url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
-			</snapshotRepository>
-	</distributionManagement>
-
 	<profiles>
 		<profile>
 			<id>default</id>
@@ -137,6 +124,55 @@
 				<module>org.eclipse.kura.protocol.can</module>
 				<module>org.eclipse.kura.protocol.can.test</module>
 			</modules>
+		</profile>
+		
+		<profile>
+			<id>test-repository</id>
+			<activation>
+				<property>
+					<name>useTestRepo</name>
+					<value>true</value>
+				</property>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+			</properties>
+			<distributionManagement>
+				<repository>
+					<id>releases</id>
+					<name>releases</name>
+					<url>http://172.17.0.2:8081/content/repositories/releases</url>
+				</repository>
+				<snapshotRepository>
+					<id>snapshots</id>
+					<name>snapshots</name>
+					<url>http://172.17.0.2:8081/content/repositories/snapshots</url>
+				</snapshotRepository>
+			</distributionManagement>
+		</profile>
+
+		<profile>
+			<id>prod-repository</id>
+			<activation>
+				<property>
+					<name>!useTestRepo</name>
+				</property>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+			</properties>
+			<distributionManagement>
+				<repository>
+					<id>repo.eclipse.org</id>
+					<name>Kura Repository - Releases</name>
+					<url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+				</repository>
+				<snapshotRepository>
+					<id>repo.eclipse.org</id>
+					<name>Kura Repository - Snapshots</name>
+					<url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+				</snapshotRepository>
+			</distributionManagement>
 		</profile>
 	</profiles>
 

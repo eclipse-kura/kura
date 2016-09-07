@@ -81,15 +81,19 @@
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 		
+		<release.repo.id>repo.eclipse.org</release.repo.id>
 		<release.repo.url>https://repo.eclipse.org/content/repositories/kura-releases/</release.repo.url>
+		<snapshot.repo.id>repo.eclipse.org</snapshot.repo.id>
 		<snapshot.repo.url>https://repo.eclipse.org/content/repositories/kura-snapshots/</snapshot.repo.url>
 	</properties>
 	
 	<distributionManagement>
 		<repository>
+			<id>${release.repo.id}</id>
 			<url>${release.repo.url}</url>
 		</repository>
 		<snapshotRepository>
+			<id>${snapshot.repo.id}</id>
 			<url>${snapshot.repo.url}</url>
 		</snapshotRepository>
 	</distributionManagement>

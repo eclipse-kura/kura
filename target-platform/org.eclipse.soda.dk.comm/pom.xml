@@ -11,7 +11,7 @@
 
     <groupId>org.eclipse</groupId>
     <artifactId>org.eclipse.soda.dk.comm</artifactId>
-    <version>1.2.2</version>
+    <version>1.2.3-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <name>Serial Device based on SODA DK comm</name>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2016 Eurotech and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -10,6 +10,8 @@
 
     Contributors:
       Eurotech
+      Red Hat Inc - "Eclipse Kura"
+	      	- added Camel test project
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -27,6 +29,7 @@
 		<module>org.eclipse.kura.api</module>
 		<module>org.eclipse.kura.test</module>
 		<module>org.eclipse.kura.camel</module>
+		<module>org.eclipse.kura.camel.xml</module>
 		<module>org.eclipse.kura.core</module>
 		<module>org.eclipse.kura.core.certificates</module>
 		<module>org.eclipse.kura.core.cloud</module>
@@ -83,12 +86,12 @@
 	<distributionManagement>
 			<repository>
 				<id>repo.eclipse.org</id>
-				<name>Kura Repository - Releases</name>
+				<name>Eclipse Kura Repository - Releases</name>
 				<url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
 			</repository>
 			<snapshotRepository>
 				<id>repo.eclipse.org</id>
-				<name>Kura Repository - Snapshots</name>
+				<name>Eclipse Kura Repository - Snapshots</name>
 				<url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
 			</snapshotRepository>
 	</distributionManagement>
@@ -145,7 +148,7 @@
 		</repository>
 		<repository>
 			<id>kura_addons</id>
-			<name>Kura Addons Maven Repository</name>
+			<name>Eclipse Kura Addons Maven Repository</name>
 			<url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</url>
 			<snapshots>
 				<enabled>true</enabled>
@@ -437,7 +440,7 @@
 							<configuration>
 								<!-- Specific configuration for the aggregate report -->
 								<skip>false</skip>
-								<doctitle>Kura ${project.version}</doctitle>
+								<doctitle>Eclipse Kura ${project.version}</doctitle>
 							</configuration>
 						</execution>
 					</executions>

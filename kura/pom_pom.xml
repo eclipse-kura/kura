@@ -35,18 +35,17 @@
 		<org.eclipse.kura.can.skip>true</org.eclipse.kura.can.skip>
 		<org.eclipse.kura.dio.skip>false</org.eclipse.kura.dio.skip>
 		<org.eclipse.kura.dio.include>true</org.eclipse.kura.dio.include>
+		
+		<release.repo.url>https://repo.eclipse.org/content/repositories/kura-releases/</release.repo.url>
+		<snapshot.repo.url>https://repo.eclipse.org/content/repositories/kura-snapshots/</snapshot.repo.url>
 	</properties>
-
+	
 	<distributionManagement>
 		<repository>
-			<id>repo.eclipse.org</id>
-			<name>Eclipse Kura Repository - Releases</name>
-			<url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+			<url>${release.repo.url}</url>
 		</repository>
 		<snapshotRepository>
-			<id>repo.eclipse.org</id>
-			<name>Eclipse Kura Repository - Snapshots</name>
-			<url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+			<url>${snapshot.repo.url}</url>
 		</snapshotRepository>
 	</distributionManagement>
 

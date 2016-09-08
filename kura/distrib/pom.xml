@@ -921,6 +921,7 @@
              					<algorithm>MD5</algorithm>
              					<algorithm>SHA-1</algorithm>
              				</algorithms>
+             				<csvSummary>false</csvSummary>
              				<fileSets>
   								<fileSet>
     								<directory>${basedir}/target</directory>
@@ -1044,6 +1045,7 @@
              					<algorithm>MD5</algorithm>
              					<algorithm>SHA-1</algorithm>
              				</algorithms>
+             				<csvSummary>false</csvSummary>
              				<fileSets>
   								<fileSet>
     								<directory>${basedir}/target</directory>
@@ -1177,6 +1179,7 @@
              					<algorithm>MD5</algorithm>
              					<algorithm>SHA-1</algorithm>
              				</algorithms>
+             				<csvSummary>false</csvSummary>
              				<fileSets>
   								<fileSet>
     								<directory>${basedir}/target</directory>
@@ -1298,6 +1301,7 @@
              					<algorithm>MD5</algorithm>
              					<algorithm>SHA-1</algorithm>
              				</algorithms>
+             				<csvSummary>false</csvSummary>
              				<fileSets>
   								<fileSet>
     								<directory>${basedir}/target</directory>
@@ -1431,6 +1435,7 @@
              					<algorithm>MD5</algorithm>
              					<algorithm>SHA-1</algorithm>
              				</algorithms>
+             				<csvSummary>false</csvSummary>
              				<fileSets>
   								<fileSet>
     								<directory>${basedir}/target</directory>
@@ -1552,6 +1557,7 @@
              					<algorithm>MD5</algorithm>
              					<algorithm>SHA-1</algorithm>
              				</algorithms>
+             				<csvSummary>false</csvSummary>
              				<fileSets>
   								<fileSet>
     								<directory>${basedir}/target</directory>
@@ -1675,6 +1681,7 @@
              					<algorithm>MD5</algorithm>
              					<algorithm>SHA-1</algorithm>
              				</algorithms>
+             				<csvSummary>false</csvSummary>
              				<fileSets>
   								<fileSet>
     								<directory>${basedir}/target</directory>
@@ -1798,6 +1805,7 @@
              					<algorithm>MD5</algorithm>
              					<algorithm>SHA-1</algorithm>
              				</algorithms>
+             				<csvSummary>false</csvSummary>
              				<fileSets>
   								<fileSet>
     								<directory>${basedir}/target</directory>

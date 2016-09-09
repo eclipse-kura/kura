@@ -11,7 +11,7 @@
     Contributors:
       Eurotech
       Red Hat Inc - "Eclipse Kura"
-	      	- added Camel test project
+	      	- added Camel test project, added camel.cloud.factory
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -29,6 +29,7 @@
 		<module>org.eclipse.kura.api</module>
 		<module>org.eclipse.kura.test</module>
 		<module>org.eclipse.kura.camel</module>
+		<module>org.eclipse.kura.camel.cloud.factory</module>
 		<module>org.eclipse.kura.camel.xml</module>
 		<module>org.eclipse.kura.core</module>
 		<module>org.eclipse.kura.core.certificates</module>

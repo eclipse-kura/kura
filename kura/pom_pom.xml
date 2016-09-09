@@ -58,7 +58,6 @@
 			</activation>
 			<modules>
 				<module>distrib</module>
-				<module>tools</module>
 			</modules>
 		</profile>
 		<profile>
@@ -72,6 +71,14 @@
 			<modules>
 				<module>org.eclipse.kura.web2</module>
 				<module>distrib</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>tools</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<modules>
 				<module>tools</module>
 			</modules>
 		</profile>

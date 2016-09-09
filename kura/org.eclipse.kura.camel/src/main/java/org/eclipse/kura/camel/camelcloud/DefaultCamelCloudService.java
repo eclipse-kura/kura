@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2016 Red Hat Inc and others.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,15 +11,16 @@
  *******************************************************************************/
 package org.eclipse.kura.camel.camelcloud;
 
+import static org.apache.camel.ServiceStatus.Started;
+
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.camel.CamelContext;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.camel.internal.camelcloud.CamelCloudClient;
 import org.eclipse.kura.cloud.CloudClient;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static org.apache.camel.ServiceStatus.Started;
 
 public class DefaultCamelCloudService implements CamelCloudService {
 
@@ -35,7 +37,7 @@ public class DefaultCamelCloudService implements CamelCloudService {
     @Override
     public CloudClient newCloudClient(String applicationId) throws KuraException {
         String baseEndpoint = this.baseEndpoints.get(applicationId);
-        if(baseEndpoint == null) {
+        if (baseEndpoint == null) {
             baseEndpoint = "vm:%s";
         }
         CloudClient cloudClient = new CamelCloudClient(this, this.camelContext, applicationId, baseEndpoint);
@@ -55,11 +57,34 @@ public class DefaultCamelCloudService implements CamelCloudService {
 
     @Override
     public void registerBaseEndpoint(String applicationId, String baseEndpoint) {
-    	this.baseEndpoints.put(applicationId, baseEndpoint);
+        this.baseEndpoints.put(applicationId, baseEndpoint);
     }
 
     @Override
     public void release(String applicationId) {
-    	this.clients.remove(applicationId);
+        CloudClient client = this.clients.remove(applicationId);
+        if (client != null) {
+            client.release();
+        }
+    }
+
+    public void dispose() {
+        final LinkedList<Exception> errors = new LinkedList<>();
+        for (CloudClient client : this.clients.values()) {
+            try {
+                client.release();
+            } catch (Exception e) {
+                errors.add(e);
+            }
+        }
+        this.clients.clear();
+
+        if (!errors.isEmpty()) {
+            final Exception first = errors.pollFirst();
+            for (Exception others : errors) {
+                first.addSuppressed(others);
+            }
+            throw new RuntimeException(first);
+        }
     }
 }

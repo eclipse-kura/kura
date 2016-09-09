@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2016 Red Hat Inc and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Red Hat Inc - Initial API and implementation
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.camel.cloud.factory.CamelFactory"
+         name="Camel Cloud Client" 
+         description="Camel Cloud Client factory">
+        
+         <AD id="xml"
+            name="Router XML"
+            type="String"
+            cardinality="1"
+            required="true"
+            description="The camel XML router configuration|TextArea"/>
+            
+         <AD id="serviceRanking"
+            name="Service Ranking"
+            type="Integer"
+            cardinality="0"
+            required="false"
+            description="The service ranking. A higher number will have more priority."/>
+        
+		 <AD id="delete"
+            name="Delete"
+            type="Boolean"
+            cardinality="1"
+            required="true"
+            default="false"
+            description="Select if you want to delete this configuration."/>
+                    
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.camel.cloud.factory.CamelFactory" factoryPid="org.eclipse.kura.camel.cloud.factory.CamelFactory">
+        <Object ocdref="org.eclipse.kura.camel.cloud.factory.CamelFactory"/>
+    </Designate>
+</MetaData>

@@ -12,12 +12,18 @@
       Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" name="org.eclipse.kura.status.CloudConnectionStatusService">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
+    activate="activate" 
+    deactivate="deactivate" 
+    name="org.eclipse.kura.status.CloudConnectionStatusService"
+    configuration-policy="require">
    <implementation class="org.eclipse.kura.core.status.CloudConnectionStatusServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.status.CloudConnectionStatusService"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.status.CloudConnectionStatusService"/>
+   <property name="service.factoryPid" value="org.eclipse.kura.status.CloudConnectionStatusService"/>
+   
    <reference name="SystemService" 
               cardinality="1..1" 
               policy="static"

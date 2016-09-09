@@ -42,4 +42,10 @@
               unbind="unsetCryptoService"
               cardinality="1..1" 
               policy="static"/>   
+              
+   <property name="osgi.command.scope" type="String" value="kura.configuration"/>
+   <property name="osgi.command.function" type="String">
+       createFactoryConfiguration
+       deleteFactoryConfiguration
+   </property>
 </scr:component>

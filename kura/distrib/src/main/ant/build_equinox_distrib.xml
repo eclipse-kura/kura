@@ -435,7 +435,7 @@ fi
 			<zipfileset dir="${kura.osgi.repo}/plugins/"
                         prefix="${build.output.name}/plugins"/>
 
-			<zipfileset dir="../target-definition/common/source/plugins" excludes="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*,com.gwt.user_*"
+			<zipfileset dir="../target-definition/common/source/plugins" excludes="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*,com.gwt.user_*,org.eclipse.kura.windows.*"
                         prefix="${build.output.name}/plugins"/>
 
 

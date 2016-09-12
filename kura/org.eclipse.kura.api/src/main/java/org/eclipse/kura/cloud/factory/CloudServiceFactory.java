@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.cloud.factory;
 
+import java.util.List;
+
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -58,6 +60,13 @@ import org.osgi.service.component.ComponentContext;
  * @since {@link org.eclipse.kura.cloud.factory} 1.0.0
  */
 public interface CloudServiceFactory {
+
+    /**
+     * The name of the property set in a @{link CloudService} configuration created
+     * through {@link #createConfiguration}.
+     * The property is set to the value returned by {@link #getFactoryPid()}.
+     */
+    public static final String KURA_CLOUD_SERVICE_FACTORY_PID = "kura.cloud.service.factory.pid";
 
     /**
      * Returns the factory PID of the OSGi Factory Component represented by this CloudServiceFactory.
@@ -114,6 +123,8 @@ public interface CloudServiceFactory {
      * @throws KuraException
      */
     void createConfiguration(String pid) throws KuraException;
+
+    List<String> getStackComponentsPids(String pid) throws KuraException;
 
     /**
      * Deletes a previously created configuration deactivating the associated {@link CloudService} instance.

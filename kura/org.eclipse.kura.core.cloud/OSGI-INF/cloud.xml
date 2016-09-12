@@ -56,4 +56,5 @@
               bind="setEventAdmin" 
               unbind="unsetEventAdmin"
               interface="org.osgi.service.event.EventAdmin"/>
+   <property name="kura.ui.service.hide" type="Boolean" value="true"/>
 </scr:component>

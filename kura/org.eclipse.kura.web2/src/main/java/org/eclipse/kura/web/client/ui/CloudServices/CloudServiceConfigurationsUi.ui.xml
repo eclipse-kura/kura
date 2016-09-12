@@ -18,26 +18,39 @@
 	xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
-	<ui:style>
-	.important { }
-	
-	.center-panel { height: 100%; padding: 0px; border: none; }
 
-	</ui:style>
+	<ui:style>
+	.important {
+		font-weight: bold;
+	}
 	
+	.asset-comp-modal-header {
+		display: none;
+	}
+	
+	.asset-comp-modal-body {
+		padding-bottom: 40px;
+	}
+	
+	.center-panel {
+		height: 100%;
+		padding: 0px;
+		border: none;
+	}
+	
+	.drivers-list {
+		padding-bottom: 30px;
+	}
+	</ui:style>
+
 	<b:Container fluid="true">
 		<b:Column size="MD12">
 			<b:Row>
-				<b:Panel>
-					<b:ButtonGroup size="SMALL">
-						<b:Button ui:field="statusRefresh" addStyleNames="fa fa-refresh"></b:Button>
-					</b:ButtonGroup>
-				</b:Panel>
-			</b:Row>
-			<b:Row>
-				<b:Well addStyleNames="{style.center-panel}" ui:field="statusWell">
-					<gwt:CellTable bordered="true" condensed="true"
-						striped="true" hover="true" height="100%" width="100%" ui:field="statusGrid" />						
+				<b:Well addStyleNames="{style.center-panel}" ui:field="configurationsWell">
+					<b:NavTabs ui:field="connectionNavtabs">
+					</b:NavTabs>
+					<b:TabContent ui:field="connectionTabContent">
+					</b:TabContent>
 				</b:Well>
 			</b:Row>
 		</b:Column>

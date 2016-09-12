@@ -49,99 +49,114 @@ public class GwtConfigParameter implements IsSerializable {
     public GwtConfigParameter() {
     }
 
+    public GwtConfigParameter(GwtConfigParameter reference) {
+        this.m_id = reference.getId();
+        this.m_name = reference.getName();
+        this.m_description = reference.getDescription();
+        this.m_type = reference.getType();
+        this.m_required = reference.isRequired();
+        this.m_default = reference.getDefault();
+        this.m_cardinality = reference.getCardinality();
+        this.m_options = reference.getOptions();
+        this.m_min = reference.getMin();
+        this.m_max = reference.getMax();
+        this.m_value = reference.getValue();
+        this.m_values = reference.getValues();
+    }
+
     public String getId() {
-        return this.m_id;
+        return m_id;
     }
 
     public void setId(String id) {
-        this.m_id = id;
+        m_id = id;
     }
 
     public String getName() {
-        return this.m_name;
+        return m_name;
     }
 
     public void setName(String name) {
-        this.m_name = name;
+        m_name = name;
     }
 
     public String getDescription() {
-        return this.m_description;
+        return m_description;
     }
 
     public void setDescription(String description) {
-        this.m_description = description;
+        m_description = description;
     }
 
     public GwtConfigParameterType getType() {
-        return this.m_type;
+        return m_type;
     }
 
     public void setType(GwtConfigParameterType type) {
-        this.m_type = type;
+        m_type = type;
     }
 
     public boolean isRequired() {
-        return this.m_required;
+        return m_required;
     }
 
     public void setRequired(boolean required) {
-        this.m_required = required;
+        m_required = required;
     }
 
     public String getDefault() {
-        return this.m_default;
+        return m_default;
     }
 
     public void setDefault(String default1) {
-        this.m_default = default1;
+        m_default = default1;
     }
 
     public int getCardinality() {
-        return this.m_cardinality;
+        return m_cardinality;
     }
 
     public void setCardinality(int cardinality) {
-        this.m_cardinality = cardinality;
+        m_cardinality = cardinality;
     }
 
     public Map<String, String> getOptions() {
-        return this.m_options;
+        return m_options;
     }
 
     public void setOptions(Map<String, String> options) {
-        this.m_options = options;
+        m_options = options;
     }
 
     public String getMin() {
-        return this.m_min;
+        return m_min;
     }
 
     public void setMin(String min) {
-        this.m_min = min;
+        m_min = min;
     }
 
     public String getMax() {
-        return this.m_max;
+        return m_max;
     }
 
     public void setMax(String max) {
-        this.m_max = max;
+        m_max = max;
     }
 
     public String getValue() {
-        return this.m_value;
+        return m_value;
     }
 
     public void setValue(String value) {
-        this.m_value = value;
+        m_value = value;
     }
 
     public String[] getValues() {
-        return this.m_values;
+        return m_values;
     }
 
     public void setValues(String[] values) {
-        this.m_values = values;
+        m_values = values;
     }
 }

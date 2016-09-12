@@ -15,13 +15,12 @@ import java.util.Random;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.eclipse.kura.camel.router.AbstractCamelRouter;
-import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.message.KuraPayload;
 
 /**
  * Example of a Kura Camel application based on the Camel Java DSL 
  */
-public class GatewayRouterJava extends AbstractCamelRouter implements ConfigurableComponent {
+public class GatewayRouterJava extends AbstractCamelRouter {
     
     @Override
     public void configure() throws Exception {

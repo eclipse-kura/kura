@@ -14,23 +14,17 @@ import java.util.Random;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.eclipse.kura.camel.camelcloud.DefaultCamelCloudService;
-import org.eclipse.kura.camel.cloud.KuraCloudComponent;
-import org.eclipse.kura.camel.router.CamelRouter;
+import org.eclipse.kura.camel.router.AbstractCamelRouter;
+import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.message.KuraPayload;
 
 /**
- * Example of the Kura Camel application.
+ * Example of a Kura Camel application based on the Camel Java DSL 
  */
-@SuppressWarnings("deprecation")
-public class GatewayRouter extends CamelRouter {
-
+public class GatewayRouterJava extends AbstractCamelRouter implements ConfigurableComponent {
+    
     @Override
     public void configure() throws Exception {
-        KuraCloudComponent cloudComponent = new KuraCloudComponent();
-        cloudComponent.setCloudService(new DefaultCamelCloudService(camelContext));
-        camelContext.addComponent("kura-cloud", cloudComponent);
-
         from("timer://heartbeat").
                 process(new Processor() {
                     @Override
@@ -49,7 +43,7 @@ public class GatewayRouter extends CamelRouter {
                   .to("log:equalToTen")
                 .otherwise()
                 .to("log:greaterThanTen");
-
+        
         from("timer://xmltopic").
                 process(new Processor() {
                     @Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,17 +9,13 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-/*
- * Render the Content in the Main Panel corressponding to Service (GwtBSConfigComponent) selected in the Services Panel
- *
- * Fields are rendered based on their type (Password(Input), Choice(Dropboxes) etc. with Text fields rendered
- * for both numeric and other textual field with validate() checking if value in numeric fields is numeric
- */
-package org.eclipse.kura.web.client.ui;
+package org.eclipse.kura.web.client.ui.CloudServices;
 
 import java.util.Iterator;
 import java.util.logging.Level;
 
+import org.eclipse.kura.web.client.ui.AbstractServicesUi;
+import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
@@ -29,7 +25,6 @@ import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Alert;
-import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.ButtonGroup;
 import org.gwtbootstrap3.client.ui.FieldSet;
@@ -39,9 +34,6 @@ import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.ModalHeader;
-import org.gwtbootstrap3.client.ui.NavPills;
-import org.gwtbootstrap3.client.ui.PanelBody;
-import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Text;
 
@@ -53,34 +45,29 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 
-public class ServicesUi extends AbstractServicesUi {
+public class CloudServiceConfigurationUi extends AbstractServicesUi {
 
-    private static final ServicesUiUiBinder uiBinder = GWT.create(ServicesUiUiBinder.class);
+    private static ServiceConfigurationUiUiBinder uiBinder = GWT.create(ServiceConfigurationUiUiBinder.class);
 
-    interface ServicesUiUiBinder extends UiBinder<Widget, ServicesUi> {
-    }
-
-    private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
 
     private boolean dirty, initialized;
+
+    interface ServiceConfigurationUiUiBinder extends UiBinder<Widget, CloudServiceConfigurationUi> {
+    }
+
+    private Modal modal;
     private final GwtConfigComponent originalConfig;
 
-    NavPills menu;
-    PanelBody content;
-    AnchorListItem service;
-    TextBox validated;
-    FormGroup validatedGroup;
-    EntryClassUi entryClass;
-    Modal modal;
-
     @UiField
-    Button apply, reset;
+    Button applyConnectionEdit;
     @UiField
-    FieldSet fields;
+    Button resetConnectionEdit;
     @UiField
-    Form form;
-
+    FieldSet connectionEditFields;
+    @UiField
+    Form connectionEditField;
     @UiField
     Modal incompleteFieldsModal;
     @UiField
@@ -88,19 +75,15 @@ public class ServicesUi extends AbstractServicesUi {
     @UiField
     Text incompleteFieldsText;
 
-    //
-    // Public methods
-    //
-    public ServicesUi(final GwtConfigComponent addedItem, EntryClassUi entryClassUi) {
+    public CloudServiceConfigurationUi(final GwtConfigComponent addedItem) {
         initWidget(uiBinder.createAndBindUi(this));
         this.initialized = false;
-        this.entryClass = entryClassUi;
         this.originalConfig = addedItem;
         restoreConfiguration(this.originalConfig);
-        this.fields.clear();
+        this.connectionEditFields.clear();
 
-        this.apply.setText(MSGS.apply());
-        this.apply.addClickHandler(new ClickHandler() {
+        this.applyConnectionEdit.setText(MSGS.apply());
+        this.applyConnectionEdit.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -108,28 +91,28 @@ public class ServicesUi extends AbstractServicesUi {
             }
         });
 
-        this.reset.setText(MSGS.reset());
-        this.reset.addClickHandler(new ClickHandler() {
+        this.resetConnectionEdit.setText(MSGS.reset());
+        this.resetConnectionEdit.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
                 reset();
             }
         });
-        renderForm();
-        initInvalidDataModal();
 
         setDirty(false);
-        this.apply.setEnabled(false);
-        this.reset.setEnabled(false);
+        this.applyConnectionEdit.setEnabled(false);
+        this.resetConnectionEdit.setEnabled(false);
+
+        initInvalidDataModal();
     }
 
     @Override
-    public void setDirty(boolean flag) {
+    protected void setDirty(boolean flag) {
         this.dirty = flag;
         if (this.dirty && this.initialized) {
-            this.apply.setEnabled(true);
-            this.reset.setEnabled(true);
+            this.applyConnectionEdit.setEnabled(true);
+            this.resetConnectionEdit.setEnabled(true);
         }
     }
 
@@ -139,60 +122,16 @@ public class ServicesUi extends AbstractServicesUi {
     }
 
     @Override
-    public void reset() {
+    protected void reset() {
         if (isDirty()) {
             // Modal
-            this.modal = new Modal();
-
-            ModalHeader header = new ModalHeader();
-            header.setTitle(MSGS.confirm());
-            this.modal.add(header);
-
-            ModalBody body = new ModalBody();
-            body.add(new Span(MSGS.deviceConfigDirty()));
-            this.modal.add(body);
-
-            ModalFooter footer = new ModalFooter();
-            ButtonGroup group = new ButtonGroup();
-            Button yes = new Button();
-            yes.setText(MSGS.yesButton());
-            yes.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    ServicesUi.this.modal.hide();
-                    restoreConfiguration(ServicesUi.this.originalConfig);
-                    renderForm();
-                    ServicesUi.this.apply.setEnabled(false);
-                    ServicesUi.this.reset.setEnabled(false);
-                    setDirty(false);
-                    ServicesUi.this.entryClass.initServicesTree();
-                }
-            });
-            group.add(yes);
-            Button no = new Button();
-            no.setText(MSGS.noButton());
-            no.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    ServicesUi.this.modal.hide();
-                }
-            });
-            group.add(no);
-            footer.add(group);
-            this.modal.add(footer);
-            this.modal.show();
-        }                   // end is dirty
+            showDirtyModal();
+        }       // end is dirty
     }
 
-    // TODO: Separate render methods for each type (ex: Boolean, String,
-    // Password, etc.). See latest org.eclipse.kura.web code.
-    // Iterates through all GwtConfigParameter in the selected
-    // GwtConfigComponent
     @Override
-    public void renderForm() {
-        this.fields.clear();
+    protected void renderForm() {
+        this.connectionEditFields.clear();
         for (GwtConfigParameter param : this.m_configurableComponent.getParameters()) {
             if (param.getCardinality() == 0 || param.getCardinality() == 1 || param.getCardinality() == -1) {
                 FormGroup formGroup = new FormGroup();
@@ -207,30 +146,27 @@ public class ServicesUi extends AbstractServicesUi {
     @Override
     protected void renderTextField(final GwtConfigParameter param, boolean isFirstInstance, final FormGroup formGroup) {
         super.renderTextField(param, isFirstInstance, formGroup);
-        this.fields.add(formGroup);
+        this.connectionEditFields.add(formGroup);
     }
 
     @Override
     protected void renderPasswordField(final GwtConfigParameter param, boolean isFirstInstance, FormGroup formGroup) {
         super.renderPasswordField(param, isFirstInstance, formGroup);
-        this.fields.add(formGroup);
+        this.connectionEditFields.add(formGroup);
     }
 
     @Override
     protected void renderBooleanField(final GwtConfigParameter param, boolean isFirstInstance, FormGroup formGroup) {
         super.renderBooleanField(param, isFirstInstance, formGroup);
-        this.fields.add(formGroup);
+        this.connectionEditFields.add(formGroup);
     }
 
     @Override
     protected void renderChoiceField(final GwtConfigParameter param, boolean isFirstInstance, FormGroup formGroup) {
         super.renderChoiceField(param, isFirstInstance, formGroup);
-        this.fields.add(formGroup);
+        this.connectionEditFields.add(formGroup);
     }
 
-    //
-    // Private methods
-    //
     private void apply() {
         if (isValid()) {
             if (isDirty()) {
@@ -261,7 +197,8 @@ public class ServicesUi extends AbstractServicesUi {
                             FailureHandler.handle(ex);
                             return;
                         }
-                        ServicesUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+                        CloudServiceConfigurationUi.this.gwtXSRFService
+                                .generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                             @Override
                             public void onFailure(Throwable ex) {
@@ -271,8 +208,9 @@ public class ServicesUi extends AbstractServicesUi {
 
                             @Override
                             public void onSuccess(GwtXSRFToken token) {
-                                ServicesUi.this.gwtComponentService.updateComponentConfiguration(token,
-                                        ServicesUi.this.m_configurableComponent, new AsyncCallback<Void>() {
+                                CloudServiceConfigurationUi.this.gwtComponentService.updateComponentConfiguration(token,
+                                        CloudServiceConfigurationUi.this.m_configurableComponent,
+                                        new AsyncCallback<Void>() {
 
                                     @Override
                                     public void onFailure(Throwable caught) {
@@ -286,12 +224,11 @@ public class ServicesUi extends AbstractServicesUi {
 
                                     @Override
                                     public void onSuccess(Void result) {
-                                        ServicesUi.this.modal.hide();
+                                        CloudServiceConfigurationUi.this.modal.hide();
                                         logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
-                                        ServicesUi.this.apply.setEnabled(false);
-                                        ServicesUi.this.reset.setEnabled(false);
+                                        CloudServiceConfigurationUi.this.applyConnectionEdit.setEnabled(false);
+                                        CloudServiceConfigurationUi.this.resetConnectionEdit.setEnabled(false);
                                         setDirty(false);
-                                        ServicesUi.this.entryClass.initServicesTree();
                                         EntryClassUi.hideWaitModal();
                                     }
                                 });
@@ -307,7 +244,7 @@ public class ServicesUi extends AbstractServicesUi {
 
                     @Override
                     public void onClick(ClickEvent event) {
-                        ServicesUi.this.modal.hide();
+                        CloudServiceConfigurationUi.this.modal.hide();
                     }
                 });
                 group.add(no);
@@ -317,15 +254,15 @@ public class ServicesUi extends AbstractServicesUi {
 
                 // ----
 
-            }                   // end isDirty()
+            }                        // end isDirty()
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");
             this.incompleteFieldsModal.show();
-        }                   // end else isValid
+        }                        // end else isValid
     }
 
     private GwtConfigComponent getUpdatedConfiguration() {
-        Iterator<Widget> it = this.fields.iterator();
+        Iterator<Widget> it = this.connectionEditFields.iterator();
         while (it.hasNext()) {
             Widget w = it.next();
             if (w instanceof FormGroup) {
@@ -334,6 +271,53 @@ public class ServicesUi extends AbstractServicesUi {
             }
         }
         return this.m_configurableComponent;
+    }
+
+    private void showDirtyModal() {
+        this.modal = new Modal();
+
+        ModalHeader header = new ModalHeader();
+        header.setTitle(MSGS.confirm());
+        this.modal.add(header);
+
+        ModalBody body = new ModalBody();
+        body.add(new Span(MSGS.deviceConfigDirty()));
+        this.modal.add(body);
+
+        ModalFooter footer = new ModalFooter();
+        ButtonGroup group = new ButtonGroup();
+        Button yes = new Button();
+        yes.setText(MSGS.yesButton());
+        yes.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                CloudServiceConfigurationUi.this.modal.hide();
+                resetVisualization();
+            }
+        });
+        group.add(yes);
+        Button no = new Button();
+        no.setText(MSGS.noButton());
+        no.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                CloudServiceConfigurationUi.this.modal.hide();
+            }
+        });
+        group.add(no);
+        footer.add(group);
+        this.modal.add(footer);
+        this.modal.show();
+    }
+
+    protected void resetVisualization() {
+        restoreConfiguration(this.originalConfig);
+        renderForm();
+        this.applyConnectionEdit.setEnabled(false);
+        this.resetConnectionEdit.setEnabled(false);
+        setDirty(false);
     }
 
     private void initInvalidDataModal() {

@@ -573,8 +573,9 @@ public class SystemServiceImpl implements SystemService
 				Enumeration<NetworkInterface> networks = NetworkInterface.getNetworkInterfaces();
 				while (networks.hasMoreElements()) {
 					NetworkInterface network = networks.nextElement();
-					if(network.getIndex() == 0) {
+					if("eth0".equals(network.getName())) {
 						ip = network.getInetAddresses().nextElement();
+						break;
 					}
 				}
 				NetworkInterface network = NetworkInterface.getByInetAddress(ip);

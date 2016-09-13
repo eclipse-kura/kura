@@ -10,6 +10,7 @@
             type="String"
             cardinality="1"
             required="false"
+            max="2147483647"
             default='&lt;routes xmlns=&quot;http://camel.apache.org/schema/spring&quot;&gt;&#10;
 	&lt;route id=&quot;cloudConsumer&quot;&gt;&#10;
         &lt;from uri=&quot;kura-cloud:myapp/xmltopic&quot;/&gt;&#10;

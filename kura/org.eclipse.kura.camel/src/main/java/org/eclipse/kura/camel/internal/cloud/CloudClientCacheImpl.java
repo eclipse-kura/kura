@@ -129,14 +129,9 @@ public class CloudClientCacheImpl implements CloudClientCache {
 
 	@Override
 	public void close() {
-		/*
-		 * TODO: This process cloud be more performant by tracking a list of
-		 * all created clients
-		 */
-
 		final List<CloudClientHandle> handles = new ArrayList<CloudClientHandle>();
 		synchronized (this) {
-			for (Set<CloudClientHandle> set : this.cache.values()) {
+			for (final Set<CloudClientHandle> set : this.cache.values()) {
 				handles.addAll(set);
 			}
 			this.cache.clear();
@@ -145,7 +140,7 @@ public class CloudClientCacheImpl implements CloudClientCache {
 		// release outside the lock
 
 		final Set<CloudClient> clients = new HashSet<CloudClient>();
-		for (CloudClientHandle handle : handles) {
+		for (final CloudClientHandle handle : handles) {
 
 			final CloudClient client = handle.getClient();
 

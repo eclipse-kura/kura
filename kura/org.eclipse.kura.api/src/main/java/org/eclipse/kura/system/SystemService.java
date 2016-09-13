@@ -259,7 +259,8 @@ public interface SystemService
 	/**
 	 * Gets the product version for this unit.
 	 * 
-	 * The product version is defined in the kura.version property of the kura.properties file.
+	 * The product version is defined in the kura.version property of the kura.properties file 
+	 * located in the ${BASE_DIR}/${KURA_SYMLINK}/kura directory.
 	 * 
 	 * @return	The Kura version string as denoted in kura.version property of the kura.properties file.
 	 */

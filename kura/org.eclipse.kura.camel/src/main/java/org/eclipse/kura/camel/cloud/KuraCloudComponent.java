@@ -75,7 +75,7 @@ public class KuraCloudComponent extends UriEndpointComponent {
         return kuraCloudEndpoint;
     }
 
-    private CloudService getCloudService() {
+    public CloudService getCloudService() {
         if (this.cloudService == null) {
             this.cloudService = retrieveService(CloudService.class, getCamelContext().getRegistry());
         }

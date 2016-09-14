@@ -821,8 +821,7 @@ public class SystemServiceImpl implements SystemService
 	}
 
 	@Override
-	public String getKuraHome() 
-	{
+	public String getKuraHome() {
 		return this.m_kuraProperties.getProperty(KEY_KURA_HOME_DIR);
 	}
 

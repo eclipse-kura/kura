@@ -649,7 +649,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
         <replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.symlink}" value="${kura.symlink}"/>
 
     	
-    	<condition property="kura.osgi.repo" value="../target-definition/equinox_3.8.1/repository">
+    	<condition property="kura.osgi.repo" value="../target-definition/equinox_3.8.1/source">
     		<or>
     			<not>
     				<isset property="kura.osgi"/>
@@ -716,7 +716,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<condition property="is.nn">
 			<contains string="${build.name}" substring="-nn"/>
 		</condition>
-		<antcall target="emulator-config" />
+		<antcall target="emulator-config-win" />
 
 		<!-- Add mToolkit to config.ini -->
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
@@ -774,7 +774,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</copy>
                         
 		<copy todir="${build.install.dir.kura}/plugins">
-			<fileset dir="../target-definition/common/repository/plugins">
+			<fileset dir="../target-definition/common/source/plugins">
 				<exclude name="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*,com.gwt.user_*"/>
 			</fileset>
 		</copy>                        
@@ -1257,6 +1257,13 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar@4" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.emulator.net_${org.eclipse.kura.emulator.net.version}.jar@4" />
+		</propertyfile>
+	</target>
+
+	<target name="emulator-config-win">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.emulator.net_${org.eclipse.kura.emulator.net.version}.jar@4" />
 		</propertyfile>

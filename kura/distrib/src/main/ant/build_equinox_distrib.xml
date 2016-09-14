@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2016 Eurotech and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -9,6 +9,7 @@
 
     Contributors:
       Eurotech
+      Red Hat Inc - minor fixes on startup scripts
 
 -->
 <project name="build_equinox_distrib" default="dist-linux" basedir="../../../">
@@ -152,7 +153,7 @@
 		<antcall target="set-http-port" />
 
 		<!-- Create the Kura start scripts -->
-		<echo file="${project.build.directory}/${build.output.name}/start_kura.sh" append="false">#!/bin/sh
+		<echo file="${project.build.directory}/${build.output.name}/start_kura.sh" append="false"><![CDATA[#!/bin/sh
 
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
@@ -187,9 +188,11 @@ if [ -z "$KURA_RUNNING" ] ; then
         -configuration  /tmp/.kura/configuration \
         -console \
         -consoleLog
-fi
+else
+		echo "Failed to start Kura. It is already running ..."
+fi]]>
 	</echo>
-		<echo file="${project.build.directory}/${build.output.name}/start_kura_debug.sh" append="false">#!/bin/sh
+		<echo file="${project.build.directory}/${build.output.name}/start_kura_debug.sh" append="false"><![CDATA[#!/bin/sh
 
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
@@ -227,9 +230,11 @@ if [ -z "$KURA_RUNNING" ] ; then
         -configuration  /tmp/.kura/configuration \
         -console \
         -consoleLog
-fi
+else
+		echo "Failed to start Kura. It is already running ..."
+fi]]>
 	</echo>
-		<echo file="${project.build.directory}/${build.output.name}/start_kura_background.sh" append="false">#!/bin/sh
+		<echo file="${project.build.directory}/${build.output.name}/start_kura_background.sh" append="false"><![CDATA[#!/bin/sh
 
 # Kura should be installed to the ${kura.install.dir} directory.
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
@@ -272,7 +277,7 @@ if [ -z "$KURA_RUNNING" ] ; then
     echo $KURA_PID > /var/run/kura.pid
 else
     echo "Failed to start Kura. It is already running ..." >> /var/log/kura-console.log
-fi
+fi]]>
 	</echo>
 
 		<!-- Populate parameters -->

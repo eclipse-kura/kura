@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,17 +8,14 @@
  *
  * Contributors:
  *     Eurotech
- *     Jens Reimann <jreimann@redhat.com> - Clean up kura properties handling
+ *     Red Hat Inc - Clean up kura properties handling
  *******************************************************************************/
 
 package org.eclipse.kura.core.deployment;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -67,7 +64,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 	public static final String APP_ID = "DEPLOY-V2";
 
 	private static final String DPA_CONF_PATH_PROPNAME = "dpa.configuration";
-	private static final String KURA_CONF_URL_PROPNAME = SystemService.KURA_CONFIG;
 	private static final String PACKAGES_PATH_PROPNAME = "kura.packages";
 	private static final String KURA_DATA_DIR = "kura.data";
 
@@ -146,6 +142,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 
 	private SslManagerService m_sslManagerService;
 	private DeploymentAdmin   m_deploymentAdmin;
+	private SystemService     m_systemService;
 
 	private static ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -202,7 +199,14 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 	public void unsetDataTransportService(DataTransportService dataTransportService) {
 		m_dataTransportService = null;
 	}
-
+	
+	public void setSystemService(SystemService systemService) {
+        this.m_systemService = systemService;
+    }
+	
+	public void unsetSystemService(SystemService systemService) {
+        this.m_systemService = null;
+    }
 
 	// ----------------------------------------------------------------
 	//
@@ -222,26 +226,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 			throw new ComponentException("The value of '" + DPA_CONF_PATH_PROPNAME + "' is not defined");
 		}
 
-		String sKuraConfUrl = System.getProperty(KURA_CONF_URL_PROPNAME);
-		if (sKuraConfUrl == null || sKuraConfUrl.isEmpty()) {
-			throw new ComponentException("The value of '" + KURA_CONF_URL_PROPNAME + "' is not defined");
-		}
-
-		URL kuraUrl = null;
-		try {
-			kuraUrl = new URL(sKuraConfUrl);
-		} catch (MalformedURLException e) {
-			throw new ComponentException("Invalid Kura configuration URL");
-		}
-
-		Properties kuraProperties = new Properties();
-		try {
-			kuraProperties.load(kuraUrl.openStream());
-		} catch (FileNotFoundException e) {
-			throw new ComponentException("Kura configuration file not found", e);
-		} catch (IOException e) {
-			throw new ComponentException("Exception loading Kura configuration file", e);
-		}
+		final Properties kuraProperties = this.m_systemService.getProperties ();
 
 		m_packagesPath = kuraProperties.getProperty(PACKAGES_PATH_PROPNAME);
 		if (m_packagesPath == null || m_packagesPath.isEmpty()) {

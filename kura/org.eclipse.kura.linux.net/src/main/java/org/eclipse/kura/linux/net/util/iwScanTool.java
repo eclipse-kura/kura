@@ -15,7 +15,6 @@ package org.eclipse.kura.linux.net.util;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
@@ -26,13 +25,9 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
-import org.eclipse.kura.core.net.WifiAccessPointImpl;
-import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
-import org.eclipse.kura.net.wifi.WifiMode;
-import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -180,242 +175,62 @@ public class iwScanTool extends ScanTool implements IScanTool {
 		return wifiAccessPoints;
 	}
 	
-	
 	private List<WifiAccessPoint> parse() throws Exception {
 		
-		List<WifiAccessPoint> wifiAccessPoints = new ArrayList<WifiAccessPoint>();
+		List<IWAPParser> apInfos = new ArrayList<IWAPParser>();
+		IWAPParser currentAP = null;
 		
-		//get the output
 		BufferedReader br = new BufferedReader(new InputStreamReader(m_process.getInputStream()));
-		String line = null;
-		
-		String ssid = null;
-		List<Long> bitrate = null;
-		long frequency = -1;
-		byte[] hardwareAddress = null;
-		WifiMode mode = null;
-		EnumSet<WifiSecurity> rsnSecurity = null;
-		int strength = -1;
-		EnumSet<WifiSecurity> wpaSecurity = null;
-		List<String> capabilities = null;
-		
-		while((line = br.readLine()) != null) {
-			
-			if (line.startsWith("scan aborted!")) {
-				br.close();
-				s_logger.warn("parse() :: scan operation was aborted");
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "iw scan operation was aborted");
-			}
-			
-			if (line.startsWith("BSS")) {
-				//new AP
-				if(ssid != null) {
-					WifiAccessPointImpl wifiAccessPoint = new WifiAccessPointImpl(ssid);
-					wifiAccessPoint.setBitrate(bitrate);
-					wifiAccessPoint.setFrequency(frequency);
-					wifiAccessPoint.setHardwareAddress(hardwareAddress);
-					wifiAccessPoint.setMode(WifiMode.MASTER);				//FIME - is this right? - always MASTER - or maybe AD-HOC too?
-					wifiAccessPoint.setRsnSecurity(rsnSecurity);
-					wifiAccessPoint.setStrength(strength);
-					wifiAccessPoint.setWpaSecurity(wpaSecurity);
-					if ((capabilities != null) && (capabilities.size() > 0)) {
-						wifiAccessPoint.setCapabilities(capabilities);
-					}
-					wifiAccessPoints.add(wifiAccessPoint);
+		try {
+			String line = null;
+			while((line = br.readLine()) != null) {
+				
+				if (line.startsWith("scan aborted!")) {
+					br.close();
+					s_logger.warn("parse() :: scan operation was aborted");
+					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "iw scan operation was aborted");
 				}
 				
-				//reset
-				ssid = null;
-				bitrate = null;
-				frequency = -1;
-				hardwareAddress = null;
-				mode = null;
-				rsnSecurity = null;
-				strength = -1;
-				wpaSecurity = null;
-				capabilities = null;
-				
-				//parse out the MAC
-				StringTokenizer st = new StringTokenizer(line, " ");
-				st.nextToken(); //eat BSS
-				String macAddressString = st.nextToken().substring(0, 16);
-				if(macAddressString != null) {
-					hardwareAddress = NetworkUtil.macToBytes(macAddressString);				
-				}
-			} else if(line.contains("freq: ")) {
-				StringTokenizer st = new StringTokenizer(line, " ");
-				st.nextToken();	//eat freq:
-				frequency = Long.parseLong(st.nextToken());
-			} else if(line.contains("SSID: ")) {
-				ssid = line.trim().substring(5).trim();
-			} else if(line.contains("RSN:")) {
-				rsnSecurity = EnumSet.noneOf(WifiSecurity.class);
-				boolean foundGroup = false;
-				boolean foundPairwise = false;
-				boolean foundAuthSuites = false;
-				while((line = br.readLine()) != null) {
-					if(line.contains("Group cipher:")) {
-						foundGroup = true;
-						if(line.contains("CCMP")) {
-							rsnSecurity.add(WifiSecurity.GROUP_CCMP);
-						}
-						if(line.contains("TKIP")) {
-							rsnSecurity.add(WifiSecurity.GROUP_TKIP);
-						}
-						if(line.contains("WEP104")) {
-							rsnSecurity.add(WifiSecurity.GROUP_WEP104);
-						}
-						if(line.contains("WEP40")) {
-							rsnSecurity.add(WifiSecurity.GROUP_WEP40);
-						}
-					} else if(line.contains("Pairwise ciphers:")) {
-						foundPairwise = true;
-						if(line.contains("CCMP")) {
-							rsnSecurity.add(WifiSecurity.PAIR_CCMP);
-						}
-						if(line.contains("TKIP")) {
-							rsnSecurity.add(WifiSecurity.PAIR_TKIP);
-						}
-						if(line.contains("WEP104")) {
-							rsnSecurity.add(WifiSecurity.PAIR_WEP104);
-						}
-						if(line.contains("WEP40")) {
-							rsnSecurity.add(WifiSecurity.PAIR_WEP40);
-						}
-					} else if(line.contains("Authentication suites:")) {
-						foundAuthSuites = true;
-						if(line.contains("802_1X")) {
-							rsnSecurity.add(WifiSecurity.KEY_MGMT_802_1X);
-						}
-						if(line.contains("PSK")) {
-							rsnSecurity.add(WifiSecurity.KEY_MGMT_PSK);
-						}
-					} else {
-						s_logger.debug("Ignoring line in RSN: {}", line);
-					}
-					
-					if(foundGroup && foundPairwise && foundAuthSuites) {
-						break;
-					}
-				}
-			} else if(line.contains("WPA:")) {
-				wpaSecurity = EnumSet.noneOf(WifiSecurity.class);
-				boolean foundGroup = false;
-				boolean foundPairwise = false;
-				boolean foundAuthSuites = false;
-				while((line = br.readLine()) != null) {
-					if(line.contains("Group cipher:")) {
-						foundGroup = true;
-						if(line.contains("CCMP")) {
-							wpaSecurity.add(WifiSecurity.GROUP_CCMP);
-						}
-						if(line.contains("TKIP")) {
-							wpaSecurity.add(WifiSecurity.GROUP_TKIP);
-						}
-						if(line.contains("WEP104")) {
-							wpaSecurity.add(WifiSecurity.GROUP_WEP104);
-						}
-						if(line.contains("WEP40")) {
-							wpaSecurity.add(WifiSecurity.GROUP_WEP40);
-						}
-					} else if(line.contains("Pairwise ciphers:")) {
-						foundPairwise = true;
-						if(line.contains("CCMP")) {
-							wpaSecurity.add(WifiSecurity.PAIR_CCMP);
-						}
-						if(line.contains("TKIP")) {
-							wpaSecurity.add(WifiSecurity.PAIR_TKIP);
-						}
-						if(line.contains("WEP104")) {
-							wpaSecurity.add(WifiSecurity.PAIR_WEP104);
-						}
-						if(line.contains("WEP40")) {
-							wpaSecurity.add(WifiSecurity.PAIR_WEP40);
-						}
-					} else if(line.contains("Authentication suites:")) {
-						foundAuthSuites = true;
-						if(line.contains("802_1X")) {
-							wpaSecurity.add(WifiSecurity.KEY_MGMT_802_1X);
-						}
-						if(line.contains("PSK")) {
-							wpaSecurity.add(WifiSecurity.KEY_MGMT_PSK);
-						}
-					} else {
-						s_logger.debug("Ignoring line in WPA: {}", line);
-					}
-					
-					if(foundGroup && foundPairwise && foundAuthSuites) {
-						break;
-					}
-				}
-			} else if(line.contains("Supported rates: ")) {
-				//Supported rates: 1.0* 2.0* 5.5* 11.0* 18.0 24.0 36.0 54.0
-				if(bitrate == null) {
-					bitrate = new ArrayList<Long>();
-				}
-				StringTokenizer st = new StringTokenizer(line, " *");
-				while(st.hasMoreTokens()) {
-					String token = st.nextToken();
-					if(!(token.contains("Supported") || token.contains("rates:"))) {
-						bitrate.add((long) (Float.parseFloat(token) * 1000000));
-					}
-				}
-			} else if(line.contains("Extended supported rates: ")) {
-				//Extended supported rates: 6.0 9.0 12.0 48.0 
-				if(bitrate == null) {
-					bitrate = new ArrayList<Long>();
-				}
-				StringTokenizer st = new StringTokenizer(line, " *");
-				while(st.hasMoreTokens()) {
-					String token = st.nextToken();
-					if(!(token.contains("Extended") || token.contains("supported") || token.contains("rates:"))) {
-						bitrate.add((long) (Float.parseFloat(token) * 1000000));
-					}
-				}
-			} else if(line.contains("signal:")) {
-				try {
-					//signal: -56.00 dBm
+				if (line.startsWith("BSS")) {
+					//new AP - parse out the MAC
 					StringTokenizer st = new StringTokenizer(line, " ");
-					st.nextToken(); //eat signal:
-					final String strengthRaw = st.nextToken();
-					if (strengthRaw.contains("/")) {
-						// Could also be of format 39/100
-						final String[] parts = strengthRaw.split("/");
-						strength = (int) Float.parseFloat(parts[0]);
-						strength = SignalStrengthConversion.getRssi(strength);
-					} else {
-						strength = Math.abs((int)Float.parseFloat(strengthRaw));
+					st.nextToken(); //eat BSS
+					String macAddressString = st.nextToken().substring(0, 16);
+					
+					if(macAddressString != null) {
+						// Set this AP parser as the current one
+						currentAP = new IWAPParser(macAddressString);		
 					}
-				} catch (RuntimeException e) {
-					s_logger.debug("Cannot parse signal strength {}", line);
-				}
-			} else if (line.contains("capability:")) {
-				capabilities = new ArrayList<String>();
-				line = line.substring("capability:".length()).trim();
-				StringTokenizer st = new StringTokenizer(line, " ");
-				while (st.hasMoreTokens()) {
-					capabilities.add(st.nextToken());
+					
+					// Add it to the list
+					apInfos.add(currentAP);
+					
+				} else {
+					// Must be an AP property line
+					String propLine = line.trim();
+					
+					if(currentAP != null) {
+						// We're currently parsing an AP
+						try {
+							// Give this line to the AP parser
+							currentAP.parsePropLine(propLine);
+						} catch(Exception e) {
+							currentAP = null;
+							s_logger.error("Failed to parse line: {}; giving up on the current AP", propLine, e);
+						}
+					}
 				}
 			}
+		} finally {
+			br.close();
 		}
-		
-		//store the last one
-		if(ssid != null) {
-			WifiAccessPointImpl wifiAccessPoint = new WifiAccessPointImpl(ssid);
-			wifiAccessPoint.setBitrate(bitrate);
-			wifiAccessPoint.setFrequency(frequency);
-			wifiAccessPoint.setHardwareAddress(hardwareAddress);
-			wifiAccessPoint.setMode(mode);
-			wifiAccessPoint.setRsnSecurity(rsnSecurity);
-			wifiAccessPoint.setStrength(strength);
-			wifiAccessPoint.setWpaSecurity(wpaSecurity);
-			if ((capabilities != null) && (capabilities.size() > 0)) {
-				wifiAccessPoint.setCapabilities(capabilities);
-			}
-			wifiAccessPoints.add(wifiAccessPoint);
+
+		// Generate list of WifiAccessPoint objects
+		List<WifiAccessPoint> wifiAccessPoints = new ArrayList<WifiAccessPoint>();
+		for(IWAPParser info : apInfos) {
+			wifiAccessPoints.add(info.toWifiAccessPoint());
 		}
-		
-		br.close();
 		return wifiAccessPoints;
 	}
 }
+

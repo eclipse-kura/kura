@@ -116,6 +116,8 @@ Then export address of your Raspberry Pi device to RPBI IP environment variable:
 
 ### Configure Kura
 
+**Note: ** Starting with Kura 2.0.1 is no longer required to set a special OSGi boot delegation for the Camel integration.
+
 Keep in mind that `/opt/eclipse/kura/kura/config.ini` file on your target device should have OSGi boot delegation
 enabled for packages `sun`. A boot delegation of `sun` packages is required to make Camel work smoothly in
 [Eclipse Equinox](http://www.eclipse.org/equinox/). In order to enable boot delegation, just add the following line to

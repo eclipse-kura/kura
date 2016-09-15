@@ -259,18 +259,10 @@ public interface SystemService
 	/**
 	 * Gets the product version for this unit.
 	 * 
-	 * The product version is defined as the version in the release.xml file.
-	 * The release.xml file is stored in /etc/kura/ and has the format:
-	 * PRODUCT_NAME_release-VERSION-VERSION_NUMBER.xml
+	 * The product version is defined in the kura.version property of the kura.properties file 
+	 * located in the ${BASE_DIR}/${KURA_SYMLINK}/kura directory.
 	 * 
-	 * For example this is a valid product name: helios_denali_release-1.2.3.xml.  The version number would be 1.2.3.
-	 * This would be an invalid product name: my-product-name_release-1.2.3.xml.  This is because the product name has
-	 * '-' characters in it.  They should be '_' to be valid.  So, the correct representation would be:
-	 * my_product_name_release-1.2.3.xml.  It's version number would be 1.2.3.  The use of '-' characters should only
-	 * be used immediately before the version number and the use of '.' characters should only be used immediately after
-	 * the version number.
-	 * 
-	 * @return	The version number as denoted in the release.xml file.
+	 * @return	The Kura version string as denoted in kura.version property of the kura.properties file.
 	 */
 	public String getKuraVersion();
 	

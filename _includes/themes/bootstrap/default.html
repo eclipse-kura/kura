@@ -10,6 +10,7 @@
 
     <link href="{{ site.baseurl }}/assets/themes/bootstrap/resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ site.baseurl }}/assets/themes/bootstrap/css/style.css" rel="stylesheet">
+	<link href="{{ site.baseurl }}/assets/themes/bootstrap/css/github.css" rel="stylesheet">
 
     <!--[if lt IE 9]>
       <script src="{{ ASSET_PATH }}/resources/respond/Respond.min.js"></script>
@@ -43,8 +44,8 @@
       </div>
     </nav>
     <div class="container" style="padding-bottom: 40px;">
-      <div class="row" style="height: 400px;">
-        <div id="navigation" class="col-md-3 collapse navbar-collapse navbar-ex1-collapse" style="font-size: 1em; font-weight: bold;">
+      <div class="row">
+        <div id="navigation" class="col-md-3 collapse navbar-collapse navbar-ex1-collapse" style="font-size: 1em; font-weight: bold; margin-right: 50px;">
           <ul data-spy="affix" class="list-unstyled">
             {% for section in site.sections %}
               {% assign attr = section[0] %}

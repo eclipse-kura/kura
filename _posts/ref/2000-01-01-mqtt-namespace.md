@@ -8,17 +8,17 @@ categories: [ref]
 
 [MQTT Request/Response Conversations](#mqtt-request/response-conversations)
 
--   [MQTT Request/Response Example](#mqtt-requestresponse-example)
+*  [MQTT Request/Response Example](#mqtt-requestresponse-example)
 
 [MQTT Remote Resource Management](#mqtt-remote-resource-management)
 
--   [Read Resources](#read-resources)
+*  [Read Resources](#read-resources)
 
--   [Create or Update Resources](#create-or-update-resources)
+*  [Create or Update Resources](#create-or-update-resources)
 
--   [Delete Resources](#delete-resources)
+*  [Delete Resources](#delete-resources)
 
--   [Other Operations](#other-operations)
+*  [Other Operations](#other-operations)
 
 [MQTT Unsolicited Events](#mqtt-unsolicited-events)
 
@@ -26,50 +26,50 @@ categories: [ref]
 
 [Remote OSGi Management via MQTT](#remote-osgi-management-via-mqtt)
 
--   [Remote OSGi ConfigurationAdmin Interactions via MQTT](#remote-osgi-configurationadmin-interactions-via-mqtt)
+*  [Remote OSGi ConfigurationAdmin Interactions via MQTT](#remote-osgi-configurationadmin-interactions-via-mqtt)
 
-    -   [Read All Configurations](#read-all-configurations)
+    *  [Read All Configurations](#read-all-configurations)
 
-    -   [Read Configuration for a Given Service](#read-configuration-for-a-given-service)
+    *  [Read Configuration for a Given Service](#read-configuration-for-a-given-service)
 
-    -   [Update All Configurations](#update-all-configurations)
+    *  [Update All Configurations](#update-all-configurations)
 
-    -   [Update the Configuration of a Given Service](#update-the-configuration-of-a-given-service)
+    *  [Update the Configuration of a Given Service](#update-the-configuration-of-a-given-service)
 
-    -   [Example Management Web Application](#_Example_Management_Web)
+    *  [Example Management Web Application](#_Example_Management_Web)
 
--   [Remote OSGi DeploymentAdmin Interactions via
+*  [Remote OSGi DeploymentAdmin Interactions via
     MQTT](#remote-osgi-deploymentadmin-interactions-via-mqtt)
 
-    -   [DEPLOY-V1](#deploy-v1)
+    *  [DEPLOY-V1](#deploy-v1)
 
-        -   [Read All Deployment Packages](#read-all-deployment-packages)
+        *  [Read All Deployment Packages](#read-all-deployment-packages)
 
-        -   [Install a Deployment Package](#install-a-deployment-package)
+        *  [Install a Deployment Package](#install-a-deployment-package)
 
-        -   [Uninstall a Deployment Package](#uninstall-a-deployment-package)
+        *  [Uninstall a Deployment Package](#uninstall-a-deployment-package)
 
-        -   [Read All Bundles](#read-all-bundles)
+        *  [Read All Bundles](#read-all-bundles)
 
-        -   [Start a Bundle](#start-a-bundle)
+        *  [Start a Bundle](#start-a-bundle)
 
-        -   [Stop a Bundle](#stop-a-bundle)
+        *  [Stop a Bundle](#stop-a-bundle)
 
-        -   [Example Management Web Application](#example-management-web-application)
+        *  [Example Management Web Application](#example-management-web-application)
 
-    -   [DEPLOY-V2](#deploy-v2)
+    *  [DEPLOY-V2](#deploy-v2)
 
-        -   [Download Messages](#download-messages)
+        *  [Download Messages](#download-messages)
 
-        -   [Install Messages](#install-messages)
+        *  [Install Messages](#install-messages)
 
-        -   [Uninstall Messages](#uninstall-messages)
+        *  [Uninstall Messages](#uninstall-messages)
 
-        -   [Read All Bundles](#read-all-bundles)
+        *  [Read All Bundles](#read-all-bundles)
 
-        -   [Start a Bundle](#start-a-bundle)
+        *  [Start a Bundle](#start-a-bundle)
 
-        -   [Stop a Bundle](#stop-a-bundle)
+        *  [Stop a Bundle](#stop-a-bundle)
 
 
 ## Overview
@@ -85,13 +85,14 @@ event-driven patterns.
 
 The table below defines some basic terms used in this document:
 
-|||
-|-------------|---|
-|**account_name**|Identifies a group of devices and users. It can be seen as partition of the MQTT topic namespace. For example, access control lists can be defined so that users are only given access to the child topics of a given account_name.|
-|**client_id**|Identifies a single gateway device within an account (typically the MAC address of a gateway’s primary network interface). The **client_id** maps to the Client Identifier (Client ID) as defined in the MQTT specifications.|
-|**app_id**|Identifies an application running on the gateway device. To support multiple versions of the application, it is recommended that a version number be assigned with the **app_id** (e.g., “CONF-V1”, “CONF-V2”, etc.)|
-|**resource_id**|Identifies a resource(s) that is owned and managed by a particular application. Management of resources (e.g., sensors, actuators, local files, or configuration options) includes listing them, reading the latest value, or updating them to a new value. A **resource_id** may be a hierarchical topic, where, for example, “sensors/temp” may identify a temperature sensor and “sensor/hum” a humidity sensor.|
-</br>
+Field         |   
+--------------|---
+**account_name** | Identifies a group of devices and users. It can be seen as partition of the MQTT topic namespace. For example, access control lists can be defined so that users are only given access to the child topics of a given account_name.
+**client_id**|Identifies a single gateway device within an account (typically the MAC address of a gateway’s primary network interface). The **client_id** maps to the Client Identifier (Client ID) as defined in the MQTT specifications.
+**app_id**|Identifies an application running on the gateway device. To support multiple versions of the application, it is recommended that a version number be assigned with the **app_id** (e.g., “CONF-V1”, “CONF-V2”, etc.)
+**resource_id**|Identifies a resource(s) that is owned and managed by a particular application. Management of resources (e.g., sensors, actuators, local files, or configuration options) includes listing them, reading the latest value, or updating them to a new value. A **resource_id** may be a hierarchical topic, where, for example, “sensors/temp” may identify a temperature sensor and “sensor/hum” a humidity sensor.
+
+<br>
 A gateway, as identified by a specific **client_id** and belonging to a
 particular **account_name**, may have one or more applications running
 on it (e.g., “app_id1”, “app_id2”, etc.). Each application can manage
@@ -136,9 +137,9 @@ conversation through the following events:
 
 3.  Sending the request message to the appropriate application-specific
     topic with the following fields in the payload:
-    -   **request.id** (identifier used to match a response with a
+    *  **request.id** (identifier used to match a response with a
         request)
-    -   **requester.client.id** (client ID of the requester)
+    *  **requester.client.id** (client ID of the requester)
 
 The application receives the request, processes it, and responds on a
 REPLY topic structured as:
@@ -153,7 +154,7 @@ Protocol Buffers. Eclipse Kura includes the request.id and the
 requester.client.id as two named metrics of the Request messages. The
 Eclipse Kura payload definition can be found at the following link:
 
--   https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.core.cloud/src/main/protobuf/kurapayload.proto
+*  https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.core.cloud/src/main/protobuf/kurapayload.proto
 
 Once the response for a given request is received, the requester
 unsubscribes from the REPLY topic.
@@ -172,26 +173,26 @@ Remote Service Requester client_id: 00:E0:C7:01:02:03
 
 The remote server publishes a request message similar to the following:
 
--   Request Topic:
-    -   **$EDC/guest/F0:DE:F1:C4:53:DB/CONF-V1/GET/configurations**
--   Request Payload:
-    -   **request.id: 1363603920892-8078887174204257595**
-    -   **requester.client.id: 00:E0:C7:01:02:03**
+*  Request Topic:
+    *  **$EDC/guest/F0:DE:F1:C4:53:DB/CONF-V1/GET/configurations**
+*  Request Payload:
+    *  **request.id: 1363603920892-8078887174204257595**
+    *  **requester.client.id: 00:E0:C7:01:02:03**
 
 The gateway device replies with a response message similar to the
 following:
 
--   Response Topic:
-    -   **$EDC/guest/00:E0:C7:01:02:03/CONF-V1/REPLY/1363603920892-8078887174204257595**
--   Response Payload, where the following properties are mandatory:
-    -   **response.code** </br>Possible response code values include:
-      -   **200 (RESPONSE_CODE_OK)**
-      -   **400 (RESPONSE_CODE_BAD_REQUEST)**
-      -   **404 (RESPONSE_CODE_NOTFOUND)**
-      -   **500 (RESPONSE_CODE_ERROR)**
-    -   **response.exception.message** (value is null or an exception
+*  Response Topic:
+    *  **$EDC/guest/00:E0:C7:01:02:03/CONF-V1/REPLY/1363603920892-8078887174204257595**
+*  Response Payload, where the following properties are mandatory:
+    *  **response.code** </br>Possible response code values include:
+      *  **200 (RESPONSE_CODE_OK)**
+      *  **400 (RESPONSE_CODE_BAD_REQUEST)**
+      *  **404 (RESPONSE_CODE_NOTFOUND)**
+      *  **500 (RESPONSE_CODE_ERROR)**
+    *  **response.exception.message** (value is null or an exception
     message)
-    -   **response.exception.message** (value is null or an exception stack
+    *  **response.exception.message** (value is null or an exception stack
     trace)
 
 NOTE: In addition to the mandatory properties, the response payload may
@@ -215,7 +216,7 @@ conversations.
 An MQTT message published on the following topic is a read request for
 the resource identified by the **resource_id**:
 
--   **$EDC/account_name/client_id/app_id/GET/resource_id**
+*  **$EDC/account_name/client_id/app_id/GET/resource_id**
 
 The receiving application responds with a REPLY message containing the
 latest value of the requested resource.
@@ -239,7 +240,7 @@ managed by the application.
 An MQTT message published on the following topic is a create or update
 request for the resource identified by the **resource_id**:
 
--   **$EDC/account_name/client_id/app_id/PUT/resource_id**
+*  **$EDC/account_name/client_id/app_id/PUT/resource_id**
 
 The receiving application creates the specified resource (or updates it
 if it already exists) with the value supplied in the message payload and
@@ -257,7 +258,7 @@ with the new value suplliied in the message payload.
 An MQTT message published on the following topic is a delete request for
 the resource identified by the **resource_id**:
 
--   **$EDC/account_name/client_id/app_id/DEL/resource_id**
+*  **$EDC/account_name/client_id/app_id/DEL/resource_id**
 
 The receiving application deletes the specified resource, if it exists,
 and responds with a REPLY message.
@@ -268,7 +269,7 @@ and responds with a REPLY message.
 An MQTT message published on the following topic is an execute request
 for the resource identified by the **resource_id**:
 
--   **$EDC/account_name/client_id/app_id/EXEC/resource_id**
+*  **$EDC/account_name/client_id/app_id/EXEC/resource_id**
 
 The receiving application executes the specified resource, if it exists,
 and responds with a REPLY message. The semantics of the execute
@@ -280,7 +281,7 @@ The IOT application may respond to certain commands, such as taking a
 snapshot of its configuration or executing an OS-level command. The
 following topic namespace is recommended for command operations:
 
--   **$EDC/account_name/client_id/app_id/EXEC/command_name**
+*  **$EDC/account_name/client_id/app_id/EXEC/command_name**
 
 An MQTT message published with this topic triggers the execution of the
 associated command. The EXEC message may contain properties in the MQTT
@@ -298,7 +299,7 @@ events, and subsequently, to avoid the $EDC topic prefix.
 Event MQTT topics generally follow the pattern shown below to report
 unsolicited data observations for a given resource:
 
--   **account_name/client_id/app_id/resource_id**
+*  **account_name/client_id/app_id/resource_id**
 
 ##Discoverability
 
@@ -314,11 +315,11 @@ The concepts previously described have been applied to develop a
 solution that allows for the remote management of certain aspects of an
 OSGi container through the MQTT protocol, including:
 
--   Remote deployment of application bundles
+*  Remote deployment of application bundles
 
--   Remote start and stop of services
+*  Remote start and stop of services
 
--   Remote read and update of service configurations
+*  Remote read and update of service configurations
 
 The following sections describe the MQTT topic namespaces and the
 application payloads used to achieve the remote management of an OSGi
@@ -382,13 +383,13 @@ WatchDog service:
 The service configuration XML message is comprised of the following
 parts:
 
--   The **Object Class Definition** (OCD), which describes the service
+*  The **Object Class Definition** (OCD), which describes the service
     attributes that may be configured. (The syntax of the OCD element is
     described in the [OSGi Service Platform Service Compendium 4.3
     Specifications](http://www.osgi.org/Specifications/HomePage),
     Section 105.3.)
 
--   The **properties** element, which contains one or more properties
+*  The **properties** element, which contains one or more properties
     with their associated type and values. The type name must match the
     name provided in the corresponding attribute definition identifier
     (AD id) contained in the OCD.
@@ -402,13 +403,13 @@ id="_Read_All_Configurations" class="anchor"></span>
 This operation provides all service configurations for which remote
 administration is supported.
 
--   Request Topic:
-    -   **$EDC/account_name/client_id/CONF-V1/GET/configurations**
--   Request Payload:
-    -   Nothing application-specific beyond the request ID and requester
+*  Request Topic:
+    *  **$EDC/account_name/client_id/CONF-V1/GET/configurations**
+*  Request Payload:
+    *  Nothing application-specific beyond the request ID and requester
         client ID
--   Response Payload:
-    -   Configurations of all the registered services serialized in XML
+*  Response Payload:
+    *  Configurations of all the registered services serialized in XML
         format
 
 #### Read Configuration for a Given Service
@@ -416,37 +417,37 @@ administration is supported.
 This operation provides configurations for a specific service that is
 identified by an OSGi service persistent identifier (**pid)**.
 
--   Request Topic:
-    -   **$EDC/account_name/client_id/CONF-V1/GET/configurations/pid**
--   Request Payload:
-    -   Nothing application-specific beyond the request ID and requester
+*  Request Topic:
+    *  **$EDC/account_name/client_id/CONF-V1/GET/configurations/pid**
+*  Request Payload:
+    *  Nothing application-specific beyond the request ID and requester
         client ID
--   Response Payload:
-    -   Configurations of the registered service identified by a **pid**
+*  Response Payload:
+    *  Configurations of the registered service identified by a **pid**
         serialized in XML format
 
 #### Update All Configurations
 
 This operation remotely updates the configuration of a set of services.
 
--   Request Topic:
-    -   **$EDC/account_name/client_id/CONF-V1/PUT/configurations**
--   Request Payload:
-    -   Service configurations serialized in XML format
--   Response Payload:
-    -   Nothing application-specific beyond the response code
+*  Request Topic:
+    *  **$EDC/account_name/client_id/CONF-V1/PUT/configurations**
+*  Request Payload:
+    *  Service configurations serialized in XML format
+*  Response Payload:
+    *  Nothing application-specific beyond the response code
 
 #### Update the Configuration of a Given Service
 
 This operation remotely updates the configuration of the service
 identified by a **pid**.
 
--   Request Topic:
-    -   **$EDC/account_name/client_id/CONF-V1/PUT/configurations/pid**
--   Request Payload:
-    -   Service configurations serialized in XML format
--   Response Payload:
-    -   Nothing application-specific
+*  Request Topic:
+    *  **$EDC/account_name/client_id/CONF-V1/PUT/configurations/pid**
+*  Request Payload:
+    *  Service configurations serialized in XML format
+*  Response Payload:
+    *  Nothing application-specific
 
 #### Example Management Web Application
 
@@ -559,9 +560,9 @@ The following XML message is an example of a service deployment:
 The deployment package XML message is comprised of the following package
 elements:
 
--   Symbolic name
--   Version
--   Bundles that are managed by the deployment package along with their
+*  Symbolic name
+*  Version
+*  Bundles that are managed by the deployment package along with their
     symbolic name and version
 
 #### DEPLOY-V1
@@ -574,59 +575,59 @@ sections.
 This operation provides the deployment packages installed in the OSGi
 framework.
 
--   Request Topic:
-    -   **$EDC/account_name/client_id/DEPLOY-V1/GET/packages**
--   Request Payload:
-    -   Nothing application-specific beyond the request ID and requester
+*  Request Topic:
+    *  **$EDC/account_name/client_id/DEPLOY-V1/GET/packages**
+*  Request Payload:
+    *  Nothing application-specific beyond the request ID and requester
         client ID
--   Response Payload:
-    -   Installed deployment packages serialized in XML format
+*  Response Payload:
+    *  Installed deployment packages serialized in XML format
 
 ##### Install a Deployment Package
 
 This operation installs a deployment package in the OSGi framework.
 
--   Request Topic:
-    -   **$EDC/account_name/client_id/DEPLOY-V1/EXEC/install**
--   Request Payload:
-    -   The following application-specific properties in addition to the
+*  Request Topic:
+    *  **$EDC/account_name/client_id/DEPLOY-V1/EXEC/install**
+*  Request Payload:
+    *  The following application-specific properties in addition to the
         request ID and requester client ID:
-        -   A **deploy.url** property that provides the URL to be used
+        *  A **deploy.url** property that provides the URL to be used
             by the receiving application to download the deployment
             package.
-        -   Alternatively, the deployment package is present in a body
+        *  Alternatively, the deployment package is present in a body
             property of the MQTT payload. The **deploy.filename**
             property provides the filename of the deployment package on
             the receiving device.
--   Response Payload:
-    -   **deploy.pkg.name** provides the symbolic name of the deployment
+*  Response Payload:
+    *  **deploy.pkg.name** provides the symbolic name of the deployment
         package
-    -   **deploy.pkg.version** provides the version of the deployment
+    *  **deploy.pkg.version** provides the version of the deployment
         package
 
 ##### Uninstall a Deployment Package
 
 This operation uninstalls a deployment package.
 
--   Request Topic:
-    -   **$EDC/account_name/client_id/DEPLOY-V1/EXEC/uninstall**
--   Request Payload:
-    -   **deploy.pkg.name** provides the symbolic name of the deployment
+*  Request Topic:
+    *  **$EDC/account_name/client_id/DEPLOY-V1/EXEC/uninstall**
+*  Request Payload:
+    *  **deploy.pkg.name** provides the symbolic name of the deployment
         package
--   Response Payload:
-    -   Nothing application-specific beyond the response code
+*  Response Payload:
+    *  Nothing application-specific beyond the response code
 
 ##### Read All Bundles
 
 This operation provides all the bundles installed in the OSGi framework.
 
--   Request Topic:
-    -   **$EDC/account_name/client_id/DEPLOY-V1/GET/bundles**
--   Request Payload:
-    -   Nothing application-specific beyond the request ID and requester
+*  Request Topic:
+    *  **$EDC/account_name/client_id/DEPLOY-V1/GET/bundles**
+*  Request Payload:
+    *  Nothing application-specific beyond the request ID and requester
         client ID
--   Response Payload:
-    -   Installed bundles serialized in XML format
+*  Response Payload:
+    *  Installed bundles serialized in XML format
 
 The following XML message is an example of a bundle:
 
@@ -650,34 +651,34 @@ The following XML message is an example of a bundle:
 
 The bundle XML message is comprised of the following bundle elements:
 
--   Symbolic name
--   Version
--   ID
--   State
+*  Symbolic name
+*  Version
+*  ID
+*  State
 
 ##### Start a Bundle
 
 This operation starts a bundle identified by its ID.
 
--   Request Topic:
-    -   **$EDC/account_name/client_id/DEPLOY-V1/EXEC/start/bundle_id**
--   Request Payload:
-    -   Nothing application-specific beyond the request ID and requester
+*  Request Topic:
+    *  **$EDC/account_name/client_id/DEPLOY-V1/EXEC/start/bundle_id**
+*  Request Payload:
+    *  Nothing application-specific beyond the request ID and requester
         client ID
--   Response Payload:
-    -   Nothing application-specific beyond the response code
+*  Response Payload:
+    *  Nothing application-specific beyond the response code
 
 ##### Stop a Bundle
 
 This operation stops a bundle identified by its ID.
 
--   Request Topic:
-    -   **$EDC/account_name/client_id/DEPLOY-V1/EXEC/stop/bundle_id**
--   Request Payload:
-    -   Nothing application-specific beyond the request ID and requester
+*  Request Topic:
+    *  **$EDC/account_name/client_id/DEPLOY-V1/EXEC/stop/bundle_id**
+*  Request Payload:
+    *  Nothing application-specific beyond the request ID and requester
         client ID
--   Response Payload:
-    -   Nothing application-specific beyond the response code
+*  Response Payload:
+    *  Nothing application-specific beyond the response code
 
 #### Example Management Web Application
 
@@ -712,69 +713,69 @@ The "DEPLOY-V2" application continues to support the *read*, *start/stop*, and
 
 Request:
 
--   Request Topic:
-    -   **$EDC/[account_name]/[client_id]/DEPLOY-V2/EXEC/download**
+*  Request Topic:
+    *  **$EDC/[account_name]/[client_id]/DEPLOY-V2/EXEC/download**
 
--   Payload:
+*  Payload:
 
-    -   metrics:
-        -   **dp.job.id** (Long). Mandatory.
+    *  metrics:
+        *  **dp.job.id** (Long). Mandatory.
             Represents a unique Job ID for the download.
-        -   **dp.uri** (String). Mandatory.
+        *  **dp.uri** (String). Mandatory.
             Represents the URI of the deployment package.
-        -   **dp.name** (String). Mandatory.
+        *  **dp.name** (String). Mandatory.
             The value of the header DeploymentPackage-SymbolicName in the
             DP MANIFEST.
-        -   **dp.version** (String). Mandatory.
+        *  **dp.version** (String). Mandatory.
             The value of the header DeploymentPackage-Version in the DP MANIFEST.
             The file will be saved in the temporary directory as
             <dp.name>-<dp.version>.jar possibly overwriting an existing file.
-        -   **dp.download.protocol** (String) Mandatory.
+        *  **dp.download.protocol** (String) Mandatory.
             Specifies the protocol to be used to download the
             bundles/shell scripts. Must be set to HTTP or HTTPS.
-        -   **dp.download.block.size** (Integer). Optional
+        *  **dp.download.block.size** (Integer). Optional
             (if not specified by the cloud platform, it is estimated by the
                 device, depending on the total file size. In this case it is
                 fixed at 1% of the total file size).
             The size in kBi of the blocks used to download the DP.
-        -   **dp.download.block.delay** (Integer). Optional (default: 0).
+        *  **dp.download.block.delay** (Integer). Optional (default: 0).
             Delay in ms between block transfers.
-        -   **dp.download.notify.block.size** (Integer). Optional
+        *  **dp.download.notify.block.size** (Integer). Optional
             (if not specified by the cloud platform, it is estimated by the
                 device, depending on the total file size. In this case it is
                 fixed at 5% of the total file size).
             The size in kBi between the notification messages sent to the cloud
             platform.
-        -   **dp.download.timeout** (Integer). Optional (default: 60000).
+        *  **dp.download.timeout** (Integer). Optional (default: 60000).
             The timeout in seconds for each block that has to be downloaded.
-        -   **dp.download.resume** (Bool). Optional (default: true).
+        *  **dp.download.resume** (Bool). Optional (default: true).
             Resume download transfer if supported by the server.
-        -   **dp.download.force** (Bool). Optional (default: true).
+        *  **dp.download.force** (Bool). Optional (default: true).
             Specifies if the download forces to download again the file,
             if already exists on target device.
-        -   **dp.download.username** (String). Optional.
+        *  **dp.download.username** (String). Optional.
             Username for password protected download. No authentication will be
             tried if username is not present.
-        -   **dp.download.password** (String). Optional.
+        *  **dp.download.password** (String). Optional.
             Password for password protected download. No authentication will be
             tried if password is not present
-        -   **dp.download.hash** (String). Optional.
+        *  **dp.download.hash** (String). Optional.
             The algorithm and value of the hash of the file used to verify the
             integrity of the download. The format is of this property is:
             {algorithm}:{hash value}
-        -   **dp.install** (Bool). Optional (default: true).
+        *  **dp.install** (Bool). Optional (default: true).
             Whether the package should be immediately installed after being
             downloaded.
-        -   **dp.install.system.update** (Bool). Optional (default: false).
+        *  **dp.install.system.update** (Bool). Optional (default: false).
             Sets whether or not this is a system update, rather than a
             bundle/package update.
-        -   **dp.install.verifier.uri** (String). Optional.
+        *  **dp.install.verifier.uri** (String). Optional.
             The verifier script URI to run after the installation of the system
             update.
-        -   **dp.reboot** (Bool). Optional (default: false).
+        *  **dp.reboot** (Bool). Optional (default: false).
             Whether the system should be rebooted as part of the package
             installation process.
-        -   **dp.reboot.delay** (Integer). Optional (default: 0 - immediately).
+        *  **dp.reboot.delay** (Integer). Optional (default: 0 - immediately).
             Delay after which the device will be rebooted. Only meaningful if
             dp.reboot==true.
 
@@ -792,35 +793,35 @@ Payload: no application-specific metrics or body.
 
 Request:
 
--   Request Topic:
-    -   **$EDC/[account_name]/[client_id]/DEPLOY-V2/GET/download**
--   Payload: no application-specific metrics or body.
+*  Request Topic:
+    *  **$EDC/[account_name]/[client_id]/DEPLOY-V2/GET/download**
+*  Payload: no application-specific metrics or body.
 
 Response:
 
--   Payload:
-    -   metrics:
-        -   **dp.http.transfer.size** (Integer).
+*  Payload:
+    *  metrics:
+        *  **dp.http.transfer.size** (Integer).
             The size in kBi of the DP being downloaded
-        -   **dp.http.transfer.progress** (Integer).
+        *  **dp.http.transfer.progress** (Integer).
             The estimated progress of the download in percentage (0-100%).
             Do not rely on this indicator to detect the download completion.
-        -   **dp.http.transfer.status** (String).
+        *  **dp.http.transfer.status** (String).
             An enum specifying the download status
             (IN_PROGRESS, COMPLETED, FAILED...).
-        -   **job.id** (Long) Optional.
+        *  **job.id** (Long) Optional.
             The ID of the job to notify status
 
 Request:
 
--   Request Topic:
-    -   **$EDC/[account_name]/[client_id]/DEPLOY-V2/DEL/download**
--   Payload: no application-specific metrics or body.
+*  Request Topic:
+    *  **$EDC/[account_name]/[client_id]/DEPLOY-V2/DEL/download**
+*  Payload: no application-specific metrics or body.
 
 Response:
 
--   Response Payload:
-    -   Nothing application-specific beyond the response code. Unsolicited messages
+*  Response Payload:
+    *  Nothing application-specific beyond the response code. Unsolicited messages
     will report the status of the cancel operation.
 
 _Unsolicited messages for download progress:_
@@ -837,23 +838,23 @@ request received.
 
 Download Notification:
 
--   **$EDC/account_name/requester.client.id/DEPLOY-V2/NOTIFY/client-id/download**
--   Payload:
-    -   metrics:
-        -   **job.id** (Long).
+*  **$EDC/account_name/requester.client.id/DEPLOY-V2/NOTIFY/client-id/download**
+*  Payload:
+    *  metrics:
+        *  **job.id** (Long).
             The ID of the job to notify status
-        -   **dp.download.size** (Integer).
+        *  **dp.download.size** (Integer).
             The size in kBi of the DP being downloaded
-        -   **dp.download.progress** (Integer).
+        *  **dp.download.progress** (Integer).
             The estimated progress of the download in percentage (0-100%).
             Do not rely on this indicator to detect the download completion.
-        -   **dp.download.status** (String).
+        *  **dp.download.status** (String).
             An enum specifying the download status (IN_PROGRESS, COMPLETED,
                 FAILED, CANCELLED...).
-        -   **dp.download.error.message** (String).
+        *  **dp.download.error.message** (String).
             In case of FAILED status, this metric will contain information
             about the error.
-        -   **dp.download.index** (Integer).
+        *  **dp.download.index** (Integer).
             The index of the file that is currently downloaded. This is supposed
             to support multiple file downloads.
 
@@ -861,32 +862,32 @@ Download Notification:
 
 Request:
 
--   Request Topic:
-    -   **$EDC/[account_name]/[client_id]/DEPLOY-V2/EXEC/install**
--   Payload:
-    -   metrics:
-        -   **dp.name** (String). Mandatory.
+*  Request Topic:
+    *  **$EDC/[account_name]/[client_id]/DEPLOY-V2/EXEC/install**
+*  Payload:
+    *  metrics:
+        *  **dp.name** (String). Mandatory.
             The value of the header DeploymentPackage-SymbolicName in the DP
             MANIFEST.
-        -   **dp.version** (String). Mandatory.
+        *  **dp.version** (String). Mandatory.
             The value of the header DeploymentPackage-Version in the DP
             MANIFEST. The basename of the DP file will to install is derived as
             <dp.name>-<dp.version>.jar. The file is assumed to reside in the
             temporary directory.
-        -   **dp.install.system.update** (Bool). Mandatory.
+        *  **dp.install.system.update** (Bool). Mandatory.
             Specifies if the specified resource is a system update or not.
             It can be applied to the system immediately or after a system reboot.
-        -   **dp.install.verifier.uri** (String). Optional.
+        *  **dp.install.verifier.uri** (String). Optional.
             The verifier script URI to run after the installation of the system
             update.
-        -   **dp.reboot** (Bool). Optional (default: false).
+        *  **dp.reboot** (Bool). Optional (default: false).
             Whether the system should be rebooted as part of the package
             installation process. There might be DPs requiring a
             post-installation (from the standpoint of the OSGi Deployment Admin)
             step requiring a system reboot. Note that the post-install phase is
             not handled by the Deployment Admin. The installation in this case
             is complete (and can fail) after the reboot.
-        -   **dp.reboot.delay** (Integer). Optional (default: 0 - immediately).
+        *  **dp.reboot.delay** (Integer). Optional (default: 0 - immediately).
             Delay after which the device will be rebooted. Only meaningful if
             dp.reboot==true.
 
@@ -895,27 +896,27 @@ Note: this operation can be retried. Anyway, if it fails once it's likely to fai
 
 Response:
 
--   Payload: Nothing application-specific beyond the response code. Unsolicited
+*  Payload: Nothing application-specific beyond the response code. Unsolicited
             messages will report the status of the install operation.
 
 Request:
 
--   Request Topic:
-    -   **$EDC/[account_name]/[client_id]/DEPLOY-V2/GET/install**
--   Payload: no application-specific metrics or body.
+*  Request Topic:
+    *  **$EDC/[account_name]/[client_id]/DEPLOY-V2/GET/install**
+*  Payload: no application-specific metrics or body.
 
 Response:
 
--   Payload:
-    -   metrics:
-        -   **dp.install.status** (String).
+*  Payload:
+    *  metrics:
+        *  **dp.install.status** (String).
             An enum specifying the install status
-            -   **IDLE**
-            -   **INSTALLING BUNDLE**
-        -   **dp.name** (String). Optional.
+            *  **IDLE**
+            *  **INSTALLING BUNDLE**
+        *  **dp.name** (String). Optional.
             If installing: the value of the header DeploymentPackage-SymbolicName
             in the DP MANIFEST.
-        -   **dp.version** (String). Optional.
+        *  **dp.version** (String). Optional.
             If installing: the value of the header DeploymentPackage-Version
             in the DP MANIFEST.
 
@@ -929,22 +930,22 @@ Otherwise (dp.install==false), the platform can request the installation of an a
 
 Install notification:
 
--   **$EDC/account_name/requester.client.id/DEPLOY-V2/NOTIFY/client-id/install**
--   Payload:
-    -   metrics:
-        -   **job.id** (Long).
+*  **$EDC/account_name/requester.client.id/DEPLOY-V2/NOTIFY/client-id/install**
+*  Payload:
+    *  metrics:
+        *  **job.id** (Long).
             The ID of the job to notify status
-        -   **dp.name** (String).
+        *  **dp.name** (String).
             The name of the package that is installing.
-        -   **dp.install.progress** (Integer).
+        *  **dp.install.progress** (Integer).
             The estimated progress of the install in percentage (0-100%). Due
             to limitations of the OSGi DeploymentAdmin, it's not possible to
             have a linear progress. It will go from 0% to 100% in one step. Do
             not rely on this indicator to detect the download completion.
-        -   **dp.install.status** (String).
+        *  **dp.install.status** (String).
             An enum specifying the install status (IN_PROGRESS, COMPLETED,
                 FAILED...).
-        -   **dp.install.error.message** (String) Optional.
+        *  **dp.install.error.message** (String) Optional.
             In case of FAILED status, this metric will contain information
             about the error.
 
@@ -953,24 +954,24 @@ Install notification:
 
 Request:
 
--   Request Topic:
-    -   **$EDC/[account_name]/[client_id]/DEPLOY-V2/EXEC/uninstall**
--   Payload:
-    -   metrics:
-        -   **dp.name** (String). Mandatory.
+*  Request Topic:
+    *  **$EDC/[account_name]/[client_id]/DEPLOY-V2/EXEC/uninstall**
+*  Payload:
+    *  metrics:
+        *  **dp.name** (String). Mandatory.
             The value of the header DeploymentPackage-SymbolicName in the DP
             MANIFEST.
-        -   **job.id** (Long) Mandatory.
+        *  **job.id** (Long) Mandatory.
             The ID of the job to notify status
-        -   **dp.version** (String). Mandatory.
+        *  **dp.version** (String). Mandatory.
             The value of the header DeploymentPackage-Version in the DP
             MANIFEST. The basename of the DP file will to install is derived
             as <dp.name>-<dp.version>.jar. The file is assumed to reside in the
             temporary directory.
-        -   **dp.reboot** (Bool). Optional (default: false).
+        *  **dp.reboot** (Bool). Optional (default: false).
             Whether the system should be rebooted as part of the package
             uninstall process.
-        -   **dp.reboot.delay** (Integer). Optional (default: 0 - immediately).
+        *  **dp.reboot.delay** (Integer). Optional (default: 0 - immediately).
             Delay after which the device will be rebooted. Only meaningful if
             dp.reboot==true.
 
@@ -981,22 +982,22 @@ _Unsolicited messages for uninstall progress:_
 
 Uninstall notification:
 
--   **$EDC/account_name/requester.client.id/DEPLOY-V2/NOTIFY/client-id/uninstall**
--   Payload:
-    -   metrics:
-        -   **job.id** (Long).
+*  **$EDC/account_name/requester.client.id/DEPLOY-V2/NOTIFY/client-id/uninstall**
+*  Payload:
+    *  metrics:
+        *  **job.id** (Long).
             The ID of the job to notify status
-        -   **dp.name** (String).
+        *  **dp.name** (String).
             The name of the package that is uninstalling.
-        -   **dp.uninstall.progress** (Integer).
+        *  **dp.uninstall.progress** (Integer).
             The estimated progress of the install in percentage (0-100%).
             Due to limitations of the OSGi DeploymentAdmin, it's not possible
             to have a linear progress. It will go from 0% to 100% in one step.
             Do not rely on this indicator to detect the download completion.
-        -   **dp.uninstall.status** (String).
+        *  **dp.uninstall.status** (String).
             An enum specifying the uninstall status (IN_PROGRESS, COMPLETED,
                 FAILED...).
-        -   **dp.uninstall.error.message** (String) Optional.
+        *  **dp.uninstall.error.message** (String) Optional.
             In case of FAILED status, this metric will contain information
             about the error.
 
@@ -1007,13 +1008,13 @@ Uninstall notification:
 
 This operation provides all the bundles installed in the OSGi framework.
 
--   Request Topic:
-    -   **$EDC/account_name/client_id/DEPLOY-V2/GET/bundles**
--   Request Payload:
-    -   Nothing application-specific beyond the request ID and requester
+*  Request Topic:
+    *  **$EDC/account_name/client_id/DEPLOY-V2/GET/bundles**
+*  Request Payload:
+    *  Nothing application-specific beyond the request ID and requester
         client ID
--   Response Payload:
-    -   Installed bundles serialized in XML format
+*  Response Payload:
+    *  Installed bundles serialized in XML format
 
 The following XML message is an example of a bundle:
 
@@ -1037,31 +1038,31 @@ The following XML message is an example of a bundle:
 
 The bundle XML message is comprised of the following bundle elements:
 
--   Symbolic name
--   Version
--   ID
--   State
+*  Symbolic name
+*  Version
+*  ID
+*  State
 
 ##### Start a Bundle
 
 This operation starts a bundle identified by its ID.
 
--   Request Topic:
-    -   **$EDC/account_name/client_id/DEPLOY-V2/EXEC/start/bundle_id**
--   Request Payload:
-    -   Nothing application-specific beyond the request ID and requester
+*  Request Topic:
+    *  **$EDC/account_name/client_id/DEPLOY-V2/EXEC/start/bundle_id**
+*  Request Payload:
+    *  Nothing application-specific beyond the request ID and requester
         client ID
--   Response Payload:
-    -   Nothing application-specific beyond the response code
+*  Response Payload:
+    *  Nothing application-specific beyond the response code
 
 ##### Stop a Bundle
 
 This operation stops a bundle identified by its ID.
 
--   Request Topic:
-    -   **$EDC/account_name/client_id/DEPLOY-V2/EXEC/stop/bundle_id**
--   Request Payload:
-    -   Nothing application-specific beyond the request ID and requester
+*  Request Topic:
+    *  **$EDC/account_name/client_id/DEPLOY-V2/EXEC/stop/bundle_id**
+*  Request Payload:
+    *  Nothing application-specific beyond the request ID and requester
         client ID
--   Response Payload:
-    -   Nothing application-specific beyond the response code
+*  Response Payload:
+    *  Nothing application-specific beyond the response code

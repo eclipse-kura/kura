@@ -7,20 +7,19 @@ categories: [doc]
 
 [Overview](#_Overview)
 
--   [Prerequisites](#prerequisites)
+*  [Prerequisites](#prerequisites)
 
 [Connecting to the Cloud](#_Connecting_to_the)
 
--   [Local Emulation Mode](#local-emulation-mode)
+*  [Local Emulation Mode](#local-emulation-mode)
 
--   [Run Kura in Emulator Mode](#_Run_ESF_in)
+*  [Run Kura in Emulator Mode](#_Run_ESF_in)
 
--   [Run Kura on a Remote Target Device](#_List_OSGi_Bundles)
+*  [Run Kura on a Remote Target Device](#_List_OSGi_Bundles)
 
--   [Configuring the Cloud Service](#configuring-the-cloud-service)
+*  [Configuring the Cloud Service](#configuring-the-cloud-service)
 
-<span id="_Overview_1" class="anchor"><span id="_Overview" class="anchor"></span></span>Overview
-================================================================================================
+## Overview
 
 Eclipse Kura offers Data Services, where store and forward functionality
 for the telemetry data is collected by the gateway and published to
@@ -31,7 +30,7 @@ networks, MQTT’s publish/subscribe, lightweight messaging protocol,
 minimizes network bandwidth and device resource requirements while also
 attempting to ensure reliability and delivery assurance in M2M / IoT
 solutions.
-<br />
+
 Kura also offers Cloud Services with an easy-to-use API layer for the
 M2M application to communicate with a remote server. In addition to
 simple publish/subscribe, the Cloud Service API simplifies the
@@ -44,35 +43,31 @@ This section provides information on how to connect your Kura-enabled
 device to an MQTT broker-url, which handles receiving published messages
 and sending them on to clients who have subscribed.
 
-Prerequisites
--------------
+### Prerequisites
 
--   Requires Kura development environment set-up ([Setting up Kura
+*  Requires Kura development environment set-up ([Setting up Kura
     Development Environment](kura-setup.html))
 
--   Implements the use of Kura web user-interface (UI)
+*  Implements the use of Kura web user-interface (UI)
 
-<span id="_Hello_World_Using" class="anchor"><span id="_Testing_the_Plug-in" class="anchor"><span id="_Testing_the_OSGi" class="anchor"><span id="_Connecting_to_the" class="anchor"></span></span></span></span>Connecting to the Cloud
-========================================================================================================================================================================================================================================
+## Connecting to the Cloud
 
 With the Eclipse Kura development environment set up, you can either:
 
--   Configure the emulator to connect to the Cloud (see [Local Emulation
+*  Configure the emulator to connect to the Cloud (see [Local Emulation
     Mode](#local-emulation-mode))
 
--   Configure a physical device running Kura to connect to the Cloud
+*  Configure a physical device running Kura to connect to the Cloud
     (see [Run Kura on a Remote Target Device](#_List_OSGi_Bundles))
 
-Local Emulation Mode
---------------------
+### Local Emulation Mode
 
 The Kura user workspace can be used in Eclipse in local emulation mode
 (Linux/OS X only; this feature is not currently supported under
 Windows). To deploy the code to a running system, refer to the section
 [Run Kura on a Remote Target Device](#_List_OSGi_Bundles).
 
-<span id="_Running_ESF_in" class="anchor"><span id="_Run_ESF_in" class="anchor"></span></span>Run Kura in Emulator Mode
------------------------------------------------------------------------------------------------------------------------
+### Run Kura in Emulator Mode
 
 In the Eclipse workspace, locate the **org.eclipse.kura.emulator**
 project. Expand it to show the src/main/resources folder.
@@ -89,15 +84,10 @@ and will appear similar to the following:
 ![]({{ site.baseurl }}/assets/images/cloud_configuration/media/image1.png)
 
 At this point, the Kura web UI, which starts a Web service on the local
-computer, is available at <http://127.0.0.1:8080/>.<span
-id="_List_OSGi_Bundles" class="anchor"><span id="_Run_ESF_on"
-class="anchor"><span id="_Run_ESF_on_1" class="anchor"><span
-id="_Run_ESF_on_2" class="anchor"></span></span></span></span> Refer to
-the section [Configuring the Cloud
+computer, is available at <http://127.0.0.1:8080/>. Refer to the section [Configuring the Cloud
 Service](#configuring-the-cloud-service) to set the Cloud credentials.
 
-Run Kura on a Remote Target Device
-----------------------------------
+### Run Kura on a Remote Target Device
 
 Kura is designed to start automatically on remote target devices. With
 it preinstalled, simply power-on the device and wait for it to fully
@@ -107,8 +97,7 @@ address of the device. For information on the default IP settings for
 various devices, see [Kura Default
 Configuration](4.01-ESF-Default-Configuration.asp).
 
-Configuring the Cloud Service
------------------------------
+### Configuring the Cloud Service
 
 Once connected to the Kura web UI, a log in window appears prompting you
 to enter the Name and Password as shown below:
@@ -127,14 +116,14 @@ as needed (shown below).
 
 ![]({{ site.baseurl }}/assets/images/cloud_configuration/media/image4.png)
 
-Configure the Cloud credentials as needed. The most pertinent fields
-include:
+Configure the Cloud credentials as needed. The most pertinent fields include:  
 
-  broker-url:                   the url for the MQTT broker (this example shows the MQTT broker-url **mqtt://iot.eclipse.org:1883/** hosted by the Eclipse Foundation)
-  ----------------------------- ----------------------------------------------------------------------------------------------------------------------------------------
-  topic.context.account-name:   your *[account_name]*
-  username:                     typically *[account_name]*_broker
-  password:                     the password for your user
+Field                        |
+-----------------------------|-------------
+broker-url:                  | The url for the MQTT broker (this example shows the MQTT broker-url **mqtt://iot.eclipse.org:1883/** hosted by the Eclipse Foundation)  
+topic.context.account-name:  | Your **[account_name]**  
+username:                    | Typically *[account_name]*_broker  
+password:                    | The password for your user  
 
 Once these credentials are set, click the **Apply** button near the top
 left of the configuration pane.
@@ -150,5 +139,3 @@ browser window. For the ‘connect.auto-on-startup’ parameter, select
 Click **Apply**. At this point, the MQTT client in Kura is configured to
 automatically connect to the Cloud.
 
-<span id="_See_the_Device" class="anchor"><span id="_Verify_Device_is"
-class="anchor"></span></span>

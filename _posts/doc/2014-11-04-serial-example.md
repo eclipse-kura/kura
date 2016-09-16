@@ -7,34 +7,33 @@ categories: [doc]
 
 [Overview](#_Overview_1)
 
--   [Prerequisites](#prerequisites)
+*  [Prerequisites](#prerequisites)
 
 [Serial Communication with Kura](#_Serial_Communication_with)
 
--   [Hardware Setup](#hardware-setup)
+*  [Hardware Setup](#hardware-setup)
 
--   [Determine Serial Device Nodes](#determine-serial-device-nodes)
+*  [Determine Serial Device Nodes](#determine-serial-device-nodes)
 
--   [Implement the Bundle](#implement-the-bundle)
+*  [Implement the Bundle](#implement-the-bundle)
 
-    -   [META-INF/MANIFEST.MF File](#_META-INF/MANIFEST.MF_File)
+    *  [META-INF/MANIFEST.MF File](#_META-INF/MANIFEST.MF_File)
 
-    -   [OSGI-INF/component.xml File](#osgi-infcomponent.xml-file)
+    *  [OSGI-INF/component.xml File](#osgi-infcomponent.xml-file)
 
-    -   [OSGI-INF/metatype/org.eclipse.kura.example.serial.SerialExample.xml
+    *  [OSGI-INF/metatype/org.eclipse.kura.example.serial.SerialExample.xml
         File](#_OSGI-INF/metatype/org.eclipse.kura.exam)
 
-    -   [org.eclipse.kura.example.serial.SerialExample.java
+    *  [org.eclipse.kura.example.serial.SerialExample.java
         File](#_org.eclipse.kura.example.serial.SerialE)
 
--   [Export the Bundle](#_Export_the_Bundle)
+*  [Export the Bundle](#_Export_the_Bundle)
 
--   [Deploy the Bundle](#deploy-the-bundle)
+*  [Deploy the Bundle](#deploy-the-bundle)
 
--   [Validate the Bundle](#validate-the-bundle)
+*  [Validate the Bundle](#validate-the-bundle)
 
-<span id="_Example" class="anchor"><span id="_Overview" class="anchor"><span id="_Overview_1" class="anchor"></span></span></span>Overview
-==========================================================================================================================================
+## Overview
 
 This section provides an example of how to create a Kura bundle that
 will communicate with a serial device. In this example, you will
@@ -42,37 +41,34 @@ communicate with a simple terminal emulator to demonstrate both
 transmitting and receiving data. You will learn how to perform the
 following functions:
 
--   Create a plugin that communicates to serial devices
+*  Create a plugin that communicates to serial devices
 
--   Export the bundle
+*  Export the bundle
 
--   Install the bundle on the remote device
+*  Install the bundle on the remote device
 
--   Test the communication with minicom where, minicom is acting as an
+*  Test the communication with minicom where, minicom is acting as an
     attached serial device such as an NFC reader, GPS device, or some
     other ASCII-based communication device
 
-Prerequisites
--------------
+### Prerequisites
 
--   Setting up Kura Development Environment (refer to section *2.01
+*  Setting up Kura Development Environment (refer to section *2.01
     Setting up the Kura Development Environment*)
 
--   Hello World Using the Kura Logger (refer to section *2.02 Hello
+*  Hello World Using the Kura Logger (refer to section *2.02 Hello
     World using the Kura Logger*)
 
--   Hardware
+*  Hardware
 
-    -   Use an embedded device running Kura with two available serial
+    *  Use an embedded device running Kura with two available serial
         ports.
         (If the device does not have a serial port, USB to serial
         adapters can be used.)
 
-    -   Ensure minicom is installed on the embedded device.<span
-        id="_Optional_Prerequisites" class="anchor"></span>
+    *  Ensure minicom is installed on the embedded device.
 
-<span id="_Hello_World_Using" class="anchor"><span id="_Serial_Communication_with" class="anchor"></span></span>Serial Communication with Kura
-==============================================================================================================================================
+## Serial Communication with Kura
 
 This section of the tutorial covers setting up the hardware, determining
 serial port device nodes, implementing the basic serial communication
@@ -83,17 +79,16 @@ In this example, we are using ASCII for clarity, but these same
 techniques can be used to communicate with serial devices that
 communicate using binary protocols.
 
-Hardware Setup
---------------
+### Hardware Setup
 
 Your setup requirements will depend on your hardware platform. At a
 minimum, you will need two serial ports with a null modem serial,
 crossover cable connecting them.
 
--   If your platform has integrated serial ports, you only need to
+*  If your platform has integrated serial ports, you only need to
     connect them using a null modem serial cable.
 
--   If you do not have integrated serial ports on your platform, you
+*  If you do not have integrated serial ports on your platform, you
     will need to purchase USB-to-Serial adapters. It is recommended to
     use a USB-to-Serial adapter with either the PL2303 or FTDI chipset,
     but others may work depending on your hardware platform and
@@ -101,8 +96,7 @@ crossover cable connecting them.
     your device, you can attach the null modem serial cable between the
     two ports.
 
-Determine Serial Device Nodes
------------------------------
+### Determine Serial Device Nodes
 
 This step is hardware specific. If your hardware device has integrated
 serial ports, contact your hardware device manufacturer or review the
@@ -124,8 +118,8 @@ the embedded gateway:
 tail -f /var/log/syslog
 ```
 
-NOTE: Depending on your specific Linux implementation, other possible
-log files may be: /var/log/kern.log, /var/log/kernel, or /var/log/dmesg.
+{% include alerts.html message="Depending on your specific Linux implementation, other possible
+log files may be: /var/log/kern.log, /var/log/kernel, or /var/log/dmesg." %}
 
 With the above command running, insert your USB-to-Serial adapter. You
 should see output similar to the following:
@@ -151,8 +145,7 @@ If you are using two USB-to-Serial adapters, repeat the above procedure
 for the second serial port. The resulting device node will be referred
 to as [device_node_2].
 
-Implement the Bundle
---------------------
+### Implement the Bundle
 
 Now that you have two serial ports connected to each other, you are
 ready to implement the code. You will use the same general method that
@@ -163,46 +156,46 @@ Bundle](#_Export_the_Bundle_1) section) will have an additional step,
 and 2) the actual code in this example will have the following
 differences:
 
--   The new Plug-in Project is named “org.eclipse.kura.example.serial”
+*  The new Plug-in Project is named “org.eclipse.kura.example.serial”
 
--   A class named “SerialExample” is created in the
+*  A class named “SerialExample” is created in the
     org.eclipse.kura.example.serial project
 
--   The following bundles are included in the Automated Management of
+*  The following bundles are included in the Automated Management of
     Dependencies section in the MANIFEST.MF:
 
-    -   javax.comm
+    *  javax.comm
 
-    -   javax.microedition.io
+    *  javax.microedition.io
 
-    -   org.eclipse.kura.cloud
+    *  org.eclipse.kura.cloud
 
-    -   org.eclipse.kura.comm
+    *  org.eclipse.kura.comm
 
-    -   org.eclipse.kura.configuration
+    *  org.eclipse.kura.configuration
 
-    -   org.osgi.service.component
+    *  org.osgi.service.component
 
-    -   org.osgi.service.io
+    *  org.osgi.service.io
 
-    -   org.slf4j
+    *  org.slf4j
 
 The following files need to be implemented:
 
--   META-INF/MANIFEST.MF – OSGI manifest that describes the bundle
+*  META-INF/MANIFEST.MF – OSGI manifest that describes the bundle
     and its dependencies
 
--   OSGI-INF/component.xml – declarative services definition that
+*  OSGI-INF/component.xml – declarative services definition that
     describe what services are exposed and consumed by this bundle
 
--   OSGI-INF/metatype/org.eclipse.kura.example.serial.SerialExample.xml
+*  OSGI-INF/metatype/org.eclipse.kura.example.serial.SerialExample.xml
     – configuration description of the bundle and its parameters, types,
     and defaults
 
--   org.eclipse.kura.example.serial.SerialExample.java – main
+*  org.eclipse.kura.example.serial.SerialExample.java – main
     implementation class
 
-### <span id="_META-INF/MANIFEST.MF_File" class="anchor"><span id="_META-INF/MANIFEST.MF_File_1" class="anchor"></span></span>META-INF/MANIFEST.MF File
+#### META-INF/MANIFEST.MF File
 
 The META-INF/MANIFEST.MF file should appear as shown below when
 complete:
@@ -233,16 +226,13 @@ Bundle-ClassPath: .
 
 ```
 
-<span id="_OSGI-INF/component.xml_File" class="anchor"><span
-id="_OSGI-INF/component.xml_File_1" class="anchor"></span></span>In
-addition, the build.propertiesfile should have org.eclipse.equinox.io listed
-as an additional bundle similar to below:
+In addition, the build.propertiesfile should have org.eclipse.equinox.io listed as an additional bundle similar to below:
 
 ```
 additional.bundles = org.eclipse.equinox.io
 ```
 
-### OSGI-INF/component.xml File
+#### OSGI-INF/component.xml File
 
 The OSGI-INF/component.xml should appear as shown below when complete:
 
@@ -265,7 +255,7 @@ The OSGI-INF/component.xml should appear as shown below when complete:
 </scr:component>
 ```
 
-### <span id="_OSGI-INF/metatype/org.eclipse.kura.exam" class="anchor"><span id="OSGI-INF/metatype/org.eclipse.kura.exam_" class="anchor"></span></span>OSGI-INF/metatype/org.eclipse.kura.example.serial.SerialExample.xml File
+#### OSGI-INF/metatype/org.eclipse.kura.example.serial.SerialExample.xml File
 
 The OSGI-INF/metatype/org.eclipse.kura.example.serial.SerialExample.xml
 file should appear as shown below when complete:
@@ -341,7 +331,7 @@ file should appear as shown below when complete:
 </MetaData>
 ```
 
-### <span id="_org.eclipse.kura.example.serial.SerialE" class="anchor"><span id="org.eclipse.kura.example.serial.SerialE_" class="anchor"></span></span>org.eclipse.kura.example.serial.SerialExample.java File
+#### org.eclipse.kura.example.serial.SerialExample.java File
 
 The org.eclipse.kura.example.serial.SerialExample.java file should
 appear as shown below when complete:
@@ -593,16 +583,10 @@ public class SerialExample implements ConfigurableComponent {
   }
 }
 ```
-
-<span id="_META-INF/MANIFEST.MF_build.properties_F" class="anchor"><span
-id="META-INF/MANIFEST.MF_build.properties_F_"
-class="anchor"></span></span>
-
 At this point, the bundle implementation is complete. *Make sure to save
 all files before proceeding.*
 
-<span id="_Export_the_Bundle" class="anchor"><span id="_Export_the_Bundle_1" class="anchor"></span></span>Export the Bundle
-----------------------------------------------------------------------------------------------------------------------------
+### Export the Bundle
 
 To build the Serial Example bundle as a stand-alone OSGi plugin,
 right-click the project and select Export.
@@ -619,9 +603,8 @@ Under Destination, select the Directory option button and use
 the Browse button to select an appropriate place to save the JAR
 file on the local file system.
 
-NOTE: You will need to know the location where this JAR file is saved
-for the deployment process.
-
+{% include alerts.html message=" You will need to know the location where this JAR file is saved
+for the deployment process." %}
 
 ![]({{ site.baseurl }}/assets/images/serial_example//media/image2.png)
 
@@ -634,8 +617,7 @@ Finish.
 Doing so will create a JAR file in the selected directory (e.g.,
 /home/joe/myPlugins/plugins/org.eclipse.kura.example.serial_1.0.0.201410311510.jar).
 
-Deploy the Bundle
------------------
+### Deploy the Bundle
 
 In order to proceed, you need to know the IP address of your embedded
 gateway that is running Kura. Once you have this IP address, follow the
@@ -651,8 +633,7 @@ serial device in /dev.
 
 ![]({{ site.baseurl }}/assets/images/serial_example//media/image4.png)
 
-Validate the Bundle
--------------------
+### Validate the Bundle
 
 Next, you need to test that your bundle does indeed echo characters back
 by opening minicom and configuring it to use [device_node_2] that was
@@ -680,7 +661,7 @@ Use the minicom menu options on the left (i.e., A, B, C, etc.) to change
 desired fields. Set the fields to the same values as shown in the
 previous screen capture except the Serial Device should match the
 [device_node_2] on your target device. Once this is set, press
-<ENTER> to exit from this menu.
+\<ENTER\> to exit from this menu.
 
 In the main configuration menu, select Exit (*do not* select the
 option Exit from Minicom). At this point, you have successfully started

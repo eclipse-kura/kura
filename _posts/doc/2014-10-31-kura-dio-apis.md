@@ -15,8 +15,7 @@ categories: [doc]
 
 [Code Examples](#code-examples)
 
-Overview
-========
+## Overview
 
 OpenJDK Device I/O is a third-party library which leverages standard Java ME
 Device I/O APIs to Java SE.
@@ -30,20 +29,18 @@ default configuration files shipped with Kura.
 
 The current Device I/O implementation supports the following:
 
--   Hardware Platforms
+*  Hardware Platforms
 
-    -   ARMv6
+    *  ARMv6
 
-    -   ARMv7
+    *  ARMv7
 
--   Devices
+*  Devices
+	* GPIO
 
-	- GPIO
+	* I2C
 
-	- I2C
-
-Security Policy
-===============
+## Security Policy
 
 Standard Java Security Policy is used in order to restrict access to specific devices.
 The defauld Kura distribution allows access to all the peripherals through the
@@ -62,8 +59,7 @@ grant {
 
 Custom permissions may be specified editing the file.
 
-Default Configuration
-=====================
+## Default Configuration
 
 Default hardware configuration for the hardware platform is defined in the **jdk.dio.properties** file.
 Standard configuration for complex devices can be added on a per-device basis:
@@ -80,29 +76,27 @@ gpio.GPIOPin = initValue:0, deviceNumber:0, direction:3, mode:-1, trigger:3
 
 ```
 
-APIs
-====
+## APIs
 
 Kura supports the full set of APIs for the listed device types.
-Refere to the **API Reference** for further information on the APIs.
+Refere to the [API Reference](../ref/api-ref.html) for further information on the APIs.
 
-Code Examples
-=============
+## Code Examples
 
-**Accessing a GPIO Pin with OpenJDK Device I/O**
+### Accessing a GPIO Pin with OpenJDK Device I/O
 
 A GPIO Pin can be accessed by referencing it's index in the properties file,
 or by creating a Pin configuration object and feeding it to the DeviceManager:
 
--   Accessing a GPIO Pin by its index
+#### Accessing a GPIO Pin by its index
 
-```
-#Accessing the GPIO Pin number 17. De default behavioue is defined in the
-#jdk.dio.properties file
-#
-#i.e.:
-# gpio.GPIOPin = initValue:0, deviceNumber:0, direction:3, mode:-1, trigger:3
-# 17 = deviceType: gpio.GPIOPin, pinNumber:17, name:GPIO_USER_1
+```java
+// Accessing the GPIO Pin number 17. De default behavioue is defined in the
+// jdk.dio.properties file
+//
+// i.e.:
+// gpio.GPIOPin = initValue:0, deviceNumber:0, direction:3, mode:-1, trigger:3
+// 17 = deviceType: gpio.GPIOPin, pinNumber:17, name:GPIO_USER_1
 
 GPIOPin led = (GPIOPin)DeviceManager.open(17);
 
@@ -112,10 +106,10 @@ boolean status = led.getValue() //true if the LED is on
 
 ```
 
--   Accessing a GPIO Pin using a device configuration object
+#### Accessing a GPIO Pin using a device configuration object
 
-```
-#Accessing the Pin number 17 with custom configuration
+```java
+// Accessing the Pin number 17 with custom configuration
 
 GPIOPinConfig pinConfig = new GPIOPinConfig(
 	DeviceConfig.DEFAULT, 						//GPIO Controller number or name
@@ -138,17 +132,17 @@ button.setInputListener(new PinListener(){
 
 ```
 
-**Accessing a I2C device with OpenJDK Device I/O**
+### Accessing a I2C device with OpenJDK Device I/O
 
 An SPI device can be accessed in the same way as GPIO.
-Note, however, that the default **jdk.dio.properties** file doesn't contain any default
-configuration for I2C devices.
-When accessing a I2C device through its index, a new default configuration for the device
-must be added to the **jdk.dio.properties** file.
 
--   Accessing a I2C Device using its peripheral index
+{% include alerts.html message="The default **jdk.dio.properties** file doesn't contain any default
+configuration for I2C devices. When accessing a I2C device through its index, a new default configuration for the device
+must be added to the **jdk.dio.properties** file." %}
 
-		- inside the **jdk.dio.properties** file:
+####  Accessing a I2C Device using its peripheral index
+
+Inside the **jdk.dio.properties** file:
 
 ```
 ...
@@ -156,17 +150,16 @@ must be added to the **jdk.dio.properties** file.
 ...
 ```
 
-		- then in the code:
-```
+Then in the code:
 
+```java
 I2CDevice aDevice = (I2CDevice) DeviceManager.open(41);
 
 ```
 
--   Accessing a I2C Device using a Device Configuration object:
+#### Accessing a I2C Device using a Device Configuration object:
 
-```
-
+```java
 I2CDeviceConfig config = new I2CDeviceConfig(
 	1,									//I2C bus index
 	41, 								//I2C device address
@@ -178,9 +171,9 @@ I2CDevice aDevice = (I2CDevice) DeviceManager.open(I2CDevice.class, config);
 
 ```
 
--   Reading and writing data
+#### Reading and writing data
 
-```
+```java
 /*
  * OpenJDK Device I/O can manage transactional reads/writes.
  * Data sent between a begin() and end() block will create

@@ -15,7 +15,7 @@ categories: [ref]
 [Artifacts](#artifacts)
 
 
-#Overview
+## Overview
 This reference provides instructions on adding a new hardware target to Kura. Before beginning,
 make sure you have <a href="http://wiki.eclipse.org/Kura/Getting_Started" target="_blank">setup a full Kura development environment</a>.
 The only two hard
@@ -29,7 +29,7 @@ framework and the amount/frequency of messages being sent and received. Also not
 functionality relies on native libraries. If the libraries supplied in Kura do not match your
 target architecture, you will need to compile your own native libraries.
 
-#Code Modifications
+## Code Modifications
 The code changes required to add a new hardware target to Kura are minimal. For the remainder
 of this document, "hello-hw" will refer to the new example target hardare to be setup. First, modify
 kura/distrib/pom.xml and add the below Maven profile to the profiles section:
@@ -125,7 +125,7 @@ The majority of the profile can be used as is, the attributes that must be edite
 * \<property name="kura.arch"> - This is used to identify the correct native libraries to load
 * \<property name="kura.mem.size"> - This sets the Xms, Xmx, and MaxPermSize Java VM memory properties
 
-#Code Additions
+## Code Additions
 Each hardware target has a directory in kura/distrib/src/main/resources (ex: kura/distrib/src/main/resources/raspberry-pi). For simplicity, use the below code to
 copy an existing target platform:
 
@@ -149,8 +149,8 @@ Each file in the new directory should be reviewed and edited to match the new ta
 * snapshot_0.xml - This is the main configuration file for Kura. A good practice is to use the copied configuration file to start Kura for the first time. After Kura has been configured to the desired
 starting conditions, the updated snapshot file can be obtained through the management UI (Settings -> Snapshots) or from the /opt/eclipse/kura/data/snapshots directory. The latest snapshot will have the largest numeric value. This updated file can then be renamed to snapshot_0.xml and copied over to the hardware directory.
 
-#Native Libraries
+## Native Libraries
 <b>Coming Soon</b>
 
-#Artifacts
+## Artifacts
 After a successful Maven build, the new target hardware should have artifacts in kura/distrib/target. Most important of which is an installer shell script that should be used to install Kura on the new target hardware.

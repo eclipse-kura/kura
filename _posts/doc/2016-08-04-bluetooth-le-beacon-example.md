@@ -13,16 +13,15 @@ categories: [doc]
 
 [Beacon Advertising with ESF](#beacon_advertising_with_esf_1)
 
--   [Develop the Beacon Bundle](#develop_the_beacon_bundle_1)
+*  [Develop the Beacon Bundle](#develop_the_beacon_bundle_1)
 
-    -   [OSGI-INF/metatype/org.eclipse.kura.example.beacon.BeaconExample.xml File](#OSGI-INF/metatype_1)
+    *  [OSGI-INF/metatype/org.eclipse.kura.example.beacon.BeaconExample.xml File](#OSGI-INF/metatype_1)
 
-    -   [org.eclipse.kura.example.beacon.BeaconExample.java File](#BluetoothExample_1)
+    *  [org.eclipse.kura.example.beacon.BeaconExample.java File](#BluetoothExample_1)
 
--   [Deploy and Validate the Bundle](#deploy_and_validate_the_bundle_1)
+*  [Deploy and Validate the Bundle](#deploy_and_validate_the_bundle_1)
 
-<span id="overview" class="anchor"><span id="overview_1" class="anchor"></span></span></span>Overview
-==========================================================================================================================================
+## Overview
 
 The Bluetooth Beacon example is a simple bundle for Eclipse Kura that allows you to configure a device as a Beacon. A Beacon device is a Bluetooth Low Energy device that broadcasts its identity to nearby devices. It uses a specific BLE packet, called beacon or advertising packet, that contains the following information:
 
@@ -36,8 +35,7 @@ The Bluetooth Beacon example is a simple bundle for Eclipse Kura that allows you
 
 The advertising packet has a fixed format and is broadcasted periodically. The information contained in the advertising packet can be used by a receiver, typically a smartphone, to identify the beacon and to roughly estimate its distance.
 
-<span id="prerequisites" class="anchor"><span id="prerequisites_1" class="anchor"></span></span>Prerequisites
-==============================================================================================================================================
+## Prerequisites
 
 * [Development Environment Setup](kura-setup.html)
 
@@ -49,8 +47,7 @@ The advertising packet has a fixed format and is broadcasted periodically. The i
 
 For this tutorial a Raspberry Pi Type B with a LMTechnologies LM506 Bluetooth 4.0 <http://lm-technologies.com/wireless-adapters/lm506-class-1-bluetooth-4-0-usb-adapter/> dongle is used.
 
-<span id="beacon_advertising_with_hcitool" class="anchor"><span id="beacon_advertising_with_hcitool_1" class="anchor"></span></span>Beacon Advertising with *hcitool*
-==========================================================================================================================================================
+## Beacon Advertising with *hcitool*
 
 After the embedded device is properly configured, the advertising may be started using the _hcitool_ command contained in the _bluez_ packet.
 
@@ -94,12 +91,11 @@ To stop the advertising, write 0 to the register 0x000a as shown in the followin
 sudo hcitool -i hci0 cmd 0x08 0x000a 00
 ```
 
-<span id="beacon_advertising_with_esf" class="anchor"><span id="beacon_advertising_with_esf_1" class="anchor"></span></span>Beacon Advertising with ESF
-=======================================================================================================================================
+## Beacon Advertising with ESF
 
 The Beacon bundle is a simple example that allows you to configure the advertising packet, the time interval, and to start/stop the advertising.
 
-## <span id="develop_the_beacon_bundle" class="anchor"><span id="develop_the_beacon_bundle_1" class="anchor"></span></span>Develop the Beacon Bundle
+## Develop the Beacon Bundle
 
 The Beacon bundle code development follows the guidelines presented in the [Hello World Application](hello-example.html) :
 
@@ -124,7 +120,7 @@ The following files need to be implemented in order to write the source code:
 
 * [**org.eclipse.kura.example.beacon.BeaconExample.java**](<https://github.com/eclipse/kura/blob/develop/kura/examples/org.eclipse.kura.example.beacon/src/main/java/org/eclipse/kura/example/beacon/BeaconExample.java>) - main implementation class.
 
-### <span id="OSGI-INF/metatype" class="anchor"><span id="OSGI-INF/metatype_1" class="anchor"></span></span>OSGI-INF/metatype/org.eclipse.kura.example.beacon.BeaconExample.xml File
+### OSGI-INF/metatype/org.eclipse.kura.example.beacon.BeaconExample.xml File
 
 The OSGI-INF/metatype/org.eclipse.kura.example.beacon.beaconExample.xml file describes the parameters for this bundle including the following:
 
@@ -154,11 +150,11 @@ The OSGI-INF/metatype/org.eclipse.kura.example.beacon.beaconExample.xml file des
 
 * **iname** - provides the name of bluetooth adapter.
 
-### <span id="BluetoothExample" class="anchor"><span id="BluetoothExample_1" class="anchor"></span></span>org.eclipse.kura.example.beacon.BeaconExample.java File
+### org.eclipse.kura.example.beacon.BeaconExample.java File
 
 The com.eurotech.example.beacon.BeaconExample.java file contains the activate and deactivate methods for this bundle. The activate method gets the _BluetoothAdapter_, enables the interface if needed, and executes the _configureBeacon_ method that configures the device according to the properties. The following code sample shows part of the activate method:
 
-```
+```java
 try {
 	// Get Bluetooth adapter with Beacon capabilities and ensure it is enabled
 	m_bluetoothAdapter = m_bluetoothService.getBluetoothAdapter(m_iname, this);
@@ -178,11 +174,12 @@ try {
 	}
 	else
 		s_logger.warn("No Bluetooth adapter found ...");
+}
 ```
 
 The _configureBeacon_ (shown below) is a private method:
 
-```
+```java
 private void configureBeacon() {
 
 	if (m_enable) {
@@ -203,7 +200,7 @@ private void configureBeacon() {
 }
 ```
 
-## <span id="deploy_and_validate_the_bundle" class="anchor"><span id="deploy_and_validate_the_bundle_1" class="anchor"></span></span>Deploy and Validate the Bundle
+## Deploy and Validate the Bundle
 
 In order to proceed, you need to know the IP address of your embedded gateway that is on the remote target unit. With this information, follow the mToolkit instructions for installing a single bundle to the remote target device [located here](deploying-bundles.html#_Install_Single_Bundle).  When the installation is complete, the bundle starts automatically.
 

@@ -12,27 +12,21 @@ categories: [doc]
 [Development Environment
 Installation](#development-environment-installation)
 
-Overview
-========
+## Overview
 
 This section provides Eclipse Kura quick installation procedures for the
 Raspberry Pi and the Kura development environment.
 
-<span id="_Use_Kura_with" class="anchor"><span id="_Prerequisites"
-class="anchor"><span id="_Prerequisites_1" class="anchor"><span
-id="_Target_Platform_Installation"
-class="anchor"></span></span></span></span>
+{% include alerts.html message="This quickstart will install the version of Kura with the
+administraive web UI and netwowrk configuration support but not CAN support. For more information
+on this please visit the [Eclipse Kura download page](https://www.eclipse.org/kura/downloads.php)" %}
 
-NOTE: These packages **do** contain the web UI and CAN bus support. For more information on this please visit https://www.eclipse.org/kura/downloads.php.
-
-Target Platform Installation
-============================
+## Target Platform Installation
 
 To install Kura with its dependencies on the Raspberry Pi 2, perform the
 following steps:
 
 1. Boot the Raspberry Pi with the latest Raspbian image.
-
 2. Eclipse Kura requires Oracle Java VM or Open JDK to be installed on the target device. Verify that Java 7 or above is installed with:
 
     <pre>java –version</pre>
@@ -60,33 +54,15 @@ following steps:
 
     Kura starts on the target platform after reboot.
 
-Development Environment Installation
-====================================
+## Development Environment Installation
 
 To set up the development environment for Eclipse Kura, perform the
 following steps:
 
-1.  Download and install JDK SE 7 as appropriate for your OS (if it is
-    not already installed). For Windows and Linux users, the JDK can be
-    downloaded from Java SE 7 Downloads. Use the latest version of Java
-    SE Development Kit.
+1. Download and install JDK SE 7 as appropriate for your OS (if it is not already installed). For Windows and Linux users, the JDK can be
+downloaded from Java SE 7 Downloads. Use the latest version of Java SE Development Kit.
+2. Download and install the Eclipse IDE for Java EE Developers from the <a href="http://www.eclipse.org/downloads/" target="_blank">Eclipse download site</a>.
+3.  Download the Kura user workspace archive from the <a href="https://www.eclipse.org/kura/downloads.php" target="_blank">Eclipse Kura download site</a>.
+4.  Import the Kura workspace zip file into the new Eclipse project development environment.
+5.  Begin developing Kura-based applications for your target platform.
 
-2.  Download and install the Eclipse IDE for Java EE Developers from
-    http://www.eclipse.org/downloads/.
-
-3.  Download the Kura user workspace archive *with* Kura web UI from
-
-    https://s3.amazonaws.com/kura_downloads/user_workspace/<latest_version>/user_workspace_archive_<latest_version>.zip
-
-    or
-
-    Download the Kura user workspace archive *without* Kura web UI from
-
-    http://www.eclipse.org/kura/downloads.php
-
-1.  Import the Kura workspace zip file into the new Eclipse project
-    development environment.
-
-2.  Begin developing Kura-based applications for your target platform.
-
-<span id="_Support_for_Serial" class="anchor"></span>

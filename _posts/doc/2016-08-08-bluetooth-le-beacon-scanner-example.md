@@ -11,16 +11,15 @@ categories: [doc]
 
 [Beacon Scanning with ESF](#beacon_scanning_with_esf_1)
 
--   [Develop the Beacon Bundle](#develop_the_beacon_bundle_1)
+*  [Develop the Beacon Bundle](#develop_the_beacon_bundle_1)
 
-    -   [OSGI-INF/metatype/org.eclipse.kura.example.beacon.scanner.BeaconScannerExample.xml File](#OSGI-INF/metatype_1)
+    *  [OSGI-INF/metatype/org.eclipse.kura.example.beacon.scanner.BeaconScannerExample.xml File](#OSGI-INF/metatype_1)
 
-    -   [org.eclipse.kura.example.beacon.scanner.BeaconScannerExample.java File](#BluetoothScannerExample_1)
+    *  [org.eclipse.kura.example.beacon.scanner.BeaconScannerExample.java File](#BluetoothScannerExample_1)
 
--   [Deploy and Validate the Bundle](#deploy_and_validate_the_bundle_1)
+*  [Deploy and Validate the Bundle](#deploy_and_validate_the_bundle_1)
 
-<span id="overview" class="anchor"><span id="overview_1" class="anchor"></span></span></span>Overview
-==========================================================================================================================================
+## Overview
 
 The Bluetooth Beacon Scanner example is a bundle for Eclipse Kura that uses the Bluetooth LE service to search for near Beacon devices. A Beacon device is a Bluetooth Low Energy device that broadcasts its identity to nearby devices. It uses a specific BLE packet, called beacon or advertising packet, that contains the following information:
 
@@ -36,8 +35,7 @@ The Beacon Scanner bundle is configured with a **Company Code** in order to filt
 
 For further information about the Beacons, please refer to the [BLE Beacon Example](bluetooth-le-example.html).
 
-<span id="prerequisites" class="anchor"><span id="prerequisites_1" class="anchor"></span></span>Prerequisites
-==============================================================================================================================================
+## Prerequisites
 
 * [Development Environment Setup](kura-setup.html)
 
@@ -49,8 +47,7 @@ For further information about the Beacons, please refer to the [BLE Beacon Examp
 
 For this tutorial a Raspberry Pi Type B with a LMTechnologies LM506 Bluetooth 4.0 <http://lm-technologies.com/wireless-adapters/lm506-class-1-bluetooth-4-0-usb-adapter/> dongle is used.
 
-<span id="beacon_scanning_with_esf" class="anchor"><span id="beacon_scanning_with_esf_1" class="anchor"></span></span>Beacon Scanning with ESF
-=======================================================================================================================================
+## Beacon Scanning with ESF
 
 The Beacon Scanner bundle is a Kura example that allows you to configure the Company Code for the Beacon filtering and to start/stop the scanner procedure.
 
@@ -79,7 +76,7 @@ The following files need to be implemented in order to write the source code:
 
 * [**org.eclipse.kura.example.beacon.scanner.BeaconScannerExample.java**](<https://github.com/eclipse/kura/blob/develop/kura/examples/org.eclipse.kura.example.beacon.scanner/src/main/java/org/eclipse/kura/example/beacon/scanner/BeaconScannerExample.java>) - main implementation class.
 
-### <span id="OSGI-INF/metatype" class="anchor"><span id="OSGI-INF/metatype_1" class="anchor"></span></span>OSGI-INF/metatype/org.eclipse.kura.example.beacon.scanner.BeaconScannerExample.xml File
+### OSGI-INF/metatype/org.eclipse.kura.example.beacon.scanner.BeaconScannerExample.xml File
 
 The OSGI-INF/metatype/org.eclipse.kura.example.beacon.scanner.BeaconScannerExample.xml file describes the parameters for this bundle including the following:
 
@@ -89,12 +86,12 @@ The OSGI-INF/metatype/org.eclipse.kura.example.beacon.scanner.BeaconScannerExamp
 
 * **iname** - provides the name of bluetooth adapter.
 
-### <span id="BluetoothScannerExample" class="anchor"><span id="BluetoothScannerExample_1" class="anchor"></span></span>org.eclipse.kura.example.beacon.scanner.BeaconScannerExample.java File
+### org.eclipse.kura.example.beacon.scanner.BeaconScannerExample.java File
 
 The com.eurotech.example.beacon.scanner.BeaconScannerExample.java file contains the activate, deactivate and updated methods for this bundle. The activate and updated methods gets the properties from the configurable component and, if the scanning is enabled, call the _setup_ private method. This method gets the _BluetoothAdapter_, enables the interface if needed, and starts the scan calling the _bluetootAdapter.startBeaconScan(companyCode, listener)_ method. The arguments of the method are the _companyCode_ and a _listener_ that is notified when a device is detected. In this case the _BeaconScannerExample_ class implements _BluetoothBeaconScanListener_.
 The following code sample shows the _setup_ method:
 
-```
+```java
 private void setup() {
 
 	bluetoothAdapter = bluetoothService.getBluetoothAdapter(adapterName);
@@ -121,7 +118,7 @@ Since _BeaconScannerExample_ implements _BluetoothBeaconScanListener_, the _onBe
 
 The following code is an implementation of _onBeaconDataReceived_ that logs the _BluetoothBeaconData_ fields:
 
-```
+```java
 @Override
 public void onBeaconDataReceived(BluetoothBeaconData beaconData) {
 
@@ -140,7 +137,7 @@ public void onBeaconDataReceived(BluetoothBeaconData beaconData) {
 
 Finally, the Beacon Scanner is able to roughly estimate the distance of the detected beacon using the _calculateDistance_ method:
 
-```
+```java
 private double calculateDistance(int rssi, int txpower) {
 
   double distance;

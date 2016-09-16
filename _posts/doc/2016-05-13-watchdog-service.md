@@ -12,8 +12,7 @@ categories: [doc]
 [Code Example](#code_example_1)
 
 
-<span id="overview" class="anchor"><span id="overview_1" class="anchor"></span></span></span>Overview
-==========================================================================================================================================
+## Overview
 
 When enabled, the watchdog is a peripheral monitor that will reboot the system if it is not refreshed during a certain time interval. In ESF, the WatchdogService can be used by critical applications. If the specified application is alive, the service notifies the watchdog; if the application is down, the service stops notifying the watchdog and a hardware reset occurs.
 
@@ -24,8 +23,7 @@ ls –l /dev/watchdog
 ```
 
 
-<span id="configuration" class="anchor"><span id="configuration_1" class="anchor"></span></span>Configuration
-==============================================================================================================================================
+## Configuration
 
 To configure the **WatchdogService**, select the WatchdogService option located in the **Services** area as shown in the screen capture below.
 
@@ -37,8 +35,7 @@ The WatchdogService provides the following configuration parameters:
 
 * **pingInterval** - specifies the time between two watchdog notifications. This time is hardware dependent. Generally, the maximum time between two notifications should be between 30 seconds and 1 minute. 10000 milliseconds for the pingInterval is typically a good choice.
 
-<span id="code_example" class="anchor"><span id="code_example_1" class="anchor"></span></span>Code Example
-==========================================================================================================================================================
+## Code Example
 
 The WatchdogService references a list of Critical Components that correspond to the applications implementing the CriticalComponent interface.
 

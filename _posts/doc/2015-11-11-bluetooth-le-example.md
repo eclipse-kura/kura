@@ -7,7 +7,7 @@ categories: [doc]
 
 [Overview](#overview_1)
 
--   [Prerequisites](#prerequisites)
+*  [Prerequisites](#prerequisites)
 
 [Prepare the Embedded Device](#prepare_the_embedded_device_1)
 
@@ -15,18 +15,17 @@ categories: [doc]
 
 [BLE Bundle for TI SensorTag](#bundle_sensortag_1)
 
--   [Develop the BLE Bundle](#develop_the_ble_bundle_1)
+*  [Develop the BLE Bundle](#develop_the_ble_bundle_1)
 
-    -   [OSGI-INF/metatype/org.eclipse.kura.example.ble.tisensortag.BluetoothLe.xml File](#OSGI-INF/metatype_1)
+    *  [OSGI-INF/metatype/org.eclipse.kura.example.ble.tisensortag.BluetoothLe.xml File](#OSGI-INF/metatype_1)
 
-    -   [org.eclipse.kura.example.ble.tisensortag.BluetoothLe.java File](#BluetoothLe_1)
+    *  [org.eclipse.kura.example.ble.tisensortag.BluetoothLe.java File](#BluetoothLe_1)
 
-    -   [org.eclipse.kura.example.ble.sensortag.TiSensorTag.java File](#TiSensorTag_1)
+    *  [org.eclipse.kura.example.ble.sensortag.TiSensorTag.java File](#TiSensorTag_1)
 
--   [Deploy and Validate the Bundle](#deploy_and_validate_the_bundle_1)
+*  [Deploy and Validate the Bundle](#deploy_and_validate_the_bundle_1)
 
-<span id="overview" class="anchor"><span id="overview_1" class="anchor"></span></span></span>Overview
-==========================================================================================================================================
+## Overview
 
 This section provides an example of how to develop a simple bundle that discovers and connects to a Smart device (BLE), retrieves data from it, and publishes the results to the cloud. This example uses the TI SensorTag based on CC2541 or CC2650. For more information about this device, refer to <http://www.ti.com/tool/cc2541dk-sensor> and <http://www.ti.com/ww/en/wireless_connectivity/sensortag2015/index.html>.
 
@@ -38,7 +37,7 @@ You will learn how to perform the following functions:
 
 * Optionally publish the data in the cloud
 
-## <span id="prerequisites" class="anchor"><span id="prerequisites_1" class="anchor"></span></span>Prerequisites
+### Prerequisites
 
 * [Setting up Kura Development Environment](kura-setup.html)
 
@@ -50,8 +49,7 @@ You will learn how to perform the following functions:
 
 This tutorial uses a Raspberry Pi Type B with a LMTechnologies LM506 Bluetooth 4.0 <http://lm-technologies.com/wireless-adapters/lm506-class-1-bluetooth-4-0-usb-adapter/> dongle.
 
-<span id="prepare_the_embedded_device" class="anchor"><span id="prepare_the_embedded_device_1" class="anchor"></span></span>Prepare the Embedded Device
-==============================================================================================================================================
+## Prepare the Embedded Device
 
 In order to communicate with Smart devices, the _bluez_ package must be installed on the embedded device. To do so, make sure you have the necessary libraries on the Raspberry Pi and proceed as follows:
 
@@ -82,8 +80,7 @@ sudo mv /usr/local/sbin/hciconfig /usr/sbin
 sudo mv /usr/local/bin/gatttool /usr/sbin
 ```
 
-<span id="sensortag_command_line" class="anchor"><span id="sensortag_command_line_1" class="anchor"></span></span>SensorTag Communication via Command Line
-==========================================================================================================================================================
+## SensorTag Communication via Command Line
 
 Once configured, you can scan and connect with a Smart device. A TI SensorTag is used in the example that follows.
 
@@ -171,8 +168,7 @@ Notification handle = 0x0025 value: 9e fe 3c 0d
 Notification handle = 0x0025 value: a3 fe 3c 0d
 [CON][BC:6A:29:AE:CC:96][LE]>
 ```
-<span id="bundle_sensortag" class="anchor"><span id="bundle_sensortag_1" class="anchor"></span></span>BLE Bundle for TI SensorTag
-=======================================================================================================================================
+## BLE Bundle for TI SensorTag
 
 The BLE bundle performs the following operations:
 
@@ -184,7 +180,7 @@ The BLE bundle performs the following operations:
 
 * Reads data from all the sensors onboard and writes the values in the log file
 
-## <span id="develop_the_ble_bundle" class="anchor"><span id="develop_the_ble_bundle_1" class="anchor"></span></span>Develop the BLE Bundle
+## Develop the BLE Bundle
 
 Once the required packages are installed and communication with the SensorTag via command line is established, you may start to develop the BLE bundle.
 For more detailed information about bundle development (i.e., the plug-in project, classes, and MANIFEST file configuration), please refer to the [Hello World Application](hello-example.html).
@@ -214,7 +210,7 @@ The following files need to be implemented in order to write the source code:
 
 * [**org.eclipse.kura.example.ble.tisensortag.TiSensorTagGatt.java**](<https://github.com/eclipse/kura/blob/develop/kura/examples/org.eclipse.kura.example.ble.tisensortag/src/main/java/org/eclipse/kura/example/ble/tisensortag/TiSensorTagGatt.java>) - class that describes all the handles and UUIDs to access to the SensorTag sensors.
 
-### <span id="OSGI-INF/metatype" class="anchor"><span id="OSGI-INF/metatype_1" class="anchor"></span></span>OSGI-INF/metatype/org.eclipse.kura.example.ble.tisensortag.BluetoothLe.xml File
+### OSGI-INF/metatype/org.eclipse.kura.example.ble.tisensortag.BluetoothLe.xml File
 
 The OSGI-INF/metatype/org.eclipse.kura.example.ble.tisensortag.BluetoothLe.xml file describes the parameters for this bundle including the following:
 
@@ -232,11 +228,11 @@ The OSGI-INF/metatype/org.eclipse.kura.example.ble.tisensortag.BluetoothLe.xml f
 
 * **iname** - Name of bluetooth adapter.
 
-### <span id="BluetoothLe" class="anchor"><span id="BluetoothLe_1" class="anchor"></span></span>org.eclipse.kura.example.ble.tisensortag.BluetoothLe.java File
+### org.eclipse.kura.example.ble.tisensortag.BluetoothLe.java File
 
 The org.eclipse.kura.example.ble.tisensortag.BluetoothLe.java file contains the activate and deactivate methods for this bundle. The activate method gets the _BluetoothAdapter_ and defines a _ScheduledExecutorService_, which schedules the execution of the _checkScan_ method every second. The following code sample shows part of the activate method:
 
-```
+```java
 m_tiSensorTagList = new ArrayList<TiSensorTag>();
 m_worker = Executors.newSingleThreadScheduledExecutor();
 
@@ -274,7 +270,7 @@ try {
 
 The _checkScan_ method manages the start and stop of the scanning procedure as shown below.
 
-```
+```java
 void checkScan() {
 
 	// Scan for devices
@@ -297,7 +293,7 @@ void checkScan() {
 
 The _BluetoothLe_ class implements the _org.eclipse.kura.bluetooth.BluetoothLeScanListener_ interface and the _onScanResults_ method is called when the scan procedure ends. The method filters the scan results and stores the SensorTag devices in a list. For each device in the list a connection is opened and the selected sensors are read. Part of the _onScanResults_ method is shown below.
 
-```
+```java
 public void onScanResults(List<BluetoothDevice> scanResults) {
 
 	// Scan for TI SensorTag
@@ -356,11 +352,11 @@ public void onScanResults(List<BluetoothDevice> scanResults) {
 
 Since it is not possible to poll the status of the buttons on the SensorTag, the BLE example enables the notifications for them.
 
-### <span id="TiSensorTag" class="anchor"><span id="TiSensorTag_1" class="anchor"></span></span>org.eclipse.kura.example.ble.sensortag.TiSensorTag.java File
+### org.eclipse.kura.example.ble.sensortag.TiSensorTag.java File
 
 The org.eclipse.kura.example.ble.sensortag.TiSensorTag.java file is used to connect and disconnect to the SensorTag. It also contains the methods to configure and read data from the sensor. The connection method uses the BluetoothGatt Service as shown below:
 
-```
+```java
 public boolean connect() {
     m_bluetoothGatt = m_device.getBluetoothGatt();
     boolean connected = m_bluetoothGatt.connect();
@@ -380,7 +376,7 @@ public boolean connect() {
 
 A set of methods for _reading from_ and _writing to_ the internal register of the device are included in the file. The following code sample presents the methods to manage the temperature sensor.
 
-```
+```java
 /*
  * Enable temperature sensor
  */
@@ -500,7 +496,7 @@ private double[] calculateTemperature(String value) {
 
 The _TiSensorTag_ class implements the org.eclipse.kura.bluetooth.BluetoothLeNotificationListener interface and the method _onDataReceived_ is called when a BLE notification is received. In this example the notifications are used only for the buttons. The method is shown below.
 
-```
+```java
 public void onDataReceived(String handle, String value) {
 
 	if (handle.equals(TiSensorTagGatt.HANDLE_KEYS_STATUS_2541) || handle.equals(TiSensorTagGatt.HANDLE_KEYS_STATUS_2650)) {
@@ -512,7 +508,7 @@ public void onDataReceived(String handle, String value) {
 }
 ```
 
-## <span id="deploy_and_validate_the_bundle" class="anchor"><span id="deploy_and_validate_the_bundle_1" class="anchor"></span></span>Deploy and Validate the Bundle
+## Deploy and Validate the Bundle
 
 In order to proceed, you need to know the IP address of your embedded gateway that is on the remote target unit. Once you do, follow the mToolkit instructions for installing a single bundle to the remote target device [located here](deploying-bundles.html#remote-target-device). When the installation completes, the bundle starts automatically. You should see a message similar to the one below from **/var/log/kura.log** indicating that the bundle was successfully installed and configured, and started to search for TI SensorTags.
 

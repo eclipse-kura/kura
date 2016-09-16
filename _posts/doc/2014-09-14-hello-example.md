@@ -7,56 +7,50 @@ categories: [doc]
 
 [Overview](#_Overview)
 
--   [Prerequisites](#prerequisites)
+* [Prerequisites](#prerequisites)
 
 [Hello World Using the Kura Logger](#hello-world-using-the-kura-logger)
 
--   [Create Hello World Plug-in](#create-hello-world-plug-in)
+* [Create Hello World Plug-in](#create-hello-world-plug-in)
 
--   [Add Dependencies to Manifest](#add-dependencies-to-manifest)
+* [Add Dependencies to Manifest](#add-dependencies-to-manifest)
 
--   [Create Java Class](#create-java-class)
+* [Create Java Class](#create-java-class)
 
--   [Resolve Dependencies](#resolve-dependencies)
+* [Resolve Dependencies](#resolve-dependencies)
 
--   [Create Component Class](#create-component-class)
+* [Create Component Class](#create-component-class)
 
 [Deploying the Plug-in](#deploying-the-plug-in)
 
--   [Export the OSGi Bundle](#export-the-osgi-bundle)
+* [Export the OSGi Bundle](#export-the-osgi-bundle)
 
--   [Create a Deployment Package](#_Create_a_Deployment)
+* [Create a Deployment Package](#_Create_a_Deployment)
 
-<span id="_Example" class="anchor"><span id="_Overview"
-class="anchor"></span></span>
 
-Overview
-========
+## Overview
 
 This section provides a simple example of how to create a Kura “Hello
 World” OSGi project using Eclipse. With this example, you will learn how
 to perform the following functions:
 
--   Create a plugin project
+* Create a plugin project
 
--   Consume the Kura Logger service
+* Consume the Kura Logger service
 
--   Write an OSGi Activator
+* Write an OSGi Activator
 
--   Export a single OSGi bundle (plug-in)
+* Export a single OSGi bundle (plug-in)
 
--   Create a Deployment Package
+* Create a Deployment Package
 
-Prerequisites
--------------
+## Prerequisites
 
 Setting up the Kura Development Environment
 
-Hello World Using the Kura Logger
-=================================
+## Hello World Using the Kura Logger
 
-Create Hello World Plug-in
---------------------------
+### Create Hello World Plug-in
 
 In Eclipse, create a new Plug-in project by selecting **File | New |
 Project**. Select **Plug-in Development | Plug-in Project** and click
@@ -106,8 +100,7 @@ MANIFEST.MF was automatically opened in the Manifest Editor. An OSGi
 bundle is a regular Java .jar file that contains Java code and resources
 and a custom Manifest and an Activator.
 
-Add Dependencies to Manifest
-----------------------------
+### Add Dependencies to Manifest
 
 First, you will use the Manifest Editor in Eclipse to add some
 dependencies. Click the **Dependencies** tab at the bottom of the editor
@@ -135,8 +128,7 @@ Manifest.
 
 ![]({{ site.baseurl }}/assets/images/hello_example/media/image7.png)
 
-Create Java Class
------------------
+### Create Java Class
 
 Now you are ready to start writing a simple Java class. Right-click the
 **org.eclipse.kura.example.hello_osgi** project. Select **New |
@@ -150,29 +142,31 @@ field to **HelloOsgi**, and then click **Finish**.
 Write the following code for the new class. You can copy and paste the
 code provided below into your newly created Java class file.
 
-	package org.eclipse.kura.example.hello_osgi;
+```java
+package org.eclipse.kura.example.hello_osgi;
 
-	public class HelloOsgi {
+public class HelloOsgi {
 
-		private static final Logger s_logger = LoggerFactory.getLogger(HelloOsgi.class);
+	private static final Logger s_logger = LoggerFactory.getLogger(HelloOsgi.class);
 
-		private static final String APP_ID = "org.eclipse.kura.example.hello_osgi";
+	private static final String APP_ID = "org.eclipse.kura.example.hello_osgi";
 
-		protected void activate(ComponentContext componentContext) {
+	protected void activate(ComponentContext componentContext) {
 
-			s_logger.info("Bundle " + APP_ID + " has started!");
+		s_logger.info("Bundle " + APP_ID + " has started!");
 
-			s_logger.debug(APP_ID + ": This is a debug message.");
-
-		}
-
-		protected void deactivate(ComponentContext componentContext) {
-
-			s_logger.info("Bundle " + APP_ID + " has stopped!");
-
-		}
+		s_logger.debug(APP_ID + ": This is a debug message.");
 
 	}
+
+	protected void deactivate(ComponentContext componentContext) {
+
+		s_logger.info("Bundle " + APP_ID + " has stopped!");
+
+	}
+
+}
+```
 
 The activate() method is the entry point when the bundle in started. The
 deactivate() method is the entry point when the bundle is stopped.
@@ -191,26 +185,25 @@ include: “error”, “warn”, “info”, “debug”, and “trace”, whic
 increasingly lower (more detailed) levels of log information. Logger
 levels should generally be used to represent the following conditions:
 
--   ERROR - A serious problem has occurred that requires attention from
+* ERROR - A serious problem has occurred that requires attention from
     the system administrator.
 
--   WARNING - An action occurred or a condition was discovered that
+* WARNING - An action occurred or a condition was discovered that
     should be reviewed and may require action before an error occurs. It
     may also be used for transient issues.
 
--   INFO - A report of a normal action or event. This could be a user
+* INFO - A report of a normal action or event. This could be a user
     operation, such as "login completed", or an automatic operation,
     such as a log file rotation.
 
--   DEBUG - A debug message used for troubleshooting or performance
+* DEBUG - A debug message used for troubleshooting or performance
     monitoring. It typically contains detailed event data including
     things an application developer would need to know.
 
--   TRACE - A fairly detailed output of diagnostic logging, such as
+* TRACE - A fairly detailed output of diagnostic logging, such as
     actual bytes of a particular message being examined.
 
-Resolve Dependencies
---------------------
+### Resolve Dependencies
 
 At this point, there will be errors in your code because of unresolved
 imports.
@@ -229,35 +222,37 @@ HelloOsgi class.
 
 The complete set of code (with import statements) is shown below.
 
-	package org.eclipse.kura.example.hello_osgi;
+```java
+package org.eclipse.kura.example.hello_osgi;
 
-	import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentContext;
 
-	import org.slf4j.Logger;
+import org.slf4j.Logger;
 
-	import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory;
 
-	public class HelloOsgi {
+public class HelloOsgi {
 
-		private static final Logger s_logger = LoggerFactory.getLogger(HelloOsgi.class);
+	private static final Logger s_logger = LoggerFactory.getLogger(HelloOsgi.class);
 
-		private static final String APP_ID = "org.eclipse.kura.example.hello_osgi";
+	private static final String APP_ID = "org.eclipse.kura.example.hello_osgi";
 
-		protected void activate(ComponentContext componentContext) {
+	protected void activate(ComponentContext componentContext) {
 
-			s_logger.info("Bundle " + APP_ID + " has started!");
+		s_logger.info("Bundle " + APP_ID + " has started!");
 
-			s_logger.debug(APP_ID + ": This is a debug message.");
-
-		}
-
-		protected void deactivate(ComponentContext componentContext) {
-
-			s_logger.info("Bundle " + APP_ID + " has stopped!");
-
-		}
+		s_logger.debug(APP_ID + ": This is a debug message.");
 
 	}
+
+	protected void deactivate(ComponentContext componentContext) {
+
+		s_logger.info("Bundle " + APP_ID + " has stopped!");
+
+	}
+
+}
+```
 
 For more information on using the Simple Logging Facade for Java
 (slf4j), see the [Logger
@@ -271,8 +266,7 @@ Save changes to the Manifest again.
 
 ![]({{ site.baseurl }}/assets/images/hello_example/media/image11.png)
 
-Create Component Class
-----------------------
+### Create Component Class
 
 Right-click the example project and select **New | Other**. From the
 wizard, select **Plug-in Development | Component Definition** and click
@@ -306,8 +300,7 @@ file.
 
 ![]({{ site.baseurl }}/assets/images/hello_example/media/image16.png)
 
-Deploying the Plug-in
-=====================
+## Deploying the Plug-in
 
 The next few sections describe how to create a stand-alone JAR file as a
 deployable OSGI plug-in and how to create an installable Deployment
@@ -321,8 +314,7 @@ file that may be deployed in the OSGi framework through the Deployment
 Admin service and may contain one or more bundles, configuration
 objects, etc.
 
-Export the OSGi Bundle
------------------------
+### Export the OSGi Bundle
 
 Your bundle can be built as a stand-alone OSGi plug-in.
 
@@ -349,8 +341,7 @@ Click **Finish**.
 This will create a JAR file in the selected directory (e.g.,
 /home/joe/myPlugins/plugins/org.eclipse.kura.example.hello_osgi_1.0.0.jar).
 
-<span id="_Creating_a_Deployment" class="anchor"><span id="_Create_a_Deployment" class="anchor"></span></span>Create a Deployment Package
------------------------------------------------------------------------------------------------------------------------------------------
+## Create a Deployment Package
 
 Rather than creating a stand-alone plug-in, you can also create a
 Deployment Package that contains multiple bundles, configuration

@@ -7,47 +7,39 @@ categories: [doc]
 
 [Overview](#overview)
 
--   [Prerequisites](#prerequisites)
+* [Prerequisites](#prerequisites)
 
 [Testing the OSGi Plug-in](#_Testing_the_OSGi)
 
--   [Local Emulation Mode](#local-emulation-mode)
+* [Local Emulation Mode](#local-emulation-mode)
 
-    -   [Run Kura in Emulator Mode](#_Run_ESF_in)
+    * [Run Kura in Emulator Mode](#_Run_ESF_in)
 
-    -   [List OSGi Bundles in Local
-        Mode](#list-osgi-bundles-in-local-mode)
+    * [List OSGi Bundles in Local Mode](#list-osgi-bundles-in-local-mode)
 
-    -   [Start/Stop Bundle in Local
-        Mode](#startstop-bundle-in-local-mode)
+    * [Start/Stop Bundle in Local Mode](#startstop-bundle-in-local-mode)
 
-    -   [Install/Uninstall Bundle in Local
-        Mode](#installuninstall-bundle-in-local-mode)
+    * [Install/Uninstall Bundle in Local Mode](#installuninstall-bundle-in-local-mode)
 
--   [Remote Target Device](#remote-target-device)
+* [Remote Target Device](#remote-target-device)
 
-    -   [Connect to Remote OSGi
-        Framework](#connect-to-remote-osgi-framework)
+    * [Connect to Remote OSGi Framework](#connect-to-remote-osgi-framework)
 
-    -   [Open Port for OSGi Remote
-        Connection](#open-port-for-osgi-remote-connection)
+    * [Open Port for OSGi Remote Connection](#open-port-for-osgi-remote-connection)
 
-    -   [Install Single Bundle to Target
-        Device](#_Install_Single_Bundle)
+    * [Install Single Bundle to Target Device](#_Install_Single_Bundle)
 
-    -   [Install Deployment Package to Target
-        Device](#install-deployment-package-to-target-device)
+    * [Install Deployment Package to Target Device](#install-deployment-package-to-target-device)
 
 [Connect to OSGi on Target Device](#_Connect_to_OSGi)
 
--   [Manage Bundles on Target Device](#manage-bundles-on-target-device)
+* [Manage Bundles on Target Device](#manage-bundles-on-target-device)
 
--   [Set Kura Logger Levels](#set-kura-logger-levels)
+* [Set Kura Logger Levels](#set-kura-logger-levels)
 
 [Making Deployment Permanent](#making-deployment-permanent)
 
-Overview
-========
+## Overview
 
 This section provides a simple example of how to test and deploy OSGi
 bundles and deployment packages in a Kura environment. These
@@ -55,40 +47,36 @@ instructions use the “Hello World” OSGi project created in the [previous
 section](hello-example.html). In this example, you will learn how to perform
 the following functions:
 
--   Use local OSGi emulation mode in Eclipse
+* Use local OSGi emulation mode in Eclipse
 
--   Deploy a bundle to a remote target running the OSGi Framework
+* Deploy a bundle to a remote target running the OSGi Framework
 
--   Install a Deployment Package to a remote target running the OSGi
-    Framework
+* Install a Deployment Package to a remote target running the OSGi Framework
 
--   Manage OSGi bundles on a target device
+* Manage OSGi bundles on a target device
 
--   Set bundle Logger levels in Kura
+* Set bundle Logger levels in Kura
 
-Prerequisites
--------------
+### Prerequisites
 
--   [Setting up Kura Development Environment](kura-setup.html)
+* [Setting up Kura Development Environment](kura-setup.html)
 
--   [Hello World Using the Kura Logger](hello-example.html)
+* [Hello World Using the Kura Logger](hello-example.html)
 
-<span id="_Hello_World_Using" class="anchor"><span id="_Testing_the_Plug-in" class="anchor"><span id="_Testing_the_OSGi" class="anchor"></span></span></span>Testing the OSGi Plug-in
-=====================================================================================================================================================================================
+## Testing the OSGi Plug-in
 
 Once you have created an OSGi plug-in, you can test it in [Local
 Emulation Mode](#local-emulation-mode) and/or deploy it to a [Remote
 Target Device](#remote-target-device).
 
-Local Emulation Mode
---------------------
+### Local Emulation Mode
 
 The Kura user workspace can be used in Eclipse in local emulation mode
 (Linux/OS X only; this feature is not currently supported under
 Windows). To deploy the code to a running system, see the section
 [Remote Target Device](#remote-target-device).
 
-### <span id="_Running_ESF_in" class="anchor"><span id="_Run_ESF_in" class="anchor"></span></span>Run Kura in Emulator Mode
+#### Run Kura in Emulator Mode
 
 In the Eclipse workspace, locate the **org.eclipse.kura.emulator**
 project. Expand it to show the src/main/resources folder.
@@ -109,7 +97,7 @@ that shows the bundle’s activate() method was run.
 
 ![]({{ site.baseurl }}/assets/images/deploying_bundles/media/image1.png)
 
-### List OSGi Bundles in Local Mode
+#### List OSGi Bundles in Local Mode
 
 With the OSGi framework running in the Eclipse console (refer to the
 previous section), click in the Console window. Press **Enter/Return**
@@ -119,7 +107,7 @@ Note the bundle ID number for the
 
 ![]({{ site.baseurl }}/assets/images/deploying_bundles/media/image2.png)
 
-### Start/Stop Bundle in Local Mode
+#### Start/Stop Bundle in Local Mode
 
 In the OSGi Console window in Eclipse, run the
 
@@ -137,7 +125,7 @@ window when the bundle is started or stopped.
 
 ![]({{ site.baseurl }}/assets/images/deploying_bundles/media/image3.png)
 
-### Install/Uninstall Bundle in Local Mode
+#### Install/Uninstall Bundle in Local Mode
 
 In the OSGi Console window in Eclipse, bundles can be installed or
 uninstalled. To uninstall the example bundle, issue the command
@@ -177,42 +165,41 @@ bundle after installation.
 
 ![]({{ site.baseurl }}/assets/images/deploying_bundles/media/image5.png)
 
-Remote Target Device
---------------------
+### Remote Target Device
 
 One or more OSGi bundles can be deployed to a remote device running
 Kura, either by installing separate bundle files or deployment packages
 using Eclipse.
 
-NOTE: These steps require Kura to be running on the target device.
+{% include alerts.html message="These steps require Kura to be running on the target device." %}
 
 This method of deployment is temporary on the remote target device and
 is not persistent after a restart. To make the deployment permanent, see
 [Making Deployment Permanent](#making-deployment-permanent).
 
-### Connect to Remote OSGi Framework
+#### Connect to Remote OSGi Framework
 
 To deploy a bundle to the remote target device, you will need to connect
 Eclipse to the OSGi framework running on the device. This is done using
 mToolkit. See [Kura Setup](kura-setup.html) for instructions on
 installing mToolkit into the Eclipse development environment.
 
--   Select the Eclipse menu **Window | Show View | Other**.
+*  Select the Eclipse menu **Window \| Show View \| Other**.
 
--   Select **mToolkit -\> Frameworks** entry to open the mToolkit
+*  Select **mToolkit -\> Frameworks** entry to open the mToolkit
     Frameworks view.
 
--   Enter a name for the framework definition and the IP address of the
+*  Enter a name for the framework definition and the IP address of the
     target device.
 
 ![]({{ site.baseurl }}/assets/images/deploying_bundles/media/image6.png)
 
 Close the dialog by clicking the **OK** button.
 
-NOTE: The remote target device must have port 1450 open in its firewall,
+{% include alerts.html message="The remote target device must have port 1450 open in its firewall,
 in order to allow mToolkit o make a connection to its OSGi framework. If
 this port is not opened, refer to the section [Open Port for OSGi Remote
-Connection](#open-port-for-osgi-remote-connection).
+Connection](#open-port-for-osgi-remote-connection)." %}
 
 Right-click the framework icon name and select **Connect Framework**.
 The list of installed bundles and deployment packages should be
@@ -221,7 +208,7 @@ disconnect from the remote target framework when finished.)
 
 ![]({{ site.baseurl }}/assets/images/deploying_bundles/media/image7.png)
 
-### Open Port for OSGi Remote Connection
+#### Open Port for OSGi Remote Connection
 
 In order to allow mToolkit to make a remote connection to the OSGi
 framework on the target device, the device must allow the incoming port
@@ -240,7 +227,7 @@ button under Open Ports. Enter the port **1450** and select protocol
 Now, click **Apply** to apply changes to the remote device.<span
 id="_Install_Single_Bundle" class="anchor"></span>
 
-### Install Single Bundle to Target Device
+#### Install Single Bundle to Target Device
 
 With the Eclipse environment connected to the remote OSGi target
 framework, a single bundle can be installed on the remote device.
@@ -263,24 +250,24 @@ Bundles.
 To control operation of the bundle through the OSGi Frameworks view,
 right-click the bundle name. The following actions can be performed:
 
--   Start – start the bundle
+*  Start – start the bundle
 
--   Stop – stop the bundle
+*  Stop – stop the bundle
 
--   Update – reinstall the bundle
+*  Update – reinstall the bundle
 
--   Install Bundle – install a different bundle
+*  Install Bundle – install a different bundle
 
--   Uninstall Bundle – remove this bundle from the target device
+*  Uninstall Bundle – remove this bundle from the target device
 
--   Show Bundle IDs / Show Bundle Versions – show additional information
+*  Show Bundle IDs / Show Bundle Versions – show additional information
     about bundles
 
 You can also verify operation of the bundle on the target device itself.
 See the section [Manage Bundles on Target
 Device](#manage-bundles-on-target-device).
 
-### Install Deployment Package to Target Device
+#### Install Deployment Package to Target Device
 
 With the Eclipse environment connected to the remote OSGi target
 framework, a deployment package can be installed on the remote device.
@@ -312,8 +299,7 @@ bundles. The operation of the bundle can also be verified on the target
 device itself. See the section [Manage Bundles on Target
 Device](#manage-bundles-on-target-device).
 
-<span id="_Manage_OSGi_Bundles" class="anchor"><span id="_Managing_OSGi_Bundles" class="anchor"><span id="_Connect_to_OSGi" class="anchor"></span></span></span>Connect to OSGi on Target Device
-================================================================================================================================================================================================
+## Connect to OSGi on Target Device
 
 You can manage the OSGi framework on a target device by logging into a
 console on the device using a connected keyboard and VGA monitor or over
@@ -332,18 +318,17 @@ commands:
 There are many commands available in the OSGi console for managing
 bundles. Following are just a few useful commands:
 
-|Command||
-|-------------|---|
-|ss|Lists names and ID of bundles|
-|help|Displays the help menu of OSGi commands|
-|lb|Lists all installed bundles and IDs|
-|h [bundle IDs]|   Displays bundle headers (i.e., Bundle Manifest Version, Name, Required Execution Environment, Symbolic Name, Version, Import Package, Manifest Version, and Service Component)|
-|exit|Exits the OSGi console and stops Kura|
-|disconnect|Exits the OSGi console, but leaves Kura running|
+Command       ||
+--------------|---|
+ss            |Lists names and ID of bundles|
+help          |Displays the help menu of OSGi commands|
+lb            |Lists all installed bundles and IDs|
+h [bundle IDs]|Displays bundle headers (i.e., Bundle Manifest Version, Name, Required Execution Environment, Symbolic Name, Version, Import Package, Manifest Version, and Service Component)|
+exit          |Exits the OSGi console and stops Kura|
+disconnect    |Exits the OSGi console, but leaves Kura running|
 
 
-Manage Bundles on Target Device
--------------------------------
+### Manage Bundles on Target Device
 
 From the OSGi command line, you can display a list of bundles with the
 ‘**ss**’ command as shown in the example below:
@@ -365,8 +350,7 @@ started, the activity will show ACTIVE (as shown above).
 
 ![]({{ site.baseurl }}/assets/images/deploying_bundles/media/image14.png)
 
-Set Kura Logger Levels
-----------------------
+### Set Kura Logger Levels
 
 Kura logger levels are defined in a configuration file. The messages
 that appear require a log statement in the application and that the log
@@ -399,8 +383,7 @@ the ‘**:wq**’ command. Restart Kura, and check the log levels in the
 OSGi console again to make sure that the desired levels have taken
 effect.
 
-Making Deployment Permanent
-===========================
+## Making Deployment Permanent
 
 The mToolkit deployment of a package is a temporary installation and
 does not make the package permanent. Once a set of bundles has been
@@ -410,27 +393,23 @@ packages from the command line of a target device using the instructions
 below:
 
 1.  Copy the deployment package file (\*.dp) to the target device, into
-    the folder:
-
+    the folder:  
+```
 /opt/eclipse/kura/kura/packages
-
-1.  Edit the dpa.properties file through the vi editor by entering the
-    following command:
-
+```
+2.  Edit the dpa.properties file through the vi editor by entering the following command:  
+```
   vi /opt/eclipse/kura/kura/dpa.properties
-  ------------------------------------------
-
-1.  Add an entry in the dpa.properties file to include the new package
-    name, such as:
-
+```
+3.  Add an entry in the dpa.properties file to include the new package name, such as:  
+```
 package_name=file\\:/opt/eclipse/kura/kura/packages/package_filename.dp
+```  
+where, “package_name” and “package_filename” should be replaced with the actual name of the deployment package.
 
-where, “package_name” and “package_filename” should be replaced with
-the actual name of the deployment package.
+4.  Save and close the file using the ‘**:wq**’ command.
 
-1.  Save and close the file using the ‘**:wq**’ command.
-
-2.  Then restart Kura, and the new package should be installed in
+5.  Then restart Kura, and the new package should be installed in
     addition to the default Kura package.
 
 In conclusion, this section described how to test a bundle in an

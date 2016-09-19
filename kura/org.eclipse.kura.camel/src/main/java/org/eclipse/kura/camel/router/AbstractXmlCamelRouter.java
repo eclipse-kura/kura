@@ -57,7 +57,7 @@ public abstract class AbstractXmlCamelRouter extends AbstractCamelRouter {
                 logger.debug("Adding new routes");
 
                 final InputStream bais = new ByteArrayInputStream(routeXml.getBytes());
-                final RoutesDefinition routesDefinition = this.camelContext.loadRoutesDefinition(bais);
+                final RoutesDefinition routesDefinition = getCamelContext().loadRoutesDefinition(bais);
 
                 // now add
                 addRoutes(routesDefinition.getRoutes());
@@ -72,7 +72,7 @@ public abstract class AbstractXmlCamelRouter extends AbstractCamelRouter {
 
     private void addRoutes(final List<RouteDefinition> routes) throws Exception {
         this.currentRoutes = new ArrayList<>(routes);
-        this.camelContext.addRouteDefinitions(currentRoutes);
+        getCamelContext().addRouteDefinitions(currentRoutes);
     }
 
     private void clearExistingRoutes() throws Exception {
@@ -84,7 +84,7 @@ public abstract class AbstractXmlCamelRouter extends AbstractCamelRouter {
                     logger.debug("\tRoute: {}", route.getId());
                 }
             }
-            this.camelContext.removeRouteDefinitions(oldRoutes);
+            getCamelContext().removeRouteDefinitions(oldRoutes);
         }
     }
 
@@ -126,5 +126,10 @@ public abstract class AbstractXmlCamelRouter extends AbstractCamelRouter {
         }
 
         return !this.currentRouteXml.equals(routeXml);
+    }
+    
+    @Override
+    public void configure() throws Exception {
+        // we don't configure anything initially
     }
 }

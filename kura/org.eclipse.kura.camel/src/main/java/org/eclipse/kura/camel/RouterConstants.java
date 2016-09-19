@@ -15,8 +15,10 @@ public final class RouterConstants {
 
     // Constants
 
+    @Deprecated
     public static final String XML_ROUTE_PROPERTY = "camel.route.xml";
 
+    @Deprecated
     public static final String METATYPE_NAME = "metatype";
 
     private RouterConstants() {

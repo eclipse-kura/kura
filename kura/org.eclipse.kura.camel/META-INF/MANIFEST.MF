@@ -10,6 +10,7 @@ Bundle-ActivationPolicy: lazy
 Import-Package: org.apache.camel;version="2.17.2",
  org.apache.camel.builder;version="2.17.2",
  org.apache.camel.component.kura;version="2.17.2",
+ org.apache.camel.core.osgi;version="2.17.2",
  org.apache.camel.impl;version="2.17.2",
  org.apache.camel.model;version="2.17.2",
  org.apache.camel.spi;version="2.17.2",

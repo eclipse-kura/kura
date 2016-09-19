@@ -64,15 +64,19 @@ public class GatewayRouter extends AbstractCamelRouter implements ConfigurableCo
 
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) throws Exception {
         logger.info("Activated");
-        
+
         setProperties(properties);
-        super.activate(componentContext, properties);
+        start();
     }
 
     protected void modified(final Map<String, Object> properties) {
         logger.info("Modified");
 
         setProperties(properties);
+    }
+
+    protected void deactivate() throws Exception {
+        stop();
     }
 
     private int random() {

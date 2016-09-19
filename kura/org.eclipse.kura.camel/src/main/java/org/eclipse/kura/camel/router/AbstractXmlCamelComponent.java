@@ -43,7 +43,7 @@ public abstract class AbstractXmlCamelComponent extends AbstractXmlCamelRouter {
 
     protected void activate(final BundleContext context, final Map<String, Object> properties) throws Exception {
         try {
-            start(context);
+            start();
             modified(properties);
         } catch (Exception e) {
             logger.warn("Problem activating component", e);
@@ -53,7 +53,7 @@ public abstract class AbstractXmlCamelComponent extends AbstractXmlCamelRouter {
 
     protected void deactivate(final BundleContext context) throws Exception {
         try {
-            stop(context);
+            stop();
         } catch (Exception e) {
             logger.warn("Problem deactivating component", e);
             throw e;

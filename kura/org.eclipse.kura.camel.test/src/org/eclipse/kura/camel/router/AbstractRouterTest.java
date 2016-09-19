@@ -20,7 +20,6 @@ import org.apache.camel.Route;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.osgi.framework.FrameworkUtil;
 
 /**
  * Unit test base for testing an activated router
@@ -33,12 +32,12 @@ public abstract class AbstractRouterTest {
     @Before
     public void before() throws Exception {
         this.router = createRouter();
-        this.router.start(FrameworkUtil.getBundle(RouterTest.class).getBundleContext());
+        this.router.start();
     }
 
     @After
     public void after() throws Exception {
-        this.router.stop(FrameworkUtil.getBundle(RouterTest.class).getBundleContext());
+        this.router.stop();
     }
 
     protected Route firstRoute() {

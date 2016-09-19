@@ -53,7 +53,7 @@ public abstract class AbstractXmlCamelRouter extends AbstractCamelRouter {
                 clearExistingRoutes();
             }
 
-            if (routeXml != null) {
+            if (routeXml != null && !routeXml.isEmpty()) {
                 logger.debug("Adding new routes");
 
                 final InputStream bais = new ByteArrayInputStream(routeXml.getBytes());

@@ -5,7 +5,7 @@
         
         <Icon resource="OSGI-INF/logo.png" size="32" />
 
-        <AD id="camel.route.xml" name="camel.route.xml"
+        <AD id="camel.route.xml" name="Camel router XML"
             description="Camel XML route definition|TextArea"
             type="String" max="10000" cardinality="0" required="false" default='&lt;routes xmlns=&quot;http://camel.apache.org/schema/spring&quot;&gt;&#10;
 	&lt;route id=&quot;cloudConsumer&quot;&gt;&#10;

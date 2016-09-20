@@ -4,6 +4,7 @@ Description=Kura
 [Service]
 Type=forking
 ExecStart=/bin/sh INSTALL_DIR/kura/bin/start_kura_background.sh
+PIDFile=/var/run/kura.pid
 
 [Install]
 WantedBy=multi-user.target

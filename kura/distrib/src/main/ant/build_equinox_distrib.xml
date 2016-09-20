@@ -9,7 +9,8 @@
 
     Contributors:
       Eurotech
-      Red Hat Inc - minor fixes on startup scripts, fix issue #603
+      Red Hat Inc - minor fixes on startup scripts, fix issue #603,
+      	Add Fedora support to RPi (#552)
 
 -->
 <project name="build_equinox_distrib" default="dist-linux" basedir="../../../">
@@ -292,14 +293,14 @@ fi]]>
 		<copy file="src/main/resources/common/kura.init.raspbian"
               tofile="${project.build.directory}/${build.output.name}/kura.init.raspbian"
         	  failonerror="false" />
-		<copy file="src/main/resources/common/kura.service.edison"
-              tofile="${project.build.directory}/${build.output.name}/kura.service.edison"
+		<copy file="src/main/resources/common/kura.service"
+              tofile="${project.build.directory}/${build.output.name}/kura.service"
         	  failonerror="false" />
 		<replaceregexp file="${project.build.directory}/${build.output.name}/kura_install.sh" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
 		<replaceregexp file="${project.build.directory}/${build.output.name}/kura.init.wrl" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
 		<replaceregexp file="${project.build.directory}/${build.output.name}/kura.init.yocto" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
 		<replaceregexp file="${project.build.directory}/${build.output.name}/kura.init.raspbian" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
-		<replaceregexp file="${project.build.directory}/${build.output.name}/kura.service.edison" match="INSTALL_DIR" replace="${kura.install.dir}" />
+		<replaceregexp file="${project.build.directory}/${build.output.name}/kura.service" match="INSTALL_DIR" replace="${kura.install.dir}" />
 
 
 		<zip destfile="${project.build.directory}/${build.output.name}.zip">
@@ -331,7 +332,7 @@ fi]]>
                         prefix="${build.output.name}/install" />
 			<zipfileset file="${project.build.directory}/${build.output.name}/kura.init.raspbian"
                         prefix="${build.output.name}/install" />
-			<zipfileset file="${project.build.directory}/${build.output.name}/kura.service.edison"
+			<zipfileset file="${project.build.directory}/${build.output.name}/kura.service"
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/${build.name}/recover_default_config.init"
                         prefix="${build.output.name}/install" />

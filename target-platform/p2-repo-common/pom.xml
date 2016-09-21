@@ -123,8 +123,8 @@
 									<version>${org.json.version}</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>slf4j</groupId>
-									<artifactId>slf4j.api</artifactId>
+									<groupId>org.slf4j</groupId>
+									<artifactId>slf4j-api</artifactId>
 									<version>${slf4j.api.version}</version>
 								</artifactItem>
 								<artifactItem>
@@ -138,8 +138,8 @@
 									<version>${org.junit.version}</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>slf4j</groupId>
-									<artifactId>slf4j.jdk14</artifactId>
+									<groupId>org.slf4j</groupId>
+									<artifactId>slf4j-jdk14</artifactId>
 									<version>${slf4j.jdk14.version}</version>
 								</artifactItem>
 								<artifactItem>
@@ -148,8 +148,8 @@
 									<version>${log4j.apache-log4j-extras.version}</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>slf4j</groupId>
-									<artifactId>slf4j.log4j12</artifactId>
+									<groupId>org.slf4j</groupId>
+									<artifactId>slf4j-log4j12</artifactId>
 									<version>${slf4j.log4j12.version}</version>
 								</artifactItem>
 								<artifactItem>
@@ -239,12 +239,12 @@
 								<move file="target/source/plugins/org.hsqldb.hsqldb.jar" tofile="target/source/plugins/org.hsqldb.hsqldb_${org.hsqldb.hsqldb.version}.jar"/>
 								<move file="target/source/plugins/jdk.dio.jar" tofile="target/source/plugins/jdk.dio_${jdk.dio.version}.jar"/>
 								<move file="target/source/plugins/org.json.jar" tofile="target/source/plugins/org.json_${org.json.version}.jar"/>
-								<move file="target/source/plugins/slf4j.api.jar" tofile="target/source/plugins/slf4j.api_${slf4j.api.version}.jar"/>
+								<move file="target/source/plugins/slf4j-api.jar" tofile="target/source/plugins/slf4j.api_${slf4j.api.version}.jar"/>
 								<move file="target/source/plugins/log4j.jar" tofile="target/source/plugins/log4j_${log4j.version}.jar"/>
 								<move file="target/source/plugins/org.junit.jar" tofile="target/source/plugins/org.junit_${org.junit.version}.jar"/>
-								<move file="target/source/plugins/slf4j.jdk14.jar" tofile="target/source/plugins/slf4j.jdk14_${slf4j.jdk14.version}.jar"/>
+								<move file="target/source/plugins/slf4j-jdk14.jar" tofile="target/source/plugins/slf4j.jdk14_${slf4j.jdk14.version}.jar"/>
 								<move file="target/source/plugins/log4j.apache-log4j-extras.jar" tofile="target/source/plugins/log4j.apache-log4j-extras_${log4j.apache-log4j-extras.version}.jar"/>
-								<move file="target/source/plugins/slf4j.log4j12.jar" tofile="target/source/plugins/slf4j.log4j12_${slf4j.log4j12.version}.jar"/>
+								<move file="target/source/plugins/slf4j-log4j12.jar" tofile="target/source/plugins/slf4j.log4j12_${slf4j.log4j12.version}.jar"/>
 								<move file="target/source/plugins/org.apache.commons.fileupload.jar" tofile="target/source/plugins/org.apache.commons.fileupload_${org.apache.commons.fileupload.version}.jar"/>
 								<move file="target/source/plugins/usb4java-javax.jar" tofile="target/source/plugins/usb4java-javax_${usb4java-javax.version}.jar"/>
 								<move file="target/source/plugins/org.apache.commons.io.jar" tofile="target/source/plugins/org.apache.commons.io_${org.apache.commons.io.version}.jar"/>

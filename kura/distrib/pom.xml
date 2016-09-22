@@ -520,6 +520,39 @@
 							</target>
 						</configuration>
 					</execution>
+					<execution>
+						<id>calc-checksums</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<checksum algorithm="md5">
+									<fileset dir="${basedir}/target/">
+										<include name="*.deb" />
+										<include name="*.dp" />
+										<include name="*.zip"/>
+										<include name="kura_${project.version}_*.sh"/>
+										<include name="kura_${project.version}_*.dp"/>
+										<exclude name="kura_${project.version}_*.dp" />
+										<exclude name="kura_${project.version}_*.zip"/>
+									</fileset>
+								</checksum>
+								<checksum algorithm="SHA-1">
+									<fileset dir="${basedir}/target/">
+										<include name="*.deb" />
+										<include name="*.dp" />
+										<include name="*.zip"/>
+										<include name="kura_${project.version}_*.sh"/>
+										<include name="kura_${project.version}_*.dp"/>
+										<exclude name="kura_${project.version}_*.dp" />
+										<exclude name="kura_${project.version}_*.zip"/>
+									</fileset>
+								</checksum>
+							</target>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
@@ -858,29 +891,6 @@
 									</target>
 								</configuration>
 							</execution>
-							<execution>
-								<id>beaglebone-deb-checksums</id>
-								<phase>install</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<checksum algorithm="md5">
-											<fileset dir="${basedir}/target/">
-												<include
-													name="kura_${project.version}_beaglebone_debian_installer.deb" />
-											</fileset>
-										</checksum>
-										<checksum algorithm="SHA-1">
-											<fileset dir="${basedir}/target/">
-												<include
-													name="kura_${project.version}_beaglebone_debian_installer.deb" />
-											</fileset>
-										</checksum>
-									</target>
-								</configuration>
-							</execution>
 							<!-- <execution> <id>beaglebone-test</id> <phase>install</phase> <goals>
 								<goal>run</goal> </goals> <configuration> <target> <property name="buildNumber"
 								value="buildNumber" /> <property name="deployment.package.version" value="${deployment.package.version}"
@@ -996,29 +1006,6 @@
 									</target>
 								</configuration>
 							</execution>
-							<execution>
-								<id>beaglebone-nn-deb-checksums</id>
-								<phase>install</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<checksum algorithm="md5">
-											<fileset dir="${basedir}/target/">
-												<include
-													name="kura_${project.version}_beaglebone-nn_debian_installer.deb" />
-											</fileset>
-										</checksum>
-										<checksum algorithm="SHA-1">
-											<fileset dir="${basedir}/target/">
-												<include
-													name="kura_${project.version}_beaglebone-nn_debian_installer.deb" />
-											</fileset>
-										</checksum>
-									</target>
-								</configuration>
-							</execution>
 						</executions>
 					</plugin>
 					<plugin>
@@ -1111,29 +1098,6 @@
 										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
-									</target>
-								</configuration>
-							</execution>
-							<execution>
-								<id>raspberry-pi-deb-checksums</id>
-								<phase>install</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<checksum algorithm="md5">
-											<fileset dir="${basedir}/target/">
-												<include
-													name="kura_${project.version}_raspberry-pi_installer.deb" />
-											</fileset>
-										</checksum>
-										<checksum algorithm="SHA-1">
-											<fileset dir="${basedir}/target/">
-												<include
-													name="kura_${project.version}_raspberry-pi_installer.deb" />
-											</fileset>
-										</checksum>
 									</target>
 								</configuration>
 							</execution>
@@ -1240,29 +1204,6 @@
 									</target>
 								</configuration>
 							</execution>
-							<execution>
-								<id>raspberry-pi-nn-deb-checksums</id>
-								<phase>install</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<checksum algorithm="md5">
-											<fileset dir="${basedir}/target/">
-												<include
-													name="kura_${project.version}_raspberry-pi-nn_installer.deb" />
-											</fileset>
-										</checksum>
-										<checksum algorithm="SHA-1">
-											<fileset dir="${basedir}/target/">
-												<include
-													name="kura_${project.version}_raspberry-pi-nn_installer.deb" />
-											</fileset>
-										</checksum>
-									</target>
-								</configuration>
-							</execution>
 						</executions>
 					</plugin>
 					<plugin>
@@ -1355,29 +1296,6 @@
 										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
-									</target>
-								</configuration>
-							</execution>
-							<execution>
-								<id>raspberry-pi-bplus-deb-checksums</id>
-								<phase>install</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<checksum algorithm="md5">
-											<fileset dir="${basedir}/target/">
-												<include
-													name="kura_${project.version}_raspberry-pi-bplus_installer.deb" />
-											</fileset>
-										</checksum>
-										<checksum algorithm="SHA-1">
-											<fileset dir="${basedir}/target/">
-												<include
-													name="kura_${project.version}_raspberry-pi-bplus_installer.deb" />
-											</fileset>
-										</checksum>
 									</target>
 								</configuration>
 							</execution>
@@ -1484,29 +1402,6 @@
 									</target>
 								</configuration>
 							</execution>
-							<execution>
-								<id>raspberry-pi-bplus-nn-deb-checksums</id>
-								<phase>install</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<checksum algorithm="md5">
-											<fileset dir="${basedir}/target/">
-												<include
-													name="kura_${project.version}_raspberry-pi-bplus-nn_installer.deb" />
-											</fileset>
-										</checksum>
-										<checksum algorithm="SHA-1">
-											<fileset dir="${basedir}/target/">
-												<include
-													name="kura_${project.version}_raspberry-pi-bplus-nn_installer.deb" />
-											</fileset>
-										</checksum>
-									</target>
-								</configuration>
-							</execution>
 						</executions>
 					</plugin>
 					<plugin>
@@ -1602,29 +1497,6 @@
 									</target>
 								</configuration>
 							</execution>
-							<execution>
-								<id>raspberry-pi-2-deb-checksums</id>
-								<phase>install</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<checksum algorithm="md5">
-											<fileset dir="${basedir}/target/">
-												<include
-													name="kura_${project.version}_raspberry-pi-2_installer.deb" />
-											</fileset>
-										</checksum>
-										<checksum algorithm="SHA-1">
-											<fileset dir="${basedir}/target/">
-												<include
-													name="kura_${project.version}_raspberry-pi-2_installer.deb" />
-											</fileset>
-										</checksum>
-									</target>
-								</configuration>
-							</execution>
 						</executions>
 					</plugin>
 					<plugin>
@@ -1717,29 +1589,6 @@
 										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
 											target="dist-linux" />
-									</target>
-								</configuration>
-							</execution>
-							<execution>
-								<id>raspberry-pi-2-nn-deb-checksums</id>
-								<phase>install</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<checksum algorithm="md5">
-											<fileset dir="${basedir}/target/">
-												<include
-													name="kura_${project.version}_raspberry-pi-2-nn_installer.deb" />
-											</fileset>
-										</checksum>
-										<checksum algorithm="SHA-1">
-											<fileset dir="${basedir}/target/">
-												<include
-													name="kura_${project.version}_raspberry-pi-2-nn_installer.deb" />
-											</fileset>
-										</checksum>
 									</target>
 								</configuration>
 							</execution>
@@ -2147,16 +1996,6 @@
 											<zipfileset dir="${project.build.directory}/staging/publisher/"
 												prefix="org.eclipse.kura.example.publisher/" />
 										</zip>
-										<checksum algorithm="md5">
-    										<fileset dir="./target/" >
-    											<include name="${zip_workspace.prefix}.zip"/>
-    										</fileset>
-										</checksum>
-										<checksum algorithm="SHA-1">
-    										<fileset dir="./target/" >
-    											<include name="${zip_workspace.prefix}.zip"/>
-    										</fileset>
-										</checksum>
 									</target>
 								</configuration>
 							</execution>
@@ -2260,29 +2099,6 @@
 									<target if="${is.not.snapshot}">
 										<ant antfile="${basedir}/src/main/ant/build_camel-quickstart_dp.xml"
 											target="build-dp" />
-									</target>
-								</configuration>
-							</execution>
-							<execution>
-								<id>bundle-dps-checksum</id>
-								<phase>install</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<checksum algorithm="md5">
-											<fileset dir="${basedir}/target/">
-												<include name="*.dp" />
-												<exclude name="kura_${project.version}_${build.name}*.dp" />
-											</fileset>
-										</checksum>
-										<checksum algorithm="SHA-1">
-											<fileset dir="${basedir}/target/">
-												<include name="*.dp" />
-												<exclude name="kura_${project.version}_${build.name}*.dp" />
-											</fileset>
-										</checksum>
 									</target>
 								</configuration>
 							</execution>

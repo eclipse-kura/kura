@@ -585,19 +585,6 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<jar destfile="${project.build.directory}/${build.output.name}_upgrader.dp"
                 manifest="${project.build.directory}/${build.output.name}/dp_upgrade_stage/META-INF/MANIFEST.MF"
                 basedir="${project.build.directory}/${build.output.name}/dp_upgrade_stage" />
-
-		<checksum algorithm="md5">
-			<fileset dir="./target/" >
-				<include name="kura_${project.version}_${build.name}*.sh"/>
-				<include name="kura_${project.version}_${build.name}*.dp"/>
-			</fileset>
-		</checksum>
-		<checksum algorithm="SHA-1">
-			<fileset dir="./target/" >
-				<include name="kura_${project.version}_${build.name}*.sh"/>
-				<include name="kura_${project.version}_${build.name}*.dp"/>
-			</fileset>
-		</checksum>
 	</target>
 
 <!-- ### WINDOWS ########################################################################################################################### -->

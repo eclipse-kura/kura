@@ -213,7 +213,7 @@ public class StatusPanelUi extends Composite {
 									if ("Connection Name".equals(resultPair.getName()) && "CloudService".equals(resultPair.getValue())) {
 										GwtGroupedNVPair connectionStatus= result.get(connectionNameIndex + 1); // done based on the idea that in the pairs data connection name is before connection status
 										
-										if ("Connection Status".equals(connectionStatus.getName()) && "CONNECTED".equals(connectionStatus.getValue())) {
+										if ("Service Status".equals(connectionStatus.getName()) && "CONNECTED".equals(connectionStatus.getValue())) {
 											parent.updateConnectionStatusImage(true);
 										} else {
 											parent.updateConnectionStatusImage(false);

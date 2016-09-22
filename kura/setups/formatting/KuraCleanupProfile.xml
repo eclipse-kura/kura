@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <profiles version="2">
-<profile kind="CleanUpProfile" name="KuraCodeStyle" version="2">
+<profile kind="CleanUpProfile" name="KuraCleanup_v1" version="2">
 <setting id="cleanup.qualify_static_method_accesses_with_declaring_class" value="false"/>
 <setting id="cleanup.always_use_this_for_non_static_method_access" value="false"/>
 <setting id="cleanup.organize_imports" value="true"/>
@@ -16,11 +16,11 @@
 <setting id="cleanup.make_private_fields_final" value="true"/>
 <setting id="cleanup.use_lambda" value="true"/>
 <setting id="cleanup.always_use_blocks" value="true"/>
-<setting id="cleanup.use_this_for_non_static_field_access_only_if_necessary" value="true"/>
+<setting id="cleanup.use_this_for_non_static_field_access_only_if_necessary" value="false"/>
 <setting id="cleanup.sort_members_all" value="true"/>
 <setting id="cleanup.remove_trailing_whitespaces_all" value="true"/>
 <setting id="cleanup.add_missing_annotations" value="true"/>
-<setting id="cleanup.always_use_this_for_non_static_field_access" value="false"/>
+<setting id="cleanup.always_use_this_for_non_static_field_access" value="true"/>
 <setting id="cleanup.make_parameters_final" value="false"/>
 <setting id="cleanup.sort_members" value="false"/>
 <setting id="cleanup.remove_private_constructors" value="true"/>

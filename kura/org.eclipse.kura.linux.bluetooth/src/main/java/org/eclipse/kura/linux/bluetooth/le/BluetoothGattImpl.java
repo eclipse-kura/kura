@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - minor clean ups
  *******************************************************************************/
 package org.eclipse.kura.linux.bluetooth.le;
 
@@ -33,19 +34,19 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 
 	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothGattImpl.class);
 
-	private final long GATT_CONNECTION_TIMEOUT = 10000;
-	private final long GATT_SERVICE_TIMEOUT    = 6000;
-	private final long GATT_COMMAND_TIMEOUT    = 2000;
+	private static final long GATT_CONNECTION_TIMEOUT = 10000;
+	private static final long GATT_SERVICE_TIMEOUT    = 6000;
+	private static final long GATT_COMMAND_TIMEOUT    = 2000;
 
-	private final String[] NOT_CONNECTED        = {"[   ]", "disconnected", "not connected", "error: connect"};
-    private final String[] CONNECTED            = {"[con]", "connection successful", "usage: mtu <value>"};
-    private final String   SERVICES             = "attr handle:";
-    private final String   CHARACTERISTICS      = "handle:";
-    private final String   READ_CHAR            = "characteristic value/descriptor:";
-    private final String   REGEX_READ_CHAR_UUID = "handle\\:.*value\\:[\\s|0-9|a-f|A-F]*";
-    private final String   NOTIFICATION         = "notification handle";
-    private final String   ERROR_HANDLE         = "invalid handle";
-    private final String[] ERROR_UUID           = {"invalid uuid", "read characteristics by uuid failed: attribute can't be read"};
+	private static final String[] NOT_CONNECTED        = {"[   ]", "disconnected", "not connected", "error: connect"};
+    private static final String[] CONNECTED            = {"[con]", "connection successful", "usage: mtu <value>"};
+    private static final String   SERVICES             = "attr handle:";
+    private static final String   CHARACTERISTICS      = "handle:";
+    private static final String   READ_CHAR            = "characteristic value/descriptor:";
+    private static final String   REGEX_READ_CHAR_UUID = "handle\\:.*value\\:[\\s|0-9|a-f|A-F]*";
+    private static final String   NOTIFICATION         = "notification handle";
+    private static final String   ERROR_HANDLE         = "invalid handle";
+    private static final String[] ERROR_UUID           = {"invalid uuid", "read characteristics by uuid failed: attribute can't be read"};
 	
 	private List<BluetoothGattService> m_bluetoothServices;
 	private List<BluetoothGattCharacteristic> m_bluetoothGattCharacteristics;

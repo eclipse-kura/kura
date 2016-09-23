@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - minor clean ups
  *******************************************************************************/
 package org.eclipse.kura.linux.bluetooth.le;
 
@@ -34,7 +35,7 @@ import org.slf4j.LoggerFactory;
 public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopListener {
 
 	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothLeScanner.class); 
-	private static final String s_mac_regex = "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$";
+	private static final String MAC_REGEX = "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$";
 
 	public static final int SCAN_FAILED_INTERNAL_ERROR = 0x0003;
 	private static final String SIGINT = "2";
@@ -61,7 +62,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 		// Start scan process
 		m_proc = BluetoothUtil.hcitoolCmd(name, "lescan", this);
 					
-		set_scanRunning(true);
+		setScanRunning(true);
 	}
 	
 	public void startAdvertisementScan(String name, String companyName, BluetoothAdvertisementScanListener listener) {
@@ -76,7 +77,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 		// Start dump process
 		m_dump_proc = BluetoothUtil.btdumpCmd(name, this);
 					
-		set_scanRunning(true);
+		setScanRunning(true);
 	}
 	
 
@@ -92,7 +93,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 		// Start dump process
 		m_dump_proc = BluetoothUtil.btdumpCmd(name, this);
 					
-		set_scanRunning(true);
+		setScanRunning(true);
 	}
 
 	public void killScan() {
@@ -114,7 +115,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 		else
 			s_logger.info("Cannot Kill btdump, m_dump_proc = null ...");
 		
-		set_scanRunning(false);
+		setScanRunning(false);
 	}
 
 	// --------------------------------------------------------------------
@@ -169,7 +170,7 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 				address = results[0].trim();
 				name = results[1].trim();
 
-				if(address.matches(s_mac_regex)) {
+				if(address.matches(MAC_REGEX)) {
 					if (m_devices.containsKey(address)) {
 						if (!name.equals("(unknown)") && !m_devices.get(address).equals(name)) {
 							s_logger.debug("Updating device: {} - {}", address, name);
@@ -226,13 +227,22 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
 		
 	}
 
+	public boolean isScanRunning ()  {
+	    return this.m_scanRunning;
+	}
+	
+	private void setScanRunning ( boolean scanRunning )  {
+        this.m_scanRunning = scanRunning;
+    }
+	
+	@Deprecated
 	public boolean is_scanRunning() {
 		return m_scanRunning;
 	}
 
+	@Deprecated
 	public void set_scanRunning(boolean m_scanRunning) {
 		this.m_scanRunning = m_scanRunning;
 	}
-
 
 }

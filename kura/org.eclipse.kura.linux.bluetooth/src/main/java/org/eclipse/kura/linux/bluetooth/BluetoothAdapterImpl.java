@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - minor clean ups
  *******************************************************************************/
 package org.eclipse.kura.linux.bluetooth;
 
@@ -44,10 +45,10 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 	private BluetoothBeaconCommandListener m_bbcl;
 	
 	// See Bluetooth 4.0 Core specifications (https://www.bluetooth.org/docman/handlers/downloaddoc.ashx?doc_id=229737)
-	private final String OGF_CONTROLLER_CMD           = "0x08";
-	private final String OCF_ADVERTISING_PARAM_CMD    = "0x0006";
-	private final String OCF_ADVERTISING_DATA_CMD     = "0x0008";
-	private final String OCF_ADVERTISING_ENABLE_CMD   = "0x000a";
+	private static final String OGF_CONTROLLER_CMD           = "0x08";
+	private static final String OCF_ADVERTISING_PARAM_CMD    = "0x0006";
+	private static final String OCF_ADVERTISING_DATA_CMD     = "0x0008";
+	private static final String OCF_ADVERTISING_ENABLE_CMD   = "0x000a";
 	
 	public BluetoothAdapterImpl(String name) throws KuraException {
 		m_name = name;
@@ -149,11 +150,13 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
 		}
 	}
 
-	public boolean isScanning() {
-		if(m_bls!=null)
-			return m_bls.is_scanRunning();
-		else return false;
-	}
+    public boolean isScanning() {
+        if (m_bls != null) {
+            return m_bls.isScanRunning();
+        } else {
+            return false;
+        }
+    }
 
 	@Override
 	public boolean isLeReady() {

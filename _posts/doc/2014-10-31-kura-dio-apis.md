@@ -23,7 +23,7 @@ Kura ships the relevant native libraries together with the default hardware
 configuration for each platforms it runs on.
 
 When using some devices, the hardware configuration may change according to
-user needs (i.e. BeagleBone Black Device-Tree Overlay)
+user needs (i.e. BeagleBone Black Device-Tree Overlay).
 In such cases the default configuration can be changed by modifying the
 default configuration files shipped with Kura.
 
@@ -43,7 +43,7 @@ The current Device I/O implementation supports the following:
 ## Security Policy
 
 Standard Java Security Policy is used in order to restrict access to specific devices.
-The defauld Kura distribution allows access to all the peripherals through the
+The default Kura distribution allows access to all the peripherals through the
 **jdk.dio.policy**
 
 ```
@@ -91,7 +91,7 @@ or by creating a Pin configuration object and feeding it to the DeviceManager:
 #### Accessing a GPIO Pin by its index
 
 ```java
-// Accessing the GPIO Pin number 17. De default behavioue is defined in the
+// Accessing the GPIO Pin number 17. The default behaviour is defined in the
 // jdk.dio.properties file
 //
 // i.e.:

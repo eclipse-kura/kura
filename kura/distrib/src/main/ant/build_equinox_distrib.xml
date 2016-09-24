@@ -269,7 +269,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
         -configuration  /tmp/.kura/configuration \
         -console 5002 \
-        -consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
+        -consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &
 
     #Save the PID
     KURA_PID=$!

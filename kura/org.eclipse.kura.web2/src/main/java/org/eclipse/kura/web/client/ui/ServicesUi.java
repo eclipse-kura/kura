@@ -346,15 +346,11 @@ public class ServicesUi extends Composite {
             logger.fine("Widget: " + fg.getClass());
 
             if (fg.getWidget(i) instanceof FormLabel) {
-                param = m_configurableComponent.getParameter(fg.getWidget(i).getTitle());
-                logger.fine("Param: " + fg.getTitle() + " -> " + param);
+                String id = ((FormLabel) fg.getWidget(i)).getText();
+                param = m_configurableComponent.getParameter(id.trim().replaceAll("\\*$", ""));
 
             } else if (fg.getWidget(i) instanceof ListBox || fg.getWidget(i) instanceof Input || fg.getWidget(i) instanceof TextBoxBase) {
 
-                if (param == null) {
-                    System.out.println("Missing parameter");
-                    continue;
-                }
                 String value = getUpdatedFieldConfiguration(param, fg.getWidget(i));
                 if (value == null) {
                     continue;

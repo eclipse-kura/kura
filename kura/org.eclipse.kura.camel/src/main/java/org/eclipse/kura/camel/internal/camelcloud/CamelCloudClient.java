@@ -56,13 +56,13 @@ public class CamelCloudClient implements CloudClient {
 
     private final ProducerTemplate producerTemplate;
 
-    private final List<CloudClientListener> cloudClientListeners = new CopyOnWriteArrayList<CloudClientListener>();
+    private final List<CloudClientListener> cloudClientListeners = new CopyOnWriteArrayList<>();
 
     private final String applicationId;
 
     private final String baseEndpoint;
 
-    private ExecutorService executorService;
+    private final ExecutorService executorService;
 
     public CamelCloudClient(CamelCloudService cloudService, CamelContext camelContext, String applicationId, String baseEndpoint) {
         this.cloudService = cloudService;
@@ -87,12 +87,12 @@ public class CamelCloudClient implements CloudClient {
     @Override
     public void release() {
         this.cloudService.release(this.applicationId);
-        this.camelContext.getExecutorServiceManager().shutdown(executorService);
+        this.camelContext.getExecutorServiceManager().shutdown(this.executorService);
     }
 
     @Override
     public boolean isConnected() {
-        return camelContext.getStatus() == Started;
+        return this.camelContext.getStatus() == Started;
     }
 
     @Override
@@ -141,8 +141,8 @@ public class CamelCloudClient implements CloudClient {
 
     @Override
     public void unsubscribe(String topic) throws KuraException {
-        final String internalQueue = applicationId + ":" + topic;
-        
+        final String internalQueue = this.applicationId + ":" + topic;
+
         try {
             ShutdownStrategy strategy = this.camelContext.getShutdownStrategy();
             if (strategy instanceof DefaultShutdownStrategy) {
@@ -169,12 +169,12 @@ public class CamelCloudClient implements CloudClient {
 
     @Override
     public void addCloudClientListener(CloudClientListener cloudClientListener) {
-        cloudClientListeners.add(cloudClientListener);
+        this.cloudClientListeners.add(cloudClientListener);
     }
 
     @Override
     public void removeCloudClientListener(CloudClientListener cloudClientListener) {
-        cloudClientListeners.remove(cloudClientListener);
+        this.cloudClientListeners.remove(cloudClientListener);
     }
 
     @Override
@@ -195,10 +195,10 @@ public class CamelCloudClient implements CloudClient {
     // Helpers
 
     private int doPublish(boolean isControl, String deviceId, String topic, KuraPayload kuraPayload, int qos, boolean retain, int priority) throws KuraException {
-        final String target = target(applicationId + ":" + topic);
+        final String target = target(this.applicationId + ":" + topic);
         final int kuraMessageId = Math.abs(new Random().nextInt());
 
-        Map<String, Object> headers = new HashMap<String, Object>();
+        Map<String, Object> headers = new HashMap<>();
         headers.put(CAMEL_KURA_CLOUD_CONTROL, isControl);
         headers.put(CAMEL_KURA_CLOUD_MESSAGEID, kuraMessageId);
         headers.put(CAMEL_KURA_CLOUD_DEVICEID, deviceId);
@@ -208,20 +208,20 @@ public class CamelCloudClient implements CloudClient {
 
         logger.trace("Publishing: {} -> {} / {}", new Object[] { target, kuraPayload, this.camelContext });
 
-        producerTemplate.sendBodyAndHeaders(target, kuraPayload, headers);
+        this.producerTemplate.sendBodyAndHeaders(target, kuraPayload, headers);
         return kuraMessageId;
     }
 
     private void forkSubscribe(final boolean isControl, final String topic, final int qos) throws KuraException {
         /*
          * This construct is needed due to CAMEL-10206
-         * 
+         *
          * It does fork off the subscription process, which actually creates a
          * new camel route, into the background since we currently may be in the
          * process of starting the camel context. If that is the case then the
          * newly added route won't be started since the camel context is in the
          * "starting" mode. Events won't get processed.
-         * 
+         *
          * So we do fork off the subscription process after the camel context
          * has been started. The executor is needed since, according to the
          * camel javadoc on StartupListener, the camel context may still be in
@@ -229,9 +229,11 @@ public class CamelCloudClient implements CloudClient {
          */
         try {
             this.camelContext.addStartupListener(new StartupListener() {
+
                 @Override
                 public void onCamelContextStarted(CamelContext context, boolean alreadyStarted) throws Exception {
-                    executorService.submit(new Callable<Void>() {
+                    CamelCloudClient.this.executorService.submit(new Callable<Void>() {
+
                         @Override
                         public Void call() throws Exception {
                             doSubscribe(isControl, topic, qos);
@@ -250,31 +252,31 @@ public class CamelCloudClient implements CloudClient {
         final String internalQueue = this.applicationId + ":" + topic;
         logger.debug("\tInternal target: {} / {}", target(internalQueue), this.camelContext);
         try {
-            camelContext.addRoutes(new RouteBuilder() {
+            this.camelContext.addRoutes(new RouteBuilder() {
+
                 @Override
                 public void configure() throws Exception {
-                    from(target(internalQueue)).
-                        routeId(internalQueue).
-                        process(new Processor() {
-                            @Override
-                            public void process(Exchange exchange) throws Exception {
-                                logger.debug("Processing: {}", exchange);
-                                for(CloudClientListener listener : cloudClientListeners) {
-                                    logger.debug("\t{}", listener);
-                                    Object body = exchange.getIn().getBody();
-                                    KuraPayload payload;
-                                    if(body instanceof KuraPayload) {
-                                        payload = (KuraPayload) body;
-                                    } else {
-                                        payload = new KuraPayload();
-                                        payload.setBody(getContext().getTypeConverter().convertTo(byte[].class, body));
-                                    }
-                                    String deviceId = exchange.getIn().getHeader(CAMEL_KURA_CLOUD_DEVICEID, String.class);
-                                    int qos = exchange.getIn().getHeader(CAMEL_KURA_CLOUD_QOS, 0, int.class);
-                                    listener.onMessageArrived(deviceId, "camel", payload, qos, true);
+                    from(target(internalQueue)).routeId(internalQueue).process(new Processor() {
+
+                        @Override
+                        public void process(Exchange exchange) throws Exception {
+                            logger.debug("Processing: {}", exchange);
+                            for (CloudClientListener listener : CamelCloudClient.this.cloudClientListeners) {
+                                logger.debug("\t{}", listener);
+                                Object body = exchange.getIn().getBody();
+                                KuraPayload payload;
+                                if (body instanceof KuraPayload) {
+                                    payload = (KuraPayload) body;
+                                } else {
+                                    payload = new KuraPayload();
+                                    payload.setBody(getContext().getTypeConverter().convertTo(byte[].class, body));
                                 }
+                                String deviceId = exchange.getIn().getHeader(CAMEL_KURA_CLOUD_DEVICEID, String.class);
+                                int qos = exchange.getIn().getHeader(CAMEL_KURA_CLOUD_QOS, 0, int.class);
+                                listener.onMessageArrived(deviceId, "camel", payload, qos, true);
                             }
-                        });
+                        }
+                    });
                 }
             });
         } catch (Exception e) {
@@ -284,10 +286,10 @@ public class CamelCloudClient implements CloudClient {
     }
 
     private String target(String topic) {
-        if (baseEndpoint.contains("%s")) {
-            return format(baseEndpoint, topic);
+        if (this.baseEndpoint.contains("%s")) {
+            return format(this.baseEndpoint, topic);
         }
-        return baseEndpoint + topic;
+        return this.baseEndpoint + topic;
     }
 
 }

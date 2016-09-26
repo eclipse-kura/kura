@@ -1,15 +1,23 @@
+/*******************************************************************************
+ * Copyright (c) 2016 Red Hat Inc and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat Inc - initial API and implementation
+ *******************************************************************************/
 /**
- * Apache Camel routers for the use inside of Kura
+ * Components for building Kura application based on Apache Camel™
  * <p>
- * This package provides a set of Camel routers for the use inside of Kura. It
- * is preferred to use at least the {@link org.eclipse.kura.camel.router.AbstractCamelRouter} as a base class
- * instead of using Camel directly.
+ * This package provides a few
  * </p>
  * <p>
  * The following base classes are provided by this package:
  * </p>
  * <dl>
- * <dt>{@link AbstractCamelRouter}</dt>
+ * <dt>{@link AbstractCamelComponent}</dt>
  * <dd>This provides a thin wrapper around the original Camel context, enabling options are best the use
  * of Camel inside Kura</dd>
  * <dt>{@link AbstractXmlCamelRouter}</dt>
@@ -28,4 +36,4 @@
  * located in the bundle {@code org.eclipse.kura.camel.xml}.
  * </p>
  */
-package org.eclipse.kura.camel.router;
+package org.eclipse.kura.camel.component;

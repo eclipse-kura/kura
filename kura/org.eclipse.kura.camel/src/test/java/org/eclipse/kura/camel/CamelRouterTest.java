@@ -12,7 +12,7 @@
 
 package org.eclipse.kura.camel;
 
-import org.eclipse.kura.camel.router.CamelRouter;
+import org.eclipse.kura.camel.component.CamelRouter;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 

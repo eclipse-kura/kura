@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.kura.camel.cloud;
 
+import static org.eclipse.kura.camel.internal.utils.KuraServiceFactory.retrieveService;
+
 import java.util.Map;
 
 import org.apache.camel.CamelContext;
@@ -18,9 +20,9 @@ import org.eclipse.kura.camel.internal.cloud.CloudClientCache;
 import org.eclipse.kura.camel.internal.cloud.CloudClientCacheImpl;
 import org.eclipse.kura.cloud.CloudService;
 
-import static org.eclipse.kura.camel.utils.KuraServiceFactory.retrieveService;
-
 public class KuraCloudComponent extends UriEndpointComponent {
+
+    public static final String DEFAULT_NAME = "kura-cloud";
 
     private CloudService cloudService;
     private CloudClientCache cache;
@@ -35,9 +37,14 @@ public class KuraCloudComponent extends UriEndpointComponent {
         super(context, KuraCloudEndpoint.class);
     }
 
+    public KuraCloudComponent(final CamelContext context, final CloudService cloudService) {
+        super(context, KuraCloudEndpoint.class);
+        this.cloudService = cloudService;
+    }
+
     @Override
     protected void doStart() throws Exception {
-        final CloudService cloudService = getCloudService();
+        final CloudService cloudService = lookupCloudService();
 
         if (cloudService == null) {
             throw new IllegalStateException("'cloudService' is not set and not found in Camel context service registry");
@@ -75,15 +82,10 @@ public class KuraCloudComponent extends UriEndpointComponent {
         return kuraCloudEndpoint;
     }
 
-    public CloudService getCloudService() {
+    protected CloudService lookupCloudService() {
         if (this.cloudService == null) {
             this.cloudService = retrieveService(CloudService.class, getCamelContext().getRegistry());
         }
         return this.cloudService;
     }
-
-    public void setCloudService(CloudService cloudService) {
-        this.cloudService = cloudService;
-    }
-
 }

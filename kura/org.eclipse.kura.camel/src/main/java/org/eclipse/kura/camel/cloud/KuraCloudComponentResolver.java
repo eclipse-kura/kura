@@ -20,23 +20,23 @@ import org.slf4j.LoggerFactory;
 
 public class KuraCloudComponentResolver implements ComponentResolver {
 
-	private static final Logger logger = LoggerFactory.getLogger(KuraCloudComponentResolver.class);
-	
-	private CloudService cloudService;
-	
-	public void setCloudService(final CloudService cloudService) {
-		this.cloudService = cloudService;
-	}
-	
-	@Override
-	public Component resolveComponent(final String name, final CamelContext context) throws Exception {
-		if ("kura-cloud".equals(name)) {
-			final KuraCloudComponent component = new KuraCloudComponent(context);
-			logger.debug("Created new cloud component: {}", component);
-			component.setCloudService(this.cloudService);
-			return component;
-		}
-		return null;
-	}
+    private static final Logger logger = LoggerFactory.getLogger(KuraCloudComponentResolver.class);
+
+    private CloudService cloudService;
+
+    public void setCloudService(final CloudService cloudService) {
+        this.cloudService = cloudService;
+    }
+
+    @Override
+    public Component resolveComponent(final String name, final CamelContext context) throws Exception {
+        switch (name) {
+        case KuraCloudComponent.DEFAULT_NAME:
+            final KuraCloudComponent component = new KuraCloudComponent(context, this.cloudService);
+            logger.debug("Created new cloud component: {}", component);
+            return component;
+        }
+        return null;
+    }
 
 }

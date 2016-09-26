@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.camel.component.Configuration;
 import org.eclipse.kura.cloud.factory.CloudServiceFactory;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -36,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CamelManager implements SelfConfiguringComponent, CloudServiceFactory {
+
     private static final Logger logger = LoggerFactory.getLogger(CamelManager.class);
 
     private static final String PID = "org.eclipse.kura.camel.cloud.factory.CamelManager";
@@ -100,7 +102,7 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
 
     /**
      * Add a new CamelFactory
-     * 
+     *
      * @param userPid
      *            the PID as entered by the user
      * @param properties
@@ -113,14 +115,14 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
 
         final Map<String, Object> props = new HashMap<>();
 
-        String xml = Properties.asString(properties, "xml");
+        String xml = Configuration.asString(properties, "xml");
         if (xml == null || xml.trim().isEmpty()) {
             xml = "<routes xmlns=\"http://camel.apache.org/schema/spring\"></routes>";
         }
 
         props.put("xml", xml);
 
-        final Integer serviceRanking = Properties.asInteger(properties, "serviceRanking");
+        final Integer serviceRanking = Configuration.asInteger(properties, "serviceRanking");
         if (serviceRanking != null) {
             props.put("serviceRanking", serviceRanking);
         }
@@ -169,7 +171,7 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
 
     /**
      * Enumerate all registered CamelFactory instances
-     * 
+     *
      * @return a PID (<code>kura.service.pid</code>) set of all registered CamelFactory instances
      */
     public static Set<String> lookupIds() {
@@ -199,7 +201,7 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
      * <p>
      * Right now this is a rather slim implementation used by CamelFactory and the CamelManager
      * </p>
-     * 
+     *
      * @param configurationService
      *            the configuration service to use
      * @param pid
@@ -215,7 +217,7 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
 
     @Override
     public void createConfiguration(String pid) throws KuraException {
-        add(pid, Collections.<String, Object>emptyMap());
+        add(pid, Collections.<String, Object> emptyMap());
     }
 
     @Override

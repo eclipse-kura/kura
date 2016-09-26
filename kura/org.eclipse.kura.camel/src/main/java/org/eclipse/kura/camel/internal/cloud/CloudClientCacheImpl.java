@@ -25,130 +25,132 @@ import org.slf4j.LoggerFactory;
 
 public class CloudClientCacheImpl implements CloudClientCache {
 
-	private final class CloudClientHandleImplementation implements CloudClientHandle {
-		private String applicationId;
+    private final class CloudClientHandleImplementation implements CloudClientHandle {
 
-		private CloudClient client;
+        private final String applicationId;
 
-		public CloudClientHandleImplementation(String applicationId, CloudClient client) {
-			this.applicationId = applicationId;
-			this.client = client;
-		}
+        private final CloudClient client;
 
-		@Override
-		public void close() throws Exception {
-			removeHandle(CloudClientHandleImplementation.this, applicationId, client);
-		}
+        public CloudClientHandleImplementation(String applicationId, CloudClient client) {
+            this.applicationId = applicationId;
+            this.client = client;
+        }
 
-		@Override
-		public CloudClient getClient() {
-			return client;
-		}
-	}
+        @Override
+        public void close() throws Exception {
+            removeHandle(CloudClientHandleImplementation.this, this.applicationId, this.client);
+        }
 
-	private final static Logger logger = LoggerFactory.getLogger(CloudClientCacheImpl.class);
+        @Override
+        public CloudClient getClient() {
+            return this.client;
+        }
+    }
 
-	private final CloudService cloudService;
+    private final static Logger logger = LoggerFactory.getLogger(CloudClientCacheImpl.class);
 
-	private final Map<String, Set<CloudClientHandle>> cache = new HashMap<String, Set<CloudClientHandle>>();
+    private final CloudService cloudService;
 
-	public CloudClientCacheImpl(CloudService cloudService) {
-		this.cloudService = cloudService;
-	}
+    private final Map<String, Set<CloudClientHandle>> cache = new HashMap<>();
 
-	@Override
-	public synchronized CloudClientHandle getOrCreate(final String applicationId) {
-		try {
-			Set<CloudClientHandle> set = this.cache.get(applicationId);
-			if (set == null) {
-				logger.debug("CloudClient for application ID {} not found. Creating new one.", applicationId);
-				set = new HashSet<CloudClientHandle>();
-				this.cache.put(applicationId, set);
-			} else {
-				logger.debug("CloudClient for application ID {} ... cache hit.", applicationId);
-			}
+    public CloudClientCacheImpl(CloudService cloudService) {
+        this.cloudService = cloudService;
+    }
 
-			boolean created = false;
-			CloudClient client = null;
-			try {
+    @Override
+    public synchronized CloudClientHandle getOrCreate(final String applicationId) {
+        try {
+            Set<CloudClientHandle> set = this.cache.get(applicationId);
+            if (set == null) {
+                logger.debug("CloudClient for application ID {} not found. Creating new one.", applicationId);
+                set = new HashSet<>();
+                this.cache.put(applicationId, set);
+            } else {
+                logger.debug("CloudClient for application ID {} ... cache hit.", applicationId);
+            }
 
-				if (set.isEmpty()) {
-					logger.debug("Creating new cloud client for: {}", applicationId);
-					created = true;
-					client = this.cloudService.newCloudClient(applicationId);
-				} else {
-					client = set.iterator().next().getClient();
-					logger.debug("Re-using cloud client: {} -> {}", applicationId, client );
-				}
+            boolean created = false;
+            CloudClient client = null;
+            try {
 
-				try {
-					final CloudClientHandle handle = new CloudClientHandleImplementation(applicationId, client);
-					set.add(handle);
-					return handle;
-				} finally {
-					// mark as returned
-					client = null;
-				}
-			} finally {
-				if (created && client != null) {
-					// clean up leaked resource
-					client.release();
-				}
-			}
+                if (set.isEmpty()) {
+                    logger.debug("Creating new cloud client for: {}", applicationId);
+                    created = true;
+                    client = this.cloudService.newCloudClient(applicationId);
+                } else {
+                    client = set.iterator().next().getClient();
+                    logger.debug("Re-using cloud client: {} -> {}", applicationId, client);
+                }
 
-		} catch (KuraException e) {
-			throw new RuntimeException(e);
-		}
-	}
+                try {
+                    final CloudClientHandle handle = new CloudClientHandleImplementation(applicationId, client);
+                    set.add(handle);
+                    return handle;
+                } finally {
+                    // mark as returned
+                    client = null;
+                }
+            } finally {
+                if (created && client != null) {
+                    // clean up leaked resource
+                    client.release();
+                }
+            }
 
-	private void removeHandle(CloudClientHandle handle, String applicationId, CloudClient client) {
-		
-		logger.debug("Remove handle: {}", handle);
-		
-		final Set<CloudClientHandle> set;
+        } catch (KuraException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-		synchronized (this) {
-			set = this.cache.get(applicationId);
-			if (set == null)
-				return;
+    private void removeHandle(CloudClientHandle handle, String applicationId, CloudClient client) {
 
-			set.remove(handle); // don't process result, we clean up anyway
+        logger.debug("Remove handle: {}", handle);
 
-			if (set.isEmpty()) {
-				logger.debug("Removing last handle for: {}", applicationId);
-				this.cache.remove(applicationId);
-			}
-		}
+        final Set<CloudClientHandle> set;
 
-		if (set.isEmpty()) {
-			// release outside of lock
-			logger.debug("Releasing client: {} / {}", applicationId, client);
-			client.release();
-		}
-	}
+        synchronized (this) {
+            set = this.cache.get(applicationId);
+            if (set == null) {
+                return;
+            }
 
-	@Override
-	public void close() {
-		final List<CloudClientHandle> handles = new ArrayList<CloudClientHandle>();
-		synchronized (this) {
-			for (final Set<CloudClientHandle> set : this.cache.values()) {
-				handles.addAll(set);
-			}
-			this.cache.clear();
-		}
+            set.remove(handle); // don't process result, we clean up anyway
 
-		// release outside the lock
+            if (set.isEmpty()) {
+                logger.debug("Removing last handle for: {}", applicationId);
+                this.cache.remove(applicationId);
+            }
+        }
 
-		final Set<CloudClient> clients = new HashSet<CloudClient>();
-		for (final CloudClientHandle handle : handles) {
+        if (set.isEmpty()) {
+            // release outside of lock
+            logger.debug("Releasing client: {} / {}", applicationId, client);
+            client.release();
+        }
+    }
 
-			final CloudClient client = handle.getClient();
+    @Override
+    public void close() {
+        final List<CloudClientHandle> handles = new ArrayList<>();
+        synchronized (this) {
+            for (final Set<CloudClientHandle> set : this.cache.values()) {
+                handles.addAll(set);
+            }
+            this.cache.clear();
+        }
 
-			if (clients.add(client)) {
-				client.release();
-				logger.info("Closing client: {}", client);
-			}
-		}
-	}
+        // release outside the lock
+
+        final Set<CloudClient> clients = new HashSet<>();
+        for (final CloudClientHandle handle : handles) {
+
+            final CloudClient client = handle.getClient();
+
+            if (clients.add(client)) {
+                client.release();
+                logger.info("Closing client: {}", client);
+            }
+        }
+    }
 
 }

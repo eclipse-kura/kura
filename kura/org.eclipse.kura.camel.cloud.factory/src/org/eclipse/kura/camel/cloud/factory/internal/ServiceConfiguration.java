@@ -11,19 +11,22 @@
 package org.eclipse.kura.camel.cloud.factory.internal;
 
 public class ServiceConfiguration {
+
     private String xml;
     private Integer serviceRanking;
 
     /**
      * Set the router XML
-     * @param xml must not be {@code null}
+     * 
+     * @param xml
+     *            must not be {@code null}
      */
     public void setXml(String xml) {
         this.xml = xml;
     }
 
     public String getXml() {
-        return xml;
+        return this.xml;
     }
 
     public void setServiceRanking(Integer serviceRanking) {
@@ -31,37 +34,44 @@ public class ServiceConfiguration {
     }
 
     public Integer getServiceRanking() {
-        return serviceRanking;
+        return this.serviceRanking;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((serviceRanking == null) ? 0 : serviceRanking.hashCode());
-        result = prime * result + ((xml == null) ? 0 : xml.hashCode());
+        result = prime * result + (this.serviceRanking == null ? 0 : this.serviceRanking.hashCode());
+        result = prime * result + (this.xml == null ? 0 : this.xml.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ServiceConfiguration other = (ServiceConfiguration) obj;
-        if (serviceRanking == null) {
-            if (other.serviceRanking != null)
+        if (this.serviceRanking == null) {
+            if (other.serviceRanking != null) {
                 return false;
-        } else if (!serviceRanking.equals(other.serviceRanking))
+            }
+        } else if (!this.serviceRanking.equals(other.serviceRanking)) {
             return false;
-        if (xml == null) {
-            if (other.xml != null)
+        }
+        if (this.xml == null) {
+            if (other.xml != null) {
                 return false;
-        } else if (!xml.equals(other.xml))
+            }
+        } else if (!this.xml.equals(other.xml)) {
             return false;
+        }
         return true;
     }
 

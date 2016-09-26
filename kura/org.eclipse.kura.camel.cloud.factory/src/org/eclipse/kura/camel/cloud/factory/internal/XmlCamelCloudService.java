@@ -29,13 +29,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class XmlCamelCloudService {
+
     private static final Logger logger = LoggerFactory.getLogger(XmlCamelCloudService.class);
 
-    private BundleContext context;
+    private final BundleContext context;
 
-    private String pid;
+    private final String pid;
 
-    private ServiceConfiguration configuration;
+    private final ServiceConfiguration configuration;
 
     private DefaultCamelCloudService service;
 
@@ -61,8 +62,7 @@ public class XmlCamelCloudService {
 
         // set up
 
-        final KuraCloudComponent cloudComponent = new KuraCloudComponent(this.router);
-        cloudComponent.setCloudService(this.service);
+        final KuraCloudComponent cloudComponent = new KuraCloudComponent(this.router, this.service);
         this.router.addComponent("kura-cloud", cloudComponent);
 
         final RoutesDefinition routesDefinition = this.router.loadRoutesDefinition(new ByteArrayInputStream(this.configuration.getXml().getBytes()));
@@ -84,7 +84,7 @@ public class XmlCamelCloudService {
         if (this.configuration.getServiceRanking() != null) {
             props.put(Constants.SERVICE_RANKING, this.configuration.getServiceRanking());
         }
-        
+
         this.handle = this.context.registerService(CloudService.class, this.service, props);
     }
 

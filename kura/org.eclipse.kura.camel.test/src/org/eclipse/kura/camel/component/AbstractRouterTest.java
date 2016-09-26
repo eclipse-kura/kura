@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc - initial API and implementation
  *******************************************************************************/
-package org.eclipse.kura.camel.router;
+package org.eclipse.kura.camel.component;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -20,6 +20,7 @@ import org.apache.camel.Route;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  * Unit test base for testing an activated router
@@ -32,7 +33,7 @@ public abstract class AbstractRouterTest {
     @Before
     public void before() throws Exception {
         this.router = createRouter();
-        this.router.start();
+        this.router.activate(FrameworkUtil.getBundle(AbstractRouterTest.class).getBundleContext(), Collections.<String, Object> emptyMap());
     }
 
     @After
@@ -41,11 +42,11 @@ public abstract class AbstractRouterTest {
     }
 
     protected Route firstRoute() {
-        return this.router.getContext().getRoutes().iterator().next();
+        return this.router.getCamelContext().getRoutes().iterator().next();
     }
 
     protected static Map<String, Object> xmlProperties(String resourceName) {
-        return Collections.<String, Object>singletonMap(XML_PROPERTY, readStringResource(resourceName));
+        return Collections.<String, Object> singletonMap(XML_PROPERTY, readStringResource(resourceName));
     }
 
     protected static AbstractXmlCamelComponent createRouter() {

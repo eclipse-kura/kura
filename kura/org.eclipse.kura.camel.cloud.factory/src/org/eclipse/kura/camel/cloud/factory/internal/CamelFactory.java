@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.kura.camel.cloud.factory.internal;
 
-import static org.eclipse.kura.camel.cloud.factory.internal.Properties.asInteger;
-import static org.eclipse.kura.camel.cloud.factory.internal.Properties.asString;
+import static org.eclipse.kura.camel.component.Configuration.asInteger;
+import static org.eclipse.kura.camel.component.Configuration.asString;
 
 import java.util.Map;
 
@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CamelFactory implements ConfigurableComponent {
+
     private static final Logger logger = LoggerFactory.getLogger(CamelFactory.class);
 
     public static final String FACTORY_ID = "org.eclipse.kura.camel.cloud.factory.CamelFactory";
@@ -114,8 +115,9 @@ public class CamelFactory implements ConfigurableComponent {
 
     private static boolean shouldDelete(Map<String, Object> properties) {
         final Object value = properties.get("delete");
-        if (value == null)
+        if (value == null) {
             return false;
+        }
         return "true".equals(value.toString());
     }
 

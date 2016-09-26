@@ -12,6 +12,7 @@
 package org.eclipse.kura.example.camel.aggregation;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.eclipse.kura.camel.component.Configuration.asInt;
 
 import java.util.Map;
 import java.util.Random;
@@ -19,7 +20,7 @@ import java.util.Random;
 import org.apache.camel.Exchange;
 import org.apache.camel.processor.aggregate.AggregationStrategy;
 import org.apache.camel.support.ExpressionAdapter;
-import org.eclipse.kura.camel.router.AbstractCamelRouter;
+import org.eclipse.kura.camel.component.AbstractJavaCamelComponent;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Example of the Kura Camel application.
  */
-public class GatewayRouter extends AbstractCamelRouter implements ConfigurableComponent {
+public class GatewayRouter extends AbstractJavaCamelComponent implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(GatewayRouter.class);
 
@@ -93,15 +94,5 @@ public class GatewayRouter extends AbstractCamelRouter implements ConfigurableCo
 
         this.minimum = minimum;
         this.maximum = maximum;
-    }
-
-    private static int asInt(Map<String, Object> properties, String key, int defaultValue) {
-        final Object value = properties.get(key);
-
-        if (value instanceof Number) {
-            return ((Number) value).intValue();
-        }
-
-        return defaultValue;
     }
 }

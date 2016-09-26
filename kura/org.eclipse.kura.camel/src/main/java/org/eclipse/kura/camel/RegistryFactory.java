@@ -8,18 +8,11 @@
  * Contributors:
  *     Red Hat Inc - initial API and implementation
  *******************************************************************************/
-package org.eclipse.kura.camel.internal.cloud;
+package org.eclipse.kura.camel;
 
-import org.eclipse.kura.cloud.CloudClient;
+import org.apache.camel.spi.Registry;
 
-public interface CloudClientCache {
+public interface RegistryFactory {
 
-    interface CloudClientHandle extends AutoCloseable {
-
-        CloudClient getClient();
-    }
-
-    CloudClientHandle getOrCreate(String applicationId);
-
-    void close();
+    public Registry createRegistry();
 }

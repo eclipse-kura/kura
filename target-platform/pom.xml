@@ -21,6 +21,25 @@
 		<module>p2-repo-common</module>
 		<module>p2-repo-equinox_3.8.1</module>
 	</modules>
+	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<release.repo.id>repo.eclipse.org</release.repo.id>
+		<release.repo.url>https://repo.eclipse.org/content/repositories/kura-releases/</release.repo.url>
+		<snapshot.repo.id>repo.eclipse.org</snapshot.repo.id>
+		<snapshot.repo.url>https://repo.eclipse.org/content/repositories/kura-snapshots/</snapshot.repo.url>
+	</properties>
+	
+	<distributionManagement>
+		<repository>
+			<id>${release.repo.id}</id>
+			<url>${release.repo.url}</url>
+		</repository>
+		<snapshotRepository>
+			<id>${snapshot.repo.id}</id>
+			<url>${snapshot.repo.url}</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<profiles>
 		<profile>
@@ -53,10 +72,6 @@
 		</repository>
 	</repositories>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -73,17 +88,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	
-	<distributionManagement>
-		<repository>
-			<id>repo.eclipse.org</id>
-			<name>Kura Repository - Releases</name>
-			<url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>repo.eclipse.org</id>
-			<name>Kura Repository - Snapshots</name>
-			<url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
 </project>

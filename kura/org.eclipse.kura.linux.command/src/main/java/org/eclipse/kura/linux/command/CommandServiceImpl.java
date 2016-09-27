@@ -8,15 +8,24 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> Fix concurrency issue with scripts
+ *     		Clean up script processing to not rely on command line tools
  *******************************************************************************/
 package org.eclipse.kura.linux.command;
 
+import static java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE;
+import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
+import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
+
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.EnumSet;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.command.CommandService;
@@ -25,149 +34,96 @@ import org.eclipse.kura.core.util.SafeProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CommandServiceImpl  implements CommandService{
-	
+public class CommandServiceImpl implements CommandService {
+
 	private static final Logger s_logger = LoggerFactory.getLogger(CommandServiceImpl.class);
-	
-	private static final String SCRIPT_FILE = System.getProperty("java.io.tmpdir") + File.separator + "runCmd.sh";
-	
-	private File	m_scriptFile;
+	private static final File TEMP_DIR = new File(System.getProperty("java.io.tmpdir"));
 
 	// ----------------------------------------------------------------
 	//
-	//   Activation APIs
+	// Activation APIs
 	//
 	// ----------------------------------------------------------------
 	protected void activate() {
 		s_logger.debug("Activating...");
 	}
-	
+
 	protected void deactivate() {
 		s_logger.debug("Deactivating...");
 	}
-	
+
 	// ----------------------------------------------------------------
 	//
-	//   Service APIs
+	// Service APIs
 	//
 	// ----------------------------------------------------------------
-	
-	public String execute(String cmd) throws KuraException {
+
+	public String execute(final String cmd) throws KuraException {
 		if (cmd == null) {
 			s_logger.debug("null command");
 			return "null command";
 		}
-	
-		// Delete script file if it exists
-		m_scriptFile = new File(SCRIPT_FILE);
-		if (m_scriptFile.exists()) {
-			try {
-				m_scriptFile.delete();
-			} catch (SecurityException se) {
-				s_logger.error("File " + m_scriptFile + " cannot be deleted");
-			}
-		}
-		
-		// Create script file and set appropriate permissions
-		createScript(cmd);
-		setPermissions();
-		
-		// Run script
-		String output = runScript();
-		
-		return output;
-	}
-	
-	// ----------------------------------------------------------------
-	//
-	//   Private Methods
-	//
-	// ----------------------------------------------------------------
-	private void createScript(String cmd) throws KuraException {
-		try {
-			cmd = "#!/bin/sh\n\n" + 
-					"cd " + System.getProperty("java.io.tmpdir") + "\n" +
-					cmd;
-			
-			FileOutputStream fos = new FileOutputStream(m_scriptFile);
-			PrintWriter pw = new PrintWriter(fos);
-			pw.write(cmd);
-			pw.write("\n");
-			pw.flush();
-			fos.getFD().sync();
-			pw.close();
-			fos.close();
-		} catch (IOException e) {
-			throw KuraException.internalError(e);
-		}
-	}
-	
-	private void setPermissions() throws KuraException {
-		SafeProcess procChmod = null;
-		SafeProcess procDos = null;
-		
-		try {
-			procChmod = ProcessUtil.exec("chmod 700 " + m_scriptFile.toString());
-			procChmod.waitFor();
-			
-			procDos = ProcessUtil.exec("dos2unix " + m_scriptFile.toString());
-			procDos.waitFor();
-		} catch (Exception e) {
-			throw KuraException.internalError(e);
-		} finally {
-			if (procChmod != null) ProcessUtil.destroy(procChmod);
-			if (procDos != null) ProcessUtil.destroy(procDos);
-		}
-		
-	}
-	
-	private String runScript() throws KuraException{
-		SafeProcess procUserScript = null;
-		BufferedReader ibr = null;
-		BufferedReader ebr = null;
-		StringBuilder sb = new StringBuilder();
-		try {
-			procUserScript = ProcessUtil.exec("sh " + m_scriptFile.toString());
-			procUserScript.waitFor();
-			
-			ibr = new BufferedReader(new InputStreamReader(procUserScript.getInputStream()));
-			ebr = new BufferedReader(new InputStreamReader(procUserScript.getErrorStream()));
 
-			BufferedReader br = null;
-			if (procUserScript.exitValue() == 0) {
-				br = ibr;
+		// Delete script file if it exists
+		try {
+			final Path scriptFile = Files.createTempFile("script-", ".sh");
+			try {
+				createScript(scriptFile, cmd);
+				return runScript(scriptFile);
+			} finally {
+				Files.deleteIfExists(scriptFile);
 			}
-			else {
-				br = ebr;
-			}
-			
-			String line = null;
-			String newLine = "";
-			while ((line = br.readLine()) != null) {
-				sb.append(newLine);
-				sb.append(line);
-				newLine = "\n";
+		} catch (Exception e) {
+			throw KuraException.internalError(e, "Failed to execute command");
+		}
+	}
+
+	// ----------------------------------------------------------------
+	//
+	// Private Methods
+	//
+	// ----------------------------------------------------------------
+	private void createScript(final Path scriptFile, final String cmd) throws IOException {
+		try (final OutputStream fos = Files.newOutputStream(scriptFile); final PrintWriter pw = new PrintWriter(fos);) {
+			pw.println("#!/bin/sh");
+			pw.println();
+			pw.println(cmd.replace("\r\n", "\n"));
+		}
+		Files.setPosixFilePermissions(scriptFile, EnumSet.of(OWNER_EXECUTE, OWNER_READ, OWNER_WRITE));
+	}
+
+	private String runScript(final Path scriptFile) throws KuraException {
+		SafeProcess procUserScript = null;
+		final StringBuilder sb = new StringBuilder();
+		try {
+			procUserScript = ProcessUtil.exec(TEMP_DIR, scriptFile.toAbsolutePath().toString());
+			procUserScript.waitFor();
+
+			try (BufferedReader ibr = new BufferedReader(new InputStreamReader(procUserScript.getInputStream()));
+					BufferedReader ebr = new BufferedReader(new InputStreamReader(procUserScript.getErrorStream()));) {
+
+				final BufferedReader br;
+				if (procUserScript.exitValue() == 0) {
+					br = ibr;
+				} else {
+					br = ebr;
+				}
+
+				String line;
+				String newLine = "";
+				while ((line = br.readLine()) != null) {
+					sb.append(newLine);
+					sb.append(line);
+					newLine = "\n";
+				}
 			}
 		} catch (Exception e) {
 			throw KuraException.internalError(e);
 		} finally {
-			if (ibr != null) {
-				try {
-					ibr.close();
-				} catch (IOException e) {
-					s_logger.warn("Cannot close process input stream", e);
-				}
-			}
-			if (ebr != null) {
-				try {
-					ebr.close();
-				} catch (IOException e) {
-					s_logger.warn("Cannot close process error stream", e);
-				}
-			}
-			if (procUserScript != null) ProcessUtil.destroy(procUserScript);
+			if (procUserScript != null)
+				ProcessUtil.destroy(procUserScript);
 		}
-		
+
 		return sb.toString();
 	}
 }

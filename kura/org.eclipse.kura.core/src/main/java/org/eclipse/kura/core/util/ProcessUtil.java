@@ -8,15 +8,19 @@
  *
  * Contributors:
  *     Eurotech
+ *     Jens Reimann <jreimann@redhat.com> - Clean up a bit
  *******************************************************************************/
 package org.eclipse.kura.core.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.StringTokenizer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +29,24 @@ public class ProcessUtil
 {
 	private static final Logger s_logger = LoggerFactory.getLogger(ProcessUtil.class);
 
-	private static final ExecutorService s_processExecutor = Executors.newSingleThreadExecutor();
+	private static final AtomicLong THREAD_COUNTER = new AtomicLong();
+	private static final ExecutorService s_processExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+		
+		@Override
+		public Thread newThread(Runnable r) {
+			Thread t = new Thread(r);
+			t.setName("SafeProcessExecutor/" + THREAD_COUNTER.incrementAndGet());
+			return t;
+		}
+	});
     
 	public static SafeProcess exec(String command)
+			throws IOException
+	{
+		return exec(null, command);
+	}
+	
+	public static SafeProcess exec(File directory, String command)
 		throws IOException
 	{
 		// Use StringTokenizer since this is the method documented by Runtime
@@ -39,19 +58,24 @@ public class ProcessUtil
 			cmdArray[i] = st.nextToken();
 		}
 		
-		return exec(cmdArray);
+		return exec(directory, cmdArray);
 	}
 
 	public static SafeProcess exec(final String[] cmdarray)
+			throws IOException
+	{
+		return exec ( null, cmdarray );
+	}
+	
+	public static SafeProcess exec(final File directory, final String[] cmdarray)
 		throws IOException
 	{		
 		// Serialize process executions. One at a time so we can consume all streams.
         Future<SafeProcess> futureSafeProcess = s_processExecutor.submit(new Callable<SafeProcess>() {
             @Override
             public SafeProcess call() throws Exception {
-                Thread.currentThread().setName("SafeProcessExecutor");
                 SafeProcess safeProcess = new SafeProcess();
-                safeProcess.exec(cmdarray);
+                safeProcess.exec(directory, cmdarray);
                 return safeProcess;
             }
         });

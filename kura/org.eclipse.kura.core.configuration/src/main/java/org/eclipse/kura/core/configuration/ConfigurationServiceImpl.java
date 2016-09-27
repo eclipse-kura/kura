@@ -501,6 +501,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             s_logger.warn("Either kura.service.pid {} or service.pid {} are null", pid, servicePid);
             return;
         }
+        
         if (!m_allActivatedPids.contains(pid)) {
             // register the component instance
             s_logger.info("Registration of ConfigurableComponent {} by {}...", pid, this);
@@ -1073,7 +1074,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                             // set kura.service.pid if missing
                             Map<String, Object> newProperties = new HashMap<String, Object>(props);
                             if (!newProperties.containsKey(ConfigurationService.KURA_SERVICE_PID)) {
-                                newProperties.put(ConfigurationService.KURA_SERVICE_PID, newProperties.get(Constants.SERVICE_PID));
+                                newProperties.put(ConfigurationService.KURA_SERVICE_PID, config.getPid());
                             }
 
                             cfg.update(CollectionsUtil.mapToDictionary(newProperties));

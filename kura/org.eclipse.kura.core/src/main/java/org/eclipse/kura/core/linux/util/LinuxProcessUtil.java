@@ -37,31 +37,31 @@ public class LinuxProcessUtil {
 	private static final boolean IS_INTEL_EDISON;
 
 	static {
-	    final BundleContext ctx = FrameworkUtil.getBundle(LinuxProcessUtil.class).getBundleContext();
-	    
-	    final ServiceReference<SystemService> systemServiceRef = ctx.getServiceReference(SystemService.class);
-	    if ( systemServiceRef == null ) {
-	        throw new IllegalStateException("Unable to find instance of: " + SystemService.class.getName());
-	    }
-	    
-	    final SystemService service = ctx.getService(systemServiceRef);
-	    if ( service == null ) {
-            throw new IllegalStateException("Unable to get instance of: " + SystemService.class.getName());
-        }
-	    
-	    try {
-	        IS_INTEL_EDISON = PLATFORM_INTEL_EDISON.equals(service.getPlatform());
-	    }
-	    finally
-	    {
-	        ctx.ungetService(systemServiceRef);
-	    }
+		final BundleContext ctx = FrameworkUtil.getBundle(LinuxProcessUtil.class).getBundleContext();
+		
+		final ServiceReference<SystemService> systemServiceRef = ctx.getServiceReference(SystemService.class);
+		if ( systemServiceRef == null ) {
+			throw new IllegalStateException("Unable to find instance of: " + SystemService.class.getName());
+		}
+		
+		final SystemService service = ctx.getService(systemServiceRef);
+		if ( service == null ) {
+			throw new IllegalStateException("Unable to get instance of: " + SystemService.class.getName());
+		}
+		
+		try {
+			IS_INTEL_EDISON = PLATFORM_INTEL_EDISON.equals(service.getPlatform());
+		}
+		finally
+		{
+			ctx.ungetService(systemServiceRef);
+		}
 	}
 
-	public static int start(String command, boolean wait, boolean background)
-			throws Exception {
-		SafeProcess proc = null;
-		try {
+    public static int start(String command, boolean wait, boolean background)
+            throws Exception {
+        SafeProcess proc = null;
+        try {
 			s_logger.info("executing: " + command);
 			proc = ProcessUtil.exec(command);
 			// FIXME:MC this leads to a process leak when called with false

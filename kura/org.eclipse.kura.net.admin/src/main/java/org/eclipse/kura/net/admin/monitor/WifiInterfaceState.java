@@ -18,7 +18,7 @@ import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiMode;
 
 public class WifiInterfaceState extends InterfaceState {
-
+	
 	/**
 	 * WifiInterfaceState
 	 * 
@@ -29,8 +29,10 @@ public class WifiInterfaceState extends InterfaceState {
 	public WifiInterfaceState(String interfaceName, WifiMode wifiMode) throws KuraException {
 		super(NetInterfaceType.WIFI, interfaceName);
 		if (WifiMode.MASTER.equals(wifiMode)) {
-			if (HostapdManager.isRunning(interfaceName) && WifiMode.MASTER.equals(LinuxNetworkUtil.getWifiMode(interfaceName))) {
-				m_link = true;
+			if (m_link) {
+				if (!HostapdManager.isRunning(interfaceName) || !WifiMode.MASTER.equals(LinuxNetworkUtil.getWifiMode(interfaceName))) {
+					m_link = false;
+				} 
 			}
 		}
 	}

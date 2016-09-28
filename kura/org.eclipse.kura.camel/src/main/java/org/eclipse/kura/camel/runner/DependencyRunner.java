@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc - initial API and implementation
  *******************************************************************************/
-package org.eclipse.kura.camel;
+package org.eclipse.kura.camel.runner;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import org.eclipse.kura.camel.ServiceDependency.Handle;
+import org.eclipse.kura.camel.runner.ServiceDependency.Handle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

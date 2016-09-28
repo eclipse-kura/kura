@@ -27,8 +27,25 @@ Import-Package: org.apache.camel;version="[2.17.2,3.0.0)",
  org.osgi.util.tracker;version="1.5.0",
  org.slf4j;version="1.7.0"
 Export-Package: org.eclipse.kura.camel;version="1.1.0",
- org.eclipse.kura.camel.camelcloud;version="1.1.0",
- org.eclipse.kura.camel.cloud;version="1.1.0",
- org.eclipse.kura.camel.component;version="1.1.0",
- org.eclipse.kura.camel.router;version="1.1.0"
+ org.eclipse.kura.camel.camelcloud;version="1.1.0";uses:="org.apache.camel,org.eclipse.kura.cloud",
+ org.eclipse.kura.camel.cloud;version="1.1.0";
+  uses:="org.apache.camel,
+   org.apache.camel.impl,
+   org.apache.camel.spi,
+   org.eclipse.kura.camel.internal.cloud,
+   org.eclipse.kura.message,
+   org.eclipse.kura.cloud",
+ org.eclipse.kura.camel.component;version="1.1.0";
+  uses:="org.osgi.framework,
+   org.apache.camel.builder,
+   org.eclipse.kura.camel.runner,
+   org.apache.camel,
+   org.eclipse.kura.configuration",
+ org.eclipse.kura.camel.router;version="1.1.0";uses:="org.osgi.framework,org.apache.camel,org.eclipse.kura.camel.component",
+ org.eclipse.kura.camel.runner;version="1.1.0";
+  uses:="org.osgi.framework,
+   org.apache.camel.builder,
+   org.apache.camel,
+   org.apache.camel.spi,
+   org.apache.camel.model"
 Service-Component: OSGI-INF/*.xml

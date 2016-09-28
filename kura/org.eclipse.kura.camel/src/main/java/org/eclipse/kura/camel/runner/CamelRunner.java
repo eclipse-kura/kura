@@ -8,11 +8,8 @@
  * Contributors:
  *     Red Hat Inc - initial API and implementation
  *******************************************************************************/
-package org.eclipse.kura.camel;
+package org.eclipse.kura.camel.runner;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -21,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Route;
@@ -33,107 +31,33 @@ import org.apache.camel.model.OptionalIdentifiedDefinition;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.RoutesDefinition;
 import org.apache.camel.spi.Registry;
+import org.eclipse.kura.camel.cloud.KuraCloudComponent;
+import org.eclipse.kura.cloud.CloudService;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A lifecycle manager for running a CamelContext
+ * <p>
+ * Use the {@link Builder} class to create instances of the {@link CamelRunner}.
+ * </p>
+ */
 public class CamelRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(CamelRunner.class);
 
-    public interface RoutesProvider {
-
-        /**
-         * Apply the desired state of camel routes to the context
-         * <p>
-         * <strong>Note: </strong> This method may need to stop and remove
-         * routes which are no longer used
-         * </p>
-         *
-         * @param camelContext
-         *            the context the routes should by applied to
-         * @throws Exception
-         *             if anything goes wrong
-         */
-        public void applyRoutes(CamelContext camelContext) throws Exception;
-    }
-
-    public static class EmptyRoutesProvider implements RoutesProvider {
-
-        public static final EmptyRoutesProvider INSTANCE = new EmptyRoutesProvider();
-
-        private EmptyRoutesProvider() {
-        }
-
-        @Override
-        public void applyRoutes(final CamelContext camelContext) throws Exception {
-            removeRoutes(camelContext, fromRoutes(camelContext.getRoutes()));
-        }
-    }
-
-    public static class BuilderRoutesProvider implements RoutesProvider {
-
-        private final RouteBuilder builder;
-
-        public BuilderRoutesProvider(final RouteBuilder builder) throws Exception {
-            this.builder = builder;
-        }
-
-        @Override
-        public void applyRoutes(CamelContext camelContext) throws Exception {
-            removeMissingRoutes(camelContext, this.builder.getRouteCollection().getRoutes());
-            camelContext.addRoutes(this.builder);
-        }
-    }
-
-    public static abstract class AbstractRoutesProvider implements RoutesProvider {
-
-        @Override
-        public void applyRoutes(final CamelContext camelContext) throws Exception {
-
-            final RoutesDefinition routes = getRoutes(camelContext);
-
-            removeMissingRoutes(camelContext, routes.getRoutes());
-            camelContext.addRouteDefinitions(routes.getRoutes());
-        }
-
-        protected abstract RoutesDefinition getRoutes(CamelContext camelContext) throws Exception;
-    }
-
-    public static class SimpleRoutesProvider extends AbstractRoutesProvider {
-
-        private final RoutesDefinition routes;
-
-        public SimpleRoutesProvider(RoutesDefinition routes) {
-            Objects.requireNonNull(routes);
-            this.routes = routes;
-        }
-
-        @Override
-        protected RoutesDefinition getRoutes(final CamelContext camelContext) throws Exception {
-            return this.routes;
-        }
-    }
-
-    public static class XmlRoutesProvider extends AbstractRoutesProvider {
-
-        private final String xml;
-
-        public XmlRoutesProvider(final String xml) {
-            Objects.requireNonNull(xml);
-            this.xml = xml;
-        }
-
-        @Override
-        protected RoutesDefinition getRoutes(final CamelContext camelContext) throws Exception {
-            try (final InputStream in = new ByteArrayInputStream(this.xml.getBytes(StandardCharsets.UTF_8))) { // just always close it
-                return camelContext.loadRoutesDefinition(in);
-            }
-        }
-    }
-
+    /**
+     * Creates a new {@link ContextFactory} backed by {@link OsgiDefaultCamelContext}
+     * 
+     * @param bundleContext
+     *            the bundle context to use
+     * @return a context factory creating {@link OsgiDefaultCamelContext}s
+     */
     public static ContextFactory createOsgiFactory(final BundleContext bundleContext) {
         Objects.requireNonNull(bundleContext);
 
@@ -146,6 +70,13 @@ public class CamelRunner {
         };
     }
 
+    /**
+     * Creates a new {@link RegistryFactory} backed by {@link OsgiServiceRegistry}
+     * 
+     * @param bundleContext
+     *            the bundle context to use
+     * @return a registry factory creating {@link OsgiServiceRegistry}s
+     */
     public static RegistryFactory createOsgiRegistry(final BundleContext bundleContext) {
         Objects.requireNonNull(bundleContext);
 
@@ -189,14 +120,14 @@ public class CamelRunner {
         };
     }
 
-    public interface BeforeStart {
-
-        public void beforeStart(CamelContext camelContext) throws Exception;
-    }
-
+    /**
+     * A builder for creating {@link CamelRunner} instances
+     */
     public static final class Builder {
 
-        private final RegistryFactory registryFactory;
+        private BundleContext bundleContext;
+
+        private RegistryFactory registryFactory;
 
         private ContextFactory contextFactory;
 
@@ -209,17 +140,13 @@ public class CamelRunner {
         private int shutdownTimeout = 5;
 
         public Builder() {
-            final BundleContext bundleContext = FrameworkUtil.getBundle(CamelRunner.class).getBundleContext();
-
-            this.registryFactory = createOsgiRegistry(bundleContext);
-            this.contextFactory = createOsgiFactory(bundleContext);
-
-            this.dependencies = new LinkedList<>();
-            this.beforeStarts = new LinkedList<>();
+            this(FrameworkUtil.getBundle(CamelRunner.class).getBundleContext());
         }
 
         public Builder(final BundleContext bundleContext) {
             Objects.requireNonNull(bundleContext);
+
+            this.bundleContext = bundleContext;
 
             this.registryFactory = createOsgiRegistry(bundleContext);
             this.contextFactory = createOsgiFactory(bundleContext);
@@ -231,6 +158,7 @@ public class CamelRunner {
         public Builder(final Builder other) {
             Objects.requireNonNull(other);
 
+            this.bundleContext = other.bundleContext;
             this.registryFactory = other.registryFactory;
             this.contextFactory = other.contextFactory;
             this.dependencies = new LinkedList<>(other.dependencies);
@@ -239,12 +167,32 @@ public class CamelRunner {
             this.shutdownTimeout = other.shutdownTimeout;
         }
 
-        public Builder disableJmx(boolean disableJmx) {
+        /**
+         * Disable the use of JMX in the CamelContext
+         * <p>
+         * JMX is disabled by default.
+         * </p>
+         * 
+         * @param disableJmx
+         *            whether JMX should be disabled or not
+         * @return the builder instance
+         */
+        public Builder disableJmx(final boolean disableJmx) {
             this.disableJmx = disableJmx;
             return this;
         }
 
-        public Builder shutdownTimeout(int shutdownTimeout) {
+        /**
+         * The shutdown timeout
+         * <p>
+         * This defaults to 5 seconds
+         * </p>
+         * 
+         * @param shutdownTimeout
+         *            The shutdown timeout in seconds
+         * @return the builder instance
+         */
+        public Builder shutdownTimeout(final int shutdownTimeout) {
             this.shutdownTimeout = shutdownTimeout;
             return this;
         }
@@ -255,6 +203,13 @@ public class CamelRunner {
             return contextFactory(createOsgiFactory(bundleContext));
         }
 
+        public Builder registryFactory(final RegistryFactory registryFactory) {
+            Objects.requireNonNull(registryFactory);
+
+            this.registryFactory = registryFactory;
+            return this;
+        }
+
         public Builder contextFactory(final ContextFactory contextFactory) {
             Objects.requireNonNull(contextFactory);
 
@@ -262,11 +217,110 @@ public class CamelRunner {
             return this;
         }
 
-        public <T> Builder dependOn(final BundleContext bundleContext, final Filter filter, final ServiceConsumer<T, CamelContext> consumer) {
+        public <T> Builder dependOn(final Filter filter, final ServiceConsumer<T, CamelContext> consumer) {
+            return dependOn(null, filter, consumer);
+        }
+
+        public <T> Builder dependOn(BundleContext bundleContext, final Filter filter, final ServiceConsumer<T, CamelContext> consumer) {
+            Objects.requireNonNull(filter);
+            Objects.requireNonNull(consumer);
+
+            if (bundleContext == null) {
+                bundleContext = Builder.this.bundleContext;
+            }
+
             this.dependencies.add(new DefaultServiceDependency<>(bundleContext, filter, consumer));
+
             return this;
         }
 
+        /**
+         * Depend on a specific {@link CloudService} instance
+         * <p>
+         * If a filter is specified then it will be combined with the filter for the object class of the {@link CloudService}.
+         * If the filter expression is omitted then only the object class filter will be used.
+         * </p>
+         * 
+         * @param bundleContext
+         *            the bundle context to use for service lookup
+         * @param filter
+         *            the filter expression to use searching for the cloud service instance
+         * @param consumer
+         *            the consumer processing the service instance
+         * @return the builder instance
+         */
+        public Builder cloudService(BundleContext bundleContext, final String filter, final ServiceConsumer<CloudService, CamelContext> consumer) {
+            final String baseFilter = String.format("(%s=%s)", Constants.OBJECTCLASS, CloudService.class.getName());
+
+            try {
+                if (filter != null && !filter.trim().isEmpty()) {
+                    // combined filter
+                    final Filter f = FrameworkUtil.createFilter(String.format("(&%s%s)", baseFilter, filter));
+                    return dependOn(bundleContext, f, consumer);
+                } else {
+                    // empty custom filter, so only filter for class name
+                    return dependOn(bundleContext, FrameworkUtil.createFilter(baseFilter), consumer);
+                }
+            } catch (InvalidSyntaxException e) {
+                throw new RuntimeException("Failed to parse filter", e);
+            }
+        }
+
+        /**
+         * Depend on a specific {@link CloudService} instance
+         * <p>
+         * The cloud service will be injected into the camel context as component "kura-cloud".
+         * </p>
+         * <p>
+         * If a filter is specified then it will be combined with the filter for the object class of the {@link CloudService}.
+         * If the filter expression is omitted then only the object class filter will be used.
+         * </p>
+         * 
+         * @param filter
+         *            optional filter expression
+         * @return the builder instance
+         */
+        public Builder cloudService(final String filter) {
+            return cloudService((BundleContext) null, filter, addAsCloudComponent("kura-cloud"));
+        }
+
+        /**
+         * Depend on a specific {@link CloudService} instance by key and value
+         * <p>
+         * This is a convenience method for {@link #cloudService(String)}. It will effectively call
+         * this method with a filter of {@code "(" + attribute + "=" + value + ")"}
+         * </p>
+         * 
+         * @param attribute
+         *            the OSGi attribute to look for
+         * @param value
+         *            the value the OSGi must have
+         * @return the builder instance
+         */
+        public Builder cloudService(final String attribute, final String value) {
+            Objects.requireNonNull(attribute);
+            Objects.requireNonNull(value);
+
+            return cloudService(String.format("(%s=%s)", attribute, value));
+        }
+
+        public static ServiceConsumer<CloudService, CamelContext> addAsCloudComponent(final String componentName) {
+            return new ServiceConsumer<CloudService, CamelContext>() {
+
+                @Override
+                public void consume(CamelContext context, CloudService service) {
+                    context.addComponent(componentName, new KuraCloudComponent(context, service));
+                }
+            };
+        }
+
+        /**
+         * Add an operation which will be executed before the Camel context is started
+         * 
+         * @param beforeStart
+         *            the action to start
+         * @return the builder instance
+         */
         public Builder addBeforeStart(final BeforeStart beforeStart) {
             Objects.requireNonNull(beforeStart);
 
@@ -275,6 +329,16 @@ public class CamelRunner {
             return this;
         }
 
+        /**
+         * Build the actual CamelRunner instance based on the current configuration of the builder instance
+         * <p>
+         * Modifications which will be made to the builder after the {@link #build()} method was called will
+         * no affect the created CamelRunner instance. It is possible though to call the {@link #build()} method
+         * multiple times.
+         * </p>
+         * 
+         * @return the new instance
+         */
         public CamelRunner build() {
             final List<BeforeStart> beforeStarts = new ArrayList<>(this.beforeStarts);
             final List<ServiceDependency<?, CamelContext>> dependencies = new ArrayList<>(this.dependencies);
@@ -294,6 +358,7 @@ public class CamelRunner {
 
                     @Override
                     public void beforeStart(CamelContext camelContext) {
+                        camelContext.getShutdownStrategy().setTimeUnit(TimeUnit.SECONDS);
                         camelContext.getShutdownStrategy().setTimeout(shutdownTimeout);
                     }
                 });
@@ -326,6 +391,12 @@ public class CamelRunner {
         return this.contextFactory.createContext(registry);
     }
 
+    /**
+     * Start the camel runner instance
+     * <p>
+     * This may not start the camel context right away if there are unresolved dependencies
+     * </p>
+     */
     public void start() {
         logger.info("Starting...");
         stop();
@@ -353,6 +424,9 @@ public class CamelRunner {
         this.dependencyRunner.start();
     }
 
+    /**
+     * Stop the camel runner instance
+     */
     public void stop() {
         logger.info("Stopping...");
 
@@ -399,7 +473,21 @@ public class CamelRunner {
         }
     }
 
+    /**
+     * Remove a set of routes from the context
+     * <p>
+     * This is a helper method intended to be used by implementations of {@link RoutesProvider}.
+     * </p>
+     * 
+     * @param context
+     *            the context to work on
+     * @param removedRouteIds
+     *            the ID to remove
+     */
     public static void removeRoutes(final CamelContext context, final Set<String> removedRouteIds) {
+        Objects.requireNonNull(context);
+        Objects.requireNonNull(removedRouteIds);
+
         for (final String id : removedRouteIds) {
             try {
                 logger.debug("Stopping route: {}", id);
@@ -412,7 +500,21 @@ public class CamelRunner {
         }
     }
 
+    /**
+     * Remove all routes from the context which are not in the new set
+     * <p>
+     * This is a helper method intended to be used by implementations of {@link RoutesProvider}.
+     * </p>
+     * 
+     * @param context
+     *            the context to work on
+     * @param routes
+     *            the collection of new routes
+     */
     public static void removeMissingRoutes(final CamelContext context, final Collection<RouteDefinition> routes) {
+        Objects.requireNonNull(context);
+        Objects.requireNonNull(routes);
+
         // gather new IDs
 
         final Set<String> newRouteIds = fromDefs(routes);
@@ -427,10 +529,19 @@ public class CamelRunner {
         removeRoutes(context, removedRouteIds);
     }
 
+    /**
+     * Clear all routes from the context
+     */
     public void clearRoutes() {
         setRoutes(EmptyRoutesProvider.INSTANCE);
     }
 
+    /**
+     * Replace the current set of route with an new one
+     * 
+     * @param routes
+     *            the new set of routes
+     */
     public void setRoutes(final RoutesProvider routes) {
         this.routes = routes;
 
@@ -444,6 +555,12 @@ public class CamelRunner {
         }
     }
 
+    /**
+     * Replace the current set of route with an new one
+     * 
+     * @param routes
+     *            the new set of routes
+     */
     public void setRoutes(final String xml) throws Exception {
         logger.info("Setting routes...");
 
@@ -454,6 +571,12 @@ public class CamelRunner {
         }
     }
 
+    /**
+     * Replace the current set of route with an new one
+     * 
+     * @param routes
+     *            the new set of routes
+     */
     public void setRoutes(final RoutesDefinition routes) throws Exception {
         logger.info("Setting routes...");
 
@@ -461,6 +584,12 @@ public class CamelRunner {
         setRoutes(new SimpleRoutesProvider(routes));
     }
 
+    /**
+     * Replace the current set of route with an new one
+     * 
+     * @param routes
+     *            the new set of routes
+     */
     public void setRoutes(final RouteBuilder routeBuilder) throws Exception {
         logger.info("Setting routes...");
 
@@ -468,7 +597,7 @@ public class CamelRunner {
         setRoutes(new BuilderRoutesProvider(routeBuilder));
     }
 
-    private static Set<String> fromRoutes(final Collection<Route> routes) {
+    static Set<String> fromRoutes(final Collection<Route> routes) {
         final Set<String> result = new HashSet<>(routes.size());
 
         for (final Route route : routes) {
@@ -493,6 +622,14 @@ public class CamelRunner {
         return result;
     }
 
+    /**
+     * Get the camel context
+     * <p>
+     * <strong>Note: </strong> This method may return {@code null} even after the {@link #start()} method was called
+     * if there are unresolved dependencies for the runner.
+     * </p>
+     * @return the camel context, if the camel context is currently not running then {@code null} is being returned
+     */
     public CamelContext getCamelContext() {
         return this.context;
     }

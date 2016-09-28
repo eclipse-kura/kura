@@ -12,10 +12,10 @@
 package org.eclipse.kura.camel.component;
 
 import org.apache.camel.CamelContext;
-import org.eclipse.kura.camel.CamelRunner;
-import org.eclipse.kura.camel.CamelRunner.BeforeStart;
-import org.eclipse.kura.camel.CamelRunner.Builder;
-import org.eclipse.kura.camel.ContextFactory;
+import org.eclipse.kura.camel.runner.BeforeStart;
+import org.eclipse.kura.camel.runner.CamelRunner;
+import org.eclipse.kura.camel.runner.ContextFactory;
+import org.eclipse.kura.camel.runner.CamelRunner.Builder;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;

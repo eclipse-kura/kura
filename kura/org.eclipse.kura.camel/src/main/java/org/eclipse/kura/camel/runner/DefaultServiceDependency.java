@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc - initial API and implementation
  *******************************************************************************/
-package org.eclipse.kura.camel;
+package org.eclipse.kura.camel.runner;
 
 import java.util.Objects;
 import java.util.TreeMap;

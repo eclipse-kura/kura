@@ -8,9 +8,12 @@
  * Contributors:
  *     Red Hat Inc - initial API and implementation
  *******************************************************************************/
-package org.eclipse.kura.camel;
+package org.eclipse.kura.camel.runner;
 
-public interface ServiceConsumer<T, C> {
+import org.apache.camel.CamelContext;
+import org.apache.camel.spi.Registry;
 
-    public void consume(C context, T service);
+public interface ContextFactory {
+
+    public CamelContext createContext(Registry registry);
 }

@@ -8,12 +8,21 @@
  * Contributors:
  *     Red Hat Inc - initial API and implementation
  *******************************************************************************/
-package org.eclipse.kura.camel;
+package org.eclipse.kura.camel.runner;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.spi.Registry;
+import org.apache.camel.model.RoutesDefinition;
 
-public interface ContextFactory {
+public abstract class AbstractRoutesProvider implements RoutesProvider {
 
-    public CamelContext createContext(Registry registry);
+    @Override
+    public void applyRoutes(final CamelContext camelContext) throws Exception {
+
+        final RoutesDefinition routes = getRoutes(camelContext);
+
+        CamelRunner.removeMissingRoutes(camelContext, routes.getRoutes());
+        camelContext.addRouteDefinitions(routes.getRoutes());
+    }
+
+    protected abstract RoutesDefinition getRoutes(CamelContext camelContext) throws Exception;
 }

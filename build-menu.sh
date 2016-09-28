@@ -19,26 +19,24 @@ set -e
 KURA_BUILD_SELECTION=~/.kura.build.selection
 IGNORE_PROFILES=(default)
 
-## Test if we have the "dialog" command and install if not present
+## Test if we have the "dialog" command
 hash dialog &>/dev/null || {
-  echo "Determining current running platform..."
+  echo "Please intall Dialog to continue"
   # check if Mac OSX
   if [[ "$OSTYPE" == "darwin"* ]]; then
-        echo "Installing Dialog for Mac OSX..."
-        brew install dialog
+        echo "To intall Dialog, please execute: brew install dialog"
   #check if Linux
   elif [[ "$OSTYPE" == "linux-gnu" ]]; then
       #check if redhat
       if [ -f /etc/redhat-release ]; then
-        echo "Installing Dialog for Redhat Platform..."
-        sudo yum install dialog
+        echo "To intall Dialog, please execute: sudo yum install dialog"
       fi
       #check if Ubuntu
       if [ -f /etc/lsb-release ]; then
-        echo "Installing Dialog for Debian Platform..."
-        sudo apt-get install dialog
+        echo "To intall Dialog, please execute: sudo apt-get install dialog"
       fi
   fi
+  exit 1
 }
 
 ## detect all maven profiles of the "distrib" project

@@ -9,6 +9,7 @@
 # 
 # Contributors:
 #     Red Hat Inc - initial API and implementation
+#     Amit Kumar Mondal (admin@amitinside.com)
 #
 
 set -e
@@ -19,13 +20,32 @@ KURA_BUILD_SELECTION=~/.kura.build.selection
 IGNORE_PROFILES=(default)
 
 ## Test if we have the "dialog" command
-
 hash dialog &>/dev/null || {
-  echo >&2 "This script requires you to install 'dialog'. Exiting ..."
-  echo >&2 "  on RHEL   run 'sudo yum install dialog'"
-  echo >&2 "  on Fedora run 'sudo dnf install dialog'"
-  echo >&2 "  on Ubuntu run 'sudo apt-get install dialog'"
-  echo >&2 "  on Mac OS run 'brew install dialog'"
+  echo "Please intall Dialog to continue"
+  # check if Mac OSX
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "To intall Dialog, please execute: brew install dialog"
+  #check if Linux
+  elif [[ "$OSTYPE" == "linux-gnu" ]]; then
+      #check if RedHat Family (CentOS, Fedora)
+      if [ -f /etc/redhat-release ]; then
+        REV=$(cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*//)
+        #check if Fedora
+        if [ $REV =~ .*Fedora.* ]; then
+          echo "To intall Dialog, please execute: sudo dnf install dialog"
+        else
+          echo "To intall Dialog, please execute: sudo yum install dialog"
+        fi
+      fi
+      #check if Ubuntu
+      if [ -f /etc/lsb-release ]; then
+        echo "To intall Dialog, please execute: sudo apt-get install dialog"
+      fi
+      #check if SuSE
+      if [ -f /etc/SuSE-release ]; then
+        echo "To intall Dialog, please execute: sudo zypper install dialog"
+      fi
+  fi
   exit 1
 }
 

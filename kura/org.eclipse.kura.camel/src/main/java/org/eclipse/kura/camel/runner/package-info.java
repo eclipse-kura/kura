@@ -8,11 +8,11 @@
  * Contributors:
  *     Red Hat Inc - initial API and implementation
  *******************************************************************************/
-package org.eclipse.kura.camel;
-
-import org.apache.camel.spi.Registry;
-
-public interface RegistryFactory {
-
-    public Registry createRegistry();
-}
+/**
+ * Functionality for running a Camel context
+ * <p>
+ * The main class to create, run and update a {@link CamelContext} is the {@link CamelRunner} which
+ * is being created using a {@link CamelRunner.Builder}
+ * </p>
+ */
+package org.eclipse.kura.camel.runner;

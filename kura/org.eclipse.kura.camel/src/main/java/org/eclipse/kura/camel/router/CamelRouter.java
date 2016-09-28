@@ -16,8 +16,8 @@ import java.util.Objects;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.core.osgi.OsgiDefaultCamelContext;
-import org.eclipse.kura.camel.CamelRunner;
 import org.eclipse.kura.camel.component.AbstractXmlCamelComponent;
+import org.eclipse.kura.camel.runner.CamelRunner;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;

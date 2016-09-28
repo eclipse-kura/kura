@@ -20,7 +20,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.camel.DependencyRunner.Listener;
+import org.eclipse.kura.camel.runner.DependencyRunner;
+import org.eclipse.kura.camel.runner.ServiceDependency;
+import org.eclipse.kura.camel.runner.DependencyRunner.Listener;
 import org.junit.Test;
 
 public class DependencyRunnerTest {

@@ -27,13 +27,23 @@ hash dialog &>/dev/null || {
         echo "To intall Dialog, please execute: brew install dialog"
   #check if Linux
   elif [[ "$OSTYPE" == "linux-gnu" ]]; then
-      #check if redhat
+      #check if RedHat Family (CentOS, Fedora)
       if [ -f /etc/redhat-release ]; then
-        echo "To intall Dialog, please execute: sudo yum install dialog"
+        REV=$(cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*//)
+        #check if Fedora
+        if [ $REV =~ .*Fedora.* ]; then
+          echo "To intall Dialog, please execute: sudo dnf install dialog"
+        else
+          echo "To intall Dialog, please execute: sudo yum install dialog"
+        fi
       fi
       #check if Ubuntu
       if [ -f /etc/lsb-release ]; then
         echo "To intall Dialog, please execute: sudo apt-get install dialog"
+      fi
+      #check if SuSE
+      if [ -f /etc/SuSE-release ]; then
+        echo "To intall Dialog, please execute: sudo zypper install dialog"
       fi
   fi
   exit 1

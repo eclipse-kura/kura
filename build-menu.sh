@@ -9,6 +9,7 @@
 # 
 # Contributors:
 #     Red Hat Inc - initial API and implementation
+#     Amit Kumar Mondal (admin@amitinside.com)
 #
 
 set -e
@@ -18,15 +19,26 @@ set -e
 KURA_BUILD_SELECTION=~/.kura.build.selection
 IGNORE_PROFILES=(default)
 
-## Test if we have the "dialog" command
-
+## Test if we have the "dialog" command and install if not present
 hash dialog &>/dev/null || {
-  echo >&2 "This script requires you to install 'dialog'. Exiting ..."
-  echo >&2 "  on RHEL   run 'sudo yum install dialog'"
-  echo >&2 "  on Fedora run 'sudo dnf install dialog'"
-  echo >&2 "  on Ubuntu run 'sudo apt-get install dialog'"
-  echo >&2 "  on Mac OS run 'brew install dialog'"
-  exit 1
+  echo "Determining current running platform..."
+  # check if Mac OSX
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "Installing Dialog for Mac OSX..."
+        brew install dialog
+  #check if Linux
+  elif [[ "$OSTYPE" == "linux-gnu" ]]; then
+      #check if redhat
+      if [ -f /etc/redhat-release ]; then
+        echo "Installing Dialog for Redhat Platform..."
+        sudo yum install dialog
+      fi
+      #check if Ubuntu
+      if [ -f /etc/lsb-release ]; then
+        echo "Installing Dialog for Debian Platform..."
+        sudo apt-get install dialog
+      fi
+  fi
 }
 
 ## detect all maven profiles of the "distrib" project

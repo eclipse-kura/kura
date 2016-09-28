@@ -25,6 +25,7 @@ hash dialog &>/dev/null || {
   echo >&2 "  on RHEL   run 'sudo yum install dialog'"
   echo >&2 "  on Fedora run 'sudo dnf install dialog'"
   echo >&2 "  on Ubuntu run 'sudo apt-get install dialog'"
+  echo >&2 "  on Mac OS run 'brew install dialog'"
   exit 1
 }
 

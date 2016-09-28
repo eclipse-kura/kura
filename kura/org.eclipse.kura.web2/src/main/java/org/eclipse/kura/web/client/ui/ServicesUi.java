@@ -346,8 +346,8 @@ public class ServicesUi extends Composite {
             logger.fine("Widget: " + fg.getClass());
 
             if (fg.getWidget(i) instanceof FormLabel) {
-                String id = ((FormLabel) fg.getWidget(i)).getText();
-                param = m_configurableComponent.getParameter(id.trim().replaceAll("\\*$", ""));
+                final String id = ((FormLabel) fg.getWidget(i)).getTitle();
+                param = m_configurableComponent.getParameter(id);
 
             } else if (fg.getWidget(i) instanceof ListBox || fg.getWidget(i) instanceof Input || fg.getWidget(i) instanceof TextBoxBase) {
 
@@ -453,11 +453,11 @@ public class ServicesUi extends Composite {
 
         if (isFirstInstance) {
             FormLabel formLabel = new FormLabel();
+            formLabel.setTitle(param.getId()); // title is used to hold ID
             formLabel.setText(param.getName());
             if (param.isRequired()) {
                 formLabel.setShowRequiredIndicator(true);
             }
-            formLabel.setTitle(param.getId());
             formGroup.add(formLabel);
 
             InlineHelpBlock ihb = new InlineHelpBlock();
@@ -615,6 +615,7 @@ public class ServicesUi extends Composite {
 
         if (isFirstInstance) {
             FormLabel formLabel = new FormLabel();
+            formLabel.setTitle(param.getId()); // title is used to hold ID
             formLabel.setText(param.getName());
             if (param.isRequired()) {
                 formLabel.setShowRequiredIndicator(true);
@@ -682,6 +683,7 @@ public class ServicesUi extends Composite {
 
         if (isFirstInstance) {
             FormLabel formLabel = new FormLabel();
+            formLabel.setTitle(param.getId()); // title is used to hold ID
             formLabel.setText(param.getName());
             if (param.isRequired()) {
                 formLabel.setShowRequiredIndicator(true);
@@ -747,6 +749,7 @@ public class ServicesUi extends Composite {
 
         if (isFirstInstance) {
             FormLabel formLabel = new FormLabel();
+            formLabel.setTitle(param.getId()); // title is used to hold ID
             formLabel.setText(param.getName());
             if (param.isRequired()) {
                 formLabel.setShowRequiredIndicator(true);

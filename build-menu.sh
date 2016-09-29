@@ -21,11 +21,34 @@ IGNORE_PROFILES=(default)
 ## Test if we have the "dialog" command
 
 hash dialog &>/dev/null || {
-  echo >&2 "This script requires you to install 'dialog'. Exiting ..."
-  echo >&2 "  on RHEL   run 'sudo yum install dialog'"
-  echo >&2 "  on Fedora run 'sudo dnf install dialog'"
-  echo >&2 "  on Ubuntu run 'sudo apt-get install dialog'"
-  echo >&2 "  on Mac OS run 'brew install dialog'"
+  echo >&2
+  echo >&2 "This script requires you to install the command 'dialog'. Exiting ..."
+
+  if [[ "$OSTYPE" == "darwin" ]]; then
+    echo >&2 "  on Mac OS run"
+    echo >&2 "     brew install dialog"
+
+  elif [[ "$OSTYPE" == "linux-gnu" && -f /etc/redhat-release ]]; then
+    echo >&2 "  on RHEL/Fedora/CentOS run:"
+    if hash dnf &>/dev/null ; then
+      echo >&2 "     sudo dnf install dialog"
+    else
+      echo >&2 "     sudo yum install dialog"
+    fi
+
+  elif [[ "$OSTYPE" == "linux-gnu" && -f /etc/debian_version ]]; then
+    echo >&2 "  on Debian/Ubuntu run:"
+    echo >&2 "     sudo apt-get install dialog"
+
+  elif [[ "$OSTYPE" == "linux-gnu" && -f /etc/SuSE-release ]]; then
+    echo >&2 "  on Suse run:"
+    echo >&2 "     sudo zypper install dialog"
+
+  else
+    echo >&2 "  Unable to deterimine operating system"
+    
+  fi
+  echo >&2
   exit 1
 }
 

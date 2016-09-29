@@ -14,15 +14,18 @@ package org.eclipse.kura.camel.component;
 import org.apache.camel.CamelContext;
 import org.eclipse.kura.camel.runner.BeforeStart;
 import org.eclipse.kura.camel.runner.CamelRunner;
-import org.eclipse.kura.camel.runner.ContextFactory;
 import org.eclipse.kura.camel.runner.CamelRunner.Builder;
+import org.eclipse.kura.camel.runner.ContextFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An abstract base camel router for the use inside of Kura
+ * An abstract base Camel component for the use inside of Kura
+ * <p>
+ * This class intended to be subclasses and customized according to needs.
+ * </p>
  */
 public abstract class AbstractCamelComponent {
 
@@ -63,10 +66,21 @@ public abstract class AbstractCamelComponent {
         }
     }
 
+    /**
+     * Get the Camel context
+     *
+     * @return the camel context or {@code null} if the context is not started
+     */
     public CamelContext getCamelContext() {
         return this.runner.getCamelContext();
     }
 
+    /**
+     * Called before the context is started
+     *
+     * @param camelContext
+     *            the Camel context which is being prepared for starting
+     */
     protected void beforeStart(final CamelContext camelContext) {
     }
 

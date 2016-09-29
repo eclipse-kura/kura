@@ -14,10 +14,21 @@ package org.eclipse.kura.camel.cloud;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Component;
 import org.apache.camel.spi.ComponentResolver;
+import org.eclipse.kura.camel.runner.CamelRunner;
 import org.eclipse.kura.cloud.CloudService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A resolver for "kura-cloud"
+ * <p>
+ * This resolver will register to any instance of {@link CloudService} and
+ * wrap it into a {@link KuraCloudComponent} instance.
+ * </p>
+ * <p>
+ * If you need finer grained control, consider using the {@link CamelRunner} mechanism.
+ * </p>
+ */
 public class KuraCloudComponentResolver implements ComponentResolver {
 
     private static final Logger logger = LoggerFactory.getLogger(KuraCloudComponentResolver.class);

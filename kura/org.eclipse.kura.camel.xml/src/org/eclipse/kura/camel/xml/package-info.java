@@ -9,8 +9,6 @@
  *     Red Hat Inc - initial API and implementation
  *******************************************************************************/
 /**
- * Old Camel API of Kura
- *
- * @deprecated For alternatives see the deprecation note of {@link CamelRouter}
+ * A ready-to-run Apache Camel XML router component
  */
-package org.eclipse.kura.camel.router;
+package org.eclipse.kura.camel.xml;

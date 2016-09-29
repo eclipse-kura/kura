@@ -22,6 +22,9 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.camel.internal.camelcloud.CamelCloudClient;
 import org.eclipse.kura.cloud.CloudClient;
 
+/**
+ * A default implementation of the {@link CamelCloudService}
+ */
 public class DefaultCamelCloudService implements CamelCloudService {
 
     private final CamelContext camelContext;

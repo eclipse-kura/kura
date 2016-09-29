@@ -12,6 +12,10 @@ package org.eclipse.kura.camel.xml;
 
 import org.eclipse.kura.camel.component.AbstractXmlCamelComponent;
 
+/**
+ * A ready to run XML based Apache Camel component
+ * @noextend This class is not intended to be extened
+ */
 public class XmlRouterComponent extends AbstractXmlCamelComponent {
 
     public XmlRouterComponent() {

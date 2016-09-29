@@ -9,8 +9,6 @@
  *     Red Hat Inc - initial API and implementation
  *******************************************************************************/
 /**
- * Old Camel API of Kura
- *
- * @deprecated For alternatives see the deprecation note of {@link CamelRouter}
+ * Support for implementing a {@link org.eclipse.kura.cloud.CloudService} based on Apache Camel
  */
-package org.eclipse.kura.camel.router;
+package org.eclipse.kura.camel.camelcloud;

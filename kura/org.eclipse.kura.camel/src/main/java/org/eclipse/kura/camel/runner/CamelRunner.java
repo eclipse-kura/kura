@@ -53,7 +53,7 @@ public class CamelRunner {
 
     /**
      * Creates a new {@link ContextFactory} backed by {@link OsgiDefaultCamelContext}
-     * 
+     *
      * @param bundleContext
      *            the bundle context to use
      * @return a context factory creating {@link OsgiDefaultCamelContext}s
@@ -72,7 +72,7 @@ public class CamelRunner {
 
     /**
      * Creates a new {@link RegistryFactory} backed by {@link OsgiServiceRegistry}
-     * 
+     *
      * @param bundleContext
      *            the bundle context to use
      * @return a registry factory creating {@link OsgiServiceRegistry}s
@@ -125,7 +125,7 @@ public class CamelRunner {
      */
     public static final class Builder {
 
-        private BundleContext bundleContext;
+        private final BundleContext bundleContext;
 
         private RegistryFactory registryFactory;
 
@@ -172,7 +172,7 @@ public class CamelRunner {
          * <p>
          * JMX is disabled by default.
          * </p>
-         * 
+         *
          * @param disableJmx
          *            whether JMX should be disabled or not
          * @return the builder instance
@@ -187,7 +187,7 @@ public class CamelRunner {
          * <p>
          * This defaults to 5 seconds
          * </p>
-         * 
+         *
          * @param shutdownTimeout
          *            The shutdown timeout in seconds
          * @return the builder instance
@@ -240,7 +240,7 @@ public class CamelRunner {
          * If a filter is specified then it will be combined with the filter for the object class of the {@link CloudService}.
          * If the filter expression is omitted then only the object class filter will be used.
          * </p>
-         * 
+         *
          * @param bundleContext
          *            the bundle context to use for service lookup
          * @param filter
@@ -275,7 +275,7 @@ public class CamelRunner {
          * If a filter is specified then it will be combined with the filter for the object class of the {@link CloudService}.
          * If the filter expression is omitted then only the object class filter will be used.
          * </p>
-         * 
+         *
          * @param filter
          *            optional filter expression
          * @return the builder instance
@@ -290,7 +290,7 @@ public class CamelRunner {
          * This is a convenience method for {@link #cloudService(String)}. It will effectively call
          * this method with a filter of {@code "(" + attribute + "=" + value + ")"}
          * </p>
-         * 
+         *
          * @param attribute
          *            the OSGi attribute to look for
          * @param value
@@ -316,7 +316,7 @@ public class CamelRunner {
 
         /**
          * Add an operation which will be executed before the Camel context is started
-         * 
+         *
          * @param beforeStart
          *            the action to start
          * @return the builder instance
@@ -336,7 +336,7 @@ public class CamelRunner {
          * no affect the created CamelRunner instance. It is possible though to call the {@link #build()} method
          * multiple times.
          * </p>
-         * 
+         *
          * @return the new instance
          */
         public CamelRunner build() {
@@ -478,7 +478,7 @@ public class CamelRunner {
      * <p>
      * This is a helper method intended to be used by implementations of {@link RoutesProvider}.
      * </p>
-     * 
+     *
      * @param context
      *            the context to work on
      * @param removedRouteIds
@@ -505,7 +505,7 @@ public class CamelRunner {
      * <p>
      * This is a helper method intended to be used by implementations of {@link RoutesProvider}.
      * </p>
-     * 
+     *
      * @param context
      *            the context to work on
      * @param routes
@@ -538,7 +538,7 @@ public class CamelRunner {
 
     /**
      * Replace the current set of route with an new one
-     * 
+     *
      * @param routes
      *            the new set of routes
      */
@@ -557,7 +557,7 @@ public class CamelRunner {
 
     /**
      * Replace the current set of route with an new one
-     * 
+     *
      * @param routes
      *            the new set of routes
      */
@@ -573,7 +573,7 @@ public class CamelRunner {
 
     /**
      * Replace the current set of route with an new one
-     * 
+     *
      * @param routes
      *            the new set of routes
      */
@@ -586,7 +586,7 @@ public class CamelRunner {
 
     /**
      * Replace the current set of route with an new one
-     * 
+     *
      * @param routes
      *            the new set of routes
      */
@@ -628,6 +628,7 @@ public class CamelRunner {
      * <strong>Note: </strong> This method may return {@code null} even after the {@link #start()} method was called
      * if there are unresolved dependencies for the runner.
      * </p>
+     * 
      * @return the camel context, if the camel context is currently not running then {@code null} is being returned
      */
     public CamelContext getCamelContext() {

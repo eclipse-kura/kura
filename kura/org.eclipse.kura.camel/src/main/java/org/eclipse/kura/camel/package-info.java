@@ -9,7 +9,13 @@
  *     Red Hat Inc - initial API and implementation
  *******************************************************************************/
 /**
- * Basic Camel functionality
+ * Basic Apache Camel™ functionality
+ * <p>
+ * For information on how to create a component based on Apache Camel see:
+ * </p>
+ * <ul>
+ * <li>{@link org.eclipse.kura.camel.runner.CamelRunner}</li>
+ * <li>{@link org.eclipse.kura.camel.component}</li>
+ * </ul>
  */
 package org.eclipse.kura.camel;
-

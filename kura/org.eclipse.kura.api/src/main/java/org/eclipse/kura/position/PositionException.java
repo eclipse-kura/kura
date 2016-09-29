@@ -13,25 +13,25 @@ package org.eclipse.kura.position;
 
 public class PositionException extends Exception {
 
-	private static final long serialVersionUID = 2611760893640245224L;
+    private static final long serialVersionUID = 2611760893640245224L;
 
-	public PositionException() {
-		// TODO Auto-generated constructor stub
-	}
+    public PositionException() {
+        // TODO Auto-generated constructor stub
+    }
 
-	public PositionException(String message) {
-		super(message);
-		// TODO Auto-generated constructor stub
-	}
+    public PositionException(String message) {
+        super(message);
+        // TODO Auto-generated constructor stub
+    }
 
-	public PositionException(Throwable cause) {
-		super(cause);
-		// TODO Auto-generated constructor stub
-	}
+    public PositionException(Throwable cause) {
+        super(cause);
+        // TODO Auto-generated constructor stub
+    }
 
-	public PositionException(String message, Throwable cause) {
-		super(message, cause);
-		// TODO Auto-generated constructor stub
-	}
+    public PositionException(String message, Throwable cause) {
+        super(message, cause);
+        // TODO Auto-generated constructor stub
+    }
 
 }

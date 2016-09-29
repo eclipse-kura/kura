@@ -19,126 +19,126 @@ import java.util.Date;
  * Everyware Cloud. Refer to the description of each of the fields for more
  * information on the model of EdcPosition.
  */
-public class KuraPosition 
-{
-	/**
-	 * Longitude of this position in degrees. This is a mandatory field.
-	 */
-	private Double longitude;
+public class KuraPosition {
 
-	/**
-	 * Latitude of this position in degrees. This is a mandatory field.
-	 */
-	private Double latitude;
+    /**
+     * Longitude of this position in degrees. This is a mandatory field.
+     */
+    private Double longitude;
 
-	/**
-	 * Altitude of the position in meters.
-	 */
-	private Double altitude;
+    /**
+     * Latitude of this position in degrees. This is a mandatory field.
+     */
+    private Double latitude;
 
-	/**
-	 * Dilution of the precision (DOP) of the current GPS fix.
-	 */
-	private Double precision;
+    /**
+     * Altitude of the position in meters.
+     */
+    private Double altitude;
 
-	/**
-	 * Heading (direction) of the position in degrees
-	 */
-	private Double heading;
+    /**
+     * Dilution of the precision (DOP) of the current GPS fix.
+     */
+    private Double precision;
 
-	/**
-	 * Speed for this position in meter/sec.
-	 */
-	private Double speed;
+    /**
+     * Heading (direction) of the position in degrees
+     */
+    private Double heading;
 
-	/**
-	 * Timestamp extracted from the GPS system
-	 */
-	private Date timestamp;
+    /**
+     * Speed for this position in meter/sec.
+     */
+    private Double speed;
 
-	/**
-	 * Number of satellites seen by the systems
-	 */
-	private Integer satellites;
+    /**
+     * Timestamp extracted from the GPS system
+     */
+    private Date timestamp;
 
-	/**
-	 * Status of GPS system: 1 = no GPS response, 2 = error in response, 4 =
-	 * valid.
-	 */
-	private Integer status;
+    /**
+     * Number of satellites seen by the systems
+     */
+    private Integer satellites;
 
-	public KuraPosition() {
-	}
+    /**
+     * Status of GPS system: 1 = no GPS response, 2 = error in response, 4 =
+     * valid.
+     */
+    private Integer status;
 
-	public Double getLongitude() {
-		return longitude;
-	}
+    public KuraPosition() {
+    }
 
-	public void setLongitude(double longitude) {
-		this.longitude = longitude;
-	}
+    public Double getLongitude() {
+        return this.longitude;
+    }
 
-	public Double getLatitude() {
-		return latitude;
-	}
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
 
-	public void setLatitude(double latitude) {
-		this.latitude = latitude;
-	}
+    public Double getLatitude() {
+        return this.latitude;
+    }
 
-	public Double getAltitude() {
-		return altitude;
-	}
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
 
-	public void setAltitude(double altitude) {
-		this.altitude = altitude;
-	}
+    public Double getAltitude() {
+        return this.altitude;
+    }
 
-	public Double getPrecision() {
-		return precision;
-	}
+    public void setAltitude(double altitude) {
+        this.altitude = altitude;
+    }
 
-	public void setPrecision(double precision) {
-		this.precision = precision;
-	}
+    public Double getPrecision() {
+        return this.precision;
+    }
 
-	public Double getHeading() {
-		return heading;
-	}
+    public void setPrecision(double precision) {
+        this.precision = precision;
+    }
 
-	public void setHeading(double heading) {
-		this.heading = heading;
-	}
+    public Double getHeading() {
+        return this.heading;
+    }
 
-	public Double getSpeed() {
-		return speed;
-	}
+    public void setHeading(double heading) {
+        this.heading = heading;
+    }
 
-	public void setSpeed(double speed) {
-		this.speed = speed;
-	}
+    public Double getSpeed() {
+        return this.speed;
+    }
 
-	public Date getTimestamp() {
-		return timestamp;
-	}
+    public void setSpeed(double speed) {
+        this.speed = speed;
+    }
 
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
-	}
+    public Date getTimestamp() {
+        return this.timestamp;
+    }
 
-	public Integer getSatellites() {
-		return satellites;
-	}
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
 
-	public void setSatellites(int satellites) {
-		this.satellites = satellites;
-	}
+    public Integer getSatellites() {
+        return this.satellites;
+    }
 
-	public Integer getStatus() {
-		return status;
-	}
+    public void setSatellites(int satellites) {
+        this.satellites = satellites;
+    }
 
-	public void setStatus(int status) {
-		this.status = status;
-	}
+    public Integer getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
 }

@@ -12,9 +12,9 @@
 package org.eclipse.kura.net.modem;
 
 public enum ModemConnectionType {
-	/** Point to Point Protocol **/
-	PPP,
-	
-	/** Direct IP **/
-	DirectIP
+    /** Point to Point Protocol **/
+    PPP,
+
+    /** Direct IP **/
+    DirectIP
 }

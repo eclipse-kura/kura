@@ -7,13 +7,13 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Eurotech
+ * Eurotech
  *******************************************************************************/
 /**
- * 
+ *
  */
 /**
- * Provides APIs to acquire and use GPIO resources available on the system. 
+ * Provides APIs to acquire and use GPIO resources available on the system.
  *
  */
 package org.eclipse.kura.gpio;

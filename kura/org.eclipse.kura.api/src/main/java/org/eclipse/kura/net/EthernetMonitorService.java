@@ -13,10 +13,9 @@ package org.eclipse.kura.net;
 
 /**
  * Placeholder for the EthernetLinkStateMonitorService
- * 
+ *
  * @author eurotech
  *
  */
 public interface EthernetMonitorService {
-
 }

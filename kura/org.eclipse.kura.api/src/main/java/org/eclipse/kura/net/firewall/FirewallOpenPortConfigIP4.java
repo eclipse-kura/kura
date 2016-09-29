@@ -17,20 +17,27 @@ import org.eclipse.kura.net.NetworkPair;
 
 /**
  * The implementation of IPv4 firewall open port configurations
+ *
  * @author eurotech
  *
  */
-public class FirewallOpenPortConfigIP4 extends FirewallOpenPortConfigIP<IP4Address> implements FirewallOpenPortConfig4 {
+public class FirewallOpenPortConfigIP4 extends FirewallOpenPortConfigIP<IP4Address>implements FirewallOpenPortConfig4 {
 
-	public FirewallOpenPortConfigIP4() {
-		super();
-	}
-	
-	public FirewallOpenPortConfigIP4(int port, NetProtocol protocol, NetworkPair<IP4Address> permittedNetwork, String permittedInterfaceName, String unpermittedInterfaceName, String permittedMac, String sourcePortRange) { 	
-		super(port, protocol, permittedNetwork, permittedInterfaceName, unpermittedInterfaceName, permittedMac, sourcePortRange);
-	}
-	
-	public FirewallOpenPortConfigIP4(String portRange, NetProtocol protocol, NetworkPair<IP4Address> permittedNetwork, String permittedInterfaceName, String unpermittedInterfaceName, String permittedMac, String sourcePortRange) { 	
-		super(portRange, protocol, permittedNetwork, permittedInterfaceName, unpermittedInterfaceName, permittedMac, sourcePortRange);
-	}
+    public FirewallOpenPortConfigIP4() {
+        super();
+    }
+
+    public FirewallOpenPortConfigIP4(int port, NetProtocol protocol, NetworkPair<IP4Address> permittedNetwork,
+            String permittedInterfaceName, String unpermittedInterfaceName, String permittedMac,
+            String sourcePortRange) {
+        super(port, protocol, permittedNetwork, permittedInterfaceName, unpermittedInterfaceName, permittedMac,
+                sourcePortRange);
+    }
+
+    public FirewallOpenPortConfigIP4(String portRange, NetProtocol protocol, NetworkPair<IP4Address> permittedNetwork,
+            String permittedInterfaceName, String unpermittedInterfaceName, String permittedMac,
+            String sourcePortRange) {
+        super(portRange, protocol, permittedNetwork, permittedInterfaceName, unpermittedInterfaceName, permittedMac,
+                sourcePortRange);
+    }
 }

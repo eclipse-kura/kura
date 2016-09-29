@@ -7,10 +7,10 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Eurotech
+ * Eurotech
  *******************************************************************************/
 /**
- * 
+ *
  */
 /**
  * Provides expected schemas for JAXB bindings.

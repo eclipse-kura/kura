@@ -12,56 +12,57 @@
 package org.eclipse.kura.usb;
 
 /**
- * Representation of a USB block device.  This includes storage type USB devices.
+ * Representation of a USB block device. This includes storage type USB devices.
  */
 public class UsbBlockDevice extends AbstractUsbDevice {
 
-	private String m_deviceNode;
+    private final String m_deviceNode;
 
-	public UsbBlockDevice(String vendorId, String productId, String manufacturerName, String productName, String usbBusNumber, String usbDevicePath, String deviceNode) {
-		super(vendorId, productId, manufacturerName, productName, usbBusNumber, usbDevicePath);
-		m_deviceNode = deviceNode;
-	}
+    public UsbBlockDevice(String vendorId, String productId, String manufacturerName, String productName,
+            String usbBusNumber, String usbDevicePath, String deviceNode) {
+        super(vendorId, productId, manufacturerName, productName, usbBusNumber, usbDevicePath);
+        this.m_deviceNode = deviceNode;
+    }
 
-	public String getDeviceNode() {
-		return m_deviceNode;
-	}
+    public String getDeviceNode() {
+        return this.m_deviceNode;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result
-				+ ((m_deviceNode == null) ? 0 : m_deviceNode.hashCode());
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + (this.m_deviceNode == null ? 0 : this.m_deviceNode.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		UsbBlockDevice other = (UsbBlockDevice) obj;
-		if (m_deviceNode == null) {
-			if (other.m_deviceNode != null)
-				return false;
-		} else if (!m_deviceNode.equals(other.m_deviceNode))
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        UsbBlockDevice other = (UsbBlockDevice) obj;
+        if (this.m_deviceNode == null) {
+            if (other.m_deviceNode != null) {
+                return false;
+            }
+        } else if (!this.m_deviceNode.equals(other.m_deviceNode)) {
+            return false;
+        }
+        return true;
+    }
 
-	@Override
-	public String toString() {
-		return "UsbBlockDevice [getDeviceNode()=" + getDeviceNode()
-				+ ", getVendorId()=" + getVendorId()
-				+ ", getProductId()=" + getProductId()
-				+ ", getManufacturerName()=" + getManufacturerName()
-				+ ", getProductName()=" + getProductName()
-				+ ", getUsbBusNumber()=" + getUsbBusNumber()
-				+ ", getUsbDevicePath()=" + getUsbDevicePath()
-				+ ", getUsbPort()=" + getUsbPort() + "]";
-	}
+    @Override
+    public String toString() {
+        return "UsbBlockDevice [getDeviceNode()=" + getDeviceNode() + ", getVendorId()=" + getVendorId()
+                + ", getProductId()=" + getProductId() + ", getManufacturerName()=" + getManufacturerName()
+                + ", getProductName()=" + getProductName() + ", getUsbBusNumber()=" + getUsbBusNumber()
+                + ", getUsbDevicePath()=" + getUsbDevicePath() + ", getUsbPort()=" + getUsbPort() + "]";
+    }
 }

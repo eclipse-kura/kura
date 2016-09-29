@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Eurotech
+ * Eurotech
  *******************************************************************************/
 /**
  * Provides services for managing a connection with a serial port.

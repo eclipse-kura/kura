@@ -29,10 +29,19 @@ import org.slf4j.LoggerFactory;
  * An abstract base class for implementing a {@link ConfigurableComponent} using
  * configured XML
  * <p>
+ * This class intended to be subclasses and customized according to needs.
+ * </p>
+ * <p>
  * <strong>Note:</strong> This class is intended to be used as <em>OSGi Service
  * Component</em>. There the methods {@link #activate(BundleContext, Map)},
  * {@link #modified(Map)} and {@link #deactivate(BundleContext)} need to be
  * configured accordingly.
+ * </p>
+ * <p>
+ * The lifecycle methods of this class declare annotations based on {@link org.osgi.service.component.annotations}.
+ * However those annotations are only discovered during build time. They are declared in order
+ * to provide proper support when annotation based tooling is used. Otherwise those methods must be
+ * mapped manually in the DS declaration.
  * </p>
  */
 public abstract class AbstractXmlCamelComponent extends AbstractCamelComponent implements ConfigurableComponent {

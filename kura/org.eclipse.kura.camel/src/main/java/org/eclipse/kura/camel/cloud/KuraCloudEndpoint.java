@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Red Hat and/or its affiliates
+ * Copyright (c) 2011, 2016 Red Hat and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,6 +19,9 @@ import org.eclipse.kura.camel.internal.cloud.CloudClientCache.CloudClientHandle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Endpoint implementation for {@link KuraCloudComponent}
+ */
 @UriEndpoint(scheme = "kura-cloud", title = "Kura Cloud", label = "iot,kura,cloud", syntax = "kura-cloud:applicationId/appTopic")
 public class KuraCloudEndpoint extends DefaultEndpoint {
 

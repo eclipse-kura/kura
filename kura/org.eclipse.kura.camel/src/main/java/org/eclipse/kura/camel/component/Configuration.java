@@ -12,16 +12,39 @@ package org.eclipse.kura.camel.component;
 
 import java.util.Map;
 
+/**
+ * A few helper methods for consuming configuration from a properties map
+ */
 public final class Configuration {
 
     private Configuration() {
     }
 
-    public static String asString(Map<String, ?> properties, final String key) {
+    /**
+     * Get a string value, defaulting to {@code null}
+     *
+     * @param properties
+     *            the properties to read from, may be {@code null}
+     * @param key
+     *            the key to read, may be {@code null}
+     * @return the string value or {@code null}
+     */
+    public static String asString(final Map<String, ?> properties, final String key) {
         return asString(properties, key, null);
     }
 
-    public static String asString(Map<String, ?> properties, final String key, final String defaultValue) {
+    /**
+     * Get a string value
+     *
+     * @param properties
+     *            the properties to read from, may be {@code null}
+     * @param key
+     *            the key to read, may be {@code null}
+     * @param defaultValue
+     *            the default value, may be {@code null}
+     * @return the string value or the default value
+     */
+    public static String asString(final Map<String, ?> properties, final String key, final String defaultValue) {
         if (properties == null) {
             return defaultValue;
         }
@@ -34,7 +57,22 @@ public final class Configuration {
         return defaultValue;
     }
 
-    public static String asStringNotEmpty(Map<String, ?> properties, final String key, final String defaultValue) {
+    /**
+     * Get a string value, unless it is empty
+     * <p>
+     * If the properties map contains the string, but the string is empty by {@link String#isEmpty()}, then
+     * also the default value will be returned.
+     * </p>
+     *
+     * @param properties
+     *            the properties to read from, may be {@code null}
+     * @param key
+     *            the key to read, may be {@code null}
+     * @param defaultValue
+     *            the default value, may be {@code null}
+     * @return the string value or the default value
+     */
+    public static String asStringNotEmpty(final Map<String, ?> properties, final String key, final String defaultValue) {
         if (properties == null) {
             return defaultValue;
         }
@@ -52,11 +90,11 @@ public final class Configuration {
         return stringValue;
     }
 
-    public static Integer asInteger(Map<String, ?> properties, String key) {
+    public static Integer asInteger(final Map<String, ?> properties, final String key) {
         return asInteger(properties, key, null);
     }
 
-    public static Integer asInteger(Map<String, ?> properties, String key, Integer defaultValue) {
+    public static Integer asInteger(final Map<String, ?> properties, final String key, final Integer defaultValue) {
         if (properties == null) {
             return defaultValue;
         }
@@ -69,7 +107,7 @@ public final class Configuration {
         return defaultValue;
     }
 
-    public static int asInt(Map<String, ?> properties, String key, int defaultValue) {
+    public static int asInt(final Map<String, ?> properties, final String key, final int defaultValue) {
         if (properties == null) {
             return defaultValue;
         }
@@ -82,11 +120,11 @@ public final class Configuration {
         return defaultValue;
     }
 
-    public static Long asLong(Map<String, ?> properties, String key) {
+    public static Long asLong(final Map<String, ?> properties, final String key) {
         return asLong(properties, key, null);
     }
 
-    public static Long asLong(Map<String, ?> properties, String key, Long defaultValue) {
+    public static Long asLong(final Map<String, ?> properties, final String key, final Long defaultValue) {
         if (properties == null) {
             return defaultValue;
         }
@@ -99,7 +137,7 @@ public final class Configuration {
         return defaultValue;
     }
 
-    public static long asLong(Map<String, ?> properties, String key, long defaultValue) {
+    public static long asLong(final Map<String, ?> properties, final String key, final long defaultValue) {
         if (properties == null) {
             return defaultValue;
         }
@@ -112,11 +150,11 @@ public final class Configuration {
         return defaultValue;
     }
 
-    public static Double asDouble(Map<String, ?> properties, String key) {
+    public static Double asDouble(final Map<String, ?> properties, final String key) {
         return asDouble(properties, key, null);
     }
 
-    public static Double asDouble(Map<String, ?> properties, String key, Double defaultValue) {
+    public static Double asDouble(final Map<String, ?> properties, final String key, final Double defaultValue) {
         if (properties == null) {
             return defaultValue;
         }
@@ -129,7 +167,7 @@ public final class Configuration {
         return defaultValue;
     }
 
-    public static double asDouble(Map<String, ?> properties, String key, double defaultValue) {
+    public static double asDouble(final Map<String, ?> properties, final String key, final double defaultValue) {
         if (properties == null) {
             return defaultValue;
         }

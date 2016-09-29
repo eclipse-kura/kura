@@ -20,6 +20,9 @@ import org.eclipse.kura.camel.internal.cloud.CloudClientCache;
 import org.eclipse.kura.camel.internal.cloud.CloudClientCacheImpl;
 import org.eclipse.kura.cloud.CloudService;
 
+/**
+ * The Camel component for providing "kura-cloud"
+ */
 public class KuraCloudComponent extends UriEndpointComponent {
 
     public static final String DEFAULT_NAME = "kura-cloud";

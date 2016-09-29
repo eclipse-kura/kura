@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Red Hat and/or its affiliates
+ * Copyright (c) 2011, 2016 Red Hat and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,6 +25,9 @@ import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudClientListener;
 import org.eclipse.kura.message.KuraPayload;
 
+/**
+ * Consumer implementation for {@link KuraCloudComponent}
+ */
 public class KuraCloudConsumer extends DefaultConsumer implements CloudClientListener {
 
     private final CloudClient cloudClient;

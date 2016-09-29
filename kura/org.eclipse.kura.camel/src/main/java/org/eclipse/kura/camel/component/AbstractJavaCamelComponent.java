@@ -16,19 +16,41 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.eclipse.kura.camel.runner.BeforeStart;
 import org.eclipse.kura.camel.runner.CamelRunner;
-import org.eclipse.kura.camel.runner.ContextFactory;
 import org.eclipse.kura.camel.runner.CamelRunner.Builder;
+import org.eclipse.kura.camel.runner.ContextFactory;
+import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractJavaCamelComponent extends RouteBuilder {
+/**
+ * An abstract base class for implementing a {@link ConfigurableComponent} using
+ * the Java DSL
+ * <p>
+ * This class intended to be subclasses and customized according to needs.
+ * </p>
+ * <p>
+ * <strong>Note:</strong> This class is intended to be used as <em>OSGi Service
+ * Component</em>. The methods {@link #start()} and {@link #stop()} have to be configured
+ * accordingly.
+ * </p>
+ * <p>
+ * The lifecycle methods of this class declare annotations based on {@link org.osgi.service.component.annotations}.
+ * However those annotations are only discovered during build time. They are declared in order
+ * to provide proper support when annotation based tooling is used. Otherwise those methods must be
+ * mapped manually in the DS declaration.
+ * </p>
+ */
+public abstract class AbstractJavaCamelComponent extends RouteBuilder implements ConfigurableComponent {
 
     private final static Logger logger = LoggerFactory.getLogger(AbstractJavaCamelComponent.class);
 
     protected CamelRunner runner;
 
+    @Activate
     protected void start() throws Exception {
         logger.info("Starting camel router");
 
@@ -52,6 +74,7 @@ public abstract class AbstractJavaCamelComponent extends RouteBuilder {
         this.runner.start();
     }
 
+    @Deactivate
     protected void stop() throws Exception {
         logger.info("Stopping camel router");
 
@@ -63,6 +86,12 @@ public abstract class AbstractJavaCamelComponent extends RouteBuilder {
         }
     }
 
+    /**
+     * Called before the context is started
+     *
+     * @param camelContext
+     *            the Camel context which is being prepared for starting
+     */
     protected void beforeStart(final CamelContext camelContext) {
     }
 

@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Asset Provider Test
+Bundle-SymbolicName: org.eclipse.kura.asset.provider.test
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: EUROTECH
+Bundle-License: Eclipse Public License v1.0
+Fragment-Host: org.eclipse.kura.asset.provider;bundle-version="1.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.junit;bundle-version="4.10.0"
+Import-Package: org.eclipse.kura.core.configuration.metatype;version="[1.0,2.0)",
+ org.eclipse.kura.test.annotation;version="[1.0,2.0)"

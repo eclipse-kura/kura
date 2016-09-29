@@ -24,7 +24,7 @@ hash dialog &>/dev/null || {
   echo >&2
   echo >&2 "This script requires you to install the command 'dialog'. Exiting ..."
 
-  if [[ "$OSTYPE" == "darwin" ]]; then
+  if [[ "$OSTYPE" == "darwin"* ]]; then
     echo >&2 "  on Mac OS run"
     echo >&2 "     brew install dialog"
 

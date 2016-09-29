@@ -13,7 +13,7 @@ package org.eclipse.kura.net.dns;
 
 /**
  * Placeholder for IPv4 DNS server configurations
- * 
+ *
  * @author eurotech
  *
  */

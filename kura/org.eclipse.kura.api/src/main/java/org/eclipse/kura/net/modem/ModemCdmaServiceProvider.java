@@ -12,19 +12,16 @@
 package org.eclipse.kura.net.modem;
 
 public enum ModemCdmaServiceProvider {
-	
-	UNKNOWN(0),
-	SPRINT(1),
-	AERIS(2),
-	VERIZON(3);
-	
-	private int m_provider;
-	
-	private ModemCdmaServiceProvider(int provider) {
-		m_provider = provider;
-	}
-	
-	public int getProvider() {
-		return m_provider;
-	}
+
+    UNKNOWN(0), SPRINT(1), AERIS(2), VERIZON(3);
+
+    private int m_provider;
+
+    private ModemCdmaServiceProvider(int provider) {
+        this.m_provider = provider;
+    }
+
+    public int getProvider() {
+        return this.m_provider;
+    }
 }

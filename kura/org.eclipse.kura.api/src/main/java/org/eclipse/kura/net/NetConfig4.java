@@ -14,7 +14,6 @@ package org.eclipse.kura.net;
 /**
  * Marker interface for IPv4-based configurations of network interfaces
  */
-public interface NetConfig4 extends NetConfig 
-{
+public interface NetConfig4 extends NetConfig {
 
 }

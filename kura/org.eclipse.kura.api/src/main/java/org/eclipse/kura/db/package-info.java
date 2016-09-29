@@ -7,13 +7,13 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Eurotech
+ * Eurotech
  *******************************************************************************/
 /**
- * 
+ *
  */
 /**
- * Provides APIs to acquire and use a JDBC Connection to the embedded SQL database running in the framework. 
+ * Provides APIs to acquire and use a JDBC Connection to the embedded SQL database running in the framework.
  *
  */
 package org.eclipse.kura.db;

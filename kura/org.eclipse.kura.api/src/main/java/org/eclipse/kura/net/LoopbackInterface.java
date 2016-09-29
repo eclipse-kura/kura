@@ -13,7 +13,7 @@ package org.eclipse.kura.net;
 
 /**
  * Placeholder for a LoopbackInterface
- * 
+ *
  * @author eurotech
  *
  * @param <T>

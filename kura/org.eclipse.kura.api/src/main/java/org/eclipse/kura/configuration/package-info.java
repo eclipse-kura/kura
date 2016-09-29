@@ -7,13 +7,14 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Eurotech
+ * Eurotech
  *******************************************************************************/
 /**
- * 
+ *
  */
 /**
- * Contains services to manage all configurable components of the system. This provides an extension to the existing OSGi MetaTypeService services.
+ * Contains services to manage all configurable components of the system. This provides an extension to the existing
+ * OSGi MetaTypeService services.
  *
  */
 package org.eclipse.kura.configuration;

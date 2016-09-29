@@ -12,16 +12,16 @@
 package org.eclipse.kura.net;
 
 /**
- * This class represents an Internet Protocol version 4 (IPv4) address. 
+ * This class represents an Internet Protocol version 4 (IPv4) address.
  */
-public class IP4Address extends IPAddress 
-{
-	IP4Address(byte[] addr, java.net.InetAddress jnAddress) {
-		super(addr, jnAddress);
-	}
-	
-	@Override
-	public String toString() {
-	    return this.getHostAddress();
-	}
+public class IP4Address extends IPAddress {
+
+    IP4Address(byte[] addr, java.net.InetAddress jnAddress) {
+        super(addr, jnAddress);
+    }
+
+    @Override
+    public String toString() {
+        return getHostAddress();
+    }
 }

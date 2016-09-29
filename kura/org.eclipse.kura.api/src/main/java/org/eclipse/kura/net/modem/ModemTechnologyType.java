@@ -12,13 +12,5 @@
 package org.eclipse.kura.net.modem;
 
 public enum ModemTechnologyType {
-    NONE,
-    CDMA,
-    EVDO,
-    LTE,
-    HSPA,
-    HSDPA,
-    UMTS,
-    GSM_GPRS,
-    GPS
+    NONE, CDMA, EVDO, LTE, HSPA, HSDPA, UMTS, GSM_GPRS, GPS
 }

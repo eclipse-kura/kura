@@ -19,52 +19,52 @@ import org.eclipse.kura.net.NetConfig;
  */
 public interface RouteConfig extends NetConfig {
 
-	/**
-	 * Gets the description of the route
-	 * 
-	 * @return		The description of the route
-	 */
-	public String getDescription();
-	
-	/**
-	 * Gets the destination of the route
-	 * 
-	 * @return		The destination of the route
-	 */
-	public IPAddress getDestination();
+    /**
+     * Gets the description of the route
+     *
+     * @return The description of the route
+     */
+    public String getDescription();
 
-	/**
-	 * Gets the gateway of the route
-	 * 
-	 * @return		The gateway of the route
-	 */
-	public IPAddress getGateway();
-	
-	/**
-	 * Gets the network mask of the route
-	 * 
-	 * @return		The network mask of the route
-	 */
-	public IPAddress getNetmask();
-	
-	/**
-	 * Gets the interface name associated with the route
-	 * 
-	 * @return		The interface name associated with the route
-	 */
-	public String getInterfaceName();
+    /**
+     * Gets the destination of the route
+     *
+     * @return The destination of the route
+     */
+    public IPAddress getDestination();
 
-	/**
-	 * Gets the metric of the route
-	 * 
-	 * @return		The metric of the route
-	 */
-	public int getMetric();
-	
-	/**
-	 * Compares one route to another
-	 * 
-	 * @return		Whether or not the two routes are equal
-	 */
-	public boolean equals(RouteConfig r);
+    /**
+     * Gets the gateway of the route
+     *
+     * @return The gateway of the route
+     */
+    public IPAddress getGateway();
+
+    /**
+     * Gets the network mask of the route
+     *
+     * @return The network mask of the route
+     */
+    public IPAddress getNetmask();
+
+    /**
+     * Gets the interface name associated with the route
+     *
+     * @return The interface name associated with the route
+     */
+    public String getInterfaceName();
+
+    /**
+     * Gets the metric of the route
+     *
+     * @return The metric of the route
+     */
+    public int getMetric();
+
+    /**
+     * Compares one route to another
+     *
+     * @return Whether or not the two routes are equal
+     */
+    public boolean equals(RouteConfig r);
 }

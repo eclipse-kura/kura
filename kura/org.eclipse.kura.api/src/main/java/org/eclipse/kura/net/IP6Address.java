@@ -14,17 +14,19 @@ package org.eclipse.kura.net;
 /**
  * This class represents an Internet Protocol version 6 (IPv6) address.
  */
-public class IP6Address extends IPAddress
-{
-	IP6Address(byte[] addr, java.net.InetAddress jnAddress) {
-		super(addr, jnAddress);
-	}
+public class IP6Address extends IPAddress {
 
-	/**
-	 * Utility routine to check if the InetAddress is an IPv4 compatible IPv6 address.
-	 * @return a boolean indicating if the InetAddress is an IPv4 compatible IPv6 address; or false if address is IPv4 address.
-	 */
-	public boolean isIPv4CompatibleAddress() {
-		return ((java.net.Inet6Address) javaNetAddress).isIPv4CompatibleAddress();
-	}
+    IP6Address(byte[] addr, java.net.InetAddress jnAddress) {
+        super(addr, jnAddress);
+    }
+
+    /**
+     * Utility routine to check if the InetAddress is an IPv4 compatible IPv6 address.
+     *
+     * @return a boolean indicating if the InetAddress is an IPv4 compatible IPv6 address; or false if address is IPv4
+     *         address.
+     */
+    public boolean isIPv4CompatibleAddress() {
+        return ((java.net.Inet6Address) this.javaNetAddress).isIPv4CompatibleAddress();
+    }
 }

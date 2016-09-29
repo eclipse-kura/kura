@@ -17,25 +17,28 @@ import org.eclipse.kura.net.NetInterfaceAddress;
  * Interface for wifi status information
  *
  */
-public interface WifiInterfaceAddress extends NetInterfaceAddress 
-{
-	/**
-	 * The operating mode of the wireless device.
-	 * @return
-	 */
-	public WifiMode getMode();	
-	
-	/**
-	 * The bit rate currently used by the wireless device, in kilobits/second (Kb/s).
-	 * @return
-	 */
-	public long getBitrate();
+public interface WifiInterfaceAddress extends NetInterfaceAddress {
 
-	/**
-	 * Returns the WifiAccessPoint that this InterfaceAddress was acquired from when in managed mode.
-	 * Returns a WifiAccessPoint representing itself when in master mode.
-	 * @return the WifiAccessPoint
-	 */
-	public WifiAccessPoint getWifiAccessPoint();
-	
+    /**
+     * The operating mode of the wireless device.
+     *
+     * @return
+     */
+    public WifiMode getMode();
+
+    /**
+     * The bit rate currently used by the wireless device, in kilobits/second (Kb/s).
+     *
+     * @return
+     */
+    public long getBitrate();
+
+    /**
+     * Returns the WifiAccessPoint that this InterfaceAddress was acquired from when in managed mode.
+     * Returns a WifiAccessPoint representing itself when in master mode.
+     *
+     * @return the WifiAccessPoint
+     */
+    public WifiAccessPoint getWifiAccessPoint();
+
 }

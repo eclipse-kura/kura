@@ -13,15 +13,15 @@ package org.eclipse.kura.net;
 
 /**
  * Used to distinguish network protocol types
- * 
+ *
  * @author eurotech
  *
  */
 public enum NetProtocol {
 
-	/** Transmission Control Protocol (TCP) **/
-	tcp,
-	
-	/** User Datagram Protocol (UDP) **/
-	udp
+    /** Transmission Control Protocol (TCP) **/
+    tcp,
+
+    /** User Datagram Protocol (UDP) **/
+    udp
 }

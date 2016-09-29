@@ -14,21 +14,21 @@ package org.eclipse.kura.net.modem;
 import java.util.List;
 
 public interface ModemDevice {
-	
-	public List<String> getSerialPorts();
-	
-	/**
-	 * The manufacturer name of the device
-	 * 
-	 * @return		The manufacturer name of the device
-	 */
-	public String getManufacturerName();
-	
-	/**
-	 * The product name of the device
-	 * 
-	 * @return		The product name of the device
-	 */
-	public String getProductName();
-	
+
+    public List<String> getSerialPorts();
+
+    /**
+     * The manufacturer name of the device
+     *
+     * @return The manufacturer name of the device
+     */
+    public String getManufacturerName();
+
+    /**
+     * The product name of the device
+     *
+     * @return The product name of the device
+     */
+    public String getProductName();
+
 }

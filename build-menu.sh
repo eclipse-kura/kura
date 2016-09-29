@@ -70,7 +70,9 @@ echo "Available profiles: $PROFILES"
 
 ## read previous selection
 
-test -r "$KURA_BUILD_SELECTION" && readarray -t oldsel < "$KURA_BUILD_SELECTION"
+if ((BASH_VERSINFO[0] >= 4)); then
+  test -r "$KURA_BUILD_SELECTION" && readarray -t oldsel < "$KURA_BUILD_SELECTION"
+fi
 
 ## build command line
 

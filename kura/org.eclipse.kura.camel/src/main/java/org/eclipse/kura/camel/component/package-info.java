@@ -12,7 +12,7 @@
  * Components for building Kura application based on Apache Camel™
  * <p>
  * This package provides a few classes which are intended as based classes
- * helping to impelement simple Camel based components.
+ * helping to implement simple Camel based components.
  * </p>
  */
 package org.eclipse.kura.camel.component;

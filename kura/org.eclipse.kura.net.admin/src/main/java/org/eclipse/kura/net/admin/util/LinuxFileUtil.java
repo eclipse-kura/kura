@@ -18,17 +18,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LinuxFileUtil {
-    
+
     private static final Logger s_logger = LoggerFactory.getLogger(LinuxFileUtil.class);
-    
+
     /*
      * This method creates symbolic link, deleting existing link by default
      */
-    public static void createSymbolicLink(String sourceFile, String targetFile)
-            throws Exception {
+    public static void createSymbolicLink(String sourceFile, String targetFile) throws Exception {
         createSymbolicLink(sourceFile, targetFile, true);
     }
-    
+
     /*
      * This method creates symbolic link
      */
@@ -36,7 +35,7 @@ public class LinuxFileUtil {
             throws Exception {
 
         s_logger.debug("Creating symbolic link from " + targetFile + " to " + sourceFile);
-        
+
         File f = new File(targetFile);
         if (f.exists()) {
             if (deleteOldLink) {
@@ -44,7 +43,7 @@ public class LinuxFileUtil {
                 f.delete();
             }
         }
-    
+
         if (!f.exists()) {
             StringBuffer buf = new StringBuffer("ln -s");
             buf.append(' ');
@@ -54,8 +53,7 @@ public class LinuxFileUtil {
 
             int ret = LinuxProcessUtil.start(buf.toString());
             if (ret != 0) {
-                throw new Exception("error executing command - "
-                        + buf.toString());
+                throw new Exception("error executing command - " + buf.toString());
             }
         }
     }

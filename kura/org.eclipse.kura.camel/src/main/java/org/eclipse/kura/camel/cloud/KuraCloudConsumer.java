@@ -95,20 +95,25 @@ public class KuraCloudConsumer extends DefaultConsumer implements CloudClientLis
 
     @Override
     public void onMessageConfirmed(int messageId, String appTopic) {
-        this.log.debug("Executing empty 'onMessageConfirmed' callback with message ID {} and application topic {}.", messageId, appTopic);
+        this.log.debug("Executing empty 'onMessageConfirmed' callback with message ID {} and application topic {}.",
+                messageId, appTopic);
     }
 
     @Override
     public void onMessagePublished(int messageId, String appTopic) {
-        this.log.debug("Executing empty 'onMessagePublished' callback with message ID {} and application topic {}.", messageId, appTopic);
+        this.log.debug("Executing empty 'onMessagePublished' callback with message ID {} and application topic {}.",
+                messageId, appTopic);
     }
 
     // Helpers
 
-    private void onInternalMessageArrived(String deviceId, String appTopic, KuraPayload message, int qos, boolean retain, boolean control) {
+    private void onInternalMessageArrived(String deviceId, String appTopic, KuraPayload message, int qos,
+            boolean retain, boolean control) {
         this.log.debug("Received message with deviceId {}, application topic {}.", deviceId, appTopic);
-        Exchange exchange = anExchange(getEndpoint().getCamelContext()).withBody(message).withHeader(CAMEL_KURA_CLOUD_TOPIC, appTopic).withHeader(CAMEL_KURA_CLOUD_DEVICEID, deviceId)
-                .withHeader(CAMEL_KURA_CLOUD_QOS, qos).withHeader(CAMEL_KURA_CLOUD_CONTROL, control).withHeader(CAMEL_KURA_CLOUD_RETAIN, retain).build();
+        Exchange exchange = anExchange(getEndpoint().getCamelContext()).withBody(message)
+                .withHeader(CAMEL_KURA_CLOUD_TOPIC, appTopic).withHeader(CAMEL_KURA_CLOUD_DEVICEID, deviceId)
+                .withHeader(CAMEL_KURA_CLOUD_QOS, qos).withHeader(CAMEL_KURA_CLOUD_CONTROL, control)
+                .withHeader(CAMEL_KURA_CLOUD_RETAIN, retain).build();
         exchange.setFromEndpoint(getEndpoint());
         try {
             getProcessor().process(exchange);

@@ -49,7 +49,8 @@ public class DefaultServiceDependency<T, C> implements ServiceDependency<T, C> {
             }
         };
 
-        public HandleImpl(BundleContext bundleContext, Filter filter, Runnable runnable, final ServiceConsumer<T, C> consumer) {
+        public HandleImpl(BundleContext bundleContext, Filter filter, Runnable runnable,
+                final ServiceConsumer<T, C> consumer) {
             this.bundleContext = bundleContext;
             this.consumer = consumer;
             this.runnable = runnable;
@@ -107,7 +108,8 @@ public class DefaultServiceDependency<T, C> implements ServiceDependency<T, C> {
 
     private final ServiceConsumer<T, C> consumer;
 
-    public DefaultServiceDependency(final BundleContext bundleContext, final Filter filter, final ServiceConsumer<T, C> consumer) {
+    public DefaultServiceDependency(final BundleContext bundleContext, final Filter filter,
+            final ServiceConsumer<T, C> consumer) {
         Objects.requireNonNull(bundleContext);
         Objects.requireNonNull(filter);
 

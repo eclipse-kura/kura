@@ -17,7 +17,7 @@ public class ServiceConfiguration {
 
     /**
      * Set the router XML
-     * 
+     *
      * @param xml
      *            must not be {@code null}
      */

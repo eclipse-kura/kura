@@ -47,7 +47,7 @@ public class CloudClientCacheImpl implements CloudClientCache {
         }
     }
 
-    private final static Logger logger = LoggerFactory.getLogger(CloudClientCacheImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(CloudClientCacheImpl.class);
 
     private final CloudService cloudService;
 

@@ -89,7 +89,8 @@ public class CamelRunner {
         };
     }
 
-    public static RegistryFactory createOsgiRegistry(final BundleContext bundleContext, final Map<String, Object> services) {
+    public static RegistryFactory createOsgiRegistry(final BundleContext bundleContext,
+            final Map<String, Object> services) {
         Objects.requireNonNull(bundleContext);
 
         if (services == null || services.isEmpty()) {
@@ -221,7 +222,8 @@ public class CamelRunner {
             return dependOn(null, filter, consumer);
         }
 
-        public <T> Builder dependOn(BundleContext bundleContext, final Filter filter, final ServiceConsumer<T, CamelContext> consumer) {
+        public <T> Builder dependOn(BundleContext bundleContext, final Filter filter,
+                final ServiceConsumer<T, CamelContext> consumer) {
             Objects.requireNonNull(filter);
             Objects.requireNonNull(consumer);
 
@@ -237,7 +239,8 @@ public class CamelRunner {
         /**
          * Depend on a specific {@link CloudService} instance
          * <p>
-         * If a filter is specified then it will be combined with the filter for the object class of the {@link CloudService}.
+         * If a filter is specified then it will be combined with the filter for the object class of the
+         * {@link CloudService}.
          * If the filter expression is omitted then only the object class filter will be used.
          * </p>
          *
@@ -249,7 +252,8 @@ public class CamelRunner {
          *            the consumer processing the service instance
          * @return the builder instance
          */
-        public Builder cloudService(BundleContext bundleContext, final String filter, final ServiceConsumer<CloudService, CamelContext> consumer) {
+        public Builder cloudService(BundleContext bundleContext, final String filter,
+                final ServiceConsumer<CloudService, CamelContext> consumer) {
             final String baseFilter = String.format("(%s=%s)", Constants.OBJECTCLASS, CloudService.class.getName());
 
             try {
@@ -272,7 +276,8 @@ public class CamelRunner {
          * The cloud service will be injected into the camel context as component "kura-cloud".
          * </p>
          * <p>
-         * If a filter is specified then it will be combined with the filter for the object class of the {@link CloudService}.
+         * If a filter is specified then it will be combined with the filter for the object class of the
+         * {@link CloudService}.
          * If the filter expression is omitted then only the object class filter will be used.
          * </p>
          *
@@ -376,7 +381,8 @@ public class CamelRunner {
     private RoutesProvider routes = EmptyRoutesProvider.INSTANCE;
     private DependencyRunner<CamelContext> dependencyRunner;
 
-    private CamelRunner(final RegistryFactory registryFactory, final ContextFactory contextFactory, final List<BeforeStart> beforeStarts, final List<ServiceDependency<?, CamelContext>> dependencies) {
+    private CamelRunner(final RegistryFactory registryFactory, final ContextFactory contextFactory,
+            final List<BeforeStart> beforeStarts, final List<ServiceDependency<?, CamelContext>> dependencies) {
         this.registryFactory = registryFactory;
         this.contextFactory = contextFactory;
         this.beforeStarts = beforeStarts;
@@ -401,26 +407,27 @@ public class CamelRunner {
         logger.info("Starting...");
         stop();
 
-        this.dependencyRunner = new DependencyRunner<>(this.dependencies, new DependencyRunner.Listener<CamelContext>() {
+        this.dependencyRunner = new DependencyRunner<>(this.dependencies,
+                new DependencyRunner.Listener<CamelContext>() {
 
-            @Override
-            public void ready(final List<ServiceDependency.Handle<CamelContext>> dependencies) {
-                try {
-                    startCamel(dependencies);
-                } catch (Exception e) {
-                    logger.warn("Failed to start context", e);
-                }
-            }
+                    @Override
+                    public void ready(final List<ServiceDependency.Handle<CamelContext>> dependencies) {
+                        try {
+                            startCamel(dependencies);
+                        } catch (Exception e) {
+                            logger.warn("Failed to start context", e);
+                        }
+                    }
 
-            @Override
-            public void notReady() {
-                try {
-                    stopCamel();
-                } catch (Exception e) {
-                    logger.warn("Failed to stop context", e);
-                }
-            }
-        });
+                    @Override
+                    public void notReady() {
+                        try {
+                            stopCamel();
+                        } catch (Exception e) {
+                            logger.warn("Failed to stop context", e);
+                        }
+                    }
+                });
         this.dependencyRunner.start();
     }
 

@@ -81,7 +81,8 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
             tad.setType(Tscalar.INTEGER);
             tad.setCardinality(0);
             tad.setRequired(Boolean.FALSE);
-            tad.setDescription("The initial service ranking of the new cloud service. A higher number will have more priority.");
+            tad.setDescription(
+                    "The initial service ranking of the new cloud service. A higher number will have more priority.");
             tocd.addAD(tad);
         }
 
@@ -178,7 +179,8 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
         final Set<String> ids = new TreeSet<>();
         try {
 
-            final Collection<ServiceReference<CamelFactory>> refs = FrameworkUtil.getBundle(CamelManager.class).getBundleContext().getServiceReferences(CamelFactory.class, null);
+            final Collection<ServiceReference<CamelFactory>> refs = FrameworkUtil.getBundle(CamelManager.class)
+                    .getBundleContext().getServiceReferences(CamelFactory.class, null);
             if (refs != null) {
                 for (ServiceReference<CamelFactory> ref : refs) {
                     addService(ref, ids);

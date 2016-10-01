@@ -47,7 +47,8 @@ public class DependencyRunner<C> {
     };
     private boolean working;
 
-    public DependencyRunner(final List<ServiceDependency<?, C>> dependencies, final DependencyRunner.Listener<C> listener) {
+    public DependencyRunner(final List<ServiceDependency<?, C>> dependencies,
+            final DependencyRunner.Listener<C> listener) {
         Objects.requireNonNull(dependencies);
         Objects.requireNonNull(listener);
 

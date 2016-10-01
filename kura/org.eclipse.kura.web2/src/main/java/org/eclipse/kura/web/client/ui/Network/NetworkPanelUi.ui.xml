@@ -15,42 +15,51 @@
 -->
 
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
+    xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
-	<ui:style>
-	.important { font-weight: bold;	}
-	
-	.center-panel {	height: 100%; padding: 0px; margin: 2px; }
-	
-	.interfaces { height: 40vh; }
-	</ui:style>
+    <ui:style>
+    .important {
+    	font-weight: bold;
+    }
+    
+    .center-panel {
+    	height: 100%;
+    	padding: 0px;
+    	margin: 2px;
+    }
+    
+    .interfaces {
+    	height: 40vh;
+    }
+    </ui:style>
 
-	<b:Container fluid="true">
-		<b:Row>
-			<g:HTMLPanel ui:field="networkIntro">
-			</g:HTMLPanel>
-		</b:Row>
-		<b:Row>
-			<b:Column addStyleNames="{style.center-panel}" size="MD_2">
-				<b:Well addStyleNames="{style.center-panel}">
-					<b:Panel>
-						<b:PanelBody ui:field="interfacesTable">
-						</b:PanelBody>
-					</b:Panel>
-				</b:Well>
-			</b:Column>
+    <b:Container fluid="true">
+        <b:Row>
+            <g:HTMLPanel ui:field="networkIntro">
+            </g:HTMLPanel>
+        </b:Row>
+        <b:Row>
+            <b:Column addStyleNames="{style.center-panel}"
+                size="MD_2">
+                <b:Well addStyleNames="{style.center-panel}">
+                    <b:Panel>
+                        <b:PanelBody ui:field="interfacesTable">
+                        </b:PanelBody>
+                    </b:Panel>
+                </b:Well>
+            </b:Column>
 
-			<b:Column size="MD_9" addStyleNames="{style.center-panel}">
-				<b:Well addStyleNames="{style.center-panel}">				
-					<b:Container fluid="true" ui:field="buttonBar" />
-					<b:Panel>
-						<b:PanelBody ui:field="tabsPanel">
-						</b:PanelBody>
-					</b:Panel>
-				</b:Well>
-			</b:Column>
-		</b:Row>
+            <b:Column size="MD_9" addStyleNames="{style.center-panel}">
+                <b:Well addStyleNames="{style.center-panel}">
+                    <b:Container fluid="true" ui:field="buttonBar" />
+                    <b:Panel>
+                        <b:PanelBody ui:field="tabsPanel">
+                        </b:PanelBody>
+                    </b:Panel>
+                </b:Well>
+            </b:Column>
+        </b:Row>
 
-	</b:Container>
+    </b:Container>
 </ui:UiBinder> 

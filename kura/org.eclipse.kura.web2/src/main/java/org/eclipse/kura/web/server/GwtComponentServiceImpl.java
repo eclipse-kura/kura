@@ -21,23 +21,25 @@ import java.util.Map;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Icon;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Option;
-import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.web.server.util.KuraExceptionHandler;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
 
 public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements GwtComponentService {
+
     private static final long serialVersionUID = -4176701819112753800L;
 
+    @Override
     public List<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
@@ -47,6 +49,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             List<ComponentConfiguration> configs = cs.getComponentConfigurations();
             // sort the list alphabetically by service name
             Collections.sort(configs, new Comparator<ComponentConfiguration>() {
+
                 @Override
                 public int compare(ComponentConfiguration arg0, ComponentConfiguration arg1) {
                     String name0;
@@ -72,11 +75,11 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             for (ComponentConfiguration config : configs) {
 
                 // ignore items we want to hide
-                if (config.getPid().endsWith("SystemPropertiesService") ||
-                        config.getPid().endsWith("NetworkAdminService") ||
-                        config.getPid().endsWith("NetworkConfigurationService") ||
-                        config.getPid().endsWith("SslManagerService") ||
-                        config.getPid().endsWith("FirewallConfigurationService")) {
+                if (config.getPid().endsWith("SystemPropertiesService")
+                        || config.getPid().endsWith("NetworkAdminService")
+                        || config.getPid().endsWith("NetworkConfigurationService")
+                        || config.getPid().endsWith("SslManagerService")
+                        || config.getPid().endsWith("FirewallConfigurationService")) {
                     continue;
                 }
 
@@ -163,6 +166,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         return gwtConfigs;
     }
 
+    @Override
     public List<GwtConfigComponent> findComponentConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
@@ -172,6 +176,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             List<ComponentConfiguration> configs = cs.getComponentConfigurations();
             // sort the list alphabetically by service name
             Collections.sort(configs, new Comparator<ComponentConfiguration>() {
+
                 @Override
                 public int compare(ComponentConfiguration arg0, ComponentConfiguration arg1) {
                     String name0;
@@ -277,7 +282,9 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         return gwtConfigs;
     }
 
-    public void updateComponentConfiguration(GwtXSRFToken xsrfToken, GwtConfigComponent gwtCompConfig) throws GwtKuraException {
+    @Override
+    public void updateComponentConfiguration(GwtXSRFToken xsrfToken, GwtConfigComponent gwtCompConfig)
+            throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         try {
@@ -299,7 +306,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
                     String strValue = gwtConfigParam.getValue();
 
-                    if ((currentObjValue instanceof Password) && PLACEHOLDER.equals(strValue)) {
+                    if (currentObjValue instanceof Password && PLACEHOLDER.equals(strValue)) {
                         objValue = currentConfigProp.get(gwtConfigParam.getId());
                     } else {
                         objValue = getObjectValue(gwtConfigParam, strValue);
@@ -341,35 +348,35 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             objValue = strValue;
         } else if (strValue != null && !strValue.trim().isEmpty()) {
             switch (gwtType) {
-                case LONG:
-                    objValue = Long.parseLong(strValue);
-                    break;
-                case DOUBLE:
-                    objValue = Double.parseDouble(strValue);
-                    break;
-                case FLOAT:
-                    objValue = Float.parseFloat(strValue);
-                    break;
-                case INTEGER:
-                    objValue = Integer.parseInt(strValue);
-                    break;
-                case SHORT:
-                    objValue = Short.parseShort(strValue);
-                    break;
-                case BYTE:
-                    objValue = Byte.parseByte(strValue);
-                    break;
-                case BOOLEAN:
-                    objValue = Boolean.parseBoolean(strValue);
-                    break;
-                case PASSWORD:
-                    objValue = new Password(strValue);
-                    break;
-                case CHAR:
-                    objValue = Character.valueOf(strValue.charAt(0));
-                    break;
-                default:
-                    break;
+            case LONG:
+                objValue = Long.parseLong(strValue);
+                break;
+            case DOUBLE:
+                objValue = Double.parseDouble(strValue);
+                break;
+            case FLOAT:
+                objValue = Float.parseFloat(strValue);
+                break;
+            case INTEGER:
+                objValue = Integer.parseInt(strValue);
+                break;
+            case SHORT:
+                objValue = Short.parseShort(strValue);
+                break;
+            case BYTE:
+                objValue = Byte.parseByte(strValue);
+                break;
+            case BOOLEAN:
+                objValue = Boolean.parseBoolean(strValue);
+                break;
+            case PASSWORD:
+                objValue = new Password(strValue);
+                break;
+            case CHAR:
+                objValue = Character.valueOf(strValue.charAt(0));
+                break;
+            default:
+                break;
             }
         }
         return objValue;
@@ -379,75 +386,85 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         List<Object> values = new ArrayList<Object>();
         GwtConfigParameterType type = gwtConfigParam.getType();
         switch (type) {
-            case BOOLEAN:
-                for (String value : defaultValues) {
-                    if (!value.trim().isEmpty())
-                        values.add(Boolean.valueOf(value));
+        case BOOLEAN:
+            for (String value : defaultValues) {
+                if (!value.trim().isEmpty()) {
+                    values.add(Boolean.valueOf(value));
                 }
-                return values.toArray(new Boolean[] {});
+            }
+            return values.toArray(new Boolean[] {});
 
-            case BYTE:
-                for (String value : defaultValues) {
-                    if (!value.trim().isEmpty())
-                        values.add(Byte.valueOf(value));
+        case BYTE:
+            for (String value : defaultValues) {
+                if (!value.trim().isEmpty()) {
+                    values.add(Byte.valueOf(value));
                 }
-                return values.toArray(new Byte[] {});
+            }
+            return values.toArray(new Byte[] {});
 
-            case CHAR:
-                for (String value : defaultValues) {
-                    if (!value.trim().isEmpty())
-                        values.add(new Character(value.charAt(0)));
+        case CHAR:
+            for (String value : defaultValues) {
+                if (!value.trim().isEmpty()) {
+                    values.add(new Character(value.charAt(0)));
                 }
-                return values.toArray(new Character[] {});
+            }
+            return values.toArray(new Character[] {});
 
-            case DOUBLE:
-                for (String value : defaultValues) {
-                    if (!value.trim().isEmpty())
-                        values.add(Double.valueOf(value));
+        case DOUBLE:
+            for (String value : defaultValues) {
+                if (!value.trim().isEmpty()) {
+                    values.add(Double.valueOf(value));
                 }
-                return values.toArray(new Double[] {});
+            }
+            return values.toArray(new Double[] {});
 
-            case FLOAT:
-                for (String value : defaultValues) {
-                    if (!value.trim().isEmpty())
-                        values.add(Float.valueOf(value));
+        case FLOAT:
+            for (String value : defaultValues) {
+                if (!value.trim().isEmpty()) {
+                    values.add(Float.valueOf(value));
                 }
-                return values.toArray(new Float[] {});
+            }
+            return values.toArray(new Float[] {});
 
-            case INTEGER:
-                for (String value : defaultValues) {
-                    if (!value.trim().isEmpty())
-                        values.add(Integer.valueOf(value));
+        case INTEGER:
+            for (String value : defaultValues) {
+                if (!value.trim().isEmpty()) {
+                    values.add(Integer.valueOf(value));
                 }
-                return values.toArray(new Integer[] {});
+            }
+            return values.toArray(new Integer[] {});
 
-            case LONG:
-                for (String value : defaultValues) {
-                    if (!value.trim().isEmpty())
-                        values.add(Long.valueOf(value));
+        case LONG:
+            for (String value : defaultValues) {
+                if (!value.trim().isEmpty()) {
+                    values.add(Long.valueOf(value));
                 }
-                return values.toArray(new Long[] {});
+            }
+            return values.toArray(new Long[] {});
 
-            case SHORT:
-                for (String value : defaultValues) {
-                    if (!value.trim().isEmpty())
-                        values.add(Short.valueOf(value));
+        case SHORT:
+            for (String value : defaultValues) {
+                if (!value.trim().isEmpty()) {
+                    values.add(Short.valueOf(value));
                 }
-                return values.toArray(new Short[] {});
+            }
+            return values.toArray(new Short[] {});
 
-            case PASSWORD:
-                for (String value : defaultValues) {
-                    if (!value.trim().isEmpty())
-                        values.add(new Password(value));
+        case PASSWORD:
+            for (String value : defaultValues) {
+                if (!value.trim().isEmpty()) {
+                    values.add(new Password(value));
                 }
-                return values.toArray(new Password[] {});
+            }
+            return values.toArray(new Password[] {});
 
-            case STRING:
-                for (String value : defaultValues) {
-                    if (!value.trim().isEmpty())
-                        values.add(value);
+        case STRING:
+            for (String value : defaultValues) {
+                if (!value.trim().isEmpty()) {
+                    values.add(value);
                 }
-                return values.toArray(new String[] {});
+            }
+            return values.toArray(new String[] {});
         }
 
         return null;

@@ -36,98 +36,100 @@ import com.google.gwt.view.client.ListDataProvider;
 
 public class SystemPropertiesTabUi extends Composite {
 
-	private static SystemPropertiesTabUiUiBinder uiBinder = GWT.create(SystemPropertiesTabUiUiBinder.class);
+    private static SystemPropertiesTabUiUiBinder uiBinder = GWT.create(SystemPropertiesTabUiUiBinder.class);
 
-	interface SystemPropertiesTabUiUiBinder extends
-			UiBinder<Widget, SystemPropertiesTabUi> {
-	}
+    interface SystemPropertiesTabUiUiBinder extends UiBinder<Widget, SystemPropertiesTabUi> {
+    }
 
-	private static final Messages MSGS = GWT.create(Messages.class);
+    private static final Messages MSGS = GWT.create(Messages.class);
 
-	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
-	
-	@UiField
-	CellTable<GwtGroupedNVPair> systemPropertiesGrid = new CellTable<GwtGroupedNVPair>();
-	private ListDataProvider<GwtGroupedNVPair> systemPropertiesDataProvider = new ListDataProvider<GwtGroupedNVPair>();
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 
+    @UiField
+    CellTable<GwtGroupedNVPair> systemPropertiesGrid = new CellTable<GwtGroupedNVPair>();
+    private final ListDataProvider<GwtGroupedNVPair> systemPropertiesDataProvider = new ListDataProvider<GwtGroupedNVPair>();
 
-	public SystemPropertiesTabUi() {
-		initWidget(uiBinder.createAndBindUi(this));
-		
-		systemPropertiesGrid.setRowStyles(new RowStyles<GwtGroupedNVPair>() {
-			@Override
-			public String getStyleNames(GwtGroupedNVPair row, int rowIndex) {
-				return row.getValue().contains("  ") ? "rowHeader" : " ";
-			}
-		});
-	
-		loadSystemPropertiesTable(systemPropertiesGrid, systemPropertiesDataProvider);
-	}
+    public SystemPropertiesTabUi() {
+        initWidget(uiBinder.createAndBindUi(this));
 
+        this.systemPropertiesGrid.setRowStyles(new RowStyles<GwtGroupedNVPair>() {
 
-	private void loadSystemPropertiesTable(CellTable<GwtGroupedNVPair> grid, ListDataProvider<GwtGroupedNVPair> dataProvider) {
-		TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
-			@Override
-			public String getValue(GwtGroupedNVPair object) {
-				return String.valueOf(object.getName());
-			}
-		};
-		col1.setCellStyleNames("status-table-row");
-		grid.addColumn(col1, MSGS.devicePropName());
+            @Override
+            public String getStyleNames(GwtGroupedNVPair row, int rowIndex) {
+                return row.getValue().contains("  ") ? "rowHeader" : " ";
+            }
+        });
 
-		TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
-			@Override
-			public String getValue(GwtGroupedNVPair object) {
-				return String.valueOf(object.getValue());
-			}
-		};
-		col2.setCellStyleNames("status-table-row");
-		grid.addColumn(col2, MSGS.devicePropValue());
+        loadSystemPropertiesTable(this.systemPropertiesGrid, this.systemPropertiesDataProvider);
+    }
 
-		dataProvider.addDataDisplay(grid);
-		
-	}
-	
-	public void loadSystemPropertiesData(){
-		systemPropertiesDataProvider.getList().clear();
-		
-		EntryClassUi.showWaitModal();
-		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+    private void loadSystemPropertiesTable(CellTable<GwtGroupedNVPair> grid,
+            ListDataProvider<GwtGroupedNVPair> dataProvider) {
+        TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
 
-			@Override
-			public void onFailure(Throwable ex) {
-				EntryClassUi.hideWaitModal();
-				FailureHandler.handle(ex);
-			}
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return String.valueOf(object.getName());
+            }
+        };
+        col1.setCellStyleNames("status-table-row");
+        grid.addColumn(col1, MSGS.devicePropName());
 
-			@Override
-			public void onSuccess(GwtXSRFToken token) {
-				gwtDeviceService.findSystemProperties(token, new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+        TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
 
-					@Override
-					public void onFailure(Throwable caught) {
-						EntryClassUi.hideWaitModal();
-						systemPropertiesDataProvider.getList().clear();
-						FailureHandler.handle(caught);
-						systemPropertiesDataProvider.flush();
-					}
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return String.valueOf(object.getValue());
+            }
+        };
+        col2.setCellStyleNames("status-table-row");
+        grid.addColumn(col2, MSGS.devicePropValue());
 
-					@Override
-					public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-						for (GwtGroupedNVPair resultPair : result) {
-							systemPropertiesDataProvider.getList().add(resultPair);
-						}	
-						int size= systemPropertiesDataProvider.getList().size();
-						systemPropertiesGrid.setVisibleRange(0, size);
-						systemPropertiesDataProvider.flush();
-						EntryClassUi.hideWaitModal();
-					}
-					
-				});
-			}
-			
-		});
-	}
+        dataProvider.addDataDisplay(grid);
+
+    }
+
+    public void loadSystemPropertiesData() {
+        this.systemPropertiesDataProvider.getList().clear();
+
+        EntryClassUi.showWaitModal();
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                SystemPropertiesTabUi.this.gwtDeviceService.findSystemProperties(token,
+                        new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        SystemPropertiesTabUi.this.systemPropertiesDataProvider.getList().clear();
+                        FailureHandler.handle(caught);
+                        SystemPropertiesTabUi.this.systemPropertiesDataProvider.flush();
+                    }
+
+                    @Override
+                    public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                        for (GwtGroupedNVPair resultPair : result) {
+                            SystemPropertiesTabUi.this.systemPropertiesDataProvider.getList().add(resultPair);
+                        }
+                        int size = SystemPropertiesTabUi.this.systemPropertiesDataProvider.getList().size();
+                        SystemPropertiesTabUi.this.systemPropertiesGrid.setVisibleRange(0, size);
+                        SystemPropertiesTabUi.this.systemPropertiesDataProvider.flush();
+                        EntryClassUi.hideWaitModal();
+                    }
+
+                });
+            }
+
+        });
+    }
 
 }

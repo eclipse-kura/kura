@@ -18,13 +18,13 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("security")
-public interface GwtSecurityService extends RemoteService 
-{	
-	public Boolean isSecurityServiceAvailable();
-	
-	public Boolean isDebugMode();
-	
-	public void reloadSecurityPolicyFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException;
-	
-	public void reloadCommandLineFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException;
+public interface GwtSecurityService extends RemoteService {
+
+    public Boolean isSecurityServiceAvailable();
+
+    public Boolean isDebugMode();
+
+    public void reloadSecurityPolicyFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    public void reloadCommandLineFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException;
 }

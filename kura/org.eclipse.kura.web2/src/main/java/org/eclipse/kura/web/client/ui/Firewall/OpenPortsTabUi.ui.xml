@@ -15,92 +15,110 @@
 -->
 
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
+    xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
-	<ui:style>
-	.important { font-weight: bold; }
-	.center-panel {	padding: 2px; }
-	</ui:style>
+    <ui:style>
+    .important {
+    	font-weight: bold;
+    }
+    
+    .center-panel {
+    	padding: 2px;
+    }
+    </ui:style>
 
-	<b:Container fluid="true" addStyleNames="{style.center-panel}">
-		<b:Row>
-			<b:Panel>
-				<b:ButtonGroup size="SMALL">
-					<b:Button ui:field="apply" addStyleNames="fa fa-check"></b:Button>
-					<b:Button ui:field="create" addStyleNames="fa fa-plus"></b:Button>
-					<b:Button ui:field="edit" addStyleNames="fa fa-pencil"></b:Button>
-					<b:Button ui:field="delete" addStyleNames="fa fa-trash"></b:Button>
-				</b:ButtonGroup>
-			</b:Panel>
-		</b:Row>
+    <b:Container fluid="true" addStyleNames="{style.center-panel}">
+        <b:Row>
+            <b:Panel>
+                <b:ButtonGroup size="SMALL">
+                    <b:Button ui:field="apply" addStyleNames="fa fa-check"></b:Button>
+                    <b:Button ui:field="create" addStyleNames="fa fa-plus"></b:Button>
+                    <b:Button ui:field="edit" addStyleNames="fa fa-pencil"></b:Button>
+                    <b:Button ui:field="delete" addStyleNames="fa fa-trash"></b:Button>
+                </b:ButtonGroup>
+            </b:Panel>
+        </b:Row>
 
-		<b:Row>
-			<b:Alert type="WARNING" ui:field="notification" />
-			<gwt:CellTable bordered="true" condensed="true" striped="true"
-				hover="true" height="100%" width="100%" ui:field="openPortsGrid" />
-		</b:Row>
+        <b:Row>
+            <b:Alert type="WARNING" ui:field="notification" />
+            <gwt:CellTable bordered="true" condensed="true"
+                striped="true" hover="true" height="100%" width="100%"
+                ui:field="openPortsGrid" />
+        </b:Row>
 
-		<b:Modal ui:field="openPortsForm">
-			<b:ModalBody>
-				<b:Form>
-					<b:FieldSet>
+        <b:Modal ui:field="openPortsForm">
+            <b:ModalBody>
+                <b:Form>
+                    <b:FieldSet>
 
-						<b:FormGroup ui:field="groupPort">
-							<b:FormLabel for="port" ui:field="labelPort"></b:FormLabel>
-							<b:TextBox b:id="port" ui:field="port" />
-						</b:FormGroup>
-						<b:FormGroup>
-							<b:FormLabel for="protocol" ui:field="labelProtocol"></b:FormLabel>
-							<g:FlowPanel>
-								<b:ListBox b:id="protocol" ui:field="protocol" />
-							</g:FlowPanel>
-						</b:FormGroup>
-						<b:FormGroup ui:field="groupPermittedNw">
-							<b:FormLabel for="permittedNw" ui:field="labelPermitttedNw"></b:FormLabel>
-							<b:TextBox b:id="permittedNw" ui:field="permittedNw" />
-						</b:FormGroup>
-						<b:FormGroup ui:field="groupPermittedI">
-							<b:FormLabel for="permittedI" ui:field="labelPermitttedI"></b:FormLabel>
-							<b:Tooltip ui:field="tooltipPermittedI">
-								<b:TextBox b:id="permittedI" ui:field="permittedI" />
-							</b:Tooltip>
-						</b:FormGroup>
-						<b:FormGroup ui:field="groupUnpermittedI">
-							<b:FormLabel for="unpermittedI" ui:field="labelUnPermitttedI"></b:FormLabel>
-							<b:Tooltip ui:field="tooltipUnpermittedI">
-								<b:TextBox b:id="unpermittedI" ui:field="unpermittedI" />
-							</b:Tooltip>
-						</b:FormGroup>
-						<b:FormGroup ui:field="groupPermittedMac">
-							<b:FormLabel for="permittedMac" ui:field="labelPermitttedMac"></b:FormLabel>
-							<b:TextBox b:id="permittedMac" ui:field="permittedMac" />
-						</b:FormGroup>
-						<b:FormGroup ui:field="groupSource">
-							<b:FormLabel for="source" ui:field="labelsource"></b:FormLabel>
-							<b:TextBox b:id="source" ui:field="source" />
-						</b:FormGroup>
-					</b:FieldSet>
-				</b:Form>
-			</b:ModalBody>
-			<b:ModalFooter>
-				<b:Button ui:field="submit" />
-				<b:Button ui:field="cancel" />
-			</b:ModalFooter>
-		</b:Modal>
+                        <b:FormGroup ui:field="groupPort">
+                            <b:FormLabel for="port"
+                                ui:field="labelPort"></b:FormLabel>
+                            <b:TextBox b:id="port" ui:field="port" />
+                        </b:FormGroup>
+                        <b:FormGroup>
+                            <b:FormLabel for="protocol"
+                                ui:field="labelProtocol"></b:FormLabel>
+                            <g:FlowPanel>
+                                <b:ListBox b:id="protocol"
+                                    ui:field="protocol" />
+                            </g:FlowPanel>
+                        </b:FormGroup>
+                        <b:FormGroup ui:field="groupPermittedNw">
+                            <b:FormLabel for="permittedNw"
+                                ui:field="labelPermitttedNw"></b:FormLabel>
+                            <b:TextBox b:id="permittedNw"
+                                ui:field="permittedNw" />
+                        </b:FormGroup>
+                        <b:FormGroup ui:field="groupPermittedI">
+                            <b:FormLabel for="permittedI"
+                                ui:field="labelPermitttedI"></b:FormLabel>
+                            <b:Tooltip ui:field="tooltipPermittedI">
+                                <b:TextBox b:id="permittedI"
+                                    ui:field="permittedI" />
+                            </b:Tooltip>
+                        </b:FormGroup>
+                        <b:FormGroup ui:field="groupUnpermittedI">
+                            <b:FormLabel for="unpermittedI"
+                                ui:field="labelUnPermitttedI"></b:FormLabel>
+                            <b:Tooltip ui:field="tooltipUnpermittedI">
+                                <b:TextBox b:id="unpermittedI"
+                                    ui:field="unpermittedI" />
+                            </b:Tooltip>
+                        </b:FormGroup>
+                        <b:FormGroup ui:field="groupPermittedMac">
+                            <b:FormLabel for="permittedMac"
+                                ui:field="labelPermitttedMac"></b:FormLabel>
+                            <b:TextBox b:id="permittedMac"
+                                ui:field="permittedMac" />
+                        </b:FormGroup>
+                        <b:FormGroup ui:field="groupSource">
+                            <b:FormLabel for="source"
+                                ui:field="labelsource"></b:FormLabel>
+                            <b:TextBox b:id="source" ui:field="source" />
+                        </b:FormGroup>
+                    </b:FieldSet>
+                </b:Form>
+            </b:ModalBody>
+            <b:ModalFooter>
+                <b:Button ui:field="submit" />
+                <b:Button ui:field="cancel" />
+            </b:ModalFooter>
+        </b:Modal>
 
-		<b:Modal ui:field="alert">
-			<b:ModalBody>
-				<b.html:Span ui:field="alertBody" />
-			</b:ModalBody>
+        <b:Modal ui:field="alert">
+            <b:ModalBody>
+                <b.html:Span ui:field="alertBody" />
+            </b:ModalBody>
 
-			<b:ModalFooter ui:field="alertFooter">
-				<b:Button ui:field="yes" />
-				<b:Button ui:field="no" />
-			</b:ModalFooter>
-		</b:Modal>
+            <b:ModalFooter ui:field="alertFooter">
+                <b:Button ui:field="yes" />
+                <b:Button ui:field="no" />
+            </b:ModalFooter>
+        </b:Modal>
 
 
-	</b:Container>
+    </b:Container>
 
 </ui:UiBinder> 

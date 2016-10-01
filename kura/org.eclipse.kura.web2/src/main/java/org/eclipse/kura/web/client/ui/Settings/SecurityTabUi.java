@@ -38,160 +38,174 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class SecurityTabUi extends Composite implements Tab {
 
-	private static SecurityTabUiUiBinder uiBinder = GWT.create(SecurityTabUiUiBinder.class);
+    private static SecurityTabUiUiBinder uiBinder = GWT.create(SecurityTabUiUiBinder.class);
 
-	interface SecurityTabUiUiBinder extends UiBinder<Widget, SecurityTabUi> {
-	}
-	
-	private static final Messages MSGS = GWT.create(Messages.class);
-	
-	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-	private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
+    interface SecurityTabUiUiBinder extends UiBinder<Widget, SecurityTabUi> {
+    }
 
-	@UiField
-	HTMLPanel description;
-	@UiField
-	Anchor collapseOneAnchor;
-	@UiField
-	Anchor collapseTwoAnchor;
-	@UiField
-	PanelCollapse collapseOne;
-	@UiField
-	PanelCollapse collapseTwo;
-	@UiField
-	FormLabel securityPolicyLabel;
-	@UiField
-	FormLabel commandLineLabel;
-	@UiField
-	AnchorButton reloadPolicyFingerprint;
-	@UiField
-	AnchorButton reloadCommandLineFingerprint;
-	
-	public SecurityTabUi() {
-		initWidget(uiBinder.createAndBindUi(this));
-		initTab();
-	}
+    private static final Messages MSGS = GWT.create(Messages.class);
 
-	@Override
-	public void setDirty(boolean flag) {
-	}
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
 
-	@Override
-	public boolean isDirty() {
-		return false;
-	}
+    @UiField
+    HTMLPanel description;
+    @UiField
+    Anchor collapseOneAnchor;
+    @UiField
+    Anchor collapseTwoAnchor;
+    @UiField
+    PanelCollapse collapseOne;
+    @UiField
+    PanelCollapse collapseTwo;
+    @UiField
+    FormLabel securityPolicyLabel;
+    @UiField
+    FormLabel commandLineLabel;
+    @UiField
+    AnchorButton reloadPolicyFingerprint;
+    @UiField
+    AnchorButton reloadCommandLineFingerprint;
 
-	@Override
-	public boolean isValid() {
-		return true;
-	}
+    public SecurityTabUi() {
+        initWidget(uiBinder.createAndBindUi(this));
+        initTab();
+    }
 
-	@Override
-	public void refresh() {
-		if (isDirty()) {
-			setDirty(false);
-			reset();
-		}
-	}	
-	
-	private void initTab() {
-		StringBuilder title= new StringBuilder();
-		title.append("<p>");
-		title.append(MSGS.settingsSecurityDescription());
-		title.append("</p>");
-		description.add(new Span(title.toString()));
-		
-		collapseOneAnchor.setText(MSGS.settingsSecurityReloadPolicyTitle());
-		collapseTwoAnchor.setText(MSGS.settingsReloadStartupFingerprintTitle());
-		
-		securityPolicyLabel.setText(MSGS.settingsSecurityReloadPolicyDescription());
-		commandLineLabel.setText(MSGS.settingsReloadStartupFingerprintDescription());
-		
-		reloadPolicyFingerprint.setText(MSGS.settingsSecurityReloadPolicy());
-		reloadPolicyFingerprint.addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {
-				EntryClassUi.showWaitModal();
-				
-				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-					@Override
-					public void onFailure(Throwable ex) {
-						FailureHandler.handle(ex);
-						EntryClassUi.hideWaitModal();
-					}
+    @Override
+    public void setDirty(boolean flag) {
+    }
 
-					@Override
-					public void onSuccess(GwtXSRFToken token) {	
-						gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-							@Override
-							public void onFailure(Throwable ex) {
-								FailureHandler.handle(ex);
-								EntryClassUi.hideWaitModal();
-							}
+    @Override
+    public boolean isDirty() {
+        return false;
+    }
 
-							@Override
-							public void onSuccess(GwtXSRFToken token) {
-								AsyncCallback<Void> callback = new AsyncCallback<Void>() {
-									public void onFailure(Throwable caught) {
-										FailureHandler.handle(caught);
-										EntryClassUi.hideWaitModal();
-									}
+    @Override
+    public boolean isValid() {
+        return true;
+    }
 
-									public void onSuccess(Void result) {
-										EntryClassUi.hideWaitModal();
-									}
-								};
-								gwtSecurityService.reloadSecurityPolicyFingerprint(token, callback);
-							}
-						});
+    @Override
+    public void refresh() {
+        if (isDirty()) {
+            setDirty(false);
+            reset();
+        }
+    }
 
-					}});
-			}
-		});
-		
-		reloadCommandLineFingerprint.setText(MSGS.settingsSecurityReloadPolicy());
-		reloadCommandLineFingerprint.addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {
-				EntryClassUi.showWaitModal();
-				
-				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-					@Override
-					public void onFailure(Throwable ex) {
-						FailureHandler.handle(ex);
-						EntryClassUi.hideWaitModal();
-					}
+    private void initTab() {
+        StringBuilder title = new StringBuilder();
+        title.append("<p>");
+        title.append(MSGS.settingsSecurityDescription());
+        title.append("</p>");
+        this.description.add(new Span(title.toString()));
 
-					@Override
-					public void onSuccess(GwtXSRFToken token) {	
-						gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-							@Override
-							public void onFailure(Throwable ex) {
-								FailureHandler.handle(ex);
-								EntryClassUi.hideWaitModal();
-							}
+        this.collapseOneAnchor.setText(MSGS.settingsSecurityReloadPolicyTitle());
+        this.collapseTwoAnchor.setText(MSGS.settingsReloadStartupFingerprintTitle());
 
-							@Override
-							public void onSuccess(GwtXSRFToken token) {
-								AsyncCallback<Void> callback = new AsyncCallback<Void>() {
-									public void onFailure(Throwable caught) {
-										FailureHandler.handle(caught);
-										EntryClassUi.hideWaitModal();
-									}
+        this.securityPolicyLabel.setText(MSGS.settingsSecurityReloadPolicyDescription());
+        this.commandLineLabel.setText(MSGS.settingsReloadStartupFingerprintDescription());
 
-									public void onSuccess(Void result) {
-										EntryClassUi.hideWaitModal();
-									}
-								};
-								gwtSecurityService.reloadCommandLineFingerprint(token, callback);
-							}
-						});
+        this.reloadPolicyFingerprint.setText(MSGS.settingsSecurityReloadPolicy());
+        this.reloadPolicyFingerprint.addClickHandler(new ClickHandler() {
 
-					}});
-			}
-		});
-	}
-	
-	private void reset() {
-	}
+            @Override
+            public void onClick(ClickEvent event) {
+                EntryClassUi.showWaitModal();
+
+                SecurityTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex);
+                        EntryClassUi.hideWaitModal();
+                    }
+
+                    @Override
+                    public void onSuccess(GwtXSRFToken token) {
+                        SecurityTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                FailureHandler.handle(ex);
+                                EntryClassUi.hideWaitModal();
+                            }
+
+                            @Override
+                            public void onSuccess(GwtXSRFToken token) {
+                                AsyncCallback<Void> callback = new AsyncCallback<Void>() {
+
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        FailureHandler.handle(caught);
+                                        EntryClassUi.hideWaitModal();
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        EntryClassUi.hideWaitModal();
+                                    }
+                                };
+                                SecurityTabUi.this.gwtSecurityService.reloadSecurityPolicyFingerprint(token, callback);
+                            }
+                        });
+
+                    }
+                });
+            }
+        });
+
+        this.reloadCommandLineFingerprint.setText(MSGS.settingsSecurityReloadPolicy());
+        this.reloadCommandLineFingerprint.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                EntryClassUi.showWaitModal();
+
+                SecurityTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex);
+                        EntryClassUi.hideWaitModal();
+                    }
+
+                    @Override
+                    public void onSuccess(GwtXSRFToken token) {
+                        SecurityTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                FailureHandler.handle(ex);
+                                EntryClassUi.hideWaitModal();
+                            }
+
+                            @Override
+                            public void onSuccess(GwtXSRFToken token) {
+                                AsyncCallback<Void> callback = new AsyncCallback<Void>() {
+
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        FailureHandler.handle(caught);
+                                        EntryClassUi.hideWaitModal();
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        EntryClassUi.hideWaitModal();
+                                    }
+                                };
+                                SecurityTabUi.this.gwtSecurityService.reloadCommandLineFingerprint(token, callback);
+                            }
+                        });
+
+                    }
+                });
+            }
+        });
+    }
+
+    private void reset() {
+    }
 }

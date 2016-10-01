@@ -20,8 +20,8 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("ssl")
 public interface GwtSslService extends RemoteService {
-	
-	public void updateSslConfiguration(GwtXSRFToken xsrfToken, GwtSslConfig sslConfig) throws GwtKuraException;
 
-	public GwtSslConfig getSslConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
+    public void updateSslConfiguration(GwtXSRFToken xsrfToken, GwtSslConfig sslConfig) throws GwtKuraException;
+
+    public GwtSslConfig getSslConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
 }

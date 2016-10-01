@@ -16,42 +16,40 @@ import java.util.Arrays;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 
+public class AuthenticationManager {
 
-public class AuthenticationManager 
-{
-	private static AuthenticationManager s_instance;
+    private static AuthenticationManager s_instance;
 
-	private char[] password;
-	private String username;
+    private char[] password;
+    private String username;
 
-	protected AuthenticationManager(String username, char[] psw) {
-		this.username= username;
-		this.password= psw;
-		s_instance= this;
-	}
+    protected AuthenticationManager(String username, char[] psw) {
+        this.username = username;
+        this.password = psw;
+        s_instance = this;
+    }
 
-	public static AuthenticationManager getInstance() {
-		return s_instance;
-	}
-	
-	protected void updateUsername(String username){
-		this.username= username;
-	}
-	
-	protected void updatePassword(char[] psw){
-		password= psw;
-	}
+    public static AuthenticationManager getInstance() {
+        return s_instance;
+    }
 
-	public boolean authenticate(String username, String password)
-	{
-		try {			
-			CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
-			String sha1Password= cryptoService.sha1Hash(password);
-			boolean isUsernameMatching= username.equals(this.username);
-			boolean isPasswordMatching= Arrays.equals(sha1Password.toCharArray(), this.password);
-			return isUsernameMatching && isPasswordMatching;
-		}catch (Exception e) {
-		}
-		return false;
-	}
+    protected void updateUsername(String username) {
+        this.username = username;
+    }
+
+    protected void updatePassword(char[] psw) {
+        this.password = psw;
+    }
+
+    public boolean authenticate(String username, String password) {
+        try {
+            CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
+            String sha1Password = cryptoService.sha1Hash(password);
+            boolean isUsernameMatching = username.equals(this.username);
+            boolean isPasswordMatching = Arrays.equals(sha1Password.toCharArray(), this.password);
+            return isUsernameMatching && isPasswordMatching;
+        } catch (Exception e) {
+        }
+        return false;
+    }
 }

@@ -39,12 +39,15 @@ public final class KuraServiceFactory {
         Set<T> servicesFromRegistry = registry.findByType(clazz);
         if (servicesFromRegistry.size() == 1) {
             T service = servicesFromRegistry.iterator().next();
-            logger.info("Found Kura " + clazz.getCanonicalName() + " in the registry. Kura component will use that instance.");
+            logger.info("Found Kura " + clazz.getCanonicalName()
+                    + " in the registry. Kura component will use that instance.");
             return service;
         } else if (servicesFromRegistry.size() > 1) {
-            throw new IllegalStateException("Too many " + clazz.getCanonicalName() + " services found in a registry: " + servicesFromRegistry.size());
+            throw new IllegalStateException("Too many " + clazz.getCanonicalName() + " services found in a registry: "
+                    + servicesFromRegistry.size());
         } else {
-            throw new IllegalArgumentException("No " + clazz.getCanonicalName() + " service instance found in a registry.");
+            throw new IllegalArgumentException(
+                    "No " + clazz.getCanonicalName() + " service instance found in a registry.");
         }
     }
 

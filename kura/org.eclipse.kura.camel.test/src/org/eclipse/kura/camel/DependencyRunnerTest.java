@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.camel.runner.DependencyRunner;
-import org.eclipse.kura.camel.runner.ServiceDependency;
 import org.eclipse.kura.camel.runner.DependencyRunner.Listener;
+import org.eclipse.kura.camel.runner.ServiceDependency;
 import org.junit.Test;
 
 public class DependencyRunnerTest {
@@ -145,7 +145,8 @@ public class DependencyRunnerTest {
     @Test
     public void testEmpty1() {
         final MockListener listener = new MockListener();
-        final DependencyRunner<Map<String, Object>> runner = new DependencyRunner<>(Collections.<ServiceDependency<?, Map<String, Object>>> emptyList(), listener);
+        final DependencyRunner<Map<String, Object>> runner = new DependencyRunner<>(
+                Collections.<ServiceDependency<?, Map<String, Object>>> emptyList(), listener);
 
         // no events yet
 

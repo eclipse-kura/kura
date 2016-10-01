@@ -33,7 +33,8 @@ public abstract class AbstractRouterTest {
     @Before
     public void before() throws Exception {
         this.router = createRouter();
-        this.router.activate(FrameworkUtil.getBundle(AbstractRouterTest.class).getBundleContext(), Collections.<String, Object> emptyMap());
+        this.router.activate(FrameworkUtil.getBundle(AbstractRouterTest.class).getBundleContext(),
+                Collections.<String, Object> emptyMap());
     }
 
     @After
@@ -55,7 +56,8 @@ public abstract class AbstractRouterTest {
     }
 
     protected static String readStringResource(String resourceName) {
-        try (InputStreamReader reader = new InputStreamReader(RouterTest.class.getResourceAsStream(resourceName), StandardCharsets.UTF_8)) {
+        try (InputStreamReader reader = new InputStreamReader(RouterTest.class.getResourceAsStream(resourceName),
+                StandardCharsets.UTF_8)) {
             return IOUtils.toString(reader);
         } catch (IOException e) {
             throw new RuntimeException(e);

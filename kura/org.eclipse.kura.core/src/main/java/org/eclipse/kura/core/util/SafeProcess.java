@@ -26,118 +26,111 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SafeProcess 
-{
-	private static final Logger s_logger = LoggerFactory.getLogger(SafeProcess.class);
+public class SafeProcess {
 
-	private static final ExecutorService s_streamGobblers = Executors.newFixedThreadPool(2);
-	
-	private Process m_process;
-	private Future<byte[]> m_futureInputGobbler;
-	private Future<byte[]> m_futureErrorGobbler;
-	private byte[]  m_inBytes;
-	private byte[]  m_errBytes;
-	private boolean m_waited;
-	private int     m_exitValue;
-	
+    private static final Logger s_logger = LoggerFactory.getLogger(SafeProcess.class);
+
+    private static final ExecutorService s_streamGobblers = Executors.newFixedThreadPool(2);
+
+    private Process m_process;
+    private Future<byte[]> m_futureInputGobbler;
+    private Future<byte[]> m_futureErrorGobbler;
+    private byte[] m_inBytes;
+    private byte[] m_errBytes;
+    private boolean m_waited;
+    private int m_exitValue;
+
     SafeProcess() {
-		super();
-	}
+        super();
+    }
 
-	public OutputStream getOutputStream() {
-		s_logger.warn("getOutputStream() is unsupported");
-		return null;
-	}
+    public OutputStream getOutputStream() {
+        s_logger.warn("getOutputStream() is unsupported");
+        return null;
+    }
 
-	public InputStream getInputStream() {
-		if (!m_waited) {
-			s_logger.warn("getInputStream() must be called after waitFor()");
-			//Thread.dumpStack();
-		}
- 		return new ByteArrayInputStream(m_inBytes);
-	}
+    public InputStream getInputStream() {
+        if (!this.m_waited) {
+            s_logger.warn("getInputStream() must be called after waitFor()");
+            // Thread.dumpStack();
+        }
+        return new ByteArrayInputStream(this.m_inBytes);
+    }
 
-	public InputStream getErrorStream() {
-		if (!m_waited) {
-			s_logger.warn("getErrorStream() must be called after waitFor()");
-			//Thread.dumpStack();
-		}
-		return new ByteArrayInputStream(m_errBytes);
-	}
+    public InputStream getErrorStream() {
+        if (!this.m_waited) {
+            s_logger.warn("getErrorStream() must be called after waitFor()");
+            // Thread.dumpStack();
+        }
+        return new ByteArrayInputStream(this.m_errBytes);
+    }
 
-	void exec(String[] cmdarray)
-	    throws IOException
-	{
+    void exec(String[] cmdarray) throws IOException {
         s_logger.debug("Executing: {}", Arrays.toString(cmdarray));
         ProcessBuilder pb = new ProcessBuilder(cmdarray);
-        m_process = pb.start();
+        this.m_process = pb.start();
 
         // process the input stream
-        m_futureInputGobbler = s_streamGobblers.submit( new Callable<byte[]>() {
+        this.m_futureInputGobbler = s_streamGobblers.submit(new Callable<byte[]>() {
+
             @Override
             public byte[] call() throws Exception {
                 Thread.currentThread().setName("SafeProcess InputStream Gobbler");
-                return readStreamFully(m_process.getInputStream());                    
+                return readStreamFully(SafeProcess.this.m_process.getInputStream());
             }
         });
 
         // process the error stream
-        m_futureErrorGobbler = s_streamGobblers.submit( new Callable<byte[]>() {
+        this.m_futureErrorGobbler = s_streamGobblers.submit(new Callable<byte[]>() {
+
             @Override
             public byte[] call() throws Exception {
                 Thread.currentThread().setName("SafeProcess ErrorStream Gobbler");
-                return readStreamFully(m_process.getErrorStream());                    
+                return readStreamFully(SafeProcess.this.m_process.getErrorStream());
             }
-        });      
-        
+        });
+
         // wait for the process execution
         try {
-            m_inBytes   = m_futureInputGobbler.get();
-            m_errBytes  = m_futureErrorGobbler.get();
-            m_exitValue = m_process.waitFor();
-        }
-        catch (InterruptedException e) {
+            this.m_inBytes = this.m_futureInputGobbler.get();
+            this.m_errBytes = this.m_futureErrorGobbler.get();
+            this.m_exitValue = this.m_process.waitFor();
+        } catch (InterruptedException e) {
             throw new IOException(e);
-        }
-        catch (ExecutionException e) {
+        } catch (ExecutionException e) {
             throw new IOException(e);
+        } finally {
+            closeQuietly(this.m_process.getInputStream());
+            closeQuietly(this.m_process.getErrorStream());
+            closeQuietly(this.m_process.getOutputStream());
+            this.m_process.destroy();
+            this.m_process = null;
+            this.m_waited = true;
         }
-        finally {
-            closeQuietly(m_process.getInputStream());
-            closeQuietly(m_process.getErrorStream());
-            closeQuietly(m_process.getOutputStream());
-            m_process.destroy();
-            m_process = null;
-            m_waited  = true;
+    }
+
+    public int waitFor() throws InterruptedException {
+        return this.m_exitValue;
+    }
+
+    public int exitValue() {
+        return this.m_exitValue;
+    }
+
+    public void destroy() {
+        if (!this.m_waited) {
+            s_logger.warn("Calling destroy() before waitFor() might lead to resource leaks");
+            Thread.dumpStack();
+            if (this.m_process != null) {
+                this.m_process.destroy();
+            }
         }
-	}
-	
-	public int waitFor() throws InterruptedException 
-	{
-		return m_exitValue;
-	}
+        this.m_inBytes = null; // just in case...
+        this.m_errBytes = null;
+        this.m_process = null;
+    }
 
-	public int exitValue() {
-		return m_exitValue;
-	}
-
-	public void destroy() {
-		if (!m_waited) {
-			s_logger.warn("Calling destroy() before waitFor() might lead to resource leaks");
-			Thread.dumpStack();
-			if (m_process != null) {
-			    m_process.destroy();
-			}
-		}
-		m_inBytes  = null; // just in case...
-		m_errBytes = null;
-		m_process  = null;
-	}
-	
-	
-    private byte[] readStreamFully(InputStream is) 
-        throws IOException 
-    {
+    private byte[] readStreamFully(InputStream is) throws IOException {
         int len;
         byte[] buf = new byte[1024];
         ByteArrayOutputStream inBaos = new ByteArrayOutputStream(1024);
@@ -146,7 +139,7 @@ public class SafeProcess
         }
         return inBaos.toByteArray();
     }
-    
+
     private void closeQuietly(InputStream is) {
         if (is != null) {
             try {

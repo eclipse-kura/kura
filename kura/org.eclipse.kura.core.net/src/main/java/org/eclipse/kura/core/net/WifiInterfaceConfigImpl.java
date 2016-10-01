@@ -19,30 +19,32 @@ import org.eclipse.kura.net.wifi.WifiInterface;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddress;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 
-public class WifiInterfaceConfigImpl extends WifiInterfaceImpl<WifiInterfaceAddressConfig> implements NetInterfaceConfig<WifiInterfaceAddressConfig> {
+public class WifiInterfaceConfigImpl extends WifiInterfaceImpl<WifiInterfaceAddressConfig>
+        implements NetInterfaceConfig<WifiInterfaceAddressConfig> {
 
-	public WifiInterfaceConfigImpl(String name) {
-		super(name);
-	}
-	   
+    public WifiInterfaceConfigImpl(String name) {
+        super(name);
+    }
+
     public WifiInterfaceConfigImpl(WifiInterface<? extends WifiInterfaceAddress> other) {
         super(other);
-        
+
         // Copy the NetInterfaceAddresses
         List<? extends WifiInterfaceAddress> otherNetInterfaceAddresses = other.getNetInterfaceAddresses();
         ArrayList<WifiInterfaceAddressConfig> interfaceAddresses = new ArrayList<WifiInterfaceAddressConfig>();
 
-        if(otherNetInterfaceAddresses != null) {
-            for(WifiInterfaceAddress wifiInterfaceAddress : otherNetInterfaceAddresses) {
-                WifiInterfaceAddressConfigImpl copiedInterfaceAddressImpl = new WifiInterfaceAddressConfigImpl(wifiInterfaceAddress);
+        if (otherNetInterfaceAddresses != null) {
+            for (WifiInterfaceAddress wifiInterfaceAddress : otherNetInterfaceAddresses) {
+                WifiInterfaceAddressConfigImpl copiedInterfaceAddressImpl = new WifiInterfaceAddressConfigImpl(
+                        wifiInterfaceAddress);
                 interfaceAddresses.add(copiedInterfaceAddressImpl);
             }
         }
         if (interfaceAddresses.size() == 0) {
-            // add at least one empty interface implementation. 
-            // It is needed as a container for the NetConfig objects 
-            interfaceAddresses.add( new WifiInterfaceAddressConfigImpl());
+            // add at least one empty interface implementation.
+            // It is needed as a container for the NetConfig objects
+            interfaceAddresses.add(new WifiInterfaceAddressConfigImpl());
         }
-        this.setNetInterfaceAddresses(interfaceAddresses);
+        setNetInterfaceAddresses(interfaceAddresses);
     }
 }

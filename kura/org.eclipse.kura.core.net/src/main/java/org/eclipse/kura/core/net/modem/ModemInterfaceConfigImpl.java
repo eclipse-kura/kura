@@ -21,35 +21,37 @@ import org.eclipse.kura.net.modem.ModemInterface;
 import org.eclipse.kura.net.modem.ModemInterfaceAddress;
 import org.eclipse.kura.net.modem.ModemInterfaceAddressConfig;
 
-public class ModemInterfaceConfigImpl extends ModemInterfaceImpl<ModemInterfaceAddressConfig> implements NetInterfaceConfig<ModemInterfaceAddressConfig> {
+public class ModemInterfaceConfigImpl extends ModemInterfaceImpl<ModemInterfaceAddressConfig>
+        implements NetInterfaceConfig<ModemInterfaceAddressConfig> {
 
-	public ModemInterfaceConfigImpl(String name) {
-		super(name);
-	}
+    public ModemInterfaceConfigImpl(String name) {
+        super(name);
+    }
 
     public ModemInterfaceConfigImpl(ModemInterface<? extends ModemInterfaceAddress> other) {
         super(ModemInterfaceAddressConfig.class, other);
-        
+
         // Copy the NetInterfaceAddresses
         List<? extends ModemInterfaceAddress> otherNetInterfaceAddresses = other.getNetInterfaceAddresses();
         ArrayList<ModemInterfaceAddressConfig> interfaceAddresses = new ArrayList<ModemInterfaceAddressConfig>();
-        if(otherNetInterfaceAddresses != null) {
-            for(ModemInterfaceAddress modemInterfaceAddress : otherNetInterfaceAddresses) {
-                ModemInterfaceAddressConfigImpl copiedInterfaceAddressImpl = new ModemInterfaceAddressConfigImpl(modemInterfaceAddress);
+        if (otherNetInterfaceAddresses != null) {
+            for (ModemInterfaceAddress modemInterfaceAddress : otherNetInterfaceAddresses) {
+                ModemInterfaceAddressConfigImpl copiedInterfaceAddressImpl = new ModemInterfaceAddressConfigImpl(
+                        modemInterfaceAddress);
                 copiedInterfaceAddressImpl.setConnectionType(ModemConnectionType.PPP);
                 if (other.isUp()) {
                     copiedInterfaceAddressImpl.setConnectionStatus(ModemConnectionStatus.CONNECTED);
                 } else {
                     copiedInterfaceAddressImpl.setConnectionStatus(ModemConnectionStatus.DISCONNECTED);
-                }                
+                }
                 interfaceAddresses.add(copiedInterfaceAddressImpl);
             }
         }
         if (interfaceAddresses.size() == 0) {
-            // add at least one empty interface implementation. 
-            // It is needed as a container for the NetConfig objects 
-            interfaceAddresses.add( new ModemInterfaceAddressConfigImpl());
+            // add at least one empty interface implementation.
+            // It is needed as a container for the NetConfig objects
+            interfaceAddresses.add(new ModemInterfaceAddressConfigImpl());
         }
-        this.setNetInterfaceAddresses(interfaceAddresses);
+        setNetInterfaceAddresses(interfaceAddresses);
     }
 }

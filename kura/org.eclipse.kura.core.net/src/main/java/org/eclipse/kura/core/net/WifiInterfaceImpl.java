@@ -19,61 +19,64 @@ import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiInterface;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddress;
 
-public class WifiInterfaceImpl<T extends WifiInterfaceAddress> extends AbstractNetInterface<T> implements WifiInterface<T> 
-{
-	private EnumSet<Capability> capabilities = null;
+public class WifiInterfaceImpl<T extends WifiInterfaceAddress> extends AbstractNetInterface<T>
+        implements WifiInterface<T> {
 
-	public WifiInterfaceImpl(String name) {
-		super(name);
-	}
-	
+    private EnumSet<Capability> capabilities = null;
+
+    public WifiInterfaceImpl(String name) {
+        super(name);
+    }
+
     @SuppressWarnings("unchecked")
     public WifiInterfaceImpl(WifiInterface<? extends WifiInterfaceAddress> other) {
         super(other);
         this.capabilities = other.getCapabilities();
-        
+
         // Copy the NetInterfaceAddresses
         List<? extends WifiInterfaceAddress> otherNetInterfaceAddresses = other.getNetInterfaceAddresses();
         ArrayList<T> interfaceAddresses = new ArrayList<T>();
 
-        if(otherNetInterfaceAddresses != null) {
-            for(WifiInterfaceAddress wifiInterfaceAddress : otherNetInterfaceAddresses) {
-                WifiInterfaceAddressImpl copiedInterfaceAddressImpl = new WifiInterfaceAddressImpl(wifiInterfaceAddress);
-                interfaceAddresses.add((T)copiedInterfaceAddressImpl);
+        if (otherNetInterfaceAddresses != null) {
+            for (WifiInterfaceAddress wifiInterfaceAddress : otherNetInterfaceAddresses) {
+                WifiInterfaceAddressImpl copiedInterfaceAddressImpl = new WifiInterfaceAddressImpl(
+                        wifiInterfaceAddress);
+                interfaceAddresses.add((T) copiedInterfaceAddressImpl);
             }
         }
-        this.setNetInterfaceAddresses(interfaceAddresses);
+        setNetInterfaceAddresses(interfaceAddresses);
     }
-	
-	public NetInterfaceType getType() {
-		return NetInterfaceType.WIFI;
-	}
 
-	public EnumSet<Capability> getCapabilities() {
-		if (capabilities != null) {
-			return EnumSet.copyOf(capabilities);
-		}
-		
-		return null;
-	}
+    @Override
+    public NetInterfaceType getType() {
+        return NetInterfaceType.WIFI;
+    }
 
-	public void setCapabilities(EnumSet<Capability> capabilities) {
-		this.capabilities = capabilities;
-	}
-	
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(super.toString());
-		if(capabilities != null && capabilities.size() > 0) {
-			sb.append(" :: capabilities=");
-			for(Capability capability : capabilities) {
-				sb.append(capability)
-				.append(" ");
-			}
-		} else {
-			sb.append(" :: capabilities=null");
-		}
-		return sb.toString();
-	}
+    @Override
+    public EnumSet<Capability> getCapabilities() {
+        if (this.capabilities != null) {
+            return EnumSet.copyOf(this.capabilities);
+        }
+
+        return null;
+    }
+
+    public void setCapabilities(EnumSet<Capability> capabilities) {
+        this.capabilities = capabilities;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(super.toString());
+        if (this.capabilities != null && this.capabilities.size() > 0) {
+            sb.append(" :: capabilities=");
+            for (Capability capability : this.capabilities) {
+                sb.append(capability).append(" ");
+            }
+        } else {
+            sb.append(" :: capabilities=null");
+        }
+        return sb.toString();
+    }
 }

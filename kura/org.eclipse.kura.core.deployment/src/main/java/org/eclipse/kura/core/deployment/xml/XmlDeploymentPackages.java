@@ -11,16 +11,15 @@
  *******************************************************************************/
 package org.eclipse.kura.core.deployment.xml;
 
-
 public class XmlDeploymentPackages {
-	
-	private XmlDeploymentPackage[] deploymentPackages;
 
-	public XmlDeploymentPackage[] getDeploymentPackages() {
-		return deploymentPackages;
-	}
+    private XmlDeploymentPackage[] deploymentPackages;
 
-	public void setDeploymentPackages(XmlDeploymentPackage[] deploymentPackages) {
-		this.deploymentPackages = deploymentPackages;
-	}
+    public XmlDeploymentPackage[] getDeploymentPackages() {
+        return this.deploymentPackages;
+    }
+
+    public void setDeploymentPackages(XmlDeploymentPackage[] deploymentPackages) {
+        this.deploymentPackages = deploymentPackages;
+    }
 }

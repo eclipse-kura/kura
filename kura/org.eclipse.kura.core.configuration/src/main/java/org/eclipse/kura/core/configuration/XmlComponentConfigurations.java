@@ -13,23 +13,22 @@ package org.eclipse.kura.core.configuration;
 
 import java.util.List;
 
-
 /**
  * Utility class to serialize a set of configurations.
  * This is used to serialize a full snapshot.
  */
-public class XmlComponentConfigurations 
-{
-	private List<ComponentConfigurationImpl> configurations;
-	
-	public XmlComponentConfigurations()
-	{}
+public class XmlComponentConfigurations {
 
-	public List<ComponentConfigurationImpl> getConfigurations() {
-		return configurations;
-	}
+    private List<ComponentConfigurationImpl> configurations;
 
-	public void setConfigurations(List<ComponentConfigurationImpl> configurations) {
-		this.configurations = configurations;
-	}
+    public XmlComponentConfigurations() {
+    }
+
+    public List<ComponentConfigurationImpl> getConfigurations() {
+        return this.configurations;
+    }
+
+    public void setConfigurations(List<ComponentConfigurationImpl> configurations) {
+        this.configurations = configurations;
+    }
 }

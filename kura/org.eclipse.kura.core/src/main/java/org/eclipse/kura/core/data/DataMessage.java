@@ -20,65 +20,66 @@ import java.util.Date;
  * but it also capture all the state information of the message through its
  * DataService life-cycle of: stored -> published -> confirmed.
  */
-public class DataMessage 
-{
-	private int  	id;
-	private String  topic;
-	private int     qos;
-	private boolean retain;
-	private Date    createdOn;
-	private Date   	publishedOn;
-    private int     publishedMessageId;
-	private Date    confirmedOn;
-	private byte[]  payload;
-	private int     priority;
-	private String  sessionId;
-	private Date    droppedOn;
-		
-	public DataMessage()
-	{}
-	
-	public DataMessage(Builder b) {
-		id                 = b.id;
-		topic              = b.topic;
-		qos                = b.qos;
-		retain             = b.retain;
-		createdOn          = b.createdOn;	
-		publishedOn        = b.publishedOn;
-		publishedMessageId = b.publishedMessageId;;
-		confirmedOn        = b.confirmedOn;
-		payload            = b.payload;
-		priority           = b.priority;
-		sessionId          = b.sessionId;
-		droppedOn          = b.droppedOn;
-	}
+public class DataMessage {
 
-	public int getId() {
-		return id;
-	}
+    private int id;
+    private String topic;
+    private int qos;
+    private boolean retain;
+    private Date createdOn;
+    private Date publishedOn;
+    private int publishedMessageId;
+    private Date confirmedOn;
+    private byte[] payload;
+    private int priority;
+    private String sessionId;
+    private Date droppedOn;
 
-	public String getTopic() {
-		return topic;
-	}
+    public DataMessage() {
+    }
 
-	public int getQos() {
-		return qos;
-	}
+    public DataMessage(Builder b) {
+        this.id = b.id;
+        this.topic = b.topic;
+        this.qos = b.qos;
+        this.retain = b.retain;
+        this.createdOn = b.createdOn;
+        this.publishedOn = b.publishedOn;
+        this.publishedMessageId = b.publishedMessageId;
+        ;
+        this.confirmedOn = b.confirmedOn;
+        this.payload = b.payload;
+        this.priority = b.priority;
+        this.sessionId = b.sessionId;
+        this.droppedOn = b.droppedOn;
+    }
 
-	public boolean isRetain() {
-		return retain;
-	}
+    public int getId() {
+        return this.id;
+    }
 
-	public Date getCreatedOn() {
-		return createdOn;
-	}
+    public String getTopic() {
+        return this.topic;
+    }
 
-	public Date getPublishedOn() {
-		return publishedOn;
-	}
+    public int getQos() {
+        return this.qos;
+    }
+
+    public boolean isRetain() {
+        return this.retain;
+    }
+
+    public Date getCreatedOn() {
+        return this.createdOn;
+    }
+
+    public Date getPublishedOn() {
+        return this.publishedOn;
+    }
 
     public int getPublishedMessageId() {
-        return publishedMessageId;
+        return this.publishedMessageId;
     }
 
     public void setPublishedMessageId(int publishedMessageId) {
@@ -86,80 +87,81 @@ public class DataMessage
     }
 
     public Date getConfirmedOn() {
-		return confirmedOn;
-	}
+        return this.confirmedOn;
+    }
 
-	public byte[] getPayload() {
-		return payload;
-	}
-	
-	public int getPriority() {
-		return priority;
-	}
-	
-	public String getSessionId() {
-		return sessionId;
-	}
-	
-	public Date droppedOn() {
-		return this.droppedOn;
-	}
+    public byte[] getPayload() {
+        return this.payload;
+    }
 
-	@Override
-	public String toString() {
-		return "DataMessage [id=" + id + ", topic=" + topic + ", qos=" + qos
-				+ ", retain=" + retain + ", createdOn=" + createdOn
-				+ ", publishedOn=" + publishedOn + ", publishedMessageId="
-				+ publishedMessageId + ", confirmedOn=" + confirmedOn
-				+ ", payload=" + Arrays.toString(payload) + ", priority="
-				+ priority + ", sessionId=" 
-				+ sessionId + ", droppedOn="
-				+ droppedOn + "]";
-	}
+    public int getPriority() {
+        return this.priority;
+    }
 
-	public static class Builder {
+    public String getSessionId() {
+        return this.sessionId;
+    }
 
-		private int		   id;
-		private String     topic;
-		private int        qos;
-		private boolean    retain;
-		private Date       createdOn;
-		private Date   	   publishedOn;
-        private int        publishedMessageId;
-		private Date       confirmedOn;
-		private byte[]	   payload;
-		private int        priority;
-		private String     sessionId;
-		private Date       droppedOn;
-		
-		public Builder(int id) {
-			this.id = id;
-		}
-		
-		public Builder withTopic(String topic) {
-			this.topic = topic;
-			return this;
-		}
+    public Date droppedOn() {
+        return this.droppedOn;
+    }
 
-		public Builder withQos(int qos) {
-			this.qos = qos;
-			return this;
-		}
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("DataMessage [id=").append(this.id).append(", topic=")
+                .append(this.topic).append(", qos=").append(this.qos).append(", retain=").append(this.retain)
+                .append(", createdOn=").append(this.createdOn).append(", publishedOn=").append(this.publishedOn)
+                .append(", publishedMessageId=").append(this.publishedMessageId).append(", confirmedOn=")
+                .append(this.confirmedOn).append(", payload=").append(Arrays.toString(this.payload))
+                .append(", priority=").append(this.priority).append(", sessionId=").append(this.sessionId)
+                .append(", droppedOn=").append(this.droppedOn).append("]");
 
-		public Builder withRetain(boolean retain) {
-			this.retain = retain;
-			return this;
-		}
-		
-		public Builder withCreatedOn(Date createdOn) {
-			this.createdOn = createdOn;
-			return this;
-		}
+        return builder.toString();
+    }
 
-		public Builder withPublishedOn(Date publishedOn) {
-			this.publishedOn = publishedOn;
-			return this;
-		}
+    public static class Builder {
+
+        private final int id;
+        private String topic;
+        private int qos;
+        private boolean retain;
+        private Date createdOn;
+        private Date publishedOn;
+        private int publishedMessageId;
+        private Date confirmedOn;
+        private byte[] payload;
+        private int priority;
+        private String sessionId;
+        private Date droppedOn;
+
+        public Builder(int id) {
+            this.id = id;
+        }
+
+        public Builder withTopic(String topic) {
+            this.topic = topic;
+            return this;
+        }
+
+        public Builder withQos(int qos) {
+            this.qos = qos;
+            return this;
+        }
+
+        public Builder withRetain(boolean retain) {
+            this.retain = retain;
+            return this;
+        }
+
+        public Builder withCreatedOn(Date createdOn) {
+            this.createdOn = createdOn;
+            return this;
+        }
+
+        public Builder withPublishedOn(Date publishedOn) {
+            this.publishedOn = publishedOn;
+            return this;
+        }
 
         public Builder withPublishedMessageId(int publishedMessageId) {
             this.publishedMessageId = publishedMessageId;
@@ -167,80 +169,80 @@ public class DataMessage
         }
 
         public Builder withConfirmedOn(Date confirmedOn) {
-			this.confirmedOn = confirmedOn;
-			return this;
-		}
+            this.confirmedOn = confirmedOn;
+            return this;
+        }
 
-		public Builder withPayload(byte[] payload) {
-			this.payload = payload;
-			return this;
-		}
-		
-		public Builder withPriority(int priority) {
-			this.priority = priority;
-			return this;
-		}
-		
-		public Builder withSessionId(String sessionId) {
-			this.sessionId = sessionId;
-			return this;
-		}
-		
-		public Builder withDroppedOn(Date droppedOn) {
-			this.droppedOn = droppedOn;
-			return this;
-		}
-		
-		public int getId() {
-			return id;
-		}
+        public Builder withPayload(byte[] payload) {
+            this.payload = payload;
+            return this;
+        }
 
-		public String getTopic() {
-			return topic;
-		}
+        public Builder withPriority(int priority) {
+            this.priority = priority;
+            return this;
+        }
 
-		public int getQos() {
-			return qos;
-		}
+        public Builder withSessionId(String sessionId) {
+            this.sessionId = sessionId;
+            return this;
+        }
 
-		public boolean getRetain() {
-			return retain;
-		}
+        public Builder withDroppedOn(Date droppedOn) {
+            this.droppedOn = droppedOn;
+            return this;
+        }
 
-		public Date getCreatedOn() {
-			return createdOn;
-		}
+        public int getId() {
+            return this.id;
+        }
 
-		public Date getPublishedOn() {
-			return publishedOn;
-		}
+        public String getTopic() {
+            return this.topic;
+        }
+
+        public int getQos() {
+            return this.qos;
+        }
+
+        public boolean getRetain() {
+            return this.retain;
+        }
+
+        public Date getCreatedOn() {
+            return this.createdOn;
+        }
+
+        public Date getPublishedOn() {
+            return this.publishedOn;
+        }
 
         public int getPublishedMessageId() {
-            return publishedMessageId;
+            return this.publishedMessageId;
         }
 
         public Date getConfirmedOn() {
-			return confirmedOn;
-		}
+            return this.confirmedOn;
+        }
 
-		public byte[] getPayload() {
-			return payload;
-		}
-		
-		public int getPriority() {
-			return priority;
-		}
-		
-		public String getSessionId() {
-			return sessionId;
-		}
-		
-		public Date getDroppedOn() {
-			return droppedOn;
-		}
- 		
-		public DataMessage build() {			
-			return new DataMessage(this);
-		}
-	}
+        public byte[] getPayload() {
+            return this.payload;
+        }
+
+        public int getPriority() {
+            return this.priority;
+        }
+
+        public String getSessionId() {
+            return this.sessionId;
+        }
+
+        public Date getDroppedOn() {
+            return this.droppedOn;
+        }
+
+        public DataMessage build() {
+            return new DataMessage(this);
+        }
+    }
 }

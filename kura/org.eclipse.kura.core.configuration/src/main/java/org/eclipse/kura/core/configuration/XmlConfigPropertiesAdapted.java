@@ -11,22 +11,21 @@
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
-
 /**
  * Helper class to serialize a property in XML.
  */
-public class XmlConfigPropertiesAdapted 
-{
-	private XmlConfigPropertyAdapted[] properties;
-	
-	public XmlConfigPropertiesAdapted()
-	{}
+public class XmlConfigPropertiesAdapted {
 
-	public XmlConfigPropertyAdapted[] getProperties() {
-		return properties;
-	}
+    private XmlConfigPropertyAdapted[] properties;
 
-	public void setProperties(XmlConfigPropertyAdapted[] properties) {
-		this.properties = properties;
-	}
+    public XmlConfigPropertiesAdapted() {
+    }
+
+    public XmlConfigPropertyAdapted[] getProperties() {
+        return this.properties;
+    }
+
+    public void setProperties(XmlConfigPropertyAdapted[] properties) {
+        this.properties = properties;
+    }
 }

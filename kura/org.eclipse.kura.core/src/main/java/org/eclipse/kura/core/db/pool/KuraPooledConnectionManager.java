@@ -22,22 +22,22 @@ import org.hsqldb.jdbc.JDBCConnection;
 import org.hsqldb.jdbc.pool.JDBCPooledConnection;
 
 public class KuraPooledConnectionManager {
- 
-	public static PooledConnection getPooledConnection(String url, Properties props) throws SQLException{
-		
-		Connection connection = DriverManager.getConnection(url, props);
-		
-		if(connection instanceof JDBCConnection){
-			return new JDBCPooledConnection((JDBCConnection)connection);
-		}
-		
-		throw new SQLException();
-	}
-	
-	public static void releaseConnection(PooledConnection connection){
-		if(connection instanceof JDBCPooledConnection){
-			((JDBCPooledConnection)connection).release();
-		}
-	}
-	
+
+    public static PooledConnection getPooledConnection(String url, Properties props) throws SQLException {
+
+        Connection connection = DriverManager.getConnection(url, props);
+
+        if (connection instanceof JDBCConnection) {
+            return new JDBCPooledConnection((JDBCConnection) connection);
+        }
+
+        throw new SQLException();
+    }
+
+    public static void releaseConnection(PooledConnection connection) {
+        if (connection instanceof JDBCPooledConnection) {
+            ((JDBCPooledConnection) connection).release();
+        }
+    }
+
 }

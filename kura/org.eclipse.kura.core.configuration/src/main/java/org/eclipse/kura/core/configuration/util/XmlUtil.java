@@ -41,6 +41,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class XmlUtil {
+
     private static final Logger s_logger = LoggerFactory.getLogger(XmlUtil.class);
 
     //
@@ -66,7 +67,8 @@ public class XmlUtil {
             if (object instanceof XmlSnapshotIdResult) {
                 // Resulting xml:
                 // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-                // <esf:snapshot-ids xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0" xmlns:esf="http://eurotech.com/esf/2.0">
+                // <esf:snapshot-ids xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0"
+                // xmlns:esf="http://eurotech.com/esf/2.0">
                 // <esf:snapshotIds>1434122113492</esf:snapshotIds>
                 // <esf:snapshotIds>1434122124387</esf:snapshotIds>
                 // </esf:snapshot-ids>
@@ -94,15 +96,13 @@ public class XmlUtil {
     }
 
     // un-marshalling
-    public static <T> T unmarshal(String s, Class<T> clazz)
-            throws XMLStreamException, FactoryConfigurationError {
+    public static <T> T unmarshal(String s, Class<T> clazz) throws XMLStreamException, FactoryConfigurationError {
         StringReader sr = new StringReader(s);
         T result = unmarshal(sr, clazz);
         return result;
     }
 
-    public static <T> T unmarshal(Reader r, Class<T> clazz)
-            throws XMLStreamException, FactoryConfigurationError {
+    public static <T> T unmarshal(Reader r, Class<T> clazz) throws XMLStreamException, FactoryConfigurationError {
         DocumentBuilderFactory factory = null;
         DocumentBuilder parser = null;
 

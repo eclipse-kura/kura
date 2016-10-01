@@ -13,5 +13,5 @@ package org.eclipse.kura.core.test;
 
 public interface IConfigurationServiceTest {
 
-	//DO NOT REMOVE - used by the ConfigurationServiceTest
+    // DO NOT REMOVE - used by the ConfigurationServiceTest
 }

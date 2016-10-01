@@ -18,6 +18,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
 import java.util.StringTokenizer;
 
 import org.eclipse.kura.core.util.ProcessUtil;
@@ -66,7 +67,7 @@ public class LinuxProcessUtil {
                 try {
                     proc.waitFor();
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    s_logger.warn("Interrupted exception - ", e);
                 }
 
                 s_logger.info(command + " returned with exit value:" + proc.exitValue());
@@ -84,10 +85,8 @@ public class LinuxProcessUtil {
             throw e;
         } finally {
             // FIXME:MC this may lead to a process leak when called with false
-            if (!background) {
-                if (proc != null) {
-                    ProcessUtil.destroy(proc);
-                }
+            if (!background && proc != null) {
+                ProcessUtil.destroy(proc);
             }
         }
     }
@@ -123,7 +122,6 @@ public class LinuxProcessUtil {
                 s_logger.info(command + " returned with exit value:" + exitVal);
             } catch (InterruptedException e) {
                 s_logger.error("error executing " + command + " command" + e);
-                // e.printStackTrace();
             }
 
             ProcessStats stats = new ProcessStats(proc);
@@ -150,7 +148,6 @@ public class LinuxProcessUtil {
                 s_logger.debug("{} returned with exit value:{}", cmdBuilder, +exitVal);
             } catch (InterruptedException e) {
                 s_logger.error("error executing " + command + " command" + e);
-                // e.printStackTrace();
             }
 
             ProcessStats stats = new ProcessStats(proc);

@@ -29,279 +29,252 @@ import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ExamplePublisher implements ConfigurableComponent, CloudClientListener  
-{	
-	private static final Logger s_logger = LoggerFactory.getLogger(ExamplePublisher.class);
-	
-	// Cloud Application identifier
-	private static final String APP_ID = "EXAMPLE_PUBLISHER";
+public class ExamplePublisher implements ConfigurableComponent, CloudClientListener {
 
-	// Publishing Property Names
-	private static final String   PUBLISH_RATE_PROP_NAME   = "publish.rate";
-	private static final String   PUBLISH_TOPIC_PROP_NAME  = "publish.appTopic";
-	private static final String   PUBLISH_QOS_PROP_NAME    = "publish.qos";
-	private static final String   PUBLISH_RETAIN_PROP_NAME = "publish.retain";
-	private static final String   TEMP_INITIAL_PROP_NAME   = "metric.temperature.initial";
-	private static final String   TEMP_INCREMENT_PROP_NAME = "metric.temperature.increment";
-	private static final String[] METRIC_PROP_NAMES        = { 
-		"metric.string",
-		"metric.string.oneof",
-		"metric.long",
-		"metric.integer",
-		"metric.integer.fixed",
-		"metric.short",
-		"metric.double",
-		"metric.float",
-		"metric.char",
-		"metric.byte",
-		"metric.boolean",
-		"metric.password"
-	};
+    private static final Logger s_logger = LoggerFactory.getLogger(ExamplePublisher.class);
 
-	
-	private CloudService m_cloudService;
-	private CloudClient m_cloudClient;
-	
-	private ScheduledExecutorService    m_worker;
-	private ScheduledFuture<?>          m_handle;
-	
-	private float               m_temperature;
-	private Map<String, Object> m_properties;
-	
-	// ----------------------------------------------------------------
-	//
-	//   Dependencies
-	//
-	// ----------------------------------------------------------------
-	
-	public ExamplePublisher() 
-	{
-		super();
-		m_worker = Executors.newSingleThreadScheduledExecutor();
-	}
+    // Cloud Application identifier
+    private static final String APP_ID = "EXAMPLE_PUBLISHER";
 
-	public void setCloudService(CloudService cloudService) {
-		m_cloudService = cloudService;
-	}
+    // Publishing Property Names
+    private static final String PUBLISH_RATE_PROP_NAME = "publish.rate";
+    private static final String PUBLISH_TOPIC_PROP_NAME = "publish.appTopic";
+    private static final String PUBLISH_QOS_PROP_NAME = "publish.qos";
+    private static final String PUBLISH_RETAIN_PROP_NAME = "publish.retain";
+    private static final String TEMP_INITIAL_PROP_NAME = "metric.temperature.initial";
+    private static final String TEMP_INCREMENT_PROP_NAME = "metric.temperature.increment";
+    private static final String[] METRIC_PROP_NAMES = { "metric.string", "metric.string.oneof", "metric.long",
+            "metric.integer", "metric.integer.fixed", "metric.short", "metric.double", "metric.float", "metric.char",
+            "metric.byte", "metric.boolean", "metric.password" };
 
-	public void unsetCloudService(CloudService cloudService) {
-		m_cloudService = null;
-	}
-	
-		
-	// ----------------------------------------------------------------
-	//
-	//   Activation APIs
-	//
-	// ----------------------------------------------------------------
+    private CloudService m_cloudService;
+    private CloudClient m_cloudClient;
 
-	protected void activate(ComponentContext componentContext, Map<String,Object> properties) 
-	{
-		s_logger.info("Activating ExamplePublisher...");
-		
-		m_properties = properties;
-		for (String s : properties.keySet()) {
-			s_logger.info("Activate - "+s+": "+properties.get(s));
-		}
-		
-		// get the mqtt client for this application
-		try  {
-			
-			// Acquire a Cloud Application Client for this Application 
-			s_logger.info("Getting CloudApplicationClient for {}...", APP_ID);
-			m_cloudClient = m_cloudService.newCloudClient(APP_ID);
-			m_cloudClient.addCloudClientListener(this);
-			
-			// Don't subscribe because these are handled by the default 
-			// subscriptions and we don't want to get messages twice			
-			doUpdate();
-		}
-		catch (Exception e) {
-			s_logger.error("Error during component activation", e);
-			throw new ComponentException(e);
-		}
-		s_logger.info("Activating ExamplePublisher... Done.");
-	}
-	
-	protected void deactivate(ComponentContext componentContext) 
-	{
-		s_logger.debug("Deactivating ExamplePublisher...");
+    private final ScheduledExecutorService m_worker;
+    private ScheduledFuture<?> m_handle;
 
-		// shutting down the worker and cleaning up the properties
-		m_worker.shutdown();
-		
-		// Releasing the CloudApplicationClient
-		s_logger.info("Releasing CloudApplicationClient for {}...", APP_ID);
-		m_cloudClient.release();
+    private float m_temperature;
+    private Map<String, Object> m_properties;
 
-		s_logger.debug("Deactivating ExamplePublisher... Done.");
-	}	
-	
-	public void updated(Map<String,Object> properties)
-	{
-		s_logger.info("Updated ExamplePublisher...");
+    // ----------------------------------------------------------------
+    //
+    // Dependencies
+    //
+    // ----------------------------------------------------------------
 
-		// store the properties received
-		m_properties = properties;
-		for (String s : properties.keySet()) {
-			s_logger.info("Update - "+s+": "+properties.get(s));
-		}
-		
-		// try to kick off a new job
-		doUpdate();
-		s_logger.info("Updated ExamplePublisher... Done.");
-	}
-	
-	
-	// ----------------------------------------------------------------
-	//
-	//   Cloud Application Callback Methods
-	//
-	// ----------------------------------------------------------------
-	
-	@Override
-	public void onConnectionEstablished() 
-	{
-		s_logger.info("Connection established");
-		
-		try {
-			// Getting the lists of unpublished messages
-			s_logger.info("Number of unpublished messages: {}", m_cloudClient.getUnpublishedMessageIds().size());
-		} catch (KuraException e) {
-			s_logger.error("Cannot get the list of unpublished messages");
-		}
-		
-		try {
-			// Getting the lists of in-flight messages
-			s_logger.info("Number of in-flight messages: {}", m_cloudClient.getInFlightMessageIds().size());
-		} catch (KuraException e) {
-			s_logger.error("Cannot get the list of in-flight messages");
-		}
-		
-		try {
-			// Getting the lists of dropped in-flight messages
-			s_logger.info("Number of dropped in-flight messages: {}", m_cloudClient.getDroppedInFlightMessageIds().size());
-		} catch (KuraException e) {
-			s_logger.error("Cannot get the list of dropped in-flight messages");
-		}
-	}
+    public ExamplePublisher() {
+        super();
+        this.m_worker = Executors.newSingleThreadScheduledExecutor();
+    }
 
-	@Override
-	public void onConnectionLost() 
-	{
-		s_logger.warn("Connection lost!");
-	}
+    public void setCloudService(CloudService cloudService) {
+        this.m_cloudService = cloudService;
+    }
 
-	@Override
-	public void onControlMessageArrived(String deviceId, String appTopic,
-			KuraPayload msg, int qos, boolean retain) {
-		s_logger.info("Control message arrived on assetId: {} and semantic topic: {}", deviceId, appTopic);
-	}
+    public void unsetCloudService(CloudService cloudService) {
+        this.m_cloudService = null;
+    }
 
-	@Override
-	public void onMessageArrived(String deviceId, String appTopic,
-			KuraPayload msg, int qos, boolean retain) {
-		s_logger.info("Message arrived on assetId: {} and semantic topic: {}", deviceId, appTopic);
-	}
+    // ----------------------------------------------------------------
+    //
+    // Activation APIs
+    //
+    // ----------------------------------------------------------------
 
-	@Override
-	public void onMessagePublished(int messageId, String appTopic) {
-		s_logger.info("Published message with ID: {} on application topic: {}", messageId, appTopic);
-	}
+    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
+        s_logger.info("Activating ExamplePublisher...");
 
-	@Override
-	public void onMessageConfirmed(int messageId, String appTopic) {
-		s_logger.info("Confirmed message with ID: {} on application topic: {}", messageId, appTopic);
-	}
-	
-	// ----------------------------------------------------------------
-	//
-	//   Private Methods
-	//
-	// ----------------------------------------------------------------
+        this.m_properties = properties;
+        for (String s : properties.keySet()) {
+            s_logger.info("Activate - " + s + ": " + properties.get(s));
+        }
 
-	/**
-	 * Called after a new set of properties has been configured on the service
-	 */
-	private void doUpdate() 
-	{
-		// cancel a current worker handle if one if active
-		if (m_handle != null) {
-			m_handle.cancel(true);
-		}
-		
-		if (!m_properties.containsKey(TEMP_INITIAL_PROP_NAME) ||
-		    !m_properties.containsKey(PUBLISH_RATE_PROP_NAME)) {
-			s_logger.info("Update ExamplePublisher - Ignore as properties do not contain TEMP_INITIAL_PROP_NAME and PUBLISH_RATE_PROP_NAME.");
-			return;
-		}
-		
-		// reset the temperature to the initial value
-		m_temperature = (Float) m_properties.get(TEMP_INITIAL_PROP_NAME);		
-		
-		// schedule a new worker based on the properties of the service
-		int pubrate = (Integer) m_properties.get(PUBLISH_RATE_PROP_NAME);
-		m_handle = m_worker.scheduleAtFixedRate(new Runnable() {		
-			@Override
-			public void run() {
-				doPublish();
-			}
-		}, 0, pubrate, TimeUnit.MILLISECONDS);
-	}
-	
-	
-	/**
-	 * Called at the configured rate to publish the next temperature measurement.
-	 */
-	private void doPublish() 
-	{				
-		// fetch the publishing configuration from the publishing properties
-		String  topic  = (String) m_properties.get(PUBLISH_TOPIC_PROP_NAME);
-		Integer qos    = (Integer) m_properties.get(PUBLISH_QOS_PROP_NAME);
-		Boolean retain = (Boolean) m_properties.get(PUBLISH_RETAIN_PROP_NAME);
-		
-		// Increment the simulated temperature value
-		float tempIncr = (Float) m_properties.get(TEMP_INCREMENT_PROP_NAME);
-		m_temperature += tempIncr;
-				
-		// Allocate a new payload
-		KuraPayload payload = new KuraPayload();
-		
-		// Timestamp the message
-		payload.setTimestamp(new Date());
-		
-		// Add the temperature as a metric to the payload
-		payload.addMetric("temperature", m_temperature);
+        // get the mqtt client for this application
+        try {
 
-		// add all the other metrics
-		for (String metric : METRIC_PROP_NAMES) {
-			if ("metric.char".equals(metric)) {			
-				// publish character as a string as the 
-				// "char" type is not support in the EDC Payload
-				payload.addMetric(metric, String.valueOf(m_properties.get(metric)));
-			}
-			else if ("metric.short".equals(metric)) {
-				// publish short as an integer as the 
-				// "short " type is not support in the EDC Payload
-				payload.addMetric(metric, ((Short) (m_properties.get(metric))).intValue());
-			}
-			else if ("metric.byte".equals(metric)) {
-				// publish byte as an integer as the 
-				// "byte" type is not support in the EDC Payload
-				payload.addMetric(metric, ((Byte) (m_properties.get(metric))).intValue());
-			}
-			else {
-				payload.addMetric(metric, m_properties.get(metric));
-			}
-		}
-		
-		// Publish the message
-		try {
-			int messageId = m_cloudClient.publish(topic, payload, qos, retain);
-			s_logger.info("Published to {} message: {} with ID: {}", new Object[] {topic, payload, messageId});
-		} 
-		catch (Exception e) {
-			s_logger.error("Cannot publish topic: "+topic, e);
-		}
-	}
+            // Acquire a Cloud Application Client for this Application
+            s_logger.info("Getting CloudApplicationClient for {}...", APP_ID);
+            this.m_cloudClient = this.m_cloudService.newCloudClient(APP_ID);
+            this.m_cloudClient.addCloudClientListener(this);
+
+            // Don't subscribe because these are handled by the default
+            // subscriptions and we don't want to get messages twice
+            doUpdate();
+        } catch (Exception e) {
+            s_logger.error("Error during component activation", e);
+            throw new ComponentException(e);
+        }
+        s_logger.info("Activating ExamplePublisher... Done.");
+    }
+
+    protected void deactivate(ComponentContext componentContext) {
+        s_logger.debug("Deactivating ExamplePublisher...");
+
+        // shutting down the worker and cleaning up the properties
+        this.m_worker.shutdown();
+
+        // Releasing the CloudApplicationClient
+        s_logger.info("Releasing CloudApplicationClient for {}...", APP_ID);
+        this.m_cloudClient.release();
+
+        s_logger.debug("Deactivating ExamplePublisher... Done.");
+    }
+
+    public void updated(Map<String, Object> properties) {
+        s_logger.info("Updated ExamplePublisher...");
+
+        // store the properties received
+        this.m_properties = properties;
+        for (String s : properties.keySet()) {
+            s_logger.info("Update - " + s + ": " + properties.get(s));
+        }
+
+        // try to kick off a new job
+        doUpdate();
+        s_logger.info("Updated ExamplePublisher... Done.");
+    }
+
+    // ----------------------------------------------------------------
+    //
+    // Cloud Application Callback Methods
+    //
+    // ----------------------------------------------------------------
+
+    @Override
+    public void onConnectionEstablished() {
+        s_logger.info("Connection established");
+
+        try {
+            // Getting the lists of unpublished messages
+            s_logger.info("Number of unpublished messages: {}", this.m_cloudClient.getUnpublishedMessageIds().size());
+        } catch (KuraException e) {
+            s_logger.error("Cannot get the list of unpublished messages");
+        }
+
+        try {
+            // Getting the lists of in-flight messages
+            s_logger.info("Number of in-flight messages: {}", this.m_cloudClient.getInFlightMessageIds().size());
+        } catch (KuraException e) {
+            s_logger.error("Cannot get the list of in-flight messages");
+        }
+
+        try {
+            // Getting the lists of dropped in-flight messages
+            s_logger.info("Number of dropped in-flight messages: {}",
+                    this.m_cloudClient.getDroppedInFlightMessageIds().size());
+        } catch (KuraException e) {
+            s_logger.error("Cannot get the list of dropped in-flight messages");
+        }
+    }
+
+    @Override
+    public void onConnectionLost() {
+        s_logger.warn("Connection lost!");
+    }
+
+    @Override
+    public void onControlMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
+        s_logger.info("Control message arrived on assetId: {} and semantic topic: {}", deviceId, appTopic);
+    }
+
+    @Override
+    public void onMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
+        s_logger.info("Message arrived on assetId: {} and semantic topic: {}", deviceId, appTopic);
+    }
+
+    @Override
+    public void onMessagePublished(int messageId, String appTopic) {
+        s_logger.info("Published message with ID: {} on application topic: {}", messageId, appTopic);
+    }
+
+    @Override
+    public void onMessageConfirmed(int messageId, String appTopic) {
+        s_logger.info("Confirmed message with ID: {} on application topic: {}", messageId, appTopic);
+    }
+
+    // ----------------------------------------------------------------
+    //
+    // Private Methods
+    //
+    // ----------------------------------------------------------------
+
+    /**
+     * Called after a new set of properties has been configured on the service
+     */
+    private void doUpdate() {
+        // cancel a current worker handle if one if active
+        if (this.m_handle != null) {
+            this.m_handle.cancel(true);
+        }
+
+        if (!this.m_properties.containsKey(TEMP_INITIAL_PROP_NAME)
+                || !this.m_properties.containsKey(PUBLISH_RATE_PROP_NAME)) {
+            s_logger.info(
+                    "Update ExamplePublisher - Ignore as properties do not contain TEMP_INITIAL_PROP_NAME and PUBLISH_RATE_PROP_NAME.");
+            return;
+        }
+
+        // reset the temperature to the initial value
+        this.m_temperature = (Float) this.m_properties.get(TEMP_INITIAL_PROP_NAME);
+
+        // schedule a new worker based on the properties of the service
+        int pubrate = (Integer) this.m_properties.get(PUBLISH_RATE_PROP_NAME);
+        this.m_handle = this.m_worker.scheduleAtFixedRate(new Runnable() {
+
+            @Override
+            public void run() {
+                doPublish();
+            }
+        }, 0, pubrate, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Called at the configured rate to publish the next temperature measurement.
+     */
+    private void doPublish() {
+        // fetch the publishing configuration from the publishing properties
+        String topic = (String) this.m_properties.get(PUBLISH_TOPIC_PROP_NAME);
+        Integer qos = (Integer) this.m_properties.get(PUBLISH_QOS_PROP_NAME);
+        Boolean retain = (Boolean) this.m_properties.get(PUBLISH_RETAIN_PROP_NAME);
+
+        // Increment the simulated temperature value
+        float tempIncr = (Float) this.m_properties.get(TEMP_INCREMENT_PROP_NAME);
+        this.m_temperature += tempIncr;
+
+        // Allocate a new payload
+        KuraPayload payload = new KuraPayload();
+
+        // Timestamp the message
+        payload.setTimestamp(new Date());
+
+        // Add the temperature as a metric to the payload
+        payload.addMetric("temperature", this.m_temperature);
+
+        // add all the other metrics
+        for (String metric : METRIC_PROP_NAMES) {
+            if ("metric.char".equals(metric)) {
+                // publish character as a string as the
+                // "char" type is not support in the EDC Payload
+                payload.addMetric(metric, String.valueOf(this.m_properties.get(metric)));
+            } else if ("metric.short".equals(metric)) {
+                // publish short as an integer as the
+                // "short " type is not support in the EDC Payload
+                payload.addMetric(metric, ((Short) this.m_properties.get(metric)).intValue());
+            } else if ("metric.byte".equals(metric)) {
+                // publish byte as an integer as the
+                // "byte" type is not support in the EDC Payload
+                payload.addMetric(metric, ((Byte) this.m_properties.get(metric)).intValue());
+            } else {
+                payload.addMetric(metric, this.m_properties.get(metric));
+            }
+        }
+
+        // Publish the message
+        try {
+            int messageId = this.m_cloudClient.publish(topic, payload, qos, retain);
+            s_logger.info("Published to {} message: {} with ID: {}", new Object[] { topic, payload, messageId });
+        } catch (Exception e) {
+            s_logger.error("Cannot publish topic: " + topic, e);
+        }
+    }
 }

@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.kura.KuraException;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * The Configuration Service is used to manage the configuration of OSGi Declarative Services

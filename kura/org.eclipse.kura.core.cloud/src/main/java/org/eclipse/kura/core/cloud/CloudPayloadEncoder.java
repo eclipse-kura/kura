@@ -16,7 +16,7 @@ import java.io.IOException;
 /**
  * Common interface for the PayloadEncoders
  */
-public interface CloudPayloadEncoder 
-{
-	public byte[] getBytes() throws IOException;
+public interface CloudPayloadEncoder {
+
+    public byte[] getBytes() throws IOException;
 }

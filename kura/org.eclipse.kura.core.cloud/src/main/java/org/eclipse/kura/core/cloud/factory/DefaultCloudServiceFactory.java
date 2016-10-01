@@ -29,12 +29,24 @@ import org.osgi.service.component.ComponentConstants;
  *
  * <table>
  * <thead>
- *    <tr><th>Factory PID</th><th>Service interface</th></tr>
+ * <tr>
+ * <th>Factory PID</th>
+ * <th>Service interface</th>
+ * </tr>
  * </thead>
  * <tbody>
- *    <tr><td>org.eclipse.kura.cloud.CloudService</td><td>{@link CloudService}</td></tr>
- *    <tr><td>org.eclipse.kura.data.DataService</td><td>{@link DataService}</td></tr>
- *    <tr><td>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport</td><td>{@link DataTransportService}</td></tr>
+ * <tr>
+ * <td>org.eclipse.kura.cloud.CloudService</td>
+ * <td>{@link CloudService}</td>
+ * </tr>
+ * <tr>
+ * <td>org.eclipse.kura.data.DataService</td>
+ * <td>{@link DataService}</td>
+ * </tr>
+ * <tr>
+ * <td>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport</td>
+ * <td>{@link DataTransportService}</td>
+ * </tr>
  * </tbody>
  * </table>
  * <br>
@@ -45,31 +57,55 @@ import org.osgi.service.component.ComponentConstants;
  * <br>
  * The default stack instance is special.
  * For backward compatibility the PIDs of the default stack must be as follows:
- * 
+ *
  * <table>
  * <thead>
- *    <tr><th>PID (kura.service.pid)</th><th>Factory PID</th></tr>
+ * <tr>
+ * <th>PID (kura.service.pid)</th>
+ * <th>Factory PID</th>
+ * </tr>
  * </thead>
  * <tbody>
- *    <tr><td>org.eclipse.kura.cloud.CloudService</td><td>org.eclipse.kura.cloud.CloudService</td></tr>
- *    <tr><td>org.eclipse.kura.data.DataService</td><td>org.eclipse.kura.data.DataService</td></tr>
- *    <tr><td></td><td>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport</td></tr>
+ * <tr>
+ * <td>org.eclipse.kura.cloud.CloudService</td>
+ * <td>org.eclipse.kura.cloud.CloudService</td>
+ * </tr>
+ * <tr>
+ * <td>org.eclipse.kura.data.DataService</td>
+ * <td>org.eclipse.kura.data.DataService</td>
+ * </tr>
+ * <tr>
+ * <td></td>
+ * <td>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport</td>
+ * </tr>
  * </tbody>
  * </table>
  * <br>
- * 
+ *
  * For other stack instances the convention used to generate the PIDs for the lower layers is
  * to use the sub string in the CloudService PID starting after the first occurrence of the '-' character and append
  * the sub string to the PIDs of the default stack above, for example:
- * 
+ *
  * <table>
  * <thead>
- *    <tr><th>PID (kura.service.pid)</th><th>Factory PID</th></tr>
+ * <tr>
+ * <th>PID (kura.service.pid)</th>
+ * <th>Factory PID</th>
+ * </tr>
  * </thead>
  * <tbody>
- *    <tr><td>org.eclipse.kura.cloud.CloudService-2</td><td>org.eclipse.kura.cloud.CloudService</td></tr>
- *    <tr><td>org.eclipse.kura.data.DataService-2</td><td>org.eclipse.kura.data.DataService</td></tr>
- *    <tr><td>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport-2</td><td>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport</td></tr>
+ * <tr>
+ * <td>org.eclipse.kura.cloud.CloudService-2</td>
+ * <td>org.eclipse.kura.cloud.CloudService</td>
+ * </tr>
+ * <tr>
+ * <td>org.eclipse.kura.data.DataService-2</td>
+ * <td>org.eclipse.kura.data.DataService</td>
+ * </tr>
+ * <tr>
+ * <td>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport-2</td>
+ * <td>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport</td>
+ * </tr>
  * </tbody>
  * </table>
  * <br>
@@ -82,6 +118,7 @@ import org.osgi.service.component.ComponentConstants;
  * The following example shows this selective dependency mechanism for the DataService and MqttDataTransport services.
  * <br>
  * The DataService component definition specifies a dependency on a DataTransportService as follows:
+ *
  * <pre>
  * &ltreference name="DataTransportService"
  *              bind="setDataTransportService"
@@ -90,9 +127,10 @@ import org.osgi.service.component.ComponentConstants;
  *              policy="static"
  *              interface="org.eclipse.kura.data.DataTransportService"/&gt
  * </pre>
+ *
  * <br>
  * The DataService with PID <i>org.eclipse.kura.data.DataService-2</i> needs to be activated
- * only when its dependency on a specific DataTransportService with 
+ * only when its dependency on a specific DataTransportService with
  * PID <i>org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport-2</i> is satisfied.
  * <br>
  * The OSGi Declarative Services specification provides a magic <i>&ltreference name&gt.target</i>
@@ -100,100 +138,105 @@ import org.osgi.service.component.ComponentConstants;
  * <br>
  * In the above example the <i>org.eclipse.kura.data.DataService-2</i> component instance will have a
  * <i>DataTransportService.target</i> property set to the value:
+ *
  * <pre>
- * (kura.service.pid=org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport-2)
+ * (kura.service.pid = org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport - 2)
  * </pre>
+ *
  * <br>
  */
 public class DefaultCloudServiceFactory implements CloudServiceFactory {
 
-	// The following constants must match the factory component definitions
-	private static final String CLOUD_SERVICE_FACTORY_PID = "org.eclipse.kura.cloud.CloudService";
-	private static final String DATA_SERVICE_FACTORY_PID = "org.eclipse.kura.data.DataService";
-	private static final String DATA_TRANSPORT_SERVICE_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";	
-	
-	private static final String CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
-	private static final String DATA_SERVICE_PID = "org.eclipse.kura.data.DataService";
-	private static final String DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
-	
-	private static final String DATA_SERVICE_REFERENCE_NAME = "DataService";
-	private static final String DATA_TRANSPORT_SERVICE_REFERENCE_NAME = "DataTransportService";
-		
-	private static final String REFERENCE_TARGET_VALUE_FORMAT = "("+ConfigurationService.KURA_SERVICE_PID+"=%s)";
-	
-	private ConfigurationService m_configurationService;
-	
-	protected void setConfigurationService(ConfigurationService configurationService) {
-		m_configurationService = configurationService;
-	}
-	
-	protected void unsetConfigurationService(ConfigurationService configurationService) {
-		if (configurationService == m_configurationService) {
-			m_configurationService = null;
-		}
-	}
-	
-	@Override
-	public String getFactoryPid() {
-		return CLOUD_SERVICE_FACTORY_PID;
-	}
+    // The following constants must match the factory component definitions
+    private static final String CLOUD_SERVICE_FACTORY_PID = "org.eclipse.kura.cloud.CloudService";
+    private static final String DATA_SERVICE_FACTORY_PID = "org.eclipse.kura.data.DataService";
+    private static final String DATA_TRANSPORT_SERVICE_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
 
-	@Override
-	public void createConfiguration(String pid) throws KuraException {		
-		String[] parts = pid.split("-");
-		if (parts.length != 0 && CLOUD_SERVICE_PID.equals(parts[0])) {
-			String suffix = null;
-			if (parts.length > 1) {
-				suffix = parts[1];
-			}
-			
-			String dataServicePid = DATA_SERVICE_PID;
-			String dataTransportServicePid = DATA_TRANSPORT_SERVICE_PID;
-			if (suffix != null) {
-				dataServicePid += "-" + suffix;
-				dataTransportServicePid += "-" + suffix;
-			}
-			
-			// create the CloudService layer and set the selective dependency on the DataService PID
-			Map<String, Object> cloudServiceProperties = new HashMap<String, Object>();
-			String name = DATA_SERVICE_REFERENCE_NAME+ComponentConstants.REFERENCE_TARGET_SUFFIX;
-			cloudServiceProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataServicePid));
-			
-			m_configurationService.createFactoryConfiguration(CLOUD_SERVICE_FACTORY_PID, pid, cloudServiceProperties, false);
-			
-			// create the DataService layer and set the selective dependency on the DataTransportService PID
-			Map<String, Object> dataServiceProperties = new HashMap<String, Object>();
-			name = DATA_TRANSPORT_SERVICE_REFERENCE_NAME+ComponentConstants.REFERENCE_TARGET_SUFFIX;
-			dataServiceProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataTransportServicePid));
-			
-			m_configurationService.createFactoryConfiguration(DATA_SERVICE_FACTORY_PID, dataServicePid, dataServiceProperties, false);
-			
-			// create the DataTransportService layer and take a snapshot
-			m_configurationService.createFactoryConfiguration(DATA_TRANSPORT_SERVICE_FACTORY_PID, dataTransportServicePid, null, true);
-		} else {
-			throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Invalid PID '{}'", pid);
-		}
-	}
+    private static final String CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
+    private static final String DATA_SERVICE_PID = "org.eclipse.kura.data.DataService";
+    private static final String DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
 
-	@Override
-	public void deleteConfiguration(String pid) throws KuraException {
-		String[] parts = pid.split("-");
-		if (parts.length != 0 && CLOUD_SERVICE_PID.equals(parts[0])) {
-			String suffix = null;
-			if (parts.length > 1) {
-				suffix = parts[1];
-			}
-			
-			String dataServicePid = DATA_SERVICE_PID;
-			String dataTransportServicePid = DATA_TRANSPORT_SERVICE_PID;
-			if (suffix != null) {
-				dataServicePid += "-" + suffix;
-				dataTransportServicePid += "-" + suffix;
-			}
-			
-			m_configurationService.deleteFactoryConfiguration(pid, false);
-			m_configurationService.deleteFactoryConfiguration(dataServicePid, false);
-			m_configurationService.deleteFactoryConfiguration(dataTransportServicePid, true);
-		}
-	}
+    private static final String DATA_SERVICE_REFERENCE_NAME = "DataService";
+    private static final String DATA_TRANSPORT_SERVICE_REFERENCE_NAME = "DataTransportService";
+
+    private static final String REFERENCE_TARGET_VALUE_FORMAT = "(" + ConfigurationService.KURA_SERVICE_PID + "=%s)";
+
+    private ConfigurationService configurationService;
+
+    protected void setConfigurationService(ConfigurationService configurationService) {
+        this.configurationService = configurationService;
+    }
+
+    protected void unsetConfigurationService(ConfigurationService configurationService) {
+        if (configurationService == this.configurationService) {
+            this.configurationService = null;
+        }
+    }
+
+    @Override
+    public String getFactoryPid() {
+        return CLOUD_SERVICE_FACTORY_PID;
+    }
+
+    @Override
+    public void createConfiguration(String pid) throws KuraException {
+        String[] parts = pid.split("-");
+        if (parts.length != 0 && CLOUD_SERVICE_PID.equals(parts[0])) {
+            String suffix = null;
+            if (parts.length > 1) {
+                suffix = parts[1];
+            }
+
+            String dataServicePid = DATA_SERVICE_PID;
+            String dataTransportServicePid = DATA_TRANSPORT_SERVICE_PID;
+            if (suffix != null) {
+                dataServicePid += "-" + suffix;
+                dataTransportServicePid += "-" + suffix;
+            }
+
+            // create the CloudService layer and set the selective dependency on the DataService PID
+            Map<String, Object> cloudServiceProperties = new HashMap<String, Object>();
+            String name = DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
+            cloudServiceProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataServicePid));
+
+            this.configurationService.createFactoryConfiguration(CLOUD_SERVICE_FACTORY_PID, pid,
+                    cloudServiceProperties, false);
+
+            // create the DataService layer and set the selective dependency on the DataTransportService PID
+            Map<String, Object> dataServiceProperties = new HashMap<String, Object>();
+            name = DATA_TRANSPORT_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
+            dataServiceProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataTransportServicePid));
+
+            this.configurationService.createFactoryConfiguration(DATA_SERVICE_FACTORY_PID, dataServicePid,
+                    dataServiceProperties, false);
+
+            // create the DataTransportService layer and take a snapshot
+            this.configurationService.createFactoryConfiguration(DATA_TRANSPORT_SERVICE_FACTORY_PID,
+                    dataTransportServicePid, null, true);
+        } else {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Invalid PID '{}'", pid);
+        }
+    }
+
+    @Override
+    public void deleteConfiguration(String pid) throws KuraException {
+        String[] parts = pid.split("-");
+        if (parts.length != 0 && CLOUD_SERVICE_PID.equals(parts[0])) {
+            String suffix = null;
+            if (parts.length > 1) {
+                suffix = parts[1];
+            }
+
+            String dataServicePid = DATA_SERVICE_PID;
+            String dataTransportServicePid = DATA_TRANSPORT_SERVICE_PID;
+            if (suffix != null) {
+                dataServicePid += "-" + suffix;
+                dataTransportServicePid += "-" + suffix;
+            }
+
+            this.configurationService.deleteFactoryConfiguration(pid, false);
+            this.configurationService.deleteFactoryConfiguration(dataServicePid, false);
+            this.configurationService.deleteFactoryConfiguration(dataTransportServicePid, true);
+        }
+    }
 }

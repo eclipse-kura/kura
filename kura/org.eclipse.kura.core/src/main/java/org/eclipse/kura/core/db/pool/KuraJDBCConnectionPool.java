@@ -23,154 +23,155 @@ import javax.sql.StatementEventListener;
 
 public class KuraJDBCConnectionPool implements ConnectionEventListener, StatementEventListener {
 
-	interface RefState {
-		int empty = 0;
-		int available = 1;
-		int allocated = 2;
-	}
+    interface RefState {
 
-	AtomicIntegerArray states;
-	PooledConnection[] connections;
-	KuraJDBCPooledDatasource source;
-	volatile boolean closed;
+        int empty = 0;
+        int available = 1;
+        int allocated = 2;
+    }
 
-	public KuraJDBCConnectionPool() {
-		this(10);
-	}
+    AtomicIntegerArray states;
+    PooledConnection[] connections;
+    KuraJDBCPooledDatasource source;
+    volatile boolean closed;
 
-	public KuraJDBCConnectionPool(int size) {
-		source = new KuraJDBCPooledDatasource();
-		connections = new PooledConnection[size];
-		states = new AtomicIntegerArray(size);
-	}
+    public KuraJDBCConnectionPool() {
+        this(10);
+    }
 
-	public Connection getConnection() throws SQLException {
+    public KuraJDBCConnectionPool(int size) {
+        this.source = new KuraJDBCPooledDatasource();
+        this.connections = new PooledConnection[size];
+        this.states = new AtomicIntegerArray(size);
+    }
 
-		int retries = 300;
+    public Connection getConnection() throws SQLException {
 
-		if (source.getLoginTimeout() != 0) {
-			retries = source.getLoginTimeout() * 10;
-		}
+        int retries = 300;
 
-		if (closed) {
-			throw new SQLException("connection pool is closed");
-		}
+        if (this.source.getLoginTimeout() != 0) {
+            retries = this.source.getLoginTimeout() * 10;
+        }
 
-		for (int count = 0; count < retries; count++) {
-			for (int i = 0; i < states.length(); i++) {
-				if (states.compareAndSet(i, RefState.available, RefState.allocated)) {
-					return connections[i].getConnection();
-				}
+        if (this.closed) {
+            throw new SQLException("connection pool is closed");
+        }
 
-				if (states.compareAndSet(i, RefState.empty, RefState.allocated)) {
-					try {
-						PooledConnection connection = source.getPooledConnection();
+        for (int count = 0; count < retries; count++) {
+            for (int i = 0; i < this.states.length(); i++) {
+                if (this.states.compareAndSet(i, RefState.available, RefState.allocated)) {
+                    return this.connections[i].getConnection();
+                }
 
-						connection.addConnectionEventListener(this);
-						connection.addStatementEventListener(this);
-						connections[i] = connection;
+                if (this.states.compareAndSet(i, RefState.empty, RefState.allocated)) {
+                    try {
+                        PooledConnection connection = this.source.getPooledConnection();
 
-						return connections[i].getConnection();
-					} catch (SQLException e) {
-						states.set(i, RefState.empty);
-					}
-				}
-			}
+                        connection.addConnectionEventListener(this);
+                        connection.addStatementEventListener(this);
+                        this.connections[i] = connection;
 
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-			}
-		}
+                        return this.connections[i].getConnection();
+                    } catch (SQLException e) {
+                        this.states.set(i, RefState.empty);
+                    }
+                }
+            }
 
-		throw new SQLException("Invalid argument!");
-	}
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+            }
+        }
 
-	public Connection getConnection(String username, String password) throws SQLException {
-		return source.getPooledConnection(username, password).getConnection();
-	}
+        throw new SQLException("Invalid argument!");
+    }
 
-	@Override
-	public void connectionClosed(ConnectionEvent event) {
-		PooledConnection connection = (PooledConnection) event.getSource();
+    public Connection getConnection(String username, String password) throws SQLException {
+        return this.source.getPooledConnection(username, password).getConnection();
+    }
 
-		for (int i = 0; i < connections.length; i++) {
-			if (connections[i] == connection) {
-				states.set(i, RefState.available);
+    @Override
+    public void connectionClosed(ConnectionEvent event) {
+        PooledConnection connection = (PooledConnection) event.getSource();
 
-				break;
-			}
-		}
-	}
+        for (int i = 0; i < this.connections.length; i++) {
+            if (this.connections[i] == connection) {
+                this.states.set(i, RefState.available);
 
-	@Override
-	public void connectionErrorOccurred(ConnectionEvent event) {
-		PooledConnection connection = (PooledConnection) event.getSource();
+                break;
+            }
+        }
+    }
 
-		for (int i = 0; i < connections.length; i++) {
-			if (connections[i] == connection) {
-				states.set(i, RefState.allocated);
-				connections[i] = null;
-				states.set(i, RefState.empty);
-				break;
-			}
-		}
-	}
+    @Override
+    public void connectionErrorOccurred(ConnectionEvent event) {
+        PooledConnection connection = (PooledConnection) event.getSource();
 
-	@Override
-	public void statementClosed(StatementEvent event) {
-	}
+        for (int i = 0; i < this.connections.length; i++) {
+            if (this.connections[i] == connection) {
+                this.states.set(i, RefState.allocated);
+                this.connections[i] = null;
+                this.states.set(i, RefState.empty);
+                break;
+            }
+        }
+    }
 
-	@Override
-	public void statementErrorOccurred(StatementEvent event) {
-	}
+    @Override
+    public void statementClosed(StatementEvent event) {
+    }
 
-	public String getUrl() {
-		return source.getUrl();
-	}
+    @Override
+    public void statementErrorOccurred(StatementEvent event) {
+    }
 
-	public String getUser() {
-		return source.getUser();
-	}
+    public String getUrl() {
+        return this.source.getUrl();
+    }
 
-	public void setUrl(String url) {
-		source.setUrl(url);
-	}
+    public String getUser() {
+        return this.source.getUser();
+    }
 
-	public void setPassword(String password) {
-		source.setPassword(password);
-	}
+    public void setUrl(String url) {
+        this.source.setUrl(url);
+    }
 
-	public void setUser(String user) {
-		source.setUser(user);
-	}
+    public void setPassword(String password) {
+        this.source.setPassword(password);
+    }
 
-	public void close(int wait) throws SQLException {
+    public void setUser(String user) {
+        this.source.setUser(user);
+    }
 
-		if (wait < 0 || wait > 60) {
-			throw new SQLException("Out of range!");
-		}
-		if (closed) {
-			return;
-		}
+    public void close(int wait) throws SQLException {
 
-		closed = true;
+        if (wait < 0 || wait > 60) {
+            throw new SQLException("Out of range!");
+        }
+        if (this.closed) {
+            return;
+        }
 
-		try {
-			Thread.sleep(1000 * wait);
-		} catch (Throwable t) {
-		}
+        this.closed = true;
 
-		for (int i = 0; i < connections.length; i++) {
-			if (connections[i] != null) {
-				KuraPooledConnectionManager.releaseConnection(connections[i]);
-			}
-		}
+        try {
+            Thread.sleep(1000 * wait);
+        } catch (Throwable t) {
+        }
 
-		for (int i = 0; i < connections.length; i++) {
-			connections[i] = null;
-		}
+        for (PooledConnection connection : this.connections) {
+            if (connection != null) {
+                KuraPooledConnectionManager.releaseConnection(connection);
+            }
+        }
 
-	}
+        for (int i = 0; i < this.connections.length; i++) {
+            this.connections[i] = null;
+        }
+
+    }
 
 }

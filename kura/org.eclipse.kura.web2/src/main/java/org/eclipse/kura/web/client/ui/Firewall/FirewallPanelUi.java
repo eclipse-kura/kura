@@ -27,93 +27,98 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class FirewallPanelUi extends Composite {
 
-	private static FirewallPanelUiUiBinder uiBinder = GWT.create(FirewallPanelUiUiBinder.class);
+    private static FirewallPanelUiUiBinder uiBinder = GWT.create(FirewallPanelUiUiBinder.class);
 
-	interface FirewallPanelUiUiBinder extends UiBinder<Widget, FirewallPanelUi> {
-	}
+    interface FirewallPanelUiUiBinder extends UiBinder<Widget, FirewallPanelUi> {
+    }
 
-	private static OpenPortsTabUi openPortsBinder = GWT.create(OpenPortsTabUi.class);
-	private static PortForwardingTabUi portForwardingBinder = GWT.create(PortForwardingTabUi.class);
-	private static NatTabUi ipForwardingBinder = GWT.create(NatTabUi.class);
+    private static OpenPortsTabUi openPortsBinder = GWT.create(OpenPortsTabUi.class);
+    private static PortForwardingTabUi portForwardingBinder = GWT.create(PortForwardingTabUi.class);
+    private static NatTabUi ipForwardingBinder = GWT.create(NatTabUi.class);
 
-	private static final Messages MSGS = GWT.create(Messages.class);
-	
-	
-	@UiField
-	HTMLPanel firewallIntro;
-	@UiField
-	AnchorListItem openPorts, portForwarding, ipForwarding; 
-	@UiField
-	Well content;
+    private static final Messages MSGS = GWT.create(Messages.class);
 
-	public FirewallPanelUi() {
-		initWidget(uiBinder.createAndBindUi(this));
-		firewallIntro.add(new Span("<p>"+MSGS.firewallIntro()+"</p>"));
-		openPorts.setText(MSGS.firewallOpenPorts());
-		portForwarding.setText(MSGS.firewallPortForwarding());
-		ipForwarding.setText(MSGS.firewallNat());
+    @UiField
+    HTMLPanel firewallIntro;
+    @UiField
+    AnchorListItem openPorts, portForwarding, ipForwarding;
+    @UiField
+    Well content;
 
-		openPorts.addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {
-				setSelectedActive(openPorts);
-				content.clear();
-				content.add(openPortsBinder);
-				if (!openPortsBinder.isDirty()) {
-					openPortsBinder.refresh();
-				}
-			}});
+    public FirewallPanelUi() {
+        initWidget(uiBinder.createAndBindUi(this));
+        this.firewallIntro.add(new Span("<p>" + MSGS.firewallIntro() + "</p>"));
+        this.openPorts.setText(MSGS.firewallOpenPorts());
+        this.portForwarding.setText(MSGS.firewallPortForwarding());
+        this.ipForwarding.setText(MSGS.firewallNat());
 
-		portForwarding.addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {
-				setSelectedActive(portForwarding);
-				content.clear();
-				content.add(portForwardingBinder);
-				if (!portForwardingBinder.isDirty()) {
-					portForwardingBinder.refresh();
-				}
-			}});
+        this.openPorts.addClickHandler(new ClickHandler() {
 
-		ipForwarding.addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {
-				setSelectedActive(ipForwarding);
-				content.clear();
-				content.add(ipForwardingBinder);
-				if (!ipForwardingBinder.isDirty()) {
-					ipForwardingBinder.refresh();
-				}
-			}});
-	}
+            @Override
+            public void onClick(ClickEvent event) {
+                setSelectedActive(FirewallPanelUi.this.openPorts);
+                FirewallPanelUi.this.content.clear();
+                FirewallPanelUi.this.content.add(openPortsBinder);
+                if (!openPortsBinder.isDirty()) {
+                    openPortsBinder.refresh();
+                }
+            }
+        });
 
-	public void initFirewallPanel() {
-		setSelectedActive(openPorts);
-		content.clear();
-		content.add(openPortsBinder);
-		openPortsBinder.refresh();
-	}
+        this.portForwarding.addClickHandler(new ClickHandler() {
 
-	public void setSelectedActive(AnchorListItem item){
-		openPorts.setActive(false);
-		portForwarding.setActive(false);
-		ipForwarding.setActive(false);
-		item.setActive(true);
-	}
+            @Override
+            public void onClick(ClickEvent event) {
+                setSelectedActive(FirewallPanelUi.this.portForwarding);
+                FirewallPanelUi.this.content.clear();
+                FirewallPanelUi.this.content.add(portForwardingBinder);
+                if (!portForwardingBinder.isDirty()) {
+                    portForwardingBinder.refresh();
+                }
+            }
+        });
 
-	public boolean isDirty() {
-		return openPortsBinder.isDirty() || portForwardingBinder.isDirty() || ipForwardingBinder.isDirty();
-	}
+        this.ipForwarding.addClickHandler(new ClickHandler() {
 
-	public void setDirty(boolean b) {
-		if (openPortsBinder != null) {
-			openPortsBinder.setDirty(b);
-		}
-		if (portForwardingBinder != null) {
-			portForwardingBinder.setDirty(b);
-		}
-		if (ipForwardingBinder != null) {
-			ipForwardingBinder.setDirty(b);
-		}
-	}
+            @Override
+            public void onClick(ClickEvent event) {
+                setSelectedActive(FirewallPanelUi.this.ipForwarding);
+                FirewallPanelUi.this.content.clear();
+                FirewallPanelUi.this.content.add(ipForwardingBinder);
+                if (!ipForwardingBinder.isDirty()) {
+                    ipForwardingBinder.refresh();
+                }
+            }
+        });
+    }
+
+    public void initFirewallPanel() {
+        setSelectedActive(this.openPorts);
+        this.content.clear();
+        this.content.add(openPortsBinder);
+        openPortsBinder.refresh();
+    }
+
+    public void setSelectedActive(AnchorListItem item) {
+        this.openPorts.setActive(false);
+        this.portForwarding.setActive(false);
+        this.ipForwarding.setActive(false);
+        item.setActive(true);
+    }
+
+    public boolean isDirty() {
+        return openPortsBinder.isDirty() || portForwardingBinder.isDirty() || ipForwardingBinder.isDirty();
+    }
+
+    public void setDirty(boolean b) {
+        if (openPortsBinder != null) {
+            openPortsBinder.setDirty(b);
+        }
+        if (portForwardingBinder != null) {
+            portForwardingBinder.setDirty(b);
+        }
+        if (ipForwardingBinder != null) {
+            ipForwardingBinder.setDirty(b);
+        }
+    }
 }

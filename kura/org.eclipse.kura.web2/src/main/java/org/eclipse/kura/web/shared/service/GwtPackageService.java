@@ -21,12 +21,12 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("package")
-public interface GwtPackageService extends RemoteService 
-{
-	public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken) throws GwtKuraException;
-	
-	public void uninstallDeploymentPackage(GwtXSRFToken xsrfToken, String packageName) throws GwtKuraException;
-	
-	public String getMarketplaceUri(GwtXSRFToken xsrfToken, String url) throws GwtKuraException;
+public interface GwtPackageService extends RemoteService {
+
+    public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    public void uninstallDeploymentPackage(GwtXSRFToken xsrfToken, String packageName) throws GwtKuraException;
+
+    public String getMarketplaceUri(GwtXSRFToken xsrfToken, String url) throws GwtKuraException;
 
 }

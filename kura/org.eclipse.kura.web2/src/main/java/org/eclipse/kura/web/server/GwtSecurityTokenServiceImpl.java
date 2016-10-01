@@ -27,13 +27,13 @@ import com.google.gwt.user.client.rpc.SerializationException;
  * This is the security token service, a concrete implementation to fix the XSFR security problem.
  */
 public class GwtSecurityTokenServiceImpl extends OsgiRemoteServiceServlet implements GwtSecurityTokenService {
-    
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 5333012054583792499L;
 
-	private static ThreadLocal<HttpServletRequest> perThreadRequest = new ThreadLocal<HttpServletRequest>();
+    /**
+     *
+     */
+    private static final long serialVersionUID = 5333012054583792499L;
+
+    private static ThreadLocal<HttpServletRequest> perThreadRequest = new ThreadLocal<HttpServletRequest>();
 
     public static Logger s_logger = LoggerFactory.getLogger(GwtSecurityTokenServiceImpl.class);
     public static final String XSRF_TOKEN_KEY = "XSRF_TOKEN";
@@ -43,8 +43,7 @@ public class GwtSecurityTokenServiceImpl extends OsgiRemoteServiceServlet implem
         try {
             perThreadRequest.set(getThreadLocalRequest());
             return super.processCall(payload);
-        }
-        finally {
+        } finally {
             perThreadRequest.set(null);
         }
     }
@@ -63,7 +62,7 @@ public class GwtSecurityTokenServiceImpl extends OsgiRemoteServiceServlet implem
         GwtXSRFToken token = null;
 
         // Before to generate a token we must to check if the user is correctly authenticated
-        HttpSession session = getHttpSession(); 
+        HttpSession session = getHttpSession();
         if (session != null) {
             token = new GwtXSRFToken(UUID.randomUUID().toString());
             session.setAttribute(XSRF_TOKEN_KEY, token);

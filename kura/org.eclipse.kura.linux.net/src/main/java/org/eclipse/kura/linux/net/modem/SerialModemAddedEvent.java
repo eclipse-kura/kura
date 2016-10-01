@@ -18,16 +18,16 @@ import org.osgi.service.event.Event;
 
 public class SerialModemAddedEvent extends Event {
 
-	public static final String SERIAL_MODEM_EVENT_ADDED_TOPIC = "org/eclipse/kura/net/modem/serial-modem/ADDED";
-	
-	private SupportedSerialModemInfo m_supportedSerialModemInfo;
-	
-	public SerialModemAddedEvent (SupportedSerialModemInfo supportedSerialModemInfo) {
-		 super(SERIAL_MODEM_EVENT_ADDED_TOPIC, (Map<String, ?>)null);
-		m_supportedSerialModemInfo = supportedSerialModemInfo;
-	}
-	
-	public SupportedSerialModemInfo getSupportedSerialModemInfo() {
-		return m_supportedSerialModemInfo;
-	}
+    public static final String SERIAL_MODEM_EVENT_ADDED_TOPIC = "org/eclipse/kura/net/modem/serial-modem/ADDED";
+
+    private final SupportedSerialModemInfo m_supportedSerialModemInfo;
+
+    public SerialModemAddedEvent(SupportedSerialModemInfo supportedSerialModemInfo) {
+        super(SERIAL_MODEM_EVENT_ADDED_TOPIC, (Map<String, ?>) null);
+        this.m_supportedSerialModemInfo = supportedSerialModemInfo;
+    }
+
+    public SupportedSerialModemInfo getSupportedSerialModemInfo() {
+        return this.m_supportedSerialModemInfo;
+    }
 }

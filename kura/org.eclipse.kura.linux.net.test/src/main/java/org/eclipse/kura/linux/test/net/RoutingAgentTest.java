@@ -16,47 +16,53 @@ import junit.framework.TestCase;
 
 public class RoutingAgentTest extends TestCase {
 
-	/*
-	private static final Logger s_logger = LoggerFactory.getLogger(RoutingAgentTest.class);
-		
-	private static IRoutingAgent s_routingAgentService = null;
+    /*
+     * private static final Logger s_logger = LoggerFactory.getLogger(RoutingAgentTest.class);
+     *
+     * private static IRoutingAgent s_routingAgentService = null;
+     *
+     *
+     * public void setRoutingAgent(IRoutingAgent ras) {
+     * s_routingAgentService = ras;
+     * }
+     *
+     * public void unsetRoutingAgent(IRoutingAgent ras) {
+     * s_routingAgentService = null;
+     * }
+     */
 
-	
-	public void setRoutingAgent(IRoutingAgent ras) {
-		s_routingAgentService = ras;
-	}
-	
-	public void unsetRoutingAgent(IRoutingAgent ras) {
-		s_routingAgentService = null;
-	}*/
-
-	/*
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
-	@Test
-	public void testServiceExists() {
-		assertNotNull(s_routingAgentService);
-	}
-
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
-	@Test
-	public void addEthernetWifiInterface() {
-		String iface = "eth0";
-		
-		s_logger.info("Adding EthernetWifi interface");
-		//s_routingAgentService.addInterface(new NetworkInterfaceStatus(iface, iface, 0, false, false, true, false, false, null, null, null));
-		
-		assertTrue("Has interface " + iface, s_routingAgentService.hasInterface(iface));
-	}
-
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
-	@Test
-	public void addCellularInterface() {
-		String iface = "eth1";
-		
-		s_logger.info("Adding interfaces");
-		//s_routingAgentService.addInterface(new NetworkInterfaceStatus(iface, true, true, false, true, true, null, null, null));
-		
-		assertTrue("Has interface " + iface, s_routingAgentService.hasInterface(iface));
-	}	
-	*/
+    /*
+     * @TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
+     *
+     * @Test
+     * public void testServiceExists() {
+     * assertNotNull(s_routingAgentService);
+     * }
+     *
+     * @TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
+     *
+     * @Test
+     * public void addEthernetWifiInterface() {
+     * String iface = "eth0";
+     *
+     * s_logger.info("Adding EthernetWifi interface");
+     * //s_routingAgentService.addInterface(new NetworkInterfaceStatus(iface, iface, 0, false, false, true, false,
+     * false, null, null, null));
+     *
+     * assertTrue("Has interface " + iface, s_routingAgentService.hasInterface(iface));
+     * }
+     *
+     * @TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
+     *
+     * @Test
+     * public void addCellularInterface() {
+     * String iface = "eth1";
+     *
+     * s_logger.info("Adding interfaces");
+     * //s_routingAgentService.addInterface(new NetworkInterfaceStatus(iface, true, true, false, true, true, null, null,
+     * null));
+     *
+     * assertTrue("Has interface " + iface, s_routingAgentService.hasInterface(iface));
+     * }
+     */
 }

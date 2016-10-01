@@ -33,268 +33,274 @@ import org.slf4j.LoggerFactory;
 
 public class SerialModemDriver extends ModemDriver {
 
-	private static final Logger s_logger = LoggerFactory.getLogger(SerialModemDriver.class);
+    private static final Logger s_logger = LoggerFactory.getLogger(SerialModemDriver.class);
 
-	private static final String OS_VERSION = System.getProperty("kura.os.version");
-	private static final String TARGET_NAME = System.getProperty("target.device");
+    private static final String OS_VERSION = System.getProperty("kura.os.version");
+    private static final String TARGET_NAME = System.getProperty("target.device");
 
-	private SerialModemComm m_serialModemComm;
-	private String m_getModelAtCommand;
-	private String m_modemName;
-	private String m_modemModel;
-	
-	private ServiceTracker<ConnectionFactory, ConnectionFactory> m_serviceTracker;
+    private final SerialModemComm m_serialModemComm;
+    private final String m_getModelAtCommand;
+    private final String m_modemName;
+    private String m_modemModel;
 
-	public SerialModemDriver (String modemName, SerialModemComm serialModemComm, String getModelAtCommand) {
+    private final ServiceTracker<ConnectionFactory, ConnectionFactory> m_serviceTracker;
 
-		m_modemName = modemName;
-		m_serialModemComm = serialModemComm;
-		m_getModelAtCommand = getModelAtCommand;
-		BundleContext bundleContext = FrameworkUtil.getBundle(SerialModemDriver.class).getBundleContext();
+    public SerialModemDriver(String modemName, SerialModemComm serialModemComm, String getModelAtCommand) {
 
-		m_serviceTracker = new ServiceTracker<ConnectionFactory, ConnectionFactory>(bundleContext, ConnectionFactory.class, null);
-		m_serviceTracker.open(true);
-	}
+        this.m_modemName = modemName;
+        this.m_serialModemComm = serialModemComm;
+        this.m_getModelAtCommand = getModelAtCommand;
+        BundleContext bundleContext = FrameworkUtil.getBundle(SerialModemDriver.class).getBundleContext();
 
-	public int install() throws KuraException {
-		int status = -1;
-		boolean modemReachable = false;
+        this.m_serviceTracker = new ServiceTracker<ConnectionFactory, ConnectionFactory>(bundleContext,
+                ConnectionFactory.class, null);
+        this.m_serviceTracker.open(true);
+    }
 
-		try {
-			modemReachable = isAtReachable(3, 1000);
-		} catch (KuraException kuraEx) {
-			s_logger.warn("Exception reaching serial modem ... " + kuraEx);
-			try {
-				unlockSerialPort();
-				sleep (2000);
-				modemReachable = isAtReachable(3, 1000);
-			} catch (Exception e) {
-				s_logger.error("Error unlocking the " + this.m_serialModemComm.getDataPort() + " device " + e);
-			}
-		}
+    public int install() throws KuraException {
+        int status = -1;
+        boolean modemReachable = false;
 
-		if (!modemReachable) {
-			s_logger.info("{} modem is not reachable, installing driver ...", m_modemName);
-			int retries = 3;
-			if ((OS_VERSION != null && TARGET_NAME != null) && 
-				(OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
-				TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) ||
-				(OS_VERSION.equals(KuraConstants.Reliagate_10_11.getImageName() + "_" + KuraConstants.Reliagate_10_11.getImageVersion()) &&
-				TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName()))) {			
-				try {
-					turnModemOn();
-					retries = 15;
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			} 
+        try {
+            modemReachable = isAtReachable(3, 1000);
+        } catch (KuraException kuraEx) {
+            s_logger.warn("Exception reaching serial modem ... " + kuraEx);
+            try {
+                unlockSerialPort();
+                sleep(2000);
+                modemReachable = isAtReachable(3, 1000);
+            } catch (Exception e) {
+                s_logger.error("Error unlocking the " + this.m_serialModemComm.getDataPort() + " device " + e);
+            }
+        }
 
-			modemReachable = isAtReachable(retries, 1000);
-		}
+        if (!modemReachable) {
+            s_logger.info("{} modem is not reachable, installing driver ...", this.m_modemName);
+            int retries = 3;
+            if (OS_VERSION != null && TARGET_NAME != null
+                    && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_"
+                            + KuraConstants.Mini_Gateway.getImageVersion())
+                    && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())
+                    || OS_VERSION
+                            .equals(KuraConstants.Reliagate_10_11.getImageName() + "_"
+                                    + KuraConstants.Reliagate_10_11.getImageVersion())
+                            && TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
+                try {
+                    turnModemOn();
+                    retries = 15;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
 
-		if (modemReachable) {
-			if ((OS_VERSION != null && TARGET_NAME != null) && 
-				(OS_VERSION.equals(KuraConstants.Reliagate_10_11.getImageName() + "_" + KuraConstants.Reliagate_10_11.getImageVersion()) &&
-				TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName()))) {
-				enableSIM();
-			}
-			status = 0;
-			s_logger.info("{} modem is reachable !!!", m_modemName);
-		} else {
-			s_logger.warn("{} modem is not reachable, failed to install modem driver", m_modemName);
-		}
+            modemReachable = isAtReachable(retries, 1000);
+        }
 
-		return status;
-	}
+        if (modemReachable) {
+            if (OS_VERSION != null && TARGET_NAME != null
+                    && OS_VERSION.equals(KuraConstants.Reliagate_10_11.getImageName() + "_"
+                            + KuraConstants.Reliagate_10_11.getImageVersion())
+                    && TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
+                enableSIM();
+            }
+            status = 0;
+            s_logger.info("{} modem is reachable !!!", this.m_modemName);
+        } else {
+            s_logger.warn("{} modem is not reachable, failed to install modem driver", this.m_modemName);
+        }
 
-	public int remove() throws Exception {
+        return status;
+    }
 
-		int status = -1;
-		boolean modemReachable = true;
+    public int remove() throws Exception {
 
-		try {
-			modemReachable = isAtReachable(3, 1000);
-		} catch (KuraException e) {
-			s_logger.warn("Exception reaching serial modem ... " + e);
-		}
-		if (modemReachable) {
-			int retries = 3;
-			if ((OS_VERSION != null && TARGET_NAME != null) && 
-				(OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion()) &&
-				TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) ||
-				(OS_VERSION.equals(KuraConstants.Reliagate_10_11.getImageName() + "_" + KuraConstants.Reliagate_10_11.getImageVersion()) &&
-				TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName()))) {
-				turnModemOff();
-				sleep (2000);
-				retries = 15;
-			}
+        int status = -1;
+        boolean modemReachable = true;
 
-			modemReachable = isAtReachable(retries, 1000);
-		}
+        try {
+            modemReachable = isAtReachable(3, 1000);
+        } catch (KuraException e) {
+            s_logger.warn("Exception reaching serial modem ... " + e);
+        }
+        if (modemReachable) {
+            int retries = 3;
+            if (OS_VERSION != null && TARGET_NAME != null
+                    && OS_VERSION.equals(KuraConstants.Mini_Gateway.getImageName() + "_"
+                            + KuraConstants.Mini_Gateway.getImageVersion())
+                    && TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())
+                    || OS_VERSION
+                            .equals(KuraConstants.Reliagate_10_11.getImageName() + "_"
+                                    + KuraConstants.Reliagate_10_11.getImageVersion())
+                            && TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
+                turnModemOff();
+                sleep(2000);
+                retries = 15;
+            }
 
-		if (!modemReachable) {
-			status = 0;
-			s_logger.info("{} modem is not reachable !!!", m_modemName);
-		} else {
-			s_logger.info("{} modem is still reachable, failed to remove modem driver", m_modemName);
-		}
-		return status;
-	}
-	
-	public boolean isReachable()  throws KuraException {
-		return isAtReachable(3, 1000);
-	}
+            modemReachable = isAtReachable(retries, 1000);
+        }
 
-	public String getModemName () {
-		return m_modemName;
-	}
+        if (!modemReachable) {
+            status = 0;
+            s_logger.info("{} modem is not reachable !!!", this.m_modemName);
+        } else {
+            s_logger.info("{} modem is still reachable, failed to remove modem driver", this.m_modemName);
+        }
+        return status;
+    }
 
-	public String getModemModel () {
+    public boolean isReachable() throws KuraException {
+        return isAtReachable(3, 1000);
+    }
 
-		return m_modemModel;
-	}
+    public String getModemName() {
+        return this.m_modemName;
+    }
 
-	public SerialModemComm getComm () {
-		return m_serialModemComm;
-	}
+    public String getModemModel() {
 
-	private CommConnection openSerialPort (int tout) throws KuraException {
-		
-		ConnectionFactory connectionFactory;
-		connectionFactory = m_serviceTracker.getService();
-		CommConnection connection = null;
-		if(connectionFactory != null) {
-			String uri = new CommURI.Builder(m_serialModemComm.getAtPort())
-			.withBaudRate(m_serialModemComm.getBaudRate())
-			.withDataBits(m_serialModemComm.getDataBits())
-			.withStopBits(m_serialModemComm.getStopBits())
-			.withParity(m_serialModemComm.getParity())
-			.withTimeout(tout)
-			.build().toString();
+        return this.m_modemModel;
+    }
 
-			try {
-				connection = (CommConnection) connectionFactory.createConnection(uri, 1, false);
-			} catch (Exception e) {
-				s_logger.warn("Exception creating connection: " + e);
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-			}
-		}
-		
-		return connection;
-	}
+    public SerialModemComm getComm() {
+        return this.m_serialModemComm;
+    }
 
-	private static void closeSerialPort (CommConnection connection) throws KuraException {
-		if(connection != null){
-			try {
-				connection.close();
-			} catch (IOException e) {
-				throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-			}
-		}
-	}
+    private CommConnection openSerialPort(int tout) throws KuraException {
 
-	private boolean isAtReachable(int numAttempts, int retryInMsec) throws KuraException {
-		boolean status = false;
-		CommConnection connection = openSerialPort(2000);
+        ConnectionFactory connectionFactory;
+        connectionFactory = this.m_serviceTracker.getService();
+        CommConnection connection = null;
+        if (connectionFactory != null) {
+            String uri = new CommURI.Builder(this.m_serialModemComm.getAtPort())
+                    .withBaudRate(this.m_serialModemComm.getBaudRate())
+                    .withDataBits(this.m_serialModemComm.getDataBits())
+                    .withStopBits(this.m_serialModemComm.getStopBits()).withParity(this.m_serialModemComm.getParity())
+                    .withTimeout(tout).build().toString();
 
-		do {
-			numAttempts--;
-			try {
-				status = connection.sendCommand("at\r\n".getBytes(), 500).length > 0;
-				if (status) {
-					byte [] reply = connection.sendCommand(m_getModelAtCommand.getBytes(), 1000, 100);
-					if (reply != null) {
-						m_modemModel = getResponseString(reply);
-						reply = null;
-					}
-				} else {
-					if (numAttempts > 0) {
-						sleep(retryInMsec);
-					}
-				}
-			} catch (Exception e) {
-				sleep(retryInMsec);
-			}			
-		} while((status == false) && (numAttempts > 0));
+            try {
+                connection = (CommConnection) connectionFactory.createConnection(uri, 1, false);
+            } catch (Exception e) {
+                s_logger.warn("Exception creating connection: " + e);
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            }
+        }
 
-		closeSerialPort(connection);
-		return status;	
-	}
+        return connection;
+    }
 
-	// Parse the AT command response for the relevant info
-	private static String getResponseString(String resp) {
-		if(resp == null) {
-			return "";
-		}
+    private static void closeSerialPort(CommConnection connection) throws KuraException {
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (IOException e) {
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            }
+        }
+    }
 
-		// remove the command and space at the beginning, and the 'OK' and spaces at the end
-		return resp.replaceFirst("^\\S*\\s*", "").replaceFirst("\\s*(OK)?\\s*$", "");
-	}
+    private boolean isAtReachable(int numAttempts, int retryInMsec) throws KuraException {
+        boolean status = false;
+        CommConnection connection = openSerialPort(2000);
 
-	private static String getResponseString(byte[] resp) {
-		if (resp == null) {
-			return "";
-		}
+        do {
+            numAttempts--;
+            try {
+                status = connection.sendCommand("at\r\n".getBytes(), 500).length > 0;
+                if (status) {
+                    byte[] reply = connection.sendCommand(this.m_getModelAtCommand.getBytes(), 1000, 100);
+                    if (reply != null) {
+                        this.m_modemModel = getResponseString(reply);
+                        reply = null;
+                    }
+                } else {
+                    if (numAttempts > 0) {
+                        sleep(retryInMsec);
+                    }
+                }
+            } catch (Exception e) {
+                sleep(retryInMsec);
+            }
+        } while (status == false && numAttempts > 0);
 
-		return getResponseString(new String(resp));
-	}
+        closeSerialPort(connection);
+        return status;
+    }
 
-	private void unlockSerialPort() throws Exception {
-		String dataPort = m_serialModemComm.getDataPort();
-		dataPort = dataPort.substring(dataPort.lastIndexOf("/")+1);
-		File fLockFile = new File ("/var/lock/LCK.." + dataPort);
-		if (fLockFile.exists()) {
-			s_logger.warn("lock exists for the {} device", dataPort);
-			BufferedReader br = new BufferedReader(new FileReader(fLockFile));
-			int lockedPid = Integer.parseInt(br.readLine().trim());
-			br.close();
+    // Parse the AT command response for the relevant info
+    private static String getResponseString(String resp) {
+        if (resp == null) {
+            return "";
+        }
 
-			ProcessStats processStats = LinuxProcessUtil.startWithStats("pgrep pppd");
-			br = new BufferedReader(new InputStreamReader(processStats.getInputStream()));
-			String spid = null;
-			int pidToKill = -1;
-			while ((spid = br.readLine()) != null) {
-				int pid = Integer.parseInt(spid);
-				if (pid == lockedPid) {
-					pidToKill = pid;
-					break;
-				}
-			}
-			br.close();
-			if (pidToKill > 0) {
-				s_logger.info("killing pppd that locks the {} device", dataPort);
-				int stat = LinuxProcessUtil.start("kill " + pidToKill, true);
-				if (stat == 0) {
-					s_logger.info("deleting " + fLockFile.getName());
-					fLockFile.delete();
-				}
-			}
-		}
-	}
-	
-	private void enableSIM() {
-		
-		CommConnection connection = null;
-		try {
-			connection = openSerialPort(10000);
+        // remove the command and space at the beginning, and the 'OK' and spaces at the end
+        return resp.replaceFirst("^\\S*\\s*", "").replaceFirst("\\s*(OK)?\\s*$", "");
+    }
 
-			connection.sendCommand("AT#SIMDET=0\r\n".getBytes(), 500);
-			Thread.sleep(5000);
-			connection.sendCommand("AT#SIMDET=1\r\n".getBytes(), 500);
-			Thread.sleep(1000);
-			connection.sendCommand("AT#QSS?\r\n".getBytes(), 500);
-			Thread.sleep(1000);
-		} catch (Exception e) {
-			s_logger.error("Error in enabling SIM.");
-		} finally {	
-			if (connection != null) {
-				try {
-					closeSerialPort(connection);
-				} catch (KuraException e) {
-					s_logger.error("Error in closing serial port.");
-				}
-			}
-		}
-	}
-	
+    private static String getResponseString(byte[] resp) {
+        if (resp == null) {
+            return "";
+        }
+
+        return getResponseString(new String(resp));
+    }
+
+    private void unlockSerialPort() throws Exception {
+        String dataPort = this.m_serialModemComm.getDataPort();
+        dataPort = dataPort.substring(dataPort.lastIndexOf("/") + 1);
+        File fLockFile = new File("/var/lock/LCK.." + dataPort);
+        if (fLockFile.exists()) {
+            s_logger.warn("lock exists for the {} device", dataPort);
+            BufferedReader br = new BufferedReader(new FileReader(fLockFile));
+            int lockedPid = Integer.parseInt(br.readLine().trim());
+            br.close();
+
+            ProcessStats processStats = LinuxProcessUtil.startWithStats("pgrep pppd");
+            br = new BufferedReader(new InputStreamReader(processStats.getInputStream()));
+            String spid = null;
+            int pidToKill = -1;
+            while ((spid = br.readLine()) != null) {
+                int pid = Integer.parseInt(spid);
+                if (pid == lockedPid) {
+                    pidToKill = pid;
+                    break;
+                }
+            }
+            br.close();
+            if (pidToKill > 0) {
+                s_logger.info("killing pppd that locks the {} device", dataPort);
+                int stat = LinuxProcessUtil.start("kill " + pidToKill, true);
+                if (stat == 0) {
+                    s_logger.info("deleting " + fLockFile.getName());
+                    fLockFile.delete();
+                }
+            }
+        }
+    }
+
+    private void enableSIM() {
+
+        CommConnection connection = null;
+        try {
+            connection = openSerialPort(10000);
+
+            connection.sendCommand("AT#SIMDET=0\r\n".getBytes(), 500);
+            Thread.sleep(5000);
+            connection.sendCommand("AT#SIMDET=1\r\n".getBytes(), 500);
+            Thread.sleep(1000);
+            connection.sendCommand("AT#QSS?\r\n".getBytes(), 500);
+            Thread.sleep(1000);
+        } catch (Exception e) {
+            s_logger.error("Error in enabling SIM.");
+        } finally {
+            if (connection != null) {
+                try {
+                    closeSerialPort(connection);
+                } catch (KuraException e) {
+                    s_logger.error("Error in closing serial port.");
+                }
+            }
+        }
+    }
+
 }

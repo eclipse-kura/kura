@@ -13,84 +13,88 @@ package org.eclipse.kura.linux.usb;
 
 public class UsbSerialEntry {
 
-	private int ttyUsbPortNo = 0;
-	private String vendorID = null;
-	private String productID = null;
-	private int numberOfPorts = 0;
-	private int portEnumeration = 0;
-	private String path2usbDevice = null;
-	
-	/**
-	 * UsbSerialEntry constructor 
-	 * @param ttyUsbPortNo - ttyUSB port number
-	 * @param vendor - vendor ID
-	 * @param product - product ID
-	 * @param portEnum - port enumeration 
-	 * @param path - path to USB device
-	 */
-	public UsbSerialEntry(int ttyUsbPortNo, String vendor, String product,
-			int numPorts, int portEnum, String path) {
+    private int ttyUsbPortNo = 0;
+    private String vendorID = null;
+    private String productID = null;
+    private int numberOfPorts = 0;
+    private int portEnumeration = 0;
+    private String path2usbDevice = null;
 
-		this.ttyUsbPortNo = ttyUsbPortNo;
-		this.vendorID = vendor;
-		this.productID = product;
-		this.numberOfPorts = numPorts;
-		this.portEnumeration = portEnum;
-		this.path2usbDevice = path;
-	}
+    /**
+     * UsbSerialEntry constructor
+     *
+     * @param ttyUsbPortNo
+     *            - ttyUSB port number
+     * @param vendor
+     *            - vendor ID
+     * @param product
+     *            - product ID
+     * @param portEnum
+     *            - port enumeration
+     * @param path
+     *            - path to USB device
+     */
+    public UsbSerialEntry(int ttyUsbPortNo, String vendor, String product, int numPorts, int portEnum, String path) {
 
-	/**
-	 * Reports ttyUSB port number
-	 * 
-	 * @return ttyUSB port number as <code>int</code>
-	 */
-	public int getTtyUsbPortNo() {
-		return ttyUsbPortNo;
-	}
+        this.ttyUsbPortNo = ttyUsbPortNo;
+        this.vendorID = vendor;
+        this.productID = product;
+        this.numberOfPorts = numPorts;
+        this.portEnumeration = portEnum;
+        this.path2usbDevice = path;
+    }
 
-	/**
-	 * Reports vendor ID
-	 * 
-	 * @return vendor ID as <code>String</code>
-	 */
-	public String getVendorID() {
-		return vendorID;
-	}
+    /**
+     * Reports ttyUSB port number
+     *
+     * @return ttyUSB port number as <code>int</code>
+     */
+    public int getTtyUsbPortNo() {
+        return this.ttyUsbPortNo;
+    }
 
-	/**
-	 * Reports product ID
-	 * 
-	 * @return product ID as <code>String</code>
-	 */
-	public String getProductID() {
-		return productID;
-	}
-	
-	
-	/**
-	 * Reports total number of ports.
-	 * 
-	 * @return number of ports as <code>int</code> 
-	 */
-	public int getNumberOfPorts() {
-		return numberOfPorts;
-	}
+    /**
+     * Reports vendor ID
+     *
+     * @return vendor ID as <code>String</code>
+     */
+    public String getVendorID() {
+        return this.vendorID;
+    }
 
-	/**
-	 * Reports port enumeration
-	 * 
-	 * @return port enumeration as <code>int</code>
-	 */
-	public int getPortEnumeration() {
-		return portEnumeration;
-	}
+    /**
+     * Reports product ID
+     *
+     * @return product ID as <code>String</code>
+     */
+    public String getProductID() {
+        return this.productID;
+    }
 
-	/**
-	 * Reports path to USB device
-	 * 
-	 * @return path to USB device as <code>String</code>
-	 */
-	public String getPath2usbDevice() {
-		return path2usbDevice;
-	}
+    /**
+     * Reports total number of ports.
+     *
+     * @return number of ports as <code>int</code>
+     */
+    public int getNumberOfPorts() {
+        return this.numberOfPorts;
+    }
+
+    /**
+     * Reports port enumeration
+     *
+     * @return port enumeration as <code>int</code>
+     */
+    public int getPortEnumeration() {
+        return this.portEnumeration;
+    }
+
+    /**
+     * Reports path to USB device
+     *
+     * @return path to USB device as <code>String</code>
+     */
+    public String getPath2usbDevice() {
+        return this.path2usbDevice;
+    }
 }

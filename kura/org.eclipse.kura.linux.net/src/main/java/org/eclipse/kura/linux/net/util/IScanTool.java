@@ -19,5 +19,5 @@ import org.eclipse.kura.net.wifi.WifiAccessPoint;
 
 public interface IScanTool {
 
-	public List<WifiAccessPoint> scan() throws KuraException;
+    public List<WifiAccessPoint> scan() throws KuraException;
 }

@@ -27,25 +27,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ModemDriver {
+
     private static final Logger s_logger = LoggerFactory.getLogger(ModemDriver.class);
 
-    private static final String TARGET_NAME                = System.getProperty("target.device");
-    private static final String GPIO_PATH                  = "/sys/class/gpio";
-    private static final String GPIO_EXPORT_PATH           = GPIO_PATH + "/export";
-    private static final String BASE_GPIO_PATH             = "/sys/class/gpio/gpio";
+    private static final String TARGET_NAME = System.getProperty("target.device");
+    private static final String GPIO_PATH = "/sys/class/gpio";
+    private static final String GPIO_EXPORT_PATH = GPIO_PATH + "/export";
+    private static final String BASE_GPIO_PATH = "/sys/class/gpio/gpio";
     private static final String GPIO_DIRECTION_SUFFIX_PATH = "/direction";
-    private static final String GPIO_VALUE_SUFFIX_PATH     = "/value";
+    private static final String GPIO_VALUE_SUFFIX_PATH = "/value";
 
     private static final String GPIO_INDEX_60 = "60";
     private static final String GPIO_INDEX_65 = "65";
 
-    private static final String RELIAGATE_10_20_GPIO_PATH     = "/sys/class/gpio/usb-rear-pwr/value";
+    private static final String RELIAGATE_10_20_GPIO_PATH = "/sys/class/gpio/usb-rear-pwr/value";
     private static final String RELIAGATE_50_21_GPIO_11_0_CMD = "/usr/sbin/vector-j21-gpio 11 0";
     private static final String RELIAGATE_50_21_GPIO_11_1_CMD = "/usr/sbin/vector-j21-gpio 11 1";
-    private static final String RELIAGATE_50_21_GPIO_6_CMD    = "/usr/sbin/vector-j21-gpio 6";
+    private static final String RELIAGATE_50_21_GPIO_6_CMD = "/usr/sbin/vector-j21-gpio 6";
 
     private static final String RELIAGATE_10_05_GSM_RESET_GPIO_NUM = "252";
-    private static final String RELIAGATE_10_05_GSM_USB_PATH       = "/sys/bus/usb/devices/usb2/authorized";
+    private static final String RELIAGATE_10_05_GSM_USB_PATH = "/sys/bus/usb/devices/usb2/authorized";
 
     private static final String GPIO_DIRECTION = "out";
 
@@ -158,7 +159,7 @@ public class ModemDriver {
 
                 status = exec5021Gpio110();
                 s_logger.info("turnModemOff() :: '{}' returned {}", RELIAGATE_50_21_GPIO_11_0_CMD, status);
-                retVal = (status == 0) ? true : false;
+                retVal = status == 0 ? true : false;
             } else if (TARGET_NAME.equals(KuraConstants.Reliagate_20_25.getTargetName())) {
                 // TODO: make resets more smart, based on the effective modem
                 // that has to be stopped/started
@@ -183,7 +184,8 @@ public class ModemDriver {
                     invertGpioValue(gpioValuePath);
                 }
             } else {
-                s_logger.warn("turnModemOff() :: modem turnOff operation is not supported for the {} platform", TARGET_NAME);
+                s_logger.warn("turnModemOff() :: modem turnOff operation is not supported for the {} platform",
+                        TARGET_NAME);
                 retVal = true;
                 break;
             }
@@ -229,7 +231,7 @@ public class ModemDriver {
 
                 status = exec5021Gpio6();
                 s_logger.info("turnModemOn() :: '{}' returned {}", RELIAGATE_50_21_GPIO_6_CMD, status);
-                retVal = (status == 0) ? true : false;
+                retVal = status == 0 ? true : false;
             } else if (TARGET_NAME.equals(KuraConstants.Reliagate_20_25.getTargetName())) {
                 if (baseGpio != -1) {
                     // invert gpio value for internal modem. (Modem Power)
@@ -251,7 +253,8 @@ public class ModemDriver {
                     invertGpioValue(gpioValuePath);
                 }
             } else {
-                s_logger.warn("turnModemOn() :: modem turnOn operation is not supported for the {} platform", TARGET_NAME);
+                s_logger.warn("turnModemOn() :: modem turnOn operation is not supported for the {} platform",
+                        TARGET_NAME);
                 retVal = true;
                 break;
             }
@@ -464,16 +467,14 @@ public class ModemDriver {
 
         boolean isModemOn;
         if (this instanceof UsbModemDriver) {
-            isModemOn = SupportedUsbModems.isAttached(
-                    ((UsbModemDriver) this).getVendor(),
+            isModemOn = SupportedUsbModems.isAttached(((UsbModemDriver) this).getVendor(),
                     ((UsbModemDriver) this).getProduct());
             s_logger.info("isOn() :: USB modem attached? {}", isModemOn);
         } else if (this instanceof SerialModemDriver) {
             isModemOn = ((SerialModemDriver) this).isReachable();
             s_logger.info("isOn() :: Serial modem reachable? {}", isModemOn);
         } else {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR,
-                    "Unsupported modem device");
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
         }
         return isModemOn;
     }
@@ -577,9 +578,9 @@ public class ModemDriver {
             fr = new FileReader(gpioChipFile);
             br = new BufferedReader(fr);
             StringBuilder sb = new StringBuilder();
-            
+
             String line;
-            while ((line = br.readLine()) != null)   {
+            while ((line = br.readLine()) != null) {
                 sb.append(line);
             }
             return sb.toString();

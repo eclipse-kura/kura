@@ -23,43 +23,41 @@ import org.eclipse.kura.KuraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JavaNtpClockSyncProvider extends AbstractNtpClockSyncProvider
-{
-	private static final Logger s_logger = LoggerFactory.getLogger(JavaNtpClockSyncProvider.class);
-	
-	
-	// ----------------------------------------------------------------
-	//
-	//   Concrete Methods
-	//
-	// ----------------------------------------------------------------	
-	
-	protected boolean syncClock() throws KuraException
-	{
-		boolean ret = false;
-		// connect and get the delta
-		NTPUDPClient ntpClient = new NTPUDPClient();
-        ntpClient.setDefaultTimeout(m_ntpTimeout);
+public class JavaNtpClockSyncProvider extends AbstractNtpClockSyncProvider {
+
+    private static final Logger s_logger = LoggerFactory.getLogger(JavaNtpClockSyncProvider.class);
+
+    // ----------------------------------------------------------------
+    //
+    // Concrete Methods
+    //
+    // ----------------------------------------------------------------
+
+    @Override
+    protected boolean syncClock() throws KuraException {
+        boolean ret = false;
+        // connect and get the delta
+        NTPUDPClient ntpClient = new NTPUDPClient();
+        ntpClient.setDefaultTimeout(this.m_ntpTimeout);
         try {
             ntpClient.open();
             try {
-            	InetAddress ntpHostAddr = InetAddress.getByName(m_ntpHost);
-            	TimeInfo info = ntpClient.getTime(ntpHostAddr, m_ntpPort);
-            	m_lastSync = new Date();
+                InetAddress ntpHostAddr = InetAddress.getByName(this.m_ntpHost);
+                TimeInfo info = ntpClient.getTime(ntpHostAddr, this.m_ntpPort);
+                this.m_lastSync = new Date();
                 info.computeDetails();
-                
-                m_listener.onClockUpdate(info.getOffset());
+
+                this.m_listener.onClockUpdate(info.getOffset());
                 ret = true;
             } catch (IOException e) {
-            	ntpClient.close();
-				s_logger.warn(
-						"Error while synchronizing System Clock with NTP host {}. Please verify network connectivity ...",
-						m_ntpHost);
+                ntpClient.close();
+                s_logger.warn(
+                        "Error while synchronizing System Clock with NTP host {}. Please verify network connectivity ...",
+                        this.m_ntpHost);
             }
-        } 
-        catch (Exception e) {
-        	throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
         return ret;
-	}
+    }
 }

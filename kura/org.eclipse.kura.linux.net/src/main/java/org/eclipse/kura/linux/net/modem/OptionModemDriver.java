@@ -20,48 +20,48 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OptionModemDriver extends UsbModemDriver {
-	
-	private static final Logger s_logger = LoggerFactory.getLogger(OptionModemDriver.class);
-	
-	private static final String USB_BUS_DRIVERS_PATH = "/sys/bus/usb-serial/drivers/option1/new_id";
 
-	public OptionModemDriver(String vendor, String product) {
-		super("option", vendor, product);
-	}
-	
-	@Override
-	public int install() throws Exception {	
-		int status = super.install();
-		if (status == 0) {
-			s_logger.info("submiting {}:{} information to option driver ...", getVendor(), getProduct());
-			File newIdFile = new File(USB_BUS_DRIVERS_PATH);
-			if (newIdFile.exists()) {
-				writeToFile(newIdFile);
-			}
-		}
-		return status;
-	}
+    private static final Logger s_logger = LoggerFactory.getLogger(OptionModemDriver.class);
 
-	private void writeToFile(File newIdFile) throws IOException {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getVendor());
-		sb.append(' ');
-		sb.append(getProduct());
-		
-		FileOutputStream fos = null;
-		PrintWriter pw = null;
-		try{
-		fos = new FileOutputStream(newIdFile);
-		pw = new PrintWriter(fos);
-		pw.write(sb.toString());
-		pw.flush();
-		} finally {
-			if (pw != null) {
-				pw.close();
-			}
-			if (fos != null) {
-				fos.close();
-			}
-		}
-	}
+    private static final String USB_BUS_DRIVERS_PATH = "/sys/bus/usb-serial/drivers/option1/new_id";
+
+    public OptionModemDriver(String vendor, String product) {
+        super("option", vendor, product);
+    }
+
+    @Override
+    public int install() throws Exception {
+        int status = super.install();
+        if (status == 0) {
+            s_logger.info("submiting {}:{} information to option driver ...", getVendor(), getProduct());
+            File newIdFile = new File(USB_BUS_DRIVERS_PATH);
+            if (newIdFile.exists()) {
+                writeToFile(newIdFile);
+            }
+        }
+        return status;
+    }
+
+    private void writeToFile(File newIdFile) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getVendor());
+        sb.append(' ');
+        sb.append(getProduct());
+
+        FileOutputStream fos = null;
+        PrintWriter pw = null;
+        try {
+            fos = new FileOutputStream(newIdFile);
+            pw = new PrintWriter(fos);
+            pw.write(sb.toString());
+            pw.flush();
+        } finally {
+            if (pw != null) {
+                pw.close();
+            }
+            if (fos != null) {
+                fos.close();
+            }
+        }
+    }
 }

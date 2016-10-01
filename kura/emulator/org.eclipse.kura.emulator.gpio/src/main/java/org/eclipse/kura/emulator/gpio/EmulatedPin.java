@@ -26,106 +26,106 @@ import org.slf4j.LoggerFactory;
 
 public class EmulatedPin implements KuraGPIOPin {
 
-	private static final Logger s_logger = LoggerFactory.getLogger(EmulatedPin.class);
-	
-	private boolean internalValue = false;
-	String pinName = null;
-	int pinIndex = -1;
-	
-	private KuraGPIODirection direction = KuraGPIODirection.OUTPUT;
-	private KuraGPIOMode mode = KuraGPIOMode.OUTPUT_OPEN_DRAIN;
-	private KuraGPIOTrigger trigger = KuraGPIOTrigger.NONE;
-	
-	public EmulatedPin(String pinName) {
-		super();
-		this.pinName = pinName;
-	}
+    private static final Logger s_logger = LoggerFactory.getLogger(EmulatedPin.class);
 
-	public EmulatedPin(int pinIndex) {
-		super();
-		this.pinIndex = pinIndex;
-	}
-	
-	public EmulatedPin(String pinName, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
-		super();
-		this.pinName = pinName;
-		this.direction = direction;
-		this.mode = mode;
-		this.trigger = trigger;
-	}
+    private boolean internalValue = false;
+    String pinName = null;
+    int pinIndex = -1;
 
-	public EmulatedPin(int pinIndex, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
-		super();
-		this.pinIndex = pinIndex;
-		this.direction = direction;
-		this.mode = mode;
-		this.trigger = trigger;
-	}
+    private KuraGPIODirection direction = KuraGPIODirection.OUTPUT;
+    private KuraGPIOMode mode = KuraGPIOMode.OUTPUT_OPEN_DRAIN;
+    private KuraGPIOTrigger trigger = KuraGPIOTrigger.NONE;
 
-	@Override
-	public void setValue(boolean active) throws KuraUnavailableDeviceException, KuraClosedDeviceException, IOException {
-		internalValue = active;
-		
-		s_logger.debug("Emulated GPIO Pin {} changed to {}", pinName != null ? pinName : pinIndex, active == true ? "on" : "off");
-	}
+    public EmulatedPin(String pinName) {
+        super();
+        this.pinName = pinName;
+    }
 
-	@Override
-	public boolean getValue() throws KuraUnavailableDeviceException, KuraClosedDeviceException, IOException {
-		return internalValue;
-	}
+    public EmulatedPin(int pinIndex) {
+        super();
+        this.pinIndex = pinIndex;
+    }
 
-	@Override
-	public void addPinStatusListener(PinStatusListener listener) throws KuraClosedDeviceException, IOException {
-	}
+    public EmulatedPin(String pinName, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
+        super();
+        this.pinName = pinName;
+        this.direction = direction;
+        this.mode = mode;
+        this.trigger = trigger;
+    }
 
-	@Override
-	public void removePinStatusListener(PinStatusListener listener) throws KuraClosedDeviceException, IOException {
-	}
+    public EmulatedPin(int pinIndex, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
+        super();
+        this.pinIndex = pinIndex;
+        this.direction = direction;
+        this.mode = mode;
+        this.trigger = trigger;
+    }
 
-	@Override
-	public void open() throws KuraGPIODeviceException, KuraUnavailableDeviceException, IOException {
-		s_logger.info("Emulated GPIO Pin {} open.", pinName != null ? pinName : pinIndex);
-	}
+    @Override
+    public void setValue(boolean active) throws KuraUnavailableDeviceException, KuraClosedDeviceException, IOException {
+        this.internalValue = active;
 
-	@Override
-	public void close() throws IOException {
-		s_logger.info("Emulated GPIO Pin {} closed.", pinName != null ? pinName : pinIndex);
-	}
+        s_logger.debug("Emulated GPIO Pin {} changed to {}", this.pinName != null ? this.pinName : this.pinIndex,
+                active == true ? "on" : "off");
+    }
 
-	@Override
-	public String toString() {
-		return pinName != null ? "GPIO Pin: "+ pinName : "Gpio PIN #" + String.valueOf(pinIndex);
-	}
+    @Override
+    public boolean getValue() throws KuraUnavailableDeviceException, KuraClosedDeviceException, IOException {
+        return this.internalValue;
+    }
 
-	@Override
-	public KuraGPIODirection getDirection() {
-		return direction;
-	}
+    @Override
+    public void addPinStatusListener(PinStatusListener listener) throws KuraClosedDeviceException, IOException {
+    }
 
-	@Override
-	public KuraGPIOMode getMode() {
-		return mode;
-	}
+    @Override
+    public void removePinStatusListener(PinStatusListener listener) throws KuraClosedDeviceException, IOException {
+    }
 
-	@Override
-	public KuraGPIOTrigger getTrigger() {
-		return trigger;
-	}
+    @Override
+    public void open() throws KuraGPIODeviceException, KuraUnavailableDeviceException, IOException {
+        s_logger.info("Emulated GPIO Pin {} open.", this.pinName != null ? this.pinName : this.pinIndex);
+    }
 
-	@Override
-	public String getName() {
-		return pinName != null ? pinName : String.valueOf(pinIndex);
-	}
+    @Override
+    public void close() throws IOException {
+        s_logger.info("Emulated GPIO Pin {} closed.", this.pinName != null ? this.pinName : this.pinIndex);
+    }
 
-	@Override
-	public int getIndex() {
-		return pinIndex;
-	}
+    @Override
+    public String toString() {
+        return this.pinName != null ? "GPIO Pin: " + this.pinName : "Gpio PIN #" + String.valueOf(this.pinIndex);
+    }
 
-	@Override
-	public boolean isOpen() {
-		return true;
-	}
+    @Override
+    public KuraGPIODirection getDirection() {
+        return this.direction;
+    }
 
-	
+    @Override
+    public KuraGPIOMode getMode() {
+        return this.mode;
+    }
+
+    @Override
+    public KuraGPIOTrigger getTrigger() {
+        return this.trigger;
+    }
+
+    @Override
+    public String getName() {
+        return this.pinName != null ? this.pinName : String.valueOf(this.pinIndex);
+    }
+
+    @Override
+    public int getIndex() {
+        return this.pinIndex;
+    }
+
+    @Override
+    public boolean isOpen() {
+        return true;
+    }
+
 }

@@ -12,31 +12,32 @@
 package org.eclipse.kura.emulator.position;
 
 public class GpsPoint {
-	private double latitude;
-	private double longitude;
-	private double altitude;
-	private String time;
-	
-	public GpsPoint(double latitude, double longitude, double altitude, String time) {
-		this.latitude = latitude;
-		this.longitude = longitude;
-		this.altitude = altitude;
-		this.time = time;
-	}
 
-	public double getLatitude() {
-		return latitude;
-	}
+    private final double latitude;
+    private final double longitude;
+    private final double altitude;
+    private final String time;
 
-	public double getLongitude() {
-		return longitude;
-	}
+    public GpsPoint(double latitude, double longitude, double altitude, String time) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.altitude = altitude;
+        this.time = time;
+    }
 
-	public double getAltitude() {
-		return altitude;
-	}
+    public double getLatitude() {
+        return this.latitude;
+    }
 
-	public String getTime() {
-		return time;
-	}
+    public double getLongitude() {
+        return this.longitude;
+    }
+
+    public double getAltitude() {
+        return this.altitude;
+    }
+
+    public String getTime() {
+        return this.time;
+    }
 }

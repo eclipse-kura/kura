@@ -12,21 +12,21 @@
 package org.eclipse.kura.net.admin.modem.telit.de910;
 
 public enum TelitDe910AtCommands {
-	
-	getNetRegistrationStatus("at+creg?\r\n"), 
-	getMdn("at#modem=0?\r\n"),
-	getMsid("at#modem=1?\r\n"),
-	getServiceType("at+service?\r\n"),
-	getSessionDataVolume("at#gdatavol=1\r\n"),
-	provisionVerizon("atd*22899;\r\n");
-	
-	private String m_command;
-	
-	private TelitDe910AtCommands (String atCommand) {
-		m_command = atCommand;
-	}
-	
-	public String getCommand () {
-		return m_command;
-	}
+
+    getNetRegistrationStatus("at+creg?\r\n"),
+    getMdn("at#modem=0?\r\n"),
+    getMsid("at#modem=1?\r\n"),
+    getServiceType("at+service?\r\n"),
+    getSessionDataVolume("at#gdatavol=1\r\n"),
+    provisionVerizon("atd*22899;\r\n");
+
+    private String m_command;
+
+    private TelitDe910AtCommands(String atCommand) {
+        this.m_command = atCommand;
+    }
+
+    public String getCommand() {
+        return this.m_command;
+    }
 }

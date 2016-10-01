@@ -14,15 +14,15 @@ package org.eclipse.kura.net.admin.modem.telit.le910;
 
 public enum TelitLe910AtCommands {
 
-	gpsStartLocationServiceRequest("AT$GPSSLSR=2,3\r\n");
-	
-	private String m_command;
-	
-	private TelitLe910AtCommands(String atCommand) {
-		m_command = atCommand;
-	}
-	
-	public String getCommand () {
-		return m_command;
-	}
+    gpsStartLocationServiceRequest("AT$GPSSLSR=2,3\r\n");
+
+    private String m_command;
+
+    private TelitLe910AtCommands(String atCommand) {
+        this.m_command = atCommand;
+    }
+
+    public String getCommand() {
+        return this.m_command;
+    }
 }

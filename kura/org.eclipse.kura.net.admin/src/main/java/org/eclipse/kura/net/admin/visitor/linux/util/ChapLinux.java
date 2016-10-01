@@ -11,42 +11,41 @@
  *******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux.util;
 
-
 /**
  * Defines CHAP authentication in Linux
  */
 public class ChapLinux extends PppAuthSecrets {
-	
-	/*
-	#Secrets for authentication using CHAP
-	#client					server			secret			IP addresses	Provider
-	ISP@CINGULARGPRS.COM	*               CINGULAR1		*				#att
-	mobileweb				* 				password		*				#o2
-	user					*				pass			*				#orange
-	web						*				web				*				#vodaphone
-	*/
-	
-	private static final String CHAP_SECRETS_FILE = "/etc/ppp/chap-secrets";
 
-	private static ChapLinux s_instance = null;
+    /*
+     * #Secrets for authentication using CHAP
+     * #client server secret IP addresses Provider
+     * ISP@CINGULARGPRS.COM * CINGULAR1 * #att
+     * mobileweb * password * #o2
+     * user * pass * #orange
+     * web * web * #vodaphone
+     */
 
-	/**
-	 * ChapLinux constructor
-	 */
-	private ChapLinux() {
-	    super(CHAP_SECRETS_FILE);
-	}
-	
-	/**
-	 * Get a singleton instance
-	 * 
-	 * @return ChapLinux
-	 */
-	public static ChapLinux getInstance() {
-	    if(s_instance == null) {
-	        s_instance = new ChapLinux();
-	    }
-	    
-	    return s_instance;
-	}
+    private static final String CHAP_SECRETS_FILE = "/etc/ppp/chap-secrets";
+
+    private static ChapLinux s_instance = null;
+
+    /**
+     * ChapLinux constructor
+     */
+    private ChapLinux() {
+        super(CHAP_SECRETS_FILE);
+    }
+
+    /**
+     * Get a singleton instance
+     *
+     * @return ChapLinux
+     */
+    public static ChapLinux getInstance() {
+        if (s_instance == null) {
+            s_instance = new ChapLinux();
+        }
+
+        return s_instance;
+    }
 }

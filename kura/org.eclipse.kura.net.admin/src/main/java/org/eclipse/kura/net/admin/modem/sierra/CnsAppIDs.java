@@ -13,34 +13,34 @@ package org.eclipse.kura.net.admin.modem.sierra;
 
 public enum CnsAppIDs {
 
-	/**
-	 * CnS 'MC572x Application' ID
-	 */
-	MC572x_APPLICATION_ID(0x10000001),
-	
-	/**
-	 * CnS 'MC87xx Application' ID
-	 */
-	MC87xx_APPLICATION_ID(0x10000002),
-	
-	/**
-	 * CnS 'C8xx Application' ID
-	 */
-	C8xx_APPLICATION_ID(0x10000003),
-	
-	/**
-	 * CnS 'USB 598 Application' ID
-	 */
-	USB598_APPLICATION_ID(0x10000004);
-	
-	private int m_appID = 0;
-	
-	private CnsAppIDs(int appID) {
-		m_appID = appID;
-	}
-	
-	public int getID() {
-		return m_appID;
-	}
-	
+    /**
+     * CnS 'MC572x Application' ID
+     */
+    MC572x_APPLICATION_ID(0x10000001),
+
+    /**
+     * CnS 'MC87xx Application' ID
+     */
+    MC87xx_APPLICATION_ID(0x10000002),
+
+    /**
+     * CnS 'C8xx Application' ID
+     */
+    C8xx_APPLICATION_ID(0x10000003),
+
+    /**
+     * CnS 'USB 598 Application' ID
+     */
+    USB598_APPLICATION_ID(0x10000004);
+
+    private int m_appID = 0;
+
+    private CnsAppIDs(int appID) {
+        this.m_appID = appID;
+    }
+
+    public int getID() {
+        return this.m_appID;
+    }
+
 }

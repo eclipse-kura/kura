@@ -12,19 +12,19 @@
 package org.eclipse.kura.net.admin.modem.telit.de910;
 
 public enum TelitDe910ServiceProviders {
-	
-	UNKNOWN(-1),
-	SPRINT(0),
-	AERIS(1),
-	VERIZON(2);
-	
-	private int m_provider;
-	
-	private TelitDe910ServiceProviders(int provider) {
-		m_provider = provider;
-	}
-	
-	public int getProvider () {
-		return m_provider;
-	}
+
+    UNKNOWN(-1),
+    SPRINT(0),
+    AERIS(1),
+    VERIZON(2);
+
+    private int m_provider;
+
+    private TelitDe910ServiceProviders(int provider) {
+        this.m_provider = provider;
+    }
+
+    public int getProvider() {
+        return this.m_provider;
+    }
 }

@@ -14,9 +14,9 @@ package org.eclipse.kura.net.admin.modem.hspa;
 
 public enum HspaModemAtCommands {
 
-	at("at\r\n"),
-	getSimPinStatus("at+cpin?\r\n"),
-	getModelNumber("at+gmm\r\n"),
+    at("at\r\n"),
+    getSimPinStatus("at+cpin?\r\n"),
+    getModelNumber("at+gmm\r\n"),
     getManufacturer("at+gmi\r\n"),
     getSerialNumber("at+cgsn\r\n"),
     getRevision("at+gmr\r\n"),
@@ -26,14 +26,14 @@ public enum HspaModemAtCommands {
     getMobileStationClass("at+cgclass?\r\n"),
     getRegistrationStatus("at+cgreg?\r\n"),
     pdpContext("at+cgdcont");
-	
-	private String m_command;
-	
-	private HspaModemAtCommands(String atCommand) {
-		m_command = atCommand;
-	}
-	
-	public String getCommand () {
-		return m_command;
-	}
+
+    private String m_command;
+
+    private HspaModemAtCommands(String atCommand) {
+        this.m_command = atCommand;
+    }
+
+    public String getCommand() {
+        return this.m_command;
+    }
 }

@@ -18,17 +18,16 @@ import java.util.ResourceBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class NetworkAdminConfigurationMessages {
 
-	private static final Logger s_logger = LoggerFactory.getLogger(NetworkAdminConfigurationMessages.class);
-	
-	private static final String NETWORK_ADMIN_CONFIGURATION_MESSAGES_BUNDLE = "org.eclipse.kura.net.admin.messages.NetworkAdminConfigurationMessagesBundle";
-	
-	public static String getMessage(NetworkAdminConfiguration code) {
-		return getLocalizedMessage(Locale.getDefault(), code);
-	}
-	
+    private static final Logger s_logger = LoggerFactory.getLogger(NetworkAdminConfigurationMessages.class);
+
+    private static final String NETWORK_ADMIN_CONFIGURATION_MESSAGES_BUNDLE = "org.eclipse.kura.net.admin.messages.NetworkAdminConfigurationMessagesBundle";
+
+    public static String getMessage(NetworkAdminConfiguration code) {
+        return getLocalizedMessage(Locale.getDefault(), code);
+    }
+
     private static String getLocalizedMessage(Locale locale, NetworkAdminConfiguration code) {
 
         //
@@ -36,15 +35,15 @@ public class NetworkAdminConfigurationMessages {
         String message = null;
         ResourceBundle resourceBundle = null;
         try {
-                resourceBundle = ResourceBundle.getBundle(NETWORK_ADMIN_CONFIGURATION_MESSAGES_BUNDLE, locale);
-                message = resourceBundle.getString(code.name());
-                if (message == null) {
-                        s_logger.warn("Could not find Configuration Message for Locale {} and code {}", locale, code);
-                }
+            resourceBundle = ResourceBundle.getBundle(NETWORK_ADMIN_CONFIGURATION_MESSAGES_BUNDLE, locale);
+            message = resourceBundle.getString(code.name());
+            if (message == null) {
+                s_logger.warn("Could not find Configuration Message for Locale {} and code {}", locale, code);
+            }
         } catch (MissingResourceException mre) {
-                // log the failure to load a message bundle
-                s_logger.warn("Could not find Messages Bundle for Locale {}", locale);
-                mre.printStackTrace();
+            // log the failure to load a message bundle
+            s_logger.warn("Could not find Messages Bundle for Locale {}", locale);
+            mre.printStackTrace();
         }
 
         return message;

@@ -107,16 +107,16 @@ public class ExampleTest implements DataServiceListener {
 		s_dataService = null;
 	}
 	
-	//
-	// JUnit 4 stuff
 	@BeforeClass
 	public static void setUpOnce() {
 		System.err.println("Setup test preconditions. This static method is called once");
 		// Wait for OSGi dependencies
 		try {
-			s_dependencyLatch.await(5, TimeUnit.SECONDS);
+			if (!s_dependencyLatch.await(5, TimeUnit.SECONDS)) {
+				fail("OSGi dependencies unfulfilled");
+			}
 		} catch (InterruptedException e) {
-			fail("OSGi dependencies unfulfilled");
+			fail("Interrupted waiting for OSGi dependencies");
 		}
 	}
 	

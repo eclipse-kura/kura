@@ -34,12 +34,24 @@
     <build>
     <plugins>
             <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-packaging-plugin</artifactId>
+                    <version>${tycho-version}</version>
+                    <configuration>
+                        <archive>
+                            <compress>false</compress>
+                        </archive>
+                        <format>'${kura.build.version}'</format>
+                        <strictVersions>true</strictVersions>
+                    </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-surefire-plugin</artifactId>
                 <version>${tycho-version}</version>
                 <configuration>
                     <providerHint>junit4</providerHint>
-					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <testSuite>org.eclipse.kura.core.test</testSuite>
                     <testClass>org.eclipse.kura.core.test.AllCoreTests</testClass>
 <!--
@@ -394,12 +406,6 @@
                             <type>p2-installable-unit</type>
                             <artifactId>com.google.protobuf</artifactId>
                         </dependency>
-<!--
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>mqtt-client</artifactId>
-                        </dependency>
--->
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.hsqldb.hsqldb</artifactId>
@@ -483,10 +489,6 @@
 						<dependency>
                         	<type>p2-installable-unit</type>
                             <artifactId>org.eclipse.kura.emulator</artifactId>
-                        </dependency>
-                        <dependency>
-                        	<type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.kura.test</artifactId>
                         </dependency>
                     </dependencies>
                 </configuration>

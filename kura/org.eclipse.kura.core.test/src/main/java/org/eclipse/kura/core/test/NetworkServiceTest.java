@@ -11,54 +11,59 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import junit.framework.TestCase;
-
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetworkService;
-import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class NetworkServiceTest extends TestCase
+public class NetworkServiceTest
 {
-	private static CountDownLatch dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
+	private static CountDownLatch s_dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
 	private static final String MAC_DELIM = ":";
 
 	private static NetworkService       networkService;
 	
 	@BeforeClass
-	public void setUp() {
+	public static void setUp() {
 		// Wait for OSGi dependencies
 		try {
-			dependencyLatch.await(5, TimeUnit.SECONDS);
+			if (!s_dependencyLatch.await(5, TimeUnit.SECONDS)) {
+				fail("OSGi dependencies unfulfilled");
+			}
 		} catch (InterruptedException e) {
-			fail("OSGi dependencies unfulfilled");
+			fail("Interrupted waiting for OSGi dependencies");
 		}
 	}
 	
 	public void setNetworkService(NetworkService networkService) {
 		NetworkServiceTest.networkService = networkService;
-		dependencyLatch.countDown();
+		s_dependencyLatch.countDown();
 	}
 
+	public void unsetNetworkService(NetworkService networkService) {
+		NetworkServiceTest.networkService = null;
+	}
+	
 	@Test
 	public void testDummy() {
 		assertTrue(true);
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testServiceExists() {
 		assertNotNull(NetworkServiceTest.networkService);
 	}
 
-
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testInterfaceNamesList() 
 		throws Exception
@@ -72,7 +77,6 @@ public class NetworkServiceTest extends TestCase
 		}
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testAllInterfaces() 
 		throws Exception
@@ -102,7 +106,6 @@ public class NetworkServiceTest extends TestCase
 		}		
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testActiveInterfaces() 
 		throws Exception

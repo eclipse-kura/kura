@@ -11,6 +11,11 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -21,51 +26,52 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import junit.framework.TestCase;
-
 import org.eclipse.kura.system.SystemService;
-import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class SystemServiceTest extends TestCase {
+public class SystemServiceTest {
 
-	private static SystemService systemService = null;
-	private static CountDownLatch dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
-	private static boolean onCloudbees = false;
+	private static SystemService s_systemService;
+	private static CountDownLatch s_dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
+	private static boolean onCloudbees;
 
 	@BeforeClass
-	public void setUp() {
+	public static void setUp() {
 		// Wait for OSGi dependencies
 		try {
-			dependencyLatch.await(10, TimeUnit.SECONDS);
+			if (!s_dependencyLatch.await(5, TimeUnit.SECONDS)) {
+				fail("OSGi dependencies unfulfilled");
+			}
 		} catch (InterruptedException e) {
-			fail("OSGi dependencies unfulfilled");
+			fail("Interrupted waiting for OSGi dependencies");
 		}
-	}	
+	}
 
 	public static void setSystemService(SystemService sms) {
-		systemService = sms;
-		onCloudbees = systemService.getOsName().contains("Cloudbees");		
-		dependencyLatch.countDown();
+		s_systemService = sms;
+		onCloudbees = s_systemService.getOsName().contains("Cloudbees");		
+		s_dependencyLatch.countDown();
 	}
+	
+	public static void unsetSystemService(SystemService sms) {
+		s_systemService = null;
+	}	
 
 	@Test
 	public void testDummy() {
 		assertTrue(true);
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testServiceExists() {
-		assertNotNull(systemService);
+		assertNotNull(s_systemService);
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetPrimaryMacAddress() {
 
-		String actual = systemService.getPrimaryMacAddress();
+		String actual = s_systemService.getPrimaryMacAddress();
 		System.out.println("MAC: " + actual);
 
 		Pattern regex = Pattern.compile("[0-9a-fA-F:]{12}");
@@ -75,7 +81,6 @@ public class SystemServiceTest extends TestCase {
 		assertTrue("getPrimaryMacAddress() is string with colons", match.find());
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetPlatform() {
 		String[] expected = { "dynacor", 					//emulated
@@ -86,7 +91,7 @@ public class SystemServiceTest extends TestCase {
 		try {
 			boolean foundMatch = false;
 			for(String possibility : expected) {
-				if(systemService.getPlatform().equals(possibility)) {
+				if(s_systemService.getPlatform().equals(possibility)) {
 					foundMatch = true;
 					break;
 				}
@@ -97,7 +102,6 @@ public class SystemServiceTest extends TestCase {
 		}	
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetOsDistro() {
 		String[] expected = { "DevOsDitribution", 			//emulated
@@ -107,7 +111,7 @@ public class SystemServiceTest extends TestCase {
 		try {
 			boolean foundMatch = false;
 			for(String possibility : expected) {
-				if(systemService.getOsDistro().equals(possibility)) {
+				if(s_systemService.getOsDistro().equals(possibility)) {
 					foundMatch = true;
 					break;
 				}
@@ -118,7 +122,6 @@ public class SystemServiceTest extends TestCase {
 		}	
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetOsDistroVersion() {
 		String[] expected = { "DevOsDitributionVersion", 	//emulated
@@ -128,7 +131,7 @@ public class SystemServiceTest extends TestCase {
 		try {
 			boolean foundMatch = false;
 			for(String possibility : expected) {
-				if(systemService.getOsDistroVersion().equals(possibility)) {
+				if(s_systemService.getOsDistroVersion().equals(possibility)) {
 					foundMatch = true;
 					break;
 				}
@@ -139,29 +142,26 @@ public class SystemServiceTest extends TestCase {
 		}		
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetOsArch() {
 		String expected = System.getProperty("os.arch");		
-		String actual = systemService.getOsArch();
+		String actual = s_systemService.getOsArch();
 
 		assertNotNull("getOsArch() not null", actual);
 		assertEquals("getOsArch() value", expected, actual);
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetOsName() {
 		String expected = System.getProperty("os.name");
 		if(onCloudbees) expected = "Linux (Cloudbees)";
 
-		String actual = systemService.getOsName();
+		String actual = s_systemService.getOsName();
 
 		assertNotNull("getOsName() not null", actual);
 		assertEquals("getOsName() value", expected, actual);
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetOsVersion() {
 		String osVersion = System.getProperty("os.version");	
@@ -201,110 +201,96 @@ public class SystemServiceTest extends TestCase {
 
 
 		String expected= sbOsVersion.toString();
-		String actual = systemService.getOsVersion();
+		String actual = s_systemService.getOsVersion();
 
 		assertNotNull("getOsVersion() not null", actual);
 		assertEquals("getOsVersion() value", expected, actual);
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetJavaVersion() {
 		String expected = System.getProperty("java.runtime.version");
-		String actual = systemService.getJavaVersion();
+		String actual = s_systemService.getJavaVersion();
 
 		assertNotNull("getJavaVersion() not null", actual);
 		assertEquals("getJavaVersion() value", expected, actual);
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetJavaVmName() {
 		String expected = System.getProperty("java.vm.name");
-		String actual = systemService.getJavaVmName();
+		String actual = s_systemService.getJavaVmName();
 
 		assertNotNull("getJavaVmName() not null", actual);
 		assertEquals("getJavaVmName() value", expected, actual);
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetJavaVmVersion() {
 		String expected = System.getProperty("java.vm.version");
-		String actual = systemService.getJavaVmVersion();
+		String actual = s_systemService.getJavaVmVersion();
 
 		assertNotNull("getJavaVmVersion() not null", actual);
 		assertEquals("getJavaVmVersion() value", expected, actual);
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetFileSeparator() {
 		String expected = System.getProperty("file.separator");
-		String actual = systemService.getFileSeparator();
+		String actual = s_systemService.getFileSeparator();
 
 		assertNotNull("getFileSeparator() not null", actual);
 		assertEquals("getFileSeparator() value", expected, actual);
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testJavaHome() {
-		String actual = systemService.getJavaHome();
+		String actual = s_systemService.getJavaHome();
 		assertNotNull("getJavaHome() not null", actual);
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetProductVersion() {
 		assertTrue(true);
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testKuraTemporaryConfigDirectory() {
-		assertNotNull(systemService.getKuraTemporaryConfigDirectory());
+		assertNotNull(s_systemService.getKuraTemporaryConfigDirectory());
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testGetBiosVersion() {
-		assertNotNull(systemService.getBiosVersion());
+		assertNotNull(s_systemService.getBiosVersion());
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void getDeviceName() {
-		assertNotNull(systemService.getDeviceName());
+		assertNotNull(s_systemService.getDeviceName());
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void getFirmwareVersion() {
-		assertNotNull(systemService.getFirmwareVersion());
+		assertNotNull(s_systemService.getFirmwareVersion());
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void getModelId() {
-		assertNotNull(systemService.getModelId());
+		assertNotNull(s_systemService.getModelId());
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void getModelName() {
-		assertNotNull(systemService.getModelName());
+		assertNotNull(s_systemService.getModelName());
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void getPartNumber() {
-		assertNotNull(systemService.getPartNumber());
+		assertNotNull(s_systemService.getPartNumber());
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void getSerialNumber() {
-		assertNotNull(systemService.getSerialNumber());
+		assertNotNull(s_systemService.getSerialNumber());
 	}
 }

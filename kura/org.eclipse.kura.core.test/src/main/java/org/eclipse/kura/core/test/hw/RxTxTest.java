@@ -11,6 +11,23 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test.hw;
 
+import static org.junit.Assert.assertNotNull;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Enumeration;
+
+import javax.comm.CommPort;
+import javax.comm.CommPortIdentifier;
+import javax.comm.NoSuchPortException;
+import javax.comm.PortInUseException;
+import javax.comm.SerialPort;
+import javax.comm.UnsupportedCommOperationException;
+
+import org.junit.Ignore;
+import org.junit.Test;
+
 
 public class RxTxTest {
 
@@ -23,11 +40,12 @@ public class RxTxTest {
 	 * Find your device node with 'ls -l /dev/*PL*' and replace it as needed below in the com port identifier call
 	 * This is commented out because it will not work on cloudbees (or anything without a physical comm port)
 	 */
-	/*@Test
+	@Test
+	@Ignore
 	public void serialTest() {
 		
 		try {
-			Enumeration ports = CommPortIdentifier.getPortIdentifiers();
+			Enumeration<?> ports = CommPortIdentifier.getPortIdentifiers();
 			while (ports.hasMoreElements()) {
 				CommPortIdentifier port = (CommPortIdentifier)ports.nextElement();
 				String type;
@@ -87,8 +105,8 @@ public class RxTxTest {
 					e.printStackTrace();
 				}
 				
-				Assert.assertNotNull(in);
-				Assert.assertNotNull(out);
+				assertNotNull(in);
+				assertNotNull(out);
 				
 				try {
 					in.close();
@@ -105,5 +123,5 @@ public class RxTxTest {
 				System.out.println("Error: Only serial ports are handled by this example.");
 			}
 		}
-	}*/
+	}
 }

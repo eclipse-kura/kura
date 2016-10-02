@@ -12,232 +12,148 @@
  *******************************************************************************/
 package org.eclipse.kura.test;
 
-import java.util.Dictionary;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloud.CloudClient;
-import org.eclipse.kura.cloud.CloudService;
-import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.system.SystemService;
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.BundleTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RemoteTargetTest {
-	
-	private static final Logger s_logger = LoggerFactory.getLogger(RemoteTargetTest.class);
+public class RemoteTargetTest implements ConfigurableComponent {
 
-	private static final String TEST_HEADER = "Unit-Test";
+	private static final Logger s_logger = LoggerFactory
+			.getLogger(RemoteTargetTest.class);
 
 	private SystemService m_systemService;
-	private CloudService m_cloudService;
-	private CloudClient  m_cloudClient;
 	
-	private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+	private ComponentContext m_ctx;
+	private Map<String, Object> m_properties;
 
-	private ConfigurationAdmin m_configAdmin;
-	private BundleTracker<?> bundleTracker;
-	private TestExtender testExtender;
+	private final ScheduledExecutorService m_scheduler = Executors
+			.newSingleThreadScheduledExecutor();
 
 	public void setSystemService(SystemService systemService) {
 		m_systemService = systemService;
 	}
-	
+
 	public void unsetSystemService(SystemService systemService) {
 		m_systemService = null;
 	}
-	
-	public void setCloudService(CloudService cloudService) {
-		m_cloudService = cloudService;
-		try {
-			m_cloudClient  = cloudService.newCloudClient("RemoteTargetTest");
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void unsetCloudService(CloudService cloudService) {
-		m_cloudService = null;
-	}
-	
-	public void setConfigAdmin(ConfigurationAdmin configAdmin) {
-		m_configAdmin = configAdmin;
-	}
-	
-	public void unsetConfigAdmin(ConfigurationAdmin configAdmin) {
-		m_configAdmin = configAdmin;
-	}
 
-	protected void activate(final ComponentContext componentContext) 
-	{
-		// 
-		// if we are running in the Eclipse JUnit Plugin Test, 
-		// then we are running in emulator mode and therefore we 
-		// will leverage the JUnit runner available in Eclipse PDE.
-		if (!"emulator".equals(System.getProperty("org.eclipse.kura.mode"))) {
-			scheduler.submit(new Runnable() {
-				public void run() {
-					runTests(componentContext);
-				}
-			});
-		}
+	protected void activate(final ComponentContext componentContext, Map<String,Object> properties) {
+		s_logger.info("Activating");
+		m_ctx = componentContext;
+		m_properties = properties;
+		doUpdate(properties);
+		s_logger.info("Activated");
 	}
 	
-	private void runTests(ComponentContext componentContext) {
-		s_logger.debug("m_systemService.getPlatform(): " + m_systemService.getPlatform());
-		testExtender = new TestExtender(m_systemService.getPlatform(), componentContext.getBundleContext());
-
-		bundleTracker = new BundleTracker<Object>(componentContext.getBundleContext(), Bundle.RESOLVED|Bundle.ACTIVE|Bundle.INSTALLED, testExtender);
-		bundleTracker.open();
-
-		Bundle[] currentBundles = bundleTracker.getBundles();
-		if(currentBundles != null) {
-			Bundle netAdminBundle = null;
-			
-			for(Bundle bundle : bundleTracker.getBundles()) {
-				if("org.eclipse.kura.net.admin".equals(bundle.getSymbolicName())) {
-					netAdminBundle = bundle;
-					
-					s_logger.debug("Disabling network admin bundle");
-					try {
-						netAdminBundle.stop();
-					} catch (BundleException e) {
-						s_logger.warn("Could not stop net admin bundle", e);
-					}
-				}
+	protected void updated(final Map<String,Object> properties) {
+		// Note that a spurious updates might be triggered due
+		// to a test calling a configuration rollback (which is usually the case).
+		// This would cause the test runner to run the tests again in an
+		// endless loop.
+		if (m_properties != null && propertiesAreEqual(m_properties, properties)) {
+			s_logger.info("Old and new properties are equal. Ignoring update");
+			return;
+		}
+		
+		m_properties = properties;
+		
+		s_logger.info("Updating");
+		doUpdate(properties);
+		s_logger.info("Updated");
+	}
+	
+	private void doUpdate(final Map<String,Object> properties) {
+		m_scheduler.submit(new Runnable() {
+			public void run() {
+				runTests(properties);
 			}
-			
-			s_logger.debug("Starting tests");
-			startingTests();
-			
-			for(Bundle bundle : currentBundles) {
-				if(isTestFragment(bundle)) {
-					testExtender.addBundle(bundle.getBundleId(), bundle);
-					
-					if(isAutoTestEnabled(bundle)) {
-						testExtender.test(bundle.getBundleId());
-					}
-				}
-			}
-			
-			finishedTests();
-			
-			if(netAdminBundle != null) {
-				s_logger.debug("Re-enabling network admin bundle");
-				try {
-					netAdminBundle.start();
-				} catch (BundleException e) {
-					s_logger.warn("Could not start net admin bundle", e);
-				}
-			}
-			
-			s_logger.warn("Tests finished - shutting down");
-			System.exit(0);
-		}
-			
-		componentContext.getBundleContext().registerService(CommandProvider.class.getName(), new KuraTestCommandProvider(), null);
+		});		
 	}
-
+	
 	protected void deactivate(ComponentContext componentContext) {
-
-	}
-
-	public static final boolean isTestFragment(Bundle bundle) {
-		String header = bundle.getHeaders().get(TEST_HEADER) + "";
-		String fragment = bundle.getHeaders().get(org.osgi.framework.Constants.FRAGMENT_HOST) + "";
-		return (!"null".equals(header) && !"null".equals(fragment));
-	}
-
-	public static final boolean isAutoTestEnabled(Bundle bundle) {
-		return "true".equals(bundle.getHeaders().get(TEST_HEADER) + "");
-	}
-
-	public class KuraTestCommandProvider implements CommandProvider {
-		public Object _test(CommandInterpreter intp) {
-			String nextArgument = intp.nextArgument();
-			testExtender.test(Long.parseLong(nextArgument));
-			return null;
-		}
-
-		public Object _testall(CommandInterpreter intp) {       
-			testExtender.testAll();
-			return null;
-		}
-
-		public Object _helpTest(CommandInterpreter intp) {
-			String help = getHelp();
-			System.out.println(help);
-			return null;
-		}	   
-
-		@Override
-		public String getHelp() {
-			StringBuilder buffer = new StringBuilder();
-			buffer.append("---Testing commands---\n\t");
-			buffer.append("test [bundle id] - test bundle fragment id\n\t");
-			buffer.append("testall - test all fragments\n\t");
-			buffer.append("help - Print this help\n");
-			return buffer.toString();
-		}
+		s_logger.info("Deactivating");
+		m_scheduler.shutdownNow();
+		s_logger.info("Deactivated");
 	}
 	
-	private void startingTests() {
-		//hijack the settings
+	private void runTests(Map<String,Object> properties) {
+		long bundleWaitTimeout = (Long) properties.get("bundle.wait.timeout");
+		boolean shutdown = (Boolean) properties.get("auto.shutdown");
+		
+		TestRun testRun = new TestRun(properties, m_systemService, m_ctx,
+				bundleWaitTimeout);
+
+		testRun.run();
+
+		PrintWriter writer = null;
+		final String filename = formFilename();
 		try {
-			Configuration mqttConfig = m_configAdmin.getConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport");
-			Dictionary<String, Object> mqttProps = mqttConfig.getProperties();
-			mqttProps.put("broker-url", "mqtt://broker-sandbox.everyware-cloud.com:1883/");
-			mqttProps.put("topic.context.account-name", "EDC-KURA-CI");
-			mqttProps.put("username", "EDC-KURA-CI");
-			mqttProps.put("password", "PYtv3?s@");
-			mqttConfig.update(mqttProps);
+			writer = new PrintWriter(filename, "UTF-8");
+			testRun.printReport(writer);
+		} catch (FileNotFoundException e) {
+			s_logger.error("Failed to write test report: '{}'", filename, e);
+		} catch (UnsupportedEncodingException e) {
+			s_logger.error("Failed to write test report: '{}'", filename, e);
+		} finally {
+			if (writer != null) {
+				writer.close();
+			}
 			
-			Configuration dataConfig = m_configAdmin.getConfiguration("org.eclipse.kura.data.DataService");
-			Dictionary<String, Object> dataProps = dataConfig.getProperties();
-			dataProps.put("connect.auto-on-startup", true);
-			dataConfig.update(dataProps);
-		} catch(Exception e) {
-			e.printStackTrace();
-			s_logger.error("Failed to reconfigure the broker settings - failing out");
-			System.exit(-1);
-		}
-		
-		//wait for connection?
-		while(!m_cloudService.isConnected()) {
-			s_logger.warn("waiting for the cloud client to connect");
-			try {Thread.sleep(1000);} catch(Exception e) {e.printStackTrace();}
-		}
-
-		KuraPayload payload = new KuraPayload(); 
-		try {
-			m_cloudClient.publish("test/start", payload, 1, false);
-		} catch (KuraException e) {
-			e.printStackTrace();
+			if (shutdown) {
+				System.exit(0);
+			}
 		}
 	}
-	
-	private void finishedTests() {
-		//wait for connection??
-		while(!m_cloudService.isConnected()) {
-			s_logger.warn("waiting for the cloud client to connect");
-			try {Thread.sleep(1000);} catch(Exception e) {e.printStackTrace();}
+		
+	private boolean propertiesAreEqual(Map<String, Object> a, Map<String, Object> b)
+	{
+		if (a.keySet().size() != b.keySet().size()) {
+			return false;
 		}
 		
-		KuraPayload payload = new KuraPayload(); 
-		try {
-			m_cloudClient.publish("test/finished", payload, 1, false);
-		} catch (KuraException e) {
-			e.printStackTrace();
+		for (String key : a.keySet()) {
+			Object oa = a.get(key);
+			Object ob = b.get(key);
+			if (oa.getClass() != ob.getClass()) {
+				return false;
+			}
+			List<Object> la = Arrays.asList(oa);
+			List<Object> lb = Arrays.asList(ob);
+			
+			if (!la.equals(lb)) {
+				return false;
+			}
 		}
+		return true;
+	}
+	
+	private String formFilename() {
+		final SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmSS");
+		final String date = format.format(new Date());
+		final String platform = m_systemService.getPlatform().replace(" ", "_");
+		final String kuraVersion = m_systemService.getKuraVersion().replace(" ", "_");
+		StringBuilder sb = new StringBuilder();
+		sb.append("/tmp/test")
+		.append("-")
+		.append(date)
+		.append("-")
+		.append(kuraVersion)
+		.append("-")
+		.append(platform);
+		
+		return sb.toString();
 	}
 }

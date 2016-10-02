@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -18,9 +21,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import junit.framework.Assert;
-import junit.framework.TestCase;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
@@ -35,36 +35,16 @@ import org.eclipse.kura.core.deployment.xml.XmlBundles;
 import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
 import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
 import org.eclipse.kura.core.deployment.xml.XmlUtil;
-import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class XmlUtilTest extends TestCase {
-
-	private static final Logger s_logger = LoggerFactory.getLogger(XmlUtilTest.class);
-
+public class XmlUtilTest {
 	private static final String stringWriter = "String Writer";
 	private static final String string = "String";
-	private static final String id = "Id";
-	private static final String name = "Name";
-	private static final String state = "State";
-	private static final String version = "Version";
-	private static final String description = "Description";
-	private static final String bundleInfo = "Bundle Info";
 	private static final String pid = "Pid";
-	private static final String tocdDescription = "Tocd Description";
 	private static final String hashmapValues = "Hashmap values";
 	private static final String differentInstanceMessage = "Unmarshalled Object from String is not of type %s, but was %s";
 	private static final String missingItemsMessage = "Unmarshalled object does not contain all the value from the marshalled object. Missing value : %s ;";
-	private static final String additionalItmesMessage = "Unmarshalled object contains additional value than the marshalled object.";
 	private static final String propertyValueDiffersMessage = "Property value  %s of unmarshalled object from %s differs from original. Orignal : %s ; Received : %s ;";
-	private static final String whiteSpace = "   ";
-	private static final String marshalled = "marshalled " + whiteSpace;
-	private static final String unmarshalled = "unmarshalled" + whiteSpace;
-	private static final String snapshotFilePath = "/src/main/resources/snapshot_0.xml";
-
-	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
 	@Test
 	public void testXmlComponentConfigurationsUnmarshalling() {
 
@@ -75,7 +55,7 @@ public class XmlUtilTest extends TestCase {
 			// test String unmarshalling
 			String marshalledString = org.eclipse.kura.core.configuration.util.XmlUtil.marshal(xmlComponentConfigurations);
 			Object unmarshalledObjectFromString = org.eclipse.kura.core.configuration.util.XmlUtil.unmarshal(marshalledString, XmlComponentConfigurations.class);
-			Assert.assertTrue(String.format(differentInstanceMessage, XmlComponentConfigurations.class, unmarshalledObjectFromString.getClass()), unmarshalledObjectFromString instanceof XmlComponentConfigurations);
+			assertTrue(String.format(differentInstanceMessage, XmlComponentConfigurations.class, unmarshalledObjectFromString.getClass()), unmarshalledObjectFromString instanceof XmlComponentConfigurations);
 
 			XmlComponentConfigurations outputXmlComponentConfigurations = (XmlComponentConfigurations) unmarshalledObjectFromString;
 
@@ -102,7 +82,7 @@ public class XmlUtilTest extends TestCase {
 			// test Reader unmarshalling
 			Reader marshalledStringReader = new StringReader(marshalledString);
 			Object unmarshalledObjectFromStringReader = org.eclipse.kura.core.configuration.util.XmlUtil.unmarshal(marshalledStringReader, XmlComponentConfigurations.class);
-			Assert.assertTrue(String.format(differentInstanceMessage, XmlComponentConfigurations.class, unmarshalledObjectFromStringReader.getClass()), unmarshalledObjectFromStringReader instanceof XmlComponentConfigurations);
+			assertTrue(String.format(differentInstanceMessage, XmlComponentConfigurations.class, unmarshalledObjectFromStringReader.getClass()), unmarshalledObjectFromStringReader instanceof XmlComponentConfigurations);
 
 			outputXmlComponentConfigurations = (XmlComponentConfigurations) unmarshalledObjectFromStringReader;
 
@@ -134,7 +114,6 @@ public class XmlUtilTest extends TestCase {
 
 	}
 
-	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
 	@Test
 	public void testXmlSnapshotIdResultMarshalling() {
 
@@ -143,7 +122,7 @@ public class XmlUtilTest extends TestCase {
 			String marshalledString = org.eclipse.kura.core.configuration.util.XmlUtil.marshal(xmlSnapshotIdResult);
 
 			for (Long value : xmlSnapshotIdResult.getSnapshotIds()) {
-				Assert.assertTrue(String.format(missingItemsMessage, value), marshalledString.contains(Long.toString(value)));
+				assertTrue(String.format(missingItemsMessage, value), marshalledString.contains(Long.toString(value)));
 			}
 
 		} catch (Exception e) {
@@ -154,18 +133,17 @@ public class XmlUtilTest extends TestCase {
 
 	}
 
-	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
 	@Test
 	public void testXmlDeploymentPackagesMarshalling() {
 		try {
 
 			XmlDeploymentPackages xmlDeploymentPackages = getSampleXmlDeploymentPackagesObject();
 			String marshalledString = XmlUtil.marshal(xmlDeploymentPackages);
-			Assert.assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getName()), marshalledString.contains(xmlDeploymentPackages.getDeploymentPackages()[0].getName()));
-			Assert.assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getVersion()), marshalledString.contains(xmlDeploymentPackages.getDeploymentPackages()[0].getVersion()));
-			Assert.assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getName()),
+			assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getName()), marshalledString.contains(xmlDeploymentPackages.getDeploymentPackages()[0].getName()));
+			assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getVersion()), marshalledString.contains(xmlDeploymentPackages.getDeploymentPackages()[0].getVersion()));
+			assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getName()),
 					marshalledString.contains(xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getName()));
-			Assert.assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getVersion()),
+			assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getVersion()),
 					marshalledString.contains(xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getVersion()));
 
 		} catch (Exception e) {
@@ -174,17 +152,16 @@ public class XmlUtilTest extends TestCase {
 		}
 	}
 
-	@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
 	@Test
 	public void testXmlBundlesMarshalling() {
 		try {
 
 			XmlBundles xmlBundles = getSampleXmlBundlesObject();
 			String marshalledString = XmlUtil.marshal(xmlBundles);
-			Assert.assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getId()), marshalledString.contains(Long.toString(xmlBundles.getBundles()[0].getId())));
-			Assert.assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getName()), marshalledString.contains(xmlBundles.getBundles()[0].getName()));
-			Assert.assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getState()), marshalledString.contains(xmlBundles.getBundles()[0].getState()));
-			Assert.assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getVersion()), marshalledString.contains(xmlBundles.getBundles()[0].getVersion()));
+			assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getId()), marshalledString.contains(Long.toString(xmlBundles.getBundles()[0].getId())));
+			assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getName()), marshalledString.contains(xmlBundles.getBundles()[0].getName()));
+			assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getState()), marshalledString.contains(xmlBundles.getBundles()[0].getState()));
+			assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getVersion()), marshalledString.contains(xmlBundles.getBundles()[0].getVersion()));
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -273,7 +250,7 @@ public class XmlUtilTest extends TestCase {
 		sampleMap.put("short", (short) 1);
 		sampleMap.put("byte", (byte) 90);
 		Password password = new Password("password".toCharArray());
-		// sampleMap.put("password", password);
+		sampleMap.put("password", password);
 
 		ComponentConfigurationImpl componentConfigurationImpl = new ComponentConfigurationImpl();
 		componentConfigurationImpl.setPid("8236");
@@ -290,21 +267,6 @@ public class XmlUtilTest extends TestCase {
 
 		String source = isStringWriter ? stringWriter : string;
 
-		Assert.assertTrue(String.format(propertyValueDiffersMessage, name, source, orignal, unmarshalled), orignal.equals(unmarshalled));
+		assertTrue(String.format(propertyValueDiffersMessage, name, source, orignal, unmarshalled), orignal.equals(unmarshalled));
 	}
-
-	private static String printList(List<Long> list) {
-
-		StringBuilder sb = new StringBuilder();
-		for (Long id : list) {
-			sb.append(id + whiteSpace);
-		}
-		return sb.toString();
-	}
-
-	private static void info(Object object) {
-		s_logger.info(String.valueOf(object));
-		System.out.println(object);
-	}
-
 }

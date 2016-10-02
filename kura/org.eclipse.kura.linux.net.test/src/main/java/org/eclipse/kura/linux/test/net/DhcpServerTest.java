@@ -29,7 +29,6 @@ import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
-import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,8 +48,7 @@ public class DhcpServerTest extends TestCase {
 	
 	private static final String s_testInterface = "eth0";
 
-	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
+
 	@BeforeClass
 	public void setUp() {
 		try {
@@ -101,8 +99,7 @@ public class DhcpServerTest extends TestCase {
 			System.exit(1);
 		}
 	}
-		
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
+
 	@Test
 	public void testDisable() {
 		s_logger.info("Test disable dhcp server");
@@ -115,7 +112,6 @@ public class DhcpServerTest extends TestCase {
 		}
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testEnable() {
 		s_logger.info("Test enable dhcp server");
@@ -146,7 +142,6 @@ public class DhcpServerTest extends TestCase {
 		}
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testSettings() {
 		s_logger.info("Test get/set dhcp settings");
@@ -177,8 +172,6 @@ public class DhcpServerTest extends TestCase {
 		}
 	}
 	
-
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@AfterClass()
 	public void tearDown() {
 		

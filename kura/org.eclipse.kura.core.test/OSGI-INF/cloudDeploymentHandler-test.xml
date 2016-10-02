@@ -16,4 +16,9 @@
    <implementation class="org.eclipse.kura.core.test.CloudDeploymentHandlerTest"/>
    <reference bind="setCloudCallService" cardinality="1..1" interface="org.eclipse.kura.cloud.CloudCallService" name="CloudCallService" policy="static" unbind="unsetCloudCallService"/>
    <reference bind="setDeploymentAdmin" cardinality="1..1" interface="org.osgi.service.deploymentadmin.DeploymentAdmin" name="DeploymentAdmin" policy="static" unbind="unsetDeploymentAdmin"/>
+   <reference bind="setCloudService" cardinality="1..1" interface="org.eclipse.kura.cloud.CloudService" name="CloudService" policy="static" unbind="unsetCloudService"/>
+   <service>
+      <provide interface="org.osgi.service.event.EventHandler"/>
+   </service>
+   <property name="event.topics" type="String" value="org/osgi/service/deployment/INSTALL"/>
 </scr:component>

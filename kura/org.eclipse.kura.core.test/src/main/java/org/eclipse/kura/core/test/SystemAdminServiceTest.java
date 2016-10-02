@@ -11,35 +11,48 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.system.SystemAdminService;
-import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class SystemAdminServiceTest extends TestCase {
+public class SystemAdminServiceTest {
 
-	private static SystemAdminService sysAdminService = null;
+	private static CountDownLatch s_dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
+	
+	private static SystemAdminService s_sysAdminService;
 	
 	@BeforeClass
-	public void setUp() {
+	public static void setUp() {
+		// Wait for OSGi dependencies
+		try {
+			if (!s_dependencyLatch.await(5, TimeUnit.SECONDS)) {
+				fail("OSGi dependencies unfulfilled");
+			}
+		} catch (InterruptedException e) {
+			fail("Interrupted waiting for OSGi dependencies");
+		}
 	}	
 	
 	public static void setSystemAdminService(SystemAdminService sas) {
-		sysAdminService = sas;
+		s_sysAdminService = sas;
+		s_dependencyLatch.countDown();
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testServiceExists() {
-		assertNotNull(sysAdminService);
+		assertNotNull(s_sysAdminService);
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
   	public void testGetUptime() {
-		String actual = sysAdminService.getUptime();
+		String actual = s_sysAdminService.getUptime();
 		assertTrue(Long.parseLong(actual) > 0);
 	}
 }

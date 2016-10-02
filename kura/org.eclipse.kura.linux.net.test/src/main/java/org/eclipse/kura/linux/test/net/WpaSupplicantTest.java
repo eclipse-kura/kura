@@ -24,7 +24,6 @@ import org.eclipse.kura.linux.net.wifi.WpaSupplicant;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
-import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,8 +48,6 @@ public class WpaSupplicantTest extends TestCase {
 	private static final String m_ssid = "WpaSupplicantTest";
 	private static final String m_password = "123WpaSupplicantTestPassword";
 
-	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@BeforeClass
 	public void setUp() {
 		File tmpDir = new File(TMPDIR);
@@ -108,7 +105,6 @@ public class WpaSupplicantTest extends TestCase {
 		}
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testDisable() {
 		s_logger.info("Test disable wpa_supplicant");
@@ -121,7 +117,6 @@ public class WpaSupplicantTest extends TestCase {
 		}
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testConstructor1() {
 		s_logger.info("Test wpa_supplicant - Infra WPA");
@@ -153,7 +148,6 @@ public class WpaSupplicantTest extends TestCase {
 		}
 	}
 	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testConstructor2() {
 		s_logger.info("Test wpa_supplicant - Infra WEP");
@@ -189,7 +183,6 @@ public class WpaSupplicantTest extends TestCase {
 		}
 	}
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@Test
 	public void testConstructor3() {
 		s_logger.info("Test wpa_supplicant - Adhoc none");
@@ -223,8 +216,6 @@ public class WpaSupplicantTest extends TestCase {
 		}
 	}
 	
-
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
 	@AfterClass()
 	public void tearDown() {
 		
@@ -288,5 +279,4 @@ public class WpaSupplicantTest extends TestCase {
 
 		return data.toString();
 	}
-
 }

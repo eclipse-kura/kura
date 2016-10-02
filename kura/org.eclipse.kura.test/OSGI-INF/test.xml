@@ -12,11 +12,10 @@
       Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
-               name="org.eclipse.kura.test.RemoteTargetTest"
-               modified="updated">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" modified="updated" name="org.eclipse.kura.test.RemoteTargetTest" configuration-policy="require">
    <implementation class="org.eclipse.kura.test.RemoteTargetTest"/>
    <reference bind="setSystemService" cardinality="1..1" interface="org.eclipse.kura.system.SystemService" name="SystemService" policy="static" unbind="unsetSystemService"/>
-   <reference bind="setCloudService" cardinality="1..1" interface="org.eclipse.kura.cloud.CloudService" name="CloudService" policy="static" unbind="unsetCloudService"/>
-   <reference bind="setConfigAdmin" cardinality="1..1" interface="org.osgi.service.cm.ConfigurationAdmin" name="ConfigurationAdmin" policy="static" unbind="unsetConfigAdmin"/>
+   <service>
+      <provide interface="org.eclipse.kura.test.RemoteTargetTest"/>
+   </service>
 </scr:component>

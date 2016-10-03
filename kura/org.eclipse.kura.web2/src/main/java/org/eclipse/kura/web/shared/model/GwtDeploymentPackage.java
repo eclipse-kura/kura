@@ -16,33 +16,33 @@ import java.util.List;
 
 public class GwtDeploymentPackage extends GwtBaseModel implements Serializable {
 
-	private static final long serialVersionUID = -7648638193931336835L;
-		
-	// Needed to prevent serialization errors
-	@SuppressWarnings("unused")
-	private GwtBundleInfo unused;
+    private static final long serialVersionUID = -7648638193931336835L;
 
-	public void setName(String name) {
-		set("name", name);
-	}
-	
-	public String getName() {
-		return (String) get("name");
-	}
-	
-	public void setVersion(String version) {
-		set("version", version);
-	}
-	
-	public String getVersion() {
-		return (String) get("version");
-	}
-	
-	public List<GwtBundleInfo> getBundleInfos() {
-		return get("bundles");
-	}
+    // Needed to prevent serialization errors
+    @SuppressWarnings("unused")
+    private GwtBundleInfo unused;
 
-	public void setBundleInfos(List<GwtBundleInfo> bundleInfos) {
-		set("bundles", bundleInfos);
-	}
+    public void setName(String name) {
+        set("name", name);
+    }
+
+    public String getName() {
+        return (String) get("name");
+    }
+
+    public void setVersion(String version) {
+        set("version", version);
+    }
+
+    public String getVersion() {
+        return (String) get("version");
+    }
+
+    public List<GwtBundleInfo> getBundleInfos() {
+        return get("bundles");
+    }
+
+    public void setBundleInfos(List<GwtBundleInfo> bundleInfos) {
+        set("bundles", bundleInfos);
+    }
 }

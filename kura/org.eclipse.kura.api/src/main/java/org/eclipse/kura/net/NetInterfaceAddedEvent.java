@@ -16,25 +16,26 @@ import java.util.Map;
 import org.osgi.service.event.Event;
 
 /**
- * An event raised when a new network interface has been added to the system. 
+ * An event raised when a new network interface has been added to the system.
  */
-public class NetInterfaceAddedEvent extends Event
-{
-	/** Topic of the NetworkInterfaceAddedEvent */
-	public static final String NETWORK_EVENT_INTERFACE_ADDED_TOPIC = "org/eclipse/kura/net/NetworkEvent/interface/ADDED";
-	
-	/** Name of the property to access the network interface name */
-	public static final String NETWORK_EVENT_INTERFACE_PROPERTY = "network.interface";
+public class NetInterfaceAddedEvent extends Event {
 
-	public NetInterfaceAddedEvent(Map<String, ?> properties) {
-		super(NETWORK_EVENT_INTERFACE_ADDED_TOPIC, properties);
-	}
-	
-	/**
-	 * Returns the name of the added interface.
-	 * @return
-	 */
-	public String getInterfaceName() {
-		return (String) getProperty(NETWORK_EVENT_INTERFACE_PROPERTY);
-	}
+    /** Topic of the NetworkInterfaceAddedEvent */
+    public static final String NETWORK_EVENT_INTERFACE_ADDED_TOPIC = "org/eclipse/kura/net/NetworkEvent/interface/ADDED";
+
+    /** Name of the property to access the network interface name */
+    public static final String NETWORK_EVENT_INTERFACE_PROPERTY = "network.interface";
+
+    public NetInterfaceAddedEvent(Map<String, ?> properties) {
+        super(NETWORK_EVENT_INTERFACE_ADDED_TOPIC, properties);
+    }
+
+    /**
+     * Returns the name of the added interface.
+     *
+     * @return
+     */
+    public String getInterfaceName() {
+        return (String) getProperty(NETWORK_EVENT_INTERFACE_PROPERTY);
+    }
 }

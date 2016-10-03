@@ -7,15 +7,15 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Eurotech
+ * Eurotech
  *******************************************************************************/
 /**
  *
  */
 /**
- * Contains interfaces and event model to manage and configure network interfaces on a given system. 
+ * Contains interfaces and event model to manage and configure network interfaces on a given system.
  * <p>
- * 
+ *
  *
  */
 package org.eclipse.kura.net;

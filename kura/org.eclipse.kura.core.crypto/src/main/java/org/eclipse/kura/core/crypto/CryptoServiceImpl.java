@@ -42,317 +42,308 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CryptoServiceImpl implements CryptoService {
-	private static final Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
-	
-	private static final String ALGORITHM   = "AES";
-	private static final byte[] SECRET_KEY  = "rv;ipse329183!@#".getBytes();
 
-	private static String s_keystorePasswordPath;
+    private static final Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
 
-	static {
-		initKeystorePasswordPath();
-	}
+    private static final String ALGORITHM = "AES";
+    private static final byte[] SECRET_KEY = "rv;ipse329183!@#".getBytes();
 
-	@Override
-	public char[] encryptAes(char[] value) throws KuraException {        
-		String encryptedValue = null;
+    private static String s_keystorePasswordPath;
 
-		try {
-			Key  key = generateKey();
-			Cipher c = Cipher.getInstance(ALGORITHM);
-			c.init(Cipher.ENCRYPT_MODE, key);
-			byte[] encryptedBytes = c.doFinal(new String(value).getBytes());
-			encryptedValue = base64Encode(encryptedBytes);
-		} catch (NoSuchAlgorithmException e) {
-			throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
-		} catch (NoSuchPaddingException e) {
-			throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
-		} catch (InvalidKeyException e) {
-			throw new KuraException(KuraErrorCode.ENCODE_ERROR);
-		} catch (IllegalBlockSizeException e) {
-			throw new KuraException(KuraErrorCode.ENCODE_ERROR);
-		} catch (BadPaddingException e) {
-			throw new KuraException(KuraErrorCode.ENCODE_ERROR);
-		}
+    static {
+        initKeystorePasswordPath();
+    }
 
-		return encryptedValue.toCharArray();
-	}
+    @Override
+    public char[] encryptAes(char[] value) throws KuraException {
+        String encryptedValue = null;
 
-	private byte[] base64Decode(String internalStringValue){
-		Object convertedData= null;
-		try {
-			Class<?> clazz = Class.forName( "javax.xml.bind.DatatypeConverter" );
-			Method method = clazz.getMethod("parseBase64Binary", String.class);
-			convertedData= method.invoke(null, internalStringValue);
-		} catch (ClassNotFoundException e ) {
-			convertedData = base64DecodeJava8(internalStringValue);
-		} catch (LinkageError e){
-			convertedData = base64DecodeJava8(internalStringValue);
-		} catch (Exception e){
-			
-		}
-		
-		if(convertedData != null){
-			return (byte[]) convertedData;
-		}
-		return null;
-	}
-	
-	private Object base64DecodeJava8(String internalStringValue){
-		Object convertedData= null;
-		try {
-			Class<?> clazz = Class.forName("java.util.Base64");
-			Method decoderMethod= clazz.getMethod("getDecoder", (Class<?>[]) null);
-			Object decoder= decoderMethod.invoke(null, new Object[0]);
+        try {
+            Key key = generateKey();
+            Cipher c = Cipher.getInstance(ALGORITHM);
+            c.init(Cipher.ENCRYPT_MODE, key);
+            byte[] encryptedBytes = c.doFinal(new String(value).getBytes());
+            encryptedValue = base64Encode(encryptedBytes);
+        } catch (NoSuchAlgorithmException e) {
+            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        } catch (NoSuchPaddingException e) {
+            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        } catch (InvalidKeyException e) {
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR);
+        } catch (IllegalBlockSizeException e) {
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR);
+        } catch (BadPaddingException e) {
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR);
+        }
 
-			Class<?> Base64Decoder = Class.forName("java.util.Base64$Decoder");
-			Method decodeMethod = Base64Decoder.getMethod("decode", String.class);
-			convertedData= decodeMethod.invoke(decoder, internalStringValue);
-		} catch (Exception e1) {	
-		} 
-		return convertedData;
-	}
+        return encryptedValue.toCharArray();
+    }
 
-	private String base64Encode(byte[] encryptedBytes){
-		Object convertedData= null;
-		try {
-			Class<?> clazz = Class.forName( "javax.xml.bind.DatatypeConverter" );
-			Method method = clazz.getMethod("printBase64Binary", byte[].class);
-			convertedData= method.invoke(null, encryptedBytes);
-		} catch (ClassNotFoundException e ) {
-			convertedData= base64EncodeJava8(encryptedBytes);
-		} catch (LinkageError e ) {
-			convertedData= base64EncodeJava8(encryptedBytes);
-		} catch (Exception e ) {
-			 
-		}
-		
-		if(convertedData != null){
-			return (String) convertedData;
-		}
-		return null;
-	}
-	
-	private Object base64EncodeJava8(byte[] encryptedBytes){
-		Object convertedData= null;
-		try {
-			Class<?> clazz = Class.forName("java.util.Base64");
-			Method encoderMethod= clazz.getMethod("getEncoder", (Class<?>[]) null);
-			Object encoder= encoderMethod.invoke(null, new Object[0]);
+    private byte[] base64Decode(String internalStringValue) {
+        Object convertedData = null;
+        try {
+            Class<?> clazz = Class.forName("javax.xml.bind.DatatypeConverter");
+            Method method = clazz.getMethod("parseBase64Binary", String.class);
+            convertedData = method.invoke(null, internalStringValue);
+        } catch (ClassNotFoundException e) {
+            convertedData = base64DecodeJava8(internalStringValue);
+        } catch (LinkageError e) {
+            convertedData = base64DecodeJava8(internalStringValue);
+        } catch (Exception e) {
 
-			Class<?> Base64Decoder = Class.forName("java.util.Base64$Encoder");
-			Method decodeMethod = Base64Decoder.getMethod("encodeToString", byte[].class);
-			convertedData= decodeMethod.invoke(encoder, encryptedBytes);
-		} catch (Exception e1) {
-		}
-		return convertedData;
-	}
+        }
 
-	@Override
-	public char[] decryptAes(char[] encryptedValue) throws KuraException {
-		Key  key = generateKey();
-		Cipher c;
-		try {
-			c = Cipher.getInstance(ALGORITHM);
-			c.init(Cipher.DECRYPT_MODE, key);
-			String internalStringValue = new String(encryptedValue);
-			byte[] decodedValue  =  base64Decode(internalStringValue);
-			byte[] decryptedBytes = c.doFinal(decodedValue);
-			String decryptedValue = new String(decryptedBytes);
-			return decryptedValue.toCharArray();
-		} catch (NoSuchAlgorithmException e) {
-			throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
-		} catch (NoSuchPaddingException e) {
-			throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
-		} catch (InvalidKeyException e) {
-			throw new KuraException(KuraErrorCode.DECODER_ERROR);
-		} catch (BadPaddingException e) {
-			throw new KuraException(KuraErrorCode.DECODER_ERROR);
-		} catch (IllegalBlockSizeException e) {
-			throw new KuraException(KuraErrorCode.DECODER_ERROR);
-		}
-	}
+        if (convertedData != null) {
+            return (byte[]) convertedData;
+        }
+        return null;
+    }
 
-	@Override
-	@Deprecated
-	public String encryptAes(String value) 
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException 
-	{
-		char[] encryptedValue = null;
-		try {
-			encryptedValue = encryptAes(value.toCharArray());
-		} catch (KuraException e) {
-			Throwable t = e.getCause();
-			if (t instanceof NoSuchAlgorithmException) {
-				throw (NoSuchAlgorithmException) t;
-			} else if (t instanceof NoSuchPaddingException) {
-				throw (NoSuchPaddingException) t;
-			} else if (t instanceof InvalidKeyException) {
-				throw (InvalidKeyException) t;
-			} else if (t instanceof IllegalBlockSizeException) {
-				throw (IllegalBlockSizeException) t; 
-			} else if (t instanceof BadPaddingException) {
-				throw (BadPaddingException) t;
-			}
-		}
+    private Object base64DecodeJava8(String internalStringValue) {
+        Object convertedData = null;
+        try {
+            Class<?> clazz = Class.forName("java.util.Base64");
+            Method decoderMethod = clazz.getMethod("getDecoder", (Class<?>[]) null);
+            Object decoder = decoderMethod.invoke(null, new Object[0]);
 
-		return new String(encryptedValue);
-	}
+            Class<?> base64Decoder = Class.forName("java.util.Base64$Decoder");
+            Method decodeMethod = base64Decoder.getMethod("decode", String.class);
+            convertedData = decodeMethod.invoke(decoder, internalStringValue);
+        } catch (Exception e1) {
+        }
+        return convertedData;
+    }
 
-	@Override
-	@Deprecated
-	public String decryptAes(String encryptedValue) 
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException 
-	{
-		try {
-			return new String(decryptAes(encryptedValue.toCharArray()));
-		} catch (KuraException e) {
-			throw new IOException();
-		}
-	}
+    private String base64Encode(byte[] encryptedBytes) {
+        Object convertedData = null;
+        try {
+            Class<?> clazz = Class.forName("javax.xml.bind.DatatypeConverter");
+            Method method = clazz.getMethod("printBase64Binary", byte[].class);
+            convertedData = method.invoke(null, encryptedBytes);
+        } catch (ClassNotFoundException e) {
+            convertedData = base64EncodeJava8(encryptedBytes);
+        } catch (LinkageError e) {
+            convertedData = base64EncodeJava8(encryptedBytes);
+        } catch (Exception e) {
 
-	@Override
-	public String sha1Hash(String s) 
-			throws NoSuchAlgorithmException, UnsupportedEncodingException 
-	{
-		MessageDigest cript = MessageDigest.getInstance("SHA-1");
-		cript.reset();
-		cript.update(s.getBytes("UTF8"));
+        }
 
-		byte[] encodedBytes = cript.digest();
-		return base64Encode(encodedBytes);
-	}
+        if (convertedData != null) {
+            return (String) convertedData;
+        }
+        return null;
+    }
 
-	@Override
-	public String encodeBase64(String stringValue) 
-			throws NoSuchAlgorithmException, UnsupportedEncodingException 
-	{
-		byte[] bytesValue = stringValue.getBytes("UTF-8");
-		String encodedValue = base64Encode(bytesValue);
-		return encodedValue;	
+    private Object base64EncodeJava8(byte[] encryptedBytes) {
+        Object convertedData = null;
+        try {
+            Class<?> clazz = Class.forName("java.util.Base64");
+            Method encoderMethod = clazz.getMethod("getEncoder", (Class<?>[]) null);
+            Object encoder = encoderMethod.invoke(null, new Object[0]);
 
-	}
+            Class<?> base64Encoder = Class.forName("java.util.Base64$Encoder");
+            Method encodeMethod = base64Encoder.getMethod("encodeToString", byte[].class);
+            convertedData = encodeMethod.invoke(encoder, encryptedBytes);
+        } catch (Exception e1) {
+        }
+        return convertedData;
+    }
 
-	@Override
-	public String decodeBase64(String encodedValue) 
-			throws NoSuchAlgorithmException, UnsupportedEncodingException 
-	{
-		byte[] decodedBytes = base64Decode(encodedValue);
-		String decodedValue = new String(decodedBytes, "UTF-8");
-		return decodedValue;		
-	}
+    @Override
+    public char[] decryptAes(char[] encryptedValue) throws KuraException {
+        Key key = generateKey();
+        Cipher c;
+        try {
+            c = Cipher.getInstance(ALGORITHM);
+            c.init(Cipher.DECRYPT_MODE, key);
+            String internalStringValue = new String(encryptedValue);
+            byte[] decodedValue = base64Decode(internalStringValue);
+            byte[] decryptedBytes = c.doFinal(decodedValue);
+            String decryptedValue = new String(decryptedBytes);
+            return decryptedValue.toCharArray();
+        } catch (NoSuchAlgorithmException e) {
+            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        } catch (NoSuchPaddingException e) {
+            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        } catch (InvalidKeyException e) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+        } catch (BadPaddingException e) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+        } catch (IllegalBlockSizeException e) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+        }
+    }
 
-	@Override
-	public char[] getKeyStorePassword(String keyStorePath) {
-		Properties props = new Properties();
-		char[] password = null;
-		FileInputStream fis = null;
+    @Override
+    @Deprecated
+    public String encryptAes(String value) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+            IllegalBlockSizeException, BadPaddingException {
+        char[] encryptedValue = null;
+        try {
+            encryptedValue = encryptAes(value.toCharArray());
+        } catch (KuraException e) {
+            Throwable t = e.getCause();
+            if (t instanceof NoSuchAlgorithmException) {
+                throw (NoSuchAlgorithmException) t;
+            } else if (t instanceof NoSuchPaddingException) {
+                throw (NoSuchPaddingException) t;
+            } else if (t instanceof InvalidKeyException) {
+                throw (InvalidKeyException) t;
+            } else if (t instanceof IllegalBlockSizeException) {
+                throw (IllegalBlockSizeException) t;
+            } else if (t instanceof BadPaddingException) {
+                throw (BadPaddingException) t;
+            }
+        }
 
-		File f = new File(s_keystorePasswordPath);
-		if (!f.exists()) {
-			return "changeit".toCharArray();
-		}
+        return new String(encryptedValue);
+    }
 
-		try {
-			fis = new FileInputStream(s_keystorePasswordPath);
-			props.load(fis);
-			Object value = props.get(keyStorePath);
-			if (value != null) {
-				String encryptedPassword = (String) value;
-				password = decryptAes(encryptedPassword.toCharArray());
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (KuraException e) {
-			e.printStackTrace();
-		} finally {
-			if (fis != null) {
-				try {
-					fis.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+    @Override
+    @Deprecated
+    public String decryptAes(String encryptedValue) throws NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException {
+        try {
+            return new String(decryptAes(encryptedValue.toCharArray()));
+        } catch (KuraException e) {
+            throw new IOException();
+        }
+    }
 
-		return password;
-	}
+    @Override
+    public String sha1Hash(String s) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        MessageDigest cript = MessageDigest.getInstance("SHA-1");
+        cript.reset();
+        cript.update(s.getBytes("UTF8"));
 
-	@Override
-	public void setKeyStorePassword(String keyStorePath, char[] password) throws KuraException {
-		Properties props = new Properties();
-		char[] encryptedPassword = encryptAes(password);
-		props.put(keyStorePath, new String(encryptedPassword));
+        byte[] encodedBytes = cript.digest();
+        return base64Encode(encodedBytes);
+    }
 
-		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream(s_keystorePasswordPath);
-			props.store(fos, "Do not edit this file. It's automatically generated by Kura");
-		} catch (FileNotFoundException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} catch (IOException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		} finally {
-			if (fos != null) {
-				try {
-					fos.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
+    @Override
+    public String encodeBase64(String stringValue) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        byte[] bytesValue = stringValue.getBytes("UTF-8");
+        String encodedValue = base64Encode(bytesValue);
+        return encodedValue;
 
-	@Override
-	@Deprecated
-	public void setKeyStorePassword(String keyStorePath, String password)
-			throws IOException {
-		try {
-			setKeyStorePassword(keyStorePath, password.toCharArray());
-		} catch (KuraException e) {
-			throw new IOException(e);
-		}
-	}
+    }
 
-	@Override
-	public boolean isFrameworkSecure() {
-		return false;
-	}
+    @Override
+    public String decodeBase64(String encodedValue) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        byte[] decodedBytes = base64Decode(encodedValue);
+        String decodedValue = new String(decodedBytes, "UTF-8");
+        return decodedValue;
+    }
 
-	private static Key generateKey() 
-	{
-		Key key = new SecretKeySpec(SECRET_KEY, ALGORITHM);
-		return key;
-	}
+    @Override
+    public char[] getKeyStorePassword(String keyStorePath) {
+        Properties props = new Properties();
+        char[] password = null;
+        FileInputStream fis = null;
 
-	private static void initKeystorePasswordPath() {
-		final String uriSpec = System.getProperty(SystemService.KURA_CONFIG);
-		if (uriSpec == null || uriSpec.isEmpty()) {
-			logger.error("Unable to initialize keystore password. 'kura.configuration' is not set.");
-			return;
-		}
-		
-		Properties props = new Properties();
-		InputStream in = null;
-		try {
-			in = new URL(uriSpec).openStream();
-			props.load(in);
-			Object value = props.get("kura.data");
-			if (value != null) {
-				s_keystorePasswordPath = (String) value + File.separator + "store.save"; 
-			}
-		} catch (Exception e) {
-			logger.error("Failed to load keystore password", e);
-		} finally {
-			if (in != null) {
-				try {
-					in.close();
-				} catch (IOException e) {
-					logger.warn("Failed to close configuration file", e);
-				}
-			}
-		}
-	}
+        File f = new File(s_keystorePasswordPath);
+        if (!f.exists()) {
+            return "changeit".toCharArray();
+        }
+
+        try {
+            fis = new FileInputStream(s_keystorePasswordPath);
+            props.load(fis);
+            Object value = props.get(keyStorePath);
+            if (value != null) {
+                String encryptedPassword = (String) value;
+                password = decryptAes(encryptedPassword.toCharArray());
+            }
+        } catch (FileNotFoundException e) {
+            logger.warn("File not found exception while getting keystore password - ", e);
+        } catch (IOException e) {
+            logger.warn("IOException while getting keystore password - ", e);
+        } catch (KuraException e) {
+            logger.warn("KuraException while getting keystore password - ", e);
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    logger.warn("IOException while closing source - ", e);
+                }
+            }
+        }
+
+        return password;
+    }
+
+    @Override
+    public void setKeyStorePassword(String keyStorePath, char[] password) throws KuraException {
+        Properties props = new Properties();
+        char[] encryptedPassword = encryptAes(password);
+        props.put(keyStorePath, new String(encryptedPassword));
+
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(s_keystorePasswordPath);
+            props.store(fos, "Do not edit this file. It's automatically generated by Kura");
+        } catch (FileNotFoundException e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    logger.warn("IOException while closing destination - ", e);
+                }
+            }
+        }
+    }
+
+    @Override
+    @Deprecated
+    public void setKeyStorePassword(String keyStorePath, String password) throws IOException {
+        try {
+            setKeyStorePassword(keyStorePath, password.toCharArray());
+        } catch (KuraException e) {
+            throw new IOException(e);
+        }
+    }
+
+    @Override
+    public boolean isFrameworkSecure() {
+        return false;
+    }
+
+    private static Key generateKey() {
+        Key key = new SecretKeySpec(SECRET_KEY, ALGORITHM);
+        return key;
+    }
+
+    private static void initKeystorePasswordPath() {
+        final String uriSpec = System.getProperty(SystemService.KURA_CONFIG);
+        if (uriSpec == null || uriSpec.isEmpty()) {
+            logger.error("Unable to initialize keystore password. 'kura.configuration' is not set.");
+            return;
+        }
+
+        Properties props = new Properties();
+        InputStream in = null;
+        try {
+            in = new URL(uriSpec).openStream();
+            props.load(in);
+            Object value = props.get("kura.data");
+            if (value != null) {
+                s_keystorePasswordPath = (String) value + File.separator + "store.save";
+            }
+        } catch (Exception e) {
+            logger.error("Failed to load keystore password", e);
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    logger.warn("Failed to close configuration file", e);
+                }
+            }
+        }
+    }
 }

@@ -19,29 +19,31 @@ import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 
-public class EthernetInterfaceConfigImpl extends EthernetInterfaceImpl<NetInterfaceAddressConfig> implements NetInterfaceConfig<NetInterfaceAddressConfig> {
-	
-	public EthernetInterfaceConfigImpl(String name) {
-		super(name);
-	}
-	
+public class EthernetInterfaceConfigImpl extends EthernetInterfaceImpl<NetInterfaceAddressConfig>
+        implements NetInterfaceConfig<NetInterfaceAddressConfig> {
+
+    public EthernetInterfaceConfigImpl(String name) {
+        super(name);
+    }
+
     public EthernetInterfaceConfigImpl(EthernetInterface<? extends NetInterfaceAddress> other) {
         super(other);
-        
-        // Copy the NetInterfaceAddresses into NetInterfaceAddressesConfig instances 
+
+        // Copy the NetInterfaceAddresses into NetInterfaceAddressesConfig instances
         List<? extends NetInterfaceAddress> otherNetInterfaceAddresses = other.getNetInterfaceAddresses();
         ArrayList<NetInterfaceAddressConfig> interfaceAddresses = new ArrayList<NetInterfaceAddressConfig>();
-        if(otherNetInterfaceAddresses != null) {
-            for(NetInterfaceAddress netInterfaceAddress : otherNetInterfaceAddresses) {
-                NetInterfaceAddressConfigImpl copiedInterfaceAddressImpl = new NetInterfaceAddressConfigImpl(netInterfaceAddress);
+        if (otherNetInterfaceAddresses != null) {
+            for (NetInterfaceAddress netInterfaceAddress : otherNetInterfaceAddresses) {
+                NetInterfaceAddressConfigImpl copiedInterfaceAddressImpl = new NetInterfaceAddressConfigImpl(
+                        netInterfaceAddress);
                 interfaceAddresses.add(copiedInterfaceAddressImpl);
             }
         }
         if (interfaceAddresses.size() == 0) {
-            // add at least one empty interface implementation. 
-            // It is needed as a container for the NetConfig objects 
-            interfaceAddresses.add( new NetInterfaceAddressConfigImpl());
+            // add at least one empty interface implementation.
+            // It is needed as a container for the NetConfig objects
+            interfaceAddresses.add(new NetInterfaceAddressConfigImpl());
         }
-        this.setNetInterfaceAddresses(interfaceAddresses);
+        setNetInterfaceAddresses(interfaceAddresses);
     }
 }

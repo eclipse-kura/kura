@@ -44,11 +44,13 @@ public class GatewayRouter extends AbstractJavaCamelComponent implements Configu
     @Override
     public void configure() throws Exception {
         from("timer://temperature").setBody(new ExpressionAdapter() {
+
             @Override
             public Object evaluate(Exchange exchange) {
                 return random();
             }
         }).aggregate(simple("temperature"), new AggregationStrategy() {
+
             @Override
             public Exchange aggregate(Exchange oldExchange, Exchange newExchange) {
                 if (oldExchange == null) {
@@ -63,7 +65,8 @@ public class GatewayRouter extends AbstractJavaCamelComponent implements Configu
         }).completionInterval(SECONDS.toMillis(10)).to("log:averageTemperatureFromLast10Seconds");
     }
 
-    protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) throws Exception {
+    protected void activate(final ComponentContext componentContext, final Map<String, Object> properties)
+            throws Exception {
         logger.info("Activated");
 
         setProperties(properties);

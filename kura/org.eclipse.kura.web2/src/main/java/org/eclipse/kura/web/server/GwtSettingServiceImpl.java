@@ -22,49 +22,48 @@ import org.eclipse.kura.web.shared.model.GwtSettings;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSettingService;
 
-public class GwtSettingServiceImpl extends OsgiRemoteServiceServlet implements GwtSettingService
-{
-	private static final long serialVersionUID = -3422518194598042896L;
+public class GwtSettingServiceImpl extends OsgiRemoteServiceServlet implements GwtSettingService {
 
-	public void updateSettings(GwtXSRFToken xsrfToken, GwtSettings settings) throws GwtKuraException
-	{
-		checkXSRFToken(xsrfToken);
-		AuthenticationManager authMgr = AuthenticationManager.getInstance(); 
+    private static final long serialVersionUID = -3422518194598042896L;
 
-		//
-		// verify the current password
-		boolean validCurrPwd = false;
-		
-		validCurrPwd = authMgr.authenticate("admin", settings.getPasswordCurrent());
-		
-		
-		if (!validCurrPwd) {
-			throw new GwtKuraException(GwtKuraErrorCode.CURRENT_ADMIN_PASSWORD_DOES_NOT_MATCH);
-		}
-		
-		//
-		// set the new password
-		/*try {
-			authMgr.changeAdminPassword(settings.getPasswordNew());
-		}
-		catch (SQLException e) {
-			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-		}*/
-	}
-	
-	
-	@SuppressWarnings("rawtypes")
-	public void logout(GwtXSRFToken xsrfToken) 
-		throws GwtKuraException
-	{
-		checkXSRFToken(xsrfToken);
-		HttpSession httpSession = this.getThreadLocalRequest().getSession();
-		Enumeration attrs = httpSession.getAttributeNames();
-		while (attrs.hasMoreElements()) {
-			
-			String attr = (String) attrs.nextElement();
-			httpSession.removeAttribute(attr);
-		}
-		httpSession.setAttribute("logout", "true");
-	}
+    @Override
+    public void updateSettings(GwtXSRFToken xsrfToken, GwtSettings settings) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        AuthenticationManager authMgr = AuthenticationManager.getInstance();
+
+        //
+        // verify the current password
+        boolean validCurrPwd = false;
+
+        validCurrPwd = authMgr.authenticate("admin", settings.getPasswordCurrent());
+
+        if (!validCurrPwd) {
+            throw new GwtKuraException(GwtKuraErrorCode.CURRENT_ADMIN_PASSWORD_DOES_NOT_MATCH);
+        }
+
+        //
+        // set the new password
+        /*
+         * try {
+         * authMgr.changeAdminPassword(settings.getPasswordNew());
+         * }
+         * catch (SQLException e) {
+         * throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+         * }
+         */
+    }
+
+    @Override
+    @SuppressWarnings("rawtypes")
+    public void logout(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        HttpSession httpSession = getThreadLocalRequest().getSession();
+        Enumeration attrs = httpSession.getAttributeNames();
+        while (attrs.hasMoreElements()) {
+
+            String attr = (String) attrs.nextElement();
+            httpSession.removeAttribute(attr);
+        }
+        httpSession.setAttribute("logout", "true");
+    }
 }

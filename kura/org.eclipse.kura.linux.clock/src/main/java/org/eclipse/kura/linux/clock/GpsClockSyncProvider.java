@@ -36,186 +36,188 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
-	
-	private static final Logger s_logger = LoggerFactory.getLogger(GpsClockSyncProvider.class);
-	
-	private PositionService		  m_positionService;
-	protected Map<String, Object> m_properties;
-	protected ClockSyncListener   m_listener;
-	protected int                 m_refreshInterval;
-	protected Date                m_lastSync;
-	protected boolean			  m_waitForLocked;
-	protected ScheduledExecutorService m_scheduler;
 
-	// ----------------------------------------------------------------
-	//
-	//   Wait for GPS locked event if single clock update
-	//
-	// ----------------------------------------------------------------	
-	
-	public void handleEvent(Event event) {
-		if(PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC.contains(event.getTopic())){
-			if((m_waitForLocked)&&(m_refreshInterval == 0)){
-				s_logger.info("Received Position Locked event");
-				try { synchClock(); }
-				catch(KuraException e) {
-					s_logger.error("Error Synchronizing Clock", e);
-				}
-			}
-		}
-	}
+    private static final Logger s_logger = LoggerFactory.getLogger(GpsClockSyncProvider.class);
 
-	public GpsClockSyncProvider() {
-	}
+    private PositionService m_positionService;
+    protected Map<String, Object> m_properties;
+    protected ClockSyncListener m_listener;
+    protected int m_refreshInterval;
+    protected Date m_lastSync;
+    protected boolean m_waitForLocked;
+    protected ScheduledExecutorService m_scheduler;
 
-	@Override
-	public void init(Map<String, Object> properties, ClockSyncListener listener)
-			throws KuraException {
-		s_logger.debug("initiing the GPS clock sync provider");
-		m_properties = properties;
-		m_listener   = listener;
-		
-		m_waitForLocked=false;
-		
-		m_refreshInterval = 0;
-		if (m_properties.containsKey("clock.ntp.refresh-interval")) {
-			m_refreshInterval = (Integer) m_properties.get("clock.ntp.refresh-interval");
-		}	
-		
-		try {
-			// looking for a valid PositionService from SCR
-			BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-			ServiceReference<PositionService> scrServiceRef = bundleContext.getServiceReference(PositionService.class);
-			m_positionService = bundleContext.getService(scrServiceRef);
-	
-			// install event listener for GPS locked event
-			Dictionary<String,Object> props = new Hashtable<String, Object>();
-			String[] topic = {PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC};
-			props.put(EventConstants.EVENT_TOPIC, topic);
-			bundleContext.registerService(EventHandler.class.getName(), this, props);
-		} catch(Exception e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Failed to initialize the GpsClockSyncProvider", e);
-		}
-		
-		s_logger.debug("done initiing the GPS clock sync provider");
-	}
+    // ----------------------------------------------------------------
+    //
+    // Wait for GPS locked event if single clock update
+    //
+    // ----------------------------------------------------------------
 
-	@Override
-	public void start() throws KuraException {
-		
-		if (m_refreshInterval < 0) {			
-			// Never do any update. So Nothing to do.
-			s_logger.info("No clock update required");
-		}
-		else if (m_refreshInterval == 0) {
-			// Perform a single clock update.
-			s_logger.info("Perform single clock update.");
-			try { 
-				synchClock(); 
-			}
-			catch(KuraException e) {
-				s_logger.error("Error Synchronizing Clock", e);
-			}
-		}
-		else {
-			// Perform periodic clock updates.
-			s_logger.info("Perform periodic clock updates every {} sec", m_refreshInterval);
-			if (m_scheduler != null) {
-				m_scheduler.shutdown();
-				m_scheduler = null;
-			}
-			m_scheduler = Executors.newSingleThreadScheduledExecutor();
-			m_scheduler.scheduleAtFixedRate(new Runnable() {
-				public void run() {
-					Thread.currentThread().setName("GpsClockSyncProvider");
-					try { synchClock(); }
-					catch(KuraException e) {
-						s_logger.error("Error Synchronizing Clock", e);
-					}
-				}
-			}, 0, m_refreshInterval, TimeUnit.SECONDS);
-		}		
-	}
+    @Override
+    public void handleEvent(Event event) {
+        if (PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC.contains(event.getTopic())) {
+            if (this.m_waitForLocked && this.m_refreshInterval == 0) {
+                s_logger.info("Received Position Locked event");
+                try {
+                    synchClock();
+                } catch (KuraException e) {
+                    s_logger.error("Error Synchronizing Clock", e);
+                }
+            }
+        }
+    }
 
-	@Override
-	public void stop() throws KuraException {
-		if (m_scheduler != null) {
-			m_scheduler.shutdown();
-			m_scheduler = null;
-		}
-		m_positionService=null;
-	}
+    public GpsClockSyncProvider() {
+    }
 
-	@Override
-	public Date getLastSync() {
-		return m_lastSync;
-	}
+    @Override
+    public void init(Map<String, Object> properties, ClockSyncListener listener) throws KuraException {
+        s_logger.debug("initiing the GPS clock sync provider");
+        this.m_properties = properties;
+        this.m_listener = listener;
 
-	// ----------------------------------------------------------------
-	//
-	//   The actual time sync method
-	//   The GPS can give time but not date 
-	//
-	// ----------------------------------------------------------------	
-	
-	protected void synchClock() throws KuraException
-	{
-		SafeProcess procDate = null;
-		SafeProcess procTime = null;
-		try {			
-			if(m_positionService!=null){
-				if(m_positionService.isLocked()){
-					String gpsTime = m_positionService.getNmeaTime();
-					String gpsDate = m_positionService.getNmeaDate();
-					// Execute a native Linux command to perform the set time and date.
-					if(!gpsDate.isEmpty()){
-						String YY = gpsDate.substring(4, 6);
-						String MM = gpsDate.substring(2, 4);
-						String DD = gpsDate.substring(0, 2);
-						String commandDate ="date +%Y%m%d -s \"20"+YY+MM+DD+"\"";
-						procDate = ProcessUtil.exec(commandDate);
-						procDate.waitFor();
-						if (procDate.exitValue() == 0) {
-							s_logger.info("System Clock Synchronized with GPS, date = {} ",gpsDate);
-							m_lastSync = new Date();
-							if(!gpsTime.isEmpty()){
-								String hh = gpsTime.substring(0, 2);
-								String mm = gpsTime.substring(2, 4);
-								String ss = gpsTime.substring(4, 6);
-								String commandTime ="date +%T -u -s \""+hh+":"+mm+":"+ss+"\""; // time is in UTC => -u
-								procTime = ProcessUtil.exec(commandTime);
-								procTime.waitFor();
-								if (procTime.exitValue() == 0) {
-									s_logger.info("System Clock Synchronized with GPS, time = {}",gpsTime);
-									m_lastSync = new Date();
-						            m_waitForLocked=false;
-								}
-								else {
-									s_logger.error("Unexpected error while Synchronizing System Clock with GPS");
-									m_waitForLocked=true;
-								}
-							}
-				            m_waitForLocked=false;
-				            // Call update method with 0 offset to ensure the clock event gets fired and the HW clock
-							// is updated if desired.
-							m_listener.onClockUpdate(0);
-						}
-						else {
-							s_logger.error("Unexpected error while Synchronizing System Clock with GPS");
-							m_waitForLocked=true;
-						}
-					}
-				}
-				else
-					m_waitForLocked=true;
-			}
-		} 
-		catch (Exception e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
-		finally {
-			if (procDate != null) ProcessUtil.destroy(procDate);
-			if (procTime != null) ProcessUtil.destroy(procTime);
-		}
-	}
+        this.m_waitForLocked = false;
+
+        this.m_refreshInterval = 0;
+        if (this.m_properties.containsKey("clock.ntp.refresh-interval")) {
+            this.m_refreshInterval = (Integer) this.m_properties.get("clock.ntp.refresh-interval");
+        }
+
+        try {
+            // looking for a valid PositionService from SCR
+            BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+            ServiceReference<PositionService> scrServiceRef = bundleContext.getServiceReference(PositionService.class);
+            this.m_positionService = bundleContext.getService(scrServiceRef);
+
+            // install event listener for GPS locked event
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            String[] topic = { PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC };
+            props.put(EventConstants.EVENT_TOPIC, topic);
+            bundleContext.registerService(EventHandler.class.getName(), this, props);
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Failed to initialize the GpsClockSyncProvider", e);
+        }
+
+        s_logger.debug("done initiing the GPS clock sync provider");
+    }
+
+    @Override
+    public void start() throws KuraException {
+
+        if (this.m_refreshInterval < 0) {
+            // Never do any update. So Nothing to do.
+            s_logger.info("No clock update required");
+        } else if (this.m_refreshInterval == 0) {
+            // Perform a single clock update.
+            s_logger.info("Perform single clock update.");
+            try {
+                synchClock();
+            } catch (KuraException e) {
+                s_logger.error("Error Synchronizing Clock", e);
+            }
+        } else {
+            // Perform periodic clock updates.
+            s_logger.info("Perform periodic clock updates every {} sec", this.m_refreshInterval);
+            if (this.m_scheduler != null) {
+                this.m_scheduler.shutdown();
+                this.m_scheduler = null;
+            }
+            this.m_scheduler = Executors.newSingleThreadScheduledExecutor();
+            this.m_scheduler.scheduleAtFixedRate(new Runnable() {
+
+                @Override
+                public void run() {
+                    Thread.currentThread().setName("GpsClockSyncProvider");
+                    try {
+                        synchClock();
+                    } catch (KuraException e) {
+                        s_logger.error("Error Synchronizing Clock", e);
+                    }
+                }
+            }, 0, this.m_refreshInterval, TimeUnit.SECONDS);
+        }
+    }
+
+    @Override
+    public void stop() throws KuraException {
+        if (this.m_scheduler != null) {
+            this.m_scheduler.shutdown();
+            this.m_scheduler = null;
+        }
+        this.m_positionService = null;
+    }
+
+    @Override
+    public Date getLastSync() {
+        return this.m_lastSync;
+    }
+
+    // ----------------------------------------------------------------
+    //
+    // The actual time sync method
+    // The GPS can give time but not date
+    //
+    // ----------------------------------------------------------------
+
+    protected void synchClock() throws KuraException {
+        SafeProcess procDate = null;
+        SafeProcess procTime = null;
+        try {
+            if (this.m_positionService != null) {
+                if (this.m_positionService.isLocked()) {
+                    String gpsTime = this.m_positionService.getNmeaTime();
+                    String gpsDate = this.m_positionService.getNmeaDate();
+                    // Execute a native Linux command to perform the set time and date.
+                    if (!gpsDate.isEmpty()) {
+                        String YY = gpsDate.substring(4, 6);
+                        String MM = gpsDate.substring(2, 4);
+                        String DD = gpsDate.substring(0, 2);
+                        String commandDate = "date +%Y%m%d -s \"20" + YY + MM + DD + "\"";
+                        procDate = ProcessUtil.exec(commandDate);
+                        procDate.waitFor();
+                        if (procDate.exitValue() == 0) {
+                            s_logger.info("System Clock Synchronized with GPS, date = {} ", gpsDate);
+                            this.m_lastSync = new Date();
+                            if (!gpsTime.isEmpty()) {
+                                String hh = gpsTime.substring(0, 2);
+                                String mm = gpsTime.substring(2, 4);
+                                String ss = gpsTime.substring(4, 6);
+
+                                // time is in UTC => -u
+                                String commandTime = "date +%T -u -s \"" + hh + ":" + mm + ":" + ss + "\"";
+                                procTime = ProcessUtil.exec(commandTime);
+                                procTime.waitFor();
+                                if (procTime.exitValue() == 0) {
+                                    s_logger.info("System Clock Synchronized with GPS, time = {}", gpsTime);
+                                    this.m_lastSync = new Date();
+                                    this.m_waitForLocked = false;
+                                } else {
+                                    s_logger.error("Unexpected error while Synchronizing System Clock with GPS");
+                                    this.m_waitForLocked = true;
+                                }
+                            }
+                            this.m_waitForLocked = false;
+                            // Call update method with 0 offset to ensure the clock event gets fired and the HW clock
+                            // is updated if desired.
+                            this.m_listener.onClockUpdate(0);
+                        } else {
+                            s_logger.error("Unexpected error while Synchronizing System Clock with GPS");
+                            this.m_waitForLocked = true;
+                        }
+                    }
+                } else {
+                    this.m_waitForLocked = true;
+                }
+            }
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        } finally {
+            if (procDate != null) {
+                ProcessUtil.destroy(procDate);
+            }
+            if (procTime != null) {
+                ProcessUtil.destroy(procTime);
+            }
+        }
+    }
 }

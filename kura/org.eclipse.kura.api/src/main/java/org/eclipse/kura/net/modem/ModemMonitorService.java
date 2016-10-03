@@ -11,13 +11,13 @@
  *******************************************************************************/
 package org.eclipse.kura.net.modem;
 
-
 /**
  * Marker interface for the ModemMonitor
  *
  */
 public interface ModemMonitorService {
-	
-	public void registerListener(ModemMonitorListener listener);
-	public void unregisterListener(ModemMonitorListener listener);
+
+    public void registerListener(ModemMonitorListener listener);
+
+    public void unregisterListener(ModemMonitorListener listener);
 }

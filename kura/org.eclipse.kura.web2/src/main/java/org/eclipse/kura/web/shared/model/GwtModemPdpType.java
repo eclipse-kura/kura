@@ -13,7 +13,7 @@ package org.eclipse.kura.web.shared.model;
 
 public enum GwtModemPdpType {
     netModemPdpUnknown,
-	netModemPdpIP,
-	netModemPdpPPP,
-	netModemPdpIPv6
+    netModemPdpIP,
+    netModemPdpPPP,
+    netModemPdpIPv6
 }

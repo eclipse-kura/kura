@@ -12,15 +12,15 @@
 package org.eclipse.kura.net.modem;
 
 public enum ModemConnectionStatus {
-	/** UNKNOWN **/
-	UNKNOWN,
-	
-	/** DISCONNECTED **/
-	DISCONNECTED,
-	
-	/** CONNECTING **/
-	CONNECTING,
-	
-	/** CONNECTED **/
-	CONNECTED
+    /** UNKNOWN **/
+    UNKNOWN,
+
+    /** DISCONNECTED **/
+    DISCONNECTED,
+
+    /** CONNECTING **/
+    CONNECTING,
+
+    /** CONNECTED **/
+    CONNECTED
 }

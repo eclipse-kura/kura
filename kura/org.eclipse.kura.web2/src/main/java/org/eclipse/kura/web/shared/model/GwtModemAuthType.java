@@ -12,8 +12,8 @@
 package org.eclipse.kura.web.shared.model;
 
 public enum GwtModemAuthType {
-	netModemAuthNONE,
-	netModemAuthAUTO,
-	netModemAuthCHAP,
-	netModemAuthPAP
+    netModemAuthNONE,
+    netModemAuthAUTO,
+    netModemAuthCHAP,
+    netModemAuthPAP
 }

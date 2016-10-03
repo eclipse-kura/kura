@@ -19,30 +19,28 @@ import org.eclipse.kura.web.client.util.MessageUtils;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class GwtSnapshot extends GwtBaseModel implements IsSerializable, Serializable 
-{
-	private static final long serialVersionUID = 204571826084819719L;
-	
-	public GwtSnapshot()
-	{}
-	
-    @Override
-    @SuppressWarnings({"unchecked"})
-    public <X> X get(String property) {
-    	if ("createdOnFormatted".equals(property)) {
-    		if (((Date) get("createdOn")).getTime() == 0) {
-    			return (X) (MessageUtils.get("snapSeeded"));
-    		}    		
-    		return (X) (DateUtils.formatDateTime((Date) get("createdOn")));
-    	}
-    	else if ("snapshotId".equals(property)) {
-    		return (X) new Long(((Date) get("createdOn")).getTime());
-    	}
-    	else {
-    		return super.get(property);
-    	}
+public class GwtSnapshot extends GwtBaseModel implements IsSerializable, Serializable {
+
+    private static final long serialVersionUID = 204571826084819719L;
+
+    public GwtSnapshot() {
     }
-	
+
+    @Override
+    @SuppressWarnings({ "unchecked" })
+    public <X> X get(String property) {
+        if ("createdOnFormatted".equals(property)) {
+            if (((Date) get("createdOn")).getTime() == 0) {
+                return (X) MessageUtils.get("snapSeeded");
+            }
+            return (X) DateUtils.formatDateTime((Date) get("createdOn"));
+        } else if ("snapshotId".equals(property)) {
+            return (X) new Long(((Date) get("createdOn")).getTime());
+        } else {
+            return super.get(property);
+        }
+    }
+
     public Date getCreatedOn() {
         return (Date) get("createdOn");
     }
@@ -53,9 +51,9 @@ public class GwtSnapshot extends GwtBaseModel implements IsSerializable, Seriali
 
     public String getCreatedOnFormatted() {
         return DateUtils.formatDateTime((Date) get("createdOn"));
-    }    
+    }
 
     public void setCreatedOn(Date createdOn) {
-       set("createdOn", createdOn);
+        set("createdOn", createdOn);
     }
 }

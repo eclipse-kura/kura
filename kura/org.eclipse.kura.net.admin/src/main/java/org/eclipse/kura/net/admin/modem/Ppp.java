@@ -22,69 +22,69 @@ import org.slf4j.LoggerFactory;
 
 public class Ppp implements IModemLinkService {
 
-	private static final Logger s_logger = LoggerFactory.getLogger(Ppp.class);
-	
-	private static Object s_lock = new Object();
-	private String m_iface;
-	private String m_port;
-		
-	public Ppp(String iface, String port) {
-		m_iface = iface;
-		m_port = port;
-	}
+    private static final Logger s_logger = LoggerFactory.getLogger(Ppp.class);
 
-	@Override
-	public void connect() throws KuraException {
-		PppLinux.connect(m_iface, m_port);
-	}
+    private static Object s_lock = new Object();
+    private final String m_iface;
+    private final String m_port;
 
-	@Override
-	public void disconnect() throws KuraException {
-		
-		s_logger.info("disconnecting :: stopping PPP monitor ...");
-		PppLinux.disconnect(m_iface, m_port);
-		
-		try {
-			LinuxDns linuxDns = LinuxDns.getInstance();
-			if (linuxDns.isPppDnsSet()) {
-				linuxDns.unsetPppDns();
-			}
-		} catch (Exception e) {
-			throw new KuraException (KuraErrorCode.INTERNAL_ERROR, e);
-		}
-	}
-	
-	@Override
-	public String getIPaddress() throws KuraException {
-		String ipAddress = null;
-		LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(m_iface);
-		if (ifconfig != null) {
-			ipAddress = ifconfig.getInetAddress();
-		}
-		return ipAddress;
-	}
+    public Ppp(String iface, String port) {
+        this.m_iface = iface;
+        this.m_port = port;
+    }
 
-	@Override
-	public String getIfaceName() {
-		return m_iface;
-	}
-	
-	@Override
-	public PppState getPppState () throws KuraException {
-		
-		PppState pppState = PppState.NOT_CONNECTED;
-		synchronized (s_lock) {
-			boolean pppdRunning = PppLinux.isPppProcessRunning(m_iface, m_port);
-			String ip = this.getIPaddress();
-			
-			if (pppdRunning && (ip != null)) {
-				pppState = PppState.CONNECTED;
-			} else if (pppdRunning && (ip == null)) {
-				pppState = PppState.IN_PROGRESS;
-			} else {
-				pppState = PppState.NOT_CONNECTED;
-			}
-		}
-		return pppState;
-	}
+    @Override
+    public void connect() throws KuraException {
+        PppLinux.connect(this.m_iface, this.m_port);
+    }
+
+    @Override
+    public void disconnect() throws KuraException {
+
+        s_logger.info("disconnecting :: stopping PPP monitor ...");
+        PppLinux.disconnect(this.m_iface, this.m_port);
+
+        try {
+            LinuxDns linuxDns = LinuxDns.getInstance();
+            if (linuxDns.isPppDnsSet()) {
+                linuxDns.unsetPppDns();
+            }
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    @Override
+    public String getIPaddress() throws KuraException {
+        String ipAddress = null;
+        LinuxIfconfig ifconfig = LinuxNetworkUtil.getInterfaceConfiguration(this.m_iface);
+        if (ifconfig != null) {
+            ipAddress = ifconfig.getInetAddress();
+        }
+        return ipAddress;
+    }
+
+    @Override
+    public String getIfaceName() {
+        return this.m_iface;
+    }
+
+    @Override
+    public PppState getPppState() throws KuraException {
+
+        PppState pppState = PppState.NOT_CONNECTED;
+        synchronized (s_lock) {
+            boolean pppdRunning = PppLinux.isPppProcessRunning(this.m_iface, this.m_port);
+            String ip = getIPaddress();
+
+            if (pppdRunning && ip != null) {
+                pppState = PppState.CONNECTED;
+            } else if (pppdRunning && ip == null) {
+                pppState = PppState.IN_PROGRESS;
+            } else {
+                pppState = PppState.NOT_CONNECTED;
+            }
+        }
+        return pppState;
+    }
 }

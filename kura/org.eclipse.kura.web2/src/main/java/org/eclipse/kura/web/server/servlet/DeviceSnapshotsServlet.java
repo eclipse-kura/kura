@@ -32,63 +32,59 @@ import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DeviceSnapshotsServlet extends HttpServlet 
-{
+public class DeviceSnapshotsServlet extends HttpServlet {
+
     private static final long serialVersionUID = -2533869595709953567L;
 
     private static Logger s_logger = LoggerFactory.getLogger(DeviceSnapshotsServlet.class);
-    
-    
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
-    {
-    	// BEGIN XSRF - Servlet dependent code
+
+    @Override
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // BEGIN XSRF - Servlet dependent code
 
         try {
             GwtXSRFToken token = new GwtXSRFToken(request.getParameter("xsrfToken"));
             KuraRemoteServiceServlet.checkXSRFToken(request, token);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new ServletException("Security error: please retry this operation correctly.", e);
         }
         // END XSRF security check
-        
+
         String snapshotId = request.getParameter("snapshotId");
 
         response.setCharacterEncoding("UTF-8");
-		response.setContentType("application/xml");
-		response.setHeader("Content-Disposition", "attachment; filename=snapshot_"+snapshotId+".xml");
-		response.setHeader("Cache-Control", "no-transform, max-age=0");
-		PrintWriter writer = response.getWriter();
-		try {
+        response.setContentType("application/xml");
+        response.setHeader("Content-Disposition", "attachment; filename=snapshot_" + snapshotId + ".xml");
+        response.setHeader("Cache-Control", "no-transform, max-age=0");
+        PrintWriter writer = response.getWriter();
+        try {
 
-            ServiceLocator  locator = ServiceLocator.getInstance();
-			ConfigurationService cs = locator.getService(ConfigurationService.class);			 
-			if (snapshotId != null) {
+            ServiceLocator locator = ServiceLocator.getInstance();
+            ConfigurationService cs = locator.getService(ConfigurationService.class);
+            if (snapshotId != null) {
 
-				long sid = Long.parseLong(snapshotId);
-				List<ComponentConfiguration> configs = cs.getSnapshot(sid);
-					
-				// build a list of configuration which can be marshalled in XML
-				List<ComponentConfigurationImpl> configImpls = new ArrayList<ComponentConfigurationImpl>();
-				for (ComponentConfiguration config : configs) {
-					configImpls.add((ComponentConfigurationImpl) config);
-				}
-				XmlComponentConfigurations xmlConfigs = new XmlComponentConfigurations();
-				xmlConfigs.setConfigurations(configImpls);
-				
-				//
-				// marshall the response and write it
-				XmlUtil.marshal(xmlConfigs, writer);
-			}
-        } 
-        catch (Exception e) {
+                long sid = Long.parseLong(snapshotId);
+                List<ComponentConfiguration> configs = cs.getSnapshot(sid);
+
+                // build a list of configuration which can be marshalled in XML
+                List<ComponentConfigurationImpl> configImpls = new ArrayList<ComponentConfigurationImpl>();
+                for (ComponentConfiguration config : configs) {
+                    configImpls.add((ComponentConfigurationImpl) config);
+                }
+                XmlComponentConfigurations xmlConfigs = new XmlComponentConfigurations();
+                xmlConfigs.setConfigurations(configImpls);
+
+                //
+                // marshall the response and write it
+                XmlUtil.marshal(xmlConfigs, writer);
+            }
+        } catch (Exception e) {
             s_logger.error("Error creating Excel export", e);
             throw new ServletException(e);
-        } 
-        finally {
-            if (writer != null)
-            	writer.close();
+        } finally {
+            if (writer != null) {
+                writer.close();
+            }
         }
     }
 }
-

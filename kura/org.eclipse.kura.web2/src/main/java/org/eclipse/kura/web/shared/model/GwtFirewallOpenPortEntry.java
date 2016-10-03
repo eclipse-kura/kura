@@ -17,36 +17,37 @@ import org.eclipse.kura.web.client.util.KuraBaseModel;
 
 public class GwtFirewallOpenPortEntry extends KuraBaseModel implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1153451329284913943L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1153451329284913943L;
 
-	public GwtFirewallOpenPortEntry() {}
-	
-	/*
-	public Integer getPort() {
-    	if (get("port") != null) {
-    		return (Integer) get("port");
-    	}
-    	else {
-    		return 0;
-    	}
+    public GwtFirewallOpenPortEntry() {
     }
 
-    public void setPort(int port) {
-        set("port", port);
-    }
-    */
-    
+    /*
+     * public Integer getPort() {
+     * if (get("port") != null) {
+     * return (Integer) get("port");
+     * }
+     * else {
+     * return 0;
+     * }
+     * }
+     *
+     * public void setPort(int port) {
+     * set("port", port);
+     * }
+     */
+
     public String getPortRange() {
-    	return get("portRange");
+        return get("portRange");
     }
-    
+
     public void setPortRange(String portRange) {
-    	set("portRange", portRange);
+        set("portRange", portRange);
     }
-    
+
     public String getProtocol() {
         return get("protocol");
     }
@@ -54,7 +55,7 @@ public class GwtFirewallOpenPortEntry extends KuraBaseModel implements Serializa
     public void setProtocol(String protocol) {
         set("protocol", protocol);
     }
-    
+
     public String getPermittedNetwork() {
         return get("permittedNetwork");
     }
@@ -62,23 +63,23 @@ public class GwtFirewallOpenPortEntry extends KuraBaseModel implements Serializa
     public void setPermittedNetwork(String permittedNetwork) {
         set("permittedNetwork", permittedNetwork);
     }
-    
+
     public String getPermittedInterfaceName() {
-    	return get("permittedInterfaceName");
+        return get("permittedInterfaceName");
     }
-    
+
     public void setPermittedInterfaceName(String permittedInterfaceName) {
-    	set("permittedInterfaceName", permittedInterfaceName);
+        set("permittedInterfaceName", permittedInterfaceName);
     }
-    
+
     public String getUnpermittedInterfaceName() {
-    	return get("unpermittedInterfaceName");
+        return get("unpermittedInterfaceName");
     }
-    
+
     public void setUnpermittedInterfaceName(String unpermittedInterfaceName) {
-    	set("unpermittedInterfaceName", unpermittedInterfaceName);
+        set("unpermittedInterfaceName", unpermittedInterfaceName);
     }
-    
+
     public String getPermittedMAC() {
         return get("permittedMAC");
     }
@@ -86,7 +87,7 @@ public class GwtFirewallOpenPortEntry extends KuraBaseModel implements Serializa
     public void setPermittedMAC(String permittedMAC) {
         set("permittedMAC", permittedMAC);
     }
-    
+
     public String getSourcePortRange() {
         return get("sourcePortRange");
     }

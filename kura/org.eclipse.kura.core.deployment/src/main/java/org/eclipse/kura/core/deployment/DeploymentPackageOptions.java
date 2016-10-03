@@ -14,120 +14,118 @@ package org.eclipse.kura.core.deployment;
 
 public abstract class DeploymentPackageOptions {
 
-	// Metrics
-	
-	public static final String METRIC_DP_NAME = "dp.name";
-	public static final String METRIC_DP_VERSION = "dp.version";
-	public static final String METRIC_DP_REBOOT = "dp.reboot";
-	public static final String METRIC_DP_REBOOT_DELAY = "dp.reboot.delay";
-	public static final String METRIC_DP_CLIENT_ID = "client.id";
-	public static final String METRIC_JOB_ID = "job.id";
+    // Metrics
 
-	
-	private String dpName;
-	private String dpVersion;
-	private boolean resume = false;
-	private boolean install = true;
-	private boolean postInst = false;
-	private boolean delete = false;
-	private boolean reboot = false;
-	private int rebootDelay = 0;
-	
+    public static final String METRIC_DP_NAME = "dp.name";
+    public static final String METRIC_DP_VERSION = "dp.version";
+    public static final String METRIC_DP_REBOOT = "dp.reboot";
+    public static final String METRIC_DP_REBOOT_DELAY = "dp.reboot.delay";
+    public static final String METRIC_DP_CLIENT_ID = "client.id";
+    public static final String METRIC_JOB_ID = "job.id";
 
-	private String clientId = "";
-	private String requestClientId = "";
-	private Long jobId = null;
+    private String dpName;
+    private String dpVersion;
+    private boolean resume = false;
+    private boolean install = true;
+    private boolean postInst = false;
+    private boolean delete = false;
+    private boolean reboot = false;
+    private int rebootDelay = 0;
 
-	public DeploymentPackageOptions(String dpName, String dpVersion) {
-		this.dpName = dpName;
-		this.dpVersion = dpVersion;
-	}
+    private String clientId = "";
+    private String requestClientId = "";
+    private Long jobId = null;
 
-	public String getDpName() {
-		return dpName;
-	}
-	
-	public void setDpName(String dpName) {
-		this.dpName = dpName;
-	}
+    public DeploymentPackageOptions(String dpName, String dpVersion) {
+        this.dpName = dpName;
+        this.dpVersion = dpVersion;
+    }
 
-	public String getDpVersion() {
-		return dpVersion;
-	}
-	
-	public void setDpVersion(String dpVersion) {
-		this.dpVersion = dpVersion;
-	}
-	
-	public Long getJobId() {
-		return jobId;
-	}
-	
-	public void setJobId(long jobId) {
-		this.jobId = jobId;
-	}
+    public String getDpName() {
+        return this.dpName;
+    }
 
-	public boolean isResume() {
-		return resume;
-	}
+    public void setDpName(String dpName) {
+        this.dpName = dpName;
+    }
 
-	public void setResume(boolean resume) {
-		this.resume = resume;
-	}
+    public String getDpVersion() {
+        return this.dpVersion;
+    }
 
-	public boolean isInstall() {
-		return install;
-	}
+    public void setDpVersion(String dpVersion) {
+        this.dpVersion = dpVersion;
+    }
 
-	public void setInstall(boolean install) {
-		this.install = install;
-	}
+    public Long getJobId() {
+        return this.jobId;
+    }
 
-	public boolean isPostInst() {
-		return postInst;
-	}
+    public void setJobId(long jobId) {
+        this.jobId = jobId;
+    }
 
-	public void setPostInst(boolean postInst) {
-		this.postInst = postInst;
-	}
+    public boolean isResume() {
+        return this.resume;
+    }
 
-	public boolean isDelete() {
-		return delete;
-	}
+    public void setResume(boolean resume) {
+        this.resume = resume;
+    }
 
-	public void setDelete(boolean delete) {
-		this.delete = delete;
-	}
+    public boolean isInstall() {
+        return this.install;
+    }
 
-	public boolean isReboot() {
-		return reboot;
-	}
+    public void setInstall(boolean install) {
+        this.install = install;
+    }
 
-	public void setReboot(boolean reboot) {
-		this.reboot = reboot;
-	}
+    public boolean isPostInst() {
+        return this.postInst;
+    }
 
-	public int getRebootDelay() {
-		return rebootDelay;
-	}
+    public void setPostInst(boolean postInst) {
+        this.postInst = postInst;
+    }
 
-	public void setRebootDelay(int rebootDelay) {
-		this.rebootDelay = rebootDelay;
-	}
+    public boolean isDelete() {
+        return this.delete;
+    }
 
-	public String getClientId() {
-		return clientId;
-	}
+    public void setDelete(boolean delete) {
+        this.delete = delete;
+    }
 
-	public void setClientId(String clientId) {
-		this.clientId = clientId;
-	}
+    public boolean isReboot() {
+        return this.reboot;
+    }
 
-	public String getRequestClientId() {
-		return requestClientId;
-	}
+    public void setReboot(boolean reboot) {
+        this.reboot = reboot;
+    }
 
-	public void setRequestClientId(String requestClientId) {
-		this.requestClientId = requestClientId;
-	}
+    public int getRebootDelay() {
+        return this.rebootDelay;
+    }
+
+    public void setRebootDelay(int rebootDelay) {
+        this.rebootDelay = rebootDelay;
+    }
+
+    public String getClientId() {
+        return this.clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getRequestClientId() {
+        return this.requestClientId;
+    }
+
+    public void setRequestClientId(String requestClientId) {
+        this.requestClientId = requestClientId;
+    }
 }

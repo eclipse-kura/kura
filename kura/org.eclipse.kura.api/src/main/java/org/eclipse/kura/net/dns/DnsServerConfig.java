@@ -20,21 +20,24 @@ import org.eclipse.kura.net.NetworkPair;
 
 /**
  * The placeholder for all DNS proxy servers
+ *
  * @author eurotech
  *
  */
 public interface DnsServerConfig extends NetConfig {
 
-	/**
-	 * returns the DNS forwarders associated with this DnsServerConfig
-	 * @return	a {@link List } of DNS forwarders
-	 */
-	public Set<? extends IPAddress> getForwarders();
+    /**
+     * returns the DNS forwarders associated with this DnsServerConfig
+     *
+     * @return a {@link List } of DNS forwarders
+     */
+    public Set<? extends IPAddress> getForwarders();
 
-	/**
-	 * returns the allowed networks for resolving DNS queries
-	 * @return	a {@link List } of {@link NetworkPair } representing the networks that are allowed to
-	 * 			perform DNS queries
-	 */
-	public Set<? extends NetworkPair<? extends IPAddress>> getAllowedNetworks();
+    /**
+     * returns the allowed networks for resolving DNS queries
+     *
+     * @return a {@link List } of {@link NetworkPair } representing the networks that are allowed to
+     *         perform DNS queries
+     */
+    public Set<? extends NetworkPair<? extends IPAddress>> getAllowedNetworks();
 }

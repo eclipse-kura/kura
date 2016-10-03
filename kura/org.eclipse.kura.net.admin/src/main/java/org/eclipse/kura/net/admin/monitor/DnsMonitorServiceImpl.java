@@ -54,19 +54,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
-    
+
     private static final Logger s_logger = LoggerFactory.getLogger(DnsMonitorServiceImpl.class);
 
     private final static String[] EVENT_TOPICS = new String[] {
-        NetworkStatusChangeEvent.NETWORK_EVENT_STATUS_CHANGE_TOPIC,
-        NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC,
-    };
-    
+            NetworkStatusChangeEvent.NETWORK_EVENT_STATUS_CHANGE_TOPIC,
+            NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC, };
+
     private final static long THREAD_INTERVAL = 60000;
     private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
     private static Future<?> s_monitorTask;
     private ExecutorService m_executor;
-    
+
     private boolean m_enabled;
     private static AtomicBoolean stopThread;
     private NetworkConfigurationService m_netConfigService;
@@ -75,128 +74,132 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     private Set<IP4Address> m_forwarders;
 
     public void setNetworkConfigurationService(NetworkConfigurationService netConfigService) {
-        m_netConfigService = netConfigService;
+        this.m_netConfigService = netConfigService;
     }
-    
+
     public void unsetNetworkConfigurationService(NetworkConfigurationService netConfigService) {
-        m_netConfigService = null;
+        this.m_netConfigService = null;
     }
-    
-    protected void activate(ComponentContext componentContext) {        
+
+    protected void activate(ComponentContext componentContext) {
         s_logger.debug("Activating DnsProxyMonitor Service...");
 
         Dictionary<String, String[]> d = new Hashtable<String, String[]>();
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
         componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
-        
+
         try {
-			m_networkConfiguration = m_netConfigService.getNetworkConfiguration();
-		} catch (KuraException e) {
-			s_logger.error("Could not get initial network configuration", e);
-		}
-        
+            this.m_networkConfiguration = this.m_netConfigService.getNetworkConfiguration();
+        } catch (KuraException e) {
+            s_logger.error("Could not get initial network configuration", e);
+        }
+
         stopThread = new AtomicBoolean();
-        
-        //FIXME - brute force handler for DNS updates
+
+        // FIXME - brute force handler for DNS updates
         // m_executorUtil = ExecutorUtil.getInstance();
-        m_executor = Executors.newSingleThreadExecutor();
+        this.m_executor = Executors.newSingleThreadExecutor();
         stopThread.set(false);
-        s_monitorTask = m_executor.submit(new Runnable() {
-    		@Override
-    		public void run() {
-    			while (!stopThread.get()) {
-	    			Thread.currentThread().setName("DnsMonitorServiceImpl");
-	    			Set<IPAddress> dnsServers = LinuxDns.getInstance().getDnServers();
-	    			
-	    			// Check that resolv.conf matches what is configured
-	    			Set<IPAddress> configuredServers = getConfiguredDnsServers();
-	    			if(!configuredServers.equals(dnsServers)) {
-	    				setDnsServers(configuredServers);
-	    				dnsServers = configuredServers;
-	    			}
-	    			
-	    			Set<IP4Address> forwarders = new HashSet<IP4Address>();    			
-	                if(dnsServers != null && !dnsServers.isEmpty()) {
-	                	for(IPAddress dnsServer : dnsServers) {
-	                		s_logger.debug("Found DNS Server: {}", dnsServer.getHostAddress());
-	                		forwarders.add((IP4Address) dnsServer);
-	                	}
-	                }
-	                
-	                if(forwarders != null && !forwarders.isEmpty()) {
-	                	if(!forwarders.equals(m_forwarders)) {
-	                		//there was a change - deal with it
-	                		s_logger.info("Detected DNS resolv.conf change - restarting DNS proxy");
-	                		m_forwarders = forwarders;
-	                		
-	                		try {
-	                            LinuxNamed linuxNamed = LinuxNamed.getInstance();
-	                            DnsServerConfigIP4 currentDnsServerConfig = linuxNamed.getDnsServerConfig();
-	                            DnsServerConfigIP4 newDnsServerConfig = new DnsServerConfigIP4(m_forwarders, m_allowedNetworks); 
-	                            
-	                            if(currentDnsServerConfig.equals(newDnsServerConfig)) {
-	                            	s_logger.debug("DNS server config has changed - updating from " + currentDnsServerConfig + " to " + newDnsServerConfig);
-		                            s_logger.debug("Disabling DNS proxy");
-		                            linuxNamed.disable();
-		                            
-		                            s_logger.debug("Writing config");
-		                            linuxNamed.setConfig(newDnsServerConfig);
-		
-		                            if(m_enabled) {
-		                                sleep(500);
-		                                s_logger.debug("Starting DNS proxy");
-		                                linuxNamed.enable();
-		                            } else {
-		                            	s_logger.debug("DNS proxy not enabled");
-		                            }
-	                            }
-	                        } catch (KuraException e) {
-	                            e.printStackTrace();
-	                        }        
-	                	}
-	                }
-	                try {
-						monitorWait();
-					} catch (InterruptedException e) {
-						s_logger.debug("DNS monitor interrupted", e);
-					}
-    			}
-    		}
-    	});
+        s_monitorTask = this.m_executor.submit(new Runnable() {
+
+            @Override
+            public void run() {
+                while (!stopThread.get()) {
+                    Thread.currentThread().setName("DnsMonitorServiceImpl");
+                    Set<IPAddress> dnsServers = LinuxDns.getInstance().getDnServers();
+
+                    // Check that resolv.conf matches what is configured
+                    Set<IPAddress> configuredServers = getConfiguredDnsServers();
+                    if (!configuredServers.equals(dnsServers)) {
+                        setDnsServers(configuredServers);
+                        dnsServers = configuredServers;
+                    }
+
+                    Set<IP4Address> forwarders = new HashSet<IP4Address>();
+                    if (dnsServers != null && !dnsServers.isEmpty()) {
+                        for (IPAddress dnsServer : dnsServers) {
+                            s_logger.debug("Found DNS Server: {}", dnsServer.getHostAddress());
+                            forwarders.add((IP4Address) dnsServer);
+                        }
+                    }
+
+                    if (forwarders != null && !forwarders.isEmpty()) {
+                        if (!forwarders.equals(DnsMonitorServiceImpl.this.m_forwarders)) {
+                            // there was a change - deal with it
+                            s_logger.info("Detected DNS resolv.conf change - restarting DNS proxy");
+                            DnsMonitorServiceImpl.this.m_forwarders = forwarders;
+
+                            try {
+                                LinuxNamed linuxNamed = LinuxNamed.getInstance();
+                                DnsServerConfigIP4 currentDnsServerConfig = linuxNamed.getDnsServerConfig();
+                                DnsServerConfigIP4 newDnsServerConfig = new DnsServerConfigIP4(
+                                        DnsMonitorServiceImpl.this.m_forwarders,
+                                        DnsMonitorServiceImpl.this.m_allowedNetworks);
+
+                                if (currentDnsServerConfig.equals(newDnsServerConfig)) {
+                                    s_logger.debug("DNS server config has changed - updating from "
+                                            + currentDnsServerConfig + " to " + newDnsServerConfig);
+                                    s_logger.debug("Disabling DNS proxy");
+                                    linuxNamed.disable();
+
+                                    s_logger.debug("Writing config");
+                                    linuxNamed.setConfig(newDnsServerConfig);
+
+                                    if (DnsMonitorServiceImpl.this.m_enabled) {
+                                        sleep(500);
+                                        s_logger.debug("Starting DNS proxy");
+                                        linuxNamed.enable();
+                                    } else {
+                                        s_logger.debug("DNS proxy not enabled");
+                                    }
+                                }
+                            } catch (KuraException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    try {
+                        monitorWait();
+                    } catch (InterruptedException e) {
+                        s_logger.debug("DNS monitor interrupted", e);
+                    }
+                }
+            }
+        });
     }
-    
+
     protected void deactivate(ComponentContext componentContext) {
-        if ((s_monitorTask != null) && (!s_monitorTask.isDone())) {
-        	stopThread.set(true);
-        	monitorNotity();
-        	s_logger.debug("Cancelling DnsMonitorServiceImpl task ...");
-        	s_monitorTask.cancel(true);
-    		s_logger.info("DnsMonitorServiceImpl task cancelled? = {}", s_monitorTask.isDone());
-    		s_monitorTask = null;
+        if (s_monitorTask != null && !s_monitorTask.isDone()) {
+            stopThread.set(true);
+            monitorNotity();
+            s_logger.debug("Cancelling DnsMonitorServiceImpl task ...");
+            s_monitorTask.cancel(true);
+            s_logger.info("DnsMonitorServiceImpl task cancelled? = {}", s_monitorTask.isDone());
+            s_monitorTask = null;
         }
-            
-        if (m_executor != null) {
-        	s_logger.debug("Terminating DnsMonitorServiceImpl Thread ...");
-        	m_executor.shutdownNow();
-    		try {
-				m_executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {
-				s_logger.warn("Interrupted", e);
-			}
-    		s_logger.info("DnsMonitorServiceImpl Thread terminated? - {}", m_executor.isTerminated());
-        	m_executor = null;
+
+        if (this.m_executor != null) {
+            s_logger.debug("Terminating DnsMonitorServiceImpl Thread ...");
+            this.m_executor.shutdownNow();
+            try {
+                this.m_executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                s_logger.warn("Interrupted", e);
+            }
+            s_logger.info("DnsMonitorServiceImpl Thread terminated? - {}", this.m_executor.isTerminated());
+            this.m_executor = null;
         }
     }
-    
+
     @Override
     public void handleEvent(Event event) {
         s_logger.debug("handleEvent - topic: {}", event.getTopic());
         String topic = event.getTopic();
-        
+
         if (topic.equals(NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC)) {
-            NetworkConfigurationChangeEvent netConfigChangedEvent = (NetworkConfigurationChangeEvent)event;
-            String [] propNames = netConfigChangedEvent.getPropertyNames();
-            if ((propNames != null) && (propNames.length > 0)) {
+            NetworkConfigurationChangeEvent netConfigChangedEvent = (NetworkConfigurationChangeEvent) event;
+            String[] propNames = netConfigChangedEvent.getPropertyNames();
+            if (propNames != null && propNames.length > 0) {
                 Map<String, Object> props = new HashMap<String, Object>();
                 for (String propName : propNames) {
                     Object prop = netConfigChangedEvent.getProperty(propName);
@@ -205,100 +208,105 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
                     }
                 }
                 try {
-                    m_networkConfiguration = new NetworkConfiguration(props);
+                    this.m_networkConfiguration = new NetworkConfiguration(props);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        	updateDnsResolverConfig();
-        	updateDnsProxyConfig();
+            updateDnsResolverConfig();
+            updateDnsProxyConfig();
         } else if (topic.equals(NetworkStatusChangeEvent.NETWORK_EVENT_STATUS_CHANGE_TOPIC)) {
-        	updateDnsResolverConfig();
-        	updateDnsProxyConfig();
+            updateDnsResolverConfig();
+            updateDnsProxyConfig();
         }
     }
-    
+
     private void updateDnsResolverConfig() {
-    	s_logger.debug("Updating resolver config");
-    	setDnsServers(getConfiguredDnsServers());
+        s_logger.debug("Updating resolver config");
+        setDnsServers(getConfiguredDnsServers());
     }
 
-	private void updateDnsProxyConfig() {
-		m_enabled = false;
+    private void updateDnsProxyConfig() {
+        this.m_enabled = false;
 
-		m_allowedNetworks = new HashSet<NetworkPair<IP4Address>>();
-		m_forwarders = new HashSet<IP4Address>();
-		        
-		if (m_networkConfiguration != null) {
-			if (m_networkConfiguration.getNetInterfaceConfigs() != null) {
-				List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = m_networkConfiguration
-						.getNetInterfaceConfigs();
+        this.m_allowedNetworks = new HashSet<NetworkPair<IP4Address>>();
+        this.m_forwarders = new HashSet<IP4Address>();
 
-				for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-					if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
-							|| netInterfaceConfig.getType() == NetInterfaceType.WIFI
-							|| netInterfaceConfig.getType() == NetInterfaceType.MODEM) {
-						try {
-							getAllowedNetworks(netInterfaceConfig);
-						} catch (KuraException e) {
-							s_logger.error("Error updating dns proxy", e);
-						}
-					}
-				}
-			}
-		}
-		
-		Set<IPAddress> dnsServers = LinuxDns.getInstance().getDnServers();
-		if(dnsServers != null && !dnsServers.isEmpty()) {
-			for(IPAddress dnsServer : dnsServers) {
-				s_logger.debug("Found DNS Server: {}", dnsServer.getHostAddress());
-				m_forwarders.add((IP4Address) dnsServer);
-			}
-		}
-		
-		try {
-		    LinuxNamed linuxNamed = LinuxNamed.getInstance();
+        if (this.m_networkConfiguration != null) {
+            if (this.m_networkConfiguration.getNetInterfaceConfigs() != null) {
+                List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = this.m_networkConfiguration
+                        .getNetInterfaceConfigs();
 
-		    s_logger.debug("Disabling DNS proxy");
-		    linuxNamed.disable();
-		    
-		    s_logger.debug("Writing config");
-		    DnsServerConfigIP4 dnsServerConfigIP4 = new DnsServerConfigIP4(m_forwarders, m_allowedNetworks);            
-		    linuxNamed.setConfig(dnsServerConfigIP4);
+                for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
+                    if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
+                            || netInterfaceConfig.getType() == NetInterfaceType.WIFI
+                            || netInterfaceConfig.getType() == NetInterfaceType.MODEM) {
+                        try {
+                            getAllowedNetworks(netInterfaceConfig);
+                        } catch (KuraException e) {
+                            s_logger.error("Error updating dns proxy", e);
+                        }
+                    }
+                }
+            }
+        }
 
-		    if(m_enabled) {
-		        sleep(500);
-		        s_logger.debug("Starting DNS proxy");
-		        linuxNamed.enable();
-		    } else {
-		    	s_logger.debug("DNS proxy not enabled");
-		    }
-		} catch (KuraException e) {
-		    e.printStackTrace();
-		}
-	}
-    
-    private void getAllowedNetworks(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
-        
+        Set<IPAddress> dnsServers = LinuxDns.getInstance().getDnServers();
+        if (dnsServers != null && !dnsServers.isEmpty()) {
+            for (IPAddress dnsServer : dnsServers) {
+                s_logger.debug("Found DNS Server: {}", dnsServer.getHostAddress());
+                this.m_forwarders.add((IP4Address) dnsServer);
+            }
+        }
+
+        try {
+            LinuxNamed linuxNamed = LinuxNamed.getInstance();
+
+            s_logger.debug("Disabling DNS proxy");
+            linuxNamed.disable();
+
+            s_logger.debug("Writing config");
+            DnsServerConfigIP4 dnsServerConfigIP4 = new DnsServerConfigIP4(this.m_forwarders, this.m_allowedNetworks);
+            linuxNamed.setConfig(dnsServerConfigIP4);
+
+            if (this.m_enabled) {
+                sleep(500);
+                s_logger.debug("Starting DNS proxy");
+                linuxNamed.enable();
+            } else {
+                s_logger.debug("DNS proxy not enabled");
+            }
+        } catch (KuraException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getAllowedNetworks(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
+            throws KuraException {
+
         String interfaceName = netInterfaceConfig.getName();
         s_logger.debug("Getting DNS proxy config for {}", interfaceName);
 
         List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = null;
         netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();
 
-        if(netInterfaceAddressConfigs != null && netInterfaceAddressConfigs.size() > 0) {
-            for(NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
+        if (netInterfaceAddressConfigs != null && netInterfaceAddressConfigs.size() > 0) {
+            for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
                 List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-                if(netConfigs != null && netConfigs.size() > 0) {
-                    for(int i=0; i<netConfigs.size(); i++) {
+                if (netConfigs != null && netConfigs.size() > 0) {
+                    for (int i = 0; i < netConfigs.size(); i++) {
                         NetConfig netConfig = netConfigs.get(i);
-                        if(netConfig instanceof DhcpServerConfig) {
-                            if(((DhcpServerConfig) netConfig).isPassDns()) {
-                                s_logger.debug("Found an allowed network: " + ((DhcpServerConfig) netConfig).getRouterAddress() + "/" + ((DhcpServerConfig) netConfig).getPrefix());
-                                m_enabled = true;
-                                
-                                //this is an 'allowed network'
-                                m_allowedNetworks.add(new NetworkPair<IP4Address>((IP4Address)((DhcpServerConfig) netConfig).getRouterAddress(), ((DhcpServerConfig) netConfig).getPrefix()));
+                        if (netConfig instanceof DhcpServerConfig) {
+                            if (((DhcpServerConfig) netConfig).isPassDns()) {
+                                s_logger.debug(
+                                        "Found an allowed network: " + ((DhcpServerConfig) netConfig).getRouterAddress()
+                                                + "/" + ((DhcpServerConfig) netConfig).getPrefix());
+                                this.m_enabled = true;
+
+                                // this is an 'allowed network'
+                                this.m_allowedNetworks.add(new NetworkPair<IP4Address>(
+                                        (IP4Address) ((DhcpServerConfig) netConfig).getRouterAddress(),
+                                        ((DhcpServerConfig) netConfig).getPrefix()));
                             }
                         }
                     }
@@ -306,152 +314,157 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
             }
         }
     }
-    
+
     private boolean isEnabledForWan(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
-    	for(NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceConfig.getNetInterfaceAddresses()) {
-    		if (netInterfaceAddressConfig != null) {
-    			List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-    			if (netConfigs != null) {
-		    		for(NetConfig netConfig : netConfigs) {
-		    			if(netConfig instanceof NetConfigIP4) {
-		    				return NetInterfaceStatus.netIPv4StatusEnabledWAN.equals(((NetConfigIP4) netConfig).getStatus());
-		    			}
-		    		}
-    			}
-    		}
-    	}
-    	
-    	return false;
+        for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceConfig.getNetInterfaceAddresses()) {
+            if (netInterfaceAddressConfig != null) {
+                List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
+                if (netConfigs != null) {
+                    for (NetConfig netConfig : netConfigs) {
+                        if (netConfig instanceof NetConfigIP4) {
+                            return NetInterfaceStatus.netIPv4StatusEnabledWAN
+                                    .equals(((NetConfigIP4) netConfig).getStatus());
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
-    
-	private void setDnsServers(Set<IPAddress> newServers) {
-    	LinuxDns linuxDns = LinuxDns.getInstance();
-    	Set<IPAddress> currentServers = linuxDns.getDnServers();
-    	
-    	if(newServers == null || newServers.isEmpty()) {
-    		s_logger.warn("Not Setting DNS servers to empty");
-    		return;
-    	}
-    	
-    	if(currentServers != null && !currentServers.isEmpty()) {
-    		if(!currentServers.equals(newServers)) {
-    			s_logger.info("Change to DNS - setting dns servers: " + newServers);
-    			linuxDns.setDnServers(newServers);
-    		} else {
-    			s_logger.debug("No change to DNS servers - not updating");
-    		}
-    	} else {
-    		s_logger.info("Current DNS servers are null - setting dns servers: " + newServers);
-    		linuxDns.setDnServers(newServers);
-    	}
-	}
+
+    private void setDnsServers(Set<IPAddress> newServers) {
+        LinuxDns linuxDns = LinuxDns.getInstance();
+        Set<IPAddress> currentServers = linuxDns.getDnServers();
+
+        if (newServers == null || newServers.isEmpty()) {
+            s_logger.warn("Not Setting DNS servers to empty");
+            return;
+        }
+
+        if (currentServers != null && !currentServers.isEmpty()) {
+            if (!currentServers.equals(newServers)) {
+                s_logger.info("Change to DNS - setting dns servers: " + newServers);
+                linuxDns.setDnServers(newServers);
+            } else {
+                s_logger.debug("No change to DNS servers - not updating");
+            }
+        } else {
+            s_logger.info("Current DNS servers are null - setting dns servers: " + newServers);
+            linuxDns.setDnServers(newServers);
+        }
+    }
 
     // Get a list of dns servers for all WAN interfaces
-	private Set<IPAddress> getConfiguredDnsServers() {
-		LinkedHashSet<IPAddress> serverList = new LinkedHashSet<IPAddress>();
-    	
-		if(m_networkConfiguration!=null){
-			if(m_networkConfiguration.getNetInterfaceConfigs()!=null){
-				List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = m_networkConfiguration.getNetInterfaceConfigs();
-				// If there are multiple WAN interfaces, their configured DNS servers are all included in no particular order
-				for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {		
-				    if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET || 
-				            netInterfaceConfig.getType() == NetInterfaceType.WIFI || 
-				            netInterfaceConfig.getType() == NetInterfaceType.MODEM) {
-			        	if(isEnabledForWan(netInterfaceConfig)) {
-			        		try {
-			        			Set<IPAddress> servers = getConfiguredDnsServers(netInterfaceConfig);
-			        			s_logger.trace("{} is WAN, adding its dns servers: {}", netInterfaceConfig.getName(), servers);
-								serverList.addAll(servers);
-							} catch (KuraException e) {
-								s_logger.error("Error adding dns servers for " + netInterfaceConfig.getName(), e);
-							}
-				        }
-				    }
-				}
-			}
-		}
-		return serverList;
-	}
+    private Set<IPAddress> getConfiguredDnsServers() {
+        LinkedHashSet<IPAddress> serverList = new LinkedHashSet<IPAddress>();
 
-	// Get a list of dns servers for the specified NetInterfaceConfig
-    private Set<IPAddress> getConfiguredDnsServers(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
-    	String interfaceName = netInterfaceConfig.getName();
-    	s_logger.trace("Getting dns servers for {}", interfaceName);
-    	LinuxDns linuxDns = LinuxDns.getInstance();
-    	LinkedHashSet<IPAddress> serverList = new LinkedHashSet<IPAddress>();
-    	
-    	for(NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceConfig.getNetInterfaceAddresses()) {
-    		for(NetConfig netConfig : netInterfaceAddressConfig.getConfigs()) {
-    			if(netConfig instanceof NetConfigIP4) {
-    				NetConfigIP4 netConfigIP4 = (NetConfigIP4) netConfig;
-					List<IP4Address> userServers = netConfigIP4.getDnsServers();
-    				if(netConfigIP4.isDhcp()) {
-    					// If DHCP but there are user defined entries, use those instead
-    					if(userServers != null && !userServers.isEmpty()) {
-    						s_logger.debug("Configured for DHCP with user-defined servers - adding: {}", userServers);
-    						serverList.addAll(userServers);
-    					} else {
-    						if(netInterfaceConfig.getType().equals(NetInterfaceType.MODEM)) {
-    							// FIXME - don't like this
-    							// cannot use interfaceName here because it one config behind
-    							int pppNo = ((ModemInterfaceConfigImpl) netInterfaceConfig).getPppNum();
-    							if (LinuxNetworkUtil.hasAddress("ppp"+pppNo)) {  
-	    							List<IPAddress> servers = linuxDns.getPppDnServers();   
-	    							if (servers != null) {
-	    								s_logger.debug("Adding PPP dns servers: {}", servers);
-	    								serverList.addAll(servers);
-	    							}
-    							}
-    						} else {
-    							String currentAddress = LinuxNetworkUtil.getCurrentIpAddress(interfaceName);
-    							List<IPAddress> servers = linuxDns.getDhcpDnsServers(interfaceName, currentAddress); 
-    							if (servers != null) {
-    								s_logger.debug("Configured for DHCP - adding DHCP servers: {}", servers);
-    								serverList.addAll(servers);
-    							}
-    						}
-    					}    					
-    				} else {
-    					// If static, use the user defined entries
-    					s_logger.debug("Configured for static - adding user-defined servers: {}", userServers);
-    					serverList.addAll(userServers);
-    				}
-    			}
-    		}
-    	}    	
-    	return serverList;
+        if (this.m_networkConfiguration != null) {
+            if (this.m_networkConfiguration.getNetInterfaceConfigs() != null) {
+                List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = this.m_networkConfiguration
+                        .getNetInterfaceConfigs();
+                // If there are multiple WAN interfaces, their configured DNS servers are all included in no particular
+                // order
+                for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
+                    if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
+                            || netInterfaceConfig.getType() == NetInterfaceType.WIFI
+                            || netInterfaceConfig.getType() == NetInterfaceType.MODEM) {
+                        if (isEnabledForWan(netInterfaceConfig)) {
+                            try {
+                                Set<IPAddress> servers = getConfiguredDnsServers(netInterfaceConfig);
+                                s_logger.trace("{} is WAN, adding its dns servers: {}", netInterfaceConfig.getName(),
+                                        servers);
+                                serverList.addAll(servers);
+                            } catch (KuraException e) {
+                                s_logger.error("Error adding dns servers for " + netInterfaceConfig.getName(), e);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return serverList;
     }
-    
+
+    // Get a list of dns servers for the specified NetInterfaceConfig
+    private Set<IPAddress> getConfiguredDnsServers(
+            NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
+        String interfaceName = netInterfaceConfig.getName();
+        s_logger.trace("Getting dns servers for {}", interfaceName);
+        LinuxDns linuxDns = LinuxDns.getInstance();
+        LinkedHashSet<IPAddress> serverList = new LinkedHashSet<IPAddress>();
+
+        for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceConfig.getNetInterfaceAddresses()) {
+            for (NetConfig netConfig : netInterfaceAddressConfig.getConfigs()) {
+                if (netConfig instanceof NetConfigIP4) {
+                    NetConfigIP4 netConfigIP4 = (NetConfigIP4) netConfig;
+                    List<IP4Address> userServers = netConfigIP4.getDnsServers();
+                    if (netConfigIP4.isDhcp()) {
+                        // If DHCP but there are user defined entries, use those instead
+                        if (userServers != null && !userServers.isEmpty()) {
+                            s_logger.debug("Configured for DHCP with user-defined servers - adding: {}", userServers);
+                            serverList.addAll(userServers);
+                        } else {
+                            if (netInterfaceConfig.getType().equals(NetInterfaceType.MODEM)) {
+                                // FIXME - don't like this
+                                // cannot use interfaceName here because it one config behind
+                                int pppNo = ((ModemInterfaceConfigImpl) netInterfaceConfig).getPppNum();
+                                if (LinuxNetworkUtil.hasAddress("ppp" + pppNo)) {
+                                    List<IPAddress> servers = linuxDns.getPppDnServers();
+                                    if (servers != null) {
+                                        s_logger.debug("Adding PPP dns servers: {}", servers);
+                                        serverList.addAll(servers);
+                                    }
+                                }
+                            } else {
+                                String currentAddress = LinuxNetworkUtil.getCurrentIpAddress(interfaceName);
+                                List<IPAddress> servers = linuxDns.getDhcpDnsServers(interfaceName, currentAddress);
+                                if (servers != null) {
+                                    s_logger.debug("Configured for DHCP - adding DHCP servers: {}", servers);
+                                    serverList.addAll(servers);
+                                }
+                            }
+                        }
+                    } else {
+                        // If static, use the user defined entries
+                        s_logger.debug("Configured for static - adding user-defined servers: {}", userServers);
+                        serverList.addAll(userServers);
+                    }
+                }
+            }
+        }
+        return serverList;
+    }
+
     private static void sleep(int millis) {
         long start = System.currentTimeMillis();
         long now = start;
         long end = start + millis;
-        
-        while(now < end) {
+
+        while (now < end) {
             try {
                 Thread.sleep(end - now);
             } catch (InterruptedException e) {
                 s_logger.debug("sleep interrupted: " + e);
             }
-            
+
             now = System.currentTimeMillis();
         }
     }
-    
-	private void monitorNotity() {
-		if (stopThread != null) {
-			synchronized (stopThread) {
-				stopThread.notifyAll();
-			}
-		}
-	}
-	
-	private void monitorWait() throws InterruptedException {
-		if (stopThread != null) {
-			synchronized (stopThread) {
-				stopThread.wait(THREAD_INTERVAL);
-			}
-		}
-	}
+
+    private void monitorNotity() {
+        if (stopThread != null) {
+            synchronized (stopThread) {
+                stopThread.notifyAll();
+            }
+        }
+    }
+
+    private void monitorWait() throws InterruptedException {
+        if (stopThread != null) {
+            synchronized (stopThread) {
+                stopThread.wait(THREAD_INTERVAL);
+            }
+        }
+    }
 }

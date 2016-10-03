@@ -37,231 +37,226 @@ import org.eclipse.kura.ssl.SslManagerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DownloadImpl implements ProgressListener{
-	private static final Logger s_logger = LoggerFactory.getLogger(DownloadImpl.class);
-	public static final String RESOURCE_DOWNLOAD = "download";
+public class DownloadImpl implements ProgressListener {
 
-	private CloudDeploymentHandlerV2 callback;
-	private DeploymentPackageDownloadOptions options;
-	private DownloadCountingOutputStream downloadHelper;
-	private SslManagerService sslManagerService;
-	private boolean alreadyDownloadedFlag;
-	private String verificationDirectory;
+    private static final Logger s_logger = LoggerFactory.getLogger(DownloadImpl.class);
+    public static final String RESOURCE_DOWNLOAD = "download";
 
-	public DownloadImpl(DeploymentPackageDownloadOptions options, CloudDeploymentHandlerV2 callback){
-		this.options = options;
-		this.callback = callback;
-	}
+    private final CloudDeploymentHandlerV2 callback;
+    private final DeploymentPackageDownloadOptions options;
+    private DownloadCountingOutputStream downloadHelper;
+    private SslManagerService sslManagerService;
+    private boolean alreadyDownloadedFlag;
+    private String verificationDirectory;
 
+    public DownloadImpl(DeploymentPackageDownloadOptions options, CloudDeploymentHandlerV2 callback) {
+        this.options = options;
+        this.callback = callback;
+    }
 
-	// ----------------------------------------------------------------
-	//
-	// Public methods
-	//
-	// ----------------------------------------------------------------
+    // ----------------------------------------------------------------
+    //
+    // Public methods
+    //
+    // ----------------------------------------------------------------
 
-	public DownloadCountingOutputStream getDownloadHelper(){
-		return downloadHelper;
-	}
+    public DownloadCountingOutputStream getDownloadHelper() {
+        return this.downloadHelper;
+    }
 
-	public void setSslManager(SslManagerService sslManager){
-		this.sslManagerService = sslManager;
-	}
+    public void setSslManager(SslManagerService sslManager) {
+        this.sslManagerService = sslManager;
+    }
 
-	public void setAlreadyDownloadedFlag(boolean alreadyDownloaded){
-		this.alreadyDownloadedFlag = alreadyDownloaded;
-	}
+    public void setAlreadyDownloadedFlag(boolean alreadyDownloaded) {
+        this.alreadyDownloadedFlag = alreadyDownloaded;
+    }
 
-	public void setVerificationDirectory(String verificationDirectory){
-		this.verificationDirectory = verificationDirectory;
-	}
+    public void setVerificationDirectory(String verificationDirectory) {
+        this.verificationDirectory = verificationDirectory;
+    }
 
-	@Override
-	public void progressChanged(ProgressEvent progress) {
+    @Override
+    public void progressChanged(ProgressEvent progress) {
 
-		s_logger.info("{}% downloaded", progress.getTransferProgress());
+        s_logger.info("{}% downloaded", progress.getTransferProgress());
 
-		KuraNotifyPayload notify = new KuraNotifyPayload(progress.getClientId());
-		notify.setTimestamp(new Date());
-		notify.setTransferSize(progress.getTransferSize());
-		notify.setTransferProgress(progress.getTransferProgress());
-		notify.setTransferStatus(progress.getTransferStatus());
-		notify.setJobId(progress.getJobId());
-		if (progress.getExceptionMessage() != null){
-			notify.setErrorMessage(progress.getExceptionMessage());
-		}
+        KuraNotifyPayload notify = new KuraNotifyPayload(progress.getClientId());
+        notify.setTimestamp(new Date());
+        notify.setTransferSize(progress.getTransferSize());
+        notify.setTransferProgress(progress.getTransferProgress());
+        notify.setTransferStatus(progress.getTransferStatus());
+        notify.setJobId(progress.getJobId());
+        if (progress.getExceptionMessage() != null) {
+            notify.setErrorMessage(progress.getExceptionMessage());
+        }
 
-		notify.setTransferIndex(progress.getDownloadIndex());
+        notify.setTransferIndex(progress.getDownloadIndex());
 
-		callback.publishMessage(options, notify, RESOURCE_DOWNLOAD);
-	}
+        this.callback.publishMessage(this.options, notify, RESOURCE_DOWNLOAD);
+    }
 
-	public void downloadDeploymentPackageInternal() throws KuraException{
-		File dpFile = null;
-		int downloadIndex = 0;
-		boolean downloadSuccess= true;
-		try {
-			// Download the package to a temporary file.
-			// Check for file existence has already been done
-			dpFile = DownloadFileUtilities.getDpDownloadFile(options);
-			boolean forceDownload = options.isDownloadForced();
+    public void downloadDeploymentPackageInternal() throws KuraException {
+        File dpFile = null;
+        int downloadIndex = 0;
+        boolean downloadSuccess = true;
+        try {
+            // Download the package to a temporary file.
+            // Check for file existence has already been done
+            dpFile = DownloadFileUtilities.getDpDownloadFile(this.options);
+            boolean forceDownload = this.options.isDownloadForced();
 
-			if (!alreadyDownloadedFlag || forceDownload) {
-				s_logger.info("To download");
-				incrementalDownloadFromURL(dpFile, options.getDeployUri(), downloadIndex);
-				downloadIndex++;
+            if (!this.alreadyDownloadedFlag || forceDownload) {
+                s_logger.info("To download");
+                incrementalDownloadFromURL(dpFile, this.options.getDeployUri(), downloadIndex);
+                downloadIndex++;
 
-				if(options.getVerifierURL() != null){
-					File dpVerifier= getDpVerifierFile(options);
-					incrementalDownloadFromURL(dpVerifier, options.getVerifierURL(), downloadIndex);
-				}
-			} else {
-				alreadyDownloadedAsync();
-			}
-		} catch (CancellationException ce) {
-			s_logger.error("Download exception", ce);
-			downloadSuccess = false;
-		} catch (Exception e) {
-			s_logger.info("Download exception", e);
-			downloadSuccess= false;
-			downloadFailedAsync(downloadIndex);
-		} 
+                if (this.options.getVerifierURL() != null) {
+                    File dpVerifier = getDpVerifierFile(this.options);
+                    incrementalDownloadFromURL(dpVerifier, this.options.getVerifierURL(), downloadIndex);
+                }
+            } else {
+                alreadyDownloadedAsync();
+            }
+        } catch (CancellationException ce) {
+            s_logger.error("Download exception", ce);
+            downloadSuccess = false;
+        } catch (Exception e) {
+            s_logger.info("Download exception", e);
+            downloadSuccess = false;
+            downloadFailedAsync(downloadIndex);
+        }
 
+        if (downloadSuccess && dpFile != null && this.options.isInstall()) {
+            s_logger.info("Ready to install");
+            this.callback.installDownloadedFile(dpFile, this.options);
+        }
+    }
 
-		if (downloadSuccess && dpFile != null && options.isInstall()) {
-			s_logger.info("Ready to install");
-			callback.installDownloadedFile(dpFile, options);
-		}
-	}
+    public boolean isAlreadyDownloaded() throws KuraException {
+        try {
+            File dp = DownloadFileUtilities.getDpDownloadFile(this.options);
 
-	public boolean isAlreadyDownloaded() throws KuraException {
-		try {
-			File dp = DownloadFileUtilities.getDpDownloadFile(options);
+            return dp.exists();
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
 
-			return dp.exists();
-		} catch (Exception e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
-	}
+    public boolean deleteDownloadedFile() throws KuraException {
+        try {
+            return DownloadFileUtilities.deleteDownloadedFile(this.options);
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
 
-	public boolean deleteDownloadedFile() throws KuraException {
-		try {
-			return DownloadFileUtilities.deleteDownloadedFile(options);
-		} catch (Exception e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
-	}
+    // ----------------------------------------------------------------
+    //
+    // Private methods
+    //
+    // ----------------------------------------------------------------
 
+    private void incrementalDownloadFromURL(File dpFile, String url, int downloadIndex) throws Exception {
+        OutputStream os = null;
 
-	// ----------------------------------------------------------------
-	//
-	// Private methods
-	//
-	// ----------------------------------------------------------------
+        try {
+            os = new FileOutputStream(dpFile);
+            DownloadOptions downloadOptions = new DownloadOptions();
+            downloadOptions.setOut(os);
+            downloadOptions.setRequestOptions(this.options);
+            downloadOptions.setCallback(this);
+            downloadOptions.setSslManagerService(this.sslManagerService);
+            downloadOptions.setDownloadURL(url);
+            downloadOptions.setAlreadyDownloaded(downloadIndex);
 
-	private void incrementalDownloadFromURL(File dpFile, String url, int downloadIndex) throws Exception {
-		OutputStream os = null;
+            this.downloadHelper = DownloadFactory.getDownloadInstance(this.options.getDownloadProtocol(),
+                    downloadOptions);
+            this.downloadHelper.startWork();
+            this.downloadHelper.close();
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (IOException e1) {
+                    s_logger.error("Exception while trying to close stream.", e1);
+                }
+            }
+        }
 
-		try {
-			os = new FileOutputStream(dpFile);
-			DownloadOptions downloadOptions= new DownloadOptions();
-			downloadOptions.setOut(os);
-			downloadOptions.setRequestOptions(options);
-			downloadOptions.setCallback(this);
-			downloadOptions.setSslManagerService(sslManagerService);
-			downloadOptions.setDownloadURL(url);
-			downloadOptions.setAlreadyDownloaded(downloadIndex);
-			
-			downloadHelper = DownloadFactory.getDownloadInstance(options.getDownloadProtocol(), downloadOptions);
-			downloadHelper.startWork();
-			downloadHelper.close();
-		} finally {
-			if (os != null) {
-				try {
-					os.close();
-				} catch (IOException e1) {
-					s_logger.error("Exception while trying to close stream.", e1);
-				}
-			}
-		}
+        if (this.options.getHash() != null) {
+            String[] hashAlgorithmValue = this.options.getHash().split(":");
 
-		if(options.getHash() != null){
-			String[] hashAlgorithmValue= options.getHash().split(":");
+            String hashAlgorithm = null;
+            String hashValue = null;
+            if (hashAlgorithmValue.length == 2) {
+                hashAlgorithm = hashAlgorithmValue[0].trim();
+                hashValue = hashAlgorithmValue[1].trim();
+            }
+            s_logger.info("--> Going to verify hash signature!");
+            try {
+                String checksum = HashUtil.hash(hashAlgorithm, dpFile);
+                if (hashAlgorithm == null || "".equals(hashAlgorithm) || hashValue == null || "".equals(hashValue)
+                        || checksum == null || !checksum.equals(hashValue)) {
+                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, null,
+                            "Failed to verify checksum with algorithm: " + hashAlgorithm);
+                }
+            } catch (Exception e) {
+                dpFile.delete();
+                throw e;
+            }
+        }
+    }
 
-			String hashAlgorithm= null;
-			String hashValue= null;
-			if(hashAlgorithmValue.length == 2){
-				hashAlgorithm= hashAlgorithmValue[0].trim();
-				hashValue= hashAlgorithmValue[1].trim();
-			}
-			s_logger.info("--> Going to verify hash signature!");
-			try{
-				String checksum= HashUtil.hash(hashAlgorithm, dpFile);
-				if(		   hashAlgorithm == null 
-						|| "".equals(hashAlgorithm) 
-						|| hashValue == null 
-						|| "".equals(hashValue)
-						|| checksum == null
-						|| !checksum.equals(hashValue)
-						){
-					throw new KuraException(KuraErrorCode.INTERNAL_ERROR, null, "Failed to verify checksum with algorithm: " + hashAlgorithm);
-				}
-			}catch(Exception e){
-				dpFile.delete();
-				throw e;
-			}
-		}
-	}
+    // Synchronous messages
+    public static void downloadInProgressSyncMessage(KuraResponsePayload respPayload,
+            DownloadCountingOutputStream downloadHelper, DeploymentPackageDownloadOptions downloadOptions) {
+        respPayload.setTimestamp(new Date());
+        respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE, downloadHelper.getTotalBytes().intValue());
+        respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS,
+                downloadHelper.getDownloadTransferProgressPercentage().intValue());
+        respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS,
+                downloadHelper.getDownloadTransferStatus().getStatusString());
+        respPayload.addMetric(KuraNotifyPayload.METRIC_JOB_ID, downloadOptions.getJobId());
+    }
 
-	//Synchronous messages
-	public static void downloadInProgressSyncMessage(KuraResponsePayload respPayload, DownloadCountingOutputStream downloadHelper, DeploymentPackageDownloadOptions downloadOptions) {
-		respPayload.setTimestamp(new Date());
-		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE, downloadHelper.getTotalBytes().intValue());
-		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS, downloadHelper.getDownloadTransferProgressPercentage().intValue());
-		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS, downloadHelper.getDownloadTransferStatus().getStatusString());
-		respPayload.addMetric(KuraNotifyPayload.METRIC_JOB_ID, downloadOptions.getJobId());
-	}
+    public static void downloadAlreadyDoneSyncMessage(KuraResponsePayload respPayload) {
+        respPayload.setTimestamp(new Date());
+        respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE, 0);
+        respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS, 100);
+        respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS, DOWNLOAD_STATUS.ALREADY_DONE);
+    }
 
-	public static void downloadAlreadyDoneSyncMessage(KuraResponsePayload respPayload) {
-		respPayload.setTimestamp(new Date());
-		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE, 0);
-		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS, 100);
-		respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS, DOWNLOAD_STATUS.ALREADY_DONE);
-	}
+    private void alreadyDownloadedAsync() {
+        KuraNotifyPayload notify = new KuraNotifyPayload(this.options.getClientId());
+        notify.setTimestamp(new Date());
+        notify.setTransferSize(0);
+        notify.setTransferProgress(100);
+        notify.setTransferStatus(DOWNLOAD_STATUS.COMPLETED.getStatusString());
+        notify.setJobId(this.options.getJobId());
 
-	private void alreadyDownloadedAsync(){
-		KuraNotifyPayload notify = new KuraNotifyPayload(options.getClientId());
-		notify.setTimestamp(new Date());
-		notify.setTransferSize(0);
-		notify.setTransferProgress(100);
-		notify.setTransferStatus(DOWNLOAD_STATUS.COMPLETED.getStatusString());
-		notify.setJobId(options.getJobId());
+        this.callback.publishMessage(this.options, notify, RESOURCE_DOWNLOAD);
+    }
 
+    private void downloadFailedAsync(int downloadIndex) {
+        KuraNotifyPayload notify = new KuraNotifyPayload(this.options.getClientId());
+        notify.setTimestamp(new Date());
+        notify.setTransferSize(0);
+        notify.setTransferProgress(0);
+        notify.setTransferStatus(DOWNLOAD_STATUS.FAILED.getStatusString());
+        notify.setJobId(this.options.getJobId());
+        notify.setErrorMessage("Error during download process and verification!"); // message to get cause
+        notify.setTransferIndex(downloadIndex);
 
-		callback.publishMessage(options, notify, RESOURCE_DOWNLOAD);
-	}
+        this.callback.publishMessage(this.options, notify, RESOURCE_DOWNLOAD);
+    }
 
-	private void downloadFailedAsync(int downloadIndex) {
-		KuraNotifyPayload notify = new KuraNotifyPayload(options.getClientId());
-		notify.setTimestamp(new Date());
-		notify.setTransferSize(0);
-		notify.setTransferProgress(0);
-		notify.setTransferStatus(DOWNLOAD_STATUS.FAILED.getStatusString());
-		notify.setJobId(options.getJobId());
-		notify.setErrorMessage("Error during download process and verification!"); //message to get cause
-		notify.setTransferIndex(downloadIndex);
+    private File getDpVerifierFile(DeploymentPackageInstallOptions options) throws IOException {
 
-		callback.publishMessage(options, notify, RESOURCE_DOWNLOAD);
-	}
+        String shName = FileUtilities.getFileName(options.getDpName(), options.getDpVersion(), "_verifier.sh");
+        String packageFilename = new StringBuilder().append(this.verificationDirectory).append(File.separator)
+                .append(shName).toString();
 
-	private File getDpVerifierFile(DeploymentPackageInstallOptions options) throws IOException {
-
-		String shName= FileUtilities.getFileName(options.getDpName(), options.getDpVersion(), "_verifier.sh");
-		String packageFilename = new StringBuilder().append(verificationDirectory)
-				.append(File.separator)
-				.append(shName)
-				.toString();
-
-		return new File(packageFilename);
-	}
+        return new File(packageFilename);
+    }
 }

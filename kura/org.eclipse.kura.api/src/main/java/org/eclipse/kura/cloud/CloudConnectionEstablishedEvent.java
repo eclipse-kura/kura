@@ -16,14 +16,14 @@ import java.util.Map;
 import org.osgi.service.event.Event;
 
 /**
- * CloudConnectionEstablishedEvent is raised with the Cloud Connection is established. 
+ * CloudConnectionEstablishedEvent is raised with the Cloud Connection is established.
  */
-public class CloudConnectionEstablishedEvent extends Event
-{
-	/** Topic of the CloudConnectionEstablishedEvent */
-	public static final String CLOUD_CONNECTION_STATUS_ESTABLISHED = "org/eclipse/kura/cloud/CloudConnectionStatus/ESTABLISHED";
-	
-	public CloudConnectionEstablishedEvent(Map<String, ?> properties) {
-		super(CLOUD_CONNECTION_STATUS_ESTABLISHED, properties);
-	}
+public class CloudConnectionEstablishedEvent extends Event {
+
+    /** Topic of the CloudConnectionEstablishedEvent */
+    public static final String CLOUD_CONNECTION_STATUS_ESTABLISHED = "org/eclipse/kura/cloud/CloudConnectionStatus/ESTABLISHED";
+
+    public CloudConnectionEstablishedEvent(Map<String, ?> properties) {
+        super(CLOUD_CONNECTION_STATUS_ESTABLISHED, properties);
+    }
 }

@@ -41,8 +41,8 @@ import com.google.gwt.user.client.ui.RootPanel;
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
-public class denali implements EntryPoint 
-{
+public class denali implements EntryPoint {
+
     private static final Messages MSGS = GWT.create(Messages.class);
     Logger logger = Logger.getLogger(denali.class.getSimpleName());
     private final GwtStatusServiceAsync gwtStatusService = GWT.create(GwtStatusService.class);
@@ -60,38 +60,43 @@ public class denali implements EntryPoint
      * {@link #onModuleLoad2()} so that the UncaughtExceptionHandler can catch
      * any unexpected exceptions.
      */
-    public void onModuleLoad() 
-    {
+    @Override
+    public void onModuleLoad() {
         // use deferred command to catch initialization exceptions in
         // onModuleLoad2
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+            @Override
             public void execute() {
                 onModuleLoad2();
             }
         });
     }
 
-
     /**
      * This is the 'real' entry point method.
      */
     public void onModuleLoad2() {
 
-        RootPanel.get().add(binder);
+        RootPanel.get().add(this.binder);
 
         // load custom CSS/JS
         loadCss("denali/skin/skin.css");
         ScriptInjector.fromUrl("denali/skin/skin.js?v=1").inject(); // Make sure this request is not cached
 
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
             @Override
             public void onFailure(Throwable ex) {
                 FailureHandler.handle(ex, denali.class.getSimpleName());
             }
 
             @Override
-            public void onSuccess(GwtXSRFToken token) {	
-                gwtDeviceService.findSystemProperties(token, new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {    				
+            public void onSuccess(GwtXSRFToken token) {
+                denali.this.gwtDeviceService.findSystemProperties(token,
+                        new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+
+                    @Override
                     public void onSuccess(ArrayList<GwtGroupedNVPair> results) {
 
                         final GwtSession gwtSession = new GwtSession();
@@ -115,77 +120,105 @@ public class denali implements EntryPoint
                             }
                         }
 
-                        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+                        denali.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
                             @Override
                             public void onFailure(Throwable ex) {
                                 FailureHandler.handle(ex);
                             }
 
                             @Override
-                            public void onSuccess(GwtXSRFToken token) {     
-                                gwtStatusService.getDeviceConfig(token, gwtSession.isNetAdminAvailable(), new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+                            public void onSuccess(GwtXSRFToken token) {
+                                denali.this.gwtStatusService.getDeviceConfig(token, gwtSession.isNetAdminAvailable(),
+                                        new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+
+                                    @Override
                                     public void onFailure(Throwable caught) {
 
                                         FailureHandler.handle(caught);
                                     }
+
+                                    @Override
                                     public void onSuccess(ArrayList<GwtGroupedNVPair> pairs) {
-                                        m_connected = false;
-                                        int connectionNameIndex= 0;
+                                        denali.this.m_connected = false;
+                                        int connectionNameIndex = 0;
                                         for (GwtGroupedNVPair result : pairs) {
-                                            if ("Connection Name".equals(result.getName()) && "CloudService".equals(result.getValue())) {
-                                                GwtGroupedNVPair connectionStatus= pairs.get(connectionNameIndex + 1); // done based on the idea that in the pairs data connection name is before connection status
-                                                if ("Connection Status".equals(connectionStatus.getName()) && "CONNECTED".equals(connectionStatus.getValue())) {
-                                                    m_connected = true;
+                                            if ("Connection Name".equals(result.getName())
+                                                    && "CloudService".equals(result.getValue())) {
+                                                GwtGroupedNVPair connectionStatus = pairs.get(connectionNameIndex + 1); // done
+ // based
+ // on
+ // the
+ // idea
+ // that
+ // in
+ // the
+ // pairs
+ // data
+ // connection
+ // name
+ // is
+ // before
+ // connection
+ // status
+                                                if ("Connection Status".equals(connectionStatus.getName())
+                                                        && "CONNECTED".equals(connectionStatus.getValue())) {
+                                                    denali.this.m_connected = true;
                                                     break;
-                                                }   
+                                                }
                                             }
                                             connectionNameIndex++;
                                         }
-                                        gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
+                                        denali.this.gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
 
+                                            @Override
                                             public void onFailure(Throwable caught) {
                                                 FailureHandler.handle(caught, denali.class.getSimpleName());
-                                                binder.setFooter(gwtSession);
-                                                binder.initSystemPanel(gwtSession, m_connected);
-                                                binder.setSession(gwtSession);
-                                                binder.initServicesTree();
-                                                //binder.setDirty(false);
+                                                denali.this.binder.setFooter(gwtSession);
+                                                denali.this.binder.initSystemPanel(gwtSession, denali.this.m_connected);
+                                                denali.this.binder.setSession(gwtSession);
+                                                denali.this.binder.initServicesTree();
+                                                // binder.setDirty(false);
                                             }
 
+                                            @Override
                                             public void onSuccess(Boolean result) {
-                                                if(result){
-                                                    isDevelopMode = true;
+                                                if (result) {
+                                                    denali.this.isDevelopMode = true;
                                                     gwtSession.setDevelopMode(true);
                                                 }
-                                                binder.setFooter(gwtSession);
-                                                binder.initSystemPanel(gwtSession, m_connected);
-                                                binder.setSession(gwtSession);
-                                                binder.initServicesTree();
-                                                //binder.setDirty(false);
+                                                denali.this.binder.setFooter(gwtSession);
+                                                denali.this.binder.initSystemPanel(gwtSession, denali.this.m_connected);
+                                                denali.this.binder.setSession(gwtSession);
+                                                denali.this.binder.initServicesTree();
+                                                // binder.setDirty(false);
                                             }
                                         });
                                     }
                                 });
-                            }});
+                            }
+                        });
                     }
 
+                    @Override
                     public void onFailure(Throwable caught) {
                         FailureHandler.handle(caught, denali.class.getSimpleName());
-                        binder.setFooter(new GwtSession());
-                        binder.initSystemPanel(new GwtSession(), m_connected);
-                        binder.setSession(new GwtSession());
+                        denali.this.binder.setFooter(new GwtSession());
+                        denali.this.binder.initSystemPanel(new GwtSession(), denali.this.m_connected);
+                        denali.this.binder.setSession(new GwtSession());
                     }
                 });
-            }});
+            }
+        });
     }
 
     private static native void loadCss(String url) /*-{
-		var l = $doc.createElement("link");
-		l.setAttribute("id", url);
-		l.setAttribute("rel", "stylesheet");
-		l.setAttribute("type", "text/css");
-		l.setAttribute("href", url + "?v=1"); // Make sure this request is not cached
-		$doc.getElementsByTagName("head")[0].appendChild(l);
-	}-*/;
+                                                   var l = $doc.createElement("link");
+                                                   l.setAttribute("id", url);
+                                                   l.setAttribute("rel", "stylesheet");
+                                                   l.setAttribute("type", "text/css");
+                                                   l.setAttribute("href", url + "?v=1"); // Make sure this request is not cached
+                                                   $doc.getElementsByTagName("head")[0].appendChild(l);
+                                                   }-*/;
 
 }

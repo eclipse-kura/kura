@@ -13,7 +13,6 @@ package org.eclipse.kura.web.shared.model;
 
 import org.eclipse.kura.web.client.util.KuraBaseModel;
 
-
 public class GwtWifiWirelessModeModel extends KuraBaseModel {
 
     private static final long serialVersionUID = -6095963356000494663L;
@@ -21,11 +20,11 @@ public class GwtWifiWirelessModeModel extends KuraBaseModel {
     public static final String NAME = "name";
     public static final String MODE = "mode";
     public static final String TOOLTIP = "tooltip";
-    
+
     protected GwtWifiWirelessModeModel() {
-        
+
     }
-    
+
     public GwtWifiWirelessModeModel(GwtWifiWirelessMode mode, String name, String tooltip) {
         set(MODE, mode.name());
         set(NAME, name);
@@ -35,52 +34,52 @@ public class GwtWifiWirelessModeModel extends KuraBaseModel {
     public String getName() {
         return get(NAME);
     }
-    
+
     public GwtWifiWirelessMode getMode() {
         GwtWifiWirelessMode mode = null;
         String modeStr = get(MODE);
-        
+
         try {
             mode = GwtWifiWirelessMode.valueOf(modeStr);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         return mode;
     }
-    
+
     public String getTooltip() {
         return get(TOOLTIP);
     }
-    
+
     @Override
     public boolean equals(Object obj) {
-        if(obj == null) {
+        if (obj == null) {
             return false;
         }
-        
+
         if (!(obj instanceof GwtWifiWirelessModeModel)) {
             return false;
         }
-        
+
         GwtWifiWirelessModeModel other = (GwtWifiWirelessModeModel) obj;
-        
-        if(getMode() != null) {
-            if(!getMode().equals(other.getMode())) {
+
+        if (getMode() != null) {
+            if (!getMode().equals(other.getMode())) {
                 return false;
             }
-        } else if(other.getMode() != null) {
+        } else if (other.getMode() != null) {
             return false;
         }
-        
-        if(getTooltip() != null) {
-            if(!getTooltip().equals(other.getTooltip())) {
+
+        if (getTooltip() != null) {
+            if (!getTooltip().equals(other.getTooltip())) {
                 return false;
             }
-        } else if(other.getTooltip() != null) {
+        } else if (other.getTooltip() != null) {
             return false;
         }
-        
+
         return true;
     }
 }

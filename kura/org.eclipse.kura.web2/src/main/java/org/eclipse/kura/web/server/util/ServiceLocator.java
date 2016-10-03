@@ -23,10 +23,11 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 public class ServiceLocator {
+
     private static final ServiceLocator s_instance = new ServiceLocator();
 
-    private ServiceLocator() {}
-
+    private ServiceLocator() {
+    }
 
     public static ServiceLocator getInstance() {
         return s_instance;
@@ -43,8 +44,9 @@ public class ServiceLocator {
         }
         return sr;
     }
-    
-    public <T> Collection<ServiceReference<T>> getServiceReferences(Class<T> serviceClass, String filter) throws GwtKuraException {
+
+    public <T> Collection<ServiceReference<T>> getServiceReferences(Class<T> serviceClass, String filter)
+            throws GwtKuraException {
         final BundleContext bundleContext = Console.getBundleContext();
         Collection<ServiceReference<T>> sr = null;
         if (bundleContext != null) {
@@ -61,7 +63,7 @@ public class ServiceLocator {
     }
 
     public <T> T getService(Class<T> serviceClass) throws GwtKuraException {
-        T service = null; 
+        T service = null;
 
         ServiceReference<T> sr = getServiceReference(serviceClass);
         if (sr != null) {
@@ -71,7 +73,7 @@ public class ServiceLocator {
     }
 
     public <T> T getService(ServiceReference<T> serviceReference) throws GwtKuraException {
-        T service = null; 
+        T service = null;
         BundleContext bundleContext = Console.getBundleContext();
         if (bundleContext != null && serviceReference != null) {
             service = bundleContext.getService(serviceReference);
@@ -91,10 +93,10 @@ public class ServiceLocator {
 
         BundleContext bundleContext = Console.getBundleContext();
         if (bundleContext != null) {
-            Collection<ServiceReference<T>> serviceReferences= getServiceReferences(serviceClass, filter);
+            Collection<ServiceReference<T>> serviceReferences = getServiceReferences(serviceClass, filter);
 
             if (serviceReferences != null) {
-                services= new ArrayList<T>(serviceReferences.size());
+                services = new ArrayList<T>(serviceReferences.size());
                 for (ServiceReference<T> sr : serviceReferences) {
                     services.add(getService(sr));
                 }
@@ -103,7 +105,7 @@ public class ServiceLocator {
 
         return services;
     }
-    
+
     public boolean ungetService(ServiceReference<?> serviceReference) {
         BundleContext bundleContext = Console.getBundleContext();
         if (bundleContext != null && serviceReference != null) {

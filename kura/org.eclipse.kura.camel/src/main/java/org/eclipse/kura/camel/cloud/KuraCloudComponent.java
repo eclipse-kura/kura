@@ -50,7 +50,8 @@ public class KuraCloudComponent extends UriEndpointComponent {
         final CloudService cloudService = lookupCloudService();
 
         if (cloudService == null) {
-            throw new IllegalStateException("'cloudService' is not set and not found in Camel context service registry");
+            throw new IllegalStateException(
+                    "'cloudService' is not set and not found in Camel context service registry");
         }
 
         this.cache = new CloudClientCacheImpl(cloudService);

@@ -13,22 +13,21 @@ package org.eclipse.kura.core.configuration;
 
 import java.util.List;
 
-
 /**
  * Utility class to serialize a set of snapshot ids.
  */
-public class XmlSnapshotIdResult 
-{
-	private List<Long> snapshotIds;
-	
-	public XmlSnapshotIdResult()
-	{}
+public class XmlSnapshotIdResult {
 
-	public List<Long> getSnapshotIds() {
-		return snapshotIds;
-	}
+    private List<Long> snapshotIds;
 
-	public void setSnapshotIds(List<Long> snapshotIds) {
-		this.snapshotIds = snapshotIds;
-	}
+    public XmlSnapshotIdResult() {
+    }
+
+    public List<Long> getSnapshotIds() {
+        return this.snapshotIds;
+    }
+
+    public void setSnapshotIds(List<Long> snapshotIds) {
+        this.snapshotIds = snapshotIds;
+    }
 }

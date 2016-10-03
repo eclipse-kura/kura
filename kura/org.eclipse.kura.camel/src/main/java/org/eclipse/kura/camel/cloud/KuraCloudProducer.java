@@ -41,10 +41,13 @@ public class KuraCloudProducer extends DefaultProducer {
 
         String topic = firstNotNull(in.getHeader(CAMEL_KURA_CLOUD_TOPIC, String.class), getEndpoint().getTopic());
         int qos = firstNotNull(in.getHeader(CAMEL_KURA_CLOUD_QOS, Integer.class), getEndpoint().getQos());
-        int priority = firstNotNull(in.getHeader(CAMEL_KURA_CLOUD_PRIORITY, Integer.class), getEndpoint().getPriority());
+        int priority = firstNotNull(in.getHeader(CAMEL_KURA_CLOUD_PRIORITY, Integer.class),
+                getEndpoint().getPriority());
         boolean retain = firstNotNull(in.getHeader(CAMEL_KURA_CLOUD_RETAIN, Boolean.class), getEndpoint().isRetain());
-        boolean control = firstNotNull(in.getHeader(CAMEL_KURA_CLOUD_CONTROL, Boolean.class), getEndpoint().isControl());
-        String deviceId = firstNotNull(in.getHeader(CAMEL_KURA_CLOUD_DEVICEID, String.class), getEndpoint().getDeviceId());
+        boolean control = firstNotNull(in.getHeader(CAMEL_KURA_CLOUD_CONTROL, Boolean.class),
+                getEndpoint().isControl());
+        String deviceId = firstNotNull(in.getHeader(CAMEL_KURA_CLOUD_DEVICEID, String.class),
+                getEndpoint().getDeviceId());
 
         Object body = in.getBody();
         if (body == null) {

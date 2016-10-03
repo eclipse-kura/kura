@@ -11,46 +11,45 @@
  *******************************************************************************/
 package org.eclipse.kura.core.deployment.xml;
 
-
 public class XmlBundle {
-	
-	private String name;
-	
-	private String version;
-	
-	private long id;
-	
-	private String state;
 
-	public String getName() {
-		return name;
-	}
+    private String name;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    private String version;
 
-	public String getVersion() {
-		return version;
-	}
+    private long id;
 
-	public void setVersion(String version) {
-		this.version = version;
-	}
+    private String state;
 
-	public long getId() {
-		return id;
-	}
+    public String getName() {
+        return this.name;
+    }
 
-	public void setId(long id) {
-		this.id = id;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getState() {
-		return state;
-	}
+    public String getVersion() {
+        return this.version;
+    }
 
-	public void setState(String state) {
-		this.state = state;
-	}
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public long getId() {
+        return this.id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getState() {
+        return this.state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
 }

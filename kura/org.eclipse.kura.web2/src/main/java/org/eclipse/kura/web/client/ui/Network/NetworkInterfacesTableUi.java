@@ -46,242 +46,250 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class NetworkInterfacesTableUi extends Composite {
 
-	private static NetworkInterfacesTableUiUiBinder uiBinder = GWT.create(NetworkInterfacesTableUiUiBinder.class);
+    private static NetworkInterfacesTableUiUiBinder uiBinder = GWT.create(NetworkInterfacesTableUiUiBinder.class);
 
-	interface NetworkInterfacesTableUiUiBinder extends
-	UiBinder<Widget, NetworkInterfacesTableUi> {
-	}
+    interface NetworkInterfacesTableUiUiBinder extends UiBinder<Widget, NetworkInterfacesTableUi> {
+    }
 
-	private static final Messages MSGS = GWT.create(Messages.class);
-	private static final String SELECTED_INTERFACE = "ui.selected.interface";
-	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
+    private static final Messages MSGS = GWT.create(Messages.class);
+    private static final String SELECTED_INTERFACE = "ui.selected.interface";
+    private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
 
-	GwtSession session;
-	NetworkTabsUi tabs;
-	GwtNetInterfaceConfig selection;
+    GwtSession session;
+    NetworkTabsUi tabs;
+    GwtNetInterfaceConfig selection;
 
-	@UiField
-	Alert notification;
-	@UiField
+    @UiField
+    Alert notification;
+    @UiField
 
-	CellTable<GwtNetInterfaceConfig> interfacesGrid = new CellTable<GwtNetInterfaceConfig>();
+    CellTable<GwtNetInterfaceConfig> interfacesGrid = new CellTable<GwtNetInterfaceConfig>();
 
-	private ListDataProvider<GwtNetInterfaceConfig> interfacesProvider = new ListDataProvider<GwtNetInterfaceConfig>();
-	final SingleSelectionModel<GwtNetInterfaceConfig> selectionModel = new SingleSelectionModel<GwtNetInterfaceConfig>();
-	TextColumn<GwtNetInterfaceConfig> col1;
+    private final ListDataProvider<GwtNetInterfaceConfig> interfacesProvider = new ListDataProvider<GwtNetInterfaceConfig>();
+    final SingleSelectionModel<GwtNetInterfaceConfig> selectionModel = new SingleSelectionModel<GwtNetInterfaceConfig>();
+    TextColumn<GwtNetInterfaceConfig> col1;
 
-	public NetworkInterfacesTableUi(GwtSession s,	NetworkTabsUi tabsPanel) {
-		initWidget(uiBinder.createAndBindUi(this));
-		this.session = s;
-		this.tabs = tabsPanel;
-		initTable();
-		loadData();
+    public NetworkInterfacesTableUi(GwtSession s, NetworkTabsUi tabsPanel) {
+        initWidget(uiBinder.createAndBindUi(this));
+        this.session = s;
+        this.tabs = tabsPanel;
+        initTable();
+        loadData();
 
-		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        this.selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
-			@Override
-			public void onSelectionChange(SelectionChangeEvent event) {
-				if (selection != null && tabs.isDirty()) {
-					// there was an earlier selection, changes have not
-					// been saved						
-					final Modal confirm = new Modal();
-					ModalBody confirmBody = new ModalBody();
-					ModalFooter confirmFooter = new ModalFooter();
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                if (NetworkInterfacesTableUi.this.selection != null && NetworkInterfacesTableUi.this.tabs.isDirty()) {
+                    // there was an earlier selection, changes have not
+                    // been saved
+                    final Modal confirm = new Modal();
+                    ModalBody confirmBody = new ModalBody();
+                    ModalFooter confirmFooter = new ModalFooter();
 
-					confirm.setTitle(MSGS.confirm());
-					confirmBody.add(new Span(MSGS.deviceConfigDirty()));
-					confirmFooter.add(new Button(MSGS.yesButton(),
-							new ClickHandler() {
-						@Override
-						public void onClick(ClickEvent event) {
-							confirm.hide();
-							selection = selectionModel.getSelectedObject();
-							if (selection != null) {
-								session.set(SELECTED_INTERFACE, selection.getName());
-								tabs.setNetInterface(selection);
-								tabs.setDirty(false);
-							}
-						}
-					}));
+                    confirm.setTitle(MSGS.confirm());
+                    confirmBody.add(new Span(MSGS.deviceConfigDirty()));
+                    confirmFooter.add(new Button(MSGS.yesButton(), new ClickHandler() {
 
-					confirmFooter.add(new Button(MSGS.noButton(),
-							new ClickHandler() {
-						@Override
-						public void onClick(ClickEvent event) {
-							confirm.hide();
-						}
-					}));
-					confirm.add(confirmBody);
-					confirm.add(confirmFooter);
-					confirm.show();
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            confirm.hide();
+                            NetworkInterfacesTableUi.this.selection = NetworkInterfacesTableUi.this.selectionModel
+                                    .getSelectedObject();
+                            if (NetworkInterfacesTableUi.this.selection != null) {
+                                NetworkInterfacesTableUi.this.session.set(SELECTED_INTERFACE,
+                                        NetworkInterfacesTableUi.this.selection.getName());
+                                NetworkInterfacesTableUi.this.tabs
+                                        .setNetInterface(NetworkInterfacesTableUi.this.selection);
+                                NetworkInterfacesTableUi.this.tabs.setDirty(false);
+                            }
+                        }
+                    }));
 
-				} else {
-					// no unsaved changes
-					selection = selectionModel.getSelectedObject();
-					if (selection != null) {
-						session.set(SELECTED_INTERFACE, selection.getName());
-						tabs.setNetInterface(selection);
-					}
-				}
-			}
-		});
+                    confirmFooter.add(new Button(MSGS.noButton(), new ClickHandler() {
 
-	}
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            confirm.hide();
+                        }
+                    }));
+                    confirm.add(confirmBody);
+                    confirm.add(confirmFooter);
+                    confirm.show();
 
+                } else {
+                    // no unsaved changes
+                    NetworkInterfacesTableUi.this.selection = NetworkInterfacesTableUi.this.selectionModel
+                            .getSelectedObject();
+                    if (NetworkInterfacesTableUi.this.selection != null) {
+                        NetworkInterfacesTableUi.this.session.set(SELECTED_INTERFACE,
+                                NetworkInterfacesTableUi.this.selection.getName());
+                        NetworkInterfacesTableUi.this.tabs.setNetInterface(NetworkInterfacesTableUi.this.selection);
+                    }
+                }
+            }
+        });
 
-	public void refresh() {
-		if (selection != null && tabs.isDirty()) {
-			// there was an earlier selection, changes have not been saved
-			final Modal confirm = new Modal();
-			ModalBody confirmBody = new ModalBody();
-			ModalFooter confirmFooter = new ModalFooter();
+    }
 
-			confirm.setTitle(MSGS.confirm());
-			confirmBody.add(new Span(MSGS.deviceConfigDirty()));
-			confirmFooter.add(new Button(MSGS.yesButton(),
-					new ClickHandler() {
-				@Override
-				public void onClick(ClickEvent event) {
-					confirm.hide();
-					//selection = null;
-					tabs.setDirty(false);
-					loadData();
-				}
-			}));
+    public void refresh() {
+        if (this.selection != null && this.tabs.isDirty()) {
+            // there was an earlier selection, changes have not been saved
+            final Modal confirm = new Modal();
+            ModalBody confirmBody = new ModalBody();
+            ModalFooter confirmFooter = new ModalFooter();
 
-			confirmFooter.add(new Button(MSGS.noButton(),
-					new ClickHandler() {
-				@Override
-				public void onClick(ClickEvent event) {
-					confirm.hide();
-				}
-			}));
-			confirm.add(confirmBody);
-			confirm.add(confirmFooter);
-			confirm.show();
-		} else {
-			tabs.setDirty(false);
-			loadData();
-		}
-	}
+            confirm.setTitle(MSGS.confirm());
+            confirmBody.add(new Span(MSGS.deviceConfigDirty()));
+            confirmFooter.add(new Button(MSGS.yesButton(), new ClickHandler() {
 
+                @Override
+                public void onClick(ClickEvent event) {
+                    confirm.hide();
+                    // selection = null;
+                    NetworkInterfacesTableUi.this.tabs.setDirty(false);
+                    loadData();
+                }
+            }));
 
+            confirmFooter.add(new Button(MSGS.noButton(), new ClickHandler() {
 
-	/*--------------------------------------
-	 * -------Private methods---------------
-	 --------------------------------------*/
+                @Override
+                public void onClick(ClickEvent event) {
+                    confirm.hide();
+                }
+            }));
+            confirm.add(confirmBody);
+            confirm.add(confirmFooter);
+            confirm.show();
+        } else {
+            this.tabs.setDirty(false);
+            loadData();
+        }
+    }
 
-	private void initTable() {
-		col1 = new TextColumn<GwtNetInterfaceConfig>() {
-			@Override
-			public String getValue(GwtNetInterfaceConfig object) {
-				return object.getName();
-			}
-		};
-		col1.setCellStyleNames("status-table-row");
-		col1.setSortable(true);
-		interfacesGrid.addColumn(col1, MSGS.netInterfaceName());
+    /*--------------------------------------
+     * -------Private methods---------------
+     --------------------------------------*/
 
-		interfacesProvider.addDataDisplay(interfacesGrid);
-		interfacesGrid.setSelectionModel(selectionModel);
-		
-		interfacesGrid.getColumnSortList().push(col1);
-	}
+    private void initTable() {
+        this.col1 = new TextColumn<GwtNetInterfaceConfig>() {
 
-	private void loadData() {
-		EntryClassUi.showWaitModal();
-		interfacesProvider.getList().clear();
-		gwtNetworkService.findNetInterfaceConfigurations(new AsyncCallback<List<GwtNetInterfaceConfig>>() {
+            @Override
+            public String getValue(GwtNetInterfaceConfig object) {
+                return object.getName();
+            }
+        };
+        this.col1.setCellStyleNames("status-table-row");
+        this.col1.setSortable(true);
+        this.interfacesGrid.addColumn(this.col1, MSGS.netInterfaceName());
 
-			@Override
-			public void onFailure(Throwable caught) {
-				EntryClassUi.hideWaitModal();
-				FailureHandler.handle(caught);
-			}
+        this.interfacesProvider.addDataDisplay(this.interfacesGrid);
+        this.interfacesGrid.setSelectionModel(this.selectionModel);
 
-			@Override
-			public void onSuccess(List<GwtNetInterfaceConfig> result) {
-				ListHandler<GwtNetInterfaceConfig> columnSortHandler = new ListHandler<GwtNetInterfaceConfig>(interfacesProvider.getList());
-			    columnSortHandler.setComparator(col1, new Comparator<GwtNetInterfaceConfig>() {
-			          public int compare(GwtNetInterfaceConfig o1, GwtNetInterfaceConfig o2) {
-			            if (o1 == o2) {
-			              return 0;
-			            }
+        this.interfacesGrid.getColumnSortList().push(this.col1);
+    }
 
-			            // Compare the name columns.
-			            if (o1 != null) {
-			              return (o2 != null) ? compareFromName(o1.getName(), o2.getName()) : 1;
-			            }
-			            return -1;
-			          }
-			        });
-			    interfacesGrid.addColumnSortHandler(columnSortHandler);
+    private void loadData() {
+        EntryClassUi.showWaitModal();
+        this.interfacesProvider.getList().clear();
+        this.gwtNetworkService.findNetInterfaceConfigurations(new AsyncCallback<List<GwtNetInterfaceConfig>>() {
 
-				interfacesProvider.getList().addAll(result);
-				ColumnSortEvent.fire(interfacesGrid, interfacesGrid.getColumnSortList());
-				interfacesProvider.flush();
+            @Override
+            public void onFailure(Throwable caught) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(caught);
+            }
 
-				if (!interfacesProvider.getList().isEmpty()) {
-					interfacesGrid.setVisible(true);
-					notification.setVisible(false);
-					
-					// Check session to see if interface was already chosen
-					// Must select based on name, as keys in SelectionModel change across RPC calls
-					String sessionSelection = (String) session.get(SELECTED_INTERFACE);
-					if (sessionSelection != null) {
-						for (GwtNetInterfaceConfig gc : interfacesProvider.getList()) {
-							if (gc.getName().equals(sessionSelection)) {
-								selectionModel.setSelected(gc, true);
-								break;
-							}							
-						}
-					}
-					else {
-						selectionModel.setSelected(interfacesProvider.getList().get(0),	true);						
-					}
+            @Override
+            public void onSuccess(List<GwtNetInterfaceConfig> result) {
+                ListHandler<GwtNetInterfaceConfig> columnSortHandler = new ListHandler<GwtNetInterfaceConfig>(
+                        NetworkInterfacesTableUi.this.interfacesProvider.getList());
+                columnSortHandler.setComparator(NetworkInterfacesTableUi.this.col1,
+                        new Comparator<GwtNetInterfaceConfig>() {
 
-				} else {
-					interfacesGrid.setVisible(false);
-					notification.setVisible(true);
-					notification.setText(MSGS.netTableNoInterfaces());
-				}
-				EntryClassUi.hideWaitModal();
-			}
-		});
-	}
-	
-	private int compareFromName (String name1, String name2) {
-		int result= 1;
-		if (name1.equals(name2)) {
-			result= 0;
-		}
-		if ("lo".equals(name1)) {
-			result= -1;
-		}
-		if (name1.startsWith("eth") && !"lo".equals(name2)) {
-			if (name2.startsWith("eth")) {
-				//compare eths
-				result= name1.compareTo(name2);
-			} else {
-				result= -1;
-			}
-		}
-		if (name1.startsWith("wlan") && !name2.startsWith("lo") && !name2.startsWith("eth")) {
-			if (name2.startsWith("wlan")) {
-				//compare wlans
-				result= name1.compareTo(name2);
-			} else {
-				result= -1;
-			}
-		}
-		if (name1.startsWith("ppp") && !name2.startsWith("wlan") && !name2.startsWith("lo") && !name2.startsWith("eth")) {
-			if (name2.startsWith("ppp")) {
-				//compare ppps
-				result= name1.compareTo(name2);
-			} else {
-				result= -1;
-			}
-		}
-		return result;
-	}
+                    @Override
+                    public int compare(GwtNetInterfaceConfig o1, GwtNetInterfaceConfig o2) {
+                        if (o1 == o2) {
+                            return 0;
+                        }
+
+                        // Compare the name columns.
+                        if (o1 != null) {
+                            return o2 != null ? compareFromName(o1.getName(), o2.getName()) : 1;
+                        }
+                        return -1;
+                    }
+                });
+                NetworkInterfacesTableUi.this.interfacesGrid.addColumnSortHandler(columnSortHandler);
+
+                NetworkInterfacesTableUi.this.interfacesProvider.getList().addAll(result);
+                ColumnSortEvent.fire(NetworkInterfacesTableUi.this.interfacesGrid,
+                        NetworkInterfacesTableUi.this.interfacesGrid.getColumnSortList());
+                NetworkInterfacesTableUi.this.interfacesProvider.flush();
+
+                if (!NetworkInterfacesTableUi.this.interfacesProvider.getList().isEmpty()) {
+                    NetworkInterfacesTableUi.this.interfacesGrid.setVisible(true);
+                    NetworkInterfacesTableUi.this.notification.setVisible(false);
+
+                    // Check session to see if interface was already chosen
+                    // Must select based on name, as keys in SelectionModel change across RPC calls
+                    String sessionSelection = (String) NetworkInterfacesTableUi.this.session.get(SELECTED_INTERFACE);
+                    if (sessionSelection != null) {
+                        for (GwtNetInterfaceConfig gc : NetworkInterfacesTableUi.this.interfacesProvider.getList()) {
+                            if (gc.getName().equals(sessionSelection)) {
+                                NetworkInterfacesTableUi.this.selectionModel.setSelected(gc, true);
+                                break;
+                            }
+                        }
+                    } else {
+                        NetworkInterfacesTableUi.this.selectionModel
+                                .setSelected(NetworkInterfacesTableUi.this.interfacesProvider.getList().get(0), true);
+                    }
+
+                } else {
+                    NetworkInterfacesTableUi.this.interfacesGrid.setVisible(false);
+                    NetworkInterfacesTableUi.this.notification.setVisible(true);
+                    NetworkInterfacesTableUi.this.notification.setText(MSGS.netTableNoInterfaces());
+                }
+                EntryClassUi.hideWaitModal();
+            }
+        });
+    }
+
+    private int compareFromName(String name1, String name2) {
+        int result = 1;
+        if (name1.equals(name2)) {
+            result = 0;
+        }
+        if ("lo".equals(name1)) {
+            result = -1;
+        }
+        if (name1.startsWith("eth") && !"lo".equals(name2)) {
+            if (name2.startsWith("eth")) {
+                // compare eths
+                result = name1.compareTo(name2);
+            } else {
+                result = -1;
+            }
+        }
+        if (name1.startsWith("wlan") && !name2.startsWith("lo") && !name2.startsWith("eth")) {
+            if (name2.startsWith("wlan")) {
+                // compare wlans
+                result = name1.compareTo(name2);
+            } else {
+                result = -1;
+            }
+        }
+        if (name1.startsWith("ppp") && !name2.startsWith("wlan") && !name2.startsWith("lo")
+                && !name2.startsWith("eth")) {
+            if (name2.startsWith("ppp")) {
+                // compare ppps
+                result = name1.compareTo(name2);
+            } else {
+                result = -1;
+            }
+        }
+        return result;
+    }
 }

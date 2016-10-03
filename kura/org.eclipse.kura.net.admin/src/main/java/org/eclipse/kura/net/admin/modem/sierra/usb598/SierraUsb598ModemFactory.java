@@ -25,59 +25,60 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class SierraUsb598ModemFactory implements CellularModemFactory {
 
-	private static SierraUsb598ModemFactory s_factoryInstance = null;
-	private static ModemTechnologyType s_type = ModemTechnologyType.EVDO;
-	private BundleContext s_bundleContext = null;
-	private Hashtable<String, SierraUsb598> m_modemServices = null;
-	private ConnectionFactory m_connectionFactory = null;
-	
-	private SierraUsb598ModemFactory() {
-		s_bundleContext = FrameworkUtil.getBundle(NetworkConfigurationService.class).getBundleContext();
-		
-		ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<ConnectionFactory, ConnectionFactory>(s_bundleContext, ConnectionFactory.class, null);
-		serviceTracker.open(true);
-		m_connectionFactory = serviceTracker.getService();
-		
-		m_modemServices = new Hashtable<String, SierraUsb598>();
-	}
-	
-	public static SierraUsb598ModemFactory getInstance() {
-	    if(s_factoryInstance == null) {
-	        s_factoryInstance = new SierraUsb598ModemFactory();
-	    }
-	    return s_factoryInstance;
-	}
+    private static SierraUsb598ModemFactory s_factoryInstance = null;
+    private static ModemTechnologyType s_type = ModemTechnologyType.EVDO;
+    private BundleContext s_bundleContext = null;
+    private Hashtable<String, SierraUsb598> m_modemServices = null;
+    private ConnectionFactory m_connectionFactory = null;
 
-	@Override
-	public CellularModem obtainCellularModemService(ModemDevice modemDevice, String platform) throws Exception {
-		String key = modemDevice.getProductName();
-		SierraUsb598 sierraUsb598 = m_modemServices.get(key);
+    private SierraUsb598ModemFactory() {
+        this.s_bundleContext = FrameworkUtil.getBundle(NetworkConfigurationService.class).getBundleContext();
 
-		if (sierraUsb598 == null) {
-			sierraUsb598 = new SierraUsb598(modemDevice, m_connectionFactory);
-			sierraUsb598.bind();
-			m_modemServices.put(key, sierraUsb598);
-		} else {
-			sierraUsb598.setModemDevice(modemDevice);
-		}
-		
-		return sierraUsb598;
-	}
+        ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<ConnectionFactory, ConnectionFactory>(
+                this.s_bundleContext, ConnectionFactory.class, null);
+        serviceTracker.open(true);
+        this.m_connectionFactory = serviceTracker.getService();
 
-	@Override
-	public Hashtable<String, ? extends CellularModem> getModemServices() {
-		return m_modemServices;
-	}
+        this.m_modemServices = new Hashtable<String, SierraUsb598>();
+    }
 
-	@Override
-	public void releaseModemService(String usbPortAddress) {
-		SierraUsb598 sierraUsb598 = m_modemServices.remove(usbPortAddress);
-		sierraUsb598.unbind();
-	}
+    public static SierraUsb598ModemFactory getInstance() {
+        if (s_factoryInstance == null) {
+            s_factoryInstance = new SierraUsb598ModemFactory();
+        }
+        return s_factoryInstance;
+    }
 
-	@Override
-	@Deprecated
-	public ModemTechnologyType getType() {
-		return s_type;
-	}
+    @Override
+    public CellularModem obtainCellularModemService(ModemDevice modemDevice, String platform) throws Exception {
+        String key = modemDevice.getProductName();
+        SierraUsb598 sierraUsb598 = this.m_modemServices.get(key);
+
+        if (sierraUsb598 == null) {
+            sierraUsb598 = new SierraUsb598(modemDevice, this.m_connectionFactory);
+            sierraUsb598.bind();
+            this.m_modemServices.put(key, sierraUsb598);
+        } else {
+            sierraUsb598.setModemDevice(modemDevice);
+        }
+
+        return sierraUsb598;
+    }
+
+    @Override
+    public Hashtable<String, ? extends CellularModem> getModemServices() {
+        return this.m_modemServices;
+    }
+
+    @Override
+    public void releaseModemService(String usbPortAddress) {
+        SierraUsb598 sierraUsb598 = this.m_modemServices.remove(usbPortAddress);
+        sierraUsb598.unbind();
+    }
+
+    @Override
+    @Deprecated
+    public ModemTechnologyType getType() {
+        return s_type;
+    }
 }

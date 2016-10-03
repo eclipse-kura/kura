@@ -19,85 +19,73 @@ import org.slf4j.LoggerFactory;
 /**
  * Utility class to invoke CloudClientListeners catching and ignoring possible raised exceptions.
  */
-public class CloudClientListenerAdapter implements CloudClientListener  
-{
-	private static final Logger s_logger = LoggerFactory.getLogger(CloudClientListenerAdapter.class);
-	
-	private CloudClientListener m_listener;
-	
-	CloudClientListenerAdapter(CloudClientListener listener) {
-		m_listener = listener;
-	}
-	
-	public CloudClientListener getCloudClientListenerAdapted() {
-		return m_listener;
-	}
-	
-	@Override
-	public void onControlMessageArrived(String deviceId, String appTopic,
-										KuraPayload msg, int qos, boolean retain) 
-	{
-		try {
-			m_listener.onControlMessageArrived(deviceId, appTopic, msg, qos, retain);
-		}
-		catch (Exception e) {
-			s_logger.error("IGNORED - Error notifying "+m_listener+" for onControlMessageArrived", e);			
-		}
-	}
+public class CloudClientListenerAdapter implements CloudClientListener {
 
-	@Override
-	public void onMessageArrived(String deviceId, String appTopic,
-							     KuraPayload msg, int qos, boolean retain) 
-	{
-		try {
-			m_listener.onMessageArrived(deviceId, appTopic, msg, qos, retain);
-		}
-		catch (Exception e) {
-			s_logger.error("IGNORED - Error notifying "+m_listener+" for onMessageArrived", e);			
-		}
-	}
+    private static final String IGNORED_ERROR_NOTIFYING = "IGNORED - Error notifying ";
 
-	@Override
-	public void onConnectionLost() 
-	{
-		try {
-			m_listener.onConnectionLost();
-		}
-		catch (Exception e) {
-			s_logger.error("IGNORED - Error notifying "+m_listener+" for onConnectionLost", e);			
-		}
-	}
+    private static final Logger s_logger = LoggerFactory.getLogger(CloudClientListenerAdapter.class);
 
-	@Override
-	public void onConnectionEstablished() 
-	{
-		try {
-			m_listener.onConnectionEstablished();
-		}
-		catch (Exception e) {
-			s_logger.error("IGNORED - Error notifying "+m_listener+" for onConnectionEstablished", e);			
-		}
-	}
+    private final CloudClientListener m_listener;
 
-	@Override
-	public void onMessageConfirmed(int messageId, String appTopic) 
-	{
-		try {
-			m_listener.onMessageConfirmed(messageId, appTopic);
-		}
-		catch (Exception e) {
-			s_logger.error("IGNORED - Error notifying "+m_listener+" for onMessageConfirmed", e);			
-		}
-	}
+    CloudClientListenerAdapter(CloudClientListener listener) {
+        this.m_listener = listener;
+    }
 
-	@Override
-	public void onMessagePublished(int messageId, String appTopic) 
-	{
-		try {
-			m_listener.onMessagePublished(messageId, appTopic);
-		}
-		catch (Exception e) {
-			s_logger.error("IGNORED - Error notifying "+m_listener+" for onMessagePublished", e);			
-		}
-	}
+    public CloudClientListener getCloudClientListenerAdapted() {
+        return this.m_listener;
+    }
+
+    @Override
+    public void onControlMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
+        try {
+            this.m_listener.onControlMessageArrived(deviceId, appTopic, msg, qos, retain);
+        } catch (Exception e) {
+            s_logger.error(IGNORED_ERROR_NOTIFYING + this.m_listener + " for onControlMessageArrived", e);
+        }
+    }
+
+    @Override
+    public void onMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
+        try {
+            this.m_listener.onMessageArrived(deviceId, appTopic, msg, qos, retain);
+        } catch (Exception e) {
+            s_logger.error(IGNORED_ERROR_NOTIFYING + this.m_listener + " for onMessageArrived", e);
+        }
+    }
+
+    @Override
+    public void onConnectionLost() {
+        try {
+            this.m_listener.onConnectionLost();
+        } catch (Exception e) {
+            s_logger.error(IGNORED_ERROR_NOTIFYING + this.m_listener + " for onConnectionLost", e);
+        }
+    }
+
+    @Override
+    public void onConnectionEstablished() {
+        try {
+            this.m_listener.onConnectionEstablished();
+        } catch (Exception e) {
+            s_logger.error(IGNORED_ERROR_NOTIFYING + this.m_listener + " for onConnectionEstablished", e);
+        }
+    }
+
+    @Override
+    public void onMessageConfirmed(int messageId, String appTopic) {
+        try {
+            this.m_listener.onMessageConfirmed(messageId, appTopic);
+        } catch (Exception e) {
+            s_logger.error(IGNORED_ERROR_NOTIFYING + this.m_listener + " for onMessageConfirmed", e);
+        }
+    }
+
+    @Override
+    public void onMessagePublished(int messageId, String appTopic) {
+        try {
+            this.m_listener.onMessagePublished(messageId, appTopic);
+        } catch (Exception e) {
+            s_logger.error(IGNORED_ERROR_NOTIFYING + this.m_listener + " for onMessagePublished", e);
+        }
+    }
 }

@@ -29,7 +29,8 @@ public class XmlRoutesProvider extends AbstractRoutesProvider {
 
     @Override
     protected RoutesDefinition getRoutes(final CamelContext camelContext) throws Exception {
-        try (final InputStream in = new ByteArrayInputStream(this.xml.getBytes(StandardCharsets.UTF_8))) { // just always close it
+        // just always close it
+        try (final InputStream in = new ByteArrayInputStream(this.xml.getBytes(StandardCharsets.UTF_8))) {
             return camelContext.loadRoutesDefinition(in);
         }
     }

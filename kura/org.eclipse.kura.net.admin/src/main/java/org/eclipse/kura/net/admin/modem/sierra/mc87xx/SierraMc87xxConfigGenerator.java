@@ -21,60 +21,60 @@ import org.eclipse.kura.net.modem.ModemConfig.PdpType;
 
 public class SierraMc87xxConfigGenerator implements ModemPppConfigGenerator {
 
-	@Override
-	public PppPeer getPppPeer(String deviceId, ModemConfig modemConfig,
-			String logFile, String connectScript, String disconnectScript) {
+    @Override
+    public PppPeer getPppPeer(String deviceId, ModemConfig modemConfig, String logFile, String connectScript,
+            String disconnectScript) {
 
-		 PppPeer pppPeer = new PppPeer();
-	        
-	        // default values
-	        pppPeer.setBaudRate(115200);
-	        pppPeer.setEnableDebug(true);
-	        pppPeer.setUseModemControlLines(true);
-	        pppPeer.setUseRtsCtsFlowControl(false);
-	        pppPeer.setLockSerialDevice(true);
-	        pppPeer.setPeerMustAuthenticateItself(false);
-	        pppPeer.setPeerToSupplyLocalIP(true);
-	        pppPeer.setAddDefaultRoute(true);
-	        pppPeer.setUsePeerDns(true);
-	        pppPeer.setAllowProxyArps(false);
-	        pppPeer.setAllowVanJacobsonTcpIpHdrCompression(false);
-	        pppPeer.setAllowVanJacobsonConnectionIDCompression(false);
-	        pppPeer.setAllowBsdCompression(false);
-	        pppPeer.setAllowDeflateCompression(false);
-	        pppPeer.setAllowMagic(false);
-	        pppPeer.setConnect_delay(1000);
-	        pppPeer.setLcp_echo_interval(0);
+        PppPeer pppPeer = new PppPeer();
 
-	        // other config
-	        pppPeer.setLogfile(logFile);
-	        pppPeer.setProvider(deviceId);
-	        pppPeer.setPppUnitNumber(modemConfig.getPppNumber());
-	        pppPeer.setConnectScript(connectScript);
-	        pppPeer.setDisconnectScript(disconnectScript);
-	        pppPeer.setApn(modemConfig.getApn());
-	        pppPeer.setAuthType(modemConfig.getAuthType());
-	        pppPeer.setUsername(modemConfig.getUsername());
-	        pppPeer.setPassword(modemConfig.getPassword());
-	        pppPeer.setDialString(modemConfig.getDialString());
-	        pppPeer.setLcp_echo_interval(modemConfig.getLcpEchoInterval());
-	        pppPeer.setLcp_echo_failure(modemConfig.getLcpEchoFailure());
+        // default values
+        pppPeer.setBaudRate(115200);
+        pppPeer.setEnableDebug(true);
+        pppPeer.setUseModemControlLines(true);
+        pppPeer.setUseRtsCtsFlowControl(false);
+        pppPeer.setLockSerialDevice(true);
+        pppPeer.setPeerMustAuthenticateItself(false);
+        pppPeer.setPeerToSupplyLocalIP(true);
+        pppPeer.setAddDefaultRoute(true);
+        pppPeer.setUsePeerDns(true);
+        pppPeer.setAllowProxyArps(false);
+        pppPeer.setAllowVanJacobsonTcpIpHdrCompression(false);
+        pppPeer.setAllowVanJacobsonConnectionIDCompression(false);
+        pppPeer.setAllowBsdCompression(false);
+        pppPeer.setAllowDeflateCompression(false);
+        pppPeer.setAllowMagic(false);
+        pppPeer.setConnect_delay(1000);
+        pppPeer.setLcp_echo_interval(0);
 
-	        return pppPeer;
-	}
+        // other config
+        pppPeer.setLogfile(logFile);
+        pppPeer.setProvider(deviceId);
+        pppPeer.setPppUnitNumber(modemConfig.getPppNumber());
+        pppPeer.setConnectScript(connectScript);
+        pppPeer.setDisconnectScript(disconnectScript);
+        pppPeer.setApn(modemConfig.getApn());
+        pppPeer.setAuthType(modemConfig.getAuthType());
+        pppPeer.setUsername(modemConfig.getUsername());
+        pppPeer.setPassword(modemConfig.getPassword());
+        pppPeer.setDialString(modemConfig.getDialString());
+        pppPeer.setLcp_echo_interval(modemConfig.getLcpEchoInterval());
+        pppPeer.setLcp_echo_failure(modemConfig.getLcpEchoFailure());
 
-	@Override
-	public ModemXchangeScript getConnectScript(ModemConfig modemConfig) {
-		
-		int pdpPid = 1;
+        return pppPeer;
+    }
+
+    @Override
+    public ModemXchangeScript getConnectScript(ModemConfig modemConfig) {
+
+        int pdpPid = 1;
         String apn = "";
         String dialString = "";
-        
-        if(modemConfig != null) {
+
+        if (modemConfig != null) {
             apn = modemConfig.getApn();
             dialString = modemConfig.getDialString();
-        }        
-        
+        }
+
         ModemXchangeScript modemXchange = new ModemXchangeScript();
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", "ABORT"));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", "ABORT"));
@@ -84,18 +84,18 @@ public class SierraMc87xxConfigGenerator implements ModemPppConfigGenerator {
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"ERROR\"", "ABORT"));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"+++ath\"", "\"\""));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"AT\"", "OK"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair(this.formPDPcontext (pdpPid, PdpType.IP, apn), "OK"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair(formPDPcontext(pdpPid, PdpType.IP, apn), "OK"));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"\\d\\d\\d\"", "OK"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair(this.formDialString(dialString), "\"\""));
+        modemXchange.addmodemXchangePair(new ModemXchangePair(formDialString(dialString), "\"\""));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"\\c\"", "CONNECT"));
-        
-        return modemXchange;
-	}
 
-	@Override
-	public ModemXchangeScript getDisconnectScript(ModemConfig modemConfig) {
-		
-		ModemXchangeScript modemXchange = new ModemXchangeScript();
+        return modemXchange;
+    }
+
+    @Override
+    public ModemXchangeScript getDisconnectScript(ModemConfig modemConfig) {
+
+        ModemXchangeScript modemXchange = new ModemXchangeScript();
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", "ABORT"));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", "ABORT"));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO CARRIER\"", "ABORT"));
@@ -103,23 +103,23 @@ public class SierraMc87xxConfigGenerator implements ModemPppConfigGenerator {
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", "ABORT"));
         modemXchange.addmodemXchangePair(new ModemXchangePair("BREAK", "\"\""));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"+++ATH\"", "\"\""));
-    
+
         return modemXchange;
-	}
-	
-	/*
+    }
+
+    /*
      * This method forms dial string
      */
     private String formDialString(String dialString) {
         StringBuffer buf = new StringBuffer();
         buf.append('"');
         if (dialString != null) {
-        	buf.append(dialString);
+            buf.append(dialString);
         }
         buf.append('"');
         return buf.toString();
     }
-    
+
     /*
      * This method forms PDP context
      * (e.g. AT+CGDCONT=<pid>,<pdp_type>,<apn>)
@@ -136,7 +136,7 @@ public class SierraMc87xxConfigGenerator implements ModemPppConfigGenerator {
         pdpcontext.append(',');
         pdpcontext.append('"');
         if (apn != null) {
-        	pdpcontext.append(apn);
+            pdpcontext.append(apn);
         }
         pdpcontext.append('"');
 

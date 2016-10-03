@@ -20,34 +20,34 @@ import org.eclipse.kura.status.CloudConnectionStatusEnum;
 
 public class OnOffStatusRunnable implements Runnable {
 
-	private KuraGPIOPin local_pin;
-	private boolean on = false;
-	
-	public OnOffStatusRunnable(KuraGPIOPin local_pin, boolean on) {
-		this.local_pin = local_pin;
-		this.on = on;
-	}
+    private final KuraGPIOPin local_pin;
+    private boolean on = false;
 
-	@Override
-	public void run() {
-		while(true){
-			try {
-				local_pin.setValue(on);				
-			}catch(KuraUnavailableDeviceException ex){
-				ex.printStackTrace();
-				break;				
-			}catch(KuraClosedDeviceException ex){
-				ex.printStackTrace();
-				break;				
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			try {
-				Thread.sleep(CloudConnectionStatusEnum.PERIODIC_STATUS_CHECK_DELAY);
-			} catch (InterruptedException e) {
-				break;
-			}
-		}
-	}
+    public OnOffStatusRunnable(KuraGPIOPin local_pin, boolean on) {
+        this.local_pin = local_pin;
+        this.on = on;
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                this.local_pin.setValue(this.on);
+            } catch (KuraUnavailableDeviceException ex) {
+                ex.printStackTrace();
+                break;
+            } catch (KuraClosedDeviceException ex) {
+                ex.printStackTrace();
+                break;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                Thread.sleep(CloudConnectionStatusEnum.PERIODIC_STATUS_CHECK_DELAY);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+    }
 
 }

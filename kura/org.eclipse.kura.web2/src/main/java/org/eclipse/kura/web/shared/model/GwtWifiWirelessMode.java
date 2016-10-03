@@ -12,9 +12,8 @@
 package org.eclipse.kura.web.shared.model;
 
 public enum GwtWifiWirelessMode {
-	netWifiWirelessModeDisabled,
-	netWifiWirelessModeStation,
-	netWifiWirelessModeAccessPoint,
-	netWifiWirelessModeAdHoc
+    netWifiWirelessModeDisabled,
+    netWifiWirelessModeStation,
+    netWifiWirelessModeAccessPoint,
+    netWifiWirelessModeAdHoc
 }
-

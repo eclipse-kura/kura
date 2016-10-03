@@ -115,13 +115,14 @@ public class GatewayRouterJava implements ConfigurableComponent {
 
         // add service dependency
 
-        builder.dependOn(ctx, FrameworkUtil.createFilter(fullFilter), new ServiceConsumer<CloudService, CamelContext>() {
+        builder.dependOn(ctx, FrameworkUtil.createFilter(fullFilter),
+                new ServiceConsumer<CloudService, CamelContext>() {
 
-            @Override
-            public void consume(final CamelContext context, final CloudService service) {
-                context.addComponent("cloud", new KuraCloudComponent(context, service));
-            }
-        });
+                    @Override
+                    public void consume(final CamelContext context, final CloudService service) {
+                        context.addComponent("cloud", new KuraCloudComponent(context, service));
+                    }
+                });
 
         // return un-started instance
 
@@ -136,8 +137,10 @@ public class GatewayRouterJava implements ConfigurableComponent {
      * @return the OSGi filter selecting the cloud service instance
      */
     private static String makeCloudServiceFilter(final Map<String, Object> properties) {
-        final String filterPid = Configuration.asStringNotEmpty(properties, "cloudService", "org.eclipse.kura.cloud.CloudService");
-        final String fullFilter = String.format("(&(%s=%s)(kura.service.pid=%s))", Constants.OBJECTCLASS, CloudService.class.getName(), filterPid);
+        final String filterPid = Configuration.asStringNotEmpty(properties, "cloudService",
+                "org.eclipse.kura.cloud.CloudService");
+        final String fullFilter = String.format("(&(%s=%s)(kura.service.pid=%s))", Constants.OBJECTCLASS,
+                CloudService.class.getName(), filterPid);
         return fullFilter;
     }
 

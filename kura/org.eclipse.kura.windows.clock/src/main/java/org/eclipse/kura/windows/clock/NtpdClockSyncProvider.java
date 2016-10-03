@@ -20,46 +20,41 @@ import org.eclipse.kura.core.util.SafeProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NtpdClockSyncProvider extends AbstractNtpClockSyncProvider
-{
-	private static final Logger s_logger = LoggerFactory.getLogger(NtpdClockSyncProvider.class);
+public class NtpdClockSyncProvider extends AbstractNtpClockSyncProvider {
 
-	// ----------------------------------------------------------------
-	//
-	//   Concrete Methods
-	//
-	// ----------------------------------------------------------------	
-	
-	protected boolean syncClock() throws KuraException
-	{
-		boolean ret = false;
-		SafeProcess proc = null;
-		try {			
-			// Execute a native Windows command to perform the NTP time sync.
-			int ntpTimeout = m_ntpTimeout / 1000;
-			proc = ProcessUtil.exec("w32tm /config /manualpeerlist:"+m_ntpHost+",0x8 /syncfromflags:MANUAL");
-			proc.waitFor();
-			if (proc.exitValue() == 0) {
-				s_logger.info("System Clock Synchronized with "+m_ntpHost);
-				m_lastSync = new Date();
-				
-				// Call update method with 0 offset to ensure the clock event gets fired and the HW clock
-				// is updated if desired.
-				m_listener.onClockUpdate(0);
-				ret = true;
-			}
-			else {
-				s_logger.warn(
-						"Error while synchronizing System Clock with NTP host {}. Please verify network connectivity ...",
-						m_ntpHost);
-			}
-		} 
-		catch (Exception e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-		}
-		finally {
-			ProcessUtil.destroy(proc);
-		}
-		return ret;
-	}
+    private static final Logger s_logger = LoggerFactory.getLogger(NtpdClockSyncProvider.class);
+
+    // ----------------------------------------------------------------
+    //
+    // Concrete Methods
+    //
+    // ----------------------------------------------------------------
+
+    @Override
+    protected boolean syncClock() throws KuraException {
+        boolean ret = false;
+        SafeProcess proc = null;
+        try {
+            proc = ProcessUtil.exec("w32tm /config /manualpeerlist:" + this.m_ntpHost + ",0x8 /syncfromflags:MANUAL");
+            proc.waitFor();
+            if (proc.exitValue() == 0) {
+                s_logger.info("System Clock Synchronized with " + this.m_ntpHost);
+                this.m_lastSync = new Date();
+
+                // Call update method with 0 offset to ensure the clock event gets fired and the HW clock
+                // is updated if desired.
+                this.m_listener.onClockUpdate(0);
+                ret = true;
+            } else {
+                s_logger.warn(
+                        "Error while synchronizing System Clock with NTP host {}. Please verify network connectivity ...",
+                        this.m_ntpHost);
+            }
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        } finally {
+            ProcessUtil.destroy(proc);
+        }
+        return ret;
+    }
 }

@@ -15,18 +15,19 @@ import org.eclipse.kura.usb.UsbDevice;
 
 public interface LinuxUdevListener {
 
-	/**
-	 * Callback for notifications of new UsbDevice ATTACH events
-	 *
-	 * @param device	The UsbDevice that was just attached
-	 */
-	void attached(UsbDevice device);
+    /**
+     * Callback for notifications of new UsbDevice ATTACH events
+     *
+     * @param device
+     *            The UsbDevice that was just attached
+     */
+    void attached(UsbDevice device);
 
-	/**
-	 * Callback for notifications of new UsbDevice DETACH events
-	 *
-	 * @param device	The UsbDevice that was just detached
-	 */
-	void detached(UsbDevice device);
+    /**
+     * Callback for notifications of new UsbDevice DETACH events
+     *
+     * @param device
+     *            The UsbDevice that was just detached
+     */
+    void detached(UsbDevice device);
 }
-

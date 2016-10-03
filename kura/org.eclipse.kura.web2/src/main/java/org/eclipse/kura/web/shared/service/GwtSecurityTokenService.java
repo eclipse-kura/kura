@@ -21,7 +21,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  */
 @RemoteServiceRelativePath("xsrf")
 public interface GwtSecurityTokenService extends RemoteService {
-	
-	public GwtXSRFToken generateSecurityToken();
-	
+
+    public GwtXSRFToken generateSecurityToken();
+
 }

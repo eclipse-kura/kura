@@ -19,47 +19,40 @@ import org.eclipse.kura.comm.CommURI;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.io.ConnectionFactory;
 
-public class CommConnectionFactory implements ConnectionFactory 
-{
-	@SuppressWarnings("unused")
-	private ComponentContext      m_ctx;
+public class CommConnectionFactory implements ConnectionFactory {
 
-	// ----------------------------------------------------------------
-	//
-	//   Dependencies
-	//
-	// ----------------------------------------------------------------
+    @SuppressWarnings("unused")
+    private ComponentContext m_ctx;
 
-	
-	
-	// ----------------------------------------------------------------
-	//
-	//   Activation APIs
-	//
-	// ----------------------------------------------------------------
-	
-	protected void activate(ComponentContext componentContext) 
-	{			
-		//
-		// save the bundle context
-		m_ctx = componentContext;
-	}
-	
-	
-	protected void deactivate(ComponentContext componentContext) 
-	{
-		m_ctx = null;
-	}
-	
-	public Connection createConnection(String name, int mode, boolean timeouts)
-		throws IOException
-	{
-		try {
-			CommURI uri = CommURI.parseString(name);
-			return new CommConnectionImpl(uri, mode, timeouts);
-		}
-		catch (Throwable t) {
-			throw new IOException(t);
-		}
-	}
+    // ----------------------------------------------------------------
+    //
+    // Dependencies
+    //
+    // ----------------------------------------------------------------
+
+    // ----------------------------------------------------------------
+    //
+    // Activation APIs
+    //
+    // ----------------------------------------------------------------
+
+    protected void activate(ComponentContext componentContext) {
+        //
+        // save the bundle context
+        this.m_ctx = componentContext;
+    }
+
+    protected void deactivate(ComponentContext componentContext) {
+        this.m_ctx = null;
+    }
+
+    @Override
+    public Connection createConnection(String name, int mode, boolean timeouts) throws IOException {
+        try {
+            CommURI uri = CommURI.parseString(name);
+            return new CommConnectionImpl(uri, mode, timeouts);
+        } catch (Throwable t) {
+            throw new IOException(t);
+        }
+    }
 }

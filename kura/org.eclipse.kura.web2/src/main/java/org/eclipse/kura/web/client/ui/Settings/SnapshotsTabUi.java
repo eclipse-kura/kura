@@ -54,320 +54,333 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class SnapshotsTabUi extends Composite implements Tab {
 
-	private static SnapshotsTabUiUiBinder uiBinder = GWT.create(SnapshotsTabUiUiBinder.class);
-	private static final Logger logger = Logger.getLogger(SnapshotsTabUi.class.getSimpleName());
+    private static SnapshotsTabUiUiBinder uiBinder = GWT.create(SnapshotsTabUiUiBinder.class);
+    private static final Logger logger = Logger.getLogger(SnapshotsTabUi.class.getSimpleName());
 
-	interface SnapshotsTabUiUiBinder extends UiBinder<Widget, SnapshotsTabUi> {
-	}
+    interface SnapshotsTabUiUiBinder extends UiBinder<Widget, SnapshotsTabUi> {
+    }
 
-	private static final Messages MSGS = GWT.create(Messages.class);
+    private static final Messages MSGS = GWT.create(Messages.class);
 
-	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-	private final GwtSnapshotServiceAsync gwtSnapshotService = GWT.create(GwtSnapshotService.class);
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private final GwtSnapshotServiceAsync gwtSnapshotService = GWT.create(GwtSnapshotService.class);
 
-	private final static String SERVLET_URL = "/" + GWT.getModuleName()	+ "/file/configuration/snapshot";
+    private final static String SERVLET_URL = "/" + GWT.getModuleName() + "/file/configuration/snapshot";
 
-	@UiField
-	Modal uploadModal;
-	@UiField
-	FormPanel snapshotsForm;
-	@UiField
-	Button uploadCancel, uploadUpload;
+    @UiField
+    Modal uploadModal;
+    @UiField
+    FormPanel snapshotsForm;
+    @UiField
+    Button uploadCancel, uploadUpload;
 
-	@UiField
-	Button refresh, download, rollback, upload;
-	@UiField
-	Alert notification;
-	@UiField
-	FileUpload filePath;
-	@UiField
-	Hidden xsrfTokenField;
-	@UiField
-	CellTable<GwtSnapshot> snapshotsGrid = new CellTable<GwtSnapshot>();
-	
-	private ListDataProvider<GwtSnapshot> snapshotsDataProvider = new ListDataProvider<GwtSnapshot>();
-	final SingleSelectionModel<GwtSnapshot> selectionModel = new SingleSelectionModel<GwtSnapshot>();
-	
-	private CustomWindow m_downloadWindow;
-	GwtSnapshot selected;
+    @UiField
+    Button refresh, download, rollback, upload;
+    @UiField
+    Alert notification;
+    @UiField
+    FileUpload filePath;
+    @UiField
+    Hidden xsrfTokenField;
+    @UiField
+    CellTable<GwtSnapshot> snapshotsGrid = new CellTable<GwtSnapshot>();
 
-	public SnapshotsTabUi() {
-		logger.log(Level.FINER, "Initiating SnapshotsTabUI...");
-		initWidget(uiBinder.createAndBindUi(this));
-		initTable();
-		snapshotsGrid.setSelectionModel(selectionModel);
+    private final ListDataProvider<GwtSnapshot> snapshotsDataProvider = new ListDataProvider<GwtSnapshot>();
+    final SingleSelectionModel<GwtSnapshot> selectionModel = new SingleSelectionModel<GwtSnapshot>();
 
-		initInterfaceButtons();
-		
-		initUploadModalHandlers();
-		
-		snapshotsForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-			@Override
-			public void onSubmitComplete(SubmitCompleteEvent event) {
-				String htmlResponse = event.getResults();
-				EntryClassUi.hideWaitModal();
-				if (htmlResponse == null || htmlResponse.isEmpty()) {
-					logger.log(Level.FINER, MSGS.information() + ": " + MSGS.fileUploadSuccess());
-					refresh();
-				} else {
-					logger.log(Level.SEVERE, MSGS.information() + ": " + MSGS.fileUploadFailure());
-					FailureHandler.handle(new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR));
-				}
-			}
-		});
-	}
-	
-	@Override
-	public void setDirty(boolean flag) {
-	}
+    private CustomWindow m_downloadWindow;
+    GwtSnapshot selected;
 
-	@Override
-	public boolean isDirty() {
-		return false;
-	}
+    public SnapshotsTabUi() {
+        logger.log(Level.FINER, "Initiating SnapshotsTabUI...");
+        initWidget(uiBinder.createAndBindUi(this));
+        initTable();
+        this.snapshotsGrid.setSelectionModel(this.selectionModel);
 
-	@Override
-	public boolean isValid() {
-		return true;
-	}
+        initInterfaceButtons();
 
-	@Override
-	public void refresh() {
-		notification.setVisible(false);
-		EntryClassUi.showWaitModal();
-		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+        initUploadModalHandlers();
 
-			@Override
-			public void onFailure(Throwable ex) {
-				EntryClassUi.hideWaitModal();
-				FailureHandler.handle(ex);
-			}
+        this.snapshotsForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
 
-			@Override
-			public void onSuccess(GwtXSRFToken token) {
-				gwtSnapshotService.findDeviceSnapshots(token, new AsyncCallback<ArrayList<GwtSnapshot>>() {
-					@Override
-					public void onFailure(Throwable ex) {
-						EntryClassUi.hideWaitModal();
-						FailureHandler.handle(ex);
-					}
+            @Override
+            public void onSubmitComplete(SubmitCompleteEvent event) {
+                String htmlResponse = event.getResults();
+                EntryClassUi.hideWaitModal();
+                if (htmlResponse == null || htmlResponse.isEmpty()) {
+                    logger.log(Level.FINER, MSGS.information() + ": " + MSGS.fileUploadSuccess());
+                    refresh();
+                } else {
+                    logger.log(Level.SEVERE, MSGS.information() + ": " + MSGS.fileUploadFailure());
+                    FailureHandler.handle(new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR));
+                }
+            }
+        });
+    }
 
-					@Override
-					public void onSuccess(ArrayList<GwtSnapshot> result) {
-						snapshotsDataProvider.getList().clear();
-						for (GwtSnapshot pair : result) {
-							snapshotsDataProvider.getList().add(pair);
-						}
-						int snapshotsDataSize= snapshotsDataProvider.getList().size();
-						if (snapshotsDataSize == 0) {
-							snapshotsGrid.setVisible(false);
-							notification.setVisible(true);
-							notification.setText("No Snapshots Available");
-							download.setEnabled(false);
-							rollback.setEnabled(false);
-						} else {
-							snapshotsGrid.setVisibleRange(0, snapshotsDataSize);
-							snapshotsGrid.setVisible(true);
-							notification.setVisible(false);
-							download.setEnabled(true);
-							rollback.setEnabled(true);
-						}
-						snapshotsDataProvider.flush();
-						EntryClassUi.hideWaitModal();
-					}
-				});
-			}
-			
-		});		
-	}
+    @Override
+    public void setDirty(boolean flag) {
+    }
 
-	private void initTable() {
+    @Override
+    public boolean isDirty() {
+        return false;
+    }
 
-		TextColumn<GwtSnapshot> col1 = new TextColumn<GwtSnapshot>() {
-			@Override
-			public String getValue(GwtSnapshot object) {
-				return String.valueOf(object.getSnapshotId());
-			}
-		};
-		col1.setCellStyleNames("status-table-row");
-		snapshotsGrid.addColumn(col1, MSGS.deviceSnapshotId());
+    @Override
+    public boolean isValid() {
+        return true;
+    }
 
-		TextColumn<GwtSnapshot> col2 = new TextColumn<GwtSnapshot>() {
-			@Override
-			public String getValue(GwtSnapshot object) {
-				return String.valueOf(object.get("createdOnFormatted"));
-			}
-		};
-		col2.setCellStyleNames("status-table-row");
-		snapshotsGrid.addColumn(col2, MSGS.deviceSnapshotCreatedOn());
+    @Override
+    public void refresh() {
+        this.notification.setVisible(false);
+        EntryClassUi.showWaitModal();
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-		snapshotsDataProvider.addDataDisplay(snapshotsGrid);
-	}
-	
-	private void initUploadModalHandlers() {
-		uploadCancel.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				uploadModal.hide();
-			}
-		});
+            @Override
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
 
-		uploadUpload.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-					@Override
-					public void onFailure(Throwable ex) {
-						FailureHandler.handle(ex);
-					}
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                SnapshotsTabUi.this.gwtSnapshotService.findDeviceSnapshots(token,
+                        new AsyncCallback<ArrayList<GwtSnapshot>>() {
 
-					@Override
-					public void onSuccess(GwtXSRFToken token) {
-						xsrfTokenField.setValue(token.getToken());
-						snapshotsForm.submit();
-						uploadModal.hide();
-						EntryClassUi.showWaitModal();
-					}
-				});
-			}
-		});
-	}
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(ex);
+                    }
 
-	private void initInterfaceButtons() {
-		refresh.setText(MSGS.refresh());
-		refresh.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				refresh();
-			}
-		});
+                    @Override
+                    public void onSuccess(ArrayList<GwtSnapshot> result) {
+                        SnapshotsTabUi.this.snapshotsDataProvider.getList().clear();
+                        for (GwtSnapshot pair : result) {
+                            SnapshotsTabUi.this.snapshotsDataProvider.getList().add(pair);
+                        }
+                        int snapshotsDataSize = SnapshotsTabUi.this.snapshotsDataProvider.getList().size();
+                        if (snapshotsDataSize == 0) {
+                            SnapshotsTabUi.this.snapshotsGrid.setVisible(false);
+                            SnapshotsTabUi.this.notification.setVisible(true);
+                            SnapshotsTabUi.this.notification.setText("No Snapshots Available");
+                            SnapshotsTabUi.this.download.setEnabled(false);
+                            SnapshotsTabUi.this.rollback.setEnabled(false);
+                        } else {
+                            SnapshotsTabUi.this.snapshotsGrid.setVisibleRange(0, snapshotsDataSize);
+                            SnapshotsTabUi.this.snapshotsGrid.setVisible(true);
+                            SnapshotsTabUi.this.notification.setVisible(false);
+                            SnapshotsTabUi.this.download.setEnabled(true);
+                            SnapshotsTabUi.this.rollback.setEnabled(true);
+                        }
+                        SnapshotsTabUi.this.snapshotsDataProvider.flush();
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
+            }
 
-		download.setText(MSGS.download());
-		download.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				selected = selectionModel.getSelectedObject();
-				if (selected != null) {
-					//please see http://stackoverflow.com/questions/13277752/gwt-open-window-after-rpc-is-prevented-by-popup-blocker
-					m_downloadWindow= CustomWindow.open(null, "_blank", "location=no"); 
-					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-						@Override
-						public void onFailure(Throwable ex) {
-							FailureHandler.handle(ex);
-						}
+        });
+    }
 
-						@Override
-						public void onSuccess(GwtXSRFToken token) {
-							downloadSnapshot(token.getToken());
-						}
-					});
-				}
-			}
-		});
+    private void initTable() {
 
-		rollback.setText(MSGS.rollback());
-		rollback.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				rollback();
-			}
-		});
+        TextColumn<GwtSnapshot> col1 = new TextColumn<GwtSnapshot>() {
 
-		upload.setText(MSGS.upload());
-		upload.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				uploadAndApply();
-			}
-		});
-	}
-	
-	private void rollback() {
-		final GwtSnapshot snapshot = selectionModel.getSelectedObject();
-		if (snapshot != null) {
-			final Modal rollbackModal = new Modal();
-			ModalBody rollbackModalBody = new ModalBody();
-			ModalFooter rollbackModalFooter = new ModalFooter();
-			rollbackModal.setTitle(MSGS.confirm());
-			rollbackModal.setClosable(true);
-			rollbackModalBody.add(new Span(MSGS.deviceSnapshotRollbackConfirm()));
+            @Override
+            public String getValue(GwtSnapshot object) {
+                return String.valueOf(object.getSnapshotId());
+            }
+        };
+        col1.setCellStyleNames("status-table-row");
+        this.snapshotsGrid.addColumn(col1, MSGS.deviceSnapshotId());
 
-			rollbackModalFooter.add(new Button("Yes", new ClickHandler() {
-				@Override
-				public void onClick(ClickEvent event) {
-					EntryClassUi.showWaitModal();
-					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+        TextColumn<GwtSnapshot> col2 = new TextColumn<GwtSnapshot>() {
 
-						@Override
-						public void onFailure(Throwable ex) {
-							EntryClassUi.hideWaitModal();
-							FailureHandler.handle(ex);
-						}
+            @Override
+            public String getValue(GwtSnapshot object) {
+                return String.valueOf(object.get("createdOnFormatted"));
+            }
+        };
+        col2.setCellStyleNames("status-table-row");
+        this.snapshotsGrid.addColumn(col2, MSGS.deviceSnapshotCreatedOn());
 
-						@Override
-						public void onSuccess(GwtXSRFToken token) {
-							gwtSnapshotService.rollbackDeviceSnapshot(token, snapshot,new AsyncCallback<Void>() {
+        this.snapshotsDataProvider.addDataDisplay(this.snapshotsGrid);
+    }
 
-								@Override
-								public void onFailure(Throwable ex) {
-									EntryClassUi.hideWaitModal();
-									FailureHandler.handle(ex);
-								}
+    private void initUploadModalHandlers() {
+        this.uploadCancel.addClickHandler(new ClickHandler() {
 
-								@Override
-								public void onSuccess(Void result) {
-									EntryClassUi.hideWaitModal();
-									refresh();
-								}
-							});
-						}
-						
-					});
-					
-					rollbackModal.hide();
-				}
-			}));
+            @Override
+            public void onClick(ClickEvent event) {
+                SnapshotsTabUi.this.uploadModal.hide();
+            }
+        });
 
-			rollbackModalFooter.add(new Button("No", new ClickHandler() {
-				@Override
-				public void onClick(ClickEvent event) {
-					rollbackModal.hide();
-				}
-			}));
+        this.uploadUpload.addClickHandler(new ClickHandler() {
 
-			rollbackModal.add(rollbackModalBody);
-			rollbackModal.add(rollbackModalFooter);
-			rollbackModal.show();
+            @Override
+            public void onClick(ClickEvent event) {
+                SnapshotsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-		}
-	}
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex);
+                    }
 
-	private void downloadSnapshot(String tokenId) {
-		final StringBuilder sbUrl = new StringBuilder();
+                    @Override
+                    public void onSuccess(GwtXSRFToken token) {
+                        SnapshotsTabUi.this.xsrfTokenField.setValue(token.getToken());
+                        SnapshotsTabUi.this.snapshotsForm.submit();
+                        SnapshotsTabUi.this.uploadModal.hide();
+                        EntryClassUi.showWaitModal();
+                    }
+                });
+            }
+        });
+    }
 
-		Long snapshot = selected.getSnapshotId();
-		sbUrl.append("/" + GWT.getModuleName() + "/device_snapshots?")
-		.append("snapshotId=")
-		.append(snapshot)
-		.append("&")
-		.append("xsrfToken=")
-		.append(tokenId);
+    private void initInterfaceButtons() {
+        this.refresh.setText(MSGS.refresh());
+        this.refresh.addClickHandler(new ClickHandler() {
 
-		m_downloadWindow.setUrl(sbUrl.toString());
-	}
-	
-	private void uploadAndApply() {
-		uploadModal.show();
-		uploadModal.setTitle(MSGS.upload());
-		snapshotsForm.setEncoding(FormPanel.ENCODING_MULTIPART);
-		snapshotsForm.setMethod(FormPanel.METHOD_POST);
-		snapshotsForm.setAction(SERVLET_URL);
-		
-		filePath.setName("uploadedFile");
-		
-		xsrfTokenField.setID("xsrfToken");
-        xsrfTokenField.setName("xsrfToken");
-        xsrfTokenField.setValue("");
+            @Override
+            public void onClick(ClickEvent event) {
+                refresh();
+            }
+        });
 
-	}
+        this.download.setText(MSGS.download());
+        this.download.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                SnapshotsTabUi.this.selected = SnapshotsTabUi.this.selectionModel.getSelectedObject();
+                if (SnapshotsTabUi.this.selected != null) {
+                    // please see
+                    // http://stackoverflow.com/questions/13277752/gwt-open-window-after-rpc-is-prevented-by-popup-blocker
+                    SnapshotsTabUi.this.m_downloadWindow = CustomWindow.open(null, "_blank", "location=no");
+                    SnapshotsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+                        @Override
+                        public void onFailure(Throwable ex) {
+                            FailureHandler.handle(ex);
+                        }
+
+                        @Override
+                        public void onSuccess(GwtXSRFToken token) {
+                            downloadSnapshot(token.getToken());
+                        }
+                    });
+                }
+            }
+        });
+
+        this.rollback.setText(MSGS.rollback());
+        this.rollback.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                rollback();
+            }
+        });
+
+        this.upload.setText(MSGS.upload());
+        this.upload.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                uploadAndApply();
+            }
+        });
+    }
+
+    private void rollback() {
+        final GwtSnapshot snapshot = this.selectionModel.getSelectedObject();
+        if (snapshot != null) {
+            final Modal rollbackModal = new Modal();
+            ModalBody rollbackModalBody = new ModalBody();
+            ModalFooter rollbackModalFooter = new ModalFooter();
+            rollbackModal.setTitle(MSGS.confirm());
+            rollbackModal.setClosable(true);
+            rollbackModalBody.add(new Span(MSGS.deviceSnapshotRollbackConfirm()));
+
+            rollbackModalFooter.add(new Button("Yes", new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    EntryClassUi.showWaitModal();
+                    SnapshotsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+                        @Override
+                        public void onFailure(Throwable ex) {
+                            EntryClassUi.hideWaitModal();
+                            FailureHandler.handle(ex);
+                        }
+
+                        @Override
+                        public void onSuccess(GwtXSRFToken token) {
+                            SnapshotsTabUi.this.gwtSnapshotService.rollbackDeviceSnapshot(token, snapshot,
+                                    new AsyncCallback<Void>() {
+
+                                @Override
+                                public void onFailure(Throwable ex) {
+                                    EntryClassUi.hideWaitModal();
+                                    FailureHandler.handle(ex);
+                                }
+
+                                @Override
+                                public void onSuccess(Void result) {
+                                    EntryClassUi.hideWaitModal();
+                                    refresh();
+                                }
+                            });
+                        }
+
+                    });
+
+                    rollbackModal.hide();
+                }
+            }));
+
+            rollbackModalFooter.add(new Button("No", new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    rollbackModal.hide();
+                }
+            }));
+
+            rollbackModal.add(rollbackModalBody);
+            rollbackModal.add(rollbackModalFooter);
+            rollbackModal.show();
+
+        }
+    }
+
+    private void downloadSnapshot(String tokenId) {
+        final StringBuilder sbUrl = new StringBuilder();
+
+        Long snapshot = this.selected.getSnapshotId();
+        sbUrl.append("/" + GWT.getModuleName() + "/device_snapshots?").append("snapshotId=").append(snapshot)
+                .append("&").append("xsrfToken=").append(tokenId);
+
+        this.m_downloadWindow.setUrl(sbUrl.toString());
+    }
+
+    private void uploadAndApply() {
+        this.uploadModal.show();
+        this.uploadModal.setTitle(MSGS.upload());
+        this.snapshotsForm.setEncoding(FormPanel.ENCODING_MULTIPART);
+        this.snapshotsForm.setMethod(FormPanel.METHOD_POST);
+        this.snapshotsForm.setAction(SERVLET_URL);
+
+        this.filePath.setName("uploadedFile");
+
+        this.xsrfTokenField.setID("xsrfToken");
+        this.xsrfTokenField.setName("xsrfToken");
+        this.xsrfTokenField.setValue("");
+
+    }
 }

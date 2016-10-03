@@ -15,7 +15,8 @@ import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 
 public interface NetworkTab extends Tab {
-	
-	public void setNetInterface(GwtNetInterfaceConfig config);
-	public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf);
+
+    public void setNetInterface(GwtNetInterfaceConfig config);
+
+    public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf);
 }

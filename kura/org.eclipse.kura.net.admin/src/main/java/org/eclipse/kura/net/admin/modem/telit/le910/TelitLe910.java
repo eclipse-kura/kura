@@ -32,82 +32,82 @@ import org.slf4j.LoggerFactory;
 
 public class TelitLe910 extends TelitHe910 implements HspaCellularModem {
 
-	private static final Logger s_logger = LoggerFactory.getLogger(TelitLe910.class);
-	
-	public TelitLe910(ModemDevice device, String platform,
-			ConnectionFactory connectionFactory) {
-		super(device, platform, connectionFactory);
-	}
-	
-	/* Don't need this since we can now use AT$GPSP=1
-	public void enableGps() throws KuraException {
-		enableGps(TelitLe910AtCommands.gpsPowerUp.getCommand());
-	}
-	*/
-	
-	@Override
-	public List<ModemTechnologyType> getTechnologyTypes() throws KuraException {
-		
-		List<ModemTechnologyType>modemTechnologyTypes = null;
-		ModemDevice device = getModemDevice();
-		if (device == null) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No modem device");
-		}
-		if (device instanceof UsbModemDevice) {
-    		SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice)device);
-    		if (usbModemInfo != null)  {
-    			modemTechnologyTypes = usbModemInfo.getTechnologyTypes();
-    		} else {
-    			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No usbModemInfo available");
-    		}
-    	} else {
-    		throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
-    	}
-		return modemTechnologyTypes;
-	}
-	
-	@Override
-	public boolean isSimCardReady() throws KuraException {
-		
-    	boolean simReady = false;
-		String port = null;
-		
-		if (isGpsEnabled() && getAtPort().equals(getGpsPort()) && !getAtPort().equals(getDataPort())) {
-			port = getDataPort();
-		} else {
-			port = getAtPort();
-		}
+    private static final Logger s_logger = LoggerFactory.getLogger(TelitLe910.class);
 
-    	synchronized (s_atLock) {
-    		s_logger.debug("sendCommand getSimStatus :: {} command to port {}", TelitHe910AtCommands.getSimStatus.getCommand(), port);
-	    	byte[] reply = null;
-	    	CommConnection commAtConnection = null;
-	    	try {
+    public TelitLe910(ModemDevice device, String platform, ConnectionFactory connectionFactory) {
+        super(device, platform, connectionFactory);
+    }
 
-	    	    commAtConnection = openSerialPort(port);
-	    	    if (!isAtReachable(commAtConnection)) {	    		
-	    	        throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands: " + TelitHe910.class.getName());
-	    	    }
-	    	    
-				reply = commAtConnection.sendCommand(TelitHe910AtCommands.getSimStatus.getCommand().getBytes(), 1000, 100);
-    	        if (reply != null) {
-    	            String simStatus = getResponseString(reply);
-    	            String[] simStatusSplit = simStatus.split(",");
-    	            if((simStatusSplit.length > 1) && (Integer.valueOf(simStatusSplit[1]) > 0)) {
-    	                simReady = true;
-    	            } 
-    	        }
-	    	}
-        	catch (IOException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+    /*
+     * Don't need this since we can now use AT$GPSP=1
+     * public void enableGps() throws KuraException {
+     * enableGps(TelitLe910AtCommands.gpsPowerUp.getCommand());
+     * }
+     */
+
+    @Override
+    public List<ModemTechnologyType> getTechnologyTypes() throws KuraException {
+
+        List<ModemTechnologyType> modemTechnologyTypes = null;
+        ModemDevice device = getModemDevice();
+        if (device == null) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No modem device");
+        }
+        if (device instanceof UsbModemDevice) {
+            SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) device);
+            if (usbModemInfo != null) {
+                modemTechnologyTypes = usbModemInfo.getTechnologyTypes();
+            } else {
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "No usbModemInfo available");
             }
-        	catch (KuraException e) {
-        	    throw e;
-        	}
-        	finally {	        
-    	        closeSerialPort(commAtConnection);
-        	}
-    	}
-    	return simReady;
-	}
+        } else {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
+        }
+        return modemTechnologyTypes;
+    }
+
+    @Override
+    public boolean isSimCardReady() throws KuraException {
+
+        boolean simReady = false;
+        String port = null;
+
+        if (isGpsEnabled() && getAtPort().equals(getGpsPort()) && !getAtPort().equals(getDataPort())) {
+            port = getDataPort();
+        } else {
+            port = getAtPort();
+        }
+
+        synchronized (s_atLock) {
+            s_logger.debug("sendCommand getSimStatus :: {} command to port {}",
+                    TelitHe910AtCommands.getSimStatus.getCommand(), port);
+            byte[] reply = null;
+            CommConnection commAtConnection = null;
+            try {
+
+                commAtConnection = openSerialPort(port);
+                if (!isAtReachable(commAtConnection)) {
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED,
+                            "Modem not available for AT commands: " + TelitHe910.class.getName());
+                }
+
+                reply = commAtConnection.sendCommand(TelitHe910AtCommands.getSimStatus.getCommand().getBytes(), 1000,
+                        100);
+                if (reply != null) {
+                    String simStatus = getResponseString(reply);
+                    String[] simStatusSplit = simStatus.split(",");
+                    if (simStatusSplit.length > 1 && Integer.valueOf(simStatusSplit[1]) > 0) {
+                        simReady = true;
+                    }
+                }
+            } catch (IOException e) {
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            } catch (KuraException e) {
+                throw e;
+            } finally {
+                closeSerialPort(commAtConnection);
+            }
+        }
+        return simReady;
+    }
 }

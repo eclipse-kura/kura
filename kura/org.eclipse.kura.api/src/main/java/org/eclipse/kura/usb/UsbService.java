@@ -22,40 +22,40 @@ import org.eclipse.kura.KuraException;
  */
 public interface UsbService {
 
-	/**
-	 * Gets the UsbServices currently available as specified by JSR-80 in the javax.usb
-	 * 
-	 * @return	The currently available javax.usb.UsbServices
-	 * @throws 	KuraException
-	 */
-	public UsbServices getUsbServices() throws KuraException;
+    /**
+     * Gets the UsbServices currently available as specified by JSR-80 in the javax.usb
+     *
+     * @return The currently available javax.usb.UsbServices
+     * @throws KuraException
+     */
+    public UsbServices getUsbServices() throws KuraException;
 
-	/**
-	 * Gets the USB devices on the gateway
-	 * 
-	 * @return	The currently attached USB devices
-	 */
-	public List<? extends UsbDevice> getUsbDevices();
+    /**
+     * Gets the USB devices on the gateway
+     *
+     * @return The currently attached USB devices
+     */
+    public List<? extends UsbDevice> getUsbDevices();
 
-	/**
-	 * Gets the USB block devices on the gateway
-	 * 
-	 * @return	The currently attached USB block devices
-	 */
-	public List<UsbBlockDevice> getUsbBlockDevices();
+    /**
+     * Gets the USB block devices on the gateway
+     *
+     * @return The currently attached USB block devices
+     */
+    public List<UsbBlockDevice> getUsbBlockDevices();
 
-	/**
-	 * Gets the USB network devices on the gateway
-	 * 
-	 * @return	The currently attached USB network devices
-	 */
-	public List<UsbNetDevice> getUsbNetDevices();
+    /**
+     * Gets the USB network devices on the gateway
+     *
+     * @return The currently attached USB network devices
+     */
+    public List<UsbNetDevice> getUsbNetDevices();
 
-	/**
-	 * Gets the USB TTY devices on the gateway
-	 * 
-	 * @return	The currently attached USB TTY devices
-	 */
-	public List<UsbTtyDevice> getUsbTtyDevices();
-	
+    /**
+     * Gets the USB TTY devices on the gateway
+     *
+     * @return The currently attached USB TTY devices
+     */
+    public List<UsbTtyDevice> getUsbTtyDevices();
+
 }

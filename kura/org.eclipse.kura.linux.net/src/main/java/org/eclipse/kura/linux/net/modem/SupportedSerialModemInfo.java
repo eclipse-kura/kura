@@ -19,63 +19,64 @@ import org.eclipse.kura.net.modem.ModemTechnologyType;
 
 public enum SupportedSerialModemInfo {
 
-	MiniGateway_Telit_HE910_NAD("HE910", new String[]{"HE910-NAD", "HE910-EUD"}, "Telit", KuraConstants.Mini_Gateway.getImageName(), 
-			KuraConstants.Mini_Gateway.getImageVersion(), KuraConstants.Mini_Gateway.getTargetName(),
-			Arrays.asList(ModemTechnologyType.HSPA, ModemTechnologyType.UMTS), 
-			new SerialModemDriver("HE910", SerialModemComm.MiniGateway, "at+gmm\r\n"));
+    MiniGateway_Telit_HE910_NAD("HE910", new String[] { "HE910-NAD", "HE910-EUD" }, "Telit",
+            KuraConstants.Mini_Gateway.getImageName(), KuraConstants.Mini_Gateway.getImageVersion(),
+            KuraConstants.Mini_Gateway.getTargetName(),
+            Arrays.asList(ModemTechnologyType.HSPA, ModemTechnologyType.UMTS),
+            new SerialModemDriver("HE910", SerialModemComm.MiniGateway, "at+gmm\r\n"));
 
-	private String m_modemName;
-	private String [] m_modemModels;
-	private String m_manufacturerName;
-	private String m_osImageName;
-	private String m_osImageVersion;
-	private String m_targetName;
-	private List<ModemTechnologyType> m_technologyTypes;
-	private SerialModemDriver m_driver;
+    private String m_modemName;
+    private String[] m_modemModels;
+    private String m_manufacturerName;
+    private String m_osImageName;
+    private String m_osImageVersion;
+    private String m_targetName;
+    private List<ModemTechnologyType> m_technologyTypes;
+    private SerialModemDriver m_driver;
 
-	private SupportedSerialModemInfo(String modemName, String [] modemModels, String manufacturerName, String osImageName,
-			String osImageVersion, String targetName, List<ModemTechnologyType> technologyTypes,
-			SerialModemDriver driver) {
+    private SupportedSerialModemInfo(String modemName, String[] modemModels, String manufacturerName,
+            String osImageName, String osImageVersion, String targetName, List<ModemTechnologyType> technologyTypes,
+            SerialModemDriver driver) {
 
-		m_modemName = modemName;
-		m_modemModels = modemModels;
-		m_manufacturerName = manufacturerName;
-		m_osImageName = osImageName;
-		m_osImageVersion = osImageVersion;
-		m_targetName = targetName;
-		m_technologyTypes = technologyTypes;
-		m_driver = driver;
-	}
+        this.m_modemName = modemName;
+        this.m_modemModels = modemModels;
+        this.m_manufacturerName = manufacturerName;
+        this.m_osImageName = osImageName;
+        this.m_osImageVersion = osImageVersion;
+        this.m_targetName = targetName;
+        this.m_technologyTypes = technologyTypes;
+        this.m_driver = driver;
+    }
 
-	public String getModemName() {
-		return m_modemName;
-	}
+    public String getModemName() {
+        return this.m_modemName;
+    }
 
-	public String [] getModemModels() {
-		return m_modemModels;
-	}
+    public String[] getModemModels() {
+        return this.m_modemModels;
+    }
 
-	public String getManufacturerName() {
-		return m_manufacturerName;
-	}
+    public String getManufacturerName() {
+        return this.m_manufacturerName;
+    }
 
-	public String getOsImageName() {
-		return m_osImageName;
-	}
+    public String getOsImageName() {
+        return this.m_osImageName;
+    }
 
-	public String getOsImageVersion() {
-		return m_osImageVersion;
-	}
+    public String getOsImageVersion() {
+        return this.m_osImageVersion;
+    }
 
-	public String getTargetName() {
-		return m_targetName;
-	}
-	
-	public List<ModemTechnologyType> getTechnologyTypes() {
-		return m_technologyTypes;
-	}	
+    public String getTargetName() {
+        return this.m_targetName;
+    }
 
-	public SerialModemDriver getDriver() {
-		return m_driver;
-	}
+    public List<ModemTechnologyType> getTechnologyTypes() {
+        return this.m_technologyTypes;
+    }
+
+    public SerialModemDriver getDriver() {
+        return this.m_driver;
+    }
 }

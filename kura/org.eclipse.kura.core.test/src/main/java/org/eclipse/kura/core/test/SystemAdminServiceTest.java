@@ -11,35 +11,36 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
-import junit.framework.TestCase;
-
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import junit.framework.TestCase;
+
 public class SystemAdminServiceTest extends TestCase {
 
-	private static SystemAdminService sysAdminService = null;
-	
-	@BeforeClass
-	public void setUp() {
-	}	
-	
-	public static void setSystemAdminService(SystemAdminService sas) {
-		sysAdminService = sas;
-	}
-	
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
-	@Test
-	public void testServiceExists() {
-		assertNotNull(sysAdminService);
-	}
+    private static SystemAdminService sysAdminService = null;
 
-	@TestTarget(targetPlatforms={TestTarget.PLATFORM_ALL})
-	@Test
-  	public void testGetUptime() {
-		String actual = sysAdminService.getUptime();
-		assertTrue(Long.parseLong(actual) > 0);
-	}
+    @Override
+    @BeforeClass
+    public void setUp() {
+    }
+
+    public static void setSystemAdminService(SystemAdminService sas) {
+        sysAdminService = sas;
+    }
+
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testServiceExists() {
+        assertNotNull(sysAdminService);
+    }
+
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testGetUptime() {
+        String actual = sysAdminService.getUptime();
+        assertTrue(Long.parseLong(actual) > 0);
+    }
 }

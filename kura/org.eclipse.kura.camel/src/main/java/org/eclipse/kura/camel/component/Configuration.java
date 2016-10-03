@@ -187,7 +187,8 @@ public final class Configuration {
      *            the configuration
      * @param key
      *            the key to fetch
-     * @return the boolean value from the configuration, or {@code false} if the property set is {@code null}, the property is not set or it is not boolean
+     * @return the boolean value from the configuration, or {@code false} if the property set is {@code null}, the
+     *         property is not set or it is not boolean
      */
     public static boolean asBoolean(Map<String, ?> properties, String key) {
         return asBoolean(properties, key, false);

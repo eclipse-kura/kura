@@ -14,30 +14,29 @@ package org.eclipse.kura.web.client.util;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Image;
 
-public class ScaledAbstractImagePrototype extends AbstractImagePrototype 
-{
-	private AbstractImagePrototype m_aip;
-	
-	public ScaledAbstractImagePrototype(AbstractImagePrototype aip)
-	{
-		m_aip = aip;
-	}
-	
-	@Override
-	public void applyTo(Image image) {
-		m_aip.applyTo(image);
-	}
+public class ScaledAbstractImagePrototype extends AbstractImagePrototype {
 
-	@Override
-	public Image createImage() {
-		Image img = m_aip.createImage();
-		return new Image(img.getUrl());
-	}
-	
-	@Override
-	public ImagePrototypeElement createElement() {
-		ImagePrototypeElement imgElement = m_aip.createElement();
-		imgElement.getStyle().setProperty("backgroundSize", "100%");
-		return imgElement;		
-	}
+    private final AbstractImagePrototype m_aip;
+
+    public ScaledAbstractImagePrototype(AbstractImagePrototype aip) {
+        this.m_aip = aip;
+    }
+
+    @Override
+    public void applyTo(Image image) {
+        this.m_aip.applyTo(image);
+    }
+
+    @Override
+    public Image createImage() {
+        Image img = this.m_aip.createImage();
+        return new Image(img.getUrl());
+    }
+
+    @Override
+    public ImagePrototypeElement createElement() {
+        ImagePrototypeElement imgElement = this.m_aip.createElement();
+        imgElement.getStyle().setProperty("backgroundSize", "100%");
+        return imgElement;
+    }
 }

@@ -27,35 +27,35 @@ import org.osgi.service.component.ComponentContext;
 
 public class UsbServiceImpl implements UsbService {
 
-	protected void activate(ComponentContext componentContext) {
-	}
+    protected void activate(ComponentContext componentContext) {
+    }
 
-	protected void deactivate(ComponentContext componentContext) {
-	}
+    protected void deactivate(ComponentContext componentContext) {
+    }
 
-	@Override
-	public UsbServices getUsbServices() throws KuraException {
-		return null;
-	}
+    @Override
+    public UsbServices getUsbServices() throws KuraException {
+        return null;
+    }
 
-	@Override
-	public List<? extends UsbDevice> getUsbDevices() {
-		return Collections.emptyList();
-	}
+    @Override
+    public List<? extends UsbDevice> getUsbDevices() {
+        return Collections.emptyList();
+    }
 
-	@Override
-	public List<UsbBlockDevice> getUsbBlockDevices() {
-		return Collections.emptyList();
-	}
+    @Override
+    public List<UsbBlockDevice> getUsbBlockDevices() {
+        return Collections.emptyList();
+    }
 
-	@Override
-	public List<UsbNetDevice> getUsbNetDevices() {
-		return Collections.emptyList();
-	}
+    @Override
+    public List<UsbNetDevice> getUsbNetDevices() {
+        return Collections.emptyList();
+    }
 
-	@Override
-	public List<UsbTtyDevice> getUsbTtyDevices() {
-		return Collections.emptyList();
-	}
+    @Override
+    public List<UsbTtyDevice> getUsbTtyDevices() {
+        return Collections.emptyList();
+    }
 
 }

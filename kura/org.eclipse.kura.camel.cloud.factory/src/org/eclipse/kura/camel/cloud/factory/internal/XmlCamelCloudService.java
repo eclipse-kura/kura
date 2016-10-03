@@ -44,7 +44,8 @@ public class XmlCamelCloudService {
 
     private ServiceRegistration<CloudService> handle;
 
-    public XmlCamelCloudService(final BundleContext context, final String pid, final ServiceConfiguration configuration) {
+    public XmlCamelCloudService(final BundleContext context, final String pid,
+            final ServiceConfiguration configuration) {
         this.context = context;
         this.pid = pid;
         this.configuration = configuration;
@@ -65,7 +66,8 @@ public class XmlCamelCloudService {
         final KuraCloudComponent cloudComponent = new KuraCloudComponent(this.router, this.service);
         this.router.addComponent("kura-cloud", cloudComponent);
 
-        final RoutesDefinition routesDefinition = this.router.loadRoutesDefinition(new ByteArrayInputStream(this.configuration.getXml().getBytes()));
+        final RoutesDefinition routesDefinition = this.router
+                .loadRoutesDefinition(new ByteArrayInputStream(this.configuration.getXml().getBytes()));
         this.router.addRouteDefinitions(routesDefinition.getRoutes());
 
         // start
@@ -73,7 +75,8 @@ public class XmlCamelCloudService {
         logger.debug("Starting router...");
         this.router.start();
         final ServiceStatus status = this.router.getStatus();
-        logger.debug("Starting router... {} ({}, {})", new Object[] { status, status == Started, this.service.isConnected() });
+        logger.debug("Starting router... {} ({}, {})",
+                new Object[] { status, status == Started, this.service.isConnected() });
 
         // register
 

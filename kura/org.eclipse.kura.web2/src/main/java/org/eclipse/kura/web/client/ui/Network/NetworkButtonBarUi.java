@@ -44,214 +44,213 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 
 public class NetworkButtonBarUi extends Composite {
 
-	private static final String IPV4_MODE_MANUAL_NAME = GwtNetIfConfigMode.netIPv4ConfigModeManual.name();
-	
-	private static NetworkButtonBarUiUiBinder uiBinder = GWT.create(NetworkButtonBarUiUiBinder.class);
-	private static final Logger logger = Logger.getLogger(NetworkButtonBarUi.class.getSimpleName());
+    private static final String IPV4_MODE_MANUAL_NAME = GwtNetIfConfigMode.netIPv4ConfigModeManual.name();
 
-	interface NetworkButtonBarUiUiBinder extends UiBinder<Widget, NetworkButtonBarUi> {
-	}
+    private static NetworkButtonBarUiUiBinder uiBinder = GWT.create(NetworkButtonBarUiUiBinder.class);
+    private static final Logger logger = Logger.getLogger(NetworkButtonBarUi.class.getSimpleName());
 
-	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-	private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
-	
-	private static final Messages MSGS = GWT.create(Messages.class);
-	
-	GwtSession session;
-	NetworkInterfacesTableUi table;
-	NetworkTabsUi tabs;
+    interface NetworkButtonBarUiUiBinder extends UiBinder<Widget, NetworkButtonBarUi> {
+    }
 
-	@UiField
-	AnchorButton apply, refresh;
-	
-	@UiField
-	Modal incompleteFieldsModal;
-	@UiField
-	Alert incompleteFields;
-	@UiField
-	Text incompleteFieldsText;
-	
-	
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
 
-	public NetworkButtonBarUi(GwtSession currentSession,
-			NetworkTabsUi tabsPanel, NetworkInterfacesTableUi interfaces) {
-		initWidget(uiBinder.createAndBindUi(this));
-		this.session = currentSession;
-		this.table = interfaces;
-		this.tabs = tabsPanel;
-		initButtons();
-		initModal();
-	}
+    private static final Messages MSGS = GWT.create(Messages.class);
 
-	private void initButtons() {
+    GwtSession session;
+    NetworkInterfacesTableUi table;
+    NetworkTabsUi tabs;
 
-		// Apply Button
-		apply.setText(MSGS.apply());
-		apply.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				if (!tabs.visibleTabs.isEmpty() && tabs.isValid()) {
-					GwtNetInterfaceConfig prevNetIf = table.selectionModel.getSelectedObject();
-					final GwtNetInterfaceConfig updatedNetIf = tabs.getUpdatedInterface();
+    @UiField
+    AnchorButton apply, refresh;
 
-					// submit updated netInterfaceConfig and priorities
-					if (prevNetIf != null && prevNetIf.equals(updatedNetIf)) {
-						table.refresh();
-						apply.setEnabled(false);
-					} else {
-						String newNetwork = null;
-						String prevNetwork = null;
-						try {
-							newNetwork = calculateNetwork(updatedNetIf.getIpAddress(), updatedNetIf.getSubnetMask());
-							//prevNetwork = Window.Location.getHost();
-							prevNetwork = calculateNetwork(Window.Location.getHost(), updatedNetIf.getSubnetMask());
-						} catch (Exception e) {
-							
-						}
+    @UiField
+    Modal incompleteFieldsModal;
+    @UiField
+    Alert incompleteFields;
+    @UiField
+    Text incompleteFieldsText;
 
-						if (newNetwork != null) {
-							// if a static ip assigned, re-direct to the new
-							// location
-							if (    updatedNetIf.getConfigMode().equals(IPV4_MODE_MANUAL_NAME) && 
-									newNetwork.equals(prevNetwork) && 
-									Window.Location.getHost().equals(prevNetIf.getIpAddress()) ) {
-								Timer t = new Timer() {
-									@Override
-									public void run() {
-										Window.Location.replace("http://" + updatedNetIf.getIpAddress());
-									}
-								};
-								t.schedule(500);
-							}
-						}
+    public NetworkButtonBarUi(GwtSession currentSession, NetworkTabsUi tabsPanel, NetworkInterfacesTableUi interfaces) {
+        initWidget(uiBinder.createAndBindUi(this));
+        this.session = currentSession;
+        this.table = interfaces;
+        this.tabs = tabsPanel;
+        initButtons();
+        initModal();
+    }
 
-						EntryClassUi.showWaitModal();
-						gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+    private void initButtons() {
 
-							@Override
-							public void onFailure(Throwable ex) {
-								EntryClassUi.hideWaitModal();
-								FailureHandler.handle(ex, NetworkButtonBarUi.class.getSimpleName());
-							}
+        // Apply Button
+        this.apply.setText(MSGS.apply());
+        this.apply.addClickHandler(new ClickHandler() {
 
-							@Override
-							public void onSuccess(GwtXSRFToken token) {
-								gwtNetworkService.updateNetInterfaceConfigurations(token, updatedNetIf, new AsyncCallback<Void>() {
-											@Override
-											public void onFailure(Throwable ex) {
-												EntryClassUi.hideWaitModal();
-												FailureHandler.handle(ex, NetworkButtonBarUi.class.getSimpleName());
-											}
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!NetworkButtonBarUi.this.tabs.visibleTabs.isEmpty() && NetworkButtonBarUi.this.tabs.isValid()) {
+                    GwtNetInterfaceConfig prevNetIf = NetworkButtonBarUi.this.table.selectionModel.getSelectedObject();
+                    final GwtNetInterfaceConfig updatedNetIf = NetworkButtonBarUi.this.tabs.getUpdatedInterface();
 
-											@Override
-											public void onSuccess(Void result) {
-												EntryClassUi.hideWaitModal();
-												tabs.setDirty(false);
-												table.refresh();
-												tabs.refresh();
-												apply.setEnabled(false);
-											}
+                    // submit updated netInterfaceConfig and priorities
+                    if (prevNetIf != null && prevNetIf.equals(updatedNetIf)) {
+                        NetworkButtonBarUi.this.table.refresh();
+                        NetworkButtonBarUi.this.apply.setEnabled(false);
+                    } else {
+                        String newNetwork = null;
+                        String prevNetwork = null;
+                        try {
+                            newNetwork = calculateNetwork(updatedNetIf.getIpAddress(), updatedNetIf.getSubnetMask());
+                            // prevNetwork = Window.Location.getHost();
+                            prevNetwork = calculateNetwork(Window.Location.getHost(), updatedNetIf.getSubnetMask());
+                        } catch (Exception e) {
 
-										});
-							}
-							
-						});
-					}
-				} else {
-					logger.log(Level.FINER, MSGS.information() + ": " + MSGS.deviceConfigError());
-					incompleteFieldsModal.show();
-				}
-			}
+                        }
 
-		});
+                        if (newNetwork != null) {
+                            // if a static ip assigned, re-direct to the new
+                            // location
+                            if (updatedNetIf.getConfigMode().equals(IPV4_MODE_MANUAL_NAME)
+                                    && newNetwork.equals(prevNetwork)
+                                    && Window.Location.getHost().equals(prevNetIf.getIpAddress())) {
+                                Timer t = new Timer() {
 
-		// Refresh Button
-		refresh.setText(MSGS.refresh());
-		refresh.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				table.refresh();
-				tabs.setDirty(false);
-				tabs.refresh();
-				tabs.adjustInterfaceTabs();
-			}
-		});
+                                    @Override
+                                    public void run() {
+                                        Window.Location.replace("http://" + updatedNetIf.getIpAddress());
+                                    }
+                                };
+                                t.schedule(500);
+                            }
+                        }
 
-		table.interfacesGrid.getSelectionModel().addSelectionChangeHandler(
-				new SelectionChangeEvent.Handler() {
-					@Override
-					public void onSelectionChange(SelectionChangeEvent event) {
-						apply.setEnabled(true);
-					}
-				});
+                        EntryClassUi.showWaitModal();
+                        NetworkButtonBarUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-		// TODO ?? how to detect changes
-	}
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(ex, NetworkButtonBarUi.class.getSimpleName());
+                            }
 
-	private String calculateNetwork(String ipAddress, String netmask) {
-		if (	ipAddress == null   || 
-				ipAddress.isEmpty() || 
-				netmask == null     || 
-				netmask.isEmpty()   ) {
-			return null;
-		}
+                            @Override
+                            public void onSuccess(GwtXSRFToken token) {
+                                NetworkButtonBarUi.this.gwtNetworkService.updateNetInterfaceConfigurations(token,
+                                        updatedNetIf, new AsyncCallback<Void>() {
 
-		String network = null;
+                                    @Override
+                                    public void onFailure(Throwable ex) {
+                                        EntryClassUi.hideWaitModal();
+                                        FailureHandler.handle(ex, NetworkButtonBarUi.class.getSimpleName());
+                                    }
 
-		try {
-			int ipAddressValue = 0;
-			int netmaskValue = 0;
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        EntryClassUi.hideWaitModal();
+                                        NetworkButtonBarUi.this.tabs.setDirty(false);
+                                        NetworkButtonBarUi.this.table.refresh();
+                                        NetworkButtonBarUi.this.tabs.refresh();
+                                        NetworkButtonBarUi.this.apply.setEnabled(false);
+                                    }
 
-			String[] sa = this.splitIp(ipAddress);
+                                });
+                            }
 
-			for (int i = 24, t = 0; i >= 0; i -= 8, t++) {
-				ipAddressValue = ipAddressValue | (Integer.parseInt(sa[t]) << i);
-			}
+                        });
+                    }
+                } else {
+                    logger.log(Level.FINER, MSGS.information() + ": " + MSGS.deviceConfigError());
+                    NetworkButtonBarUi.this.incompleteFieldsModal.show();
+                }
+            }
 
-			sa = this.splitIp(netmask);
-			for (int i = 24, t = 0; i >= 0; i -= 8, t++) {
-				netmaskValue = netmaskValue | (Integer.parseInt(sa[t]) << i);
-			}
+        });
 
-			network = dottedQuad(ipAddressValue & netmaskValue);
-		} catch (Exception e) {
-			logger.warning(e.getLocalizedMessage());
-		}
-		return network;
-	}
+        // Refresh Button
+        this.refresh.setText(MSGS.refresh());
+        this.refresh.addClickHandler(new ClickHandler() {
 
-	private String dottedQuad(int ip) {
-		StringBuffer sb = new StringBuffer(15);
-		for (int shift = 24; shift > 0; shift -= 8) {
-			// process 3 bytes, from high order byte down.
-			sb.append(Integer.toString((ip >>> shift) & 0xff));
-			sb.append('.');
-		}
-		sb.append(Integer.toString(ip & 0xff));
-		return sb.toString();
-	}
+            @Override
+            public void onClick(ClickEvent event) {
+                NetworkButtonBarUi.this.table.refresh();
+                NetworkButtonBarUi.this.tabs.setDirty(false);
+                NetworkButtonBarUi.this.tabs.refresh();
+                NetworkButtonBarUi.this.tabs.adjustInterfaceTabs();
+            }
+        });
 
-	private String[] splitIp(String ip) {
+        this.table.interfacesGrid.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
-		String sIp = new String(ip);
-		String[] ret = new String[4];
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                NetworkButtonBarUi.this.apply.setEnabled(true);
+            }
+        });
 
-		int ind = 0;
-		for (int i = 0; i < 3; i++) {
-			if ((ind = sIp.indexOf(".")) >= 0) {
-				ret[i] = sIp.substring(0, ind);
-				sIp = sIp.substring(ind + 1);
-				if (i == 2) {
-					ret[3] = sIp;
-				}
-			}
-		}
-		return ret;
-	}
-	
-	private void initModal() {
-		incompleteFieldsModal.setTitle(MSGS.warning());
-		incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
-	}
+        // TODO ?? how to detect changes
+    }
+
+    private String calculateNetwork(String ipAddress, String netmask) {
+        if (ipAddress == null || ipAddress.isEmpty() || netmask == null || netmask.isEmpty()) {
+            return null;
+        }
+
+        String network = null;
+
+        try {
+            int ipAddressValue = 0;
+            int netmaskValue = 0;
+
+            String[] sa = splitIp(ipAddress);
+
+            for (int i = 24, t = 0; i >= 0; i -= 8, t++) {
+                ipAddressValue = ipAddressValue | Integer.parseInt(sa[t]) << i;
+            }
+
+            sa = splitIp(netmask);
+            for (int i = 24, t = 0; i >= 0; i -= 8, t++) {
+                netmaskValue = netmaskValue | Integer.parseInt(sa[t]) << i;
+            }
+
+            network = dottedQuad(ipAddressValue & netmaskValue);
+        } catch (Exception e) {
+            logger.warning(e.getLocalizedMessage());
+        }
+        return network;
+    }
+
+    private String dottedQuad(int ip) {
+        StringBuffer sb = new StringBuffer(15);
+        for (int shift = 24; shift > 0; shift -= 8) {
+            // process 3 bytes, from high order byte down.
+            sb.append(Integer.toString(ip >>> shift & 0xff));
+            sb.append('.');
+        }
+        sb.append(Integer.toString(ip & 0xff));
+        return sb.toString();
+    }
+
+    private String[] splitIp(String ip) {
+
+        String sIp = new String(ip);
+        String[] ret = new String[4];
+
+        int ind = 0;
+        for (int i = 0; i < 3; i++) {
+            if ((ind = sIp.indexOf(".")) >= 0) {
+                ret[i] = sIp.substring(0, ind);
+                sIp = sIp.substring(ind + 1);
+                if (i == 2) {
+                    ret[3] = sIp;
+                }
+            }
+        }
+        return ret;
+    }
+
+    private void initModal() {
+        this.incompleteFieldsModal.setTitle(MSGS.warning());
+        this.incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
+    }
 
 }

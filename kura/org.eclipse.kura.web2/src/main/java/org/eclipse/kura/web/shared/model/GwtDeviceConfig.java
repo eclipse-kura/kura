@@ -19,28 +19,26 @@ import org.eclipse.kura.web.client.util.DateUtils;
 public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
 
     private static final long serialVersionUID = 1708831984640005284L;
-    
-	public GwtDeviceConfig() {}   
-	
-    @Override
-    @SuppressWarnings({"unchecked"})
-    public <X> X get(String property) {
-    	if ("lastEventOnFormatted".equals(property)) {
-    		return (X) (DateUtils.formatDateTime((Date) get("lastEventOn")));
-    	}
-    	else if ("uptimeFormatted".equals(property)) {
-    	    if (getUptime() == -1) {
-    	        return (X) "Unknown";
-    	    }
-    	    else {
-    	        return (X) String.valueOf(getUptime());
-    	    }
-        }
-    	else {
-    		return super.get(property);
-    	}
+
+    public GwtDeviceConfig() {
     }
-    
+
+    @Override
+    @SuppressWarnings({ "unchecked" })
+    public <X> X get(String property) {
+        if ("lastEventOnFormatted".equals(property)) {
+            return (X) DateUtils.formatDateTime((Date) get("lastEventOn"));
+        } else if ("uptimeFormatted".equals(property)) {
+            if (getUptime() == -1) {
+                return (X) "Unknown";
+            } else {
+                return (X) String.valueOf(getUptime());
+            }
+        } else {
+            return super.get(property);
+        }
+    }
+
     public String getAccountName() {
         return get("accountName");
     }
@@ -48,16 +46,15 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
     public void setAccountName(String accountName) {
         set("accountName", accountName);
     }
-    
+
     public String getClientId() {
         return (String) get("clientId");
     }
 
-
     public void setClientId(String clientId) {
         set("clientId", clientId);
     }
-	
+
     public Long getUptime() {
         return (Long) get("uptime");
     }
@@ -69,15 +66,15 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
     public void setUptime(Long uptime) {
         set("uptime", uptime);
     }
-    
-    public String getGwtDeviceStatus() {
-    	return (String) get("gwtDeviceStatus");
-	}
 
-	public void setGwtDeviceStatus(String gwtDeviceStatus) {
-		set("gwtDeviceStatus", gwtDeviceStatus);
-	}    
-    
+    public String getGwtDeviceStatus() {
+        return (String) get("gwtDeviceStatus");
+    }
+
+    public void setGwtDeviceStatus(String gwtDeviceStatus) {
+        set("gwtDeviceStatus", gwtDeviceStatus);
+    }
+
     public String getDisplayName() {
         return (String) get("displayName");
     }
@@ -85,7 +82,7 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
     public void setDisplayName(String displayName) {
         set("displayName", displayName);
     }
-    
+
     public String getModelName() {
         return (String) get("modelName");
     }
@@ -93,7 +90,7 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
     public void setModelName(String modelName) {
         set("modelName", modelName);
     }
-    
+
     public String getModelId() {
         return (String) get("modelId");
     }
@@ -101,15 +98,15 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
     public void setModelId(String modelId) {
         set("modelId", modelId);
     }
-    
+
     public String getPartNumber() {
         return (String) get("partNumber");
     }
 
     public void setPartNumber(String partNumber) {
         set("partNumber", partNumber);
-    }    
-    
+    }
+
     public String getSerialNumber() {
         return (String) get("serialNumber");
     }
@@ -117,7 +114,7 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
     public void setSerialNumber(String serialNumber) {
         set("serialNumber", serialNumber);
     }
-    
+
     public String getAvailableProcessors() {
         return (String) get("availableProcessors");
     }
@@ -125,7 +122,7 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
     public void setAvailableProcessors(String availableProcessors) {
         set("availableProcessors", availableProcessors);
     }
-    
+
     public String getTotalMemory() {
         return (String) get("totalMemory");
     }
@@ -133,55 +130,55 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
     public void setTotalMemory(String totalMemory) {
         set("totalMemory", totalMemory);
     }
-   
+
     public String getFirmwareVersion() {
         return (String) get("firmwareVersion");
     }
 
     public void setFirmwareVersion(String firmwareVersion) {
         set("firmwareVersion", firmwareVersion);
-    }    
-    
+    }
+
     public String getBiosVersion() {
         return (String) get("biosVersion");
     }
 
     public void setBiosVersion(String biosVersion) {
         set("biosVersion", biosVersion);
-    }    
-    
+    }
+
     public String getOs() {
         return (String) get("os");
     }
 
     public void setOs(String os) {
         set("os", os);
-    }    
-    
+    }
+
     public String getOsVersion() {
         return (String) get("osVersion");
     }
 
     public void setOsVersion(String osVersion) {
         set("osVersion", osVersion);
-    }    
-    
+    }
+
     public String getOsArch() {
         return (String) get("osArch");
     }
 
     public void setOsArch(String osArch) {
         set("osArch", osArch);
-    }    
-    
+    }
+
     public String getJvmName() {
         return (String) get("jvmName");
     }
 
     public void setJvmName(String jvmName) {
         set("jvmName", jvmName);
-    }    
-    
+    }
+
     public String getJvmVersion() {
         return (String) get("jvmVersion");
     }
@@ -189,7 +186,7 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
     public void setJvmVersion(String jvmVersion) {
         set("jvmVersion", jvmVersion);
     }
-    
+
     public String getJvmProfile() {
         return (String) get("jvmProfile");
     }
@@ -197,7 +194,7 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
     public void setJvmProfile(String jvmProfile) {
         set("jvmProfile", jvmProfile);
     }
-    
+
     public String getOsgiFramework() {
         return (String) get("osgiFramework");
     }
@@ -205,7 +202,7 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
     public void setOsgiFramework(String osgiFramework) {
         set("osgiFramework", osgiFramework);
     }
-    
+
     public String getOsgiFrameworkVersion() {
         return (String) get("osgiFrameworkVersion");
     }
@@ -213,7 +210,7 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
     public void setOsgiFrameworkVersion(String osgiFrameworkVersion) {
         set("osgiFrameworkVersion", osgiFrameworkVersion);
     }
-    
+
     public String getConnectionInterface() {
         return (String) get("connectionInterface");
     }
@@ -221,7 +218,7 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
     public void setConnectionInterface(String connectionInterface) {
         set("connectionInterface", connectionInterface);
     }
-    
+
     public String getConnectionIp() {
         return (String) get("connectionIp");
     }
@@ -229,13 +226,13 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
     public void setConnectionIp(String connectionIp) {
         set("connectionIp", connectionIp);
     }
-    
+
     public String getAcceptEncoding() {
-    	return (String) get("acceptEncoding");
+        return (String) get("acceptEncoding");
     }
-    
+
     public void setAcceptEncoding(String acceptEncoding) {
-    	set("acceptEncoding", acceptEncoding);
+        set("acceptEncoding", acceptEncoding);
     }
 
     public String getApplicationIdentifiers() {
@@ -245,7 +242,7 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
     public void setApplicationIdentifiers(String applicationIdentifiers) {
         set("applicationIdentifiers", applicationIdentifiers);
     }
-    
+
     public Double getGpsLatitude() {
         return (Double) get("gpsLatitude");
     }
@@ -268,8 +265,8 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
 
     public void setGpsAltitude(Double gpsAltitude) {
         set("gpsAltitude", gpsAltitude);
-    }    
-    
+    }
+
     public String getGpsAddress() {
         return (String) get("gpsAddress");
     }
@@ -288,8 +285,8 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
 
     public void setLastEventOn(Date lastEventDate) {
         set("lastEventOn", lastEventDate);
-    }    
-    
+    }
+
     public String getLastEventType() {
         return (String) get("lastEventType");
     }
@@ -297,8 +294,8 @@ public class GwtDeviceConfig extends GwtBaseModel implements Serializable {
     public void setLastEventType(String lastEventType) {
         set("lastEventType", lastEventType);
     }
-    
+
     public boolean isOnline() {
-    	return getGwtDeviceStatus().compareTo("CONNECTED") == 0;
+        return getGwtDeviceStatus().compareTo("CONNECTED") == 0;
     }
 }

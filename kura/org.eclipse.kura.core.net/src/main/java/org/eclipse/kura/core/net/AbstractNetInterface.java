@@ -21,203 +21,211 @@ import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.usb.UsbDevice;
 
-public abstract class AbstractNetInterface<T extends NetInterfaceAddress> implements NetInterface<T> 
-{
-	private String 			   name;
-	private byte[]			   hardwareAddress;
-	private boolean            loopback;
-	private boolean            pointToPoint;
-	private boolean            virtual;
-	private boolean            supportsMulticast;
-	private boolean            up;
-	private int                mtu;
-	private UsbDevice          usbDevice;
-	private String             driver;
-	private String             driverVersion;
-	private String             firmwareVersion;
-	private NetInterfaceState  state;
-	private boolean            autoConnect;
-	private List<T>            interfaceAddresses;
-	
-	protected AbstractNetInterface(String name) {
-		super();
-		this.name = name;
-		this.interfaceAddresses = new ArrayList<T>();
-	}
-	
-	protected AbstractNetInterface(NetInterface<? extends NetInterfaceAddress> other) {
-	    super();
-	    this.name = other.getName();
-	    this.hardwareAddress = other.getHardwareAddress();
-	    this.loopback = other.isLoopback();
-	    this.pointToPoint = other.isPointToPoint();
-	    this.virtual = other.isVirtual();
-	    this.supportsMulticast = other.supportsMulticast();
-	    this.up = other.isUp();
-	    this.mtu = other.getMTU();
-	    this.usbDevice = other.getUsbDevice();
-	    this.driver = other.getDriver();
-	    this.driverVersion = other.getDriverVersion();
-	    this.firmwareVersion = other.getFirmwareVersion();
-	    this.state = other.getState();
-	    this.autoConnect = other.isAutoConnect();
-	    this.interfaceAddresses = new ArrayList<T>();	    
-	    // note - copying of interfaceAddresses are handled in the subclasses
-	}
-	
-	public String getName() {
-		return name;
-	}
-	
-	public void setName(String name) {
-	    this.name = name;
-	}
+public abstract class AbstractNetInterface<T extends NetInterfaceAddress> implements NetInterface<T> {
 
-	public byte[] getHardwareAddress() {
-		return hardwareAddress;
-	}
-	
-	public boolean isLoopback() {
-		return loopback;
-	}
-	
-	public boolean isPointToPoint() {
-		return pointToPoint;
-	}
-	
-	public boolean isVirtual() {
-		return virtual;
-	}
-	
-	public boolean supportsMulticast() {
-		return supportsMulticast;
-	}
-	
-	public boolean isUp() {
-		return up;
-	}
+    private String name;
+    private byte[] hardwareAddress;
+    private boolean loopback;
+    private boolean pointToPoint;
+    private boolean virtual;
+    private boolean supportsMulticast;
+    private boolean up;
+    private int mtu;
+    private UsbDevice usbDevice;
+    private String driver;
+    private String driverVersion;
+    private String firmwareVersion;
+    private NetInterfaceState state;
+    private boolean autoConnect;
+    private List<T> interfaceAddresses;
 
-	public int getMTU() {
-		return mtu;
-	}
+    protected AbstractNetInterface(String name) {
+        super();
+        this.name = name;
+        this.interfaceAddresses = new ArrayList<T>();
+    }
 
-	public void setMTU(int mtu) {
-		this.mtu = mtu;
-	}
-	
-	public String getDriver() {
-		return driver;
-	}
+    protected AbstractNetInterface(NetInterface<? extends NetInterfaceAddress> other) {
+        super();
+        this.name = other.getName();
+        this.hardwareAddress = other.getHardwareAddress();
+        this.loopback = other.isLoopback();
+        this.pointToPoint = other.isPointToPoint();
+        this.virtual = other.isVirtual();
+        this.supportsMulticast = other.supportsMulticast();
+        this.up = other.isUp();
+        this.mtu = other.getMTU();
+        this.usbDevice = other.getUsbDevice();
+        this.driver = other.getDriver();
+        this.driverVersion = other.getDriverVersion();
+        this.firmwareVersion = other.getFirmwareVersion();
+        this.state = other.getState();
+        this.autoConnect = other.isAutoConnect();
+        this.interfaceAddresses = new ArrayList<T>();
+        // note - copying of interfaceAddresses are handled in the subclasses
+    }
 
-	public void setDriver(String driver) {
-		this.driver = driver;
-	}
+    @Override
+    public String getName() {
+        return this.name;
+    }
 
-	public String getDriverVersion() {
-		return driverVersion;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setDriverVersion(String driverVersion) {
-		this.driverVersion = driverVersion;
-	}
+    @Override
+    public byte[] getHardwareAddress() {
+        return this.hardwareAddress;
+    }
 
-	public String getFirmwareVersion() {
-		return firmwareVersion;
-	}
+    @Override
+    public boolean isLoopback() {
+        return this.loopback;
+    }
 
-	public void setFirmwareVersion(String firmwareVersion) {
-		this.firmwareVersion = firmwareVersion;
-	}
+    @Override
+    public boolean isPointToPoint() {
+        return this.pointToPoint;
+    }
 
-	public NetInterfaceState getState() {
-		return state;
-	}
+    @Override
+    public boolean isVirtual() {
+        return this.virtual;
+    }
 
-	public void setState(NetInterfaceState state) {
-		this.state = state;
-	}
+    @Override
+    public boolean supportsMulticast() {
+        return this.supportsMulticast;
+    }
 
-	public UsbDevice getUsbDevice() {
-		return usbDevice;
-	}
+    @Override
+    public boolean isUp() {
+        return this.up;
+    }
 
-	public void setHardwareAddress(byte[] hardwareAddress) {
-		this.hardwareAddress = hardwareAddress;
-	}
+    @Override
+    public int getMTU() {
+        return this.mtu;
+    }
 
-	public void setLoopback(boolean loopback) {
-		this.loopback = loopback;
-	}
+    public void setMTU(int mtu) {
+        this.mtu = mtu;
+    }
 
-	public void setPointToPoint(boolean pointToPoint) {
-		this.pointToPoint = pointToPoint;
-	}
+    @Override
+    public String getDriver() {
+        return this.driver;
+    }
 
-	public void setVirtual(boolean virtual) {
-		this.virtual = virtual;
-	}
+    public void setDriver(String driver) {
+        this.driver = driver;
+    }
 
-	public void setSupportsMulticast(boolean supportsMulticast) {
-		this.supportsMulticast = supportsMulticast;
-	}
+    @Override
+    public String getDriverVersion() {
+        return this.driverVersion;
+    }
 
-	public void setUp(boolean up) {
-		this.up = up;
-	}
+    public void setDriverVersion(String driverVersion) {
+        this.driverVersion = driverVersion;
+    }
 
-	public void setUsbDevice(UsbDevice usbDevice) {
-		this.usbDevice = usbDevice;
-	}
-	
-	public boolean isAutoConnect() {
-		return autoConnect;
-	}
+    @Override
+    public String getFirmwareVersion() {
+        return this.firmwareVersion;
+    }
 
-	public void setAutoConnect(boolean autoConnect) {
-		this.autoConnect = autoConnect;
-	}
-	
-	public List<T> getNetInterfaceAddresses() {
-	    if(this.interfaceAddresses != null) {
-	        return Collections.unmodifiableList(this.interfaceAddresses);
-	    }	    
-	    return null;
-	}
+    public void setFirmwareVersion(String firmwareVersion) {
+        this.firmwareVersion = firmwareVersion;
+    }
 
-	public void setNetInterfaceAddresses(List<T> interfaceAddresses) {
-		this.interfaceAddresses = interfaceAddresses;
-	}
-	
-	@Override
-	public String toString() {		
-		StringBuilder sb = new StringBuilder();
-		sb.append("name=").append(name);
-		if(hardwareAddress != null && hardwareAddress.length == 6) {
-			sb.append(" :: hardwareAddress=")
-			.append(NetworkUtil.macToString(hardwareAddress));
-		}
-		sb.append(" :: loopback=").append(loopback)
-		.append(" :: pointToPoint=").append(pointToPoint)
-		.append(" :: virtual=").append(virtual)
-		.append(" :: supportsMulticast=").append(supportsMulticast)
-		.append(" :: up=").append(up)
-		.append(" :: mtu=").append(mtu);
-		if(usbDevice != null) {
-			sb.append(" :: usbDevice=").append(usbDevice);
-		}
-		sb.append(" :: driver=").append(driver)
-		.append(" :: driverVersion=").append(driverVersion)
-		.append(" :: firmwareVersion=").append(firmwareVersion)
-		.append(" :: state=").append(state)
-		.append(" :: autoConnect=").append(autoConnect);
-		if(interfaceAddresses != null && interfaceAddresses.size() > 0) {
-			sb.append(" :: InterfaceAddress=");
-			for(T interfaceAddress : interfaceAddresses) {
-				sb.append(interfaceAddress)
-				.append(" ");
-			}
-		}
-		
-		return sb.toString();
-	}
+    @Override
+    public NetInterfaceState getState() {
+        return this.state;
+    }
+
+    public void setState(NetInterfaceState state) {
+        this.state = state;
+    }
+
+    @Override
+    public UsbDevice getUsbDevice() {
+        return this.usbDevice;
+    }
+
+    public void setHardwareAddress(byte[] hardwareAddress) {
+        this.hardwareAddress = hardwareAddress;
+    }
+
+    public void setLoopback(boolean loopback) {
+        this.loopback = loopback;
+    }
+
+    public void setPointToPoint(boolean pointToPoint) {
+        this.pointToPoint = pointToPoint;
+    }
+
+    public void setVirtual(boolean virtual) {
+        this.virtual = virtual;
+    }
+
+    public void setSupportsMulticast(boolean supportsMulticast) {
+        this.supportsMulticast = supportsMulticast;
+    }
+
+    public void setUp(boolean up) {
+        this.up = up;
+    }
+
+    public void setUsbDevice(UsbDevice usbDevice) {
+        this.usbDevice = usbDevice;
+    }
+
+    @Override
+    public boolean isAutoConnect() {
+        return this.autoConnect;
+    }
+
+    public void setAutoConnect(boolean autoConnect) {
+        this.autoConnect = autoConnect;
+    }
+
+    @Override
+    public List<T> getNetInterfaceAddresses() {
+        if (this.interfaceAddresses != null) {
+            return Collections.unmodifiableList(this.interfaceAddresses);
+        }
+        return null;
+    }
+
+    public void setNetInterfaceAddresses(List<T> interfaceAddresses) {
+        this.interfaceAddresses = interfaceAddresses;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("name=").append(this.name);
+        if (this.hardwareAddress != null && this.hardwareAddress.length == 6) {
+            sb.append(" :: hardwareAddress=").append(NetworkUtil.macToString(this.hardwareAddress));
+        }
+        sb.append(" :: loopback=").append(this.loopback).append(" :: pointToPoint=").append(this.pointToPoint)
+                .append(" :: virtual=").append(this.virtual).append(" :: supportsMulticast=")
+                .append(this.supportsMulticast).append(" :: up=").append(this.up).append(" :: mtu=").append(this.mtu);
+        if (this.usbDevice != null) {
+            sb.append(" :: usbDevice=").append(this.usbDevice);
+        }
+        sb.append(" :: driver=").append(this.driver).append(" :: driverVersion=").append(this.driverVersion)
+                .append(" :: firmwareVersion=").append(this.firmwareVersion).append(" :: state=").append(this.state)
+                .append(" :: autoConnect=").append(this.autoConnect);
+        if (this.interfaceAddresses != null && this.interfaceAddresses.size() > 0) {
+            sb.append(" :: InterfaceAddress=");
+            for (T interfaceAddress : this.interfaceAddresses) {
+                sb.append(interfaceAddress).append(" ");
+            }
+        }
+
+        return sb.toString();
+    }
 }

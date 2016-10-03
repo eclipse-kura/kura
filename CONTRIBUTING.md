@@ -10,6 +10,7 @@ Here is a (non-exclusive, non-prioritized) list of things you might be able to h
 * improvements regarding code quality e.g. improving readability, performance, modularity etc.
 * documentation (Getting Started guide, Examples, Deployment instructions ni cloud environments)
 * features (both ideas and code are welcome)
+* tests
 
 In order to get you started as fast as possible we need to go through some organizational issues first, though.
 
@@ -41,6 +42,10 @@ You can find all the details in the [Contributing via Git](http://wiki.eclipse.o
 
 * Fork the repository on GitHub
 * Create a new branch for your changes
+* Configure your IDE installing:
+  * The formatter profile available in kura/setup/formatting/KuraFormatter*.xml
+  * The cleanup profile available in kura/setup/formatting/KuraCleanupProfile*.xml
+  * [SonarLint](http://www.sonarlint.org/eclipse/index.html)
 * Make your changes
 * Make sure you include test cases for non-trivial features
 * Make sure the test suite passes after your changes

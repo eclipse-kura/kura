@@ -36,110 +36,114 @@ import com.google.gwt.view.client.ListDataProvider;
 
 public class BundlesTabUi extends Composite {
 
-	private static BundlesTabUiUiBinder uiBinder = GWT.create(BundlesTabUiUiBinder.class);
+    private static BundlesTabUiUiBinder uiBinder = GWT.create(BundlesTabUiUiBinder.class);
 
-	interface BundlesTabUiUiBinder extends UiBinder<Widget, BundlesTabUi> {
-	}
+    interface BundlesTabUiUiBinder extends UiBinder<Widget, BundlesTabUi> {
+    }
 
-	private static final Messages MSGS = GWT.create(Messages.class);
-	private static final ValidationMessages msgs = GWT.create(ValidationMessages.class);
-	
-	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
-	
-	@UiField
-	CellTable<GwtGroupedNVPair> bundlesGrid = new CellTable<GwtGroupedNVPair>();
-	private ListDataProvider<GwtGroupedNVPair> bundlesDataProvider = new ListDataProvider<GwtGroupedNVPair>();
+    private static final Messages MSGS = GWT.create(Messages.class);
+    private static final ValidationMessages msgs = GWT.create(ValidationMessages.class);
 
-	public BundlesTabUi() {
-		initWidget(uiBinder.createAndBindUi(this));
-		loadBundlesTable(bundlesGrid, bundlesDataProvider);
-		//loadBundlesData();
-	}
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 
-	private void loadBundlesTable(CellTable<GwtGroupedNVPair> bundlesGrid2,
+    @UiField
+    CellTable<GwtGroupedNVPair> bundlesGrid = new CellTable<GwtGroupedNVPair>();
+    private final ListDataProvider<GwtGroupedNVPair> bundlesDataProvider = new ListDataProvider<GwtGroupedNVPair>();
 
-	ListDataProvider<GwtGroupedNVPair> dataProvider) {
+    public BundlesTabUi() {
+        initWidget(uiBinder.createAndBindUi(this));
+        loadBundlesTable(this.bundlesGrid, this.bundlesDataProvider);
+        // loadBundlesData();
+    }
 
-		TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
-			@Override
-			public String getValue(GwtGroupedNVPair object) {
-				return object.getId();
-			}
-		};
-		col1.setCellStyleNames("status-table-row");
-		bundlesGrid2.addColumn(col1, MSGS.deviceBndId());
+    private void loadBundlesTable(CellTable<GwtGroupedNVPair> bundlesGrid2,
 
-		TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
-			@Override
-			public String getValue(GwtGroupedNVPair object) {
-				return object.getName();
-			}
-		};
-		col2.setCellStyleNames("status-table-row");
-		bundlesGrid2.addColumn(col2, MSGS.deviceBndName());
+    ListDataProvider<GwtGroupedNVPair> dataProvider) {
 
-		TextColumn<GwtGroupedNVPair> col3 = new TextColumn<GwtGroupedNVPair>() {
-			@Override
-			public String getValue(GwtGroupedNVPair object) {
-				return msgs.getString(object.getStatus());
-			}
-		};
-		col3.setCellStyleNames("status-table-row");
-		bundlesGrid2.addColumn(col3, MSGS.deviceBndState());
+        TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
 
-		TextColumn<GwtGroupedNVPair> col4 = new TextColumn<GwtGroupedNVPair>() {
-			@Override
-			public String getValue(GwtGroupedNVPair object) {
-				return object.getVersion();
-			}
-		};
-		col4.setCellStyleNames("status-table-row");
-		bundlesGrid2.addColumn(col4, MSGS.deviceBndVersion());
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return object.getId();
+            }
+        };
+        col1.setCellStyleNames("status-table-row");
+        bundlesGrid2.addColumn(col1, MSGS.deviceBndId());
 
-		dataProvider.addDataDisplay(bundlesGrid2);
-	}
+        TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
 
-	public void loadBundlesData() {
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return object.getName();
+            }
+        };
+        col2.setCellStyleNames("status-table-row");
+        bundlesGrid2.addColumn(col2, MSGS.deviceBndName());
 
-		bundlesDataProvider.getList().clear();
-		
-		EntryClassUi.showWaitModal();
-		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+        TextColumn<GwtGroupedNVPair> col3 = new TextColumn<GwtGroupedNVPair>() {
 
-			@Override
-			public void onFailure(Throwable ex) {
-				EntryClassUi.hideWaitModal();
-				FailureHandler.handle(ex);
-			}
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return msgs.getString(object.getStatus());
+            }
+        };
+        col3.setCellStyleNames("status-table-row");
+        bundlesGrid2.addColumn(col3, MSGS.deviceBndState());
 
-			@Override
-			public void onSuccess(GwtXSRFToken token) {
-				gwtDeviceService.findBundles(token, new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+        TextColumn<GwtGroupedNVPair> col4 = new TextColumn<GwtGroupedNVPair>() {
 
-					@Override
-					public void onFailure(Throwable caught) {
-						EntryClassUi.hideWaitModal();
-						FailureHandler.handle(caught);
-						bundlesDataProvider.flush();
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return object.getVersion();
+            }
+        };
+        col4.setCellStyleNames("status-table-row");
+        bundlesGrid2.addColumn(col4, MSGS.deviceBndVersion());
 
-					}
+        dataProvider.addDataDisplay(bundlesGrid2);
+    }
 
-					@Override
-					public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-						for (GwtGroupedNVPair resultPair : result) {
-							bundlesDataProvider.getList().add(resultPair);
-						}
-						int size= bundlesDataProvider.getList().size();
-						bundlesGrid.setVisibleRange(0, size);
-						bundlesDataProvider.flush();
-						EntryClassUi.hideWaitModal();
+    public void loadBundlesData() {
 
-					}
-				});
-			}
-			
-		});
-	}
+        this.bundlesDataProvider.getList().clear();
+
+        EntryClassUi.showWaitModal();
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                BundlesTabUi.this.gwtDeviceService.findBundles(token, new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                        BundlesTabUi.this.bundlesDataProvider.flush();
+
+                    }
+
+                    @Override
+                    public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                        for (GwtGroupedNVPair resultPair : result) {
+                            BundlesTabUi.this.bundlesDataProvider.getList().add(resultPair);
+                        }
+                        int size = BundlesTabUi.this.bundlesDataProvider.getList().size();
+                        BundlesTabUi.this.bundlesGrid.setVisibleRange(0, size);
+                        BundlesTabUi.this.bundlesDataProvider.flush();
+                        EntryClassUi.hideWaitModal();
+
+                    }
+                });
+            }
+
+        });
+    }
 
 }

@@ -46,166 +46,177 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class CommandTabUi extends Composite {
 
-	private static CommandTabUiUiBinder uiBinder = GWT.create(CommandTabUiUiBinder.class);
+    private static CommandTabUiUiBinder uiBinder = GWT.create(CommandTabUiUiBinder.class);
 
-	private static final Messages MSGS = GWT.create(Messages.class);
-	private static final String SERVLET_URL = "/" + GWT.getModuleName()	+ "/file/command";
+    private static final Messages MSGS = GWT.create(Messages.class);
+    private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/command";
 
-	@SuppressWarnings("unused")
-	private GwtSession session;
+    @SuppressWarnings("unused")
+    private GwtSession session;
 
-	interface CommandTabUiUiBinder extends UiBinder<Widget, CommandTabUi> {
-	}
+    interface CommandTabUiUiBinder extends UiBinder<Widget, CommandTabUi> {
+    }
 
-	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 
-	@UiField
-	TextBox formExecute;
-	@UiField
-	Input formPassword;
-	@UiField
-	Button reset, execute;
-	@UiField
-	FormPanel commandForm;
-	@UiField
-	FileUpload docPath;
-	@UiField
-	PanelBody resultPanel;
-	@UiField
-	Hidden xsrfTokenField;
+    @UiField
+    TextBox formExecute;
+    @UiField
+    Input formPassword;
+    @UiField
+    Button reset, execute;
+    @UiField
+    FormPanel commandForm;
+    @UiField
+    FileUpload docPath;
+    @UiField
+    PanelBody resultPanel;
+    @UiField
+    Hidden xsrfTokenField;
 
-	String command, password;
-	SafeHtmlBuilder safeHtml= new SafeHtmlBuilder();
+    String command, password;
+    SafeHtmlBuilder safeHtml = new SafeHtmlBuilder();
 
-	public CommandTabUi() {
-		initWidget(uiBinder.createAndBindUi(this));
+    public CommandTabUi() {
+        initWidget(uiBinder.createAndBindUi(this));
 
-		formExecute.clear();
-		formExecute.setFocus(true);
-		formExecute.setName("command");
-		formExecute.addKeyDownHandler(new KeyDownHandler() {
-			@Override
-			public void onKeyDown(KeyDownEvent event) {
-				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-					formPassword.setFocus(true);
-				}
-			}
-		});
+        this.formExecute.clear();
+        this.formExecute.setFocus(true);
+        this.formExecute.setName("command");
+        this.formExecute.addKeyDownHandler(new KeyDownHandler() {
 
-		xsrfTokenField.setID("xsrfToken");
-		xsrfTokenField.setName("xsrfToken");
-		xsrfTokenField.setValue("");
+            @Override
+            public void onKeyDown(KeyDownEvent event) {
+                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                    CommandTabUi.this.formPassword.setFocus(true);
+                }
+            }
+        });
 
-		formPassword.setText(null);
-		formPassword.setName("password");
-		formPassword.addKeyDownHandler(new KeyDownHandler() {
-			@Override
-			public void onKeyDown(KeyDownEvent event) {
-				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-					execute.setFocus(true);
-				}
-			}
-		});
+        this.xsrfTokenField.setID("xsrfToken");
+        this.xsrfTokenField.setName("xsrfToken");
+        this.xsrfTokenField.setValue("");
 
-		docPath.setName("file");
+        this.formPassword.setText(null);
+        this.formPassword.setName("password");
+        this.formPassword.addKeyDownHandler(new KeyDownHandler() {
 
-		display(MSGS.deviceCommandNoOutput());
+            @Override
+            public void onKeyDown(KeyDownEvent event) {
+                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                    CommandTabUi.this.execute.setFocus(true);
+                }
+            }
+        });
 
-		reset.setText(MSGS.reset());
-		reset.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				commandForm.reset();
-				formExecute.setFocus(true);				
-				display(MSGS.deviceCommandNoOutput());
-			}
-		});
+        this.docPath.setName("file");
 
-		execute.setText(MSGS.deviceCommandExecute());
-		execute.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
+        display(MSGS.deviceCommandNoOutput());
 
-				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-					@Override
-					public void onFailure(Throwable ex) {
-						FailureHandler.handle(ex);
-					}
+        this.reset.setText(MSGS.reset());
+        this.reset.addClickHandler(new ClickHandler() {
 
-					@Override
-					public void onSuccess(GwtXSRFToken token) {
-						xsrfTokenField.setValue(token.getToken());
-						commandForm.submit();
-						formExecute.setFocus(true);
-					}
-				});
-				// http://www.gwtproject.org/javadoc/latest/com/google/gwt/user/client/ui/FileUpload.html
-			}
-		});
+            @Override
+            public void onClick(ClickEvent event) {
+                CommandTabUi.this.commandForm.reset();
+                CommandTabUi.this.formExecute.setFocus(true);
+                display(MSGS.deviceCommandNoOutput());
+            }
+        });
 
-		commandForm.setEncoding(FormPanel.ENCODING_MULTIPART);
-		commandForm.setMethod(FormPanel.METHOD_POST);
-		commandForm.setAction(SERVLET_URL);
-		
-		commandForm.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
-			@Override
-			public void onSubmitComplete(SubmitCompleteEvent event) {
+        this.execute.setText(MSGS.deviceCommandExecute());
+        this.execute.addClickHandler(new ClickHandler() {
 
-				String result = event.getResults();
+            @Override
+            public void onClick(ClickEvent event) {
 
-				if (result.contains("HTTP ERROR")) {							
-					display(MSGS.fileUploadFailure());
-				} else {
-					EntryClassUi.showWaitModal();
-					gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+                CommandTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-						@Override
-						public void onFailure(Throwable ex) {
-							EntryClassUi.hideWaitModal();
-							FailureHandler.handle(ex);
-						}
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex);
+                    }
 
-						@Override
-						public void onSuccess(GwtXSRFToken token) {
-							gwtDeviceService.executeCommand(token, formExecute.getText(), formPassword.getText(), new AsyncCallback<String>() {
-								@Override
-								public void onFailure(Throwable caught) {
-									if (caught.getLocalizedMessage().equals(GwtKuraErrorCode.SERVICE_NOT_ENABLED.toString())) {
-										display(MSGS.error() + "\n" + MSGS.commandServiceNotEnabled());
-									} else if (caught.getLocalizedMessage().equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())) {
-										display(MSGS.error() + "\n"+ MSGS.commandPasswordNotCorrect());
-									} else {
-										display(MSGS.error() + "\n" + caught.getLocalizedMessage());
-									}
-									EntryClassUi.hideWaitModal();
-								}
+                    @Override
+                    public void onSuccess(GwtXSRFToken token) {
+                        CommandTabUi.this.xsrfTokenField.setValue(token.getToken());
+                        CommandTabUi.this.commandForm.submit();
+                        CommandTabUi.this.formExecute.setFocus(true);
+                    }
+                });
+                // http://www.gwtproject.org/javadoc/latest/com/google/gwt/user/client/ui/FileUpload.html
+            }
+        });
 
-								@Override
-								public void onSuccess(String result) {									
-									display(result);
-									EntryClassUi.hideWaitModal();
-								}
+        this.commandForm.setEncoding(FormPanel.ENCODING_MULTIPART);
+        this.commandForm.setMethod(FormPanel.METHOD_POST);
+        this.commandForm.setAction(SERVLET_URL);
 
-							});
-						}
+        this.commandForm.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
 
-					});
-				}
+            @Override
+            public void onSubmitComplete(SubmitCompleteEvent event) {
 
-			}
+                String result = event.getResults();
 
-		});
+                if (result.contains("HTTP ERROR")) {
+                    display(MSGS.fileUploadFailure());
+                } else {
+                    EntryClassUi.showWaitModal();
+                    CommandTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-	}
+                        @Override
+                        public void onFailure(Throwable ex) {
+                            EntryClassUi.hideWaitModal();
+                            FailureHandler.handle(ex);
+                        }
 
-	public void display(String string){
-		resultPanel.clear();		
-		resultPanel.add(new HTML((new SafeHtmlBuilder().appendEscapedLines(string).toSafeHtml())));
-	}
+                        @Override
+                        public void onSuccess(GwtXSRFToken token) {
+                            CommandTabUi.this.gwtDeviceService.executeCommand(token,
+                                    CommandTabUi.this.formExecute.getText(), CommandTabUi.this.formPassword.getText(),
+                                    new AsyncCallback<String>() {
 
-	public void setSession(GwtSession currentSession) {
-		this.session = currentSession;
-	}
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    if (caught.getLocalizedMessage()
+                                            .equals(GwtKuraErrorCode.SERVICE_NOT_ENABLED.toString())) {
+                                        display(MSGS.error() + "\n" + MSGS.commandServiceNotEnabled());
+                                    } else if (caught.getLocalizedMessage()
+                                            .equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())) {
+                                        display(MSGS.error() + "\n" + MSGS.commandPasswordNotCorrect());
+                                    } else {
+                                        display(MSGS.error() + "\n" + caught.getLocalizedMessage());
+                                    }
+                                    EntryClassUi.hideWaitModal();
+                                }
+
+                                @Override
+                                public void onSuccess(String result) {
+                                    display(result);
+                                    EntryClassUi.hideWaitModal();
+                                }
+
+                            });
+                        }
+
+                    });
+                }
+
+            }
+
+        });
+
+    }
+
+    public void display(String string) {
+        this.resultPanel.clear();
+        this.resultPanel.add(new HTML(new SafeHtmlBuilder().appendEscapedLines(string).toSafeHtml()));
+    }
+
+    public void setSession(GwtSession currentSession) {
+        this.session = currentSession;
+    }
 
 }

@@ -20,159 +20,165 @@ import org.eclipse.kura.net.IPAddress;
  */
 public abstract class RouteConfigIP<T extends IPAddress> implements RouteConfig {
 
-	private T 		m_destination;
-	private T 		m_gateway;
-	private T 		m_netmask;
-	private String 	m_interfaceName;
-	private int		m_metric;
-	
-	public RouteConfigIP(T destination, T gateway, T netmask, String interfaceName, int metric) {
-		super();
-		
-		m_destination = destination;
-		m_gateway = gateway;
-		m_netmask = netmask;
-		m_interfaceName = interfaceName;
-		m_metric = metric;
-	}
+    private T m_destination;
+    private T m_gateway;
+    private T m_netmask;
+    private String m_interfaceName;
+    private int m_metric;
 
-	@Override
-	public String getDescription() {
-		StringBuffer desc = new StringBuffer();
-		String gw;
-		if(m_gateway == null) {
-			gw = "default";
-		} else {
-			gw = m_gateway.getHostAddress();
-		}
-		desc.append("Destination: " + m_destination.getHostAddress() + ", " +
-				"Gateway: " + gw + ", " +
-				"Netmask: " + m_netmask.getHostAddress() + ", " +
-				"Interface: " + m_interfaceName + ", " +
-				"Metric: " + m_metric);
-		return desc.toString();
-	}
+    public RouteConfigIP(T destination, T gateway, T netmask, String interfaceName, int metric) {
+        super();
 
-	@Override
-	public T getDestination() {
-		return m_destination;
-	}
+        this.m_destination = destination;
+        this.m_gateway = gateway;
+        this.m_netmask = netmask;
+        this.m_interfaceName = interfaceName;
+        this.m_metric = metric;
+    }
 
-	public void setDestination(T destination) {
-		m_destination = destination;
-	}
+    @Override
+    public String getDescription() {
+        StringBuffer desc = new StringBuffer();
+        String gw;
+        if (this.m_gateway == null) {
+            gw = "default";
+        } else {
+            gw = this.m_gateway.getHostAddress();
+        }
+        desc.append("Destination: " + this.m_destination.getHostAddress() + ", " + "Gateway: " + gw + ", " + "Netmask: "
+                + this.m_netmask.getHostAddress() + ", " + "Interface: " + this.m_interfaceName + ", " + "Metric: "
+                + this.m_metric);
+        return desc.toString();
+    }
 
-	@Override
-	public T getGateway() {
-		return m_gateway;
-	}
+    @Override
+    public T getDestination() {
+        return this.m_destination;
+    }
 
-	public void setGateway(T gateway) {
-		m_gateway = gateway;
-	}
+    public void setDestination(T destination) {
+        this.m_destination = destination;
+    }
 
-	@Override
-	public T getNetmask() {
-		return m_netmask;
-	}
+    @Override
+    public T getGateway() {
+        return this.m_gateway;
+    }
 
-	public void setNetmask(T netmask) {
-		m_netmask = netmask;
-	}
+    public void setGateway(T gateway) {
+        this.m_gateway = gateway;
+    }
 
-	@Override
-	public String getInterfaceName() {
-		return m_interfaceName;
-	}
+    @Override
+    public T getNetmask() {
+        return this.m_netmask;
+    }
 
-	public void setInterfaceName(String interfaceName) {
-		m_interfaceName = interfaceName;
-	}
+    public void setNetmask(T netmask) {
+        this.m_netmask = netmask;
+    }
 
-	@Override
-	public int getMetric() {
-		return m_metric;
-	}
+    @Override
+    public String getInterfaceName() {
+        return this.m_interfaceName;
+    }
 
-	public void setMetric(int metric) {
-		m_metric = metric;
-	}
+    public void setInterfaceName(String interfaceName) {
+        this.m_interfaceName = interfaceName;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((m_destination == null) ? 0 : m_destination.hashCode());
-		result = prime * result
-				+ ((m_gateway == null) ? 0 : m_gateway.hashCode());
-		result = prime * result
-				+ ((m_interfaceName == null) ? 0 : m_interfaceName.hashCode());
-		result = prime * result + m_metric;
-		result = prime * result
-				+ ((m_netmask == null) ? 0 : m_netmask.hashCode());
-		return result;
-	}
+    @Override
+    public int getMetric() {
+        return this.m_metric;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		@SuppressWarnings("rawtypes")
-		RouteConfigIP other = (RouteConfigIP) obj;
-		if (m_destination == null) {
-			if (other.m_destination != null)
-				return false;
-		} else if (!m_destination.equals(other.m_destination))
-			return false;
-		if (m_gateway == null) {
-			if (other.m_gateway != null)
-				return false;
-		} else if (!m_gateway.equals(other.m_gateway))
-			return false;
-		if (m_interfaceName == null) {
-			if (other.m_interfaceName != null)
-				return false;
-		} else if (!m_interfaceName.equals(other.m_interfaceName))
-			return false;
-		if (m_metric != other.m_metric)
-			return false;
-		if (m_netmask == null) {
-			if (other.m_netmask != null)
-				return false;
-		} else if (!m_netmask.equals(other.m_netmask))
-			return false;
-		return true;
-	}
-	
-	@Override
-	public boolean isValid() {
-		if(m_destination == null || m_gateway == null || m_netmask == null ||
-				m_interfaceName == null) {
-			return false;
-		}
-		
-		return true;
-	}
+    public void setMetric(int metric) {
+        this.m_metric = metric;
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("RouteConfigIP [m_destination=");
-		builder.append(m_destination);
-		builder.append(", m_gateway=");
-		builder.append(m_gateway);
-		builder.append(", m_netmask=");
-		builder.append(m_netmask);
-		builder.append(", m_interfaceName=");
-		builder.append(m_interfaceName);
-		builder.append(", m_metric=");
-		builder.append(m_metric);
-		builder.append("]");
-		return builder.toString();
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (this.m_destination == null ? 0 : this.m_destination.hashCode());
+        result = prime * result + (this.m_gateway == null ? 0 : this.m_gateway.hashCode());
+        result = prime * result + (this.m_interfaceName == null ? 0 : this.m_interfaceName.hashCode());
+        result = prime * result + this.m_metric;
+        result = prime * result + (this.m_netmask == null ? 0 : this.m_netmask.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        @SuppressWarnings("rawtypes")
+        RouteConfigIP other = (RouteConfigIP) obj;
+        if (this.m_destination == null) {
+            if (other.m_destination != null) {
+                return false;
+            }
+        } else if (!this.m_destination.equals(other.m_destination)) {
+            return false;
+        }
+        if (this.m_gateway == null) {
+            if (other.m_gateway != null) {
+                return false;
+            }
+        } else if (!this.m_gateway.equals(other.m_gateway)) {
+            return false;
+        }
+        if (this.m_interfaceName == null) {
+            if (other.m_interfaceName != null) {
+                return false;
+            }
+        } else if (!this.m_interfaceName.equals(other.m_interfaceName)) {
+            return false;
+        }
+        if (this.m_metric != other.m_metric) {
+            return false;
+        }
+        if (this.m_netmask == null) {
+            if (other.m_netmask != null) {
+                return false;
+            }
+        } else if (!this.m_netmask.equals(other.m_netmask)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean isValid() {
+        if (this.m_destination == null || this.m_gateway == null || this.m_netmask == null
+                || this.m_interfaceName == null) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("RouteConfigIP [m_destination=");
+        builder.append(this.m_destination);
+        builder.append(", m_gateway=");
+        builder.append(this.m_gateway);
+        builder.append(", m_netmask=");
+        builder.append(this.m_netmask);
+        builder.append(", m_interfaceName=");
+        builder.append(this.m_interfaceName);
+        builder.append(", m_metric=");
+        builder.append(this.m_metric);
+        builder.append("]");
+        return builder.toString();
+    }
 }

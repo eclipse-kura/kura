@@ -18,16 +18,16 @@ import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.util.KuraBaseModel;
 
-public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
-{
-	private static final Logger logger = Logger.getLogger(GwtNetInterfaceConfig.class.getSimpleName());
-	private static final long serialVersionUID = 7079533925979145804L;
-	
-	public GwtNetInterfaceConfig() {	
-		setStatus(GwtNetIfStatus.netIPv4StatusDisabled.name());
-		setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
-		setRouterMode(GwtNetRouterMode.netRouterOff.name());
-	}
+public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable {
+
+    private static final Logger logger = Logger.getLogger(GwtNetInterfaceConfig.class.getSimpleName());
+    private static final long serialVersionUID = 7079533925979145804L;
+
+    public GwtNetInterfaceConfig() {
+        setStatus(GwtNetIfStatus.netIPv4StatusDisabled.name());
+        setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
+        setRouterMode(GwtNetRouterMode.netRouterOff.name());
+    }
 
     public String getName() {
         return get("name");
@@ -36,7 +36,7 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
     public void setName(String name) {
         set("name", name);
     }
-    
+
     public GwtNetIfStatus getStatusEnum() {
         return GwtNetIfStatus.valueOf(getStatus());
     }
@@ -48,7 +48,7 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
     public void setStatus(String status) {
         set("status", status);
     }
-    
+
     public GwtNetIfConfigMode getConfigModeEnum() {
         return GwtNetIfConfigMode.valueOf(getConfigMode());
     }
@@ -60,7 +60,7 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
     public void setConfigMode(String configMode) {
         set("configMode", configMode);
     }
- 
+
     public String getIpAddress() {
         return get("ipAddress");
     }
@@ -100,7 +100,7 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
     public void setReadOnlyDnsServers(String dnsServers) {
         set("dnsReadOnlyServers", dnsServers);
     }
-    
+
     public String getSearchDomains() {
         return get("searchDomains");
     }
@@ -108,115 +108,114 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
     public void setSearchDomains(String searchDomains) {
         set("searchDomains", searchDomains);
     }
-    
+
     public void setHwState(String hwState) {
-    	set("hwState", hwState);
+        set("hwState", hwState);
     }
 
     public String getHwState() {
-    	return get("hwState");
+        return get("hwState");
     }
 
     public void setHwName(String hwName) {
-    	set("hwName", hwName);
+        set("hwName", hwName);
     }
 
     public String getHwName() {
-    	return get("hwName");
+        return get("hwName");
     }
-    
+
     public GwtNetIfType getHwTypeEnum() {
         GwtNetIfType typeEnum = GwtNetIfType.UNKNOWN;
-        
+
         try {
             typeEnum = GwtNetIfType.valueOf(getHwType());
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         return typeEnum;
     }
 
     public void setHwType(String hwType) {
-    	set("hwType", hwType);
+        set("hwType", hwType);
     }
 
     public String getHwType() {
-    	return get("hwType");
+        return get("hwType");
     }
 
     public void setHwAddress(String hwAddress) {
-    	set("hwAddress", hwAddress);
+        set("hwAddress", hwAddress);
     }
 
     public String getHwAddress() {
-    	return get("hwAddress");
+        return get("hwAddress");
     }
-    
+
     public void setHwSerial(String hwSerial) {
         set("hwSerial", hwSerial);
     }
-    
+
     public String getHwSerial() {
         return get("hwSerial");
     }
 
     public void setHwDriver(String hwDriver) {
-    	set("hwDriver", hwDriver);
+        set("hwDriver", hwDriver);
     }
 
     public String getHwDriver() {
-    	return get("hwDriver");
+        return get("hwDriver");
     }
 
     public void setHwDriverVersion(String hwDriverVersion) {
-    	set("hwDriverVersion", hwDriverVersion);
+        set("hwDriverVersion", hwDriverVersion);
     }
 
     public String getHwDriverVersion() {
-    	return get("hwDriverVersion");
+        return get("hwDriverVersion");
     }
 
     public void setHwFirmware(String hwFirmware) {
-    	set("hwFirmware", hwFirmware);
+        set("hwFirmware", hwFirmware);
     }
 
     public String getHwFirmware() {
-    	return get("hwFirmware");
+        return get("hwFirmware");
     }
 
     public void setHwMTU(int mtu) {
-    	set("hwMTU", mtu);
+        set("hwMTU", mtu);
     }
 
     public int getHwMTU() {
-    	if (get("hwMTU") != null) {
-    		return (Integer) get("hwMTU");
-    	}
-    	else {
-    		return 0;
-    	}
+        if (get("hwMTU") != null) {
+            return (Integer) get("hwMTU");
+        } else {
+            return 0;
+        }
     }
 
     public void setHwUsbDevice(String hwUsbDevice) {
-    	set("hwUsbDevice", hwUsbDevice);
+        set("hwUsbDevice", hwUsbDevice);
     }
 
     public String getHwUsbDevice() {
-    	return get("hwUsbDevice");
+        return get("hwUsbDevice");
     }
-    
+
     public String getHwRssi() {
-    	return get("hwRssi");
+        return get("hwRssi");
     }
-    
+
     public void setHwRssi(String rssi) {
-    	set("hwRssi", rssi);
+        set("hwRssi", rssi);
     }
-    
+
     public GwtNetRouterMode getRouterModeEnum() {
         return GwtNetRouterMode.valueOf(getRouterMode());
-}
+    }
 
     public String getRouterMode() {
         return get("routerMode");
@@ -243,21 +242,21 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
     }
 
     public int getRouterDhcpDefaultLease() {
-    	if (get("routerDhcpDefaultLease") != null) {
-    		return (Integer) get("routerDhcpDefaultLease");
-    	}
-		return 0;
+        if (get("routerDhcpDefaultLease") != null) {
+            return (Integer) get("routerDhcpDefaultLease");
+        }
+        return 0;
     }
 
     public void setRouterDhcpDefaultLease(int routerDhcpDefaultLease) {
         set("routerDhcpDefaultLease", routerDhcpDefaultLease);
     }
-    
+
     public int getRouterDhcpMaxLease() {
-    	if (get("routerDhcpMaxLease") != null) {
-    		return (Integer) get("routerDhcpMaxLease");
-    	}
-		return 0;
+        if (get("routerDhcpMaxLease") != null) {
+            return (Integer) get("routerDhcpMaxLease");
+        }
+        return 0;
     }
 
     public void setRouterDhcpMaxLease(int routerDhcpMaxLease) {
@@ -265,62 +264,61 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
     }
 
     public String getRouterDhcpSubnetMask() {
-		return (String) get("routerDhcpSubnetMask");
+        return (String) get("routerDhcpSubnetMask");
     }
-    
+
     public void setRouterDhcpSubnetMask(String routerDhcpSubnetMask) {
-    	set("routerDhcpSubnetMask", routerDhcpSubnetMask);
+        set("routerDhcpSubnetMask", routerDhcpSubnetMask);
     }
-    
+
     public boolean getRouterDnsPass() {
-    	if (get("routerDnsPass") != null) {
-    		return (Boolean) get("routerDnsPass");
-    	}
-    	return false;
+        if (get("routerDnsPass") != null) {
+            return (Boolean) get("routerDnsPass");
+        }
+        return false;
     }
 
     public void setRouterDnsPass(boolean routerDnsPass) {
         set("routerDnsPass", routerDnsPass);
     }
-    
+
     @Override
     public boolean equals(Object o) {
-        if(!(o instanceof GwtNetInterfaceConfig)) {
+        if (!(o instanceof GwtNetInterfaceConfig)) {
             return false;
         }
-        
-        Map<String, Object> properties = this.getProperties();
-        Map<String, Object> otherProps = ((GwtNetInterfaceConfig)o).getProperties();
-        
-        if(properties != null) {
-            if(otherProps == null) {
+
+        Map<String, Object> properties = getProperties();
+        Map<String, Object> otherProps = ((GwtNetInterfaceConfig) o).getProperties();
+
+        if (properties != null) {
+            if (otherProps == null) {
                 return false;
-            }            
-            if(properties.size() != otherProps.size()) {
-            	logger.log(Level.FINER, "Sizes differ");
+            }
+            if (properties.size() != otherProps.size()) {
+                logger.log(Level.FINER, "Sizes differ");
                 return false;
-            };
-            
+            }
+            ;
+
             Object oldVal, newVal;
-            for(String key : properties.keySet()) {
+            for (String key : properties.keySet()) {
                 oldVal = properties.get(key);
-                newVal = otherProps.get(key);                
-                if(oldVal != null) {
-                    if(!oldVal.equals(newVal)) {
-                    	logger.log(Level.FINER, "Values differ - Key: " + key + " oldVal: " + oldVal + ", newVal: " + newVal);
+                newVal = otherProps.get(key);
+                if (oldVal != null) {
+                    if (!oldVal.equals(newVal)) {
+                        logger.log(Level.FINER,
+                                "Values differ - Key: " + key + " oldVal: " + oldVal + ", newVal: " + newVal);
                         return false;
                     }
-                } else if(newVal != null) {
+                } else if (newVal != null) {
                     return false;
                 }
             }
-        } else if(otherProps != null) {
+        } else if (otherProps != null) {
             return false;
         }
-        
+
         return true;
     }
 }
-
-
-

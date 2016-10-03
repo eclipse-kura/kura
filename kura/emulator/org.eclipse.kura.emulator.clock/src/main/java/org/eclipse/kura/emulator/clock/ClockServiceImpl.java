@@ -22,72 +22,67 @@ import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClockServiceImpl implements ConfigurableComponent, ClockService
-{
-	private static final Logger s_logger = LoggerFactory.getLogger(ClockServiceImpl.class);
+public class ClockServiceImpl implements ConfigurableComponent, ClockService {
 
-	@SuppressWarnings("unused")
-	private ComponentContext      m_ctx;
-	@SuppressWarnings("unused")
-	private EventAdmin            m_eventAdmin;
-	@SuppressWarnings("unused")
-	private Map<String,Object>    m_properties;
-		
-	// ----------------------------------------------------------------
-	//
-	//   Dependencies
-	//
-	// ----------------------------------------------------------------
+    private static final Logger s_logger = LoggerFactory.getLogger(ClockServiceImpl.class);
 
-	public void setEventAdmin(EventAdmin eventAdmin) {
-		this.m_eventAdmin = eventAdmin;
-	}
+    @SuppressWarnings("unused")
+    private ComponentContext m_ctx;
+    @SuppressWarnings("unused")
+    private EventAdmin m_eventAdmin;
+    @SuppressWarnings("unused")
+    private Map<String, Object> m_properties;
 
-	public void unsetEventAdmin(EventAdmin eventAdmin) {
-		this.m_eventAdmin = null;
-	}
+    // ----------------------------------------------------------------
+    //
+    // Dependencies
+    //
+    // ----------------------------------------------------------------
 
-	// ----------------------------------------------------------------
-	//
-	//   Activation APIs
-	//
-	// ----------------------------------------------------------------
-	
-	protected void activate(ComponentContext componentContext) 
-	{
-		s_logger.info("Activate. Current Time: {}", new Date());
+    public void setEventAdmin(EventAdmin eventAdmin) {
+        this.m_eventAdmin = eventAdmin;
+    }
 
-		// save the bundle context
-		m_ctx = componentContext;		
-	}
-	
-	protected void deactivate(ComponentContext componentContext) 
-	{
-		s_logger.info("Deactivate...");
-	}
-	
-	public void updated(Map<String,Object> properties)
-	{
-		s_logger.info("Updated...");		
-		try {
+    public void unsetEventAdmin(EventAdmin eventAdmin) {
+        this.m_eventAdmin = null;
+    }
 
-			// save the properties
-			m_properties = properties;
-		}
-		catch (Throwable t) {
-			s_logger.error("Error updating ClockService Configuration", t);
-		}
-	}
+    // ----------------------------------------------------------------
+    //
+    // Activation APIs
+    //
+    // ----------------------------------------------------------------
 
-		
-	// ----------------------------------------------------------------
-	//
-	//   Master Client Management APIs
-	//
-	// ----------------------------------------------------------------
-	
-	@Override
-	public Date getLastSync() throws KuraException {
-		return new Date();
-	}
+    protected void activate(ComponentContext componentContext) {
+        s_logger.info("Activate. Current Time: {}", new Date());
+
+        // save the bundle context
+        this.m_ctx = componentContext;
+    }
+
+    protected void deactivate(ComponentContext componentContext) {
+        s_logger.info("Deactivate...");
+    }
+
+    public void updated(Map<String, Object> properties) {
+        s_logger.info("Updated...");
+        try {
+
+            // save the properties
+            this.m_properties = properties;
+        } catch (Throwable t) {
+            s_logger.error("Error updating ClockService Configuration", t);
+        }
+    }
+
+    // ----------------------------------------------------------------
+    //
+    // Master Client Management APIs
+    //
+    // ----------------------------------------------------------------
+
+    @Override
+    public Date getLastSync() throws KuraException {
+        return new Date();
+    }
 }

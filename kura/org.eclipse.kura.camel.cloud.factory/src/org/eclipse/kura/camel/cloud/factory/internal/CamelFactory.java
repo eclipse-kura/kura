@@ -98,7 +98,8 @@ public class CamelFactory implements ConfigurableComponent {
 
         // start new service
         if (configuration.isValid()) {
-            this.service = new XmlCamelCloudService(FrameworkUtil.getBundle(CamelFactory.class).getBundleContext(), pid, configuration);
+            this.service = new XmlCamelCloudService(FrameworkUtil.getBundle(CamelFactory.class).getBundleContext(), pid,
+                    configuration);
             this.service.start();
         }
 

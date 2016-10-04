@@ -33,25 +33,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GPIOServiceImpl implements GPIOService {
-	private static final Logger s_logger = LoggerFactory.getLogger(GPIOServiceImpl.class);
 
-	//private static final HashMap<Integer, String> pins = new HashMap<Integer, String>();
+    private static final Logger s_logger = LoggerFactory.getLogger(GPIOServiceImpl.class);
 
-	private static final HashSet<JdkDioPin> pins = new HashSet<JdkDioPin>();
+    // private static final HashMap<Integer, String> pins = new HashMap<Integer, String>();
 
-	private SystemService m_SystemService;
+    private static final HashSet<JdkDioPin> pins = new HashSet<JdkDioPin>();
 
-	public void setSystemService(SystemService systemService) {
-		m_SystemService = systemService;
-	}
+    private SystemService m_SystemService;
 
-	public void unsetSystemService(SystemService systemService) {
-		m_SystemService = null;
-	}
+    public void setSystemService(SystemService systemService) {
+        this.m_SystemService = systemService;
+    }
+
+    public void unsetSystemService(SystemService systemService) {
+        this.m_SystemService = null;
+    }
 
     /**
      * Test if a file is available for loading
-     * 
+     *
      * @param path
      *            the path to thest
      * @return the path from input which can be used for loading, {@code null}
@@ -80,160 +81,159 @@ public class GPIOServiceImpl implements GPIOService {
             return null;
         }
     }
-	
-	protected void activate(ComponentContext componentContext) {
-		s_logger.debug("activating jdk.dio GPIOService");
 
-		FileReader fr= null;
-		try {
-			String configFile = System.getProperty("jdk.dio.registry");
-			if(configFile != null) {
-			    configFile = "file:" + configFile;
-			}
-			s_logger.debug("System property location: {}", configFile);
-			
-			if(configFile == null) {
-			    // Testing for Kura home relative path
-			    configFile = whenAvailable ( this.m_SystemService.getKuraHome() + File.separator + "jdk.dio.properties" );
-			    s_logger.debug("Kura Home relative location: {}", configFile);
-			}
-			
-			if(configFile == null) {
-			    //Emulator?
-			    configFile = this.m_SystemService.getProperties().getProperty(SystemService.KURA_CONFIG).replace("kura.properties", "jdk.dio.properties");
-			}
-			
-			s_logger.debug("Final location: {}", configFile);
-			
-			File dioPropsFile = new File(new URL(configFile).toURI());
-			if (dioPropsFile.exists()) {
-				final Properties dioDefaults = new Properties();
-				fr= new FileReader(dioPropsFile);
-				dioDefaults.load(fr);
+    protected void activate(ComponentContext componentContext) {
+        s_logger.debug("activating jdk.dio GPIOService");
 
-				pins.clear();
+        FileReader fr = null;
+        try {
+            String configFile = System.getProperty("jdk.dio.registry");
+            if (configFile != null) {
+                configFile = "file:" + configFile;
+            }
+            s_logger.debug("System property location: {}", configFile);
 
-				for (final Map.Entry<Object, Object> entry : dioDefaults.entrySet()) {
-				    final Object k = entry.getKey();
-					//s_logger.info("{} -> {}", k, dioDefaults.get(k));
-					final String line = (String) entry.getValue();
+            if (configFile == null) {
+                // Testing for Kura home relative path
+                configFile = whenAvailable(this.m_SystemService.getKuraHome() + File.separator + "jdk.dio.properties");
+                s_logger.debug("Kura Home relative location: {}", configFile);
+            }
 
-					final JdkDioPin p = JdkDioPin.parseFromProperty(k, line);
-					if(p != null){
-						pins.add(p);
-					}
-				}
-				s_logger.info("Loaded File jdk.dio.properties: {}", dioPropsFile);
-			} else {
-				s_logger.warn("File does not exist: {}", dioPropsFile);
-			}
-		} catch (IOException e) {
-			s_logger.error("Exception while accessing resource!", e);
-		} catch (URISyntaxException e) {
-			s_logger.error("Exception while accessing resource!", e);
-		} finally {
-			if (fr != null){
-				try {
-					fr.close();
-				} catch (IOException e) {
-					s_logger.error("Exception while releasing resource!", e);
-				}
-			}
-		}
+            if (configFile == null) {
+                // Emulator?
+                configFile = this.m_SystemService.getProperties().getProperty(SystemService.KURA_CONFIG)
+                        .replace("kura.properties", "jdk.dio.properties");
+            }
 
-		s_logger.debug("GPIOService activated.");
-	}
+            s_logger.debug("Final location: {}", configFile);
 
-	protected void deactivate(ComponentContext componentContext) {
-		s_logger.debug("deactivating jdk.dio GPIOService");
-	}
+            File dioPropsFile = new File(new URL(configFile).toURI());
+            if (dioPropsFile.exists()) {
+                final Properties dioDefaults = new Properties();
+                fr = new FileReader(dioPropsFile);
+                dioDefaults.load(fr);
 
-	@Override
-	public KuraGPIOPin getPinByName(String pinName) {
-		for(JdkDioPin p : pins){
-			if(p.getName().equals(pinName)){
-				return p;
-			}
-		}
-		return null;
-	}
+                pins.clear();
 
-	@Override
-	public KuraGPIOPin getPinByName(String pinName, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
-		for(JdkDioPin p : pins){
-			if(p.getName().equals(pinName)){
-				if((p.getDirection() != direction) ||
-						(p.getMode() != mode) ||
-						(p.getTrigger() != trigger)){
-					if(p.isOpen()){
-						try {
-							p.close();	
-						} catch (IOException e) {
-							s_logger.warn("Cannot close GPIO Pin {}", pinName);
-							return p;
-						}
-					}
-					int index = p.getIndex();
-					pins.remove(p);
-					JdkDioPin newPin = new JdkDioPin(index, pinName, direction, mode, trigger);
-					pins.add(newPin);
-					return newPin;
-				}
-				return p;
-			}
-		}
-		return null;
-	}
+                for (final Map.Entry<Object, Object> entry : dioDefaults.entrySet()) {
+                    final Object k = entry.getKey();
+                    // s_logger.info("{} -> {}", k, dioDefaults.get(k));
+                    final String line = (String) entry.getValue();
 
-	@Override
-	public KuraGPIOPin getPinByTerminal(int terminal) {
-		for(JdkDioPin p : pins){
-			if(p.getIndex() == terminal){
-				return p;
-			}
-		}
-		JdkDioPin newPin = new JdkDioPin(terminal);
-		pins.add(newPin);
-		return newPin;
-	}
+                    final JdkDioPin p = JdkDioPin.parseFromProperty(k, line);
+                    if (p != null) {
+                        pins.add(p);
+                    }
+                }
+                s_logger.info("Loaded File jdk.dio.properties: {}", dioPropsFile);
+            } else {
+                s_logger.warn("File does not exist: {}", dioPropsFile);
+            }
+        } catch (IOException e) {
+            s_logger.error("Exception while accessing resource!", e);
+        } catch (URISyntaxException e) {
+            s_logger.error("Exception while accessing resource!", e);
+        } finally {
+            if (fr != null) {
+                try {
+                    fr.close();
+                } catch (IOException e) {
+                    s_logger.error("Exception while releasing resource!", e);
+                }
+            }
+        }
 
-	@Override
-	public KuraGPIOPin getPinByTerminal(int terminal, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
-		for(JdkDioPin p : pins){
-			if(p.getIndex() == terminal){
-				if((p.getDirection() != direction) ||
-						(p.getMode() != mode) ||
-						(p.getTrigger() != trigger)){
-					if(p.isOpen()){
-						try {
-							p.close();	
-						} catch (IOException e) {
-							s_logger.warn("Cannot close GPIO Pin {}", terminal);
-							return p;
-						}
-					}
-					String pinName = p.getName();
-					pins.remove(p);
-					JdkDioPin newPin = new JdkDioPin(terminal, pinName, direction, mode, trigger);
-					pins.add(newPin);
-					return newPin;
-				}
-				return p;
-			}
-		}
-		JdkDioPin newPin = new JdkDioPin(terminal, null, direction, mode, trigger);
-		pins.add(newPin);
-		return newPin;
-	}
+        s_logger.debug("GPIOService activated.");
+    }
 
-	@Override
-	public Map<Integer, String> getAvailablePins() {
-		HashMap<Integer, String> result = new HashMap<Integer, String>();
-		for(JdkDioPin p : pins){
-			result.put(p.getIndex(), p.getName());
-		}
+    protected void deactivate(ComponentContext componentContext) {
+        s_logger.debug("deactivating jdk.dio GPIOService");
+    }
 
-		return result;
-	}
+    @Override
+    public KuraGPIOPin getPinByName(String pinName) {
+        for (JdkDioPin p : pins) {
+            if (p.getName().equals(pinName)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public KuraGPIOPin getPinByName(String pinName, KuraGPIODirection direction, KuraGPIOMode mode,
+            KuraGPIOTrigger trigger) {
+        for (JdkDioPin p : pins) {
+            if (p.getName().equals(pinName)) {
+                if (p.getDirection() != direction || p.getMode() != mode || p.getTrigger() != trigger) {
+                    if (p.isOpen()) {
+                        try {
+                            p.close();
+                        } catch (IOException e) {
+                            s_logger.warn("Cannot close GPIO Pin {}", pinName);
+                            return p;
+                        }
+                    }
+                    int index = p.getIndex();
+                    pins.remove(p);
+                    JdkDioPin newPin = new JdkDioPin(index, pinName, direction, mode, trigger);
+                    pins.add(newPin);
+                    return newPin;
+                }
+                return p;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public KuraGPIOPin getPinByTerminal(int terminal) {
+        for (JdkDioPin p : pins) {
+            if (p.getIndex() == terminal) {
+                return p;
+            }
+        }
+        JdkDioPin newPin = new JdkDioPin(terminal);
+        pins.add(newPin);
+        return newPin;
+    }
+
+    @Override
+    public KuraGPIOPin getPinByTerminal(int terminal, KuraGPIODirection direction, KuraGPIOMode mode,
+            KuraGPIOTrigger trigger) {
+        for (JdkDioPin p : pins) {
+            if (p.getIndex() == terminal) {
+                if (p.getDirection() != direction || p.getMode() != mode || p.getTrigger() != trigger) {
+                    if (p.isOpen()) {
+                        try {
+                            p.close();
+                        } catch (IOException e) {
+                            s_logger.warn("Cannot close GPIO Pin {}", terminal);
+                            return p;
+                        }
+                    }
+                    String pinName = p.getName();
+                    pins.remove(p);
+                    JdkDioPin newPin = new JdkDioPin(terminal, pinName, direction, mode, trigger);
+                    pins.add(newPin);
+                    return newPin;
+                }
+                return p;
+            }
+        }
+        JdkDioPin newPin = new JdkDioPin(terminal, null, direction, mode, trigger);
+        pins.add(newPin);
+        return newPin;
+    }
+
+    @Override
+    public Map<Integer, String> getAvailablePins() {
+        HashMap<Integer, String> result = new HashMap<Integer, String>();
+        for (JdkDioPin p : pins) {
+            result.put(p.getIndex(), p.getName());
+        }
+
+        return result;
+    }
 
 }

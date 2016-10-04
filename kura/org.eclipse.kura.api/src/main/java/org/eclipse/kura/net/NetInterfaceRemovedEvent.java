@@ -16,25 +16,26 @@ import java.util.Map;
 import org.osgi.service.event.Event;
 
 /**
- * An event raised when a network interface has been removed from the system. 
+ * An event raised when a network interface has been removed from the system.
  */
-public class NetInterfaceRemovedEvent extends Event
-{
-	/** Topic of the NetworkInterfaceRemovedEvent */
-	public static final String NETWORK_EVENT_INTERFACE_REMOVED_TOPIC = "org/eclipse/kura/net/NetworkEvent/interface/REMOVED";
+public class NetInterfaceRemovedEvent extends Event {
 
-	/** Name of the property to access the network interface name */
-	public static final String NETWORK_EVENT_INTERFACE_PROPERTY = "network.interface";
+    /** Topic of the NetworkInterfaceRemovedEvent */
+    public static final String NETWORK_EVENT_INTERFACE_REMOVED_TOPIC = "org/eclipse/kura/net/NetworkEvent/interface/REMOVED";
 
-	public NetInterfaceRemovedEvent(Map<String, ?> properties) {
-		super(NETWORK_EVENT_INTERFACE_REMOVED_TOPIC, properties);
-	}
+    /** Name of the property to access the network interface name */
+    public static final String NETWORK_EVENT_INTERFACE_PROPERTY = "network.interface";
 
-	/**
-	 * Returns the name of the removed interface.
-	 * @return
-	 */
-	public String getInterfaceName() {
-		return (String) getProperty(NETWORK_EVENT_INTERFACE_PROPERTY);
-	}
+    public NetInterfaceRemovedEvent(Map<String, ?> properties) {
+        super(NETWORK_EVENT_INTERFACE_REMOVED_TOPIC, properties);
+    }
+
+    /**
+     * Returns the name of the removed interface.
+     *
+     * @return
+     */
+    public String getInterfaceName() {
+        return (String) getProperty(NETWORK_EVENT_INTERFACE_PROPERTY);
+    }
 }

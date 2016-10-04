@@ -16,14 +16,14 @@ import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 
-public interface ClockSyncProvider 
-{
-	public void init(Map<String,Object> properties, ClockSyncListener listener) throws KuraException;
+public interface ClockSyncProvider {
 
-	public void start() throws KuraException;
+    public void init(Map<String, Object> properties, ClockSyncListener listener) throws KuraException;
 
-	public void stop() throws KuraException;
-	
-	public Date getLastSync();
+    public void start() throws KuraException;
+
+    public void stop() throws KuraException;
+
+    public Date getLastSync();
 
 }

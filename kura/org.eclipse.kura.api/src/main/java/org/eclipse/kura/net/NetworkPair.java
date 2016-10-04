@@ -12,78 +12,75 @@
 package org.eclipse.kura.net;
 
 /**
- * Model class for a 'network' that is specified by an IP and a mask.  For example in the network
- * represented by 192.168.1.0/24 the IpAddress would be 192.168.1.0 and the mask is 24 bits or 
- * 255.255.255.0.  NetworkPairs are used in various components such as DHCP server configurations
+ * Model class for a 'network' that is specified by an IP and a mask. For example in the network
+ * represented by 192.168.1.0/24 the IpAddress would be 192.168.1.0 and the mask is 24 bits or
+ * 255.255.255.0. NetworkPairs are used in various components such as DHCP server configurations
  * where a network must be specified to provide addresses on.
- * 
+ *
  * @author eurotech
  *
  * @param <T>
  */
 public class NetworkPair<T extends IPAddress> {
 
-	/** The IP Address portion of the NetworkPair **/
-	public T 		m_ipAddress; 
-	
-	/** The prefix portion of the NetworkPair **/
-	public short	m_prefix;
-	
-	public NetworkPair(T ipAddress, short prefix) {
-		m_ipAddress = ipAddress;
-		m_prefix = prefix;
-	}
+    /** The IP Address portion of the NetworkPair **/
+    public T m_ipAddress;
 
-	public T getIpAddress() {
-		return m_ipAddress;
-	}
+    /** The prefix portion of the NetworkPair **/
+    public short m_prefix;
 
-	public void setIpAddress(T ipAddress) {
-		m_ipAddress = ipAddress;
-	}
+    public NetworkPair(T ipAddress, short prefix) {
+        this.m_ipAddress = ipAddress;
+        this.m_prefix = prefix;
+    }
 
-	public short getPrefix() {
-		return m_prefix;
-	}
+    public T getIpAddress() {
+        return this.m_ipAddress;
+    }
 
-	public void setPrefix(short prefix) {
-		m_prefix = prefix;
-	}
-	
-	@Override
-	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append(m_ipAddress.getHostAddress())
-		.append("/")
-		.append(m_prefix);
+    public void setIpAddress(T ipAddress) {
+        this.m_ipAddress = ipAddress;
+    }
 
-		return sb.toString();
-	}
-	
-	@Override
-	public boolean equals(Object o) {
-	    if(!(o instanceof NetworkPair<?>)) {
-	        return false;
-	    }
-	    
-	    NetworkPair<?> other = (NetworkPair<?>) o;
-	    
-	    if(!(this.m_ipAddress.equals(other.m_ipAddress))) {
-	        return false;
-	    } else if(this.m_prefix != other.m_prefix) {
-	        return false;
-	    }
-	    
-	    return true;
-	}
-	
+    public short getPrefix() {
+        return this.m_prefix;
+    }
+
+    public void setPrefix(short prefix) {
+        this.m_prefix = prefix;
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append(this.m_ipAddress.getHostAddress()).append("/").append(this.m_prefix);
+
+        return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof NetworkPair<?>)) {
+            return false;
+        }
+
+        NetworkPair<?> other = (NetworkPair<?>) o;
+
+        if (!this.m_ipAddress.equals(other.m_ipAddress)) {
+            return false;
+        } else if (this.m_prefix != other.m_prefix) {
+            return false;
+        }
+
+        return true;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 67;
         int result = 1;
-        result = prime * result + m_prefix;
-        result = prime * result
-                + ((m_ipAddress == null) ? 0 : m_ipAddress.hashCode());
+        result = prime * result + this.m_prefix;
+        result = prime * result + (this.m_ipAddress == null ? 0 : this.m_ipAddress.hashCode());
 
         return result;
     }

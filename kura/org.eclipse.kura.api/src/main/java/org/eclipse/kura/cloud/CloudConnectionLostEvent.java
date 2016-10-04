@@ -16,14 +16,14 @@ import java.util.Map;
 import org.osgi.service.event.Event;
 
 /**
- * CloudConnectionEstablishedEvent is raised with the Cloud Connection is lost. 
+ * CloudConnectionEstablishedEvent is raised with the Cloud Connection is lost.
  */
-public class CloudConnectionLostEvent extends Event
-{
-	/** Topic of the CloudConnectionLostEvent */
-	public static final String CLOUD_CONNECTION_STATUS_LOST = "org/eclipse/kura/cloud/CloudConnectionStatus/LOST";
-	
-	public CloudConnectionLostEvent(Map<String, ?> properties) {
-		super(CLOUD_CONNECTION_STATUS_LOST, properties);
-	}
+public class CloudConnectionLostEvent extends Event {
+
+    /** Topic of the CloudConnectionLostEvent */
+    public static final String CLOUD_CONNECTION_STATUS_LOST = "org/eclipse/kura/cloud/CloudConnectionStatus/LOST";
+
+    public CloudConnectionLostEvent(Map<String, ?> properties) {
+        super(CLOUD_CONNECTION_STATUS_LOST, properties);
+    }
 }

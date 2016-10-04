@@ -113,6 +113,7 @@ public class GPIOServiceImpl implements GPIOService {
                 fr = new FileReader(dioPropsFile);
                 dioDefaults.load(fr);
 
+
                 pins.clear();
 
                 for (final Map.Entry<Object, Object> entry : dioDefaults.entrySet()) {

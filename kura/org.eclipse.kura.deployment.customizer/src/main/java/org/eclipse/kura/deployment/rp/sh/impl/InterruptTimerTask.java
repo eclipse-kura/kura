@@ -17,13 +17,15 @@ import java.util.TimerTask;
  * Just a simple TimerTask that interrupts the specified thread when run.
  */
 class InterruptTimerTask extends TimerTask {
-	private Thread thread;
 
-	public InterruptTimerTask(Thread t) {
-		this.thread = t;
-	}
+    private final Thread thread;
 
-	public void run() {
-		thread.interrupt();
-	}
+    public InterruptTimerTask(Thread t) {
+        this.thread = t;
+    }
+
+    @Override
+    public void run() {
+        this.thread.interrupt();
+    }
 }

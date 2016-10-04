@@ -11,42 +11,41 @@
  *******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux.util;
 
-
 /**
  * Defines PAP authentication in Linux
  */
 public class PapLinux extends PppAuthSecrets {
-	
-	/*
-	#Secrets for authentication using PAP
-	#client					server			secret			IP addresses	Provider
-	ISP@CINGULARGPRS.COM	*               CINGULAR1		*				#att
-	mobileweb				* 				password		*				#o2
-	user					*				pass			*				#orange
-	web						*				web				*				#vodaphone
-	*/
-	
-	private static final String PAP_SECRETS_FILE = "/etc/ppp/pap-secrets";
 
-	private static PapLinux s_instance = null;
+    /*
+     * #Secrets for authentication using PAP
+     * #client server secret IP addresses Provider
+     * ISP@CINGULARGPRS.COM * CINGULAR1 * #att
+     * mobileweb * password * #o2
+     * user * pass * #orange
+     * web * web * #vodaphone
+     */
 
-	/**
-	 * PapLinux constructor
-	 */
-	private PapLinux() {
-	    super(PAP_SECRETS_FILE);
-	}
-	
-	/**
-	 * Get a singleton instance
-	 * 
-	 * @return PapLinux
-	 */
-	public static PapLinux getInstance() {
-	    if(s_instance == null) {
-	        s_instance = new PapLinux();
-	    }
-	    
-	    return s_instance;
-	}
+    private static final String PAP_SECRETS_FILE = "/etc/ppp/pap-secrets";
+
+    private static PapLinux s_instance = null;
+
+    /**
+     * PapLinux constructor
+     */
+    private PapLinux() {
+        super(PAP_SECRETS_FILE);
+    }
+
+    /**
+     * Get a singleton instance
+     *
+     * @return PapLinux
+     */
+    public static PapLinux getInstance() {
+        if (s_instance == null) {
+            s_instance = new PapLinux();
+        }
+
+        return s_instance;
+    }
 }

@@ -15,70 +15,72 @@ import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddress;
 import org.eclipse.kura.net.wifi.WifiMode;
 
-public class WifiInterfaceAddressImpl extends NetInterfaceAddressImpl implements WifiInterfaceAddress 
-{
-	private WifiMode        m_mode;
-	private long            m_bitrate;
-	private WifiAccessPoint m_wifiAccessPoint;
-	
-	public WifiInterfaceAddressImpl()
-	{
-		super();
-	}
-	
-	public WifiInterfaceAddressImpl(WifiInterfaceAddress other) {
-	    super(other);
-	    this.m_mode = other.getMode();
-	    this.m_bitrate = other.getBitrate();
-	    this.m_wifiAccessPoint = other.getWifiAccessPoint();
-	}
+public class WifiInterfaceAddressImpl extends NetInterfaceAddressImpl implements WifiInterfaceAddress {
 
-	public WifiMode getMode() {
-		return m_mode;
-	}
+    private WifiMode m_mode;
+    private long m_bitrate;
+    private WifiAccessPoint m_wifiAccessPoint;
 
-	public void setMode(WifiMode mode) {
-		this.m_mode = mode;
-	}
+    public WifiInterfaceAddressImpl() {
+        super();
+    }
 
-	public long getBitrate() {
-		return m_bitrate;
-	}
+    public WifiInterfaceAddressImpl(WifiInterfaceAddress other) {
+        super(other);
+        this.m_mode = other.getMode();
+        this.m_bitrate = other.getBitrate();
+        this.m_wifiAccessPoint = other.getWifiAccessPoint();
+    }
 
-	public void setBitrate(long bitrate) {
-		this.m_bitrate = bitrate;
-	}
+    @Override
+    public WifiMode getMode() {
+        return this.m_mode;
+    }
 
-	public WifiAccessPoint getWifiAccessPoint() {
-		return m_wifiAccessPoint;
-	}
+    public void setMode(WifiMode mode) {
+        this.m_mode = mode;
+    }
 
-	public void setWifiAccessPoint(WifiAccessPoint wifiAccessPoint) {
-		this.m_wifiAccessPoint = wifiAccessPoint;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-        if(!super.equals(obj)) {
+    @Override
+    public long getBitrate() {
+        return this.m_bitrate;
+    }
+
+    public void setBitrate(long bitrate) {
+        this.m_bitrate = bitrate;
+    }
+
+    @Override
+    public WifiAccessPoint getWifiAccessPoint() {
+        return this.m_wifiAccessPoint;
+    }
+
+    public void setWifiAccessPoint(WifiAccessPoint wifiAccessPoint) {
+        this.m_wifiAccessPoint = wifiAccessPoint;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!super.equals(obj)) {
             return false;
         }
-        
-        if(!(obj instanceof WifiInterfaceAddress)) {
+
+        if (!(obj instanceof WifiInterfaceAddress)) {
             return false;
         }
-        
+
         WifiInterfaceAddress other = (WifiInterfaceAddress) obj;
-        
-        if(!compare(m_mode, other.getMode())) {
+
+        if (!compare(this.m_mode, other.getMode())) {
             return false;
         }
-        if(!compare(m_bitrate, other.getBitrate())) {
+        if (!compare(this.m_bitrate, other.getBitrate())) {
             return false;
         }
-        if(!compare(m_wifiAccessPoint, other.getWifiAccessPoint())) {
+        if (!compare(this.m_wifiAccessPoint, other.getWifiAccessPoint())) {
             return false;
         }
-	    
-	    return true;
-	}
+
+        return true;
+    }
 }

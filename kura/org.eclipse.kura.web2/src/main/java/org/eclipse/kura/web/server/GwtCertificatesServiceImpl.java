@@ -35,162 +35,169 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtCertificatesService;
 
-public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet implements GwtCertificatesService
-{
+public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet implements GwtCertificatesService {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 7402961266449489433L;
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 7402961266449489433L;
+    @Override
+    public Integer storePublicPrivateKeys(GwtXSRFToken xsrfToken, String privateKey, String publicKey, String password,
+            String alias) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        try {
+            // Remove header if exists
+            String key = privateKey.replace("-----BEGIN PRIVATE KEY-----", "").replace("\n", "");
+            key = key.replace("-----END PRIVATE KEY-----", "");
 
+            Object convertedData = null;
+            try {
+                Class<?> clazz = Class.forName("javax.xml.bind.DatatypeConverter");
+                Method method = clazz.getMethod("parseBase64Binary", String.class);
+                convertedData = method.invoke(null, key);
+            } catch (ClassNotFoundException e) {
+                convertedData = base64DecodeJava8(key);
+            } catch (LinkageError e) {
+                convertedData = base64DecodeJava8(key);
+            } catch (Exception e) {
+                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+            }
 
-	public Integer storePublicPrivateKeys(GwtXSRFToken xsrfToken, String privateKey, String publicKey, String password, String alias)
-			throws GwtKuraException {
-		checkXSRFToken(xsrfToken);
-		try {
-			// Remove header if exists
-			String key = privateKey.replace("-----BEGIN PRIVATE KEY-----", "").replace("\n", "");
-			key = key.replace("-----END PRIVATE KEY-----", "");
+            byte[] conversion = (byte[]) convertedData;
+            // Parse Base64 - after PKCS8
+            PKCS8EncodedKeySpec specPriv = new PKCS8EncodedKeySpec(conversion);
 
-			Object convertedData= null;
-			try {
-				Class<?> clazz = Class.forName("javax.xml.bind.DatatypeConverter");
-				Method method = clazz.getMethod("parseBase64Binary", String.class);
-				convertedData= method.invoke(null, key);
-			} catch(ClassNotFoundException e) {
-				convertedData = base64DecodeJava8(key);
-			} catch (LinkageError e){
-				convertedData = base64DecodeJava8(key);
-			} catch (Exception e) {
-				throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-			} 
+            // Create RSA key
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            PrivateKey privKey = kf.generatePrivate(specPriv);
 
-			byte[] conversion= (byte[]) convertedData;
-			// Parse Base64 - after PKCS8
-			PKCS8EncodedKeySpec specPriv = new PKCS8EncodedKeySpec(conversion);
+            Certificate[] certs = parsePublicCertificates(publicKey);
 
-			// Create RSA key
-			KeyFactory kf=KeyFactory.getInstance("RSA");        
-			PrivateKey privKey = kf.generatePrivate(specPriv);
+            if (privKey == null) {
+                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+            } else {
+                char[] privateKeyPassword = new char[0];
+                if (password != null) {
+                    privateKeyPassword = password.toCharArray();
+                }
+                SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
+                sslService.installPrivateKey(alias, privKey, privateKeyPassword, certs);
+            }
+            return 1;
+        } catch (UnsupportedEncodingException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+        } catch (GeneralSecurityException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+        } catch (IOException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+        }
+    }
 
-			Certificate[] certs= parsePublicCertificates(publicKey);
+    @Override
+    public Integer storeSSLPublicChain(GwtXSRFToken xsrfToken, String publicKeys, String alias)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        try {
+            X509Certificate[] certs = parsePublicCertificates(publicKeys);
 
-			if(privKey == null){
-				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
-			}else{
-				char[] privateKeyPassword= new char[0];
-				if(password != null){
-					privateKeyPassword= password.toCharArray();
-				}
-				SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
-				sslService.installPrivateKey(alias, privKey, privateKeyPassword, certs);
-			}
-			return 1;
-		} catch (UnsupportedEncodingException e) {
-			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
-		} catch (GeneralSecurityException e) {
-			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
-		} catch (IOException e) {
-			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
-		}
-	}
+            if (certs.length == 0) {
+                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+            } else {
+                SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
 
-
-
-	public Integer storeSSLPublicChain(GwtXSRFToken xsrfToken, String publicKeys, String alias) throws GwtKuraException {
-		checkXSRFToken(xsrfToken);
-		try {
-			X509Certificate[] certs= parsePublicCertificates(publicKeys);
-
-			if(certs.length == 0){
-				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
-			}else{
-				SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
-
-				boolean leafAssigned= false;
-				for(X509Certificate cert: certs){
-				    if (!leafAssigned && (cert.getBasicConstraints() == -1 || (cert.getKeyUsage() != null && !cert.getKeyUsage()[5]))) { //certificate is leaf
-				        sslService.installTrustCertificate("ssl-" + alias, cert);
-				        leafAssigned= true;
-				    } else { //Certificate is CA. http://stackoverflow.com/questions/12092457/how-to-check-if-x509certificate-is-ca-certificate
-				        String certificateAlias= "ca-" + cert.getSerialNumber().toString();
+                boolean leafAssigned = false;
+                for (X509Certificate cert : certs) {
+                    if (!leafAssigned && (cert.getBasicConstraints() == -1
+                            || cert.getKeyUsage() != null && !cert.getKeyUsage()[5])) { // certificate is leaf
+                        sslService.installTrustCertificate("ssl-" + alias, cert);
+                        leafAssigned = true;
+                    } else { // Certificate is CA.
+ // http://stackoverflow.com/questions/12092457/how-to-check-if-x509certificate-is-ca-certificate
+                        String certificateAlias = "ca-" + cert.getSerialNumber().toString();
                         sslService.installTrustCertificate(certificateAlias, cert);
-				    }
-				}
-			}
-			return certs.length;
-		} catch (CertificateException e) {
-			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
-		} catch (UnsupportedEncodingException e) {
-			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
-		} catch (GeneralSecurityException e) {
-			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
-		} catch (IOException e) {
-			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
-		}
-	}
+                    }
+                }
+            }
+            return certs.length;
+        } catch (CertificateException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+        } catch (UnsupportedEncodingException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+        } catch (GeneralSecurityException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+        } catch (IOException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+        }
+    }
 
-	public Integer storeApplicationPublicChain(GwtXSRFToken xsrfToken, String publicKeys, String alias) throws GwtKuraException {
-		checkXSRFToken(xsrfToken);
-		try {
-			X509Certificate[] certs= parsePublicCertificates(publicKeys);
+    @Override
+    public Integer storeApplicationPublicChain(GwtXSRFToken xsrfToken, String publicKeys, String alias)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        try {
+            X509Certificate[] certs = parsePublicCertificates(publicKeys);
 
-			if(certs.length == 0){
-				throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
-			}else{
-				CertificatesService certificateService = ServiceLocator.getInstance().getService(CertificatesService.class);
+            if (certs.length == 0) {
+                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+            } else {
+                CertificatesService certificateService = ServiceLocator.getInstance()
+                        .getService(CertificatesService.class);
 
-				boolean leafAssigned= false;
-				for(X509Certificate cert: certs){
-				    if (!leafAssigned && (cert.getBasicConstraints() == -1 || (cert.getKeyUsage() != null && !cert.getKeyUsage()[5]))) { //certificate is leaf
-				        certificateService.storeCertificate(cert, "bundle-" + alias);
-				        leafAssigned= true;
-				    } else { //Certificate is CA. http://stackoverflow.com/questions/12092457/how-to-check-if-x509certificate-is-ca-certificate
-				        String certificateAlias= "bundle-" + cert.getSerialNumber().toString();
+                boolean leafAssigned = false;
+                for (X509Certificate cert : certs) {
+                    if (!leafAssigned && (cert.getBasicConstraints() == -1
+                            || cert.getKeyUsage() != null && !cert.getKeyUsage()[5])) { // certificate is leaf
+                        certificateService.storeCertificate(cert, "bundle-" + alias);
+                        leafAssigned = true;
+                    } else { // Certificate is CA.
+ // http://stackoverflow.com/questions/12092457/how-to-check-if-x509certificate-is-ca-certificate
+                        String certificateAlias = "bundle-" + cert.getSerialNumber().toString();
                         certificateService.storeCertificate(cert, certificateAlias);
-				    }
-				}
-			}
-			return certs.length;
-		} catch (CertificateException e) {
-			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
-		} catch (UnsupportedEncodingException e) {
-			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
-		} catch (KuraException e) {
-			throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
-		}
-	}
+                    }
+                }
+            }
+            return certs.length;
+        } catch (CertificateException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+        } catch (UnsupportedEncodingException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+        } catch (KuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+        }
+    }
 
-	private X509Certificate[] parsePublicCertificates(String publicKey) throws CertificateException, UnsupportedEncodingException{
-		CertificateFactory certFactory= CertificateFactory.getInstance("X.509");
-		Collection<? extends Certificate> publicCertificates= certFactory.generateCertificates(new ByteArrayInputStream(publicKey.getBytes("UTF-8")));
-		Iterator<? extends Certificate> certIterator= publicCertificates.iterator();
+    private X509Certificate[] parsePublicCertificates(String publicKey)
+            throws CertificateException, UnsupportedEncodingException {
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        Collection<? extends Certificate> publicCertificates = certFactory
+                .generateCertificates(new ByteArrayInputStream(publicKey.getBytes("UTF-8")));
+        Iterator<? extends Certificate> certIterator = publicCertificates.iterator();
 
-		X509Certificate[] certs= new X509Certificate[publicCertificates.size()];
-		int i=0;
+        X509Certificate[] certs = new X509Certificate[publicCertificates.size()];
+        int i = 0;
 
-		while(certIterator.hasNext()){
-			X509Certificate cert= (X509Certificate) certIterator.next();
-			certs[i]= cert;
-			i++;
-		}
-		return certs;
-	}
+        while (certIterator.hasNext()) {
+            X509Certificate cert = (X509Certificate) certIterator.next();
+            certs[i] = cert;
+            i++;
+        }
+        return certs;
+    }
 
-	private Object base64DecodeJava8(String key) throws GwtKuraException{
-		Object convertedData= null;
-		try {
-			Class<?> clazz = Class.forName("java.util.Base64");
-			Method decoderMethod= clazz.getMethod("getDecoder", (Class<?>[]) null);
-			Object decoder= decoderMethod.invoke(null, new Object[0]);
+    private Object base64DecodeJava8(String key) throws GwtKuraException {
+        Object convertedData = null;
+        try {
+            Class<?> clazz = Class.forName("java.util.Base64");
+            Method decoderMethod = clazz.getMethod("getDecoder", (Class<?>[]) null);
+            Object decoder = decoderMethod.invoke(null, new Object[0]);
 
-			Class<?> Base64Decoder = Class.forName("java.util.Base64$Decoder");
-			Method decodeMethod = Base64Decoder.getMethod("decode", String.class);
-			convertedData= decodeMethod.invoke(decoder, key);
-		} catch (Exception e1) {
-			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e1);
-		}
-		return convertedData;
-	}
+            Class<?> Base64Decoder = Class.forName("java.util.Base64$Decoder");
+            Method decodeMethod = Base64Decoder.getMethod("decode", String.class);
+            convertedData = decodeMethod.invoke(decoder, key);
+        } catch (Exception e1) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e1);
+        }
+        return convertedData;
+    }
 }

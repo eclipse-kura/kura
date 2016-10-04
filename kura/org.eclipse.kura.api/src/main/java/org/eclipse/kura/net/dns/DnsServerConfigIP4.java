@@ -18,19 +18,19 @@ import org.eclipse.kura.net.NetworkPair;
 
 /**
  * DNS server configurations for IPv4 networks
- * 
+ *
  * @author eurotech
  *
  */
-public class DnsServerConfigIP4 extends DnsServerConfigIP<IP4Address> implements DnsServerConfig4 {
+public class DnsServerConfigIP4 extends DnsServerConfigIP<IP4Address>implements DnsServerConfig4 {
 
-	public DnsServerConfigIP4(Set<IP4Address> forwarders, Set<NetworkPair<IP4Address>> allowedNetworks) {
-		super(forwarders, allowedNetworks);
-	}
+    public DnsServerConfigIP4(Set<IP4Address> forwarders, Set<NetworkPair<IP4Address>> allowedNetworks) {
+        super(forwarders, allowedNetworks);
+    }
 
-	@Override
-	public boolean isValid() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    @Override
+    public boolean isValid() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

@@ -15,46 +15,63 @@
 -->
 
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
+    xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
-	<ui:style>
-	.important { }
-	
-	.center-panel { height: 100%; padding: 0px; border: none; }
+    <ui:style>
+    .important {
+    	
+    }
+    
+    .center-panel {
+    	height: 100%;
+    	padding: 0px;
+    	border: none;
+    }
+    </ui:style>
 
-	</ui:style>
-	
-	<b:Container fluid="true">
-		<b:Column size="MD12">
-			<b:Row>
-				<b:Panel>
-					<b:ButtonGroup size="SMALL">
-						<b:Button ui:field="statusRefresh" addStyleNames="fa fa-refresh"></b:Button>
-						<b:Button ui:field="statusConnect" addStyleNames="fa fa-toggle-on"></b:Button>
-						<b:Button ui:field="statusDisconnect" addStyleNames="fa fa-toggle-off"></b:Button>
-					</b:ButtonGroup>
-				</b:Panel>
-			</b:Row>
-			<b:Row>
-				<b:Well addStyleNames="{style.center-panel}" ui:field="statusWell">
-					<gwt:CellTable bordered="true" condensed="true"
-						striped="true" hover="true" height="100%" width="100%" ui:field="statusGrid" />						
-				</b:Well>
-			</b:Row>
-		</b:Column>
-		<b:Modal closable="false" ui:field="connectModal">
-			<b:ModalBody>
-				<b:Panel>
-					<b:PanelHeader><b:Heading size="H3" text="Available Connections" /></b:PanelHeader>
-					<b:PanelBody ui:field="connectPanel">
-						<b:Row addStyleNames="rowHeader"><b:Column size="MD_6"><g:HTML>Connection Name</g:HTML></b:Column></b:Row>
-					</b:PanelBody>
-				</b:Panel>
-			</b:ModalBody>
-			<b:ModalFooter>
-				<b:Button ui:field="cancel" />
-			</b:ModalFooter>
-		</b:Modal>
-	</b:Container>
+    <b:Container fluid="true">
+        <b:Column size="MD12">
+            <b:Row>
+                <b:Panel>
+                    <b:ButtonGroup size="SMALL">
+                        <b:Button ui:field="statusRefresh"
+                            addStyleNames="fa fa-refresh"></b:Button>
+                        <b:Button ui:field="statusConnect"
+                            addStyleNames="fa fa-toggle-on"></b:Button>
+                        <b:Button ui:field="statusDisconnect"
+                            addStyleNames="fa fa-toggle-off"></b:Button>
+                    </b:ButtonGroup>
+                </b:Panel>
+            </b:Row>
+            <b:Row>
+                <b:Well addStyleNames="{style.center-panel}"
+                    ui:field="statusWell">
+                    <gwt:CellTable bordered="true"
+                        condensed="true" striped="true" hover="true"
+                        height="100%" width="100%" ui:field="statusGrid" />
+                </b:Well>
+            </b:Row>
+        </b:Column>
+        <b:Modal closable="false" ui:field="connectModal">
+            <b:ModalBody>
+                <b:Panel>
+                    <b:PanelHeader>
+                        <b:Heading size="H3"
+                            text="Available Connections" />
+                    </b:PanelHeader>
+                    <b:PanelBody ui:field="connectPanel">
+                        <b:Row addStyleNames="rowHeader">
+                            <b:Column size="MD_6">
+                                <g:HTML>Connection Name</g:HTML>
+                            </b:Column>
+                        </b:Row>
+                    </b:PanelBody>
+                </b:Panel>
+            </b:ModalBody>
+            <b:ModalFooter>
+                <b:Button ui:field="cancel" />
+            </b:ModalFooter>
+        </b:Modal>
+    </b:Container>
 </ui:UiBinder> 

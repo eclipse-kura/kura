@@ -23,133 +23,131 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.StatusCodeException;
 
 /**
- * Handles GwtExceptions from RCP calls. 
- *  
+ * Handles GwtExceptions from RCP calls.
+ *
  * @author mcarrer
  *
  */
-public class FailureHandler 
-{
-	
-	private static final Messages          CMSGS = GWT.create(Messages.class);
-	//private static final ValidationMessages MSGS = GWT.create(ValidationMessages.class);
-	
-	private static Logger logger = Logger.getLogger("ErrorLogger");
-	private static Modal popup;
-	
-	public static void handle(Throwable caught, String name) {
-		printMessage(caught, name);
-	}
-	public static void handle(Throwable caught) {
-		printMessage(caught, "");
-	}
-	
-	private static void printMessage(Throwable caught, String name) {
-		if (caught instanceof GwtKuraException) {
+public class FailureHandler {
 
-			GwtKuraException  gee = (GwtKuraException) caught;   
-			GwtKuraErrorCode code = gee.getCode();
-			switch (code) {
-			
-			default:
-				logger.log(Level.INFO, name + ": " + caught.getLocalizedMessage(), caught);
-				popup.show();
-				break;
-			}
-		}
-		else if (caught instanceof StatusCodeException && 
-		         ((StatusCodeException) caught).getStatusCode() == 0) {
-	        // the current operation was interrupted as the user started a new one 
-	        // or navigated away from the page.
-	        // we can ignore this error and do nothing.
-		}
-		else {
-			logger.log(Level.INFO, name + ": " + caught.getLocalizedMessage(), caught);
-			popup.show();
-		}
-	}
-	
-	public static void setPopup(Modal uiElement) {
-		popup = uiElement;
-	}
+    private static final Messages CMSGS = GWT.create(Messages.class);
+    // private static final ValidationMessages MSGS = GWT.create(ValidationMessages.class);
 
-/*
-	@SuppressWarnings("unchecked")
-	public static boolean handleFormException(FormPanel form, Throwable caught) {
-		
-		boolean isWarning = false;
-		if (caught instanceof GwtKuraException) {
+    private static Logger logger = Logger.getLogger("ErrorLogger");
+    private static Modal popup;
 
-			List<Field<?>> fields = form.getFields();
-			GwtKuraException   gee = (GwtKuraException) caught;   
-			GwtKuraErrorCode  code = gee.getCode();
-			switch (code) {
-			
-			case DUPLICATE_NAME:
-			    boolean fieldFound = false;
-				String duplicateFieldName = gee.getArguments()[0];
-				for (Field<?> field : fields) {
-					if (duplicateFieldName.equals(field.getName())) {
-						TextField<String>  textField = (TextField<String>) field;
-						textField.markInvalid(MSGS.duplicateValue());
-						fieldFound = true;
-						break;
-					}
-				}
-				if (!fieldFound) {
-				    Info.display(CMSGS.error(), caught.getLocalizedMessage());
-				}
-				break;
+    public static void handle(Throwable caught, String name) {
+        printMessage(caught, name);
+    }
 
-			case ILLEGAL_NULL_ARGUMENT:
-				String invalidFieldName = gee.getArguments()[0];
-				for (Field<?> field : fields) {
-					if (invalidFieldName.equals(field.getName())) {
-						TextField<String>  textField = (TextField<String>) field;
-						textField.markInvalid(MSGS.invalidNullValue());
-						break;
-					}
-				}
-				break;
+    public static void handle(Throwable caught) {
+        printMessage(caught, "");
+    }
 
-			case ILLEGAL_ARGUMENT:
-				String invalidFieldName1 = gee.getArguments()[0];
-				for (Field<?> field : fields) {
-					if (invalidFieldName1.equals(field.getName())) {
-						TextField<String>  textField = (TextField<String>) field;
-						textField.markInvalid(gee.getCause().getMessage());
-						break;
-					}
-				}
-				break;
+    private static void printMessage(Throwable caught, String name) {
+        if (caught instanceof GwtKuraException) {
 
-			case INVALID_RULE_QUERY:
-				for (Field<?> field : fields) {
-					if ("query".equals(field.getName())) {
-						TextArea statement = (TextArea) field;
-						statement.markInvalid(caught.getLocalizedMessage());
-						break;
-					}
-				}
-				break;
+            GwtKuraException gee = (GwtKuraException) caught;
+            GwtKuraErrorCode code = gee.getCode();
+            switch (code) {
 
-			case WARNING:
-				isWarning = true;
-				Info.display(CMSGS.warning(), caught.getLocalizedMessage());
-				break;
+            default:
+                logger.log(Level.INFO, name + ": " + caught.getLocalizedMessage(), caught);
+                popup.show();
+                break;
+            }
+        } else if (caught instanceof StatusCodeException && ((StatusCodeException) caught).getStatusCode() == 0) {
+            // the current operation was interrupted as the user started a new one
+            // or navigated away from the page.
+            // we can ignore this error and do nothing.
+        } else {
+            logger.log(Level.INFO, name + ": " + caught.getLocalizedMessage(), caught);
+            popup.show();
+        }
+    }
 
-			default:
-				Info.display(CMSGS.error(), caught.getLocalizedMessage());
-				caught.printStackTrace();
-				break;
-			}
-		}
-		else {
+    public static void setPopup(Modal uiElement) {
+        popup = uiElement;
+    }
 
-			Info.display(CMSGS.error(), caught.getLocalizedMessage());
-			caught.printStackTrace();			
-		}
-		
-		return isWarning;
-	}*/
+    /*
+     * @SuppressWarnings("unchecked")
+     * public static boolean handleFormException(FormPanel form, Throwable caught) {
+     *
+     * boolean isWarning = false;
+     * if (caught instanceof GwtKuraException) {
+     *
+     * List<Field<?>> fields = form.getFields();
+     * GwtKuraException gee = (GwtKuraException) caught;
+     * GwtKuraErrorCode code = gee.getCode();
+     * switch (code) {
+     *
+     * case DUPLICATE_NAME:
+     * boolean fieldFound = false;
+     * String duplicateFieldName = gee.getArguments()[0];
+     * for (Field<?> field : fields) {
+     * if (duplicateFieldName.equals(field.getName())) {
+     * TextField<String> textField = (TextField<String>) field;
+     * textField.markInvalid(MSGS.duplicateValue());
+     * fieldFound = true;
+     * break;
+     * }
+     * }
+     * if (!fieldFound) {
+     * Info.display(CMSGS.error(), caught.getLocalizedMessage());
+     * }
+     * break;
+     *
+     * case ILLEGAL_NULL_ARGUMENT:
+     * String invalidFieldName = gee.getArguments()[0];
+     * for (Field<?> field : fields) {
+     * if (invalidFieldName.equals(field.getName())) {
+     * TextField<String> textField = (TextField<String>) field;
+     * textField.markInvalid(MSGS.invalidNullValue());
+     * break;
+     * }
+     * }
+     * break;
+     *
+     * case ILLEGAL_ARGUMENT:
+     * String invalidFieldName1 = gee.getArguments()[0];
+     * for (Field<?> field : fields) {
+     * if (invalidFieldName1.equals(field.getName())) {
+     * TextField<String> textField = (TextField<String>) field;
+     * textField.markInvalid(gee.getCause().getMessage());
+     * break;
+     * }
+     * }
+     * break;
+     *
+     * case INVALID_RULE_QUERY:
+     * for (Field<?> field : fields) {
+     * if ("query".equals(field.getName())) {
+     * TextArea statement = (TextArea) field;
+     * statement.markInvalid(caught.getLocalizedMessage());
+     * break;
+     * }
+     * }
+     * break;
+     *
+     * case WARNING:
+     * isWarning = true;
+     * Info.display(CMSGS.warning(), caught.getLocalizedMessage());
+     * break;
+     *
+     * default:
+     * Info.display(CMSGS.error(), caught.getLocalizedMessage());
+     * caught.printStackTrace();
+     * break;
+     * }
+     * }
+     * else {
+     *
+     * Info.display(CMSGS.error(), caught.getLocalizedMessage());
+     * caught.printStackTrace();
+     * }
+     *
+     * return isWarning;
+     * }
+     */
 }

@@ -12,6 +12,7 @@
 package org.eclipse.kura.example.camel.aggregation;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.eclipse.kura.camel.component.Configuration.asInt;
 
 import java.util.Map;
 import java.util.Random;
@@ -19,7 +20,7 @@ import java.util.Random;
 import org.apache.camel.Exchange;
 import org.apache.camel.processor.aggregate.AggregationStrategy;
 import org.apache.camel.support.ExpressionAdapter;
-import org.eclipse.kura.camel.router.AbstractCamelRouter;
+import org.eclipse.kura.camel.component.AbstractJavaCamelComponent;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Example of the Kura Camel application.
  */
-public class GatewayRouter extends AbstractCamelRouter implements ConfigurableComponent {
+public class GatewayRouter extends AbstractJavaCamelComponent implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(GatewayRouter.class);
 
@@ -43,11 +44,13 @@ public class GatewayRouter extends AbstractCamelRouter implements ConfigurableCo
     @Override
     public void configure() throws Exception {
         from("timer://temperature").setBody(new ExpressionAdapter() {
+
             @Override
             public Object evaluate(Exchange exchange) {
                 return random();
             }
         }).aggregate(simple("temperature"), new AggregationStrategy() {
+
             @Override
             public Exchange aggregate(Exchange oldExchange, Exchange newExchange) {
                 if (oldExchange == null) {
@@ -62,17 +65,22 @@ public class GatewayRouter extends AbstractCamelRouter implements ConfigurableCo
         }).completionInterval(SECONDS.toMillis(10)).to("log:averageTemperatureFromLast10Seconds");
     }
 
-    protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) throws Exception {
+    protected void activate(final ComponentContext componentContext, final Map<String, Object> properties)
+            throws Exception {
         logger.info("Activated");
-        
+
         setProperties(properties);
-        super.activate(componentContext, properties);
+        start();
     }
 
     protected void modified(final Map<String, Object> properties) {
         logger.info("Modified");
 
         setProperties(properties);
+    }
+
+    protected void deactivate() throws Exception {
+        stop();
     }
 
     private int random() {
@@ -89,15 +97,5 @@ public class GatewayRouter extends AbstractCamelRouter implements ConfigurableCo
 
         this.minimum = minimum;
         this.maximum = maximum;
-    }
-
-    private static int asInt(Map<String, Object> properties, String key, int defaultValue) {
-        final Object value = properties.get(key);
-
-        if (value instanceof Number) {
-            return ((Number) value).intValue();
-        }
-
-        return defaultValue;
     }
 }

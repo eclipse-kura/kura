@@ -12,6 +12,6 @@
 package org.eclipse.kura.net.modem;
 
 public interface ModemMonitorListener {
-	
-	public void setCellularSignalLevel (int signalLevel);
+
+    public void setCellularSignalLevel(int signalLevel);
 }

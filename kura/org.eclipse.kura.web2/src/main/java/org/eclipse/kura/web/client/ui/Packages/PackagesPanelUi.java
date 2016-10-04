@@ -56,375 +56,397 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class PackagesPanelUi extends Composite {
 
-	private static PackagesPanelUiUiBinder uiBinder = GWT.create(PackagesPanelUiUiBinder.class);
-	private static final Logger logger = Logger.getLogger(PackagesPanelUi.class.getSimpleName());
+    private static PackagesPanelUiUiBinder uiBinder = GWT.create(PackagesPanelUiUiBinder.class);
+    private static final Logger logger = Logger.getLogger(PackagesPanelUi.class.getSimpleName());
 
-	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-	private final GwtPackageServiceAsync gwtPackageService = GWT.create(GwtPackageService.class);
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private final GwtPackageServiceAsync gwtPackageService = GWT.create(GwtPackageService.class);
 
-	private final static String SERVLET_URL = "/" + GWT.getModuleName()	+ "/file/deploy";
-	private static final Messages MSGS = GWT.create(Messages.class);
+    private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/deploy";
+    private static final Messages MSGS = GWT.create(Messages.class);
 
-	private int refreshRequests;
-	private EntryClassUi entryClassUi;
-	
-	private ListDataProvider<GwtDeploymentPackage> packagesDataProvider = new ListDataProvider<GwtDeploymentPackage>();
-	private final SingleSelectionModel<GwtDeploymentPackage> selectionModel = new SingleSelectionModel<GwtDeploymentPackage>();
+    private int refreshRequests;
+    private EntryClassUi entryClassUi;
 
-	private GwtSession gwtSession;
-	private GwtDeploymentPackage selected;
+    private final ListDataProvider<GwtDeploymentPackage> packagesDataProvider = new ListDataProvider<GwtDeploymentPackage>();
+    private final SingleSelectionModel<GwtDeploymentPackage> selectionModel = new SingleSelectionModel<GwtDeploymentPackage>();
 
-	interface PackagesPanelUiUiBinder extends UiBinder<Widget, PackagesPanelUi> {
-	}
+    private GwtSession gwtSession;
+    private GwtDeploymentPackage selected;
 
-	@UiField
-	Modal uploadModal;
-	@UiField
-	FormPanel packagesFormFile, packagesFormUrl;
-	@UiField
-	Button fileCancel, fileSubmit, urlCancel, urlSubmit;
-	@UiField
-	TabListItem fileLabel;
+    interface PackagesPanelUiUiBinder extends UiBinder<Widget, PackagesPanelUi> {
+    }
 
-	@UiField
-	Alert notification;
-	@UiField
+    @UiField
+    Modal uploadModal;
+    @UiField
+    FormPanel packagesFormFile, packagesFormUrl;
+    @UiField
+    Button fileCancel, fileSubmit, urlCancel, urlSubmit;
+    @UiField
+    TabListItem fileLabel;
+
+    @UiField
+    Alert notification;
+    @UiField
     Modal uploadErrorModal;
     @UiField
     Text uploadErrorText;
-	@UiField
-	Button packagesRefresh, packagesInstall, packagesUninstall;
-	@UiField
-	CellTable<GwtDeploymentPackage> packagesGrid = new CellTable<GwtDeploymentPackage>(10);
-	@UiField
-	FileUpload filePath;
-	@UiField
-	TextBox formUrl;
-	@UiField
-	Hidden xsrfTokenFieldFile, xsrfTokenFieldUrl;
+    @UiField
+    Button packagesRefresh, packagesInstall, packagesUninstall;
+    @UiField
+    CellTable<GwtDeploymentPackage> packagesGrid = new CellTable<GwtDeploymentPackage>(10);
+    @UiField
+    FileUpload filePath;
+    @UiField
+    TextBox formUrl;
+    @UiField
+    Hidden xsrfTokenFieldFile, xsrfTokenFieldUrl;
 
+    public PackagesPanelUi() {
 
-	public PackagesPanelUi() {
+        // TODO - ServiceTree
+        initWidget(uiBinder.createAndBindUi(this));
+        this.packagesGrid.setSelectionModel(this.selectionModel);
+        initTable();
 
-		// TODO - ServiceTree
-		initWidget(uiBinder.createAndBindUi(this));
-		packagesGrid.setSelectionModel(selectionModel);
-		initTable();
+        initTabButtons();
 
-		initTabButtons();
+        initModalHandlers();
 
-		initModalHandlers();
-		
-		initModal();
-	}
+        initModal();
+    }
 
-	public void setSession(GwtSession currentSession) {
-		gwtSession = currentSession;
-	}
-	
-	public void setMainUi(EntryClassUi entryClassUi) {
-		this.entryClassUi= entryClassUi;
-	}
+    public void setSession(GwtSession currentSession) {
+        this.gwtSession = currentSession;
+    }
 
-	public void refresh() {
-		refresh(100);
-	}	
+    public void setMainUi(EntryClassUi entryClassUi) {
+        this.entryClassUi = entryClassUi;
+    }
 
-	private void initTabButtons() {
-		// Refresh Button
-		packagesRefresh.setText(MSGS.refreshButton());
-		packagesRefresh.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
+    public void refresh() {
+        refresh(100);
+    }
 
-				refresh();
-			}
-		});
-		// Install Button
-		packagesInstall.setText(MSGS.packageAddButton());
-		packagesInstall.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				upload();
-			}
-		});
+    private void initTabButtons() {
+        // Refresh Button
+        this.packagesRefresh.setText(MSGS.refreshButton());
+        this.packagesRefresh.addClickHandler(new ClickHandler() {
 
-		// Uninstall Button
-		packagesUninstall.setText(MSGS.packageDeleteButton());
-		packagesUninstall.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				selected = selectionModel.getSelectedObject();
-				if (selected != null && selected.getVersion()!=null) {
-					final Modal modal = new Modal();
-					ModalBody modalBody = new ModalBody();
-					ModalFooter modalFooter = new ModalFooter();
-					modal.setClosable(true);
-					modal.setTitle(MSGS.confirm());
-					modalBody.add(new Span(MSGS.deviceUninstallPackage(selected.getName())));
-					modalFooter.add(new Button("Yes", new ClickHandler() {
-						@Override
-						public void onClick(ClickEvent event) {
-							modal.hide();
-							uninstall(selected);
-						}
-					}));
-					modalFooter.add(new Button("No", new ClickHandler() {
-						@Override
-						public void onClick(ClickEvent event) {
-							modal.hide();
-						}
-					}));
+            @Override
+            public void onClick(ClickEvent event) {
 
+                refresh();
+            }
+        });
+        // Install Button
+        this.packagesInstall.setText(MSGS.packageAddButton());
+        this.packagesInstall.addClickHandler(new ClickHandler() {
 
-					modal.add(modalBody);
-					modal.add(modalFooter);
-					modal.show();
-				}// end if null
-			}// end on click
-		});
-	}
+            @Override
+            public void onClick(ClickEvent event) {
+                upload();
+            }
+        });
 
-	private void initModalHandlers() {
-		fileSubmit.addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {
-				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-					@Override
-					public void onFailure(Throwable ex) {
-						FailureHandler.handle(ex);
-					}
+        // Uninstall Button
+        this.packagesUninstall.setText(MSGS.packageDeleteButton());
+        this.packagesUninstall.addClickHandler(new ClickHandler() {
 
-					@Override
-					public void onSuccess(GwtXSRFToken token) {
-						xsrfTokenFieldFile.setValue(token.getToken());
-						if (!"".equals(filePath.getFilename())) {
-						    packagesFormFile.submit();
-						} else {
-						    uploadModal.hide();
-						    uploadErrorModal.show();
-						}
-					}
-				});
+            @Override
+            public void onClick(ClickEvent event) {
+                PackagesPanelUi.this.selected = PackagesPanelUi.this.selectionModel.getSelectedObject();
+                if (PackagesPanelUi.this.selected != null && PackagesPanelUi.this.selected.getVersion() != null) {
+                    final Modal modal = new Modal();
+                    ModalBody modalBody = new ModalBody();
+                    ModalFooter modalFooter = new ModalFooter();
+                    modal.setClosable(true);
+                    modal.setTitle(MSGS.confirm());
+                    modalBody.add(new Span(MSGS.deviceUninstallPackage(PackagesPanelUi.this.selected.getName())));
+                    modalFooter.add(new Button("Yes", new ClickHandler() {
 
-			}});
-
-		fileCancel.addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {			
-				uploadModal.hide();
-			}});
-
-		urlSubmit.addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {
-				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-					@Override
-					public void onFailure(Throwable ex) {
-						FailureHandler.handle(ex);
-					}
-
-					@Override
-					public void onSuccess(GwtXSRFToken token) {
-					    if (!"".equals(formUrl.getValue())) {
-					        xsrfTokenFieldUrl.setValue(token.getToken());
-	                        packagesFormUrl.submit();
-					    } else {
-                            uploadModal.hide();
-                            uploadErrorModal.show();
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            modal.hide();
+                            uninstall(PackagesPanelUi.this.selected);
                         }
-					}
-				});
-			}});
+                    }));
+                    modalFooter.add(new Button("No", new ClickHandler() {
 
-		urlCancel.addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {			
-				uploadModal.hide();
-			}});
-	}
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            modal.hide();
+                        }
+                    }));
 
-	private void refresh(int delay) {
-		Timer timer = new Timer() {
-			@Override
-			public void run() {
-				if (refreshRequests == 0){
-					loadPackagesData();
-					refreshRequests++;
-				}
-			}
-		};
-		timer.schedule(delay);
-	}
+                    modal.add(modalBody);
+                    modal.add(modalFooter);
+                    modal.show();
+                }   // end if null
+            }// end on click
+        });
+    }
 
-	private void upload() {
-		uploadModal.show();
+    private void initModalHandlers() {
+        this.fileSubmit.addClickHandler(new ClickHandler() {
 
-		//******FILE TAB ****//
-		fileLabel.setText(MSGS.fileLabel());
+            @Override
+            public void onClick(ClickEvent event) {
+                PackagesPanelUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-		filePath.setName("uploadedFile");
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex);
+                    }
 
-		xsrfTokenFieldFile.setID("xsrfToken");
-		xsrfTokenFieldFile.setName("xsrfToken");
-		xsrfTokenFieldFile.setValue("");
+                    @Override
+                    public void onSuccess(GwtXSRFToken token) {
+                        PackagesPanelUi.this.xsrfTokenFieldFile.setValue(token.getToken());
+                        if (!"".equals(PackagesPanelUi.this.filePath.getFilename())) {
+                            PackagesPanelUi.this.packagesFormFile.submit();
+                        } else {
+                            PackagesPanelUi.this.uploadModal.hide();
+                            PackagesPanelUi.this.uploadErrorModal.show();
+                        }
+                    }
+                });
 
-		packagesFormFile.setAction(SERVLET_URL + "/upload");
-		packagesFormFile.setEncoding(FormPanel.ENCODING_MULTIPART);
-		packagesFormFile.setMethod(FormPanel.METHOD_POST);
-		packagesFormFile.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-			@Override
-			public void onSubmitComplete(SubmitCompleteEvent event) {
-				String result = event.getResults();
-				if (result == null || result.isEmpty()) {
-					uploadModal.hide();
-					refresh(2500);
-				} else {
-					logger.log(Level.SEVERE, "Error uploading package!");
-				}
-			}
-		});
+            }
+        });
 
+        this.fileCancel.addClickHandler(new ClickHandler() {
 
-		//******URL TAB ****//
-		formUrl.setName("packageUrl");
+            @Override
+            public void onClick(ClickEvent event) {
+                PackagesPanelUi.this.uploadModal.hide();
+            }
+        });
 
-		xsrfTokenFieldUrl.setID("xsrfToken");
-		xsrfTokenFieldUrl.setName("xsrfToken");
-		xsrfTokenFieldUrl.setValue("");
+        this.urlSubmit.addClickHandler(new ClickHandler() {
 
-		packagesFormUrl.setAction(SERVLET_URL + "/url");
-		packagesFormUrl.setMethod(FormPanel.METHOD_POST);
-		packagesFormUrl.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-			@Override
-			public void onSubmitComplete(SubmitCompleteEvent event) {
-				String result = event.getResults();
-				if (result == null || result.isEmpty()) {
-					uploadModal.hide();
-					refresh(2500);
-				} else {
-					String errMsg = result;
-					int startIdx = result.indexOf("<pre>");
-					int endIndex = result.indexOf("</pre>");
-					if (startIdx != -1 && endIndex != -1) {
-						errMsg = result.substring(startIdx+5, endIndex);
-					}
-					logger.log(Level.SEVERE, MSGS.error()+": " + MSGS.fileDownloadFailure()+": "+errMsg);
-				}
-			}
-		});
-	}
+            @Override
+            public void onClick(ClickEvent event) {
+                PackagesPanelUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-	private void uninstall(final GwtDeploymentPackage selected) {
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex);
+                    }
 
-		EntryClassUi.showWaitModal();
-		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+                    @Override
+                    public void onSuccess(GwtXSRFToken token) {
+                        if (!"".equals(PackagesPanelUi.this.formUrl.getValue())) {
+                            PackagesPanelUi.this.xsrfTokenFieldUrl.setValue(token.getToken());
+                            PackagesPanelUi.this.packagesFormUrl.submit();
+                        } else {
+                            PackagesPanelUi.this.uploadModal.hide();
+                            PackagesPanelUi.this.uploadErrorModal.show();
+                        }
+                    }
+                });
+            }
+        });
 
-			@Override
-			public void onFailure(Throwable ex) {
-				EntryClassUi.hideWaitModal();
-				FailureHandler.handle(ex);
-			}
+        this.urlCancel.addClickHandler(new ClickHandler() {
 
-			@Override
-			public void onSuccess(GwtXSRFToken token) {
-				gwtPackageService.uninstallDeploymentPackage(token, selected.getName(), new AsyncCallback<Void>() {
+            @Override
+            public void onClick(ClickEvent event) {
+                PackagesPanelUi.this.uploadModal.hide();
+            }
+        });
+    }
 
-					@Override
-					public void onFailure(Throwable caught) {
-						EntryClassUi.hideWaitModal();
-						FailureHandler.handle(caught);
-					}
+    private void refresh(int delay) {
+        Timer timer = new Timer() {
 
-					@Override
-					public void onSuccess(Void result) {
-						refresh(1000);
-						EntryClassUi.hideWaitModal();
-					}});
-			}
+            @Override
+            public void run() {
+                if (PackagesPanelUi.this.refreshRequests == 0) {
+                    loadPackagesData();
+                    PackagesPanelUi.this.refreshRequests++;
+                }
+            }
+        };
+        timer.schedule(delay);
+    }
 
-		});
-	}
+    private void upload() {
+        this.uploadModal.show();
 
-	private void initTable() {
+        // ******FILE TAB ****//
+        this.fileLabel.setText(MSGS.fileLabel());
 
-		TextColumn<GwtDeploymentPackage> col1 = new TextColumn<GwtDeploymentPackage>() {
-			@Override
-			public String getValue(GwtDeploymentPackage object) {
-				return object.getName();
-			}
-		};
-		col1.setCellStyleNames("status-table-row");
-		packagesGrid.addColumn(col1, "Name");
+        this.filePath.setName("uploadedFile");
 
-		TextColumn<GwtDeploymentPackage> col2 = new TextColumn<GwtDeploymentPackage>() {
-			@Override
-			public String getValue(GwtDeploymentPackage object) {
-				return object.getVersion();
-			}
-		};
-		col2.setCellStyleNames("status-table-row");
-		packagesGrid.addColumn(col2, "Version");
+        this.xsrfTokenFieldFile.setID("xsrfToken");
+        this.xsrfTokenFieldFile.setName("xsrfToken");
+        this.xsrfTokenFieldFile.setValue("");
 
-		packagesDataProvider.addDataDisplay(packagesGrid);
-	}
+        this.packagesFormFile.setAction(SERVLET_URL + "/upload");
+        this.packagesFormFile.setEncoding(FormPanel.ENCODING_MULTIPART);
+        this.packagesFormFile.setMethod(FormPanel.METHOD_POST);
+        this.packagesFormFile.addSubmitCompleteHandler(new SubmitCompleteHandler() {
 
-	private void loadPackagesData() {
-		packagesDataProvider.getList().clear();
+            @Override
+            public void onSubmitComplete(SubmitCompleteEvent event) {
+                String result = event.getResults();
+                if (result == null || result.isEmpty()) {
+                    PackagesPanelUi.this.uploadModal.hide();
+                    refresh(2500);
+                } else {
+                    logger.log(Level.SEVERE, "Error uploading package!");
+                }
+            }
+        });
 
-		EntryClassUi.showWaitModal();
-		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+        // ******URL TAB ****//
+        this.formUrl.setName("packageUrl");
 
-			@Override
-			public void onFailure(Throwable ex) {
-				EntryClassUi.hideWaitModal();
-				FailureHandler.handle(ex);
-			}
+        this.xsrfTokenFieldUrl.setID("xsrfToken");
+        this.xsrfTokenFieldUrl.setName("xsrfToken");
+        this.xsrfTokenFieldUrl.setValue("");
 
-			@Override
-			public void onSuccess(GwtXSRFToken token) {
-				gwtPackageService.findDeviceDeploymentPackages(token, new AsyncCallback<List<GwtDeploymentPackage>>() {
-					@Override
-					public void onFailure(Throwable caught) {
-						EntryClassUi.hideWaitModal();
-						GwtDeploymentPackage pkg = new GwtDeploymentPackage();
-						pkg.setName("Unavailable! Please click refresh");
-						pkg.setVersion(caught.getLocalizedMessage());
-						packagesDataProvider.getList().add(pkg);
-					}
+        this.packagesFormUrl.setAction(SERVLET_URL + "/url");
+        this.packagesFormUrl.setMethod(FormPanel.METHOD_POST);
+        this.packagesFormUrl.addSubmitCompleteHandler(new SubmitCompleteHandler() {
 
-					@Override
-					public void onSuccess(List<GwtDeploymentPackage> result) {
-						for(GwtDeploymentPackage pair : result){
-							packagesDataProvider.getList().add(pair);
-						}
-						int size = packagesDataProvider.getList().size();
-						packagesGrid.setVisibleRange(0, size);
-						packagesDataProvider.flush();
+            @Override
+            public void onSubmitComplete(SubmitCompleteEvent event) {
+                String result = event.getResults();
+                if (result == null || result.isEmpty()) {
+                    PackagesPanelUi.this.uploadModal.hide();
+                    refresh(2500);
+                } else {
+                    String errMsg = result;
+                    int startIdx = result.indexOf("<pre>");
+                    int endIndex = result.indexOf("</pre>");
+                    if (startIdx != -1 && endIndex != -1) {
+                        errMsg = result.substring(startIdx + 5, endIndex);
+                    }
+                    logger.log(Level.SEVERE, MSGS.error() + ": " + MSGS.fileDownloadFailure() + ": " + errMsg);
+                }
+            }
+        });
+    }
 
-						if(packagesDataProvider.getList().isEmpty()){
-							packagesGrid.setVisible(false);
-							notification.setVisible(true);
-							notification.setText(MSGS.devicePackagesNone());
-						} else {
-							packagesGrid.setVisible(true);
-							notification.setVisible(false);
-						}
-						if (entryClassUi != null) {
-							entryClassUi.initServicesTree();
-						}
+    private void uninstall(final GwtDeploymentPackage selected) {
 
-						refreshRequests--;
-						EntryClassUi.hideWaitModal();
-					}});
+        EntryClassUi.showWaitModal();
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-			}
+            @Override
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
 
-		});
-	}
-	
-	private void initModal() {
-	    uploadErrorModal.setTitle(MSGS.warning());
-	    uploadErrorText.setText(MSGS.missingFileUpload());
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                PackagesPanelUi.this.gwtPackageService.uninstallDeploymentPackage(token, selected.getName(),
+                        new AsyncCallback<Void>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        refresh(1000);
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
+            }
+
+        });
+    }
+
+    private void initTable() {
+
+        TextColumn<GwtDeploymentPackage> col1 = new TextColumn<GwtDeploymentPackage>() {
+
+            @Override
+            public String getValue(GwtDeploymentPackage object) {
+                return object.getName();
+            }
+        };
+        col1.setCellStyleNames("status-table-row");
+        this.packagesGrid.addColumn(col1, "Name");
+
+        TextColumn<GwtDeploymentPackage> col2 = new TextColumn<GwtDeploymentPackage>() {
+
+            @Override
+            public String getValue(GwtDeploymentPackage object) {
+                return object.getVersion();
+            }
+        };
+        col2.setCellStyleNames("status-table-row");
+        this.packagesGrid.addColumn(col2, "Version");
+
+        this.packagesDataProvider.addDataDisplay(this.packagesGrid);
+    }
+
+    private void loadPackagesData() {
+        this.packagesDataProvider.getList().clear();
+
+        EntryClassUi.showWaitModal();
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                PackagesPanelUi.this.gwtPackageService.findDeviceDeploymentPackages(token,
+                        new AsyncCallback<List<GwtDeploymentPackage>>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        GwtDeploymentPackage pkg = new GwtDeploymentPackage();
+                        pkg.setName("Unavailable! Please click refresh");
+                        pkg.setVersion(caught.getLocalizedMessage());
+                        PackagesPanelUi.this.packagesDataProvider.getList().add(pkg);
+                    }
+
+                    @Override
+                    public void onSuccess(List<GwtDeploymentPackage> result) {
+                        for (GwtDeploymentPackage pair : result) {
+                            PackagesPanelUi.this.packagesDataProvider.getList().add(pair);
+                        }
+                        int size = PackagesPanelUi.this.packagesDataProvider.getList().size();
+                        PackagesPanelUi.this.packagesGrid.setVisibleRange(0, size);
+                        PackagesPanelUi.this.packagesDataProvider.flush();
+
+                        if (PackagesPanelUi.this.packagesDataProvider.getList().isEmpty()) {
+                            PackagesPanelUi.this.packagesGrid.setVisible(false);
+                            PackagesPanelUi.this.notification.setVisible(true);
+                            PackagesPanelUi.this.notification.setText(MSGS.devicePackagesNone());
+                        } else {
+                            PackagesPanelUi.this.packagesGrid.setVisible(true);
+                            PackagesPanelUi.this.notification.setVisible(false);
+                        }
+                        if (PackagesPanelUi.this.entryClassUi != null) {
+                            PackagesPanelUi.this.entryClassUi.initServicesTree();
+                        }
+
+                        PackagesPanelUi.this.refreshRequests--;
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
+
+            }
+
+        });
+    }
+
+    private void initModal() {
+        this.uploadErrorModal.setTitle(MSGS.warning());
+        this.uploadErrorText.setText(MSGS.missingFileUpload());
     }
 }

@@ -7,10 +7,10 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Eurotech
+ * Eurotech
  *******************************************************************************/
 /**
- * 
+ *
  */
 /**
  * Provides services to manage interfaces and their priorities in the static routing table.

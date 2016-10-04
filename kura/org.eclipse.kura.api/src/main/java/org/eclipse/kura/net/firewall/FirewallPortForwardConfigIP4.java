@@ -15,16 +15,17 @@ import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkPair;
 
-public class FirewallPortForwardConfigIP4 extends FirewallPortForwardConfigIP<IP4Address> implements FirewallPortForwardConfig4 {
-	
-	public FirewallPortForwardConfigIP4() {
-		super();
-	}
-	
-	public FirewallPortForwardConfigIP4(String inboundIface, String outboundIface, IP4Address address,
-			NetProtocol protocol, int inPort, int outPort, boolean masquerade,
-			NetworkPair<IP4Address> permittedNetwork,
-			String permittedMac, String sourcePortRange) {
-		super(inboundIface, outboundIface, address, protocol, inPort, outPort, masquerade, permittedNetwork, permittedMac, sourcePortRange);
-	}
+public class FirewallPortForwardConfigIP4 extends FirewallPortForwardConfigIP<IP4Address>
+        implements FirewallPortForwardConfig4 {
+
+    public FirewallPortForwardConfigIP4() {
+        super();
+    }
+
+    public FirewallPortForwardConfigIP4(String inboundIface, String outboundIface, IP4Address address,
+            NetProtocol protocol, int inPort, int outPort, boolean masquerade, NetworkPair<IP4Address> permittedNetwork,
+            String permittedMac, String sourcePortRange) {
+        super(inboundIface, outboundIface, address, protocol, inPort, outPort, masquerade, permittedNetwork,
+                permittedMac, sourcePortRange);
+    }
 }

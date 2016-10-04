@@ -26,68 +26,67 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class NetworkPanelUi extends Composite {
 
-	private static NetworkPanelUiUiBinder uiBinder = GWT.create(NetworkPanelUiUiBinder.class);
+    private static NetworkPanelUiUiBinder uiBinder = GWT.create(NetworkPanelUiUiBinder.class);
 
-	interface NetworkPanelUiUiBinder extends UiBinder<Widget, NetworkPanelUi> {
-	}
+    interface NetworkPanelUiUiBinder extends UiBinder<Widget, NetworkPanelUi> {
+    }
 
-	private static final Messages MSGS = GWT.create(Messages.class);
-	
-	GwtSession session;
-	private NetworkInterfacesTableUi table;
-	private NetworkButtonBarUi buttons;
-	private NetworkTabsUi tabs;
-	
-	private boolean isInitialized;
+    private static final Messages MSGS = GWT.create(Messages.class);
 
-	@UiField
-	HTMLPanel networkIntro;
-	@UiField
-	PanelBody interfacesTable;
-	@UiField
-	PanelBody tabsPanel;
-	@UiField
-	Container buttonBar;
-	
-	
-	public NetworkPanelUi() {
-		initWidget(uiBinder.createAndBindUi(this));	
-		networkIntro.add(new Span("<p>"+MSGS.netIntro()+"</p>"));
-		isInitialized = false;
-	}
+    GwtSession session;
+    private NetworkInterfacesTableUi table;
+    private NetworkButtonBarUi buttons;
+    private NetworkTabsUi tabs;
 
-	public void initNetworkPanel() {
-		if (!isInitialized) {
-			tabs = new NetworkTabsUi(session);
-			tabsPanel.add(tabs);
-			
-			table = new NetworkInterfacesTableUi(session, tabs);
-			interfacesTable.add(table);
-			
-			buttons= new NetworkButtonBarUi(session, tabs,table);
-			buttonBar.add(buttons);
-			
-			tabs.setDirty(false);
-			isInitialized = true;
-		}
-	}
-	
-	public boolean isDirty(){
-		if (tabs != null) {
-			return tabs.isDirty();
-		} else {
-			return false;
-		}
-	}
-	
-	public void setSession(GwtSession currentSession) {
-		this.session = currentSession;
-	}
+    private boolean isInitialized;
 
-	public void setDirty(boolean b) {
-		if (tabs != null) {
-			tabs.setDirty(b);
-		}
-	}
+    @UiField
+    HTMLPanel networkIntro;
+    @UiField
+    PanelBody interfacesTable;
+    @UiField
+    PanelBody tabsPanel;
+    @UiField
+    Container buttonBar;
+
+    public NetworkPanelUi() {
+        initWidget(uiBinder.createAndBindUi(this));
+        this.networkIntro.add(new Span("<p>" + MSGS.netIntro() + "</p>"));
+        this.isInitialized = false;
+    }
+
+    public void initNetworkPanel() {
+        if (!this.isInitialized) {
+            this.tabs = new NetworkTabsUi(this.session);
+            this.tabsPanel.add(this.tabs);
+
+            this.table = new NetworkInterfacesTableUi(this.session, this.tabs);
+            this.interfacesTable.add(this.table);
+
+            this.buttons = new NetworkButtonBarUi(this.session, this.tabs, this.table);
+            this.buttonBar.add(this.buttons);
+
+            this.tabs.setDirty(false);
+            this.isInitialized = true;
+        }
+    }
+
+    public boolean isDirty() {
+        if (this.tabs != null) {
+            return this.tabs.isDirty();
+        } else {
+            return false;
+        }
+    }
+
+    public void setSession(GwtSession currentSession) {
+        this.session = currentSession;
+    }
+
+    public void setDirty(boolean b) {
+        if (this.tabs != null) {
+            this.tabs.setDirty(b);
+        }
+    }
 
 }

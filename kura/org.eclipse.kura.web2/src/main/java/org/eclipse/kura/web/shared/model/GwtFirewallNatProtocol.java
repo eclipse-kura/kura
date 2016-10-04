@@ -13,6 +13,6 @@
 package org.eclipse.kura.web.shared.model;
 
 public enum GwtFirewallNatProtocol {
-	tcp,
-	udp
+    tcp,
+    udp
 }

@@ -25,102 +25,101 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /*
- * 
+ *
  */
-public final class CertificatesManager implements CertificatesService{
-	private static final Logger s_logger = LoggerFactory.getLogger(CertificatesManager.class);
+public final class CertificatesManager implements CertificatesService {
 
-	private static final String DEFAULT_KEYSTORE= System.getProperty("org.osgi.framework.trust.repositories");
+    private static final Logger s_logger = LoggerFactory.getLogger(CertificatesManager.class);
 
-	public static final String APP_ID = "org.eclipse.kura.core.certificates.CertificatesManager";
+    private static final String DEFAULT_KEYSTORE = System.getProperty("org.osgi.framework.trust.repositories");
 
-	private CryptoService m_cryptoService;
+    public static final String APP_ID = "org.eclipse.kura.core.certificates.CertificatesManager";
 
-	// ----------------------------------------------------------------
-	//
-	// Dependencies
-	//
-	// ----------------------------------------------------------------
+    private CryptoService m_cryptoService;
 
-	public void setCryptoService(CryptoService cryptoService) {
-		this.m_cryptoService = cryptoService;
-	}
+    // ----------------------------------------------------------------
+    //
+    // Dependencies
+    //
+    // ----------------------------------------------------------------
 
-	public void unsetCryptoService(CryptoService cryptoService) {
-		this.m_cryptoService = null;
-	}
+    public void setCryptoService(CryptoService cryptoService) {
+        this.m_cryptoService = cryptoService;
+    }
 
-	// ----------------------------------------------------------------
-	//
-	// Activation APIs
-	//
-	// ----------------------------------------------------------------
+    public void unsetCryptoService(CryptoService cryptoService) {
+        this.m_cryptoService = null;
+    }
 
-	protected void activate(ComponentContext componentContext) {
-		s_logger.info("Bundle " + APP_ID + " has started!");
-	}
+    // ----------------------------------------------------------------
+    //
+    // Activation APIs
+    //
+    // ----------------------------------------------------------------
 
-	protected void deactivate(ComponentContext componentContext) {
-		s_logger.info("Bundle " + APP_ID + " is deactivating!");
-	}
+    protected void activate(ComponentContext componentContext) {
+        s_logger.info("Bundle " + APP_ID + " has started!");
+    }
 
+    protected void deactivate(ComponentContext componentContext) {
+        s_logger.info("Bundle " + APP_ID + " is deactivating!");
+    }
 
-	@Override
-	public Certificate returnCertificate(String alias) throws KuraException{
-		KeyStore ks= null;
-		try {
-			char[] keystorePassword= m_cryptoService.getKeyStorePassword(DEFAULT_KEYSTORE);
-			ks= KeyStoreManagement.loadKeyStore(keystorePassword);
-			return ks.getCertificate(alias);
-		} catch (Exception e) {
-			throw KuraException.internalError("Error retrieving the certificate from the keystore");
-		}
-	}
+    @Override
+    public Certificate returnCertificate(String alias) throws KuraException {
+        KeyStore ks = null;
+        try {
+            char[] keystorePassword = this.m_cryptoService.getKeyStorePassword(DEFAULT_KEYSTORE);
+            ks = KeyStoreManagement.loadKeyStore(keystorePassword);
+            return ks.getCertificate(alias);
+        } catch (Exception e) {
+            throw KuraException.internalError("Error retrieving the certificate from the keystore");
+        }
+    }
 
+    @Override
+    public void storeCertificate(Certificate arg1, String alias) throws KuraException {
+        return;
+    }
 
-	@Override
-	public void storeCertificate(Certificate arg1, String alias) throws KuraException{
-		return;
-	}
+    @Override
+    public Enumeration<String> listBundleCertificatesAliases() {
+        return listStoredCertificatesAliases();
+    }
 
-	@Override
-	public Enumeration<String> listBundleCertificatesAliases() {
-		return listStoredCertificatesAliases();
-	}
+    @Override
+    public Enumeration<String> listDMCertificatesAliases() {
+        return listStoredCertificatesAliases();
+    }
 
-	@Override
-	public Enumeration<String> listDMCertificatesAliases() {
-		return listStoredCertificatesAliases();
-	}
+    @Override
+    public Enumeration<String> listSSLCertificatesAliases() {
+        return listStoredCertificatesAliases();
+    }
 
-	@Override
-	public Enumeration<String> listSSLCertificatesAliases() {
-		return listStoredCertificatesAliases();
-	}
+    @Override
+    public Enumeration<String> listCACertificatesAliases() {
+        return listStoredCertificatesAliases();
+    }
 
-	@Override
-	public Enumeration<String> listCACertificatesAliases() {
-		return listStoredCertificatesAliases();
-	}
+    @Override
+    public void removeCertificate(String alias) {
+        return;
+    }
 
-	@Override
-	public void removeCertificate(String alias) {
-		return;
-	}
+    @Override
+    public boolean verifySignature(KuraTopic kuraTopic, KuraPayload kuraPayload) {
+        return true;
+    }
 
-	@Override
-	public boolean verifySignature(KuraTopic kuraTopic, KuraPayload kuraPayload){
-		return true;
-	}
-	
-	private Enumeration<String> listStoredCertificatesAliases() {
-		KeyStore ks= null;
-		try {
-			char[] keystorePassword= m_cryptoService.getKeyStorePassword(DEFAULT_KEYSTORE);
-			ks= KeyStoreManagement.loadKeyStore(keystorePassword);
-			return ks.aliases();
-		} catch (Exception e) {
-			return null;
-		}
-	}
+    private Enumeration<String> listStoredCertificatesAliases() {
+        KeyStore ks = null;
+        try {
+            char[] keystorePassword = this.m_cryptoService.getKeyStorePassword(DEFAULT_KEYSTORE);
+            ks = KeyStoreManagement.loadKeyStore(keystorePassword);
+            return ks.aliases();
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

@@ -14,6 +14,6 @@ package org.eclipse.kura.core.deployment.progress;
 
 public interface ProgressListener {
 
-	public void progressChanged(ProgressEvent progress);
-	
+    public void progressChanged(ProgressEvent progress);
+
 }

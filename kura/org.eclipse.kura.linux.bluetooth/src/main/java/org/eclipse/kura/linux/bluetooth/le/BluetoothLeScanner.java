@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - minor clean ups
  *******************************************************************************/
 package org.eclipse.kura.linux.bluetooth.le;
 
@@ -33,206 +34,213 @@ import org.slf4j.LoggerFactory;
 
 public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopListener {
 
-	private static final Logger s_logger = LoggerFactory.getLogger(BluetoothLeScanner.class); 
-	private static final String s_mac_regex = "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$";
+    private static final Logger s_logger = LoggerFactory.getLogger(BluetoothLeScanner.class);
+    private static final String MAC_REGEX = "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$";
 
-	public static final int SCAN_FAILED_INTERNAL_ERROR = 0x0003;
-	private static final String SIGINT = "2";
+    public static final int SCAN_FAILED_INTERNAL_ERROR = 0x0003;
+    private static final String SIGINT = "2";
 
-	private Map<String, String> m_devices;
-	private List<BluetoothDevice> m_scanResult;
-	private BluetoothProcess m_proc = null;
-	private BluetoothProcess m_dump_proc = null;
-	private BluetoothLeScanListener m_listener = null;
-	private BluetoothBeaconScanListener m_beacon_listener = null;
-	private BluetoothAdvertisementScanListener m_advertisement_listener = null;
-	private boolean m_scanRunning = false;
-	private String m_companyName;
+    private final Map<String, String> m_devices;
+    private List<BluetoothDevice> m_scanResult;
+    private BluetoothProcess m_proc = null;
+    private BluetoothProcess m_dump_proc = null;
+    private BluetoothLeScanListener m_listener = null;
+    private BluetoothBeaconScanListener m_beacon_listener = null;
+    private BluetoothAdvertisementScanListener m_advertisement_listener = null;
+    private boolean m_scanRunning = false;
+    private String m_companyName;
 
-	public BluetoothLeScanner() {
-		m_devices = new HashMap<String, String>();
-	}
-	
-	public void startScan(String name, BluetoothLeScanListener listener) {
-		m_listener = listener;
+    public BluetoothLeScanner() {
+        this.m_devices = new HashMap<String, String>();
+    }
 
-		s_logger.info("Starting bluetooth le scan...");
-		
-		// Start scan process
-		m_proc = BluetoothUtil.hcitoolCmd(name, "lescan", this);
-					
-		set_scanRunning(true);
-	}
-	
-	public void startAdvertisementScan(String name, String companyName, BluetoothAdvertisementScanListener listener) {
-		m_advertisement_listener = listener;
-		m_companyName = companyName;
+    public void startScan(String name, BluetoothLeScanListener listener) {
+        this.m_listener = listener;
 
-		s_logger.info("Starting bluetooth le advertisement scan...");
+        s_logger.info("Starting bluetooth le scan...");
 
-		// Start scan process
-		m_proc = BluetoothUtil.hcitoolCmd(name, new String[]{ "lescan-passive", "--duplicates" }, this);
-		
-		// Start dump process
-		m_dump_proc = BluetoothUtil.btdumpCmd(name, this);
-					
-		set_scanRunning(true);
-	}
-	
+        // Start scan process
+        this.m_proc = BluetoothUtil.hcitoolCmd(name, "lescan", this);
 
-	public void startBeaconScan(String name, String companyName, BluetoothBeaconScanListener listener) {
-		m_beacon_listener = listener;
-		m_companyName = companyName;
+        setScanRunning(true);
+    }
 
-		s_logger.info("Starting bluetooth le beacon scan...");
+    public void startAdvertisementScan(String name, String companyName, BluetoothAdvertisementScanListener listener) {
+        this.m_advertisement_listener = listener;
+        this.m_companyName = companyName;
 
-		// Start scan process
-		m_proc = BluetoothUtil.hcitoolCmd(name, new String[]{ "lescan-passive", "--duplicates" }, this);
-		
-		// Start dump process
-		m_dump_proc = BluetoothUtil.btdumpCmd(name, this);
-					
-		set_scanRunning(true);
-	}
+        s_logger.info("Starting bluetooth le advertisement scan...");
 
-	public void killScan() {
-		// SIGINT must be sent to the hcitool process. Otherwise the adapter must be toggled (down/up).
-		if (m_proc != null) {
-			s_logger.info("Killing hcitool...");
-			BluetoothUtil.killCmd(BluetoothUtil.HCITOOL, SIGINT);
-			m_proc = null;
-		}
-		else
-			s_logger.info("Cannot Kill hcitool, m_proc = null ...");
-		
-		// Shut down btdump process
-		if (m_dump_proc != null) {
-			s_logger.info("Killing btdump...");
-			m_dump_proc.destroyBTSnoop();;
-			m_dump_proc = null;
-		}
-		else
-			s_logger.info("Cannot Kill btdump, m_dump_proc = null ...");
-		
-		set_scanRunning(false);
-	}
+        // Start scan process
+        this.m_proc = BluetoothUtil.hcitoolCmd(name, new String[] { "lescan-passive", "--duplicates" }, this);
 
-	// --------------------------------------------------------------------
-	//
-	//  BluetoothProcessListener API
-	//
-	// --------------------------------------------------------------------
-	@Override
-	public void processInputStream(String string) {
+        // Start dump process
+        this.m_dump_proc = BluetoothUtil.btdumpCmd(name, this);
 
-		if(m_listener != null) {
-			String[] lines = string.split("\n");
-			for (String line : lines) {
-				processLine(line);
-			}
-		
-			m_scanResult = new ArrayList<BluetoothDevice>();
-			for (Entry<String, String> device : m_devices.entrySet()) {
-				m_scanResult.add(new BluetoothDeviceImpl(device.getKey(), device.getValue()));
-				s_logger.info("m_scanResult.add {} - {}", device.getKey(), device.getValue());
-			}
+        setScanRunning(true);
+    }
 
-			// Alert listener that scan is complete
-			m_listener.onScanResults(m_scanResult);
-		}
-	}
+    public void startBeaconScan(String name, String companyName, BluetoothBeaconScanListener listener) {
+        this.m_beacon_listener = listener;
+        this.m_companyName = companyName;
 
-	@Override
-	public void processInputStream(int ch) {
-	}
+        s_logger.info("Starting bluetooth le beacon scan...");
 
-	@Override
-	public void processErrorStream(String string) {
-	}
+        // Start scan process
+        this.m_proc = BluetoothUtil.hcitoolCmd(name, new String[] { "lescan-passive", "--duplicates" }, this);
 
-	// --------------------------------------------------------------------
-	//
-	//  Private methods
-	//
-	// --------------------------------------------------------------------
-	private void processLine(String line) {
-		String name;
-		String address;
-		s_logger.info(line);
-		if (line.contains("Set scan parameters failed:")) {
-			s_logger.error("Error : " + line);
-		} else {
-			// Results from hcitool lescan should be in form:
-			// <mac_address> <device_name>
-			String[] results = line.split("\\s", 2);
-			if (results.length == 2) {
-				address = results[0].trim();
-				name = results[1].trim();
+        // Start dump process
+        this.m_dump_proc = BluetoothUtil.btdumpCmd(name, this);
 
-				if(address.matches(s_mac_regex)) {
-					if (m_devices.containsKey(address)) {
-						if (!name.equals("(unknown)") && !m_devices.get(address).equals(name)) {
-							s_logger.debug("Updating device: {} - {}", address, name);
-							m_devices.put(address, name);
-						}
-					}
-					else {
-						s_logger.debug("Device found: {} - {}", address, name);
-						m_devices.put(address, name);
-					}
-				}
-			}
-		}
-	}
-	
+        setScanRunning(true);
+    }
 
-	@Override
-	public void processBTSnoopRecord(byte[] record) {
+    public void killScan() {
+        // SIGINT must be sent to the hcitool process. Otherwise the adapter must be toggled (down/up).
+        if (this.m_proc != null) {
+            s_logger.info("Killing hcitool...");
+            BluetoothUtil.killCmd(BluetoothUtil.HCITOOL, SIGINT);
+            this.m_proc = null;
+        } else {
+            s_logger.info("Cannot Kill hcitool, m_proc = null ...");
+        }
 
-		try {
-			
-			// Extract raw advertisement data
-			BluetoothAdvertisementData bAdData = BluetoothUtil.parseLEAdvertisement(record);
-			
-			// Notify advertisement listeners
-			if (bAdData != null && m_advertisement_listener != null) {
-				try {
-					m_advertisement_listener.onAdvertisementDataReceived(bAdData);
-				} catch(Exception e) {
-					s_logger.error("Scan listener threw exception", e);
-				}
-			}
-			
-			// Extract beacon advertisements
-			List<BluetoothBeaconData> beaconDatas = BluetoothUtil.parseLEAdvertisingReport(record, m_companyName);
+        // Shut down btdump process
+        if (this.m_dump_proc != null) {
+            s_logger.info("Killing btdump...");
+            this.m_dump_proc.destroyBTSnoop();
+            this.m_dump_proc = null;
+        } else {
+            s_logger.info("Cannot Kill btdump, m_dump_proc = null ...");
+        }
 
-			// Extract beacon data
-			for(BluetoothBeaconData beaconData : beaconDatas) {
-				
-				// Notify the listener
-				try {
-					
-					if(m_beacon_listener != null)
-						m_beacon_listener.onBeaconDataReceived(beaconData);
-					
-				} catch(Exception e) {
-					s_logger.error("Scan listener threw exception", e);
-				}
-			}
-			
-		} catch(Exception e) {
-			s_logger.error("Error processing advertising report", e);
-		}
-		
-	}
+        setScanRunning(false);
+    }
 
-	public boolean is_scanRunning() {
-		return m_scanRunning;
-	}
+    // --------------------------------------------------------------------
+    //
+    // BluetoothProcessListener API
+    //
+    // --------------------------------------------------------------------
+    @Override
+    public void processInputStream(String string) {
 
-	public void set_scanRunning(boolean m_scanRunning) {
-		this.m_scanRunning = m_scanRunning;
-	}
+        if (this.m_listener != null) {
+            String[] lines = string.split("\n");
+            for (String line : lines) {
+                processLine(line);
+            }
 
+            this.m_scanResult = new ArrayList<BluetoothDevice>();
+            for (Entry<String, String> device : this.m_devices.entrySet()) {
+                this.m_scanResult.add(new BluetoothDeviceImpl(device.getKey(), device.getValue()));
+                s_logger.info("m_scanResult.add {} - {}", device.getKey(), device.getValue());
+            }
+
+            // Alert listener that scan is complete
+            this.m_listener.onScanResults(this.m_scanResult);
+        }
+    }
+
+    @Override
+    public void processInputStream(int ch) {
+    }
+
+    @Override
+    public void processErrorStream(String string) {
+    }
+
+    // --------------------------------------------------------------------
+    //
+    // Private methods
+    //
+    // --------------------------------------------------------------------
+    private void processLine(String line) {
+        String name;
+        String address;
+        s_logger.info(line);
+        if (line.contains("Set scan parameters failed:")) {
+            s_logger.error("Error : " + line);
+        } else {
+            // Results from hcitool lescan should be in form:
+            // <mac_address> <device_name>
+            String[] results = line.split("\\s", 2);
+            if (results.length == 2) {
+                address = results[0].trim();
+                name = results[1].trim();
+
+                if (address.matches(MAC_REGEX)) {
+                    if (this.m_devices.containsKey(address)) {
+                        if (!name.equals("(unknown)") && !this.m_devices.get(address).equals(name)) {
+                            s_logger.debug("Updating device: {} - {}", address, name);
+                            this.m_devices.put(address, name);
+                        }
+                    } else {
+                        s_logger.debug("Device found: {} - {}", address, name);
+                        this.m_devices.put(address, name);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void processBTSnoopRecord(byte[] record) {
+
+        try {
+
+            // Extract raw advertisement data
+            BluetoothAdvertisementData bAdData = BluetoothUtil.parseLEAdvertisement(record);
+
+            // Notify advertisement listeners
+            if (bAdData != null && this.m_advertisement_listener != null) {
+                try {
+                    this.m_advertisement_listener.onAdvertisementDataReceived(bAdData);
+                } catch (Exception e) {
+                    s_logger.error("Scan listener threw exception", e);
+                }
+            }
+
+            // Extract beacon advertisements
+            List<BluetoothBeaconData> beaconDatas = BluetoothUtil.parseLEAdvertisingReport(record, this.m_companyName);
+
+            // Extract beacon data
+            for (BluetoothBeaconData beaconData : beaconDatas) {
+
+                // Notify the listener
+                try {
+
+                    if (this.m_beacon_listener != null) {
+                        this.m_beacon_listener.onBeaconDataReceived(beaconData);
+                    }
+
+                } catch (Exception e) {
+                    s_logger.error("Scan listener threw exception", e);
+                }
+            }
+
+        } catch (Exception e) {
+            s_logger.error("Error processing advertising report", e);
+        }
+
+    }
+
+    public boolean isScanRunning() {
+        return this.m_scanRunning;
+    }
+
+    private void setScanRunning(boolean scanRunning) {
+        this.m_scanRunning = scanRunning;
+    }
+
+    @Deprecated
+    public boolean is_scanRunning() {
+        return this.m_scanRunning;
+    }
+
+    @Deprecated
+    public void set_scanRunning(boolean m_scanRunning) {
+        this.m_scanRunning = m_scanRunning;
+    }
 
 }

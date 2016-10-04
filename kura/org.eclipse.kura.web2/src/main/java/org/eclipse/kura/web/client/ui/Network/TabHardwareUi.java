@@ -25,110 +25,115 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class TabHardwareUi extends Composite implements NetworkTab {
 
-	private static TabHardwareUiUiBinder uiBinder = GWT.create(TabHardwareUiUiBinder.class);
+    private static TabHardwareUiUiBinder uiBinder = GWT.create(TabHardwareUiUiBinder.class);
 
-	interface TabHardwareUiUiBinder extends UiBinder<Widget, TabHardwareUi>  {
-	}
+    interface TabHardwareUiUiBinder extends UiBinder<Widget, TabHardwareUi> {
+    }
 
-	private static final Messages MSGS = GWT.create(Messages.class);
-	GwtSession session;
-	GwtNetInterfaceConfig SelectednetIfConfig;
-	
-	@UiField
-	FormLabel labelState,labelName,labelType,labelHardware,labelSerial,labelDriver,labelVersion,labelFirmware,labelMtu,labelUsb,labelRssi;
-	@UiField
-	FormControlStatic state,name,type,hardware,serial,driver,version,firmware,mtu,usb,rssi;
-	
-	public TabHardwareUi(GwtSession currentSession) {
-		initWidget(uiBinder.createAndBindUi(this));
-		session=currentSession;
-		setDirty(false);
-		
-		//Set Labels
-		labelState.setText(MSGS.netHwState());
-		labelName.setText(MSGS.netHwName());
-		labelType.setText(MSGS.netHwType());
-		labelHardware.setText(MSGS.netHwAddress());
-		labelSerial.setText(MSGS.netHwSerial());
-		labelDriver.setText(MSGS.netHwDriver());
-		labelVersion.setText(MSGS.netHwVersion());
-		labelFirmware.setText(MSGS.netHwFirmware());
-		labelMtu.setText(MSGS.netHwMTU());
-		labelUsb.setText(MSGS.netHwUSBDevice());
-		labelRssi.setText(MSGS.netHwSignalStrength());
-	}
+    private static final Messages MSGS = GWT.create(Messages.class);
+    GwtSession session;
+    GwtNetInterfaceConfig SelectednetIfConfig;
 
-	//Dirty flag not needed here since this tab is not modifiable
-	public void setDirty(boolean flag){	
-	}
-	
-	public boolean isDirty(){
-		return false;
-	}
-	
-	public boolean isValid(){
-		return true;
-	}
-	
-	public void setNetInterface(GwtNetInterfaceConfig config){
-		SelectednetIfConfig=config;
-	}
+    @UiField
+    FormLabel labelState, labelName, labelType, labelHardware, labelSerial, labelDriver, labelVersion, labelFirmware,
+            labelMtu, labelUsb, labelRssi;
+    @UiField
+    FormControlStatic state, name, type, hardware, serial, driver, version, firmware, mtu, usb, rssi;
 
-	public void refresh(){
-		if(SelectednetIfConfig!=null){
-			loadData();
-		}else {
-			reset();
-		}
-	}
-	
-	
-	
-	/*********Private Methods********/
-	
-	private void loadData(){		
-		state.setText(SelectednetIfConfig.getHwState());
-		name.setText(SelectednetIfConfig.getHwName());
-		type.setText(SelectednetIfConfig.getHwType());
-		hardware.setText(SelectednetIfConfig.getHwAddress());
-		serial.setText(SelectednetIfConfig.getHwSerial());
-		driver.setText(SelectednetIfConfig.getHwDriver());
-		version.setText(SelectednetIfConfig.getHwDriverVersion());
-		firmware.setText(SelectednetIfConfig.getHwFirmware());
-		mtu.setText(String.valueOf(SelectednetIfConfig.getHwMTU()));
-		usb.setText(SelectednetIfConfig.getHwUsbDevice());
-		rssi.setText(SelectednetIfConfig.getHwRssi());
-	}
-	
-	private void reset(){
-		state.setText("");
-		name.setText("");
-		type.setText("");
-		hardware.setText("");
-		serial.setText("");
-		driver.setText("");
-		version.setText("");
-		firmware.setText("");
-		mtu.setText("");
-		usb.setText("");
-		rssi.setText("");
-	}
+    public TabHardwareUi(GwtSession currentSession) {
+        initWidget(uiBinder.createAndBindUi(this));
+        this.session = currentSession;
+        setDirty(false);
 
-	public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
-		if(session!=null){
-			updatedNetIf.setHwState(state.getText());
-			updatedNetIf.setHwName(name.getText());
-			updatedNetIf.setHwType(type.getText());
-			updatedNetIf.setHwAddress(hardware.getText());
-			updatedNetIf.setHwSerial(serial.getText());
-			updatedNetIf.setHwDriver(driver.getText());
-			updatedNetIf.setHwDriverVersion(version.getText());
-			updatedNetIf.setHwFirmware(firmware.getText());
-			if(mtu.getText()!=null){
-				updatedNetIf.setHwMTU(Integer.parseInt(mtu.getText()));
-			}
-			updatedNetIf.setHwUsbDevice(usb.getText());
-			updatedNetIf.setHwRssi(rssi.getText());
-		}
-	}
+        // Set Labels
+        this.labelState.setText(MSGS.netHwState());
+        this.labelName.setText(MSGS.netHwName());
+        this.labelType.setText(MSGS.netHwType());
+        this.labelHardware.setText(MSGS.netHwAddress());
+        this.labelSerial.setText(MSGS.netHwSerial());
+        this.labelDriver.setText(MSGS.netHwDriver());
+        this.labelVersion.setText(MSGS.netHwVersion());
+        this.labelFirmware.setText(MSGS.netHwFirmware());
+        this.labelMtu.setText(MSGS.netHwMTU());
+        this.labelUsb.setText(MSGS.netHwUSBDevice());
+        this.labelRssi.setText(MSGS.netHwSignalStrength());
+    }
+
+    // Dirty flag not needed here since this tab is not modifiable
+    @Override
+    public void setDirty(boolean flag) {
+    }
+
+    @Override
+    public boolean isDirty() {
+        return false;
+    }
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
+    public void setNetInterface(GwtNetInterfaceConfig config) {
+        this.SelectednetIfConfig = config;
+    }
+
+    @Override
+    public void refresh() {
+        if (this.SelectednetIfConfig != null) {
+            loadData();
+        } else {
+            reset();
+        }
+    }
+
+    /********* Private Methods ********/
+
+    private void loadData() {
+        this.state.setText(this.SelectednetIfConfig.getHwState());
+        this.name.setText(this.SelectednetIfConfig.getHwName());
+        this.type.setText(this.SelectednetIfConfig.getHwType());
+        this.hardware.setText(this.SelectednetIfConfig.getHwAddress());
+        this.serial.setText(this.SelectednetIfConfig.getHwSerial());
+        this.driver.setText(this.SelectednetIfConfig.getHwDriver());
+        this.version.setText(this.SelectednetIfConfig.getHwDriverVersion());
+        this.firmware.setText(this.SelectednetIfConfig.getHwFirmware());
+        this.mtu.setText(String.valueOf(this.SelectednetIfConfig.getHwMTU()));
+        this.usb.setText(this.SelectednetIfConfig.getHwUsbDevice());
+        this.rssi.setText(this.SelectednetIfConfig.getHwRssi());
+    }
+
+    private void reset() {
+        this.state.setText("");
+        this.name.setText("");
+        this.type.setText("");
+        this.hardware.setText("");
+        this.serial.setText("");
+        this.driver.setText("");
+        this.version.setText("");
+        this.firmware.setText("");
+        this.mtu.setText("");
+        this.usb.setText("");
+        this.rssi.setText("");
+    }
+
+    @Override
+    public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
+        if (this.session != null) {
+            updatedNetIf.setHwState(this.state.getText());
+            updatedNetIf.setHwName(this.name.getText());
+            updatedNetIf.setHwType(this.type.getText());
+            updatedNetIf.setHwAddress(this.hardware.getText());
+            updatedNetIf.setHwSerial(this.serial.getText());
+            updatedNetIf.setHwDriver(this.driver.getText());
+            updatedNetIf.setHwDriverVersion(this.version.getText());
+            updatedNetIf.setHwFirmware(this.firmware.getText());
+            if (this.mtu.getText() != null) {
+                updatedNetIf.setHwMTU(Integer.parseInt(this.mtu.getText()));
+            }
+            updatedNetIf.setHwUsbDevice(this.usb.getText());
+            updatedNetIf.setHwRssi(this.rssi.getText());
+        }
+    }
 }

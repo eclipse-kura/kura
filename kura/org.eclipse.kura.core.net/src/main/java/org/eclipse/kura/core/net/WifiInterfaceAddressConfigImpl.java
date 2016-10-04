@@ -19,84 +19,84 @@ import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 
 public class WifiInterfaceAddressConfigImpl extends WifiInterfaceAddressImpl implements WifiInterfaceAddressConfig {
 
-	private List<NetConfig> m_configs;
-	
-	public WifiInterfaceAddressConfigImpl() {
-		super();
-	}
+    private List<NetConfig> m_configs;
+
+    public WifiInterfaceAddressConfigImpl() {
+        super();
+    }
 
     public WifiInterfaceAddressConfigImpl(WifiInterfaceAddress other) {
         super(other);
     }
 
-	@Override
-	public List<NetConfig> getConfigs() {
-		return m_configs;
-	}
+    @Override
+    public List<NetConfig> getConfigs() {
+        return this.m_configs;
+    }
 
-	public void setNetConfigs(List<NetConfig> configs) {
-		m_configs = configs;
-	}
+    public void setNetConfigs(List<NetConfig> configs) {
+        this.m_configs = configs;
+    }
 
     @Override
     public boolean equals(Object obj) {
-        
+
         if (this == obj) {
             return true;
         }
 
-        if(!super.equals(obj)) {
+        if (!super.equals(obj)) {
             return false;
         }
 
-        if(!(obj instanceof WifiInterfaceAddressConfig)) {
+        if (!(obj instanceof WifiInterfaceAddressConfig)) {
             return false;
         }
-        
+
         WifiInterfaceAddressConfig other = (WifiInterfaceAddressConfig) obj;
-        
-        if(!compare(this.getMode(), other.getMode())) {
+
+        if (!compare(getMode(), other.getMode())) {
             return false;
         }
-        
-        if(this.getBitrate() != other.getBitrate()) {
+
+        if (getBitrate() != other.getBitrate()) {
             return false;
         }
-        
-        if(!compare(this.getWifiAccessPoint(), other.getWifiAccessPoint())) {
+
+        if (!compare(getWifiAccessPoint(), other.getWifiAccessPoint())) {
             return false;
         }
-        
+
         List<NetConfig> thisNetConfigs = getConfigs();
         List<NetConfig> otherNetConfigs = other.getConfigs();
-        
-        if(thisNetConfigs.size() != otherNetConfigs.size()) {
-            return false;
-        }        
-        if(!thisNetConfigs.containsAll(otherNetConfigs)) {
+
+        if (thisNetConfigs.size() != otherNetConfigs.size()) {
             return false;
         }
-        if(!otherNetConfigs.containsAll(thisNetConfigs)) {
+        if (!thisNetConfigs.containsAll(otherNetConfigs)) {
             return false;
         }
-        
+        if (!otherNetConfigs.containsAll(thisNetConfigs)) {
+            return false;
+        }
+
         return true;
     }
-    
+
     @Override
     public String toString() {
-        if(m_configs != null) {
+        if (this.m_configs != null) {
             StringBuffer sb = new StringBuffer();
-            for(NetConfig netConfig : m_configs) {
+            for (NetConfig netConfig : this.m_configs) {
                 sb.append("NetConfig: ");
-                if(netConfig != null) {
+                if (netConfig != null) {
                     sb.append(netConfig.toString());
                 } else {
                     sb.append("null");
                 }
                 sb.append(" - ");
             }
-            
+
             return sb.toString();
         } else {
             return "NetConfig: no configurations";

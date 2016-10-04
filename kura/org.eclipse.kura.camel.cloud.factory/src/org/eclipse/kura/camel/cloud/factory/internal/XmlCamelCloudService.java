@@ -29,13 +29,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class XmlCamelCloudService {
+
     private static final Logger logger = LoggerFactory.getLogger(XmlCamelCloudService.class);
 
-    private BundleContext context;
+    private final BundleContext context;
 
-    private String pid;
+    private final String pid;
 
-    private ServiceConfiguration configuration;
+    private final ServiceConfiguration configuration;
 
     private DefaultCamelCloudService service;
 
@@ -43,7 +44,8 @@ public class XmlCamelCloudService {
 
     private ServiceRegistration<CloudService> handle;
 
-    public XmlCamelCloudService(final BundleContext context, final String pid, final ServiceConfiguration configuration) {
+    public XmlCamelCloudService(final BundleContext context, final String pid,
+            final ServiceConfiguration configuration) {
         this.context = context;
         this.pid = pid;
         this.configuration = configuration;
@@ -61,11 +63,11 @@ public class XmlCamelCloudService {
 
         // set up
 
-        final KuraCloudComponent cloudComponent = new KuraCloudComponent(this.router);
-        cloudComponent.setCloudService(this.service);
+        final KuraCloudComponent cloudComponent = new KuraCloudComponent(this.router, this.service);
         this.router.addComponent("kura-cloud", cloudComponent);
 
-        final RoutesDefinition routesDefinition = this.router.loadRoutesDefinition(new ByteArrayInputStream(this.configuration.getXml().getBytes()));
+        final RoutesDefinition routesDefinition = this.router
+                .loadRoutesDefinition(new ByteArrayInputStream(this.configuration.getXml().getBytes()));
         this.router.addRouteDefinitions(routesDefinition.getRoutes());
 
         // start
@@ -73,7 +75,8 @@ public class XmlCamelCloudService {
         logger.debug("Starting router...");
         this.router.start();
         final ServiceStatus status = this.router.getStatus();
-        logger.debug("Starting router... {} ({}, {})", new Object[] { status, status == Started, this.service.isConnected() });
+        logger.debug("Starting router... {} ({}, {})",
+                new Object[] { status, status == Started, this.service.isConnected() });
 
         // register
 
@@ -84,7 +87,7 @@ public class XmlCamelCloudService {
         if (this.configuration.getServiceRanking() != null) {
             props.put(Constants.SERVICE_RANKING, this.configuration.getServiceRanking());
         }
-        
+
         this.handle = this.context.registerService(CloudService.class, this.service, props);
     }
 

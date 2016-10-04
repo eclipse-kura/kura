@@ -12,13 +12,14 @@
 package org.eclipse.kura.net;
 
 /**
- * Network interface for Ethernet cards. 
+ * Network interface for Ethernet cards.
  */
-public interface EthernetInterface<T extends NetInterfaceAddress> extends NetInterface<T> 
-{	
-	/**
-	 * Indicates whether the physical carrier is found (e.g. whether a cable is plugged in or not).
-	 * @return
-	 */
-	public boolean isLinkUp();
+public interface EthernetInterface<T extends NetInterfaceAddress> extends NetInterface<T> {
+
+    /**
+     * Indicates whether the physical carrier is found (e.g. whether a cable is plugged in or not).
+     *
+     * @return
+     */
+    public boolean isLinkUp();
 }

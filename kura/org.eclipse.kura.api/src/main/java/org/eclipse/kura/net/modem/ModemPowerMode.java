@@ -12,15 +12,15 @@
 package org.eclipse.kura.net.modem;
 
 public enum ModemPowerMode {
-	/** UNKNOWN Mode **/
-	UNKNOWN,
-	
-	/** OFFLINE Mode **/
-	OFFLINE,
-	
-	/** ONLINE Mode **/
-	ONLINE,
-	
-	/** LOW_POWER Mode **/
-	LOW_POWER
+    /** UNKNOWN Mode **/
+    UNKNOWN,
+
+    /** OFFLINE Mode **/
+    OFFLINE,
+
+    /** ONLINE Mode **/
+    ONLINE,
+
+    /** LOW_POWER Mode **/
+    LOW_POWER
 }

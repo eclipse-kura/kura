@@ -23,58 +23,59 @@ import javax.sql.PooledConnection;
 
 public class KuraJDBCPooledDatasource implements ConnectionPoolDataSource, CommonDataSource {
 
-	protected transient PrintWriter printWriter;
-	protected String url;
-	protected int loginTimeout;
-	protected String user;
-	protected char[] password;
-	protected Properties connectionProps = new Properties();
-	
-	@Override
-	public PooledConnection getPooledConnection() throws SQLException {
-		return KuraPooledConnectionManager.getPooledConnection(url, connectionProps);
-	}
+    protected transient PrintWriter printWriter;
+    protected String url;
+    protected int loginTimeout;
+    protected String user;
+    protected char[] password;
+    protected Properties connectionProps = new Properties();
 
-	@Override
-	public PooledConnection getPooledConnection(String user, String password) throws SQLException {
-		Properties props = new Properties();
+    @Override
+    public PooledConnection getPooledConnection() throws SQLException {
+        return KuraPooledConnectionManager.getPooledConnection(this.url, this.connectionProps);
+    }
 
-		props.setProperty("user", user);
-		props.setProperty("password", password);
+    @Override
+    public PooledConnection getPooledConnection(String user, String password) throws SQLException {
+        Properties props = new Properties();
 
-		return KuraPooledConnectionManager.getPooledConnection(url, props);
-	}
+        props.setProperty("user", user);
+        props.setProperty("password", password);
 
-	@Override
-	public PrintWriter getLogWriter() throws SQLException {
-		return printWriter;
-	}
+        return KuraPooledConnectionManager.getPooledConnection(this.url, props);
+    }
 
-	@Override
-	public void setLogWriter(PrintWriter out) throws SQLException {
-		printWriter = out;
-	}
+    @Override
+    public PrintWriter getLogWriter() throws SQLException {
+        return this.printWriter;
+    }
 
-	@Override
-	public void setLoginTimeout(int seconds) throws SQLException {
-		loginTimeout = seconds;
-	}
+    @Override
+    public void setLogWriter(PrintWriter out) throws SQLException {
+        this.printWriter = out;
+    }
 
-	@Override
-	public int getLoginTimeout() throws SQLException {
-		return loginTimeout;
-	}
+    @Override
+    public void setLoginTimeout(int seconds) throws SQLException {
+        this.loginTimeout = seconds;
+    }
 
-	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-		throw new SQLFeatureNotSupportedException("Not supported!");
-	}
+    @Override
+    public int getLoginTimeout() throws SQLException {
+        return this.loginTimeout;
+    }
+
+    @Override
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        throw new SQLFeatureNotSupportedException("Not supported!");
+    }
 
     public String getUrl() {
-        return url;
+        return this.url;
     }
 
     public String getUser() {
-        return user;
+        return this.user;
     }
 
     public void setUrl(String url) {
@@ -85,31 +86,31 @@ public class KuraJDBCPooledDatasource implements ConnectionPoolDataSource, Commo
 
         this.password = password.toCharArray();
 
-        connectionProps.setProperty("password", password);
+        this.connectionProps.setProperty("password", password);
     }
 
     public void setUser(String user) {
 
         this.user = user;
 
-        connectionProps.setProperty("user", user);
+        this.connectionProps.setProperty("user", user);
     }
 
     public void setProperties(Properties props) {
 
-        connectionProps = (props == null) ? new Properties() : (Properties) props.clone();
+        this.connectionProps = props == null ? new Properties() : (Properties) props.clone();
 
-        if (user != null) {
-            props.setProperty("user", user);
+        if (this.user != null) {
+            props.setProperty("user", this.user);
         }
 
-        if (password != null) {
-            props.setProperty("password", new String(password));
+        if (this.password != null) {
+            props.setProperty("password", new String(this.password));
         }
 
-        if (loginTimeout != 0) {
-            props.setProperty("loginTimeout", Integer.toString(loginTimeout));
+        if (this.loginTimeout != 0) {
+            props.setProperty("loginTimeout", Integer.toString(this.loginTimeout));
         }
     }
-    
+
 }

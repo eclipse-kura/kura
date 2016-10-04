@@ -24,326 +24,267 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implementation of the CloudClient interface.  
+ * Implementation of the CloudClient interface.
  */
-public class CloudClientImpl implements CloudClient, CloudClientListener 
-{
-	@SuppressWarnings("unused")
-	private static final Logger s_logger = LoggerFactory.getLogger(CloudClientImpl.class);
-	
-	private String 			           m_applicationId;
-	private DataService                m_dataService;
-	private CloudServiceImpl           m_cloudServiceImpl;
+public class CloudClientImpl implements CloudClient, CloudClientListener {
 
-	private List<CloudClientListenerAdapter> m_listeners;
-	
-	protected CloudClientImpl(String applicationId,
-						      DataService dataService,
-						      CloudServiceImpl cloudServiceImpl)
-	{
-		m_applicationId    = applicationId;
-		m_dataService      = dataService;
-		m_cloudServiceImpl = cloudServiceImpl;
-		m_listeners        = new CopyOnWriteArrayList<CloudClientListenerAdapter>();
-	}
+    @SuppressWarnings("unused")
+    private static final Logger s_logger = LoggerFactory.getLogger(CloudClientImpl.class);
 
+    private final String m_applicationId;
+    private final DataService m_dataService;
+    private final CloudServiceImpl m_cloudServiceImpl;
 
-	/**
-	 * Returns the applicationId of this CloudApplicationClient 
-	 * @return applicationId
-	 */
-	public String getApplicationId() {
-		return m_applicationId;
-	}
-	
-	
-	/**
-	 * Releases this CloudClient handle.  This instance should no longer be used.
-	 * Note: CloudClient does not unsubscribes all subscriptions incurred by this client,
-	 * this responsibility is left to the application developer
-	 */
-	public void release() 
-	{
-		// remove this from being a callback handler
-		m_cloudServiceImpl.removeCloudClient(this);
-	}
+    private final List<CloudClientListenerAdapter> m_listeners;
 
-	
-	// --------------------------------------------------------------------
-	//
-	//  CloudCallbackHandler API
-	//
-	// --------------------------------------------------------------------
+    protected CloudClientImpl(String applicationId, DataService dataService, CloudServiceImpl cloudServiceImpl) {
+        this.m_applicationId = applicationId;
+        this.m_dataService = dataService;
+        this.m_cloudServiceImpl = cloudServiceImpl;
+        this.m_listeners = new CopyOnWriteArrayList<CloudClientListenerAdapter>();
+    }
 
-	public void addCloudClientListener(CloudClientListener cloudClientListener) 
-	{
-		m_listeners.add( new CloudClientListenerAdapter(cloudClientListener));
-	}
+    /**
+     * Returns the applicationId of this CloudApplicationClient
+     *
+     * @return applicationId
+     */
+    @Override
+    public String getApplicationId() {
+        return this.m_applicationId;
+    }
 
-	
-	public void removeCloudClientListener(CloudClientListener cloudClientListener) 
-	{
-		// create a copy to avoid concurrent modification exceptions
-		List<CloudClientListenerAdapter> adapters = new ArrayList<CloudClientListenerAdapter>(m_listeners);
-		for (CloudClientListenerAdapter adapter : adapters) {
-			if (adapter.getCloudClientListenerAdapted() == cloudClientListener) {
-				m_listeners.remove(adapter);
-				break;
-			}
-		}
-	}
+    /**
+     * Releases this CloudClient handle. This instance should no longer be used.
+     * Note: CloudClient does not unsubscribes all subscriptions incurred by this client,
+     * this responsibility is left to the application developer
+     */
+    @Override
+    public void release() {
+        // remove this from being a callback handler
+        this.m_cloudServiceImpl.removeCloudClient(this);
+    }
 
-	
-	// --------------------------------------------------------------------
-	//
-	//  CloudClient API
-	//
-	// --------------------------------------------------------------------
+    // --------------------------------------------------------------------
+    //
+    // CloudCallbackHandler API
+    //
+    // --------------------------------------------------------------------
 
-	public boolean isConnected() {
-		return m_dataService.isConnected();
-	}	
-	
-	
-	public int publish(String topic, KuraPayload payload, int qos, boolean retain) 
-		throws KuraException 
-	{
-		boolean isControl = false;
-		String   appTopic = encodeTopic(topic, isControl);
-		byte[] appPayload = m_cloudServiceImpl.encodePayload(payload);
-		return m_dataService.publish(appTopic, 
-									 appPayload, 
-								     qos, 
-								     retain,
-								     5);
-	}
+    @Override
+    public void addCloudClientListener(CloudClientListener cloudClientListener) {
+        this.m_listeners.add(new CloudClientListenerAdapter(cloudClientListener));
+    }
 
-	
-	public int publish(String topic, KuraPayload payload, int qos, boolean retain, int priority) 
-		throws KuraException 
-	{
-		boolean isControl = false;
-		String   appTopic = encodeTopic(topic, isControl);
-		byte[] appPayload = m_cloudServiceImpl.encodePayload(payload);
-		return m_dataService.publish(appTopic, 
-									 appPayload, 
-								     qos, 
-								     retain,
-								     priority);
-	}
+    @Override
+    public void removeCloudClientListener(CloudClientListener cloudClientListener) {
+        // create a copy to avoid concurrent modification exceptions
+        List<CloudClientListenerAdapter> adapters = new ArrayList<CloudClientListenerAdapter>(this.m_listeners);
+        for (CloudClientListenerAdapter adapter : adapters) {
+            if (adapter.getCloudClientListenerAdapted() == cloudClientListener) {
+                this.m_listeners.remove(adapter);
+                break;
+            }
+        }
+    }
 
-	
-	public int publish(String topic, byte[] payload, int qos, boolean retain, int priority) 
-		throws KuraException 
-	{
-		boolean isControl = false;
-		String   appTopic = encodeTopic(topic, isControl);
-		return m_dataService.publish(appTopic, 
-									 payload, 
-								     qos, 
-								     retain,
-								     priority);
-	}
+    // --------------------------------------------------------------------
+    //
+    // CloudClient API
+    //
+    // --------------------------------------------------------------------
 
-	
-	public int controlPublish(String topic, KuraPayload payload, int qos, boolean retain, int priority) 
-		throws KuraException 
-	{
-		boolean isControl = true;
-		String   appTopic = encodeTopic(topic, isControl);
-		byte[] appPayload = m_cloudServiceImpl.encodePayload(payload);
-		return m_dataService.publish(appTopic, 
-									 appPayload, 
-									 qos, 
-									 retain,
-									 priority);
-	}
-	
-	
-	public int controlPublish(String deviceId, String topic, KuraPayload payload, int qos, boolean retain, int priority)
-		throws KuraException 
-	{
-		boolean isControl = true;
-		String   appTopic = encodeTopic(deviceId, topic, isControl);
-		byte[] appPayload = m_cloudServiceImpl.encodePayload(payload);
-		return m_dataService.publish(appTopic, 
-								     appPayload, 
-								     qos, 
-								     retain,
-								     priority);
-	}
+    @Override
+    public boolean isConnected() {
+        return this.m_dataService.isConnected();
+    }
 
+    @Override
+    public int publish(String topic, KuraPayload payload, int qos, boolean retain) throws KuraException {
+        boolean isControl = false;
+        String appTopic = encodeTopic(topic, isControl);
+        byte[] appPayload = this.m_cloudServiceImpl.encodePayload(payload);
+        return this.m_dataService.publish(appTopic, appPayload, qos, retain, 5);
+    }
 
-	public int controlPublish(String deviceId, String topic, byte[] payload, int qos, boolean retain, int priority) 
-		throws KuraException 
-	{
-		boolean isControl = true;
-		String   appTopic = encodeTopic(deviceId, topic, isControl);
-		return m_dataService.publish(appTopic, 
-								     payload, 
-								     qos, 
-								     retain,
-								     priority);
-	}
-	
+    @Override
+    public int publish(String topic, KuraPayload payload, int qos, boolean retain, int priority) throws KuraException {
+        boolean isControl = false;
+        String appTopic = encodeTopic(topic, isControl);
+        byte[] appPayload = this.m_cloudServiceImpl.encodePayload(payload);
+        return this.m_dataService.publish(appTopic, appPayload, qos, retain, priority);
+    }
 
-	public void subscribe(String topic, int qos) 
-		throws KuraException 
-	{
-		boolean isControl = false;
-		String   appTopic = encodeTopic(topic, isControl);
-		m_dataService.subscribe(appTopic, qos);
-	}
+    @Override
+    public int publish(String topic, byte[] payload, int qos, boolean retain, int priority) throws KuraException {
+        boolean isControl = false;
+        String appTopic = encodeTopic(topic, isControl);
+        return this.m_dataService.publish(appTopic, payload, qos, retain, priority);
+    }
 
-	
-	public void controlSubscribe(String topic, int qos) 
-		throws KuraException 
-	{
-		boolean isControl = true;
-		String   appTopic = encodeTopic(topic, isControl);
-		m_dataService.subscribe(appTopic, qos);
-	}
+    @Override
+    public int controlPublish(String topic, KuraPayload payload, int qos, boolean retain, int priority)
+            throws KuraException {
+        boolean isControl = true;
+        String appTopic = encodeTopic(topic, isControl);
+        byte[] appPayload = this.m_cloudServiceImpl.encodePayload(payload);
+        return this.m_dataService.publish(appTopic, appPayload, qos, retain, priority);
+    }
 
-	
-	public void unsubscribe(String topic) 
-		throws KuraException 
-	{
-		boolean isControl = false;
-		String   appTopic = encodeTopic(topic, isControl);
-		m_dataService.unsubscribe(appTopic);
-	}
+    @Override
+    public int controlPublish(String deviceId, String topic, KuraPayload payload, int qos, boolean retain, int priority)
+            throws KuraException {
+        boolean isControl = true;
+        String appTopic = encodeTopic(deviceId, topic, isControl);
+        byte[] appPayload = this.m_cloudServiceImpl.encodePayload(payload);
+        return this.m_dataService.publish(appTopic, appPayload, qos, retain, priority);
+    }
 
+    @Override
+    public int controlPublish(String deviceId, String topic, byte[] payload, int qos, boolean retain, int priority)
+            throws KuraException {
+        boolean isControl = true;
+        String appTopic = encodeTopic(deviceId, topic, isControl);
+        return this.m_dataService.publish(appTopic, payload, qos, retain, priority);
+    }
 
-	public void controlUnsubscribe(String topic) 
-		throws KuraException 
-	{
-		boolean isControl = true;
-		String   appTopic = encodeTopic(topic, isControl);
-		m_dataService.unsubscribe(appTopic);
-	}
-		
-	@Override
-	public List<Integer> getUnpublishedMessageIds() throws KuraException {
-		String topicRegex = getAppTopicRegex();
-		return m_dataService.getUnpublishedMessageIds(topicRegex);
-	}
-	
-	@Override
-	public List<Integer> getInFlightMessageIds() throws KuraException {
-		String topicRegex = getAppTopicRegex();
-		return m_dataService.getInFlightMessageIds(topicRegex);
-	}
-	
-	@Override
-	public List<Integer> getDroppedInFlightMessageIds() throws KuraException {
-		String topicRegex = getAppTopicRegex();
-		return m_dataService.getDroppedInFlightMessageIds(topicRegex);
-	}
+    @Override
+    public void subscribe(String topic, int qos) throws KuraException {
+        boolean isControl = false;
+        String appTopic = encodeTopic(topic, isControl);
+        this.m_dataService.subscribe(appTopic, qos);
+    }
 
-	// --------------------------------------------------------------------
-	//
-	//  CloudCallbackHandler API
-	//
-	// --------------------------------------------------------------------	
+    @Override
+    public void controlSubscribe(String topic, int qos) throws KuraException {
+        boolean isControl = true;
+        String appTopic = encodeTopic(topic, isControl);
+        this.m_dataService.subscribe(appTopic, qos);
+    }
 
-	public void onMessageArrived(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain) 
-	{
-		for (CloudClientListener listener : m_listeners) {
-			listener.onMessageArrived(deviceId, appTopic, payload, qos, retain);
-		}
-	}
+    @Override
+    public void unsubscribe(String topic) throws KuraException {
+        boolean isControl = false;
+        String appTopic = encodeTopic(topic, isControl);
+        this.m_dataService.unsubscribe(appTopic);
+    }
 
-	
-	public void onControlMessageArrived(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain) 
-	{
-		for (CloudClientListener listener : m_listeners) {
-			listener.onControlMessageArrived(deviceId, appTopic, payload, qos, retain);
-		}
-	}
+    @Override
+    public void controlUnsubscribe(String topic) throws KuraException {
+        boolean isControl = true;
+        String appTopic = encodeTopic(topic, isControl);
+        this.m_dataService.unsubscribe(appTopic);
+    }
 
+    @Override
+    public List<Integer> getUnpublishedMessageIds() throws KuraException {
+        String topicRegex = getAppTopicRegex();
+        return this.m_dataService.getUnpublishedMessageIds(topicRegex);
+    }
 
-	public void onMessageConfirmed(int pubId, String appTopic) {
-		for (CloudClientListener listener : m_listeners) {
-			listener.onMessageConfirmed(pubId, appTopic);
-		}
-	}
+    @Override
+    public List<Integer> getInFlightMessageIds() throws KuraException {
+        String topicRegex = getAppTopicRegex();
+        return this.m_dataService.getInFlightMessageIds(topicRegex);
+    }
 
+    @Override
+    public List<Integer> getDroppedInFlightMessageIds() throws KuraException {
+        String topicRegex = getAppTopicRegex();
+        return this.m_dataService.getDroppedInFlightMessageIds(topicRegex);
+    }
 
-	public void onMessagePublished(int pubId, String appTopic) {
-		for (CloudClientListener listener : m_listeners) {
-			listener.onMessagePublished(pubId, appTopic);
-		}
-	}
+    // --------------------------------------------------------------------
+    //
+    // CloudCallbackHandler API
+    //
+    // --------------------------------------------------------------------
 
-	public void onConnectionEstablished() {
-		for (CloudClientListener listener : m_listeners) {
-			listener.onConnectionEstablished();
-		}
-	}
+    @Override
+    public void onMessageArrived(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain) {
+        for (CloudClientListener listener : this.m_listeners) {
+            listener.onMessageArrived(deviceId, appTopic, payload, qos, retain);
+        }
+    }
 
-	public void onConnectionLost() {
-		for (CloudClientListener listener : m_listeners) {
-			listener.onConnectionLost();
-		}
-	}
+    @Override
+    public void onControlMessageArrived(String deviceId, String appTopic, KuraPayload payload, int qos,
+            boolean retain) {
+        for (CloudClientListener listener : this.m_listeners) {
+            listener.onControlMessageArrived(deviceId, appTopic, payload, qos, retain);
+        }
+    }
 
-	
-	// ----------------------------------------------------------------
-	//
-	//   Private methods
-	//
-	// ----------------------------------------------------------------
+    @Override
+    public void onMessageConfirmed(int pubId, String appTopic) {
+        for (CloudClientListener listener : this.m_listeners) {
+            listener.onMessageConfirmed(pubId, appTopic);
+        }
+    }
 
-	private String encodeTopic(String topic, boolean isControl)
-	{
-		CloudServiceOptions options = m_cloudServiceImpl.getCloudServiceOptions();
-		return encodeTopic(options.getTopicClientIdToken(), topic, isControl);
-	}
-	
-	
-	private String encodeTopic(String deviceId, String topic, boolean isControl)
-	{
-		CloudServiceOptions options = m_cloudServiceImpl.getCloudServiceOptions();
-		StringBuilder sb = new StringBuilder();
-		if (isControl) {
-			sb.append(options.getTopicControlPrefix())
-			  .append(options.getTopicSeparator());
-		}
-		
-		sb.append(options.getTopicAccountToken())
-		  .append(options.getTopicSeparator())
-		  .append(deviceId)
-		  .append(options.getTopicSeparator())
-		  .append(m_applicationId);
-		  
-		  if (topic != null && !topic.isEmpty()) {
-			  sb.append(options.getTopicSeparator())
-			    .append(topic);
-		  }
-		
-		return sb.toString();
-	}
-	
-	private String getAppTopicRegex() {
-		CloudServiceOptions options = m_cloudServiceImpl.getCloudServiceOptions();
-		StringBuilder sb = new StringBuilder();
+    @Override
+    public void onMessagePublished(int pubId, String appTopic) {
+        for (CloudClientListener listener : this.m_listeners) {
+            listener.onMessagePublished(pubId, appTopic);
+        }
+    }
 
-		//String regexExample = "^(\\$EDC/)?eurotech/.+/conf-v1(/.+)?";
-		
-		// Optional control prefix
-		sb.append("^(")
-		//.append(options.getTopicControlPrefix())
-		.append("\\$EDC")
-		.append(options.getTopicSeparator())
-		.append(")?")
+    @Override
+    public void onConnectionEstablished() {
+        for (CloudClientListener listener : this.m_listeners) {
+            listener.onConnectionEstablished();
+        }
+    }
 
-		.append(options.getTopicAccountToken())
-		.append(options.getTopicSeparator())
-		.append(".+") // Any device ID
-		.append(options.getTopicSeparator())
-		.append(m_applicationId)
-		.append("(/.+)?");
-		
-		return sb.toString();
-	}
+    @Override
+    public void onConnectionLost() {
+        for (CloudClientListener listener : this.m_listeners) {
+            listener.onConnectionLost();
+        }
+    }
+
+    // ----------------------------------------------------------------
+    //
+    // Private methods
+    //
+    // ----------------------------------------------------------------
+
+    private String encodeTopic(String topic, boolean isControl) {
+        CloudServiceOptions options = this.m_cloudServiceImpl.getCloudServiceOptions();
+        return encodeTopic(options.getTopicClientIdToken(), topic, isControl);
+    }
+
+    private String encodeTopic(String deviceId, String topic, boolean isControl) {
+        CloudServiceOptions options = this.m_cloudServiceImpl.getCloudServiceOptions();
+        StringBuilder sb = new StringBuilder();
+        if (isControl) {
+            sb.append(options.getTopicControlPrefix()).append(options.getTopicSeparator());
+        }
+
+        sb.append(options.getTopicAccountToken()).append(options.getTopicSeparator()).append(deviceId)
+                .append(options.getTopicSeparator()).append(this.m_applicationId);
+
+        if (topic != null && !topic.isEmpty()) {
+            sb.append(options.getTopicSeparator()).append(topic);
+        }
+
+        return sb.toString();
+    }
+
+    private String getAppTopicRegex() {
+        CloudServiceOptions options = this.m_cloudServiceImpl.getCloudServiceOptions();
+        StringBuilder sb = new StringBuilder();
+
+        // String regexExample = "^(\\$EDC/)?eurotech/.+/conf-v1(/.+)?";
+
+        // Optional control prefix
+        sb.append("^(")
+                // .append(options.getTopicControlPrefix())
+                .append("\\$EDC").append(options.getTopicSeparator()).append(")?")
+
+        .append(options.getTopicAccountToken()).append(options.getTopicSeparator()).append(".+") // Any device ID
+                .append(options.getTopicSeparator()).append(this.m_applicationId).append("(/.+)?");
+
+        return sb.toString();
+    }
 }

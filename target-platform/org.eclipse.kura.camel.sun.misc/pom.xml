@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2016 Red Hat Inc
+    Copyright (c) 2016 Red Hat Inc and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -9,7 +9,7 @@
      http://www.eclipse.org/legal/epl-v10.html
 
     Contributors:
-      Jens Reimann <jreimann@redhat.com> - Initial file
+      Red Hat Inc - Initial file
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -22,7 +22,6 @@
         <version>2.1.0-SNAPSHOT</version>
     </parent>
 	
-	<groupId>org.eclipse.kura</groupId>
 	<artifactId>org.eclipse.kura.camel.sun.misc</artifactId>
 	<version>1.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>

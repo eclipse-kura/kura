@@ -26,17 +26,18 @@ import com.google.protobuf.ByteString;
  * Encodes an KuraPayload class using the Google ProtoBuf binary format.
  */
 public class CloudPayloadProtoBufEncoderImpl implements CloudPayloadEncoder {
+
     private static final Logger s_logger = LoggerFactory.getLogger(CloudPayloadProtoBufEncoderImpl.class);
 
-    private KuraPayload m_kuraPayload;
+    private final KuraPayload m_kuraPayload;
 
     public CloudPayloadProtoBufEncoderImpl(KuraPayload kuraPayload) {
-        m_kuraPayload = kuraPayload;
+        this.m_kuraPayload = kuraPayload;
     }
 
     /**
      * Conversion method to serialize an KuraPayload instance into a byte array.
-     * 
+     *
      * @return
      */
     @Override
@@ -45,22 +46,23 @@ public class CloudPayloadProtoBufEncoderImpl implements CloudPayloadEncoder {
         KuraPayloadProto.KuraPayload.Builder protoMsg = KuraPayloadProto.KuraPayload.newBuilder();
 
         // set the timestamp
-        if (m_kuraPayload.getTimestamp() != null) {
-            protoMsg.setTimestamp(m_kuraPayload.getTimestamp().getTime());
+        if (this.m_kuraPayload.getTimestamp() != null) {
+            protoMsg.setTimestamp(this.m_kuraPayload.getTimestamp().getTime());
         }
 
         // set the position
-        if (m_kuraPayload.getPosition() != null) {
+        if (this.m_kuraPayload.getPosition() != null) {
             protoMsg.setPosition(buildPositionProtoBuf());
         }
 
         // set the metrics
-        for (String name : m_kuraPayload.metricNames()) {
+        for (String name : this.m_kuraPayload.metricNames()) {
 
             // build a metric
-            Object value = m_kuraPayload.getMetric(name);
+            Object value = this.m_kuraPayload.getMetric(name);
             try {
-                KuraPayloadProto.KuraPayload.KuraMetric.Builder metricB = KuraPayloadProto.KuraPayload.KuraMetric.newBuilder();
+                KuraPayloadProto.KuraPayload.KuraMetric.Builder metricB = KuraPayloadProto.KuraPayload.KuraMetric
+                        .newBuilder();
                 metricB.setName(name);
 
                 boolean result = setProtoKuraMetricValue(metricB, value);
@@ -72,7 +74,8 @@ public class CloudPayloadProtoBufEncoderImpl implements CloudPayloadEncoder {
                 }
             } catch (KuraInvalidMetricTypeException eihte) {
                 try {
-                    s_logger.error("During serialization, ignoring metric named: {}. Unrecognized value type: {}.", name, value.getClass().getName());
+                    s_logger.error("During serialization, ignoring metric named: {}. Unrecognized value type: {}.",
+                            name, value.getClass().getName());
                 } catch (NullPointerException npe) {
                     s_logger.error("During serialization, ignoring metric named: {}. The value is null.", name);
                 }
@@ -81,8 +84,8 @@ public class CloudPayloadProtoBufEncoderImpl implements CloudPayloadEncoder {
         }
 
         // set the body
-        if (m_kuraPayload.getBody() != null) {
-            protoMsg.setBody(ByteString.copyFrom(m_kuraPayload.getBody()));
+        if (this.m_kuraPayload.getBody() != null) {
+            protoMsg.setBody(ByteString.copyFrom(this.m_kuraPayload.getBody()));
         }
 
         return protoMsg.build().toByteArray();
@@ -92,9 +95,10 @@ public class CloudPayloadProtoBufEncoderImpl implements CloudPayloadEncoder {
     // Helper methods to convert the KuraMetrics
     //
     private KuraPayloadProto.KuraPayload.KuraPosition buildPositionProtoBuf() {
-        KuraPayloadProto.KuraPayload.KuraPosition.Builder protoPos = KuraPayloadProto.KuraPayload.KuraPosition.newBuilder();
+        KuraPayloadProto.KuraPayload.KuraPosition.Builder protoPos = KuraPayloadProto.KuraPayload.KuraPosition
+                .newBuilder();
 
-        KuraPosition position = m_kuraPayload.getPosition();
+        KuraPosition position = this.m_kuraPayload.getPosition();
         if (position.getLatitude() != null) {
             protoPos.setLatitude(position.getLatitude());
         }

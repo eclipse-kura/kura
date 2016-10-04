@@ -19,12 +19,11 @@ import org.osgi.service.event.Event;
  * Emitted when a modem is removed from the gateway
  */
 public class ModemRemovedEvent extends Event {
-	
+
     /** Topic of the ModemRemovedEvent */
     public static final String MODEM_EVENT_REMOVED_TOPIC = "org/eclipse/kura/net/modem/REMOVED";
 
     public ModemRemovedEvent(Map<String, ?> properties) {
-            super(MODEM_EVENT_REMOVED_TOPIC, properties);
+        super(MODEM_EVENT_REMOVED_TOPIC, properties);
     }
 }
-

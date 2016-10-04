@@ -6,7 +6,7 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  *      Eurotech
  *******************************************************************************/
 package org.eclipse.kura.core.test;
@@ -28,17 +28,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(Suite.class)
-@SuiteClasses({ DataServiceTest.class, CloudDeploymentHandlerTest.class, CloudServiceTest.class, CommURITest.class, ComponentConfigurationImplTest.class, ConfigurationServiceTest.class, NetUtilTest.class,
+@SuiteClasses({ DataServiceTest.class, CloudDeploymentHandlerTest.class, CloudServiceTest.class, CommURITest.class,
+        ComponentConfigurationImplTest.class, ConfigurationServiceTest.class, NetUtilTest.class,
         NetworkServiceTest.class, SystemAdminServiceTest.class, SystemServiceTest.class, XmlUtilTest.class })
 public class AllCoreTests {
+
     private static final Logger s_logger = LoggerFactory.getLogger(AllCoreTests.class);
 
     /** A latch to be initialized with the no of OSGi dependencies needed */
     private static CountDownLatch dependencyLatch = new CountDownLatch(3);
 
     private static ConfigurationService s_configService;
-    private static DataService          s_dataService;
-    private static SystemService        s_sysService;
+    private static DataService s_dataService;
+    private static SystemService s_sysService;
 
     public void setConfigService(ConfigurationService configService) {
         s_configService = configService;
@@ -82,7 +84,8 @@ public class AllCoreTests {
         try {
 
             // update the settings
-            ComponentConfiguration mqttConfig = s_configService.getComponentConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport");
+            ComponentConfiguration mqttConfig = s_configService
+                    .getComponentConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport");
             Map<String, Object> mqttProps = mqttConfig.getConfigurationProperties();
 
             // mqttProps.put("broker-url", "mqtt://iot.eclipse.org:1883/");
@@ -105,9 +108,11 @@ public class AllCoreTests {
                 // ignore.
             }
             mqttProps.put("client-id", clientId);
-            s_configService.updateConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport", mqttProps);
+            s_configService.updateConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport",
+                    mqttProps);
 
-            ComponentConfiguration dataConfig = s_configService.getComponentConfiguration("org.eclipse.kura.data.DataService");
+            ComponentConfiguration dataConfig = s_configService
+                    .getComponentConfiguration("org.eclipse.kura.data.DataService");
             Map<String, Object> dataProps = dataConfig.getConfigurationProperties();
             dataProps.put("connect.auto-on-startup", false);
             s_configService.updateConfiguration("org.eclipse.kura.data.DataService", dataProps);

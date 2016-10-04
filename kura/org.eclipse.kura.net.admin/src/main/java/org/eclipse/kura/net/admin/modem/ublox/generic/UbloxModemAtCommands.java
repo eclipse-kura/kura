@@ -15,14 +15,14 @@ package org.eclipse.kura.net.admin.modem.ublox.generic;
 public enum UbloxModemAtCommands {
 
     getGprsSessionDataVolume("at+ugcntrd\r\n");
-	
-	private String m_command;
-	
-	private UbloxModemAtCommands(String atCommand) {
-		m_command = atCommand;
-	}
-	
-	public String getCommand () {
-		return m_command;
-	}
+
+    private String m_command;
+
+    private UbloxModemAtCommands(String atCommand) {
+        this.m_command = atCommand;
+    }
+
+    public String getCommand() {
+        return this.m_command;
+    }
 }

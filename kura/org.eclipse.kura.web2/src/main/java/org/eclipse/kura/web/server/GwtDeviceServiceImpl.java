@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements GwtDeviceService {
+
     private static final Logger s_logger = LoggerFactory.getLogger(GwtDeviceServiceImpl.class);
 
     private static final String UNKNOWN = "UNKNOWN";
@@ -47,8 +48,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     private static final long serialVersionUID = -4176701819112753800L;
 
     @Override
-    public ArrayList<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken)
-            throws GwtKuraException {
+    public ArrayList<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
@@ -60,10 +60,13 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             Properties systemProperties = systemService.getProperties();
 
             pairs.add(new GwtGroupedNVPair("devInfo", "devKuraVersion", systemService.getKuraVersion()));
-            pairs.add(new GwtGroupedNVPair("devInfo", "devClientId", systemService.getPrimaryMacAddress() != null ? systemService.getPrimaryMacAddress() : UNKNOWN));
+            pairs.add(new GwtGroupedNVPair("devInfo", "devClientId",
+                    systemService.getPrimaryMacAddress() != null ? systemService.getPrimaryMacAddress() : UNKNOWN));
             pairs.add(new GwtGroupedNVPair("devInfo", "devDisplayName", systemService.getDeviceName()));
-            pairs.add(new GwtGroupedNVPair("devInfo", "devUptime", formatUptime(Long.parseLong(systemAdminService.getUptime()))));
-            pairs.add(new GwtGroupedNVPair("devInfo", "devLastWifiChannel", String.valueOf(systemService.getKuraWifiTopChannel())));
+            pairs.add(new GwtGroupedNVPair("devInfo", "devUptime",
+                    formatUptime(Long.parseLong(systemAdminService.getUptime()))));
+            pairs.add(new GwtGroupedNVPair("devInfo", "devLastWifiChannel",
+                    String.valueOf(systemService.getKuraWifiTopChannel())));
 
             pairs.add(new GwtGroupedNVPair("devHw", "devModelName", systemService.getModelName()));
             pairs.add(new GwtGroupedNVPair("devHw", "devModelId", systemService.getModelId()));
@@ -76,17 +79,25 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             pairs.add(new GwtGroupedNVPair("devSw", "devOs", systemService.getOsName()));
             pairs.add(new GwtGroupedNVPair("devSw", "devOsArch", systemService.getOsArch()));
 
-            pairs.add(new GwtGroupedNVPair("devJava", "devJvmName", systemProperties.getProperty(SystemService.KEY_JAVA_VM_NAME)));
-            pairs.add(new GwtGroupedNVPair("devJava", "devJvmVersion", systemProperties.getProperty(SystemService.KEY_JAVA_VM_VERSION)));
+            pairs.add(new GwtGroupedNVPair("devJava", "devJvmName",
+                    systemProperties.getProperty(SystemService.KEY_JAVA_VM_NAME)));
+            pairs.add(new GwtGroupedNVPair("devJava", "devJvmVersion",
+                    systemProperties.getProperty(SystemService.KEY_JAVA_VM_VERSION)));
 
-            pairs.add(new GwtGroupedNVPair("devJava", "devJvmProfile", systemService.getJavaVendor() + " " + systemService.getJavaVersion()));
-            pairs.add(new GwtGroupedNVPair("devJava", "devOsgiFramework", systemProperties.getProperty(SystemService.KEY_OSGI_FW_NAME)));
-            pairs.add(new GwtGroupedNVPair("devJava", "devOsgiFrameworkVersion", systemProperties.getProperty(SystemService.KEY_OSGI_FW_VERSION)));
+            pairs.add(new GwtGroupedNVPair("devJava", "devJvmProfile",
+                    systemService.getJavaVendor() + " " + systemService.getJavaVersion()));
+            pairs.add(new GwtGroupedNVPair("devJava", "devOsgiFramework",
+                    systemProperties.getProperty(SystemService.KEY_OSGI_FW_NAME)));
+            pairs.add(new GwtGroupedNVPair("devJava", "devOsgiFrameworkVersion",
+                    systemProperties.getProperty(SystemService.KEY_OSGI_FW_VERSION)));
             if (systemService.getNumberOfProcessors() != -1) {
-                pairs.add(new GwtGroupedNVPair("devJava", "devNumProc", String.valueOf(systemService.getNumberOfProcessors())));
+                pairs.add(new GwtGroupedNVPair("devJava", "devNumProc",
+                        String.valueOf(systemService.getNumberOfProcessors())));
             }
-            pairs.add(new GwtGroupedNVPair("devJava", "devRamTot", String.valueOf(systemService.getTotalMemory()) + " kB"));
-            pairs.add(new GwtGroupedNVPair("devJava", "devRamFree", String.valueOf(systemService.getFreeMemory()) + " kB"));
+            pairs.add(new GwtGroupedNVPair("devJava", "devRamTot",
+                    String.valueOf(systemService.getTotalMemory()) + " kB"));
+            pairs.add(new GwtGroupedNVPair("devJava", "devRamFree",
+                    String.valueOf(systemService.getFreeMemory()) + " kB"));
 
             // TODO: Add cloud status information in the Denali Device Profile
             // deviceConfig.deviceStatus
@@ -102,8 +113,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
     @SuppressWarnings("unchecked")
     @Override
-    public ArrayList<GwtGroupedNVPair> findThreads(GwtXSRFToken xsrfToken)
-            throws GwtKuraException {
+    public ArrayList<GwtGroupedNVPair> findThreads(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
@@ -117,15 +127,11 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         final ThreadGroup[] groups = new ThreadGroup[2 * numGroups];
         numGroups = rootGroup.enumerate(groups);
         Arrays.sort(groups, ThreadGroupComparator.getInstance());
-        for (int i = 0; i < groups.length; i++) {
+        for (ThreadGroup group : groups) {
 
-            ThreadGroup group = groups[i];
             if (group != null) {
                 StringBuilder sbGroup = new StringBuilder();
-                sbGroup.append("ThreadGroup ")
-                        .append(group.getName())
-                        .append(" [")
-                        .append("maxprio=")
+                sbGroup.append("ThreadGroup ").append(group.getName()).append(" [").append("maxprio=")
                         .append(group.getMaxPriority());
                 sbGroup.append(", parent=");
                 if (group.getParent() != null) {
@@ -144,15 +150,12 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 Thread[] threads = new Thread[numThreads * 2];
                 group.enumerate(threads, false);
                 Arrays.sort(threads, ThreadComparator.getInstance());
-                for (int j = 0; j < threads.length; j++) {
+                for (Thread thread : threads) {
 
-                    Thread thread = threads[j];
                     if (thread != null) {
 
                         StringBuilder sbThreadName = new StringBuilder();
-                        sbThreadName.append(thread.getId())
-                                .append('/')
-                                .append(thread.getName());
+                        sbThreadName.append(thread.getId()).append('/').append(thread.getName());
 
                         StringBuilder sbThreadValue = new StringBuilder();
                         sbThreadValue.append("priority=");
@@ -167,7 +170,8 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
                         sbThreadValue.append(thread.getContextClassLoader());
                         sbThreadValue.append(']');
 
-                        pairs.add(new GwtGroupedNVPair(sbGroup.toString(), sbThreadName.toString(), sbThreadValue.toString()));
+                        pairs.add(new GwtGroupedNVPair(sbGroup.toString(), sbThreadName.toString(),
+                                sbThreadValue.toString()));
                     }
                 }
             }
@@ -177,8 +181,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public ArrayList<GwtGroupedNVPair> findSystemProperties(GwtXSRFToken xsrfToken)
-            throws GwtKuraException {
+    public ArrayList<GwtGroupedNVPair> findSystemProperties(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
         // kura properties
@@ -193,8 +196,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     }
 
     @Override
-    public ArrayList<GwtGroupedNVPair> findBundles(GwtXSRFToken xsrfToken)
-            throws GwtKuraException {
+    public ArrayList<GwtGroupedNVPair> findBundles(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
@@ -308,7 +310,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
      *         details.
      */
     private String getName(Bundle bundle) {
-        String name = (String) bundle.getHeaders().get(Constants.BUNDLE_NAME);
+        String name = bundle.getHeaders().get(Constants.BUNDLE_NAME);
         if (name == null || name.length() == 0) {
             name = bundle.getSymbolicName();
             if (name == null) {
@@ -341,37 +343,31 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
     private String toStateString(final Bundle bundle) {
         switch (bundle.getState()) {
-            case Bundle.INSTALLED:
-                return "bndInstalled";
-            case Bundle.RESOLVED:
-                return "bndResolved";
-            case Bundle.STARTING:
-                return "bndStarting";
-            case Bundle.ACTIVE:
-                return "bndActive";
-            case Bundle.STOPPING:
-                return "bndStopping";
-            case Bundle.UNINSTALLED:
-                return "bndUninstalled";
-            default:
-                return "bndUnknown";
+        case Bundle.INSTALLED:
+            return "bndInstalled";
+        case Bundle.RESOLVED:
+            return "bndResolved";
+        case Bundle.STARTING:
+            return "bndStarting";
+        case Bundle.ACTIVE:
+            return "bndActive";
+        case Bundle.STOPPING:
+            return "bndStopping";
+        case Bundle.UNINSTALLED:
+            return "bndUninstalled";
+        default:
+            return "bndUnknown";
         }
     }
 
     private String formatUptime(long uptime) {
         int days = (int) TimeUnit.MILLISECONDS.toDays(uptime);
-        long hours = TimeUnit.MILLISECONDS.toHours(uptime) - (days * 24);
-        long minutes = TimeUnit.MILLISECONDS.toMinutes(uptime) - (TimeUnit.MILLISECONDS.toHours(uptime) * 60);
-        long seconds = TimeUnit.MILLISECONDS.toSeconds(uptime) - (TimeUnit.MILLISECONDS.toMinutes(uptime) * 60);
+        long hours = TimeUnit.MILLISECONDS.toHours(uptime) - days * 24;
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(uptime) - TimeUnit.MILLISECONDS.toHours(uptime) * 60;
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(uptime) - TimeUnit.MILLISECONDS.toMinutes(uptime) * 60;
 
         StringBuilder sb = new StringBuilder();
-        sb.append(days)
-                .append(" days ")
-                .append(hours)
-                .append(":")
-                .append(minutes)
-                .append(":")
-                .append(seconds)
+        sb.append(days).append(" days ").append(hours).append(":").append(minutes).append(":").append(seconds)
                 .append(" hms");
 
         return sb.toString();
@@ -391,13 +387,15 @@ final class ThreadComparator implements Comparator {
         return instance;
     }
 
+    @Override
     public int compare(Object thread1, Object thread2) {
         if (thread1 == null || thread2 == null) {
-            return (thread1 == null) ? -1 : 1;
+            return thread1 == null ? -1 : 1;
         }
-        if (thread1 == null || thread2 == null)  // FIXME: this check is never
-                                                 // done!
+        if (thread1 == null || thread2 == null) {
+            // done!
             return 0;
+        }
 
         String t1 = ((Thread) thread1).getName();
         String t2 = ((Thread) thread2).getName();
@@ -425,13 +423,15 @@ final class ThreadGroupComparator implements Comparator {
         return instance;
     }
 
+    @Override
     public int compare(Object thread1, Object thread2) {
         if (thread1 == null || thread2 == null) {
-            return (thread1 == null) ? -1 : 1;
+            return thread1 == null ? -1 : 1;
         }
-        if (thread1 == null || thread2 == null)  // FIXME: this check is the
-                                                 // same as the previous!
+        if (thread1 == null || thread2 == null) {
+            // same as the previous!
             return 0;
+        }
 
         String t1 = ((ThreadGroup) thread1).getName();
         String t2 = ((ThreadGroup) thread2).getName();

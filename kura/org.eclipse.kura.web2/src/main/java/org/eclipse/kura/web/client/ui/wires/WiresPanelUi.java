@@ -25,32 +25,32 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class WiresPanelUi extends Composite {
 
-	interface WiresPanelUiUiBinder extends UiBinder<Widget, WiresPanelUi> {
-	}
-	
-	private static WiresPanelUiUiBinder uiBinder = GWT.create(WiresPanelUiUiBinder.class);
-	private static final Logger logger = Logger.getLogger(WiresPanelUi.class.getSimpleName());
-	
-	@UiField
-	Modal wiresModal;
-	@UiField
-	Button wiresButton;
-	
-	public WiresPanelUi() {
-		initWidget(uiBinder.createAndBindUi(this));
-		wiresModal.addShownHandler(new ModalShownHandler() {
+    interface WiresPanelUiUiBinder extends UiBinder<Widget, WiresPanelUi> {
+    }
 
-			@Override
-			public void onShown(ModalShownEvent evt) {
-				wiresModalOpen();
-				
-			}
-			
-		});
-	}
-	
-	public static native void wiresModalOpen() /*-{
-	    $wnd.ethWires.test();
-	}-*/;
-	
+    private static WiresPanelUiUiBinder uiBinder = GWT.create(WiresPanelUiUiBinder.class);
+    private static final Logger logger = Logger.getLogger(WiresPanelUi.class.getSimpleName());
+
+    @UiField
+    Modal wiresModal;
+    @UiField
+    Button wiresButton;
+
+    public WiresPanelUi() {
+        initWidget(uiBinder.createAndBindUi(this));
+        this.wiresModal.addShownHandler(new ModalShownHandler() {
+
+            @Override
+            public void onShown(ModalShownEvent evt) {
+                wiresModalOpen();
+
+            }
+
+        });
+    }
+
+    public static native void wiresModalOpen() /*-{
+                                               $wnd.ethWires.test();
+                                               }-*/;
+
 }

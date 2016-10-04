@@ -26,144 +26,137 @@ import org.slf4j.LoggerFactory;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
-public class CloudPayloadProtoBufDecoderImpl 
-{
-	private static final Logger s_logger = LoggerFactory.getLogger(CloudPayloadProtoBufDecoderImpl.class); 
-		
-	private byte[] m_bytes;
-	
-	public CloudPayloadProtoBufDecoderImpl(byte[] bytes) {
-		m_bytes = bytes;
-	}
-	
-	/**
-	 * Factory method to build an KuraPayload instance from a byte array.
-	 * 
-	 * @param bytes
-	 * @return
-	 * @throws InvalidProtocolBufferException
-	 * @throws IOException
-	 */
-	public KuraPayload buildFromByteArray()
-		throws KuraInvalidMessageException, IOException 
-	{
-		// Check if a compressed payload and try to decompress it
-		if (GZipUtil.isCompressed(m_bytes)) {
-			try {
-				m_bytes = GZipUtil.decompress(m_bytes);
-			} catch (IOException e) {
-				s_logger.info("Decompression failed");
-				// do not rethrow the exception here as isCompressed may return some false positives
-			}
-		}
+public class CloudPayloadProtoBufDecoderImpl {
 
-		// build the KuraPayloadProto.KuraPayload
-		KuraPayloadProto.KuraPayload protoMsg = null;
-		try {
-			protoMsg = KuraPayloadProto.KuraPayload.parseFrom(m_bytes);
-		} catch (InvalidProtocolBufferException ipbe) {
-			throw new KuraInvalidMessageException(ipbe);
-		}
+    private static final Logger s_logger = LoggerFactory.getLogger(CloudPayloadProtoBufDecoderImpl.class);
 
-		// build the KuraPayload
-		KuraPayload kuraMsg = new KuraPayload();
+    private byte[] m_bytes;
 
-		// set the timestamp
-		if (protoMsg.hasTimestamp()) {
-			kuraMsg.setTimestamp( new Date(protoMsg.getTimestamp()));
-		}
+    public CloudPayloadProtoBufDecoderImpl(byte[] bytes) {
+        this.m_bytes = bytes;
+    }
 
-		// set the position
-		if (protoMsg.hasPosition()) {
-			kuraMsg.setPosition( buildFromProtoBuf(protoMsg.getPosition()));
-		}
+    /**
+     * Factory method to build an KuraPayload instance from a byte array.
+     *
+     * @param bytes
+     * @return
+     * @throws InvalidProtocolBufferException
+     * @throws IOException
+     */
+    public KuraPayload buildFromByteArray() throws KuraInvalidMessageException, IOException {
+        // Check if a compressed payload and try to decompress it
+        if (GZipUtil.isCompressed(this.m_bytes)) {
+            try {
+                this.m_bytes = GZipUtil.decompress(this.m_bytes);
+            } catch (IOException e) {
+                s_logger.info("Decompression failed");
+                // do not rethrow the exception here as isCompressed may return some false positives
+            }
+        }
 
-		// set the metrics
-		for (int i = 0; i < protoMsg.getMetricCount(); i++) {
-			String name = protoMsg.getMetric(i).getName();
-			try {
-				Object value = getProtoKuraMetricValue(protoMsg.getMetric(i),
-						protoMsg.getMetric(i).getType());
-				kuraMsg.addMetric(name, value);
-			} catch (KuraInvalidMetricTypeException ihte) {
-				s_logger.warn("During deserialization, ignoring metric named: "+name+". Unrecognized value type: "+protoMsg.getMetric(i).getType(), ihte);
-			}
-		}
+        // build the KuraPayloadProto.KuraPayload
+        KuraPayloadProto.KuraPayload protoMsg = null;
+        try {
+            protoMsg = KuraPayloadProto.KuraPayload.parseFrom(this.m_bytes);
+        } catch (InvalidProtocolBufferException ipbe) {
+            throw new KuraInvalidMessageException(ipbe);
+        }
 
-		// set the body
-		if (protoMsg.hasBody()) {
-			kuraMsg.setBody(protoMsg.getBody().toByteArray());
-		}
+        // build the KuraPayload
+        KuraPayload kuraMsg = new KuraPayload();
 
-		return kuraMsg;
-	}
+        // set the timestamp
+        if (protoMsg.hasTimestamp()) {
+            kuraMsg.setTimestamp(new Date(protoMsg.getTimestamp()));
+        }
 
+        // set the position
+        if (protoMsg.hasPosition()) {
+            kuraMsg.setPosition(buildFromProtoBuf(protoMsg.getPosition()));
+        }
 
-	private KuraPosition buildFromProtoBuf(KuraPayloadProto.KuraPayload.KuraPosition protoPosition) 
-	{
-		KuraPosition position = new KuraPosition();
+        // set the metrics
+        for (int i = 0; i < protoMsg.getMetricCount(); i++) {
+            String name = protoMsg.getMetric(i).getName();
+            try {
+                Object value = getProtoKuraMetricValue(protoMsg.getMetric(i), protoMsg.getMetric(i).getType());
+                kuraMsg.addMetric(name, value);
+            } catch (KuraInvalidMetricTypeException ihte) {
+                s_logger.warn("During deserialization, ignoring metric named: {}. Unrecognized value type: {}", name,
+                        protoMsg.getMetric(i).getType(), ihte);
+            }
+        }
 
-		if (protoPosition.hasLatitude()) {
-			position.setLatitude(protoPosition.getLatitude());
-		}
-		if (protoPosition.hasLongitude()) {
-			position.setLongitude(protoPosition.getLongitude());
-		}
-		if (protoPosition.hasAltitude()) {
-			position.setAltitude(protoPosition.getAltitude());
-		}
-		if (protoPosition.hasPrecision()) {
-			position.setPrecision(protoPosition.getPrecision());
-		}
-		if (protoPosition.hasHeading()) {
-			position.setHeading(protoPosition.getHeading());
-		}
-		if (protoPosition.hasSpeed()) {
-			position.setSpeed(protoPosition.getSpeed());
-		}
-		if (protoPosition.hasSatellites()) {
-			position.setSatellites(protoPosition.getSatellites());
-		}
-		if (protoPosition.hasStatus()) {
-			position.setStatus(protoPosition.getStatus());
-		}
-		if (protoPosition.hasTimestamp()) {
-			position.setTimestamp(new Date(protoPosition.getTimestamp()));
-		}
-		return position;
-	}	
-	
-	
-	private Object getProtoKuraMetricValue(KuraPayloadProto.KuraPayload.KuraMetric metric,
-										  KuraPayloadProto.KuraPayload.KuraMetric.ValueType type)
-		throws KuraInvalidMetricTypeException 
-	{
-		switch (type) {
+        // set the body
+        if (protoMsg.hasBody()) {
+            kuraMsg.setBody(protoMsg.getBody().toByteArray());
+        }
 
-		case DOUBLE:
-			return metric.getDoubleValue();
+        return kuraMsg;
+    }
 
-		case FLOAT:
-			return metric.getFloatValue();
+    private KuraPosition buildFromProtoBuf(KuraPayloadProto.KuraPayload.KuraPosition protoPosition) {
+        KuraPosition position = new KuraPosition();
 
-		case INT64:
-			return metric.getLongValue();
+        if (protoPosition.hasLatitude()) {
+            position.setLatitude(protoPosition.getLatitude());
+        }
+        if (protoPosition.hasLongitude()) {
+            position.setLongitude(protoPosition.getLongitude());
+        }
+        if (protoPosition.hasAltitude()) {
+            position.setAltitude(protoPosition.getAltitude());
+        }
+        if (protoPosition.hasPrecision()) {
+            position.setPrecision(protoPosition.getPrecision());
+        }
+        if (protoPosition.hasHeading()) {
+            position.setHeading(protoPosition.getHeading());
+        }
+        if (protoPosition.hasSpeed()) {
+            position.setSpeed(protoPosition.getSpeed());
+        }
+        if (protoPosition.hasSatellites()) {
+            position.setSatellites(protoPosition.getSatellites());
+        }
+        if (protoPosition.hasStatus()) {
+            position.setStatus(protoPosition.getStatus());
+        }
+        if (protoPosition.hasTimestamp()) {
+            position.setTimestamp(new Date(protoPosition.getTimestamp()));
+        }
+        return position;
+    }
 
-		case INT32:
-			return metric.getIntValue();
+    private Object getProtoKuraMetricValue(KuraPayloadProto.KuraPayload.KuraMetric metric,
+            KuraPayloadProto.KuraPayload.KuraMetric.ValueType type) throws KuraInvalidMetricTypeException {
+        switch (type) {
 
-		case BOOL:
-			return metric.getBoolValue();
+        case DOUBLE:
+            return metric.getDoubleValue();
 
-		case STRING:
-			return metric.getStringValue();
+        case FLOAT:
+            return metric.getFloatValue();
 
-		case BYTES:
-			ByteString bs = metric.getBytesValue();
-			return bs.toByteArray();
+        case INT64:
+            return metric.getLongValue();
 
-		default:
-			throw new KuraInvalidMetricTypeException(type);
-		}
-	}
+        case INT32:
+            return metric.getIntValue();
+
+        case BOOL:
+            return metric.getBoolValue();
+
+        case STRING:
+            return metric.getStringValue();
+
+        case BYTES:
+            ByteString bs = metric.getBytesValue();
+            return bs.toByteArray();
+
+        default:
+            throw new KuraInvalidMetricTypeException(type);
+        }
+    }
 }

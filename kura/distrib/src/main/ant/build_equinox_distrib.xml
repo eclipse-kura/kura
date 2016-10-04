@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2016 Eurotech and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -9,6 +9,7 @@
 
     Contributors:
       Eurotech
+      Red Hat Inc - minor fixes on startup scripts
 
 -->
 <project name="build_equinox_distrib" default="dist-linux" basedir="../../../">
@@ -152,7 +153,7 @@
 		<antcall target="set-http-port" />
 
 		<!-- Create the Kura start scripts -->
-		<echo file="${project.build.directory}/${build.output.name}/start_kura.sh" append="false">#!/bin/sh
+		<echo file="${project.build.directory}/${build.output.name}/start_kura.sh" append="false"><![CDATA[#!/bin/sh
 
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
@@ -187,9 +188,11 @@ if [ -z "$KURA_RUNNING" ] ; then
         -configuration  /tmp/.kura/configuration \
         -console \
         -consoleLog
-fi
+else
+		echo "Failed to start Kura. It is already running ..."
+fi]]>
 	</echo>
-		<echo file="${project.build.directory}/${build.output.name}/start_kura_debug.sh" append="false">#!/bin/sh
+		<echo file="${project.build.directory}/${build.output.name}/start_kura_debug.sh" append="false"><![CDATA[#!/bin/sh
 
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
@@ -227,9 +230,11 @@ if [ -z "$KURA_RUNNING" ] ; then
         -configuration  /tmp/.kura/configuration \
         -console \
         -consoleLog
-fi
+else
+		echo "Failed to start Kura. It is already running ..."
+fi]]>
 	</echo>
-		<echo file="${project.build.directory}/${build.output.name}/start_kura_background.sh" append="false">#!/bin/sh
+		<echo file="${project.build.directory}/${build.output.name}/start_kura_background.sh" append="false"><![CDATA[#!/bin/sh
 
 # Kura should be installed to the ${kura.install.dir} directory.
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
@@ -264,7 +269,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
         -configuration  /tmp/.kura/configuration \
         -console 5002 \
-        -consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
+        -consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &
 
     #Save the PID
     KURA_PID=$!
@@ -272,7 +277,7 @@ if [ -z "$KURA_RUNNING" ] ; then
     echo $KURA_PID > /var/run/kura.pid
 else
     echo "Failed to start Kura. It is already running ..." >> /var/log/kura-console.log
-fi
+fi]]>
 	</echo>
 
 		<!-- Populate parameters -->
@@ -580,19 +585,6 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<jar destfile="${project.build.directory}/${build.output.name}_upgrader.dp"
                 manifest="${project.build.directory}/${build.output.name}/dp_upgrade_stage/META-INF/MANIFEST.MF"
                 basedir="${project.build.directory}/${build.output.name}/dp_upgrade_stage" />
-
-		<checksum algorithm="md5">
-			<fileset dir="./target/" >
-				<include name="kura_${project.version}_${build.name}*.sh"/>
-				<include name="kura_${project.version}_${build.name}*.dp"/>
-			</fileset>
-		</checksum>
-		<checksum algorithm="SHA-1">
-			<fileset dir="./target/" >
-				<include name="kura_${project.version}_${build.name}*.sh"/>
-				<include name="kura_${project.version}_${build.name}*.dp"/>
-			</fileset>
-		</checksum>
 	</target>
 
 <!-- ### WINDOWS ########################################################################################################################### -->
@@ -1216,9 +1208,9 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			<entry key="osgi.bundles" operation="+"
                    value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"
-                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.camel.cloud.factory_${org.eclipse.kura.camel.cloud.factory.version}.jar@4:start" />
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.camel.cloud.factory_${org.eclipse.kura.camel.cloud.factory.version}.jar@5:start" />
 			<entry key="osgi.bundles" operation="+"
-                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar@4:start" />
+                   value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar@5:start" />
 		</propertyfile>
 	</target>
 	

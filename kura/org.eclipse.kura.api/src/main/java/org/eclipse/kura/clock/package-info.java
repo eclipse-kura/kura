@@ -7,10 +7,10 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Eurotech
+ * Eurotech
  *******************************************************************************/
 /**
- * 
+ *
  */
 /**
  * Contains interface and event model to synchronize hardware clock.

@@ -17,49 +17,49 @@ import org.eclipse.kura.net.NetInterfaceAddress;
  * Modem Interface Address represents the modem state
  *
  */
-public interface ModemInterfaceAddress extends NetInterfaceAddress 
-{
-	/**
-	 * Reports signal strength in dBm
-	 * 
-	 * @return signal strength
-	 */
-	public int getSignalStrength();
+public interface ModemInterfaceAddress extends NetInterfaceAddress {
 
-	/**
-	 * Reports roaming status
-	 * 
-	 * @return
-	 * 		true - modem is roaming
-	 * 		false - modem is not roaming
-	 */
-	public boolean isRoaming();
-	
-	/**
-	 * Reports connection status
-	 * 
-	 * @return connection status
-	 */
-	public ModemConnectionStatus getConnectionStatus();
-	
-	/**
-	 * Reports number of bytes transmitted during a call
-	 * 
-	 * @return number of bytes transmitted
-	 */
-	public long getBytesTransmitted();
-	
-	/**
-	 * Reports number of bytes received during a call
-	 * 
-	 * @return number of bytes received
-	 */
-	public long getBytesReceived();
-	
-	/**
-	 * Reports Connection Type 
-	 * 
-	 * @return connection type
-	 */
-	public ModemConnectionType getConnectionType();
+    /**
+     * Reports signal strength in dBm
+     *
+     * @return signal strength
+     */
+    public int getSignalStrength();
+
+    /**
+     * Reports roaming status
+     *
+     * @return
+     *         true - modem is roaming
+     *         false - modem is not roaming
+     */
+    public boolean isRoaming();
+
+    /**
+     * Reports connection status
+     *
+     * @return connection status
+     */
+    public ModemConnectionStatus getConnectionStatus();
+
+    /**
+     * Reports number of bytes transmitted during a call
+     *
+     * @return number of bytes transmitted
+     */
+    public long getBytesTransmitted();
+
+    /**
+     * Reports number of bytes received during a call
+     *
+     * @return number of bytes received
+     */
+    public long getBytesReceived();
+
+    /**
+     * Reports Connection Type
+     *
+     * @return connection type
+     */
+    public ModemConnectionType getConnectionType();
 }

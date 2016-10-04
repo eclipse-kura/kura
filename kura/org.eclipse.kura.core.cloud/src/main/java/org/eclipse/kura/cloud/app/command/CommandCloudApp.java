@@ -30,22 +30,22 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
-        PasswordCommandService {
-    private static final Logger s_logger                 = LoggerFactory.getLogger(CommandCloudApp.class);
+public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, PasswordCommandService {
+
+    private static final Logger s_logger = LoggerFactory.getLogger(CommandCloudApp.class);
     private static final String EDC_PASSWORD_METRIC_NAME = "command.password";
-    private static final String COMMAND_ENABLED_ID       = "command.enable";
-    private static final String COMMAND_PASSWORD_ID      = "command.password.value";
-    private static final String COMMAND_WORKDIR_ID       = "command.working.directory";
-    private static final String COMMAND_TIMEOUT_ID       = "command.timeout";
-    private static final String COMMAND_ENVIRONMENT_ID   = "command.environment";
+    private static final String COMMAND_ENABLED_ID = "command.enable";
+    private static final String COMMAND_PASSWORD_ID = "command.password.value";
+    private static final String COMMAND_WORKDIR_ID = "command.working.directory";
+    private static final String COMMAND_TIMEOUT_ID = "command.timeout";
+    private static final String COMMAND_ENVIRONMENT_ID = "command.environment";
 
     public static final String APP_ID = "CMD-V1";
 
     private Map<String, Object> properties;
 
     private ComponentContext compCtx;
-    private CryptoService    m_cryptoService;
+    private CryptoService m_cryptoService;
 
     private boolean currentStatus;
 
@@ -81,13 +81,12 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 
     // This component inherits the activation methods from the parent
     // class CloudApp.
-    protected void activate(ComponentContext componentContext,
-            Map<String, Object> properties) {
+    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         s_logger.info("Bundle " + APP_ID + " has started with config!");
         this.compCtx = componentContext;
-        currentStatus = (Boolean) properties.get(COMMAND_ENABLED_ID);
-        if (currentStatus) {
-            super.activate(compCtx);
+        this.currentStatus = (Boolean) properties.get(COMMAND_ENABLED_ID);
+        if (this.currentStatus) {
+            super.activate(this.compCtx);
         }
         updated(properties);
     }
@@ -102,7 +101,8 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
             Object value = entry.getValue();
             if (key.equals(COMMAND_PASSWORD_ID)) {
                 try {
-                    Password decryptedPassword = new Password(m_cryptoService.decryptAes(value.toString().toCharArray()));
+                    Password decryptedPassword = new Password(
+                            this.m_cryptoService.decryptAes(value.toString().toCharArray()));
                     this.properties.put(key, decryptedPassword);
                 } catch (Exception e) {
                     this.properties.put(key, new Password((String) value));
@@ -113,22 +113,23 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
         }
 
         boolean newStatus = (Boolean) properties.get(COMMAND_ENABLED_ID);
-        boolean stateChanged = currentStatus != newStatus;
+        boolean stateChanged = this.currentStatus != newStatus;
         if (stateChanged) {
-            currentStatus = newStatus;
-            if (!currentStatus && getCloudApplicationClient() != null) {
-                super.deactivate(compCtx);
+            this.currentStatus = newStatus;
+            if (!this.currentStatus && getCloudApplicationClient() != null) {
+                super.deactivate(this.compCtx);
             }
-            if (currentStatus) {
-                super.activate(compCtx);
+            if (this.currentStatus) {
+                super.activate(this.compCtx);
             }
         }
     }
 
+    @Override
     protected void deactivate(ComponentContext componentContext) {
         s_logger.info("Bundle " + APP_ID + " is deactivating!");
         if (getCloudApplicationClient() != null) {
-            super.deactivate(compCtx);
+            super.deactivate(this.compCtx);
         }
     }
 
@@ -167,10 +168,8 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
     public KuraCommandResponsePayload execute(KuraRequestPayload reqPayload) {
         KuraCommandRequestPayload commandReq = new KuraCommandRequestPayload(reqPayload);
 
-        // String receivedPassword= (String)
-        // reqPayload.getMetric(EDC_PASSWORD_METRIC_NAME);
         String receivedPassword = (String) commandReq.getMetric(EDC_PASSWORD_METRIC_NAME);
-        Password commandPassword = (Password) properties.get(COMMAND_PASSWORD_ID);
+        Password commandPassword = (Password) this.properties.get(COMMAND_PASSWORD_ID);
 
         KuraCommandResponsePayload commandResp = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
@@ -186,7 +185,6 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 
             String[] cmdarray = prepareCommandArray(commandReq, command);
 
-            // String dir = getDir(commandReq);
             String dir = getDefaultWorkDir();
             String[] envp = getEnvironment(commandReq);
 
@@ -240,10 +238,10 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 
     @Override
     public String execute(String cmd, String password) throws KuraException {
-        boolean verificationEnabled = (Boolean) properties.get(COMMAND_ENABLED_ID);
+        boolean verificationEnabled = (Boolean) this.properties.get(COMMAND_ENABLED_ID);
         if (verificationEnabled) {
 
-            Password commandPassword = (Password) properties.get(COMMAND_PASSWORD_ID);
+            Password commandPassword = (Password) this.properties.get(COMMAND_PASSWORD_ID);
             boolean isExecutionAllowed = verifyPasswords(commandPassword, password);
             if (isExecutionAllowed) {
 
@@ -254,8 +252,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
                     Process proc = createExecutionProcess(defaultDir, cmdArray, environment);
 
                     int timeout = getDefaultTimeout();
-                    ProcessMonitorThread pmt = null;
-                    pmt = new ProcessMonitorThread(proc, null, timeout);
+                    ProcessMonitorThread pmt = new ProcessMonitorThread(proc, null, timeout);
                     pmt.start();
 
                     try {
@@ -284,34 +281,23 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
     // command service defaults getters
     private String getDefaultWorkDir() {
 
-        String workDir = (String) properties.get(COMMAND_WORKDIR_ID);
-        if (workDir != null) {
-            if (!workDir.isEmpty()) {
-                return workDir;
-            }
+        String workDir = (String) this.properties.get(COMMAND_WORKDIR_ID);
+        if (workDir != null && !workDir.isEmpty()) {
+            return workDir;
         }
         return System.getProperty("java.io.tmpdir");
     }
 
     private int getDefaultTimeout() {
-        return (Integer) properties.get(COMMAND_TIMEOUT_ID);
+        return (Integer) this.properties.get(COMMAND_TIMEOUT_ID);
     }
 
     private String[] getDefaultEnvironment() {
-        String envString = (String) properties.get(COMMAND_ENVIRONMENT_ID);
+        String envString = (String) this.properties.get(COMMAND_ENVIRONMENT_ID);
         if (envString != null) {
             return envString.split(" ");
         }
         return null;
-    }
-
-    private String getDir(KuraCommandRequestPayload req) {
-        String dir = req.getWorkingDir();
-        String defaultDir = getDefaultWorkDir();
-        if (dir != null && !dir.isEmpty()) {
-            return dir;
-        }
-        return defaultDir;
     }
 
     private int getTimeout(KuraCommandRequestPayload req) {
@@ -356,14 +342,11 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
 
     private Process createExecutionProcess(String dir, String[] cmdarray, String[] envp) throws IOException {
         Runtime rt = Runtime.getRuntime();
-        Process proc = null;
         File fileDir = dir == null ? null : new File(dir);
-        proc = rt.exec(cmdarray, envp, fileDir);
-        return proc;
+        return rt.exec(cmdarray, envp, fileDir);
     }
 
-    private String[] prepareCommandArray(KuraCommandRequestPayload req,
-            String command) {
+    private String[] prepareCommandArray(KuraCommandRequestPayload req, String command) {
         String[] args = req.getArguments();
         int argsCount = args != null ? args.length : 0;
         String[] cmdarray = new String[1 + argsCount];
@@ -373,15 +356,14 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
             cmdarray[1 + i] = args[i];
         }
 
-        for (int i = 0; i < cmdarray.length; i++) {
-            s_logger.debug("cmdarray: {}", cmdarray[i]);
+        for (String element : cmdarray) {
+            s_logger.debug("cmdarray: {}", element);
         }
 
         return cmdarray;
     }
 
-    private void prepareResponseNoTimeout(KuraCommandResponsePayload resp,
-            ProcessMonitorThread pmt) {
+    private void prepareResponseNoTimeout(KuraCommandResponsePayload resp, ProcessMonitorThread pmt) {
 
         if (pmt.getException() != null) {
             resp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
@@ -397,14 +379,11 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent,
                 resp.setExitCode(pmt.getExitValue());
             }
         }
-
     }
 
-    private void prepareTimeoutResponse(KuraCommandResponsePayload resp,
-            ProcessMonitorThread pmt) {
+    private void prepareTimeoutResponse(KuraCommandResponsePayload resp, ProcessMonitorThread pmt) {
         resp.setStderr(pmt.getStderr());
         resp.setStdout(pmt.getStdout());
         resp.setTimedout(true);
     }
-
 }

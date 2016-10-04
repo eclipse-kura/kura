@@ -38,88 +38,89 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements GwtPackageService {
-	private static final long serialVersionUID = -3422518194598042896L;
 
-	@Override
-	public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken) throws GwtKuraException {
-		checkXSRFToken(xsrfToken);
-		DeploymentAdmin deploymentAdmin = ServiceLocator.getInstance().getService(DeploymentAdmin.class);
-		
-		List<GwtDeploymentPackage> gwtDeploymentPackages = new ArrayList<GwtDeploymentPackage>();
-		DeploymentPackage[] deploymentPackages = deploymentAdmin.listDeploymentPackages();
-		
-		if (deploymentPackages != null) {
-			for (DeploymentPackage deploymentPackage : deploymentPackages) {
-				GwtDeploymentPackage gwtDeploymentPackage = new GwtDeploymentPackage();
-				gwtDeploymentPackage.setName(GwtSafeHtmlUtils.htmlEscape(deploymentPackage.getName()));
-				gwtDeploymentPackage.setVersion(GwtSafeHtmlUtils.htmlEscape(deploymentPackage.getVersion().toString()));
-				
-				List<GwtBundleInfo> gwtBundleInfos = new ArrayList<GwtBundleInfo>();
-				BundleInfo[] bundleInfos = deploymentPackage.getBundleInfos();
-				if (bundleInfos != null) {
-					for (BundleInfo bundleInfo : bundleInfos) {
-						GwtBundleInfo gwtBundleInfo = new GwtBundleInfo();
-						gwtBundleInfo.setName(GwtSafeHtmlUtils.htmlEscape(bundleInfo.getSymbolicName()));
-						gwtBundleInfo.setVersion(GwtSafeHtmlUtils.htmlEscape(bundleInfo.getVersion().toString()));
-						
-						gwtBundleInfos.add(gwtBundleInfo);
-					}
-				}
-				
-				gwtDeploymentPackage.setBundleInfos(gwtBundleInfos);
-				
-				gwtDeploymentPackages.add(gwtDeploymentPackage);
-			}
-		}
-		
-		return gwtDeploymentPackages;
-	}
-	
-	@Override
-	public void uninstallDeploymentPackage(GwtXSRFToken xsrfToken, String packageName) throws GwtKuraException {
-		checkXSRFToken(xsrfToken);
-		DeploymentAgentService deploymentAgentService = ServiceLocator.getInstance().getService(DeploymentAgentService.class);		
-		try {
-			deploymentAgentService.uninstallDeploymentPackageAsync(GwtSafeHtmlUtils.htmlEscape(packageName));
-		} 
-		catch (Exception e) {
-			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-		}
-	}
-	
-	@Override
-	public String getMarketplaceUri(GwtXSRFToken xsrfToken, String url) throws GwtKuraException {
-		String uri = null;
-		URL mpUrl = null;
-		HttpURLConnection connection = null;
-	    
-	    try {
-	    	mpUrl = new URL(url);
-	    	connection = (HttpURLConnection) mpUrl.openConnection();
-	    	
-	    	connection.setRequestMethod("GET");
-	    	connection.connect();
-	        
-	        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-	        DocumentBuilder db = dbf.newDocumentBuilder();
-	        Document doc = db.parse(connection.getInputStream());
+    private static final long serialVersionUID = -3422518194598042896L;
 
-	        uri = doc.getElementsByTagName("updateurl").item(0).getTextContent();
-	    	
-	    } catch (MalformedURLException e) {
-	    	throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-		} catch (IOException e) {
-			throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-		} catch (SAXException e) {
-		    throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-		} catch (ParserConfigurationException e) {
-		    throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-		} finally {
-	    	if (connection != null) {
-	    		connection.disconnect();
-	    	}
-	      }
-		
-		return uri;
-	}
+    @Override
+    public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        DeploymentAdmin deploymentAdmin = ServiceLocator.getInstance().getService(DeploymentAdmin.class);
+
+        List<GwtDeploymentPackage> gwtDeploymentPackages = new ArrayList<GwtDeploymentPackage>();
+        DeploymentPackage[] deploymentPackages = deploymentAdmin.listDeploymentPackages();
+
+        if (deploymentPackages != null) {
+            for (DeploymentPackage deploymentPackage : deploymentPackages) {
+                GwtDeploymentPackage gwtDeploymentPackage = new GwtDeploymentPackage();
+                gwtDeploymentPackage.setName(GwtSafeHtmlUtils.htmlEscape(deploymentPackage.getName()));
+                gwtDeploymentPackage.setVersion(GwtSafeHtmlUtils.htmlEscape(deploymentPackage.getVersion().toString()));
+
+                List<GwtBundleInfo> gwtBundleInfos = new ArrayList<GwtBundleInfo>();
+                BundleInfo[] bundleInfos = deploymentPackage.getBundleInfos();
+                if (bundleInfos != null) {
+                    for (BundleInfo bundleInfo : bundleInfos) {
+                        GwtBundleInfo gwtBundleInfo = new GwtBundleInfo();
+                        gwtBundleInfo.setName(GwtSafeHtmlUtils.htmlEscape(bundleInfo.getSymbolicName()));
+                        gwtBundleInfo.setVersion(GwtSafeHtmlUtils.htmlEscape(bundleInfo.getVersion().toString()));
+
+                        gwtBundleInfos.add(gwtBundleInfo);
+                    }
+                }
+
+                gwtDeploymentPackage.setBundleInfos(gwtBundleInfos);
+
+                gwtDeploymentPackages.add(gwtDeploymentPackage);
+            }
+        }
+
+        return gwtDeploymentPackages;
+    }
+
+    @Override
+    public void uninstallDeploymentPackage(GwtXSRFToken xsrfToken, String packageName) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        DeploymentAgentService deploymentAgentService = ServiceLocator.getInstance()
+                .getService(DeploymentAgentService.class);
+        try {
+            deploymentAgentService.uninstallDeploymentPackageAsync(GwtSafeHtmlUtils.htmlEscape(packageName));
+        } catch (Exception e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    @Override
+    public String getMarketplaceUri(GwtXSRFToken xsrfToken, String url) throws GwtKuraException {
+        String uri = null;
+        URL mpUrl = null;
+        HttpURLConnection connection = null;
+
+        try {
+            mpUrl = new URL(url);
+            connection = (HttpURLConnection) mpUrl.openConnection();
+
+            connection.setRequestMethod("GET");
+            connection.connect();
+
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(connection.getInputStream());
+
+            uri = doc.getElementsByTagName("updateurl").item(0).getTextContent();
+
+        } catch (MalformedURLException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        } catch (IOException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        } catch (SAXException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        } catch (ParserConfigurationException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+
+        return uri;
+    }
 }

@@ -21,10 +21,12 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
  */
 public interface WifiInterfaceAddressConfig extends WifiInterfaceAddress, NetInterfaceAddressConfig {
 
-	/**
-	 * Returns a List of NetConfig Objects associated with a given WifiInterfaceAddressConfig
-	 * for a given WifiInterface
-	 * @return the NetConfig Objects associated with the WifiInterfaceAddressConfig
-	 */
-	public List<NetConfig> getConfigs();
+    /**
+     * Returns a List of NetConfig Objects associated with a given WifiInterfaceAddressConfig
+     * for a given WifiInterface
+     *
+     * @return the NetConfig Objects associated with the WifiInterfaceAddressConfig
+     */
+    @Override
+    public List<NetConfig> getConfigs();
 }

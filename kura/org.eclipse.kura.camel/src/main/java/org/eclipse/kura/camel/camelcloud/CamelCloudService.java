@@ -11,6 +11,9 @@ package org.eclipse.kura.camel.camelcloud;
 
 import org.eclipse.kura.cloud.CloudService;
 
+/**
+ * An extension interface adding Camel specific functionality to the {@link CloudService} interface
+ */
 public interface CamelCloudService extends CloudService {
 
     void registerBaseEndpoint(String applicationId, String baseEndpoint);

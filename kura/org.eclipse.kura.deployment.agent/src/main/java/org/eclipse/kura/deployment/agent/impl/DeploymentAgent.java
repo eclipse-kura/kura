@@ -72,6 +72,7 @@ public class DeploymentAgent implements DeploymentAgentService {
     private static Logger s_logger = LoggerFactory.getLogger(DeploymentAgent.class);
 
     private static final String DPA_CONF_PATH_PROPNAME = "dpa.configuration";
+
     private static final String PACKAGES_PATH_PROPNAME = "kura.packages";
 
     private static final String CONN_TIMEOUT_PROPNAME = "dpa.connection.timeout";

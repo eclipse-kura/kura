@@ -15,17 +15,15 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class KuraExceptionHandler {
 
-	private static final Logger s_logger = LoggerFactory.getLogger(KuraExceptionHandler.class);
-	
-	public static void handle(Throwable t) throws GwtKuraException 
-	{
-		t.printStackTrace();
-		
-		// all others => log and throw internal error code
-		s_logger.warn("RPC service non-application error", t);
-		throw GwtKuraException.internalError(t, t.getLocalizedMessage());
-	}
+    private static final Logger s_logger = LoggerFactory.getLogger(KuraExceptionHandler.class);
+
+    public static void handle(Throwable t) throws GwtKuraException {
+        t.printStackTrace();
+
+        // all others => log and throw internal error code
+        s_logger.warn("RPC service non-application error", t);
+        throw GwtKuraException.internalError(t, t.getLocalizedMessage());
+    }
 }

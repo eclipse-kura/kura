@@ -11,89 +11,74 @@
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
-
-
 /**
  * Helper class to serialize a property in XML.
  */
-public class XmlConfigPropertyAdapted 
-{
-	public enum ConfigPropertyType {
-		stringType,
-		longType,
-		doubleType,
-		floatType,
-		integerType,
-		byteType,
-		charType,
-		booleanType,
-		shortType,
-		passwordType
-	}
+public class XmlConfigPropertyAdapted {
 
-	private String             name;
+    public enum ConfigPropertyType {
+        STRING_TYPE, LONG_TYPE, DOUBLE_TYPE, FLOAT_TYPE, INTEGER_TYPE, BYTE_TYPE, CHAR_TYPE, BOOLEAN_TYPE, SHORT_TYPE, PASSWORD_TYPE
+    }
 
-	private boolean            array;
-	
-	private boolean            encrypted;
+    private String name;
 
-	private ConfigPropertyType type;
+    private boolean array;
 
-	private String[]           values;
-	
-	
-	public XmlConfigPropertyAdapted()
-	{}	
-	
-	public XmlConfigPropertyAdapted(String name,
-									ConfigPropertyType type, 
-								    String[] values) 
-	{
-		super();
+    private boolean encrypted;
 
-		this.name      = name;
-		this.type      = type;
-		this.values    = values;
-		this.encrypted = false;   
-	}
+    private ConfigPropertyType type;
 
-	public String getName() {
-		return name;
-	}
+    private String[] values;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public XmlConfigPropertyAdapted() {
+    }
 
-	public boolean getArray() {
-		return array;
-	}
+    public XmlConfigPropertyAdapted(String name, ConfigPropertyType type, String[] values) {
+        super();
 
-	public void setArray(boolean array) {
-		this.array = array;
-	}
+        this.name = name;
+        this.type = type;
+        this.values = values;
+        this.encrypted = false;
+    }
 
-	public ConfigPropertyType getType() {
-		return type;
-	}
+    public String getName() {
+        return this.name;
+    }
 
-	public void setType(ConfigPropertyType type) {
-		this.type = type;
-	}	
-	
-	public boolean isEncrypted() {
-		return encrypted;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setEncrypted(boolean encrypted) {
-		this.encrypted = encrypted;
-	}
+    public boolean getArray() {
+        return this.array;
+    }
 
-	public String[] getValues() {
-		return values;
-	}
+    public void setArray(boolean array) {
+        this.array = array;
+    }
 
-	public void setValues(String[] values) {
-		this.values = values;
-	}
+    public ConfigPropertyType getType() {
+        return this.type;
+    }
+
+    public void setType(ConfigPropertyType type) {
+        this.type = type;
+    }
+
+    public boolean isEncrypted() {
+        return this.encrypted;
+    }
+
+    public void setEncrypted(boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+
+    public String[] getValues() {
+        return this.values;
+    }
+
+    public void setValues(String[] values) {
+        this.values = values;
+    }
 }

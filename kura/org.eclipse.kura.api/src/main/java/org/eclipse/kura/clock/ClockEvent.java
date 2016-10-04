@@ -16,14 +16,14 @@ import java.util.Map;
 import org.osgi.service.event.Event;
 
 /**
- * ClockEvent is raised when a clock synchronization has been performed. 
+ * ClockEvent is raised when a clock synchronization has been performed.
  */
-public class ClockEvent extends Event
-{
-	/** Topic of the ClockEvent */
-	public static final String CLOCK_EVENT_TOPIC = "org/eclipse/kura/clock";
-	
-	public ClockEvent(Map<String, ?> properties) {
-		super(CLOCK_EVENT_TOPIC, properties);
-	}
+public class ClockEvent extends Event {
+
+    /** Topic of the ClockEvent */
+    public static final String CLOCK_EVENT_TOPIC = "org/eclipse/kura/clock";
+
+    public ClockEvent(Map<String, ?> properties) {
+        super(CLOCK_EVENT_TOPIC, properties);
+    }
 }

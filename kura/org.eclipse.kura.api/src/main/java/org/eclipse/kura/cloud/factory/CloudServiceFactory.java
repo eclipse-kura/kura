@@ -15,6 +15,9 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.data.DataService;
+import org.eclipse.kura.data.DataTransportService;
+import org.osgi.service.component.ComponentContext;
 
 /**
  * A CloudServiceFactory represents an OSGi Declarative Service Component
@@ -38,7 +41,7 @@ import org.eclipse.kura.configuration.ConfigurationService;
  * <br>
  * For example, in a stack architecture with CloudService at the top of the stack
  * and where lower layers are also components,
- * an implementation of CloudServiceFactory could create new configurations 
+ * an implementation of CloudServiceFactory could create new configurations
  * for all the stack layers thus constructing a new whole stack instance.
  * <br>
  * The Kura {@link CloudService}/{@link DataService}/{@link DataTransportService}
@@ -51,38 +54,41 @@ import org.eclipse.kura.configuration.ConfigurationService;
  * <br>
  * The {@link CloudService} implementation class is also required
  * to implement the {@link ConfigurableComponent} interface.
- * 
+ *
  * @since {@link org.eclipse.kura.cloud.factory} 1.0.0
  */
 public interface CloudServiceFactory {
-	
-	/**
-	 * Returns the factory PID of the OSGi Factory Component represented by this CloudServiceFactory.
-	 * @return a String representing the factory PID of the Factory Component.
-	 */
-	String getFactoryPid();
-	
-	/**
-	 * Creates a {@link CloudService} instance and initializes its configuration with the defaults
-	 * expressed in the Metatype of the target component factory providing the CloudService.
-	 * <br>
-	 * Implementation will normally rely on {@link ConfigurationService#createFactoryConfiguration}
-	 * to perform the actual creation of the component instance and the persistence of the component configuration.  
-	 * <br>
-	 * The created CloudService instance will have its <i>kura.service.pid</i> property
-	 * set to the value provided in the <i>pid</i> parameter.
-	 * <br>
-	 * Kura apps can look up the created CloudService instance through {@link ComponentContext#locateServices}
-	 * by filtering on the <i>kura.service.pid</i> property.
-	 * <br>
-	 * Likely, Kura apps will rely on OSGi Declarative Services to have their CloudService dependencies satisfied based
-	 * on a <i>target</i> filter on the value of the property <i>kura.service.pid</i>
-	 * in their component definition.
-	 * <br>
-	 * In the following example a Kura app declares two dependencies on CloudServiceS whose PIDs are <i>myCloudService</i> and <i>anotherCloudService</i>:
-	 * </br>
-	 * <pre>
-	 * &ltreference name="myCloudServiceReference"
+
+    /**
+     * Returns the factory PID of the OSGi Factory Component represented by this CloudServiceFactory.
+     *
+     * @return a String representing the factory PID of the Factory Component.
+     */
+    String getFactoryPid();
+
+    /**
+     * Creates a {@link CloudService} instance and initializes its configuration with the defaults
+     * expressed in the Metatype of the target component factory providing the CloudService.
+     * <br>
+     * Implementation will normally rely on {@link ConfigurationService#createFactoryConfiguration}
+     * to perform the actual creation of the component instance and the persistence of the component configuration.
+     * <br>
+     * The created CloudService instance will have its <i>kura.service.pid</i> property
+     * set to the value provided in the <i>pid</i> parameter.
+     * <br>
+     * Kura apps can look up the created CloudService instance through {@link ComponentContext#locateServices}
+     * by filtering on the <i>kura.service.pid</i> property.
+     * <br>
+     * Likely, Kura apps will rely on OSGi Declarative Services to have their CloudService dependencies satisfied based
+     * on a <i>target</i> filter on the value of the property <i>kura.service.pid</i>
+     * in their component definition.
+     * <br>
+     * In the following example a Kura app declares two dependencies on CloudServiceS whose PIDs are
+     * <i>myCloudService</i> and <i>anotherCloudService</i>:
+     * </br>
+     *
+     * <pre>
+     * &ltreference name="myCloudServiceReference"
      *              policy="static"
      *              bind="setMyCloudService"
      *              unbind="unsetMyCloudService"
@@ -101,18 +107,20 @@ public interface CloudServiceFactory {
      * &ltproperty  name="anotherCloudServiceReference.target"
      *              type="String"
      *              value="(kura.service.pid=anotherCloudService)"/&gt
-	 * </pre>
-	 * 
-	 * @param pid the Kura persistent identifier, <i>kura.service.pid</i>, of the factory component configuration.
-	 * @throws KuraException
-	 */
-	void createConfiguration(String pid) throws KuraException;
-	
-	/**
-	 * Deletes a previously created configuration deactivating the associated {@link CloudService} instance.
-	 * 
-	 * @param pid the Kura persistent identifier, <i>kura.service.pid</i>, of the factory component configuration.
-	 * @throws KuraException
-	 */
-	void deleteConfiguration(String pid) throws KuraException;
+     * </pre>
+     *
+     * @param pid
+     *            the Kura persistent identifier, <i>kura.service.pid</i>, of the factory component configuration.
+     * @throws KuraException
+     */
+    void createConfiguration(String pid) throws KuraException;
+
+    /**
+     * Deletes a previously created configuration deactivating the associated {@link CloudService} instance.
+     *
+     * @param pid
+     *            the Kura persistent identifier, <i>kura.service.pid</i>, of the factory component configuration.
+     * @throws KuraException
+     */
+    void deleteConfiguration(String pid) throws KuraException;
 }

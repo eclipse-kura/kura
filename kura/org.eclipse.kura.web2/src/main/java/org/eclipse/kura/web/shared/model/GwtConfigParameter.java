@@ -17,130 +17,131 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class GwtConfigParameter implements IsSerializable {
 
-	public enum GwtConfigParameterType {		
-	    STRING,
-	    LONG,
-	    DOUBLE,
-	    FLOAT,
-	    INTEGER,
-	    BYTE,
-	    CHAR,
-	    BOOLEAN,
-	    SHORT,
-	    PASSWORD;
-	    GwtConfigParameterType() 
-		{}
-	}
-	
-	private String                 m_id;
-	private String                 m_name;
-	private String                 m_description;
-	private GwtConfigParameterType m_type;
-	private boolean                m_required;
-	private String		           m_default;
-	private int                    m_cardinality;
-	private Map<String, String>    m_options;
-	private String		           m_min;
-	private String		           m_max;
-	private String		           m_value;  // used for fields with single cardinality
-	private String[]		       m_values; // used for fields with multiple cardinality
-	
-	public GwtConfigParameter()
-	{}
+    public enum GwtConfigParameterType {
+        STRING,
+        LONG,
+        DOUBLE,
+        FLOAT,
+        INTEGER,
+        BYTE,
+        CHAR,
+        BOOLEAN,
+        SHORT,
+        PASSWORD;
 
-	public String getId() {
-		return m_id;
-	}
+        GwtConfigParameterType() {
+        }
+    }
 
-	public void setId(String id) {
-		m_id = id;
-	}
+    private String m_id;
+    private String m_name;
+    private String m_description;
+    private GwtConfigParameterType m_type;
+    private boolean m_required;
+    private String m_default;
+    private int m_cardinality;
+    private Map<String, String> m_options;
+    private String m_min;
+    private String m_max;
+    private String m_value;  // used for fields with single cardinality
+    private String[] m_values; // used for fields with multiple cardinality
 
-	public String getName() {
-		return m_name;
-	}
+    public GwtConfigParameter() {
+    }
 
-	public void setName(String name) {
-		m_name = name;
-	}
+    public String getId() {
+        return this.m_id;
+    }
 
-	public String getDescription() {
-		return m_description;
-	}
+    public void setId(String id) {
+        this.m_id = id;
+    }
 
-	public void setDescription(String description) {
-		m_description = description;
-	}
+    public String getName() {
+        return this.m_name;
+    }
 
-	public GwtConfigParameterType getType() {
-		return m_type;
-	}
+    public void setName(String name) {
+        this.m_name = name;
+    }
 
-	public void setType(GwtConfigParameterType type) {
-		m_type = type;
-	}
+    public String getDescription() {
+        return this.m_description;
+    }
 
-	public boolean isRequired() {
-		return m_required;
-	}
+    public void setDescription(String description) {
+        this.m_description = description;
+    }
 
-	public void setRequired(boolean required) {
-		m_required = required;
-	}
+    public GwtConfigParameterType getType() {
+        return this.m_type;
+    }
 
-	public String getDefault() {
-		return m_default;
-	}
+    public void setType(GwtConfigParameterType type) {
+        this.m_type = type;
+    }
 
-	public void setDefault(String default1) {
-		m_default = default1;
-	}
+    public boolean isRequired() {
+        return this.m_required;
+    }
 
-	public int getCardinality() {
-		return m_cardinality;
-	}
+    public void setRequired(boolean required) {
+        this.m_required = required;
+    }
 
-	public void setCardinality(int cardinality) {
-		m_cardinality = cardinality;
-	}
-	
-	public Map<String, String> getOptions() {
-		return m_options;
-	}
-	
-	public void setOptions(Map<String, String> options) {
-		m_options = options;
-	}
+    public String getDefault() {
+        return this.m_default;
+    }
 
-	public String getMin() {
-		return m_min;
-	}
+    public void setDefault(String default1) {
+        this.m_default = default1;
+    }
 
-	public void setMin(String min) {
-		m_min = min;
-	}
+    public int getCardinality() {
+        return this.m_cardinality;
+    }
 
-	public String getMax() {
-		return m_max;
-	}
+    public void setCardinality(int cardinality) {
+        this.m_cardinality = cardinality;
+    }
 
-	public void setMax(String max) {
-		m_max = max;
-	}
+    public Map<String, String> getOptions() {
+        return this.m_options;
+    }
 
-	public String getValue() {
-		return m_value;
-	}
+    public void setOptions(Map<String, String> options) {
+        this.m_options = options;
+    }
 
-	public void setValue(String value) {
-		m_value = value;
-	}
+    public String getMin() {
+        return this.m_min;
+    }
 
-	public String[] getValues() {
-		return m_values;
-	}
+    public void setMin(String min) {
+        this.m_min = min;
+    }
 
-	public void setValues(String[] values) {
-		m_values = values;
-	}
+    public String getMax() {
+        return this.m_max;
+    }
+
+    public void setMax(String max) {
+        this.m_max = max;
+    }
+
+    public String getValue() {
+        return this.m_value;
+    }
+
+    public void setValue(String value) {
+        this.m_value = value;
+    }
+
+    public String[] getValues() {
+        return this.m_values;
+    }
+
+    public void setValues(String[] values) {
+        this.m_values = values;
+    }
 }

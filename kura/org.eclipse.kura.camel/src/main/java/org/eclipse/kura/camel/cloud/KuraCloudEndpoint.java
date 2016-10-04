@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Red Hat and/or its affiliates
+ * Copyright (c) 2011, 2016 Red Hat and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,6 +19,9 @@ import org.eclipse.kura.camel.internal.cloud.CloudClientCache.CloudClientHandle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Endpoint implementation for {@link KuraCloudComponent}
+ */
 @UriEndpoint(scheme = "kura-cloud", title = "Kura Cloud", label = "iot,kura,cloud", syntax = "kura-cloud:applicationId/appTopic")
 public class KuraCloudEndpoint extends DefaultEndpoint {
 
@@ -47,7 +50,7 @@ public class KuraCloudEndpoint extends DefaultEndpoint {
 
     private CloudClientHandle cloudClientHandle;
 
-    private CloudClientCache cache;
+    private final CloudClientCache cache;
 
     public KuraCloudEndpoint(String uri, KuraCloudComponent kuraCloudComponent, CloudClientCache cache) {
         super(uri, kuraCloudComponent);
@@ -58,7 +61,7 @@ public class KuraCloudEndpoint extends DefaultEndpoint {
     protected void doStart() throws Exception {
         synchronized (this) {
             this.cloudClientHandle = this.cache.getOrCreate(this.applicationId);
-            logger.debug("CloudClient {} -> {}", applicationId, cloudClientHandle.getClient());
+            logger.debug("CloudClient {} -> {}", this.applicationId, this.cloudClientHandle.getClient());
         }
         super.doStart();
     }
@@ -96,7 +99,7 @@ public class KuraCloudEndpoint extends DefaultEndpoint {
     }
 
     public String getTopic() {
-        return topic;
+        return this.topic;
     }
 
     public void setTopic(String topic) {
@@ -104,7 +107,7 @@ public class KuraCloudEndpoint extends DefaultEndpoint {
     }
 
     public int getQos() {
-        return qos;
+        return this.qos;
     }
 
     public void setQos(int qos) {
@@ -112,7 +115,7 @@ public class KuraCloudEndpoint extends DefaultEndpoint {
     }
 
     public boolean isRetain() {
-        return retain;
+        return this.retain;
     }
 
     public void setRetain(boolean retain) {
@@ -120,7 +123,7 @@ public class KuraCloudEndpoint extends DefaultEndpoint {
     }
 
     public int getPriority() {
-        return priority;
+        return this.priority;
     }
 
     public void setPriority(int priority) {
@@ -128,7 +131,7 @@ public class KuraCloudEndpoint extends DefaultEndpoint {
     }
 
     public boolean isControl() {
-        return control;
+        return this.control;
     }
 
     public void setControl(boolean control) {
@@ -136,7 +139,7 @@ public class KuraCloudEndpoint extends DefaultEndpoint {
     }
 
     public String getApplicationId() {
-        return applicationId;
+        return this.applicationId;
     }
 
     public void setApplicationId(String applicationId) {
@@ -144,7 +147,7 @@ public class KuraCloudEndpoint extends DefaultEndpoint {
     }
 
     public String getDeviceId() {
-        return deviceId;
+        return this.deviceId;
     }
 
     public void setDeviceId(String deviceId) {

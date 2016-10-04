@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.eclipse.kura.camel.xml;
 
-import org.eclipse.kura.camel.router.AbstractXmlCamelComponent;
-import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.camel.component.AbstractXmlCamelComponent;
 
-public class XmlRouterComponent extends AbstractXmlCamelComponent implements ConfigurableComponent {
+/**
+ * A ready to run XML based Apache Camel component
+ * @noextend This class is not intended to be extened
+ */
+public class XmlRouterComponent extends AbstractXmlCamelComponent {
+
     public XmlRouterComponent() {
         super("xml.data");
     }

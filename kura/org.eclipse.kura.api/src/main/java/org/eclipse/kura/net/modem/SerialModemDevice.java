@@ -15,26 +15,28 @@ import java.util.List;
 
 public class SerialModemDevice implements ModemDevice {
 
-	private String m_productName;
-	private String m_manufacturerName;
-	private List<String> m_serialPorts;
-	
-	public SerialModemDevice (String product, String manufacturer, List<String> serialPorts) {
-		m_productName = product;
-		m_manufacturerName = manufacturer;
-		m_serialPorts = serialPorts;
-	}
+    private final String m_productName;
+    private final String m_manufacturerName;
+    private final List<String> m_serialPorts;
 
-	public String getProductName() {
-		return m_productName;
-	}
-	
-	public String getManufacturerName() {
-		return m_manufacturerName;
-	}
+    public SerialModemDevice(String product, String manufacturer, List<String> serialPorts) {
+        this.m_productName = product;
+        this.m_manufacturerName = manufacturer;
+        this.m_serialPorts = serialPorts;
+    }
 
-	@Override
-	public List<String> getSerialPorts() {
-		return m_serialPorts;
-	}
+    @Override
+    public String getProductName() {
+        return this.m_productName;
+    }
+
+    @Override
+    public String getManufacturerName() {
+        return this.m_manufacturerName;
+    }
+
+    @Override
+    public List<String> getSerialPorts() {
+        return this.m_serialPorts;
+    }
 }

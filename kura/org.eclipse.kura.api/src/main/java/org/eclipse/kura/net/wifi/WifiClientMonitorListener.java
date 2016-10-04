@@ -13,5 +13,5 @@ package org.eclipse.kura.net.wifi;
 
 public interface WifiClientMonitorListener {
 
-	public void setWifiSignalLevel (int signalLevel);
+    public void setWifiSignalLevel(int signalLevel);
 }

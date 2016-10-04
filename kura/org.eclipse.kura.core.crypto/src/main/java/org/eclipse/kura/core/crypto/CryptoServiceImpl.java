@@ -7,9 +7,9 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *	 Eurotech
- *	 Red Hat Inc - Fix possible NPE, fix loading error
- *	   - Clean up kura.properties handling
+ *     Eurotech
+ *     Red Hat Inc - Fix possible NPE, fix loading error
+ *       - Clean up kura.properties handling
  *******************************************************************************/
 package org.eclipse.kura.core.crypto;
 
@@ -36,8 +36,12 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.system.SystemService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CryptoServiceImpl implements CryptoService {
+
+    private static final Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
 
     private static final String ALGORITHM = "AES";
     private static final byte[] SECRET_KEY = "rv;ipse329183!@#".getBytes();
@@ -110,8 +114,8 @@ public class CryptoServiceImpl implements CryptoService {
             Method decoderMethod = clazz.getMethod("getDecoder", (Class<?>[]) null);
             Object decoder = decoderMethod.invoke(null, new Object[0]);
 
-            Class<?> Base64Decoder = Class.forName("java.util.Base64$Decoder");
-            Method decodeMethod = Base64Decoder.getMethod("decode", String.class);
+            Class<?> base64Decoder = Class.forName("java.util.Base64$Decoder");
+            Method decodeMethod = base64Decoder.getMethod("decode", String.class);
             convertedData = decodeMethod.invoke(decoder, internalStringValue);
         } catch (Exception e1) {
         }
@@ -145,9 +149,9 @@ public class CryptoServiceImpl implements CryptoService {
             Method encoderMethod = clazz.getMethod("getEncoder", (Class<?>[]) null);
             Object encoder = encoderMethod.invoke(null, new Object[0]);
 
-            Class<?> Base64Decoder = Class.forName("java.util.Base64$Encoder");
-            Method decodeMethod = Base64Decoder.getMethod("encodeToString", byte[].class);
-            convertedData = decodeMethod.invoke(encoder, encryptedBytes);
+            Class<?> base64Encoder = Class.forName("java.util.Base64$Encoder");
+            Method encodeMethod = base64Encoder.getMethod("encodeToString", byte[].class);
+            convertedData = encodeMethod.invoke(encoder, encryptedBytes);
         } catch (Exception e1) {
         }
         return convertedData;
@@ -259,17 +263,17 @@ public class CryptoServiceImpl implements CryptoService {
                 password = decryptAes(encryptedPassword.toCharArray());
             }
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            logger.warn("File not found exception while getting keystore password - ", e);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.warn("IOException while getting keystore password - ", e);
         } catch (KuraException e) {
-            e.printStackTrace();
+            logger.warn("KuraException while getting keystore password - ", e);
         } finally {
             if (fis != null) {
                 try {
                     fis.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.warn("IOException while closing source - ", e);
                 }
             }
         }
@@ -296,7 +300,7 @@ public class CryptoServiceImpl implements CryptoService {
                 try {
                     fos.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.warn("IOException while closing destination - ", e);
                 }
             }
         }

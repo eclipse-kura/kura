@@ -16,17 +16,17 @@ import org.slf4j.LoggerFactory;
 
 public class Le910ModemDriver extends OptionModemDriver {
 
-	private static final Logger s_logger = LoggerFactory.getLogger(Le910ModemDriver.class);
-	private static final String s_vendor = "1bc7";
-	private static final String s_product = "1201";
-	
-	public Le910ModemDriver() {
-		super(s_vendor, s_product);
-	}
-	
-	@Override
-	public int install() throws Exception {	
-		s_logger.info("Installing {} driver for Telit LE910 modem", getName());
-		return super.install();
-	}
+    private static final Logger s_logger = LoggerFactory.getLogger(Le910ModemDriver.class);
+    private static final String s_vendor = "1bc7";
+    private static final String s_product = "1201";
+
+    public Le910ModemDriver() {
+        super(s_vendor, s_product);
+    }
+
+    @Override
+    public int install() throws Exception {
+        s_logger.info("Installing {} driver for Telit LE910 modem", getName());
+        return super.install();
+    }
 }

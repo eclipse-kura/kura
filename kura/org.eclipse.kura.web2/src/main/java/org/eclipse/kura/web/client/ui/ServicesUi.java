@@ -13,7 +13,7 @@
  *******************************************************************************/
 /*
  * Render the Content in the Main Panel corressponding to Service (GwtBSConfigComponent) selected in the Services Panel
- * 
+ *
  * Fields are rendered based on their type (Password(Input), Choice(Dropboxes) etc. with Text fields rendered
  * for both numeric and other textual field with validate() checking if value in numeric fields is numeric
  */
@@ -86,66 +86,69 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class ServicesUi extends Composite {
 
-    private static final String             CONFIG_MAX_VALUE = "configMaxValue";
-    private static final String             CONFIG_MIN_VALUE = "configMinValue";
-    private static final ServicesUiUiBinder uiBinder         = GWT.create(ServicesUiUiBinder.class);
-    private static final Logger             logger           = Logger.getLogger(ServicesUi.class.getSimpleName());
-    private static final Logger             errorLogger      = Logger.getLogger("ErrorLogger");
+    private static final String CONFIG_MAX_VALUE = "configMaxValue";
+    private static final String CONFIG_MIN_VALUE = "configMinValue";
+    private static final ServicesUiUiBinder uiBinder = GWT.create(ServicesUiUiBinder.class);
+    private static final Logger logger = Logger.getLogger(ServicesUi.class.getSimpleName());
+    private static final Logger errorLogger = Logger.getLogger("ErrorLogger");
 
-    interface ServicesUiUiBinder extends UiBinder<Widget, ServicesUi> {}
+    interface ServicesUiUiBinder extends UiBinder<Widget, ServicesUi> {
+    }
 
-    private static final Messages              MSGS                = GWT.create(Messages.class);
-    private final GwtComponentServiceAsync     gwtComponentService = GWT.create(GwtComponentService.class);
-    private final GwtSecurityTokenServiceAsync gwtXSRFService      = GWT.create(GwtSecurityTokenService.class);
+    private static final Messages MSGS = GWT.create(Messages.class);
+    private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
     HashMap<String, Boolean> valid = new HashMap<String, Boolean>();
 
     GwtConfigComponent m_configurableComponent;
-    private boolean    dirty, initialized;
+    private boolean dirty, initialized;
 
-    NavPills       menu;
-    PanelBody      content;
+    NavPills menu;
+    PanelBody content;
     AnchorListItem service;
-    TextBox        validated;
-    FormGroup      validatedGroup;
-    EntryClassUi   entryClass;
-    Modal          modal;
+    TextBox validated;
+    FormGroup validatedGroup;
+    EntryClassUi entryClass;
+    Modal modal;
 
     @UiField
-    Button   apply, reset;
+    Button apply, reset;
     @UiField
     FieldSet fields;
     @UiField
-    Form     form;
+    Form form;
 
     @UiField
     Modal incompleteFieldsModal;
     @UiField
     Alert incompleteFields;
     @UiField
-    Text  incompleteFieldsText;
+    Text incompleteFieldsText;
 
     //
     // Public methods
     //
     public ServicesUi(final GwtConfigComponent addedItem, EntryClassUi entryClassUi) {
         initWidget(uiBinder.createAndBindUi(this));
-        initialized = false;
-        entryClass = entryClassUi;
-        m_configurableComponent = addedItem;
-        fields.clear();
-        setOriginalValues(m_configurableComponent);
+        this.initialized = false;
+        this.entryClass = entryClassUi;
+        this.m_configurableComponent = addedItem;
+        this.fields.clear();
+        setOriginalValues(this.m_configurableComponent);
 
-        apply.setText(MSGS.apply());
-        apply.addClickHandler(new ClickHandler() {
+        this.apply.setText(MSGS.apply());
+        this.apply.addClickHandler(new ClickHandler() {
+
             @Override
             public void onClick(ClickEvent event) {
                 apply();
             }
         });
 
-        reset.setText(MSGS.reset());
-        reset.addClickHandler(new ClickHandler() {
+        this.reset.setText(MSGS.reset());
+        this.reset.addClickHandler(new ClickHandler() {
+
             @Override
             public void onClick(ClickEvent event) {
                 reset();
@@ -155,64 +158,66 @@ public class ServicesUi extends Composite {
         initInvalidDataModal();
 
         setDirty(false);
-        apply.setEnabled(false);
-        reset.setEnabled(false);
+        this.apply.setEnabled(false);
+        this.reset.setEnabled(false);
     }
 
     public void setDirty(boolean flag) {
-        dirty = flag;
-        if (dirty && initialized) {
-            apply.setEnabled(true);
-            reset.setEnabled(true);
+        this.dirty = flag;
+        if (this.dirty && this.initialized) {
+            this.apply.setEnabled(true);
+            this.reset.setEnabled(true);
         }
     }
 
     public boolean isDirty() {
-        return dirty;
+        return this.dirty;
     }
 
     public void reset() {
         if (isDirty()) {
             // Modal
-            modal = new Modal();
+            this.modal = new Modal();
 
             ModalHeader header = new ModalHeader();
             header.setTitle(MSGS.confirm());
-            modal.add(header);
+            this.modal.add(header);
 
             ModalBody body = new ModalBody();
             body.add(new Span(MSGS.deviceConfigDirty()));
-            modal.add(body);
+            this.modal.add(body);
 
             ModalFooter footer = new ModalFooter();
             ButtonGroup group = new ButtonGroup();
             Button yes = new Button();
             yes.setText(MSGS.yesButton());
             yes.addClickHandler(new ClickHandler() {
+
                 @Override
                 public void onClick(ClickEvent event) {
-                    modal.hide();
+                    ServicesUi.this.modal.hide();
                     renderForm();
-                    apply.setEnabled(false);
-                    reset.setEnabled(false);
+                    ServicesUi.this.apply.setEnabled(false);
+                    ServicesUi.this.reset.setEnabled(false);
                     setDirty(false);
-                    entryClass.initServicesTree();
+                    ServicesUi.this.entryClass.initServicesTree();
                 }
             });
             group.add(yes);
             Button no = new Button();
             no.setText(MSGS.noButton());
             no.addClickHandler(new ClickHandler() {
+
                 @Override
                 public void onClick(ClickEvent event) {
-                    modal.hide();
+                    ServicesUi.this.modal.hide();
                 }
             });
             group.add(no);
             footer.add(group);
-            modal.add(footer);
-            modal.show();
-        }                // end is dirty
+            this.modal.add(footer);
+            this.modal.show();
+        }                  // end is dirty
     }
 
     // TODO: Separate render methods for each type (ex: Boolean, String,
@@ -220,8 +225,8 @@ public class ServicesUi extends Composite {
     // Iterates through all GwtConfigParameter in the selected
     // GwtConfigComponent
     public void renderForm() {
-        fields.clear();
-        for (GwtConfigParameter param : m_configurableComponent.getParameters()) {
+        this.fields.clear();
+        for (GwtConfigParameter param : this.m_configurableComponent.getParameters()) {
             if (param.getCardinality() == 0 || param.getCardinality() == 1 || param.getCardinality() == -1) {
                 FormGroup formGroup = new FormGroup();
                 renderConfigParameter(param, true, formGroup);
@@ -229,11 +234,11 @@ public class ServicesUi extends Composite {
                 renderMultiFieldConfigParameter(param);
             }
         }
-        initialized = true;
+        this.initialized = true;
     }
 
     public GwtConfigComponent getConfiguration() {
-        return m_configurableComponent;
+        return this.m_configurableComponent;
     }
 
     //
@@ -243,21 +248,22 @@ public class ServicesUi extends Composite {
         if (isValid()) {
             if (isDirty()) {
                 // TODO ask for confirmation first
-                modal = new Modal();
+                this.modal = new Modal();
 
                 ModalHeader header = new ModalHeader();
                 header.setTitle(MSGS.confirm());
-                modal.add(header);
+                this.modal.add(header);
 
                 ModalBody body = new ModalBody();
-                body.add(new Span(MSGS.deviceConfigConfirmation(m_configurableComponent.getComponentName())));
-                modal.add(body);
+                body.add(new Span(MSGS.deviceConfigConfirmation(this.m_configurableComponent.getComponentName())));
+                this.modal.add(body);
 
                 ModalFooter footer = new ModalFooter();
                 ButtonGroup group = new ButtonGroup();
                 Button yes = new Button();
                 yes.setText(MSGS.yesButton());
                 yes.addClickHandler(new ClickHandler() {
+
                     @Override
                     public void onClick(ClickEvent event) {
                         EntryClassUi.showWaitModal();
@@ -268,7 +274,7 @@ public class ServicesUi extends Composite {
                             FailureHandler.handle(ex);
                             return;
                         }
-                        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+                        ServicesUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                             @Override
                             public void onFailure(Throwable ex) {
@@ -278,22 +284,27 @@ public class ServicesUi extends Composite {
 
                             @Override
                             public void onSuccess(GwtXSRFToken token) {
-                                gwtComponentService.updateComponentConfiguration(token, m_configurableComponent, new AsyncCallback<Void>() {
+                                ServicesUi.this.gwtComponentService.updateComponentConfiguration(token,
+                                        ServicesUi.this.m_configurableComponent, new AsyncCallback<Void>() {
+
                                     @Override
                                     public void onFailure(Throwable caught) {
                                         EntryClassUi.hideWaitModal();
                                         FailureHandler.handle(caught);
-                                        errorLogger.log(Level.SEVERE, caught.getLocalizedMessage() != null ? caught.getLocalizedMessage() : caught.getClass().getName(), caught);
+                                        errorLogger.log(
+                                                Level.SEVERE, caught.getLocalizedMessage() != null
+                                                        ? caught.getLocalizedMessage() : caught.getClass().getName(),
+                                                caught);
                                     }
 
                                     @Override
                                     public void onSuccess(Void result) {
-                                        modal.hide();
+                                        ServicesUi.this.modal.hide();
                                         logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
-                                        apply.setEnabled(false);
-                                        reset.setEnabled(false);
+                                        ServicesUi.this.apply.setEnabled(false);
+                                        ServicesUi.this.reset.setEnabled(false);
                                         setDirty(false);
-                                        entryClass.initServicesTree();
+                                        ServicesUi.this.entryClass.initServicesTree();
                                         EntryClassUi.hideWaitModal();
                                     }
                                 });
@@ -306,28 +317,29 @@ public class ServicesUi extends Composite {
                 Button no = new Button();
                 no.setText(MSGS.noButton());
                 no.addClickHandler(new ClickHandler() {
+
                     @Override
                     public void onClick(ClickEvent event) {
-                        modal.hide();
+                        ServicesUi.this.modal.hide();
                     }
                 });
                 group.add(no);
                 footer.add(group);
-                modal.add(footer);
-                modal.show();
+                this.modal.add(footer);
+                this.modal.show();
 
                 // ----
 
-            }                // end isDirty()
+            }                  // end isDirty()
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");
-            incompleteFieldsModal.show();
-        }                // end else isValid
+            this.incompleteFieldsModal.show();
+        }                  // end else isValid
     }
 
     // Get updated parameters
     private GwtConfigComponent getUpdatedConfiguration() {
-        Iterator<Widget> it = fields.iterator();
+        Iterator<Widget> it = this.fields.iterator();
         while (it.hasNext()) {
             Widget w = it.next();
             if (w instanceof FormGroup) {
@@ -335,7 +347,7 @@ public class ServicesUi extends Composite {
                 fillUpdatedConfiguration(fg);
             }
         }
-        return m_configurableComponent;
+        return this.m_configurableComponent;
     }
 
     private void fillUpdatedConfiguration(FormGroup fg) {
@@ -346,15 +358,12 @@ public class ServicesUi extends Composite {
             logger.fine("Widget: " + fg.getClass());
 
             if (fg.getWidget(i) instanceof FormLabel) {
-                param = m_configurableComponent.getParameter(fg.getWidget(i).getTitle());
-                logger.fine("Param: " + fg.getTitle() + " -> " + param);
+                final String id = ((FormLabel) fg.getWidget(i)).getTitle();
+                param = this.m_configurableComponent.getParameter(id);
 
-            } else if (fg.getWidget(i) instanceof ListBox || fg.getWidget(i) instanceof Input || fg.getWidget(i) instanceof TextBoxBase) {
+            } else if (fg.getWidget(i) instanceof ListBox || fg.getWidget(i) instanceof Input
+                    || fg.getWidget(i) instanceof TextBoxBase) {
 
-                if (param == null) {
-                    System.out.println("Missing parameter");
-                    continue;
-                }
                 String value = getUpdatedFieldConfiguration(param, fg.getWidget(i));
                 if (value == null) {
                     continue;
@@ -382,31 +391,31 @@ public class ServicesUi extends Composite {
             }
         } else {
             switch (param.getType()) {
-                case BOOLEAN:
-                    return param.getValue();
-                case LONG:
-                case DOUBLE:
-                case FLOAT:
-                case SHORT:
-                case BYTE:
-                case INTEGER:
-                case CHAR:
-                case STRING:
-                    TextBoxBase tb = (TextBoxBase) wg;
-                    String value = tb.getText();
-                    if (value != null) {
-                        return value;
-                    } else {
-                        return null;
-                    }
-                case PASSWORD:
-                    if (wg instanceof Input) {
-                        return ((Input) wg).getValue();
-                    } else {
-                        return null;
-                    }
-                default:
-                    break;
+            case BOOLEAN:
+                return param.getValue();
+            case LONG:
+            case DOUBLE:
+            case FLOAT:
+            case SHORT:
+            case BYTE:
+            case INTEGER:
+            case CHAR:
+            case STRING:
+                TextBoxBase tb = (TextBoxBase) wg;
+                String value = tb.getText();
+                if (value != null) {
+                    return value;
+                } else {
+                    return null;
+                }
+            case PASSWORD:
+                if (wg instanceof Input) {
+                    return ((Input) wg).getValue();
+                } else {
+                    return null;
+                }
+            default:
+                break;
             }
         }
         return null;
@@ -453,15 +462,15 @@ public class ServicesUi extends Composite {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void renderTextField(final GwtConfigParameter param, boolean isFirstInstance, final FormGroup formGroup) {
 
-        valid.put(param.getId(), true);
+        this.valid.put(param.getId(), true);
 
         if (isFirstInstance) {
             FormLabel formLabel = new FormLabel();
+            formLabel.setTitle(param.getId()); // title is used to hold ID
             formLabel.setText(param.getName());
             if (param.isRequired()) {
                 formLabel.setShowRequiredIndicator(true);
             }
-            formLabel.setTitle(param.getId());
             formGroup.add(formLabel);
 
             InlineHelpBlock ihb = new InlineHelpBlock();
@@ -482,39 +491,39 @@ public class ServicesUi extends Composite {
         // all the browsers are able to display the
         // double value as expected
         switch (param.getType()) {
-            case LONG:
-                if (param.getValue() != null && !"".equals(param.getValue().trim())) {
-                    formattedValue = String.valueOf(Long.parseLong(param.getValue()));
-                }
-                break;
-            case DOUBLE:
-                if (param.getValue() != null && !"".equals(param.getValue().trim())) {
-                    formattedValue = String.valueOf(Double.parseDouble(param.getValue()));
-                }
-                break;
-            case FLOAT:
-                if (param.getValue() != null && !"".equals(param.getValue().trim())) {
-                    formattedValue = String.valueOf(Float.parseFloat(param.getValue()));
-                }
-                break;
-            case SHORT:
-                if (param.getValue() != null && !"".equals(param.getValue().trim())) {
-                    formattedValue = String.valueOf(Short.parseShort(param.getValue()));
-                }
-                break;
-            case BYTE:
-                if (param.getValue() != null && !"".equals(param.getValue().trim())) {
-                    formattedValue = String.valueOf(Byte.parseByte(param.getValue()));
-                }
-                break;
-            case INTEGER:
-                if (param.getValue() != null && !"".equals(param.getValue().trim())) {
-                    formattedValue = String.valueOf(Integer.parseInt(param.getValue()));
-                }
-                break;
-            default:
-                formattedValue = (String) param.getValue();
-                break;
+        case LONG:
+            if (param.getValue() != null && !"".equals(param.getValue().trim())) {
+                formattedValue = String.valueOf(Long.parseLong(param.getValue()));
+            }
+            break;
+        case DOUBLE:
+            if (param.getValue() != null && !"".equals(param.getValue().trim())) {
+                formattedValue = String.valueOf(Double.parseDouble(param.getValue()));
+            }
+            break;
+        case FLOAT:
+            if (param.getValue() != null && !"".equals(param.getValue().trim())) {
+                formattedValue = String.valueOf(Float.parseFloat(param.getValue()));
+            }
+            break;
+        case SHORT:
+            if (param.getValue() != null && !"".equals(param.getValue().trim())) {
+                formattedValue = String.valueOf(Short.parseShort(param.getValue()));
+            }
+            break;
+        case BYTE:
+            if (param.getValue() != null && !"".equals(param.getValue().trim())) {
+                formattedValue = String.valueOf(Byte.parseByte(param.getValue()));
+            }
+            break;
+        case INTEGER:
+            if (param.getValue() != null && !"".equals(param.getValue().trim())) {
+                formattedValue = String.valueOf(Integer.parseInt(param.getValue()));
+            }
+            break;
+        default:
+            formattedValue = param.getValue();
+            break;
         }
 
         if (param.getValue() != null) {
@@ -532,6 +541,7 @@ public class ServicesUi extends Composite {
 
         textBox.setValidateOnBlur(true);
         textBox.addValidator(new Validator() {
+
             @Override
             public List<EditorError> validate(Editor editor, Object value) {
                 setDirty(true);
@@ -545,7 +555,7 @@ public class ServicesUi extends Composite {
         });
         textBox.validate();
 
-        fields.add(formGroup);
+        this.fields.add(formGroup);
     }
 
     private TextBoxBase createTextBox(final GwtConfigParameter param) {
@@ -615,10 +625,11 @@ public class ServicesUi extends Composite {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void renderPasswordField(final GwtConfigParameter param, boolean isFirstInstance, FormGroup formGroup) {
-        valid.put(param.getId(), true);
+        this.valid.put(param.getId(), true);
 
         if (isFirstInstance) {
             FormLabel formLabel = new FormLabel();
+            formLabel.setTitle(param.getId()); // title is used to hold ID
             formLabel.setText(param.getName());
             if (param.isRequired()) {
                 formLabel.setShowRequiredIndicator(true);
@@ -639,7 +650,7 @@ public class ServicesUi extends Composite {
         final Input input = new Input();
         input.setType(InputType.PASSWORD);
         if (param.getValue() != null) {
-            input.setText((String) param.getValue());
+            input.setText(param.getValue());
         } else {
             input.setText("");
         }
@@ -651,19 +662,19 @@ public class ServicesUi extends Composite {
 
         input.setValidateOnBlur(true);
         input.addValidator(new Validator() {
+
             @Override
             public List<EditorError> validate(Editor editor, Object value) {
                 setDirty(true);
 
                 List<EditorError> result = new ArrayList<EditorError>();
-                if ((input.getText() == null || "".equals(input.getText().trim()))
-                        && param.isRequired()) {
+                if ((input.getText() == null || "".equals(input.getText().trim())) && param.isRequired()) {
                     // null in required field
                     result.add(new BasicEditorError(input, input.getText(), MSGS.formRequiredParameter()));
-                    valid.put(param.getName(), false);
+                    ServicesUi.this.valid.put(param.getName(), false);
                 } else {
                     param.setValue(input.getText());
-                    valid.put(param.getName(), true);
+                    ServicesUi.this.valid.put(param.getName(), true);
                 }
 
                 return result;
@@ -676,16 +687,17 @@ public class ServicesUi extends Composite {
         });
 
         formGroup.add(input);
-        fields.add(formGroup);
+        this.fields.add(formGroup);
 
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private void renderBooleanField(final GwtConfigParameter param, boolean isFirstInstance, FormGroup formGroup) {
-        valid.put(param.getId(), true);
+        this.valid.put(param.getId(), true);
 
         if (isFirstInstance) {
             FormLabel formLabel = new FormLabel();
+            formLabel.setTitle(param.getId()); // title is used to hold ID
             formLabel.setText(param.getName());
             if (param.isRequired()) {
                 formLabel.setShowRequiredIndicator(true);
@@ -721,6 +733,7 @@ public class ServicesUi extends Composite {
         flowPanel.add(radioFalse);
 
         radioTrue.addValueChangeHandler(new ValueChangeHandler() {
+
             @Override
             public void onValueChange(ValueChangeEvent event) {
                 setDirty(true);
@@ -731,6 +744,7 @@ public class ServicesUi extends Composite {
             }
         });
         radioFalse.addValueChangeHandler(new ValueChangeHandler() {
+
             @Override
             public void onValueChange(ValueChangeEvent event) {
                 setDirty(true);
@@ -743,14 +757,15 @@ public class ServicesUi extends Composite {
 
         formGroup.add(flowPanel);
 
-        fields.add(formGroup);
+        this.fields.add(formGroup);
     }
 
     private void renderChoiceField(final GwtConfigParameter param, boolean isFirstInstance, FormGroup formGroup) {
-        valid.put(param.getId(), true);
+        this.valid.put(param.getId(), true);
 
         if (isFirstInstance) {
             FormLabel formLabel = new FormLabel();
+            formLabel.setTitle(param.getId()); // title is used to hold ID
             formLabel.setText(param.getName());
             if (param.isRequired()) {
                 formLabel.setShowRequiredIndicator(true);
@@ -773,17 +788,18 @@ public class ServicesUi extends Composite {
         while (it.hasNext()) {
             current = it.next();
             listBox.addItem(current);
-            if (param.getDefault() != null && oMap.get(current).equals((String) param.getDefault())) {
+            if (param.getDefault() != null && oMap.get(current).equals(param.getDefault())) {
                 listBox.setSelectedIndex(i);
             }
 
-            if (param.getValue() != null && oMap.get(current).equals((String) param.getValue())) {
+            if (param.getValue() != null && oMap.get(current).equals(param.getValue())) {
                 listBox.setSelectedIndex(i);
             }
             i++;
         }
 
         listBox.addChangeHandler(new ChangeHandler() {
+
             @Override
             public void onChange(ChangeEvent event) {
                 setDirty(true);
@@ -794,13 +810,13 @@ public class ServicesUi extends Composite {
 
         formGroup.add(listBox);
 
-        fields.add(formGroup);
+        this.fields.add(formGroup);
     }
 
     // Checks if all the fields are valid according to the Validate() method
     private boolean isValid() {
         // check if all fields are valid
-        for (Map.Entry<String, Boolean> entry : valid.entrySet()) {
+        for (Map.Entry<String, Boolean> entry : this.valid.entrySet()) {
             if (!entry.getValue()) {
                 return false;
             }
@@ -818,28 +834,33 @@ public class ServicesUi extends Composite {
     // TODO: validation should be done like in the old web ui: cleaner approach
     private List<EditorError> validateTextBox(GwtConfigParameter param, TextBoxBase box, FormGroup group) {
         group.setValidationState(ValidationState.NONE);
-        valid.put(param.getName(), true);
+        this.valid.put(param.getName(), true);
 
         List<EditorError> result = new ArrayList<EditorError>();
 
         if (param.isRequired() && (box.getText().trim() == null || "".equals(box.getText().trim()))) {
-            valid.put(param.getId(), false);
+            this.valid.put(param.getId(), false);
             result.add(new BasicEditorError(box, box.getText(), MSGS.formRequiredParameter()));
         }
 
         if (box.getText().trim() != null && !"".equals(box.getText().trim())) {
             if (param.getType().equals(GwtConfigParameterType.CHAR)) {
                 if (box.getText().trim().length() > 1) {
-                    valid.put(param.getId(), false);
-                    result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(Integer.toString(box.getText().trim().length()), box.getText())));
+                    this.valid.put(param.getId(), false);
+                    result.add(new BasicEditorError(box, box.getText(),
+                            MessageUtils.get(Integer.toString(box.getText().trim().length()), box.getText())));
                 }
-                if (param.getMin() != null && Character.valueOf(param.getMin().charAt(0)).charValue() > Character.valueOf(box.getText().trim().charAt(0)).charValue()) {
-                    valid.put(param.getId(), false);
-                    result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MIN_VALUE, Character.valueOf(param.getMin().charAt(0)).charValue())));
+                if (param.getMin() != null && Character.valueOf(param.getMin().charAt(0)).charValue() > Character
+                        .valueOf(box.getText().trim().charAt(0)).charValue()) {
+                    this.valid.put(param.getId(), false);
+                    result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MIN_VALUE,
+                            Character.valueOf(param.getMin().charAt(0)).charValue())));
                 }
-                if (param.getMax() != null && Character.valueOf(param.getMax().charAt(0)).charValue() < Character.valueOf(box.getText().trim().charAt(0)).charValue()) {
-                    valid.put(param.getId(), false);
-                    result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MAX_VALUE, Character.valueOf(param.getMax().charAt(0)).charValue())));
+                if (param.getMax() != null && Character.valueOf(param.getMax().charAt(0)).charValue() < Character
+                        .valueOf(box.getText().trim().charAt(0)).charValue()) {
+                    this.valid.put(param.getId(), false);
+                    result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MAX_VALUE,
+                            Character.valueOf(param.getMax().charAt(0)).charValue())));
                 }
             } else if (param.getType().equals(GwtConfigParameterType.STRING)) {
                 int configMinValue = 0;
@@ -855,13 +876,15 @@ public class ServicesUi extends Composite {
                     errorLogger.log(Level.SEVERE, "Configuration max value error! Applying UI defaults...");
                 }
 
-                if ((String.valueOf(box.getText().trim()).length()) < configMinValue) {
-                    valid.put(param.getName(), false);
-                    result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MIN_VALUE, configMinValue)));
+                if (String.valueOf(box.getText().trim()).length() < configMinValue) {
+                    this.valid.put(param.getName(), false);
+                    result.add(new BasicEditorError(box, box.getText(),
+                            MessageUtils.get(CONFIG_MIN_VALUE, configMinValue)));
                 }
-                if ((String.valueOf(box.getText().trim()).length()) > configMaxValue) {
-                    valid.put(param.getName(), false);
-                    result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MAX_VALUE, configMaxValue)));
+                if (String.valueOf(box.getText().trim()).length() > configMaxValue) {
+                    this.valid.put(param.getName(), false);
+                    result.add(new BasicEditorError(box, box.getText(),
+                            MessageUtils.get(CONFIG_MAX_VALUE, configMaxValue)));
                 }
             } else {
                 try {
@@ -869,67 +892,79 @@ public class ServicesUi extends Composite {
                     if (param.getType().equals(GwtConfigParameterType.FLOAT)) {
                         Float uiValue = Float.parseFloat(box.getText().trim());
                         if (param.getMin() != null && Float.parseFloat(param.getMin()) > uiValue) {
-                            valid.put(param.getId(), false);
-                            result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MIN_VALUE, param.getMin())));
+                            this.valid.put(param.getId(), false);
+                            result.add(new BasicEditorError(box, box.getText(),
+                                    MessageUtils.get(CONFIG_MIN_VALUE, param.getMin())));
                         }
                         if (param.getMax() != null && Float.parseFloat(param.getMax()) < uiValue) {
-                            valid.put(param.getId(), false);
-                            result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MAX_VALUE, param.getMax())));
+                            this.valid.put(param.getId(), false);
+                            result.add(new BasicEditorError(box, box.getText(),
+                                    MessageUtils.get(CONFIG_MAX_VALUE, param.getMax())));
                         }
                     } else if (param.getType().equals(GwtConfigParameterType.INTEGER)) {
                         Integer uiValue = Integer.parseInt(box.getText().trim());
                         if (param.getMin() != null && Integer.parseInt(param.getMin()) > uiValue) {
-                            valid.put(param.getId(), false);
-                            result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MIN_VALUE, param.getMin())));
+                            this.valid.put(param.getId(), false);
+                            result.add(new BasicEditorError(box, box.getText(),
+                                    MessageUtils.get(CONFIG_MIN_VALUE, param.getMin())));
                         }
                         if (param.getMax() != null && Integer.parseInt(param.getMax()) < uiValue) {
-                            valid.put(param.getId(), false);
-                            result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MAX_VALUE, param.getMax())));
+                            this.valid.put(param.getId(), false);
+                            result.add(new BasicEditorError(box, box.getText(),
+                                    MessageUtils.get(CONFIG_MAX_VALUE, param.getMax())));
                         }
                     } else if (param.getType().equals(GwtConfigParameterType.SHORT)) {
                         Short uiValue = Short.parseShort(box.getText().trim());
                         if (param.getMin() != null && Short.parseShort(param.getMin()) > uiValue) {
-                            valid.put(param.getId(), false);
-                            result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MIN_VALUE, param.getMin())));
+                            this.valid.put(param.getId(), false);
+                            result.add(new BasicEditorError(box, box.getText(),
+                                    MessageUtils.get(CONFIG_MIN_VALUE, param.getMin())));
                         }
                         if (param.getMax() != null && Short.parseShort(param.getMax()) < uiValue) {
-                            valid.put(param.getId(), false);
-                            result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MAX_VALUE, param.getMax())));
+                            this.valid.put(param.getId(), false);
+                            result.add(new BasicEditorError(box, box.getText(),
+                                    MessageUtils.get(CONFIG_MAX_VALUE, param.getMax())));
                         }
                     } else if (param.getType().equals(GwtConfigParameterType.BYTE)) {
                         Byte uiValue = Byte.parseByte(box.getText().trim());
                         if (param.getMin() != null && Byte.parseByte(param.getMin()) > uiValue) {
-                            valid.put(param.getId(), false);
-                            result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MIN_VALUE, param.getMin())));
+                            this.valid.put(param.getId(), false);
+                            result.add(new BasicEditorError(box, box.getText(),
+                                    MessageUtils.get(CONFIG_MIN_VALUE, param.getMin())));
                         }
                         if (param.getMax() != null && Byte.parseByte(param.getMax()) < uiValue) {
-                            valid.put(param.getId(), false);
-                            result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MAX_VALUE, param.getMax())));
+                            this.valid.put(param.getId(), false);
+                            result.add(new BasicEditorError(box, box.getText(),
+                                    MessageUtils.get(CONFIG_MAX_VALUE, param.getMax())));
                         }
                     } else if (param.getType().equals(GwtConfigParameterType.LONG)) {
                         Long uiValue = Long.parseLong(box.getText().trim());
                         if (param.getMin() != null && Long.parseLong(param.getMin()) > uiValue) {
-                            valid.put(param.getId(), false);
-                            result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MIN_VALUE, param.getMin())));
+                            this.valid.put(param.getId(), false);
+                            result.add(new BasicEditorError(box, box.getText(),
+                                    MessageUtils.get(CONFIG_MIN_VALUE, param.getMin())));
                         }
                         if (param.getMax() != null && Long.parseLong(param.getMax()) < uiValue) {
-                            valid.put(param.getId(), false);
-                            result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MAX_VALUE, param.getMax())));
+                            this.valid.put(param.getId(), false);
+                            result.add(new BasicEditorError(box, box.getText(),
+                                    MessageUtils.get(CONFIG_MAX_VALUE, param.getMax())));
                         }
                     } else if (param.getType().equals(GwtConfigParameterType.DOUBLE)) {
                         Double uiValue = Double.parseDouble(box.getText().trim());
                         if (param.getMin() != null && Double.parseDouble(param.getMin()) > uiValue) {
-                            valid.put(param.getId(), false);
-                            result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MIN_VALUE, param.getMin())));
+                            this.valid.put(param.getId(), false);
+                            result.add(new BasicEditorError(box, box.getText(),
+                                    MessageUtils.get(CONFIG_MIN_VALUE, param.getMin())));
 
                         }
                         if (param.getMax() != null && Double.parseDouble(param.getMax()) < uiValue) {
-                            valid.put(param.getId(), false);
-                            result.add(new BasicEditorError(box, box.getText(), MessageUtils.get(CONFIG_MAX_VALUE, param.getMax())));
+                            this.valid.put(param.getId(), false);
+                            result.add(new BasicEditorError(box, box.getText(),
+                                    MessageUtils.get(CONFIG_MAX_VALUE, param.getMax())));
                         }
                     }
                 } catch (NumberFormatException e) {
-                    valid.put(param.getId(), false);
+                    this.valid.put(param.getId(), false);
                     result.add(new BasicEditorError(box, box.getText(), e.getLocalizedMessage()));
                 }
             }
@@ -939,7 +974,7 @@ public class ServicesUi extends Composite {
     }
 
     private void initInvalidDataModal() {
-        incompleteFieldsModal.setTitle(MSGS.warning());
-        incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
+        this.incompleteFieldsModal.setTitle(MSGS.warning());
+        this.incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
     }
 }

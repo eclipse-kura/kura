@@ -19,19 +19,22 @@ import org.eclipse.kura.net.wifi.WifiMode;
 
 public class WifiInterfaceState extends InterfaceState {
 
-	/**
-	 * WifiInterfaceState
-	 * 
-	 * @param interfaceName - interface name as {@link String}
-	 * @param wifiMode configured wifi mode as {@link WifiMode}
-	 * @throws KuraException
-	 */
-	public WifiInterfaceState(String interfaceName, WifiMode wifiMode) throws KuraException {
-		super(NetInterfaceType.WIFI, interfaceName);
-		if (WifiMode.MASTER.equals(wifiMode)) {
-			if (HostapdManager.isRunning(interfaceName) && WifiMode.MASTER.equals(LinuxNetworkUtil.getWifiMode(interfaceName))) {
-				m_link = true;
-			}
-		}
-	}
+    /**
+     * WifiInterfaceState
+     *
+     * @param interfaceName
+     *            - interface name as {@link String}
+     * @param wifiMode
+     *            configured wifi mode as {@link WifiMode}
+     * @throws KuraException
+     */
+    public WifiInterfaceState(String interfaceName, WifiMode wifiMode) throws KuraException {
+        super(NetInterfaceType.WIFI, interfaceName);
+        if (WifiMode.MASTER.equals(wifiMode)) {
+            if (HostapdManager.isRunning(interfaceName)
+                    && WifiMode.MASTER.equals(LinuxNetworkUtil.getWifiMode(interfaceName))) {
+                this.m_link = true;
+            }
+        }
+    }
 }

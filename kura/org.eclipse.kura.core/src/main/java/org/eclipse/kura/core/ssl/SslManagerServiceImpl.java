@@ -65,15 +65,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SslManagerServiceImpl implements SslManagerService, ConfigurableComponent {
+
     private static final Logger s_logger = LoggerFactory.getLogger(SslManagerServiceImpl.class);
 
     private SslServiceListeners m_sslServiceListeners;
 
-    private ComponentContext         m_ctx;
-    private Map<String, Object>      m_properties;
+    private ComponentContext m_ctx;
+    private Map<String, Object> m_properties;
     private SslManagerServiceOptions m_options;
 
-    private CryptoService        m_cryptoService;
+    private CryptoService m_cryptoService;
     private ConfigurationService m_configurationService;
 
     private Timer m_timer;
@@ -123,20 +124,19 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
         //
         // save the bundle context and the properties
-        m_ctx = componentContext;
-        m_properties = properties;
-        m_options = new SslManagerServiceOptions(properties);
-        m_sslSocketFactories = new ConcurrentHashMap<ConnectionSslOptions, SSLSocketFactory>();
+        this.m_ctx = componentContext;
+        this.m_properties = properties;
+        this.m_options = new SslManagerServiceOptions(properties);
+        this.m_sslSocketFactories = new ConcurrentHashMap<ConnectionSslOptions, SSLSocketFactory>();
 
         ServiceTracker<SslServiceListener, SslServiceListener> listenersTracker = new ServiceTracker<SslServiceListener, SslServiceListener>(
-                componentContext.getBundleContext(),
-                SslServiceListener.class, null);
+                componentContext.getBundleContext(), SslServiceListener.class, null);
 
         // Deferred open of tracker to prevent
         // java.lang.Exception: Recursive invocation of
         // ServiceFactory.getService
         // on ProSyst
-        m_sslServiceListeners = new SslServiceListeners(listenersTracker);
+        this.m_sslServiceListeners = new SslServiceListeners(listenersTracker);
 
         // 1. If the framework is running in secure mode automatically
         // change the default keystore password with a randomly generated one.
@@ -152,19 +152,19 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     public void updated(Map<String, Object> properties) {
         s_logger.info("updated...");
 
-        m_properties = properties;
-        m_options = new SslManagerServiceOptions(properties);
+        this.m_properties = properties;
+        this.m_options = new SslManagerServiceOptions(properties);
 
         changeKeyStorePassword();
 
         // Notify listeners that service has been updated
-        m_sslServiceListeners.onConfigurationUpdated();
+        this.m_sslServiceListeners.onConfigurationUpdated();
     }
 
     protected void deactivate(ComponentContext componentContext) {
         s_logger.info("deactivate...");
-        m_timer.cancel();
-        m_sslServiceListeners.close();
+        this.m_timer.cancel();
+        this.m_sslServiceListeners.close();
     }
 
     // ----------------------------------------------------------------
@@ -174,19 +174,17 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     // ----------------------------------------------------------------
 
     @Override
-    public SSLSocketFactory getSSLSocketFactory()
-            throws GeneralSecurityException, IOException {
+    public SSLSocketFactory getSSLSocketFactory() throws GeneralSecurityException, IOException {
         return getSSLSocketFactory("");
     }
 
     @Override
-    public SSLSocketFactory getSSLSocketFactory(String keyAlias)
-            throws GeneralSecurityException, IOException {
-        String protocol = m_options.getSslProtocol();
-        String ciphers = m_options.getSslCiphers();
-        String trustStore = m_options.getSslKeyStore();
+    public SSLSocketFactory getSSLSocketFactory(String keyAlias) throws GeneralSecurityException, IOException {
+        String protocol = this.m_options.getSslProtocol();
+        String ciphers = this.m_options.getSslCiphers();
+        String trustStore = this.m_options.getSslKeyStore();
         char[] keyStorePassword = getKeyStorePassword();
-        boolean hostnameVerifcation = m_options.isSslHostnameVerification();
+        boolean hostnameVerifcation = this.m_options.isSslHostnameVerification();
 
         // Note that the SslManagerService configuration now uses a single
         // trust/keystore.
@@ -194,30 +192,22 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         // getSslTrustStore().
         // Also the metatype property ssl.default.trustStore should be changed
         // accordingly.
-        return getSSLSocketFactory(protocol, ciphers, trustStore, trustStore,
-                keyStorePassword, keyAlias, hostnameVerifcation);
+        return getSSLSocketFactory(protocol, ciphers, trustStore, trustStore, keyStorePassword, keyAlias,
+                hostnameVerifcation);
     }
 
     @Override
-    public SSLSocketFactory getSSLSocketFactory(String protocol,
-            String ciphers,
-            String trustStore,
-            String keyStore,
-            char[] keyStorePassword,
-            String keyAlias) throws GeneralSecurityException, IOException {
-        return getSSLSocketFactory(protocol, ciphers, trustStore, keyStore, keyStorePassword, keyAlias, m_options.isSslHostnameVerification());
+    public SSLSocketFactory getSSLSocketFactory(String protocol, String ciphers, String trustStore, String keyStore,
+            char[] keyStorePassword, String keyAlias) throws GeneralSecurityException, IOException {
+        return getSSLSocketFactory(protocol, ciphers, trustStore, keyStore, keyStorePassword, keyAlias,
+                this.m_options.isSslHostnameVerification());
     }
 
     @Override
-    public SSLSocketFactory getSSLSocketFactory(String protocol,
-            String ciphers,
-            String trustStore,
-            String keyStore,
-            char[] keyStorePassword,
-            String keyAlias,
-            boolean hostnameVerification)
+    public SSLSocketFactory getSSLSocketFactory(String protocol, String ciphers, String trustStore, String keyStore,
+            char[] keyStorePassword, String keyAlias, boolean hostnameVerification)
                     throws GeneralSecurityException, IOException {
-        ConnectionSslOptions connSslOpts = new ConnectionSslOptions(m_options);
+        ConnectionSslOptions connSslOpts = new ConnectionSslOptions(this.m_options);
         connSslOpts.setProtocol(protocol);
         connSslOpts.setCiphers(ciphers);
         connSslOpts.setTrustStore(trustStore);
@@ -234,11 +224,10 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     }
 
     @Override
-    public X509Certificate[] getTrustCertificates()
-            throws GeneralSecurityException, IOException {
+    public X509Certificate[] getTrustCertificates() throws GeneralSecurityException, IOException {
         // trust store
         X509Certificate[] cacerts = null;
-        String trustStore = m_options.getSslKeyStore();
+        String trustStore = this.m_options.getSslKeyStore();
         TrustManager[] tms = getTrustManagers(trustStore);
         for (TrustManager tm : tms) {
             if (tm instanceof X509TrustManager) {
@@ -275,7 +264,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
         try {
             // load the trust store
-            String trustStore = m_options.getSslKeyStore();
+            String trustStore = this.m_options.getSslKeyStore();
             KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
             File fTrustStore = new File(trustStore);
             char[] trustStorePassword = getKeyStorePassword();
@@ -299,13 +288,12 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     }
 
     @Override
-    public void deleteTrustCertificate(String alias)
-            throws GeneralSecurityException, IOException {
+    public void deleteTrustCertificate(String alias) throws GeneralSecurityException, IOException {
         InputStream tsReadStream = null;
 
         try {
             // load the trust store
-            String trustStore = m_options.getSslKeyStore();
+            String trustStore = this.m_options.getSslKeyStore();
             KeyStore ts = KeyStore.getInstance(KeyStore.getDefaultType());
             tsReadStream = new FileInputStream(trustStore);
             char[] trustStorePassword = getKeyStorePassword();
@@ -316,6 +304,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
             // save it
             ts.store(new LoadStoreParameter() {
+
                 @Override
                 public ProtectionParameter getProtectionParameter() {
                     PasswordProtection passwordProtection = null;
@@ -332,9 +321,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     }
 
     @Override
-    public void installPrivateKey(String alias, PrivateKey privateKey, char[] password,
-            Certificate[] publicCerts)
-                    throws GeneralSecurityException, IOException {
+    public void installPrivateKey(String alias, PrivateKey privateKey, char[] password, Certificate[] publicCerts)
+            throws GeneralSecurityException, IOException {
         // Note that password parameter is unused
 
         InputStream tsReadStream = null;
@@ -342,7 +330,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
         try {
             // load the key store
-            String keyStore = m_options.getSslKeyStore();
+            String keyStore = this.m_options.getSslKeyStore();
             KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
             File fKeyStore = new File(keyStore);
             char[] keyStorePassword = getKeyStorePassword();
@@ -368,7 +356,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
     @Override
     public SslManagerServiceOptions getConfigurationOptions() throws GeneralSecurityException, IOException {
-        return m_options;
+        return this.m_options;
     }
 
     // ----------------------------------------------------------------
@@ -384,7 +372,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         // for a new alias.
         // This allows for SSL Context Resumption and abbreviated SSL handshake
         // in case of reconnects to the same host.
-        SSLSocketFactory factory = m_sslSocketFactories.get(options);
+        SSLSocketFactory factory = this.m_sslSocketFactories.get(options);
         if (factory == null) {
             s_logger.info("Creating a new SSLSocketFactory instance");
 
@@ -396,19 +384,16 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
             KeyManager[] kms = getKeyManagers(options.getKeyStore(), options.getKeyStorePassword(), options.getAlias());
 
-            factory = createSSLSocketFactory(options.getProtocol(), options.getCiphers(), kms, tms, options.getHostnameVerification());
-            m_sslSocketFactories.put(options, factory);
+            factory = createSSLSocketFactory(options.getProtocol(), options.getCiphers(), kms, tms,
+                    options.getHostnameVerification());
+            this.m_sslSocketFactories.put(options, factory);
         }
 
         return factory;
     }
 
-    private static SSLSocketFactory createSSLSocketFactory(String protocol,
-            String ciphers,
-            KeyManager[] kms,
-            TrustManager[] tms,
-            boolean hostnameVerification)
-                    throws NoSuchAlgorithmException, KeyManagementException {
+    private static SSLSocketFactory createSSLSocketFactory(String protocol, String ciphers, KeyManager[] kms,
+            TrustManager[] tms, boolean hostnameVerification) throws NoSuchAlgorithmException, KeyManagementException {
         // inits the SSL context
         SSLContext sslCtx;
         if (protocol == null) {
@@ -453,10 +438,9 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         return tmf.getTrustManagers();
     }
 
-    private KeyManager[] getKeyManagers(String keyStore,
-            char[] keyStorePassword,
-            String keyAlias)
-                    throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, UnrecoverableEntryException {
+    private KeyManager[] getKeyManagers(String keyStore, char[] keyStorePassword, String keyAlias)
+            throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
+            UnrecoverableEntryException {
         KeyStore ks = getKeyStore(keyStore, keyStorePassword, keyAlias);
         KeyManager[] kms = null;
         if (ks != null) {
@@ -467,12 +451,10 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         return kms;
     }
 
-    private KeyStore getKeyStore(String keyStore,
-            char[] keyStorePassword,
-            String keyAlias)
-                    throws KeyStoreException, FileNotFoundException,
-                    IOException, NoSuchAlgorithmException,
-                    CertificateException, UnrecoverableEntryException {
+    private KeyStore getKeyStore(String keyStore, char[] keyStorePassword, String keyAlias)
+            throws KeyStoreException, FileNotFoundException, IOException, NoSuchAlgorithmException,
+            CertificateException, UnrecoverableEntryException {
+
         KeyStore ks = null;
         if (keyStore != null) {
 
@@ -495,7 +477,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
                             ks.setEntry(keyAlias, entry, pp);
                         }
                     } else {
-                        s_logger.info("Could not find alias {} in key store at {}. Using Java default.", keyAlias, keyStore);
+                        s_logger.info("Could not find alias {} in key store at {}. Using Java default.", keyAlias,
+                                keyStore);
                         ks = null;
                     }
                 }
@@ -506,7 +489,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
             }
         }
 
-        if (m_cryptoService.isFrameworkSecure()) {
+        if (this.m_cryptoService.isFrameworkSecure()) {
             if (keyStore == null) {
                 s_logger.warn("The environment is secured but the provided keystore is null");
                 throw new KeyStoreException("The environment is secured but the provided keystore is null");
@@ -520,7 +503,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     }
 
     private char[] getKeyStorePassword() {
-        return m_cryptoService.getKeyStorePassword(m_options.getSslKeyStore());
+        return this.m_cryptoService.getKeyStorePassword(this.m_options.getSslKeyStore());
     }
 
     private static boolean isKeyStoreAccessible(String location, char[] password) {
@@ -545,8 +528,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         }
     }
 
-    private static void saveKeyStore(KeyStore keystore, String location, char[] newPassword)
-            throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException {
+    private static void saveKeyStore(KeyStore keystore, String location, char[] newPassword) throws IOException,
+            KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(location);
@@ -568,19 +551,22 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
     private boolean isDefaultPassword() {
         try {
-            boolean isDefaultFromInstaller = isKeyStoreAccessible(m_options.getSslKeyStore(), SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.toCharArray());
+            boolean isDefaultFromInstaller = isKeyStoreAccessible(this.m_options.getSslKeyStore(),
+                    SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.toCharArray());
 
             boolean isDefaultFromUser = false;
-            char[] kuraPropertiesKeystorePassword = m_systemService.getJavaKeyStorePassword();
+            char[] kuraPropertiesKeystorePassword = this.m_systemService.getJavaKeyStorePassword();
             if (kuraPropertiesKeystorePassword != null) {
-                isDefaultFromUser = isKeyStoreAccessible(m_options.getSslKeyStore(), kuraPropertiesKeystorePassword);
+                isDefaultFromUser = isKeyStoreAccessible(this.m_options.getSslKeyStore(),
+                        kuraPropertiesKeystorePassword);
             }
 
             boolean isDefaultFromCrypto = false;
-            char[] cryptoPassword = m_cryptoService.getKeyStorePassword(m_options.getSslKeyStore());
-            char[] snapshotPassword = m_cryptoService.decryptAes(m_options.getSslKeystorePassword().toCharArray());
+            char[] cryptoPassword = this.m_cryptoService.getKeyStorePassword(this.m_options.getSslKeyStore());
+            char[] snapshotPassword = this.m_cryptoService
+                    .decryptAes(this.m_options.getSslKeystorePassword().toCharArray());
             if (Arrays.equals(SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.toCharArray(), snapshotPassword)) {
-                isDefaultFromCrypto = isKeyStoreAccessible(m_options.getSslKeyStore(), cryptoPassword);
+                isDefaultFromCrypto = isKeyStoreAccessible(this.m_options.getSslKeyStore(), cryptoPassword);
             }
 
             return isDefaultFromInstaller || isDefaultFromUser || isDefaultFromCrypto;
@@ -594,52 +580,55 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     private boolean changeDefaultKeystorePassword() {
         boolean result = false;
 
-        m_timer = new Timer(true);
+        this.m_timer = new Timer(true);
         char[] snapshotPassword = null;
         boolean needsPasswordChange = true;
         try {
-            snapshotPassword = m_cryptoService.decryptAes(m_options.getSslKeystorePassword().toCharArray());
+            snapshotPassword = this.m_cryptoService.decryptAes(this.m_options.getSslKeystorePassword().toCharArray());
             needsPasswordChange = isDefaultPassword();
-        } catch (KuraException e) {}
+        } catch (KuraException e) {
+        }
 
         // The password in the snapshot is the default password (or cannot be
         // decrypted).
         // If the framework is running in secure mode we must change the
         // password.
         // The keystore must be accessible with the old/default password.
-        char[] oldPassword = m_cryptoService.getKeyStorePassword(m_options.getSslKeyStore());
-        if (needsPasswordChange && snapshotPassword != null && isKeyStoreAccessible(m_options.getSslKeyStore(), snapshotPassword)) {
+        char[] oldPassword = this.m_cryptoService.getKeyStorePassword(this.m_options.getSslKeyStore());
+        if (needsPasswordChange && snapshotPassword != null
+                && isKeyStoreAccessible(this.m_options.getSslKeyStore(), snapshotPassword)) {
             oldPassword = snapshotPassword;
         }
-        if (m_cryptoService.isFrameworkSecure() &&
-                needsPasswordChange &&
-                oldPassword != null &&
-                isKeyStoreAccessible(m_options.getSslKeyStore(), oldPassword)) {
+        if (this.m_cryptoService.isFrameworkSecure() && needsPasswordChange && oldPassword != null
+                && isKeyStoreAccessible(this.m_options.getSslKeyStore(), oldPassword)) {
             try {
                 // generate a new random password
                 char[] newPassword = new BigInteger(160, new SecureRandom()).toString(32).toCharArray();
 
                 // change the password to the keystore
-                changeKeyStorePassword(m_options.getSslKeyStore(), oldPassword, newPassword);
+                changeKeyStorePassword(this.m_options.getSslKeyStore(), oldPassword, newPassword);
 
                 // change the CryptoService SSL keystore password
-                m_cryptoService.setKeyStorePassword(m_options.getSslKeyStore(), newPassword);
+                this.m_cryptoService.setKeyStorePassword(this.m_options.getSslKeyStore(), newPassword);
 
                 // update our configuration with the newly generated password
-                final String pid = (String) m_properties.get("service.pid");
+                final String pid = (String) this.m_properties.get("service.pid");
 
-                Map<String, Object> props = new HashMap<String, Object>(m_properties);
+                Map<String, Object> props = new HashMap<String, Object>(this.m_properties);
                 props.put(SslManagerServiceOptions.PROP_TRUST_PASSWORD, new Password(newPassword));
                 final Map<String, Object> theProperties = props;
 
-                m_timer.scheduleAtFixedRate(new TimerTask() {
+                this.m_timer.scheduleAtFixedRate(new TimerTask() {
+
                     @Override
                     public void run() {
                         try {
-                            if (m_ctx.getServiceReference() != null &&
-                                    m_configurationService.getComponentConfiguration(pid) != null) {
-                                m_configurationService.updateConfiguration(pid, theProperties);
-                                m_timer.cancel();
+                            if (SslManagerServiceImpl.this.m_ctx.getServiceReference() != null
+                                    && SslManagerServiceImpl.this.m_configurationService
+                                            .getComponentConfiguration(pid) != null) {
+                                SslManagerServiceImpl.this.m_configurationService.updateConfiguration(pid,
+                                        theProperties);
+                                SslManagerServiceImpl.this.m_timer.cancel();
                             } else {
                                 s_logger.info("No service or configuration available yet. Sleeping...");
                             }
@@ -659,12 +648,12 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     }
 
     private boolean changeKeyStorePassword() {
-        String password = m_options.getSslKeystorePassword();
-        char[] oldPassword = m_cryptoService.getKeyStorePassword(m_options.getSslKeyStore());
+        String password = this.m_options.getSslKeystorePassword();
+        char[] oldPassword = this.m_cryptoService.getKeyStorePassword(this.m_options.getSslKeyStore());
         char[] newPassword = oldPassword;
         if (password != null) {
             try {
-                newPassword = m_cryptoService.decryptAes(password.toCharArray());
+                newPassword = this.m_cryptoService.decryptAes(password.toCharArray());
             } catch (KuraException e) {
                 s_logger.warn("Failed to decrypt keystore password");
             }
@@ -677,14 +666,14 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
         if (!Arrays.equals(oldPassword, newPassword)) {
             try {
-                if (isKeyStoreAccessible(m_options.getSslKeyStore(), oldPassword)) {
-                    changeKeyStorePassword(m_options.getSslKeyStore(), oldPassword, newPassword);
-                } else if (isKeyStoreAccessible(m_options.getSslKeyStore(), newPassword)) {
-                    changeKeyStorePassword(m_options.getSslKeyStore(), newPassword, newPassword);
+                if (isKeyStoreAccessible(this.m_options.getSslKeyStore(), oldPassword)) {
+                    changeKeyStorePassword(this.m_options.getSslKeyStore(), oldPassword, newPassword);
+                } else if (isKeyStoreAccessible(this.m_options.getSslKeyStore(), newPassword)) {
+                    changeKeyStorePassword(this.m_options.getSslKeyStore(), newPassword, newPassword);
                 } else {
                     return false;
                 }
-                m_cryptoService.setKeyStorePassword(m_options.getSslKeyStore(), newPassword);
+                this.m_cryptoService.setKeyStorePassword(this.m_options.getSslKeyStore(), newPassword);
                 return true;
             } catch (Exception e) {
                 s_logger.warn("Failed to change keystore password");
@@ -693,8 +682,9 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         return false;
     }
 
-    private void changeKeyStorePassword(String location, char[] oldPassword, char[] newPassword)
-            throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableEntryException {
+    private void changeKeyStorePassword(String location, char[] oldPassword, char[] newPassword) throws IOException,
+            NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableEntryException {
+
         KeyStore keystore = loadKeyStore(location, oldPassword);
 
         updateKeyEntiesPasswords(keystore, oldPassword, newPassword);

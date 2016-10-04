@@ -11,26 +11,25 @@
  *******************************************************************************/
 package org.eclipse.kura.core.deployment.xml;
 
-
 public class XmlBundleInfo {
-	
-	private String name;
-	
-	private String version;
 
-	public String getName() {
-		return name;
-	}
+    private String name;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    private String version;
 
-	public String getVersion() {
-		return version;
-	}
+    public String getName() {
+        return this.name;
+    }
 
-	public void setVersion(String version) {
-		this.version = version;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getVersion() {
+        return this.version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
 }

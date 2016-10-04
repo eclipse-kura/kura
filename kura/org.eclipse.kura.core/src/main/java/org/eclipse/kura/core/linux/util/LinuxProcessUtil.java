@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,24 +8,24 @@
  *
  * Contributors:
  *     Eurotech
- *     Jens Reimann <jreimann@redhat.com> - Clean up kura properties handling
+ *     Red Hat Inc - Clean up kura properties handling
  *******************************************************************************/
 package org.eclipse.kura.core.linux.util;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
-import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.system.SystemService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,27 +33,26 @@ public class LinuxProcessUtil {
 
     private static final Logger s_logger = LoggerFactory.getLogger(LinuxProcessUtil.class);
 
-    private static String s_platform = null;
+    private static final String PLATFORM_INTEL_EDISON = "intel-edison";
+    private static final boolean IS_INTEL_EDISON;
 
     static {
-        String uriSpec = System.getProperty(SystemService.KURA_CONFIG);
-        Properties props = new Properties();
-        FileInputStream fis = null;
+        final BundleContext ctx = FrameworkUtil.getBundle(LinuxProcessUtil.class).getBundleContext();
+
+        final ServiceReference<SystemService> systemServiceRef = ctx.getServiceReference(SystemService.class);
+        if (systemServiceRef == null) {
+            throw new IllegalStateException("Unable to find instance of: " + SystemService.class.getName());
+        }
+
+        final SystemService service = ctx.getService(systemServiceRef);
+        if (service == null) {
+            throw new IllegalStateException("Unable to get instance of: " + SystemService.class.getName());
+        }
+
         try {
-            URI uri = new URI(uriSpec);
-            fis = new FileInputStream(new File(uri));
-            props.load(fis);
-            s_platform = props.getProperty("kura.platform");
-        } catch (Exception e) {
-            s_logger.error("Failed to obtain platform information - {}", e);
+            IS_INTEL_EDISON = PLATFORM_INTEL_EDISON.equals(service.getPlatform());
         } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    s_logger.warn("Failed to close file - ", e);
-                }
-            }
+            ctx.ungetService(systemServiceRef);
         }
     }
 
@@ -67,7 +66,7 @@ public class LinuxProcessUtil {
                 try {
                     proc.waitFor();
                 } catch (InterruptedException e) {
-                    s_logger.warn("Interrupted exception - ", e);
+                    e.printStackTrace();
                 }
 
                 s_logger.info(command + " returned with exit value:" + proc.exitValue());
@@ -85,8 +84,10 @@ public class LinuxProcessUtil {
             throw e;
         } finally {
             // FIXME:MC this may lead to a process leak when called with false
-            if (!background && proc != null) {
-                ProcessUtil.destroy(proc);
+            if (!background) {
+                if (proc != null) {
+                    ProcessUtil.destroy(proc);
+                }
             }
         }
     }
@@ -122,6 +123,7 @@ public class LinuxProcessUtil {
                 s_logger.info(command + " returned with exit value:" + exitVal);
             } catch (InterruptedException e) {
                 s_logger.error("error executing " + command + " command" + e);
+                // e.printStackTrace();
             }
 
             ProcessStats stats = new ProcessStats(proc);
@@ -148,6 +150,7 @@ public class LinuxProcessUtil {
                 s_logger.debug("{} returned with exit value:{}", cmdBuilder, +exitVal);
             } catch (InterruptedException e) {
                 s_logger.error("error executing " + command + " command" + e);
+                // e.printStackTrace();
             }
 
             ProcessStats stats = new ProcessStats(proc);
@@ -170,7 +173,7 @@ public class LinuxProcessUtil {
             if (command != null && !command.isEmpty()) {
                 s_logger.trace("searching process list for {}", command);
 
-                if ("intel-edison".equals(s_platform)) {
+                if (IS_INTEL_EDISON) {
                     proc = ProcessUtil.exec("ps");
                 } else {
                     proc = ProcessUtil.exec("ps -ax");
@@ -221,7 +224,7 @@ public class LinuxProcessUtil {
         try {
             if (command != null && !command.isEmpty()) {
                 s_logger.trace("searching process list for {}", command);
-                if ("intel-edison".equals(s_platform)) {
+                if (IS_INTEL_EDISON) {
                     proc = ProcessUtil.exec("ps");
                 } else {
                     proc = ProcessUtil.exec("ps -ax");

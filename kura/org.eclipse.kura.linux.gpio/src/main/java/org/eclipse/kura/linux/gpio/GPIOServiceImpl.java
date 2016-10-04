@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,12 +8,11 @@
  *
  * Contributors:
  *     Eurotech
- *     Jens Reimann <jreimann@redhat.com> - Clean up kura properties handling
+ *     Red Hat Inc - Clean up kura properties handling
  *******************************************************************************/
 package org.eclipse.kura.linux.gpio;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -51,45 +50,86 @@ public class GPIOServiceImpl implements GPIOService {
         this.m_SystemService = null;
     }
 
+    /**
+     * Test if a file is available for loading
+     *
+     * @param path
+     *            the path to thest
+     * @return the path from input which can be used for loading, {@code null}
+     *         if the file is not present or should not be used for loading
+     */
+    private static String whenAvailable(String path) {
+        if (path == null) {
+            return null;
+        }
+
+        if (!path.startsWith("file:")) {
+            path = "file: " + path;
+        }
+
+        try {
+            final File file = new File(new URL(path).toURI());
+            if (!file.isFile()) {
+                return null;
+            }
+            if (!file.canRead()) {
+                return null;
+            }
+
+            return path;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     protected void activate(ComponentContext componentContext) {
         s_logger.debug("activating jdk.dio GPIOService");
 
-        File dioPropsFile = null;
         FileReader fr = null;
         try {
             String configFile = System.getProperty("jdk.dio.registry");
+            if (configFile != null) {
+                configFile = "file:" + configFile;
+            }
+            s_logger.debug("System property location: {}", configFile);
+
+            if (configFile == null) {
+                // Testing for Kura home relative path
+                configFile = whenAvailable(this.m_SystemService.getKuraHome() + File.separator + "jdk.dio.properties");
+                s_logger.debug("Kura Home relative location: {}", configFile);
+            }
+
             if (configFile == null) {
                 // Emulator?
                 configFile = this.m_SystemService.getProperties().getProperty(SystemService.KURA_CONFIG)
                         .replace("kura.properties", "jdk.dio.properties");
-            } else {
-                configFile = "file:" + configFile;
             }
 
-            dioPropsFile = new File(new URL(configFile).toURI());
+            s_logger.debug("Final location: {}", configFile);
+
+            File dioPropsFile = new File(new URL(configFile).toURI());
             if (dioPropsFile.exists()) {
-                Properties dioDefaults = new Properties();
+                final Properties dioDefaults = new Properties();
                 fr = new FileReader(dioPropsFile);
                 dioDefaults.load(fr);
 
+
                 pins.clear();
 
-                for (Map.Entry<Object, Object> entry : dioDefaults.entrySet()) {
-                    Object k = entry.getKey();
+                for (final Map.Entry<Object, Object> entry : dioDefaults.entrySet()) {
+                    final Object k = entry.getKey();
                     // s_logger.info("{} -> {}", k, dioDefaults.get(k));
-                    String line = (String) entry.getValue();
+                    final String line = (String) entry.getValue();
 
-                    JdkDioPin p = JdkDioPin.parseFromProperty(k, line);
+                    final JdkDioPin p = JdkDioPin.parseFromProperty(k, line);
                     if (p != null) {
                         pins.add(p);
                     }
                 }
-                s_logger.info("Loaded File jdk.dio.properties: " + dioPropsFile);
+                s_logger.info("Loaded File jdk.dio.properties: {}", dioPropsFile);
             } else {
-                s_logger.warn("File does not exist: " + dioPropsFile);
+                s_logger.warn("File does not exist: {}", dioPropsFile);
             }
-        } catch (FileNotFoundException e) {
-            s_logger.error("Exception while accessing resource!", e);
         } catch (IOException e) {
             s_logger.error("Exception while accessing resource!", e);
         } catch (URISyntaxException e) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Re-use SystemService for configuration
  *******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux.util;
 
@@ -20,6 +21,10 @@ import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.system.SystemService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,9 +32,31 @@ public class KuranetConfig {
 
     private static final Logger s_logger = LoggerFactory.getLogger(KuranetConfig.class);
 
-    private static final String KURA_DATA_DIR = System.getProperty("kura.data.dir");
-    private static final String KURANET_FILENAME = KURA_DATA_DIR + "/kuranet.conf";
-    private static final String KURANET_TMP_FILENAME = KURA_DATA_DIR + "/kuranet.conf.tmp";
+    private static final String KURA_DATA_DIR;
+    private static final String KURANET_FILENAME;
+    private static final String KURANET_TMP_FILENAME;
+
+    static {
+        final BundleContext ctx = FrameworkUtil.getBundle(KuranetConfig.class).getBundleContext();
+
+        final ServiceReference<SystemService> systemServiceRef = ctx.getServiceReference(SystemService.class);
+        if (systemServiceRef == null) {
+            throw new IllegalStateException("Unable to find instance of: " + SystemService.class.getName());
+        }
+
+        final SystemService service = ctx.getService(systemServiceRef);
+        if (service == null) {
+            throw new IllegalStateException("Unable to get instance of: " + SystemService.class.getName());
+        }
+
+        try {
+            KURA_DATA_DIR = service.getKuraDataDirectory();
+            KURANET_FILENAME = KURA_DATA_DIR + "/kuranet.conf";
+            KURANET_TMP_FILENAME = KURA_DATA_DIR + "/kuranet.conf.tmp";
+        } finally {
+            ctx.ungetService(systemServiceRef);
+        }
+    }
 
     public static Properties getProperties() {
         Properties kuraExtendedProps = null;
@@ -46,13 +73,13 @@ public class KuranetConfig {
                 fis = new FileInputStream(kuranetFile);
                 kuraExtendedProps.load(fis);
             } catch (Exception e) {
-                s_logger.error("Could not load " + KURANET_FILENAME);
+                s_logger.error("Could not load {}", KURANET_FILENAME, e);
             } finally {
                 if (null != fis) {
                     try {
                         fis.close();
                     } catch (IOException e) {
-                        s_logger.error("Could not load " + KURANET_FILENAME);
+                        s_logger.error("Could not load {}", KURANET_FILENAME, e);
                     }
                 }
             }

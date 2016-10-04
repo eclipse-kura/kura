@@ -14,17 +14,16 @@ package org.eclipse.kura.core.util;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-public class NamedThreadFactory implements ThreadFactory
-{
-	public NamedThreadFactory() {
-	}
-	
-	@Override
-	public Thread newThread(Runnable r) 
-	{		
-		Thread t = Executors.defaultThreadFactory().newThread(r);
-		String className = r.getClass().getSimpleName();
-		t.setName(className);
-		return t;
-	}
+public class NamedThreadFactory implements ThreadFactory {
+
+    public NamedThreadFactory() {
+    }
+
+    @Override
+    public Thread newThread(Runnable r) {
+        Thread t = Executors.defaultThreadFactory().newThread(r);
+        String className = r.getClass().getSimpleName();
+        t.setName(className);
+        return t;
+    }
 }

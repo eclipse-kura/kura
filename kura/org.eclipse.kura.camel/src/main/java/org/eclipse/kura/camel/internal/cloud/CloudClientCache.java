@@ -14,11 +14,12 @@ import org.eclipse.kura.cloud.CloudClient;
 
 public interface CloudClientCache {
 
-	interface CloudClientHandle extends AutoCloseable {
-		CloudClient getClient ();
-	}
-	
+    interface CloudClientHandle extends AutoCloseable {
+
+        CloudClient getClient();
+    }
+
     CloudClientHandle getOrCreate(String applicationId);
 
-	void close();
+    void close();
 }

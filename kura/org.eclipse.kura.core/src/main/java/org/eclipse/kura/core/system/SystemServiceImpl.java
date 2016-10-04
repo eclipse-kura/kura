@@ -1090,7 +1090,7 @@ public class SystemServiceImpl implements SystemService {
         if (servicesToIgnore != null && !servicesToIgnore.trim().isEmpty()) {
             String[] servicesArray = servicesToIgnore.split(",");
             if (servicesArray != null && servicesArray.length > 0) {
-                List<String> services = new ArrayList<>();
+                List<String> services = new ArrayList<String>();
                 for (String service : servicesArray) {
                     services.add(service);
                 }

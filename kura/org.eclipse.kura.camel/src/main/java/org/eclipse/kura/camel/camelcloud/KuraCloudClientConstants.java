@@ -9,6 +9,9 @@
  *******************************************************************************/
 package org.eclipse.kura.camel.camelcloud;
 
+/**
+ * Kura cloud constants
+ */
 public final class KuraCloudClientConstants {
 
     public static final String TOPIC = "topic";

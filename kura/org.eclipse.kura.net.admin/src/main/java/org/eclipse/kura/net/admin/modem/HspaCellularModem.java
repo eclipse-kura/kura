@@ -16,5 +16,5 @@ import org.eclipse.kura.net.modem.CellularModem;
 
 public interface HspaCellularModem extends CellularModem {
 
-	 public boolean isSimCardReady() throws KuraException;
+    public boolean isSimCardReady() throws KuraException;
 }

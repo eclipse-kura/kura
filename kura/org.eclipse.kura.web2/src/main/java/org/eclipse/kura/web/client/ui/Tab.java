@@ -12,10 +12,13 @@
 package org.eclipse.kura.web.client.ui;
 
 public interface Tab {
-	
-	public void setDirty(boolean flag);
-	public boolean isDirty();
-	public boolean isValid();
-	public void refresh();
-	
+
+    public void setDirty(boolean flag);
+
+    public boolean isDirty();
+
+    public boolean isValid();
+
+    public void refresh();
+
 }

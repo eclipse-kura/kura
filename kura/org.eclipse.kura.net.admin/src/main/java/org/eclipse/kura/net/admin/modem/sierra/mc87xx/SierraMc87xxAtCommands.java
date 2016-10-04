@@ -13,24 +13,24 @@ package org.eclipse.kura.net.admin.modem.sierra.mc87xx;
 
 public enum SierraMc87xxAtCommands {
 
-	at("at\r\n"),
-	getModelNumber("at+gmm\r\n"),
+    at("at\r\n"),
+    getModelNumber("at+gmm\r\n"),
     getManufacturer("at+gmi\r\n"),
     getSerialNumber("at+gsn\r\n"),
     getFirmwareVersion("at!gver?\r\n"),
     getSystemInfo("at^sysinfo\r\n"),
     getSignalStrength("at+csq\r\n"),
     getMobileStationClass("at+cgclass?\r\n"),
-	pdpContext("AT+CGDCONT"),
-	softReset("at!reset\r\n");
-	
-	private String m_command;
-	
-	private SierraMc87xxAtCommands(String atCommand) {
-		m_command = atCommand;
-	}
-	
-	public String getCommand () {
-		return m_command;
-	}
+    pdpContext("AT+CGDCONT"),
+    softReset("at!reset\r\n");
+
+    private String m_command;
+
+    private SierraMc87xxAtCommands(String atCommand) {
+        this.m_command = atCommand;
+    }
+
+    public String getCommand() {
+        return this.m_command;
+    }
 }

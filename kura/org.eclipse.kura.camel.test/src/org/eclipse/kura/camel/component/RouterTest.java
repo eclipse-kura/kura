@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc - initial API and implementation
  *******************************************************************************/
-package org.eclipse.kura.camel.router;
+package org.eclipse.kura.camel.component;
 
 import static org.junit.Assert.assertEquals;
 
@@ -33,7 +33,7 @@ public class RouterTest extends AbstractRouterTest {
         // Then
 
         // expect no route
-        assertEquals(0, this.router.getContext().getRoutes().size());
+        assertEquals(0, this.router.getCamelContext().getRoutes().size());
     }
 
     @Test
@@ -50,8 +50,8 @@ public class RouterTest extends AbstractRouterTest {
         // Then
 
         // expect one route
-        assertEquals(1, this.router.getContext().getRoutes().size());
-        
+        assertEquals(1, this.router.getCamelContext().getRoutes().size());
+
         // with ID = test1
         assertEquals("test1", firstRoute().getId());
     }
@@ -71,8 +71,8 @@ public class RouterTest extends AbstractRouterTest {
         // Then
 
         // expect still one route
-        assertEquals(1, this.router.getContext().getRoutes().size());
-        
+        assertEquals(1, this.router.getCamelContext().getRoutes().size());
+
         // with ID = test1
         assertEquals("test1", firstRoute().getId());
     }
@@ -90,20 +90,20 @@ public class RouterTest extends AbstractRouterTest {
         this.router.modified(properties1);
 
         // Then
-        
+
         // expect still one route
-        assertEquals(1, this.router.getContext().getRoutes().size());
+        assertEquals(1, this.router.getCamelContext().getRoutes().size());
         // with ID = test1
         assertEquals("test1", firstRoute().getId());
-        
+
         // When
-        
+
         this.router.modified(properties2);
 
         // Then
 
         // expect still one route
-        assertEquals(1, this.router.getContext().getRoutes().size());
+        assertEquals(1, this.router.getCamelContext().getRoutes().size());
         // with ID = test1
         assertEquals("test1", firstRoute().getId());
     }
@@ -116,27 +116,27 @@ public class RouterTest extends AbstractRouterTest {
         final Map<String, Object> properties1 = xmlProperties("xml/test1.xml");
         final Map<String, Object> properties2 = xmlProperties("xml/test2.xml");
 
-        // When
+        // When ... load test1
 
         this.router.modified(properties1);
 
         // Then
 
-        // expect still one route
-        assertEquals(1, this.router.getContext().getRoutes().size());
+        // expect one route
+        assertEquals(1, this.router.getCamelContext().getRoutes().size());
         // with ID = test1
         assertEquals("test1", firstRoute().getId());
-        
-        // When
-        
+
+        // When ... update to test2
+
         this.router.modified(properties2);
-        
+
         // Then
-        
+
         // expect still one route
-        assertEquals(1, this.router.getContext().getRoutes().size());
-        // with ID = test1
-        assertEquals("test1", firstRoute().getId());
+        assertEquals(1, this.router.getCamelContext().getRoutes().size());
+        // with ID = test2
+        assertEquals("test2", firstRoute().getId());
     }
 
 }

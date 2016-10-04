@@ -19,5 +19,5 @@ import org.eclipse.kura.KuraException;
  */
 public interface CommandService {
 
-	public String execute(String cmd) throws KuraException;
+    public String execute(String cmd) throws KuraException;
 }

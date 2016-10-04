@@ -16,19 +16,19 @@ import org.eclipse.kura.net.modem.ModemConnectionStatus;
 import org.eclipse.kura.net.modem.ModemConnectionType;
 import org.eclipse.kura.net.modem.ModemInterfaceAddress;
 
-public class ModemInterfaceAddressImpl extends NetInterfaceAddressImpl implements ModemInterfaceAddress 
-{
-	private int							m_signalStrength;
-	private boolean						m_isRoaming;
-	private ModemConnectionStatus		m_connectionStatus;
-	private long						m_bytesTransmitted;
-	private long						m_bytesReceived;
-	private ModemConnectionType			m_connectionType;	
-	
-	public ModemInterfaceAddressImpl() {
-		super();
-		m_connectionType = ModemConnectionType.PPP; // FIXME - hardcoded
-	}
+public class ModemInterfaceAddressImpl extends NetInterfaceAddressImpl implements ModemInterfaceAddress {
+
+    private int m_signalStrength;
+    private boolean m_isRoaming;
+    private ModemConnectionStatus m_connectionStatus;
+    private long m_bytesTransmitted;
+    private long m_bytesReceived;
+    private ModemConnectionType m_connectionType;
+
+    public ModemInterfaceAddressImpl() {
+        super();
+        this.m_connectionType = ModemConnectionType.PPP; // FIXME - hardcoded
+    }
 
     public ModemInterfaceAddressImpl(ModemInterfaceAddress other) {
         super(other);
@@ -40,58 +40,58 @@ public class ModemInterfaceAddressImpl extends NetInterfaceAddressImpl implement
         this.m_connectionType = other.getConnectionType();
     }
 
-	@Override
-	public int getSignalStrength() {
-		return m_signalStrength;
-	}
-	
-	public void setSignalStrength(int signalStrength) {
-		this.m_signalStrength = signalStrength;
-	}
+    @Override
+    public int getSignalStrength() {
+        return this.m_signalStrength;
+    }
 
-	@Override
-	public boolean isRoaming() {
-		return m_isRoaming;
-	}
-	
-	public void setIsRoaming(boolean isRoaming) {
-		this.m_isRoaming = isRoaming;
-	}
+    public void setSignalStrength(int signalStrength) {
+        this.m_signalStrength = signalStrength;
+    }
 
-	@Override
-	public ModemConnectionStatus getConnectionStatus() {
-		return m_connectionStatus;
-	}
-	
-	public void setConnectionStatus(ModemConnectionStatus connectionStatus) {
-		this.m_connectionStatus = connectionStatus;
-	}
+    @Override
+    public boolean isRoaming() {
+        return this.m_isRoaming;
+    }
 
-	@Override
-	public long getBytesTransmitted() {
-		return m_bytesTransmitted;
-	}
-	
-	public void setBytesTransmitted(long bytesTransmitted) {
-		this.m_bytesTransmitted = bytesTransmitted;
-	}
+    public void setIsRoaming(boolean isRoaming) {
+        this.m_isRoaming = isRoaming;
+    }
 
-	@Override
-	public long getBytesReceived() {
-		return m_bytesReceived;
-	}
-	
-	public void setBytesReceived(long bytesReceived) {
-		this.m_bytesReceived = bytesReceived;
-	}
+    @Override
+    public ModemConnectionStatus getConnectionStatus() {
+        return this.m_connectionStatus;
+    }
 
-	@Override
-	public ModemConnectionType getConnectionType() {
-		return m_connectionType;
-	}
-	
-	public void setConnectionType(ModemConnectionType connectionType) {
-		this.m_connectionType = connectionType;
-	}
+    public void setConnectionStatus(ModemConnectionStatus connectionStatus) {
+        this.m_connectionStatus = connectionStatus;
+    }
+
+    @Override
+    public long getBytesTransmitted() {
+        return this.m_bytesTransmitted;
+    }
+
+    public void setBytesTransmitted(long bytesTransmitted) {
+        this.m_bytesTransmitted = bytesTransmitted;
+    }
+
+    @Override
+    public long getBytesReceived() {
+        return this.m_bytesReceived;
+    }
+
+    public void setBytesReceived(long bytesReceived) {
+        this.m_bytesReceived = bytesReceived;
+    }
+
+    @Override
+    public ModemConnectionType getConnectionType() {
+        return this.m_connectionType;
+    }
+
+    public void setConnectionType(ModemConnectionType connectionType) {
+        this.m_connectionType = connectionType;
+    }
 
 }

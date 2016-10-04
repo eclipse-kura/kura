@@ -16,25 +16,25 @@ import org.eclipse.kura.net.admin.modem.PppPeer;
 import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.modem.ModemConfig;
 
-public class SierraUsb598ConfigGenerator implements ModemPppConfigGenerator{
+public class SierraUsb598ConfigGenerator implements ModemPppConfigGenerator {
 
-	@Override
-	public PppPeer getPppPeer(String deviceId, ModemConfig modemConfig, String logFile,
-			String connectScript, String disconnectScript) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public PppPeer getPppPeer(String deviceId, ModemConfig modemConfig, String logFile, String connectScript,
+            String disconnectScript) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public ModemXchangeScript getConnectScript(ModemConfig modemConfig) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public ModemXchangeScript getConnectScript(ModemConfig modemConfig) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public ModemXchangeScript getDisconnectScript(ModemConfig modemConfig) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public ModemXchangeScript getDisconnectScript(ModemConfig modemConfig) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

@@ -22,10 +22,12 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
  */
 public interface ModemInterfaceAddressConfig extends ModemInterfaceAddress, NetInterfaceAddressConfig {
 
-	/**
-	 * Returns a List of NetConfig Objects associated with a given ModemInterfaceAddressConfig
-	 * for a given ModemInterface
-	 * @return the NetConfig Objects associated with the ModemInterfaceAddressConfig
-	 */
-	public List<NetConfig> getConfigs();
+    /**
+     * Returns a List of NetConfig Objects associated with a given ModemInterfaceAddressConfig
+     * for a given ModemInterface
+     *
+     * @return the NetConfig Objects associated with the ModemInterfaceAddressConfig
+     */
+    @Override
+    public List<NetConfig> getConfigs();
 }

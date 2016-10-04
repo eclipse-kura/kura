@@ -15,15 +15,11 @@ import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.modem.ModemConfig;
 
 public interface ModemPppConfigGenerator {
-    
-    public PppPeer getPppPeer(
-    		String deviceId,
-            ModemConfig modemConfig,
-            String logFile,
-            String connectScript,
+
+    public PppPeer getPppPeer(String deviceId, ModemConfig modemConfig, String logFile, String connectScript,
             String disconnectScript);
-    
+
     public ModemXchangeScript getConnectScript(ModemConfig modemConfig);
-    
+
     public ModemXchangeScript getDisconnectScript(ModemConfig modemConfig);
 }

@@ -16,108 +16,113 @@ import java.util.List;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterfaceAddress;
 
-public class NetInterfaceAddressImpl implements NetInterfaceAddress 
-{
-	private IPAddress                  m_address;
-	private short                      m_networkPrefixLength;
-	private IPAddress		           m_netmask;
-    private IPAddress                  m_gateway;
-	private IPAddress                  m_broadcast;
-	private List<? extends IPAddress>  m_dnsAddresses;
-	
-	public NetInterfaceAddressImpl() {
-	}
-	
-	public NetInterfaceAddressImpl(NetInterfaceAddress other) {
-	    super();
-	    this.m_address = other.getAddress();
+public class NetInterfaceAddressImpl implements NetInterfaceAddress {
+
+    private IPAddress m_address;
+    private short m_networkPrefixLength;
+    private IPAddress m_netmask;
+    private IPAddress m_gateway;
+    private IPAddress m_broadcast;
+    private List<? extends IPAddress> m_dnsAddresses;
+
+    public NetInterfaceAddressImpl() {
+    }
+
+    public NetInterfaceAddressImpl(NetInterfaceAddress other) {
+        super();
+        this.m_address = other.getAddress();
         this.m_networkPrefixLength = other.getNetworkPrefixLength();
         this.m_netmask = other.getNetmask();
         this.m_gateway = other.getGateway();
-	    this.m_broadcast = other.getBroadcast();
-	    this.m_dnsAddresses = other.getDnsServers();
-	}
+        this.m_broadcast = other.getBroadcast();
+        this.m_dnsAddresses = other.getDnsServers();
+    }
 
-	public IPAddress getAddress() {
-		return m_address;
-	}
+    @Override
+    public IPAddress getAddress() {
+        return this.m_address;
+    }
 
-	public void setAddress(IPAddress address) {
-		m_address = address;
-	}
+    public void setAddress(IPAddress address) {
+        this.m_address = address;
+    }
 
-	public short getNetworkPrefixLength() {
-		return m_networkPrefixLength;
-	}
+    @Override
+    public short getNetworkPrefixLength() {
+        return this.m_networkPrefixLength;
+    }
 
-	public void setNetworkPrefixLength(short networkPrefixLength) {
-		m_networkPrefixLength = networkPrefixLength;
-	}
+    public void setNetworkPrefixLength(short networkPrefixLength) {
+        this.m_networkPrefixLength = networkPrefixLength;
+    }
 
-	public IPAddress getNetmask() {
-		return m_netmask;
-	}
+    @Override
+    public IPAddress getNetmask() {
+        return this.m_netmask;
+    }
 
-	public void setNetmask(IPAddress netmask) {
-		m_netmask = netmask;
-	}
-	
+    public void setNetmask(IPAddress netmask) {
+        this.m_netmask = netmask;
+    }
+
+    @Override
     public IPAddress getGateway() {
-        return m_gateway;
+        return this.m_gateway;
     }
-    
+
     public void setGateway(IPAddress gateway) {
-        m_gateway = gateway;
+        this.m_gateway = gateway;
     }
 
-	public IPAddress getBroadcast() {
-		return m_broadcast;
-	}
+    @Override
+    public IPAddress getBroadcast() {
+        return this.m_broadcast;
+    }
 
-	public void setBroadcast(IPAddress broadcast) {
-		m_broadcast = broadcast;
-	}
-	
+    public void setBroadcast(IPAddress broadcast) {
+        this.m_broadcast = broadcast;
+    }
+
     @Override
     public List<? extends IPAddress> getDnsServers() {
-        return m_dnsAddresses;
+        return this.m_dnsAddresses;
     }
-    
+
     public void setDnsServers(List<? extends IPAddress> dnsAddresses) {
-        m_dnsAddresses = dnsAddresses;
+        this.m_dnsAddresses = dnsAddresses;
     }
-	
-	@Override
-	public boolean equals(Object obj) {
-	    if(!(obj instanceof NetInterfaceAddress)) {
-	        return false;
-	    }
-	    
-	    NetInterfaceAddress other = (NetInterfaceAddress) obj;
-        
-        if(m_networkPrefixLength != other.getNetworkPrefixLength()) {
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof NetInterfaceAddress)) {
             return false;
         }
-        if(!compare(m_address, other.getAddress())) {
-	        return false;
-	    }
-        if(!compare(m_netmask, other.getNetmask())) {
-            return false;
-        }	    
-        if(!compare(m_gateway, other.getGateway())) {
+
+        NetInterfaceAddress other = (NetInterfaceAddress) obj;
+
+        if (this.m_networkPrefixLength != other.getNetworkPrefixLength()) {
             return false;
         }
-        if(!compare(m_broadcast, other.getBroadcast())) {
+        if (!compare(this.m_address, other.getAddress())) {
             return false;
         }
-        if(!compare(m_dnsAddresses, other.getDnsServers())) {
+        if (!compare(this.m_netmask, other.getNetmask())) {
             return false;
         }
-	    
-	    return true;
-	}
-	
-	protected boolean compare(Object obj1, Object obj2) {
-        return (obj1 == null) ? (obj2 == null) : (obj1.equals(obj2));
-	}
+        if (!compare(this.m_gateway, other.getGateway())) {
+            return false;
+        }
+        if (!compare(this.m_broadcast, other.getBroadcast())) {
+            return false;
+        }
+        if (!compare(this.m_dnsAddresses, other.getDnsServers())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected boolean compare(Object obj1, Object obj2) {
+        return obj1 == null ? obj2 == null : obj1.equals(obj2);
+    }
 }

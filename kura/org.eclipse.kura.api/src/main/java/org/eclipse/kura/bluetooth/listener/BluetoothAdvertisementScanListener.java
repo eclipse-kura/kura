@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.kura.bluetooth.listener;
 
-
 /**
  * BluetoothAdvertisementScanListener must be implemented by any class
  * wishing to receive BLE advertisement data
@@ -19,10 +18,10 @@ package org.eclipse.kura.bluetooth.listener;
  */
 public interface BluetoothAdvertisementScanListener {
 
-	/**
-	 * Fired when bluetooth advertisement data is received
-	 * 
-	 * @param btAdData
-	 */
-	public void onAdvertisementDataReceived(BluetoothAdvertisementData btAdData);
+    /**
+     * Fired when bluetooth advertisement data is received
+     *
+     * @param btAdData
+     */
+    public void onAdvertisementDataReceived(BluetoothAdvertisementData btAdData);
 }

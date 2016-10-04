@@ -17,21 +17,21 @@ import org.eclipse.kura.KuraException;
 
 /**
  * The ClockService is used to configure how to sych the hardware clock with a remote network service.
- * The service reports when the clock has been synchronized last and raises an event when it is synchronized. 
+ * The service reports when the clock has been synchronized last and raises an event when it is synchronized.
  * The ClockService is configurable to determine how the clock synchronization should happen.
  * By default, the ClockService can be configured to set the time through a Java NTP Client.
- * It can also be extended to synchronize the clock through a native Linux NTPD service, 
+ * It can also be extended to synchronize the clock through a native Linux NTPD service,
  * using the clock acquired from a GPS signal provided by the Position Service, or
- * through the a cellular carrier. 
+ * through the a cellular carrier.
  */
-public interface ClockService 
-{
-	/**
-	 * Returns a Date denoting when the clock was synchronized last. If the clock has
-	 * not yet synchronized since Kura started, null is returned.
-	 * 
-	 * @return Date that the clock was last synchronized, null if not synchronized yet.
-	 */
-	public Date getLastSync() throws KuraException;
-	
+public interface ClockService {
+
+    /**
+     * Returns a Date denoting when the clock was synchronized last. If the clock has
+     * not yet synchronized since Kura started, null is returned.
+     *
+     * @return Date that the clock was last synchronized, null if not synchronized yet.
+     */
+    public Date getLastSync() throws KuraException;
+
 }

@@ -16,15 +16,15 @@ import java.util.Map;
 import org.osgi.service.event.Event;
 
 /**
- * PositionLockedEvent is raised when a valid GPS position has been acquired. 
+ * PositionLockedEvent is raised when a valid GPS position has been acquired.
  */
 public class PositionLockedEvent extends Event {
 
-	/** Topic of the PositionLockedEvent */
-	public static final String POSITION_LOCKED_EVENT_TOPIC = "org/eclipse/kura/position/locked";
-	
-	public PositionLockedEvent(Map<String, ?> properties) {
-		super(POSITION_LOCKED_EVENT_TOPIC, properties);
-	}
+    /** Topic of the PositionLockedEvent */
+    public static final String POSITION_LOCKED_EVENT_TOPIC = "org/eclipse/kura/position/locked";
+
+    public PositionLockedEvent(Map<String, ?> properties) {
+        super(POSITION_LOCKED_EVENT_TOPIC, properties);
+    }
 
 }

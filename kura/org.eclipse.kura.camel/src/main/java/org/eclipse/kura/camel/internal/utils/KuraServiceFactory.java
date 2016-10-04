@@ -9,14 +9,14 @@
  * Contributors:
  *     Red Hat Inc - Initial API and implementation
  *******************************************************************************/
-package org.eclipse.kura.camel.utils;
+package org.eclipse.kura.camel.internal.utils;
 
-import org.apache.camel.spi.Registry;
-import org.slf4j.Logger;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.Set;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import org.apache.camel.spi.Registry;
+import org.slf4j.Logger;
 
 public final class KuraServiceFactory {
 
@@ -31,15 +31,16 @@ public final class KuraServiceFactory {
 
     // Operations
 
-    public static <T> T retrieveService(Class<T> clazz, Registry registry) {
-        if(registry == null) {
+    public static <T> T retrieveService(final Class<T> clazz, final Registry registry) {
+        if (registry == null) {
             throw new IllegalArgumentException("Registry cannot be null.");
         }
 
         Set<T> servicesFromRegistry = registry.findByType(clazz);
         if (servicesFromRegistry.size() == 1) {
             T service = servicesFromRegistry.iterator().next();
-            logger.info("Found Kura " + clazz.getCanonicalName() + " in the registry. Kura component will use that instance.");
+            logger.info("Found Kura " + clazz.getCanonicalName()
+                    + " in the registry. Kura component will use that instance.");
             return service;
         } else if (servicesFromRegistry.size() > 1) {
             throw new IllegalStateException("Too many " + clazz.getCanonicalName() + " services found in a registry: "

@@ -18,19 +18,19 @@ import org.eclipse.kura.net.NetworkPair;
 
 /**
  * DNS server configurations for IPv6 networks
- * 
+ *
  * @author eurotech
  *
  */
-public class DnsServerConfigIP6 extends DnsServerConfigIP<IP6Address> implements DnsServerConfig6 {
+public class DnsServerConfigIP6 extends DnsServerConfigIP<IP6Address>implements DnsServerConfig6 {
 
-	public DnsServerConfigIP6(Set<IP6Address> forwarders, Set<NetworkPair<IP6Address>> allowedNetworks) {
-		super(forwarders, allowedNetworks);
-	}
+    public DnsServerConfigIP6(Set<IP6Address> forwarders, Set<NetworkPair<IP6Address>> allowedNetworks) {
+        super(forwarders, allowedNetworks);
+    }
 
-	@Override
-	public boolean isValid() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    @Override
+    public boolean isValid() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

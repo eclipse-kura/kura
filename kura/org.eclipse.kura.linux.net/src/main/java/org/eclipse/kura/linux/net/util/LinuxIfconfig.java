@@ -18,136 +18,153 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.NetInterfaceType;
 
 public class LinuxIfconfig {
-	
-	private String m_name;
-	private NetInterfaceType m_type;
-	private String m_macAddress;
-	private String m_inetAddress;
-	private String m_peerInetAddr;
-	private String m_inetBcast;
-	private String m_inetMask;
-	private int m_mtu;
-	private boolean m_multicast;
-	private Map<String,String> m_driver;
-	private Boolean m_up;
-	private boolean m_linkUp;
-	
-	public LinuxIfconfig(String name) {
-		m_name = name;
-		m_type = NetInterfaceType.UNKNOWN;
-	}
-	public String getName() {
-		return m_name;
-	}
-	public NetInterfaceType getType() {
-		return m_type;
-	}
-	public void setType(NetInterfaceType type) {
-		m_type = type;
-	}
-	public String getMacAddress() {
-		return m_macAddress;
-	}
-	public void setMacAddress(String macAddress) {
-		m_macAddress = macAddress;
-	}
-	public String getInetAddress() {
-		return m_inetAddress;
-	}
-	public void setInetAddress(String inetAddress) {
-		m_inetAddress = inetAddress;
-	}
-	public String getInetBcast() {
-		return m_inetBcast;
-	}
-	public void setInetBcast(String inetBcast) {
-		m_inetBcast = inetBcast;
-	}
-	public String getInetMask() {
-		return m_inetMask;
-	}
-	public void setInetMask(String inetMask) {
-		m_inetMask = inetMask;
-	}
-	public String getPeerInetAddr() {
-		return m_peerInetAddr;
-	}
-	public void setPeerInetAddr(String peerInetAddr) {
-		m_peerInetAddr = peerInetAddr;
-	}
-	public int getMtu() {
-		return m_mtu;
-	}
-	public void setMtu(int mtu) {
-		m_mtu = mtu;
-	}
-	public boolean isMulticast() {
-		return m_multicast;
-	}
-	public void setMulticast(boolean multicast) {
-		m_multicast = multicast;
-	}
-	
-	public Map<String,String> getDriver() {
-		return m_driver;
-	}
-	
-	public void setDriver(Map<String,String> driver) {
-		m_driver = driver;
-	}
-	
-	public boolean isUp() {
-		if (m_up != null) {
-			return m_up;
-		} else {
-			// old code
-			boolean ret = false;
-			if ((m_inetAddress != null) && (m_inetMask != null)) {
-				ret = true;
-			}	
-			return ret;
-		}
-	}
-	
-	public void setUp(boolean up) {
-		m_up = up;
-	}
-	
-	public void setLinkUp(boolean up) {
-		m_linkUp = up;
-	}
-	
-	public boolean isLinkUp() {
-		return m_linkUp;
-	}
-	
-	public byte[] getMacAddressBytes() throws KuraException {
-		
-		if(m_macAddress == null) {
-			return new byte[]{0, 0, 0, 0, 0, 0};
-		}
 
-		String macAddress = new String(m_macAddress);
-		macAddress = macAddress.replaceAll(":","");
+    private final String m_name;
+    private NetInterfaceType m_type;
+    private String m_macAddress;
+    private String m_inetAddress;
+    private String m_peerInetAddr;
+    private String m_inetBcast;
+    private String m_inetMask;
+    private int m_mtu;
+    private boolean m_multicast;
+    private Map<String, String> m_driver;
+    private Boolean m_up;
+    private boolean m_linkUp;
 
-		byte[] mac = new byte[6];
-        for(int i=0; i<6; i++) {
-        	mac[i] = (byte) ((Character.digit(macAddress.charAt(i*2), 16) << 4)
-        					+ Character.digit(macAddress.charAt(i*2+1), 16));
+    public LinuxIfconfig(String name) {
+        this.m_name = name;
+        this.m_type = NetInterfaceType.UNKNOWN;
+    }
+
+    public String getName() {
+        return this.m_name;
+    }
+
+    public NetInterfaceType getType() {
+        return this.m_type;
+    }
+
+    public void setType(NetInterfaceType type) {
+        this.m_type = type;
+    }
+
+    public String getMacAddress() {
+        return this.m_macAddress;
+    }
+
+    public void setMacAddress(String macAddress) {
+        this.m_macAddress = macAddress;
+    }
+
+    public String getInetAddress() {
+        return this.m_inetAddress;
+    }
+
+    public void setInetAddress(String inetAddress) {
+        this.m_inetAddress = inetAddress;
+    }
+
+    public String getInetBcast() {
+        return this.m_inetBcast;
+    }
+
+    public void setInetBcast(String inetBcast) {
+        this.m_inetBcast = inetBcast;
+    }
+
+    public String getInetMask() {
+        return this.m_inetMask;
+    }
+
+    public void setInetMask(String inetMask) {
+        this.m_inetMask = inetMask;
+    }
+
+    public String getPeerInetAddr() {
+        return this.m_peerInetAddr;
+    }
+
+    public void setPeerInetAddr(String peerInetAddr) {
+        this.m_peerInetAddr = peerInetAddr;
+    }
+
+    public int getMtu() {
+        return this.m_mtu;
+    }
+
+    public void setMtu(int mtu) {
+        this.m_mtu = mtu;
+    }
+
+    public boolean isMulticast() {
+        return this.m_multicast;
+    }
+
+    public void setMulticast(boolean multicast) {
+        this.m_multicast = multicast;
+    }
+
+    public Map<String, String> getDriver() {
+        return this.m_driver;
+    }
+
+    public void setDriver(Map<String, String> driver) {
+        this.m_driver = driver;
+    }
+
+    public boolean isUp() {
+        if (this.m_up != null) {
+            return this.m_up;
+        } else {
+            // old code
+            boolean ret = false;
+            if (this.m_inetAddress != null && this.m_inetMask != null) {
+                ret = true;
+            }
+            return ret;
         }
-        
+    }
+
+    public void setUp(boolean up) {
+        this.m_up = up;
+    }
+
+    public void setLinkUp(boolean up) {
+        this.m_linkUp = up;
+    }
+
+    public boolean isLinkUp() {
+        return this.m_linkUp;
+    }
+
+    public byte[] getMacAddressBytes() throws KuraException {
+
+        if (this.m_macAddress == null) {
+            return new byte[] { 0, 0, 0, 0, 0, 0 };
+        }
+
+        String macAddress = new String(this.m_macAddress);
+        macAddress = macAddress.replaceAll(":", "");
+
+        byte[] mac = new byte[6];
+        for (int i = 0; i < 6; i++) {
+            mac[i] = (byte) ((Character.digit(macAddress.charAt(i * 2), 16) << 4)
+                    + Character.digit(macAddress.charAt(i * 2 + 1), 16));
+        }
+
         return mac;
-	}
-	
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(m_name).append(":-> type: ").append(m_type).append(", MAC: ")
-				.append(m_macAddress).append(", IP Address: ")
-				.append(m_inetAddress).append(", Netmask: ").append(m_inetMask)
-				.append(", Broadcast: ").append(m_inetBcast)
-				.append(", Peer IP Address: ").append(m_peerInetAddr).append(", MTU: ")
-				.append(m_mtu).append(", multicast?: ").append(m_multicast)
-				.append(", up?: ").append(m_up).append(", link up?: ").append(m_linkUp);
-		return sb.toString();
-	}
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.m_name).append(":-> type: ").append(this.m_type).append(", MAC: ").append(this.m_macAddress)
+                .append(", IP Address: ").append(this.m_inetAddress).append(", Netmask: ").append(this.m_inetMask)
+                .append(", Broadcast: ").append(this.m_inetBcast).append(", Peer IP Address: ")
+                .append(this.m_peerInetAddr).append(", MTU: ").append(this.m_mtu).append(", multicast?: ")
+                .append(this.m_multicast).append(", up?: ").append(this.m_up).append(", link up?: ")
+                .append(this.m_linkUp);
+        return sb.toString();
+    }
 }

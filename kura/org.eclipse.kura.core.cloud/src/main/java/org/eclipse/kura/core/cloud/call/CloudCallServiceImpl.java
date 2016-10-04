@@ -33,214 +33,202 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CloudCallServiceImpl implements CloudCallService, DataServiceListener 
-{
-	private static final Logger s_logger = LoggerFactory
-			.getLogger(CloudCallServiceImpl.class);
+public class CloudCallServiceImpl implements CloudCallService, DataServiceListener {
 
-	private static RequestIdGenerator s_generator = RequestIdGenerator
-			.getInstance();
+    private static final Logger s_logger = LoggerFactory.getLogger(CloudCallServiceImpl.class);
 
-	private static final int DFLT_PUB_QOS = 0;
-	private static final boolean DFLT_RETAIN = false;
-	private static final int DFLT_PRIORITY = 1;
+    private static RequestIdGenerator s_generator = RequestIdGenerator.getInstance();
 
-	private static final String ACCOUNT_NAME_VAR_NAME = "#account-name";
-	private static final String CLIENT_ID_VAR_NAME = "#client-id";
+    private static final int DFLT_PUB_QOS = 0;
+    private static final boolean DFLT_RETAIN = false;
+    private static final int DFLT_PRIORITY = 1;
 
-	private DataService m_dataService;
+    private static final String ACCOUNT_NAME_VAR_NAME = "#account-name";
+    private static final String CLIENT_ID_VAR_NAME = "#client-id";
 
-	private Object m_lock;
-	private String m_respTopic;
-	private KuraResponsePayload m_resp;
+    private DataService m_dataService;
 
-	// ----------------------------------------------------------------
-	//
-	// Dependencies
-	//
-	// ----------------------------------------------------------------
+    private Object m_lock;
+    private String m_respTopic;
+    private KuraResponsePayload m_resp;
 
-	public void setDataService(DataService dataService) {
-		m_dataService = dataService;
-	}
+    // ----------------------------------------------------------------
+    //
+    // Dependencies
+    //
+    // ----------------------------------------------------------------
 
-	public void unsetDataService(DataService dataService) {
-		m_dataService = null;
-	}
+    public void setDataService(DataService dataService) {
+        this.m_dataService = dataService;
+    }
 
-	// ----------------------------------------------------------------
-	//
-	// Activation APIs
-	//
-	// ----------------------------------------------------------------
+    public void unsetDataService(DataService dataService) {
+        this.m_dataService = null;
+    }
 
-	protected void activate(ComponentContext componentContext) {
-		s_logger.info("Activating...");
-		m_lock = new Object();
-		m_dataService.addDataServiceListener(this);
-	}
+    // ----------------------------------------------------------------
+    //
+    // Activation APIs
+    //
+    // ----------------------------------------------------------------
 
-	protected void deactivate(ComponentContext componentContext) {
-		s_logger.info("Deactivating...");
-		m_dataService.removeDataServiceListener(this);
-		synchronized (m_lock) {
-			m_lock.notifyAll();
-		}
-	}
+    protected void activate(ComponentContext componentContext) {
+        s_logger.info("Activating...");
+        this.m_lock = new Object();
+        this.m_dataService.addDataServiceListener(this);
+    }
 
-	@Override
-	public synchronized KuraResponsePayload call(String appId, String appTopic,
-			KuraPayload appPayload, int timeout) throws KuraConnectException,
-			KuraTimeoutException, KuraStoreException, KuraException {
-		return call(CLIENT_ID_VAR_NAME, appId, appTopic, appPayload, timeout);
-	}
+    protected void deactivate(ComponentContext componentContext) {
+        s_logger.info("Deactivating...");
+        this.m_dataService.removeDataServiceListener(this);
+        synchronized (this.m_lock) {
+            this.m_lock.notifyAll();
+        }
+    }
 
-	@Override
-	public synchronized KuraResponsePayload call(String deviceId, String appId,
-			String appTopic, KuraPayload appPayload, int timeout)
-			throws KuraConnectException, KuraTimeoutException, KuraStoreException,
-			KuraException {
-		// Generate the request ID
-		String requestId = s_generator.next();
+    @Override
+    public synchronized KuraResponsePayload call(String appId, String appTopic, KuraPayload appPayload, int timeout)
+            throws KuraConnectException, KuraTimeoutException, KuraStoreException, KuraException {
+        return call(CLIENT_ID_VAR_NAME, appId, appTopic, appPayload, timeout);
+    }
 
-		StringBuilder sbReqTopic = new StringBuilder("$EDC").append("/")
-				.append(ACCOUNT_NAME_VAR_NAME).append("/").append(deviceId)
-				.append("/").append(appId).append("/").append(appTopic);
+    @Override
+    public synchronized KuraResponsePayload call(String deviceId, String appId, String appTopic, KuraPayload appPayload,
+            int timeout) throws KuraConnectException, KuraTimeoutException, KuraStoreException, KuraException {
+        // Generate the request ID
+        String requestId = s_generator.next();
 
-		StringBuilder sbRespTopic = new StringBuilder("$EDC").append("/")
-				.append(ACCOUNT_NAME_VAR_NAME).append("/")
-				.append(CLIENT_ID_VAR_NAME).append("/").append(appId)
-				.append("/").append("REPLY").append("/").append(requestId);
+        StringBuilder sbReqTopic = new StringBuilder("$EDC").append("/").append(ACCOUNT_NAME_VAR_NAME).append("/")
+                .append(deviceId).append("/").append(appId).append("/").append(appTopic);
 
-		KuraRequestPayload req = null;
-		if (appPayload != null) {
-			// Construct a request payload
-			req = new KuraRequestPayload(appPayload);
-		} else {
-			req = new KuraRequestPayload();
-		}
+        StringBuilder sbRespTopic = new StringBuilder("$EDC").append("/").append(ACCOUNT_NAME_VAR_NAME).append("/")
+                .append(CLIENT_ID_VAR_NAME).append("/").append(appId).append("/").append("REPLY").append("/")
+                .append(requestId);
 
-		req.setRequestId(requestId);
-		req.setRequesterClientId(CLIENT_ID_VAR_NAME);
+        KuraRequestPayload req = null;
+        if (appPayload != null) {
+            // Construct a request payload
+            req = new KuraRequestPayload(appPayload);
+        } else {
+            req = new KuraRequestPayload();
+        }
 
-		CloudPayloadProtoBufEncoderImpl encoder = new CloudPayloadProtoBufEncoderImpl(req);
-		byte[] rawPayload;
-		try {
-			rawPayload = encoder.getBytes();
-		} catch (IOException e) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e,
-					"Cannot encode request");
-		}
+        req.setRequestId(requestId);
+        req.setRequesterClientId(CLIENT_ID_VAR_NAME);
 
-		m_respTopic = sbRespTopic.toString();
-		m_resp = null;
+        CloudPayloadProtoBufEncoderImpl encoder = new CloudPayloadProtoBufEncoderImpl(req);
+        byte[] rawPayload;
+        try {
+            rawPayload = encoder.getBytes();
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "Cannot encode request");
+        }
 
-		m_dataService.subscribe(m_respTopic, 0);
+        this.m_respTopic = sbRespTopic.toString();
+        this.m_resp = null;
 
-		synchronized (m_lock) {
-			try {
-				m_dataService.publish(sbReqTopic.toString(), rawPayload,
-						DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY);
-				m_lock.wait(timeout);
-			} catch (KuraStoreException e) {
-				throw e;
-			} catch (InterruptedException e) {
-				// Avoid re-throwing this exception which should not normally happen
-				s_logger.warn("Interrupted while waiting for the response");
-				Thread.interrupted();
-			} finally {
-				try {
-					m_dataService.unsubscribe(m_respTopic);
-				} catch (KuraException e) {
-					s_logger.error("Cannot unsubscribe");
-				}
-				m_respTopic = null;
-			}
-		}
+        this.m_dataService.subscribe(this.m_respTopic, 0);
 
-		if (m_resp == null) {
-			throw new KuraTimeoutException(
-					"Timed out while waiting for the response");
-		}
+        synchronized (this.m_lock) {
+            try {
+                this.m_dataService.publish(sbReqTopic.toString(), rawPayload, DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY);
+                this.m_lock.wait(timeout);
+            } catch (KuraStoreException e) {
+                throw e;
+            } catch (InterruptedException e) {
+                // Avoid re-throwing this exception which should not normally happen
+                s_logger.warn("Interrupted while waiting for the response");
+                Thread.interrupted();
+            } finally {
+                try {
+                    this.m_dataService.unsubscribe(this.m_respTopic);
+                } catch (KuraException e) {
+                    s_logger.error("Cannot unsubscribe");
+                }
+                this.m_respTopic = null;
+            }
+        }
 
-		return m_resp;
-	}
-	
-	public void cancel() {
-		synchronized (m_lock) {
-			notifyAll();
-		}
-	}
-	
-	@Override
-	public void onConnectionEstablished() {
-		// Ignore
-	}
+        if (this.m_resp == null) {
+            throw new KuraTimeoutException("Timed out while waiting for the response");
+        }
 
-	@Override
-	public void onDisconnecting() {
-		// Ignore
-	}
+        return this.m_resp;
+    }
 
-	@Override
-	public void onDisconnected() {
-		// Ignore
-	}
+    public void cancel() {
+        synchronized (this.m_lock) {
+            notifyAll();
+        }
+    }
 
-	@Override
-	public void onConnectionLost(Throwable cause) {
-		// Ignore
-	}
+    @Override
+    public void onConnectionEstablished() {
+        // Ignore
+    }
 
-	@Override
-	public void onMessageArrived(String topic, byte[] payload, int qos,
-			boolean retained) {
-		
-		s_logger.debug("Message arrived on topic: '{}'", topic);
-		
-		if (m_respTopic != null) {
-			// Filter on application ID and topic
-			KuraTopic kuraTopic = new KuraTopic(topic);
-			KuraTopic kuraRespTopic = new KuraTopic(m_respTopic);
-			
-			if (kuraTopic.getApplicationId().equals(kuraRespTopic.getApplicationId()) &&
-					kuraTopic.getApplicationTopic().equals(kuraRespTopic.getApplicationTopic())) {
-				
-				s_logger.debug("Got response");
-				
-				CloudPayloadProtoBufDecoderImpl decoder = new CloudPayloadProtoBufDecoderImpl(
-						payload);
+    @Override
+    public void onDisconnecting() {
+        // Ignore
+    }
 
-				KuraResponsePayload resp = null;
-				try {
-					KuraPayload kuraPayload = decoder.buildFromByteArray();
-					resp = new KuraResponsePayload(kuraPayload);
-				} catch (KuraInvalidMessageException e) {
-					s_logger.error("Cannot decode protobuf", e);
-				} catch (IOException e) {
-					s_logger.error("Cannot decode protobuf", e);
-				}
+    @Override
+    public void onDisconnected() {
+        // Ignore
+    }
 
-				synchronized (m_lock) {
-					m_resp = resp; // Can be null
-					m_lock.notifyAll();
-				}
-			}
-		}
-	}
+    @Override
+    public void onConnectionLost(Throwable cause) {
+        // Ignore
+    }
 
-	@Override
-	public void onMessagePublished(int messageId, String topic) {
-		// Ignore
-	}
+    @Override
+    public void onMessageArrived(String topic, byte[] payload, int qos, boolean retained) {
 
-	@Override
-	public void onMessageConfirmed(int messageId, String topic) {
-		// Ignore
-	}
-	
-	@Override
-	public boolean isConnected() {
-		return m_dataService.isConnected();
-	}
+        s_logger.debug("Message arrived on topic: '{}'", topic);
+
+        if (this.m_respTopic != null) {
+            // Filter on application ID and topic
+            KuraTopic kuraTopic = new KuraTopic(topic);
+            KuraTopic kuraRespTopic = new KuraTopic(this.m_respTopic);
+
+            if (kuraTopic.getApplicationId().equals(kuraRespTopic.getApplicationId())
+                    && kuraTopic.getApplicationTopic().equals(kuraRespTopic.getApplicationTopic())) {
+
+                s_logger.debug("Got response");
+
+                CloudPayloadProtoBufDecoderImpl decoder = new CloudPayloadProtoBufDecoderImpl(payload);
+
+                KuraResponsePayload resp = null;
+                try {
+                    KuraPayload kuraPayload = decoder.buildFromByteArray();
+                    resp = new KuraResponsePayload(kuraPayload);
+                } catch (KuraInvalidMessageException e) {
+                    s_logger.error("Cannot decode protobuf", e);
+                } catch (IOException e) {
+                    s_logger.error("Cannot decode protobuf", e);
+                }
+
+                synchronized (this.m_lock) {
+                    this.m_resp = resp; // Can be null
+                    this.m_lock.notifyAll();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onMessagePublished(int messageId, String topic) {
+        // Ignore
+    }
+
+    @Override
+    public void onMessageConfirmed(int messageId, String topic) {
+        // Ignore
+    }
+
+    @Override
+    public boolean isConnected() {
+        return this.m_dataService.isConnected();
+    }
 }

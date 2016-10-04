@@ -17,13 +17,13 @@ import org.eclipse.kura.net.modem.ModemCdmaServiceProvider;
 
 public interface EvdoCellularModem extends CellularModem {
 
-	public String getMobileDirectoryNumber() throws KuraException;
-	
-	public String getMobileIdentificationNumber() throws KuraException;
-	
-	public boolean isProvisioned() throws KuraException;
-	
-	public void provision() throws KuraException; 
-	
-	public ModemCdmaServiceProvider getServiceProvider() throws KuraException;
+    public String getMobileDirectoryNumber() throws KuraException;
+
+    public String getMobileIdentificationNumber() throws KuraException;
+
+    public boolean isProvisioned() throws KuraException;
+
+    public void provision() throws KuraException;
+
+    public ModemCdmaServiceProvider getServiceProvider() throws KuraException;
 }

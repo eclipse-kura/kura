@@ -84,7 +84,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 
     /**
      * Enum representing the different status of the download process
-     * 
+     *
      * {@link DeploymentAgentService.DOWNLOAD_STATUS.PROGRESS} Download in
      * progress {@link DeploymentAgentService.DOWNLOAD_STATUS.COMPLETE} Download
      * completed {@link DeploymentAgentService.DOWNLOAD_STATUS.FAILED} Download

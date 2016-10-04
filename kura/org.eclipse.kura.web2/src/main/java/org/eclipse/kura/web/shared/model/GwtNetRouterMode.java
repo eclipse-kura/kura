@@ -12,8 +12,8 @@
 package org.eclipse.kura.web.shared.model;
 
 public enum GwtNetRouterMode {
-	netRouterDchpNat,
-	netRouterDchp,
-	netRouterNat,
-	netRouterOff;
+    netRouterDchpNat,
+    netRouterDchp,
+    netRouterNat,
+    netRouterOff;
 }

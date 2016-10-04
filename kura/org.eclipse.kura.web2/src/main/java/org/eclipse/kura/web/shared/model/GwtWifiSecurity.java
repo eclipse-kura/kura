@@ -12,9 +12,9 @@
 package org.eclipse.kura.web.shared.model;
 
 public enum GwtWifiSecurity {
-	netWifiSecurityNONE,
-	netWifiSecurityWEP,
-	netWifiSecurityWPA,
-	netWifiSecurityWPA2,
-	netWifiSecurityWPA_WPA2
+    netWifiSecurityNONE,
+    netWifiSecurityWEP,
+    netWifiSecurityWPA,
+    netWifiSecurityWPA2,
+    netWifiSecurityWPA_WPA2
 }

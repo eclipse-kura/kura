@@ -18,7 +18,9 @@ import org.eclipse.kura.KuraException;
  */
 public interface WifiClientMonitorService {
 
-	public void registerListener(WifiClientMonitorListener listener);
-	public void unregisterListener(WifiClientMonitorListener listener);
-	public int getSignalLevel(String interfaceName, String ssid) throws KuraException;
+    public void registerListener(WifiClientMonitorListener listener);
+
+    public void unregisterListener(WifiClientMonitorListener listener);
+
+    public int getSignalLevel(String interfaceName, String ssid) throws KuraException;
 }

@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc - initial API and implementation
  *******************************************************************************/
-package org.eclipse.kura.camel.router;
+package org.eclipse.kura.camel.component;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -33,20 +33,21 @@ public abstract class AbstractRouterTest {
     @Before
     public void before() throws Exception {
         this.router = createRouter();
-        this.router.start(FrameworkUtil.getBundle(RouterTest.class).getBundleContext());
+        this.router.activate(FrameworkUtil.getBundle(AbstractRouterTest.class).getBundleContext(),
+                Collections.<String, Object> emptyMap());
     }
 
     @After
     public void after() throws Exception {
-        this.router.stop(FrameworkUtil.getBundle(RouterTest.class).getBundleContext());
+        this.router.stop();
     }
 
     protected Route firstRoute() {
-        return this.router.getContext().getRoutes().iterator().next();
+        return this.router.getCamelContext().getRoutes().iterator().next();
     }
 
     protected static Map<String, Object> xmlProperties(String resourceName) {
-        return Collections.<String, Object>singletonMap(XML_PROPERTY, readStringResource(resourceName));
+        return Collections.<String, Object> singletonMap(XML_PROPERTY, readStringResource(resourceName));
     }
 
     protected static AbstractXmlCamelComponent createRouter() {
@@ -55,7 +56,8 @@ public abstract class AbstractRouterTest {
     }
 
     protected static String readStringResource(String resourceName) {
-        try (InputStreamReader reader = new InputStreamReader(RouterTest.class.getResourceAsStream(resourceName), StandardCharsets.UTF_8)) {
+        try (InputStreamReader reader = new InputStreamReader(RouterTest.class.getResourceAsStream(resourceName),
+                StandardCharsets.UTF_8)) {
             return IOUtils.toString(reader);
         } catch (IOException e) {
             throw new RuntimeException(e);

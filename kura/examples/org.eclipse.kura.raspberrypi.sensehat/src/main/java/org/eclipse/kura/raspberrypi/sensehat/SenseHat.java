@@ -18,15 +18,15 @@ import org.eclipse.kura.raspberrypi.sensehat.sensors.LSM9DS1;
 import org.eclipse.kura.raspsberrypi.sensehat.joystick.Joystick;
 
 public interface SenseHat {
-	
-	public FrameBuffer getFrameBuffer();
-	
-	public Joystick getJoystick();
-	
-	public HTS221 getHumiditySensor(int bus, int address, int addressSize, int frequency);
-	
-	public LPS25H getPressureSensor(int bus, int address, int addressSize, int frequency);
-	
-	public LSM9DS1 getIMUSensor(int bus, int accAddress, int magAddress, int addressSize, int frequency);
+
+    public FrameBuffer getFrameBuffer();
+
+    public Joystick getJoystick();
+
+    public HTS221 getHumiditySensor(int bus, int address, int addressSize, int frequency);
+
+    public LPS25H getPressureSensor(int bus, int address, int addressSize, int frequency);
+
+    public LSM9DS1 getIMUSensor(int bus, int accAddress, int magAddress, int addressSize, int frequency);
 
 }

@@ -520,6 +520,39 @@
 							</target>
 						</configuration>
 					</execution>
+					<execution>
+						<id>calc-checksums</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<checksum algorithm="md5">
+									<fileset dir="${basedir}/target/">
+										<include name="*.deb" />
+										<include name="*.dp" />
+										<include name="*.zip"/>
+										<include name="kura_${project.version}_*.sh"/>
+										<include name="kura_${project.version}_*.dp"/>
+										<exclude name="kura_${project.version}_*.dp" />
+										<exclude name="kura_${project.version}_*.zip"/>
+									</fileset>
+								</checksum>
+								<checksum algorithm="SHA-1">
+									<fileset dir="${basedir}/target/">
+										<include name="*.deb" />
+										<include name="*.dp" />
+										<include name="*.zip"/>
+										<include name="kura_${project.version}_*.sh"/>
+										<include name="kura_${project.version}_*.dp"/>
+										<exclude name="kura_${project.version}_*.dp" />
+										<exclude name="kura_${project.version}_*.zip"/>
+									</fileset>
+								</checksum>
+							</target>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
@@ -704,7 +737,7 @@
                         <executions>
                             <execution>
                                 <id>intel-edison-jars</id>
-                                <phase>install</phase>
+                                <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
@@ -769,7 +802,7 @@
                         <executions>
                             <execution>
                                 <id>intel-edison-nn-jars</id>
-                                <phase>install</phase>
+                                <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
@@ -837,7 +870,7 @@
 						<executions>
 							<execution>
 								<id>beaglebone-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -887,7 +920,7 @@
 						<executions>
 							<execution>
 								<id>beaglebone-deb</id>
-								<phase>install</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
@@ -909,35 +942,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-        				<groupId>net.ju-n.maven.plugins</groupId>
-        				<artifactId>checksum-maven-plugin</artifactId>
-        				<version>1.3</version>
-        				<executions>
-          					<execution>
-          						<id>beaglebone-deb-checksums</id>
-								<phase>install</phase>
-            					<goals>
-              						<goal>files</goal>
-            					</goals>
-          					</execution>
-        				</executions>
-        				<configuration>
-          					<algorithms>
-             					<algorithm>MD5</algorithm>
-             					<algorithm>SHA-1</algorithm>
-             				</algorithms>
-             				<csvSummary>false</csvSummary>
-             				<fileSets>
-  								<fileSet>
-    								<directory>${basedir}/target</directory>
-    								<includes>
-      									<include>kura_${project.version}_beaglebone_debian_installer.deb</include>
-    								</includes>
-  								</fileSet>
-							</fileSets>
-        				</configuration>
-      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -981,7 +985,7 @@
 						<executions>
 							<execution>
 								<id>beaglebone-nn-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1011,7 +1015,7 @@
 						<executions>
 							<execution>
 								<id>beaglebone-nn-deb</id>
-								<phase>install</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
@@ -1033,35 +1037,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-        				<groupId>net.ju-n.maven.plugins</groupId>
-        				<artifactId>checksum-maven-plugin</artifactId>
-        				<version>1.3</version>
-        				<executions>
-          					<execution>
-          						<id>beaglebone-nn-deb-checksums</id>
-								<phase>install</phase>
-            					<goals>
-              						<goal>files</goal>
-            					</goals>
-          					</execution>
-        				</executions>
-        				<configuration>
-          					<algorithms>
-             					<algorithm>MD5</algorithm>
-             					<algorithm>SHA-1</algorithm>
-             				</algorithms>
-             				<csvSummary>false</csvSummary>
-             				<fileSets>
-  								<fileSet>
-    								<directory>${basedir}/target</directory>
-    								<includes>
-      									<include>kura_${project.version}_beaglebone-nn_debian_installer.deb</include>
-    								</includes>
-  								</fileSet>
-							</fileSets>
-        				</configuration>
-      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1105,7 +1080,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1145,7 +1120,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-deb</id>
-								<phase>install</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
@@ -1167,35 +1142,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-        				<groupId>net.ju-n.maven.plugins</groupId>
-        				<artifactId>checksum-maven-plugin</artifactId>
-        				<version>1.3</version>
-        				<executions>
-          					<execution>
-          						<id>raspberry-pi-deb-checksums</id>
-								<phase>install</phase>
-            					<goals>
-              						<goal>files</goal>
-            					</goals>
-          					</execution>
-        				</executions>
-        				<configuration>
-          					<algorithms>
-             					<algorithm>MD5</algorithm>
-             					<algorithm>SHA-1</algorithm>
-             				</algorithms>
-             				<csvSummary>false</csvSummary>
-             				<fileSets>
-  								<fileSet>
-    								<directory>${basedir}/target</directory>
-    								<includes>
-      									<include>kura_${project.version}_raspberry-pi_installer.deb</include>
-    								</includes>
-  								</fileSet>
-							</fileSets>
-        				</configuration>
-      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1238,7 +1184,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-nn-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1267,7 +1213,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-nn-deb</id>
-								<phase>install</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
@@ -1289,35 +1235,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-        				<groupId>net.ju-n.maven.plugins</groupId>
-        				<artifactId>checksum-maven-plugin</artifactId>
-        				<version>1.3</version>
-        				<executions>
-          					<execution>
-          						<id>raspberry-pi-nn-deb-checksums</id>
-								<phase>install</phase>
-            					<goals>
-              						<goal>files</goal>
-            					</goals>
-          					</execution>
-        				</executions>
-        				<configuration>
-          					<algorithms>
-             					<algorithm>MD5</algorithm>
-             					<algorithm>SHA-1</algorithm>
-             				</algorithms>
-             				<csvSummary>false</csvSummary>
-             				<fileSets>
-  								<fileSet>
-    								<directory>${basedir}/target</directory>
-    								<includes>
-      									<include>kura_${project.version}_raspberry-pi-nn_installer.deb</include>
-    								</includes>
-  								</fileSet>
-							</fileSets>
-        				</configuration>
-      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1361,7 +1278,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-bplus-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1401,7 +1318,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-bplus-deb</id>
-								<phase>install</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
@@ -1423,35 +1340,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-        				<groupId>net.ju-n.maven.plugins</groupId>
-        				<artifactId>checksum-maven-plugin</artifactId>
-        				<version>1.3</version>
-        				<executions>
-          					<execution>
-          						<id>raspberry-pi-bplus-deb-checksums</id>
-								<phase>install</phase>
-            					<goals>
-              						<goal>files</goal>
-            					</goals>
-          					</execution>
-        				</executions>
-        				<configuration>
-          					<algorithms>
-             					<algorithm>MD5</algorithm>
-             					<algorithm>SHA-1</algorithm>
-             				</algorithms>
-             				<csvSummary>false</csvSummary>
-             				<fileSets>
-  								<fileSet>
-    								<directory>${basedir}/target</directory>
-    								<includes>
-      									<include>kura_${project.version}_raspberry-pi-bplus_installer.deb</include>
-    								</includes>
-  								</fileSet>
-							</fileSets>
-        				</configuration>
-      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1494,7 +1382,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-bplus-nn-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1523,7 +1411,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-bplus-nn-deb</id>
-								<phase>install</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
@@ -1545,35 +1433,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-        				<groupId>net.ju-n.maven.plugins</groupId>
-        				<artifactId>checksum-maven-plugin</artifactId>
-        				<version>1.3</version>
-        				<executions>
-          					<execution>
-          						<id>raspberry-pi-bplus-nn-deb-checksums</id>
-								<phase>install</phase>
-            					<goals>
-              						<goal>files</goal>
-            					</goals>
-          					</execution>
-        				</executions>
-        				<configuration>
-          					<algorithms>
-             					<algorithm>MD5</algorithm>
-             					<algorithm>SHA-1</algorithm>
-             				</algorithms>
-             				<csvSummary>false</csvSummary>
-             				<fileSets>
-  								<fileSet>
-    								<directory>${basedir}/target</directory>
-    								<includes>
-      									<include>kura_${project.version}_raspberry-pi-bplus-nn_installer.deb</include>
-    								</includes>
-  								</fileSet>
-							</fileSets>
-        				</configuration>
-      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1617,7 +1476,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-2-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1647,7 +1506,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-2-deb</id>
-								<phase>install</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
@@ -1669,35 +1528,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-        				<groupId>net.ju-n.maven.plugins</groupId>
-        				<artifactId>checksum-maven-plugin</artifactId>
-        				<version>1.3</version>
-        				<executions>
-          					<execution>
-          						<id>raspberry-pi-2-deb-checksums</id>
-								<phase>install</phase>
-            					<goals>
-              						<goal>files</goal>
-            					</goals>
-          					</execution>
-        				</executions>
-        				<configuration>
-          					<algorithms>
-             					<algorithm>MD5</algorithm>
-             					<algorithm>SHA-1</algorithm>
-             				</algorithms>
-             				<csvSummary>false</csvSummary>
-             				<fileSets>
-  								<fileSet>
-    								<directory>${basedir}/target</directory>
-    								<includes>
-      									<include>kura_${project.version}_raspberry-pi-2_installer.deb</include>
-    								</includes>
-  								</fileSet>
-							</fileSets>
-        				</configuration>
-      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1741,7 +1571,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-2-nn-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1771,7 +1601,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-2-nn-deb</id>
-								<phase>install</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
@@ -1793,35 +1623,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-        				<groupId>net.ju-n.maven.plugins</groupId>
-        				<artifactId>checksum-maven-plugin</artifactId>
-        				<version>1.3</version>
-        				<executions>
-          					<execution>
-          						<id>raspberry-pi-2-nn-deb-checksums</id>
-								<phase>install</phase>
-            					<goals>
-              						<goal>files</goal>
-            					</goals>
-          					</execution>
-        				</executions>
-        				<configuration>
-          					<algorithms>
-             					<algorithm>MD5</algorithm>
-             					<algorithm>SHA-1</algorithm>
-             				</algorithms>
-             				<csvSummary>false</csvSummary>
-             				<fileSets>
-  								<fileSet>
-    								<directory>${basedir}/target</directory>
-    								<includes>
-      									<include>kura_${project.version}_raspberry-pi-2-nn_installer.deb</include>
-    								</includes>
-  								</fileSet>
-							</fileSets>
-        				</configuration>
-      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1859,7 +1660,7 @@
 						<executions>
 							<execution>
 								<id>Win64-nn-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -2195,16 +1996,6 @@
 											<zipfileset dir="${project.build.directory}/staging/publisher/"
 												prefix="org.eclipse.kura.example.publisher/" />
 										</zip>
-										<checksum algorithm="md5">
-    										<fileset dir="./target/" >
-    											<include name="${zip_workspace.prefix}.zip"/>
-    										</fileset>
-										</checksum>
-										<checksum algorithm="SHA-1">
-    										<fileset dir="./target/" >
-    											<include name="${zip_workspace.prefix}.zip"/>
-    										</fileset>
-										</checksum>
 									</target>
 								</configuration>
 							</execution>

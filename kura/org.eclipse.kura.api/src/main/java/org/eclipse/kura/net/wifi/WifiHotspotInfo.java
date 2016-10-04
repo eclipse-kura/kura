@@ -15,81 +15,81 @@ import java.util.EnumSet;
 
 public class WifiHotspotInfo {
 
-	private String m_ssid;
-	private String m_macAddress;
-	private int m_signalLevel;
-	private int m_channel;
-	private int m_frequency;
-	private WifiSecurity m_security;
-	private EnumSet<WifiSecurity> m_pairCiphers;
-	private EnumSet<WifiSecurity> m_groupCiphers;
-	
-	public WifiHotspotInfo(String ssid, String macAddress,
-			int signalLevel, int channel, int frequency, WifiSecurity security) {
-		super();
-		m_ssid = ssid;
-		m_macAddress = macAddress;
-		m_signalLevel = signalLevel;
-		m_channel = channel;
-		m_frequency = frequency;
-		m_security = security;
-	}
-	
-	public WifiHotspotInfo(String ssid, String macAddress,
-			int signalLevel, int channel, int frequency, WifiSecurity security,
-			EnumSet<WifiSecurity> pairCiphers, EnumSet<WifiSecurity> groupCiphers) {
-		this(ssid, macAddress, signalLevel, channel, frequency, security);
-		m_pairCiphers = pairCiphers;
-		m_groupCiphers = groupCiphers;
-	}
+    private final String m_ssid;
+    private final String m_macAddress;
+    private final int m_signalLevel;
+    private final int m_channel;
+    private final int m_frequency;
+    private final WifiSecurity m_security;
+    private EnumSet<WifiSecurity> m_pairCiphers;
+    private EnumSet<WifiSecurity> m_groupCiphers;
 
-	public String getSsid() {
-		return m_ssid;
-	}
+    public WifiHotspotInfo(String ssid, String macAddress, int signalLevel, int channel, int frequency,
+            WifiSecurity security) {
+        super();
+        this.m_ssid = ssid;
+        this.m_macAddress = macAddress;
+        this.m_signalLevel = signalLevel;
+        this.m_channel = channel;
+        this.m_frequency = frequency;
+        this.m_security = security;
+    }
 
-	public String getMacAddress() {
-		return m_macAddress;
-	}
+    public WifiHotspotInfo(String ssid, String macAddress, int signalLevel, int channel, int frequency,
+            WifiSecurity security, EnumSet<WifiSecurity> pairCiphers, EnumSet<WifiSecurity> groupCiphers) {
+        this(ssid, macAddress, signalLevel, channel, frequency, security);
+        this.m_pairCiphers = pairCiphers;
+        this.m_groupCiphers = groupCiphers;
+    }
 
-	public int getSignalLevel() {
-		return m_signalLevel;
-	}
+    public String getSsid() {
+        return this.m_ssid;
+    }
 
-	public int getChannel() {
-		return m_channel;
-	}
+    public String getMacAddress() {
+        return this.m_macAddress;
+    }
 
-	public int getFrequency() {
-		return m_frequency;
-	}
+    public int getSignalLevel() {
+        return this.m_signalLevel;
+    }
 
-	public WifiSecurity getSecurity() {
-		return m_security;
-	}
-	
-	public EnumSet<WifiSecurity> getPairCiphers() {
-		return m_pairCiphers;
-	}
-	
-	public EnumSet<WifiSecurity> getGroupCiphers() {
-		return m_groupCiphers;
-	}
-	
-	public String toString() {
-		
-		StringBuffer sb = new StringBuffer();
-		sb.append(m_macAddress);
-		sb.append(" :: ");
-		sb.append(m_ssid);
-		sb.append(" :: ");
-		sb.append(m_signalLevel);
-		sb.append(" :: ");
-		sb.append(m_channel);
-		sb.append(" :: ");
-		sb.append(m_frequency);
-		sb.append(" :: ");
-		sb.append(m_security);
-		
-		return sb.toString();
-	}
+    public int getChannel() {
+        return this.m_channel;
+    }
+
+    public int getFrequency() {
+        return this.m_frequency;
+    }
+
+    public WifiSecurity getSecurity() {
+        return this.m_security;
+    }
+
+    public EnumSet<WifiSecurity> getPairCiphers() {
+        return this.m_pairCiphers;
+    }
+
+    public EnumSet<WifiSecurity> getGroupCiphers() {
+        return this.m_groupCiphers;
+    }
+
+    @Override
+    public String toString() {
+
+        StringBuffer sb = new StringBuffer();
+        sb.append(this.m_macAddress);
+        sb.append(" :: ");
+        sb.append(this.m_ssid);
+        sb.append(" :: ");
+        sb.append(this.m_signalLevel);
+        sb.append(" :: ");
+        sb.append(this.m_channel);
+        sb.append(" :: ");
+        sb.append(this.m_frequency);
+        sb.append(" :: ");
+        sb.append(this.m_security);
+
+        return sb.toString();
+    }
 }

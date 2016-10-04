@@ -7,13 +7,14 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Eurotech
+ * Eurotech
  *******************************************************************************/
 /**
- * 
+ *
  */
 /**
- * Provides services for managing communications between M2M applications and remote servers. Types of communications include simple publish/subscribe models to more complex
+ * Provides services for managing communications between M2M applications and remote servers. Types of communications
+ * include simple publish/subscribe models to more complex
  * request/response and remote resource management.
  *
  */

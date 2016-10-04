@@ -12,253 +12,247 @@
 package org.eclipse.kura.protocol.can.test;
 
 public class CompressorStatus {
-		
-	private short compressorPressure; /* 16 bit signed */
-	private short compressorTemperature; /* 16 bit signed */
-	private short dryerTemperature; /* 16 bit signed */
-	private short dryerStatus; /* 8 bit unsigned */
-	private int inputBitmap; /* 16 bit unsigned */
-	private short outputBitmap; /* 8 bit unsigned */
-	private short compressorStatus; /* 8 bit unsigned */
-	private short compressorLoad; /* 8 bit unsigned */
-	private long totalHours; /* 32 bit unsigned */
-	private long loadHours; /* 32 bit unsigned */
-	private short currentErrorStatus; /* 8 bit unsigned */
-	private short pressureUnit; /* 8 bit unsigned */
-	private short temperatureUnit;  /* 8 bit unsigned */
-	private int serialNumber; /* 16 bit unsigned */
-	private short productionWeek; /* 8 bit unsigned */
-	private short productionYear; /* 8 bit unsigned */
-	private short productCode;  /* 8 bit unsigned */
-	private short nextService; /* 8 bit unsigned */
-	private int airFilterRemainingTime; /* 16 bit unsigned */
-	private int oilFilterRemainingTime; /* 16 bit unsigned */
-	private int oilRemainingTime; /* 16 bit unsigned */
-	private int disoilFilterRemainingTime; /* 16 bit unsigned */
-	private int dryerFilterRemainingTime; /* 16 bit unsigned */
-	private short maxPressure; /* 16 bit signed */
-	private short minPressure; /* 16 bit signed */
-	
-	public short getCompressorPressure() {
-		return compressorPressure;
-	}
 
-	public void setCompressorPressure(short compressorPressure) {
-		this.compressorPressure = compressorPressure;
-	}
-	
-	public short getCompressorTemperature() {
-		return compressorTemperature;
-	}
+    private short compressorPressure; /* 16 bit signed */
+    private short compressorTemperature; /* 16 bit signed */
+    private short dryerTemperature; /* 16 bit signed */
+    private short dryerStatus; /* 8 bit unsigned */
+    private int inputBitmap; /* 16 bit unsigned */
+    private short outputBitmap; /* 8 bit unsigned */
+    private short compressorStatus; /* 8 bit unsigned */
+    private short compressorLoad; /* 8 bit unsigned */
+    private long totalHours; /* 32 bit unsigned */
+    private long loadHours; /* 32 bit unsigned */
+    private short currentErrorStatus; /* 8 bit unsigned */
+    private short pressureUnit; /* 8 bit unsigned */
+    private short temperatureUnit; /* 8 bit unsigned */
+    private int serialNumber; /* 16 bit unsigned */
+    private short productionWeek; /* 8 bit unsigned */
+    private short productionYear; /* 8 bit unsigned */
+    private short productCode; /* 8 bit unsigned */
+    private short nextService; /* 8 bit unsigned */
+    private int airFilterRemainingTime; /* 16 bit unsigned */
+    private int oilFilterRemainingTime; /* 16 bit unsigned */
+    private int oilRemainingTime; /* 16 bit unsigned */
+    private int disoilFilterRemainingTime; /* 16 bit unsigned */
+    private int dryerFilterRemainingTime; /* 16 bit unsigned */
+    private short maxPressure; /* 16 bit signed */
+    private short minPressure; /* 16 bit signed */
 
-	public void setCompressorTemperature(short compressorTemperature) {
-		this.compressorTemperature = compressorTemperature;
-	}
+    public short getCompressorPressure() {
+        return this.compressorPressure;
+    }
 
-	public short getDryerTemperature() {
-		return dryerTemperature;
-	}
+    public void setCompressorPressure(short compressorPressure) {
+        this.compressorPressure = compressorPressure;
+    }
 
-	public void setDryerTemperature(short dryerTemperature) {
-		this.dryerTemperature = dryerTemperature;
-	}
+    public short getCompressorTemperature() {
+        return this.compressorTemperature;
+    }
 
-	public short getDryerStatus() {
-		return dryerStatus;
-	}
+    public void setCompressorTemperature(short compressorTemperature) {
+        this.compressorTemperature = compressorTemperature;
+    }
 
-	public void setDryerStatus(short dryerStatus) {
-		this.dryerStatus = dryerStatus;
-	}
+    public short getDryerTemperature() {
+        return this.dryerTemperature;
+    }
 
-	public int getInputBitmap() {
-		return inputBitmap;
-	}
+    public void setDryerTemperature(short dryerTemperature) {
+        this.dryerTemperature = dryerTemperature;
+    }
 
-	public void setInputBitmap(int inputBitmap) {
-		this.inputBitmap = inputBitmap;
-	}
+    public short getDryerStatus() {
+        return this.dryerStatus;
+    }
 
-	public short getOutputBitmap() {
-		return outputBitmap;
-	}
+    public void setDryerStatus(short dryerStatus) {
+        this.dryerStatus = dryerStatus;
+    }
 
-	public void setOutputBitmap(short outputBitmap) {
-		this.outputBitmap = outputBitmap;
-	}
+    public int getInputBitmap() {
+        return this.inputBitmap;
+    }
 
-	public short getCompressorStatus() {
-		return compressorStatus;
-	}
+    public void setInputBitmap(int inputBitmap) {
+        this.inputBitmap = inputBitmap;
+    }
 
-	public void setCompressorStatus(short compressorStatus) {
-		this.compressorStatus = compressorStatus;
-	}
+    public short getOutputBitmap() {
+        return this.outputBitmap;
+    }
 
-	public short getCompressorLoad() {
-		return compressorLoad;
-	}
+    public void setOutputBitmap(short outputBitmap) {
+        this.outputBitmap = outputBitmap;
+    }
 
-	public void setCompressorLoad(short compressorLoad) {
-		this.compressorLoad = compressorLoad;
-	}
+    public short getCompressorStatus() {
+        return this.compressorStatus;
+    }
 
-	public long getTotalHours() {
-		return totalHours;
-	}
+    public void setCompressorStatus(short compressorStatus) {
+        this.compressorStatus = compressorStatus;
+    }
 
-	public void setTotalHours(long totalHours) {
-		this.totalHours = totalHours;
-	}
+    public short getCompressorLoad() {
+        return this.compressorLoad;
+    }
 
-	public long getLoadHours() {
-		return loadHours;
-	}
+    public void setCompressorLoad(short compressorLoad) {
+        this.compressorLoad = compressorLoad;
+    }
 
-	public void setLoadHours(long loadHours) {
-		this.loadHours = loadHours;
-	}
+    public long getTotalHours() {
+        return this.totalHours;
+    }
 
-	public short getCurrentErrorStatus() {
-		return currentErrorStatus;
-	}
+    public void setTotalHours(long totalHours) {
+        this.totalHours = totalHours;
+    }
 
-	public void setCurrentErrorStatus(short currentErrorStatus) {
-		this.currentErrorStatus = currentErrorStatus;
-	}
+    public long getLoadHours() {
+        return this.loadHours;
+    }
 
-	public short getPressureUnit() {
-		return pressureUnit;
-	}
+    public void setLoadHours(long loadHours) {
+        this.loadHours = loadHours;
+    }
 
-	public void setPressureUnit(short pressureUnit) {
-		this.pressureUnit = pressureUnit;
-	}
+    public short getCurrentErrorStatus() {
+        return this.currentErrorStatus;
+    }
 
-	public short getTemperatureUnit() {
-		return temperatureUnit;
-	}
+    public void setCurrentErrorStatus(short currentErrorStatus) {
+        this.currentErrorStatus = currentErrorStatus;
+    }
 
-	public void setTemperatureUnit(short temperatureUnit) {
-		this.temperatureUnit = temperatureUnit;
-	}
+    public short getPressureUnit() {
+        return this.pressureUnit;
+    }
 
-	public int getSerialNumber() {
-		return serialNumber;
-	}
+    public void setPressureUnit(short pressureUnit) {
+        this.pressureUnit = pressureUnit;
+    }
 
-	public void setSerialNumber(int serialNumber) {
-		this.serialNumber = serialNumber;
-	}
-	
-	public short getProductionWeek() {
-		return productionWeek;
-	}
+    public short getTemperatureUnit() {
+        return this.temperatureUnit;
+    }
 
-	public void setProductionWeek(short productionWeek) {
-		this.productionWeek = productionWeek;
-	}
+    public void setTemperatureUnit(short temperatureUnit) {
+        this.temperatureUnit = temperatureUnit;
+    }
 
-	public short getProductionYear() {
-		return productionYear;
-	}
+    public int getSerialNumber() {
+        return this.serialNumber;
+    }
 
-	public void setProductionYear(short productionYear) {
-		this.productionYear = productionYear;
-	}
-	
-	public short getProductCode() {
-		return productCode;
-	}
+    public void setSerialNumber(int serialNumber) {
+        this.serialNumber = serialNumber;
+    }
 
-	public void setProductCode(short productCode) {
-		this.productCode = productCode;
-	}
+    public short getProductionWeek() {
+        return this.productionWeek;
+    }
 
-	public short getNextService() {
-		return nextService;
-	}
+    public void setProductionWeek(short productionWeek) {
+        this.productionWeek = productionWeek;
+    }
 
-	public void setNextService(short nextService) {
-		this.nextService = nextService;
-	}
+    public short getProductionYear() {
+        return this.productionYear;
+    }
 
-	public int getAirFilterRemainingTime() {
-		return airFilterRemainingTime;
-	}
+    public void setProductionYear(short productionYear) {
+        this.productionYear = productionYear;
+    }
 
-	public void setAirFilterRemainingTime(int airFilterRemainingTime) {
-		this.airFilterRemainingTime = airFilterRemainingTime;
-	}
+    public short getProductCode() {
+        return this.productCode;
+    }
 
-	public int getOilFilterRemainingTime() {
-		return oilFilterRemainingTime;
-	}
+    public void setProductCode(short productCode) {
+        this.productCode = productCode;
+    }
 
-	public void setOilFilterRemainingTime(int oilFilterRemainingTime) {
-		this.oilFilterRemainingTime = oilFilterRemainingTime;
-	}
+    public short getNextService() {
+        return this.nextService;
+    }
 
-	public int getOilRemainingTime() {
-		return oilRemainingTime;
-	}
+    public void setNextService(short nextService) {
+        this.nextService = nextService;
+    }
 
-	public void setOilRemainingTime(int oilRemainingTime) {
-		this.oilRemainingTime = oilRemainingTime;
-	}
+    public int getAirFilterRemainingTime() {
+        return this.airFilterRemainingTime;
+    }
 
-	public int getDisoilFilterRemainingTime() {
-		return disoilFilterRemainingTime;
-	}
+    public void setAirFilterRemainingTime(int airFilterRemainingTime) {
+        this.airFilterRemainingTime = airFilterRemainingTime;
+    }
 
-	public void setDisoilFilterRemainingTime(int disoilFilterRemainingTime) {
-		this.disoilFilterRemainingTime = disoilFilterRemainingTime;
-	}
+    public int getOilFilterRemainingTime() {
+        return this.oilFilterRemainingTime;
+    }
 
-	public int getDryerFilterRemainingTime() {
-		return dryerFilterRemainingTime;
-	}
+    public void setOilFilterRemainingTime(int oilFilterRemainingTime) {
+        this.oilFilterRemainingTime = oilFilterRemainingTime;
+    }
 
-	public void setDryerFilterRemainingTime(int dryerFilterRemainingTime) {
-		this.dryerFilterRemainingTime = dryerFilterRemainingTime;
-	}
+    public int getOilRemainingTime() {
+        return this.oilRemainingTime;
+    }
 
-	public short getMaxPressure() {
-		return maxPressure;
-	}
+    public void setOilRemainingTime(int oilRemainingTime) {
+        this.oilRemainingTime = oilRemainingTime;
+    }
 
-	public void setMaxPressure(short maxPressure) {
-		this.maxPressure = maxPressure;
-	}
+    public int getDisoilFilterRemainingTime() {
+        return this.disoilFilterRemainingTime;
+    }
 
-	public short getMinPressure() {
-		return minPressure;
-	}
+    public void setDisoilFilterRemainingTime(int disoilFilterRemainingTime) {
+        this.disoilFilterRemainingTime = disoilFilterRemainingTime;
+    }
 
-	public void setMinPressure(short minPressure) {
-		this.minPressure = minPressure;
-	}
+    public int getDryerFilterRemainingTime() {
+        return this.dryerFilterRemainingTime;
+    }
 
-	@Override
-	public String toString() {
-		return "CompressorStatus [compressorPressure=" + compressorPressure
-				+ ", compressorTemperature=" + compressorTemperature
-				+ ", dryerTemperature=" + dryerTemperature + ", dryerStatus="
-				+ dryerStatus + ", inputBitmap=" + inputBitmap
-				+ ", outputBitmap=" + outputBitmap + ", compressorStatus="
-				+ compressorStatus + ", compressorLoad=" + compressorLoad
-				+ ", totalHours=" + totalHours + ", loadHours=" + loadHours
-				+ ", currentErrorStatus=" + currentErrorStatus
-				+ ", pressureUnit=" + pressureUnit + ", temperatureUnit="
-				+ temperatureUnit + ", serialNumber=" + serialNumber
-				+ ", productionWeek=" + productionWeek + ", productionYear="
-				+ productionYear + ", productCode=" + productCode
-				+ ", nextService=" + nextService + ", airFilterRemainingTime="
-				+ airFilterRemainingTime + ", oilFilterRemainingTime="
-				+ oilFilterRemainingTime + ", oilRemainingTime="
-				+ oilRemainingTime + ", disoilFilterRemainingTime="
-				+ disoilFilterRemainingTime + ", dryerFilterRemainingTime="
-				+ dryerFilterRemainingTime + ", maxPressure=" + maxPressure
-				+ ", minPressure=" + minPressure + "]";
-	}
+    public void setDryerFilterRemainingTime(int dryerFilterRemainingTime) {
+        this.dryerFilterRemainingTime = dryerFilterRemainingTime;
+    }
+
+    public short getMaxPressure() {
+        return this.maxPressure;
+    }
+
+    public void setMaxPressure(short maxPressure) {
+        this.maxPressure = maxPressure;
+    }
+
+    public short getMinPressure() {
+        return this.minPressure;
+    }
+
+    public void setMinPressure(short minPressure) {
+        this.minPressure = minPressure;
+    }
+
+    @Override
+    public String toString() {
+        return "CompressorStatus [compressorPressure=" + this.compressorPressure + ", compressorTemperature="
+                + this.compressorTemperature + ", dryerTemperature=" + this.dryerTemperature + ", dryerStatus="
+                + this.dryerStatus + ", inputBitmap=" + this.inputBitmap + ", outputBitmap=" + this.outputBitmap
+                + ", compressorStatus=" + this.compressorStatus + ", compressorLoad=" + this.compressorLoad
+                + ", totalHours=" + this.totalHours + ", loadHours=" + this.loadHours + ", currentErrorStatus="
+                + this.currentErrorStatus + ", pressureUnit=" + this.pressureUnit + ", temperatureUnit="
+                + this.temperatureUnit + ", serialNumber=" + this.serialNumber + ", productionWeek="
+                + this.productionWeek + ", productionYear=" + this.productionYear + ", productCode=" + this.productCode
+                + ", nextService=" + this.nextService + ", airFilterRemainingTime=" + this.airFilterRemainingTime
+                + ", oilFilterRemainingTime=" + this.oilFilterRemainingTime + ", oilRemainingTime="
+                + this.oilRemainingTime + ", disoilFilterRemainingTime=" + this.disoilFilterRemainingTime
+                + ", dryerFilterRemainingTime=" + this.dryerFilterRemainingTime + ", maxPressure=" + this.maxPressure
+                + ", minPressure=" + this.minPressure + "]";
+    }
 }

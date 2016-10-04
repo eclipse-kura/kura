@@ -22,13 +22,16 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.camel.internal.camelcloud.CamelCloudClient;
 import org.eclipse.kura.cloud.CloudClient;
 
+/**
+ * A default implementation of the {@link CamelCloudService}
+ */
 public class DefaultCamelCloudService implements CamelCloudService {
 
     private final CamelContext camelContext;
 
-    private final Map<String, CloudClient> clients = new ConcurrentHashMap<String, CloudClient>();
+    private final Map<String, CloudClient> clients = new ConcurrentHashMap<>();
 
-    private final Map<String, String> baseEndpoints = new ConcurrentHashMap<String, String>();
+    private final Map<String, String> baseEndpoints = new ConcurrentHashMap<>();
 
     public DefaultCamelCloudService(CamelContext camelContext) {
         this.camelContext = camelContext;

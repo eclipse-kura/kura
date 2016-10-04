@@ -17,17 +17,18 @@ import org.eclipse.kura.core.util.GZipUtil;
 
 public class CloudPayloadGZipEncoder implements CloudPayloadEncoder {
 
-	private CloudPayloadEncoder m_decorated;
-	
-	public CloudPayloadGZipEncoder(CloudPayloadEncoder decorated) {
-		m_decorated = decorated;
-	}
-	
-	public byte[] getBytes() throws IOException {
-		byte[] source = m_decorated.getBytes();
-		byte[] compressed = GZipUtil.compress(source);
-		
-		//Return gzip compressed data only if shorter than uncompressed one
-		return compressed.length < source.length ? compressed : source;
-	}
+    private final CloudPayloadEncoder m_decorated;
+
+    public CloudPayloadGZipEncoder(CloudPayloadEncoder decorated) {
+        this.m_decorated = decorated;
+    }
+
+    @Override
+    public byte[] getBytes() throws IOException {
+        byte[] source = this.m_decorated.getBytes();
+        byte[] compressed = GZipUtil.compress(source);
+
+        // Return gzip compressed data only if shorter than uncompressed one
+        return compressed.length < source.length ? compressed : source;
+    }
 }

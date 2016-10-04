@@ -19,119 +19,126 @@ import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 
-public class WifiAccessPointImpl implements WifiAccessPoint 
-{
-	private String            ssid;
-	private byte[]            hardwareAddress;
-	private long              frequency;
-	private WifiMode          mode;
-	private List<Long>        bitrate;
-	private int               strength;
-	private EnumSet<WifiSecurity> wpaSecurity;
-	private EnumSet<WifiSecurity> rsnSecurity;
-	private List<String> capabilities;
-	
-	public WifiAccessPointImpl(String ssid) {
-		this.ssid = ssid;
-	}
-	
-	public String getSSID() {
-		return ssid;
-	}
+public class WifiAccessPointImpl implements WifiAccessPoint {
 
-	public byte[] getHardwareAddress() {
-		return hardwareAddress;
-	}
+    private final String ssid;
+    private byte[] hardwareAddress;
+    private long frequency;
+    private WifiMode mode;
+    private List<Long> bitrate;
+    private int strength;
+    private EnumSet<WifiSecurity> wpaSecurity;
+    private EnumSet<WifiSecurity> rsnSecurity;
+    private List<String> capabilities;
 
-	public void setHardwareAddress(byte[] hardwareAddress) {
-		this.hardwareAddress = hardwareAddress;
-	}
+    public WifiAccessPointImpl(String ssid) {
+        this.ssid = ssid;
+    }
 
-	public long getFrequency() {
-		return frequency;
-	}
+    @Override
+    public String getSSID() {
+        return this.ssid;
+    }
 
-	public void setFrequency(long frequency) {
-		this.frequency = frequency;
-	}
+    @Override
+    public byte[] getHardwareAddress() {
+        return this.hardwareAddress;
+    }
 
-	public WifiMode getMode() {
-		return mode;
-	}
+    public void setHardwareAddress(byte[] hardwareAddress) {
+        this.hardwareAddress = hardwareAddress;
+    }
 
-	public void setMode(WifiMode mode) {
-		this.mode = mode;
-	}
+    @Override
+    public long getFrequency() {
+        return this.frequency;
+    }
 
-	public List<Long> getBitrate() {
-		return bitrate;
-	}
+    public void setFrequency(long frequency) {
+        this.frequency = frequency;
+    }
 
-	public void setBitrate(List<Long> bitrate) {
-		this.bitrate = bitrate;
-	}
+    @Override
+    public WifiMode getMode() {
+        return this.mode;
+    }
 
-	public int getStrength() {
-		return strength;
-	}
+    public void setMode(WifiMode mode) {
+        this.mode = mode;
+    }
 
-	public void setStrength(int strength) {
-		this.strength = strength;
-	}
+    @Override
+    public List<Long> getBitrate() {
+        return this.bitrate;
+    }
 
-	public EnumSet<WifiSecurity> getWpaSecurity() {
-		return wpaSecurity;
-	}
+    public void setBitrate(List<Long> bitrate) {
+        this.bitrate = bitrate;
+    }
 
-	public void setWpaSecurity(EnumSet<WifiSecurity> wpaSecurity) {
-		this.wpaSecurity = wpaSecurity;
-	}
+    @Override
+    public int getStrength() {
+        return this.strength;
+    }
 
-	public EnumSet<WifiSecurity> getRsnSecurity() {
-		return rsnSecurity;
-	}
+    public void setStrength(int strength) {
+        this.strength = strength;
+    }
 
-	public void setRsnSecurity(EnumSet<WifiSecurity> rsnSecurity) {
-		this.rsnSecurity = rsnSecurity;
-	}
-	
-	public List<String> getCapabilities() {
-		return this.capabilities;
-	}
-	
-	public void setCapabilities(List<String> capabilities) {
-		this.capabilities = capabilities;
-	}
-	
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("ssid=").append(ssid);
-		if(hardwareAddress != null && hardwareAddress.length > 0) {
-			sb.append(" :: hardwareAddress=")
-			.append(NetworkUtil.macToString(hardwareAddress));
-		}
-		sb.append(" :: frequency=").append(frequency)
-		.append(" :: mode=").append(mode);
-		if(bitrate != null && bitrate.size() > 0) {
-			sb.append(" :: bitrate=");
-			for(Long rate : bitrate) {
-				sb.append(rate).append(" ");
-			}
-		}
-		sb.append(" :: strength=").append(strength);
-		if(wpaSecurity != null && wpaSecurity.size() > 0) {
-			sb.append(" :: wpaSecurity=");
-			for(WifiSecurity security : wpaSecurity) {
-				sb.append(security).append(" ");
-			}
-		}
-		if(rsnSecurity != null && rsnSecurity.size() > 0) {
-			sb.append(" :: rsnSecurity=");
-			for(WifiSecurity security : rsnSecurity) {
-				sb.append(security).append(" ");
-			}
-		}
-		return sb.toString();
-	}
+    @Override
+    public EnumSet<WifiSecurity> getWpaSecurity() {
+        return this.wpaSecurity;
+    }
+
+    public void setWpaSecurity(EnumSet<WifiSecurity> wpaSecurity) {
+        this.wpaSecurity = wpaSecurity;
+    }
+
+    @Override
+    public EnumSet<WifiSecurity> getRsnSecurity() {
+        return this.rsnSecurity;
+    }
+
+    public void setRsnSecurity(EnumSet<WifiSecurity> rsnSecurity) {
+        this.rsnSecurity = rsnSecurity;
+    }
+
+    @Override
+    public List<String> getCapabilities() {
+        return this.capabilities;
+    }
+
+    public void setCapabilities(List<String> capabilities) {
+        this.capabilities = capabilities;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ssid=").append(this.ssid);
+        if (this.hardwareAddress != null && this.hardwareAddress.length > 0) {
+            sb.append(" :: hardwareAddress=").append(NetworkUtil.macToString(this.hardwareAddress));
+        }
+        sb.append(" :: frequency=").append(this.frequency).append(" :: mode=").append(this.mode);
+        if (this.bitrate != null && this.bitrate.size() > 0) {
+            sb.append(" :: bitrate=");
+            for (Long rate : this.bitrate) {
+                sb.append(rate).append(" ");
+            }
+        }
+        sb.append(" :: strength=").append(this.strength);
+        if (this.wpaSecurity != null && this.wpaSecurity.size() > 0) {
+            sb.append(" :: wpaSecurity=");
+            for (WifiSecurity security : this.wpaSecurity) {
+                sb.append(security).append(" ");
+            }
+        }
+        if (this.rsnSecurity != null && this.rsnSecurity.size() > 0) {
+            sb.append(" :: rsnSecurity=");
+            for (WifiSecurity security : this.rsnSecurity) {
+                sb.append(security).append(" ");
+            }
+        }
+        return sb.toString();
+    }
 }

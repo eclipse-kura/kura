@@ -29,17 +29,18 @@ import org.slf4j.LoggerFactory;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class KuraRemoteServiceServlet extends RemoteServiceServlet {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 3473193315046407200L;
-	private static Logger     s_logger         = LoggerFactory.getLogger(KuraRemoteServiceServlet.class);
 
     /**
-     * 
+     *
+     */
+    private static final long serialVersionUID = 3473193315046407200L;
+    private static Logger s_logger = LoggerFactory.getLogger(KuraRemoteServiceServlet.class);
+
+    /**
+     *
      * If the given xsrfToken is not valid a GwtEdcException will throw.
      * Check if the given xsrfToken is valid, otherwise traces the user network info and invalidates the user session.
-     * 
+     *
      * @param xsrfToken
      * @throws GwtEdcException
      */
@@ -49,14 +50,15 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
     }
 
     /**
-     * 
+     *
      * This method perform a XSRF validation on the given request and for the specific userToken.
      * This is a private method to support both, standard class validation or multipart Servlet validation.
-     * 
+     *
      * @param req
      * @param userToken
      */
-    static private void performXSRFTokenValidation(HttpServletRequest req, GwtXSRFToken userToken) throws GwtKuraException {
+    static private void performXSRFTokenValidation(HttpServletRequest req, GwtXSRFToken userToken)
+            throws GwtKuraException {
         HttpSession session = req.getSession();
 
         if (!isValidXSRFToken(session, userToken)) {
@@ -65,9 +67,7 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
                 s_logger.debug("\tSender IP: {}", req.getRemoteAddr());
                 s_logger.debug("\tSender Host: {}", req.getRemoteHost());
                 s_logger.debug("\tSender Port: {}", req.getRemotePort());
-                s_logger.debug("\tFull Request URL\n {}?{}\n\n",
-                               req.getRequestURL().toString(),
-                               req.getQueryString());
+                s_logger.debug("\tFull Request URL\n {}?{}\n\n", req.getRequestURL().toString(), req.getQueryString());
             }
 
             // forcing the console log out
@@ -79,12 +79,12 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
     }
 
     /**
-     * 
+     *
      * Verify if the given userToken is valid on the given session.
      * This method tests if the server xsrf token is equals on the user token.
      * If yes, the method returns true, otherwise returns false.
      * This method controls the xsrf token date validity based on the expire date field.
-     * 
+     *
      * @param session
      * @param userToken
      * @return boolean
@@ -107,15 +107,13 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
                 if (isValidStringToken(userToken.getToken())) {
                     if (serverToken.equals(userToken.getToken())) {
                         // Checking expire date
-                        if (new Date().before(userToken.getExpiresOn()))
-                        {
+                        if (new Date().before(userToken.getExpiresOn())) {
                             s_logger.debug("XSRF Token is VALID - {}", userToken.getToken());
 
                             // Reset used token
                             session.setAttribute(GwtSecurityTokenServiceImpl.XSRF_TOKEN_KEY, null);
                             return true;
-                        }
-                        else {
+                        } else {
                             session.setAttribute(GwtSecurityTokenServiceImpl.XSRF_TOKEN_KEY, null);
                             s_logger.error("XSRF Token is EXPIRED - {}", userToken.getToken());
                         }
@@ -129,25 +127,26 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
     }
 
     /**
-     * 
+     *
      * Performs some basic string validation on the given String token.
-     * 
+     *
      * @param token
      * @return boolean
      */
     static private boolean isValidStringToken(String token) {
         if (token != null) {
-            if (!token.isEmpty())
+            if (!token.isEmpty()) {
                 return true;
+            }
         }
         return false;
     }
 
     /**
-     * 
+     *
      * Get the given value field from the Servlet request if exist.
      * Returns null if the passed fieldName isn't present in the request.
-     * 
+     *
      * @param req
      * @param fieldName
      * @return String
@@ -163,7 +162,7 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
         // Process the uploaded items
         Iterator<FileItem> iter = items.iterator();
         while (iter.hasNext()) {
-            FileItem item = (FileItem) iter.next();
+            FileItem item = iter.next();
             if (item.isFormField()) {
                 String name = item.getFieldName();
 
@@ -182,16 +181,14 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
     }
 
     /**
-     * 
+     *
      * Check if the given xsrfToken is valid, otherwise traces the user network info and invalidates the user session.
      * This is the checkXSRFToken for the MultiPart Servlet support.
-     * 
+     *
      * @param req
      * @throws Exception
      */
-    static public void checkXSRFTokenMultiPart(HttpServletRequest req, GwtXSRFToken token)
-        throws Exception
-    {
+    static public void checkXSRFTokenMultiPart(HttpServletRequest req, GwtXSRFToken token) throws Exception {
         performXSRFTokenValidation(req, token);
     }
 

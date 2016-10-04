@@ -18,97 +18,93 @@ import org.eclipse.kura.web.client.messages.ValidationMessages;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class GwtGroupedNVPair extends GwtBaseModel implements IsSerializable, Serializable  {
-	
-	private static final long serialVersionUID = 6017065568183482351L;
+public class GwtGroupedNVPair extends GwtBaseModel implements IsSerializable, Serializable {
 
-	
-	public GwtGroupedNVPair()
-	{}
-	
-	public GwtGroupedNVPair(String group, String name, String value) {
-		setGroup(group);
-		setName(name);
-		setValue(value);
-	}
-	
-	public void setGroup(String group) {
-		set("group", group); 	
-	}
-	
-	public String getGroup() {
-		return get("group");
-	}
-	
-	public String getGroupLoc() {
-		return get("groupLoc");
-	}
+    private static final long serialVersionUID = 6017065568183482351L;
 
-	public void setId(String id) {
-		set("id", id); 	
-	}
-	
-	public String getId() {
-		return get("id");
-	}
+    public GwtGroupedNVPair() {
+    }
 
-	public void setName(String name) {
-		set("name", name); 	
-	}
-	
-	public String getName() {
-		return get("name");
-	}
+    public GwtGroupedNVPair(String group, String name, String value) {
+        setGroup(group);
+        setName(name);
+        setValue(value);
+    }
 
-	public String getNameLoc() {
-		return get("nameLoc");
-	}
-	
-	public void setValue(String value) {
-		set("value", value); 	
-	}
-	
-	public String getValue() {
-		return get("value");
-	}
+    public void setGroup(String group) {
+        set("group", group);
+    }
 
-	public void setStatus(String status) {
-		set("status", status); 	
-	}
-	
-	public String getStatus() {
-		return get("status");
-	}
+    public String getGroup() {
+        return get("group");
+    }
 
-	public String getStatusLoc() {
-		return get("statusLoc");
-	}
+    public String getGroupLoc() {
+        return get("groupLoc");
+    }
 
-	public void setVersion(String version) {
-		set("version", version); 	
-	}
-	
-	public String getVersion() {
-		return get("version");
-	}
+    public void setId(String id) {
+        set("id", id);
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
+    public String getId() {
+        return get("id");
+    }
+
+    public void setName(String name) {
+        set("name", name);
+    }
+
+    public String getName() {
+        return get("name");
+    }
+
+    public String getNameLoc() {
+        return get("nameLoc");
+    }
+
+    public void setValue(String value) {
+        set("value", value);
+    }
+
+    public String getValue() {
+        return get("value");
+    }
+
+    public void setStatus(String status) {
+        set("status", status);
+    }
+
+    public String getStatus() {
+        return get("status");
+    }
+
+    public String getStatusLoc() {
+        return get("statusLoc");
+    }
+
+    public void setVersion(String version) {
+        set("version", version);
+    }
+
+    public String getVersion() {
+        return get("version");
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
     public <X> X get(String property) {
-    	if ("groupLoc".equals(property)) {
-    		ValidationMessages msgs = GWT.create(ValidationMessages.class);
-    		return (X) msgs.getString(getGroup());
-    	}
-    	else if ("nameLoc".equals(property)) {
-    		ValidationMessages msgs = GWT.create(ValidationMessages.class);
-    		return (X) msgs.getString(getName());
-    	}
-    	else if ("statusLoc".equals(property)) {
-    		ValidationMessages msgs = GWT.create(ValidationMessages.class);
-    		return (X) msgs.getString(getStatus());
-    	}
-    	else {
-    		return super.get(property);
-    	}
+        if ("groupLoc".equals(property)) {
+            ValidationMessages msgs = GWT.create(ValidationMessages.class);
+            return (X) msgs.getString(getGroup());
+        } else if ("nameLoc".equals(property)) {
+            ValidationMessages msgs = GWT.create(ValidationMessages.class);
+            return (X) msgs.getString(getName());
+        } else if ("statusLoc".equals(property)) {
+            ValidationMessages msgs = GWT.create(ValidationMessages.class);
+            return (X) msgs.getString(getStatus());
+        } else {
+            return super.get(property);
+        }
     }
 }

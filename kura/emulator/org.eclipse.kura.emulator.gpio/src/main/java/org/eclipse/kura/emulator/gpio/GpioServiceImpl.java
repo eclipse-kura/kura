@@ -24,47 +24,50 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GpioServiceImpl implements GPIOService {
-	private static final Logger s_logger = LoggerFactory.getLogger(GpioServiceImpl.class);
-	
-	private static final HashMap<Integer, String> pins = new HashMap<Integer, String>();
-	
-	protected void activate(ComponentContext componentContext) {
-		s_logger.debug("activating emulated GPIOService");
-	}
 
-	protected void deactivate(ComponentContext componentContext) {
-		s_logger.debug("deactivating emulated GPIOService");
-	}
+    private static final Logger s_logger = LoggerFactory.getLogger(GpioServiceImpl.class);
 
-	@Override
-	public KuraGPIOPin getPinByName(String pinName) {
-		return new EmulatedPin(pinName);
-	}
+    private static final HashMap<Integer, String> pins = new HashMap<Integer, String>();
 
-	@Override
-	public KuraGPIOPin getPinByName(String pinName, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
-		return new EmulatedPin(pinName, direction, mode, trigger);
-	}
+    protected void activate(ComponentContext componentContext) {
+        s_logger.debug("activating emulated GPIOService");
+    }
 
-	@Override
-	public KuraGPIOPin getPinByTerminal(int terminal) {
-		return new EmulatedPin(terminal);
-	}
+    protected void deactivate(ComponentContext componentContext) {
+        s_logger.debug("deactivating emulated GPIOService");
+    }
 
-	@Override
-	public KuraGPIOPin getPinByTerminal(int terminal, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
-		return new EmulatedPin(terminal, direction, mode, trigger);
-	}
+    @Override
+    public KuraGPIOPin getPinByName(String pinName) {
+        return new EmulatedPin(pinName);
+    }
 
-	@Override
-	public Map<Integer, String> getAvailablePins() {
-		pins.clear();
-		
-		for(int i=1; i<11; i++){
-			pins.put(i, "Pin#"+String.valueOf(i));
-		}
-		
-		return pins;
-	}
+    @Override
+    public KuraGPIOPin getPinByName(String pinName, KuraGPIODirection direction, KuraGPIOMode mode,
+            KuraGPIOTrigger trigger) {
+        return new EmulatedPin(pinName, direction, mode, trigger);
+    }
+
+    @Override
+    public KuraGPIOPin getPinByTerminal(int terminal) {
+        return new EmulatedPin(terminal);
+    }
+
+    @Override
+    public KuraGPIOPin getPinByTerminal(int terminal, KuraGPIODirection direction, KuraGPIOMode mode,
+            KuraGPIOTrigger trigger) {
+        return new EmulatedPin(terminal, direction, mode, trigger);
+    }
+
+    @Override
+    public Map<Integer, String> getAvailablePins() {
+        pins.clear();
+
+        for (int i = 1; i < 11; i++) {
+            pins.put(i, "Pin#" + String.valueOf(i));
+        }
+
+        return pins;
+    }
 
 }

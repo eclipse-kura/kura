@@ -17,88 +17,88 @@ import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class XmlJavaPackagesMapper implements XmlJavaDataMapper{
-	private static final String PACKAGES = "packages";
-	private static final String PACKAGES_PACKAGE = "package";
-	private static final String PACKAGES_PACKAGE_NAME = "name";
-	private static final String PACKAGES_PACKAGE_VERSION = "version";
-	private static final String PACKAGES_PACKAGE_BUNDLES = "bundles";
-	private static final String PACKAGES_PACKAGE_BUNDLES_BUNDLE = "bundle";
-	private static final String PACKAGES_PACKAGE_BUNDLES_BUNDLE_NAME = "name";
-	private static final String PACKAGES_PACKAGE_BUNDLES_BUNDLE_VERSION = "version";
+public class XmlJavaPackagesMapper implements XmlJavaDataMapper {
 
-	@Override
-	public Element marshal(Document doc, Object object) throws Exception {
-		Element packages = doc.createElement(PACKAGES);
-		doc.appendChild(packages);
+    private static final String PACKAGES = "packages";
+    private static final String PACKAGES_PACKAGE = "package";
+    private static final String PACKAGES_PACKAGE_NAME = "name";
+    private static final String PACKAGES_PACKAGE_VERSION = "version";
+    private static final String PACKAGES_PACKAGE_BUNDLES = "bundles";
+    private static final String PACKAGES_PACKAGE_BUNDLES_BUNDLE = "bundle";
+    private static final String PACKAGES_PACKAGE_BUNDLES_BUNDLE_NAME = "name";
+    private static final String PACKAGES_PACKAGE_BUNDLES_BUNDLE_VERSION = "version";
 
-		XmlDeploymentPackages xdps= (XmlDeploymentPackages) object;
-		XmlDeploymentPackage[] xdpArray= xdps.getDeploymentPackages();
+    @Override
+    public Element marshal(Document doc, Object object) throws Exception {
+        Element packages = doc.createElement(PACKAGES);
+        doc.appendChild(packages);
 
-		for(XmlDeploymentPackage xdp:xdpArray){
-			Element packageInstalled= doc.createElement(PACKAGES_PACKAGE);
-			marshalDeploymentPackage(doc, xdp, packageInstalled);
-			packages.appendChild(packageInstalled);
-		}
-		return packages;
-	}
+        XmlDeploymentPackages xdps = (XmlDeploymentPackages) object;
+        XmlDeploymentPackage[] xdpArray = xdps.getDeploymentPackages();
 
-	@Override
-	public <T> T unmarshal(Document doc) throws Exception {
-		return null;
-	}
+        for (XmlDeploymentPackage xdp : xdpArray) {
+            Element packageInstalled = doc.createElement(PACKAGES_PACKAGE);
+            marshalDeploymentPackage(doc, xdp, packageInstalled);
+            packages.appendChild(packageInstalled);
+        }
+        return packages;
+    }
 
-	
-	//
-	// Marshaller's private methods
-	//
-	private static void marshalDeploymentPackage(Document doc, XmlDeploymentPackage xdp, Element packageInstalled) {
-		//Extract data from XmlDeploymentPackage
-		String packageName= xdp.getName();
-		String packageVersion= xdp.getVersion();
-		XmlBundleInfo[] xbiArray= xdp.getBundleInfos();
+    @Override
+    public <T> T unmarshal(Document doc) throws Exception {
+        return null;
+    }
 
-		//Create xml elements
-		if(packageName != null && !packageName.trim().isEmpty()){
-			Element name= doc.createElement(PACKAGES_PACKAGE_NAME);
-			name.setTextContent(packageName);
-			packageInstalled.appendChild(name);
-		}
+    //
+    // Marshaller's private methods
+    //
+    private static void marshalDeploymentPackage(Document doc, XmlDeploymentPackage xdp, Element packageInstalled) {
+        // Extract data from XmlDeploymentPackage
+        String packageName = xdp.getName();
+        String packageVersion = xdp.getVersion();
+        XmlBundleInfo[] xbiArray = xdp.getBundleInfos();
 
-		if(packageVersion != null && !packageVersion.trim().isEmpty()){
-			Element version= doc.createElement(PACKAGES_PACKAGE_VERSION);
-			version.setTextContent(packageVersion);
-			packageInstalled.appendChild(version);
-		}
+        // Create xml elements
+        if (packageName != null && !packageName.trim().isEmpty()) {
+            Element name = doc.createElement(PACKAGES_PACKAGE_NAME);
+            name.setTextContent(packageName);
+            packageInstalled.appendChild(name);
+        }
 
-		Element bundles= doc.createElement(PACKAGES_PACKAGE_BUNDLES);
-		packageInstalled.appendChild(bundles);
+        if (packageVersion != null && !packageVersion.trim().isEmpty()) {
+            Element version = doc.createElement(PACKAGES_PACKAGE_VERSION);
+            version.setTextContent(packageVersion);
+            packageInstalled.appendChild(version);
+        }
 
-		if(xbiArray != null){
-			for(XmlBundleInfo xbi:xbiArray){
-				Element bundle= doc.createElement(PACKAGES_PACKAGE_BUNDLES_BUNDLE);
-				marshalBundleInfo(doc, xbi, bundle);
-				bundles.appendChild(bundle);
-			}
-		}
-	}
+        Element bundles = doc.createElement(PACKAGES_PACKAGE_BUNDLES);
+        packageInstalled.appendChild(bundles);
 
-	private static void marshalBundleInfo(Document doc, XmlBundleInfo xbi, Element bundle) {
-		//Extract data from XmlBundleInfo
-		String bundleName= xbi.getName();
-		String bundleVersion= xbi.getVersion();
+        if (xbiArray != null) {
+            for (XmlBundleInfo xbi : xbiArray) {
+                Element bundle = doc.createElement(PACKAGES_PACKAGE_BUNDLES_BUNDLE);
+                marshalBundleInfo(doc, xbi, bundle);
+                bundles.appendChild(bundle);
+            }
+        }
+    }
 
-		//Create xml elements
-		if(bundleName != null && !bundleName.trim().isEmpty()){
-			Element name= doc.createElement(PACKAGES_PACKAGE_BUNDLES_BUNDLE_NAME);
-			name.setTextContent(bundleName);
-			bundle.appendChild(name);
-		}
+    private static void marshalBundleInfo(Document doc, XmlBundleInfo xbi, Element bundle) {
+        // Extract data from XmlBundleInfo
+        String bundleName = xbi.getName();
+        String bundleVersion = xbi.getVersion();
 
-		if(bundleVersion != null && !bundleVersion.trim().isEmpty()){
-			Element version= doc.createElement(PACKAGES_PACKAGE_BUNDLES_BUNDLE_VERSION);
-			version.setTextContent(bundleVersion);
-			bundle.appendChild(version);
-		}
-	}
+        // Create xml elements
+        if (bundleName != null && !bundleName.trim().isEmpty()) {
+            Element name = doc.createElement(PACKAGES_PACKAGE_BUNDLES_BUNDLE_NAME);
+            name.setTextContent(bundleName);
+            bundle.appendChild(name);
+        }
+
+        if (bundleVersion != null && !bundleVersion.trim().isEmpty()) {
+            Element version = doc.createElement(PACKAGES_PACKAGE_BUNDLES_BUNDLE_VERSION);
+            version.setTextContent(bundleVersion);
+            bundle.appendChild(version);
+        }
+    }
 }

@@ -19,80 +19,81 @@ import org.eclipse.kura.core.deployment.DeploymentPackageOptions;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 
-public class DeploymentPackageInstallOptions extends DeploymentPackageOptions{
-	public static final String METRIC_DP_INSTALL_SYSTEM_UPDATE = "dp.install.system.update";
-	public static final String METRIC_INSTALL_VERIFIER_URI = "dp.install.verifier.uri";
-	
-	private Boolean systemUpdate = false;
-	private String verifierURI = null; 
+public class DeploymentPackageInstallOptions extends DeploymentPackageOptions {
 
-	// Metrics in RESOURCE_INSTALL
-	public DeploymentPackageInstallOptions(String dpName, String dpVersion) {
-		super(dpName, dpVersion);
-	}
+    public static final String METRIC_DP_INSTALL_SYSTEM_UPDATE = "dp.install.system.update";
+    public static final String METRIC_INSTALL_VERIFIER_URI = "dp.install.verifier.uri";
 
-	public DeploymentPackageInstallOptions(KuraPayload request) throws KuraException {
+    private Boolean systemUpdate = false;
+    private String verifierURI = null;
 
-		super(null,null);
+    // Metrics in RESOURCE_INSTALL
+    public DeploymentPackageInstallOptions(String dpName, String dpVersion) {
+        super(dpName, dpVersion);
+    }
 
-		super.setDpName((String) request.getMetric(METRIC_DP_NAME));
-		if (super.getDpName() == null) {
-			throw new KuraInvalidMessageException("Missing deployment package name!");
-		}
+    public DeploymentPackageInstallOptions(KuraPayload request) throws KuraException {
 
-		super.setDpVersion((String) request.getMetric(METRIC_DP_VERSION));
-		if (super.getDpVersion() == null) {
-			throw new KuraInvalidMessageException("Missing deployment package version!");
-		}
-		
-		super.setJobId((Long) request.getMetric(METRIC_JOB_ID));
-		if (super.getJobId() == null) {
-			throw new KuraInvalidMessageException("Missing jobId!");
-		}
-		
-		setSystemUpdate((Boolean) request.getMetric(METRIC_DP_INSTALL_SYSTEM_UPDATE));
-		if (getSystemUpdate() == null){
-			throw new KuraInvalidMessageException("Missing System Update!");
-		}
-		
-		try {
-			Object metric = request.getMetric(METRIC_DP_REBOOT);
-			if (metric != null) {
-				super.setReboot((Boolean) metric);
-			}
-			metric = request.getMetric(METRIC_DP_REBOOT_DELAY);
-			if (metric != null) {
-				super.setRebootDelay((Integer) metric);
-			}
-		
-			metric = request.getMetric(KuraRequestPayload.REQUESTER_CLIENT_ID);
-			if (metric != null) {
-				super.setRequestClientId((String) metric);
-			}
-			
-			metric = request.getMetric(METRIC_INSTALL_VERIFIER_URI);
-			if (metric != null) {
-				setVerifierURI((String) metric);
-			}
+        super(null, null);
 
-		} catch (Exception ex) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
-		}
-	}
-	
-	public void setSystemUpdate(Boolean systemUpdate) {
-		this.systemUpdate = systemUpdate;
-	}
+        super.setDpName((String) request.getMetric(METRIC_DP_NAME));
+        if (super.getDpName() == null) {
+            throw new KuraInvalidMessageException("Missing deployment package name!");
+        }
 
-	public Boolean getSystemUpdate() {
-		return systemUpdate;
-	}
-	
-	public void setVerifierURI(String verifierURI) {
-		this.verifierURI = verifierURI;
-	}
+        super.setDpVersion((String) request.getMetric(METRIC_DP_VERSION));
+        if (super.getDpVersion() == null) {
+            throw new KuraInvalidMessageException("Missing deployment package version!");
+        }
 
-	public String getVerifierURL() {
-		return verifierURI;
-	}
+        super.setJobId((Long) request.getMetric(METRIC_JOB_ID));
+        if (super.getJobId() == null) {
+            throw new KuraInvalidMessageException("Missing jobId!");
+        }
+
+        setSystemUpdate((Boolean) request.getMetric(METRIC_DP_INSTALL_SYSTEM_UPDATE));
+        if (getSystemUpdate() == null) {
+            throw new KuraInvalidMessageException("Missing System Update!");
+        }
+
+        try {
+            Object metric = request.getMetric(METRIC_DP_REBOOT);
+            if (metric != null) {
+                super.setReboot((Boolean) metric);
+            }
+            metric = request.getMetric(METRIC_DP_REBOOT_DELAY);
+            if (metric != null) {
+                super.setRebootDelay((Integer) metric);
+            }
+
+            metric = request.getMetric(KuraRequestPayload.REQUESTER_CLIENT_ID);
+            if (metric != null) {
+                super.setRequestClientId((String) metric);
+            }
+
+            metric = request.getMetric(METRIC_INSTALL_VERIFIER_URI);
+            if (metric != null) {
+                setVerifierURI((String) metric);
+            }
+
+        } catch (Exception ex) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
+        }
+    }
+
+    public void setSystemUpdate(Boolean systemUpdate) {
+        this.systemUpdate = systemUpdate;
+    }
+
+    public Boolean getSystemUpdate() {
+        return this.systemUpdate;
+    }
+
+    public void setVerifierURI(String verifierURI) {
+        this.verifierURI = verifierURI;
+    }
+
+    public String getVerifierURL() {
+        return this.verifierURI;
+    }
 }

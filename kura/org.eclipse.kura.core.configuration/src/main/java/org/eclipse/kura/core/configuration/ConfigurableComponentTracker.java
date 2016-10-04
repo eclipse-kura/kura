@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,8 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Prevent ConfigurableComponentTracke from tracking the
+ *                   ConfigurationServiceImpl instance
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
@@ -36,8 +38,7 @@ public class ConfigurableComponentTracker extends ServiceTracker {
     private final ConfigurationServiceImpl m_confService;
 
     @SuppressWarnings("unchecked")
-    public ConfigurableComponentTracker(BundleContext context, ConfigurationServiceImpl confService)
-            throws InvalidSyntaxException {
+    public ConfigurableComponentTracker(BundleContext context, ConfigurationServiceImpl confService) throws InvalidSyntaxException {
         // super(context, (String) null, null); // Wrong: throws an exception
         // super(context, "", null); // Wrong: does not track anything
         // super(context, "org.eclipse.kura..example.publisher.ExamplePublisher", null); // tracks the specified class
@@ -82,14 +83,10 @@ public class ConfigurableComponentTracker extends ServiceTracker {
                             if (obj == null) {
                                 s_logger.info("Could not find service for: {}", ref);
                             } else if (obj instanceof ConfigurableComponent) {
-                                s_logger.info(
-                                        "Adding ConfigurableComponent with pid {}, service pid {} and factory pid "
-                                                + factoryPid,
-                                        pid, servicePid);
+                                s_logger.info("Adding ConfigurableComponent with pid {}, service pid {} and factory pid " + factoryPid, pid, servicePid);
                                 this.m_confService.registerComponentConfiguration(pid, servicePid, factoryPid);
                             } else if (obj instanceof SelfConfiguringComponent) {
-                                s_logger.info("Adding SelfConfiguringComponent with pid {} and service pid {}", pid,
-                                        servicePid);
+                                s_logger.info("Adding SelfConfiguringComponent with pid {} and service pid {}", pid, servicePid);
                                 this.m_confService.registerSelfConfiguringComponent(servicePid);
                             }
                         } finally {
@@ -106,16 +103,20 @@ public class ConfigurableComponentTracker extends ServiceTracker {
     @SuppressWarnings({ "unchecked" })
     @Override
     public Object addingService(ServiceReference ref) {
+        String servicePid = (String) ref.getProperty(Constants.SERVICE_PID);
+
+        if ("org.eclipse.kura.configuration.ConfigurationService".equals(servicePid)) {
+            return null;
+        }
+
         Object service = super.addingService(ref);
 
-        String servicePid = (String) ref.getProperty(Constants.SERVICE_PID);
         String pid = (String) ref.getProperty(ConfigurationService.KURA_SERVICE_PID);
         String factoryPid = (String) ref.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID);
 
         if (servicePid != null) {
             if (service instanceof ConfigurableComponent) {
-                s_logger.info("Adding ConfigurableComponent with pid {}, service pid {} and factory pid " + factoryPid,
-                        pid, servicePid);
+                s_logger.info("Adding ConfigurableComponent with pid {}, service pid {} and factory pid " + factoryPid, pid, servicePid);
                 this.m_confService.registerComponentConfiguration(pid, servicePid, factoryPid);
             } else if (service instanceof SelfConfiguringComponent) {
                 s_logger.info("Adding SelfConfiguringComponent with pid {} and service pid {}", pid, servicePid);

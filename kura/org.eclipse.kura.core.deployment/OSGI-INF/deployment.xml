@@ -40,4 +40,5 @@
               unbind="unsetDataTransportService"
               target="(kura.service.pid=org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport)"
               interface="org.eclipse.kura.data.DataTransportService"/>
+   <reference bind="setSystemService" cardinality="1..1" interface="org.eclipse.kura.system.SystemService" name="SystemService" policy="static" unbind="unsetSystemService"/>
 </scr:component>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,19 +8,17 @@
  *
  * Contributors:
  *     Eurotech
- *     Jens Reimann <jreimann@redhat.com> - Clean up kura properties handling
+ *     Red Hat Inc - Clean up kura properties handling
  *******************************************************************************/
 package org.eclipse.kura.deployment.agent.impl;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
@@ -74,7 +72,7 @@ public class DeploymentAgent implements DeploymentAgentService {
     private static Logger s_logger = LoggerFactory.getLogger(DeploymentAgent.class);
 
     private static final String DPA_CONF_PATH_PROPNAME = "dpa.configuration";
-    private static final String KURA_CONF_URL_PROPNAME = SystemService.KURA_CONFIG;
+
     private static final String PACKAGES_PATH_PROPNAME = "kura.packages";
 
     private static final String CONN_TIMEOUT_PROPNAME = "dpa.connection.timeout";
@@ -87,6 +85,7 @@ public class DeploymentAgent implements DeploymentAgentService {
 
     private DeploymentAdmin m_deploymentAdmin;
     private EventAdmin m_eventAdmin;
+    private SystemService m_systemService;
 
     private Queue<String> m_instPackageUrls;
     private Queue<String> m_uninstPackageNames;
@@ -111,26 +110,7 @@ public class DeploymentAgent implements DeploymentAgentService {
             throw new ComponentException("The value of '" + DPA_CONF_PATH_PROPNAME + "' is not defined");
         }
 
-        String sKuraConfUrl = System.getProperty(KURA_CONF_URL_PROPNAME);
-        if (sKuraConfUrl == null || sKuraConfUrl.isEmpty()) {
-            throw new ComponentException("The value of '" + KURA_CONF_URL_PROPNAME + "' is not defined");
-        }
-
-        URL kuraUrl = null;
-        try {
-            kuraUrl = new URL(sKuraConfUrl);
-        } catch (MalformedURLException e) {
-            throw new ComponentException("Invalid Kura configuration URL");
-        }
-
-        Properties kuraProperties = new Properties();
-        try {
-            kuraProperties.load(kuraUrl.openStream());
-        } catch (FileNotFoundException e) {
-            throw new ComponentException("Kura configuration file not found", e);
-        } catch (IOException e) {
-            throw new ComponentException("Exception loading Kura configuration file", e);
-        }
+        final Properties kuraProperties = this.m_systemService.getProperties();
 
         this.m_packagesPath = kuraProperties.getProperty(PACKAGES_PATH_PROPNAME);
         if (this.m_packagesPath == null || this.m_packagesPath.isEmpty()) {
@@ -260,6 +240,14 @@ public class DeploymentAgent implements DeploymentAgentService {
 
     protected void unsetEventAdmin(EventAdmin eventAdmin) {
         this.m_eventAdmin = null;
+    }
+
+    public void setSystemService(SystemService systemService) {
+        this.m_systemService = systemService;
+    }
+
+    public void unsetSystemService(SystemService systemService) {
+        this.m_systemService = null;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix issue #595
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
@@ -49,27 +50,6 @@ public class ComponentMetaTypeBundleTracker extends BundleTracker<Bundle> {
     // Override APIs
     //
     // ----------------------------------------------------------------
-
-    @Override
-    public void open() {
-        s_logger.info("Opening ComponentMetaTypeBundleTracker...");
-        super.open();
-        s_logger.debug("open(): getting bundles...");
-        Bundle[] bundles = this.m_context.getBundles();
-        if (bundles != null) {
-            for (Bundle bundle : bundles) {
-                if (bundle.getState() == Bundle.ACTIVE) {
-                    s_logger.debug("open(): processing MetaType for bundle: {}...", bundle.getSymbolicName());
-                    processBundleMetaType(bundle);
-                    s_logger.debug("open(): processed MetaType for bundle: {}", bundle.getSymbolicName());
-                } else {
-                    s_logger.debug("open(): bundle: {} is in state: {}. MetaType will be processed by addingBundle()",
-                            bundle.getSymbolicName(), bundle.getState());
-                }
-            }
-        }
-        s_logger.debug("open(): done");
-    }
 
     @Override
     public Bundle addingBundle(Bundle bundle, BundleEvent event) {

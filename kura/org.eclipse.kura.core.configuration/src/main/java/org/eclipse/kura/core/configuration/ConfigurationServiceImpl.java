@@ -82,6 +82,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     private static final Logger s_logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
 
+    private static final boolean TRACK_ONLY_RELEVANT_SERVICES = Boolean
+            .getBoolean("org.eclipse.kura.core.configuration.trackOnlyRelevantServices");
+
     private interface ServiceHandler {
 
         void add(String servicePid, String kuraPid, String factoryPid);
@@ -116,8 +119,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     };
 
     private ComponentContext m_ctx;
+
     private ServiceTracker<ConfigurableComponent, ConfigurableComponent> serviceTracker1;
     private ServiceTracker<SelfConfiguringComponent, SelfConfiguringComponent> serviceTracker2;
+    private ConfigurableComponentTracker anyTracker;
+
     private BundleTracker<Bundle> m_bundleTracker;
 
     @SuppressWarnings("unused")
@@ -218,11 +224,17 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // start the trackers
         s_logger.info("Trackers being opened...");
 
-        this.serviceTracker1 = createTracker(ConfigurableComponent.class, this.trackerHandler1);
-        this.serviceTracker2 = createTracker(SelfConfiguringComponent.class, this.trackerHandler2);
+        if (TRACK_ONLY_RELEVANT_SERVICES) {
+            s_logger.info("Only tracking relevant services");
+            this.serviceTracker1 = createTracker(ConfigurableComponent.class, this.trackerHandler1);
+            this.serviceTracker2 = createTracker(SelfConfiguringComponent.class, this.trackerHandler2);
 
-        this.serviceTracker1.open();
-        this.serviceTracker2.open();
+            this.serviceTracker1.open();
+            this.serviceTracker2.open();
+        } else {
+            s_logger.info("Tracking all services");
+            this.anyTracker = new ConfigurableComponentTracker(this.m_ctx.getBundleContext(), this);
+        }
 
         this.m_bundleTracker = new ComponentMetaTypeBundleTracker(this.m_ctx.getBundleContext(), this);
         this.m_bundleTracker.open();
@@ -235,9 +247,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             public T addingService(ServiceReference<T> reference) {
                 s_logger.debug("addingService - ref: {}", reference);
 
-                final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
-                final String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
-                final String factoryPid = makeString(reference.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID));
+                String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
+                String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
+                String factoryPid = makeString(reference.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID));
 
                 if (servicePid == null) {
                     s_logger.debug("No servicePid found");
@@ -257,8 +269,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             public void removedService(ServiceReference<T> reference, T service) {
                 s_logger.debug("removedService - ref: {}", reference);
 
-                final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
-                final String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
+                String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
+                String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
 
                 if (servicePid == null) {
                     s_logger.debug("No servicePid found");
@@ -280,6 +292,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         //
         // stop the trackers
+        //
+
+        if (this.anyTracker != null) {
+            this.anyTracker.close();
+            this.anyTracker = null;
+        }
         if (this.serviceTracker2 != null) {
             this.serviceTracker2.close();
             this.serviceTracker2 = null;
@@ -1053,9 +1071,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
                                                 Map<String, Object> props = cc.getConfigurationProperties();
                                                 if (props != null) {
-                                                    final Object value = props.get(adId);
+                                                    Object value = props.get(adId);
                                                     if (value != null) {
-                                                        final String propType;
+                                                        String propType;
                                                         if (!value.getClass().isArray()) {
                                                             propType = value.getClass().getSimpleName();
                                                         } else {

@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - Fix issue #462, Fix build warnings
+ *     Red Hat Inc - Fix issue #462, Fix build warnings, Fix issue #596
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
@@ -337,7 +337,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         try {
             s_logger.info("Deleting configuration for pid {}", pid);
-            Configuration config = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid));
+            Configuration config = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid), null);
 
             if (config != null) {
                 config.delete();
@@ -673,7 +673,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (servicePid == null) {
             servicePid = pid;
         }
-        Configuration config = this.m_configurationAdmin.getConfiguration(servicePid);
+        Configuration config = this.m_configurationAdmin.getConfiguration(servicePid, null);
         if (config != null) {
             // get the properties from ConfigurationAdmin if any are present
             Map<String, Object> props = new HashMap<String, Object>();
@@ -1229,7 +1229,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (!this.m_activatedSelfConfigComponents.contains(pid)) {
             try {
                 // get the current running configuration for the selected component
-                Configuration config = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid));
+                Configuration config = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid), null);
                 Map<String, Object> runningProps = CollectionsUtil.dictionaryToMap(config.getProperties(),
                         registerdOCD);
 

@@ -53,6 +53,10 @@ public class CryptoServiceImpl implements CryptoService {
     public void setSystemService(SystemService systemService) {
         this.m_systemService = systemService;
     }
+    
+    public void unsetSystemService(SystemService systemService) {
+        this.m_systemService = null;
+    }
 
     protected void activate() {
         if (this.m_systemService == null) {

@@ -38,6 +38,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
     private static final long GATT_SERVICE_TIMEOUT = 6000;
     private static final long GATT_COMMAND_TIMEOUT = 2000;
 
+    private static final String ANSI_ESCAPE_SEQUENCES = "\\x1b\\[(K|[^m]+m)";
     private static final String[] NOT_CONNECTED = { "[   ]", "disconnected", "not connected", "error: connect" };
     private static final String[] CONNECTED = { "[con]", "connection successful", "usage: mtu <value>" };
     private static final String SERVICES = "attr handle:";
@@ -259,9 +260,9 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 
         // Process stream once newline, carriage return, or > char is received.
         // '>' indicates the gatttool prompt has returned.
-        if (ch == 0xA || ch == 0xD || ch == 0x1B || (char) ch == '>') {
+        if (ch == 0xA || ch == 0xD || (char) ch == '>') {
             this.m_stringBuilder.append((char) ch);
-            processLine(this.m_stringBuilder.toString());
+            processLine(this.m_stringBuilder.toString().replaceAll(ANSI_ESCAPE_SEQUENCES, ""));
             this.m_stringBuilder.setLength(0);
         } else {
             this.m_stringBuilder.append((char) ch);

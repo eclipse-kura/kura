@@ -198,7 +198,7 @@ public class RemoteTargetTest {
         // hijack the settings
         try {
             Configuration mqttConfig = this.m_configAdmin
-                    .getConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport", null);
+                    .getConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport",  "?");
             Dictionary<String, Object> mqttProps = mqttConfig.getProperties();
             mqttProps.put("broker-url", "mqtt://broker-sandbox.everyware-cloud.com:1883/");
             mqttProps.put("topic.context.account-name", "EDC-KURA-CI");
@@ -206,7 +206,7 @@ public class RemoteTargetTest {
             mqttProps.put("password", "PYtv3?s@");
             mqttConfig.update(mqttProps);
 
-            Configuration dataConfig = this.m_configAdmin.getConfiguration("org.eclipse.kura.data.DataService", null);
+            Configuration dataConfig = this.m_configAdmin.getConfiguration("org.eclipse.kura.data.DataService", "?");
             Dictionary<String, Object> dataProps = dataConfig.getProperties();
             dataProps.put("connect.auto-on-startup", true);
             dataConfig.update(dataProps);

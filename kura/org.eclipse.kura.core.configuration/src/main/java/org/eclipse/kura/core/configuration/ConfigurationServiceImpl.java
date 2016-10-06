@@ -312,7 +312,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             mergedProperties.put(ConfigurationService.KURA_SERVICE_PID, pid);
 
             Dictionary<String, Object> dict = CollectionsUtil.mapToDictionary(mergedProperties);
-            Configuration config = this.m_configurationAdmin.getConfiguration(servicePid, null);
+            Configuration config = this.m_configurationAdmin.getConfiguration(servicePid, "?");
             config.update(dict);
 
             registerComponentConfiguration(pid, servicePid, factoryPid);
@@ -337,7 +337,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         try {
             s_logger.info("Deleting configuration for pid {}", pid);
-            Configuration config = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid), null);
+            Configuration config = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid),  "?");
 
             if (config != null) {
                 config.delete();
@@ -673,7 +673,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (servicePid == null) {
             servicePid = pid;
         }
-        Configuration config = this.m_configurationAdmin.getConfiguration(servicePid, null);
+        Configuration config = this.m_configurationAdmin.getConfiguration(servicePid,  "?");
         if (config != null) {
             // get the properties from ConfigurationAdmin if any are present
             Map<String, Object> props = new HashMap<String, Object>();
@@ -904,7 +904,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
             Tocd ocd = getOCDForPid(pid);
 
-            Configuration cfg = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid), null);
+            Configuration cfg = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid),  "?");
             Map<String, Object> props = CollectionsUtil.dictionaryToMap(cfg.getProperties(), ocd);
 
             cc = new ComponentConfigurationImpl(pid, ocd, props);
@@ -1098,7 +1098,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                             s_logger.debug("Pushing config to config admin: {}", config.getPid());
 
                             // push it to the ConfigAdmin
-                            Configuration cfg = this.m_configurationAdmin.getConfiguration(config.getPid(), null);
+                            Configuration cfg = this.m_configurationAdmin.getConfiguration(config.getPid(),  "?");
 
                             // set kura.service.pid if missing
                             Map<String, Object> newProperties = new HashMap<String, Object>(props);
@@ -1229,7 +1229,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (!this.m_activatedSelfConfigComponents.contains(pid)) {
             try {
                 // get the current running configuration for the selected component
-                Configuration config = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid), null);
+                Configuration config = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid),  "?");
                 Map<String, Object> runningProps = CollectionsUtil.dictionaryToMap(config.getProperties(),
                         registerdOCD);
 
@@ -1302,7 +1302,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         // Update the new properties
         // use ConfigurationAdmin to do the update
-        Configuration config = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid), null);
+        Configuration config = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid),  "?");
         config.update(CollectionsUtil.mapToDictionary(mergedProperties));
 
         if (snapshotOnConfirmation) {

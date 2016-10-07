@@ -208,8 +208,8 @@
                 <version>2.14</version>
                 <executions>
                     <execution>
-                        <id>checkstyle-validate</id>
-                        <phase>validate</phase>
+                        <id>checkstyle-validation</id>
+                        <phase>process-sources</phase>
                         <configuration>
                             <encoding>UTF-8</encoding>
                             <consoleOutput>true</consoleOutput>

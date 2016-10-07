@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - allow opting-out of System.exit()
+ *     Red Hat Inc - allow opting-out of System.exit(), fix resource leak
  *******************************************************************************/
 package org.eclipse.kura.core.system;
 
@@ -17,7 +17,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -141,8 +143,15 @@ public class SystemServiceImpl implements SystemService {
                 s_logger.info("Loaded Jar Resource kura.properties.");
             } else if (kuraConfig != null) {
                 try {
-                    URL kuraConfigUrl = new URL(kuraConfig);
-                    kuraDefaults.load(kuraConfigUrl.openStream());
+                    final URL kuraConfigUrl = new URL(kuraConfig);
+                    final InputStream in = kuraConfigUrl.openStream();
+                    try {
+                        kuraDefaults.load(in);
+                    } finally {
+                        if (in != null) {
+                            in.close();
+                        }
+                    }
                     s_logger.info("Loaded URL kura.properties: " + kuraConfig);
                 } catch (Exception e) {
                     s_logger.warn("Could not open kuraConfig URL", e);
@@ -150,9 +159,12 @@ public class SystemServiceImpl implements SystemService {
             } else if (kuraHome != null) {
                 File kuraPropsFile = new File(kuraHome + File.separator + KURA_PROPS_FILE);
                 if (kuraPropsFile.exists()) {
-                    FileReader fr = new FileReader(kuraPropsFile);
-                    kuraDefaults.load(fr);
-                    fr.close();
+                    final FileReader fr = new FileReader(kuraPropsFile);
+                    try {
+                        kuraDefaults.load(fr);
+                    } finally {
+                        fr.close();
+                    }
                     s_logger.info("Loaded File kura.properties: " + kuraPropsFile);
                 } else {
                     s_logger.warn("File does not exist: " + kuraPropsFile);
@@ -174,8 +186,15 @@ public class SystemServiceImpl implements SystemService {
                 s_logger.info("Loaded Jar Resource: " + KURA_CUSTOM_PROPS_FILE);
             } else if (kuraCustomConfig != null) {
                 try {
-                    URL kuraConfigUrl = new URL(kuraCustomConfig);
-                    kuraCustomProps.load(kuraConfigUrl.openStream());
+                    final URL kuraConfigUrl = new URL(kuraCustomConfig);
+                    final InputStream in = kuraConfigUrl.openStream();
+                    try {
+                        kuraCustomProps.load(in);
+                    } finally {
+                        if (in != null) {
+                            in.close();
+                        }
+                    }
                     s_logger.info("Loaded URL kura_custom.properties: " + kuraCustomConfig);
                 } catch (Exception e) {
                     s_logger.warn("Could not open kuraCustomConfig URL: " + e);
@@ -183,7 +202,12 @@ public class SystemServiceImpl implements SystemService {
             } else if (kuraHome != null) {
                 File kuraCustomPropsFile = new File(kuraHome + File.separator + KURA_CUSTOM_PROPS_FILE);
                 if (kuraCustomPropsFile.exists()) {
-                    kuraCustomProps.load(new FileReader(kuraCustomPropsFile));
+                    Reader reader = new FileReader(kuraCustomPropsFile);
+                    try {
+                        kuraCustomProps.load(reader);
+                    } finally {
+                        reader.close();
+                    }
                     s_logger.info("Loaded File " + KURA_CUSTOM_PROPS_FILE + ": " + kuraCustomPropsFile);
                 } else {
                     s_logger.warn("File does not exist: " + kuraCustomPropsFile);

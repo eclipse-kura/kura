@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF8"?>
+<!--
+  - RHEL based toolchain file:
+  -   sudo yum install java-1.6.0-openjdk-devel java-1.7.0-openjdk-devel java-1.8.0-openjdk-devel
+  -->
+<toolchains>
+	<toolchain>
+		<type>jdk</type>
+		<provides>
+			<version>1.6</version>
+			<id>JavaSE-1.6</id>
+		</provides>
+		<configuration>
+			<jdkHome>/usr/lib/jvm/java-1.6.0/jre</jdkHome>
+		</configuration>
+	</toolchain>
+	<toolchain>
+		<type>jdk</type>
+		<provides>
+			<version>1.7</version>
+			<id>JavaSE-1.7</id>
+		</provides>
+		<configuration>
+			<jdkHome>/usr/lib/jvm/java-1.7.0</jdkHome>
+		</configuration>
+	</toolchain>
+	<toolchain>
+		<type>jdk</type>
+		<provides>
+			<version>1.8</version>
+			<id>JavaSE-1.8</id>
+		</provides>
+		<configuration>
+			<jdkHome>/usr/lib/jvm/java-1.8.0</jdkHome>
+		</configuration>
+	</toolchain>
+</toolchains>

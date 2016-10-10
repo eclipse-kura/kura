@@ -3,8 +3,12 @@ language: java
 sudo: false
 
 jdk:
-  - oraclejdk7
+  - oraclejdk8
 
-script: ./build-all.sh
+before_script:
+  - ls /usr/lib/jvm
+  - cp kura/setups/toolchains/toolchains-travis.xml ~/.m2/toolchains.xml
+
+script: ./build-all.sh -Pbree
 
 

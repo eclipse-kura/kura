@@ -10,6 +10,7 @@
     Contributors:
       Eurotech
       Red Hat Inc - minor fixes on startup scripts, fix issue #603
+         - fix issue #476
 
 -->
 <project name="build_equinox_distrib" default="dist-linux" basedir="../../../">
@@ -301,6 +302,10 @@ fi]]>
 		<replaceregexp file="${project.build.directory}/${build.output.name}/kura.init.raspbian" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
 		<replaceregexp file="${project.build.directory}/${build.output.name}/kura.service.edison" match="INSTALL_DIR" replace="${kura.install.dir}" />
 
+		<script language="javascript">
+	    var nativeTag = project.getProperty("native.tag");
+	    project.setNewProperty("org.eclipse.linux.usb.native.version", project.getProperty("org.eclipse.linux.usb." + nativeTag + ".version" ) );
+		</script>
 
 		<zip destfile="${project.build.directory}/${build.output.name}.zip">
 
@@ -474,6 +479,8 @@ fi]]>
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.usb_${org.eclipse.kura.linux.usb.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.usb.${native.tag}_${org.eclipse.kura.linux.usb.native.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" /> <!-- org.eclipse.kura.linux.usb.native.version is defined in a <script> above -->
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar"

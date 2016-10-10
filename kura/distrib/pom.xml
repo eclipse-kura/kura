@@ -2058,6 +2058,7 @@
 										<zip destfile="${project.build.directory}/tmp_ws.zip">
 											<zipfileset src="${project.build.directory}/${zip_workspace.prefix}.zip">
 												<exclude name="target-definition/common/repository/plugins/jdk.dio_${jdk.dio.version}.jar" />
+												<exclude name="target-definition/common/repository/plugins/jdk.dio.*_${jdk.dio.version}.jar" />
 											</zipfileset>
 										</zip>
 										<move file="${project.build.directory}/tmp_ws.zip" tofile="${project.build.directory}/${zip_workspace.prefix}.zip" />

@@ -159,6 +159,21 @@
 			</build>
 		</profile>
 		
+        <profile>
+            <id>bree</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.eclipse.tycho</groupId>
+                        <artifactId>tycho-compiler-plugin</artifactId>
+                        <version>${tycho-version}</version>
+                        <configuration>
+                            <useJDK>BREE</useJDK>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
 		
 	</profiles>
 
@@ -275,8 +290,6 @@
 				<artifactId>tycho-compiler-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
 					<compilerArgument>-warn:[+|-]warning_tokens_separated_by_comma</compilerArgument>
 				</configuration>
 			</plugin>

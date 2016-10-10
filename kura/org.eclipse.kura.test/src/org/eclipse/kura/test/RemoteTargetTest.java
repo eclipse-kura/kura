@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - Fix build warnings
+ *     Red Hat Inc - Fix build warnings, Fix issue #596
  *******************************************************************************/
 package org.eclipse.kura.test;
 
@@ -198,7 +198,7 @@ public class RemoteTargetTest {
         // hijack the settings
         try {
             Configuration mqttConfig = this.m_configAdmin
-                    .getConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport");
+                    .getConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport",  "?");
             Dictionary<String, Object> mqttProps = mqttConfig.getProperties();
             mqttProps.put("broker-url", "mqtt://broker-sandbox.everyware-cloud.com:1883/");
             mqttProps.put("topic.context.account-name", "EDC-KURA-CI");
@@ -206,7 +206,7 @@ public class RemoteTargetTest {
             mqttProps.put("password", "PYtv3?s@");
             mqttConfig.update(mqttProps);
 
-            Configuration dataConfig = this.m_configAdmin.getConfiguration("org.eclipse.kura.data.DataService");
+            Configuration dataConfig = this.m_configAdmin.getConfiguration("org.eclipse.kura.data.DataService", "?");
             Dictionary<String, Object> dataProps = dataConfig.getProperties();
             dataProps.put("connect.auto-on-startup", true);
             dataConfig.update(dataProps);

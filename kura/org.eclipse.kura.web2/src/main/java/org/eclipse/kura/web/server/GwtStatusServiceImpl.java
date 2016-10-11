@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *     Red Hat Inc - Fix logging calls
- *          - Fix possible NPE, Fix generics
+ *          - Fix possible NPE, Fix generics, Fix issue #599
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
@@ -24,6 +24,7 @@ import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.server.util.ServiceLocator.ServiceFunction;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
@@ -299,24 +300,25 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         return pairs;
     }
 
-    private List<GwtGroupedNVPair> getPositionStatus() throws GwtKuraException {
-        List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
+    private List<GwtGroupedNVPair> getPositionStatus() {
+        final List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
-        try {
-            PositionService positionService = ServiceLocator.getInstance().getService(PositionService.class);
+        ServiceLocator.withOptionalService(PositionService.class, new ServiceFunction<PositionService, Void>() {
 
-            if (positionService != null) {
-                pairs.add(new GwtGroupedNVPair("positionStatus", "Longitude",
-                        Double.toString(Math.toDegrees(positionService.getPosition().getLongitude().getValue()))));
-                pairs.add(new GwtGroupedNVPair("positionStatus", "Latitude",
-                        Double.toString(Math.toDegrees(positionService.getPosition().getLatitude().getValue()))));
-                pairs.add(new GwtGroupedNVPair("positionStatus", "Altitude",
-                        positionService.getPosition().getAltitude().toString()));
+            @Override
+            public Void apply(PositionService positionService) {
+                if (positionService != null) {
+                    pairs.add(new GwtGroupedNVPair("positionStatus", "Longitude",
+                            Double.toString(Math.toDegrees(positionService.getPosition().getLongitude().getValue()))));
+                    pairs.add(new GwtGroupedNVPair("positionStatus", "Latitude",
+                            Double.toString(Math.toDegrees(positionService.getPosition().getLatitude().getValue()))));
+                    pairs.add(new GwtGroupedNVPair("positionStatus", "Altitude",
+                            positionService.getPosition().getAltitude().toString()));
+                }
+                return null;
             }
-        } catch (GwtKuraException e) {
-            s_logger.warn("Get position status failed", e);
-            throw e;
-        }
+
+        });
 
         return pairs;
     }

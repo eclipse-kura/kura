@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+          "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+          "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+  <!--
+      If you set the basedir property below, then all reported file
+      names will be relative to the specified directory. See
+      http://checkstyle.sourceforge.net/config.html#Checker
+
+      <property name="basedir" value="${basedir}"/>
+  -->
+
+
+  <property name="severity" value="error"/>
+
+  <!-- Filters -->
+  <module name="SeverityMatchFilter">
+    <!-- report all violations except ignore -->
+    <property name="severity" value="ignore"/>
+    <property name="acceptOnMatch" value="false"/>
+  </module>
+  
+  <module name="RegexpMultiline">
+      <property name="format" value="(?s:\r\n.*)"/>
+      <property name="fileExtensions" value="java"/>
+      <property name="message" value="Do not use Windows line endings"/>
+  </module>
+  
+
+</module>

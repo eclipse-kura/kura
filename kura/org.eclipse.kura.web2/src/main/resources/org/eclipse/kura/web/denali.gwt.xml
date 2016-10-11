@@ -52,4 +52,7 @@
   <source path='client' />
   <source path='shared' />
   
+  <!-- Specify a property to strip the GWT stack trace -->
+  <set-property name="compiler.stackMode" value="strip" />
+  
 </module>

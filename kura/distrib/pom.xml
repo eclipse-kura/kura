@@ -23,6 +23,7 @@
 	</parent>
 
 	<artifactId>distrib</artifactId>
+	<packaging>pom</packaging>
 
 	<name>distrib</name>
 	<url>http://maven.apache.org</url>

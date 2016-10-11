@@ -206,6 +206,18 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>2.17</version>
+                <dependencies>
+        			<dependency>
+            			<groupId>org.slf4j</groupId>
+            			<artifactId>jcl-over-slf4j</artifactId>
+            			<version>1.7.5</version>
+        			</dependency>
+        			<dependency>
+            			<groupId>org.slf4j</groupId>
+            			<artifactId>slf4j-jdk14</artifactId>
+            			<version>1.7.5</version>
+        			</dependency>
+    			</dependencies>
                 <executions>
                     <execution>
                         <id>checkstyle-validation</id>

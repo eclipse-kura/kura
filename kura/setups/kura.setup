@@ -78,6 +78,8 @@
     <requirement
         name="org.tigris.mtoolkit.feature.group"
         optional="true"/>
+    <requirement
+        name="org.eclipse.egit.gitflow.feature.feature.group"/>
     <repository
         url="http://repo1.maven.org/maven2/.m2e/connectors/m2eclipse-tycho/0.8.0/N/0.8.0.201409231215/"/>
     <repository
@@ -107,7 +109,6 @@
   </setupTask>
   <setupTask
       xsi:type="setup:CompoundTask"
-      id=""
       name="Import Setup">
     <setupTask
         xsi:type="projects:ProjectsImportTask">

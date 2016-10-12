@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.core.certificates
 Bundle-SymbolicName: org.eclipse.kura.core.certificates;singleton:=true
 Bundle-Version: 1.0.3.qualifier
-Bundle-Vendor: EUROTECH
+Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.certificate;version="[1.0,1.1)",

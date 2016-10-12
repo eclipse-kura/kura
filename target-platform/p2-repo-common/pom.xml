@@ -173,7 +173,7 @@
 									<version>${org.apache.commons.lang3.version}</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>org.eclipse</groupId>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.soda.dk.comm</artifactId>
 									<version>${org.eclipse.soda.dk.comm.version}</version>
 								</artifactItem>

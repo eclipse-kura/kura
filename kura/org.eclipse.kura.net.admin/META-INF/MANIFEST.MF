@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.net.admin
 Bundle-SymbolicName: org.eclipse.kura.net.admin;singleton:=true
 Bundle-Version: 1.0.11.qualifier
-Bundle-Vendor: EUROTECH
+Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: javax.microedition.io,
  org.apache.commons.io;version="2.4.0",

@@ -118,11 +118,6 @@
 									<version>${jdk.dio.version}</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>org.json</groupId>
-									<artifactId>org.json</artifactId>
-									<version>${org.json.version}</version>
-								</artifactItem>
-								<artifactItem>
 									<groupId>org.slf4j</groupId>
 									<artifactId>slf4j-api</artifactId>
 									<version>${slf4j.api.version}</version>
@@ -238,7 +233,6 @@
 								<move file="target/source/plugins/org.usb4java.jar" tofile="target/source/plugins/org.usb4java_${org.usb4java.version}.jar"/>
 								<move file="target/source/plugins/org.hsqldb.hsqldb.jar" tofile="target/source/plugins/org.hsqldb.hsqldb_${org.hsqldb.hsqldb.version}.jar"/>
 								<move file="target/source/plugins/jdk.dio.jar" tofile="target/source/plugins/jdk.dio_${jdk.dio.version}.jar"/>
-								<move file="target/source/plugins/org.json.jar" tofile="target/source/plugins/org.json_${org.json.version}.jar"/>
 								<move file="target/source/plugins/slf4j-api.jar" tofile="target/source/plugins/slf4j.api_${slf4j.api.version}.jar"/>
 								<move file="target/source/plugins/log4j.jar" tofile="target/source/plugins/log4j_${log4j.version}.jar"/>
 								<move file="target/source/plugins/org.junit.jar" tofile="target/source/plugins/org.junit_${org.junit.version}.jar"/>

@@ -9,7 +9,7 @@
 
     Contributors:
       Eurotech
-      Red Hat Inc - minor fixes on startup scripts
+      Red Hat Inc - minor fixes on startup scripts, fix issue #603
 
 -->
 <project name="build_equinox_distrib" default="dist-linux" basedir="../../../">
@@ -975,8 +975,6 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 				value=", reference:file:${kura.install.dir}/kura/plugins/log4j_${log4j.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/log4j.apache-log4j-extras_${log4j.apache-log4j-extras.version}.jar@3" />
-			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/kura/plugins/org.json_${org.json.version}.jar@5:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.hsqldb.hsqldb_${org.hsqldb.hsqldb.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"

@@ -88,7 +88,7 @@ public class GPIOServiceImpl implements GPIOService {
         FileReader fr = null;
         try {
             String configFile = System.getProperty("jdk.dio.registry");
-            if (configFile != null) {
+            if (configFile != null && !configFile.startsWith("file:")) {
                 configFile = "file:" + configFile;
             }
             s_logger.debug("System property location: {}", configFile);
@@ -101,11 +101,17 @@ public class GPIOServiceImpl implements GPIOService {
 
             if (configFile == null) {
                 // Emulator?
-                configFile = this.m_SystemService.getProperties().getProperty(SystemService.KURA_CONFIG)
-                        .replace("kura.properties", "jdk.dio.properties");
+                final String kuraConfig = this.m_SystemService.getProperties().getProperty(SystemService.KURA_CONFIG);
+                if (kuraConfig != null) {
+                    configFile = kuraConfig.replace("kura.properties", "jdk.dio.properties");
+                }
             }
 
             s_logger.debug("Final location: {}", configFile);
+
+            if (configFile == null) {
+                throw new IllegalStateException("Unable to locate 'jdk.dio.properties'");
+            }
 
             File dioPropsFile = new File(new URL(configFile).toURI());
             if (dioPropsFile.exists()) {
@@ -113,12 +119,10 @@ public class GPIOServiceImpl implements GPIOService {
                 fr = new FileReader(dioPropsFile);
                 dioDefaults.load(fr);
 
-
                 pins.clear();
 
                 for (final Map.Entry<Object, Object> entry : dioDefaults.entrySet()) {
                     final Object k = entry.getKey();
-                    // s_logger.info("{} -> {}", k, dioDefaults.get(k));
                     final String line = (String) entry.getValue();
 
                     final JdkDioPin p = JdkDioPin.parseFromProperty(k, line);

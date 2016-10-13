@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,11 +8,11 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - show return code on failure, minor cleanups
  *******************************************************************************/
 package org.eclipse.kura.linux.clock;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -22,21 +22,22 @@ import org.eclipse.kura.clock.ClockService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ClockServiceImpl implements ConfigurableComponent, ClockService, ClockSyncListener {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(ClockServiceImpl.class);
+    private static final String PROP_CLOCK_PROVIDER = "clock.provider";
+    private static final String PROP_CLOCK_SET_HWCLOCK = "clock.set.hwclock";
+    private static final String PROP_ENABLED = "enabled";
 
-    @SuppressWarnings("unused")
-    private ComponentContext m_ctx;
-    private EventAdmin m_eventAdmin;
-    private Map<String, Object> m_properties;
-    private ClockSyncProvider m_provider;
-    private boolean m_configEnabled;
+    private static final Logger logger = LoggerFactory.getLogger(ClockServiceImpl.class);
+
+    private EventAdmin eventAdmin;
+    private Map<String, Object> properties;
+    private ClockSyncProvider provider;
+    private boolean configEnabled;
 
     // ----------------------------------------------------------------
     //
@@ -45,11 +46,11 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
     // ----------------------------------------------------------------
 
     public void setEventAdmin(EventAdmin eventAdmin) {
-        this.m_eventAdmin = eventAdmin;
+        this.eventAdmin = eventAdmin;
     }
 
     public void unsetEventAdmin(EventAdmin eventAdmin) {
-        this.m_eventAdmin = null;
+        this.eventAdmin = null;
     }
 
     // ----------------------------------------------------------------
@@ -58,55 +59,52 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
     //
     // ----------------------------------------------------------------
 
-    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
+    protected void activate(Map<String, Object> properties) {
         // save the properties
-        this.m_properties = properties;
+        this.properties = properties;
 
-        s_logger.info("Activate. Current Time: {}", new Date());
-
-        // save the bundle context
-        this.m_ctx = componentContext;
+        logger.info("Activate. Current Time: {}", new Date());
 
         try {
-            if (this.m_properties.get("enabled") != null) {
-                this.m_configEnabled = (Boolean) this.m_properties.get("enabled");
+            if (this.properties.get(PROP_ENABLED) != null) {
+                this.configEnabled = (Boolean) this.properties.get(PROP_ENABLED);
             } else {
-                this.m_configEnabled = false;
+                this.configEnabled = false;
             }
 
-            if (this.m_configEnabled) {
+            if (this.configEnabled) {
                 // start the provider
                 startClockSyncProvider();
             }
         } catch (Throwable t) {
-            s_logger.error("Error updating ClockService Configuration", t);
+            logger.error("Error updating ClockService Configuration", t);
         }
     }
 
-    protected void deactivate(ComponentContext componentContext) {
-        s_logger.info("Deactivate...");
+    protected void deactivate() {
+        logger.info("Deactivate...");
         try {
             stopClockSyncProvider();
         } catch (Throwable t) {
-            s_logger.error("Error deactivate ClockService", t);
+            logger.error("Error deactivate ClockService", t);
         }
     }
 
     public void updated(Map<String, Object> properties) {
-        s_logger.info("Updated...");
+        logger.info("Updated...");
+
         try {
-
             // save the properties
-            this.m_properties = properties;
+            this.properties = properties;
 
-            if (this.m_properties.get("enabled") != null) {
-                this.m_configEnabled = (Boolean) this.m_properties.get("enabled");
+            if (this.properties.get(PROP_ENABLED) != null) {
+                this.configEnabled = (Boolean) this.properties.get(PROP_ENABLED);
             } else {
-                this.m_configEnabled = false;
+                this.configEnabled = false;
                 return;
             }
 
-            if (this.m_configEnabled) {
+            if (this.configEnabled) {
                 // start the provider
                 startClockSyncProvider();
             } else {
@@ -114,11 +112,11 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
                 try {
                     stopClockSyncProvider();
                 } catch (Throwable t) {
-                    s_logger.error("Error deactivate ClockService", t);
+                    logger.error("Error deactivate ClockService", t);
                 }
             }
         } catch (Throwable t) {
-            s_logger.error("Error updating ClockService Configuration", t);
+            logger.error("Error updating ClockService Configuration", t);
         }
     }
 
@@ -130,8 +128,8 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 
     @Override
     public Date getLastSync() throws KuraException {
-        if (this.m_provider != null) {
-            return this.m_provider.getLastSync();
+        if (this.provider != null) {
+            return this.provider.getLastSync();
         } else {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Clock service not configured yet");
         }
@@ -145,24 +143,24 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 
     private void startClockSyncProvider() throws KuraException {
         stopClockSyncProvider();
-        String provider = (String) this.m_properties.get("clock.provider");
+        String provider = (String) this.properties.get(PROP_CLOCK_PROVIDER);
         if ("java-ntp".equals(provider)) {
-            this.m_provider = new JavaNtpClockSyncProvider();
+            this.provider = new JavaNtpClockSyncProvider();
         } else if ("ntpd".equals(provider)) {
-            this.m_provider = new NtpdClockSyncProvider();
+            this.provider = new NtpdClockSyncProvider();
         } else if ("gps".equals(provider)) {
-            this.m_provider = new GpsClockSyncProvider();
+            this.provider = new GpsClockSyncProvider();
         }
-        if (this.m_provider != null) {
-            this.m_provider.init(this.m_properties, this);
-            this.m_provider.start();
+        if (this.provider != null) {
+            this.provider.init(this.properties, this);
+            this.provider.start();
         }
     }
 
     private void stopClockSyncProvider() throws KuraException {
-        if (this.m_provider != null) {
-            this.m_provider.stop();
-            this.m_provider = null;
+        if (this.provider != null) {
+            this.provider.stop();
+            this.provider = null;
         }
     }
 
@@ -172,7 +170,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
     @Override
     public void onClockUpdate(long offset) {
 
-        s_logger.info("Clock update. Offset: {}", offset);
+        logger.info("Clock update. Offset: {}", offset);
 
         // set system clock if necessary
         boolean bClockUpToDate = false;
@@ -182,14 +180,16 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
             try {
                 proc = ProcessUtil.exec("date -s @" + time / 1000);		// divide by 1000 to switch to seconds
                 proc.waitFor();
-                if (proc.exitValue() == 0) {
+                final int rc = proc.exitValue();
+                if (rc == 0) {
                     bClockUpToDate = true;
-                    s_logger.info("System Clock Updated to {}", new Date());
+                    logger.info("System Clock Updated to {}", new Date());
                 } else {
-                    s_logger.error("Unexpected error while updating System Clock - it should've been {}", new Date());
+                    logger.error("Unexpected error while updating System Clock - rc = {}, it should've been {}", rc,
+                            new Date());
                 }
             } catch (Exception e) {
-                s_logger.error("Error updating System Clock", e);
+                logger.error("Error updating System Clock", e);
             } finally {
                 if (proc != null) {
                     ProcessUtil.destroy(proc);
@@ -201,21 +201,22 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 
         // set hardware clock
         boolean updateHwClock = false;
-        if (this.m_properties.containsKey("clock.set.hwclock")) {
-            updateHwClock = (Boolean) this.m_properties.get("clock.set.hwclock");
+        if (this.properties.containsKey(PROP_CLOCK_SET_HWCLOCK)) {
+            updateHwClock = (Boolean) this.properties.get(PROP_CLOCK_SET_HWCLOCK);
         }
         if (updateHwClock) {
             SafeProcess proc = null;
             try {
                 proc = ProcessUtil.exec("hwclock --utc --systohc");
                 proc.waitFor();
-                if (proc.exitValue() == 0) {
-                    s_logger.info("Hardware Clock Updated");
+                final int rc = proc.exitValue();
+                if (rc == 0) {
+                    logger.info("Hardware Clock Updated");
                 } else {
-                    s_logger.error("Unexpected error while updating Hardware Clock");
+                    logger.error("Unexpected error while updating Hardware Clock - rc = {}", rc);
                 }
             } catch (Exception e) {
-                s_logger.error("Error updating Hardware Clock", e);
+                logger.error("Error updating Hardware Clock", e);
             } finally {
                 if (proc != null) {
                     ProcessUtil.destroy(proc);
@@ -225,7 +226,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 
         // Raise the event
         if (bClockUpToDate) {
-            this.m_eventAdmin.postEvent(new ClockEvent(new HashMap<String, Object>()));
+            this.eventAdmin.postEvent(ClockEvent.EMPTY);
         }
     }
 }

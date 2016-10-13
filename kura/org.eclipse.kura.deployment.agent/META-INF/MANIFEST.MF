@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.deployment.agent
 Bundle-SymbolicName: org.eclipse.kura.deployment.agent;singleton:=true
 Bundle-Version: 1.0.7.qualifier
-Bundle-Vendor: EUROTECH
+Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
 Export-Package: org.eclipse.kura.deployment.agent; version="1.0.0"

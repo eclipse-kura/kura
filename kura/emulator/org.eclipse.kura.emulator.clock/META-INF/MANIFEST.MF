@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.emulator.clock
 Bundle-SymbolicName: org.eclipse.kura.emulator.clock;singleton:=true
 Bundle-Version: 1.0.1.qualifier
-Bundle-Vendor: EUROTECH
+Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.eclipse.kura.emulator.clock; version="1.0.0"
 Service-Component: OSGI-INF/*.xml

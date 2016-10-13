@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.core.net
 Bundle-SymbolicName: org.eclipse.kura.core.net;singleton:=true
 Bundle-Version: 1.0.10.qualifier
-Bundle-Vendor: EUROTECH
+Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy

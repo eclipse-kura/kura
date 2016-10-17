@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2016 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -126,7 +126,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
         if (isDirty()) {
             // Modal
             showDirtyModal();
-        }       // end is dirty
+        }        // end is dirty
     }
 
     @Override
@@ -254,11 +254,11 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
 
                 // ----
 
-            }                        // end isDirty()
+            }                         // end isDirty()
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");
             this.incompleteFieldsModal.show();
-        }                        // end else isValid
+        }                         // end else isValid
     }
 
     private GwtConfigComponent getUpdatedConfiguration() {

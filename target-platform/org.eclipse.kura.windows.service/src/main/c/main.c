@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,6 +17,7 @@ BOOL g_bTerminate;							// Set to true to indicate the service should terminate
 #define KURA_CMD_LINE_SIZE			32768
 char *g_pszKuraCommandLine = NULL;
 
+#if defined(_AMD64_)
 char KuraJavaArgs[] = "java \
 -Xms256m -Xmx256m -Dkura.os.version=win32 \
 -Dkura.arch=x86_64 \
@@ -34,47 +35,67 @@ char KuraJavaArgs[] = "java \
 -console \
 -consoleLog \
 ";
+#else
+char KuraJavaArgs[] = "java \
+-Xms256m -Xmx256m -Dkura.os.version=win32 \
+-Dkura.arch=x86 \
+-Dtarget.device=windows \
+-Declipse.ignoreApp=true \
+-Dkura.home=%KURA_HOME% \
+-Dkura.data.dir=%KURA_DATA% \
+-Dkura.configuration=file:%KURA_HOME_URI%/kura.properties \
+-Dkura.custom.configuration=file:%KURA_HOME_URI%/kura_custom.properties \
+-Ddpa.configuration=%KURA_HOME%\\dpa.properties \
+-Dlog4j.configuration=file:%KURA_HOME_URI%/log4j.properties \
+-Djdk.tls.trustNameService=true \
+-jar \"%~dp0\\plugins\\org.eclipse.osgi_3.8.1.v20120830-144521.jar\" \
+-configuration %KURA_TEMP%\\Configuration \
+-console \
+-consoleLog \
+";
+#endif
 
-// Replace substr with replacement in string and return number of replacements made
-// Caller should provide a buffer large enough for the replaced string to fit it
-int str_replace ( char *string, size_t max_buf, const char *substr, const char *replacement )
+// Caller is responsible for providing a buffer large enough for the replaced string to fit it
+int str_replace( char *buf, size_t buf_size, char *strSearch, char *strNew )
 {
-  char *tok = NULL;
-  char *newstr = NULL;
-  char *oldstr = NULL;
-  char *head = NULL;
-  int cnt = 0;
- 
-  if ( substr == NULL || replacement == NULL )
-	  return 0;
+  char *p1, *buf2, *pfound;
+  int sz, cnt = 0;
+  int room_left = (int)buf_size-1;  // reserve 1 char for terminating 0
 
-  newstr = _strdup (string);
-  head = newstr;
+  if(buf==NULL || strSearch==NULL || strNew==NULL || buf_size==0)
+    return 0;
 
-  while ( (tok = strstr ( head, substr )) )
+  // Create a copy of original buffer to store modified string
+  buf2 = (char*)malloc(buf_size);
+  memset(buf2, 0, buf_size);
+
+  p1 = buf;
+  while( (pfound = strstr(p1, strSearch)) )
   {
-    oldstr = newstr;
-    newstr = malloc ( strlen ( oldstr ) - strlen ( substr ) + strlen ( replacement ) + 1 );
-    /*failed to alloc mem, free old string and return NULL */
-    if ( newstr == NULL )
-	{
-      free (oldstr);
-      return cnt;
-    }
-    memcpy ( newstr, oldstr, tok - oldstr );
-    memcpy ( newstr + (tok - oldstr), replacement, strlen ( replacement ) );
-    memcpy ( newstr + (tok - oldstr) + strlen( replacement ), tok + strlen ( substr ), strlen ( oldstr ) - strlen ( substr ) - ( tok - oldstr ) );
-    memset ( newstr + strlen ( oldstr ) - strlen ( substr ) + strlen ( replacement ) , 0, 1 );
-    /* move back head right after the last replacement */
-    head = newstr + (tok - oldstr) + strlen( replacement );
-    free (oldstr);
-	cnt++;
+    // Append the string before the found substring
+    sz = min(room_left, (int)(pfound-p1));
+    strncat(buf2, p1, sz);
+    if((room_left-=sz) <= 0)
+      break;
+
+    // Append the replaced substring
+    sz = min(room_left, (int)strlen(strNew));
+    strncat(buf2, strNew, sz);
+    if((room_left-= sz) <= 0)
+      break;
+
+    p1 = pfound + strlen(strSearch);
+    cnt++;
   }
 
+  // Now append the rest of the string
+  sz = min(room_left, (int)strlen(p1));
+  strncat(buf2, p1, sz);
+
   // now copy back the new string into the original one based on max buffer size
-  memset( string, 0, max_buf );
-  memcpy( string, newstr, min(max_buf, strlen(newstr)) );
-  free( newstr );
+  memset(buf, 0, buf_size);
+  memcpy(buf, buf2, min(buf_size, strlen(buf2)));
+  free(buf2);
   return cnt;
 }
 

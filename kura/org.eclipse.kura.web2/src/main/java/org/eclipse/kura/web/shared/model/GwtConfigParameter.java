@@ -65,98 +65,98 @@ public class GwtConfigParameter implements IsSerializable {
     }
 
     public String getId() {
-        return m_id;
+        return this.m_id;
     }
 
     public void setId(String id) {
-        m_id = id;
+        this.m_id = id;
     }
 
     public String getName() {
-        return m_name;
+        return this.m_name;
     }
 
     public void setName(String name) {
-        m_name = name;
+        this.m_name = name;
     }
 
     public String getDescription() {
-        return m_description;
+        return this.m_description;
     }
 
     public void setDescription(String description) {
-        m_description = description;
+        this.m_description = description;
     }
 
     public GwtConfigParameterType getType() {
-        return m_type;
+        return this.m_type;
     }
 
     public void setType(GwtConfigParameterType type) {
-        m_type = type;
+        this.m_type = type;
     }
 
     public boolean isRequired() {
-        return m_required;
+        return this.m_required;
     }
 
     public void setRequired(boolean required) {
-        m_required = required;
+        this.m_required = required;
     }
 
     public String getDefault() {
-        return m_default;
+        return this.m_default;
     }
 
     public void setDefault(String default1) {
-        m_default = default1;
+        this.m_default = default1;
     }
 
     public int getCardinality() {
-        return m_cardinality;
+        return this.m_cardinality;
     }
 
     public void setCardinality(int cardinality) {
-        m_cardinality = cardinality;
+        this.m_cardinality = cardinality;
     }
 
     public Map<String, String> getOptions() {
-        return m_options;
+        return this.m_options;
     }
 
     public void setOptions(Map<String, String> options) {
-        m_options = options;
+        this.m_options = options;
     }
 
     public String getMin() {
-        return m_min;
+        return this.m_min;
     }
 
     public void setMin(String min) {
-        m_min = min;
+        this.m_min = min;
     }
 
     public String getMax() {
-        return m_max;
+        return this.m_max;
     }
 
     public void setMax(String max) {
-        m_max = max;
+        this.m_max = max;
     }
 
     public String getValue() {
-        return m_value;
+        return this.m_value;
     }
 
     public void setValue(String value) {
-        m_value = value;
+        this.m_value = value;
     }
 
     public String[] getValues() {
-        return m_values;
+        return this.m_values;
     }
 
     public void setValues(String[] values) {
-        m_values = values;
+        this.m_values = values;
     }
 }

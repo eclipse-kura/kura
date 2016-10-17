@@ -252,6 +252,25 @@
 							</tasks>
 						</configuration>
 					</execution>
+					<execution>
+						<id>install-commons</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<delete dir="../../kura/target-definition/common/" />
+								<mkdir dir="../../kura/target-definition/common/repository" />
+								<copy todir="../../kura/target-definition/common/repository">
+									<fileset dir="${project.build.directory}/repository" />
+								</copy>
+								<copy todir="../../kura/target-definition/common/source">
+									<fileset dir="${project.build.directory}/source" />
+								</copy>
+							</tasks>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			
@@ -291,30 +310,6 @@
 				<configuration>
 					<compress>false</compress>
 				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>install-commons</id>
-						<phase>install</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-								<delete dir="../../kura/target-definition/common/" />
-								<mkdir dir="../../kura/target-definition/common/repository" />
-								<copy todir="../../kura/target-definition/common/repository">
-									<fileset dir="${project.build.directory}/repository" />
-								</copy>
-								<copy todir="../../kura/target-definition/common/source">
-									<fileset dir="${project.build.directory}/source" />
-								</copy>
-							</tasks>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 
 			<plugin>

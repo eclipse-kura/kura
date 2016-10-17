@@ -5,10 +5,13 @@ package org.eclipse.kura.linux.bluetooth.util;
  */
 public interface BTSnoopListener {
 
-	/**
-	 * Process a BTSnoop Record
-	 * @param record
-	 */
-	public void processBTSnoopRecord(byte[] record);
+    /**
+     * Process a BTSnoop Record
+     *
+     * @param record
+     */
+    public void processBTSnoopRecord(byte[] record);
+    
+    public void processErrorStream(String string);
 
 }

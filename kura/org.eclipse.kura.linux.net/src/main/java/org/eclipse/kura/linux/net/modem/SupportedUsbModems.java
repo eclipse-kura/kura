@@ -12,10 +12,19 @@
 package org.eclipse.kura.linux.net.modem;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteException;
+import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.NullOutputStream;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.core.linux.util.ProcessStats;
 import org.eclipse.kura.core.util.ProcessUtil;
@@ -152,32 +161,35 @@ public class SupportedUsbModems {
         return attached;
     }
 
-    private static List<LsusbEntry> getLsusbInfo() throws Exception {
-        List<LsusbEntry> lsusbEntries = new ArrayList<LsusbEntry>();
-        ProcessStats processStats = null;
-        InputStreamReader isr = null;
-        BufferedReader br = null;
+    /**
+     * Execute command an return splitted lines
+     *
+     * @param command
+     *            the command to execute
+     * @return the lines output by the command
+     * @throws IOException
+     *             if executing the commands fails
+     */
+    private static List<String> execute(final String command) throws ExecuteException, IOException {
+        final DefaultExecutor executor = new DefaultExecutor();
 
-        try {
-            processStats = LinuxProcessUtil.startWithStats("lsusb");
-            isr = new InputStreamReader(processStats.getInputStream());
-            br = new BufferedReader(isr);
-            String line;
-            while ((line = br.readLine()) != null) {
-                LsusbEntry lsusbEntry = getLsusbEntry(line);
-                if (lsusbEntry != null) {
-                    lsusbEntries.add(lsusbEntry);
-                }
-            }
-        } finally {
-            if (br != null) {
-                br.close();
-            }
-            if (isr != null) {
-                isr.close();
-            }
-            if (processStats != null) {
-                ProcessUtil.destroy(processStats.getProcess());
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        executor.setStreamHandler(new PumpStreamHandler(out, NullOutputStream.NULL_OUTPUT_STREAM));
+
+        int rc = executor.execute(CommandLine.parse(command));
+
+        s_logger.debug("Called {} - rc = {}", command, rc);
+
+        return IOUtils.readLines(new ByteArrayInputStream(out.toByteArray()));
+    }
+
+    private static List<LsusbEntry> getLsusbInfo() throws Exception {
+        final List<LsusbEntry> lsusbEntries = new ArrayList<LsusbEntry>();
+
+        for (final String line : execute("lsusb")) {
+            LsusbEntry lsusbEntry = getLsusbEntry(line);
+            if (lsusbEntry != null) {
+                lsusbEntries.add(lsusbEntry);
             }
         }
         return lsusbEntries;

@@ -59,6 +59,7 @@
         <module>org.eclipse.kura.linux.usb.armv6hf</module>
         <module>org.eclipse.kura.linux.usb.x86</module>
         <module>org.eclipse.kura.linux.usb.x86_64</module>
+        <module>org.eclipse.kura.linux.usb.x86_64.rhel7</module>
         <module>org.eclipse.kura.linux.usb.x86_64.yocto</module>
         <module>org.eclipse.kura.linux.usb.x86.ubuntu</module>
 		

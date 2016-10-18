@@ -31,12 +31,16 @@ import org.slf4j.LoggerFactory;
 
 public class LinuxProcessUtil {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(LinuxProcessUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(LinuxProcessUtil.class);
 
     private static final String PLATFORM_INTEL_EDISON = "intel-edison";
-    private static final boolean IS_INTEL_EDISON;
+    private static volatile Boolean usingBusybox;
 
-    static {
+    private static boolean isUsingBusyBox() {
+        if (usingBusybox != null) {
+            return usingBusybox;
+        }
+
         final BundleContext ctx = FrameworkUtil.getBundle(LinuxProcessUtil.class).getBundleContext();
 
         final ServiceReference<SystemService> systemServiceRef = ctx.getServiceReference(SystemService.class);
@@ -50,31 +54,33 @@ public class LinuxProcessUtil {
         }
 
         try {
-            IS_INTEL_EDISON = PLATFORM_INTEL_EDISON.equals(service.getPlatform());
+            usingBusybox = PLATFORM_INTEL_EDISON.equals(service.getPlatform());
         } finally {
             ctx.ungetService(systemServiceRef);
         }
+
+        return usingBusybox;
     }
 
     public static int start(String command, boolean wait, boolean background) throws Exception {
         SafeProcess proc = null;
         try {
-            s_logger.info("executing: " + command);
+            logger.info("executing: " + command);
             proc = ProcessUtil.exec(command);
             // FIXME:MC this leads to a process leak when called with false
             if (wait) {
                 try {
                     proc.waitFor();
                 } catch (InterruptedException e) {
-                    s_logger.warn("Interrupted exception - ", e);
+                    logger.warn("Interrupted exception - ", e);
                 }
 
-                s_logger.info(command + " returned with exit value:" + proc.exitValue());
+                logger.info(command + " returned with exit value:" + proc.exitValue());
                 if (proc.exitValue() > 0) {
                     String stdout = getInputStreamAsString(proc.getInputStream());
                     String stderr = getInputStreamAsString(proc.getErrorStream());
-                    s_logger.debug("stdout: {}", stdout);
-                    s_logger.debug("stderr: {}", stderr);
+                    logger.debug("stdout: {}", stdout);
+                    logger.debug("stderr: {}", stderr);
                 }
                 return proc.exitValue();
             } else {
@@ -113,14 +119,14 @@ public class LinuxProcessUtil {
     public static ProcessStats startWithStats(String command) throws Exception {
         SafeProcess proc = null;
         try {
-            s_logger.info("executing: " + command);
+            logger.info("executing: " + command);
             proc = ProcessUtil.exec(command);
 
             try {
                 int exitVal = proc.waitFor();
-                s_logger.info(command + " returned with exit value:" + exitVal);
+                logger.info(command + " returned with exit value:" + exitVal);
             } catch (InterruptedException e) {
-                s_logger.error("error executing " + command + " command" + e);
+                logger.error("error executing " + command + " command" + e);
             }
 
             ProcessStats stats = new ProcessStats(proc);
@@ -139,14 +145,14 @@ public class LinuxProcessUtil {
             for (String cmd : command) {
                 cmdBuilder.append(cmd).append(' ');
             }
-            s_logger.debug("executing: {}", cmdBuilder);
+            logger.debug("executing: {}", cmdBuilder);
             proc = ProcessUtil.exec(command);
 
             try {
                 int exitVal = proc.waitFor();
-                s_logger.debug("{} returned with exit value:{}", cmdBuilder, +exitVal);
+                logger.debug("{} returned with exit value:{}", cmdBuilder, +exitVal);
             } catch (InterruptedException e) {
-                s_logger.error("error executing " + command + " command" + e);
+                logger.error("error executing " + command + " command" + e);
             }
 
             ProcessStats stats = new ProcessStats(proc);
@@ -167,9 +173,9 @@ public class LinuxProcessUtil {
         try {
 
             if (command != null && !command.isEmpty()) {
-                s_logger.trace("searching process list for {}", command);
+                logger.trace("searching process list for {}", command);
 
-                if (IS_INTEL_EDISON) {
+                if (isUsingBusyBox()) {
                     proc = ProcessUtil.exec("ps");
                 } else {
                     proc = ProcessUtil.exec("ps -ax");
@@ -191,7 +197,7 @@ public class LinuxProcessUtil {
 
                     // see if the line has our command
                     if (line.indexOf(command) >= 0) {
-                        s_logger.trace("found pid {} for command: {}", pid, command);
+                        logger.trace("found pid {} for command: {}", pid, command);
                         return Integer.parseInt(pid);
                     }
                 }
@@ -219,8 +225,8 @@ public class LinuxProcessUtil {
         BufferedReader br = null;
         try {
             if (command != null && !command.isEmpty()) {
-                s_logger.trace("searching process list for {}", command);
-                if (IS_INTEL_EDISON) {
+                logger.trace("searching process list for {}", command);
+                if (isUsingBusyBox()) {
                     proc = ProcessUtil.exec("ps");
                 } else {
                     proc = ProcessUtil.exec("ps -ax");
@@ -249,7 +255,7 @@ public class LinuxProcessUtil {
                             }
                         }
                         if (allTokensPresent) {
-                            s_logger.trace("found pid {} for command: {}", pid, command);
+                            logger.trace("found pid {} for command: {}", pid, command);
                             return Integer.parseInt(pid);
                         }
                     }
@@ -300,36 +306,36 @@ public class LinuxProcessUtil {
             cmd.append(pid);
 
             if (kill) {
-                s_logger.info("attempting to kill -9 pid " + pid);
+                logger.info("attempting to kill -9 pid " + pid);
             } else {
-                s_logger.info("attempting to kill pid " + pid);
+                logger.info("attempting to kill pid " + pid);
             }
 
             if (start(cmd.toString()) == 0) {
-                s_logger.info("successfully killed pid " + pid);
+                logger.info("successfully killed pid " + pid);
                 return true;
             } else {
-                s_logger.warn("failed to kill pid " + pid);
+                logger.warn("failed to kill pid " + pid);
                 return false;
             }
         } catch (Exception e) {
-            s_logger.warn("failed to kill pid " + pid);
+            logger.warn("failed to kill pid " + pid);
             return false;
         }
     }
 
     public static boolean killAll(String command) {
         try {
-            s_logger.info("attempting to kill process " + command);
+            logger.info("attempting to kill process " + command);
             if (start("killall " + command) == 0) {
-                s_logger.info("successfully killed process " + command);
+                logger.info("successfully killed process " + command);
                 return true;
             } else {
-                s_logger.warn("failed to kill process " + command);
+                logger.warn("failed to kill process " + command);
                 return false;
             }
         } catch (Exception e) {
-            s_logger.warn("failed to kill process " + command);
+            logger.warn("failed to kill process " + command);
             return false;
         }
     }

@@ -157,6 +157,11 @@
 									<version>${org.apache.commons.fileupload.version}</version>
 								</artifactItem>
 								<artifactItem>
+								    <groupId>org.apache.commons</groupId>
+								    <artifactId>commons-exec</artifactId>
+								    <version>${commons-exec.version}</version>
+								</artifactItem>
+								<artifactItem>
 									<groupId>usb4java</groupId>
 									<artifactId>usb4java-javax</artifactId>
 									<version>${usb4java-javax.version}</version>
@@ -227,6 +232,7 @@
 							<tasks>
 							    <move file="target/source/plugins/com.codeminders.hidapi.jar" tofile="target/source/plugins/com.codeminders.hidapi_${com.codeminders.hidapi.version}.jar"/>
 								<move file="target/source/plugins/org.apache.commons.net.jar" tofile="target/source/plugins/org.apache.commons.net_${org.apache.commons.net.version}.jar"/>
+								<move file="target/source/plugins/commons-exec.jar" tofile="target/source/plugins/org.apache.commons.exec_${org.apache.commons.exec.version}.jar"/>
 								<move file="target/source/plugins/com.google.protobuf.jar" tofile="target/source/plugins/com.google.protobuf_${com.google.protobuf.version}.jar"/>
 								<move file="target/source/plugins/org.eclipse.paho.client.mqttv3.jar" tofile="target/source/plugins/org.eclipse.paho.client.mqttv3_${org.eclipse.paho.client.mqttv3.version}.jar"/>
 								<move file="target/source/plugins/org.eclipse.kura.camel.sun.misc.jar" tofile="target/source/plugins/org.eclipse.kura.camel.sun.misc_${org.eclipse.kura.camel.sun.misc.version}.jar"/>

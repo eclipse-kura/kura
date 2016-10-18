@@ -124,6 +124,18 @@ public interface CloudServiceFactory {
      */
     void createConfiguration(String pid) throws KuraException;
 
+    /**
+     * Returns the list of <i>kura.service.pid</i>s that compose the cloud stack associated with the provided
+     * <i>kura.service.pid</i> of the factory component configuration.
+     *
+     * @param pid
+     *            the Kura persistent identifier, <i>kura.service.pid</i>, of the factory component configuration.
+     * @return List<String>, the list of <i>kura.service.pid</i>s associated with the specified factory component
+     *         configuration.
+     * @throws KuraException
+     *             if the specified <i>kura.service.pid</i> is not correct or compliant with what the factory
+     *             implementation expects
+     */
     List<String> getStackComponentsPids(String pid) throws KuraException;
 
     /**

@@ -16,6 +16,7 @@
    <implementation class="org.eclipse.kura.emulator.watchdog.WatchdogServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.watchdog.WatchdogService"/>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.watchdog.WatchdogService"/>
 </scr:component>

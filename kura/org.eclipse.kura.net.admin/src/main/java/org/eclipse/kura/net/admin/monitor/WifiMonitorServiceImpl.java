@@ -347,6 +347,9 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 							}
 						} else if (WifiMode.MASTER.equals(wifiConfig.getMode())) {
 							if(!wifiState.isLinkUp()) {
+								// disabling interface is probably needed to handle potential driver issues.
+								s_logger.warn("monitor() :: !! Link is down for the {} in AP mode, while IP address is assigned. Will disable and reenable interface ...", interfaceName);
+								disableInterface(interfaceName);
 								enableInterface(wifiInterfaceConfig);
 							}
 						}

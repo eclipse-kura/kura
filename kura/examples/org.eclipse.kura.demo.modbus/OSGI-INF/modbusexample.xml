@@ -16,6 +16,7 @@
    <implementation class="org.eclipse.kura.demo.modbus.ModbusExample"/>
    <service>
       <provide interface="org.eclipse.kura.demo.modbus.ModbusExample"/>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.demo.modbus.ModbusExample"/>
 

@@ -9,6 +9,7 @@
  * Contributors:
  *     Eurotech
  *     Red Hat Inc - Fix issue #462, Fix build warnings, Fix issue #596
+ *        - Fix service registration
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
@@ -42,6 +43,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraPartialSuccessException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
@@ -80,8 +82,48 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     private static final Logger s_logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
 
+    private static final boolean TRACK_ONLY_RELEVANT_SERVICES = Boolean
+            .getBoolean("org.eclipse.kura.core.configuration.trackOnlyRelevantServices");
+
+    private interface ServiceHandler {
+
+        void add(String servicePid, String kuraPid, String factoryPid);
+
+        void remove(String servicePid, String kuraPid);
+    }
+
+    private final ServiceHandler trackerHandler1 = new ServiceHandler() {
+
+        @Override
+        public void add(String servicePid, String kuraPid, String factoryPid) {
+            registerComponentConfiguration(kuraPid, servicePid, factoryPid);
+        }
+
+        @Override
+        public void remove(String servicePid, String kuraPid) {
+            unregisterComponentConfiguration(kuraPid);
+        }
+    };
+
+    private final ServiceHandler trackerHandler2 = new ServiceHandler() {
+
+        @Override
+        public void add(String servicePid, String kuraPid, String factoryPid) {
+            registerSelfConfiguringComponent(servicePid);
+        }
+
+        @Override
+        public void remove(String servicePid, String kuraPid) {
+            unregisterComponentConfiguration(servicePid);
+        }
+    };
+
     private ComponentContext m_ctx;
-    private ServiceTracker<?, ?> m_serviceTracker;
+
+    private ServiceTracker<ConfigurableComponent, ConfigurableComponent> serviceTracker1;
+    private ServiceTracker<SelfConfiguringComponent, SelfConfiguringComponent> serviceTracker2;
+    private ConfigurableComponentTracker anyTracker;
+
     private BundleTracker<Bundle> m_bundleTracker;
 
     @SuppressWarnings("unused")
@@ -182,11 +224,67 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // start the trackers
         s_logger.info("Trackers being opened...");
 
-        this.m_serviceTracker = new ConfigurableComponentTracker(this.m_ctx.getBundleContext(), this);
-        this.m_serviceTracker.open(true);
+        if (TRACK_ONLY_RELEVANT_SERVICES) {
+            s_logger.info("Only tracking relevant services");
+            this.serviceTracker1 = createTracker(ConfigurableComponent.class, this.trackerHandler1);
+            this.serviceTracker2 = createTracker(SelfConfiguringComponent.class, this.trackerHandler2);
+
+            this.serviceTracker1.open();
+            this.serviceTracker2.open();
+        } else {
+            s_logger.info("Tracking all services");
+            this.anyTracker = new ConfigurableComponentTracker(this.m_ctx.getBundleContext(), this);
+        }
 
         this.m_bundleTracker = new ComponentMetaTypeBundleTracker(this.m_ctx.getBundleContext(), this);
         this.m_bundleTracker.open();
+    }
+
+    private <T> ServiceTracker<T, T> createTracker(final Class<T> clazz, final ServiceHandler handler) {
+        return new ServiceTracker<T, T>(this.m_ctx.getBundleContext(), clazz, null) {
+
+            @Override
+            public T addingService(ServiceReference<T> reference) {
+                s_logger.debug("addingService - ref: {}", reference);
+
+                String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
+                String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
+                String factoryPid = makeString(reference.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID));
+
+                if (servicePid == null) {
+                    s_logger.debug("No servicePid found");
+                    return null;
+                }
+
+                T service = super.addingService(reference);
+
+                s_logger.debug("Adding service: {}", service);
+
+                handler.add(servicePid, kuraPid, factoryPid);
+
+                return service;
+            }
+
+            @Override
+            public void removedService(ServiceReference<T> reference, T service) {
+                s_logger.debug("removedService - ref: {}", reference);
+
+                String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
+                String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
+
+                if (servicePid == null) {
+                    s_logger.debug("No servicePid found");
+                    return;
+                }
+
+                s_logger.debug("remove - servicePid: {}, kuraPid: {}, service: {}",
+                        new Object[] { servicePid, kuraPid, service });
+
+                handler.remove(servicePid, kuraPid);
+
+                super.removedService(reference, service);
+            }
+        };
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -194,11 +292,23 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         //
         // stop the trackers
-        if (this.m_serviceTracker != null) {
-            this.m_serviceTracker.close();
+        //
+
+        if (this.anyTracker != null) {
+            this.anyTracker.close();
+            this.anyTracker = null;
+        }
+        if (this.serviceTracker2 != null) {
+            this.serviceTracker2.close();
+            this.serviceTracker2 = null;
+        }
+        if (this.serviceTracker1 != null) {
+            this.serviceTracker1.close();
+            this.serviceTracker1 = null;
         }
         if (this.m_bundleTracker != null) {
             this.m_bundleTracker.close();
+            this.m_bundleTracker = null;
         }
     }
 
@@ -337,7 +447,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         try {
             s_logger.info("Deleting configuration for pid {}", pid);
-            Configuration config = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid),  "?");
+            Configuration config = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid), "?");
 
             if (config != null) {
                 config.delete();
@@ -673,7 +783,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (servicePid == null) {
             servicePid = pid;
         }
-        Configuration config = this.m_configurationAdmin.getConfiguration(servicePid,  "?");
+        Configuration config = this.m_configurationAdmin.getConfiguration(servicePid, "?");
         if (config != null) {
             // get the properties from ConfigurationAdmin if any are present
             Map<String, Object> props = new HashMap<String, Object>();
@@ -904,7 +1014,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
             Tocd ocd = getOCDForPid(pid);
 
-            Configuration cfg = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid),  "?");
+            Configuration cfg = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid), "?");
             Map<String, Object> props = CollectionsUtil.dictionaryToMap(cfg.getProperties(), ocd);
 
             cc = new ComponentConfigurationImpl(pid, ocd, props);
@@ -961,9 +1071,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
                                                 Map<String, Object> props = cc.getConfigurationProperties();
                                                 if (props != null) {
-                                                    final Object value = props.get(adId);
+                                                    Object value = props.get(adId);
                                                     if (value != null) {
-                                                        final String propType;
+                                                        String propType;
                                                         if (!value.getClass().isArray()) {
                                                             propType = value.getClass().getSimpleName();
                                                         } else {
@@ -1098,7 +1208,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                             s_logger.debug("Pushing config to config admin: {}", config.getPid());
 
                             // push it to the ConfigAdmin
-                            Configuration cfg = this.m_configurationAdmin.getConfiguration(config.getPid(),  "?");
+                            Configuration cfg = this.m_configurationAdmin.getConfiguration(config.getPid(), "?");
 
                             // set kura.service.pid if missing
                             Map<String, Object> newProperties = new HashMap<String, Object>(props);
@@ -1229,7 +1339,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (!this.m_activatedSelfConfigComponents.contains(pid)) {
             try {
                 // get the current running configuration for the selected component
-                Configuration config = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid),  "?");
+                Configuration config = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid), "?");
                 Map<String, Object> runningProps = CollectionsUtil.dictionaryToMap(config.getProperties(),
                         registerdOCD);
 
@@ -1302,7 +1412,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         // Update the new properties
         // use ConfigurationAdmin to do the update
-        Configuration config = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid),  "?");
+        Configuration config = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid), "?");
         config.update(CollectionsUtil.mapToDictionary(mergedProperties));
 
         if (snapshotOnConfirmation) {
@@ -1455,5 +1565,22 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             ocd = this.m_ocds.get(pid);
         }
         return ocd;
+    }
+
+    /**
+     * Convert property value to string
+     *
+     * @param value
+     *            the input value
+     * @return the string property value, or {@code null}
+     */
+    private static String makeString(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof String) {
+            return (String) value;
+        }
+        return value.toString();
     }
 }

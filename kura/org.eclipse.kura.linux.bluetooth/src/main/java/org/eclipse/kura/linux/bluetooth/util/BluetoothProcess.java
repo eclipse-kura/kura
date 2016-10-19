@@ -168,8 +168,10 @@ public class BluetoothProcess {
         this.parser.setInputStream(is);
 
         while (this.btSnoopReady) {
-            byte[] packet = this.parser.readRecord();
-            listener.processBTSnoopRecord(packet);
+            if (is != null) {
+                byte[] packet = this.parser.readRecord();
+                listener.processBTSnoopRecord(packet);
+            }
         }
 
         s_logger.debug("End of stream!");

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2016 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Amit Kumar Mondal (admin@amitinside.com)
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.wire.Logger" 
+         name="Logger" 
+         description="A wire component which logs data as received from upstream connected Wire Components">
+
+        <AD id="severity.level"
+            name="severity.level"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="SEVERE"
+            description="It signifies severity level of Wire Fields to be accepted by this Wire Component">
+            <Option label="SEVERE" value="SEVERE" />
+            <Option label="CONFIG" value="CONFIG" />
+            <Option label="ERROR" value="ERROR" />
+            <Option label="INFO" value="INFO" />
+        </AD>
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.wire.Logger" factoryPid="org.eclipse.kura.wire.Logger">
+        <Object ocdref="org.eclipse.kura.wire.Logger"/>
+    </Designate>
+</MetaData>

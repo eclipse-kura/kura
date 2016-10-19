@@ -12,7 +12,7 @@
       Eurotech
       Red Hat Inc - "Eclipse Kura"
 	      	- added Camel test project, added camel.cloud.factory
-            - cleanup
+            - cleanup, fix issue #476
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -53,7 +53,16 @@
         <module>org.eclipse.kura.linux.net</module>
         <module>org.eclipse.kura.linux.net.test</module>
         <module>org.eclipse.kura.linux.position</module>
+		
         <module>org.eclipse.kura.linux.usb</module>
+        <module>org.eclipse.kura.linux.usb.armv5sf</module>
+        <module>org.eclipse.kura.linux.usb.armv6hf</module>
+        <module>org.eclipse.kura.linux.usb.x86</module>
+        <module>org.eclipse.kura.linux.usb.x86_64</module>
+        <module>org.eclipse.kura.linux.usb.x86_64.rhel7</module>
+        <module>org.eclipse.kura.linux.usb.x86_64.yocto</module>
+        <module>org.eclipse.kura.linux.usb.x86.ubuntu</module>
+		
         <module>org.eclipse.kura.linux.watchdog</module>
         <module>org.eclipse.kura.net.admin</module>
         <module>org.eclipse.kura.protocol.modbus</module>

@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *     Red Hat Inc - Fix service leak
- *         - fix default value lookup
+ *         - fix default value lookup, fix issue #590
  *******************************************************************************/
 package org.eclipse.kura.core.configuration.util;
 
@@ -311,6 +311,10 @@ public class ComponentUtil {
     }
 
     public static Map<String, Object> getDefaultProperties(OCD ocd, ComponentContext ctx) throws KuraException {
+        return getDefaultProperties(ocd, ctx.getBundleContext());
+    }
+
+    public static Map<String, Object> getDefaultProperties(OCD ocd, BundleContext ctx) throws KuraException {
         //
         // reconcile by looping through the ocd properties
         Map<String, Object> defaults = null;
@@ -333,7 +337,7 @@ public class ComponentUtil {
         return defaults;
     }
 
-    private static Object getDefaultValue(AD attrDef, ComponentContext ctx) {
+    private static Object getDefaultValue(AD attrDef, BundleContext ctx) {
         // get the default value string from the AD
         // then split it by comma-separate list
         // keeping in mind the possible escape sequence "\,"
@@ -368,7 +372,7 @@ public class ComponentUtil {
         return objectValues;
     }
 
-    private static Object[] getObjectValue(Scalar type, String[] defaultValues, ComponentContext ctx) {
+    private static Object[] getObjectValue(Scalar type, String[] defaultValues, BundleContext ctx) {
         List<Object> values = new ArrayList<Object>();
         switch (type) {
         case BOOLEAN:
@@ -420,8 +424,8 @@ public class ComponentUtil {
             return values.toArray(new Short[] {});
 
         case PASSWORD:
-            ServiceReference<CryptoService> sr = ctx.getBundleContext().getServiceReference(CryptoService.class);
-            CryptoService cryptoService = ctx.getBundleContext().getService(sr);
+            ServiceReference<CryptoService> sr = ctx.getServiceReference(CryptoService.class);
+            CryptoService cryptoService = ctx.getService(sr);
             for (String value : defaultValues) {
                 try {
                     values.add(new Password(cryptoService.encryptAes(value.toCharArray())));

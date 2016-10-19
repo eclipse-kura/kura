@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - fix issue #590
  *******************************************************************************/
 package org.eclipse.kura.cloud;
 
@@ -55,8 +56,6 @@ public abstract class Cloudlet implements CloudClientListener {
     private CloudService m_cloudService;
     private CloudClient m_cloudClient;
 
-    private ComponentContext m_ctx;
-
     private final String m_applicationId;
 
     // ----------------------------------------------------------------
@@ -79,7 +78,7 @@ public abstract class Cloudlet implements CloudClientListener {
     //
     // ----------------------------------------------------------------
 
-    protected void activate(ComponentContext componentContext) {
+    protected void activate() {
         // get the mqtt client for this application
         try {
 
@@ -89,20 +88,29 @@ public abstract class Cloudlet implements CloudClientListener {
 
             // Don't subscribe because these are handled by the default subscriptions and we don't want to get messages
             // twice
-            this.m_ctx = componentContext;
         } catch (KuraException e) {
             s_logger.error("Cannot activate", e);
             throw new ComponentException(e);
         }
     }
 
-    protected void deactivate(ComponentContext componentContext) {
+    protected void deactivate() {
         // close the application client.
         // this will unsubscribe all open subscriptions
         s_logger.info("Releasing CloudApplicationClient for {}...", this.m_applicationId);
         if (this.m_cloudClient != null) {
             this.m_cloudClient.release();
         }
+    }
+
+    @Deprecated
+    protected void activate(ComponentContext componentContext) {
+        activate();
+    }
+
+    @Deprecated
+    protected void deactivate(ComponentContext componentContext) {
+        deactivate();
     }
 
     protected Cloudlet(String appId) {
@@ -119,10 +127,6 @@ public abstract class Cloudlet implements CloudClientListener {
 
     protected CloudClient getCloudApplicationClient() {
         return this.m_cloudClient;
-    }
-
-    protected ComponentContext getComponentContext() {
-        return this.m_ctx;
     }
 
     // ----------------------------------------------------------------

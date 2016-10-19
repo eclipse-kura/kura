@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,19 +8,20 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - fix issue #590
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
 import java.util.Map;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
-import org.eclipse.kura.core.configuration.metatype.Tocd;
+import org.eclipse.kura.configuration.metatype.OCD;
 
 public class ComponentConfigurationImpl implements ComponentConfiguration {
 
     protected String pid;
 
-    protected Tocd definition;
+    protected OCD definition;
 
     protected Map<String, Object> properties;
 
@@ -28,7 +29,7 @@ public class ComponentConfigurationImpl implements ComponentConfiguration {
     public ComponentConfigurationImpl() {
     }
 
-    public ComponentConfigurationImpl(String pid, Tocd definition, Map<String, Object> properties) {
+    public ComponentConfigurationImpl(String pid, OCD definition, Map<String, Object> properties) {
         super();
         this.pid = pid;
         this.definition = definition;
@@ -41,7 +42,7 @@ public class ComponentConfigurationImpl implements ComponentConfiguration {
     }
 
     @Override
-    public Tocd getDefinition() {
+    public OCD getDefinition() {
         return this.definition;
     }
 
@@ -54,7 +55,7 @@ public class ComponentConfigurationImpl implements ComponentConfiguration {
         this.pid = pid;
     }
 
-    public void setDefinition(Tocd definition) {
+    public void setDefinition(OCD definition) {
         this.definition = definition;
     }
 

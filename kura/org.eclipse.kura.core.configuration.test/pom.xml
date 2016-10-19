@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.eclipse.kura</groupId>
+		<artifactId>kura</artifactId>
+		<version>2.1.0-SNAPSHOT</version>
+		<relativePath>../manifest_pom.xml</relativePath>
+	</parent>
+
+	<artifactId>org.eclipse.kura.core.configuration.test</artifactId>
+	<packaging>eclipse-test-plugin</packaging>
+	<version>1.0.0-SNAPSHOT</version>
+
+	<properties>
+		<kura.basedir>${project.basedir}/..</kura.basedir>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<providerHint>junit4</providerHint>
+					
+					<showEclipseLog>true</showEclipseLog>
+
+					<bundleStartLevel>
+						<bundleStartLevel>
+							<id>org.eclipse.equinox.cm</id>
+							<autoStart>true</autoStart>
+							<level>1</level>
+						</bundleStartLevel>
+						<bundleStartLevel>
+							<id>org.eclipse.equinox.metatype</id>
+							<autoStart>true</autoStart>
+							<level>1</level>
+						</bundleStartLevel>
+					</bundleStartLevel>
+					
+					<dependencies>
+						<dependency>
+							<type>p2-installable-unit</type>
+							<artifactId>slf4j.log4j12</artifactId>
+						</dependency>
+						<dependency>
+							<type>p2-installable-unit</type>
+							<artifactId>log4j.test.configuration</artifactId>
+						</dependency>
+						<dependency>
+							<type>p2-installable-unit</type>
+							<artifactId>org.eclipse.equinox.cm</artifactId>
+						</dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.metatype</artifactId>
+                        </dependency>
+					</dependencies>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+</project>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,10 +8,13 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - fix issue #590
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
 import java.util.List;
+
+import org.eclipse.kura.configuration.ComponentConfiguration;
 
 /**
  * Utility class to serialize a set of configurations.
@@ -19,16 +22,16 @@ import java.util.List;
  */
 public class XmlComponentConfigurations {
 
-    private List<ComponentConfigurationImpl> configurations;
+    private List<ComponentConfiguration> configurations;
 
     public XmlComponentConfigurations() {
     }
 
-    public List<ComponentConfigurationImpl> getConfigurations() {
+    public List<ComponentConfiguration> getConfigurations() {
         return this.configurations;
     }
 
-    public void setConfigurations(List<ComponentConfigurationImpl> configurations) {
+    public void setConfigurations(List<ComponentConfiguration> configurations) {
         this.configurations = configurations;
     }
 }

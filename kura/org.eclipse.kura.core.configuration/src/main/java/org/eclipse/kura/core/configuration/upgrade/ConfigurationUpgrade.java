@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - fix issue #590
  *******************************************************************************/
 package org.eclipse.kura.core.configuration.upgrade;
 
@@ -20,7 +21,6 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
-import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
 
@@ -42,12 +42,12 @@ public class ConfigurationUpgrade {
     private static final String REFERENCE_TARGET_VALUE_FORMAT = "(" + ConfigurationService.KURA_SERVICE_PID + "=%s)";
 
     public static XmlComponentConfigurations upgrade(XmlComponentConfigurations xmlConfigs) {
-        List<ComponentConfigurationImpl> result = new ArrayList<ComponentConfigurationImpl>();
+        List<ComponentConfiguration> result = new ArrayList<ComponentConfiguration>();
 
         for (ComponentConfiguration config : xmlConfigs.getConfigurations()) {
             String pid = config.getPid();
             Map<String, Object> props = new HashMap<String, Object>(config.getConfigurationProperties());
-            ComponentConfigurationImpl cc = new ComponentConfigurationImpl(pid, (Tocd) config.getDefinition(), props);
+            ComponentConfigurationImpl cc = new ComponentConfigurationImpl(pid, config.getDefinition(), props);
             result.add(cc);
 
             if (CLOUD_SERVICE_PID.equals(pid)) {

@@ -26,7 +26,7 @@
 	</parent>
 
 	<artifactId>org.eclipse.kura.web2</artifactId>
-	<version>2.0.2-SNAPSHOT</version>
+	<version>2.0.2</version>
 	<packaging>war</packaging>
 	<name>org.eclipse.kura.web2</name>
 

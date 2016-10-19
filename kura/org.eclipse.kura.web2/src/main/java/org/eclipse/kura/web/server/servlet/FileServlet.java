@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - fix issue #590
  *******************************************************************************/
 package org.eclipse.kura.web.server.servlet;
 
@@ -44,7 +45,6 @@ import org.apache.commons.io.FileCleaningTracker;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
@@ -407,7 +407,7 @@ public class FileServlet extends HttpServlet {
         try {
 
             ConfigurationService cs = locator.getService(ConfigurationService.class);
-            List<ComponentConfigurationImpl> configImpls = xmlConfigs.getConfigurations();
+            List<ComponentConfiguration> configImpls = xmlConfigs.getConfigurations();
 
             List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
             configs.addAll(configImpls);

@@ -12,10 +12,8 @@
 package org.eclipse.kura.internal.wire.subscriber;
 
 import static org.eclipse.kura.Preconditions.checkNull;
-import static org.eclipse.kura.wire.SeverityLevel.CONFIG;
 import static org.eclipse.kura.wire.SeverityLevel.ERROR;
 import static org.eclipse.kura.wire.SeverityLevel.INFO;
-import static org.eclipse.kura.wire.SeverityLevel.SEVERE;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -99,6 +97,13 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
         this.wireSupport = this.wireHelperService.newWireSupport(this);
         this.options = new CloudSubscriberOptions(properties);
         this.topic = this.options.getSubscribingTopic();
+        try {
+            if (this.dataService.isConnected()) {
+                this.dataService.subscribe(this.topic, this.options.getSubscribingQos());
+            }
+        } catch (final KuraException e) {
+            s_logger.error(s_message.errorCreatingCloudClinet() + e);
+        }
         this.dataService.addDataServiceListener(this);
         s_logger.debug(s_message.activatingCloudSubscriberDone());
     }
@@ -154,6 +159,13 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
         checkNull(payload, s_message.payloadNonNull());
         final List<WireField> wireFields = CollectionUtil.newArrayList();
 
+        final String flag = "asset_flag";
+        SeverityLevel level = INFO;
+        final Object severityLevelMetric = payload.getMetric(flag);
+        if ("ERROR".equalsIgnoreCase(String.valueOf(severityLevelMetric))) {
+            level = ERROR;
+        }
+
         for (final String metric : payload.metricNames()) {
             final Object metricValue = payload.getMetric(metric);
             TypedValue<?> val = TypedValues.newStringValue("");
@@ -189,16 +201,6 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
             if (metricValue instanceof byte[]) {
                 final byte[] value = TypeUtil.objectToByteArray(metricValue);
                 val = TypedValues.newByteArrayValue(value);
-            }
-            SeverityLevel level = null;
-            if ("ERROR".equalsIgnoreCase(String.valueOf(metricValue))) {
-                level = ERROR;
-            } else if ("SEVERE".equalsIgnoreCase(String.valueOf(metricValue))) {
-                level = SEVERE;
-            } else if ("CONFIG".equalsIgnoreCase(String.valueOf(metricValue))) {
-                level = CONFIG;
-            } else if ("INFO".equalsIgnoreCase(String.valueOf(metricValue))) {
-                level = INFO;
             }
             final WireField wireField = new WireField(metric, val, level);
             wireFields.add(wireField);

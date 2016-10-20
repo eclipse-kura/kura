@@ -268,7 +268,7 @@ public final class AssetOptions {
                 final String key = entry.getKey();
                 final String value = entry.getValue().toString();
                 final List<String> strings = Arrays.asList(key.split("\\" + CHANNEL_PROPERTY_POSTFIX.value()));
-                if ((strings.size() > 2) && key.startsWith(String.valueOf(channelId))
+                if ((strings.size() > 2) && key.startsWith(String.valueOf(channelId) + CHANNEL_PROPERTY_POSTFIX.value())
                         && DRIVER_PROPERTY_POSTFIX.value().equals(strings.get(2))) {
                     final String driverSpecificPropertyKey = DRIVER_PROPERTY_POSTFIX.value()
                             + CHANNEL_PROPERTY_POSTFIX.value();

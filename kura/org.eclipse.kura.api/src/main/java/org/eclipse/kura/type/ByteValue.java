@@ -44,7 +44,7 @@ public final class ByteValue implements TypedValue<Byte> {
     @Override
     public int compareTo(final TypedValue<Byte> otherTypedValue) {
         checkNull(otherTypedValue, "Typed Value cannot be null");
-        return Byte.compare(this.value, otherTypedValue.getValue());
+        return this.value - otherTypedValue.getValue();
     }
 
     /** {@inheritDoc} */

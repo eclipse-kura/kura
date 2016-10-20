@@ -26,7 +26,6 @@
    <property name="service.pid" type="String" value="org.eclipse.kura.demo.heater.Heater"/>
    <service>
        <provide interface="org.eclipse.kura.demo.heater.Heater"/>
-       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
    
    <reference name="CloudService"

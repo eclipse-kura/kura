@@ -17,7 +17,6 @@
    <implementation class="org.eclipse.kura.example.ble.tisensortag.BluetoothLe"/>
    <service>
       <provide interface="org.eclipse.kura.example.ble.tisensortag.BluetoothLe"/>
-      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.example.ble.tisensortag.BluetoothLe"/>
    <reference bind="setCloudService" 

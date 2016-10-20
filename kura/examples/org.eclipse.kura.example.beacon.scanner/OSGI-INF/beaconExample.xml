@@ -3,7 +3,6 @@
    <implementation class="org.eclipse.kura.example.beacon.scanner.BeaconScannerExample"/>
    <service>
       <provide interface="org.eclipse.kura.example.beacon.scanner.BeaconScannerExample"/>
-      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
     <reference bind="setBluetoothService" 
               cardinality="1..1" 

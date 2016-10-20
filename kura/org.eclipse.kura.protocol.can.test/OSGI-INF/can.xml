@@ -20,7 +20,6 @@
    <implementation class="org.eclipse.kura.protocol.can.test.CanSocketTest"/>
    <service>
       <provide interface="org.eclipse.kura.protocol.can.test.CanSocketTest"/>
-      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.protocol.can.test.CanSocketTest"/>
 

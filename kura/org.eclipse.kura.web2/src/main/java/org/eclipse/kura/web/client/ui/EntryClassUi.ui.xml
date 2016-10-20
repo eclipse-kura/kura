@@ -98,110 +98,78 @@
             </b:Row>
 
 			<!-- ROW#2 content -->
-            <b:Row>
-                <b:Panel>
-                    <b:PanelBody>
-                        <b:Modal title="Error" ui:field='errorPopup'>
-                            <b:ModalBody>
-                                <g:ScrollPanel styleName='customLogScrollPanel'>
-                                    <g:VerticalPanel
-                                        ui:field='errorLogArea'
-                                        styleName='errorLogArea' />
-                                </g:ScrollPanel>
-                            </b:ModalBody>
-                        </b:Modal>
-                        <b:Row>
-                            <b:Column size="MD_2"
-                                addStyleNames="{style.center-panel}">
-                                <b:Row>
-                                    <b:Column size="MD_12,XS_6"
-                                        addStyleNames="{style.system-list}">
-                                        <b:Panel>
-                                            <b:PanelHeader>
-                                                <b:Heading
-                                                    size="H3" text="System" />
-                                            </b:PanelHeader>
-                                            <b:PanelBody
-                                                ui:field='systemPanel'>
-                                                <b:NavPills
-                                                    stacked="true">
-                                                    <b:TabListItem
-                                                        text="Status"
-                                                        icon="EXCLAMATION"
-                                                        iconFixedWidth="true"
-                                                        ui:field="status" />
+			<b:Row>
+				<b:Panel>
+					<b:PanelBody>
+						<b:Modal title="Error" ui:field='errorPopup'>
+							<b:ModalBody>
+								<g:ScrollPanel styleName='customLogScrollPanel'>
+	 								<g:VerticalPanel ui:field='errorLogArea' styleName='errorLogArea'/>
+								</g:ScrollPanel>
+							</b:ModalBody>									
+						</b:Modal>
+						<b:Row>
+							<b:Column size="MD_2" addStyleNames="{style.center-panel}">
+								<b:Row>
+									<b:Column size="MD_12,XS_6" addStyleNames="{style.system-list}">
+										<b:Panel>
+											<b:PanelHeader>
+												<b:Heading size="H3" text="System" />
+											</b:PanelHeader>
+											<b:PanelBody ui:field='systemPanel'>
+												<b:NavPills stacked="true">
+													<b:TabListItem text="Status" icon="EXCLAMATION"
+														iconFixedWidth="true" ui:field="status" />
 
-                                                    <b:AnchorListItem
-                                                        text="Device"
-                                                        icon="HDD_O"
-                                                        iconFixedWidth="true"
-                                                        ui:field="device" />
+													<b:AnchorListItem text="Device" icon="HDD_O"
+														iconFixedWidth="true" ui:field="device" />
 
-                                                    <b:AnchorListItem
-                                                        text="Network"
-                                                        icon="WIFI"
-                                                        iconFixedWidth="true"
-                                                        ui:field="network" />
+													<b:AnchorListItem text="Network" icon="WIFI"
+														iconFixedWidth="true" ui:field="network" />
 
-                                                    <b:AnchorListItem
-                                                        text="Firewall"
-                                                        icon="FIRE"
-                                                        iconFixedWidth="true"
-                                                        ui:field="firewall" />
+													<b:AnchorListItem text="Firewall" icon="FIRE"
+														iconFixedWidth="true" ui:field="firewall" />
 
-                                                    <b:AnchorListItem
-                                                        icon="CUBES"
-                                                        iconFixedWidth="true"
-                                                        text="Packages"
-                                                        ui:field="packages" />
+													<b:AnchorListItem icon="CLOUD"
+														iconFixedWidth="true" text="Cloud Services" ui:field="cloudServices"/> 
 
-                                                    <b:AnchorListItem
-                                                        icon="GEAR"
-                                                        iconFixedWidth="true"
-                                                        text="Settings"
-                                                        ui:field="settings" />
-													<!--  
+													<b:AnchorListItem icon="CUBES"
+														iconFixedWidth="true" text="Packages" ui:field="packages" />
+
 													<b:AnchorListItem icon="GEAR"
-														iconFixedWidth="true" text="Kura Wires" ui:field="wires"/> -->
-                                                </b:NavPills>
-                                            </b:PanelBody>
-                                        </b:Panel>
-                                    </b:Column>
-                                    <b:Column size="MD_12,XS_6"
-                                        addStyleNames="{style.services-list}">
-                                        <b:Panel>
-                                            <b:PanelHeader>
-                                                <b:Heading
-                                                    size="H3" text="Services" />
-                                            </b:PanelHeader>
-                                            <b:PanelBody>
-                                                <g:ScrollPanel
-                                                    ui:field="servicesPanel">
-                                                    <b:NavPills
-                                                        stacked="true"
-                                                        ui:field="servicesMenu" />
-                                                </g:ScrollPanel>
-                                            </b:PanelBody>
-                                        </b:Panel>
-                                    </b:Column>
-                                </b:Row>
-                            </b:Column>
+														iconFixedWidth="true" text="Settings" ui:field="settings" />													  
+												</b:NavPills>
+											</b:PanelBody>
+										</b:Panel>
+									</b:Column>
+									<b:Column size="MD_12,XS_6" addStyleNames="{style.services-list}">
+										<b:Panel>
+											<b:PanelHeader>
+												<b:Heading size="H3" text="Services" />
+											</b:PanelHeader>
+											<b:PanelBody>
+												<g:ScrollPanel ui:field="servicesPanel">
+													<b:NavPills stacked="true" ui:field="servicesMenu" />
+												</g:ScrollPanel>
+											</b:PanelBody>
+										</b:Panel>
+									</b:Column>
+								</b:Row>
+							</b:Column>
 
-                            <b:Column size="MD_10">
-                                <b:Panel ui:field="contentPanel">
-                                    <b:PanelHeader
-                                        ui:field="contentPanelHeader">
-                                    </b:PanelHeader>
-                                    <b:PanelBody ui:field="contentPanelBody"
-                                        addStyleNames="{style.content-panel-body}">
-                                    </b:PanelBody>
-                                </b:Panel>
-                            </b:Column>
+							<b:Column size="MD_10">
+								<b:Panel ui:field="contentPanel">
+									<b:PanelHeader ui:field="contentPanelHeader">
+									</b:PanelHeader>
+									<b:PanelBody ui:field="contentPanelBody" addStyleNames="{style.content-panel-body}">
+									</b:PanelBody>
+								</b:Panel>
+							</b:Column>
 
-                        </b:Row>
-                    </b:PanelBody>
-                </b:Panel>
-            </b:Row>
+						</b:Row>
+					</b:PanelBody>
+				</b:Panel>
+			</b:Row>
 			<!-- ROW3 (Footer) Content -->
             <b:Row>
                 <b:Column addStyleNames="{style.bottom-row-padding}"

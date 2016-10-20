@@ -49,6 +49,21 @@ public class GwtConfigParameter implements IsSerializable {
     public GwtConfigParameter() {
     }
 
+    public GwtConfigParameter(GwtConfigParameter reference) {
+        this.m_id = reference.getId();
+        this.m_name = reference.getName();
+        this.m_description = reference.getDescription();
+        this.m_type = reference.getType();
+        this.m_required = reference.isRequired();
+        this.m_default = reference.getDefault();
+        this.m_cardinality = reference.getCardinality();
+        this.m_options = reference.getOptions();
+        this.m_min = reference.getMin();
+        this.m_max = reference.getMax();
+        this.m_value = reference.getValue();
+        this.m_values = reference.getValues();
+    }
+
     public String getId() {
         return this.m_id;
     }

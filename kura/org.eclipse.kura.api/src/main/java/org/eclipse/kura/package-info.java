@@ -8,12 +8,16 @@
  *
  * Contributors:
  *     Eurotech
+ *     Amit Kumar Mondal (admin@amitinside.com)
  *******************************************************************************/
 /**
- * 
+ *
  */
 /**
- * Contains objects necessary to manage framework exceptions.
- *
+ * Contains the necessary classes for the following framework related operations
+ * <ul>
+ * <li>Management of Exceptions</li>
+ * <li>Preconditions for Defensive Programming - @since 1.0.10</li>
+ * </ul>
  */
 package org.eclipse.kura;

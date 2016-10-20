@@ -15,6 +15,7 @@ import static org.eclipse.kura.camel.cloud.factory.internal.CamelFactory.FACTORY
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -230,6 +231,12 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
     @Override
     public String getFactoryPid() {
         return FACTORY_ID;
+    }
+
+    @Override
+    public List<String> getStackComponentsPids(String pid) throws KuraException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2016 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Amit Kumar Mondal (admin@amitinside.com)
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.wire.DbWireRecordStore"
+         name="DB Store" 
+         description="A wire component that provides storage for Wire Records produced by connected WireEmitters.">
+
+        <AD id="table.name"
+            name="table.name"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="data"
+            description="The name of the table to be created and all the operations will be performed on it"/>   
+        
+        <AD id="periodic.cleanup"
+            name="periodic.cleanup"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="0"
+            description="Option for periodic cleanup of the data records collected! (in seconds) (0 denotes disabled)"
+           	min="0">
+        </AD>
+        
+        <AD id="periodic.cleanup.records.keep"
+            name="periodic.cleanup.records.keep"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="0"
+            description="Option for the number of records in the table to keep while performing a cleanup operation (if set to 0 all the records will be deleted)"
+           	min="0">
+        </AD>
+        
+        <AD id="severity.level"
+            name="severity.level"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="SEVERE"
+            description="It signifies severity level of Wire Fields to be accepted by this Wire Component">
+            <Option label="SEVERE" value="SEVERE" />
+            <Option label="CONFIG" value="CONFIG" />
+            <Option label="ERROR" value="ERROR" />
+            <Option label="INFO" value="INFO" />
+        </AD>
+             
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.wire.DbWireRecordStore" factoryPid="org.eclipse.kura.wire.DbWireRecordStore">
+        <Object ocdref="org.eclipse.kura.wire.DbWireRecordStore"/>
+    </Designate>
+</MetaData>

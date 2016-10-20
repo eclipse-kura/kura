@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Kura Asset Accessor Provider
+Bundle-SymbolicName: org.eclipse.kura.asset.provider;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: EUROTECH
+Bundle-License: Eclipse Public License v1.0
+Bundle-Category: Asset-Driver Management
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.eclipse.kura;version="[1.2,2.0)",
+ org.eclipse.kura.annotation;version="[1.0,2.0)",
+ org.eclipse.kura.asset;version="[1.0,1.1)",
+ org.eclipse.kura.asset.listener;version="[1.0,1.1)",
+ org.eclipse.kura.configuration;version="[1.1,1.2)",
+ org.eclipse.kura.configuration.metatype;version="[1.0,2.0)",
+ org.eclipse.kura.core.configuration;version="[1.0,2.0)",
+ org.eclipse.kura.core.configuration.metatype;version="[1.0,2.0)",
+ org.eclipse.kura.driver;version="[1.0,2.0)",
+ org.eclipse.kura.driver.listener;version="[1.0,1.1)",
+ org.eclipse.kura.localization;version="[1.0,2.0)",
+ org.eclipse.kura.localization.resources;version="[1.0,2.0)",
+ org.eclipse.kura.type;version="[1.0,2.0)",
+ org.eclipse.kura.util.base;version="[1.0,2.0)",
+ org.eclipse.kura.util.collection;version="[1.0,2.0)",
+ org.eclipse.kura.util.service;version="[1.0,2.0)",
+ org.osgi.framework;version="[1.7.0,2.0.0)",
+ org.osgi.service.component;version="1.2.0",
+ org.osgi.util.tracker;version="1.5.0",
+ org.slf4j;version="1.6.4"
+Service-Component: OSGI-INF/*.xml
+Bundle-ActivationPolicy: lazy
+Export-Package: org.eclipse.kura.asset.provider;version="1.0.0"

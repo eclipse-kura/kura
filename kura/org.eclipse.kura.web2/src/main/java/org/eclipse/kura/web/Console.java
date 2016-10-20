@@ -23,6 +23,7 @@ import org.eclipse.kura.configuration.KuraConfigReadyEvent;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.GwtCertificatesServiceImpl;
+import org.eclipse.kura.web.server.GwtCloudServiceImpl;
 import org.eclipse.kura.web.server.GwtComponentServiceImpl;
 import org.eclipse.kura.web.server.GwtDeviceServiceImpl;
 import org.eclipse.kura.web.server.GwtNetworkServiceImpl;
@@ -275,5 +276,6 @@ public class Console implements ConfigurableComponent {
                 httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/skin", new SkinServlet(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/ssl", new GwtSslServiceImpl(), null, httpCtx);
+        this.m_httpService.registerServlet(servletRoot + "/cloudservices", new GwtCloudServiceImpl(), null, httpCtx);
     }
 }

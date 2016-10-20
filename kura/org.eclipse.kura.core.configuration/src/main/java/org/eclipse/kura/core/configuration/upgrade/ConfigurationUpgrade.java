@@ -26,6 +26,9 @@ import org.osgi.service.component.ComponentConstants;
 
 public class ConfigurationUpgrade {
 
+    private static final String KURA_CLOUD_SERVICE_FACTORY_PID = "kura.cloud.service.factory.pid";
+    private static final String FACTORY_PID = "org.eclipse.kura.core.cloud.factory.DefaultCloudServiceFactory";
+
     private static final String CLOUD_SERVICE_FACTORY_PID = "org.eclipse.kura.cloud.CloudService";
     private static final String DATA_SERVICE_FACTORY_PID = "org.eclipse.kura.data.DataService";
     private static final String DATA_TRANSPORT_SERVICE_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
@@ -51,12 +54,15 @@ public class ConfigurationUpgrade {
                 props.put(ConfigurationAdmin.SERVICE_FACTORYPID, CLOUD_SERVICE_FACTORY_PID);
                 String name = DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
                 props.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, DATA_SERVICE_PID));
+                props.put(KURA_CLOUD_SERVICE_FACTORY_PID, FACTORY_PID);
             } else if (DATA_SERVICE_PID.equals(pid)) {
                 props.put(ConfigurationAdmin.SERVICE_FACTORYPID, DATA_SERVICE_FACTORY_PID);
                 String name = DATA_TRANSPORT_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
                 props.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, DATA_TRANSPORT_SERVICE_PID));
+                props.put(KURA_CLOUD_SERVICE_FACTORY_PID, FACTORY_PID);
             } else if (DATA_TRANSPORT_SERVICE_PID.equals(pid)) {
                 props.put(ConfigurationAdmin.SERVICE_FACTORYPID, DATA_TRANSPORT_SERVICE_FACTORY_PID);
+                props.put(KURA_CLOUD_SERVICE_FACTORY_PID, FACTORY_PID);
             }
         }
 

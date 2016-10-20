@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.CloudServices.CloudServicesUi;
 import org.eclipse.kura.web.client.ui.Device.DevicePanelUi;
 import org.eclipse.kura.web.client.ui.Firewall.FirewallPanelUi;
 import org.eclipse.kura.web.client.ui.Network.NetworkPanelUi;
@@ -89,7 +90,7 @@ public class EntryClassUi extends Composite {
     private final SettingsPanelUi settingsBinder = GWT.create(SettingsPanelUi.class);
     private final FirewallPanelUi firewallBinder = GWT.create(FirewallPanelUi.class);
     private final NetworkPanelUi networkBinder = GWT.create(NetworkPanelUi.class);
-    // private final WiresPanelUi wiresBinder = GWT.create(WiresPanelUi.class);
+    private final CloudServicesUi cloudServicesBinder = GWT.create(CloudServicesUi.class);
 
     private final GwtPackageServiceAsync gwtPackageService = GWT.create(GwtPackageService.class);
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
@@ -109,6 +110,7 @@ public class EntryClassUi extends Composite {
     private boolean networkDirty;
     private boolean firewallDirty;
     private boolean settingsDirty;
+    private boolean cloudServicesDirty;
 
     @UiField
     Panel header;
@@ -123,7 +125,17 @@ public class EntryClassUi extends Composite {
     @UiField
     TabListItem status;
     @UiField
-    AnchorListItem device, network, firewall, packages, settings;
+    AnchorListItem device;
+    @UiField
+    AnchorListItem network;
+    @UiField
+    AnchorListItem firewall;
+    @UiField
+    AnchorListItem packages;
+    @UiField
+    AnchorListItem settings;
+    @UiField
+    AnchorListItem cloudServices;
     @UiField
     ScrollPanel servicesPanel;
     @UiField
@@ -340,6 +352,30 @@ public class EntryClassUi extends Composite {
                 renderDirtyConfigModal(b);
             }
         });
+
+        // Cloud services Panel
+        this.cloudServices.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                Button b = new Button(MSGS.yesButton(), new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        forceTabsCleaning();
+                        if (EntryClassUi.this.modal != null) {
+                            EntryClassUi.this.modal.hide();
+                        }
+                        EntryClassUi.this.contentPanel.setVisible(true);
+                        EntryClassUi.this.contentPanelHeader.setText(MSGS.cloudServices());
+                        EntryClassUi.this.contentPanelBody.clear();
+                        EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.cloudServicesBinder);
+                        EntryClassUi.this.cloudServicesBinder.refresh();
+                    }
+                });
+                renderDirtyConfigModal(b);
+            }
+        });
     }
 
     public void initServicesTree() {
@@ -353,7 +389,7 @@ public class EntryClassUi extends Composite {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                EntryClassUi.this.gwtComponentService.findComponentConfigurations(token,
+                EntryClassUi.this.gwtComponentService.findServicesConfigurations(token,
                         new AsyncCallback<List<GwtConfigComponent>>() {
 
                     @Override
@@ -387,7 +423,6 @@ public class EntryClassUi extends Composite {
     }
 
     public void updateConnectionStatusImage(boolean isConnected) {
-
         String imgColor;
         String statusMessage;
 
@@ -401,7 +436,8 @@ public class EntryClassUi extends Composite {
 
         StringBuilder imageSB = new StringBuilder();
         imageSB.append("<i class=\"fa fa-plug fa-fw\" ");
-        imageSB.append("style=\"float: right; width: 23px; height: 23px; line-height: 23px; color: white; border-radius: 23px; ");
+        imageSB.append(
+                "style=\"float: right; width: 23px; height: 23px; line-height: 23px; color: white; border-radius: 23px; ");
         imageSB.append(imgColor + "\"");
         imageSB.append("\" title=\"");
         imageSB.append(statusMessage);
@@ -436,8 +472,12 @@ public class EntryClassUi extends Composite {
             this.settingsDirty = this.settingsBinder.isDirty();
         }
 
+        if (this.cloudServices.isVisible()) {
+            this.cloudServicesDirty = this.cloudServicesBinder.isDirty();
+        }
+
         if (this.servicesUi != null && this.servicesUi.isDirty() || this.networkDirty || this.firewallDirty
-                || this.settingsDirty) {
+                || this.settingsDirty || this.cloudServicesDirty) {
             this.modal = new Modal();
 
             ModalHeader header = new ModalHeader();
@@ -536,6 +576,9 @@ public class EntryClassUi extends Composite {
         if (this.settings.isVisible()) {
             this.settingsBinder.setDirty(false);
         }
+        if (this.cloudServices.isVisible()) {
+            this.cloudServicesBinder.setDirty(false);
+        }
     }
 
     private void eclipseMarketplaceInstall(String url) {
@@ -632,12 +675,12 @@ public class EntryClassUi extends Composite {
                                                              event.preventDefault();
                                                              event.stopPropagation();
                                                              });
-
+                                                             
                                                              $wnd.$("html").on("dragleave", function(event) {
                                                              event.preventDefault();
                                                              event.stopPropagation();
                                                              });
-
+                                                             
                                                              $wnd.$("html").on("drop", function(event) {
                                                              event.preventDefault();
                                                              event.stopPropagation();

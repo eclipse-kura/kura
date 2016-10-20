@@ -17,7 +17,6 @@
    <service>
       <provide interface="org.eclipse.kura.position.PositionService"/>
       <provide interface="org.osgi.service.event.EventHandler"/>
-      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.position.PositionService"/>
    <reference bind="setConnectionFactory" cardinality="1..1" interface="org.osgi.service.io.ConnectionFactory" name="ConnectionFactory" policy="static" unbind="unsetConnectionFactory"/>

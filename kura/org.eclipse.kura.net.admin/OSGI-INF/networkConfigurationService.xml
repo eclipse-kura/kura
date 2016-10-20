@@ -18,7 +18,6 @@
    <reference bind="setNetworkService" cardinality="1..1" interface="org.eclipse.kura.net.NetworkService" name="NetworkService" policy="static" unbind="unsetNetworkService"/>
    <service>
       <provide interface="org.eclipse.kura.net.admin.NetworkConfigurationService"/>
-      <provide interface="org.eclipse.kura.configuration.SelfConfiguringComponent"/>
    </service>
    <reference bind="setUsbService" cardinality="1..1" interface="org.eclipse.kura.usb.UsbService" name="UsbService" policy="static" unbind="unsetUsbService"/>
    <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unsetEventAdmin"/>

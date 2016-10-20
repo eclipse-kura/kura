@@ -23,7 +23,6 @@
    <property name="service.pid" value="org.eclipse.kura.net.admin.FirewallConfigurationService"/>
    <service>
       <provide interface="org.eclipse.kura.net.admin.FirewallConfigurationService"/>
-      <provide interface="org.eclipse.kura.configuration.SelfConfiguringComponent"/>
    </service>
    <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unsetEventAdmin"/>
 </scr:component>

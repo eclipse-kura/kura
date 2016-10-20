@@ -44,7 +44,7 @@ public final class IntegerValue implements TypedValue<Integer> {
     @Override
     public int compareTo(final TypedValue<Integer> otherTypedValue) {
         checkNull(otherTypedValue, "Typed Value cannot be null");
-        return Integer.compare(this.value, otherTypedValue.getValue());
+        return Integer.valueOf(this.value).compareTo(otherTypedValue.getValue());
     }
 
     /** {@inheritDoc} */

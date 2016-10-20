@@ -45,7 +45,7 @@ public final class BooleanValue implements TypedValue<Boolean> {
     @Override
     public int compareTo(final TypedValue<Boolean> otherTypedValue) {
         checkNull(otherTypedValue, "Typed Value cannot be null");
-        return Boolean.compare(this.value, otherTypedValue.getValue());
+        return (this.value == otherTypedValue.getValue()) ? 0 : (this.value ? 1 : -1);
     }
 
     /** {@inheritDoc} */

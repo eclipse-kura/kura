@@ -16,7 +16,6 @@
    <implementation class="org.eclipse.kura.example.beacon.BeaconExample"/>
    <service>
       <provide interface="org.eclipse.kura.example.beacon.BeaconExample"/>
-      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.example.beacon.BeaconExample"/>
     <reference bind="setBluetoothService" 

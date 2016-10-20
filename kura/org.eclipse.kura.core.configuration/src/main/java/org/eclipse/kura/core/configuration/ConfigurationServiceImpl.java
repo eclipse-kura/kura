@@ -234,6 +234,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         } else {
             s_logger.info("Tracking all services");
             this.anyTracker = new ConfigurableComponentTracker(this.m_ctx.getBundleContext(), this);
+            this.anyTracker.open(true);
         }
 
         this.m_bundleTracker = new ComponentMetaTypeBundleTracker(this.m_ctx.getBundleContext(), this);

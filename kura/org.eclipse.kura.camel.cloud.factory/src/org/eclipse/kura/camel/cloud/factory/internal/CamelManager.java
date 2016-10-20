@@ -26,7 +26,7 @@ import org.eclipse.kura.cloud.factory.CloudServiceFactory;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
-import org.eclipse.kura.configuration.metatype.OCD;
+import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.ObjectFactory;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
@@ -45,7 +45,7 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
 
     private ConfigurationService configurationService;
 
-    private static OCD makeModel() {
+    private static Tocd makeModel() {
         final ObjectFactory objectFactory = new ObjectFactory();
         final Tocd tocd = objectFactory.createTocd();
 
@@ -82,19 +82,18 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
             tad.setType(Tscalar.INTEGER);
             tad.setCardinality(0);
             tad.setRequired(Boolean.FALSE);
-            tad.setDescription(
-                    "The initial service ranking of the new cloud service. A higher number will have more priority.");
+            tad.setDescription("The initial service ranking of the new cloud service. A higher number will have more priority.");
             tocd.addAD(tad);
         }
 
         return tocd;
     }
 
-    public void setConfigurationService(ConfigurationService configurationService) {
+    public void setConfigurationService(final ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
 
-    public void modified(Map<String, Object> properties) throws KuraException {
+    public void modified(final Map<String, Object> properties) throws KuraException {
         final String add = asString(properties.get("add"));
 
         if (add != null && !add.isEmpty()) {
@@ -134,11 +133,11 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
         this.configurationService.createFactoryConfiguration(FACTORY_ID, fromUserPid(pid), props, true);
     }
 
-    private static String fromUserPid(String pid) {
+    private static String fromUserPid(final String pid) {
         return pid + "-CloudFactory";
     }
 
-    private static String asString(Object object) {
+    private static String asString(final Object object) {
         if (object instanceof String) {
             return ((String) object).trim();
         }
@@ -147,7 +146,8 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
 
     @Override
     public ComponentConfiguration getConfiguration() throws KuraException {
-        return new ComponentConfiguration() {
+        // FIXME: replace with ComponentConfiguration instance once issue #590 is fixed
+        return new ComponentConfigurationImpl() {
 
             @Override
             public String getPid() {
@@ -155,7 +155,7 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
             }
 
             @Override
-            public OCD getDefinition() {
+            public Tocd getDefinition() {
                 return makeModel();
             }
 
@@ -180,19 +180,18 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
         final Set<String> ids = new TreeSet<>();
         try {
 
-            final Collection<ServiceReference<CamelFactory>> refs = FrameworkUtil.getBundle(CamelManager.class)
-                    .getBundleContext().getServiceReferences(CamelFactory.class, null);
+            final Collection<ServiceReference<CamelFactory>> refs = FrameworkUtil.getBundle(CamelManager.class).getBundleContext().getServiceReferences(CamelFactory.class, null);
             if (refs != null) {
-                for (ServiceReference<CamelFactory> ref : refs) {
+                for (final ServiceReference<CamelFactory> ref : refs) {
                     addService(ref, ids);
                 }
             }
-        } catch (InvalidSyntaxException e) {
+        } catch (final InvalidSyntaxException e) {
         }
         return ids;
     }
 
-    private static void addService(ServiceReference<CamelFactory> ref, Set<String> ids) {
+    private static void addService(final ServiceReference<CamelFactory> ref, final Set<String> ids) {
         final Object kpid = ref.getProperty("kura.service.pid");
         if (kpid instanceof String) {
             ids.add((String) kpid);
@@ -210,21 +209,21 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
      * @param pid
      *            the PID to delete
      */
-    static void delete(ConfigurationService configurationService, String pid) {
+    static void delete(final ConfigurationService configurationService, final String pid) {
         try {
             configurationService.deleteFactoryConfiguration(pid, true);
-        } catch (KuraException e) {
+        } catch (final KuraException e) {
             logger.warn("Failed to delete: {}", pid, e);
         }
     }
 
     @Override
-    public void createConfiguration(String pid) throws KuraException {
-        add(pid, Collections.<String, Object> emptyMap());
+    public void createConfiguration(final String pid) throws KuraException {
+        add(pid, Collections.<String, Object>emptyMap());
     }
 
     @Override
-    public void deleteConfiguration(String pid) throws KuraException {
+    public void deleteConfiguration(final String pid) throws KuraException {
         delete(this.configurationService, fromUserPid(pid));
     }
 
@@ -234,7 +233,7 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
     }
 
     @Override
-    public List<String> getStackComponentsPids(String pid) throws KuraException {
+    public List<String> getStackComponentsPids(final String pid) throws KuraException {
         // TODO Auto-generated method stub
         return null;
     }

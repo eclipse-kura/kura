@@ -44,7 +44,7 @@ public final class ShortValue implements TypedValue<Short> {
     @Override
     public int compareTo(final TypedValue<Short> otherTypedValue) {
         checkNull(otherTypedValue, "Typed Value cannot be null");
-        return Short.compare(this.value, otherTypedValue.getValue());
+        return Short.valueOf(this.value).compareTo(otherTypedValue.getValue());
     }
 
     /** {@inheritDoc} */

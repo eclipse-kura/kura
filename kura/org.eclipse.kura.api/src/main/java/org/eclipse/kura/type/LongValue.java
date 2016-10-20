@@ -44,7 +44,7 @@ public final class LongValue implements TypedValue<Long> {
     @Override
     public int compareTo(final TypedValue<Long> otherTypedValue) {
         checkNull(otherTypedValue, "Typed Value cannot be null");
-        return Long.compare(this.value, otherTypedValue.getValue());
+        return Long.valueOf(this.value).compareTo(otherTypedValue.getValue());
     }
 
     /** {@inheritDoc} */

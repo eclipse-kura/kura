@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Native libraries for 'org.eclipse.kura.linux.usb' on x86
+Bundle-SymbolicName: org.eclipse.kura.linux.usb.x86.ubuntu
+Bundle-Version: 1.0.8.qualifier
+Fragment-Host: org.eclipse.kura.linux.usb;bundle-version="[1.0.8,2.0.0)"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-NativeCode: lib/linux/libEurotechLinuxUdev.so; osname=Linux; processor=x86

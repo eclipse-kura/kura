@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2016 Eurotech and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -10,6 +10,7 @@
 
     Contributors:
       Eurotech
+      Red Hat Inc - Fix issue #476
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -232,6 +233,36 @@
 									<artifactId>org.eclipse.kura.linux.usb</artifactId>
 									<version>${org.eclipse.kura.linux.usb.version}</version>
 								</artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.linux.usb.armv5sf</artifactId>
+                                    <version>${org.eclipse.kura.linux.usb.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.linux.usb.armv6hf</artifactId>
+                                    <version>${org.eclipse.kura.linux.usb.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.linux.usb.x86</artifactId>
+                                    <version>${org.eclipse.kura.linux.usb.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.linux.usb.x86_64</artifactId>
+                                    <version>${org.eclipse.kura.linux.usb.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.linux.usb.x86_64.yocto</artifactId>
+                                    <version>${org.eclipse.kura.linux.usb.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.linux.usb.x86.ubuntu</artifactId>
+                                    <version>${org.eclipse.kura.linux.usb.version}</version>
+                                </artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.linux.bluetooth</artifactId>
@@ -394,6 +425,12 @@
 							    <move file="target/plugins/org.eclipse.kura.linux.net.jar" tofile="target/plugins/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.linux.position.jar" tofile="target/plugins/org.eclipse.kura.linux.position_${org.eclipse.kura.linux.position.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.linux.usb.jar" tofile="target/plugins/org.eclipse.kura.linux.usb_${org.eclipse.kura.linux.usb.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.linux.usb.armv5sf.jar" tofile="target/plugins/org.eclipse.kura.linux.usb.armv5sf_${org.eclipse.kura.linux.usb.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.linux.usb.armv6hf.jar" tofile="target/plugins/org.eclipse.kura.linux.usb.armv6hf_${org.eclipse.kura.linux.usb.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.linux.usb.x86.jar" tofile="target/plugins/org.eclipse.kura.linux.usb.x86_${org.eclipse.kura.linux.usb.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.linux.usb.x86_64.jar" tofile="target/plugins/org.eclipse.kura.linux.usb.x86_64_${org.eclipse.kura.linux.usb.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.linux.usb.x86_64.yocto.jar" tofile="target/plugins/org.eclipse.kura.linux.usb.x86_64.yocto_${org.eclipse.kura.linux.usb.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.linux.usb.x86.ubuntu.jar" tofile="target/plugins/org.eclipse.kura.linux.usb.x86.ubuntu_${org.eclipse.kura.linux.usb.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.linux.bluetooth.jar" tofile="target/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar"/>
   								<move file="target/plugins/org.eclipse.kura.linux.watchdog.jar" tofile="target/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar"/>
   								<move file="target/plugins/org.eclipse.kura.core.status.jar" tofile="target/plugins/org.eclipse.kura.core.status_${org.eclipse.kura.core.status.version}.jar"/>
@@ -749,6 +786,7 @@
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
                                         <property name="target.device" value="intel-edison" />
+                                        <property name="native.tag" value="x86_64.yocto"/>
                                         <property name="kura.os.version" value="yocto_1.6.1_edison" />
                                         <property name="build.name" value="intel-edison" />
                                         <property name="kura.arch" value="x86_64" />
@@ -814,6 +852,7 @@
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
                                         <property name="target.device" value="intel-edison" />
+                                        <property name="native.tag" value="x86_64.yocto"/>
                                         <property name="kura.os.version" value="yocto_1.6.1_edison" />
                                         <property name="build.name" value="intel-edison-nn" />
                                         <property name="kura.arch" value="x86_64" />
@@ -883,6 +922,7 @@
 										<property name="project.build.directory" value="${project.build.directory}" />
 										<property name="build.name" value="beaglebone" />
 										<property name="target.device" value="beaglebone" />
+										<property name="native.tag" value="armv6hf"/>
 										<property name="kura.os.version" value="debian" />
 										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="256m" />
@@ -998,6 +1038,7 @@
 										<property name="project.build.directory" value="${project.build.directory}" />
 										<property name="build.name" value="beaglebone-nn" />
 										<property name="target.device" value="beaglebone" />
+										<property name="native.tag" value="armv6hf"/>
 										<property name="kura.os.version" value="debian" />
 										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="256m" />
@@ -1093,6 +1134,7 @@
 										<property name="project.build.directory" value="${project.build.directory}" />
 										<property name="build.name" value="raspberry-pi" />
 										<property name="target.device" value="raspberry-pi" />
+										<property name="native.tag" value="armv6hf"/>
 										<property name="kura.os.version" value="raspbian" />
 										<property name="kura.arch" value="armv6_hf" />
 										<property name="kura.mem.size" value="256m" />
@@ -1197,6 +1239,7 @@
 										<property name="project.build.directory" value="${project.build.directory}" />
 										<property name="build.name" value="raspberry-pi-nn" />
 										<property name="target.device" value="raspberry-pi" />
+										<property name="native.tag" value="armv6hf"/>
 										<property name="kura.os.version" value="raspbian" />
 										<property name="kura.arch" value="armv6_hf" />
 										<property name="kura.mem.size" value="256m" />
@@ -1291,6 +1334,7 @@
 										<property name="project.build.directory" value="${project.build.directory}" />
 										<property name="build.name" value="raspberry-pi-bplus" />
 										<property name="target.device" value="raspberry-pi-bplus" />
+										<property name="native.tag" value="armv6hf"/>
 										<property name="kura.os.version" value="raspbian" />
 										<property name="kura.arch" value="armv6_hf" />
 										<property name="kura.mem.size" value="256m" />
@@ -1395,6 +1439,7 @@
 										<property name="project.build.directory" value="${project.build.directory}" />
 										<property name="build.name" value="raspberry-pi-bplus-nn" />
 										<property name="target.device" value="raspberry-pi-bplus" />
+										<property name="native.tag" value="armv6hf"/>
 										<property name="kura.os.version" value="raspbian" />
 										<property name="kura.arch" value="armv6_hf" />
 										<property name="kura.mem.size" value="256m" />
@@ -1489,6 +1534,7 @@
 										<property name="project.build.directory" value="${project.build.directory}" />
 										<property name="build.name" value="raspberry-pi-2" />
 										<property name="target.device" value="raspberry-pi-2" />
+										<property name="native.tag" value="armv6hf"/>
 										<property name="kura.os.version" value="raspbian" />
 										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="512m" />
@@ -1584,6 +1630,7 @@
 										<property name="project.build.directory" value="${project.build.directory}" />
 										<property name="build.name" value="raspberry-pi-2-nn" />
 										<property name="target.device" value="raspberry-pi-2-nn" />
+										<property name="native.tag" value="armv6hf"/>
 										<property name="kura.os.version" value="raspbian" />
 										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="512m" />
@@ -1673,6 +1720,7 @@
 										<property name="project.build.directory" value="${project.build.directory}" />
 										<property name="build.name" value="Win64-nn" />
 										<property name="target.device" value="Win64" />
+										<property name="native.tag" value="win64"/>
 										<property name="kura.os.version" value="Windows 64" />
 										<property name="kura.arch" value="x64" />
 										<property name="kura.mem.size" value="256m" />
@@ -2011,6 +2059,7 @@
 										<zip destfile="${project.build.directory}/tmp_ws.zip">
 											<zipfileset src="${project.build.directory}/${zip_workspace.prefix}.zip">
 												<exclude name="target-definition/common/repository/plugins/jdk.dio_${jdk.dio.version}.jar" />
+												<exclude name="target-definition/common/repository/plugins/jdk.dio.*_${jdk.dio.version}.jar" />
 											</zipfileset>
 										</zip>
 										<move file="${project.build.directory}/tmp_ws.zip" tofile="${project.build.directory}/${zip_workspace.prefix}.zip" />

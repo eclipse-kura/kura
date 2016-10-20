@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Kura Wires Topology Management
 Bundle-SymbolicName: org.eclipse.kura.wire.provider
 Bundle-Version: 1.0.0.qualifier
-Bundle-Vendor: EUROTECH
+Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v1.0
 Bundle-Category: Asset-Driver Management
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Kura Localization
 Bundle-SymbolicName: org.eclipse.kura.localization;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Vendor: EUROTECH
+Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v1.0
 Bundle-Category: Localization
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

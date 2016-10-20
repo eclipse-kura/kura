@@ -306,8 +306,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         final Tad severityLevelAd = new Tad();
         severityLevelAd.setId(SEVERITY_LEVEL.value());
         severityLevelAd.setName(SEVERITY_LEVEL.value());
-        // default severity level is ERROR
-        severityLevelAd.setDefault(s_message.error());
+        // default severity level is SEVERE
+        severityLevelAd.setDefault(s_message.severe());
         severityLevelAd.setCardinality(0);
         severityLevelAd.setType(Tscalar.STRING);
         severityLevelAd.setDescription(s_message.severityLevelDesc());

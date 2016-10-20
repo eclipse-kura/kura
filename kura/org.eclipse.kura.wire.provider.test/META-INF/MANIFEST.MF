@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Wire Provider Test
 Bundle-SymbolicName: org.eclipse.kura.wire.provider.test
 Bundle-Version: 1.0.0.qualifier
-Bundle-Vendor: EUROTECH
+Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v1.0
 Fragment-Host: org.eclipse.kura.wire.provider;bundle-version="[1.0,2.0)"
 Bundle-ActivationPolicy: lazy

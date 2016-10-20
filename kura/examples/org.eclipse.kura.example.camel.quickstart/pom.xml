@@ -25,8 +25,21 @@
           <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
         </repository>
     </repositories> 
-	
-    <dependencies>
+
+	<distributionManagement>
+			<repository>
+				<id>repo.eclipse.org</id>
+				<name>Kura Repository - Releases</name>
+				<url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+			</repository>
+			<snapshotRepository>
+				<id>repo.eclipse.org</id>
+				<name>Kura Repository - Snapshots</name>
+				<url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+			</snapshotRepository>
+	</distributionManagement>
+    
+	<dependencies>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.camel</artifactId>

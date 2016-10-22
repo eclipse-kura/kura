@@ -346,10 +346,19 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         this.wireSupport.producersConnected(wires);
     }
 
+    /**
+     * Perform Channel Read and Emit operations
+     *
+     * @param channelsToRead
+     *            the list of {@link Channel} IDs
+     * @throws KuraRuntimeException
+     *             if the provided list is null           
+     */
     private void readChannels(final List<Long> channelsToRead) {
+    	checkNull(channelsToRead, s_message.channelIdsNonNull());
         try {
             List<AssetRecord> recentlyReadRecords = null;
-            if ((channelsToRead != null) && !channelsToRead.isEmpty()) {
+            if (!channelsToRead.isEmpty()) {
                 recentlyReadRecords = this.read(channelsToRead);
             }
             if (recentlyReadRecords != null) {
@@ -391,9 +400,18 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         this.wireSupport.updated(wire, value);
     }
 
+    /**
+     * Perform Channel Write operation
+     *
+     * @param assetRecordsToWriteChannels
+     *            the list of {@link AssetRecord}s
+     * @throws KuraRuntimeException
+     *             if the provided list is null           
+     */
     private void writeChannels(final List<AssetRecord> assetRecordsToWriteChannels) {
+    	checkNull(assetRecordsToWriteChannels, s_message.assetRecordsNonNull());
         try {
-            if ((assetRecordsToWriteChannels != null) && !assetRecordsToWriteChannels.isEmpty()) {
+            if (!assetRecordsToWriteChannels.isEmpty()) {
                 this.write(assetRecordsToWriteChannels);
             }
         } catch (final KuraException e) {

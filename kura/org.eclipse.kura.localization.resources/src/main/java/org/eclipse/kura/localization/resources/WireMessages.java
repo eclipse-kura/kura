@@ -86,9 +86,9 @@ public interface WireMessages {
     @En("Asset Records cannot be empty")
     public String assetRecordsNonEmpty();
 
-    @En("Asset Records cannot be null")
+    @En("List of Asset Records cannot be null")
     public String assetRecordsNonNull();
-
+    
     @En("Bundle context cannot be null")
     public String bundleContextNonNull();
 
@@ -97,6 +97,9 @@ public interface WireMessages {
 
     @En("channel_name")
     public String channelName();
+    
+    @En("List of Channel IDs cannot be null")
+    public String channelIdsNonNull();
 
     @En("Channel cannot be null")
     public String channelNonNull();

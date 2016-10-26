@@ -8,51 +8,112 @@
  *
  * Contributors:
  *   Eurotech
+ *   Amit Kumar Mondal (admin@amitinside.com)
  */
 /** Add css rules here for your application. */
 
-
 /** Example rules used by the template application (remove for your app) */
-body { background-color: #009AE0 !important; }
+body {
+	background-color: #009AE0 !important;
+}
 
 h1 {
-  font-size: 2em;
-  font-weight: bold;
-  color: #777777;
-  margin: 40px 0px 70px;
-  text-align: center;
+	font-size: 2em;
+	font-weight: bold;
+	color: #777777;
+	margin: 40px 0px 70px;
+	text-align: center;
 }
 
 .sendButton {
-  display: block;
-  font-size: 16pt;
+	display: block;
+	font-size: 16pt;
 }
+
+/**********************
+Overriding Bootstrap START
+***********************/
+.container-fluid {
+	padding-right:5px !important;
+	padding-left:5px !important;
+	margin-right:auto !important;
+	margin-left:auto !important;
+}
+
+.container-fluid>.navbar-collapse,
+.container-fluid>.navbar-header,
+.container>.navbar-collapse,
+.container>.navbar-header,
+.container-fluid>.row {
+    margin-right: -5px !important;
+    margin-left: -5px !important;
+}
+
+@media (min-width: 768px) {
+    .navbar>.container .navbar-brand,
+    .navbar>.container-fluid .navbar-brand {
+        margin-left: -5px !important;
+    }
+}
+
+.panel {
+    margin-bottom: 15px !important;
+}
+
+.GJE2QMYCMJ {
+    margin-top: 10px !important;
+    margin-bottom: -10px !important;
+}
+
+html {
+    font-family: verdana !important;
+}
+
+/**********************
+Overriding Bootstrap END
+***********************/
+
+/**********************
+Channel Table Validation START
+***********************/
+.error-text-box {
+	border: 1px solid red;
+	padding-left: 15px !important;
+}
+
+.noerror-text-box {
+	padding-left: 15px !important;
+}
+
+/**********************
+Channel Table Validation END
+***********************/
 
 /** Most GWT widgets already have a style name defined */
 .gwt-DialogBox {
-  width: 400px;
+	width: 400px;
 }
 
 .dialogVPanel {
-  margin: 5px;
+	margin: 5px;
 }
 
 .serverResponseLabelError {
-  color: red;
+	color: red;
 }
 
 /** Set ids using widget.getElement().setId("idOfElement") */
 #closeButton {
-  margin: 15px 6px 6px;
+	margin: 15px 6px 6px;
 }
 
 .x-tree3-node-icon {
-    margin-top: 2px;    
+	margin-top: 2px;
 }
 
-fieldset#configuration-form > div.x-form-label-left > div.x-component {
-    padding-bottom: 10px;   
-    padding-right: 25px;   
+fieldset#configuration-form>div.x-form-label-left>div.x-component {
+	padding-bottom: 10px;
+	padding-right: 25px;
 }
 
 img.x-tree3-node-icon {
@@ -61,34 +122,279 @@ img.x-tree3-node-icon {
 
 /******************************
 ***
+*** Kura Wires
+***
+*******************************/
+#asset-comp-modal #asset-comp-delete-modal #asset-comp-save-modal .modal-dialog
+	{
+	margin-top: 15%;
+}
+
+.wire {
+	stroke: #4B4F6A;
+}
+
+.composer {
+	position: relative;
+	-webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px
+		rgba(0, 0, 0, 0.1) inset;
+	-moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px
+		rgba(0, 0, 0, 0.1) inset;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1)
+		inset;
+}
+
+.composer:before, .composer:after {
+	content: "";
+	position: absolute;
+	z-index: -1;
+	-webkit-box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+	-moz-box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+	top: 0;
+	bottom: 0;
+	left: 10px;
+	right: 10px;
+	-moz-border-radius: 100px/10px;
+	border-radius: 100px/10px;
+}
+
+.composer:after {
+	right: 10px;
+	left: auto;
+	-webkit-transform: skew(8deg) rotate(3deg);
+	-moz-transform: skew(8deg) rotate(3deg);
+	-ms-transform: skew(8deg) rotate(3deg);
+	-o-transform: skew(8deg) rotate(3deg);
+	transform: skew(8deg) rotate(3deg);
+}
+
+#wires-graph {
+	position: relative;
+	border: 1px solid gray;
+	display: inline-block;
+	background: #FFF;
+	overflow: hidden;
+	padding: 0px;
+}
+
+#wires-graph svg {
+	background: transparent;
+}
+
+#wires-graph svg .link {
+	z-index: 2;
+}
+
+/* elements */
+.devs text {
+	text-transform: uppercase;
+	font-weight: 800;
+}
+
+.devs .body {
+	fill: #ffffff;
+	stroke: #31d0c6;
+	stroke-width: 4px;
+}
+
+.devs .body:hover {
+	opacity: 1;
+	stroke: #ff7e5d;
+}
+
+.devs .label {
+	fill: #31d0c6;
+	font-size: 12px;
+}
+
+.devs .port-body {
+	stroke: #ffffff;
+	stroke-width: 3px;
+	fill: #7c68fc;
+}
+
+.devs .port-body:hover {
+	opacity: 1;
+	fill: #7c68fc;
+}
+
+.devs .port-label {
+	fill: #ff7e5d;
+}
+
+.devs.Atomic .body {
+	stroke: #009ae0;
+}
+
+.devs.Atomic .label {
+	fill: #F39C12;
+}
+
+/* links */
+.link .connection {
+	/* stroke: #4B4F6A; */
+	/*stroke-width: 4px;*/
+	
+}
+
+.link .marker-arrowhead, .link .marker-vertex {
+	fill: #009ae0;
+}
+
+.link .marker-arrowhead:hover {
+	fill: #F39C12;
+}
+
+.link-tools .tool-remove circle {
+	fill: #F39C12;
+}
+
+/* highlighting */
+/*.element.highlighted rect {
+	fill: red;
+	stroke: red;
+}*/
+.devs.highlighted-parent .body {
+	stroke: #ff0000;
+	transition: stroke 1s;
+}
+
+.devs.highlighted-parent .label {
+	fill: #ff0000;
+	transition: fill 1s;
+	text-decoration: underline;
+}
+
+/* port styling */
+.available-magnet {
+	fill: #ccffcc;
+}
+
+/** highlight */
+/* Cell highlighting - e.g a cell underneath the dragged link get highlighted.
+    See joint.dia.cell.js highlight(); */
+ .highlighted {
+     opacity: 0.7;
+ }
+ 
+ /* For some reason, CSS `outline` property
+    does not work on `<text>` elements. */
+ text.highlighted {
+     fill: #FF0000;
+ }
+ 
+ /* `outline` doesn't work in Firefox, Opera and IE9+.
+    The only engine supporting outlines on SVG elements is Webkit. */
+ @media screen and (-webkit-min-device-pixel-ratio:0) {
+     .highlighted {
+        outline: -webkit-focus-ring-color auto 4px;
+         opacity: initial;
+     }
+ }
+
+/******************************
+***
 *** gwtbootstrap3 CSS rules 
 ***
 *******************************/
-.gwt-PopupPanelGlass { width: 100%; background-color: #009AE0; opacity: 0.3; }
+#wires-modal .modal-dialog {
+	width: 80%;
+	height: 90%;
+}
 
-.btn { background-color: #009AE0 !important; color: white !important; }
+#wires-modal .modal-content {
+	height: 90%;
+}
 
-.form-control { font-size: 11px !important; width: 95% !important; }
+#wires-modal-stencil {
+	border: 1px solid;
+	margin-left: 5px;
+}
 
-.well div { cursor: default; }
+.gwt-PopupPanelGlass {
+	width: 100%;
+	background-color: #009AE0;
+	opacity: 0.3;
+}
 
-.table { font-size: 12px; }
-.rowHeader { background-color: #009AE0 !important; font-size: 14px !important; color: white !important; pointer-events: none !important;  }
+.btn {
+	background-color: #009AE0 !important;
+	color: white !important;
+}
 
-.connection-table-row { padding: 10px 0px 10px 0px; border: 1px solid #ddd; }
+.form-control {
+	font-size: 11px !important;
+	width: 95% !important;
+}
 
-.fa-refresh:before { margin-right: 5px; }
-.fa-toggle-on:before { margin-right: 5px; }
-.fa-toggle-off:before { margin-right: 5px; }
-.fa-download:before { margin-right: 5px; }
-.fa-reply:before { margin-right: 5px; }
-.fa-share:before { margin-right: 5px; }
-.fa-check:before { margin-right: 5px; }
-.fa-times:before { margin-right: 6px; }
-.fa-plus:before { margin-right: 6px; }
-.fa-minus:before { margin-right: 6px; }
-.fa-pencil:before { margin-right: 6px; }
-.fa-trash:before { margin-right: 6px; }
+.well div {
+	cursor: default;
+}
+
+.table {
+	font-size: 12px;
+}
+
+.rowHeader {
+	background-color: #009AE0 !important;
+	font-size: 14px !important;
+	color: white !important;
+	pointer-events: none !important;
+}
+
+.connection-table-row {
+	padding: 10px 0px 10px 0px;
+	border: 1px solid #ddd;
+}
+
+.fa-refresh:before {
+	margin-right: 5px;
+}
+
+.fa-toggle-on:before {
+	margin-right: 5px;
+}
+
+.fa-toggle-off:before {
+	margin-right: 5px;
+}
+
+.fa-download:before {
+	margin-right: 5px;
+}
+
+.fa-reply:before {
+	margin-right: 5px;
+}
+
+.fa-share:before {
+	margin-right: 5px;
+}
+
+.fa-check:before {
+	margin-right: 5px;
+}
+
+.fa-times:before {
+	margin-right: 6px;
+}
+
+.fa-plus:before {
+	margin-right: 6px;
+}
+
+.fa-minus:before {
+	margin-right: 6px;
+}
+
+.fa-pencil:before {
+	margin-right: 6px;
+}
+
+.fa-trash:before {
+	margin-right: 6px;
+}
 
 /******************************
 ***
@@ -97,7 +403,7 @@ img.x-tree3-node-icon {
 *******************************/
 /** Fix for unwanted vertical scrollbars in Chrome */
 .x-grid3-scroller {
-	overflow-x:			hidden;
+	overflow-x: hidden;
 }
 
 /** Prevent input boxes from resizing after changing input */
@@ -113,7 +419,7 @@ img.x-tree3-node-icon {
 	width: 242px !important;
 }
 
-.kura-textfield + img {
+.kura-textfield+img {
 	left: 426px !important;
 }
 
@@ -126,27 +432,30 @@ img.x-tree3-node-icon {
 }
 
 div.copyright:after {
-	content: ' Eurotech Inc., and others. Made available under the terms of the Eclipse Public License v1.0';
+	content:
+		' Eurotech Inc., and others. Made available under the terms of the Eclipse Public License v1.0';
 }
 
-div.headerLogo { 
-	height: 			38px;
-	width: 				127px;
-	margin: 			5px 0px 5px 15px;
-	vertical-align: 	baseline;
-	background: 		url(eclipse/kura/icons/kura_logo_small.png);
-	background-repeat: 	no-repeat;
-	background-size: 	contain;
+div.headerLogo {
+	height: 38px;
+	width: 127px;
+	margin: 5px 0px 5px 15px;
+	vertical-align: baseline;
+	background: url(eclipse/kura/icons/kura_logo_small.png);
+	background-repeat: no-repeat;
+	background-size: contain;
 }
 
 div.headerLogo-ie8 {
-	height:	           38px;
-	width:             127px;
-	margin:	           5px 0px 5px 15px;
-	vertical-align:    baseline;
+	height: 38px;
+	width: 127px;
+	margin: 5px 0px 5px 15px;
+	vertical-align: baseline;
 	background-repeat: no-repeat;
-	background-size:   contain;
+	background-size: contain;
 	/* IE 8 Hack */
-	filter:            progid:DXImageTransform.Microsoft.AlphaImageLoader(src='kura/org/eclipse/kura/images/kura_logo_small.png',sizingMethod='scale');
-	-ms-filter:        "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='kura/org/eclipse/kura/images/kura_logo_small.png',sizingMethod='scale')";
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='kura/org/eclipse/kura/images/kura_logo_small.png',
+		sizingMethod='scale');
+	-ms-filter:
+		"progid:DXImageTransform.Microsoft.AlphaImageLoader(src='kura/org/eclipse/kura/images/kura_logo_small.png',sizingMethod='scale')";
 }

@@ -10,6 +10,7 @@
 
     Contributors:
       Eurotech
+      Amit Kumar Mondal (admin@amitinside.com)
 
 -->
 <assembly>
@@ -32,6 +33,13 @@
             <includes>
                 <include>denali.html</include>
                 <include>denali.css</include>
+                <include>backbone.min.js</include>
+                <include>joint.min.css</include>
+                <include>joint.min.js</include>
+                <include>joint.shapes.devs.js</include>
+                <include>jquery.min.js</include>
+                <include>kura_wires.js</include>
+                <include>lodash.min.js</include>
                 <include>denali/**</include>
                 <include>kura/**</include>
                 <include>gxt/**</include>

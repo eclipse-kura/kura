@@ -9,6 +9,7 @@
  * Contributors:
  *     Eurotech
  *     Jens Reimann <jreimann@redhat.com> - Fix possible NPE, cleanup
+ *     Amit Kumar Mondal (admin@amitinside.com)
  *******************************************************************************/
 package org.eclipse.kura.web;
 
@@ -34,6 +35,7 @@ import org.eclipse.kura.web.server.GwtSettingServiceImpl;
 import org.eclipse.kura.web.server.GwtSnapshotServiceImpl;
 import org.eclipse.kura.web.server.GwtSslServiceImpl;
 import org.eclipse.kura.web.server.GwtStatusServiceImpl;
+import org.eclipse.kura.web.server.GwtWireServiceImpl;
 import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.server.servlet.FileServlet;
 import org.eclipse.kura.web.server.servlet.SkinServlet;
@@ -236,6 +238,8 @@ public class Console implements ConfigurableComponent {
         this.m_httpService.unregister(servletRoot + "/file");
         this.m_httpService.unregister(servletRoot + "/device_snapshots");
         this.m_httpService.unregister(servletRoot + "/skin");
+        this.m_httpService.unregister(servletRoot + "/wires");
+        this.m_httpService.unregister("/sse");
 
     }
 
@@ -277,5 +281,7 @@ public class Console implements ConfigurableComponent {
         this.m_httpService.registerServlet(servletRoot + "/skin", new SkinServlet(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/ssl", new GwtSslServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/cloudservices", new GwtCloudServiceImpl(), null, httpCtx);
+        this.m_httpService.registerServlet(servletRoot + "/wires", new GwtWireServiceImpl(), null, httpCtx);
+        this.m_httpService.registerServlet("/sse", new EventHandlerServlet(), null, httpCtx);
     }
 }

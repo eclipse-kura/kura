@@ -18,7 +18,7 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.listener.AssetListener;
 
 /**
- * This interface BaseAsset provides higher level abstraction to operate or
+ * This interface Asset provides higher level abstraction to operate or
  * perform actions on the industrial device. This actually propagates the
  * necessary operations to the associated device driver. The asset exposes the
  * generic operations to perform read, write and monitor operations. The asset

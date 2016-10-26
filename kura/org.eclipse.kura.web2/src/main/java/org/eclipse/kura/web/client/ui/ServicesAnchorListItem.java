@@ -66,6 +66,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
 
             @Override
             public void onClick(ClickEvent event) {
+                EntryClassUi.setActive(ServicesAnchorListItem.this);
                 if (ServicesAnchorListItem.this.ui.selected != null
                         && ServicesAnchorListItem.this.ui.selected != ServicesAnchorListItem.this.item
                         && ServicesAnchorListItem.this.ui.servicesUi.isDirty()

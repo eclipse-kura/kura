@@ -11,7 +11,8 @@
 
     Contributors:
       Eurotech
-
+      Amit Kumar Mondal (admin@amitinside.com)
+	
 -->
 
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
@@ -78,6 +79,10 @@
     .red {
     	color: red;
     }
+    
+    .comp-modal-header { 
+    	display: none; 
+    }
     </ui:style>
     <b:Container fluid="true">
         <b:Column addStyleNames="{style.outer-column}" size="XS_12">
@@ -137,7 +142,10 @@
 														iconFixedWidth="true" text="Packages" ui:field="packages" />
 
 													<b:AnchorListItem icon="GEAR"
-														iconFixedWidth="true" text="Settings" ui:field="settings" />													  
+														iconFixedWidth="true" text="Settings" ui:field="settings" />
+													
+													<b:AnchorListItem icon="RETWEET"
+														iconFixedWidth="true" text="Wires" ui:field="wires"/>													  
 												</b:NavPills>
 											</b:PanelBody>
 										</b:Panel>
@@ -148,6 +156,23 @@
 												<b:Heading size="H3" text="Services" />
 											</b:PanelHeader>
 											<b:PanelBody>
+												<b:Form type="INLINE">
+													<b:FieldSet>
+														<b:FormGroup>
+															<b:InputGroup>
+																<b:TextBox placeholder="Search"
+																ui:field="textSearch" />
+																<b:InputGroupButton>
+																	<b:Tooltip title="Create a new factory component"
+																		placement="RIGHT">
+																	    <b:Button icon="PLUS" size="SMALL" dataTarget="#myModal"
+																	    	dataToggle="MODAL" ui:field="factoriesButton"/>
+																	</b:Tooltip>
+																</b:InputGroupButton>
+															</b:InputGroup>
+														</b:FormGroup>
+													</b:FieldSet>
+												</b:Form>
 												<g:ScrollPanel ui:field="servicesPanel">
 													<b:NavPills stacked="true" ui:field="servicesMenu" />
 												</g:ScrollPanel>
@@ -206,5 +231,45 @@
                 </b:Column>
             </b:Row>
         </b:Column>
+        		<b:Modal title="New Factory Component" closable="true" fade="true"
+			dataBackdrop="STATIC" dataKeyboard="true" b:id="myModal">
+			<b:ModalBody>
+				<b:Form type="HORIZONTAL">
+					<b:FieldSet>
+						<b:FormGroup>
+							<b:FormLabel for="formFactory" addStyleNames="col-lg-2">Factory</b:FormLabel>
+							<g:FlowPanel addStyleNames="col-lg-10">
+								<b:ListBox b:id="formFactory" ui:field="factoriesList" />
+							</g:FlowPanel>
+						</b:FormGroup>
+						<b:FormGroup>
+							<b:FormLabel for="formName" addStyleNames="col-lg-2">Name</b:FormLabel>
+							<g:FlowPanel addStyleNames="col-lg-10">
+								<b:TextBox placeholder="Please enter an user friendly name"
+									allowBlank="false" autoComplete="false" b:id="formName"
+									ui:field="componentName" />
+							</g:FlowPanel>
+						</b:FormGroup>
+					</b:FieldSet>
+				</b:Form>
+			</b:ModalBody>
+			<b:ModalFooter>
+				<b:Button type="PRIMARY" dataDismiss="MODAL" ui:field="buttonNewComponent">Create</b:Button>
+				<b:Button icon="REMOVE" type="PRIMARY" dataDismiss="MODAL">Cancel</b:Button>
+			</b:ModalFooter>
+		</b:Modal>
+		<b:Modal closable="true" fade="true" dataBackdrop="STATIC"
+			dataKeyboard="true" b:id="error-pid-modal" ui:field="errorModal">
+			<b:ModalHeader addStyleNames="{style.comp-modal-header}">
+			</b:ModalHeader>
+			<b:ModalBody>
+				<b:Alert type="DANGER">
+					<b.html:Strong ui:field="errorAlertText" />
+				</b:Alert>
+			</b:ModalBody>
+			<b:ModalFooter>
+				<b:Button icon="REMOVE" type="PRIMARY" dataDismiss="MODAL">Cancel</b:Button>
+			</b:ModalFooter>
+		</b:Modal>
     </b:Container>
 </ui:UiBinder> 

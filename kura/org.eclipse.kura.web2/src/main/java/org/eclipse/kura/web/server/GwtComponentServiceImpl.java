@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +34,7 @@ import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Icon;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Option;
+import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.KuraExceptionHandler;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -324,6 +326,34 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             KuraExceptionHandler.handle(t);
         }
         return gwtConfigs;
+    }
+
+    @Override
+    public List<String> findFactoryComponents(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        this.checkXSRFToken(xsrfToken);
+        ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
+        // finding all wire components to remove from any list as these factory instances
+        // are only shown in Kura Wires UI
+        List<String> wireEmitterFpids = new ArrayList<String>();
+        List<String> wireReceiverFpids = new ArrayList<String>();
+        GwtServerUtil.fillFactoriesLists(wireEmitterFpids, wireReceiverFpids);
+        final List<String> onlyProducers = new ArrayList<String>(wireEmitterFpids);
+        final List<String> onlyConsumers = new ArrayList<String>(wireReceiverFpids);
+        final List<String> both = new LinkedList<String>();
+        for (final String dto : wireEmitterFpids) {
+            if (wireReceiverFpids.contains(dto)) {
+                both.add(dto);
+            }
+        }
+        onlyProducers.removeAll(both);
+        onlyConsumers.removeAll(both);
+        List<String> allWireComponents = new ArrayList<String>(onlyProducers);
+        allWireComponents.addAll(onlyConsumers);
+        allWireComponents.addAll(both);
+        List<String> result = new ArrayList<String>();
+        result.addAll(cs.getFactoryComponentPids());
+        result.removeAll(allWireComponents);
+        return result;
     }
 
     @Override

@@ -35,6 +35,8 @@ public interface GwtComponentService extends RemoteService {
 
     public List<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
+    public List<String> findFactoryComponents(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
     public List<GwtConfigComponent> findFilteredComponentConfiguration(GwtXSRFToken xsrfToken, String pid)
             throws GwtKuraException;
 

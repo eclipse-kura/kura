@@ -9,6 +9,7 @@
  * Contributors:
  *     Eurotech
  *     Red Hat Inc - Fix build warnings
+ *     Amit Kumar Mondal (admin@amitinside.com)
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
@@ -25,6 +26,7 @@ import org.eclipse.kura.web.client.ui.Network.NetworkPanelUi;
 import org.eclipse.kura.web.client.ui.Packages.PackagesPanelUi;
 import org.eclipse.kura.web.client.ui.Settings.SettingsPanelUi;
 import org.eclipse.kura.web.client.ui.Status.StatusPanelUi;
+import org.eclipse.kura.web.client.ui.wires.WiresPanelUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtSession;
@@ -40,6 +42,7 @@ import org.gwtbootstrap3.client.shared.event.ModalHideHandler;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Icon;
+import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
@@ -49,13 +52,17 @@ import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.TabListItem;
+import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.IconSize;
 import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.client.ui.html.Span;
+import org.gwtbootstrap3.client.ui.html.Strong;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -75,6 +82,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class EntryClassUi extends Composite {
+    
+    private static final String SELECT_COMPONENT = "--- Select Component ---";
 
     interface EntryClassUIUiBinder extends UiBinder<Widget, EntryClassUi> {
     }
@@ -91,6 +100,7 @@ public class EntryClassUi extends Composite {
     private final FirewallPanelUi firewallBinder = GWT.create(FirewallPanelUi.class);
     private final NetworkPanelUi networkBinder = GWT.create(NetworkPanelUi.class);
     private final CloudServicesUi cloudServicesBinder = GWT.create(CloudServicesUi.class);
+    private final WiresPanelUi wiresBinder = GWT.create(WiresPanelUi.class);
 
     private final GwtPackageServiceAsync gwtPackageService = GWT.create(GwtPackageService.class);
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
@@ -111,6 +121,7 @@ public class EntryClassUi extends Composite {
     private boolean firewallDirty;
     private boolean settingsDirty;
     private boolean cloudServicesDirty;
+    private boolean wiresPanelDirty;
 
     @UiField
     Panel header;
@@ -118,6 +129,10 @@ public class EntryClassUi extends Composite {
     Label footerLeft, footerCenter, footerRight;
     @UiField
     Panel contentPanel;
+    @UiField
+    public Strong errorAlertText;
+    @UiField
+    public static Modal errorModal;
     @UiField
     PanelHeader contentPanelHeader;
     @UiField
@@ -135,15 +150,29 @@ public class EntryClassUi extends Composite {
     @UiField
     AnchorListItem settings;
     @UiField
+    AnchorListItem wires;
+    @UiField
     AnchorListItem cloudServices;
     @UiField
     ScrollPanel servicesPanel;
+    @UiField
+    TextBox textSearch;
     @UiField
     NavPills servicesMenu;
     @UiField
     VerticalPanel errorLogArea;
     @UiField
     Modal errorPopup;
+    @UiField
+    Button buttonNewComponent;
+    @UiField
+    ListBox factoriesList;
+    @UiField
+    Button factoriesButton;
+    @UiField
+    TextBox componentName;
+    
+    static AnchorListItem previousSelection;
 
     public EntryClassUi() {
         logger.log(Level.FINER, "Initiating UiBinder");
@@ -189,6 +218,20 @@ public class EntryClassUi extends Composite {
         }
 
     }
+    
+    static void setActive(AnchorListItem item) {
+        if (previousSelection != null)
+            previousSelection.setActive(false);
+        item.setActive(true);
+        previousSelection = item;
+    }
+    
+    public void discardWiresPanelChanges() {
+        if (WiresPanelUi.isDirty()) {
+            WiresPanelUi.clearUnsavedPanelChanges();
+            WiresPanelUi.loadGraph();
+        }
+    }
 
     public void initSystemPanel(GwtSession GwtSession, boolean connectionStatus) {
         final EntryClassUi m_instanceReference = this;
@@ -217,6 +260,8 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.statusBinder.setSession(EntryClassUi.this.currentSession);
                         EntryClassUi.this.statusBinder.setParent(m_instanceReference);
                         EntryClassUi.this.statusBinder.loadStatusData();
+                        EntryClassUi.this.discardWiresPanelChanges();
+                        EntryClassUi.setActive(status);
                     }
                 });
 
@@ -243,6 +288,8 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.deviceBinder);
                         EntryClassUi.this.deviceBinder.setSession(EntryClassUi.this.currentSession);
                         EntryClassUi.this.deviceBinder.initDevicePanel();
+                        EntryClassUi.this.discardWiresPanelChanges();
+                        EntryClassUi.setActive(device);
                     }
                 });
                 renderDirtyConfigModal(b);
@@ -269,6 +316,8 @@ public class EntryClassUi extends Composite {
                             EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.networkBinder);
                             EntryClassUi.this.networkBinder.setSession(EntryClassUi.this.currentSession);
                             EntryClassUi.this.networkBinder.initNetworkPanel();
+                            EntryClassUi.this.discardWiresPanelChanges();
+                            EntryClassUi.setActive(network);
                         }
                     });
                     renderDirtyConfigModal(b);
@@ -295,6 +344,8 @@ public class EntryClassUi extends Composite {
                             EntryClassUi.this.contentPanelBody.clear();
                             EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.firewallBinder);
                             EntryClassUi.this.firewallBinder.initFirewallPanel();
+                            EntryClassUi.this.discardWiresPanelChanges();
+                            EntryClassUi.setActive(firewall);
                         }
                     });
                     renderDirtyConfigModal(b);
@@ -322,6 +373,8 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.packagesBinder.setSession(EntryClassUi.this.currentSession);
                         EntryClassUi.this.packagesBinder.setMainUi(EntryClassUi.this.ui);
                         EntryClassUi.this.packagesBinder.refresh();
+                        EntryClassUi.this.discardWiresPanelChanges();
+                        EntryClassUi.setActive(packages);
                     }
                 });
                 renderDirtyConfigModal(b);
@@ -347,6 +400,8 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.settingsBinder);
                         EntryClassUi.this.settingsBinder.setSession(EntryClassUi.this.currentSession);
                         EntryClassUi.this.settingsBinder.load();
+                        EntryClassUi.this.discardWiresPanelChanges();
+                        EntryClassUi.setActive(settings);
                     }
                 });
                 renderDirtyConfigModal(b);
@@ -371,6 +426,8 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.contentPanelBody.clear();
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.cloudServicesBinder);
                         EntryClassUi.this.cloudServicesBinder.refresh();
+                        EntryClassUi.this.discardWiresPanelChanges();
+                        EntryClassUi.setActive(cloudServices);
                     }
                 });
                 renderDirtyConfigModal(b);
@@ -402,14 +459,142 @@ public class EntryClassUi extends Composite {
                     public void onSuccess(List<GwtConfigComponent> result) {
                         EntryClassUi.this.servicesMenu.clear();
                         for (GwtConfigComponent pair : result) {
-                            EntryClassUi.this.servicesMenu.add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
+                            if (!pair.isWireComponent()) {
+                                EntryClassUi.this.servicesMenu.add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
+                            }
                         }
+                    }
+                });
+            }
+        });
+        
+        // Keypress handler
+        textSearch.addValueChangeHandler(changeHandler);
+        
+        // New factory configuration handler
+        buttonNewComponent.addClickHandler(new ClickHandler(){
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                
+                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                    }
+
+                    @Override
+                    public void onSuccess(GwtXSRFToken token) {
+                        String factoryPid = factoriesList.getSelectedValue();
+                        String pid = componentName.getValue();
+                        if (SELECT_COMPONENT.equalsIgnoreCase(factoryPid) || "".equals(pid)){
+                            errorAlertText.setText("Component must be selected and the name must be non-empty");
+                            errorModal.show();
+                            return;
+                        }
+                        gwtComponentService.createFactoryComponent(token, factoryPid, pid, new AsyncCallback<Void>() {
+
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                FailureHandler.handle(ex, EntryClassUi.class.getName());
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                ValueChangeEvent event = new SelectValueChangeEvent(textSearch.getValue());
+                                changeHandler.onValueChange(event);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+        
+        factoriesButton.addClickHandler(new ClickHandler(){
+
+            @Override
+            public void onClick(ClickEvent event) {
+                //always empty the PID input field
+                componentName.setValue("");
+                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                    }
+
+                    @Override
+                    public void onSuccess(GwtXSRFToken token) {
+                        gwtComponentService.findFactoryComponents(token, new AsyncCallback<List<String>>() {
+
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                FailureHandler.handle(ex, EntryClassUi.class.getName());
+                            }
+
+                            @Override
+                            public void onSuccess(List<String> result) {
+                                factoriesList.clear();
+                                factoriesList.addItem(SELECT_COMPONENT);
+                                for(String s : result){
+                                    factoriesList.addItem(s);
+                                }
+                            }
+                        });
                     }
                 });
             }
         });
 
     }
+    
+    private class SelectValueChangeEvent extends ValueChangeEvent<String>{
+
+        protected SelectValueChangeEvent(String value) {
+            super(value);
+        }
+        
+    }
+    
+    private ValueChangeHandler changeHandler = new ValueChangeHandler(){
+        @Override
+        public void onValueChange(final ValueChangeEvent event) {
+            
+            gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+                @Override
+                public void onFailure(Throwable ex) {
+                    FailureHandler.handle(ex, EntryClassUi.class.getName());
+                }
+
+                @Override
+                public void onSuccess(GwtXSRFToken token) {
+                    gwtComponentService.findComponentConfigurations(token, new AsyncCallback<List<GwtConfigComponent>>() {
+                        @Override
+                        public void onFailure(Throwable ex) {
+                            logger.log(Level.SEVERE, ex.getMessage(), ex);
+                            FailureHandler.handle(ex, EntryClassUi.class.getName());
+                        }
+
+                        @Override
+                        public void onSuccess(List<GwtConfigComponent> result) {
+                            servicesMenu.clear();
+                            for (GwtConfigComponent pair : result) {
+                                String filter = event.getValue().toString(); 
+                                String compName = pair.getComponentName();
+                                if(!pair.isWireComponent() && compName.toLowerCase().contains(filter) ){
+                                    servicesMenu.add(new ServicesAnchorListItem(pair, ui));
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    };
 
     public void render(GwtConfigComponent item) {
         // Do everything Content Panel related in ServicesUi
@@ -475,9 +660,13 @@ public class EntryClassUi extends Composite {
         if (this.cloudServices.isVisible()) {
             this.cloudServicesDirty = this.cloudServicesBinder.isDirty();
         }
+        
+        if (wires.isVisible()) {
+            wiresPanelDirty = WiresPanelUi.isDirty(); 
+        }
 
         if (this.servicesUi != null && this.servicesUi.isDirty() || this.networkDirty || this.firewallDirty
-                || this.settingsDirty || this.cloudServicesDirty) {
+                || this.settingsDirty || this.cloudServicesDirty || wiresPanelDirty) {
             this.modal = new Modal();
 
             ModalHeader header = new ModalHeader();

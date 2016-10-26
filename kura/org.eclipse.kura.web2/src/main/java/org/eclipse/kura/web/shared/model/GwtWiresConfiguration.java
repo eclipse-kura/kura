@@ -30,7 +30,7 @@ public final class GwtWiresConfiguration extends GwtBaseModel implements Seriali
     private String graph;
 
     /** Wire Component Instances. */
-    private final List<String> wireComponents;
+    private List<String> wireComponents;
 
     /** Wire Components Configuration in JSON. */
     @Nullable
@@ -41,10 +41,10 @@ public final class GwtWiresConfiguration extends GwtBaseModel implements Seriali
     private String wireConfigurationsJson;
 
     /** Wire Emitter Factory PIDs. */
-    private final List<String> wireEmitterFactoryPids;
+    private List<String> wireEmitterFactoryPids;
 
     /** Wire Receiver Factory PIDs. */
-    private final List<String> wireReceiverFactoryPids;
+    private List<String> wireReceiverFactoryPids;
 
     /** Wires Configuration in JSON. */
     @Nullable

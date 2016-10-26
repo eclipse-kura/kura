@@ -4,6 +4,7 @@ Bundle-Name: org.eclipse.kura.web2
 Bundle-SymbolicName: org.eclipse.kura.web;singleton:=true
 Bundle-Version: 2.0.2.qualifier
 Bundle-Vendor: Eclipse Kura
+Bundle-License: Eclipse Public License v1.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
@@ -35,6 +36,7 @@ Import-Package: com.google.gwt.http.client,
  org.apache.commons.io;version="1.4.0",
  org.apache.commons.net.util;version="3.1.0",
  org.eclipse.kura;version="[1.0,2.0)",
+ org.eclipse.kura.asset.provider;version="[0.9,2.0)",
  org.eclipse.kura.certificate;version="[1.0,2.0)",
  org.eclipse.kura.cloud;version="[1.0,2.0)",
  org.eclipse.kura.cloud.factory;version="[1.1,2.0)",
@@ -60,6 +62,8 @@ Import-Package: com.google.gwt.http.client,
  org.eclipse.kura.ssl;version="[1.0,2.0)",
  org.eclipse.kura.system;version="[1.0,2.0)",
  org.eclipse.kura.usb;version="[1.0,2.0)",
+ org.eclipse.kura.wire;version="[1.0,2.0)",
+ org.json,
  org.osgi.framework;version="1.7.0",
  org.osgi.service.component;version="1.2.0",
  org.osgi.service.deploymentadmin,

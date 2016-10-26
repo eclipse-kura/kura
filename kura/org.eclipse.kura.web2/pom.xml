@@ -12,6 +12,7 @@
       Eurotech
       Red Hat Inc - remove dependency on slf4j:logj12
          - Fix build warning
+	  Amit Kumar Mondal (admin@amitinside.com)
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -73,6 +74,12 @@
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.core.net</artifactId>
 			<version>[1.0,2.0)</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.kura</groupId>
+			<artifactId>org.eclipse.kura.asset.provider</artifactId>
+			<version>[0.9,2.0)</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2016 Eurotech and/or its affiliates
  *
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
@@ -31,83 +31,84 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("wires")
 public interface GwtWireService extends RemoteService {
 
-	/**
-	 * Retrieves all the registered driver instances.
-	 *
-	 * @param xsrfToken
-	 *            the XSRF token
-	 * @return the list of driver instances
-	 * @throws GwtKuraException
-	 *             if GWT encounters exception while retrieving the driver
-	 *             instances
-	 */
-	public List<String> getDriverInstances(GwtXSRFToken xsrfToken) throws GwtKuraException;
+    /**
+     * Retrieves all the registered driver instances.
+     *
+     * @param xsrfToken
+     *            the XSRF token
+     * @return the list of driver instances
+     * @throws GwtKuraException
+     *             if GWT encounters exception while retrieving the driver
+     *             instances
+     */
+    public List<String> getDriverInstances(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
-	/**
-	 * Gets the channel descriptor.
-	 *
-	 * @param xsrfToken
-	 *            the xsrf token
-	 * @param driverPid
-	 *            the driver pid
-	 * @return the gwt channel descriptor
-	 * @throws GwtKuraException
-	 *             the gwt kura exception
-	 */
-	public GwtConfigComponent getGwtChannelDescriptor(GwtXSRFToken xsrfToken, String driverPid) throws GwtKuraException;
-	
-	/**
-	 * Gets the base channel descriptor.
-	 *
-	 * @param xsrfToken
-	 *            the xsrf token
-	 * @return the gwt base channel descriptor
-	 * @throws GwtKuraException
-	 *             the gwt kura exception
-	 */
-	public GwtConfigComponent getGwtBaseChannelDescriptor(GwtXSRFToken xsrfToken) throws GwtKuraException;
+    /**
+     * Gets the base channel descriptor.
+     *
+     * @param xsrfToken
+     *            the xsrf token
+     * @return the gwt base channel descriptor
+     * @throws GwtKuraException
+     *             the gwt kura exception
+     */
+    public GwtConfigComponent getGwtBaseChannelDescriptor(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
-	/**
-	 * Gets the channels.
-	 *
-	 * @param xsrfToken
-	 *            the xsrf token
-	 * @param descriptor
-	 *            the descriptor
-	 * @param asset
-	 *            the asset
-	 * @return the gwt channels
-	 * @throws GwtKuraException
-	 *             the gwt kura exception
-	 */
-	public List<GwtChannelInfo> getGwtChannels(GwtXSRFToken xsrfToken, GwtConfigComponent descriptor, GwtConfigComponent asset) throws GwtKuraException;
+    /**
+     * Gets the channel descriptor.
+     *
+     * @param xsrfToken
+     *            the xsrf token
+     * @param driverPid
+     *            the driver pid
+     * @return the gwt channel descriptor
+     * @throws GwtKuraException
+     *             the gwt kura exception
+     */
+    public GwtConfigComponent getGwtChannelDescriptor(GwtXSRFToken xsrfToken, String driverPid) throws GwtKuraException;
 
-	/**
-	 * Returns the {@link GwtWiresConfiguration} instance associated.
-	 *
-	 * @param xsrfToken
-	 *            the XSRF token
-	 * @return the {@link GwtWiresConfiguration} instance
-	 * @throws GwtKuraException
-	 *             if the associated instance is not retrieved
-	 */
-	public GwtWiresConfiguration getWiresConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
+    /**
+     * Gets the channels.
+     *
+     * @param xsrfToken
+     *            the xsrf token
+     * @param descriptor
+     *            the descriptor
+     * @param asset
+     *            the asset
+     * @return the gwt channels
+     * @throws GwtKuraException
+     *             the gwt kura exception
+     */
+    public List<GwtChannelInfo> getGwtChannels(GwtXSRFToken xsrfToken, GwtConfigComponent descriptor,
+            GwtConfigComponent asset) throws GwtKuraException;
 
-	/**
-	 * Updates the {@link GwtWiresConfiguration} instance with the provided
-	 * configuration.
-	 *
-	 * @param xsrfToken
-	 *            the XSRF token
-	 * @param newJsonConfiguration
-	 *            the new configuration to update
-	 * @param configurations
-	 *            the configurations
-	 * @return the updated {@link GwtWiresConfiguration} instance
-	 * @throws GwtKuraException
-	 *             if the associated instance is not updated
-	 */
-	public GwtWiresConfiguration updateWireConfiguration(GwtXSRFToken xsrfToken, String newJsonConfiguration, Map<String, GwtConfigComponent> configurations)
-			throws GwtKuraException;
+    /**
+     * Returns the {@link GwtWiresConfiguration} instance associated.
+     *
+     * @param xsrfToken
+     *            the XSRF token
+     * @return the {@link GwtWiresConfiguration} instance
+     * @throws GwtKuraException
+     *             if the associated instance is not retrieved
+     */
+    public GwtWiresConfiguration getWiresConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    /**
+     * Updates the {@link GwtWiresConfiguration} instance with the provided
+     * configuration.
+     *
+     * @param xsrfToken
+     *            the XSRF token
+     * @param newJsonConfiguration
+     *            the new configuration to update
+     * @param configurations
+     *            the configurations
+     * @return the updated {@link GwtWiresConfiguration} instance
+     * @throws GwtKuraException
+     *             if the associated instance is not updated
+     */
+    public GwtWiresConfiguration updateWireConfiguration(GwtXSRFToken xsrfToken, String newJsonConfiguration,
+            Map<String, GwtConfigComponent> configurations) throws GwtKuraException;
 
 }

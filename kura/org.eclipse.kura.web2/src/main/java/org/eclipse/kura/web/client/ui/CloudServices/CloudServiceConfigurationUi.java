@@ -52,7 +52,8 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
 
-    private boolean dirty, initialized;
+    private boolean dirty;
+    private boolean initialized;
 
     interface ServiceConfigurationUiUiBinder extends UiBinder<Widget, CloudServiceConfigurationUi> {
     }
@@ -124,9 +125,8 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
     @Override
     protected void reset() {
         if (isDirty()) {
-            // Modal
             showDirtyModal();
-        }        // end is dirty
+        }
     }
 
     @Override
@@ -251,14 +251,11 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                 footer.add(group);
                 this.modal.add(footer);
                 this.modal.show();
-
-                // ----
-
-            }                         // end isDirty()
+            }
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");
             this.incompleteFieldsModal.show();
-        }                         // end else isValid
+        }
     }
 
     private GwtConfigComponent getUpdatedConfiguration() {

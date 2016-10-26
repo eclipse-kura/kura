@@ -170,15 +170,9 @@ public class StatusPanelUi extends Composite {
                         for (GwtGroupedNVPair resultPair : result) {
                             if ("Connection Name".equals(resultPair.getName())
                                     && resultPair.getValue().endsWith("CloudService")) {
-                                GwtGroupedNVPair connectionStatus = result.get(connectionNameIndex + 1); // done based
-                                // on the idea
-                                // that in the
-                                // pairs data
-                                // connection
-                                // name is
-                                // before
-                                // connection
+                                // done based on the idea that in the pairs data connection name is before connection
                                 // status
+                                GwtGroupedNVPair connectionStatus = result.get(connectionNameIndex + 1);
 
                                 if ("Service Status".equals(connectionStatus.getName())
                                         && "CONNECTED".equals(connectionStatus.getValue())) {

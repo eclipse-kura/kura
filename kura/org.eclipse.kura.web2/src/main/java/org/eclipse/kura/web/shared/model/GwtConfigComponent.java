@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Amit Kumar Mondal (admin@amitinside.com)
  *******************************************************************************/
 package org.eclipse.kura.web.shared.model;
 
@@ -27,52 +28,76 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
         this.m_parameters = new ArrayList<GwtConfigParameter>();
     }
 
-    public String getComponentId() {
-        return get("componentId");
-    }
-
-    public void setComponentId(String componentId) {
-        set("componentId", componentId);
-    }
-
-    public String getComponentName() {
-        return get("componentName");
-    }
-
-    public void setComponentName(String componentName) {
-        set("componentName", componentName);
-    }
-
     public String getComponentDescription() {
-        return get("componentDescription");
-    }
-
-    public void setComponentDescription(String componentDescription) {
-        set("componentDescription", componentDescription);
+        return this.get("componentDescription");
     }
 
     public String getComponentIcon() {
-        return get("componentIcon");
+        return this.get("componentIcon");
     }
 
-    public void setComponentIcon(String componentIcon) {
-        set("componentIcon", componentIcon);
+    public String getComponentId() {
+        return this.get("componentId");
+    }
+
+    public String getComponentName() {
+        return this.get("componentName");
+    }
+
+    public String getFactoryId() {
+        return this.get("factoryPid");
+    }
+
+    public GwtConfigParameter getParameter(final String id) {
+        for (final GwtConfigParameter param : this.m_parameters) {
+            if (param.getId().equals(id)) {
+                return param;
+            }
+        }
+        return null;
     }
 
     public List<GwtConfigParameter> getParameters() {
         return this.m_parameters;
     }
 
-    public void setParameters(List<GwtConfigParameter> parameters) {
+    public boolean isFactoryComponent() {
+        return this.get("factoryComponent");
+    }
+
+    public boolean isWireComponent() {
+        return this.get("isWireComponent");
+    }
+
+    public void setComponentDescription(final String componentDescription) {
+        this.set("componentDescription", componentDescription);
+    }
+
+    public void setComponentIcon(final String componentIcon) {
+        this.set("componentIcon", componentIcon);
+    }
+
+    public void setComponentId(final String componentId) {
+        this.set("componentId", componentId);
+    }
+
+    public void setComponentName(final String componentName) {
+        this.set("componentName", componentName);
+    }
+
+    public void setFactoryComponent(final boolean isFactory) {
+        this.set("factoryComponent", isFactory);
+    }
+
+    public void setFactoryPid(final String factoryPid) {
+        this.set("factoryPid", factoryPid);
+    }
+
+    public void setParameters(final List<GwtConfigParameter> parameters) {
         this.m_parameters = parameters;
     }
 
-    public GwtConfigParameter getParameter(String id) {
-        for (GwtConfigParameter param : this.m_parameters) {
-            if (param.getId().equals(id)) {
-                return param;
-            }
-        }
-        return null;
+    public void setWireComponent(final boolean isWireComponent) {
+        this.set("isWireComponent", isWireComponent);
     }
 }

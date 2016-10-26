@@ -8,10 +8,12 @@
  *
  * Contributors:
  *     Eurotech
+ *     Amit Kumar Mondal (admin@amitinside.com)
  *******************************************************************************/
 package org.eclipse.kura.web.shared.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
@@ -23,18 +25,27 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("component")
 public interface GwtComponentService extends RemoteService {
 
-    public List<GwtConfigComponent> findServicesConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException;
+    public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid) throws GwtKuraException;
 
-    public List<GwtConfigComponent> findFilteredComponentConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException;
+    public void deleteFactoryConfiguration(GwtXSRFToken xsrfToken, String pid, boolean takeSnapshot)
+            throws GwtKuraException;
 
-    public List<GwtConfigComponent> findFilteredComponentConfiguration(GwtXSRFToken xsrfToken, String componentPid)
+    public List<GwtConfigComponent> findComponentConfiguration(GwtXSRFToken xsrfToken, String pid)
             throws GwtKuraException;
 
     public List<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
-    public List<GwtConfigComponent> findComponentConfiguration(GwtXSRFToken xsrfToken, String componentPid)
+    public List<GwtConfigComponent> findFilteredComponentConfiguration(GwtXSRFToken xsrfToken, String pid)
             throws GwtKuraException;
+
+    public List<GwtConfigComponent> findFilteredComponentConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    public List<GwtConfigComponent> findServicesConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    public GwtConfigComponent findWireComponentConfigurationFromPid(GwtXSRFToken xsrfToken, String pid,
+            String factoryPid, Map<String, Object> extraProps) throws GwtKuraException;
 
     public void updateComponentConfiguration(GwtXSRFToken xsrfToken, GwtConfigComponent configComponent)
             throws GwtKuraException;
+
 }

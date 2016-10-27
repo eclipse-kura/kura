@@ -433,6 +433,34 @@ public class EntryClassUi extends Composite {
                 renderDirtyConfigModal(b);
             }
         });
+        
+        // Wires Panel
+        this.wires.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                Button b = new Button(MSGS.yesButton(), new ClickHandler() {
+                    
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        forceTabsCleaning();
+                        if (EntryClassUi.this.modal != null) {
+                            EntryClassUi.this.modal.hide();
+                        }
+                        EntryClassUi.this.contentPanel.setVisible(true);
+                        EntryClassUi.this.contentPanelHeader.setText(MSGS.wires());
+                        EntryClassUi.this.contentPanelBody.clear();
+                        EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.wiresBinder);
+                        EntryClassUi.this.wiresBinder.load();
+                        EntryClassUi.this.discardWiresPanelChanges();
+                        EntryClassUi.setActive(wires);
+                    }
+                });
+                renderDirtyConfigModal(b);
+            }
+        });
+        
+        
     }
 
     public void initServicesTree() {

@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Amit Kumar Mondal (admin@amitinside.com)
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 

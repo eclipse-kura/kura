@@ -7,7 +7,6 @@
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Eurotech
  *   Amit Kumar Mondal (admin@amitinside.com)
  */
 package org.eclipse.kura.web.client.ui.wires;

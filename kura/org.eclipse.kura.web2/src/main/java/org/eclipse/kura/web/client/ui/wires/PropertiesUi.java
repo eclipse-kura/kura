@@ -164,6 +164,8 @@ public class PropertiesUi extends Composite {
         this.channelsDataProvider.addDataDisplay(this.channelTable);
         this.channelPanel.setVisible(false);
         this.btn_remove.setEnabled(false);
+        
+        logger.log(Level.SEVERE, "P-UI1");
 
         this.nonValidatedCells = new HashSet<String>();
         this.hasDriver = this.m_configurableComponent.get("driver.pid") != null;
@@ -230,37 +232,45 @@ public class PropertiesUi extends Composite {
                 PropertiesUi.this.btn_remove.setEnabled(PropertiesUi.this.selectionModel.getSelectedObject() != null);
             }
         });
-
+        
+        logger.log(Level.SEVERE, "P-UI2");
+        
         this.renderForm();
         this.initInvalidDataModal();
+        
+        logger.log(Level.SEVERE, "P-UI3");
 
-        this.setDirty(false);
+//        this.setDirty(false);
 
-        // Retrieve base Driver descriptor
-        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(final Throwable caught) {
-                FailureHandler.handle(caught);
-            }
-
-            @Override
-            public void onSuccess(final GwtXSRFToken result) {
-                PropertiesUi.this.gwtWireService.getGwtBaseChannelDescriptor(result,
-                        new AsyncCallback<GwtConfigComponent>() {
-
-                            @Override
-                            public void onFailure(final Throwable caught) {
-                                FailureHandler.handle(caught);
-                            }
-
-                            @Override
-                            public void onSuccess(final GwtConfigComponent result) {
-                                PropertiesUi.this.m_baseDriverDescriptor = result;
-                            }
-                        });
-            }
-        });
+        logger.log(Level.SEVERE, "P-UI4");
+        if (this.hasDriver) {
+            // Retrieve base Driver descriptor
+            this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+    
+                @Override
+                public void onFailure(final Throwable caught) {
+                    FailureHandler.handle(caught);
+                }
+    
+                @Override
+                public void onSuccess(final GwtXSRFToken result) {
+                    PropertiesUi.this.gwtWireService.getGwtBaseChannelDescriptor(result,
+                            new AsyncCallback<GwtConfigComponent>() {
+    
+                                @Override
+                                public void onFailure(final Throwable caught) {
+                                    FailureHandler.handle(caught);
+                                }
+    
+                                @Override
+                                public void onSuccess(final GwtConfigComponent result) {
+                                    PropertiesUi.this.m_baseDriverDescriptor = result;
+                                }
+                            });
+                }
+            });
+        }
+        logger.log(Level.SEVERE, "P-UI5");
 
     }
 

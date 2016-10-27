@@ -212,7 +212,6 @@ public class WiresPanelUi extends Composite {
     }-*/;
 
     private static void fillProperties(final GwtConfigComponent config, final String pid) {
-        logger.log(Level.SEVERE, "FPID"+config.getFactoryId());
         if ((config.getFactoryId() != null) && config.getFactoryId().contains("WireAsset")) {
             config.getProperties().put("driver.pid", getDriver(pid));
         }
@@ -477,16 +476,8 @@ public class WiresPanelUi extends Composite {
                                 public void onSuccess(final GwtConfigComponent result) {
                                     // Component configuration retrieved
                                     // from the Configuration Service
-                                    logger.log(Level.SEVERE, "PID"+pid);
-                                    for(GwtConfigParameter param : result.getParameters()) {
-                                        logger.log(Level.SEVERE, "Param Name "+param.getName());
-                                        logger.log(Level.SEVERE, "Param Value "+param.getValue());
-                                        logger.log(Level.SEVERE, "=====");
-                                    }
                                     fillProperties(result, pid);
-                                    logger.log(Level.SEVERE, "Filled");
                                     m_configs.put(pid, result);
-                                    logger.log(Level.SEVERE, "Added to Map");
                                     if (m_propertiesUis.containsKey(pid)) {
                                         m_propertiesUis.remove(pid);
                                     }
@@ -641,44 +632,31 @@ public class WiresPanelUi extends Composite {
     }
 
     public static void render(final GwtConfigComponent item, String pid) {
-        logger.log(Level.SEVERE, "A");
         if ((currentSelection != null) && (propertiesUi != null)) {
             propertiesUi.getUpdatedConfiguration();
         }
-        logger.log(Level.SEVERE, "B");
         if (item != null) {
-            logger.log(Level.SEVERE, "C");
             propertiesPanelBody.clear();
-            logger.log(Level.SEVERE, "D");
+            
             if (!m_propertiesUis.containsKey(pid)) {
-                logger.log(Level.SEVERE, "E");
                 propertiesUi = new PropertiesUi(item, pid);
-                logger.log(Level.SEVERE, "E1");
                 m_propertiesUis.put(pid, propertiesUi);
-                logger.log(Level.SEVERE, "E2");
             } else {
-                logger.log(Level.SEVERE, "F");
                 propertiesUi = m_propertiesUis.get(pid);
             }
             propertiesPanel.setVisible(true);
             if (pid == null) {
-                logger.log(Level.SEVERE, "G");
                 pid = "";
             }
-            logger.log(Level.SEVERE, "H");
+            
             if (propertiesUi.isDirty()) {
-                logger.log(Level.SEVERE, "H1");
                 propertiesPanelHeader.setText(getFormattedPid(item.getFactoryId()) + " - " + pid + "*");
             } else {
-                logger.log(Level.SEVERE, "H2");
                 propertiesPanelHeader.setText(getFormattedPid(item.getFactoryId()) + " - " + pid);
             }
             currentSelection = item;
-            logger.log(Level.SEVERE, "I");
             propertiesPanelBody.add(propertiesUi);
-            logger.log(Level.SEVERE, "J");
         } else {
-            logger.log(Level.SEVERE, "K");
             propertiesPanelBody.clear();
             propertiesPanelHeader.setText("No component selected");
             propertiesPanel.setVisible(false);

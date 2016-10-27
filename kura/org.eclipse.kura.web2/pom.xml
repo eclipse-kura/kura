@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and others
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
-
-    Contributors:
-      Eurotech
-      Red Hat Inc - remove dependency on slf4j:logj12
-         - Fix build warning
-	  Amit Kumar Mondal (admin@amitinside.com)
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

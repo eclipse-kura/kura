@@ -43,6 +43,7 @@ import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
+import org.eclipse.kura.wire.WireHelperService;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
 
@@ -54,7 +55,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
     private static final String SERVICE_FACTORY_PID = "service.factoryPid";
 
-    private GwtConfigComponent convertComponentConfigurationByOcd(ComponentConfiguration config) {
+    private GwtConfigComponent convertComponentConfigurationByOcd(ComponentConfiguration config) throws GwtKuraException {
+        WireHelperService wireHelperService = ServiceLocator.getInstance().getService(WireHelperService.class);
         OCD ocd = config.getDefinition();
         GwtConfigComponent gwtConfig = null;
         if (ocd != null) {
@@ -62,11 +64,21 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             gwtConfig.setComponentId(config.getPid());
 
             Map<String, Object> props = config.getConfigurationProperties();
+            if(props != null && props.get("driver.pid") != null){
+                gwtConfig.set("driver.pid", props.get("driver.pid"));
+            }
+            
             if ((props != null) && (props.get(SERVICE_FACTORY_PID) != null)) {
                 String pid = this.stripPidPrefix(config.getPid());
                 gwtConfig.setComponentName(pid);
+                gwtConfig.setFactoryComponent(true);
+                gwtConfig.setFactoryPid(String.valueOf(props.get(ConfigurationAdmin.SERVICE_FACTORYPID)));
+                //check if the PID is assigned to a Wire Component
+                gwtConfig.setWireComponent(wireHelperService.getServicePid(pid) != null);
             } else {
                 gwtConfig.setComponentName(ocd.getName());
+                gwtConfig.setFactoryComponent(false);
+                gwtConfig.setWireComponent(false);
             }
 
             gwtConfig.setComponentDescription(ocd.getDescription());

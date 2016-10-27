@@ -165,8 +165,6 @@ public class PropertiesUi extends Composite {
         this.channelPanel.setVisible(false);
         this.btn_remove.setEnabled(false);
         
-        logger.log(Level.SEVERE, "P-UI1");
-
         this.nonValidatedCells = new HashSet<String>();
         this.hasDriver = this.m_configurableComponent.get("driver.pid") != null;
         this.isWireAsset = (this.m_configurableComponent.getFactoryId() != null)
@@ -233,16 +231,11 @@ public class PropertiesUi extends Composite {
             }
         });
         
-        logger.log(Level.SEVERE, "P-UI2");
-        
         this.renderForm();
         this.initInvalidDataModal();
         
-        logger.log(Level.SEVERE, "P-UI3");
+        this.setDirty(false);
 
-//        this.setDirty(false);
-
-        logger.log(Level.SEVERE, "P-UI4");
         if (this.hasDriver) {
             // Retrieve base Driver descriptor
             this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
@@ -270,8 +263,6 @@ public class PropertiesUi extends Composite {
                 }
             });
         }
-        logger.log(Level.SEVERE, "P-UI5");
-
     }
 
     private void addDefaultColumns() {

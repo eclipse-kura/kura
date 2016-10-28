@@ -10,6 +10,7 @@
 package org.eclipse.kura.wire;
 
 import org.eclipse.kura.KuraRuntimeException;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The interface WireHelperService is an service utility API to provide quick
@@ -17,6 +18,7 @@ import org.eclipse.kura.KuraRuntimeException;
  *
  * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface WireHelperService {
 
     /**

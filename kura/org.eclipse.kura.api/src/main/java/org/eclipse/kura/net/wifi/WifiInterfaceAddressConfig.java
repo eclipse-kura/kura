@@ -15,10 +15,14 @@ import java.util.List;
 
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Contains both the wifi interface status as well as all current configurations
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface WifiInterfaceAddressConfig extends WifiInterfaceAddress, NetInterfaceAddressConfig {
 
     /**

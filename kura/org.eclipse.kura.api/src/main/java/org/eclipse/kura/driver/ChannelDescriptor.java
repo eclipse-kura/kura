@@ -10,6 +10,7 @@
 package org.eclipse.kura.driver;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The Interface ChannelDescriptor is mainly used to provide the protocol
@@ -19,6 +20,7 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
  *
  * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface ChannelDescriptor {
 
     /**

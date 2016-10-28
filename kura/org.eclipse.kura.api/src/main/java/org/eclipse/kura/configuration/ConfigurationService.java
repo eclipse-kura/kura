@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.kura.KuraException;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The Configuration Service is used to manage the configuration of OSGi Declarative Services
@@ -83,7 +84,10 @@ import org.eclipse.kura.KuraException;
  * <br>
  * Both properties are stored in snapshots to recreate the component instances and restore their configuration
  * at every framework restart.
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface ConfigurationService {
 
     /**

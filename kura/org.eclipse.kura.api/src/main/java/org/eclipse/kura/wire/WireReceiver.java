@@ -10,6 +10,7 @@
 package org.eclipse.kura.wire;
 
 import org.eclipse.kura.KuraRuntimeException;
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.wireadmin.Consumer;
 
 /**
@@ -19,6 +20,7 @@ import org.osgi.service.wireadmin.Consumer;
  *
  * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface WireReceiver extends WireComponent, Consumer {
 
     /**

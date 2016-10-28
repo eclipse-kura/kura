@@ -15,12 +15,16 @@ import java.util.EnumSet;
 import java.util.List;
 
 import org.eclipse.kura.net.NetInterface;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Wifi interface
  *
  * @param <T>
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface WifiInterface<T extends WifiInterfaceAddress> extends NetInterface<T> {
 
     /**

@@ -13,6 +13,8 @@ package org.eclipse.kura.gpio;
 
 import java.io.IOException;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * The <b>KuraGPIOPin</b> class is used to access the GPIO resource.<br/>
  * The pin can be programmed either as an input or as an output. The way this is handled is implementation dependent.
@@ -25,7 +27,9 @@ import java.io.IOException;
  * {@link PinStatusListener}
  * to the pin.
  *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface KuraGPIOPin {
 
     /**

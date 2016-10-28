@@ -19,6 +19,7 @@ import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The CloudCallService provides helper methods to make a request/response conversation with the remote server.
@@ -26,7 +27,10 @@ import org.eclipse.kura.message.KuraResponsePayload;
  * All call methods are synchronous; after a request is issued, the implementation will wait for the response
  * to arrive or a timeout occurs. The timeout interval used by the service is configurable as a property
  * of the {@link DataTransportService}.
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface CloudCallService {
 
     /**

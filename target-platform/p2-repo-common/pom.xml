@@ -236,6 +236,11 @@
 									<artifactId>mockito-core</artifactId>
 									<version>${mockito-core.version}</version>
 								</artifactItem>
+								<artifactItem>
+									<groupId>org.osgi</groupId>
+									<artifactId>osgi.annotation</artifactId>
+									<version>${osgi.annotation.version}</version>
+								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

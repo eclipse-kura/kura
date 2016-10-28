@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.driver.listener.DriverListener;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The Interface Driver is the main interface that all Kura specific
@@ -29,6 +30,7 @@ import org.eclipse.kura.driver.listener.DriverListener;
  *
  * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface Driver {
 
     /**

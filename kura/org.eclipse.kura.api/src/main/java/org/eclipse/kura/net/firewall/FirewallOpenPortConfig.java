@@ -15,13 +15,16 @@ import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkPair;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Marker interface for firewall open port configurations
  *
  * @author eurotech
  *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface FirewallOpenPortConfig extends NetConfig {
 
     /**

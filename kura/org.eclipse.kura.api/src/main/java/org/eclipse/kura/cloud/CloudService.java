@@ -12,6 +12,7 @@
 package org.eclipse.kura.cloud;
 
 import org.eclipse.kura.KuraException;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The CloudService provides an easy to use API layer for M2M application to communicate with a remote server.
@@ -31,7 +32,10 @@ import org.eclipse.kura.KuraException;
  * The CloudService can be used through the {@link CloudClient} API or by extending the {@link Cloudlet} class.
  * {@link Cloudlet} simplifies the interactions with remote servers providing a servlet-like API
  * to implement request and response flows and remote resource management.
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface CloudService {
 
     /**

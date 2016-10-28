@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.kura.wire;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * WireComponent is a marker interface representing a generic identity for
  * {@link WireEmitter}s and {@link WireReceiver}s. A Wire Component is a
@@ -17,5 +19,6 @@ package org.eclipse.kura.wire;
  *
  * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface WireComponent {
 }

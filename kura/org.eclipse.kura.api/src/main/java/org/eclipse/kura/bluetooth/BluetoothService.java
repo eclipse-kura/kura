@@ -11,11 +11,15 @@
  *******************************************************************************/
 package org.eclipse.kura.bluetooth;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * BluetoothService provides a mechanism for interfacing with Standard
  * Bluetooth and Bluetooth LE devices.
  *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface BluetoothService {
 
     /**

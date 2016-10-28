@@ -12,13 +12,16 @@
 package org.eclipse.kura.net.dhcp;
 
 import org.eclipse.kura.KuraException;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Represents a DHCP server.
  *
  * @author eurotech
  *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface DhcpServer {
 
     /**

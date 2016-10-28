@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.status;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * The CloudConnectionStatusService is responsible for updating the user on the connection status of the framework.
  * Default implementation will link the status to a LED or to the log file.<br/>
@@ -61,7 +63,10 @@ package org.eclipse.kura.status;
  * <b>ccs.status.notification.url.foo=ccs:led:25</b><br/>
  * Same configuration, but linking the status to the system log, would be:<br/>
  * <b>ccs.status.notification.url.foo=ccs:log</b>
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface CloudConnectionStatusService {
 
     /**

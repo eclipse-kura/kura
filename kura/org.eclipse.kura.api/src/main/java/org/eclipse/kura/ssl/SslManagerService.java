@@ -19,6 +19,8 @@ import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * The SslManagerService is responsible to manage the configuration of the SSL connections.
  * It provide APIs to manage the trust certificates and the private keys and public certificates
@@ -27,7 +29,10 @@ import javax.net.ssl.SSLSocketFactory;
  * and disable the Nagle algorithm.
  * Its implementation is configurable exposing the possibility to express the allowed SSL protocols,
  * the allowed cipher suites, and the location of the Trust Store and the Key Store files.
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface SslManagerService {
 
     /**

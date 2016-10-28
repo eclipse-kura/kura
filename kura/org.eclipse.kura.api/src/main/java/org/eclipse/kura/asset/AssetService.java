@@ -11,12 +11,15 @@ package org.eclipse.kura.asset;
 
 import java.util.List;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * The interface AssetService is an utility service API to provide useful
  * methods for assets
  *
  * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface AssetService {
 
     /**

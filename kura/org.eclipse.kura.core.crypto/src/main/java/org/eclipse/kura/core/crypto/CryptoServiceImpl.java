@@ -8,8 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - Fix possible NPE, fix loading error
- *       - Clean up kura.properties handling
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.crypto;
 
@@ -19,11 +18,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Properties;
 
 import javax.crypto.BadPaddingException;
@@ -46,24 +45,24 @@ public class CryptoServiceImpl implements CryptoService {
     private static final String ALGORITHM = "AES";
     private static final byte[] SECRET_KEY = "rv;ipse329183!@#".getBytes();
 
-    private String m_keystorePasswordPath;
+    private String keystorePasswordPath;
 
-    private SystemService m_systemService;
+    private SystemService systemService;
 
     public void setSystemService(SystemService systemService) {
-        this.m_systemService = systemService;
+        this.systemService = systemService;
     }
-    
+
     public void unsetSystemService(SystemService systemService) {
-        this.m_systemService = null;
+        this.systemService = null;
     }
 
     protected void activate() {
-        if (this.m_systemService == null) {
+        if (this.systemService == null) {
             throw new IllegalStateException("Unable to get instance of: " + SystemService.class.getName());
         }
 
-        this.m_keystorePasswordPath = this.m_systemService.getKuraDataDirectory() + File.separator + "store.save";
+        this.keystorePasswordPath = this.systemService.getKuraDataDirectory() + File.separator + "store.save";
     }
 
     @Override
@@ -92,73 +91,11 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     private byte[] base64Decode(String internalStringValue) {
-        Object convertedData = null;
-        try {
-            Class<?> clazz = Class.forName("javax.xml.bind.DatatypeConverter");
-            Method method = clazz.getMethod("parseBase64Binary", String.class);
-            convertedData = method.invoke(null, internalStringValue);
-        } catch (ClassNotFoundException e) {
-            convertedData = base64DecodeJava8(internalStringValue);
-        } catch (LinkageError e) {
-            convertedData = base64DecodeJava8(internalStringValue);
-        } catch (Exception e) {
-
-        }
-
-        if (convertedData != null) {
-            return (byte[]) convertedData;
-        }
-        return null;
-    }
-
-    private Object base64DecodeJava8(String internalStringValue) {
-        Object convertedData = null;
-        try {
-            Class<?> clazz = Class.forName("java.util.Base64");
-            Method decoderMethod = clazz.getMethod("getDecoder", (Class<?>[]) null);
-            Object decoder = decoderMethod.invoke(null, new Object[0]);
-
-            Class<?> base64Decoder = Class.forName("java.util.Base64$Decoder");
-            Method decodeMethod = base64Decoder.getMethod("decode", String.class);
-            convertedData = decodeMethod.invoke(decoder, internalStringValue);
-        } catch (Exception e1) {
-        }
-        return convertedData;
+        return Base64.getDecoder().decode(internalStringValue);
     }
 
     private String base64Encode(byte[] encryptedBytes) {
-        Object convertedData = null;
-        try {
-            Class<?> clazz = Class.forName("javax.xml.bind.DatatypeConverter");
-            Method method = clazz.getMethod("printBase64Binary", byte[].class);
-            convertedData = method.invoke(null, encryptedBytes);
-        } catch (ClassNotFoundException e) {
-            convertedData = base64EncodeJava8(encryptedBytes);
-        } catch (LinkageError e) {
-            convertedData = base64EncodeJava8(encryptedBytes);
-        } catch (Exception e) {
-
-        }
-
-        if (convertedData != null) {
-            return (String) convertedData;
-        }
-        return null;
-    }
-
-    private Object base64EncodeJava8(byte[] encryptedBytes) {
-        Object convertedData = null;
-        try {
-            Class<?> clazz = Class.forName("java.util.Base64");
-            Method encoderMethod = clazz.getMethod("getEncoder", (Class<?>[]) null);
-            Object encoder = encoderMethod.invoke(null, new Object[0]);
-
-            Class<?> base64Encoder = Class.forName("java.util.Base64$Encoder");
-            Method encodeMethod = base64Encoder.getMethod("encodeToString", byte[].class);
-            convertedData = encodeMethod.invoke(encoder, encryptedBytes);
-        } catch (Exception e1) {
-        }
-        return convertedData;
+        return Base64.getEncoder().encodeToString(encryptedBytes);
     }
 
     @Override
@@ -188,8 +125,7 @@ public class CryptoServiceImpl implements CryptoService {
 
     @Override
     @Deprecated
-    public String encryptAes(String value) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-            IllegalBlockSizeException, BadPaddingException {
+    public String encryptAes(String value) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         char[] encryptedValue = null;
         try {
             encryptedValue = encryptAes(value.toCharArray());
@@ -213,8 +149,8 @@ public class CryptoServiceImpl implements CryptoService {
 
     @Override
     @Deprecated
-    public String decryptAes(String encryptedValue) throws NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException {
+    public String decryptAes(String encryptedValue)
+            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException {
         try {
             return new String(decryptAes(encryptedValue.toCharArray()));
         } catch (KuraException e) {
@@ -233,18 +169,19 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     @Override
-    public String encodeBase64(String stringValue) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        byte[] bytesValue = stringValue.getBytes("UTF-8");
-        String encodedValue = base64Encode(bytesValue);
-        return encodedValue;
+    public String encodeBase64(String stringValue) throws UnsupportedEncodingException {
+        if (stringValue == null)
+            return null;
 
+        return base64Encode(stringValue.getBytes("UTF-8"));
     }
 
     @Override
     public String decodeBase64(String encodedValue) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        byte[] decodedBytes = base64Decode(encodedValue);
-        String decodedValue = new String(decodedBytes, "UTF-8");
-        return decodedValue;
+        if (encodedValue == null)
+            return null;
+
+        return new String(base64Decode(encodedValue), "UTF-8");
     }
 
     @Override
@@ -253,13 +190,13 @@ public class CryptoServiceImpl implements CryptoService {
         char[] password = null;
         FileInputStream fis = null;
 
-        File f = new File(this.m_keystorePasswordPath);
+        File f = new File(this.keystorePasswordPath);
         if (!f.exists()) {
             return "changeit".toCharArray();
         }
 
         try {
-            fis = new FileInputStream(this.m_keystorePasswordPath);
+            fis = new FileInputStream(this.keystorePasswordPath);
             props.load(fis);
             Object value = props.get(keyStorePath);
             if (value != null) {
@@ -293,7 +230,7 @@ public class CryptoServiceImpl implements CryptoService {
 
         FileOutputStream fos = null;
         try {
-            fos = new FileOutputStream(this.m_keystorePasswordPath);
+            fos = new FileOutputStream(this.keystorePasswordPath);
             props.store(fos, "Do not edit this file. It's automatically generated by Kura");
         } catch (FileNotFoundException e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -326,7 +263,6 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     private static Key generateKey() {
-        Key key = new SecretKeySpec(SECRET_KEY, ALGORITHM);
-        return key;
+        return new SecretKeySpec(SECRET_KEY, ALGORITHM);
     }
 }

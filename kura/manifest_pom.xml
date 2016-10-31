@@ -10,9 +10,7 @@
 
     Contributors:
       Eurotech
-      Red Hat Inc - "Eclipse Kura"
-	      	- added Camel test project, added camel.cloud.factory
-            - cleanup, fix issue #476
+      Red Hat Inc
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -48,6 +46,7 @@
         <module>org.eclipse.kura.core.comm</module>
         <module>org.eclipse.kura.core.configuration</module>
         <module>org.eclipse.kura.core.crypto</module>
+        <module>org.eclipse.kura.core.crypto.test</module>
         <module>org.eclipse.kura.core.deployment</module>
         <module>org.eclipse.kura.core.log</module>
         <module>org.eclipse.kura.core.net</module>

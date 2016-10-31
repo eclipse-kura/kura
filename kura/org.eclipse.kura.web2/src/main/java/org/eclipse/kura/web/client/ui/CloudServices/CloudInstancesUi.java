@@ -149,7 +149,7 @@ public class CloudInstancesUi extends Composite {
     public void loadData() {
         this.cloudServicesDataProvider.getList().clear();
 
-        this.gwtCloudService.findCloudServices(new AsyncCallback<List<GwtCloudConnectionEntry>>() {
+        this.gwtCloudService.getCloudServices(new AsyncCallback<List<GwtCloudConnectionEntry>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -331,7 +331,7 @@ public class CloudInstancesUi extends Composite {
         this.cloudServicePid.clear();
         this.cloudFactoriesPids.clear();
 
-        this.gwtCloudService.findCloudServiceFactories(new AsyncCallback<List<GwtGroupedNVPair>>() {
+        this.gwtCloudService.getCloudServiceFactories(new AsyncCallback<List<GwtGroupedNVPair>>() {
 
             @Override
             public void onFailure(Throwable caught) {

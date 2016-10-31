@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import static org.eclipse.kura.cloud.factory.CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID;
+import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -18,7 +21,6 @@ import java.util.List;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.factory.CloudServiceFactory;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -34,13 +36,11 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
 
     private static final String COMPONENT_NAME = "component.name";
     private static final String SERVICE_FACTORY_PID = "service.factoryPid";
-    private static final String KURA_SERVICE_PID = ConfigurationService.KURA_SERVICE_PID;
     private static final String KURA_UI_CSF_PID_DEFAULT = "kura.ui.csf.pid.default";
     private static final String KURA_UI_CSF_PID_REGEX = "kura.ui.csf.pid.regex";
-    private static final String KURA_CLOUD_SERVICE_FACTORY_PID = "kura.cloud.service.factory.pid";
 
     @Override
-    public List<GwtCloudConnectionEntry> findCloudServices() throws GwtKuraException {
+    public List<GwtCloudConnectionEntry> getCloudServices() throws GwtKuraException {
         List<GwtCloudConnectionEntry> pairs = new ArrayList<GwtCloudConnectionEntry>();
         Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceLocator.getInstance()
                 .getServiceReferences(CloudService.class, null);
@@ -63,7 +63,7 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     }
 
     @Override
-    public List<GwtGroupedNVPair> findCloudServiceFactories() throws GwtKuraException {
+    public List<GwtGroupedNVPair> getCloudServiceFactories() throws GwtKuraException {
         List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
         Collection<ServiceReference<CloudServiceFactory>> cloudServiceFactoryReferences = ServiceLocator.getInstance()
                 .getServiceReferences(CloudServiceFactory.class, null);
@@ -79,7 +79,7 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     }
 
     @Override
-    public List<String> findStackPidsByFactory(String factoryPid, String cloudServicePid) throws GwtKuraException {
+    public List<String> getStackPidsByFactory(String factoryPid, String cloudServicePid) throws GwtKuraException {
         List<String> componentPids = new ArrayList<String>();
         Collection<ServiceReference<CloudServiceFactory>> cloudServiceFactoryReferences = ServiceLocator.getInstance()
                 .getServiceReferences(CloudServiceFactory.class, null);

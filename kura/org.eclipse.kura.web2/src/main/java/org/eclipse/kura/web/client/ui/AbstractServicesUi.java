@@ -498,7 +498,7 @@ public abstract class AbstractServicesUi extends Composite {
                 }
             } else if (param.getType().equals(GwtConfigParameterType.STRING)) {
                 int configMinValue = 0;
-                int configMaxValue = 255;
+                int configMaxValue = Integer.MAX_VALUE;
                 try {
                     configMinValue = Integer.parseInt(param.getMin());
                 } catch (NumberFormatException nfe) {

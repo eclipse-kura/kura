@@ -26,15 +26,15 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  * This interface provide a set of methods to manage cloud services from the web UI.
  * In particular, it provides a way to generate or delete Cloud Services from a defined factory.
  * 
- * Furthermore, it provides a way to get the list of all the cloud services instances {@link #getCloudServices()}, all
- * the registered cloud services factories {@link #getCloudServiceFactories()} or the list of PIDs that compose a
- * specified cloud service stack {@link #getStackPidsByFactory(String, String)}.
+ * Furthermore, it provides a way to get the list of all the cloud services instances {@link #findCloudServices()}, all
+ * the registered cloud services factories {@link #findCloudServiceFactories()} or the list of PIDs that compose a
+ * specified cloud service stack {@link #findStackPidsByFactory(String, String)}.
  * 
  * This interface provides two additional methods that can be used in the client part, during the creation of a new
  * cloud service stack instance. In particular,
- * {@link #getSuggestedCloudServicePid(String)} will return a String representing the suggested cloud service PID, as
+ * {@link #findSuggestedCloudServicePid(String)} will return a String representing the suggested cloud service PID, as
  * defined by the factory referenced.
- * {@link #getCloudServicePidRegex(String)} will return, if exists, the regex specified by the referenced factory that
+ * {@link #findCloudServicePidRegex(String)} will return, if exists, the regex specified by the referenced factory that
  * will be used to validate the user input.
  *
  */
@@ -51,7 +51,7 @@ public interface GwtCloudService extends RemoteService {
      * @throws GwtKuraException
      *             when service referencing fails
      */
-    public List<GwtCloudConnectionEntry> getCloudServices() throws GwtKuraException;
+    public List<GwtCloudConnectionEntry> findCloudServices() throws GwtKuraException;
 
     /**
      * Returns the list of all the {@link org.eclipse.kura.cloud.factory.CloudServiceFactory} instances registered in
@@ -62,7 +62,7 @@ public interface GwtCloudService extends RemoteService {
      * @throws GwtKuraException
      *             when service referencing fails
      */
-    public List<GwtGroupedNVPair> getCloudServiceFactories() throws GwtKuraException;
+    public List<GwtGroupedNVPair> findCloudServiceFactories() throws GwtKuraException;
 
     /**
      * Returns a list of PIDs that compose the cloud stack referenced by the specified factory and cloud service.
@@ -78,7 +78,7 @@ public interface GwtCloudService extends RemoteService {
      * @throws GwtKuraException
      *             if the invocation of the corresponding factory method returns an exception
      */
-    public List<String> getStackPidsByFactory(String factoryPid, String cloudServicePid) throws GwtKuraException;
+    public List<String> findStackPidsByFactory(String factoryPid, String cloudServicePid) throws GwtKuraException;
 
     /**
      * Returns a string that represents the suggested cloud service PID, for the specified factory. If the factory does
@@ -90,7 +90,7 @@ public interface GwtCloudService extends RemoteService {
      * @throws GwtKuraException
      *             when service referencing fails
      */
-    public String getSuggestedCloudServicePid(String factoryPid) throws GwtKuraException;
+    public String findSuggestedCloudServicePid(String factoryPid) throws GwtKuraException;
 
     /**
      * Returns a string representing the regex specified by the specified Factory Component.
@@ -102,7 +102,7 @@ public interface GwtCloudService extends RemoteService {
      * @throws GwtKuraException
      *             when service referencing fails
      */
-    public String getCloudServicePidRegex(String factoryPid) throws GwtKuraException;
+    public String findCloudServicePidRegex(String factoryPid) throws GwtKuraException;
 
     /**
      * Invokes the creation of a new cloud stack by the specified Factory Component, using the specified Cloud Service

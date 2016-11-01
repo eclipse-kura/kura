@@ -40,7 +40,7 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     private static final String KURA_UI_CSF_PID_REGEX = "kura.ui.csf.pid.regex";
 
     @Override
-    public List<GwtCloudConnectionEntry> getCloudServices() throws GwtKuraException {
+    public List<GwtCloudConnectionEntry> findCloudServices() throws GwtKuraException {
         List<GwtCloudConnectionEntry> pairs = new ArrayList<GwtCloudConnectionEntry>();
         Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceLocator.getInstance()
                 .getServiceReferences(CloudService.class, null);
@@ -63,7 +63,7 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     }
 
     @Override
-    public List<GwtGroupedNVPair> getCloudServiceFactories() throws GwtKuraException {
+    public List<GwtGroupedNVPair> findCloudServiceFactories() throws GwtKuraException {
         List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
         Collection<ServiceReference<CloudServiceFactory>> cloudServiceFactoryReferences = ServiceLocator.getInstance()
                 .getServiceReferences(CloudServiceFactory.class, null);
@@ -79,7 +79,7 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     }
 
     @Override
-    public List<String> getStackPidsByFactory(String factoryPid, String cloudServicePid) throws GwtKuraException {
+    public List<String> findStackPidsByFactory(String factoryPid, String cloudServicePid) throws GwtKuraException {
         List<String> componentPids = new ArrayList<String>();
         Collection<ServiceReference<CloudServiceFactory>> cloudServiceFactoryReferences = ServiceLocator.getInstance()
                 .getServiceReferences(CloudServiceFactory.class, null);
@@ -157,7 +157,7 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     }
 
     @Override
-    public String getSuggestedCloudServicePid(String factoryPid) throws GwtKuraException {
+    public String findSuggestedCloudServicePid(String factoryPid) throws GwtKuraException {
         Collection<ServiceReference<CloudServiceFactory>> cloudServiceFactoryReferences = ServiceLocator.getInstance()
                 .getServiceReferences(CloudServiceFactory.class, null);
 
@@ -177,7 +177,7 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     }
 
     @Override
-    public String getCloudServicePidRegex(String factoryPid) throws GwtKuraException {
+    public String findCloudServicePidRegex(String factoryPid) throws GwtKuraException {
         Collection<ServiceReference<CloudServiceFactory>> cloudServiceFactoryReferences = ServiceLocator.getInstance()
                 .getServiceReferences(CloudServiceFactory.class, null);
 

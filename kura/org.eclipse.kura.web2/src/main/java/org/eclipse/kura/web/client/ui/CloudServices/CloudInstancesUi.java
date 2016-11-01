@@ -149,7 +149,7 @@ public class CloudInstancesUi extends Composite {
     public void loadData() {
         this.cloudServicesDataProvider.getList().clear();
 
-        this.gwtCloudService.getCloudServices(new AsyncCallback<List<GwtCloudConnectionEntry>>() {
+        this.gwtCloudService.findCloudServices(new AsyncCallback<List<GwtCloudConnectionEntry>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -331,7 +331,7 @@ public class CloudInstancesUi extends Composite {
         this.cloudServicePid.clear();
         this.cloudFactoriesPids.clear();
 
-        this.gwtCloudService.getCloudServiceFactories(new AsyncCallback<List<GwtGroupedNVPair>>() {
+        this.gwtCloudService.findCloudServiceFactories(new AsyncCallback<List<GwtGroupedNVPair>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -482,7 +482,7 @@ public class CloudInstancesUi extends Composite {
     }
 
     private void getSuggestedCloudServicePid(final String factoryPid) {
-        this.gwtCloudService.getSuggestedCloudServicePid(factoryPid, new AsyncCallback<String>() {
+        this.gwtCloudService.findSuggestedCloudServicePid(factoryPid, new AsyncCallback<String>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -506,7 +506,7 @@ public class CloudInstancesUi extends Composite {
     }
 
     private void getCloudServicePidRegex(final String factoryPid) {
-        this.gwtCloudService.getCloudServicePidRegex(factoryPid, new AsyncCallback<String>() {
+        this.gwtCloudService.findCloudServicePidRegex(factoryPid, new AsyncCallback<String>() {
 
             @Override
             public void onFailure(Throwable caught) {

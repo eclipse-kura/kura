@@ -161,7 +161,7 @@ public class CloudServiceConfigurationsUi extends Composite {
     }
 
     private void getCloudStackConfigurations(String factoryPid, String cloudServicePid) {
-        this.gwtCloudService.getStackPidsByFactory(factoryPid, cloudServicePid, new AsyncCallback<List<String>>() {
+        this.gwtCloudService.findStackPidsByFactory(factoryPid, cloudServicePid, new AsyncCallback<List<String>>() {
 
             @Override
             public void onFailure(Throwable ex) {

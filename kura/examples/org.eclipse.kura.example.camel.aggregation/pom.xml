@@ -24,7 +24,20 @@
 		</repository>
 	</repositories>
 
-	<build>
+    <distributionManagement>
+        <repository>
+            <id>repo.eclipse.org</id>
+            <name>Kura Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>repo.eclipse.org</id>
+            <name>Kura Repository - Snapshots</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+        </snapshotRepository>
+	</distributionManagement>
+
+    <build>
 		<plugins>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>

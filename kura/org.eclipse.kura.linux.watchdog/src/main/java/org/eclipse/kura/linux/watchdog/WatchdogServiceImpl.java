@@ -42,9 +42,9 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     private int pingInterval = 2000;	// milliseconds
     private static ArrayList<CriticalComponentImpl> s_criticalServiceList;
-    private boolean m_configEnabled = false;	// initialized in properties, if false -> no watchdog
-    private boolean m_enabled;
-    private boolean m_watchdogToStop = false;
+    volatile boolean m_configEnabled = false;	// initialized in properties, if false -> no watchdog
+    volatile boolean m_enabled;
+    volatile boolean m_watchdogToStop = false;
     private String watchdogDevice = "/dev/watchdog";
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
@@ -249,14 +249,14 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
                         bw.flush();
                         s_logger.debug("watchdog refreshed");
                     } catch (IOException e) {
-                        s_logger.error("IOException on refresh watchdog : {}", e.getMessage());
+                        s_logger.error("IOException on refresh watchdog", e);
                     } finally {
                         try {
                             if (bw != null) {
                                 bw.close();
                             }
                         } catch (IOException e) {
-                            s_logger.error("IOException on closing watchdog file : {}", e.getMessage());
+                            s_logger.error("IOException on closing watchdog file", e);
                         }
                     }
                 }
@@ -275,14 +275,14 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
                     this.m_enabled = true;
                     s_logger.info("watchdog started");
                 } catch (IOException e) {
-                    s_logger.error("IOException on start watchdog : {}", e.getMessage());
+                    s_logger.error("IOException on start watchdog", e);
                 } finally {
                     try {
                         if (bw != null) {
                             bw.close();
                         }
                     } catch (IOException e) {
-                        s_logger.error("IOException on closing watchdog file : {}", e.getMessage());
+                        s_logger.error("IOException on closing watchdog file", e);
                     }
                 }
             }
@@ -300,14 +300,14 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
                 this.m_enabled = false;
                 s_logger.info("watchdog disabled");
             } catch (IOException e) {
-                s_logger.error("IOException on disable watchdog : {}", e.getMessage());
+                s_logger.error("IOException on disable watchdog", e);
             } finally {
                 try {
                     if (bw != null) {
                         bw.close();
                     }
                 } catch (IOException e) {
-                    s_logger.error("IOException on closing watchdog file : {}", e.getMessage());
+                    s_logger.error("IOException on closing watchdog file", e);
                 }
             }
         }

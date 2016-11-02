@@ -54,7 +54,7 @@ public class GPIOServiceImpl implements GPIOService {
      * Test if a file is available for loading
      *
      * @param path
-     *            the path to thest
+     *            the path to test
      * @return the path from input which can be used for loading, {@code null}
      *         if the file is not present or should not be used for loading
      */
@@ -64,7 +64,7 @@ public class GPIOServiceImpl implements GPIOService {
         }
 
         if (!path.startsWith("file:")) {
-            path = "file: " + path;
+            path = "file:" + path;
         }
 
         try {

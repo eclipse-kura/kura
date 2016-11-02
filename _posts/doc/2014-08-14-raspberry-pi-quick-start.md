@@ -54,6 +54,15 @@ following steps:
 
     Kura starts on the target platform after reboot.
 
+7.  Kura setups a local web ui that is available using a browser via:
+    <pre>http://&lt;device-ip&gt;</pre>
+
+    Default **username** is:
+    <pre>admin</pre>
+
+    Default **password** is:
+    <pre>admin</pre>
+
 ## Development Environment Installation
 
 To set up the development environment for Eclipse Kura, perform the
@@ -65,4 +74,3 @@ downloaded from Java SE 7 Downloads. Use the latest version of Java SE Developme
 3.  Download the Kura user workspace archive from the <a href="https://www.eclipse.org/kura/downloads.php" target="_blank">Eclipse Kura download site</a>.
 4.  Import the Kura workspace zip file into the new Eclipse project development environment.
 5.  Begin developing Kura-based applications for your target platform.
-

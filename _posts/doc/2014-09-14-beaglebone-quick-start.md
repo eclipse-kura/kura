@@ -79,6 +79,15 @@ following steps:
 
     Kura starts on the target platform after reboot.
 
+7.  Kura setups a local web ui that is available using a browser via:
+    <pre>http://&lt;device-ip&gt;</pre>
+
+    Default **username** is:
+    <pre>admin</pre>
+
+    Default **password** is:
+    <pre>admin</pre>
+
 ## Support Serial Communication
 
 The recommended method for using serial communication on the BeagleBone
@@ -101,8 +110,8 @@ Sample output:
 UART1 through UART5 also provide serial ports on the BeagleBone;
 UART0/ttyO0 is reserved for serial console.
 
-{% include alerts.html message="The voltage levels on the BeagleBone header pins are 3.3V. Make sure that the device connecting to the BeagleBone also uses 3.3V, 
-or else use a [logic level converter](https://www.sparkfun.com/products/12009). Failure to 
+{% include alerts.html message="The voltage levels on the BeagleBone header pins are 3.3V. Make sure that the device connecting to the BeagleBone also uses 3.3V,
+or else use a [logic level converter](https://www.sparkfun.com/products/12009). Failure to
 match voltage levels could damage the BeagleBone Black, the connected device, or both." %}
 
 To enable a UART for serial communication, perform the following step:
@@ -145,5 +154,3 @@ downloaded from Java SE 7 Downloads. Use the latest version of Java SE Developme
 3.  Download the Kura user workspace archive from the <a href="https://www.eclipse.org/kura/downloads.php" target="_blank">Eclipse Kura download site</a>.
 4.  Import the Kura workspace zip file into the new Eclipse project development environment.
 5.  Begin developing Kura-based applications for your target platform.
-
-

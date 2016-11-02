@@ -42,9 +42,9 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     private int pingInterval = 2000;	// milliseconds
     private static ArrayList<CriticalComponentImpl> s_criticalServiceList;
-    volatile boolean m_configEnabled = false;	// initialized in properties, if false -> no watchdog
-    volatile boolean m_enabled;
-    volatile boolean m_watchdogToStop = false;
+    private volatile boolean m_configEnabled = false;	// initialized in properties, if false -> no watchdog
+    private volatile boolean m_enabled;
+    private volatile boolean m_watchdogToStop = false;
     private String watchdogDevice = "/dev/watchdog";
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {

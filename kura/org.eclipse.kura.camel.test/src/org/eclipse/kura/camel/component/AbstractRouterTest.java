@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.apache.camel.Route;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -64,4 +65,20 @@ public abstract class AbstractRouterTest {
         }
     }
 
+    /**
+     * Get a mock endpoint
+     * <br>
+     * <strong>Note:</strong> This call will fail if the endpoint is not of
+     * instance MockEndpoint.
+     */
+    protected MockEndpoint getMockEndpoint(String endpoint) {
+        return (MockEndpoint) this.router.getCamelContext().getEndpoint(endpoint);
+    }
+
+    /**
+     * Assert all mock endpoints
+     */
+    protected void assertMockEndpoints() throws InterruptedException {
+        MockEndpoint.assertIsSatisfied(this.router.getCamelContext());
+    }
 }

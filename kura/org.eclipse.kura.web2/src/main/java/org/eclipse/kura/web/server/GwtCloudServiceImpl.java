@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,14 +8,18 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix #691
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+
 import static org.eclipse.kura.cloud.factory.CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
+import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
@@ -28,13 +32,13 @@ import org.eclipse.kura.web.shared.model.GwtCloudConnectionEntry;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtCloudService;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements GwtCloudService {
 
     private static final long serialVersionUID = 2595835826149606703L;
 
-    private static final String COMPONENT_NAME = "component.name";
     private static final String SERVICE_FACTORY_PID = "service.factoryPid";
     private static final String KURA_UI_CSF_PID_DEFAULT = "kura.ui.csf.pid.default";
     private static final String KURA_UI_CSF_PID_REGEX = "kura.ui.csf.pid.regex";
@@ -79,26 +83,67 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     }
 
     @Override
-    public List<String> findStackPidsByFactory(String factoryPid, String cloudServicePid) throws GwtKuraException {
-        List<String> componentPids = new ArrayList<String>();
-        Collection<ServiceReference<CloudServiceFactory>> cloudServiceFactoryReferences = ServiceLocator.getInstance()
-                .getServiceReferences(CloudServiceFactory.class, null);
+    public List<String> findStackPidsByFactory(String cloudServicePid) throws GwtKuraException {
 
-        for (ServiceReference<CloudServiceFactory> cloudServiceFactoryReference : cloudServiceFactoryReferences) {
-            if (!cloudServiceFactoryReference.getProperty(COMPONENT_NAME).equals(factoryPid)) {
-                continue;
+        final ServiceLocator locator = ServiceLocator.getInstance();
+
+        // find service by kura ID
+
+        final Collection<ServiceReference<CloudService>> refs = locator.getServiceReferences(CloudService.class,
+                format("(%s=%s)", KURA_SERVICE_PID, cloudServicePid));
+
+        // iterate over results, should only be one
+
+        for (final ServiceReference<CloudService> ref : refs) {
+
+            final Object factoryProp = ref.getProperty(KURA_CLOUD_SERVICE_FACTORY_PID);
+
+            // test if property is String
+            if (factoryProp instanceof String) {
+
+                // fetch other PIDs
+                return findStackPidsByFactory((String) factoryProp, cloudServicePid);
             }
-            CloudServiceFactory cloudServiceFactory = ServiceLocator.getInstance()
-                    .getService(cloudServiceFactoryReference);
+
+        }
+
+        // no factory id found ... return empty list
+
+        return Collections.emptyList();
+    }
+
+    public List<String> findStackPidsByFactory(String factoryId, String cloudServicePid) throws GwtKuraException {
+        final ServiceLocator locator = ServiceLocator.getInstance();
+
+        // get all matchings refs
+
+        final Collection<ServiceReference<CloudServiceFactory>> refs = locator
+                .getServiceReferences(CloudServiceFactory.class, format("(%s=%s)", Constants.SERVICE_PID, factoryId));
+
+        // prepare result
+
+        final List<String> result = new ArrayList<String>();
+
+        // iterate over all candidates
+
+        for (final ServiceReference<CloudServiceFactory> ref : refs) {
+
+            final CloudServiceFactory factory = locator.getService(ref);
+
             try {
-                componentPids.addAll(cloudServiceFactory.getStackComponentsPids(cloudServicePid));
+                // add to results
+                result.addAll(factory.getStackComponentsPids(cloudServicePid));
+
             } catch (KuraException e) {
                 throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+
             } finally {
-                ServiceLocator.getInstance().ungetService(cloudServiceFactoryReference);
+                // release service
+                locator.ungetService(ref);
             }
         }
-        return componentPids;
+
+        return result;
     }
 
     @Override

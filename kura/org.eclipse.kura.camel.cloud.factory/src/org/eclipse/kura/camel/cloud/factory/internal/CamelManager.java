@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -41,7 +42,7 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
 
     private static final Logger logger = LoggerFactory.getLogger(CamelManager.class);
 
-    private static final String PID = "org.eclipse.kura.camel.cloud.factory.CamelManager";
+    public static final String PID = "org.eclipse.kura.camel.cloud.factory.CamelManager";
 
     private ConfigurationService configurationService;
 
@@ -82,7 +83,8 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
             tad.setType(Tscalar.INTEGER);
             tad.setCardinality(0);
             tad.setRequired(Boolean.FALSE);
-            tad.setDescription("The initial service ranking of the new cloud service. A higher number will have more priority.");
+            tad.setDescription(
+                    "The initial service ranking of the new cloud service. A higher number will have more priority.");
             tocd.addAD(tad);
         }
 
@@ -134,6 +136,7 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
     }
 
     private static String fromUserPid(final String pid) {
+        Objects.requireNonNull(pid);
         return pid + "-CloudFactory";
     }
 
@@ -180,7 +183,8 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
         final Set<String> ids = new TreeSet<>();
         try {
 
-            final Collection<ServiceReference<CamelFactory>> refs = FrameworkUtil.getBundle(CamelManager.class).getBundleContext().getServiceReferences(CamelFactory.class, null);
+            final Collection<ServiceReference<CamelFactory>> refs = FrameworkUtil.getBundle(CamelManager.class)
+                    .getBundleContext().getServiceReferences(CamelFactory.class, null);
             if (refs != null) {
                 for (final ServiceReference<CamelFactory> ref : refs) {
                     addService(ref, ids);
@@ -219,7 +223,7 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
 
     @Override
     public void createConfiguration(final String pid) throws KuraException {
-        add(pid, Collections.<String, Object>emptyMap());
+        add(pid, Collections.<String, Object> emptyMap());
     }
 
     @Override
@@ -234,8 +238,7 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
 
     @Override
     public List<String> getStackComponentsPids(final String pid) throws KuraException {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.singletonList(fromUserPid(pid));
     }
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - Fix #691
  *******************************************************************************/
 package org.eclipse.kura.web.shared.service;
 
@@ -67,8 +68,6 @@ public interface GwtCloudService extends RemoteService {
     /**
      * Returns a list of PIDs that compose the cloud stack referenced by the specified factory and cloud service.
      * 
-     * @param factoryPid
-     *            the factory PID of the Factory Component
      * @param cloudServicePid
      *            the PID of the selected Cloud Service
      * @return the list of <i>kura.service.pid</i>s associated with the specified factory component
@@ -78,7 +77,7 @@ public interface GwtCloudService extends RemoteService {
      * @throws GwtKuraException
      *             if the invocation of the corresponding factory method returns an exception
      */
-    public List<String> findStackPidsByFactory(String factoryPid, String cloudServicePid) throws GwtKuraException;
+    public List<String> findStackPidsByFactory(String cloudServicePid) throws GwtKuraException;
 
     /**
      * Returns a string that represents the suggested cloud service PID, for the specified factory. If the factory does

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,49 +8,26 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - clean up
  *******************************************************************************/
 package org.eclipse.kura.core.comm;
+
+import static org.eclipse.kura.comm.CommURI.parseString;
 
 import java.io.IOException;
 
 import javax.microedition.io.Connection;
 
-import org.eclipse.kura.comm.CommURI;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.io.ConnectionFactory;
 
 public class CommConnectionFactory implements ConnectionFactory {
 
-    @SuppressWarnings("unused")
-    private ComponentContext m_ctx;
-
-    // ----------------------------------------------------------------
-    //
-    // Dependencies
-    //
-    // ----------------------------------------------------------------
-
-    // ----------------------------------------------------------------
-    //
-    // Activation APIs
-    //
-    // ----------------------------------------------------------------
-
-    protected void activate(ComponentContext componentContext) {
-        //
-        // save the bundle context
-        this.m_ctx = componentContext;
-    }
-
-    protected void deactivate(ComponentContext componentContext) {
-        this.m_ctx = null;
-    }
-
     @Override
     public Connection createConnection(String name, int mode, boolean timeouts) throws IOException {
         try {
-            CommURI uri = CommURI.parseString(name);
-            return new CommConnectionImpl(uri, mode, timeouts);
+            return new CommConnectionImpl(parseString(name), mode, timeouts);
+        } catch (IOException e) {
+            throw e; // re-throw
         } catch (Throwable t) {
             throw new IOException(t);
         }

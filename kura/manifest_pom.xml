@@ -46,6 +46,7 @@
         <module>org.eclipse.kura.core.certificates</module>
         <module>org.eclipse.kura.core.cloud</module>
         <module>org.eclipse.kura.core.comm</module>
+        <module>org.eclipse.kura.core.comm.test</module>
         <module>org.eclipse.kura.core.configuration</module>
         <module>org.eclipse.kura.core.crypto</module>
         <module>org.eclipse.kura.core.deployment</module>

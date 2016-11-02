@@ -105,6 +105,9 @@
         <module>emulator</module>
         <module>examples</module>
         <module>test</module>
+        
+        <!-- A module containing log4j configuration for running unit tests -->
+        <module>log4j.test.configuration</module>
     </modules>
 
     <properties>

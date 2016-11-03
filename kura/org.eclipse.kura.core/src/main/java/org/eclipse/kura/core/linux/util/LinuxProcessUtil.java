@@ -274,6 +274,43 @@ public class LinuxProcessUtil {
             }
         }
     }
+    
+    public static int getPid(int pid) throws Exception {
+    	int ret = -1;
+    	StringTokenizer st = null;
+        String line = null;
+        SafeProcess proc = null;
+        BufferedReader br = null;
+        try {
+        	s_logger.trace("searching process list for pid{}", pid);
+        	if (IS_INTEL_EDISON) {
+        		proc = ProcessUtil.exec("ps");
+            } else {
+            	proc = ProcessUtil.exec("ps -ax");
+            }
+            proc.waitFor();
+
+            // get the output
+            br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            while ((line = br.readLine()) != null) {
+            	st = new StringTokenizer(line);
+                int processID = Integer.parseInt(st.nextToken());
+                if (processID == pid) {
+                	ret = processID;
+                }
+            }
+            return ret;
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            if (br != null) {
+                br.close();
+            }
+            if (proc != null) {
+                ProcessUtil.destroy(proc);
+            }
+        }
+    }
 
     public static int getKuraPid() throws Exception {
 
@@ -357,4 +394,22 @@ public class LinuxProcessUtil {
         }
         return sb.toString();
     }
+    
+    public static boolean waitProcess(int pid, long poll, long timeout) {
+		boolean exists = false;
+		try {
+			final long startTime = System.currentTimeMillis();
+			long now;
+			do {
+				Thread.sleep(poll);
+				exists = (getPid(pid) >= 0)? true : false;
+				now = System.currentTimeMillis();
+			} while (exists && (now - startTime) < timeout);
+		} catch (Exception e) {
+			Thread.currentThread().interrupt();
+			s_logger.warn("Failed waiting for pid {} to exit - {}", pid, e);
+		}
+			
+		return exists;
+	}
 }

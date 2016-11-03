@@ -15,8 +15,6 @@ import java.io.File;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
-import org.eclipse.kura.core.util.ProcessUtil;
-import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +38,6 @@ public class HostapdManager {
     }
 
     public static void start(String ifaceName) throws KuraException {
-        SafeProcess proc = null;
         File configFile = new File(getHostapdConfigFileName(ifaceName));
         if (!configFile.exists()) {
             throw KuraException.internalError("Config file does not exist: " + configFile.getAbsolutePath());
@@ -52,41 +49,76 @@ public class HostapdManager {
 
             // start hostapd
             String launchHostapdCommand = generateStartCommand(ifaceName);
-            s_logger.debug("starting hostapd --> {}", launchHostapdCommand);
-            proc = ProcessUtil.exec(launchHostapdCommand);
-            if (proc.waitFor() != 0) {
-                s_logger.error("failed to start hostapd for unknown reason");
-                throw KuraException.internalError("failed to start hostapd for unknown reason");
-            }
+            s_logger.info("starting hostapd for the {} interface --> {}", ifaceName, launchHostapdCommand);
+            int stat = LinuxProcessUtil.start(launchHostapdCommand);
+			if(stat != 0) {
+				s_logger.error("failed to start hostapd for the {} interface for unknown reason - errorCode={}", ifaceName, stat);
+				throw KuraException.internalError("failed to start hostapd for unknown reason");
+			}
             Thread.sleep(1000);
         } catch (Exception e) {
             throw KuraException.internalError(e);
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
         }
     }
 
-    public static void stop(String ifaceName) throws KuraException {
-        SafeProcess proc = null;
-        try {
-            // kill hostapd
-            s_logger.debug("stopping hostapd");
-            String cmd = generateStopCommand(ifaceName);
-            if (cmd != null && !cmd.isEmpty()) {
-                proc = ProcessUtil.exec(cmd);
-                proc.waitFor();
-                Thread.sleep(1000);
-            }
-        } catch (Exception e) {
-            throw KuraException.internalError(e);
-        } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
-        }
-    }
+	public static void stop(String ifaceName) throws KuraException {
+		try {
+			if (!s_isIntelEdison) {
+				int pid = getPid(ifaceName);
+				if (pid >= 0) {
+		    		s_logger.info("stopping hostapd for the {} interface, pid={}", ifaceName, pid);
+		    		
+		    		boolean exists = LinuxProcessUtil.stop(pid);
+		    		if (!exists) {
+		    			s_logger.warn("stopping hostapd for the {} inetrface, pid={} has failed", ifaceName, pid);
+		    		} else {
+		    			exists = LinuxProcessUtil.waitProcess(pid, 500, 5000);
+		    		}
+		    		
+		    		if (exists) {
+		    			s_logger.info("stopping hostapd for the {} interface - killing pid={}", ifaceName, pid);
+		    			exists = LinuxProcessUtil.kill(pid);
+		    			if (!exists) {
+		    				s_logger.warn("stopping hostapd for the {} interface - killing pid={} has failed", ifaceName, pid);
+		    			} else {
+		    				exists = LinuxProcessUtil.waitProcess(pid, 500, 5000);
+		    			}
+		    		}
+		    		
+		    		if (exists) {
+		    			s_logger.warn("Failed to stop hostapd for the {} interface", ifaceName);
+		    		}
+				}
+			} else {
+				LinuxProcessUtil.start("systemctl stop hostapd");
+				Thread.sleep(1000);
+			}
+		} catch (Exception e) {
+			throw KuraException.internalError(e);
+		}
+	}
+	
+	// Only call this method after a call to stop or kill.
+	// FIXME: this is an utility method that should be moved in a suitable package.
+	/*
+	private static boolean waitProcess(int pid, long poll, long timeout) {
+		boolean exists = true;
+		try {
+			final long startTime = System.currentTimeMillis();
+			long now;
+			do {
+				Thread.sleep(poll);
+				exists = LinuxProcessUtil.stop(pid);
+				now = System.currentTimeMillis();
+			} while (exists && (now - startTime) < timeout);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			s_logger.warn("Interrupted waiting for pid {} to exit", pid);
+		}
+			
+		return exists;
+	}
+	*/
 
     public static boolean isRunning(String ifaceName) throws KuraException {
         try {
@@ -119,25 +151,6 @@ public class HostapdManager {
         } else {
             File configFile = new File(getHostapdConfigFileName(ifaceName));
             cmd.append(HOSTAPD_EXEC).append(" -B ").append(configFile.getAbsolutePath());
-        }
-        return cmd.toString();
-    }
-
-    private static String generateStopCommand(String ifaceName) throws KuraException {
-        StringBuilder cmd = new StringBuilder();
-        if (s_isIntelEdison) {
-            cmd.append("systemctl stop hostapd");
-        } else {
-            int pid;
-            try {
-                pid = getPid(ifaceName);
-                // cmd.append("killall hostapd");
-                if (pid > 0) {
-                    cmd.append("kill -9 ").append(pid);
-                }
-            } catch (KuraException e) {
-                throw KuraException.internalError(e);
-            }
         }
         return cmd.toString();
     }

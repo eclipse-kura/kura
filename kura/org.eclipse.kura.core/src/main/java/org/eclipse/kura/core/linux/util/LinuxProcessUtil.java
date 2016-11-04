@@ -292,12 +292,17 @@ public class LinuxProcessUtil {
 
             // get the output
             br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            br.readLine(); // skip first line: PID	TTY		STAT	TIME	COMMAND
             while ((line = br.readLine()) != null) {
             	st = new StringTokenizer(line);
-                int processID = Integer.parseInt(st.nextToken());
-                if (processID == pid) {
-                	ret = processID;
-                }
+            	try {
+	                int processID = Integer.parseInt(st.nextToken());
+	                if (processID == pid) {
+	                	ret = processID;
+	                }
+            	} catch (NumberFormatException e) {
+            		s_logger.error("getPid() :: NumberFormatException reading PID - {}", e);
+            	}
             }
             return ret;
         } catch (Exception e) {

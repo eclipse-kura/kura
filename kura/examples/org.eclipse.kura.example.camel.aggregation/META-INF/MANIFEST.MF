@@ -7,7 +7,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Service-Component: OSGI-INF/*.xml
 Import-Package: org.apache.camel;version="[2.17.0,3.0.0)",
  org.apache.camel.builder;version="[2.17.0,3.0.0)",
- org.apache.camel.component.kura;version="[2.17.0,3.0.0)",
  org.apache.camel.model;version="[2.17.0,3.0.0)",
  org.apache.camel.processor.aggregate;version="[2.17.0,3.0.0)",
  org.apache.camel.support;version="[2.17.0,3.0.0)",

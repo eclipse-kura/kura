@@ -10,7 +10,8 @@
     Contributors:
       Eurotech
       Red Hat Inc - minor fixes on startup scripts, fix issue #603,
-      	Add Fedora support to RPi (#552) - fix issue #476
+      	 - Add Fedora support to RPi (#552), fix issue #476
+         - fix issue #640
 
 -->
 <project name="build_equinox_distrib" default="dist-linux" basedir="../../../">
@@ -995,6 +996,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 				value=", reference:file:${kura.install.dir}/kura/plugins/jdk.dio_${jdk.dio.version}.jar@3" /> 
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.commons.net_${org.apache.commons.net.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.commons.exec_${org.apache.commons.exec.version}.jar" />
 		</propertyfile>
 	</target>
 

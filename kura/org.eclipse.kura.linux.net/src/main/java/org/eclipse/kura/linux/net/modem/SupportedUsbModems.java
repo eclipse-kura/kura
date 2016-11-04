@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,17 +8,22 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc - fix issue #640
  *******************************************************************************/
 package org.eclipse.kura.linux.net.modem;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
-import org.eclipse.kura.core.linux.util.ProcessStats;
-import org.eclipse.kura.core.util.ProcessUtil;
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteException;
+import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.NullOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,8 +67,8 @@ public class SupportedUsbModems {
         List<LsusbEntry> lsusbEntries = null;
         try {
             lsusbEntries = getLsusbInfo();
-        } catch (Exception e1) {
-            s_logger.error("failed to obtain lsusb information - {}", e1);
+        } catch (Exception e) {
+            s_logger.error("failed to obtain lsusb information", e);
         }
         for (SupportedUsbModemInfo modem : SupportedUsbModemInfo.values()) {
             try {
@@ -101,38 +106,18 @@ public class SupportedUsbModems {
     }
 
     public static boolean isAttached(String vendor, String product) throws Exception {
-        boolean attached = false;
-        String lsusbCmd = formLsusbCommand(vendor, product); // e.g. lsusb -d 1bc7:1010
-        BufferedReader br = null;
-        InputStreamReader isr = null;
-        ProcessStats processStats = null;
-        try {
-            processStats = LinuxProcessUtil.startWithStats(lsusbCmd);
-            isr = new InputStreamReader(processStats.getInputStream());
-            br = new BufferedReader(isr);
-            String line;
-            while ((line = br.readLine()) != null) {
-                LsusbEntry lsusbEntry = getLsusbEntry(line);
-                if (lsusbEntry != null && vendor != null && product != null && vendor.equals(lsusbEntry.m_vendor)
-                        && product.equals(lsusbEntry.m_product)) {
-                    s_logger.info("The '{}' command detected {}", lsusbCmd, lsusbEntry);
-                    attached = true;
-                    break;
-                }
-            }
-        } finally {
-            if (br != null) {
-                br.close();
-            }
-            if (isr != null) {
-                isr.close();
-            }
-            if (processStats != null) {
-                ProcessUtil.destroy(processStats.getProcess());
+        final String lsusbCmd = formLsusbCommand(vendor, product); // e.g. lsusb -d 1bc7:1010
+        final List<String> lines = execute(lsusbCmd);
+
+        for (final String line : lines) {
+            final LsusbEntry lsusbEntry = getLsusbEntry(line);
+            if (lsusbEntry != null && vendor != null && product != null && vendor.equals(lsusbEntry.m_vendor)
+                    && product.equals(lsusbEntry.m_product)) {
+                s_logger.info("The '{}' command detected {}", lsusbCmd, lsusbEntry);
+                return true;
             }
         }
-
-        return attached;
+        return false;
     }
 
     private static boolean isAttached(String vendor, String product, List<LsusbEntry> lsusbEntries) throws Exception {
@@ -152,32 +137,35 @@ public class SupportedUsbModems {
         return attached;
     }
 
-    private static List<LsusbEntry> getLsusbInfo() throws Exception {
-        List<LsusbEntry> lsusbEntries = new ArrayList<LsusbEntry>();
-        ProcessStats processStats = null;
-        InputStreamReader isr = null;
-        BufferedReader br = null;
+    /**
+     * Execute command an return splitted lines
+     *
+     * @param command
+     *            the command to execute
+     * @return the lines output by the command
+     * @throws IOException
+     *             if executing the commands fails
+     */
+    private static List<String> execute(final String command) throws ExecuteException, IOException {
+        final DefaultExecutor executor = new DefaultExecutor();
 
-        try {
-            processStats = LinuxProcessUtil.startWithStats("lsusb");
-            isr = new InputStreamReader(processStats.getInputStream());
-            br = new BufferedReader(isr);
-            String line;
-            while ((line = br.readLine()) != null) {
-                LsusbEntry lsusbEntry = getLsusbEntry(line);
-                if (lsusbEntry != null) {
-                    lsusbEntries.add(lsusbEntry);
-                }
-            }
-        } finally {
-            if (br != null) {
-                br.close();
-            }
-            if (isr != null) {
-                isr.close();
-            }
-            if (processStats != null) {
-                ProcessUtil.destroy(processStats.getProcess());
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        executor.setStreamHandler(new PumpStreamHandler(out, NullOutputStream.NULL_OUTPUT_STREAM));
+
+        int rc = executor.execute(CommandLine.parse(command));
+
+        s_logger.debug("Called {} - rc = {}", command, rc);
+
+        return IOUtils.readLines(new ByteArrayInputStream(out.toByteArray()));
+    }
+
+    private static List<LsusbEntry> getLsusbInfo() throws Exception {
+        final List<LsusbEntry> lsusbEntries = new ArrayList<LsusbEntry>();
+
+        for (final String line : execute("lsusb")) {
+            LsusbEntry lsusbEntry = getLsusbEntry(line);
+            if (lsusbEntry != null) {
+                lsusbEntries.add(lsusbEntry);
             }
         }
         return lsusbEntries;

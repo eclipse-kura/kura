@@ -947,41 +947,42 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
 
             NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
-		    WifiMode wifiMode = WifiMode.UNKNOWN;
-		    WifiConfig wifiConfig = null;
-		    WifiInterfaceState wifiInterfaceState = null;
-		    if (type == NetInterfaceType.WIFI) {
-			    List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = getNetworkInterfaceConfigs();
-			    for(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-			        if(netInterfaceConfig.getName().equals(interfaceName)) {
-			            List<? extends NetInterfaceAddressConfig> netInterfaceAddresses = netInterfaceConfig.getNetInterfaceAddresses();
-			            if(netInterfaceAddresses != null) {
-			                for(NetInterfaceAddressConfig netInterfaceAddress : netInterfaceAddresses) {
-			                    if(netInterfaceAddress instanceof WifiInterfaceAddressConfig) {
-			                        wifiMode = ((WifiInterfaceAddressConfig) netInterfaceAddress).getMode();
-			                        
-			                        for(NetConfig netConfig : netInterfaceAddress.getConfigs()) {
-			                            if(netConfig instanceof NetConfigIP4) {
-			                                status = ((NetConfigIP4) netConfig).getStatus();
-			                                s_logger.debug("Interface status is set to {}", status);
-			                            } else if (netConfig instanceof WifiConfig) {
-			                                if(((WifiConfig)netConfig).getMode() == wifiMode) {
-			                                    wifiConfig = (WifiConfig) netConfig;
-			                                }
-			                            }
-			                        }
-			                    }
-			                }
-			            }
-			            break;
-			        }
-			    }
-			    
-			    wifiInterfaceState = new WifiInterfaceState(interfaceName, wifiMode);
-		    }
+            WifiMode wifiMode = WifiMode.UNKNOWN;
+            WifiConfig wifiConfig = null;
+            WifiInterfaceState wifiInterfaceState = null;
+            if (type == NetInterfaceType.WIFI) {
+                List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = getNetworkInterfaceConfigs();
+                for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
+                    if (netInterfaceConfig.getName().equals(interfaceName)) {
+                        List<? extends NetInterfaceAddressConfig> netInterfaceAddresses = netInterfaceConfig
+                                .getNetInterfaceAddresses();
+                        if (netInterfaceAddresses != null) {
+                            for (NetInterfaceAddressConfig netInterfaceAddress : netInterfaceAddresses) {
+                                if (netInterfaceAddress instanceof WifiInterfaceAddressConfig) {
+                                    wifiMode = ((WifiInterfaceAddressConfig) netInterfaceAddress).getMode();
+
+                                    for (NetConfig netConfig : netInterfaceAddress.getConfigs()) {
+                                        if (netConfig instanceof NetConfigIP4) {
+                                            status = ((NetConfigIP4) netConfig).getStatus();
+                                            s_logger.debug("Interface status is set to {}", status);
+                                        } else if (netConfig instanceof WifiConfig) {
+                                            if (((WifiConfig) netConfig).getMode() == wifiMode) {
+                                                wifiConfig = (WifiConfig) netConfig;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+
+                wifiInterfaceState = new WifiInterfaceState(interfaceName, wifiMode);
+            }
 		    
-		    if(!LinuxNetworkUtil.hasAddress(interfaceName) ||
-					((type == NetInterfaceType.WIFI) && (wifiInterfaceState != null) && !wifiInterfaceState.isLinkUp())) {
+            if (!LinuxNetworkUtil.hasAddress(interfaceName) || ((type == NetInterfaceType.WIFI)
+                    && (wifiInterfaceState != null) && !wifiInterfaceState.isLinkUp())) {
 		    
                 s_logger.info("bringing interface {} up", interfaceName);
 

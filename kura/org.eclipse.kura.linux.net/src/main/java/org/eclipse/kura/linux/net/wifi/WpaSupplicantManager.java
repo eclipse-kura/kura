@@ -73,10 +73,11 @@ public class WpaSupplicantManager {
             String wpaSupplicantCommand = formSupplicantStartCommand(interfaceName, configFile);
             s_logger.info("starting wpa_supplicant for the {} interface -> {}", interfaceName, wpaSupplicantCommand);
             int stat = LinuxProcessUtil.start(wpaSupplicantCommand);
-			if(stat != 0) {
-				s_logger.error("failed to start wpa_supplicant for the {} interface for unknown reason - errorCode={}", interfaceName, stat);
-				throw KuraException.internalError("failed to start hostapd for unknown reason");
-			}
+            if (stat != 0) {
+                s_logger.error("failed to start wpa_supplicant for the {} interface for unknown reason - errorCode={}",
+                        interfaceName, stat);
+                throw KuraException.internalError("failed to start hostapd for unknown reason");
+            }
         } catch (Exception e) {
             s_logger.error("Exception while enabling WPA Supplicant!", e);
             throw KuraException.internalError(e);
@@ -146,68 +147,48 @@ public class WpaSupplicantManager {
 	 * 
 	 * @throws Exception
 	 */
-	public static void stop(String ifaceName) throws KuraException {
-		try {
-			if (!s_isIntelEdison) {
-				int pid = getPid(ifaceName);
-				if (pid >= 0) {
-		    		s_logger.info("stopping wpa_suplicant for the {} interface, pid={}", ifaceName, pid);
-		    		
-		    		boolean exists = LinuxProcessUtil.stop(pid);
-		    		if (!exists) {
-		    			s_logger.warn("stopping wpa_supplicant for the {} inetrface, pid={} has failed", ifaceName, pid);
-		    		} else {
-		    			exists = LinuxProcessUtil.waitProcess(pid, 500, 5000);
-		    		}
-		    		
-		    		if (exists) {
-		    			s_logger.info("stopping wpa_supplicant for the {} interface - killing pid={}", ifaceName, pid);
-		    			exists = LinuxProcessUtil.kill(pid);
-		    			if (!exists) {
-		    				s_logger.warn("stopping wpa_supplicant for the {} interface - killing pid={} has failed", ifaceName, pid);
-		    			} else {
-		    				exists = LinuxProcessUtil.waitProcess(pid, 500, 5000);
-		    			}
-		    		}
-		    		
-		    		if (exists) {
-		    			s_logger.warn("Failed to stop hostapd for the {} interface", ifaceName);
-		    		}
-				} 
-			} else {
-				LinuxProcessUtil.start("systemctl stop hostapd");
-			}
-			if(ifaceName != null) {
-				LinuxNetworkUtil.disableInterface(ifaceName);
-				Thread.sleep(1000);
-			}
-		} catch (Exception e) {
-			throw KuraException.internalError(e);
-		}
-	}
+    public static void stop(String ifaceName) throws KuraException {
+        try {
+            if (!s_isIntelEdison) {
+                int pid = getPid(ifaceName);
+                if (pid >= 0) {
+                    s_logger.info("stopping wpa_suplicant for the {} interface, pid={}", ifaceName, pid);
+
+                    boolean exists = LinuxProcessUtil.stop(pid);
+                    if (!exists) {
+                        s_logger.warn("stopping wpa_supplicant for the {} inetrface, pid={} has failed", ifaceName,
+                                pid);
+                    } else {
+                        exists = LinuxProcessUtil.waitProcess(pid, 500, 5000);
+                    }
+
+                    if (exists) {
+                        s_logger.info("stopping wpa_supplicant for the {} interface - killing pid={}", ifaceName, pid);
+                        exists = LinuxProcessUtil.kill(pid);
+                        if (!exists) {
+                            s_logger.warn("stopping wpa_supplicant for the {} interface - killing pid={} has failed",
+                                    ifaceName, pid);
+                        } else {
+                            exists = LinuxProcessUtil.waitProcess(pid, 500, 5000);
+                        }
+                    }
+
+                    if (exists) {
+                        s_logger.warn("Failed to stop hostapd for the {} interface", ifaceName);
+                    }
+                }
+            } else {
+                LinuxProcessUtil.start("systemctl stop hostapd");
+            }
+            if (ifaceName != null) {
+                LinuxNetworkUtil.disableInterface(ifaceName);
+                Thread.sleep(1000);
+            }
+        } catch (Exception e) {
+            throw KuraException.internalError(e);
+        }
+    }
 		
-	// Only call this method after a call to stop or kill.
-	// FIXME: this is an utility method that should be moved in a suitable package.
-	/*
-	private static boolean waitProcess(int pid, long poll, long timeout) {
-		boolean exists = true;
-		try {
-			final long startTime = System.currentTimeMillis();
-			long now;
-			do {
-				Thread.sleep(poll);
-				exists = LinuxProcessUtil.stop(pid);
-				now = System.currentTimeMillis();
-			} while (exists && (now - startTime) < timeout);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			s_logger.warn("Interrupted waiting for pid {} to exit", pid);
-		}
-				
-		return exists;
-	}
-	*/
-	
     public static String getWpaSupplicantConfigFilename(String ifaceName) {
         StringBuilder sb = new StringBuilder();
         if (s_isIntelEdison) {

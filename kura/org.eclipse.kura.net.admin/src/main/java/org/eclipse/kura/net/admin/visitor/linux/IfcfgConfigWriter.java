@@ -332,11 +332,11 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
             // If config not present in file, append to end
             if (appendConfig) {
                 s_logger.debug("Appending entry to interface file...");
-				// append an empty line if not there 
-				String s = sb.toString();
-				if (!"\\n".equals(s.substring(s.length() - 1))) {
-					sb.append("\n");
-				}
+                // append an empty line if not there
+                String s = sb.toString();
+                if (!"\\n".equals(s.substring(s.length() - 1))) {
+                    sb.append("\n");
+                }
                 sb.append(debianWriteUtility(netInterfaceConfig, iName));
                 sb.append("\n");
             }

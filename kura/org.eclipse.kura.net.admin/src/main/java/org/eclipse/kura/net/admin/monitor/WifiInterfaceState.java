@@ -31,19 +31,19 @@ public class WifiInterfaceState extends InterfaceState {
      *            configured wifi mode as {@link WifiMode}
      * @throws KuraException
      */
-	public WifiInterfaceState(String interfaceName, WifiMode wifiMode) throws KuraException {
-		super(NetInterfaceType.WIFI, interfaceName);
-		if (WifiMode.MASTER.equals(wifiMode)) {
-			if (m_link) {
-				boolean isHostapdRunning = HostapdManager.isRunning(interfaceName);
-				boolean isIfaceInApMode = WifiMode.MASTER.equals(LinuxNetworkUtil.getWifiMode(interfaceName));
-				if (!isHostapdRunning || !isIfaceInApMode) {
-					s_logger.warn("WifiInterfaceState() :: !! Link is down for the " + interfaceName
-							+ " interface. isHostapdRunning? " + isHostapdRunning + " isIfaceInApMode? "
-							+ isIfaceInApMode);
-					m_link = false;
-				} 
-			}
-		}
-	}
+    public WifiInterfaceState(String interfaceName, WifiMode wifiMode) throws KuraException {
+        super(NetInterfaceType.WIFI, interfaceName);
+        if (WifiMode.MASTER.equals(wifiMode)) {
+            if (m_link) {
+                boolean isHostapdRunning = HostapdManager.isRunning(interfaceName);
+                boolean isIfaceInApMode = WifiMode.MASTER.equals(LinuxNetworkUtil.getWifiMode(interfaceName));
+                if (!isHostapdRunning || !isIfaceInApMode) {
+                    s_logger.warn("WifiInterfaceState() :: !! Link is down for the " + interfaceName
+                            + " interface. isHostapdRunning? " + isHostapdRunning + " isIfaceInApMode? "
+                            + isIfaceInApMode);
+                    m_link = false;
+                }
+            }
+        }
+    }
 }

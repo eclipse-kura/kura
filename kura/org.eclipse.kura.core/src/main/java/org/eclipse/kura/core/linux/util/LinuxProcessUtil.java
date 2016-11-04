@@ -276,33 +276,33 @@ public class LinuxProcessUtil {
     }
     
     public static int getPid(int pid) throws Exception {
-    	int ret = -1;
-    	StringTokenizer st = null;
+        int ret = -1;
+        StringTokenizer st = null;
         String line = null;
         SafeProcess proc = null;
         BufferedReader br = null;
         try {
-        	s_logger.trace("searching process list for pid{}", pid);
-        	if (IS_INTEL_EDISON) {
-        		proc = ProcessUtil.exec("ps");
+            s_logger.trace("searching process list for pid{}", pid);
+            if (IS_INTEL_EDISON) {
+                proc = ProcessUtil.exec("ps");
             } else {
-            	proc = ProcessUtil.exec("ps -ax");
+                proc = ProcessUtil.exec("ps -ax");
             }
             proc.waitFor();
 
             // get the output
             br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            br.readLine(); // skip first line: PID	TTY		STAT	TIME	COMMAND
+            br.readLine(); // skip first line: PID TTY STAT TIME COMMAND
             while ((line = br.readLine()) != null) {
-            	st = new StringTokenizer(line);
-            	try {
-	                int processID = Integer.parseInt(st.nextToken());
-	                if (processID == pid) {
-	                	ret = processID;
-	                }
-            	} catch (NumberFormatException e) {
-            		s_logger.error("getPid() :: NumberFormatException reading PID - {}", e);
-            	}
+                st = new StringTokenizer(line);
+                try {
+                    int processID = Integer.parseInt(st.nextToken());
+                    if (processID == pid) {
+                        ret = processID;
+                    }
+                } catch (NumberFormatException e) {
+                    s_logger.error("getPid() :: NumberFormatException reading PID - {}", e);
+                }
             }
             return ret;
         } catch (Exception e) {
@@ -401,20 +401,20 @@ public class LinuxProcessUtil {
     }
     
     public static boolean waitProcess(int pid, long poll, long timeout) {
-		boolean exists = false;
-		try {
-			final long startTime = System.currentTimeMillis();
-			long now;
-			do {
-				Thread.sleep(poll);
-				exists = (getPid(pid) >= 0)? true : false;
-				now = System.currentTimeMillis();
-			} while (exists && (now - startTime) < timeout);
-		} catch (Exception e) {
-			Thread.currentThread().interrupt();
-			s_logger.warn("Failed waiting for pid {} to exit - {}", pid, e);
-		}
-			
-		return exists;
-	}
+        boolean exists = false;
+        try {
+            final long startTime = System.currentTimeMillis();
+            long now;
+            do {
+                Thread.sleep(poll);
+                exists = (getPid(pid) >= 0) ? true : false;
+                now = System.currentTimeMillis();
+            } while (exists && (now - startTime) < timeout);
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
+            s_logger.warn("Failed waiting for pid {} to exit - {}", pid, e);
+        }
+
+        return exists;
+    }
 }

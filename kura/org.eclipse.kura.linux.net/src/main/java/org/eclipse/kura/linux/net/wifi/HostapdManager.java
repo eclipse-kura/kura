@@ -51,75 +51,55 @@ public class HostapdManager {
             String launchHostapdCommand = generateStartCommand(ifaceName);
             s_logger.info("starting hostapd for the {} interface --> {}", ifaceName, launchHostapdCommand);
             int stat = LinuxProcessUtil.start(launchHostapdCommand);
-			if(stat != 0) {
-				s_logger.error("failed to start hostapd for the {} interface for unknown reason - errorCode={}", ifaceName, stat);
-				throw KuraException.internalError("failed to start hostapd for unknown reason");
-			}
+            if (stat != 0) {
+                s_logger.error("failed to start hostapd for the {} interface for unknown reason - errorCode={}",
+                        ifaceName, stat);
+                throw KuraException.internalError("failed to start hostapd for unknown reason");
+            }
             Thread.sleep(1000);
         } catch (Exception e) {
             throw KuraException.internalError(e);
         }
     }
 
-	public static void stop(String ifaceName) throws KuraException {
-		try {
-			if (!s_isIntelEdison) {
-				int pid = getPid(ifaceName);
-				if (pid >= 0) {
-		    		s_logger.info("stopping hostapd for the {} interface, pid={}", ifaceName, pid);
-		    		
-		    		boolean exists = LinuxProcessUtil.stop(pid);
-		    		if (!exists) {
-		    			s_logger.warn("stopping hostapd for the {} inetrface, pid={} has failed", ifaceName, pid);
-		    		} else {
-		    			exists = LinuxProcessUtil.waitProcess(pid, 500, 5000);
-		    		}
-		    		
-		    		if (exists) {
-		    			s_logger.info("stopping hostapd for the {} interface - killing pid={}", ifaceName, pid);
-		    			exists = LinuxProcessUtil.kill(pid);
-		    			if (!exists) {
-		    				s_logger.warn("stopping hostapd for the {} interface - killing pid={} has failed", ifaceName, pid);
-		    			} else {
-		    				exists = LinuxProcessUtil.waitProcess(pid, 500, 5000);
-		    			}
-		    		}
-		    		
-		    		if (exists) {
-		    			s_logger.warn("Failed to stop hostapd for the {} interface", ifaceName);
-		    		}
-				}
-			} else {
-				LinuxProcessUtil.start("systemctl stop hostapd");
-				Thread.sleep(1000);
-			}
-		} catch (Exception e) {
-			throw KuraException.internalError(e);
-		}
-	}
-	
-	// Only call this method after a call to stop or kill.
-	// FIXME: this is an utility method that should be moved in a suitable package.
-	/*
-	private static boolean waitProcess(int pid, long poll, long timeout) {
-		boolean exists = true;
-		try {
-			final long startTime = System.currentTimeMillis();
-			long now;
-			do {
-				Thread.sleep(poll);
-				exists = LinuxProcessUtil.stop(pid);
-				now = System.currentTimeMillis();
-			} while (exists && (now - startTime) < timeout);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			s_logger.warn("Interrupted waiting for pid {} to exit", pid);
-		}
-			
-		return exists;
-	}
-	*/
+    public static void stop(String ifaceName) throws KuraException {
+        try {
+            if (!s_isIntelEdison) {
+                int pid = getPid(ifaceName);
+                if (pid >= 0) {
+                    s_logger.info("stopping hostapd for the {} interface, pid={}", ifaceName, pid);
 
+                    boolean exists = LinuxProcessUtil.stop(pid);
+                    if (!exists) {
+                        s_logger.warn("stopping hostapd for the {} inetrface, pid={} has failed", ifaceName, pid);
+                    } else {
+                        exists = LinuxProcessUtil.waitProcess(pid, 500, 5000);
+                    }
+
+                    if (exists) {
+                        s_logger.info("stopping hostapd for the {} interface - killing pid={}", ifaceName, pid);
+                        exists = LinuxProcessUtil.kill(pid);
+                        if (!exists) {
+                            s_logger.warn("stopping hostapd for the {} interface - killing pid={} has failed",
+                                    ifaceName, pid);
+                        } else {
+                            exists = LinuxProcessUtil.waitProcess(pid, 500, 5000);
+                        }
+                    }
+
+                    if (exists) {
+                        s_logger.warn("Failed to stop hostapd for the {} interface", ifaceName);
+                    }
+                }
+            } else {
+                LinuxProcessUtil.start("systemctl stop hostapd");
+                Thread.sleep(1000);
+            }
+        } catch (Exception e) {
+            throw KuraException.internalError(e);
+        }
+    }
+	
     public static boolean isRunning(String ifaceName) throws KuraException {
         try {
             boolean ret = false;

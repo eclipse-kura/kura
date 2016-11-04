@@ -403,7 +403,7 @@ below:
 ```
 3.  Add an entry in the dpa.properties file to include the new package name, such as:  
 ```
-package_name=file\\:/opt/eclipse/kura/kura/packages/package_filename.dp
+package_name=file\:/opt/eclipse/kura/kura/packages/package_filename.dp
 ```  
 where, “package_name” and “package_filename” should be replaced with the actual name of the deployment package.
 

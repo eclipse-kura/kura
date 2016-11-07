@@ -13,8 +13,9 @@ package org.eclipse.kura.message;
 
 /**
  * Models a topic for messages posted to the Kura platform.
- * Topic are expected to be in the form of "account/asset/<application_specific>";
- * system topic starts with the $EDC account.
+ * Topics are expected to be in the form of "account/asset/<application_specific>";
+ * The system control topic prefix is defined in the {@link CloudService} and defaults
+ * to $EDC.
  */
 public class KuraTopic {
 

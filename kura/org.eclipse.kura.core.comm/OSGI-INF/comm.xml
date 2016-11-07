@@ -13,7 +13,7 @@
       Red Hat Inc - clean up
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.eclipse.kura.core.comm.CommConnectionFactory">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.kura.core.comm.CommConnectionFactory">
    <implementation class="org.eclipse.kura.core.comm.CommConnectionFactory"/>
    <service>
       <provide interface="org.osgi.service.io.ConnectionFactory"/>

@@ -145,6 +145,9 @@ import org.osgi.service.component.ComponentConstants;
  * (kura.service.pid = org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport - 2)
  * </pre>
  *
+ * Since {@link org.eclipse.kura.cloud.factory} 1.1.0, the CloudService instance contains a property that maps the
+ * instance with the {@link org.eclipse.kura.cloud.factory.CloudServiceFactory} implementation that generated it.
+ * 
  * <br>
  */
 public class DefaultCloudServiceFactory implements CloudServiceFactory {

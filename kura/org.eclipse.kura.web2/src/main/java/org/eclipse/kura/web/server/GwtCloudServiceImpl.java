@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import static org.eclipse.kura.cloud.factory.CloudServiceFactory.KURA_CLOUD_SERVICE_FACTORY_PID;
+import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -18,7 +21,6 @@ import java.util.List;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.factory.CloudServiceFactory;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -34,10 +36,8 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
 
     private static final String COMPONENT_NAME = "component.name";
     private static final String SERVICE_FACTORY_PID = "service.factoryPid";
-    private static final String KURA_SERVICE_PID = ConfigurationService.KURA_SERVICE_PID;
     private static final String KURA_UI_CSF_PID_DEFAULT = "kura.ui.csf.pid.default";
     private static final String KURA_UI_CSF_PID_REGEX = "kura.ui.csf.pid.regex";
-    private static final String KURA_CLOUD_SERVICE_FACTORY_PID = "kura.cloud.service.factory.pid";
 
     @Override
     public List<GwtCloudConnectionEntry> findCloudServices() throws GwtKuraException {
@@ -157,7 +157,7 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     }
 
     @Override
-    public String getSuggestedCloudServicePid(String factoryPid) throws GwtKuraException {
+    public String findSuggestedCloudServicePid(String factoryPid) throws GwtKuraException {
         Collection<ServiceReference<CloudServiceFactory>> cloudServiceFactoryReferences = ServiceLocator.getInstance()
                 .getServiceReferences(CloudServiceFactory.class, null);
 
@@ -177,7 +177,7 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     }
 
     @Override
-    public String getCloudServicePidRegex(String factoryPid) throws GwtKuraException {
+    public String findCloudServicePidRegex(String factoryPid) throws GwtKuraException {
         Collection<ServiceReference<CloudServiceFactory>> cloudServiceFactoryReferences = ServiceLocator.getInstance()
                 .getServiceReferences(CloudServiceFactory.class, null);
 

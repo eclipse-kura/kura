@@ -64,7 +64,10 @@ public interface CloudServiceFactory {
     /**
      * The name of the property set in a @{link CloudService} configuration created
      * through {@link #createConfiguration}.
-     * The property is set to the value returned by {@link #getFactoryPid()}.
+     * The property is set in the cloud service instance to relate it with the Factory that generated the whole cloud
+     * stack.
+     * 
+     * @since {@link org.eclipse.kura.cloud.factory} 1.1.0
      */
     public static final String KURA_CLOUD_SERVICE_FACTORY_PID = "kura.cloud.service.factory.pid";
 
@@ -135,6 +138,7 @@ public interface CloudServiceFactory {
      * @throws KuraException
      *             if the specified <i>kura.service.pid</i> is not correct or compliant with what the factory
      *             implementation expects
+     * @since {@link org.eclipse.kura.cloud.factory} 1.1.0
      */
     List<String> getStackComponentsPids(String pid) throws KuraException;
 

@@ -36,22 +36,25 @@ import org.slf4j.LoggerFactory;
 
 public class CommConnectionImpl implements CommConnection, Closeable {
 
+    private static final String JAVA_EXT_DIRS = "java.ext.dirs";
+    private static final String KURA_EXT_DIR = "kura.ext.dir";
+    
     private static final Logger logger = LoggerFactory.getLogger(CommConnectionImpl.class);
 
     // set up the appropriate ext dir for RXTX extra device nodes
     static {
-        String kuraExtDir = System.getProperty("kura.ext.dir");
+        String kuraExtDir = System.getProperty(KURA_EXT_DIR);
         if (kuraExtDir != null) {
             StringBuffer sb = new StringBuffer();
-            String existingDirs = System.getProperty("java.ext.dirs");
+            String existingDirs = System.getProperty(JAVA_EXT_DIRS);
             if (existingDirs != null) {
                 if (!existingDirs.contains(kuraExtDir)) {
                     sb.append(existingDirs).append(File.pathSeparator).append(kuraExtDir);
-                    System.setProperty("java.ext.dirs", sb.toString());
+                    System.setProperty(JAVA_EXT_DIRS, sb.toString());
                 }
             } else {
                 sb.append(kuraExtDir);
-                System.setProperty("java.ext.dirs", sb.toString());
+                System.setProperty(JAVA_EXT_DIRS, sb.toString());
             }
         }
     }
@@ -104,7 +107,7 @@ public class CommConnectionImpl implements CommConnection, Closeable {
     @Override
     public synchronized InputStream openInputStream() throws IOException {
         checkIfClosed();
-        
+
         if (this.inputStream == null) {
             this.inputStream = this.serialPort.getInputStream();
         }
@@ -119,7 +122,7 @@ public class CommConnectionImpl implements CommConnection, Closeable {
     @Override
     public synchronized OutputStream openOutputStream() throws IOException {
         checkIfClosed();
-        
+
         if (this.outputStream == null) {
             this.outputStream = this.serialPort.getOutputStream();
         }
@@ -150,13 +153,13 @@ public class CommConnectionImpl implements CommConnection, Closeable {
             throw new IOException("Connection is already closed");
         }
     }
-    
+
     @Override
     public synchronized void sendMessage(byte[] message) throws KuraException, IOException {
         checkIfClosed();
-        
+
         if (message == null) {
-            throw new NullPointerException("Messahe must not be null");
+            throw new NullPointerException("Message must not be null");
         }
 
         if (logger.isDebugEnabled()) {
@@ -207,11 +210,11 @@ public class CommConnectionImpl implements CommConnection, Closeable {
             return null;
         }
     }
-    
+
     @Override
     public synchronized byte[] sendCommand(byte[] command, int timeout, int demark) throws KuraException, IOException {
         checkIfClosed();
-        
+
         if (command == null) {
             throw new NullPointerException("Serial command must not be null");
         }
@@ -246,7 +249,7 @@ public class CommConnectionImpl implements CommConnection, Closeable {
     @Override
     public synchronized byte[] flushSerialBuffer() throws KuraException, IOException {
         checkIfClosed();
-        
+
         ByteBuffer buffer = getResponse(50);
         if (buffer != null) {
             byte[] response = new byte[buffer.limit()];

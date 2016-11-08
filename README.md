@@ -1,5 +1,5 @@
 Eclipse Kura™
-====
+=============
 An OSGi-based Application Framework for M2M Service Gateways
 
 
@@ -15,6 +15,12 @@ Description
 Kura aims at offering a Java/OSGi-based container for M2M applications running in service gateways. Kura provides or, when available, aggregates open source implementations for the most common services needed by M2M applications. Kura components are designed as configurable OSGi Declarative Service exposing service API and raising events. While several Kura components are in pure Java, others are invoked through JNI and have a dependency on the Linux operating system.
 
 For more information, see the [Eclipse project proposal](http://www.eclipse.org/proposals/technology.kura/).
+
+
+System Requirements
+-------------------
+
+Eclipse Kura requires at least Java 8 and OSGi R6. All bundles can make use of a Java 8 as execution environment. All bundles must be limited to the "compact2" profile of Java.
 
 
 Development Model

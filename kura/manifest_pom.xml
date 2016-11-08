@@ -61,8 +61,8 @@
         <module>org.eclipse.kura.stress</module>
         <module>emulator</module>
         <module>org.eclipse.kura.core.test</module>
-        <module>org.eclipse.kura.windows.command</module>
-        <module>org.eclipse.kura.windows.clock</module>
+        <!--<module>org.eclipse.kura.windows.command</module>
+        <module>org.eclipse.kura.windows.clock</module>-->
         <module>examples</module>
     </modules>
 

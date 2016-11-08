@@ -971,7 +971,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/slf4j.api_${slf4j.api.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
-			    value=", reference:file:${kura.install.dir}/kura/plugins/jcl.over.slf4j_${jcl.over.slf4j.version}.jar@3:start" />
+			    value=", reference:file:${kura.install.dir}/kura/plugins/jcl-over-slf4j_${jcl.over.slf4j.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/slf4j.log4j12_${slf4j.log4j12.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"

@@ -268,7 +268,7 @@
 									<artifactId>org.eclipse.kura.example.camel.quickstart</artifactId>
 									<version>${org.eclipse.kura.example.camel.quickstart.version}</version>
 								</artifactItem>
-								<artifactItem>
+								<!--<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.windows.command</artifactId>
 									<version>${org.eclipse.kura.windows.command.version}</version>
@@ -277,7 +277,7 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.windows.clock</artifactId>
 									<version>${org.eclipse.kura.windows.clock.version}</version>
-								</artifactItem>
+								</artifactItem>-->
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -413,8 +413,8 @@
   								<move file="target/plugins/org.eclipse.kura.emulator.watchdog.jar" tofile="target/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.example.camel.aggregation.jar" tofile="target/plugins/org.eclipse.kura.example.camel.aggregation_${org.eclipse.kura.example.camel.aggregation.version}.jar" failonerror="false"/>
 								<move file="target/plugins/org.eclipse.kura.example.camel.quickstart.jar" tofile="target/plugins/org.eclipse.kura.example.camel.quickstart_${org.eclipse.kura.example.camel.quickstart.version}.jar" failonerror="false"/>
-							    <move file="target/plugins/org.eclipse.kura.windows.command.jar" tofile="target/plugins/org.eclipse.kura.windows.command_${org.eclipse.kura.windows.command.version}.jar"/>
-							    <move file="target/plugins/org.eclipse.kura.windows.clock.jar" tofile="target/plugins/org.eclipse.kura.windows.clock_${org.eclipse.kura.windows.clock.version}.jar"/>
+							    <!--<move file="target/plugins/org.eclipse.kura.windows.command.jar" tofile="target/plugins/org.eclipse.kura.windows.command_${org.eclipse.kura.windows.command.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.windows.clock.jar" tofile="target/plugins/org.eclipse.kura.windows.clock_${org.eclipse.kura.windows.clock.version}.jar"/>-->
 							</tasks>
 						</configuration>
 					</execution>

@@ -150,7 +150,11 @@
                 <repository>
                     <id>p2-repo-equinox_3.11.1</id>
                     <layout>p2</layout>
+<<<<<<< HEAD
                     <url>file:////${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
+=======
+                    <url>file:////${kura.basedir}/target-definition/equinox_3.8.1/repository/</url>
+>>>>>>> a47d3de... added structure for the new unit test projects
                 </repository>
             </repositories>
         </profile>
@@ -166,7 +170,11 @@
                 <repository>
                     <id>p2-repo-equinox_3.11.1</id>
                     <layout>p2</layout>
+<<<<<<< HEAD
                     <url>file:////${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
+=======
+                    <url>file:////${kura.basedir}/target-definition/equinox_3.8.1/repository/</url>
+>>>>>>> a47d3de... added structure for the new unit test projects
                 </repository>
             </repositories>
         </profile>
@@ -221,7 +229,7 @@
         <repository>
             <id>p2-repo-common</id>
             <layout>p2</layout>
-            <url>file:///${kura.basedir}/target-definition/common/repository/</url>
+            <url>file:////${kura.basedir}/target-definition/common/repository/</url>
         </repository>
         <repository>
             <id>kura_addons</id>

@@ -36,8 +36,10 @@ import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -84,11 +86,12 @@ public class SnapshotsTabUi extends Composite implements Tab {
     Hidden xsrfTokenField;
     @UiField
     CellTable<GwtSnapshot> snapshotsGrid = new CellTable<GwtSnapshot>();
+    
+    private Element downloadIframe;
 
     private final ListDataProvider<GwtSnapshot> snapshotsDataProvider = new ListDataProvider<GwtSnapshot>();
     final SingleSelectionModel<GwtSnapshot> selectionModel = new SingleSelectionModel<GwtSnapshot>();
 
-    private CustomWindow m_downloadWindow;
     GwtSnapshot selected;
 
     public SnapshotsTabUi() {
@@ -97,6 +100,8 @@ public class SnapshotsTabUi extends Composite implements Tab {
         initTable();
         this.snapshotsGrid.setSelectionModel(this.selectionModel);
 
+        initDownloadIframe();
+        
         initInterfaceButtons();
 
         initUploadModalHandlers();
@@ -117,7 +122,7 @@ public class SnapshotsTabUi extends Composite implements Tab {
             }
         });
     }
-
+    
     @Override
     public void setDirty(boolean flag) {
     }
@@ -260,7 +265,6 @@ public class SnapshotsTabUi extends Composite implements Tab {
                 if (SnapshotsTabUi.this.selected != null) {
                     // please see
                     // http://stackoverflow.com/questions/13277752/gwt-open-window-after-rpc-is-prevented-by-popup-blocker
-                    SnapshotsTabUi.this.m_downloadWindow = CustomWindow.open(null, "_blank", "location=no");
                     SnapshotsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                         @Override
@@ -296,6 +300,13 @@ public class SnapshotsTabUi extends Composite implements Tab {
         });
     }
 
+    private native void initDownloadIframe() /*-{
+		var iframe = document.createElement('iframe');
+		iframe.style.display = 'none'
+		document.getElementsByTagName('body')[0].appendChild(iframe);
+		this.@org.eclipse.kura.web.client.ui.Settings.SnapshotsTabUi::downloadIframe = iframe;
+	}-*/;
+    
     private void rollback() {
         final GwtSnapshot snapshot = this.selectionModel.getSelectedObject();
         if (snapshot != null) {
@@ -364,10 +375,15 @@ public class SnapshotsTabUi extends Composite implements Tab {
 
         Long snapshot = this.selected.getSnapshotId();
         sbUrl.append("/" + GWT.getModuleName() + "/device_snapshots?").append("snapshotId=").append(snapshot)
-                .append("&").append("xsrfToken=").append(tokenId);
+                .append("&").append("xsrfToken=").append(URL.encodeQueryString(tokenId));
 
-        this.m_downloadWindow.setUrl(sbUrl.toString());
+        downloadFile(sbUrl.toString());
     }
+    
+    private native void downloadFile(String url) /*-{
+    		var downloadIframe = this.@org.eclipse.kura.web.client.ui.Settings.SnapshotsTabUi::downloadIframe;
+    		downloadIframe.setAttribute('src', url);
+    }-*/;
 
     private void uploadAndApply() {
         this.uploadModal.show();

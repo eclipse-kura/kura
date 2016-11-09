@@ -231,6 +231,11 @@
 									<artifactId>org.eclipse.kura.windows.launcher</artifactId>
 									<version>${org.eclipse.kura.windows.launcher.version}</version>
 								</artifactItem>
+								<artifactItem>
+									<groupId>org.mockito</groupId>
+									<artifactId>mockito-core</artifactId>
+									<version>${mockito-core.version}</version>
+								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

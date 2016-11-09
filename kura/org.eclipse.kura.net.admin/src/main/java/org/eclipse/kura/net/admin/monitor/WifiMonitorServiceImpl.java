@@ -267,6 +267,10 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                         this.m_first = false;
                         interfacesToReconfigure.add(interfaceName);
                         disableInterface(interfaceName);
+                        // Update the current wifi state
+                        m_interfaceStatuses.remove(interfaceName);
+                        m_interfaceStatuses.put(interfaceName,
+                                new InterfaceState(NetInterfaceType.WIFI, interfaceName));
                     }
 
                     // Get current state

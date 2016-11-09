@@ -12,7 +12,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TestUtil {
+
+    private static final Logger logger = LoggerFactory.getLogger(TestUtil.class);
 
     private static Field getField(Object svc, String fieldName) throws NoSuchFieldException {
         Field field = null;
@@ -41,11 +46,11 @@ public class TestUtil {
             field.setAccessible(true);
             result = field.get(svc);
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            logger.warn(e.getMessage(), e);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            logger.warn(e.getMessage(), e);
         } catch (NoSuchFieldException e) {
-            e.printStackTrace();
+            logger.warn(e.getMessage(), e);
         }
 
         return result;
@@ -82,9 +87,9 @@ public class TestUtil {
             Object result = method.invoke(svc, params);
             return result;
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            logger.warn(e.getMessage(), e);
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            logger.warn(e.getMessage(), e);
         } catch (InvocationTargetException e) {
             throw e.getCause();
         }
@@ -100,9 +105,9 @@ public class TestUtil {
         try {
             field.set(svc, value);
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            logger.warn(e.getMessage(), e);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            logger.warn(e.getMessage(), e);
         }
     }
 

@@ -50,7 +50,7 @@ Copyright (c) 2016 Eurotech and/or its affiliates and others
 
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.12.4</version>
+                <version>2.7.2</version>
                 <executions>
                     <execution>
                         <id>default-test</id>
@@ -92,7 +92,7 @@ Copyright (c) 2016 Eurotech and/or its affiliates and others
 <!--
         <module>org.eclipse.kura.core.configuration.test</module>
         <module>org.eclipse.kura.core.net.test</module>
-		<module>org.eclipse.kura.core.test</module>
+        <module>org.eclipse.kura.core.test</module>
 -->
         <module>org.eclipse.kura.core.testutil</module>
     </modules>

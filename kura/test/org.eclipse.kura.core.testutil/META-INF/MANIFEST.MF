@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.core.testutil
+Bundle-SymbolicName: org.eclipse.kura.core.testutil;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: javax.comm,
+ junit.framework,
+ org.junit,
+ org.slf4j;version="1.6.4"
+Bundle-ActivationPolicy: lazy
+Comment: Unit testing utilities
+Require-Bundle: org.junit;bundle-version="4.12.0",
+ org.mockito.mockito-core;bundle-version="1.10.19"
+Export-Package: org.eclipse.kura.core.testutil

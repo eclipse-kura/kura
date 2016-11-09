@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="start" configuration-policy="require" deactivate="stop" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.example.camel.publisher.ExamplePublisher">
+	<implementation class="org.eclipse.kura.example.camel.publisher.ExamplePublisher"/>
+	<service>
+  <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+	</service>
+	<property name="service.pid" type="String" value="org.eclipse.kura.example.camel.publisher.ExamplePublisher"/>
+</scr:component>

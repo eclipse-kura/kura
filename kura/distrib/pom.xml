@@ -1940,6 +1940,65 @@
 			</build>
 		</profile>
 
+		<profile>
+			<id>Win32-nn</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+					</resource>
+				</resources>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>buildnumber-maven-plugin</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<phase>validate</phase>
+								<goals>
+									<goal>create-timestamp</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>Win32-nn-jars</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="Win32-nn" />
+										<property name="target.device" value="Win32" />
+										<property name="kura.os.version" value="Windows (x86)" />
+										<property name="kura.arch" value="x86" />
+										<property name="kura.mem.size" value="256m" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
+											target="dist-windows" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>	
 
 		<profile>
 			<id>Win64-nn</id>
@@ -1987,8 +2046,8 @@
 										<property name="build.name" value="Win64-nn" />
 										<property name="target.device" value="Win64" />
 										<property name="native.tag" value="win64"/>
-										<property name="kura.os.version" value="Windows 64" />
-										<property name="kura.arch" value="x64" />
+										<property name="kura.os.version" value="Windows (x64)" />
+										<property name="kura.arch" value="x86_64" />
 										<property name="kura.mem.size" value="256m" />
 										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"

@@ -482,7 +482,7 @@ public class CloudInstancesUi extends Composite {
     }
 
     private void getSuggestedCloudServicePid(final String factoryPid) {
-        this.gwtCloudService.getSuggestedCloudServicePid(factoryPid, new AsyncCallback<String>() {
+        this.gwtCloudService.findSuggestedCloudServicePid(factoryPid, new AsyncCallback<String>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -506,7 +506,7 @@ public class CloudInstancesUi extends Composite {
     }
 
     private void getCloudServicePidRegex(final String factoryPid) {
-        this.gwtCloudService.getCloudServicePidRegex(factoryPid, new AsyncCallback<String>() {
+        this.gwtCloudService.findCloudServicePidRegex(factoryPid, new AsyncCallback<String>() {
 
             @Override
             public void onFailure(Throwable caught) {

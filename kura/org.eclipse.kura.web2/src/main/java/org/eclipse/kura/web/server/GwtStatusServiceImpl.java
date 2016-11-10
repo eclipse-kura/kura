@@ -191,8 +191,6 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
             final DataService dataService = ServiceLocator.getInstance().getService(dataServiceReference);
             try {
                 if (dataService != null) {
-                    pairs.add(new GwtGroupedNVPair("cloudStatus", "Connection Status",
-                            dataService.isConnected() ? "CONNECTED" : "DISCONNECTED"));
                     pairs.add(new GwtGroupedNVPair("cloudStatus", "Auto-connect",
                             dataService.isAutoConnectEnabled()
                                     ? "ON (Retry Interval is " + Integer.toString(dataService.getRetryInterval()) + "s)"

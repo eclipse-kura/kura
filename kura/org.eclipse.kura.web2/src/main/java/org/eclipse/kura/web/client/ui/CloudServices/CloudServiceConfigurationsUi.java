@@ -170,8 +170,7 @@ public class CloudServiceConfigurationsUi extends Composite {
             }
 
             @Override
-            public void onSuccess(List<String> result) {
-                final List<String> pidsResult = result;
+            public void onSuccess(final List<String> pids) {
 
                 CloudServiceConfigurationsUi.this.gwtXSRFService
                         .generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
@@ -195,10 +194,12 @@ public class CloudServiceConfigurationsUi extends Composite {
                             @Override
                             public void onSuccess(List<GwtConfigComponent> result) {
                                 boolean isFirstEntry = true;
-                                for (GwtConfigComponent pair : result) {
-                                    if (pidsResult.contains(pair.getComponentId())) {
-                                        renderTabs(pair, isFirstEntry);
-                                        isFirstEntry = false;
+                                for (String cloudStackPid : pids) {
+                                    for (GwtConfigComponent pair : result) {
+                                        if (cloudStackPid.equals(pair.getComponentId())) {
+                                            renderTabs(pair, isFirstEntry);
+                                            isFirstEntry = false;
+                                        }
                                     }
                                 }
                             }
@@ -210,16 +211,7 @@ public class CloudServiceConfigurationsUi extends Composite {
     }
 
     private void renderTabs(GwtConfigComponent config, boolean isFirstEntry) {
-        String selectedCloudServicePid = config.getComponentId();
-        String name0;
-        int start = selectedCloudServicePid.lastIndexOf('.');
-        int substringIndex = start + 1;
-        if (start != -1 && substringIndex < selectedCloudServicePid.length()) {
-            name0 = selectedCloudServicePid.substring(substringIndex);
-        } else {
-            name0 = selectedCloudServicePid;
-        }
-        final String simplifiedComponentName = name0;
+        final String simplifiedComponentName = getSimplifiedComponentName(config);
         TabListItem item = new TabListItem(simplifiedComponentName);
         item.setDataTarget("#" + simplifiedComponentName);
         item.addClickHandler(new ClickHandler() {
@@ -248,4 +240,16 @@ public class CloudServiceConfigurationsUi extends Composite {
         serviceConfigurationBinder.renderForm();
     }
 
+    private String getSimplifiedComponentName(GwtConfigComponent config) {
+        String selectedCloudServicePid = config.getComponentId();
+        String tempName;
+        int start = selectedCloudServicePid.lastIndexOf('.');
+        int substringIndex = start + 1;
+        if (start != -1 && substringIndex < selectedCloudServicePid.length()) {
+            tempName = selectedCloudServicePid.substring(substringIndex);
+        } else {
+            tempName = selectedCloudServicePid;
+        }
+        return tempName;
+    }
 }

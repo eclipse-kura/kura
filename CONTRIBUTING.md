@@ -19,6 +19,7 @@ In order to get you started as fast as possible we need to go through some organ
 Kura is an [Eclipse IoT](http://iot.eclipse.org) project and as such is governed by the Eclipse Development process.
 This process helps us in creating great open source software within a safe legal framework.
 
+### First Steps
 For you as a contributor, the following preliminary steps are required in order for us to be able to accept your contribution:
 
 * Sign the [Eclipse Foundation Contributor License Agreement](http://www.eclipse.org/legal/CLA.php).
@@ -30,6 +31,39 @@ If you don't already have an account simply [register on the Eclipse web site](h
 
 * Add your GiHub username to your Eclipse Foundation account. Log in to Eclipse and go to [Edit my account](https://dev.eclipse.org/site_login/myaccount.php).
 
+### File Headers
+A proper header must be in place for any file contributed to Eclipse Kura. For a new contribution, please add the below header:
+
+```
+/*******************************************************************************
+ * Copyright (c) 2016 <legal entity> and/or its affiliates and others
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ *******************************************************************************/
+ ```
+ 
+ Please ensure \<legal entity\> is replaced with the relevant information. If you are editing an existing contribution, feel free
+ to create or add your legal entity to the contributors section as such:
+ 
+ ```
+ /*******************************************************************************
+ * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     <legal entity>
+ *******************************************************************************/
+ ```
+ 
+### How to Contribute
 The easiest way to contribute code/patches/whatever is by creating a GitHub pull request (PR). When you do make sure that you *Sign-off* your commit records using the same email address used for your Eclipse account.
 
 You do this by adding the `-s` flag when you make the commit(s), e.g.
@@ -49,6 +83,7 @@ You can find all the details in the [Contributing via Git](http://wiki.eclipse.o
 * Make your changes
 * Make sure you include test cases for non-trivial features
 * Make sure the test suite passes after your changes
+* Make sure proper headers are in place for each file (see above Legal Requirements)
 * Commit your changes into that branch
 * Use descriptive and meaningful commit messages
 * If you have a lot of commits squash them into a single commit

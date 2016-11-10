@@ -1137,6 +1137,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
         try {
             if (wifiMode == WifiMode.MASTER) {
+                reloadKernelModule(ifaceName, WifiMode.INFRA);
                 WpaSupplicantConfigWriter wpaSupplicantConfigWriter = WpaSupplicantConfigWriter.getInstance();
                 wpaSupplicantConfigWriter.generateTempWpaSupplicantConf();
 
@@ -1278,6 +1279,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                     s_logger.debug("getWifiHotspots() :: stoping temporary instance of wpa_supplicant");
                     WpaSupplicantManager.stop(ifaceName);
                 }
+                reloadKernelModule(ifaceName, WifiMode.MASTER);
             }
         } catch (Throwable t) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, t, "scan operation has failed");
@@ -1673,4 +1675,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     private int frequencyMhz2Channel(int frequency) {
         return (frequency - 2407) / 5;
     }
+
+    private void reloadKernelModule(String interfaceName, WifiMode wifiMode) throws KuraException {
+        s_logger.info("monitor() :: reload {} using kernel module for WiFi mode {}", interfaceName, wifiMode);
+        LinuxNetworkUtil.unloadKernelModule(interfaceName);
+        LinuxNetworkUtil.loadKernelModule(interfaceName, wifiMode);
+    }
+
 }

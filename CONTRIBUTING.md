@@ -36,7 +36,7 @@ A proper header must be in place for any file contributed to Eclipse Kura. For a
 
 ```
 /*******************************************************************************
- * Copyright (c) 2016 <legal entity> and/or its affiliates and others
+ * Copyright (c) 2016 <legal entity> and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -51,7 +51,7 @@ A proper header must be in place for any file contributed to Eclipse Kura. For a
  
  ```
  /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016 <legal entity> and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0

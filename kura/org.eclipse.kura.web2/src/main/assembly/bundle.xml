@@ -1,15 +1,12 @@
 <?xml version="1.0"?>
 <!--
 
-    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
-
-    Contributors:
-      Eurotech
 
 -->
 <assembly>
@@ -32,6 +29,13 @@
             <includes>
                 <include>denali.html</include>
                 <include>denali.css</include>
+                <include>backbone.min.js</include>
+                <include>joint.min.css</include>
+                <include>joint.min.js</include>
+                <include>joint.shapes.devs.js</include>
+                <include>jquery.min.js</include>
+                <include>kura_wires.js</include>
+                <include>lodash.min.js</include>
                 <include>denali/**</include>
                 <include>kura/**</include>
                 <include>gxt/**</include>

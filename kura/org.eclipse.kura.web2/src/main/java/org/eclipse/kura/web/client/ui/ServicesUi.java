@@ -1,13 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     Eurotech
  *******************************************************************************/
 /*
  * Render the Content in the Main Panel corressponding to Service (GwtBSConfigComponent) selected in the Services Panel
@@ -75,18 +73,22 @@ public class ServicesUi extends AbstractServicesUi {
     Modal modal;
 
     @UiField
-    Button apply, reset;
+    Button apply, reset, delete;
     @UiField
     FieldSet fields;
     @UiField
     Form form;
+    @UiField
+    Button deleteButton;
 
     @UiField
-    Modal incompleteFieldsModal;
+    Modal incompleteFieldsModal, deleteModal;
     @UiField
     Alert incompleteFields;
     @UiField
     Text incompleteFieldsText;
+    @UiField
+    Alert deleteMessage;
 
     //
     // Public methods
@@ -116,12 +118,30 @@ public class ServicesUi extends AbstractServicesUi {
                 reset();
             }
         });
+        
+        delete.setText(MSGS.delete());
+        delete.addClickHandler(new ClickHandler(){
+
+            @Override
+            public void onClick(ClickEvent event) {
+                deleteModal.show();
+            }});
+        
+        deleteButton.addClickHandler(new ClickHandler(){
+
+            @Override
+            public void onClick(ClickEvent event) {
+                delete();
+            }});
+        deleteMessage.setText(MSGS.deleteWarning());
+        
         renderForm();
         initInvalidDataModal();
 
         setDirty(false);
         this.apply.setEnabled(false);
         this.reset.setEnabled(false);
+        delete.setEnabled(m_configurableComponent.isFactoryComponent());
     }
 
     @Override
@@ -184,6 +204,43 @@ public class ServicesUi extends AbstractServicesUi {
             this.modal.add(footer);
             this.modal.show();
         }                   // end is dirty
+    }
+    
+    public void delete(){
+        if(m_configurableComponent.isFactoryComponent()){
+            EntryClassUi.showWaitModal();
+            gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+                @Override
+                public void onFailure(Throwable ex) {
+                    EntryClassUi.hideWaitModal();
+                    FailureHandler.handle(ex);
+                }
+
+                @Override
+                public void onSuccess(GwtXSRFToken token) {
+                    gwtComponentService.deleteFactoryConfiguration(token, m_configurableComponent.getComponentId(), true, new AsyncCallback<Void>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            EntryClassUi.hideWaitModal();
+                            errorLogger.log(Level.SEVERE, caught.getLocalizedMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            modal.hide();   
+                            logger.info(MSGS.info()+": " + MSGS.deviceConfigDeleted());
+                            apply.setEnabled(false);
+                            reset.setEnabled(false);
+                            setDirty(false);
+                            entryClass.initServicesTree();
+                            EntryClassUi.hideWaitModal();
+                        }
+                    });
+                }
+            });
+        }
     }
 
     // TODO: Separate render methods for each type (ex: Boolean, String,

@@ -82,6 +82,11 @@
 									<version>${org.eclipse.kura.sun.misc.version}</version>
 								</artifactItem>
 								<artifactItem>
+								    <groupId>org.json</groupId>
+								    <artifactId>json</artifactId>
+								    <version>${org.json.version}</version>
+								</artifactItem>
+								<artifactItem>
 									<groupId>org.tigris</groupId>
 									<artifactId>org.tigris.mtoolkit.iagent.rpc</artifactId>
 									<version>${org.tigris.mtoolkit.iagent.rpc.version}</version>

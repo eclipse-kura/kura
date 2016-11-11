@@ -2,15 +2,12 @@
 
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
-
-    Contributors:
-      Eurotech
 
 -->
 
@@ -58,6 +55,10 @@
                         <b:Button ui:field="reset"
                             addStyleNames="fa fa-times"></b:Button>
                     </b:ButtonGroup>
+                    <b:ButtonGroup size="SMALL" addStyleNames="pull-right">
+					    <b:Button ui:field="delete" 
+					    	addStyleNames="fa fa-trash"></b:Button>
+					</b:ButtonGroup>
                 </b:Panel>
             </b:Row>
 
@@ -82,6 +83,16 @@
                     </b:Panel>
                 </b:ModalBody>
             </b:Modal>
+            <b:Modal closable="true" dataKeyboard="true" b:id="deleteModal" 
+            	ui:field="deleteModal">
+			    <b:ModalBody>
+			    	<b:Alert type="WARNING" ui:field="deleteMessage"/>    
+			    </b:ModalBody>
+			    <b:ModalFooter>
+			        <b:Button type="DANGER" dataDismiss="MODAL" ui:field="deleteButton">Delete</b:Button>
+			        <b:Button type="PRIMARY" dataDismiss="MODAL">Cancel</b:Button>
+			    </b:ModalFooter>
+			</b:Modal>
         </b:Column>
     </b:Container>
 </ui:UiBinder> 

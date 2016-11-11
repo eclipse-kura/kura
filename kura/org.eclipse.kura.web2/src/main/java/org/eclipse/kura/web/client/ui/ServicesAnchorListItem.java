@@ -1,13 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     Eurotech
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
@@ -66,6 +64,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
 
             @Override
             public void onClick(ClickEvent event) {
+                EntryClassUi.setActive(ServicesAnchorListItem.this);
                 if (ServicesAnchorListItem.this.ui.selected != null
                         && ServicesAnchorListItem.this.ui.selected != ServicesAnchorListItem.this.item
                         && ServicesAnchorListItem.this.ui.servicesUi.isDirty()

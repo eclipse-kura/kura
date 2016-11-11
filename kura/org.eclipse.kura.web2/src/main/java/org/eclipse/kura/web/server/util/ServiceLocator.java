@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - Fix generic types, Fix issue #599
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.web.server.util;
 
@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.kura.web.Console;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -75,7 +76,12 @@ public class ServiceLocator {
 
     public interface ServiceFunction<T, R> {
 
-        public R apply(T service);
+        public R apply(T service) throws Exception;
+    }
+
+    public interface ServiceConsumer<T> {
+
+        public void consume(T service) throws Exception;
     }
 
     /**
@@ -89,20 +95,92 @@ public class ServiceLocator {
      *            the service to locate
      * @param function
      *            the function to execute
+     * @throws GwtKuraException
+     *             if the service function throws an exception
      * @return the return value of the function
      */
-    public static <T, R> R withOptionalService(final Class<T> serviceClass, final ServiceFunction<T, R> function) {
+    public static <T, R> R withOptionalService(final Class<T> serviceClass, final ServiceFunction<T, R> function)
+            throws GwtKuraException {
         final BundleContext ctx = FrameworkUtil.getBundle(ServiceLocator.class).getBundleContext();
         final ServiceReference<T> ref = ctx.getServiceReference(serviceClass);
-        if (ref == null) {
-            return function.apply(null);
+
+        try {
+            if (ref == null) {
+                return function.apply(null);
+            }
+
+            final T service = ctx.getService(ref);
+            try {
+                return function.apply(service);
+            } finally {
+                ctx.ungetService(ref);
+            }
+        } catch (Exception e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    /**
+     * Lookup services and iterate over their instances
+     *
+     * @param serviceClass
+     *            the services to look for
+     * @param consumer
+     *            the consumer which will be called for each service instance
+     * @throws GwtKuraException
+     *             if any service consumer throws an exception
+     */
+    public static <T> void withAllServices(final Class<T> serviceClass, final ServiceConsumer<T> consumer)
+            throws GwtKuraException {
+
+        withAllServices(serviceClass, null, consumer);
+    }
+
+    /**
+     * Lookup services with a filter and iterate over their instances
+     *
+     * @param serviceClass
+     *            the services to look for
+     * @param consumer
+     *            the consumer which will be called for each service instance
+     * @throws GwtKuraException
+     *             if any service consumer throws an exception
+     * @throws InvalidSyntaxException
+     *             if the filter was not {@code null} and had an invalid syntax
+     */
+    public static <T> void withAllServices(final Class<T> serviceClass, String filter,
+            final ServiceConsumer<T> consumer) throws GwtKuraException {
+
+        final BundleContext ctx = FrameworkUtil.getBundle(ServiceLocator.class).getBundleContext();
+
+        // get matching references
+
+        final Collection<ServiceReference<T>> refs;
+        try {
+            refs = ctx.getServiceReferences(serviceClass, filter);
+        } catch (InvalidSyntaxException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
         }
 
-        final T service = ctx.getService(ref);
-        try {
-            return function.apply(service);
-        } finally {
-            ctx.ungetService(ref);
+        // no result ... do nothing
+
+        if (refs == null) {
+            return;
+        }
+
+        // iterate over results
+
+        for (final ServiceReference<T> ref : refs) {
+            final T service = ctx.getService(ref);
+
+            try {
+                consumer.consume(service);
+            } catch (Exception e) {
+                // wrap and throw
+                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+            } finally {
+                ctx.ungetService(ref);
+            }
         }
     }
 

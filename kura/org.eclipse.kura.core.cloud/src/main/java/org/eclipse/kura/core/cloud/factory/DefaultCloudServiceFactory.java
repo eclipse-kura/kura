@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,18 +8,22 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.cloud.factory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.factory.CloudServiceFactory;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
@@ -147,7 +151,7 @@ import org.osgi.service.component.ComponentConstants;
  *
  * Since {@link org.eclipse.kura.cloud.factory} 1.1.0, the CloudService instance contains a property that maps the
  * instance with the {@link org.eclipse.kura.cloud.factory.CloudServiceFactory} implementation that generated it.
- * 
+ *
  * <br>
  */
 public class DefaultCloudServiceFactory implements CloudServiceFactory {
@@ -272,5 +276,18 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory {
         } else {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Invalid PID '{}'", pid);
         }
+    }
+
+    @Override
+    public Set<String> getManagedCloudServicePids() throws KuraException {
+        Set<String> result = new HashSet<String>();
+
+        for (ComponentConfiguration cc : this.configurationService.getComponentConfigurations()) {
+            if (CLOUD_SERVICE_PID.equals(cc.getDefinition().getId())) {
+                result.add(cc.getPid());
+            }
+        }
+
+        return result;
     }
 }

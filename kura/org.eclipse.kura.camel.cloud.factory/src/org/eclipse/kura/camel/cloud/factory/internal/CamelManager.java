@@ -15,6 +15,7 @@ import static org.eclipse.kura.camel.cloud.factory.internal.CamelFactory.FACTORY
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -140,6 +141,11 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
         return pid + "-CloudFactory";
     }
 
+    private static String fromInternalPid(final String pid) {
+        Objects.requireNonNull(pid);
+        return pid.replaceAll("-CloudFactory$", "");
+    }
+
     private static String asString(final Object object) {
         if (object instanceof String) {
             return ((String) object).trim();
@@ -241,4 +247,16 @@ public class CamelManager implements SelfConfiguringComponent, CloudServiceFacto
         return Collections.singletonList(fromUserPid(pid));
     }
 
+    @Override
+    public Set<String> getManagedCloudServicePids() throws KuraException {
+        final Set<String> result = new HashSet<>();
+
+        for (final ComponentConfiguration cc : this.configurationService.getComponentConfigurations()) {
+            if (FACTORY_ID.equals(cc.getDefinition().getId())) {
+                result.add(fromInternalPid(cc.getPid()));
+            }
+        }
+
+        return result;
+    }
 }

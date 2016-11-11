@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - Fix #691
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.CloudServices;
 
@@ -117,7 +117,7 @@ public class CloudServiceConfigurationsUi extends Composite {
         this.connectionNavtabs.clear();
         this.connectionTabContent.clear();
 
-        getCloudStackConfigurations(selection.getCloudServicePid());
+        getCloudStackConfigurations(selection.getCloudFactoryPid(), selection.getCloudServicePid());
     }
 
     public TabListItem getSelectedTab() {
@@ -128,8 +128,9 @@ public class CloudServiceConfigurationsUi extends Composite {
         this.currentlySelectedTab = tabListItem;
     }
 
-    private void getCloudStackConfigurations(String cloudServicePid) {
-        this.gwtCloudService.findStackPidsByFactory(cloudServicePid, new AsyncCallback<List<String>>() {
+    private void getCloudStackConfigurations(String factoryPid, String cloudServicePid) {
+
+        this.gwtCloudService.findStackPidsByFactory(factoryPid, cloudServicePid, new AsyncCallback<List<String>>() {
 
             @Override
             public void onFailure(Throwable ex) {
@@ -141,36 +142,39 @@ public class CloudServiceConfigurationsUi extends Composite {
             public void onSuccess(List<String> result) {
                 final List<String> pidsResult = result;
 
-                CloudServiceConfigurationsUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        CloudServiceConfigurationsUi.this.gwtComponentService.findFilteredComponentConfigurations(token, new AsyncCallback<List<GwtConfigComponent>>() {
+                CloudServiceConfigurationsUi.this.gwtXSRFService
+                        .generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                             @Override
                             public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
                                 FailureHandler.handle(ex, EntryClassUi.class.getName());
                             }
 
                             @Override
-                            public void onSuccess(List<GwtConfigComponent> result) {
-                                boolean isFirstEntry = true;
-                                for (GwtConfigComponent pair : result) {
-                                    if (pidsResult.contains(pair.getComponentId())) {
-                                        renderTabs(pair, isFirstEntry);
-                                        isFirstEntry = false;
-                                    }
-                                }
+                            public void onSuccess(GwtXSRFToken token) {
+                                CloudServiceConfigurationsUi.this.gwtComponentService
+                                        .findFilteredComponentConfigurations(token,
+                                                new AsyncCallback<List<GwtConfigComponent>>() {
+
+                                                    @Override
+                                                    public void onFailure(Throwable ex) {
+                                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                                    }
+
+                                                    @Override
+                                                    public void onSuccess(List<GwtConfigComponent> result) {
+                                                        boolean isFirstEntry = true;
+                                                        for (GwtConfigComponent pair : result) {
+                                                            if (pidsResult.contains(pair.getComponentId())) {
+                                                                renderTabs(pair, isFirstEntry);
+                                                                isFirstEntry = false;
+                                                            }
+                                                        }
+                                                    }
+                                                });
                             }
                         });
-                    }
-                });
             }
         });
     }

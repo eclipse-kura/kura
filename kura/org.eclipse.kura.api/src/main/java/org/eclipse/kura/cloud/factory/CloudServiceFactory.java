@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,14 +8,15 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.cloud.factory;
 
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
-import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
@@ -53,9 +54,6 @@ import org.osgi.service.component.ComponentContext;
  * In order to leverage the Kura configuration persistence in snapshot files,
  * an implementation will use the {@link ConfigurationService}
  * to create component configurations.
- * <br>
- * The {@link CloudService} implementation class is also required
- * to implement the {@link ConfigurableComponent} interface.
  *
  * @since {@link org.eclipse.kura.cloud.factory} 1.0.0
  */
@@ -66,7 +64,7 @@ public interface CloudServiceFactory {
      * through {@link #createConfiguration}.
      * The property is set in the cloud service instance to relate it with the Factory that generated the whole cloud
      * stack.
-     * 
+     *
      * @since {@link org.eclipse.kura.cloud.factory} 1.1.0
      */
     public static final String KURA_CLOUD_SERVICE_FACTORY_PID = "kura.cloud.service.factory.pid";
@@ -150,4 +148,21 @@ public interface CloudServiceFactory {
      * @throws KuraException
      */
     void deleteConfiguration(String pid) throws KuraException;
+
+    /**
+     * Return a set of services managed by this factory
+     * <br>
+     * It is up to the factory how it does assembles this. The PIDs returned by this list must be the PIDs assigned
+     * to the OSGi service property <i>kura.service.pid</i> and it must be possible to pass all those results into
+     * the method {@link #getStackComponentsPids(String)} of the same factory instance.
+     * <br>
+     * The IDs returned by this method must not necessarily point to registered OSGi services. But if they do, they must
+     * point only to instances of the {@link CloudService}.
+     * 
+     * @return the set of services, never returns {@code null}
+     * @throws KuraException
+     *
+     * @since {@link org.eclipse.kura.cloud.factory} 1.1.0
+     */
+    Set<String> getManagedCloudServicePids() throws KuraException;
 }

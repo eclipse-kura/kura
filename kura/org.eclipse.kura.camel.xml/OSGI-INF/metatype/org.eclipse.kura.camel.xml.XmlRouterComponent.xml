@@ -18,6 +18,15 @@
     &lt;/route&gt;&#10;
 &lt;/routes&gt;'/>
 
+        <AD id="component.prereqs" name="Required Camel Components"
+            description="A comma separated list of Camel components which are required in order to start up this setup"
+            type="String"
+            cardinality="1"
+            required="false"
+            max="2147483647"
+            >
+        </AD>
+
     </OCD>
 
     <Designate pid="org.eclipse.kura.camel.xml.XmlRouterComponent">

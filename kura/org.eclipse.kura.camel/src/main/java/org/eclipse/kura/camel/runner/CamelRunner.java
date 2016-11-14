@@ -30,6 +30,7 @@ import org.apache.camel.impl.SimpleRegistry;
 import org.apache.camel.model.OptionalIdentifiedDefinition;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.RoutesDefinition;
+import org.apache.camel.spi.ComponentResolver;
 import org.apache.camel.spi.Registry;
 import org.eclipse.kura.camel.cloud.KuraCloudComponent;
 import org.eclipse.kura.cloud.CloudService;
@@ -307,6 +308,31 @@ public class CamelRunner {
             Objects.requireNonNull(value);
 
             return cloudService(String.format("(%s=%s)", attribute, value));
+        }
+
+        /**
+         * Require a Camel component to be registered with OSGi before starting
+         * 
+         * @param componentName
+         *            the component name (e.g. "timer")
+         * @return the builder instance
+         */
+        public Builder requireComponent(final String componentName) {
+            try {
+                final String filterString = String.format("(&(%s=%s)(%s=%s))", Constants.OBJECTCLASS,
+                        ComponentResolver.class.getName(), "component", componentName);
+                final Filter filter = FrameworkUtil.createFilter(filterString);
+                dependOn(filter, new ServiceConsumer<Object, CamelContext>() {
+
+                    @Override
+                    public void consume(final CamelContext context, final Object service) {
+                    }
+                });
+            } catch (InvalidSyntaxException e) {
+                throw new IllegalArgumentException(String.format("Illegal component name: '%s'", componentName), e);
+            }
+
+            return this;
         }
 
         public static ServiceConsumer<CloudService, CamelContext> addAsCloudComponent(final String componentName) {
@@ -635,7 +661,7 @@ public class CamelRunner {
      * <strong>Note: </strong> This method may return {@code null} even after the {@link #start()} method was called
      * if there are unresolved dependencies for the runner.
      * </p>
-     * 
+     *
      * @return the camel context, if the camel context is currently not running then {@code null} is being returned
      */
     public CamelContext getCamelContext() {

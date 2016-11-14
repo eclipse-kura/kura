@@ -1,19 +1,76 @@
 ---
 layout: page
-title:  "Apache Camel integration"
-date:   2014-05-11 11:31:11
+title:  "Apache Camel™ as application"
+date:   2014-05-16 11:31:11
 categories: [doc]
 ---
 
-# Camel Kura router
+# Camel as Kura application
 
-Kura provides `org.eclipse.kura.camel.router.CamelRouter` class, which extends 
-`org.apache.camel.component.kura.KuraRouter` class from the Apache Camel 
-[camel-kura](http://camel.apache.org/kura) module. While `KuraRouter` provides a generic base for Kura routes, it 
-doesn't rely on the Kura-specific jars, because of limitations of the Apache Camel policy regarding adding 3rd parties repositories to the Camel (like Eclipse Kura repository). `CamelRouter` extends `KuraRouter` and enhances it with Kura-specific API.
+As of 2.1.0 Kura provides a set of different ways to implement an application backed by Camel:
 
-In the near future we plan to migrate Kura related code from Apache Camel to Eclipse Kura, so all the code related to
-Kura-Camel integration will be hosted here under Kura umbrella.
+ * Simple XML route configuration
+ * Custom XML route configuration
+ * Custom Java DSL definition 
+
+## Simple XML routes
+
+Eclipse Kura 2.1.0 introduces a new "out-of-the-box" component which
+allows to configure a set of XML based routes. The component is called "Camel XML router"
+and can be configured with a simple set of XML routes.
+
+The following example logs all messages received on the topic `foo/bar` to a logger named
+`MESSAGE_FROM_CLOUD`:
+
+    <routes xmlns="http://camel.apache.org/schema/spring">
+      <route id="cloudConsumer">
+        <from uri="kura-cloud:foo/bar"/>
+        <to uri="log:MESSAGE_FROM_CLOUD"/>
+      </route>
+    </routes>
+    
+But it is also possible to generate data and push to upstream to the cloud service:
+
+    <route id="route1">
+      <from uri="timer:foo"/>
+      <setBody>
+        <method ref="payloadFactory" method="create('random',${random(10)})"/>
+      </setBody>
+      <bean ref="payloadFactory" method="append('foo','bar')"/>
+      <to uri="stream:out"/>
+      <to uri="kura-cloud:myapp/test"/>
+    </route>
+    
+This example to run a timer named "foo" every second. It uses the "Payload Factory" bean,
+which is pre-registered, to create a new payload structure and then append a second elemen
+to it.
+
+The output is first sent to a logger and then to the cloud source.
+
+### Defining dependencies on components
+
+It is possible to use the Web UI to define a list of Camel components which must be present in
+order for this configuration to work. For example if the routes make use of the "milo-server"
+adapter for providing OPC UA support then "milo-server" can be added and the setup will wait for
+this component to be registered with OSGi before the Camel context gets started.
+
+The field contains a list of comma separated component names: e.g. `milo-server, timer, log`
+
+### Selecting a cloud service
+
+It is also possible to define a map of cloud services which will be available for upstream connectivity.
+This makes use of Kura's "multi cloud client" feature. CloudService instances will get mapped from either
+a Kura Service PID (`kura.service.pid`, as shown in the Web UI) or a full OSGi filter. The string is
+a comma seperated, `key=value` string, where the key is the name of the Camel cloud the instance will be
+registered as and the value is the Kura service PID or the OSGi filter string.
+
+For example: `cloud=org.eclipse.kura.cloud.CloudService, cloud-2=foobar`
+
+## Custom XML routes
+
+If a standard XML route configuration is not enough then it is possible to use XML routes
+in combination with a custom OSGi bundle. For this to work a Kura development setup
+is required, please see [Getting started](kura-setup.html) for more information. 
 
 ## Maven dependency
 

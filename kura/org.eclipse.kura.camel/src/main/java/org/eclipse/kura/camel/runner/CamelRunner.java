@@ -66,7 +66,7 @@ public class CamelRunner {
 
             @Override
             public CamelContext createContext(final Registry registry) {
-                return new OsgiDefaultCamelContext(bundleContext);
+                return new OsgiDefaultCamelContext(bundleContext, registry);
             }
         };
     }

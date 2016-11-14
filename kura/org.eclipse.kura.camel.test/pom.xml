@@ -43,6 +43,11 @@
 							<autoStart>true</autoStart>
 							<level>2</level>
 						</bundleStartLevel>
+                        <bundleStartLevel>
+                            <id>org.eclipse.kura.camel</id>
+                            <autoStart>true</autoStart>
+                            <level>3</level>
+                        </bundleStartLevel>
 					</bundleStartLevel>
 
 					<dependencies>
@@ -70,7 +75,6 @@
 					<target>1.7</target>
 				</configuration>
 			</plugin>
-
 		</plugins>
 	</build>
 </project>

@@ -312,7 +312,7 @@ public class CamelRunner {
 
         /**
          * Require a Camel component to be registered with OSGi before starting
-         * 
+         *
          * @param componentName
          *            the component name (e.g. "timer")
          * @return the builder instance
@@ -560,6 +560,20 @@ public class CamelRunner {
         // remove from running context
 
         removeRoutes(context, removedRouteIds);
+    }
+
+    /**
+     * Remove all routes of a context
+     *
+     * @param context
+     *            the context to work on
+     */
+    public static void removeAllRoutes(final CamelContext context) {
+        Objects.requireNonNull(context);
+
+        // remove all routes
+
+        removeRoutes(context, fromDefs(context.getRouteDefinitions()));
     }
 
     /**

@@ -1,7 +1,6 @@
 ---
 layout: page
 title:  "Getting Started"
-date:   2014-08-25 11:31:11
 categories: [doc]
 ---
 

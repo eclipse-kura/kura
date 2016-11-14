@@ -1,7 +1,6 @@
 ---
 layout: page
 title:  "Publishing Application"
-date:   2014-08-24 11:29:11
 categories: [doc]
 ---
 

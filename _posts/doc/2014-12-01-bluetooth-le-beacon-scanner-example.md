@@ -1,7 +1,6 @@
 ---
 layout: page
 title:  "BLE Beacon Scanner Example"
-date:   2014-08-10 11:28:20
 categories: [doc]
 ---
 

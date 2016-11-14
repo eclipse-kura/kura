@@ -1,7 +1,6 @@
 ---
 layout: page
 title:  "Apache Camel™ integration"
-date:   2014-05-16 11:31:11
 categories: [doc]
 ---
 

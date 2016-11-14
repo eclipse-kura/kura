@@ -1,7 +1,6 @@
 ---
 layout: page
 title:  "Apache Camel™ Cloud Service"
-date:   2014-05-14 11:31:11
 categories: [doc]
 ---
 

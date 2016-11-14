@@ -1,7 +1,6 @@
 ---
 layout: page
 title:  "Cloud Configuration"
-date:   2014-08-22 11:31:11
 categories: [doc]
 ---
 

@@ -1,7 +1,6 @@
 ---
 layout: page
 title:  "Hello World Example"
-date:   2014-08-24 11:31:11
 categories: [doc]
 ---
 

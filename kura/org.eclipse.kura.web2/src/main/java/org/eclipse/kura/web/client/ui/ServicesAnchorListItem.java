@@ -64,7 +64,6 @@ public class ServicesAnchorListItem extends AnchorListItem {
 
             @Override
             public void onClick(ClickEvent event) {
-                EntryClassUi.setActive(ServicesAnchorListItem.this);
                 if (ServicesAnchorListItem.this.ui.selected != null
                         && ServicesAnchorListItem.this.ui.selected != ServicesAnchorListItem.this.item
                         && ServicesAnchorListItem.this.ui.servicesUi.isDirty()
@@ -119,6 +118,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
 
                 } else {
                     ServicesAnchorListItem.this.ui.selected = ServicesAnchorListItem.this.item;
+                    ServicesAnchorListItem.this.ui.setSelectedAnchorListItem(ServicesAnchorListItem.this);
                     if (ServicesAnchorListItem.this.instance.getIcon() != null) {
                         ServicesAnchorListItem.this.instance.setIconSpin(true);
                     }

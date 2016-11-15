@@ -19,19 +19,19 @@
     	height: 572px;
     }
     
-    .button {<!--
+    .button {/*
     	border-style: solid;
     	border-radius: 5px;
     	border-width: 1px;
     	background-color: #e8e8e8;
-    	-->
+    	*/
     }
     </ui:style>
 
     <b:Column size="MD_4">
         <b:Row>
             <b:Row>
-                <b:ButtonGroup justified="true" size="SMALL">
+                <b:ButtonGroup justified="false" size="SMALL">
                     <b:AnchorButton icon="CHECK"
                         iconFixedWidth="true" ui:field="apply"
                         addStyleNames="{style.button}" />

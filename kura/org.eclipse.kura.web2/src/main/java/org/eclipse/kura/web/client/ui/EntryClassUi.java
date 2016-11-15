@@ -37,6 +37,7 @@ import org.gwtbootstrap3.client.shared.event.ModalHideEvent;
 import org.gwtbootstrap3.client.shared.event.ModalHideHandler;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.Column;
 import org.gwtbootstrap3.client.ui.Icon;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
@@ -73,16 +74,21 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class EntryClassUi extends Composite {
-    
+
     private static final String SELECT_COMPONENT = "--- Select Component ---";
 
     interface EntryClassUIUiBinder extends UiBinder<Widget, EntryClassUi> {
     }
+
+    private static final String SIDENAV_HIDDEN_STYLE_NAME = "sidenav-hidden";
+    private static final String SELECTED_ANCHOR_LIST_ITEM_STYLE_NAME = "selected-item";
+    private static final String NOT_SCROLLABLE_STYLE_NAME = "not-scrollable";
 
     private static EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
     private static final Messages MSGS = GWT.create(Messages.class);
@@ -167,8 +173,36 @@ public class EntryClassUi extends Composite {
     Button factoriesButton;
     @UiField
     TextBox componentName;
-    
-    static AnchorListItem previousSelection;
+    @UiField
+    Button sidenavButton;
+    @UiField
+    Column sidenav;
+    @UiField
+    Panel sidenavOverlay;
+
+    private AnchorListItem selectedAnchorListItem;
+
+    private void showSidenav() {
+        sidenav.removeStyleName(SIDENAV_HIDDEN_STYLE_NAME);
+        sidenavOverlay.removeStyleName(SIDENAV_HIDDEN_STYLE_NAME);
+        // prevent body scrolling if sidenav is shown
+        RootPanel.get().addStyleName(NOT_SCROLLABLE_STYLE_NAME);
+    }
+
+    private void hideSidenav() {
+        sidenav.addStyleName(SIDENAV_HIDDEN_STYLE_NAME);
+        sidenavOverlay.addStyleName(SIDENAV_HIDDEN_STYLE_NAME);
+        RootPanel.get().removeStyleName(NOT_SCROLLABLE_STYLE_NAME);
+    }
+
+    public void setSelectedAnchorListItem(AnchorListItem selected) {
+        if (selectedAnchorListItem != null) {
+            selectedAnchorListItem.removeStyleName(SELECTED_ANCHOR_LIST_ITEM_STYLE_NAME);
+        }
+        selectedAnchorListItem = selected;
+        selectedAnchorListItem.addStyleName(SELECTED_ANCHOR_LIST_ITEM_STYLE_NAME);
+        hideSidenav();
+    }
 
     public EntryClassUi() {
         logger.log(Level.FINER, "Initiating UiBinder");
@@ -185,6 +219,19 @@ public class EntryClassUi extends Composite {
         this.footerLeft.setStyleName("copyright");
         this.contentPanel.setVisible(false);
 
+        // Add handler for sidenav show/hide button
+        sidenavButton.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (sidenav.getStyleName().contains(SIDENAV_HIDDEN_STYLE_NAME)) {
+                    showSidenav();
+                } else {
+                    hideSidenav();
+                }
+            }
+        });
+
         // Set client side logging
         errorLogger.addHandler(new HasWidgetsLogHandler(this.errorLogArea));
         this.errorPopup.addHideHandler(new ModalHideHandler() {
@@ -199,6 +246,8 @@ public class EntryClassUi extends Composite {
         dragDropInit(this);
 
         FailureHandler.setPopup(this.errorPopup);
+
+        showSidenav();
     }
 
     public void setSession(GwtSession GwtSession) {
@@ -214,14 +263,7 @@ public class EntryClassUi extends Composite {
         }
 
     }
-    
-    static void setActive(AnchorListItem item) {
-        if (previousSelection != null)
-            previousSelection.setActive(false);
-        item.setActive(true);
-        previousSelection = item;
-    }
-    
+
     public void discardWiresPanelChanges() {
         if (WiresPanelUi.isDirty()) {
             WiresPanelUi.clearUnsavedPanelChanges();
@@ -249,6 +291,7 @@ public class EntryClassUi extends Composite {
                         if (EntryClassUi.this.modal != null) {
                             EntryClassUi.this.modal.hide();
                         }
+                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.status);
                         EntryClassUi.this.contentPanel.setVisible(true);
                         EntryClassUi.this.contentPanelHeader.setText("Status");
                         EntryClassUi.this.contentPanelBody.clear();
@@ -257,7 +300,6 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.statusBinder.setParent(m_instanceReference);
                         EntryClassUi.this.statusBinder.loadStatusData();
                         EntryClassUi.this.discardWiresPanelChanges();
-                        EntryClassUi.setActive(status);
                     }
                 });
 
@@ -278,6 +320,7 @@ public class EntryClassUi extends Composite {
                         if (EntryClassUi.this.modal != null) {
                             EntryClassUi.this.modal.hide();
                         }
+                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.device);
                         EntryClassUi.this.contentPanel.setVisible(true);
                         EntryClassUi.this.contentPanelHeader.setText(MSGS.device());
                         EntryClassUi.this.contentPanelBody.clear();
@@ -285,7 +328,6 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.deviceBinder.setSession(EntryClassUi.this.currentSession);
                         EntryClassUi.this.deviceBinder.initDevicePanel();
                         EntryClassUi.this.discardWiresPanelChanges();
-                        EntryClassUi.setActive(device);
                     }
                 });
                 renderDirtyConfigModal(b);
@@ -306,6 +348,7 @@ public class EntryClassUi extends Composite {
                             if (EntryClassUi.this.modal != null) {
                                 EntryClassUi.this.modal.hide();
                             }
+                            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.network);
                             EntryClassUi.this.contentPanel.setVisible(true);
                             EntryClassUi.this.contentPanelHeader.setText(MSGS.network());
                             EntryClassUi.this.contentPanelBody.clear();
@@ -313,7 +356,6 @@ public class EntryClassUi extends Composite {
                             EntryClassUi.this.networkBinder.setSession(EntryClassUi.this.currentSession);
                             EntryClassUi.this.networkBinder.initNetworkPanel();
                             EntryClassUi.this.discardWiresPanelChanges();
-                            EntryClassUi.setActive(network);
                         }
                     });
                     renderDirtyConfigModal(b);
@@ -335,13 +377,13 @@ public class EntryClassUi extends Composite {
                             if (EntryClassUi.this.modal != null) {
                                 EntryClassUi.this.modal.hide();
                             }
+                            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.firewall);
                             EntryClassUi.this.contentPanel.setVisible(true);
                             EntryClassUi.this.contentPanelHeader.setText(MSGS.firewall());
                             EntryClassUi.this.contentPanelBody.clear();
                             EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.firewallBinder);
                             EntryClassUi.this.firewallBinder.initFirewallPanel();
                             EntryClassUi.this.discardWiresPanelChanges();
-                            EntryClassUi.setActive(firewall);
                         }
                     });
                     renderDirtyConfigModal(b);
@@ -362,6 +404,7 @@ public class EntryClassUi extends Composite {
                         if (EntryClassUi.this.modal != null) {
                             EntryClassUi.this.modal.hide();
                         }
+                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.packages);
                         EntryClassUi.this.contentPanel.setVisible(true);
                         EntryClassUi.this.contentPanelHeader.setText(MSGS.packages());
                         EntryClassUi.this.contentPanelBody.clear();
@@ -370,7 +413,6 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.packagesBinder.setMainUi(EntryClassUi.this.ui);
                         EntryClassUi.this.packagesBinder.refresh();
                         EntryClassUi.this.discardWiresPanelChanges();
-                        EntryClassUi.setActive(packages);
                     }
                 });
                 renderDirtyConfigModal(b);
@@ -390,6 +432,7 @@ public class EntryClassUi extends Composite {
                         if (EntryClassUi.this.modal != null) {
                             EntryClassUi.this.modal.hide();
                         }
+                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.settings);
                         EntryClassUi.this.contentPanel.setVisible(true);
                         EntryClassUi.this.contentPanelHeader.setText(MSGS.settings());
                         EntryClassUi.this.contentPanelBody.clear();
@@ -397,7 +440,6 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.settingsBinder.setSession(EntryClassUi.this.currentSession);
                         EntryClassUi.this.settingsBinder.load();
                         EntryClassUi.this.discardWiresPanelChanges();
-                        EntryClassUi.setActive(settings);
                     }
                 });
                 renderDirtyConfigModal(b);
@@ -417,46 +459,45 @@ public class EntryClassUi extends Composite {
                         if (EntryClassUi.this.modal != null) {
                             EntryClassUi.this.modal.hide();
                         }
+                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.cloudServices);
                         EntryClassUi.this.contentPanel.setVisible(true);
                         EntryClassUi.this.contentPanelHeader.setText(MSGS.cloudServices());
                         EntryClassUi.this.contentPanelBody.clear();
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.cloudServicesBinder);
                         EntryClassUi.this.cloudServicesBinder.refresh();
                         EntryClassUi.this.discardWiresPanelChanges();
-                        EntryClassUi.setActive(cloudServices);
                     }
                 });
                 renderDirtyConfigModal(b);
             }
         });
-        
+
         // Wires Panel
         this.wires.addClickHandler(new ClickHandler() {
-            
+
             @Override
             public void onClick(ClickEvent event) {
                 Button b = new Button(MSGS.yesButton(), new ClickHandler() {
-                    
+
                     @Override
                     public void onClick(ClickEvent event) {
                         forceTabsCleaning();
                         if (EntryClassUi.this.modal != null) {
                             EntryClassUi.this.modal.hide();
                         }
+                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.wires);
                         EntryClassUi.this.contentPanel.setVisible(true);
                         EntryClassUi.this.contentPanelHeader.setText(MSGS.wires());
                         EntryClassUi.this.contentPanelBody.clear();
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.wiresBinder);
                         EntryClassUi.this.wiresBinder.load();
                         EntryClassUi.this.discardWiresPanelChanges();
-                        EntryClassUi.setActive(wires);
                     }
                 });
                 renderDirtyConfigModal(b);
             }
         });
-        
-        
+
     }
 
     public void initServicesTree() {
@@ -473,35 +514,36 @@ public class EntryClassUi extends Composite {
                 EntryClassUi.this.gwtComponentService.findServicesConfigurations(token,
                         new AsyncCallback<List<GwtConfigComponent>>() {
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        logger.log(Level.SEVERE, ex.getMessage(), ex);
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(List<GwtConfigComponent> result) {
-                        EntryClassUi.this.servicesMenu.clear();
-                        for (GwtConfigComponent pair : result) {
-                            if (!pair.isWireComponent()) {
-                                EntryClassUi.this.servicesMenu.add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                FailureHandler.handle(ex, EntryClassUi.class.getName());
                             }
-                        }
-                    }
-                });
+
+                            @Override
+                            public void onSuccess(List<GwtConfigComponent> result) {
+                                EntryClassUi.this.servicesMenu.clear();
+                                for (GwtConfigComponent pair : result) {
+                                    if (!pair.isWireComponent()) {
+                                        EntryClassUi.this.servicesMenu
+                                                .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
+                                    }
+                                }
+                            }
+                        });
             }
         });
-        
+
         // Keypress handler
         textSearch.addValueChangeHandler(changeHandler);
-        
+
         // New factory configuration handler
-        buttonNewComponent.addClickHandler(new ClickHandler(){
-            
+        buttonNewComponent.addClickHandler(new ClickHandler() {
+
             @Override
             public void onClick(ClickEvent event) {
-                
-                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -512,7 +554,7 @@ public class EntryClassUi extends Composite {
                     public void onSuccess(GwtXSRFToken token) {
                         String factoryPid = factoriesList.getSelectedValue();
                         String pid = componentName.getValue();
-                        if (SELECT_COMPONENT.equalsIgnoreCase(factoryPid) || "".equals(pid)){
+                        if (SELECT_COMPONENT.equalsIgnoreCase(factoryPid) || "".equals(pid)) {
                             errorAlertText.setText("Component must be selected and the name must be non-empty");
                             errorModal.show();
                             return;
@@ -535,14 +577,14 @@ public class EntryClassUi extends Composite {
                 });
             }
         });
-        
-        factoriesButton.addClickHandler(new ClickHandler(){
+
+        factoriesButton.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                //always empty the PID input field
+                // always empty the PID input field
                 componentName.setValue("");
-                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -563,7 +605,7 @@ public class EntryClassUi extends Composite {
                             public void onSuccess(List<String> result) {
                                 factoriesList.clear();
                                 factoriesList.addItem(SELECT_COMPONENT);
-                                for(String s : result){
+                                for (String s : result) {
                                     factoriesList.addItem(s);
                                 }
                             }
@@ -574,20 +616,21 @@ public class EntryClassUi extends Composite {
         });
 
     }
-    
-    private class SelectValueChangeEvent extends ValueChangeEvent<String>{
+
+    private class SelectValueChangeEvent extends ValueChangeEvent<String> {
 
         protected SelectValueChangeEvent(String value) {
             super(value);
         }
-        
+
     }
-    
-    private ValueChangeHandler changeHandler = new ValueChangeHandler(){
+
+    private ValueChangeHandler changeHandler = new ValueChangeHandler() {
+
         @Override
         public void onValueChange(final ValueChangeEvent event) {
-            
-            gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+
+            gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                 @Override
                 public void onFailure(Throwable ex) {
@@ -596,25 +639,27 @@ public class EntryClassUi extends Composite {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
-                    gwtComponentService.findComponentConfigurations(token, new AsyncCallback<List<GwtConfigComponent>>() {
-                        @Override
-                        public void onFailure(Throwable ex) {
-                            logger.log(Level.SEVERE, ex.getMessage(), ex);
-                            FailureHandler.handle(ex, EntryClassUi.class.getName());
-                        }
+                    gwtComponentService.findComponentConfigurations(token,
+                            new AsyncCallback<List<GwtConfigComponent>>() {
 
-                        @Override
-                        public void onSuccess(List<GwtConfigComponent> result) {
-                            servicesMenu.clear();
-                            for (GwtConfigComponent pair : result) {
-                                String filter = event.getValue().toString(); 
-                                String compName = pair.getComponentName();
-                                if(!pair.isWireComponent() && compName.toLowerCase().contains(filter) ){
-                                    servicesMenu.add(new ServicesAnchorListItem(pair, ui));
+                                @Override
+                                public void onFailure(Throwable ex) {
+                                    logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                    FailureHandler.handle(ex, EntryClassUi.class.getName());
                                 }
-                            }
-                        }
-                    });
+
+                                @Override
+                                public void onSuccess(List<GwtConfigComponent> result) {
+                                    servicesMenu.clear();
+                                    for (GwtConfigComponent pair : result) {
+                                        String filter = event.getValue().toString();
+                                        String compName = pair.getComponentName();
+                                        if (!pair.isWireComponent() && compName.toLowerCase().contains(filter)) {
+                                            servicesMenu.add(new ServicesAnchorListItem(pair, ui));
+                                        }
+                                    }
+                                }
+                            });
                 }
             });
         }
@@ -684,9 +729,9 @@ public class EntryClassUi extends Composite {
         if (this.cloudServices.isVisible()) {
             this.cloudServicesDirty = this.cloudServicesBinder.isDirty();
         }
-        
+
         if (wires.isVisible()) {
-            wiresPanelDirty = WiresPanelUi.isDirty(); 
+            wiresPanelDirty = WiresPanelUi.isDirty();
         }
 
         if (this.servicesUi != null && this.servicesUi.isDirty() || this.networkDirty || this.firewallDirty

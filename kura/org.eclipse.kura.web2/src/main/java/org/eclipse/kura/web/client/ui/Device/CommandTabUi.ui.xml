@@ -31,7 +31,7 @@
     </ui:style>
     <b:Container fluid="true">
         <b:Row>
-            <gwt:FormPanel ui:field="commandForm">
+            <gwt:FormPanel ui:field="commandForm" addStyleNames="command-form">
                 <b:FieldSet>
                     <b:FormGroup>
                         <b:FormLabel for="formExecute">Execute</b:FormLabel>
@@ -57,7 +57,7 @@
                     <g:Hidden ui:field="xsrfTokenField"></g:Hidden>
                 </b:FieldSet>
             </gwt:FormPanel>
-            <b:Panel addStyleNames="{style.output-panel}">
+            <b:Panel addStyleNames="{style.output-panel} command-output-panel">
                 <b:PanelBody ui:field="resultPanel">
                 </b:PanelBody>
             </b:Panel>

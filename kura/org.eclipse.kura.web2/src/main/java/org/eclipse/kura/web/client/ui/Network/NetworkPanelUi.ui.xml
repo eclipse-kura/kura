@@ -24,7 +24,6 @@
     }
     
     .center-panel {
-    	height: 100%;
     	padding: 0px;
     	margin: 2px;
     }

@@ -34,10 +34,6 @@
     	background-size: contain;
     }
     
-    .center-panel {
-    	
-    }
-    
     .top-row-padding {
     	margin-right: 30px;
     	margin-top: 20px;
@@ -80,16 +76,20 @@
     	display: none; 
     }
     </ui:style>
+    
     <b:Container fluid="true">
+    	<b:Panel ui:field='sidenavOverlay' addStyleNames='sidenav-overlay'></b:Panel>
         <b:Column addStyleNames="{style.outer-column}" size="XS_12">
 
 			<!-- ROW#1 - Header logo -->
-            <b:Row>
+            <b:Row addStyleNames="header-bar z-depth-1">
                 <b:Row>
                     <b:Column addStyleNames="{style.top-row-padding}"
                         size="XS_12">
                         <b:Panel>
-                            <b:PanelHeader>
+                            <b:PanelHeader addStyleNames="header-container">
+                            	<b:Button ui:field="sidenavButton"
+									addStyleNames="glyphicon glyphicon-menu-hamburger sidebar-button"></b:Button>
                                 <b:Panel addStyleNames="{style.image}"
                                     ui:field="header" />
                             </b:PanelHeader>
@@ -97,22 +97,11 @@
                     </b:Column>
                 </b:Row>
             </b:Row>
-
+			<b:Row addStyleNames='main-container'>
 			<!-- ROW#2 content -->
-			<b:Row>
-				<b:Panel>
-					<b:PanelBody>
-						<b:Modal title="Error" ui:field='errorPopup'>
-							<b:ModalBody>
-								<g:ScrollPanel styleName='customLogScrollPanel'>
-	 								<g:VerticalPanel ui:field='errorLogArea' styleName='errorLogArea'/>
-								</g:ScrollPanel>
-							</b:ModalBody>									
-						</b:Modal>
-						<b:Row>
-							<b:Column size="MD_2" addStyleNames="{style.center-panel}">
+			<b:Column ui:field="sidenav" size="MD_2" addStyleNames="center-panel z-depth-1 sidenav">
 								<b:Row>
-									<b:Column size="MD_12,XS_6" addStyleNames="{style.system-list}">
+									<b:Column size="MD_12" addStyleNames="{style.system-list}">
 										<b:Panel>
 											<b:PanelHeader>
 												<b:Heading size="H3" text="System" />
@@ -146,7 +135,7 @@
 											</b:PanelBody>
 										</b:Panel>
 									</b:Column>
-									<b:Column size="MD_12,XS_6" addStyleNames="{style.services-list}">
+									<b:Column size="MD_12" addStyleNames="{style.services-list}">
 										<b:Panel>
 											<b:PanelHeader>
 												<b:Heading size="H3" text="Services" />
@@ -177,9 +166,19 @@
 									</b:Column>
 								</b:Row>
 							</b:Column>
-
+			<b:Row addStyleNames='main-content'>
+				<b:Panel>
+					<b:PanelBody>
+						<b:Modal title="Error" ui:field='errorPopup'>
+							<b:ModalBody>
+								<g:ScrollPanel styleName='customLogScrollPanel'>
+	 								<g:VerticalPanel ui:field='errorLogArea' styleName='errorLogArea'/>
+								</g:ScrollPanel>
+							</b:ModalBody>									
+						</b:Modal>
+						<b:Row addStyleNames='content-wrapper'>
 							<b:Column size="MD_10">
-								<b:Panel ui:field="contentPanel">
+								<b:Panel ui:field="contentPanel" addStyleNames="content-panel">
 									<b:PanelHeader ui:field="contentPanelHeader">
 									</b:PanelHeader>
 									<b:PanelBody ui:field="contentPanelBody" addStyleNames="{style.content-panel-body}">
@@ -192,7 +191,7 @@
 				</b:Panel>
 			</b:Row>
 			<!-- ROW3 (Footer) Content -->
-            <b:Row>
+            <b:Row addStyleNames='footer'>
                 <b:Column addStyleNames="{style.bottom-row-padding}"
                     size="MD_12">
                     <b:Row>
@@ -226,6 +225,7 @@
                     </b:Row>
                 </b:Column>
             </b:Row>
+          </b:Row>
         </b:Column>
         		<b:Modal title="New Factory Component" closable="true" fade="true"
 			dataBackdrop="STATIC" dataKeyboard="true" b:id="myModal">

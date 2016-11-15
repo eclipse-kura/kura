@@ -5,9 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.web.server;
+
+import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,8 +51,6 @@ import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireService;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -61,6 +61,9 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
 
 /**
  * The class GwtWireServiceImpl implements {@link GwtWireService}
@@ -124,8 +127,8 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         }
 
         // Force kura.service.pid into properties, if originally present
-        if (backupConfigProp.get("kura.service.pid") != null) {
-            properties.put("kura.service.pid", backupConfigProp.get("kura.service.pid"));
+        if (backupConfigProp.get(KURA_SERVICE_PID) != null) {
+            properties.put(KURA_SERVICE_PID, backupConfigProp.get(KURA_SERVICE_PID));
         }
         return properties;
     }
@@ -145,7 +148,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         final Collection<ServiceReference<WireComponent>> refs = ServiceLocator.getInstance()
                 .getServiceReferences(WireComponent.class, null);
         for (final ServiceReference<WireComponent> ref : refs) {
-            if (ref.getProperty(ConfigurationService.KURA_SERVICE_PID).equals(pid)) {
+            if (ref.getProperty(KURA_SERVICE_PID).equals(pid)) {
                 final String fPid = (String) ref.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID);
                 final WireComponent comp = ctx.getService(ref);
                 String compType;
@@ -327,7 +330,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         }
 
         // create the JSON for the Wires Configuration
-        final JSONObject wireConfig = new JSONObject();
+        final JsonObject wireConfig = Json.object();
         int i = 0;
         for (final WireConfiguration wireConfiguration : wireConfigurations) {
             final String emitterPid = wireConfiguration.getEmitterPid();
@@ -335,14 +338,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             wireComponents.add(getComponentString(emitterPid));
             wireComponents.add(getComponentString(receiverPid));
 
-            final JSONObject wireConf = new JSONObject();
-            try {
-                wireConf.put("p", emitterPid);
-                wireConf.put("c", receiverPid);
-                wireConfig.put(String.valueOf(++i), wireConf);
-            } catch (final JSONException exception) {
-                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
-            }
+            final JsonObject wireConf = Json.object();
+            wireConf.add("p", emitterPid).add("c", receiverPid);
+            wireConfig.add(String.valueOf(++i), wireConf);
         }
         final List<GwtWireComponentConfiguration> configs = new ArrayList<GwtWireComponentConfiguration>();
         for (final String wc : GwtWireServiceUtil.getWireComponents()) {
@@ -384,15 +382,15 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                     throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
 
-        JSONObject jWireGraph = null;
+        JsonObject jWireGraph = null;
         final WireService wireService = ServiceLocator.getInstance().getService(WireService.class);
         final WireHelperService wireHelperService = ServiceLocator.getInstance().getService(WireHelperService.class);
         final ConfigurationService configService = ServiceLocator.getInstance().getService(ConfigurationService.class);
 
         try {
-            jWireGraph = new JSONObject(newJsonConfiguration).getJSONObject(GRAPH);
+            jWireGraph = Json.parse(newJsonConfiguration).asObject().get(GRAPH).asObject();
             // don't consider the "wires" JSON
-            final int length = jWireGraph.length() - 1;
+            final int length = jWireGraph.size() - 1;
             // Delete wires
             final Set<WireConfiguration> set = new CopyOnWriteArraySet<WireConfiguration>(
                     wireService.getWireConfigurations());
@@ -415,7 +413,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                 final WireConfiguration wireConfiguration = iterator.next();
                 boolean isFound = false;
                 for (final GwtWireConfiguration configuration : GwtWireServiceUtil
-                        .getWireConfigurationsFromJson(jWireGraph.getJSONObject("wires"))) {
+                        .getWireConfigurationsFromJson(jWireGraph.get("wires").asObject())) {
                     final WireConfiguration temp = new WireConfiguration(configuration.getEmitterPid(),
                             configuration.getReceiverPid(), null);
                     if (temp.equals(wireConfiguration)) {
@@ -441,8 +439,8 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                 }
                 boolean isFound = false;
                 for (int i = 0; i < length; i++) {
-                    final JSONObject jsonObject = jWireGraph.getJSONObject(String.valueOf(i));
-                    final String component = jsonObject.getString("pid");
+                    final JsonObject jsonObject = jWireGraph.get(String.valueOf(i)).asObject();
+                    final String component = jsonObject.getString("pid", null);
                     if (component.equalsIgnoreCase(componentPid)) {
                         isFound = true;
                         break;
@@ -455,17 +453,13 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             }
 
             for (int i = 0; i < length; i++) {
-                final JSONObject jsonObject = jWireGraph.getJSONObject(String.valueOf(i));
+                final JsonObject jsonObject = jWireGraph.get(String.valueOf(i)).asObject();
                 String pid = null;
                 String fpid = null;
                 String driver = null;
-                try {
-                    pid = jsonObject.getString("pid");
-                    fpid = jsonObject.getString("fpid");
-                    driver = jsonObject.getString("driver");
-                } catch (final JSONException jse) {
-                    // no need
-                }
+                pid = jsonObject.getString("pid", null);
+                fpid = jsonObject.getString("fpid", null);
+                driver = jsonObject.getString("driver", null);
                 Map<String, Object> properties = null;
                 if ((pid != null) && !wireComponents.contains(pid)) {
                     s_logger.info("Creating new Wire Component: Factory PID -> " + fpid + " | PID -> " + pid);
@@ -481,7 +475,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             // Create new wires
             final Set<WireConfiguration> wireConfs = wireService.getWireConfigurations();
             for (final GwtWireConfiguration conf : GwtWireServiceUtil
-                    .getWireConfigurationsFromJson(jWireGraph.getJSONObject("wires"))) {
+                    .getWireConfigurationsFromJson(jWireGraph.get("wires").asObject())) {
                 final String emitterPid = conf.getEmitterPid();
                 final String receiverPid = conf.getReceiverPid();
                 final WireConfiguration temp = new WireConfiguration(emitterPid, receiverPid, null);
@@ -539,8 +533,6 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             props.put(GRAPH, jWireGraph.toString());
             configService.updateConfiguration(WIRE_SERVICE_PID, props, true);
             configurations.clear();
-        } catch (final JSONException exception) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
         } catch (final KuraException exception) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
         } catch (final InterruptedException exception) {

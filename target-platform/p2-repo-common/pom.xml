@@ -52,7 +52,7 @@
 						<configuration>
 							<artifactItems>
 								<artifactItem>
-									<groupId>com.codeminders</groupId>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>com.codeminders.hidapi</artifactId>
 									<version>${com.codeminders.hidapi.version}</version>
 								</artifactItem>

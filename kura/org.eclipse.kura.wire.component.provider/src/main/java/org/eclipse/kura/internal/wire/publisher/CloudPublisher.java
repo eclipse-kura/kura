@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.publisher;
 
@@ -36,13 +36,14 @@ import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.osgi.util.position.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
 
 /**
  * The Class CloudPublisher is the specific Wire Component to publish a list of
@@ -166,18 +167,18 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
      * @throws KuraRuntimeException
      *             if the wire record provided is null
      */
-    private JSONObject buildJsonObject(final WireRecord wireRecord) throws JSONException {
+    private JsonObject buildJsonObject(final WireRecord wireRecord) {
         checkNull(wireRecord, s_message.wireRecordNonNull());
-        final JSONObject jsonObject = new JSONObject();
+        final JsonObject jsonObject = Json.object();
         if (wireRecord.getTimestamp() != null) {
-            jsonObject.put(s_message.timestamp(), wireRecord.getTimestamp());
+            jsonObject.add(s_message.timestamp(), wireRecord.getTimestamp().getTime());
         }
         if (wireRecord.getPosition() != null) {
-            jsonObject.put(s_message.position(), this.buildKuraPositionForJson(wireRecord.getPosition()));
+            jsonObject.add(s_message.position(), this.buildKuraPositionForJson(wireRecord.getPosition()));
         }
         for (final WireField dataField : wireRecord.getFields()) {
             final Object wrappedValue = dataField.getValue().getValue();
-            jsonObject.put(dataField.getName(), wrappedValue);
+            jsonObject.add(dataField.getName(), wrappedValue.toString());
         }
         return jsonObject;
     }
@@ -244,28 +245,26 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
      * @param position
      *            the OSGi position instance
      * @return the kura position
-     * @throws JSONException
-     *             if it encounters any JSON parsing specific error
      * @throws KuraRuntimeException
      *             if position provided is null
      */
-    private JSONObject buildKuraPositionForJson(final Position position) throws JSONException {
+    private JsonObject buildKuraPositionForJson(final Position position) {
         checkNull(position, s_message.positionNonNull());
-        final JSONObject jsonObject = new JSONObject();
+        final JsonObject jsonObject = Json.object();
         if (position.getLatitude() != null) {
-            jsonObject.put(s_message.latitude(), position.getLatitude().getValue());
+            jsonObject.add(s_message.latitude(), position.getLatitude().getValue());
         }
         if (position.getLongitude() != null) {
-            jsonObject.put(s_message.longitude(), position.getLongitude().getValue());
+            jsonObject.add(s_message.longitude(), position.getLongitude().getValue());
         }
         if (position.getAltitude() != null) {
-            jsonObject.put(s_message.altitude(), position.getAltitude().getValue());
+            jsonObject.add(s_message.altitude(), position.getAltitude().getValue());
         }
         if (position.getSpeed() != null) {
-            jsonObject.put(s_message.speed(), position.getSpeed().getValue());
+            jsonObject.add(s_message.speed(), position.getSpeed().getValue());
         }
         if (position.getTrack() != null) {
-            jsonObject.put(s_message.heading(), position.getTrack().getValue());
+            jsonObject.add(s_message.heading(), position.getTrack().getValue());
         }
         return jsonObject;
     }
@@ -395,7 +394,7 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
                                 this.options.getPublishingRetain(), this.options.getPublishingPriority());
                     }
                     if (this.options.getMessageType() == 2) { // JSON
-                        final JSONObject jsonWire = this.buildJsonObject(dataRecord);
+                        final JsonObject jsonWire = this.buildJsonObject(dataRecord);
                         this.cloudClient.publish(appTopic, jsonWire.toString().getBytes(),
                                 this.options.getPublishingQos(), this.options.getPublishingRetain(),
                                 this.options.getPublishingPriority());

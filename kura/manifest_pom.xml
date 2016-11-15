@@ -29,6 +29,9 @@
         <module>target-definition</module>
         <module>org.eclipse.kura.api</module>
         <module>org.eclipse.kura.test</module>
+        <module>org.eclipse.kura.asset.cloudlet.provider</module>
+        <module>org.eclipse.kura.asset.provider</module>
+        <module>org.eclipse.kura.asset.provider.test</module>
         <module>org.eclipse.kura.camel</module>
         <module>org.eclipse.kura.camel.cloud.factory</module>
         <module>org.eclipse.kura.camel.xml</module>
@@ -64,6 +67,8 @@
         <module>org.eclipse.kura.linux.usb.x86.ubuntu</module>
 		
         <module>org.eclipse.kura.linux.watchdog</module>
+        <module>org.eclipse.kura.localization</module>
+        <module>org.eclipse.kura.localization.resources</module>
         <module>org.eclipse.kura.net.admin</module>
         <module>org.eclipse.kura.protocol.modbus</module>
         <module>org.eclipse.kura.protocol.modbus.test</module>
@@ -72,6 +77,10 @@
         <module>org.eclipse.kura.core.test</module>
         <module>org.eclipse.kura.windows.command</module>
         <module>org.eclipse.kura.windows.clock</module>
+        <module>org.eclipse.kura.util</module>
+        <module>org.eclipse.kura.wire.component.provider</module>
+        <module>org.eclipse.kura.wire.provider</module>
+        <module>org.eclipse.kura.wire.provider.test</module>
         <module>examples</module>
     </modules>
 

@@ -381,7 +381,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
     @Override
     public GwtWiresConfiguration updateWireConfiguration(final GwtXSRFToken xsrfToken,
             final String newJsonConfiguration, final Map<String, GwtConfigComponent> configurations)
-            throws GwtKuraException {
+                    throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
 
         JSONObject jWireGraph = null;

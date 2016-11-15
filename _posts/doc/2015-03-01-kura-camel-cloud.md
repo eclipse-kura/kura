@@ -45,10 +45,5 @@ metric and writes out the actual value to it. The output in the log file should 
     2016-11-14 16:14:36,539 [Camel (camel-10) thread #18 - vm://camel:example] INFO  k.d.intValue - Exchange[ExchangePattern: InOnly, BodyType: Long, Body: 19]
     2016-11-14 16:14:36,567 [Camel (camel-10) thread #18 - vm://camel:example] INFO  k.d.doubleValue - Exchange[ExchangePattern: InOnly, BodyType: Double, Body: 10.314456684208022]
 
-Kura provides `org.eclipse.kura.camel.router.CamelRouter` class, which extends 
-`org.apache.camel.component.kura.KuraRouter` class from the Apache Camel 
-[camel-kura](http://camel.apache.org/kura) module. While `KuraRouter` provides a generic base for Kura routes, it 
-doesn't rely on the Kura-specific jars, because of limitations of the Apache Camel policy regarding adding 3rd parties repositories to the Camel (like Eclipse Kura repository). `CamelRouter` extends `KuraRouter` and enhances it with Kura-specific API.
 
-In the near future we plan to migrate Kura related code from Apache Camel to Eclipse Kura, so all the code related to
-Kura-Camel integration will be hosted here under Kura umbrella.
+

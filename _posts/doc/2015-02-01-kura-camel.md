@@ -18,3 +18,18 @@ which is configured in Kura. For example the default CloudService instance which
 
 The second approach allows one to create a custom CloudService implementation and route data coming from other
 Kura applications with the routes provided by this Camel context.
+
+## Deploying additional Camel components
+
+Kura comes with the following Camel components pre-installed:
+
+* camel-core
+* camel-core-osgi
+* camel-stream
+
+If additional Camel components are required, they can be installed using
+deployment packages (DP), as common with Kura.
+
+There are pre-packaged DPs available for e.g. AMQP, OPC UA, MQTT and other
+Camel components outside of the Kura project.
+ 

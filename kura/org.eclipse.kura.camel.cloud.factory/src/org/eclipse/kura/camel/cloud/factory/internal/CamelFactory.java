@@ -60,6 +60,7 @@ public class CamelFactory implements ConfigurableComponent {
         final ServiceConfiguration configuration = new ServiceConfiguration();
         configuration.setXml(asString(properties, "xml"));
         configuration.setServiceRanking(asInteger(properties, "serviceRanking"));
+        configuration.setInitCode(asString(properties, "initCode"));
 
         createService(pid, configuration);
     }

@@ -11,16 +11,21 @@
 package org.eclipse.kura.camel.cloud.factory.internal;
 
 import static org.apache.camel.ServiceStatus.Started;
+import static org.eclipse.kura.camel.runner.ScriptRunner.create;
 
 import java.io.ByteArrayInputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
+
+import javax.script.ScriptException;
+import javax.script.SimpleBindings;
 
 import org.apache.camel.ServiceStatus;
 import org.apache.camel.core.osgi.OsgiDefaultCamelContext;
 import org.apache.camel.model.RoutesDefinition;
 import org.eclipse.kura.camel.camelcloud.DefaultCamelCloudService;
 import org.eclipse.kura.camel.cloud.KuraCloudComponent;
+import org.eclipse.kura.camel.runner.ScriptRunner;
 import org.eclipse.kura.cloud.CloudService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -57,6 +62,10 @@ public class XmlCamelCloudService {
 
         this.router = new OsgiDefaultCamelContext(this.context);
 
+        // call init code
+
+        callInitCode(this.router);
+
         // new cloud service
 
         this.service = new DefaultCamelCloudService(this.router);
@@ -75,8 +84,7 @@ public class XmlCamelCloudService {
         logger.debug("Starting router...");
         this.router.start();
         final ServiceStatus status = this.router.getStatus();
-        logger.debug("Starting router... {} ({}, {})",
-                new Object[] { status, status == Started, this.service.isConnected() });
+        logger.debug("Starting router... {} ({}, {})", status, status == Started, this.service.isConnected());
 
         // register
 
@@ -89,6 +97,32 @@ public class XmlCamelCloudService {
         }
 
         this.handle = this.context.registerService(CloudService.class, this.service, props);
+    }
+
+    private void callInitCode(OsgiDefaultCamelContext router) throws ScriptException {
+        if (this.configuration.getInitCode() == null || this.configuration.getInitCode().isEmpty()) {
+            return;
+        }
+
+        try {
+
+            // setup runner
+
+            final ScriptRunner runner = create(XmlCamelCloudService.class.getClassLoader(), "JavaScript",
+                    this.configuration.getInitCode());
+
+            // setup arguments
+
+            final SimpleBindings bindings = new SimpleBindings();
+            bindings.put("camelContext", router);
+
+            // perform call
+
+            runner.run(bindings);
+        } catch (final Exception e) {
+            logger.warn("Failed to run init code", e);
+            throw e;
+        }
     }
 
     public void stop() throws Exception {

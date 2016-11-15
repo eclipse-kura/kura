@@ -24,13 +24,13 @@
     		<plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-maven-plugin</artifactId>
-                <version>0.20.0</version>
+                <version>0.26.0</version>
                 <extensions>true</extensions>
             </plugin>
         	<plugin>
             	<groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-packaging-plugin</artifactId>
-                <version>0.20.0</version>
+                <version>0.26.0</version>
                 <configuration>
                 	<archive>
                     	<compress>false</compress>

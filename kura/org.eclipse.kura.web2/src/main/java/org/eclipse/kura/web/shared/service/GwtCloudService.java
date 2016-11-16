@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,12 +8,14 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.web.shared.service;
 
 import java.util.List;
 
 import org.eclipse.kura.cloud.CloudService;
+import org.eclipse.kura.cloud.factory.CloudServiceFactory;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtCloudConnectionEntry;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
@@ -25,11 +27,11 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 /**
  * This interface provide a set of methods to manage cloud services from the web UI.
  * In particular, it provides a way to generate or delete Cloud Services from a defined factory.
- * 
+ *
  * Furthermore, it provides a way to get the list of all the cloud services instances {@link #findCloudServices()}, all
  * the registered cloud services factories {@link #findCloudServiceFactories()} or the list of PIDs that compose a
  * specified cloud service stack {@link #findStackPidsByFactory(String, String)}.
- * 
+ *
  * This interface provides two additional methods that can be used in the client part, during the creation of a new
  * cloud service stack instance. In particular,
  * {@link #findSuggestedCloudServicePid(String)} will return a String representing the suggested cloud service PID, as
@@ -45,7 +47,7 @@ public interface GwtCloudService extends RemoteService {
      * Returns the list of all the {@link org.eclipse.kura.cloud.CloudService} instances registered in the framework. An
      * entry will be added to the returned result only if the {@link org.eclipse.kura.cloud.CloudService} implementation
      * specifies the {@link org.eclipse.kura.cloud.factory.CloudServiceFactory} KURA_CLOUD_SERVICE_FACTORY_PID property.
-     * 
+     *
      * @return the list of {@link GwtCloudConnectionEntry} that represent the
      *         different {@link org.eclipse.kura.cloud.CloudService} instances registered in the framework.
      * @throws GwtKuraException
@@ -56,7 +58,7 @@ public interface GwtCloudService extends RemoteService {
     /**
      * Returns the list of all the {@link org.eclipse.kura.cloud.factory.CloudServiceFactory} instances registered in
      * the framework.
-     * 
+     *
      * @return a list of {@link GwtGroupedNVPair} with the factory PID returned by the
      *         {@link org.eclipse.kura.cloud.factory.CloudServiceFactory} instances
      * @throws GwtKuraException
@@ -66,9 +68,9 @@ public interface GwtCloudService extends RemoteService {
 
     /**
      * Returns a list of PIDs that compose the cloud stack referenced by the specified factory and cloud service.
-     * 
+     *
      * @param factoryPid
-     *            the factory PID of the Factory Component
+     *            the PID of the {@link CloudServiceFactory} this CloudService was registered with
      * @param cloudServicePid
      *            the PID of the selected Cloud Service
      * @return the list of <i>kura.service.pid</i>s associated with the specified factory component
@@ -83,7 +85,7 @@ public interface GwtCloudService extends RemoteService {
     /**
      * Returns a string that represents the suggested cloud service PID, for the specified factory. If the factory does
      * not specify a value, null is returned.
-     * 
+     *
      * @param factoryPid
      *            the factory PID of the Factory Component
      * @return a String that represents the suggested cloud service PID. Null otherwise.
@@ -94,7 +96,7 @@ public interface GwtCloudService extends RemoteService {
 
     /**
      * Returns a string representing the regex specified by the specified Factory Component.
-     * 
+     *
      * @param factoryPid
      *            the factory PID of the Factory Component
      * @return a String representing the regex to be used to verify the user's input. A null value is returned if the
@@ -107,7 +109,7 @@ public interface GwtCloudService extends RemoteService {
     /**
      * Invokes the creation of a new cloud stack by the specified Factory Component, using the specified Cloud Service
      * PID.
-     * 
+     *
      * @param xsrfToken
      *            the cross site request forgery token
      * @param factoryPid
@@ -124,7 +126,7 @@ public interface GwtCloudService extends RemoteService {
 
     /**
      * Invokes the deletion of the associated {@link CloudService} instance by the specified Factory Component.
-     * 
+     *
      * @param xsrfToken
      *            the cross site request forgery token
      * @param factoryPid

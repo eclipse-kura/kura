@@ -82,7 +82,9 @@ public class XmlCamelCloudService {
 
         final Dictionary<String, Object> props = new Hashtable<>();
         props.put(Constants.SERVICE_PID, this.pid);
+        props.put("service.factoryPid", CamelFactory.FACTORY_ID);
         props.put("kura.service.pid", this.pid);
+        props.put("kura.cloud.service.factory.pid", CamelManager.PID);
 
         if (this.configuration.getServiceRanking() != null) {
             props.put(Constants.SERVICE_RANKING, this.configuration.getServiceRanking());

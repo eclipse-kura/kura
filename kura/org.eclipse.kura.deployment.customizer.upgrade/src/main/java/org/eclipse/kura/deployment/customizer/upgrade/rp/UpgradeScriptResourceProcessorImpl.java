@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.deployment.customizer.upgrade.rp;
 
@@ -22,7 +23,6 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.osgi.service.deploymentadmin.spi.DeploymentSession;
 import org.osgi.service.deploymentadmin.spi.ResourceProcessor;
 import org.osgi.service.deploymentadmin.spi.ResourceProcessorException;
@@ -34,8 +34,6 @@ public class UpgradeScriptResourceProcessorImpl implements ResourceProcessor {
     private static Logger s_logger = LoggerFactory.getLogger(UpgradeScriptResourceProcessorImpl.class);
 
     private BundleContext m_bundleContext;
-    private DeploymentPackage m_sourceDP;
-    private DeploymentPackage m_targetDP;
     private final Map<String, File> m_sourceResourceFiles = new LinkedHashMap<String, File>(); // preserve insertion
  // order
 
@@ -51,9 +49,6 @@ public class UpgradeScriptResourceProcessorImpl implements ResourceProcessor {
     @Override
     public void begin(DeploymentSession session) {
         s_logger.debug("Upgrade script resource processor: begin");
-
-        this.m_sourceDP = session.getSourceDeploymentPackage();
-        this.m_targetDP = session.getTargetDeploymentPackage();
     }
 
     @Override

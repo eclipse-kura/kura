@@ -6,7 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v1.0
 Bundle-Category: Localization
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.eclipse.kura.localization;version="1.0.0"
 Import-Package: org.eclipse.kura;version="[1.2,2.0)"
 Bundle-ActivationPolicy: lazy

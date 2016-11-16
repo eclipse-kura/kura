@@ -222,7 +222,7 @@ public class DbDataStore implements DataStore {
         boolean doCheckpoint = !((HsqlDbServiceImpl) this.m_dbService).isLogDataEnabled();
 
         // Start the Housekeeper task
-        this.m_houseKeeperTask = this.m_houseKeeperExecutor.scheduleWithFixedDelay(
+        this.m_houseKeeperTask = this.m_houseKeeperExecutor.scheduleAtFixedRate(
                 new HouseKeeperTask(this, purgeAge, doCheckpoint), 1,    // start in one second
                 houseKeeperInterval,   // repeat every retryInterval until we stopped.
                 TimeUnit.SECONDS);

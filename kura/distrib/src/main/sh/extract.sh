@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+# Copyright (c) 2011, 2016 Eurotech and/or its affiliates
 #
 #  All rights reserved. This program and the accompanying materials
 #  are made available under the terms of the Eclipse Public License v1.0
@@ -16,8 +16,124 @@ TIMESTAMP=`date +%Y%m%d%H%M%S`
 LOG=/tmp/kura_install_${TIMESTAMP}.log
 
 ##############################################
+# UTILITY FUNCTIONS
+##############################################
+
+function abspath {
+  OLDPWD="$PWD"
+  cd "$(dirname "$1")"
+  echo "$PWD/$(basename "$1")"
+  cd "$OLDPWD"
+}
+
+function require {
+  if ! [[ $(which "$1") ]];
+  then
+    echo "$1 not found, please install it"
+    exit 1
+  fi
+}
+
+##############################################
+# END UTILITY FUNCTIONS
+##############################################
+
+##############################################
+# BACKUP FUNCTIONS
+##############################################
+
+#backup root can be overridden setting the BACKUP_ROOT environment variable
+BACKUP_ROOT=${BACKUP_ROOT:-"/tmp/kura_backup_root_${TIMESTAMP}"}
+BACKUP_FILES=()
+BACKED_UP_FILES=()
+
+function is_already_backed_up {
+  for BACKED_UP_FILE in ${BACKED_UP_FILES[@]};
+  do
+    [[ "$BACKED_UP_FILE" == "$1" ]] && return 0
+  done
+  return 1
+}
+
+function do_backup {
+  require install
+  require basename
+  require dirname
+
+  printf "Creating backup...\n"
+
+  install -d $BACKUP_ROOT
+
+  for TARGET in ${BACKUP_FILES[@]};
+  do
+    if ! [[ $TARGET ]] || ! [ -e $TARGET ] || is_already_backed_up "$TARGET";
+    then
+
+      continue
+    fi
+    SRC=$(abspath "$TARGET")
+    SRC_DIR=$(dirname "$SRC")
+    printf "\r\033[Kbackup: $TARGET -> ${BACKUP_ROOT}${SRC}"
+    echo "backup: $TARGET -> ${BACKUP_ROOT}${SRC}" >> $LOG 2>&1
+    install -d "$BACKUP_ROOT/$SRC_DIR"
+    cp -r "$SRC" "$BACKUP_ROOT/$SRC_DIR/"
+    BACKED_UP_FILES+=("$TARGET")
+  done
+
+   printf "\r\033[K"
+}
+
+function do_restore {
+  #remove signal handler
+  trap - SIGINT SIGTERM ERR
+
+  if ! [[ -e "$BACKUP_ROOT" ]];
+  then
+    echo "backup not present"
+    exit
+  fi
+
+  echo "Restoring backup..."
+  cp -r "$BACKUP_ROOT"/* /
+
+  sync
+  
+  do_delete_backup
+}
+
+function do_delete_backup {
+  echo "Removing backup..."
+  rm -rf "$BACKUP_ROOT"
+}
+
+##############################################
+# END BACKUP FUNCTIONS
+##############################################
+
+##############################################
+# JAVA 8 CHECK FUNCTION
+##############################################
+
+function require_java_8 {
+  require java
+  JAVA_VERSION=$(java -version 2>&1 | head -n 1 | sed 's/java version ["][^.]*[.]\([^.]*\).*/\1/g')
+  if [ $JAVA_VERSION -lt 8 ];
+  then
+    echo "Java version 8 or greater is required for running Kura, please upgrade"
+    exit 1
+  fi
+}
+
+##############################################
+# END JAVA 8 CHECK FUNCTION
+##############################################
+
+##############################################
 # PRE-INSTALL SCRIPT
 ##############################################
+
+require_java_8
+
 echo ""
 echo "Installing Kura..."
 echo "Installing Kura..." > $LOG 2>&1
@@ -25,27 +141,29 @@ echo "Installing Kura..." > $LOG 2>&1
 #Kill JVM and monit for installation
 killall monit java >> $LOG 2>&1
 
-#clean up old installation if present
-rm -fr /opt/eclipse/data >> $LOG 2>&1
-rm -fr /opt/eclipse/kura* >> $LOG 2>&1
-rm -fr ${INSTALL_DIR}/kura* >> $LOG 2>&1
-rm -fr /tmp/.kura/ >> $LOG 2>&1
-rm /etc/init.d/firewall >> $LOG 2>&1
-rm /etc/dhcpd-*.conf >> $LOG 2>&1
-rm /etc/named.conf >> $LOG 2>&1
-rm /etc/wpa_supplicant.conf >> $LOG 2>&1
-rm /etc/hostapd.conf >> $LOG 2>&1
-rm /tmp/coninfo-* >> $LOG 2>&1
-rm /var/log/esf.log >> $LOG 2>&1
-rm /var/log/kura.log >> $LOG 2>&1
-rm -fr /etc/ppp/chat >> $LOG 2>&1
-rm -fr /etc/ppp/peers >> $LOG 2>&1
-rm -fr /etc/ppp/scripts >> $LOG 2>&1
-rm /etc/ppp/*ap-secrets >> $LOG 2>&1
-rm /etc/rc*.d/S*esf >> $LOG 2>&1
-rm /etc/rc*.d/S*kura >> $LOG 2>&1
 rm kura-*.zip >> $LOG 2>&1
 rm kura_*.zip >> $LOG 2>&1
+
+#add existing files to backup
+BACKUP_FILES+=("/opt/eclipse/data")
+BACKUP_FILES+=("/opt/eclipse/kura*")
+BACKUP_FILES+=("${INSTALL_DIR}/kura*")
+BACKUP_FILES+=("/tmp/.kura/")
+BACKUP_FILES+=("/tmp/coninfo-*")
+BACKUP_FILES+=("/var/log/esf.log")
+BACKUP_FILES+=("/var/log/kura.log")
+BACKUP_FILES+=("/etc/rc*.d/S*esf")
+BACKUP_FILES+=("/etc/rc*.d/S*kura")
+BACKUP_FILES+=("/etc/init.d/kura*")
+BACKUP_FILES+=("/etc/init.d/firewall")
+BACKUP_FILES+=("/etc/dhcpd-*.conf")
+BACKUP_FILES+=("/etc/named.conf")
+BACKUP_FILES+=("/etc/wpa_supplicant.conf")
+BACKUP_FILES+=("/etc/hostapd.conf")
+BACKUP_FILES+=("/etc/ppp/chat")
+BACKUP_FILES+=("/etc/ppp/peers")
+BACKUP_FILES+=("/etc/ppp/scripts")
+BACKUP_FILES+=("/etc/ppp/*ap-secrets")
 
 #clean up and/or install OS specific stuff
 HOSTNAME=`hostname`
@@ -53,12 +171,23 @@ if [ ${HOSTNAME} == "mini-gateway" ] ; then
 	#MGW specific items
 	mkdir /var/named >> $LOG 2>&1
 
-	#remove ntpd
-	rm /etc/rc2.d/S20ntpd >> $LOG 2>&1
-	rm /etc/rc3.d/S20ntpd >> $LOG 2>&1
-	rm /etc/rc4.d/S20ntpd >> $LOG 2>&1
-	rm /etc/rc5.d/S20ntpd >> $LOG 2>&1
+	#add original ntpd files to backup
+	BACKUP_FILES+=("/etc/rc2.d/S20ntpd")
+    BACKUP_FILES+=("/etc/rc3.d/S20ntpd")
+    BACKUP_FILES+=("/etc/rc4.d/S20ntpd")
+    BACKUP_FILES+=("/etc/rc5.d/S20ntpd")
 fi
+
+do_backup
+
+#install failure signal handler
+trap 'do_restore; exit 1' SIGINT SIGTERM ERR
+
+#remove existing files
+for BACKED_UP_FILE in ${BACKUP_FILES[@]};
+do
+	rm -rf "$BACKED_UP_FILE" >> $LOG 2>&1
+done
 
 echo ""
 ##############################################
@@ -69,7 +198,7 @@ echo "Extracting Kura files"
 SKIP=`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' $0`
 
 # take the tarfile and pipe it into tar and redirect the output
-tail -n +$SKIP $0 | tar -xz
+tail -n +$SKIP $0 | tar -xz >> $LOG 2>&1
 
 
 ##############################################
@@ -93,6 +222,8 @@ mv $LOG ${INSTALL_DIR}/kura/log/
 #flush all cached filesystem to disk
 sync
 
+echo ""
+do_delete_backup
 echo ""
 echo "Finished.  Kura has been installed to ${INSTALL_DIR}/kura and will start automatically after a reboot"
 exit 0

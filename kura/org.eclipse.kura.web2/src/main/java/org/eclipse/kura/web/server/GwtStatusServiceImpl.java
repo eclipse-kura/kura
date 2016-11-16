@@ -303,7 +303,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
     private List<GwtGroupedNVPair> getPositionStatus() throws GwtKuraException {
         final List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
-        ServiceLocator.withOptionalService(PositionService.class, new ServiceFunction<PositionService, Void>() {
+        ServiceLocator.applyToServiceOptionally(PositionService.class, new ServiceFunction<PositionService, Void>() {
 
             @Override
             public Void apply(PositionService positionService) {

@@ -14,6 +14,7 @@ package org.eclipse.kura.web.server;
 
 import static java.lang.String.format;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
+import static org.eclipse.kura.web.server.util.ServiceLocator.applyToAllServices;
 import static org.eclipse.kura.web.server.util.ServiceLocator.withAllServices;
 import static org.eclipse.kura.web.shared.model.GwtCloudConnectionState.CONNECTED;
 import static org.eclipse.kura.web.shared.model.GwtCloudConnectionState.DISCONNECTED;
@@ -73,7 +74,7 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
 
         final List<GwtCloudConnectionEntry> pairs = new ArrayList<GwtCloudConnectionEntry>();
 
-        withAllServices(CloudServiceFactory.class, new ServiceConsumer<CloudServiceFactory>() {
+        applyToAllServices(CloudServiceFactory.class, new ServiceConsumer<CloudServiceFactory>() {
 
             @Override
             public void consume(final CloudServiceFactory service) throws Exception {
@@ -163,7 +164,7 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
 
         // iterate over all candidates
 
-        withAllServices(CloudServiceFactory.class, new ServiceConsumer<CloudServiceFactory>() {
+        applyToAllServices(CloudServiceFactory.class, new ServiceConsumer<CloudServiceFactory>() {
 
             @Override
             public void consume(final CloudServiceFactory factory) throws Exception {

@@ -99,7 +99,7 @@ public class ServiceLocator {
      *             if the service function throws an exception
      * @return the return value of the function
      */
-    public static <T, R> R withOptionalService(final Class<T> serviceClass, final ServiceFunction<T, R> function)
+    public static <T, R> R applyToServiceOptionally(final Class<T> serviceClass, final ServiceFunction<T, R> function)
             throws GwtKuraException {
         final BundleContext ctx = FrameworkUtil.getBundle(ServiceLocator.class).getBundleContext();
         final ServiceReference<T> ref = ctx.getServiceReference(serviceClass);
@@ -130,7 +130,7 @@ public class ServiceLocator {
      * @throws GwtKuraException
      *             if any service consumer throws an exception
      */
-    public static <T> void withAllServices(final Class<T> serviceClass, final ServiceConsumer<T> consumer)
+    public static <T> void applyToAllServices(final Class<T> serviceClass, final ServiceConsumer<T> consumer)
             throws GwtKuraException {
 
         withAllServices(serviceClass, null, consumer);

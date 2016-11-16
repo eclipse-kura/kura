@@ -161,6 +161,8 @@
       <dropinLocation
           rootFolder="${git.clone.location}/target-platform/p2-repo-equinox_3.8.1/target/repository"/>
       <dropinLocation
+          rootFolder="${git.clone.location}/target-platform/p2-repo-equinox_3.11.1/target/repository"/>
+      <dropinLocation
           rootFolder="${git.clone.location}/target-platform/usb4java-javax/target"
           recursive="false"/>
       <dropinLocation

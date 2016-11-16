@@ -21,7 +21,7 @@
 		<module>org.eclipse.kura.windows.launcher</module>
 		<module>jdk.dio-parent</module>
 		<module>p2-repo-common</module>
-		<module>p2-repo-equinox_3.8.1</module>
+		<module>p2-repo-equinox_3.11.1</module>
 	</modules>
 
 	<profiles>

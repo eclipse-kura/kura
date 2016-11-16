@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.web.server.util;
 
@@ -17,7 +17,6 @@ import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
-import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtWireComponentConfiguration;
 import org.eclipse.kura.web.shared.model.GwtWireConfiguration;
@@ -27,12 +26,14 @@ import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireService;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.ConfigurationAdmin;
+
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
 
 /**
  * The Class GwtWireServiceUtil.
@@ -47,15 +48,13 @@ public final class GwtWireServiceUtil {
     }
 
     /**
-     * Gets the driver by pid.
+     * Gets the driver by PID.
      *
      * @param pid
-     *            the pid
-     * @return the driver by pid
-     * @throws GwtKuraException
-     *             the gwt kura exception
+     *            the PID
+     * @return the driver by PID
      */
-    public static String getDriverByPid(final String pid) throws GwtKuraException {
+    public static String getDriverByPid(final String pid) {
         final BundleContext context = FrameworkUtil.getBundle(GwtWireServiceUtil.class).getBundleContext();
         final ServiceReference<?>[] refs = getServiceReferences(context, WireComponent.class.getName(), null);
         for (final ServiceReference<?> ref : refs) {
@@ -69,20 +68,18 @@ public final class GwtWireServiceUtil {
     }
 
     /**
-     * Gets the factory pid.
+     * Gets the factory PID.
      *
      * @param pid
-     *            the pid
-     * @return the factory pid
-     * @throws GwtKuraException
-     *             the gwt kura exception
+     *            the PID
+     * @return the factory PID
      */
-    public static String getFactoryPid(final String pid) throws GwtKuraException {
+    public static String getFactoryPid(final String pid) {
         final BundleContext context = FrameworkUtil.getBundle(GwtWireServiceUtil.class).getBundleContext();
         final ServiceReference<?>[] refs = getServiceReferences(context, WireComponent.class.getName(), null);
         for (final ServiceReference<?> ref : refs) {
             if (ref.getProperty(KURA_SERVICE_PID).equals(pid)) {
-                return (String) ref.getProperty("service.factoryPid");
+                return (String) ref.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID);
             }
         }
         return null;
@@ -114,16 +111,14 @@ public final class GwtWireServiceUtil {
      * Gets the type.
      *
      * @param pid
-     *            the pid
+     *            the PID
      * @return the type
-     * @throws GwtKuraException
-     *             the gwt kura exception
      */
-    public static String getType(final String pid) throws GwtKuraException {
+    public static String getType(final String pid) {
         final BundleContext context = FrameworkUtil.getBundle(GwtWireServiceUtil.class).getBundleContext();
         final ServiceReference<?>[] refs = getServiceReferences(context, WireComponent.class.getName(), null);
         for (final ServiceReference<?> ref : refs) {
-            WireComponent wc = null;
+            WireComponent wc;
             if (ref.getProperty(KURA_SERVICE_PID).equals(pid)) {
                 wc = (WireComponent) context.getService(ref);
             } else {
@@ -172,35 +167,21 @@ public final class GwtWireServiceUtil {
     }
 
     /**
-     * Gets the wire components json.
+     * Gets the wire components JSON.
      *
      * @param list
-     *            the list
-     * @return the wire components json
-     * @throws GwtKuraException
-     *             the gwt kura exception
+     *            the list containing the Wire Component Configuration
+     * @return the wire components JSON
      */
-    public static String getWireComponentsJson(final List<GwtWireComponentConfiguration> list) throws GwtKuraException {
-        final JSONObject wireCompConfig = new JSONObject();
+    public static String getWireComponentsJson(final List<GwtWireComponentConfiguration> list) {
+        final JsonObject wireCompConfig = Json.object();
         int i = 0;
         for (final GwtWireComponentConfiguration wcConf : list) {
-            final JSONObject wireConf = new JSONObject();
-            try {
-                wireConf.put("fPid", wcConf.getFactoryPid());
-                wireConf.put("pid", wcConf.getPid());
-                wireConf.put("name", wcConf.getPid());
-                wireConf.put("type", wcConf.getType());
-                wireConf.put("driver", wcConf.getDriverPid());
-                wireCompConfig.put(String.valueOf(i++), wireConf);
-            } catch (final JSONException exception) {
-                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
-            }
+            final JsonObject wireConf = Json.object().add("fPid", wcConf.getFactoryPid()).add("pid", wcConf.getPid())
+                    .add("name", wcConf.getPid()).add("type", wcConf.getType()).add("driver", wcConf.getDriverPid());
+            wireCompConfig.add(String.valueOf(i++), wireConf);
         }
-        try {
-            wireCompConfig.put("length", String.valueOf(i));
-        } catch (final JSONException e) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        }
+        wireCompConfig.add("length", String.valueOf(i));
         return wireCompConfig.toString();
     }
 
@@ -217,11 +198,11 @@ public final class GwtWireServiceUtil {
     }
 
     /**
-     * Gets the wire configurations by emitter pid.
+     * Gets the wire configurations by emitter PID.
      *
      * @param pid
-     *            the pid
-     * @return the wire configurations by emitter pid
+     *            the PID
+     * @return the wire configurations by emitter PID
      * @throws GwtKuraException
      *             the gwt kura exception
      */
@@ -238,11 +219,11 @@ public final class GwtWireServiceUtil {
     }
 
     /**
-     * Gets the wire configurations by receiver pid.
+     * Gets the wire configurations by receiver PID.
      *
      * @param pid
-     *            the pid
-     * @return the wire configurations by receiver pid
+     *            the PID
+     * @return the wire configurations by receiver PID
      * @throws GwtKuraException
      *             the gwt kura exception
      */
@@ -259,20 +240,18 @@ public final class GwtWireServiceUtil {
     }
 
     /**
-     * Gets the wire configurations from json.
+     * Gets the wire configurations from JSON.
      *
      * @param json
-     *            the json
-     * @return the wire configurations from json
-     * @throws JSONException
-     *             the JSON exception
+     *            the JSON
+     * @return the wire configurations from JSON
      */
-    public static List<GwtWireConfiguration> getWireConfigurationsFromJson(final JSONObject json) throws JSONException {
+    public static List<GwtWireConfiguration> getWireConfigurationsFromJson(final JsonObject json) {
         final List<GwtWireConfiguration> list = new ArrayList<GwtWireConfiguration>();
-        for (int i = 0; i < json.length(); i++) {
-            final JSONObject jsonObject = json.getJSONObject(String.valueOf(i));
-            final String emitter = jsonObject.getString("producer");
-            final String receiver = jsonObject.getString("consumer");
+        for (int i = 0; i < json.size(); i++) {
+            final JsonObject jsonObject = json.get(String.valueOf(i)).asObject();
+            final String emitter = jsonObject.getString("producer", null);
+            final String receiver = jsonObject.getString("consumer", null);
             final GwtWireConfiguration configuration = new GwtWireConfiguration();
             configuration.setEmitterPid(emitter);
             configuration.setReceiverPid(receiver);
@@ -282,32 +261,21 @@ public final class GwtWireServiceUtil {
     }
 
     /**
-     * Gets the wire configurations json.
+     * Gets the wire configurations JSON.
      *
      * @param list
-     *            the list
-     * @return the wire configurations json
-     * @throws GwtKuraException
-     *             the gwt kura exception
+     *            the list containing Wire Configurations
+     * @return the wire configurations JSON
      */
-    public static String getWireConfigurationsJson(final List<GwtWireConfiguration> list) throws GwtKuraException {
-        final JSONObject wireConfigs = new JSONObject();
+    public static String getWireConfigurationsJson(final List<GwtWireConfiguration> list) {
+        final JsonObject wireConfigs = Json.object();
         int i = 0;
         for (final GwtWireConfiguration wcConf : list) {
-            final JSONObject wireConf = new JSONObject();
-            try {
-                wireConf.put("emitter", wcConf.getEmitterPid());
-                wireConf.put("receiver", wcConf.getReceiverPid());
-                wireConfigs.put(String.valueOf(i++), wireConf);
-            } catch (final JSONException exception) {
-                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
-            }
+            final JsonObject wireConf = Json.object();
+            wireConf.add("emitter", wcConf.getEmitterPid()).add("receiver", wcConf.getReceiverPid());
+            wireConfigs.add(String.valueOf(i++), wireConf);
         }
-        try {
-            wireConfigs.put("length", String.valueOf(i));
-        } catch (final JSONException e) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        }
+        wireConfigs.add("length", String.valueOf(i));
         return wireConfigs.toString();
     }
 

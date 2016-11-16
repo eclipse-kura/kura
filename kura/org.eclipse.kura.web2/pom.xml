@@ -99,9 +99,9 @@
 			<version>4.3.0</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.json</groupId>
-		    <artifactId>json</artifactId>
-		    <version>20160810</version>
+		    <groupId>com.eclipsesource.minimal-json</groupId>
+		    <artifactId>minimal-json</artifactId>
+		    <version>0.9.4</version>
 		    <scope>provided</scope>
 		</dependency>
 		<dependency>

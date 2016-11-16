@@ -82,9 +82,9 @@
 									<version>${org.eclipse.kura.sun.misc.version}</version>
 								</artifactItem>
 								<artifactItem>
-								    <groupId>org.json</groupId>
-								    <artifactId>json</artifactId>
-								    <version>${org.json.version}</version>
+								    <groupId>com.eclipsesource.minimal-json</groupId>
+								    <artifactId>minimal-json</artifactId>
+								    <version>${com.eclipsesource.minimal-json.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.tigris</groupId>

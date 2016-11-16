@@ -63,7 +63,7 @@
 		<replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.symlink}" value="${kura.symlink}"/>
 
 
-		<condition property="kura.osgi.repo" value="../target-definition/equinox_3.8.1/source">
+		<condition property="kura.osgi.repo" value="../target-definition/equinox_3.11.1/repository">
 			<or>
 				<not>
 					<isset property="kura.osgi"/>
@@ -74,7 +74,7 @@
 
 		<copy file="src/main/resources/${build.name}/snapshot_0.xml"
               tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" />
-		<copy file="src/main/osgi/equinox_3.8.1/configuration/config.ini"
+		<copy file="src/main/osgi/equinox_3.11.1/configuration/config.ini"
               tofile="${project.build.directory}/${build.output.name}/config.ini" />
 
 		<!-- Copy jdk.dio files -->
@@ -118,6 +118,9 @@
 		
 		<!-- Added Camel bundles configs -->
 		<antcall target="camel-config" />
+		
+		<!-- Wires bundles config -->
+		<antcall target="wires-config" />
 
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
@@ -170,7 +173,7 @@ cp ${DIR}/kura/config.ini /tmp/.kura/configuration/
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ -z "$KURA_RUNNING" ] ; then
-        java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m \
+        java -Xms${kura.mem.size} -Xmx${kura.mem.size} \
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
         -XX:ErrorFile=/var/log/kura-error.log \
         -Dkura.os.version=${kura.os.version} \
@@ -186,7 +189,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
-        -jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+        -jar ${DIR}/plugins/org.eclipse.osgi_3.11.1.v20160708-1632.jar \
         -configuration  /tmp/.kura/configuration \
         -console \
         -consoleLog
@@ -209,7 +212,7 @@ cp ${DIR}/kura/config.ini /tmp/.kura/configuration/
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ -z "$KURA_RUNNING" ] ; then
-        java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m \
+        java -Xms${kura.mem.size} -Xmx${kura.mem.size} \
         -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Xloggc:/var/log/kura-gc.log \
         -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M \
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
@@ -228,7 +231,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
-        -jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+        -jar ${DIR}/plugins/org.eclipse.osgi_3.11.1.v20160708-1632.jar \
         -configuration  /tmp/.kura/configuration \
         -console \
         -consoleLog
@@ -252,7 +255,7 @@ cp ${DIR}/kura/config.ini /tmp/.kura/configuration/
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ -z "$KURA_RUNNING" ] ; then
-  nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m \
+  nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} \
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
         -XX:ErrorFile=/var/log/kura-error.log \
         -Dkura.os.version=${kura.os.version} \
@@ -268,7 +271,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
-        -jar ${DIR}/plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+        -jar ${DIR}/plugins/org.eclipse.osgi_3.11.1.v20160708-1632.jar \
         -configuration  /tmp/.kura/configuration \
         -console 5002 \
         -consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &
@@ -439,12 +442,41 @@ fi]]>
                         prefix="${build.output.name}/kura/" />
 
 			<zipfileset dir="${kura.osgi.repo}/plugins/"
-                        prefix="${build.output.name}/plugins"/>
+                        prefix="${build.output.name}/plugins">
+				
+				<!-- exclude source bundles -->
+				<exclude name="*.source_*.jar"/>
+				<!-- exclude .SNAPSHOT bundles -->
+				<exclude name="*.SNAPSHOT.jar"/>
+				
+			</zipfileset>
+			
+			<zipfileset dir="../target-definition/common/repository/plugins"
+                        prefix="${build.output.name}/plugins">
+				
+				<exclude name="com.google.protobuf_2.6.0.jar"/>
+				<exclude name="org.eclipse.paho.*"/>
+				<exclude name="com.gwt.user_*"/>
+				<exclude name="org.eclipse.kura.windows.*"/>
+				
+				<!-- exclude source bundles -->
+				<exclude name="*.source_*.jar"/>
+				
+				<!-- exclude .SNAPSHOT bundles -->
+				<exclude name="*.SNAPSHOT.jar"/>
+				
+			</zipfileset>
 
-			<zipfileset dir="../target-definition/common/source/plugins" excludes="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*,com.gwt.user_*,org.eclipse.kura.windows.*"
-                        prefix="${build.output.name}/plugins"/>
-
-
+			<!-- add .SNAPSHOT as -SNAPSHOT -->
+			<mappedresources>
+				<fileset dir="${kura.osgi.repo}/plugins" includes="*.SNAPSHOT.jar" />
+				<globmapper from="*.SNAPSHOT.jar" to="${build.output.name}/plugins/*-SNAPSHOT.jar" />
+			</mappedresources>
+			<mappedresources>
+				<fileset dir="../target-definition/common/repository/plugins" includes="*.SNAPSHOT.jar" />
+				<globmapper from="*.SNAPSHOT.jar" to="${build.output.name}/plugins/*-SNAPSHOT.jar" />
+			</mappedresources>
+			
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"
@@ -490,6 +522,7 @@ fi]]>
 		</zip>
 
 		<antcall target="camel-jar" />
+		<antcall target="wires-jar" />
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web-jar" />
@@ -640,7 +673,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
         <replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.symlink}" value="${kura.symlink}"/>
 
     	
-    	<condition property="kura.osgi.repo" value="../target-definition/equinox_3.8.1/repository">
+    	<condition property="kura.osgi.repo" value="../target-definition/equinox_3.11.1/repository">
     		<or>
     			<not>
     				<isset property="kura.osgi"/>
@@ -656,7 +689,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 
         <copy file="src/main/resources/${build.name}/snapshot_0.xml" tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" />
 
-		<copy file="src/main/osgi/equinox_3.8.1/configwindows/config.ini" tofile="${project.build.directory}/${build.output.name}/config.ini" />
+		<copy file="src/main/osgi/equinox_3.11.1/configwindows/config.ini" tofile="${project.build.directory}/${build.output.name}/config.ini" />
 
 
         <!-- Populate config.ini with correct OSGi packages -->
@@ -694,6 +727,9 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		
 		<!-- Added Camel bundles configs -->
 		<antcall target="camel-config" />
+
+		<!-- Wires bundles config -->
+		<antcall target="wires-config" />
 
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
@@ -761,15 +797,28 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<copy file="src/main/resources/${build.name}/SCH_Kura.xml" todir="${build.install.dir.kura}/" />
 
 		<copy todir="${build.install.dir.kura}/plugins">
-			<fileset dir="${kura.osgi.repo}/plugins" />
-		</copy>
-                        
-		<copy todir="${build.install.dir.kura}/plugins">
+			
+			<!-- copy OSGi runtime bundles -->
+			<fileset dir="${kura.osgi.repo}/plugins">
+				<!-- exclude source bundles -->
+				<exclude name="*.source_*.jar"/>
+			</fileset>
+			
+			<!-- copy common bundles -->
 			<fileset dir="../target-definition/common/repository/plugins">
 				<exclude name="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*,com.gwt.user_*"/>
+				<!-- exclude source bundles -->
+				<exclude name="*.source_*.jar"/>
 			</fileset>
-		</copy>                        
+			
+		</copy>
 
+		<!-- fix -SNAPSHOT bundle naming which P2 can't handle -->
+		<move todir="${build.install.dir.kura}/plugins">
+			<fileset dir="${build.install.dir.kura}/plugins"/>
+			<globmapper from="*.SNAPSHOT.jar" to="*-SNAPSHOT.jar" />
+		</move>
+	
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
 			todir="${build.install.dir.kura}/kura/plugins" />
 
@@ -841,6 +890,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<copy file="../../target-platform/org.eclipse.kura.windows.launcher/src/main/c/Release/Win32/x64/KURALauncher.exe" todir="${build.install.dir.kura}"/>
 
 		<antcall target="camel-jar-win" />
+    	<antcall target="wires-jar-win" />
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web-jar-win" />
@@ -947,6 +997,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/osgi.cmpn_${osgi.cmpn.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.wireadmin_${org.eclipse.equinox.wireadmin.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.http.jetty_${org.eclipse.equinox.http.jetty.version}.jar@5:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.equinox.http.servlet_${org.eclipse.equinox.http.servlet.version}.jar@5:start" />
@@ -978,6 +1030,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 				value=", reference:file:${kura.install.dir}/kura/plugins/log4j_${log4j.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/log4j.apache-log4j-extras_${log4j.apache-log4j-extras.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/minimal-json_${com.eclipsesource.minimal-json.version}.jar" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.hsqldb.hsqldb_${org.hsqldb.hsqldb.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
@@ -1196,8 +1250,41 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.windows.command_${org.eclipse.kura.windows.command.version}.jar@4" />
 		</propertyfile>
-	</target>	
+	</target>
 	
+	<target name="wires-config">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.asset.provider_${org.eclipse.kura.asset.provider.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.localization_${org.eclipse.kura.localization.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.localization.resources_${org.eclipse.kura.localization.resources.version}.jar" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.util_${org.eclipse.kura.util.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar@4:start" />
+		</propertyfile>
+	</target>
+	
+	<target name="wires-jar">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.asset.provider_${org.eclipse.kura.asset.provider.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.localization_${org.eclipse.kura.localization.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.localization.resources_${org.eclipse.kura.localization.resources.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.util_${org.eclipse.kura.util.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
+		</zip>
+	</target>
 	
 	<!-- Camel config targets -->
 	<target name="camel-config">
@@ -1334,5 +1421,20 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
         <copy file="${project.build.directory}/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar"
             todir="${build.install.dir.kura}/kura/plugins" />
     </target>
+	
+	<target name="wires-jar-win">
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.asset.provider_${org.eclipse.kura.asset.provider.version}.jar"
+            todir="${build.install.dir.kura}/kura/plugins" />
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.localization_${org.eclipse.kura.localization.version}.jar"
+            todir="${build.install.dir.kura}/kura/plugins" />
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.localization.resources_${org.eclipse.kura.localization.resources.version}.jar"
+            todir="${build.install.dir.kura}/kura/plugins" />
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.util_${org.eclipse.kura.util.version}.jar"
+            todir="${build.install.dir.kura}/kura/plugins" />
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar"
+            todir="${build.install.dir.kura}/kura/plugins" />
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar"
+            todir="${build.install.dir.kura}/kura/plugins" />
+	</target>
 
 </project>

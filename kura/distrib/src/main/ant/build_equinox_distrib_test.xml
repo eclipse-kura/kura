@@ -36,7 +36,7 @@
         <copy file="src/main/resources/${build.name}/snapshot_0.xml"
               tofile="${project.build.directory}/kura-${build.name}-test_${project.version}/snapshot_0.xml" />
     
-        <copy    file="src/main/osgi/equinox_3.8.1/configuration/config-test.ini"
+        <copy    file="src/main/osgi/equinox_3.11.1/configuration/config-test.ini"
                  tofile="${project.build.directory}/kura-${build.name}-test_${project.version}/config.ini" />
         <replace file="${project.build.directory}/kura-${build.name}-test_${project.version}/config.ini"
                  token="{project.version}" value="${project.version}"/>
@@ -70,7 +70,7 @@ cd $(dirname $0)/..
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ -z "$KURA_RUNNING" ] ; then
-        java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m \ 
+        java -Xms${kura.mem.size} -Xmx${kura.mem.size} \ 
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
         -XX:ErrorFile=/var/log/kura-error.log \
         -Dkura.os.version=${kura.os.version} \
@@ -81,7 +81,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
-        -jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+        -jar plugins/org.eclipse.osgi_3.11.1.v20160708-1632.jar \
         -configuration configuration \
         -console \
         -consoleLog
@@ -97,7 +97,7 @@ cd $(dirname $0)/..
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ -z "$KURA_RUNNING" ] ; then
-        java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m \
+        java -Xms${kura.mem.size} -Xmx${kura.mem.size} \
         -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Xloggc:/var/log/kura-gc.log \
         -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M \
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
@@ -111,7 +111,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
-        -jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+        -jar plugins/org.eclipse.osgi_3.11.1.v20160708-1632.jar \
         -configuration configuration \
         -console \
         -consoleLog
@@ -129,7 +129,7 @@ cd /opt/eclipse/kura
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.osgi"`
 
 if [ -z "$KURA_RUNNING" ] ; then
-    nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} -XX:MaxPermSize=64m \
+    nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} \
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
         -XX:ErrorFile=/var/log/kura-error.log \
         -Dkura.os.version=${kura.os.version} \
@@ -140,7 +140,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Djava.security.policy=${DIR}/kura/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/kura/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
-        -jar plugins/org.eclipse.osgi_3.8.1.v20120830-144521.jar \
+        -jar plugins/org.eclipse.osgi_3.11.1.v20160708-1632.jar \
         -configuration configuration/ \
         -console 5002 \
         -consoleLog >> /var/log/kura-console.log 2>> /var/log/kura-console.log &amp;
@@ -248,7 +248,7 @@ fi
             <zipfileset file="${project.build.directory}/kura-${build.name}-test_${project.version}/kura.properties"
                         prefix="kura-${build.name}-test_${project.version}/kura/" />
     
-            <zipfileset dir="../target-definition/equinox_3.8.1/repository/plugins"
+            <zipfileset dir="../target-definition/equinox_3.11.1/repository/plugins"
                         prefix="kura-${build.name}-test_${project.version}/plugins"/>
     
             <zipfileset file="../org.eclipse.kura.deployment.agent/target/org.eclipse.kura.deployment.agent_${project.version}.v${kura.build.version}.jar"

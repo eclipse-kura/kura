@@ -26,7 +26,7 @@ java	-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8000 ^
 	-Ddpa.configuration=%KURA_HOME%\dpa.properties ^
 	-Dlog4j.configuration=file:%KURA_HOME_URI%/log4j.properties ^
 	-Djdk.tls.trustNameService=true ^
-	-jar "%~dp0\plugins\org.eclipse.osgi_3.8.1.v20120830-144521.jar" ^
+	-jar "%~dp0\plugins\org.eclipse.osgi_3.11.1.v20160708-1632.jar" ^
 	-configuration %KURA_TEMP%\Configuration ^
 	-console ^
 	-consoleLog	

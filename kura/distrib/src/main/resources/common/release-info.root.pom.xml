@@ -20,7 +20,7 @@
 	<modules>
 		<module>kura-bundles</module>
 		<module>p2-repo-common</module>
-		<module>p2-repo-equinox_3.8.1</module>
+		<module>p2-repo-equinox_3.11.1</module>
 	</modules>
 
 	<repositories>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.linux.net.util;
 
@@ -37,11 +38,11 @@ public class RedHatNetworkInterface extends GenericNetworkInterface {
 
     private static final Logger s_logger = LoggerFactory.getLogger(RedHatNetworkInterface.class);
 
-    public static NetInterfaceConfig getCurrentConfiguration(String interfaceName, NetInterfaceType type,
+    public static NetInterfaceConfig<?> getCurrentConfiguration(String interfaceName, NetInterfaceType type,
             NetInterfaceStatus status, boolean dhcpServerEnabled, boolean passDns) throws KuraException {
         NET_CONFIGURATION_DIRECTORY = "/etc/sysconfig/network-scripts/";
 
-        NetInterfaceConfig netInterfaceConfig = null;
+        NetInterfaceConfig<?> netInterfaceConfig = null;
 
         FileInputStream fis = null;
         try {
@@ -88,7 +89,7 @@ public class RedHatNetworkInterface extends GenericNetworkInterface {
         return netInterfaceConfig;
     }
 
-    public static void writeNewConfig(NetInterfaceConfig netInterfaceConfig) throws KuraException {
+    public static void writeNewConfig(NetInterfaceConfig<?> netInterfaceConfig) throws KuraException {
         try {
             String outputFileName = "/etc/sysconfig/network-scripts/ifcfg-" + netInterfaceConfig.getName();
 

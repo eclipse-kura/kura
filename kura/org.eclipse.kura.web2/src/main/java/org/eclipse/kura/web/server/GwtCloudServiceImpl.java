@@ -33,6 +33,7 @@ import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.server.util.ServiceLocator.ServiceConsumer;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtAllTypesReference;
 import org.eclipse.kura.web.shared.model.GwtCloudConnectionEntry;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -68,6 +69,11 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
             return o1.getValue().compareTo(o2.getValue());
         }
     };
+    
+    @Override
+    public GwtAllTypesReference referenceTypesEnums() {
+        return null;
+    }
 
     @Override
     public List<GwtCloudConnectionEntry> findCloudServices() throws GwtKuraException {
@@ -273,5 +279,4 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
         }
         return null;
     }
-
 }

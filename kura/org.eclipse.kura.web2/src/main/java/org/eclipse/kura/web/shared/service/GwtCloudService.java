@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.factory.CloudServiceFactory;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtAllTypesReference;
 import org.eclipse.kura.web.shared.model.GwtCloudConnectionEntry;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -140,5 +141,9 @@ public interface GwtCloudService extends RemoteService {
      */
     public void deleteCloudServiceFromFactory(GwtXSRFToken xsrfToken, String factoryPid, String cloudServicePid)
             throws GwtKuraException;
-
+    
+    /**
+     * Reference all necessary types for GWT
+     */
+    public GwtAllTypesReference referenceTypesEnums ();
 }

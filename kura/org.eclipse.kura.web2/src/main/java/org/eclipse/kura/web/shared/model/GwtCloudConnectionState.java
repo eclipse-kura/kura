@@ -7,11 +7,14 @@
  *
  * Contributors:
  *     Red Hat Inc
+ *     Eurotech
  *******************************************************************************/
 package org.eclipse.kura.web.shared.model;
 
-public enum GwtCloudConnectionState {
-    UNREGISTERED,
-    DISCONNECTED,
-    CONNECTED;
+public class GwtCloudConnectionState {
+
+    public static final int UNREGISTERED = 0;
+    public static final int DISCONNECTED = 1;
+    public static final int CONNECTED = 2;
+
 }

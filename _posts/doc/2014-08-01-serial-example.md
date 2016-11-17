@@ -1,7 +1,6 @@
 ---
 layout: page
 title:  "Serial Example"
-date:   2014-08-23 11:30:11
 categories: [doc]
 ---
 

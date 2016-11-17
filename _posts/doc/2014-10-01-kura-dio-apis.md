@@ -1,7 +1,6 @@
 ---
 layout: page
 title:  "Device I/O"
-date:   2014-08-10 12:28:21
 categories: [doc]
 ---
 

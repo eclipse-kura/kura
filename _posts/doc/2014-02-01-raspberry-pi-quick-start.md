@@ -1,7 +1,6 @@
 ---
 layout: page
 title:  "Raspberry Pi Quick Start"
-date:   2014-08-25 12:31:11
 categories: [doc]
 ---
 

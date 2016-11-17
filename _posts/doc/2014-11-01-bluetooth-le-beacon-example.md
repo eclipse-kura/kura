@@ -1,7 +1,6 @@
 ---
 layout: page
 title:  "BLE Beacon Example"
-date:   2014-08-10 11:28:21
 categories: [doc]
 ---
 

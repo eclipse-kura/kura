@@ -1,7 +1,6 @@
 ---
 layout: page
 title:  "How to Use Watchdog"
-date:   2014-05-13 10:30:00
 categories: [doc]
 ---
 

@@ -1,7 +1,6 @@
 ---
 layout: page
 title:  "Deploying Bundles"
-date:   2014-08-23 11:31:11
 categories: [doc]
 ---
 

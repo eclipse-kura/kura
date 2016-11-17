@@ -274,7 +274,7 @@ public class LinuxProcessUtil {
             }
         }
     }
-    
+
     public static int getPid(int pid) throws Exception {
         int ret = -1;
         StringTokenizer st = null;
@@ -282,8 +282,8 @@ public class LinuxProcessUtil {
         SafeProcess proc = null;
         BufferedReader br = null;
         try {
-            s_logger.trace("searching process list for pid{}", pid);
-            if (IS_INTEL_EDISON) {
+            logger.trace("searching process list for pid{}", pid);
+            if (isUsingBusyBox()) {
                 proc = ProcessUtil.exec("ps");
             } else {
                 proc = ProcessUtil.exec("ps -ax");
@@ -301,7 +301,7 @@ public class LinuxProcessUtil {
                         ret = processID;
                     }
                 } catch (NumberFormatException e) {
-                    s_logger.error("getPid() :: NumberFormatException reading PID - {}", e);
+                    logger.error("getPid() :: NumberFormatException reading PID - {}", e);
                 }
             }
             return ret;
@@ -399,7 +399,7 @@ public class LinuxProcessUtil {
         }
         return sb.toString();
     }
-    
+
     public static boolean waitProcess(int pid, long poll, long timeout) {
         boolean exists = false;
         try {
@@ -412,7 +412,7 @@ public class LinuxProcessUtil {
             } while (exists && (now - startTime) < timeout);
         } catch (Exception e) {
             Thread.currentThread().interrupt();
-            s_logger.warn("Failed waiting for pid {} to exit - {}", pid, e);
+            logger.warn("Failed waiting for pid {} to exit - {}", pid, e);
         }
 
         return exists;

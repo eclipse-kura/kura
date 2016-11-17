@@ -142,41 +142,15 @@ public class WpaSupplicantManager {
         }
     }
 
-	/**
-	 * Stops all instances of wpa_supplicant
-	 * 
-	 * @throws Exception
-	 */
+    /**
+     * Stops all instances of wpa_supplicant
+     * 
+     * @throws Exception
+     */
     public static void stop(String ifaceName) throws KuraException {
         try {
             if (!s_isIntelEdison) {
-                int pid = getPid(ifaceName);
-                if (pid >= 0) {
-                    s_logger.info("stopping wpa_suplicant for the {} interface, pid={}", ifaceName, pid);
-
-                    boolean exists = LinuxProcessUtil.stop(pid);
-                    if (!exists) {
-                        s_logger.warn("stopping wpa_supplicant for the {} inetrface, pid={} has failed", ifaceName,
-                                pid);
-                    } else {
-                        exists = LinuxProcessUtil.waitProcess(pid, 500, 5000);
-                    }
-
-                    if (exists) {
-                        s_logger.info("stopping wpa_supplicant for the {} interface - killing pid={}", ifaceName, pid);
-                        exists = LinuxProcessUtil.kill(pid);
-                        if (!exists) {
-                            s_logger.warn("stopping wpa_supplicant for the {} interface - killing pid={} has failed",
-                                    ifaceName, pid);
-                        } else {
-                            exists = LinuxProcessUtil.waitProcess(pid, 500, 5000);
-                        }
-                    }
-
-                    if (exists) {
-                        s_logger.warn("Failed to stop hostapd for the {} interface", ifaceName);
-                    }
-                }
+                LinuxProcessUtil.stopAndKill(getPid(ifaceName));
             } else {
                 LinuxProcessUtil.start("systemctl stop hostapd");
             }
@@ -188,7 +162,7 @@ public class WpaSupplicantManager {
             throw KuraException.internalError(e);
         }
     }
-		
+
     public static String getWpaSupplicantConfigFilename(String ifaceName) {
         StringBuilder sb = new StringBuilder();
         if (s_isIntelEdison) {

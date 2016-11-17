@@ -65,32 +65,7 @@ public class HostapdManager {
     public static void stop(String ifaceName) throws KuraException {
         try {
             if (!s_isIntelEdison) {
-                int pid = getPid(ifaceName);
-                if (pid >= 0) {
-                    s_logger.info("stopping hostapd for the {} interface, pid={}", ifaceName, pid);
-
-                    boolean exists = LinuxProcessUtil.stop(pid);
-                    if (!exists) {
-                        s_logger.warn("stopping hostapd for the {} inetrface, pid={} has failed", ifaceName, pid);
-                    } else {
-                        exists = LinuxProcessUtil.waitProcess(pid, 500, 5000);
-                    }
-
-                    if (exists) {
-                        s_logger.info("stopping hostapd for the {} interface - killing pid={}", ifaceName, pid);
-                        exists = LinuxProcessUtil.kill(pid);
-                        if (!exists) {
-                            s_logger.warn("stopping hostapd for the {} interface - killing pid={} has failed",
-                                    ifaceName, pid);
-                        } else {
-                            exists = LinuxProcessUtil.waitProcess(pid, 500, 5000);
-                        }
-                    }
-
-                    if (exists) {
-                        s_logger.warn("Failed to stop hostapd for the {} interface", ifaceName);
-                    }
-                }
+                LinuxProcessUtil.stopAndKill(getPid(ifaceName));
             } else {
                 LinuxProcessUtil.start("systemctl stop hostapd");
                 Thread.sleep(1000);
@@ -99,7 +74,7 @@ public class HostapdManager {
             throw KuraException.internalError(e);
         }
     }
-	
+
     public static boolean isRunning(String ifaceName) throws KuraException {
         try {
             boolean ret = false;

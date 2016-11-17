@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.system.SystemService;
@@ -407,7 +408,7 @@ public class LinuxProcessUtil {
             long now;
             do {
                 Thread.sleep(poll);
-                exists = (getPid(pid) >= 0) ? true : false;
+                exists = stop(pid);
                 now = System.currentTimeMillis();
             } while (exists && (now - startTime) < timeout);
         } catch (Exception e) {
@@ -416,5 +417,36 @@ public class LinuxProcessUtil {
         }
 
         return exists;
+    }
+
+    public static void stopAndKill(int pid) throws KuraException {
+        try {
+            if (pid >= 0) {
+                logger.info("stopping pid={}", pid);
+
+                boolean exists = LinuxProcessUtil.stop(pid);
+                if (!exists) {
+                    logger.warn("stopping pid={} has failed", pid);
+                } else {
+                    exists = LinuxProcessUtil.waitProcess(pid, 500, 5000);
+                }
+
+                if (exists) {
+                    logger.info("killing pid={}", pid);
+                    exists = LinuxProcessUtil.kill(pid);
+                    if (!exists) {
+                        logger.warn("killing pid={} has failed", pid);
+                    } else {
+                        exists = LinuxProcessUtil.waitProcess(pid, 500, 5000);
+                    }
+                }
+
+                if (exists) {
+                    logger.warn("Failed to stop process with pid {}", pid);
+                }
+            }
+        } catch (Exception e) {
+            throw KuraException.internalError(e);
+        }
     }
 }

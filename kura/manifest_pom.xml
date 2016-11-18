@@ -85,7 +85,10 @@
         
         <module>org.eclipse.kura.util</module>
         
+        <!-- test setup broken
         <module>org.eclipse.kura.core.test</module>
+        -->
+        
         <module>org.eclipse.kura.windows.command</module>
         <module>org.eclipse.kura.windows.clock</module>
 

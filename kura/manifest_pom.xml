@@ -40,6 +40,7 @@
         
         <module>org.eclipse.kura.camel</module>
         <module>org.eclipse.kura.camel.cloud.factory</module>
+        <module>org.eclipse.kura.camel.test</module>
         <module>org.eclipse.kura.camel.xml</module>
         <module>org.eclipse.kura.core</module>
         <module>org.eclipse.kura.core.certificates</module>
@@ -98,6 +99,8 @@
         <!-- test setup broken
         <module>org.eclipse.kura.wire.provider.test</module>
         -->
+
+        <module>log4j.test.configuration</module>
 
         <module>emulator</module>
         <module>examples</module>

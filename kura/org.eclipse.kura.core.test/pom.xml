@@ -38,10 +38,6 @@
                 <artifactId>tycho-surefire-plugin</artifactId>
                 <version>${tycho-version}</version>
                 <configuration>
-                
-                    <!-- skip execution of this package until it is working again -->
-                    <skip>true</skip>
-                
                     <providerHint>junit4</providerHint>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <testSuite>org.eclipse.kura.core.test</testSuite>

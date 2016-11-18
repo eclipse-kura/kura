@@ -33,7 +33,10 @@
         
         <module>org.eclipse.kura.asset.cloudlet.provider</module>
         <module>org.eclipse.kura.asset.provider</module>
+        
+        <!-- test setup broken 
         <module>org.eclipse.kura.asset.provider.test</module>
+        -->
         
         <module>org.eclipse.kura.camel</module>
         <module>org.eclipse.kura.camel.cloud.factory</module>

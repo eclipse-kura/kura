@@ -73,7 +73,7 @@ public class WpaSupplicantManager {
             String wpaSupplicantCommand = formSupplicantStartCommand(interfaceName, configFile);
             s_logger.info("starting wpa_supplicant for the {} interface -> {}", interfaceName, wpaSupplicantCommand);
             int stat = LinuxProcessUtil.start(wpaSupplicantCommand);
-            if (stat != 0) {
+            if (stat != 0 && stat != 255) {
                 s_logger.error("failed to start wpa_supplicant for the {} interface for unknown reason - errorCode={}",
                         interfaceName, stat);
                 throw KuraException.internalError("failed to start hostapd for unknown reason");

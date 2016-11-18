@@ -369,8 +369,7 @@
                     <providerHint>junit4</providerHint>
                     <parallel>both</parallel>
                     <useUnlimitedThreads>true</useUnlimitedThreads>
-                    <argLine>-Deurotech.framework.mode=emulator
-                        -Dequinox.ds.print=true</argLine>
+                    <argLine>${tycho.testArgLine} -Deurotech.framework.mode=emulator -Dequinox.ds.print=true</argLine>
                     <dependencies>
                         <dependency>
                             <type>p2-installable-unit</type>

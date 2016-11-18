@@ -100,8 +100,6 @@
         <module>org.eclipse.kura.wire.provider.test</module>
         -->
 
-        <module>log4j.test.configuration</module>
-
         <module>emulator</module>
         <module>examples</module>
         <module>test</module>

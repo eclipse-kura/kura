@@ -12,11 +12,28 @@
             required="false"
             max="2147483647"
             default='&lt;routes xmlns=&quot;http://camel.apache.org/schema/spring&quot;&gt;&#10;
-	&lt;route id=&quot;cloudConsumer&quot;&gt;&#10;
+	&lt;route id=&quot;route1&quot;&gt;&#10;
         &lt;from uri=&quot;kura-cloud:myapp/xmltopic&quot;/&gt;&#10;
         &lt;to uri=&quot;log:MESSAGE_FROM_CLOUD&quot;/&gt;&#10;
     &lt;/route&gt;&#10;
 &lt;/routes&gt;'/>
+
+        <AD id="component.prereqs" name="Required Camel Components"
+            description="A comma separated list of Camel components which are required in order to start up this setup"
+            type="String"
+            cardinality="1"
+            required="false"
+            max="2147483647"
+            />
+        
+        <AD id="cloudService.prereqs" name="Cloud Service Mappings"
+            description="A comma separated list of entries in the format filter=name or kura-pid=name, mapping cloud service instances to component names"
+            type="String"
+            cardinality="1"
+            required="false"
+            max="2147483647"
+            default="cloud=org.eclipse.kura.cloud.CloudService"
+            />
 
     </OCD>
 

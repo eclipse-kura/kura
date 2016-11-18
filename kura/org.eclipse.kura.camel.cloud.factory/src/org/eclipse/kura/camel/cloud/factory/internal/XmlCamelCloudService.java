@@ -22,7 +22,11 @@ import javax.script.SimpleBindings;
 
 import org.apache.camel.ServiceStatus;
 import org.apache.camel.core.osgi.OsgiDefaultCamelContext;
+import org.apache.camel.core.osgi.OsgiServiceRegistry;
+import org.apache.camel.impl.CompositeRegistry;
+import org.apache.camel.impl.SimpleRegistry;
 import org.apache.camel.model.RoutesDefinition;
+import org.eclipse.kura.camel.bean.PayloadFactory;
 import org.eclipse.kura.camel.camelcloud.DefaultCamelCloudService;
 import org.eclipse.kura.camel.cloud.KuraCloudComponent;
 import org.eclipse.kura.camel.runner.ScriptRunner;
@@ -58,9 +62,18 @@ public class XmlCamelCloudService {
 
     public void start() throws Exception {
 
+        // new registry
+
+        SimpleRegistry simpleRegistry = new SimpleRegistry();
+        simpleRegistry.put("payloadFactory", new PayloadFactory());
+        
+        CompositeRegistry registry = new CompositeRegistry();
+        registry.addRegistry(new OsgiServiceRegistry(this.context));
+        registry.addRegistry(simpleRegistry);
+
         // new router
 
-        this.router = new OsgiDefaultCamelContext(this.context);
+        this.router = new OsgiDefaultCamelContext(this.context, registry);
 
         // call init code
 

@@ -24,6 +24,13 @@
             required="true"
             description="The camel XML router configuration|TextArea"/>
             
+        <AD id="initCode"
+            name="JavaScript init code"
+            type="String"
+            cardinality="1"
+            required="true"
+            description="JavaScript code which is called when the router is initialized first|TextArea"/>
+            
          <AD id="serviceRanking"
             name="Service Ranking"
             type="Integer"

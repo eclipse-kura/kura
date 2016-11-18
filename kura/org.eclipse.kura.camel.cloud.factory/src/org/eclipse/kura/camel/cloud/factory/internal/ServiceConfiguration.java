@@ -14,6 +14,7 @@ public class ServiceConfiguration {
 
     private String xml;
     private Integer serviceRanking;
+    private String initCode;
 
     /**
      * Set the router XML
@@ -37,10 +38,19 @@ public class ServiceConfiguration {
         return this.serviceRanking;
     }
 
+    public void setInitCode(String initCode) {
+        this.initCode = initCode;
+    }
+
+    public String getInitCode() {
+        return this.initCode;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + (this.initCode == null ? 0 : this.initCode.hashCode());
         result = prime * result + (this.serviceRanking == null ? 0 : this.serviceRanking.hashCode());
         result = prime * result + (this.xml == null ? 0 : this.xml.hashCode());
         return result;
@@ -58,6 +68,13 @@ public class ServiceConfiguration {
             return false;
         }
         ServiceConfiguration other = (ServiceConfiguration) obj;
+        if (this.initCode == null) {
+            if (other.initCode != null) {
+                return false;
+            }
+        } else if (!this.initCode.equals(other.initCode)) {
+            return false;
+        }
         if (this.serviceRanking == null) {
             if (other.serviceRanking != null) {
                 return false;

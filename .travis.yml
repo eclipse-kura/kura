@@ -9,6 +9,6 @@ before_script:
   - ls /usr/lib/jvm
   - cp kura/setups/toolchains/toolchains-travis.xml ~/.m2/toolchains.xml
 
-script: ./build-all.sh -Pbree
+script: RUN_TESTS=true ./build-all.sh -Pbree
 
 

@@ -12,6 +12,10 @@
 	<artifactId>p2-repo-equinox_3.11.1</artifactId>
 	<version>1.0.0</version>
 	<packaging>pom</packaging>
+    
+    <properties>
+        <equinox.download.url>http://ftp-stud.fht-esslingen.de/pub/Mirrors/eclipse/equinox/drops/R-Neon.1-201609071200/equinox-SDK-Neon.1.zip</equinox.download.url>
+    </properties>
 
 	<build>
 		<plugins>
@@ -85,13 +89,12 @@
 				</executions>
 				<configuration>
 					<compress>false</compress>
-					<!-- additional arguments example <additionalArgs>-configs win32.win32.x86</additionalArgs> -->
 				</configuration>
 			</plugin>
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>1.8</version>
-				<executions>
+                <executions>
                     <execution>
                         <id>download-equinox</id>
                         <phase>generate-resources</phase>
@@ -104,7 +107,7 @@
                                 <!--
                                   - direct mirror link: http://www.eclipse.org/downloads/download.php?file=/equinox/drops/R-Neon.1-201609071200/equinox-SDK-Neon.1.zip&amp;r=1 
                                   -->
-                                <get src="http://ftp-stud.fht-esslingen.de/pub/Mirrors/eclipse/equinox/drops/R-Neon.1-201609071200/equinox-SDK-Neon.1.zip" dest="${project.build.directory}/download/equinox.zip" usetimestamp="true" />
+                                <get src="${equinox.download.url}" dest="${project.build.directory}/download/equinox.zip" usetimestamp="true" />
                                 
                                 <delete dir="${project.build.directory}/source/plugins"/>
                                 <mkdir dir="${project.build.directory}/source/plugins"/>
@@ -165,4 +168,16 @@
 			</plugin>
 		</plugins>
 	</build>
+    
+    <profiles>
+        <profile>
+            <!-- profile for falling back to non-mirror download links -->
+            <id>no-mirror</id>
+            <properties>
+                <equinox.download.url>http://download.eclipse.org/equinox/drops/R-Neon.1-201609071200/equinox-SDK-Neon.1.zip</equinox.download.url>
+            </properties>
+        </profile>
+        
+    </profiles>
+    
 </project>

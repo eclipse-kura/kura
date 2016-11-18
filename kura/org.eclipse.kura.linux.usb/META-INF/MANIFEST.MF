@@ -12,6 +12,7 @@ Bundle-NativeCode: lib/linux/x86_64_32jvm/libEurotechLinuxUdev.so; osname=Linux;
  lib/linux/x86_ubuntu/libEurotechLinuxUdev.so; osname=Linux; processor=x86; selection-filter="(&(kura.os.version=ubuntu_14.04))",
  lib/linux/x86/libEurotechLinuxUdev.so; osname=Linux; processor=x86,
  lib/linux/x86_64/libEurotechLinuxUdev.so; osname=Linux; processor=x86-64,
+ lib/linux/armv7hl_fedora/libEurotechLinuxUdev.so; osname=Linux; processor=ARM; selection-filter="(&(kura.os.version=fedora))",
  lib/linux/armv6_hf/libEurotechLinuxUdev.so; osname=Linux; processor=ARM; selection-filter="(&(kura.arch=armv7_hf))",
  lib/linux/armv5_sf/libEurotechLinuxUdev.so; osname=Linux; processor=ARM; selection-filter="(&(kura.arch=armv7_sf))",
  lib/linux/armv6_hf/libEurotechLinuxUdev.so; osname=Linux; processor=ARM; selection-filter="(&(kura.arch=armv6_hf))",

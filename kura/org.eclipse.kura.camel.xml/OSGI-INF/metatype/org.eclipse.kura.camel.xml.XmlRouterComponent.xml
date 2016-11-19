@@ -24,6 +24,7 @@
             cardinality="1"
             required="false"
             max="2147483647"
+            default="kura-cloud"
             />
         
         <AD id="cloudService.prereqs" name="Cloud Service Mappings"

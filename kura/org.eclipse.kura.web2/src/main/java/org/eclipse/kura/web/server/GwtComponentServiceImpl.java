@@ -30,6 +30,7 @@ import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Icon;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Option;
+import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.KuraExceptionHandler;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -415,21 +416,22 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             List<ComponentConfiguration> configs = cs.getComponentConfigurations();
             // sort the list alphabetically by service name
             this.sortConfigurations(configs);
-
+            
+            final Collection<String> servicesToHide = CollectionUtil.newHashSet(
+                    Arrays.asList("SystemPropertiesService", "NetworkAdminService", "NetworkConfigurationService",
+                            "SslManagerService", "FirewallConfigurationService", "WireService"));
+            
             for (ComponentConfiguration config : configs) {
-
+                
+                final String pid = config.getPid();
+                final boolean serviceExists = servicesToHide.stream().anyMatch(pid::endsWith);
                 // ignore items we want to hide
-                if (hidePidsList.contains(config.getPid()) || config.getPid().endsWith("SystemPropertiesService")
-                        || config.getPid().endsWith("NetworkAdminService")
-                        || config.getPid().endsWith("NetworkConfigurationService")
-                        || config.getPid().endsWith("SslManagerService")
-                        || config.getPid().endsWith("FirewallConfigurationService")) {
+                if (hidePidsList.contains(pid) || serviceExists) {
                     continue;
                 }
 
                 OCD ocd = config.getDefinition();
                 if (ocd != null) {
-
                     GwtConfigComponent gwtConfig = this.convertComponentConfigurationByOcd(config);
                     gwtConfigs.add(gwtConfig);
                 }

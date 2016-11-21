@@ -40,8 +40,8 @@
             name="JavaScript init code"
             type="String"
             cardinality="1"
-            required="true"
-            description="JavaScript code which is called when the router is initialized first|TextArea"/>
+            required="false"
+            description="JavaScript code which is called when the router is initialized first. The camel context is avaiable in the variable 'camelContext'.|TextArea"/>
 
     </OCD>
 

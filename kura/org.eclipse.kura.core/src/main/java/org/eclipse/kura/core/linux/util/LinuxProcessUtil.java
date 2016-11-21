@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - Clean up kura properties handling
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.linux.util;
 
@@ -306,6 +306,53 @@ public class LinuxProcessUtil {
     }
 
     /**
+     * This method takes a pid and returns a boolean that defines if the corresponding process is running or not in the
+     * host system.
+     * 
+     * @param pid
+     *            integer representing the process id that has to be verified.
+     * @return true if the process in running in the system, false otherwise.
+     * @throws IOException
+     *             if an I/O or execution error occurs
+     */
+    public static boolean isProcessRunning(int pid) throws IOException {
+        boolean isRunning = false;
+
+        SafeProcess proc = null;
+        BufferedReader br = null;
+        try {
+            logger.trace("searching process list for pid{}", pid);
+            if (isUsingBusyBox()) {
+                proc = ProcessUtil.exec("ps");
+            } else {
+                proc = ProcessUtil.exec("ps -ax");
+            }
+            proc.waitFor();
+
+            // get the output
+            br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            br.readLine(); // skip first line: PID TTY STAT TIME COMMAND
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                if (parsePid(line) == pid) {
+                    isRunning = true;
+                    break;
+                }
+            }
+            return isRunning;
+        } catch (InterruptedException e) {
+            throw new IOException(e);
+        } finally {
+            if (br != null) {
+                br.close();
+            }
+            if (proc != null) {
+                ProcessUtil.destroy(proc);
+            }
+        }
+    }
+
+    /**
      * This method tries first to stop a process specified by the passed PID. If, aster this first step, the process is
      * still alive, the code invokes a kill operation.
      *
@@ -376,31 +423,33 @@ public class LinuxProcessUtil {
     }
 
     private static boolean stop(int pid, boolean kill) {
+        boolean result = false;
         try {
-            StringBuffer cmd = new StringBuffer();
-            cmd.append("kill ");
-            if (kill) {
-                cmd.append("-9 ");
-            }
-            cmd.append(pid);
+            if (isProcessRunning(pid)) {
+                StringBuffer cmd = new StringBuffer();
+                cmd.append("kill ");
+                if (kill) {
+                    cmd.append("-9 ");
+                }
+                cmd.append(pid);
 
-            if (kill) {
-                logger.info("attempting to kill -9 pid " + pid);
-            } else {
-                logger.info("attempting to kill pid " + pid);
-            }
+                if (kill) {
+                    logger.info("attempting to kill -9 pid {}", pid);
+                } else {
+                    logger.info("attempting to kill pid {}", pid);
+                }
 
-            if (start(cmd.toString()) == 0) {
-                logger.info("successfully killed pid " + pid);
-                return true;
-            } else {
-                logger.warn("failed to kill pid " + pid);
-                return false;
+                if (start(cmd.toString()) == 0) {
+                    logger.info("successfully killed pid {}", pid);
+                    result = true;
+                } else {
+                    logger.warn("failed to kill pid {}", pid);
+                }
             }
         } catch (Exception e) {
-            logger.warn("failed to kill pid " + pid);
-            return false;
+            logger.warn("failed to kill pid {}", pid);
         }
+        return result;
     }
 
     private static boolean waitProcess(int pid, long poll, long timeout) {
@@ -410,7 +459,7 @@ public class LinuxProcessUtil {
             long now;
             do {
                 Thread.sleep(poll);
-                exists = stop(pid);
+                exists = isProcessRunning(pid);
                 now = System.currentTimeMillis();
             } while (exists && now - startTime < timeout);
         } catch (Exception e) {
@@ -419,5 +468,16 @@ public class LinuxProcessUtil {
         }
 
         return exists;
+    }
+
+    private static int parsePid(String line) {
+        StringTokenizer st = new StringTokenizer(line);
+        int processID = -1;
+        try {
+            processID = Integer.parseInt(st.nextToken());
+        } catch (NumberFormatException e) {
+            logger.warn("getPid() :: NumberFormatException reading PID - {}", e);
+        }
+        return processID;
     }
 }

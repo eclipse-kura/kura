@@ -130,26 +130,6 @@ public class PppLinux {
         return pid;
     }
 
-    // // Only call this method after a call to stop or kill.
-    // // FIXME: this is an utility method that should be moved in a suitable package.
-    // private static boolean waitProcess(int pid, long poll, long timeout) {
-    // boolean exists = true;
-    // try {
-    // final long startTime = System.currentTimeMillis();
-    // long now;
-    // do {
-    // Thread.sleep(poll);
-    // exists = LinuxProcessUtil.stop(pid);
-    // now = System.currentTimeMillis();
-    // } while (exists && now - startTime < timeout);
-    // } catch (InterruptedException e) {
-    // Thread.currentThread().interrupt();
-    // s_logger.warn("Interrupted waiting for pid {} to exit", pid);
-    // }
-    //
-    // return exists;
-    // }
-
     private static void deleteLock(String port) {
         String portName = port;
         if (portName.startsWith("/dev/")) {

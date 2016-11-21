@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * Red Hat Inc - initial API and implementation
+ *    Red Hat Inc
  *******************************************************************************/
 /**
  * Type converters for Camel

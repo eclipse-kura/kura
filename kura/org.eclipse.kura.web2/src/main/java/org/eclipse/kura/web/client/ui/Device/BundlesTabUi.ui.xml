@@ -27,6 +27,18 @@
     }
     </ui:style>
 
-    <gwt:CellTable bordered="true" condensed="true"
-        striped="true" hover="true" height="100%" width="100%" ui:field="bundlesGrid" />
+    <b:Panel>
+        <b:ButtonGroup>
+            <b:ButtonGroup size="SMALL">
+                <b:Button ui:field="bundlesRefresh"
+                    addStyleNames="fa fa-refresh"></b:Button>
+                <b:Button ui:field="bundleStart" addStyleNames="fa fa-play"></b:Button>
+                <b:Button ui:field="bundleStop" addStyleNames="fa fa-stop"></b:Button>
+            </b:ButtonGroup>
+        </b:ButtonGroup>
+
+        <gwt:CellTable bordered="true" condensed="true"
+            striped="true" hover="true" height="100%" width="100%"
+            ui:field="bundlesGrid" />
+    </b:Panel>
 </ui:UiBinder> 

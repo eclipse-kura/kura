@@ -35,6 +35,13 @@
             max="2147483647"
             default="cloud=org.eclipse.kura.cloud.CloudService"
             />
+            
+        <AD id="initCode"
+            name="JavaScript init code"
+            type="String"
+            cardinality="1"
+            required="true"
+            description="JavaScript code which is called when the router is initialized first|TextArea"/>
 
     </OCD>
 

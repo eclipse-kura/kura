@@ -290,6 +290,7 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
     public static String formPppLogFilename(UsbDevice usbDevice) {
         StringBuffer buf = new StringBuffer();
         buf.append(OS_PPP_LOG_DIRECTORY);
+        buf.append("kura-");
         buf.append(formBaseFilename(usbDevice));
         return buf.toString();
     }

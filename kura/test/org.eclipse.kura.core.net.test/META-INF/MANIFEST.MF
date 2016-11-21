@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.core.net.test
+Bundle-SymbolicName: org.eclipse.kura.core.net.test;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ClassPath: .
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.kura.core.net.util;version="1.0.0",
+ org.junit;version="4.12.0",
+ org.junit.runners;version="4.12.0",
+ org.slf4j;version="1.6.4"

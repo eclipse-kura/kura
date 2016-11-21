@@ -6,19 +6,16 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Red Hat Inc - initial API and implementation
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.camel.cloud.factory.internal;
 
-import static org.eclipse.kura.camel.component.Configuration.asInteger;
 import static org.eclipse.kura.camel.component.Configuration.asString;
 
 import java.util.Map;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,38 +25,23 @@ public class CamelFactory implements ConfigurableComponent {
 
     public static final String FACTORY_ID = "org.eclipse.kura.camel.cloud.factory.CamelFactory";
 
-    private ConfigurationService configurationService;
-
     private XmlCamelCloudService service;
 
     private ServiceConfiguration configuration;
 
-    public void setConfigurationService(ConfigurationService configurationService) {
-        this.configurationService = configurationService;
-    }
-
-    public void activate(ComponentContext context, Map<String, Object> properties) throws Exception {
+    public void activate(final Map<String, Object> properties) throws Exception {
         setFromProperties(properties);
     }
 
-    public void modified(ComponentContext context, Map<String, Object> properties) throws Exception {
-        if (shouldDelete(properties)) {
-            final Object pid = context.getProperties().get("kura.service.pid");
-            if (pid instanceof String) {
-                triggerDelete((String) pid);
-            }
-            return;
-        } else {
-            setFromProperties(properties);
-        }
+    public void modified(final Map<String, Object> properties) throws Exception {
+        setFromProperties(properties);
     }
 
-    private void setFromProperties(Map<String, Object> properties) throws Exception {
+    private void setFromProperties(final Map<String, Object> properties) throws Exception {
         final String pid = asString(properties, "cloud.service.pid");
 
         final ServiceConfiguration configuration = new ServiceConfiguration();
         configuration.setXml(asString(properties, "xml"));
-        configuration.setServiceRanking(asInteger(properties, "serviceRanking"));
         configuration.setInitCode(asString(properties, "initCode"));
 
         createService(pid, configuration);
@@ -106,21 +88,4 @@ public class CamelFactory implements ConfigurableComponent {
 
         this.configuration = configuration;
     }
-
-    private void triggerDelete(String pid) {
-        performDelete(pid);
-    }
-
-    private void performDelete(String pid) {
-        CamelManager.delete(this.configurationService, pid);
-    }
-
-    private static boolean shouldDelete(Map<String, Object> properties) {
-        final Object value = properties.get("delete");
-        if (value == null) {
-            return false;
-        }
-        return "true".equals(value.toString());
-    }
-
 }

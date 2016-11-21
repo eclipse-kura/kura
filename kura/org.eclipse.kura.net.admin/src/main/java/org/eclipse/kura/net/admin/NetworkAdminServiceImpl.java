@@ -1607,6 +1607,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     // Private Methods
     //
     // ----------------------------------------------------------------
+
+    // TODO: simplify method signature. Probably we could take the mode from the wifiConfig.
     private void enableWifiInterface(String ifaceName, NetInterfaceStatus status, WifiMode wifiMode,
             WifiConfig wifiConfig) throws KuraException {
 

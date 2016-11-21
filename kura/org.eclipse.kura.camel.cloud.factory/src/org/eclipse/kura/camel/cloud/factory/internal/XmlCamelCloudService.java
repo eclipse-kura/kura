@@ -11,15 +11,19 @@
 package org.eclipse.kura.camel.cloud.factory.internal;
 
 import static org.apache.camel.ServiceStatus.Started;
-import static org.eclipse.kura.camel.runner.ScriptRunner.create;
+import static org.eclipse.kura.camel.cloud.factory.internal.CamelCloudServiceFactory.PID;
+import static org.eclipse.kura.camel.cloud.factory.internal.CamelFactory.FACTORY_ID;
+import static org.eclipse.kura.camel.utils.CamelContexts.scriptInitCamelContext;
+import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
+import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.io.ByteArrayInputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
 import javax.script.ScriptException;
-import javax.script.SimpleBindings;
 
+import org.apache.camel.CamelContext;
 import org.apache.camel.ServiceStatus;
 import org.apache.camel.core.osgi.OsgiDefaultCamelContext;
 import org.apache.camel.core.osgi.OsgiServiceRegistry;
@@ -29,10 +33,8 @@ import org.apache.camel.model.RoutesDefinition;
 import org.eclipse.kura.camel.bean.PayloadFactory;
 import org.eclipse.kura.camel.camelcloud.DefaultCamelCloudService;
 import org.eclipse.kura.camel.cloud.KuraCloudComponent;
-import org.eclipse.kura.camel.runner.ScriptRunner;
 import org.eclipse.kura.cloud.CloudService;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,10 +66,10 @@ public class XmlCamelCloudService {
 
         // new registry
 
-        SimpleRegistry simpleRegistry = new SimpleRegistry();
+        final SimpleRegistry simpleRegistry = new SimpleRegistry();
         simpleRegistry.put("payloadFactory", new PayloadFactory());
-        
-        CompositeRegistry registry = new CompositeRegistry();
+
+        final CompositeRegistry registry = new CompositeRegistry();
         registry.addRegistry(new OsgiServiceRegistry(this.context));
         registry.addRegistry(simpleRegistry);
 
@@ -102,42 +104,12 @@ public class XmlCamelCloudService {
         // register
 
         final Dictionary<String, Object> props = new Hashtable<>();
-        props.put(Constants.SERVICE_PID, this.pid);
-        props.put("service.factoryPid", CamelFactory.FACTORY_ID);
-        props.put("kura.service.pid", this.pid);
-        props.put("kura.cloud.service.factory.pid", CamelManager.PID);
-
-        if (this.configuration.getServiceRanking() != null) {
-            props.put(Constants.SERVICE_RANKING, this.configuration.getServiceRanking());
-        }
+        props.put(SERVICE_PID, this.pid);
+        props.put("service.factoryPid", FACTORY_ID);
+        props.put(KURA_SERVICE_PID, this.pid);
+        props.put("kura.cloud.service.factory.pid", PID);
 
         this.handle = this.context.registerService(CloudService.class, this.service, props);
-    }
-
-    private void callInitCode(OsgiDefaultCamelContext router) throws ScriptException {
-        if (this.configuration.getInitCode() == null || this.configuration.getInitCode().isEmpty()) {
-            return;
-        }
-
-        try {
-
-            // setup runner
-
-            final ScriptRunner runner = create(XmlCamelCloudService.class.getClassLoader(), "JavaScript",
-                    this.configuration.getInitCode());
-
-            // setup arguments
-
-            final SimpleBindings bindings = new SimpleBindings();
-            bindings.put("camelContext", router);
-
-            // perform call
-
-            runner.run(bindings);
-        } catch (final Exception e) {
-            logger.warn("Failed to run init code", e);
-            throw e;
-        }
     }
 
     public void stop() throws Exception {
@@ -153,6 +125,11 @@ public class XmlCamelCloudService {
             this.router.stop();
             this.router = null;
         }
-
     }
+    
+
+    private void callInitCode(final CamelContext router) throws ScriptException {
+        scriptInitCamelContext(router, configuration.getInitCode(), XmlCamelCloudService.class.getClassLoader());
+    }
+
 }

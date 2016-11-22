@@ -14,7 +14,7 @@ Import-Package: javax.microedition.io,
  org.apache.commons.io.output;version="[2.4.0,3.0.0)",
  org.eclipse.kura;version="[1.1,2.0)",
  org.eclipse.kura.comm;version="[1.0,2.0)",
- org.eclipse.kura.core.linux.util;version="[1.0,2.0)",
+ org.eclipse.kura.core.linux.util;version="[1.1,2.0)",
  org.eclipse.kura.core.net;version="[1.0,2.0)",
  org.eclipse.kura.core.net.modem;version="[1.0,2.0)",
  org.eclipse.kura.core.net.util;version="[1.0,2.0)",
@@ -46,4 +46,4 @@ Export-Package: org.eclipse.kura.linux.net;version="1.0.8";
  org.eclipse.kura.linux.net.ppp;version="1.0.0",
  org.eclipse.kura.linux.net.route;version="1.0.1";uses:="org.eclipse.kura.net,org.eclipse.kura.net.route",
  org.eclipse.kura.linux.net.util;version="1.0.2";uses:="org.eclipse.kura.net.wifi,org.eclipse.kura.net",
- org.eclipse.kura.linux.net.wifi;version="1.0.1";uses:="org.eclipse.kura.net.wifi"
+ org.eclipse.kura.linux.net.wifi;version="1.0.2";uses:="org.eclipse.kura.net.wifi"

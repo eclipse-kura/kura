@@ -4,4 +4,5 @@
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
+   <property name="kura.ui.service.hide" type="Boolean" value="true"/>
 </scr:component>

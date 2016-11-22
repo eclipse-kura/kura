@@ -602,11 +602,11 @@ public class EntryClassUi extends Composite {
                             }
 
                             @Override
-                            public void onSuccess(List<String> result) {
+                            public void onSuccess(final List<String> result) {
                                 factoriesList.clear();
                                 factoriesList.addItem(SELECT_COMPONENT);
-                                for (String s : result) {
-                                    factoriesList.addItem(s);
+                                for (final String servicePid : result) {
+                                    factoriesList.addItem(servicePid);
                                 }
                             }
                         });
@@ -614,7 +614,6 @@ public class EntryClassUi extends Composite {
                 });
             }
         });
-
     }
 
     private class SelectValueChangeEvent extends ValueChangeEvent<String> {

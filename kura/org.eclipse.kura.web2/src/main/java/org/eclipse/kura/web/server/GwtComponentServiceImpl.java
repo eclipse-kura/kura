@@ -52,7 +52,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
     private static final String SERVICE_FACTORY_PID = "service.factoryPid";
 
-    private GwtConfigComponent convertComponentConfigurationByOcd(ComponentConfiguration config) throws GwtKuraException {
+    private GwtConfigComponent convertComponentConfigurationByOcd(ComponentConfiguration config)
+            throws GwtKuraException {
         WireHelperService wireHelperService = ServiceLocator.getInstance().getService(WireHelperService.class);
         OCD ocd = config.getDefinition();
         GwtConfigComponent gwtConfig = null;
@@ -61,16 +62,16 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             gwtConfig.setComponentId(config.getPid());
 
             Map<String, Object> props = config.getConfigurationProperties();
-            if(props != null && props.get("driver.pid") != null){
+            if (props != null && props.get("driver.pid") != null) {
                 gwtConfig.set("driver.pid", props.get("driver.pid"));
             }
-            
+
             if ((props != null) && (props.get(SERVICE_FACTORY_PID) != null)) {
                 String pid = this.stripPidPrefix(config.getPid());
                 gwtConfig.setComponentName(pid);
                 gwtConfig.setFactoryComponent(true);
                 gwtConfig.setFactoryPid(String.valueOf(props.get(ConfigurationAdmin.SERVICE_FACTORYPID)));
-                //check if the PID is assigned to a Wire Component
+                // check if the PID is assigned to a Wire Component
                 gwtConfig.setWireComponent(wireHelperService.getServicePid(pid) != null);
             } else {
                 gwtConfig.setComponentName(ocd.getName());
@@ -341,14 +342,28 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     public List<String> findFactoryComponents(GwtXSRFToken xsrfToken) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
-        // finding all wire components to remove from any list as these factory instances
+        List<String> result = new ArrayList<>();
+        List<String> servicesToBeHidden = new ArrayList<>();
+        // finding all wire components to remove from the list as these factory instances
         // are only shown in Kura Wires UI
-        List<String> wireEmitterFpids = new ArrayList<String>();
-        List<String> wireReceiverFpids = new ArrayList<String>();
+        List<String> allWireComponents = findWireComponents();
+        // finding services with kura.service.ui.hide property
+        fillServicesToHideList(servicesToBeHidden);
+        // get all the factory PIDs tracked by Configuration Service
+        result.addAll(cs.getFactoryComponentPids());
+        // remove all the wire components and the services to be hidden as these are shown in different UI
+        result.removeAll(allWireComponents);
+        result.removeAll(servicesToBeHidden);
+        return result;
+    }
+
+    private List<String> findWireComponents() throws GwtKuraException {
+        List<String> wireEmitterFpids = new ArrayList<>();
+        List<String> wireReceiverFpids = new ArrayList<>();
         GwtServerUtil.fillFactoriesLists(wireEmitterFpids, wireReceiverFpids);
-        final List<String> onlyProducers = new ArrayList<String>(wireEmitterFpids);
-        final List<String> onlyConsumers = new ArrayList<String>(wireReceiverFpids);
-        final List<String> both = new LinkedList<String>();
+        final List<String> onlyProducers = new ArrayList<>(wireEmitterFpids);
+        final List<String> onlyConsumers = new ArrayList<>(wireReceiverFpids);
+        final List<String> both = new LinkedList<>();
         for (final String dto : wireEmitterFpids) {
             if (wireReceiverFpids.contains(dto)) {
                 both.add(dto);
@@ -356,13 +371,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         }
         onlyProducers.removeAll(both);
         onlyConsumers.removeAll(both);
-        List<String> allWireComponents = new ArrayList<String>(onlyProducers);
+        List<String> allWireComponents = new ArrayList<>(onlyProducers);
         allWireComponents.addAll(onlyConsumers);
         allWireComponents.addAll(both);
-        List<String> result = new ArrayList<String>();
-        result.addAll(cs.getFactoryComponentPids());
-        result.removeAll(allWireComponents);
-        return result;
+        return allWireComponents;
     }
 
     @Override
@@ -416,13 +428,13 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             List<ComponentConfiguration> configs = cs.getComponentConfigurations();
             // sort the list alphabetically by service name
             this.sortConfigurations(configs);
-            
+
             final Collection<String> servicesToHide = CollectionUtil.newHashSet(
                     Arrays.asList("SystemPropertiesService", "NetworkAdminService", "NetworkConfigurationService",
                             "SslManagerService", "FirewallConfigurationService", "WireService"));
-            
+
             for (ComponentConfiguration config : configs) {
-                
+
                 final String pid = config.getPid();
                 final boolean serviceExists = servicesToHide.stream().anyMatch(pid::endsWith);
                 // ignore items we want to hide

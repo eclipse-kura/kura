@@ -89,14 +89,14 @@ public interface CellularModem {
      * resets the modem and tries to restore the state
      * of the modem driver. (e.g. PPP connection, status thread)
      *
-     * @throws Exception
+     * @throws KuraException
      */
     public void reset() throws KuraException;
 
     /**
      * Reports signal strength in dBm
      *
-     * @throws Exception
+     * @throws KuraException
      * @return signal strength
      */
     public int getSignalStrength() throws KuraException;
@@ -104,7 +104,7 @@ public interface CellularModem {
     /**
      * Reports modem registration status
      *
-     * @throws Exception
+     * @throws KuraException
      * @return modem registration status as {@link ModemRegistrationStatus}
      */
     public ModemRegistrationStatus getRegistrationStatus() throws KuraException;
@@ -113,7 +113,7 @@ public interface CellularModem {
      * Reports number of bytes tarnsmitted during a call
      *
      * @return number of bytes transmitted
-     * @throws Exception
+     * @throws KuraException
      */
     public long getCallTxCounter() throws KuraException;
 
@@ -121,14 +121,14 @@ public interface CellularModem {
      * Reports number of bytes received during a call
      *
      * @return number of bytes received
-     * @throws Exception
+     * @throws KuraException
      */
     public long getCallRxCounter() throws KuraException;
 
     /**
      * Reports Service Type
      *
-     * @throws Exception
+     * @throws KuraException
      * @return service indication
      */
     public String getServiceType() throws KuraException;

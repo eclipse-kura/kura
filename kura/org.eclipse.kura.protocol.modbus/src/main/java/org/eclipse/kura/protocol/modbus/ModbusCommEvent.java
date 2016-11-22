@@ -14,11 +14,12 @@ package org.eclipse.kura.protocol.modbus;
 /**
  * The ModbusCommEvent class contains the values returned by Modbus functions 11(0x0B)
  * and 12(0x0C).
- * <p>
+ * <ul>
  * <li>status : two-bytes status word, 0xFFFF if a busy condition exists, 0 otherwise
  * <li>eventCount : event counter incremented for each successful message completion
  * <li>messageCount : quantity of messages processed since last restart
  * <li>events[] : 0 to 64 bytes, each byte corresponding to the status of one Modbus
+ * </ul>
  * send or receive operation, byte 0 is the most recent event.
  */
 public class ModbusCommEvent {

@@ -95,28 +95,27 @@ public interface CloudServiceFactory {
      * <br>
      * In the following example a Kura app declares two dependencies on CloudServiceS whose PIDs are
      * <i>myCloudService</i> and <i>anotherCloudService</i>:
-     * </br>
      *
      * <pre>
-     * &ltreference name="myCloudServiceReference"
+     * &lt;reference name="myCloudServiceReference"
      *              policy="static"
      *              bind="setMyCloudService"
      *              unbind="unsetMyCloudService"
      *              cardinality="1..1"
-     *              interface="org.eclipse.kura.cloud.CloudService"/&gt
-     * &ltproperty  name="myCloudServiceReference.target"
+     *              interface="org.eclipse.kura.cloud.CloudService"/&gt;
+     * &lt;property  name="myCloudServiceReference.target"
      *              type="String"
-     *              value="(kura.service.pid=myCloudService)"/&gt
+     *              value="(kura.service.pid=myCloudService)"/&gt;
      *
-     * &ltreference name="anotherCloudServiceReference"
+     * &lt;reference name="anotherCloudServiceReference"
      *              policy="static"
      *              bind="setAnotherCloudService"
      *              unbind="unsetAnotherCloudService"
      *              cardinality="1..1"
-     *              interface="org.eclipse.kura.cloud.CloudService"/&gt
-     * &ltproperty  name="anotherCloudServiceReference.target"
+     *              interface="org.eclipse.kura.cloud.CloudService"/&gt;
+     * &lt;property  name="anotherCloudServiceReference.target"
      *              type="String"
-     *              value="(kura.service.pid=anotherCloudService)"/&gt
+     *              value="(kura.service.pid=anotherCloudService)"/&gt;
      * </pre>
      *
      * @param pid
@@ -131,7 +130,7 @@ public interface CloudServiceFactory {
      *
      * @param pid
      *            the Kura persistent identifier, <i>kura.service.pid</i>, of the factory component configuration.
-     * @return List<String>, the list of <i>kura.service.pid</i>s associated with the specified factory component
+     * @return List&lt;String&gt;, the list of <i>kura.service.pid</i>s associated with the specified factory component
      *         configuration.
      * @throws KuraException
      *             if the specified <i>kura.service.pid</i> is not correct or compliant with what the factory

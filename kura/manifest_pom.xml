@@ -73,7 +73,7 @@
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <kura.basedir>${project.basedir}</kura.basedir>
         <kura.build.version>${maven.build.timestamp}</kura.build.version>
-        <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
+        <maven.javadoc.failOnError>true</maven.javadoc.failOnError>
 
 		<!-- Jacoco version -->
         <jacoco.version>0.6.4.201312101107</jacoco.version>
@@ -467,6 +467,13 @@
                         <excludePackageNames>
                             *.ermes:*.demo*:*.example:*.core:*.cloud.app:*.net.admin:*.deployment:*.emulator:*.linux:*.qa:*.web:*.service.io:*.test:*.internal.*
                         </excludePackageNames>
+                        <tags>
+                            <tag>
+                                <name>noextend</name>
+                                <placement>t</placement>
+                                <head>This class is not intended to be extended</head>
+                            </tag>
+                        </tags>
                     </configuration>
                     <executions>
                         <execution>

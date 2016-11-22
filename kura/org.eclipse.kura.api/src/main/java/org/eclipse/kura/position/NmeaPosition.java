@@ -15,24 +15,26 @@ package org.eclipse.kura.position;
  * The NmeaPosition class is similar to org.osgi.util.position.Position but with different units
  * and more fields.<br>
  * The following fields are equivalent to org.osgi.util.position.Position fields but in more typical
- * units (degrees instead of radians):<br>
- * <li>Longitude in degrees</li>
- * <li>Latitude in degrees</li>
- * <li>Track in degrees</li>
- * <li>Altitude in meters</li>
- * <li>Speed in km/h</li>
- * <li>Speed in mph</li>
- * <br>
- * It adds to the OSGI Position class the following fields :<br>
- * <li>Fix Quality (from GPGGA)</li>
- * <li>Number of Satellites (from GPGGA)</li>
- * <li>DOP : Horizontal dilution of position (from GPGGA)</li>
- * <li>3D fix (from GPGSA)</li>
- * <li>PRNs of sats used for fix (from GPGSA)</li>
- * <li>PDOP : Dilution of precision (from GPGSA)</li>
- * <li>HDOP : Horizontal Dilution of precision (from GPGSA)</li>
- * <li>VDOP : Vertical Dilution of precision (from GPGSA)</li>
- *
+ * units (degrees instead of radians):
+ * <ul>
+ * <li>Longitude in degrees
+ * <li>Latitude in degrees
+ * <li>Track in degrees
+ * <li>Altitude in meters
+ * <li>Speed in km/h
+ * <li>Speed in mph
+ * </ul>
+ * It adds to the OSGI Position class the following fields:<br>
+ * <ul>
+ * <li>Fix Quality (from GPGGA)
+ * <li>Number of Satellites (from GPGGA)
+ * <li>DOP : Horizontal dilution of position (from GPGGA)
+ * <li>3D fix (from GPGSA)
+ * <li>PRNs of sats used for fix (from GPGSA)
+ * <li>PDOP : Dilution of precision (from GPGSA)
+ * <li>HDOP : Horizontal Dilution of precision (from GPGSA)
+ * <li>VDOP : Vertical Dilution of precision (from GPGSA)
+ * </ul>
  */
 public class NmeaPosition {
 

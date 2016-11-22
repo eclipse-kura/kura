@@ -19,11 +19,11 @@ package org.eclipse.kura.status;
 public interface CloudConnectionStatusComponent {
 
     /**
-     * Returns the notification priority for this Component. Usually a constant.<br/>
-     * Priorities range from {@code Integer.MIN_VALUE} to {@code Integer.MAX_VALUE}.<br/>
-     * <br/>
-     * Several constants are available for most used priorities:<br/>
-     * <table>
+     * Returns the notification priority for this Component. Usually a constant.<br>
+     * Priorities range from {@code Integer.MIN_VALUE} to {@code Integer.MAX_VALUE}.<br>
+     * <br>
+     * Several constants are available for most used priorities:<br>
+     * <table summary="">
      * <tbody>
      * <tr>
      * <td>{@code CloudConnectionStatusService.PRIORITY_MAX}</td>

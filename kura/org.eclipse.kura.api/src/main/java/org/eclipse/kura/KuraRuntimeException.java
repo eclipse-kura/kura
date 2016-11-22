@@ -43,8 +43,6 @@ public class KuraRuntimeException extends RuntimeException
 	 * Builds a new EdcException instance based on the supplied EdcErrorCode.
 	 * 
 	 * @param code
-	 * @param t
-	 * @param arguments
 	 */
 	public KuraRuntimeException(KuraErrorCode code) {
 		m_code = code;
@@ -54,7 +52,6 @@ public class KuraRuntimeException extends RuntimeException
 	 * Builds a new EdcException instance based on the supplied EdcErrorCode.
 	 * 
 	 * @param code
-	 * @param t
 	 * @param arguments
 	 */
 	public KuraRuntimeException(KuraErrorCode code, Object... arguments) {
@@ -66,7 +63,7 @@ public class KuraRuntimeException extends RuntimeException
 	 * Builds a new EdcException instance based on the supplied EdcErrorCode, an optional Throwable cause, and optional arguments for the associated exception message.
 	 * 
 	 * @param code
-	 * @param t
+	 * @param cause
 	 * @param arguments
 	 */
 	public KuraRuntimeException(KuraErrorCode code, Throwable cause, Object... arguments) {

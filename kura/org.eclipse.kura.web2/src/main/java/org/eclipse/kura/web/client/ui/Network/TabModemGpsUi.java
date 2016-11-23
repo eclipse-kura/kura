@@ -1,6 +1,7 @@
 package org.eclipse.kura.web.client.ui.Network;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtSession;
@@ -49,11 +50,15 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
     ScrollPanel helpText;
     @UiField
     FieldSet field;
+    @UiField
+    HelpButton gpsHelp;
 
     public TabModemGpsUi(GwtSession currentSession) {
         initWidget(uiBinder.createAndBindUi(this));
         this.session = currentSession;
         initForm();
+
+        gpsHelp.setHelpText(MSGS.netModemToolTipEnableGps());
     }
 
     @Override

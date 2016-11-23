@@ -12,6 +12,7 @@
 package org.eclipse.kura.web.client.ui.Network;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
 import org.eclipse.kura.web.shared.model.GwtNetIfType;
@@ -116,6 +117,9 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     @UiField
     PanelBody helpText;
 
+    @UiField
+    HelpButton routerHelp, beginHelp, endHelp, subnetHelp, defaultLHelp, maxHelp, passHelp;
+
     public TabDhcpNatUi(GwtSession currentSession, TabTcpIpUi tcp, TabWirelessUi wireless) {
         initWidget(uiBinder.createAndBindUi(this));
         this.tcpTab = tcp;
@@ -123,6 +127,8 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         this.session = currentSession;
         setDirty(false);
         initForm();
+
+        initHelpButtons();
 
         this.tcpTab.status.addChangeHandler(new ChangeHandler() {
 
@@ -311,6 +317,16 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         this.groupMax.setValidationState(ValidationState.NONE);
 
         this.helpRouter.setText("");
+    }
+
+    private void initHelpButtons() {
+        this.routerHelp.setHelpText(MSGS.netRouterToolTipMode());
+        this.beginHelp.setHelpText(MSGS.netRouterToolTipDhcpBeginAddr());
+        this.endHelp.setHelpText(MSGS.netRouterToolTipDhcpEndAddr());
+        this.subnetHelp.setHelpText(MSGS.netRouterToolTipDhcpSubnet());
+        this.defaultLHelp.setHelpText(MSGS.netRouterToolTipDhcpDefaultLeaseTime());
+        this.maxHelp.setHelpText(MSGS.netRouterToolTipDhcpMaxLeaseTime());
+        this.passHelp.setHelpText(MSGS.netRouterToolTipPassDns());
     }
 
     private void initForm() {

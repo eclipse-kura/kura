@@ -605,7 +605,7 @@ public class CamelRunner {
     /**
      * Replace the current set of route with an new one
      *
-     * @param routes
+     * @param xml
      *            the new set of routes
      */
     public void setRoutes(final String xml) throws Exception {
@@ -634,7 +634,7 @@ public class CamelRunner {
     /**
      * Replace the current set of route with an new one
      *
-     * @param routes
+     * @param routeBuilder
      *            the new set of routes
      */
     public void setRoutes(final RouteBuilder routeBuilder) throws Exception {

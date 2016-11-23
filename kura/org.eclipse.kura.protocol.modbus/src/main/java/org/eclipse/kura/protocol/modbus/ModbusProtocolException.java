@@ -66,8 +66,6 @@ public class ModbusProtocolException extends Exception {
      * Builds a new EdcException instance based on the supplied EdcErrorCode.
      *
      * @param code
-     * @param t
-     * @param arguments
      */
     public ModbusProtocolException(ModbusProtocolErrorCode code) {
         this.m_code = code;
@@ -77,8 +75,7 @@ public class ModbusProtocolException extends Exception {
      * Builds a new EdcException instance based on the supplied EdcErrorCode and an optional complement string
      *
      * @param code
-     * @param t
-     * @param arguments
+     * @param complement
      */
     public ModbusProtocolException(ModbusProtocolErrorCode code, String complement) {
         this.m_code = code;
@@ -90,7 +87,6 @@ public class ModbusProtocolException extends Exception {
      * arguments for the associated exception message.
      *
      * @param code
-     * @param t
      * @param arguments
      */
     public ModbusProtocolException(ModbusProtocolErrorCode code, Throwable cause, Object... arguments) {

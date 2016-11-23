@@ -35,10 +35,11 @@ import org.eclipse.kura.KuraException;
  * It tracks only OSGi services which implement the ConfigurableComponent
  * or the SelfConfiguringComponent interface.
  * More explicitly it does not manage the following services of the OSGi specification:
- * <li>Managed Service</li>
- * <li>Managed Service Factory</li>
- * <li>Component Factory of the Declarative Service specification</li>
- * <br>
+ * <ul>
+ * <li>Managed Service
+ * <li>Managed Service Factory
+ * <li>Component Factory of the Declarative Service specification
+ * </ul>
  * When a ConfigurableComponent or a SelfConfiguringComponent is tracked,
  * the Configuration Service will update its Configuration,
  * as returned by the Configuration Admin, with properties fabricated
@@ -69,18 +70,18 @@ import org.eclipse.kura.KuraException;
  * The Configuration Service also allows creation of new ConfigurableComponents instances
  * through OSGi Declarative Services by creating a new component Configuration via the OSGi Configuration Admin.
  * The approach is <a href=
- * " http://www.jeremias-maerki.ch/wordpress/de/2010/04/22/osgi-ds-configuring-multiple-instances-of-a-component/">using
+ * "http://www.jeremias-maerki.ch/wordpress/de/2010/04/22/osgi-ds-configuring-multiple-instances-of-a-component/">using
  * OSGi Declative Services to configure multiple instances of a component</a>.
  * <br>
  * <br>
  * In order to manage the configuration of multiple component instances from the same configuration factory,
  * Kura relies on the following configuration properties:
- * <br>
+ * <ul>
  * <li><b>service.factoryPid</b> is set by the Configuration Admin when the component configuration is first created.
- * Its value has to match the name of the targeted Declarative Service Component</li>
+ * Its value has to match the name of the targeted Declarative Service Component
  * <li><b>kura.service.pid</b> is the persistent identity assigned by Kura when the component configuration
- * is first created calling {@link #createFactoryConfiguration(String, String, Map, boolean)}.</li>
- * <br>
+ * is first created calling {@link #createFactoryConfiguration(String, String, Map, boolean)}.
+ * </ul>
  * Both properties are stored in snapshots to recreate the component instances and restore their configuration
  * at every framework restart.
  */
@@ -105,7 +106,7 @@ public interface ConfigurationService {
     /**
      * Creates a new ConfigurableComponent instance by creating a new configuration from a
      * Configuration Admin factory.
-     * The Configuration Service will use {@link ConfigurationAdmin#createFactoryConfiguration(String, String)}
+     * The Configuration Service will use the Configuration Admin
      * to create the component configuration and will update the component configuration with the provided optional
      * properties.
      *

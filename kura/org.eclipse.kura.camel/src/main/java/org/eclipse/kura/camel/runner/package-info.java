@@ -11,8 +11,9 @@
 /**
  * Functionality for running a Camel context
  * <p>
- * The main class to create, run and update a {@link CamelContext} is the {@link CamelRunner} which
- * is being created using a {@link CamelRunner.Builder}
+ * The main class to create, run and update a {@link org.apache.camel.CamelContext}
+ * is the {@link org.eclipse.kura.camel.runner.CamelRunner} which
+ * is being created using a {@link org.eclipse.kura.camel.runner.CamelRunner.Builder}
  * </p>
  */
 package org.eclipse.kura.camel.runner;

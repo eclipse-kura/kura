@@ -19,7 +19,7 @@ import org.eclipse.kura.net.wifi.WifiAccessPoint;
 
 /**
  * The NetworkService allows to browse and configure the network interfaces of the system.
- * <br/>
+ * <br>
  * NetworkService extends what is offered by the standard Java APIs by offering information
  * like the NetworkInterface type - e.g. wired vs wireless vs modem - and additional information
  * regarding the address of a NetworkInterface - e.g. its getway address, DNS, and so on.

@@ -48,8 +48,6 @@ public class KuraException extends Exception
 	 * Builds a new EdcException instance based on the supplied EdcErrorCode.
 	 * 
 	 * @param code
-	 * @param t
-	 * @param arguments
 	 */
 	public KuraException(KuraErrorCode code) {
 		m_code = code;
@@ -59,7 +57,6 @@ public class KuraException extends Exception
 	 * Builds a new EdcException instance based on the supplied EdcErrorCode.
 	 * 
 	 * @param code
-	 * @param t
 	 * @param arguments
 	 */
 	public KuraException(KuraErrorCode code, Object... arguments) {
@@ -71,7 +68,7 @@ public class KuraException extends Exception
 	 * Builds a new EdcException instance based on the supplied EdcErrorCode, an optional Throwable cause, and optional arguments for the associated exception message.
 	 * 
 	 * @param code
-	 * @param t
+	 * @param cause
 	 * @param arguments
 	 */
 	public KuraException(KuraErrorCode code, Throwable cause, Object... arguments) {
@@ -95,7 +92,6 @@ public class KuraException extends Exception
 	 * Factory method to build an EdcException with the EdcErrorCode.INTERNAL_ERROR code providing a cause and a message.
 	 * 
 	 * @param cause
-	 * @param message
 	 * @return
 	 */
 	public static KuraException internalError(Throwable cause) {
@@ -104,8 +100,7 @@ public class KuraException extends Exception
 
 	/**
 	 * Factory method to build an EdcException with the EdcErrorCode.INTERNAL_ERROR code providing only a message.
-	 * 
-	 * @param cause
+	 *
 	 * @param message
 	 * @return
 	 */

@@ -11,9 +11,11 @@
  *******************************************************************************/
 package org.eclipse.kura.message;
 
+import org.eclipse.kura.cloud.CloudService;
+
 /**
  * Models a topic for messages posted to the Kura platform.
- * Topics are expected to be in the form of "account/asset/<application_specific>";
+ * Topics are expected to be in the form of "account/asset/&lt;application_specific&gt;";
  * The system control topic prefix is defined in the {@link CloudService} and defaults
  * to $EDC.
  */

@@ -10,7 +10,7 @@
 
     Contributors:
       Eurotech
-      Red Hat Inc - "Eclipse Kura"
+      Red Hat Inc
 
 -->
 <project>
@@ -82,20 +82,6 @@
             </activation>
             <modules>
                 <module>tools</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>web-classic</id>
-            <properties>
-                <org.eclipse.kura.web.skip>false
-                </org.eclipse.kura.web.skip>
-            </properties>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>org.eclipse.kura.web</module>
-                <module>distrib</module>
             </modules>
         </profile>
         <profile>

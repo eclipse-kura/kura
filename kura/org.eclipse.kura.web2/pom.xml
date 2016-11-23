@@ -31,7 +31,7 @@
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
 		<!-- Convenience property to set the GWT version -->
-		<gwtVersion>2.7.0</gwtVersion>
+		<gwtVersion>2.8.2</gwtVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 

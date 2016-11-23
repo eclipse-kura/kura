@@ -73,7 +73,7 @@
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <kura.basedir>${project.basedir}</kura.basedir>
         <kura.build.version>${maven.build.timestamp}</kura.build.version>
-        <maven.javadoc.failOnError>true</maven.javadoc.failOnError>
+        <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 
 		<!-- Jacoco version -->
         <jacoco.version>0.6.4.201312101107</jacoco.version>

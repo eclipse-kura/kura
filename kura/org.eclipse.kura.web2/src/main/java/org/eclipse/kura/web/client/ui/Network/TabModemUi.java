@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.HelpButton;
+import org.eclipse.kura.web.client.util.HelpButton.HelpTextProvider;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.shared.model.GwtModemAuthType;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
@@ -95,6 +97,10 @@ public class TabModemUi extends Composite implements NetworkTab {
     @UiField
     FieldSet field;
 
+    @UiField
+    HelpButton networkHelp, modemHelp, numberHelp, dialHelp, apnHelp, authHelp, usernameHelp, passwordHelp, resetHelp,
+            persistHelp, maxfailHelp, idleHelp, activeHelp, intervalHelp, failureHelp;
+
     public TabModemUi(GwtSession currentSession, TabTcpIpUi tcp) {
         initWidget(uiBinder.createAndBindUi(this));
         this.session = currentSession;
@@ -103,6 +109,8 @@ public class TabModemUi extends Composite implements NetworkTab {
         this.defaultDialString.put("HE910", "atd*99***1#");
         this.defaultDialString.put("DE910", "atd#777");
         initForm();
+
+        initHelpButtons();
 
         this.tcpTab.status.addChangeHandler(new ChangeHandler() {
 
@@ -238,6 +246,34 @@ public class TabModemUi extends Composite implements NetworkTab {
     }
 
     // ----Private Methods----
+    private void initHelpButtons() {
+        this.networkHelp.setHelpText(MSGS.netModemToolTipNetworkTopology());
+        this.modemHelp.setHelpText(MSGS.netModemToolTipModemIndentifier());
+        this.numberHelp.setHelpText(MSGS.netModemToolTipModemInterfaceNumber());
+        this.dialHelp.setHelpTextProvider(new HelpTextProvider() {
+
+            @Override
+            public String getHelpText() {
+                if ("".equals(dialString)) {
+                    return MSGS.netModemToolTipDialStringDefault();
+                } else {
+                    return MSGS.netModemToolTipDialString(dial.getText());
+                }
+            }
+        });
+        this.apnHelp.setHelpText(MSGS.netModemToolTipApn());
+        this.authHelp.setHelpText(MSGS.netModemToolTipAuthentication());
+        this.usernameHelp.setHelpText(MSGS.netModemToolTipUsername());
+        this.passwordHelp.setHelpText(MSGS.netModemToolTipPassword());
+        this.resetHelp.setHelpText(MSGS.netModemToolTipResetTimeout());
+        this.persistHelp.setHelpText(MSGS.netModemToolTipPersist());
+        this.maxfailHelp.setHelpText(MSGS.netModemToolTipMaxFail());
+        this.activeHelp.setHelpText(MSGS.netModemToolTipActiveFilter());
+        this.idleHelp.setHelpText(MSGS.netModemToolTipIdle());
+        this.intervalHelp.setHelpText(MSGS.netModemToolTipLcpEchoInterval());
+        this.failureHelp.setHelpText(MSGS.netModemToolTipLcpEchoFailure());
+    }
+
     private void initForm() {
 
         // MODEL

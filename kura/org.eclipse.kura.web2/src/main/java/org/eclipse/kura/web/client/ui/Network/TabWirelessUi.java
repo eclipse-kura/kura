@@ -20,6 +20,8 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.GwtSafeHtmlUtils;
+import org.eclipse.kura.web.client.util.HelpButton;
+import org.eclipse.kura.web.client.util.HelpButton.HelpTextProvider;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
@@ -187,6 +189,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     Text noSsidText;
     @UiField
     Text scanFailText;
+    @UiField
+    HelpButton wirelessHelp, ssidHelp, radioHelp, securityHelp, passwordHelp, verifyHelp, pairwiseHelp, groupHelp,
+            bgscanHelp, rssiHelp, shortIHelp, longIHelp, pingHelp, ignoreHelp;
 
     String passwordRegex, passwordError, tcpStatus;
 
@@ -197,6 +202,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.tcpTab = tcp;
         this.netTabs = tabs;
         initForm();
+        initHelpButtons();
         setPasswordValidation();
 
         this.tcpTab.status.addChangeHandler(new ChangeHandler() {
@@ -326,6 +332,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     // -----Private methods-------//
+
     private void update() {
         setValues(true);
         refreshForm();
@@ -581,6 +588,33 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         update();
     }
 
+    private void initHelpButtons() {
+        this.wirelessHelp.setHelpTextProvider(new HelpTextProvider() {
+
+            @Override
+            public String getHelpText() {
+                if (wireless.getSelectedItemText().equals(MessageUtils.get("netWifiWirelessModeStation"))) {
+                    return MSGS.netWifiToolTipWirelessModeStation();
+                } else {
+                    return MSGS.netWifiToolTipWirelessModeAccessPoint();
+                }
+            }
+        });
+        this.ssidHelp.setHelpText(MSGS.netWifiToolTipNetworkName());
+        this.radioHelp.setHelpText(MSGS.netWifiToolTipRadioMode());
+        this.securityHelp.setHelpText(MSGS.netWifiToolTipSecurity());
+        this.passwordHelp.setHelpText(MSGS.netWifiToolTipPassword());
+        this.verifyHelp.setHelpText(MSGS.netWifiToolTipPassword());
+        this.pairwiseHelp.setHelpText(MSGS.netWifiToolTipPairwiseCiphers());
+        this.groupHelp.setHelpText(MSGS.netWifiToolTipGroupCiphers());
+        this.bgscanHelp.setHelpText(MSGS.netWifiToolTipBgScan());
+        this.rssiHelp.setHelpText(MSGS.netWifiToolTipBgScanStrength());
+        this.shortIHelp.setHelpText(MSGS.netWifiToolTipBgScanShortInterval());
+        this.longIHelp.setHelpText(MSGS.netWifiToolTipBgScanLongInterval());
+        this.pingHelp.setHelpText(MSGS.netWifiToolTipPingAccessPoint());
+        this.ignoreHelp.setHelpText(MSGS.netWifiToolTipIgnoreSSID());
+    }
+
     private void initForm() {
 
         // Wireless Mode
@@ -634,6 +668,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 TabWirelessUi.this.netTabs.adjustInterfaceTabs();
                 setPasswordValidation();
                 update();
+                wirelessHelp.updateHelpText();
             }
 
         });

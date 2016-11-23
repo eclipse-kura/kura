@@ -16,7 +16,8 @@
 
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
     xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
-    xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
+    xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
+    xmlns:util="urn:import:org.eclipse.kura.web.client.util">
 
     <ui:style>
     .important {
@@ -39,6 +40,7 @@
 
     <b:Container fluid="true">
 
+	<b:Row>
         <b:Column size="MD_7" addStyleNames="{style.center-panel}">
             <b:Row>
                 <g:ScrollPanel addStyleNames="{style.center-panel}">
@@ -48,6 +50,7 @@
                             <b:FormGroup ui:field="groupWireless">
                                 <b:FormLabel for="wireless"
                                     ui:field="labelWireless" />
+                                <util:HelpButton ui:field="wirelessHelp"/>
                                 <b:HelpBlock color="red"
                                     ui:field="helpWireless" />
                                 <g:FlowPanel>
@@ -59,6 +62,7 @@
                             <b:FormGroup>
                                 <b:FormLabel for="ssid"
                                     ui:field="labelSsid" />
+                                <util:HelpButton ui:field="ssidHelp"/>
                                 <b:TextBox b:id="ssid"
                                     ui:field="ssid" />
                                 <b:Button ui:field="buttonSsid"
@@ -68,6 +72,7 @@
                             <b:FormGroup>
                                 <b:FormLabel for="radio"
                                     ui:field="labelRadio" />
+                                <util:HelpButton ui:field="radioHelp"/>
                                 <g:FlowPanel>
                                     <b:ListBox b:id="radio"
                                         ui:field="radio" />
@@ -77,6 +82,7 @@
                             <b:FormGroup>
                                 <b:FormLabel for="security"
                                     ui:field="labelSecurity" />
+                                <util:HelpButton ui:field="securityHelp"/>
                                 <g:FlowPanel>
                                     <b:ListBox b:id="security"
                                         ui:field="security" />
@@ -87,6 +93,7 @@
                             <b:FormGroup ui:field="groupPassword">
                                 <b:FormLabel for="password"
                                     ui:field="labelPassword" />
+                                <util:HelpButton ui:field="passwordHelp"/>
                                 <b:HelpBlock color="red"
                                     ui:field="helpPassword" />
                                 <b:Input type="PASSWORD" b:id="password"
@@ -98,6 +105,7 @@
                             <b:FormGroup ui:field="groupVerify">
                                 <b:FormLabel for="verify"
                                     ui:field="labelVerify" />
+                                <util:HelpButton ui:field="verifyHelp"/>
                                 <b:HelpBlock color="red"
                                     ui:field="helpVerify" />
                                 <b:Input type="PASSWORD" b:id="verify"
@@ -107,6 +115,7 @@
                             <b:FormGroup>
                                 <b:FormLabel for="pairwise"
                                     ui:field="labelPairwise" />
+                                <util:HelpButton ui:field="pairwiseHelp"/>
                                 <g:FlowPanel>
                                     <b:ListBox b:id="pairwise"
                                         ui:field="pairwise" />
@@ -116,6 +125,7 @@
                             <b:FormGroup>
                                 <b:FormLabel for="group"
                                     ui:field="labelGroup" />
+                                <util:HelpButton ui:field="groupHelp"/>
                                 <g:FlowPanel>
                                     <b:ListBox b:id="group"
                                         ui:field="group" />
@@ -125,6 +135,7 @@
                             <b:FormGroup>
                                 <b:FormLabel for="bgscan"
                                     ui:field="labelBgscan" />
+                                <util:HelpButton ui:field="bgscanHelp"/>
                                 <g:FlowPanel>
                                     <b:ListBox b:id="bgscan"
                                         ui:field="bgscan" />
@@ -134,6 +145,7 @@
                             <b:FormGroup ui:field="groupRssi">
                                 <b:FormLabel for="rssi"
                                     ui:field="labelRssi" />
+                                <util:HelpButton ui:field="rssiHelp"/>
                                 <b:TextBox b:id="rssi"
                                     ui:field="rssi" />
                             </b:FormGroup>
@@ -141,6 +153,7 @@
                             <b:FormGroup ui:field="groupShortI">
                                 <b:FormLabel for="shortI"
                                     ui:field="labelShortI" />
+                                <util:HelpButton ui:field="shortIHelp"/>
                                 <b:TextBox b:id="shortI"
                                     ui:field="shortI" />
                             </b:FormGroup>
@@ -148,6 +161,7 @@
                             <b:FormGroup ui:field="groupLongI">
                                 <b:FormLabel for="longI"
                                     ui:field="labelLongI" />
+                                <util:HelpButton ui:field="longIHelp"/>
                                 <b:TextBox b:id="longI"
                                     ui:field="longI" />
                             </b:FormGroup>
@@ -155,6 +169,7 @@
                             <b:FormGroup>
                                 <b:FormLabel for="ping"
                                     ui:field="labelPing" />
+                                <util:HelpButton ui:field="pingHelp"/>
                                 <g:FlowPanel>
                                     <b:RadioButton name="radio1"
                                         formValue="true" ui:field="radio1" />
@@ -166,6 +181,7 @@
                             <b:FormGroup>
                                 <b:FormLabel for="ignore"
                                     ui:field="labelIgnore" />
+                                <util:HelpButton ui:field="ignoreHelp"/>
                                 <g:FlowPanel>
                                     <b:RadioButton name="radio2"
                                         formValue="true" ui:field="radio3" />
@@ -192,10 +208,7 @@
             </b:Row>
         </b:Column>
 
-        <b:Column size="MD_5" addStyleNames="{style.center-panel}">
-            <b:Column addStyleNames="{style.padding}" size="MD_12">
-            </b:Column>
-            <b:Column size="MD_12">
+        <b:Column size="MD_5" addStyleNames="{style.center-panel}" visibleOn="MD_LG">
                 <b:Row>
                     <b:Panel>
                         <b:PanelHeader ui:field="helpTitle" />
@@ -203,8 +216,8 @@
                             ui:field="helpText" />
                     </b:Panel>
                 </b:Row>
-            </b:Column>
         </b:Column>
+        </b:Row>
 
 		<!-- WIFI Networks (SSID) Modal -->
         <b:Modal closable="true" dataKeyboard="true" ui:field="ssidModal">

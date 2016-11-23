@@ -19,6 +19,7 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
 import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
@@ -121,6 +122,9 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     @UiField
     Text multipleWanWarnText;
 
+    @UiField
+    HelpButton statusHelp, configureHelp, ipHelp, subnetHelp, gatewayHelp, dnsHelp;
+    
     public TabTcpIpUi(GwtSession currentSession, NetworkTabsUi netTabs) {
         initWidget(uiBinder.createAndBindUi(this));
         this.session = currentSession;
@@ -130,6 +134,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
         this.dnsRead.setVisible(false);
 
         initModal();
+        
+        initHelpButtons();
     }
 
     @Override
@@ -286,6 +292,16 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     }
 
     // ---------------Private Methods------------
+    
+    private void initHelpButtons() {
+    	this.statusHelp.setHelpText(MSGS.netIPv4ModemToolTipStatus());
+    	this.configureHelp.setHelpText(MSGS.netIPv4ToolTipConfigure());
+    	this.ipHelp.setHelpText(MSGS.netIPv4ToolTipAddress());
+    	this.subnetHelp.setHelpText(MSGS.netIPv4ToolTipSubnetMask());
+    	this.gatewayHelp.setHelpText(MSGS.netIPv4ToolTipGateway());
+    	this.dnsHelp.setHelpText(MSGS.netIPv4ToolTipDns());
+    }
+    
     private void initForm() {
 
         // Labels

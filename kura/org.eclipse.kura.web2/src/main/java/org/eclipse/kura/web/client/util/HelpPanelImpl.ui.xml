@@ -1,0 +1,30 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+
+<!--
+
+    Copyright (c) 2016 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:b="urn:import:org.gwtbootstrap3.client.ui">
+
+    <g:HTMLPanel ui:field="helpPanel" addStyleNames="overlay-help-panel z-depth-2">
+        <g:HTMLPanel addStyleNames="help-panel">
+            <g:HTMLPanel addStyleNames="help-header">
+                <g:Label addStyleNames="help-panel-title">Help</g:Label>
+                <b:Button ui:field="hideButton" addStyleNames="hide-button fa fa-times">Hide</b:Button>
+            </g:HTMLPanel>
+            <g:HTMLPanel ui:field="helpContent"
+                addStyleNames="help-content" />
+        </g:HTMLPanel>
+    </g:HTMLPanel>
+</ui:UiBinder> 

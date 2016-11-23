@@ -16,7 +16,8 @@
 
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
     xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
-    xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
+    xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
+    xmlns:util="urn:import:org.eclipse.kura.web.client.util">
 
     <ui:style>
     .important {
@@ -46,6 +47,8 @@
                             <b:FormGroup>
                                 <b:FormLabel for="status"
                                     ui:field="labelStatus"></b:FormLabel>
+                                <util:HelpButton
+                                    ui:field="statusHelp" />
                                 <g:FlowPanel>
                                     <b:ListBox b:id="status"
                                         ui:field="status" />
@@ -55,6 +58,8 @@
                             <b:FormGroup>
                                 <b:FormLabel for="configure"
                                     ui:field="labelConfigure"></b:FormLabel>
+                                <util:HelpButton
+                                    ui:field="configureHelp" />
                                 <g:FlowPanel>
                                     <b:ListBox b:id="configure"
                                         ui:field="configure" />
@@ -64,6 +69,8 @@
                             <b:FormGroup ui:field="groupIp">
                                 <b:FormLabel for="ip"
                                     ui:field="labelIp"></b:FormLabel>
+                                <util:HelpButton
+                                    ui:field="ipHelp" />
                                 <b:HelpBlock color="red"
                                     ui:field="helpIp" />
                                 <b:TextBox allowBlank="false"
@@ -73,6 +80,8 @@
                             <b:FormGroup ui:field="groupSubnet">
                                 <b:FormLabel for="subnet"
                                     ui:field="labelSubnet"></b:FormLabel>
+                                <util:HelpButton
+                                    ui:field="subnetHelp" />
                                 <b:HelpBlock color="red"
                                     ui:field="helpSubnet" />
                                 <b:TextBox allowBlank="false"
@@ -82,6 +91,8 @@
                             <b:FormGroup ui:field="groupGateway">
                                 <b:FormLabel for="gateway"
                                     ui:field="labelGateway"></b:FormLabel>
+                                <util:HelpButton
+                                    ui:field="gatewayHelp" />
                                 <b:HelpBlock color="red"
                                     ui:field="helpGateway" />
                                 <b:TextBox allowBlank="false"
@@ -95,6 +106,8 @@
                             <b:FormGroup ui:field="groupDns">
                                 <b:FormLabel for="dns"
                                     ui:field="labelDns"></b:FormLabel>
+                                <util:HelpButton
+                                    ui:field="dnsHelp" />
                                 <b:HelpBlock color="red"
                                     ui:field="helpDns" />
                                 <b:TextBox b:id="dns"
@@ -116,12 +129,13 @@
             </b:Row>
         </b:Column>
 
-        <b:Column size="MD_5" addStyleNames="{style.center-panel}">
+        <b:Column size="MD_5" addStyleNames="{style.center-panel}"
+            visibleOn="MD_LG">
             <b:Column addStyleNames="{style.padding}" size="MD_12">
             </b:Column>
             <b:Column size="MD_12">
                 <b:Row>
-                    <b:Panel>
+                    <b:Panel addStyleNames="help-panel">
                         <b:PanelHeader ui:field="helpTitle" />
                         <b:PanelBody addStyleNames="{style.help}"
                             ui:field="helpText" />

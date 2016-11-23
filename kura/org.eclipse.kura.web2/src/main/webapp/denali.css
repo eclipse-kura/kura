@@ -477,7 +477,7 @@ Help panel START
 .overlay-help-panel .help-content {
 	padding: 0.3cm;
 	width: 100%;
-	overflow: scroll;
+	overflow: auto;
     position: absolute;
     top: 1.1cm;
     bottom: 0;

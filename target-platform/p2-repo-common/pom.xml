@@ -236,6 +236,11 @@
 									<artifactId>mockito-core</artifactId>
 									<version>${mockito-core.version}</version>
 								</artifactItem>
+                                <artifactItem>
+                                    <groupId>org.objenesis</groupId>
+                                    <artifactId>objenesis</artifactId>
+                                    <version>${objenesis.version}</version>
+                                </artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

@@ -30,6 +30,12 @@ Copyright (c) 2016 Eurotech and/or its affiliates and others
             <version>1.10.19</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -89,6 +95,7 @@ Copyright (c) 2016 Eurotech and/or its affiliates and others
     </properties>
 
     <modules>
+        <module>org.eclipse.kura.core.net.test</module>
         <module>org.eclipse.kura.core.testutil</module>
     </modules>
 </project>

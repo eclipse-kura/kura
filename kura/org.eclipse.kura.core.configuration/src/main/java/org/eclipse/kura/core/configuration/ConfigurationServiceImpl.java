@@ -109,7 +109,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         @Override
         public void add(String servicePid, String kuraPid, String factoryPid) {
-            registerSelfConfiguringComponent(servicePid);
+            registerSelfConfiguringComponent(kuraPid, servicePid);
         }
 
         @Override
@@ -619,15 +619,16 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
     }
 
-    synchronized void registerComponentConfiguration(String pid, String servicePid, String factoryPid) {
+    synchronized void registerComponentConfiguration(final String pid, final String servicePid,
+            final String factoryPid) {
         if (pid == null || servicePid == null) {
-            s_logger.warn("Either kura.service.pid {} or service.pid {} are null", pid, servicePid);
+            s_logger.warn("Either PID (kura.service.pid) {} or Service PID (service.pid) {} is null", pid, servicePid);
             return;
         }
 
         if (!this.m_allActivatedPids.contains(pid)) {
             // register the component instance
-            s_logger.info("Registration of ConfigurableComponent {} by {}...", pid, this);
+            s_logger.info("Registering ConfigurableComponent - {}....", pid);
             this.m_servicePidByPid.put(pid, servicePid);
             if (factoryPid != null) {
                 this.m_factoryPidByPid.put(pid, factoryPid);
@@ -643,20 +644,24 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 }
             }
             this.m_allActivatedPids.add(pid);
+            s_logger.info("Registering ConfigurableComponent - {}....Done", pid);
         }
     }
 
-    synchronized void registerSelfConfiguringComponent(String pid) {
+    synchronized void registerSelfConfiguringComponent(final String pid, final String servicePid) {
         if (pid == null) {
-            s_logger.warn("pid is null");
+            s_logger.warn("PID (kura.service.pid) is null");
             return;
         }
+        s_logger.info("Registering SelfConfiguringComponent - {}....", pid);
         if (!this.m_allActivatedPids.contains(pid)) {
-            s_logger.info("Registration of SelfConfiguringComponent {} by {}...", pid, this);
             this.m_allActivatedPids.add(pid);
-            this.m_servicePidByPid.put(pid, pid);
+        }
+        if (!this.m_activatedSelfConfigComponents.contains(pid)) {
+            this.m_servicePidByPid.put(pid, servicePid);
             this.m_activatedSelfConfigComponents.add(pid);
         }
+        s_logger.info("Registering SelfConfiguringComponent - {}....Done", pid);
     }
 
     synchronized void unregisterComponentConfiguration(String pid) {
@@ -1031,7 +1036,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             ServiceReference<?>[] refs = this.m_ctx.getBundleContext().getServiceReferences((String) null, null);
             if (refs != null) {
                 for (ServiceReference<?> ref : refs) {
-                    String ppid = (String) ref.getProperty(Constants.SERVICE_PID);
+                    String ppid = (String) ref.getProperty(KURA_SERVICE_PID);
                     if (pid.equals(ppid)) {
                         Object obj = this.m_ctx.getBundleContext().getService(ref);
                         try {
@@ -1039,7 +1044,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                                 SelfConfiguringComponent selfConfigComp = null;
                                 selfConfigComp = (SelfConfiguringComponent) obj;
                                 try {
-
                                     cc = selfConfigComp.getConfiguration();
                                     if (cc.getPid() == null || !cc.getPid().equals(pid)) {
                                         s_logger.error(

@@ -90,7 +90,7 @@ public class ConfigurableComponentTracker extends ServiceTracker {
                             } else if (obj instanceof SelfConfiguringComponent) {
                                 s_logger.info("Adding SelfConfiguringComponent with pid {} and service pid {}", pid,
                                         servicePid);
-                                this.m_confService.registerSelfConfiguringComponent(servicePid);
+                                this.m_confService.registerSelfConfiguringComponent(pid, servicePid);
                             }
                         } finally {
                             this.context.ungetService(ref);
@@ -119,7 +119,7 @@ public class ConfigurableComponentTracker extends ServiceTracker {
                 this.m_confService.registerComponentConfiguration(pid, servicePid, factoryPid);
             } else if (service instanceof SelfConfiguringComponent) {
                 s_logger.info("Adding SelfConfiguringComponent with pid {} and service pid {}", pid, servicePid);
-                this.m_confService.registerSelfConfiguringComponent(servicePid);
+                this.m_confService.registerSelfConfiguringComponent(pid, servicePid);
             }
         }
 

@@ -56,12 +56,12 @@
 					</b:Panel>
 				</b:Row>
 				<b:Row>
-					<b:Column size="MD_12" b:id="wires-graph" addStyleNames="composer"></b:Column>
+					<b:Column size="MD_12,XS_12" b:id="wires-graph" addStyleNames="composer"></b:Column>
 				</b:Row>
 			</b:Column>
 			<b:Column size="MD_2">
 				<b:Row>
-					<b:Column size="MD_12,XS_6" addStyleNames="{style.wire-components-list}">
+					<b:Column size="MD_12,XS_12" addStyleNames="{style.wire-components-list}">
 						<b:Panel>
 							<b:PanelHeader>
 								<b:Heading size="H3" text="Wire Components" />

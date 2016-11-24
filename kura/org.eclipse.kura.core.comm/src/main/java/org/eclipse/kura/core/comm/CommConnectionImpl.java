@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,16 +8,20 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.comm;
 
+import static java.util.Objects.requireNonNull;
+
+import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.Date;
 
 import javax.comm.CommPort;
 import javax.comm.CommPortIdentifier;
@@ -32,64 +36,63 @@ import org.eclipse.kura.comm.CommURI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CommConnectionImpl implements CommConnection {
+public class CommConnectionImpl implements CommConnection, Closeable {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(CommConnectionImpl.class);
+    private static final String JAVA_EXT_DIRS = "java.ext.dirs";
+    private static final String KURA_EXT_DIR = "kura.ext.dir";
+
+    private static final Logger logger = LoggerFactory.getLogger(CommConnectionImpl.class);
 
     // set up the appropriate ext dir for RXTX extra device nodes
     static {
-        String kuraExtDir = System.getProperty("kura.ext.dir");
+        String kuraExtDir = System.getProperty(KURA_EXT_DIR);
         if (kuraExtDir != null) {
             StringBuffer sb = new StringBuffer();
-            String existingDirs = System.getProperty("java.ext.dirs");
+            String existingDirs = System.getProperty(JAVA_EXT_DIRS);
             if (existingDirs != null) {
                 if (!existingDirs.contains(kuraExtDir)) {
-                    sb.append(existingDirs).append(":").append(kuraExtDir);
-                    System.setProperty("java.ext.dirs", sb.toString());
+                    sb.append(existingDirs).append(File.pathSeparator).append(kuraExtDir);
+                    System.setProperty(JAVA_EXT_DIRS, sb.toString());
                 }
             } else {
                 sb.append(kuraExtDir);
-                System.setProperty("java.ext.dirs", sb.toString());
+                System.setProperty(JAVA_EXT_DIRS, sb.toString());
             }
         }
     }
 
-    private final String m_port;
-    private final int m_baudRate;
-    private final int m_dataBits;
-    private final int m_stopBits;
-    private final int m_parity;
-    private final int m_flowControl;
-    private final int m_timeout;
-
-    private final CommURI m_commUri;
-    private SerialPort m_serialPort;
-    private InputStream m_inputStream;
-    private OutputStream m_outputStream;
+    private final CommURI commUri;
+    private SerialPort serialPort;
+    private InputStream inputStream;
+    private OutputStream outputStream;
 
     public CommConnectionImpl(CommURI commUri, int mode, boolean timeouts)
             throws IOException, NoSuchPortException, PortInUseException {
-        this.m_commUri = commUri;
-        this.m_serialPort = null;
-        this.m_port = this.m_commUri.getPort();
-        this.m_baudRate = this.m_commUri.getBaudRate();
-        this.m_dataBits = this.m_commUri.getDataBits();
-        this.m_stopBits = this.m_commUri.getStopBits();
-        this.m_parity = this.m_commUri.getParity();
-        this.m_flowControl = this.m_commUri.getFlowControl();
-        this.m_timeout = this.m_commUri.getTimeout();
 
-        CommPortIdentifier commPortIdentifier = CommPortIdentifier.getPortIdentifier(this.m_port);
+        requireNonNull(commUri);
 
-        CommPort commPort = commPortIdentifier.open(this.getClass().getName(), this.m_timeout);
+        this.commUri = commUri;
+
+        final String port = this.commUri.getPort();
+        final int baudRate = this.commUri.getBaudRate();
+        final int dataBits = this.commUri.getDataBits();
+        final int stopBits = this.commUri.getStopBits();
+        final int parity = this.commUri.getParity();
+        final int flowControl = this.commUri.getFlowControl();
+        final int timeout = this.commUri.getTimeout();
+
+        final CommPortIdentifier commPortIdentifier = CommPortIdentifier.getPortIdentifier(port);
+
+        final CommPort commPort = commPortIdentifier.open(this.getClass().getName(), timeout);
 
         if (commPort instanceof SerialPort) {
-            this.m_serialPort = (SerialPort) commPort;
+            this.serialPort = (SerialPort) commPort;
             try {
-                this.m_serialPort.setSerialPortParams(this.m_baudRate, this.m_dataBits, this.m_stopBits, this.m_parity);
-                this.m_serialPort.setFlowControlMode(this.m_flowControl);
+                this.serialPort.setSerialPortParams(baudRate, dataBits, stopBits, parity);
+                this.serialPort.setFlowControlMode(flowControl);
             } catch (UnsupportedCommOperationException e) {
-                e.printStackTrace();
+                logger.error("Failed to configure COM port", e);
+                // TODO shouldn't we throw an IOException here
             }
         } else {
             throw new IOException("Unsupported Port Type");
@@ -98,7 +101,7 @@ public class CommConnectionImpl implements CommConnection {
 
     @Override
     public CommURI getURI() {
-        return this.m_commUri;
+        return this.commUri;
     }
 
     @Override
@@ -108,10 +111,12 @@ public class CommConnectionImpl implements CommConnection {
 
     @Override
     public synchronized InputStream openInputStream() throws IOException {
-        if (this.m_inputStream == null) {
-            this.m_inputStream = this.m_serialPort.getInputStream();
+        checkIfClosed();
+
+        if (this.inputStream == null) {
+            this.inputStream = this.serialPort.getInputStream();
         }
-        return this.m_inputStream;
+        return this.inputStream;
     }
 
     @Override
@@ -121,115 +126,135 @@ public class CommConnectionImpl implements CommConnection {
 
     @Override
     public synchronized OutputStream openOutputStream() throws IOException {
-        if (this.m_outputStream == null) {
-            this.m_outputStream = this.m_serialPort.getOutputStream();
+        checkIfClosed();
+
+        if (this.outputStream == null) {
+            this.outputStream = this.serialPort.getOutputStream();
         }
-        return this.m_outputStream;
+        return this.outputStream;
     }
 
     @Override
     public synchronized void close() throws IOException {
-        if (this.m_serialPort != null) {
-            this.m_serialPort.notifyOnDataAvailable(false);
-            this.m_serialPort.removeEventListener();
-            if (this.m_inputStream != null) {
-                this.m_inputStream.close();
-                this.m_inputStream = null;
+        if (this.serialPort != null) {
+            this.serialPort.notifyOnDataAvailable(false);
+            this.serialPort.removeEventListener();
+            if (this.inputStream != null) {
+                this.inputStream.close();
+                this.inputStream = null;
             }
-            if (this.m_outputStream != null) {
-                this.m_outputStream.close();
-                this.m_outputStream = null;
+            if (this.outputStream != null) {
+                this.outputStream.close();
+                this.outputStream = null;
             }
 
-            this.m_serialPort.close();
-            this.m_serialPort = null;
+            this.serialPort.close();
+            this.serialPort = null;
+        }
+    }
+
+    private void checkIfClosed() throws IOException {
+        if (this.serialPort == null) {
+            throw new IOException("Connection is already closed");
         }
     }
 
     @Override
     public synchronized void sendMessage(byte[] message) throws KuraException, IOException {
-        if (message != null) {
-            s_logger.debug("sendMessage() - {}", getBytesAsString(message));
+        checkIfClosed();
 
-            if (this.m_outputStream == null) {
-                openOutputStream();
-            }
-
-            this.m_outputStream.write(message, 0, message.length);
-            this.m_outputStream.flush();
-        } else {
-            throw new NullPointerException("Serial message is null");
+        if (message == null) {
+            throw new NullPointerException("Message must not be null");
         }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("sendMessage() - {}", getBytesAsString(message));
+        }
+
+        if (this.outputStream == null) {
+            openOutputStream();
+        }
+
+        this.outputStream.write(message, 0, message.length);
+        this.outputStream.flush();
     }
 
     @Override
     public synchronized byte[] sendCommand(byte[] command, int timeout) throws KuraException, IOException {
-        if (command != null) {
-            s_logger.debug("sendMessage() - {}", getBytesAsString(command));
+        checkIfClosed();
 
-            if (this.m_outputStream == null) {
-                openOutputStream();
-            }
-            if (this.m_inputStream == null) {
-                openInputStream();
-            }
+        if (command == null) {
+            throw new NullPointerException("Serial command must not be null");
+        }
 
-            byte[] dataInBuffer = flushSerialBuffer();
-            if (dataInBuffer != null && dataInBuffer.length > 0) {
-                s_logger.warn("eating bytes in the serial buffer input stream before sending command: "
-                        + getBytesAsString(dataInBuffer));
-            }
-            this.m_outputStream.write(command, 0, command.length);
-            this.m_outputStream.flush();
+        if (logger.isDebugEnabled()) {
+            logger.debug("sendMessage() - {}", getBytesAsString(command));
+        }
 
-            ByteBuffer buffer = getResponse(timeout);
-            if (buffer != null) {
-                byte[] response = new byte[buffer.limit()];
-                buffer.get(response, 0, response.length);
-                return response;
-            } else {
-                return null;
-            }
+        if (this.outputStream == null) {
+            openOutputStream();
+        }
+        if (this.inputStream == null) {
+            openInputStream();
+        }
+
+        byte[] dataInBuffer = flushSerialBuffer();
+        if (dataInBuffer != null && dataInBuffer.length > 0) {
+            logger.warn("eating bytes in the serial buffer input stream before sending command: {}",
+                    getBytesAsString(dataInBuffer));
+        }
+        this.outputStream.write(command, 0, command.length);
+        this.outputStream.flush();
+
+        ByteBuffer buffer = getResponse(timeout);
+        if (buffer != null) {
+            byte[] response = new byte[buffer.limit()];
+            buffer.get(response, 0, response.length);
+            return response;
         } else {
-            throw new NullPointerException("Serial command is null");
+            return null;
         }
     }
 
     @Override
     public synchronized byte[] sendCommand(byte[] command, int timeout, int demark) throws KuraException, IOException {
-        if (command != null) {
-            s_logger.debug("sendMessage() - {}", getBytesAsString(command));
+        checkIfClosed();
 
-            if (this.m_outputStream == null) {
-                openOutputStream();
-            }
-            if (this.m_inputStream == null) {
-                openInputStream();
-            }
+        if (command == null) {
+            throw new NullPointerException("Serial command must not be null");
+        }
 
-            byte[] dataInBuffer = flushSerialBuffer();
-            if (dataInBuffer != null && dataInBuffer.length > 0) {
-                s_logger.warn("eating bytes in the serial buffer input stream before sending command: "
-                        + getBytesAsString(dataInBuffer));
-            }
-            this.m_outputStream.write(command, 0, command.length);
-            this.m_outputStream.flush();
+        logger.debug("sendMessage() - {}", getBytesAsString(command));
 
-            ByteBuffer buffer = getResponse(timeout, demark);
-            if (buffer != null) {
-                byte[] response = new byte[buffer.limit()];
-                buffer.get(response, 0, response.length);
-                return response;
-            } else {
-                return null;
-            }
+        if (this.outputStream == null) {
+            openOutputStream();
+        }
+        if (this.inputStream == null) {
+            openInputStream();
+        }
+
+        byte[] dataInBuffer = flushSerialBuffer();
+        if (dataInBuffer != null && dataInBuffer.length > 0) {
+            logger.warn("eating bytes in the serial buffer input stream before sending command: {}",
+                    getBytesAsString(dataInBuffer));
+        }
+        this.outputStream.write(command, 0, command.length);
+        this.outputStream.flush();
+
+        ByteBuffer buffer = getResponse(timeout, demark);
+        if (buffer != null) {
+            byte[] response = new byte[buffer.limit()];
+            buffer.get(response, 0, response.length);
+            return response;
         } else {
-            throw new NullPointerException("Serial command is null");
+            return null;
         }
     }
 
     @Override
     public synchronized byte[] flushSerialBuffer() throws KuraException, IOException {
+        checkIfClosed();
+
         ByteBuffer buffer = getResponse(50);
         if (buffer != null) {
             byte[] response = new byte[buffer.limit()];
@@ -242,9 +267,9 @@ public class CommConnectionImpl implements CommConnection {
 
     private synchronized ByteBuffer getResponse(int timeout) throws IOException {
         ByteBuffer buffer = ByteBuffer.allocate(4096);
-        Date start = new Date();
+        long start = System.currentTimeMillis();
 
-        while (this.m_inputStream.available() < 1 && new Date().getTime() - start.getTime() < timeout) {
+        while (this.inputStream.available() < 1 && System.currentTimeMillis() - start < timeout) {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -252,8 +277,8 @@ public class CommConnectionImpl implements CommConnection {
             }
         }
 
-        while (this.m_inputStream.available() >= 1) {
-            int c = this.m_inputStream.read();
+        while (this.inputStream.available() >= 1) {
+            int c = this.inputStream.read();
             buffer.put((byte) c);
         }
 
@@ -266,7 +291,7 @@ public class CommConnectionImpl implements CommConnection {
         ByteBuffer buffer = ByteBuffer.allocate(4096);
         long start = System.currentTimeMillis();
 
-        while (this.m_inputStream.available() < 1 && System.currentTimeMillis() - start < timeout) {
+        while (this.inputStream.available() < 1 && System.currentTimeMillis() - start < timeout) {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -275,9 +300,9 @@ public class CommConnectionImpl implements CommConnection {
 
         start = System.currentTimeMillis();
         do {
-            if (this.m_inputStream.available() > 0) {
+            if (this.inputStream.available() > 0) {
                 start = System.currentTimeMillis();
-                int c = this.m_inputStream.read();
+                int c = this.inputStream.read();
                 buffer.put((byte) c);
             }
         } while (System.currentTimeMillis() - start < demark);
@@ -287,16 +312,16 @@ public class CommConnectionImpl implements CommConnection {
         return buffer.limit() > 0 ? buffer : null;
     }
 
-    private String getBytesAsString(byte[] bytes) {
+    /* default */ static String getBytesAsString(byte[] bytes) {
         if (bytes == null) {
             return null;
-        } else {
-            StringBuffer sb = new StringBuffer();
-            for (byte b : bytes) {
-                sb.append("0x").append(Integer.toHexString(b)).append(" ");
-            }
-
-            return sb.toString();
         }
+
+        StringBuilder sb = new StringBuilder(bytes.length * 3);
+        for (byte b : bytes) {
+            sb.append(String.format("%02X ", b));
+        }
+
+        return sb.toString();
     }
 }

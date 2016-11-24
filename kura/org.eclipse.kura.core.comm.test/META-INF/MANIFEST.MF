@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Unit tests for 'org.eclipse.kura.core.comm.test'
+Bundle-SymbolicName: org.eclipse.kura.core.comm.test
+Bundle-Version: 1.0.0.qualifier
+Require-Bundle: org.junit;bundle-version="[4.10.0,5.0.0)"
+Fragment-Host: org.eclipse.kura.core.comm
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7

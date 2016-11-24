@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
@@ -893,15 +894,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     private synchronized long saveSnapshot(List<? extends ComponentConfiguration> configs) throws KuraException {
+        Objects.requireNonNull(configs);
 
-        List<ComponentConfiguration> configImpls = new ArrayList<ComponentConfiguration>();
-        for (ComponentConfiguration config : configs) {
-            configImpls.add(config);
-        }
+        List<ComponentConfiguration> configurations = new ArrayList<ComponentConfiguration>(configs);
 
         // Build the XML structure
         XmlComponentConfigurations conf = new XmlComponentConfigurations();
-        conf.setConfigurations(configImpls);
+        conf.setConfigurations(configurations);
 
         // Write it to disk: marshall
         long sid = new Date().getTime();

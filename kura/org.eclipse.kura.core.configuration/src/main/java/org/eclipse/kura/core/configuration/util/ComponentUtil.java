@@ -8,8 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - Fix service leak
- *         - fix default value lookup, fix issue #590
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.configuration.util;
 

@@ -27,28 +27,28 @@
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-surefire-plugin</artifactId>
 				<version>${tycho-version}</version>
-				<configuration>
-					<dependencies>
-						<dependency>
-							<type>p2-installable-unit</type>
-							<artifactId>slf4j.log4j12</artifactId>
-						</dependency>
-						<dependency>
-							<type>p2-installable-unit</type>
-							<artifactId>log4j.test.configuration</artifactId>
-						</dependency>
-					</dependencies>
-				</configuration>
 			</plugin>
 
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
-				</configuration>
-			</plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>target-platform-configuration</artifactId>
+                <configuration>
+                    <dependency-resolution>
+                        <extraRequirements>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>slf4j.log4j12</id>
+                                <versionRange>(1.7,2)</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>log4j.test.configuration</id>
+                                <versionRange>1.0.0</versionRange>
+                            </requirement>
+                        </extraRequirements>
+                    </dependency-resolution>
+                </configuration>
+            </plugin>
 
 		</plugins>
 	</build>

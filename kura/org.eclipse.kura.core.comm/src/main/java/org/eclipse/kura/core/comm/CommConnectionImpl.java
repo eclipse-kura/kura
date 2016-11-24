@@ -8,9 +8,11 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - clean up
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.comm;
+
+import static java.util.Objects.requireNonNull;
 
 import java.io.Closeable;
 import java.io.DataInputStream;
@@ -38,7 +40,7 @@ public class CommConnectionImpl implements CommConnection, Closeable {
 
     private static final String JAVA_EXT_DIRS = "java.ext.dirs";
     private static final String KURA_EXT_DIR = "kura.ext.dir";
-    
+
     private static final Logger logger = LoggerFactory.getLogger(CommConnectionImpl.class);
 
     // set up the appropriate ext dir for RXTX extra device nodes
@@ -66,6 +68,9 @@ public class CommConnectionImpl implements CommConnection, Closeable {
 
     public CommConnectionImpl(CommURI commUri, int mode, boolean timeouts)
             throws IOException, NoSuchPortException, PortInUseException {
+
+        requireNonNull(commUri);
+
         this.commUri = commUri;
 
         final String port = this.commUri.getPort();

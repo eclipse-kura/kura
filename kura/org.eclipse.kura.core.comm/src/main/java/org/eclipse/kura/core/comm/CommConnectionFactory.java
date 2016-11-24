@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - clean up
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.comm;
 

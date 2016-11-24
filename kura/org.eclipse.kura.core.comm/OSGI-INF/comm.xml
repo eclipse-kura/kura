@@ -10,7 +10,7 @@
 
     Contributors:
       Eurotech
-      Red Hat Inc - clean up
+      Red Hat Inc
 
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.kura.core.comm.CommConnectionFactory">

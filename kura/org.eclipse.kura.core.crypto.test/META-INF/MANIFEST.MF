@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Unit tests for 'org.eclipse.kura.core.crypto'
+Bundle-SymbolicName: org.eclipse.kura.core.crypto.test
+Bundle-Version: 1.0.0.qualifier
+Fragment-Host: org.eclipse.kura.core.crypto
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.junit;bundle-version="4.10.0"

@@ -126,8 +126,6 @@ public class EntryClassUi extends Composite {
     private boolean wiresPanelDirty;
 
     @UiField
-    Panel header;
-    @UiField
     Label footerLeft, footerCenter, footerRight;
     @UiField
     Panel contentPanel;
@@ -211,7 +209,6 @@ public class EntryClassUi extends Composite {
 
         // TODO : standardize the URL?
         // header.setUrl("eclipse/kura/icons/kura_logo_small.png");
-        this.header.setStyleName("headerLogo");
         Date now = new Date();
         @SuppressWarnings("deprecation")
         int year = now.getYear() + 1900;

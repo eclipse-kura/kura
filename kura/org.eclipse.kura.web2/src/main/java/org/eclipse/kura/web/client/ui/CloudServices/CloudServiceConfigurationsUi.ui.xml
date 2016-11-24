@@ -35,7 +35,6 @@
 	.center-panel {
 		height: 100%;
 		padding: 0px;
-		border: none;
 	}
 	
 	.drivers-list {

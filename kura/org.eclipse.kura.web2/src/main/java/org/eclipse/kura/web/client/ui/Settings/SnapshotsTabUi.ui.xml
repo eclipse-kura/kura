@@ -53,7 +53,6 @@
             <b:Modal title="Upload" closable="true" fade="true"
                 b:id="uploadModal" ui:field="uploadModal">
                 <b:ModalBody>
-                    <b:Well>
                         <b:Container fluid="true">
                             <g:FormPanel ui:field="snapshotsForm">
                                 <b:FieldSet>
@@ -70,7 +69,6 @@
                                 </b:FieldSet>
                             </g:FormPanel>
                         </b:Container>
-                    </b:Well>
                 </b:ModalBody>
             </b:Modal>
         </b:Column>

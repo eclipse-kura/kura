@@ -66,9 +66,9 @@
                                 ui:field="hostnameVerificationFormLabel" />
                             <b:HelpBlock ui:field="hostnameVerificationHelpBlock" />
                             <g:FlowPanel>
-                                <b:RadioButton name="radio1"
+                                <b:InlineRadio name="radio1"
                                     formValue="true" ui:field="radio1" />
-                                <b:RadioButton name="radio1"
+                                <b:InlineRadio name="radio1"
                                     formValue="false" ui:field="radio2" />
                             </g:FlowPanel>
                         </b:FormGroup>

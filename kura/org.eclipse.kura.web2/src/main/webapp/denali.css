@@ -28,6 +28,11 @@ h1 {
 /**********************
 Overriding Bootstrap START
 ***********************/
+
+body {
+	overflow-x: hidden;
+}
+
 .center-panel {
 	padding: 0 !important;
 	overflow-y: auto;
@@ -43,20 +48,26 @@ Overriding Bootstrap START
 	padding-bottom: 0.2cm;
 }
 
-.center-panel .panel-heading, .center-heading .panel-title * {
-	background-color: white !important;
-	border-color: white !important;
-}
-
 .navbar-nav {
 	margin: 0 !important;
 }
 
-.panel:not(.help-panel), .panel-header:not(.help-panel) {
+.network-interfaces-panel {
+	border: solid 1px #ddd;
+	margin-bottom: 0.3cm !important;
+	margin-top: 0 !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+}
+
+.panel:not(.help-panel):not(.network-interfaces-panel), .panel-header:not(.help-panel) {
 	border: none !important;
 	border-radius: 0 !important;
-	margin: 0 !important;
 	box-shadow: none !important;
+}
+
+.panel:not(.help-panel):not(.headerLogo):not(.network-interfaces-panel), .panel-header:not(.help-panel):not(.headerLogo) {
+	margin: 0 !important;
 }
 
 .panel-body {
@@ -108,24 +119,20 @@ Overriding Bootstrap START
 
 .main-container {
 	min-height: 100vh;
-	padding-top: 1.5cm;
 	padding-bottom: 2.1cm;
 }
 
 .headerLogo {
 	height: 1cm !important;
-	margin-top: 0 !important;
-	margin-bottom: 0 !important;
-	display: inline-block !important;
 }
 
 table {
 	max-width: 100vh;
-	overflow-x: scroll;
+	overflow-x: auto;
 }
 
 .well {
-	overflow-x: scroll;
+	overflow-x: auto;
 }
 
 .well > * {
@@ -173,16 +180,32 @@ table {
 	border: none;
 }
 
+.status-well, .device-well, .connections-well {
+	background-color: white !important;
+	border: none !important;
+}
+
+.bundles-well {
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+}
+
+.command-panel {
+	background-color: rgb(242,242,242);
+    border: solid 1px #e7e7e7 !important;
+}
+
 .container-fluid {
 	border: none;
 }
 
 .tooltip {
-	z-index: 50 !important;
+	z-index: 100 !important;
+	position: fixed !important;
 }
 
 .rowHeader {
-    background-color: #009AE0 !important;
+    background-color: rgb(40, 96, 166) !important;
     font-size: 14px !important;
     color: white !important;
     pointer-events: none !important;
@@ -209,36 +232,31 @@ Channel Table Validation END
 ***********************/
 
 /**********************
-Shadows START
+Depth START
 ***********************/
 
 .z-depth-1 {
 	z-index: 4;
-    box-shadow: 0 2px 5px 0 rgba(0,0,0,.26) !important;
 }
 
 .z-depth-2 {
 	z-index: 8;
-    box-shadow: 0 7px 16px 0 rgba(0,0,0,.2) !important;
 }
 
 .z-depth-3 {
 	z-index: 16;
-    box-shadow: 0 11px 14px 0 rgba(0,0,0,.24) !important;
 }
 
 .z-depth-4 {
 	z-index: 20;
-    box-shadow: 0 15px 26px 0 rgba(0,0,0,.22) !important;
 }
 
 .z-depth-5 {
 	z-index: 24;
-    box-shadow: 0 26px 23px 0 rgba(0,0,0,.2) !important;
 }
 
 /**********************
-Shadows  END
+Depth  END
 ***********************/
 
 /**********************
@@ -264,7 +282,24 @@ Sidenav START
 	-ms-transform: scale(0);
 }
 
+.sidenav {
+	border-right: 1px solid #ddd;
+}
+
+.sidenav .panel-heading {
+	margin-bottom: 0.2cm;
+}
+
+.sidenav, .sidenav .panel, .sidenav .center-panel, .sidenav .panel-headning, .sidenav .row {
+	background-color: rgb(245, 245, 245) !important;
+}
+
 @media screen and (min-width: 992px) {
+
+	.header-bar {
+		display: none;
+	}
+	
 	.sidebar-button {
 		height: auto !important;
 		vertical-align: super !important;
@@ -277,7 +312,6 @@ Sidenav START
 	}
 	
 	.sidenav {
-		box-shadow: 0 0 5px 0 rgba(0,0,0,.26) !important;
     	overflow-y: auto;
 	}
 	
@@ -286,15 +320,19 @@ Sidenav START
 	}
 	
 	.sidenav {
-		position: absolute !important;
-		top: 1.5cm !important;
-		bottom: 2.1cm;
+		position: fixed! important;
 		top: 0;
+		bottom: 0;
+		overflow: auto;
 	}
 	
-	.content-wrapper > * {
-		position: relative;
-		left: 16.66666667%;
+	.main-content {
+		position: relative !important;
+		left: 16.66666667% !important;
+	}
+	
+	.footer {
+		left: 16.66666667% !important;
 	}
 	
 	.sidenav-overlay {
@@ -303,13 +341,19 @@ Sidenav START
 }
 
 @media screen and (max-width: 992px) {
+	
+	.main-container {
+		padding-top: 1.5cm;
+	}
+
 	.sidebar-button {
 		height: auto !important;
 		vertical-align: super !important;
 		font-size: 0.6cm !important;
 		background-color: rgba(0, 0, 0, 0) !important;
 		border: none !important;
-		display: inline !important;
+		display: block !important;
+		float: left !important;
 	}
 	
 	.sidenav {
@@ -318,7 +362,6 @@ Sidenav START
 		width: 6cm !important;
 		transition: transform 0.25s;
 		bottom: 0 !important;
-		background-color: white;
 		transform: translateX(0cm);
 	}
 	
@@ -342,15 +385,18 @@ Sidenav START
 
 .sidenav .nav a {
 	border-radius: 0;
-	border-left: solid 0.1cm white;
+	border-left: solid 0.1cm rgb(245, 245, 245);
+	color: #2860A6;
 }
 
 .sidenav .nav a:hover, .sidenav .nav a:active {
-	border-left: solid 0.1cm #009AE0;
+	border-left: solid 0.1cm #2860A6;
+	background-color: white;
 }
 
 .sidenav .nav li.selected-item a {
-	border-left: solid 0.15cm #009AE0;
+	border-left: solid 0.15cm #2860A6;
+	background-color: white;
 }
 
 /**********************
@@ -364,7 +410,7 @@ Navbar START
 @media screen and (min-width: 768px) {
 
 .content-panel .navbar-nav li.active {
-	border-bottom: solid 0.1cm #009AE0;
+	border-bottom: solid 0.1cm #2860A6;
 }
 
 }
@@ -372,7 +418,7 @@ Navbar START
 @media screen and (max-width: 768px) {
 	
 .content-panel .navbar-nav  li.active a {
-	border-left: solid 0.1cm #009AE0;
+	border-left: solid 0.1cm #2860A6;
 }
 
 }
@@ -396,7 +442,7 @@ Navbar START
 }
 
 .nav-tabs li.active {
-	border-bottom: solid 0.1cm #009AE0;
+	border-bottom: solid 0.1cm #2860A6;
 }
 
 /**********************
@@ -415,16 +461,47 @@ button.fa:before {
 	font: normal normal normal 14px/1 FontAwesome;
 }
 
+button.fa:not(:empty):before {
+	margin-right: 0.1cm !important;
+}
+
 /**********************
 FontAwesome button fix END
 ***********************/
 
 /**********************
-Footer fix START
+Service search fix START
+***********************/
+
+.services-form-group {
+	width: 100% !important;
+	margin: 0 !important;
+	position: relative !important;
+}
+
+.services-input-group {
+	width: 100% !important;
+	margin: 0 !important;
+	padding-left: 0.3cm !important;
+	padding-right: 0.3cm !important;
+	height: 0.9cm !important;
+	position: relative !important;
+}
+
+.services-add {
+	padding-left: 0.3cm !important;
+}
+
+/**********************
+Service search fix END
+***********************/
+
+/**********************
+Footer START
 ***********************/
 
 .footer {
-	box-shadow: 0 2px 5px 2px rgba(0,0,0,.26) !important;
+	background-color: rgb(242, 242, 242);
 	height: 2.1cm;
 	z-index: 1;
 	position: absolute;
@@ -433,13 +510,12 @@ Footer fix START
 	right: 0;
 }
 
-.footer {
-	height: 2.1cm !important;
-	background-color: rgb(242, 242, 242);
+.panel-footer * {
+	text-align: center !important;
 }
 
 /**********************
-Footer fix END
+Footer END
 ***********************/
 
 /**********************
@@ -761,31 +837,13 @@ img.x-tree3-node-icon {
 }
 
 .btn:not(.sidebar-button) {
-	background-color: #009AE0 !important;
+	background-color: rgb(40, 96, 166) !important;
 	color: white !important;
 }
 
-.form-control {
+.form-control:not(.services-search) {
 	font-size: 11px !important;
 	width: 95% !important;
-}
-
-.form-control { font-size: 11px !important; width: 95% !important; }
-
-.fa-plus:before {
-	margin-right: 6px;
-}
-
-.fa-minus:before {
-	margin-right: 6px;
-}
-
-.fa-pencil:before {
-	margin-right: 6px;
-}
-
-.fa-trash:before {
-	margin-right: 6px;
 }
 
 /******************************
@@ -825,39 +883,41 @@ img.x-tree3-node-icon {
 
 div.copyright:after {
 	content:
-		' Eurotech Inc., and others. Made available under the terms of the Eclipse Public License v1.0';
+		' Eurotech and others. Made available under the terms of the Eclipse Public License v1.0';
 }
 
 div.headerLogo { 
 	height: 			38px;
-	width: 				127px;
 	margin: 			5px 0px 5px 15px;
 	vertical-align: 	baseline;
 	background: 		url(eclipse/kura/icons/kura_logo_small.png);
 	background-repeat: 	no-repeat;
 	background-size: 	contain;
 	background-position: center !important;
-}
-
-div.headerLogo-ie8 {
-	height: 38px;
-	width: 127px;
-	margin: 5px 0px 5px 15px;
-	vertical-align: baseline;
-	background-repeat: no-repeat;
-	background-size:   contain;
-	background-position: center !important;
-	/* IE 8 Hack */
-	filter:            progid:DXImageTransform.Microsoft.AlphaImageLoader(src='kura/org/eclipse/kura/images/kura_logo_small.png',sizingMethod='scale');
-	-ms-filter:        "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='kura/org/eclipse/kura/images/kura_logo_small.png',sizingMethod='scale')";
-}
-
-@media screen and (max-width: 768px) {
-	
-.headerLogo, .headerLogo-ie8 {
 	margin-left: 0 !important;
-	max-width: 80% !important;
+	margin-right: 0 !important;
 }
+
+@media screen and (max-width: 992px) {
+	
+	.sidenav .headerLogo {
+		display: none;
+	}
+	
+	.headerLogo {
+		max-width: 80%;
+		display: inline-block;
+		margin-left: 0 !important;
+	}
 
 }
 
+@media screen and (min-width: 992px) {
+	
+	.headerLogo {
+		width: 100% !important;
+   		margin-top: 0.3cm !important;
+   		display: inline-block !important;
+	}
+
+}

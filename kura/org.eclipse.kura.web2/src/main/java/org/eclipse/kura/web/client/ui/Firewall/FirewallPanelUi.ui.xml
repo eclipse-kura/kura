@@ -30,7 +30,7 @@
 
     <b:Container fluid="true">
         <b:Row>
-            <g:HTMLPanel ui:field="firewallIntro">
+            <g:HTMLPanel ui:field="firewallIntro" addStyleNames="firewall-panel">
             </g:HTMLPanel>
         </b:Row>
         <b:Row>

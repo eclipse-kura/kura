@@ -27,12 +27,12 @@ import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.HelpBlock;
+import org.gwtbootstrap3.client.ui.InlineRadio;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.ModalHeader;
-import org.gwtbootstrap3.client.ui.RadioButton;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
@@ -116,9 +116,9 @@ public class SslTabUi extends Composite implements Tab {
     Input cipherSuitesInput;
 
     @UiField
-    RadioButton radio1;
+    InlineRadio radio1;
     @UiField
-    RadioButton radio2;
+    InlineRadio radio2;
 
     public SslTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -377,11 +377,11 @@ public class SslTabUi extends Composite implements Tab {
                     public void onSuccess(GwtSslConfig sslConfig) {
                         SslTabUi.this.defaultProtocolInput.setValue(sslConfig.getProtocol());
                         if (sslConfig.isHostnameVerification()) {
-                            SslTabUi.this.radio1.setActive(true);
-                            SslTabUi.this.radio2.setActive(false);
+                            SslTabUi.this.radio1.setValue(true);
+                            SslTabUi.this.radio2.setValue(false);
                         } else {
-                            SslTabUi.this.radio1.setActive(false);
-                            SslTabUi.this.radio2.setActive(true);
+                            SslTabUi.this.radio1.setValue(false);
+                            SslTabUi.this.radio2.setValue(true);
                         }
 
                         SslTabUi.this.keystorePathInput.setValue(sslConfig.getKeyStore());

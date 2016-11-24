@@ -7,8 +7,8 @@ import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.gwtbootstrap3.client.ui.FieldSet;
 import org.gwtbootstrap3.client.ui.FormLabel;
+import org.gwtbootstrap3.client.ui.InlineRadio;
 import org.gwtbootstrap3.client.ui.PanelHeader;
-import org.gwtbootstrap3.client.ui.RadioButton;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
@@ -43,7 +43,7 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
     @UiField
     FormLabel labelGps;
     @UiField
-    RadioButton radio1, radio2;
+    InlineRadio radio1, radio2;
     @UiField
     PanelHeader helpTitle;
     @UiField
@@ -176,11 +176,11 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
     private void update() {
         if (this.selectedModemIfConfig != null) {
             if (this.selectedModemIfConfig.isGpsEnabled()) {
-                this.radio1.setActive(true);
-                this.radio2.setActive(false);
+                this.radio1.setValue(true);
+                this.radio2.setValue(false);
             } else {
-                this.radio1.setActive(false);
-                this.radio2.setActive(true);
+                this.radio1.setValue(false);
+                this.radio2.setValue(true);
             }
         }
         refreshForm();
@@ -197,8 +197,8 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
     }
 
     private void reset() {
-        this.radio1.setActive(true);
-        this.radio2.setActive(false);
+        this.radio1.setValue(true);
+        this.radio2.setValue(false);
         /*
          * radio1.setActive(false);
          * radio2.setActive(true);

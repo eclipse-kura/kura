@@ -32,7 +32,7 @@
     }
     </ui:style>
 
-    <b:Container fluid="true">
+    <b:Container fluid="true" addStyleNames="settings-panel">
         <b:Row>
             <g:HTMLPanel ui:field="settingsIntro" />
         </b:Row>

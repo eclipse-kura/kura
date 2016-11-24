@@ -28,10 +28,10 @@ import org.gwtbootstrap3.client.ui.FormControlStatic;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.HelpBlock;
+import org.gwtbootstrap3.client.ui.InlineRadio;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.PanelHeader;
-import org.gwtbootstrap3.client.ui.RadioButton;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
@@ -89,7 +89,7 @@ public class TabModemUi extends Composite implements NetworkTab {
     @UiField
     Input password;
     @UiField
-    RadioButton radio1, radio2;
+    InlineRadio radio1, radio2;
     @UiField
     PanelHeader helpTitle;
     @UiField
@@ -871,11 +871,11 @@ public class TabModemUi extends Composite implements NetworkTab {
             this.reset.setText(String.valueOf(this.selectedNetIfConfig.getResetTimeout()));
 
             if (this.selectedNetIfConfig.isPersist()) {
-                this.radio1.setActive(true);
-                this.radio2.setActive(false);
+                this.radio1.setValue(true);
+                this.radio2.setValue(false);
             } else {
-                this.radio1.setActive(false);
-                this.radio2.setActive(true);
+                this.radio1.setValue(false);
+                this.radio2.setValue(true);
             }
 
             this.maxfail.setText(String.valueOf(this.selectedNetIfConfig.getMaxFail()));
@@ -949,8 +949,8 @@ public class TabModemUi extends Composite implements NetworkTab {
         this.username.setText(null);
         this.password.setText(null);
         this.reset.setText(null);
-        this.radio1.setActive(true);
-        this.radio2.setActive(false);
+        this.radio1.setValue(true);
+        this.radio2.setValue(false);
         this.maxfail.setText(null);
         this.idle.setText(null);
         this.active.setText(null);

@@ -27,7 +27,7 @@
     }
     </ui:style>
 
-    <b:Panel>
+    <b:Well addStyleNames="bundles-well">
         <b:ButtonGroup>
             <b:ButtonGroup size="SMALL">
                 <b:Button ui:field="bundlesRefresh"
@@ -40,5 +40,5 @@
         <gwt:CellTable bordered="true" condensed="true"
             striped="true" hover="true" height="100%" width="100%"
             ui:field="bundlesGrid" />
-    </b:Panel>
+    </b:Well>
 </ui:UiBinder> 

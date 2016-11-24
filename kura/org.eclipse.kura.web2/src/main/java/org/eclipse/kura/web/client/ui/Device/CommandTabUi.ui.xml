@@ -25,11 +25,11 @@
     .output-panel {
     	height: 250px;
     	margin-top: 20px;
-    	overflow: scroll;
+    	overflow: auto;
     	font-family: monospace;
     }
     </ui:style>
-    <b:Container fluid="true">
+    <b:Container fluid="true" addStyleNames="command-panel">
         <b:Row>
             <gwt:FormPanel ui:field="commandForm" addStyleNames="command-form">
                 <b:FieldSet>

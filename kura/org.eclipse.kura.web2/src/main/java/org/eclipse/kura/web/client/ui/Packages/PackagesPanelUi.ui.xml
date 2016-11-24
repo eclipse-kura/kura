@@ -31,7 +31,7 @@
     </ui:style>
 
 
-    <b:Container fluid="true">
+    <b:Container fluid="true" addStyleNames="packages-panel">
 		<!-- <b:Column size="MD_12"> height: 100vh; -->
         <b:Row>
             <b:Panel>

@@ -25,10 +25,10 @@ import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.HelpBlock;
+import org.gwtbootstrap3.client.ui.InlineRadio;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
-import org.gwtbootstrap3.client.ui.RadioButton;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
@@ -95,9 +95,9 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     @UiField
     TextBox max;
     @UiField
-    RadioButton radio1;
+    InlineRadio radio1;
     @UiField
-    RadioButton radio2;
+    InlineRadio radio2;
     @UiField
     FormGroup groupRouter;
     @UiField
@@ -228,8 +228,8 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
             this.subnet.setText(this.selectedNetIfConfig.getRouterDhcpSubnetMask());
             this.defaultL.setText(String.valueOf(this.selectedNetIfConfig.getRouterDhcpDefaultLease()));
             this.max.setText(String.valueOf(this.selectedNetIfConfig.getRouterDhcpMaxLease()));
-            this.radio1.setActive(this.selectedNetIfConfig.getRouterDnsPass());
-            this.radio2.setActive(!this.selectedNetIfConfig.getRouterDnsPass());
+            this.radio1.setValue(this.selectedNetIfConfig.getRouterDnsPass());
+            this.radio2.setValue(!this.selectedNetIfConfig.getRouterDnsPass());
 
         }
         refreshForm();
@@ -303,8 +303,8 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         this.subnet.setText("");
         this.defaultL.setText("");
         this.max.setText("");
-        this.radio1.setActive(true);
-        this.radio2.setActive(false);
+        this.radio1.setValue(true);
+        this.radio2.setValue(false);
         update();
     }
 

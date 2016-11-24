@@ -100,9 +100,14 @@
         <module>org.eclipse.kura.wire.provider.test</module>
         -->
 
+        <module>features</module>
+        
         <module>emulator</module>
         <module>examples</module>
         <module>test</module>
+        
+        <!-- final p2 repository -->
+        <module>org.eclipse.kura-p2</module>
         
         <!-- A module containing log4j configuration for running unit tests -->
         <module>log4j.test.configuration</module>
@@ -218,6 +223,11 @@
     </profiles>
 
     <repositories>
+        <repository>
+            <id>license-feature</id>
+            <url>http://download.eclipse.org/cbi/updates/license/</url>
+            <layout>p2</layout>
+        </repository>
         <repository>
             <id>p2-repo-common</id>
             <layout>p2</layout>
@@ -362,6 +372,19 @@
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-compiler-plugin</artifactId>
                 <version>${tycho-version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-source-plugin</artifactId>
+                <version>${tycho-version}</version>
+                <executions>
+                    <execution>
+                        <id>plugin-source</id>
+                        <goals>
+                            <goal>plugin-source</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>

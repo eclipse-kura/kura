@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.eclipse.kura.api_0.0.0.qualifier.jar" id="org.eclipse.kura.api" version="0.0.0">
+      <category name="org.eclipse.kura.api"/>
+   </feature>
+   <feature url="features/org.eclipse.kura.api.source_0.0.0.jar" id="org.eclipse.kura.api.source" version="0.0.0">
+      <category name="org.eclipse.kura.api.sdk"/>
+   </feature>
+   <category-def name="org.eclipse.kura.api" label="Eclipse Kura™ API">
+      <description>
+         The main API bundles of Eclipse Kura™
+      </description>
+   </category-def>
+   <category-def name="org.eclipse.kura.api.sdk" label="Eclipse Kura™ API SDK">
+      <description>
+         Eclipse Kura™ bundles and sources for the main API
+      </description>
+   </category-def>
+</site>

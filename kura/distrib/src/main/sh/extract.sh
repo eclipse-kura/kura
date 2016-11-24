@@ -11,6 +11,10 @@
 #   Eurotech
 #
 
+set -e
+#Install failure trap
+trap 'do_restore; exit 1' SIGINT SIGTERM ERR
+
 INSTALL_DIR=/opt/eclipse
 TIMESTAMP=`date +%Y%m%d%H%M%S`
 LOG=/tmp/kura_install_${TIMESTAMP}.log
@@ -50,35 +54,34 @@ BACKED_UP_FILES=()
 function is_already_backed_up {
   for BACKED_UP_FILE in ${BACKED_UP_FILES[@]};
   do
-    [[ "$BACKED_UP_FILE" == "$1" ]] && return 0
+    [[ "$BACKED_UP_FILE" == "$1" ]] && echo "true" && return 0
   done
-  return 1
+  echo "false"
+  return 0
 }
 
 function do_backup {
-  require install
-  require basename
-  require dirname
-
   printf "Creating backup...\n"
 
-  install -d $BACKUP_ROOT
+  install -d "${BACKUP_ROOT}_"
 
   for TARGET in ${BACKUP_FILES[@]};
   do
-    if ! [[ $TARGET ]] || ! [ -e $TARGET ] || is_already_backed_up "$TARGET";
+    if ! [[ $TARGET ]] || ! [ -e $TARGET ] || [[ $(is_already_backed_up "$TARGET") == "true" ]];
     then
 
       continue
     fi
     SRC=$(abspath "$TARGET")
     SRC_DIR=$(dirname "$SRC")
-    printf "\r\033[Kbackup: $TARGET -> ${BACKUP_ROOT}${SRC}"
-    echo "backup: $TARGET -> ${BACKUP_ROOT}${SRC}" >> $LOG 2>&1
-    install -d "$BACKUP_ROOT/$SRC_DIR"
-    cp -r "$SRC" "$BACKUP_ROOT/$SRC_DIR/"
+    printf "\r\033[Kbackup: $TARGET -> ${BACKUP_ROOT}_${SRC}"
+    echo "backup: $TARGET -> ${BACKUP_ROOT}_${SRC}" >> $LOG 2>&1
+    install -d "${BACKUP_ROOT}_/$SRC_DIR"
+    cp -r "$SRC" "${BACKUP_ROOT}_/$SRC_DIR/"
     BACKED_UP_FILES+=("$TARGET")
   done
+
+   mv "${BACKUP_ROOT}_" "$BACKUP_ROOT"
 
    printf "\r\033[K"
 }
@@ -134,15 +137,21 @@ function require_java_8 {
 
 require_java_8
 
+require install
+require basename
+require dirname
+require tar
+require unzip
+
 echo ""
 echo "Installing Kura..."
 echo "Installing Kura..." > $LOG 2>&1
 
 #Kill JVM and monit for installation
-killall monit java >> $LOG 2>&1
+{ killall monit java || true; } >> $LOG 2>&1
 
-rm kura-*.zip >> $LOG 2>&1
-rm kura_*.zip >> $LOG 2>&1
+rm -rf kura-*.zip >> $LOG 2>&1
+rm -rf kura_*.zip >> $LOG 2>&1
 
 #add existing files to backup
 BACKUP_FILES+=("/opt/eclipse/data")
@@ -179,9 +188,6 @@ if [ ${HOSTNAME} == "mini-gateway" ] ; then
 fi
 
 do_backup
-
-#install failure signal handler
-trap 'do_restore; exit 1' SIGINT SIGTERM ERR
 
 #remove existing files
 for BACKED_UP_FILE in ${BACKUP_FILES[@]};

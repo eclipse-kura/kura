@@ -28,12 +28,10 @@
     }
     </ui:style>
 
-    <b:Column size="MD_12">
-        <b:Row>
+    <b:Panel addStyleNames="network-interfaces-panel">
             <b:Alert type="WARNING" ui:field="notification" />
             <gwt:CellTable bordered="true" condensed="true"
                 striped="true" hover="true" height="100%" width="100%"
                 ui:field="interfacesGrid" />
-        </b:Row>
-    </b:Column>
+    </b:Panel>
 </ui:UiBinder> 

@@ -14,6 +14,7 @@ package org.eclipse.kura.web.client.ui.Network;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.gwtbootstrap3.client.ui.Container;
+import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.html.Span;
 
@@ -43,7 +44,7 @@ public class NetworkPanelUi extends Composite {
     @UiField
     HTMLPanel networkIntro;
     @UiField
-    PanelBody interfacesTable;
+    Panel interfacesTable;
     @UiField
     PanelBody tabsPanel;
     @UiField

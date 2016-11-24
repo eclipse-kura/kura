@@ -23,7 +23,6 @@ import org.gwtbootstrap3.client.ui.html.Span;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Timer;
 
 public class ServicesAnchorListItem extends AnchorListItem {
 
@@ -88,21 +87,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
                             ServicesAnchorListItem.this.ui.setDirty(false);
                             ServicesAnchorListItem.this.ui.selected = ServicesAnchorListItem.this.item;
                             modal.hide();
-                            if (ServicesAnchorListItem.this.instance.getIcon() != null) {
-                                ServicesAnchorListItem.this.instance.setIconSpin(true);
-                            }
                             ServicesAnchorListItem.this.ui.render(ServicesAnchorListItem.this.item);
-                            Timer timer = new Timer() {
-
-                                @Override
-                                public void run() {
-                                    if (ServicesAnchorListItem.this.instance.getIcon() != null) {
-                                        ServicesAnchorListItem.this.instance.setIconSpin(false);
-                                    }
-                                }
-                            };
-                            timer.schedule(2000);
-
                         }
                     }));
                     footer.add(new Button(MSGS.noButton(), new ClickHandler() {
@@ -119,20 +104,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
                 } else {
                     ServicesAnchorListItem.this.ui.selected = ServicesAnchorListItem.this.item;
                     ServicesAnchorListItem.this.ui.setSelectedAnchorListItem(ServicesAnchorListItem.this);
-                    if (ServicesAnchorListItem.this.instance.getIcon() != null) {
-                        ServicesAnchorListItem.this.instance.setIconSpin(true);
-                    }
                     ServicesAnchorListItem.this.ui.render(ServicesAnchorListItem.this.item);
-                    Timer timer = new Timer() {
-
-                        @Override
-                        public void run() {
-                            if (ServicesAnchorListItem.this.instance.getIcon() != null) {
-                                ServicesAnchorListItem.this.instance.setIconSpin(false);
-                            }
-                        }
-                    };
-                    timer.schedule(2000);
                 }
             }
         });

@@ -48,6 +48,7 @@ import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.HelpBlock;
+import org.gwtbootstrap3.client.ui.InlineRadio;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
@@ -55,7 +56,6 @@ import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
-import org.gwtbootstrap3.client.ui.RadioButton;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
@@ -154,7 +154,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     FormLabel labelWireless, labelSsid, labelRadio, labelSecurity, labelPassword, labelVerify, labelPairwise,
             labelGroup, labelBgscan, labelRssi, labelShortI, labelLongI, labelPing, labelIgnore;
     @UiField
-    RadioButton radio1, radio2, radio3, radio4;
+    InlineRadio radio1, radio2, radio3, radio4;
     @UiField
     ListBox wireless, radio, security, pairwise, group, bgscan;
     @UiField
@@ -430,11 +430,11 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.longI.setValue(String.valueOf(this.activeConfig.getBgscanLongInterval()));
         this.password.setValue(this.activeConfig.getPassword());
         this.verify.setValue(this.activeConfig.getPassword());
-        this.radio1.setActive(this.activeConfig.pingAccessPoint());
-        this.radio2.setActive(!this.activeConfig.pingAccessPoint());
+        this.radio1.setValue(this.activeConfig.pingAccessPoint());
+        this.radio2.setValue(!this.activeConfig.pingAccessPoint());
 
-        this.radio3.setActive(this.activeConfig.ignoreSSID());
-        this.radio4.setActive(!this.activeConfig.ignoreSSID());
+        this.radio3.setValue(this.activeConfig.ignoreSSID());
+        this.radio4.setValue(!this.activeConfig.ignoreSSID());
 
     }
 
@@ -582,8 +582,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.rssi.setValue("0.0");
         this.shortI.setValue("");
         this.longI.setValue("");
-        this.radio2.setActive(true);
-        this.radio4.setActive(true);
+        this.radio2.setValue(true);
+        this.radio4.setValue(true);
 
         update();
     }
@@ -807,25 +807,25 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                                 TabWirelessUi.this.selectedNetIfConfig.getName(), gwtWifiConfig,
                                 new AsyncCallback<Boolean>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                FailureHandler.handle(caught);
-                                EntryClassUi.hideWaitModal();
-                                TabWirelessUi.this.buttonPassword.setEnabled(true);
-                                showPasswordVerificationStatus(MSGS.netWifiPasswordVerificationFailed());
-                            }
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        FailureHandler.handle(caught);
+                                        EntryClassUi.hideWaitModal();
+                                        TabWirelessUi.this.buttonPassword.setEnabled(true);
+                                        showPasswordVerificationStatus(MSGS.netWifiPasswordVerificationFailed());
+                                    }
 
-                            @Override
-                            public void onSuccess(Boolean result) {
-                                if (!result.booleanValue()) {
-                                    showPasswordVerificationStatus(MSGS.netWifiPasswordVerificationFailed());
-                                } else {
-                                    showPasswordVerificationStatus(MSGS.netWifiPasswordVerificationSuccess());
-                                }
-                                EntryClassUi.hideWaitModal();
-                                TabWirelessUi.this.buttonPassword.setEnabled(true);
-                            }
-                        });
+                                    @Override
+                                    public void onSuccess(Boolean result) {
+                                        if (!result.booleanValue()) {
+                                            showPasswordVerificationStatus(MSGS.netWifiPasswordVerificationFailed());
+                                        } else {
+                                            showPasswordVerificationStatus(MSGS.netWifiPasswordVerificationSuccess());
+                                        }
+                                        EntryClassUi.hideWaitModal();
+                                        TabWirelessUi.this.buttonPassword.setEnabled(true);
+                                    }
+                                });
                     }
 
                 });
@@ -1234,40 +1234,40 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 TabWirelessUi.this.gwtDeviceService.findDeviceConfiguration(token,
                         new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        TabWirelessUi.this.channelGrid.setVisible(false);
-                        FailureHandler.handle(caught);
-                    }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                TabWirelessUi.this.channelGrid.setVisible(false);
+                                FailureHandler.handle(caught);
+                            }
 
-                    @Override
-                    public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-                        if (result != null) {
-                            TabWirelessUi.this.channelGrid.setVisible(true);
-                            for (GwtGroupedNVPair pair : result) {
-                                String name = pair.getName();
-                                if (name != null && name.equals("devLastWifiChannel")) {
-                                    int topChannel = Integer.parseInt(pair.getValue());
-                                    // Remove channels 12 and 13
-                                    if (topChannel < MAX_WIFI_CHANNEL) {
-                                        try {
-                                            TabWirelessUi.this.channelDataProvider.getList()
-                                                    .remove(MAX_WIFI_CHANNEL - 1);
-                                            TabWirelessUi.this.channelDataProvider.getList()
-                                                    .remove(MAX_WIFI_CHANNEL - 2);
-                                        } catch (UnsupportedOperationException e) {
-                                            logger.info(e.getLocalizedMessage());
-                                        } catch (IndexOutOfBoundsException e) {
-                                            logger.info(e.getLocalizedMessage());
+                            @Override
+                            public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                                if (result != null) {
+                                    TabWirelessUi.this.channelGrid.setVisible(true);
+                                    for (GwtGroupedNVPair pair : result) {
+                                        String name = pair.getName();
+                                        if (name != null && name.equals("devLastWifiChannel")) {
+                                            int topChannel = Integer.parseInt(pair.getValue());
+                                            // Remove channels 12 and 13
+                                            if (topChannel < MAX_WIFI_CHANNEL) {
+                                                try {
+                                                    TabWirelessUi.this.channelDataProvider.getList()
+                                                            .remove(MAX_WIFI_CHANNEL - 1);
+                                                    TabWirelessUi.this.channelDataProvider.getList()
+                                                            .remove(MAX_WIFI_CHANNEL - 2);
+                                                } catch (UnsupportedOperationException e) {
+                                                    logger.info(e.getLocalizedMessage());
+                                                } catch (IndexOutOfBoundsException e) {
+                                                    logger.info(e.getLocalizedMessage());
+                                                }
+                                            }
                                         }
                                     }
+                                    TabWirelessUi.this.channelDataProvider.flush();
                                 }
                             }
-                            TabWirelessUi.this.channelDataProvider.flush();
-                        }
-                    }
 
-                });
+                        });
             }
 
         });
@@ -1474,38 +1474,38 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                             TabWirelessUi.this.selectedNetIfConfig.getName(),
                             new AsyncCallback<List<GwtWifiHotspotEntry>>() {
 
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            // EntryClassUi.hideWaitModal();
-                            // FailureHandler.handle(caught);
-                            TabWirelessUi.this.searching.setVisible(false);
-                            TabWirelessUi.this.noSsid.setVisible(false);
-                            TabWirelessUi.this.ssidGrid.setVisible(false);
-                            TabWirelessUi.this.scanFail.setVisible(true);
-                        }
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    // EntryClassUi.hideWaitModal();
+                                    // FailureHandler.handle(caught);
+                                    TabWirelessUi.this.searching.setVisible(false);
+                                    TabWirelessUi.this.noSsid.setVisible(false);
+                                    TabWirelessUi.this.ssidGrid.setVisible(false);
+                                    TabWirelessUi.this.scanFail.setVisible(true);
+                                }
 
-                        @Override
-                        public void onSuccess(List<GwtWifiHotspotEntry> result) {
-                            for (GwtWifiHotspotEntry pair : result) {
-                                TabWirelessUi.this.ssidDataProvider.getList().add(pair);
-                            }
-                            TabWirelessUi.this.ssidDataProvider.flush();
-                            if (!TabWirelessUi.this.ssidDataProvider.getList().isEmpty()) {
-                                TabWirelessUi.this.searching.setVisible(false);
-                                TabWirelessUi.this.noSsid.setVisible(false);
-                                int size = TabWirelessUi.this.ssidDataProvider.getList().size();
-                                TabWirelessUi.this.ssidGrid.setVisibleRange(0, size);
-                                TabWirelessUi.this.ssidGrid.setVisible(true);
-                                TabWirelessUi.this.scanFail.setVisible(false);
-                            } else {
-                                TabWirelessUi.this.searching.setVisible(false);
-                                TabWirelessUi.this.noSsid.setVisible(true);
-                                TabWirelessUi.this.ssidGrid.setVisible(false);
-                                TabWirelessUi.this.scanFail.setVisible(false);
-                            }
-                            // EntryClassUi.hideWaitModal();
-                        }
-                    });
+                                @Override
+                                public void onSuccess(List<GwtWifiHotspotEntry> result) {
+                                    for (GwtWifiHotspotEntry pair : result) {
+                                        TabWirelessUi.this.ssidDataProvider.getList().add(pair);
+                                    }
+                                    TabWirelessUi.this.ssidDataProvider.flush();
+                                    if (!TabWirelessUi.this.ssidDataProvider.getList().isEmpty()) {
+                                        TabWirelessUi.this.searching.setVisible(false);
+                                        TabWirelessUi.this.noSsid.setVisible(false);
+                                        int size = TabWirelessUi.this.ssidDataProvider.getList().size();
+                                        TabWirelessUi.this.ssidGrid.setVisibleRange(0, size);
+                                        TabWirelessUi.this.ssidGrid.setVisible(true);
+                                        TabWirelessUi.this.scanFail.setVisible(false);
+                                    } else {
+                                        TabWirelessUi.this.searching.setVisible(false);
+                                        TabWirelessUi.this.noSsid.setVisible(true);
+                                        TabWirelessUi.this.ssidGrid.setVisible(false);
+                                        TabWirelessUi.this.scanFail.setVisible(false);
+                                    }
+                                    // EntryClassUi.hideWaitModal();
+                                }
+                            });
                 }
 
             });

@@ -35,7 +35,7 @@
 				</b:Panel>
 			</b:Row>
 			<b:Row>
-				<b:Well addStyleNames="{style.center-panel}" ui:field="statusWell">
+				<b:Well addStyleNames="{style.center-panel} status-well" ui:field="statusWell">
 					<gwt:CellTable bordered="true" condensed="true"
 						striped="true" hover="true" height="100%" width="100%" ui:field="statusGrid" />						
 				</b:Well>

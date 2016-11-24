@@ -171,9 +171,9 @@
                                     ui:field="labelPing" />
                                 <util:HelpButton ui:field="pingHelp"/>
                                 <g:FlowPanel>
-                                    <b:RadioButton name="radio1"
+                                    <b:InlineRadio name="radio1"
                                         formValue="true" ui:field="radio1" />
-                                    <b:RadioButton name="radio1"
+                                    <b:InlineRadio name="radio1"
                                         formValue="false" ui:field="radio2" />
                                 </g:FlowPanel>
                             </b:FormGroup>
@@ -183,9 +183,9 @@
                                     ui:field="labelIgnore" />
                                 <util:HelpButton ui:field="ignoreHelp"/>
                                 <g:FlowPanel>
-                                    <b:RadioButton name="radio2"
+                                    <b:InlineRadio name="radio2"
                                         formValue="true" ui:field="radio3" />
-                                    <b:RadioButton name="radio2"
+                                    <b:InlineRadio name="radio2"
                                         formValue="false" ui:field="radio4" />
                                 </g:FlowPanel>
                             </b:FormGroup>

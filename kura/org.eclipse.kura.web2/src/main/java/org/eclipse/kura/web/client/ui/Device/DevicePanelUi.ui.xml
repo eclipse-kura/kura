@@ -32,7 +32,7 @@
     	padding: 0px;
     }
     </ui:style>
-    <b:Container fluid="true">
+    <b:Container fluid="true" addStyleNames="device-panel">
         <b:Row>
             <g:HTMLPanel ui:field="deviceIntro">
             </g:HTMLPanel>
@@ -55,7 +55,7 @@
             </b:Navbar>
         </b:Row>
         <b:Row>
-            <b:Well addStyleNames="{style.center-panel}"
+            <b:Well addStyleNames="{style.center-panel} device-well"
                 ui:field="content">
             </b:Well>
         </b:Row>

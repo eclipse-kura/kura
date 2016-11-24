@@ -33,20 +33,14 @@
     }
     </ui:style>
 
-    <b:Container fluid="true">
+    <b:Container fluid="true" addStyleNames="network-panel">
         <b:Row>
             <g:HTMLPanel ui:field="networkIntro">
             </g:HTMLPanel>
         </b:Row>
         <b:Row>
-            <b:Column addStyleNames="{style.center-panel}"
-                size="MD_2">
-                <b:Well addStyleNames="{style.center-panel}">
-                    <b:Panel>
-                        <b:PanelBody ui:field="interfacesTable">
-                        </b:PanelBody>
-                    </b:Panel>
-                </b:Well>
+            <b:Column size="MD_2">
+                    <b:Panel ui:field="interfacesTable"/>
             </b:Column>
 
             <b:Column size="MD_9" addStyleNames="{style.center-panel}">

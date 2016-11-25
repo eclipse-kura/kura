@@ -94,7 +94,7 @@ public class AllCoreTests {
             // mqttProps.put("password", "welcome");
 
             s_logger.info("Changing cloud credentials...");
-            mqttProps.put("broker-url", "mqtt://broker-sandbox.everyware-cloud.com:1883/");
+            mqttProps.put("broker-url", "mqtt://localhost:1883/");
             mqttProps.put("topic.context.account-name", "ethdev");
             mqttProps.put("username", "ethdev_broker");
             mqttProps.put("password", "We!come12345");

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features
+    xmlns="http://karaf.apache.org/xmlns/features/v1.4.0"
+    name="kura-emulator"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0 http://karaf.apache.org/xmlns/features/v1.4.0"
+    >
+    
+    <feature name="kura-emulator">
+        <feature dependency="true">kura-core</feature>
+    </feature>
+    
+</features>

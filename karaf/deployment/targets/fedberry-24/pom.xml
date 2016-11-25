@@ -1,0 +1,58 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.eclipse.kura.karaf.targets</groupId>
+        <artifactId>targets</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>..</relativePath>
+    </parent>
+
+    <artifactId>fedberry-24</artifactId>
+    <packaging>karaf-assembly</packaging>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.eclipse.kura.karaf</groupId>
+            <artifactId>kura-linux</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
+        
+    </dependencies>
+
+    <build>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <configuration>
+                    <aggregateFeatures>true</aggregateFeatures>
+                    <bootFeatures combine.children="append">
+                    	<feature>kura-linux-armv6hf</feature>
+                    </bootFeatures>
+                </configuration>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <configuration>
+                    <target>
+                        <concat dest="target/distribution/bin/setenv">
+                            <fileset dir="target/assembly/bin" includes="setenv"/>
+                            <footer>export JAVA_HOME=/usr/lib/jvm/jre-1.8.0</footer>
+                        </concat>
+                    </target>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>

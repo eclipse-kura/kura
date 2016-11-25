@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features
+    xmlns="http://karaf.apache.org/xmlns/features/v1.4.0"
+    name="kura-linux"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0 http://karaf.apache.org/xmlns/features/v1.4.0"
+    >
+    
+    <feature name="kura-linux" version="${project.version}" description="Eclipse Kura :: Linux" hidden="true">
+        <feature dependency="true">kura-core</feature>
+        
+        <bundle dependency="true">mvn:commons-net/commons-net/3.5</bundle>
+    </feature>
+    
+    <feature name="kura-linux-armv6hf" version="${project.version}" description="Eclipse Kura :: Linux :: ARMv6 HF">
+        <feature dependency="true">kura-linux-armv6hf-natives</feature>
+        <feature>kura-linux</feature>
+    </feature>
+    
+    <feature name="kura-linux-armv6hf-natives" version="${project.version}" hidden="true">
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.linux.usb.armv6hf/1.0.8-SNAPSHOT</bundle>
+        <bundle>mvn:org.eclipse.kura/jdk.dio.armv6hf/1.0.6-SNAPSHOT</bundle>
+    </feature>
+    
+    <feature name="kura-linux-x86_64" version="${project.version}" description="Eclipse Kura :: Linux :: x86-64">
+        <feature dependency="true">kura-linux-x86_64-natives</feature>
+        <feature>kura-linux</feature>
+    </feature>
+    
+    <feature name="kura-linux-x86_64-natives" version="${project.version}" hidden="true">
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.linux.usb.x86_64/1.0.8-SNAPSHOT</bundle>
+        <bundle>mvn:org.eclipse.kura/jdk.dio.x86_64/1.0.6-SNAPSHOT</bundle>
+    </feature>
+    
+</features>

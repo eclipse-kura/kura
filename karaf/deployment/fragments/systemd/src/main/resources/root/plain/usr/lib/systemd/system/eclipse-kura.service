@@ -1,0 +1,17 @@
+[Unit]
+Description=Eclipse Kura
+After=syslog.target network.target
+
+[Service]
+EnvironmentFile=/opt/eclipse/kura/bin/setenv
+
+ExecStart=/opt/eclipse/kura/bin/karaf daemon
+ExecStop=/opt/eclipse/kura/bin/karaf stop
+
+SuccessExitStatus=0 143
+
+Restart=on-failure
+RestartSec=15
+
+[Install]
+WantedBy=multi-user.target

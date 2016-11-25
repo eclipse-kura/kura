@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features
+    xmlns="http://karaf.apache.org/xmlns/features/v1.4.0"
+    name="kura-core"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0 http://karaf.apache.org/xmlns/features/v1.4.0"
+    >
+    
+    <repository>mvn:org.apache.camel.karaf/apache-camel/2.18.0/xml/features</repository>
+    
+    <feature name="kura-core">
+        <bundle dependency="true">mvn:org.osgi/org.osgi.service.wireadmin/1.0.1</bundle>
+        <feature prerequisite="true" dependency="true">scr</feature>
+        <feature prerequisite="true" dependency="true">shell-compat</feature>
+        
+        <feature dependency="true">eventadmin</feature>
+        
+        <feature dependency="true">kura-runtime</feature>
+    </feature>
+    
+    <feature name="kura-camel" version="${project.version}" description="Eclipse Kura :: Apache Camel components">
+        <feature dependency="true">camel</feature>
+        <feature dependency="true">camel-scr</feature>
+        <feature dependency="true">kura-core</feature>
+        
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.camel/1.1.0-SNAPSHOT</bundle>
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.camel.cloud.factory/1.0.0-SNAPSHOT</bundle>
+    </feature>
+    
+    <!-- Examples -->
+    
+    <feature name="kura-example-publisher" version="${project.version}" description="Eclipse Kura Examples :: Publisher">
+        <feature dependency="true">kura-core</feature>
+    
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.example.publisher/1.0.2-SNAPSHOT</bundle>
+    </feature>
+    
+    <feature name="kura-example-camel-aggregation" version="${project.version}" description="Eclipse Kura Examples :: Camel :: Aggregation">
+        <feature dependency="true">kura-core</feature>
+        <feature dependency="true">kura-camel</feature>
+    
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.example.camel.aggregation/1.1.0-SNAPSHOT</bundle>
+    </feature>
+    
+    <feature name="kura-example-camel-quickstart" version="${project.version}" description="Eclipse Kura Examples :: Camel :: Quickstart">
+        <feature dependency="true">kura-core</feature>
+        <feature dependency="true">kura-camel</feature>
+    
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.example.camel.quickstart/1.1.0-SNAPSHOT</bundle>
+    </feature>
+</features>

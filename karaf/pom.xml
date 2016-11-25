@@ -1,0 +1,59 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.eclipse.kura.karaf</groupId>
+	<artifactId>karaf</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+    
+    <name>Eclipse Kura on Apache Karaf</name>
+
+	<properties>
+		<karaf.version.plugin>4.0.7</karaf.version.plugin>
+		<karaf.version>4.0.5</karaf.version>
+
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<modules>
+		<module>kura-runtime</module>
+		<module>kura-core</module>
+		<module>kura-web</module>
+		<module>kura-emulator</module>
+        
+        <module>kura-linux</module>
+
+		<module>emulator-instance</module>
+	</modules>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.karaf.tooling</groupId>
+					<artifactId>karaf-maven-plugin</artifactId>
+					<version>${karaf.version.plugin}</version>
+				</plugin>
+				<plugin>
+				    <groupId>org.apache.maven.plugins</groupId>
+				    <artifactId>maven-antrun-plugin</artifactId>
+				    <version>1.8</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.karaf.tooling</groupId>
+				<artifactId>karaf-maven-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<startLevel>80</startLevel>
+					<aggregateFeatures>false</aggregateFeatures>
+					<addTransitiveFeatures>false</addTransitiveFeatures>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

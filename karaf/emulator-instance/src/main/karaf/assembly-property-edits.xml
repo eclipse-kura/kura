@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<property-edits xmlns="http://karaf.apache.org/tools/property-edits/1.0.0">
+	<edits>
+        <edit>
+            <file>system.properties</file>
+            <operation>put</operation>
+            <key>db.service.hsqldb.url</key>
+            <value>jdbc:hsqldb:file:kura/data/db/data;hsqldb.lock_file=false</value>
+        </edit>
+        <edit>
+            <file>system.properties</file>
+            <operation>put</operation>
+            <key>org.eclipse.kura.mode</key>
+            <value>emulator</value>
+        </edit>
+        <edit>
+            <file>system.properties</file>
+            <operation>put</operation>
+            <key>org.eclipse.kura.core.configuration.trackOnlyRelevantServices</key>
+            <value>true</value>
+        </edit>
+	</edits>
+</property-edits>

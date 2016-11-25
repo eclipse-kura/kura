@@ -245,6 +245,8 @@ public class EntryClassUi extends Composite {
         FailureHandler.setPopup(this.errorPopup);
 
         showSidenav();
+
+        initServicesTree();
     }
 
     public void setSession(GwtSession GwtSession) {
@@ -497,7 +499,7 @@ public class EntryClassUi extends Composite {
 
     }
 
-    public void initServicesTree() {
+    public void fetchAvailableServices() {
         // (Re)Fetch Available Services
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
@@ -530,7 +532,9 @@ public class EntryClassUi extends Composite {
                         });
             }
         });
+    }
 
+    private void initServicesTree() {
         // Keypress handler
         textSearch.addValueChangeHandler(changeHandler);
 

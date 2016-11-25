@@ -432,7 +432,7 @@ public class PackagesPanelUi extends Composite {
                             PackagesPanelUi.this.notification.setVisible(false);
                         }
                         if (PackagesPanelUi.this.entryClassUi != null) {
-                            PackagesPanelUi.this.entryClassUi.initServicesTree();
+                            PackagesPanelUi.this.entryClassUi.fetchAvailableServices();
                         }
 
                         PackagesPanelUi.this.refreshRequests--;

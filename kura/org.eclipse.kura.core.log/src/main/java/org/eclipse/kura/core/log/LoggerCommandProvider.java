@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,117 +7,103 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Eurotech
+ *     Eurotech and/or its affiliates
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.log;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import static org.apache.log4j.Level.toLevel;
+import static org.apache.log4j.LogManager.getCurrentLoggers;
+import static org.apache.log4j.LogManager.getRootLogger;
 
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.apache.felix.service.command.Descriptor;
 import org.apache.log4j.Level;
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
-import org.osgi.service.component.ComponentContext;
+import org.apache.log4j.Logger;
 
 public class LoggerCommandProvider {
 
-    public void activate(ComponentContext componentContext) {
-        componentContext.getBundleContext().registerService(CommandProvider.class.getName(),
-                new KuraLoggerCommandProvider(), null);
+    @Descriptor("Shows the Kura log level for all loggers")
+    public void getkuraloglevel() {
+        getkuraloglevel(null);
     }
 
-    public void deactivate() {
-    }
+    @Descriptor("Shows the Kura log level for a specific logger")
+    public void getkuraloglevel(@Descriptor("<logger name>") String argument) {
 
-    // CommandProvider interface
-    public class KuraLoggerCommandProvider implements CommandProvider {
+        final Enumeration<?> currentLoggers = getCurrentLoggers();
+        final Map<String, Logger> loggers = new TreeMap<>();
 
-        public void _getkuraloglevel(CommandInterpreter ci) {
-            String argument = null;
-            try {
-                argument = ci.nextArgument();
-            } catch (NullPointerException e) {
-                // just means no argument - so display all
+        // enumerate all loggers
+
+        while (currentLoggers.hasMoreElements()) {
+            final Logger log4jLogger = (Logger) currentLoggers.nextElement();
+            loggers.put(log4jLogger.getName(), log4jLogger);
+        }
+
+        // display
+
+        if (argument == null || argument.isEmpty()) {
+            // Display all
+            System.out.format("Default log level: %s%n", getRootLogger().getEffectiveLevel());
+
+            for (final Logger logger : loggers.values()) {
+                System.out.format("%s: %s%n", logger.getName(), logger.getEffectiveLevel());
             }
+        } else {
+            // Display single
+            final Logger logger = loggers.get(argument);
 
-            Enumeration<?> currentLoggers = org.apache.log4j.LogManager.getCurrentLoggers();
-            Hashtable<String, org.apache.log4j.Logger> loggerHashtable = new Hashtable<String, org.apache.log4j.Logger>();
-            ArrayList<String> loggerNames = new ArrayList<String>();
+            if (logger != null) {
+                System.out.format("%s: %s%n", logger.getName(), logger.getEffectiveLevel());
+            } else {
+                System.out.format("Logger not found: %s%n", argument);
+            }
+        }
+    }
+
+    @Descriptor("Sets the Kura log level for a given logger, or all loggers if 'ALL'")
+    public void setkuraloglevel(@Descriptor("(ALL | <logger name>)") String argName,
+            @Descriptor("(ALL, TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF)") String argLevel) {
+        try {
+
+            // init
+
+            final boolean setAll = argName.equalsIgnoreCase("ALL");
+            final Enumeration<?> currentLoggers = getCurrentLoggers();
+
+            // iterate over all loggers
 
             while (currentLoggers.hasMoreElements()) {
-                org.apache.log4j.Logger log4jLogger = (org.apache.log4j.Logger) currentLoggers.nextElement();
-                loggerHashtable.put(log4jLogger.getName(), log4jLogger);
-                loggerNames.add(log4jLogger.getName());
-            }
+                final Logger logger = (Logger) currentLoggers.nextElement();
 
-            if (argument == null) {
-                // Display all
-                ci.print("Default log level: "
-                        + org.apache.log4j.LogManager.getRootLogger().getEffectiveLevel().toString() + "\n");
+                if (setAll || argName.equals(logger.getName())) {
 
-                Collections.sort(loggerNames);
-                for (String key : loggerNames) {
-                    org.apache.log4j.Logger log4jLogger = loggerHashtable.get(key);
-                    ci.print(log4jLogger.getName() + ": " + log4jLogger.getEffectiveLevel().toString() + "\n");
-                }
-            } else {
-                org.apache.log4j.Logger log4jLogger = loggerHashtable.get(argument);
+                    // set new level, falling back to current
 
-                if (log4jLogger != null) {
-                    ci.print(log4jLogger.getName() + ": " + log4jLogger.getEffectiveLevel().toString() + "\n");
-                } else {
-                    ci.print("Logger not found: " + argument);
-                }
-            }
-        }
+                    final Level oldLevel = logger.getEffectiveLevel();
+                    logger.setLevel(toLevel(argLevel, oldLevel));
+                    System.out.format("%s: %s%n", logger.getName(), logger.getEffectiveLevel().toString());
 
-        public void _setkuraloglevel(CommandInterpreter ci) {
-            String argName = null;
-            String argLevel = null;
-            try {
-                argName = ci.nextArgument();
-                argLevel = ci.nextArgument();
-                boolean setAll = argName.equalsIgnoreCase("ALL");
-
-                Enumeration<?> currentLoggers = org.apache.log4j.LogManager.getCurrentLoggers();
-
-                while (currentLoggers.hasMoreElements()) {
-                    org.apache.log4j.Logger log4jLogger = (org.apache.log4j.Logger) currentLoggers.nextElement();
-
-                    if (setAll || argName.equals(log4jLogger.getName())) {
-                        Level oldLevel = log4jLogger.getEffectiveLevel();
-                        log4jLogger.setLevel(Level.toLevel(argLevel, oldLevel));
-                        ci.print(log4jLogger.getName() + ": " + log4jLogger.getEffectiveLevel().toString() + "\n");
-
-                        if (!setAll) {
-                            return;
-                        }
+                    if (!setAll) {
+                        // we are done
+                        return;
                     }
                 }
-
-                if (!setAll) {
-                    ci.print("Could not find logger for: " + argName);
-                }
-
-            } catch (Exception e) {
-                ci.println("Invalid argument passed to setkuraloglevel");
-                e.printStackTrace();
             }
-        }
 
-        @Override
-        public String getHelp() {
-            StringBuffer buffer = new StringBuffer();
-            buffer.append("---Kura Logger Commands---\n");
-            buffer.append(
-                    "\tgetkuraloglevel [logger_name] - shows the Kura log level for all loggers, or for a specific logger if specified\n");
-            buffer.append(
-                    "\tsetkuraloglevel (ALL | <logger_name>) <log_level> - sets the Kura log level for a given logger, or all loggers if 'ALL'\n");
-            buffer.append("\t\tThe valid log_level options are: ALL, TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF\n");
+            // we had a request for a specific logger, but could not find it
 
-            return buffer.toString();
+            if (!setAll) {
+                System.out.format("Could not find logger for: %s%n", argName);
+            }
+
+        } catch (final Exception e) {
+            // the OSGi shell has exception handling capabilities
+            throw new IllegalArgumentException("Invalid argument passed to setkuraloglevel", e);
         }
     }
 }

@@ -85,7 +85,6 @@
         
         <module>org.eclipse.kura.web2</module>
         
-        <!-- test setup broken
         <module>org.eclipse.kura.core.test</module>
         
         <module>org.eclipse.kura.windows.command</module>

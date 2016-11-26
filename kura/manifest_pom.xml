@@ -92,10 +92,8 @@
 
         <module>org.eclipse.kura.wire.component.provider</module>
         <module>org.eclipse.kura.wire.provider</module>
-        
-        <!-- test setup broken
+
         <module>org.eclipse.kura.wire.provider.test</module>
-        -->
 
         <module>features</module>
         

@@ -18,8 +18,6 @@
 
 package org.eclipse.kura.core.configuration.metatype;
 
-import javax.xml.namespace.QName;
-
 /**
  * This object contains factory methods for each
  * Java content interface and Java element interface
@@ -37,8 +35,6 @@ import javax.xml.namespace.QName;
  */
 
 public class ObjectFactory {
-
-    private static final QName _MetaData_QNAME = new QName("http://www.osgi.org/xmlns/metatype/v1.2.0", "MetaData");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package:

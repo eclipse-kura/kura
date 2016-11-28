@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.net.dns;
 
@@ -105,7 +106,7 @@ public abstract class DnsServerConfigIP<T extends IPAddress> implements DnsServe
         if (getClass() != obj.getClass()) {
             return false;
         }
-        DnsServerConfigIP other = (DnsServerConfigIP) obj;
+        DnsServerConfigIP<?> other = (DnsServerConfigIP<?>) obj;
         if (this.m_allowedNetworks == null) {
             if (other.m_allowedNetworks != null) {
                 return false;

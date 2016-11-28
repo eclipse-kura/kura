@@ -407,6 +407,7 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
 
     }
 
+    @SuppressWarnings("unused")
     private void doServicesDiscovery(TiSensorTag tiSensorTag) {
         s_logger.info("Starting services discovery...");
         this.m_bluetoothGattServices = tiSensorTag.discoverServices();
@@ -416,6 +417,7 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
         }
     }
 
+    @SuppressWarnings("unused")
     private void doCharacteristicsDiscovery(TiSensorTag tiSensorTag) {
         List<BluetoothGattCharacteristic> lbgc = tiSensorTag.getCharacteristics("0x0001", "0x0100");
         for (BluetoothGattCharacteristic bgc : lbgc) {

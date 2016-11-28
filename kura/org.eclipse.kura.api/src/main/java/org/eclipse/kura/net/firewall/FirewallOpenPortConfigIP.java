@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.net.firewall;
 
@@ -197,7 +198,7 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
         if (getClass() != obj.getClass()) {
             return false;
         }
-        FirewallOpenPortConfigIP other = (FirewallOpenPortConfigIP) obj;
+        FirewallOpenPortConfigIP<?> other = (FirewallOpenPortConfigIP<?>) obj;
         if (this.permittedInterfaceName == null) {
             if (other.permittedInterfaceName != null) {
                 return false;

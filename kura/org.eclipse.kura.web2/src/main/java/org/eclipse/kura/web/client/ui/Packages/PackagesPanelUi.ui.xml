@@ -74,11 +74,11 @@
                                 active="true" b:id="tab1">
                                 <g:FormPanel ui:field="packagesFormFile">
                                     <b:FieldSet>
-                                        <b:FormGroup>
-                                            <b:FormLabel>File</b:FormLabel>
+                                        <b:FormLabel>Select the deployment package file:</b:FormLabel>
+                                        <b:Well>
                                             <g:FileUpload
                                                 ui:field="filePath"></g:FileUpload>
-                                        </b:FormGroup>
+                                        </b:Well>
                                         <b:ButtonGroup
                                             pull="RIGHT">
                                             <b:Button ui:field="fileCancel">Cancel</b:Button>
@@ -92,12 +92,10 @@
                             <b:TabPane fade="true" b:id="tab2">
                                 <g:FormPanel ui:field="packagesFormUrl">
                                     <b:FieldSet>
-                                        <b:FormGroup>
                                             <b:FormLabel
-                                                for="formUrl">URL</b:FormLabel>
+                                                for="formUrl">Enter the URL of the deployment package:</b:FormLabel>
                                             <b:TextBox b:id="formUrl"
                                                 ui:field="formUrl" />
-                                        </b:FormGroup>
                                         <b:ButtonGroup
                                             pull="RIGHT">
                                             <b:Button ui:field="urlCancel">Cancel</b:Button>

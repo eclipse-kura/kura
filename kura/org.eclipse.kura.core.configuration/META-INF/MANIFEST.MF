@@ -9,6 +9,7 @@ Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.crypto,
+ javax.xml.bind,
  javax.xml.namespace,
  javax.xml.parsers,
  javax.xml.stream,

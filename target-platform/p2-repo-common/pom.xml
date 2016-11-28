@@ -92,7 +92,7 @@
 									<version>${org.tigris.mtoolkit.iagent.rpc.version}</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>com.gwt</groupId>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>com.gwt.user</artifactId>
 									<version>${com.gwt.user.version}</version>
 								</artifactItem>

@@ -216,6 +216,19 @@ Overriding Bootstrap END
 ***********************/
 
 /**********************
+Upload panel START
+***********************/
+
+#uploadModal label {
+	padding-top: 0.3cm;
+	padding-bottom: 0.3cm;
+}
+
+/**********************
+Upload panel END
+***********************/
+
+/**********************
 Channel Table Validation START
 ***********************/
 .error-text-box {

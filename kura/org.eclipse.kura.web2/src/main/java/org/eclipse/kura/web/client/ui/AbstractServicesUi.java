@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -436,18 +437,17 @@ public abstract class AbstractServicesUi extends Composite {
 
         ListBox listBox = new ListBox();
 
-        String current;
         int i = 0;
         Map<String, String> oMap = param.getOptions();
-        java.util.Iterator<String> it = oMap.keySet().iterator();
-        while (it.hasNext()) {
-            current = it.next();
-            listBox.addItem(current);
-            if (param.getDefault() != null && oMap.get(current).equals(param.getDefault())) {
+        for (Entry<String, String> current : oMap.entrySet()) {
+            String label = current.getKey();
+            String value = current.getValue();
+            listBox.addItem(label, value);
+            if (param.getDefault() != null && value.equals(param.getDefault())) {
                 listBox.setSelectedIndex(i);
             }
 
-            if (param.getValue() != null && oMap.get(current).equals(param.getValue())) {
+            if (param.getValue() != null && value.equals(param.getValue())) {
                 listBox.setSelectedIndex(i);
             }
             i++;
@@ -459,7 +459,7 @@ public abstract class AbstractServicesUi extends Composite {
             public void onChange(ChangeEvent event) {
                 setDirty(true);
                 ListBox box = (ListBox) event.getSource();
-                param.setValue(box.getSelectedItemText());
+                param.setValue(box.getSelectedValue());
             }
         });
 

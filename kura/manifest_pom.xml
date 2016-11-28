@@ -362,6 +362,12 @@
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-compiler-plugin</artifactId>
                 <version>${tycho-version}</version>
+                <configuration>
+                    <!-- make us aware of warnings -->
+                    <showWarnings>true</showWarnings>
+                    <!-- Kura does not set bootdelegation, we let the compiler check for this -->
+                    <requireJREPackageImports>true</requireJREPackageImports>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>

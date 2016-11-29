@@ -121,8 +121,8 @@
 		<antcall target="wires-config" />
 
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
-		<available file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" property="web2.jar.present" />
-		<antcall target="web2-config" />
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
+		<antcall target="web-config" />
 
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" property="linux.gpio.jar.present" />
 		<antcall target="gpio-config" />
@@ -520,7 +520,7 @@ fi]]>
 		<antcall target="wires-jar" />
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
-		<antcall target="web2-jar" />
+		<antcall target="web-jar" />
 		<antcall target="gpio-jar" />
 		<antcall target="emulator-gpio-jar" />
 		<antcall target="emulator-jars" />
@@ -726,8 +726,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<antcall target="wires-config" />
 
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
-		<available file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" property="web2.jar.present" />
-		<antcall target="web2-config" />
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar" property="web.jar.present" />
+		<antcall target="web-config" />
 
 		<antcall target="emulator-gpio-config" />
 
@@ -884,7 +884,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
     	<antcall target="wires-jar-win" />
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
-		<antcall target="web2-jar-win" />
+		<antcall target="web-jar-win" />
 		<antcall target="emulator-gpio-jar-win" />
 
         <echo message="Building Kura Distribution for ${build.name}-jars..." />
@@ -1177,12 +1177,12 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</propertyfile>
 	</target>
 	
-	<target name="web2-config" if="web2.jar.present">
+	<target name="web-config" if="web.jar.present">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				   value=", reference:file:${kura.install.dir}/kura/plugins/com.gwt.user_1.0.1.jar@3" />
 			<entry key="osgi.bundles" operation="+"
-	               value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar@6:start" />
+	               value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar@6:start" />
 		</propertyfile>
 	</target>
 
@@ -1306,9 +1306,9 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</zip>
 	</target>
 
-	<target name="web2-jar" if="web2.jar.present">
+	<target name="web-jar" if="web.jar.present">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
-			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="../target-definition/common/repository/plugins/com.gwt.user_1.0.1.jar"
                         prefix="${build.output.name}/plugins" />
@@ -1365,8 +1365,9 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</zip>
 	</target>
 
-	<target name="web2-jar-win" if="web2.jar.present">
-		<copy file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
+	<target name="web-jar-win" if="web.jar.present">
+    	<echo message="web-jar-win ${project.build.directory}/${build.output.name}/config.ini..." />
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.web_${org.eclipse.kura.web.version}.jar"
 			todir="${build.install.dir.kura}/kura/plugins" />
 		<copy file="../target-definition/common/repository/plugins/com.gwt.user_1.0.1.jar"
 			todir="${build.install.dir.kura}/plugins" />

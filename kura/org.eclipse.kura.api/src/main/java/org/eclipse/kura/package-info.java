@@ -9,6 +9,7 @@
  *******************************************************************************/
 /**
  * Contains the necessary classes for the following framework related operations
+ * <p>
  * <ul>
  * <li>Management of Exceptions</li>
  * <li>Preconditions for Defensive Programming - @since 1.0.10</li>

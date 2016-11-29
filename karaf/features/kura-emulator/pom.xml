@@ -4,14 +4,14 @@
 
     <parent>
         <groupId>org.eclipse.kura.karaf</groupId>
-        <artifactId>karaf</artifactId>
+        <artifactId>features</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
-    <artifactId>kura-core</artifactId>
+    <artifactId>kura-emulator</artifactId>
     <packaging>feature</packaging>
-    <name>Eclipse Kura :: Core</name>
+    <name>Eclipse Kura :: Emulator</name>
 
     <dependencies>
         <dependency>
@@ -21,19 +21,19 @@
             <type>kar</type>
             <scope>provided</scope>
         </dependency>
-        
-		<dependency>
-			<groupId>org.apache.karaf.features</groupId>
-			<artifactId>standard</artifactId>
-			<version>${karaf.version}</version>
-			<classifier>features</classifier>
-			<type>xml</type>
-			<scope>provided</scope>
-		</dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>standard</artifactId>
+            <version>${karaf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.eclipse.kura.karaf</groupId>
-            <artifactId>kura-runtime</artifactId>
+            <artifactId>kura-core</artifactId>
             <version>${project.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
@@ -42,56 +42,26 @@
 
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.api</artifactId>
-            <version>1.0.10-SNAPSHOT</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.core</artifactId>
-            <version>1.0.10-SNAPSHOT</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.core.cloud</artifactId>
-            <version>1.0.9-SNAPSHOT</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.core.comm</artifactId>
-            <version>1.0.3-SNAPSHOT</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.core.configuration</artifactId>
-            <version>1.0.9-SNAPSHOT</version>
+            <artifactId>org.eclipse.kura.emulator</artifactId>
+            <version>[1.0,2.0)</version>
         </dependency>
 
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.core.crypto</artifactId>
-            <version>1.0.5-SNAPSHOT</version>
+            <artifactId>org.eclipse.kura.emulator.clock</artifactId>
+            <version>[1.0,2.0)</version>
         </dependency>
 
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.core.net</artifactId>
-            <version>1.0.10-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.core.status</artifactId>
+            <artifactId>org.eclipse.kura.emulator.gpio</artifactId>
             <version>1.0.2-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.deployment.agent</artifactId>
-            <version>1.0.7-SNAPSHOT</version>
+            <artifactId>org.eclipse.kura.emulator.net</artifactId>
+            <version>[1.0,2.0)</version>
         </dependency>
 
     </dependencies>
@@ -101,6 +71,13 @@
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
+
+                <configuration>
+                    <!-- - The emulator provides the initial snapshot file 
+                        which should be present - before the rest is being started. -->
+                    <startLevel>40</startLevel>
+                </configuration>
+
                 <executions>
                     <execution>
                         <id>verify</id>
@@ -113,6 +90,7 @@
                                 <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
                                 <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
                                 <descriptor>mvn:org.eclipse.kura.karaf/kura-runtime/${project.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.eclipse.kura.karaf/kura-core/${project.version}/xml/features</descriptor>
                                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
                             </descriptors>
                             <distribution>org.apache.karaf.features:framework</distribution>
@@ -120,13 +98,9 @@
                             <framework>
                                 <feature>framework</feature>
                             </framework>
+                            <ignoreMissingConditions>true</ignoreMissingConditions>
                             <features>
-                                <feature>kura-core</feature>
-                                <feature>kura-camel</feature>
-                                
-                                <feature>kura-example-publisher</feature>
-                                <feature>kura-example-camel-aggregation</feature>
-                                <feature>kura-example-camel-quickstart</feature>
+                                <feature>kura-emulator</feature>
                             </features>
                         </configuration>
                     </execution>

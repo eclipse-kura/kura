@@ -11,7 +11,7 @@
 
     <artifactId>emulator-instance</artifactId>
     <packaging>karaf-assembly</packaging>
-    <name>Local Karaf distribution assembly</name>
+    <name>Local Karaf emulator assembly</name>
 
     <dependencies>
         <dependency>
@@ -88,7 +88,12 @@
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
+                <extensions>true</extensions>
                 <configuration>
+                    <startLevel>80</startLevel>
+                    <aggregateFeatures>false</aggregateFeatures>
+                    <addTransitiveFeatures>false</addTransitiveFeatures>
+
                     <installedFeatures>
                         <feature>wrapper</feature>
                     </installedFeatures>
@@ -136,7 +141,6 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
-                        <version>1.5.0</version>
                         <configuration>
                             <mainClass>org.apache.karaf.main.Main</mainClass>
                             <workingDirectory>target/assembly</workingDirectory>
@@ -173,7 +177,7 @@
                                     <key>karaf.restart.jvm.supported</key>
                                     <value>false</value>
                                 </systemProperty>
-                                
+
                                 <!-- Kura properties -->
 
                                 <systemProperty>
@@ -207,7 +211,7 @@
                                     <key>db.service.hsqldb.url</key>
                                     <value>jdbc:hsqldb:file:${project.build.directory}/assembly/kura/data/db/data;hsqldb.lock_file=false</value>
                                 </systemProperty>
-                                
+
                             </systemProperties>
                         </configuration>
                     </plugin>

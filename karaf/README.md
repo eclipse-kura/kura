@@ -6,9 +6,9 @@ This is an experimental Karaf setup.
   all the Maven artifacts installed in your local Maven repository.
   You can use `cd .. ; ./build-all.sh`
   
-* Run `mvn clean install` in order to generate a Karaf distribution in `distribution`
+* Run `mvn clean install` in order to generate a Karaf distribution in `emulator-instance`
 
-* Run `cd distribution; mvn exec:java -Prun` in order to run the local Karaf distribution
+* Run `cd emulator-instance; mvn exec:java -Prun` in order to run the local Karaf distribution
 
 # Building Karaf based targets
 

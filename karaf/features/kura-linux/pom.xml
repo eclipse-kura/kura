@@ -4,16 +4,42 @@
 
     <parent>
         <groupId>org.eclipse.kura.karaf</groupId>
-        <artifactId>karaf</artifactId>
+        <artifactId>features</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
-    <artifactId>kura-emulator</artifactId>
+    <artifactId>kura-linux</artifactId>
     <packaging>feature</packaging>
-    <name>Eclipse Kura :: Emulator</name>
+    <name>Eclipse Kura :: Linux</name>
+    
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>
+        <repository>
+            <id>kura_addons</id>
+            <url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>kura</id>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <dependencies>
+    
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>framework</artifactId>
@@ -22,14 +48,14 @@
             <scope>provided</scope>
         </dependency>
         
-		<dependency>
-			<groupId>org.apache.karaf.features</groupId>
-			<artifactId>standard</artifactId>
-			<version>${karaf.version}</version>
-			<classifier>features</classifier>
-			<type>xml</type>
-			<scope>provided</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>standard</artifactId>
+            <version>${karaf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>provided</scope>
+        </dependency>
     
         <dependency>
             <groupId>org.eclipse.kura.karaf</groupId>
@@ -42,25 +68,43 @@
 
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.emulator</artifactId>
+            <artifactId>org.eclipse.kura.linux.bluetooth</artifactId>
             <version>[1.0,2.0)</version>
         </dependency>
 
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.emulator.clock</artifactId>
+            <artifactId>org.eclipse.kura.linux.clock</artifactId>
             <version>[1.0,2.0)</version>
         </dependency>
         
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.emulator.gpio</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
+            <artifactId>org.eclipse.kura.linux.command</artifactId>
+            <version>[1.0,2.0)</version>
         </dependency>
 
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.emulator.net</artifactId>
+            <artifactId>org.eclipse.kura.linux.gpio</artifactId>
+            <version>[1.0,2.0)</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.linux.net</artifactId>
+            <version>[1.0,2.0)</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.linux.position</artifactId>
+            <version>[1.0,2.0)</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>jdk.dio</artifactId>
             <version>[1.0,2.0)</version>
         </dependency>
         
@@ -71,14 +115,6 @@
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
-                
-                <configuration>
-                    <!--
-                      - The emulator provides the initial snapshot file which should be present
-                      - before the rest is being started.
-                      -->
-                    <startLevel>40</startLevel>
-                </configuration>
                 
                 <executions>
                     <execution>
@@ -100,9 +136,9 @@
                             <framework>
                                 <feature>framework</feature>
                             </framework>
-                            <ignoreMissingConditions>true</ignoreMissingConditions>
                             <features>
-                                <feature>kura-emulator</feature>
+                                <feature>kura-linux-armv6-hf</feature>
+                                <feature>kura-linux-x86_64</feature>
                             </features>
                         </configuration>
                     </execution>

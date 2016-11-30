@@ -80,6 +80,10 @@ public class NetworkInterfacesTableUi extends Composite {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
+                if (NetworkInterfacesTableUi.this.selection == NetworkInterfacesTableUi.this.selectionModel
+                        .getSelectedObject()) {
+                    return;
+                }
                 if (NetworkInterfacesTableUi.this.selection != null && NetworkInterfacesTableUi.this.tabs.isDirty()) {
                     // there was an earlier selection, changes have not
                     // been saved
@@ -111,6 +115,8 @@ public class NetworkInterfacesTableUi extends Composite {
                         @Override
                         public void onClick(ClickEvent event) {
                             confirm.hide();
+                            NetworkInterfacesTableUi.this.selectionModel
+                                    .setSelected(NetworkInterfacesTableUi.this.selection, true);
                         }
                     }));
                     confirm.add(confirmBody);
@@ -208,19 +214,19 @@ public class NetworkInterfacesTableUi extends Composite {
                 columnSortHandler.setComparator(NetworkInterfacesTableUi.this.col1,
                         new Comparator<GwtNetInterfaceConfig>() {
 
-                    @Override
-                    public int compare(GwtNetInterfaceConfig o1, GwtNetInterfaceConfig o2) {
-                        if (o1 == o2) {
-                            return 0;
-                        }
+                            @Override
+                            public int compare(GwtNetInterfaceConfig o1, GwtNetInterfaceConfig o2) {
+                                if (o1 == o2) {
+                                    return 0;
+                                }
 
-                        // Compare the name columns.
-                        if (o1 != null) {
-                            return o2 != null ? compareFromName(o1.getName(), o2.getName()) : 1;
-                        }
-                        return -1;
-                    }
-                });
+                                // Compare the name columns.
+                                if (o1 != null) {
+                                    return o2 != null ? compareFromName(o1.getName(), o2.getName()) : 1;
+                                }
+                                return -1;
+                            }
+                        });
                 NetworkInterfacesTableUi.this.interfacesGrid.addColumnSortHandler(columnSortHandler);
 
                 NetworkInterfacesTableUi.this.interfacesProvider.getList().addAll(result);

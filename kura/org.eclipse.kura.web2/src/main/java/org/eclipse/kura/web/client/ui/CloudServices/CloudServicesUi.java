@@ -15,7 +15,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.EventService;
+import org.eclipse.kura.web.shared.ForwardedEventTopic;
 import org.eclipse.kura.web.shared.model.GwtCloudConnectionEntry;
+import org.eclipse.kura.web.shared.model.GwtEventInfo;
 import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.ButtonGroup;
@@ -67,6 +70,20 @@ public class CloudServicesUi extends Composite {
 
         cloudServiceConfigurationsBinder = new CloudServiceConfigurationsUi(this);
         this.cloudConfigurationsPanel.add(cloudServiceConfigurationsBinder);
+
+        EventService.Handler onConnectionStatusChangedHandler = new EventService.Handler() {
+
+            @Override
+            public void handleEvent(GwtEventInfo eventInfo) {
+                if (CloudServicesUi.this.isVisible() && CloudServicesUi.this.isAttached()) {
+                    CloudServicesUi.this.refresh();
+                }
+            }
+        };
+
+        EventService.subscribe(ForwardedEventTopic.CLOUD_CONNECTION_STATUS_ESTABLISHED,
+                onConnectionStatusChangedHandler);
+        EventService.subscribe(ForwardedEventTopic.CLOUD_CONNECTION_STATUS_LOST, onConnectionStatusChangedHandler);
     }
 
     public void refresh() {

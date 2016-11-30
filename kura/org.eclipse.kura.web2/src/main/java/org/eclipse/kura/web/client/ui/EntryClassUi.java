@@ -23,8 +23,11 @@ import org.eclipse.kura.web.client.ui.Packages.PackagesPanelUi;
 import org.eclipse.kura.web.client.ui.Settings.SettingsPanelUi;
 import org.eclipse.kura.web.client.ui.Status.StatusPanelUi;
 import org.eclipse.kura.web.client.ui.wires.WiresPanelUi;
+import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.ForwardedEventTopic;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.eclipse.kura.web.shared.model.GwtEventInfo;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
@@ -206,6 +209,7 @@ public class EntryClassUi extends Composite {
         logger.log(Level.FINER, "Initiating UiBinder");
         this.ui = this;
         initWidget(uiBinder.createAndBindUi(this));
+        initWaitModal();
 
         // TODO : standardize the URL?
         // header.setUrl("eclipse/kura/icons/kura_logo_small.png");
@@ -241,6 +245,21 @@ public class EntryClassUi extends Composite {
 
         //
         dragDropInit(this);
+
+        EventService.subscribe(ForwardedEventTopic.CLOUD_CONNECTION_STATUS_ESTABLISHED, new EventService.Handler() {
+
+            @Override
+            public void handleEvent(GwtEventInfo eventInfo) {
+                updateConnectionStatusImage(true);
+            }
+        });
+        EventService.subscribe(ForwardedEventTopic.CLOUD_CONNECTION_STATUS_LOST, new EventService.Handler() {
+
+            @Override
+            public void handleEvent(GwtEventInfo eventInfo) {
+                updateConnectionStatusImage(false);
+            }
+        });
 
         FailureHandler.setPopup(this.errorPopup);
 
@@ -803,7 +822,7 @@ public class EntryClassUi extends Composite {
         }
     }
 
-    public static void showWaitModal() {
+    private void initWaitModal() {
         m_waitModal = new PopupPanel(false, true);
         Icon icon = new Icon();
         icon.setType(IconType.COG);
@@ -812,13 +831,15 @@ public class EntryClassUi extends Composite {
         m_waitModal.setWidget(icon);
         m_waitModal.setGlassEnabled(true);
         m_waitModal.center();
+        m_waitModal.hide();
+    }
+
+    public static void showWaitModal() {
         m_waitModal.show();
     }
 
     public static void hideWaitModal() {
-        if (m_waitModal != null) {
-            m_waitModal.hide();
-        }
+        m_waitModal.hide();
     }
 
     private void forceTabsCleaning() {

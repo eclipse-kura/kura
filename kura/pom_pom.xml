@@ -102,7 +102,6 @@
 			</modules>
 		</profile>
 	</profiles>
->>>>>>> 706efcb Convert kura.web2 to a P2 tycho based plugin
 
 	<repositories>
 		<repository>

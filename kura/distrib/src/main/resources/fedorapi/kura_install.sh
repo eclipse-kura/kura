@@ -8,7 +8,8 @@
 #  http://www.eclipse.org/legal/epl-v10.html
 #
 # Contributors:
-#     Red Hat Inc - Initial Fedora support
+#     Red Hat Inc
+#	  Eurotech
 #
 
 INSTALL_DIR=/opt/eclipse
@@ -28,6 +29,8 @@ if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
 fi
 
 # disable network manager
+systemctl stop NetworkManager.service
+systemctl disable NetworkManager.service
 systemctl disable systemd-networkd
 systemctl disable systemd-resolved
 systemctl disable systemd-hostnamed
@@ -49,12 +52,36 @@ systemctl start iptables
 
 #set up networking configuration
 mac_addr=$(head /sys/class/net/eth0/address | tr '[:lower:]' '[:upper:]')
-sed "s/^ssid=kura_gateway.*/ssid=kura_gateway_${mac_addr}/" < ${INSTALL_DIR}/kura/install/hostapd.conf > /etc/hostapd/hostapd.conf
-cp /etc/hostapd/hostapd.conf ${INSTALL_DIR}/kura/.data/hostapd.conf
+sed "s/^ssid=kura_gateway.*/ssid=kura_gateway_${mac_addr}/" < ${INSTALL_DIR}/kura/install/hostapd.conf > /etc/hostapd-wlan0.conf
+cp /etc/hostapd-wlan0.conf ${INSTALL_DIR}/kura/.data/hostapd-wlan0.conf
+
+cp ${INSTALL_DIR}/kura/install/dhcpd-eth0.conf /etc/dhcpd-eth0.conf
+cp ${INSTALL_DIR}/kura/install/dhcpd-eth0.conf ${INSTALL_DIR}/kura/.data/dhcpd-eth0.conf
+
+cp ${INSTALL_DIR}/kura/install/dhcpd-wlan0.conf /etc/dhcpd-wlan0.conf
+cp ${INSTALL_DIR}/kura/install/dhcpd-wlan0.conf ${INSTALL_DIR}/kura/.data/dhcpd-wlan0.conf
 
 #set up kuranet.conf
 cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/data/kuranet.conf
 cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/.data/kuranet.conf
+
+cp ${INSTALL_DIR}/kura/install/selinuxKura.pp /root
+cd /root
+SELINUX_KURA=$(semodule -l | grep selinuxKura)
+if [ -z $SELINUX_KURA ]; then
+	echo "Applying semodule..."
+    semodule -i selinuxKura.pp
+fi
+
+#copy snapshot_0.xml
+cp ${INSTALL_DIR}/kura/data/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
+
+#set up ifcfg files
+cp ${INSTALL_DIR}/kura/install/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-eth0
+cp ${INSTALL_DIR}/kura/install/ifcfg-eth0 ${INSTALL_DIR}/kura/.data/ifcfg-eth0
+
+cp ${INSTALL_DIR}/kura/install/ifcfg-wlan0 /etc/sysconfig/network-scripts/ifcfg-wlan0
+cp ${INSTALL_DIR}/kura/install/ifcfg-wlan0 ${INSTALL_DIR}/kura/.data/ifcfg-wlan0
 
 #set up dos2unix
 if [ ! -f "/usr/bin/dos2unix" ] ; then

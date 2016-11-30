@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,7 +7,8 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Eurotech
+ *     Eurotech and/or its affiliates
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura;
 
@@ -54,5 +55,9 @@ public enum KuraErrorCode {
 	/**
 	 * @since {@link org.eclipse.kura} 1.2.0
 	 */
-	INVALID_PARAMETER
+	INVALID_PARAMETER,
+	/**
+	 * Error executing process
+	 */
+	PROCESS_EXECUTION_ERROR
 }

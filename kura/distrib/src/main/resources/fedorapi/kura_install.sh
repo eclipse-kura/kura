@@ -37,6 +37,9 @@ systemctl disable systemd-hostnamed
 systemctl disable hostapd
 systemctl disable wpa_supplicant
 
+# remove existing /etc/resolv.conf file (it should be a link)
+rm /etc/resolv.conf
+
 #set up recover default configuration script
 cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/.data/.recoverDefaultConfig.sh
 chmod +x ${INSTALL_DIR}/kura/.data/.recoverDefaultConfig.sh
@@ -65,12 +68,13 @@ cp ${INSTALL_DIR}/kura/install/dhcpd-wlan0.conf ${INSTALL_DIR}/kura/.data/dhcpd-
 cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/data/kuranet.conf
 cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/.data/kuranet.conf
 
-cp ${INSTALL_DIR}/kura/install/selinuxKura.pp /root
-cd /root
+OLD_PATH=$(pwd)
 SELINUX_KURA=$(semodule -l | grep selinuxKura)
 if [ -z $SELINUX_KURA ]; then
 	echo "Applying semodule..."
+	cd ${INSTALL_DIR}/kura/install/
     semodule -i selinuxKura.pp
+    cd ${OLD_PATH}
 fi
 
 #copy snapshot_0.xml

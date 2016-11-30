@@ -147,12 +147,14 @@ public class CloudInstancesUi extends Composite {
     }
 
     public void loadData() {
+        EntryClassUi.showWaitModal();
         this.cloudServicesDataProvider.getList().clear();
 
         this.gwtCloudService.findCloudServices(new AsyncCallback<List<GwtCloudConnectionEntry>>() {
 
             @Override
             public void onFailure(Throwable caught) {
+                EntryClassUi.hideWaitModal();
                 FailureHandler.handle(caught, CloudInstancesUi.this.gwtCloudService.getClass().getSimpleName());
             }
 
@@ -162,6 +164,7 @@ public class CloudInstancesUi extends Composite {
                     CloudInstancesUi.this.cloudServicesDataProvider.getList().add(pair);
                 }
                 CloudInstancesUi.this.cloudServicesUi.refreshInternal();
+                EntryClassUi.hideWaitModal();
             }
         });
     }
@@ -294,20 +297,21 @@ public class CloudInstancesUi extends Composite {
                 CloudInstancesUi.this.gwtCloudService.createCloudServiceFromFactory(token, factoryPid,
                         newCloudServicePid, new AsyncCallback<Void>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught, CloudInstancesUi.this.gwtCloudService.getClass().getSimpleName());
-                        CloudInstancesUi.this.newConnectionModal.hide();
-                    }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught,
+                                        CloudInstancesUi.this.gwtCloudService.getClass().getSimpleName());
+                                CloudInstancesUi.this.newConnectionModal.hide();
+                            }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        CloudInstancesUi.this.newConnectionModal.hide();
-                        EntryClassUi.hideWaitModal();
-                        CloudInstancesUi.this.cloudServicesUi.refresh(2000);
-                    }
-                });
+                            @Override
+                            public void onSuccess(Void result) {
+                                CloudInstancesUi.this.newConnectionModal.hide();
+                                EntryClassUi.hideWaitModal();
+                                CloudInstancesUi.this.cloudServicesUi.refresh(2000);
+                            }
+                        });
             }
 
         });
@@ -369,18 +373,17 @@ public class CloudInstancesUi extends Composite {
                 CloudInstancesUi.this.gwtStatusService.connectDataService(token, connectionId,
                         new AsyncCallback<Void>() {
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        EntryClassUi.hideWaitModal();
-                        CloudInstancesUi.this.cloudServicesUi.refresh(1000);
-                    }
+                            @Override
+                            public void onSuccess(Void result) {
+                                EntryClassUi.hideWaitModal();
+                            }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
-                    }
-                });
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
+                            }
+                        });
             }
         });
     }
@@ -400,18 +403,17 @@ public class CloudInstancesUi extends Composite {
                 CloudInstancesUi.this.gwtStatusService.disconnectDataService(token, connectionId,
                         new AsyncCallback<Void>() {
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        EntryClassUi.hideWaitModal();
-                        CloudInstancesUi.this.cloudServicesUi.refresh(1000);
-                    }
+                            @Override
+                            public void onSuccess(Void result) {
+                                EntryClassUi.hideWaitModal();
+                            }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
-                    }
-                });
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
+                            }
+                        });
             }
         });
     }
@@ -431,18 +433,18 @@ public class CloudInstancesUi extends Composite {
                 CloudInstancesUi.this.gwtCloudService.deleteCloudServiceFromFactory(token, factoryPid, cloudServicePid,
                         new AsyncCallback<Void>() {
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        EntryClassUi.hideWaitModal();
-                        CloudInstancesUi.this.cloudServicesUi.refresh(2000);
-                    }
+                            @Override
+                            public void onSuccess(Void result) {
+                                EntryClassUi.hideWaitModal();
+                                CloudInstancesUi.this.cloudServicesUi.refresh(2000);
+                            }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
-                    }
-                });
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
+                            }
+                        });
             }
         });
     }

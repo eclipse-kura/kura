@@ -18,7 +18,10 @@ import java.util.logging.Logger;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.ForwardedEventTopic;
+import org.eclipse.kura.web.shared.model.GwtEventInfo;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -100,6 +103,19 @@ public class StatusPanelUi extends Composite {
                 loadStatusData();
             }
         });
+
+        EventService.Handler connectionStateChangeHandler = new EventService.Handler() {
+
+            @Override
+            public void handleEvent(GwtEventInfo eventInfo) {
+                if (StatusPanelUi.this.isVisible() && StatusPanelUi.this.isAttached())
+                    loadStatusData();
+            }
+        };
+
+        EventService.subscribe(ForwardedEventTopic.CLOUD_CONNECTION_STATUS_ESTABLISHED, connectionStateChangeHandler);
+        EventService.subscribe(ForwardedEventTopic.CLOUD_CONNECTION_STATUS_LOST, connectionStateChangeHandler);
+
     }
 
     // get current session from UI parent
@@ -150,58 +166,59 @@ public class StatusPanelUi extends Composite {
                         StatusPanelUi.this.currentSession.isNetAdminAvailable(),
                         new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        FailureHandler.handle(caught);
-                        StatusPanelUi.this.statusGridProvider.flush();
-                        EntryClassUi.hideWaitModal();
-                    }
-
-                    @Override
-                    public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-                        String title = "cloudStatus";
-                        StatusPanelUi.this.statusGridProvider.getList()
-                                .add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));
-
-                        StatusPanelUi.this.parent.updateConnectionStatusImage(false);
-
-                        int connectionNameIndex = 0;
-
-                        for (GwtGroupedNVPair resultPair : result) {
-                            if ("Connection Name".equals(resultPair.getName())
-                                    && resultPair.getValue().endsWith("CloudService")) {
-                                GwtGroupedNVPair connectionStatus = result.get(connectionNameIndex + 1); // done based
-                                // on the idea
-                                // that in the
-                                // pairs data
-                                // connection
-                                // name is
-                                // before
-                                // connection
-                                // status
-
-                                if ("Service Status".equals(connectionStatus.getName())
-                                        && "CONNECTED".equals(connectionStatus.getValue())) {
-                                    StatusPanelUi.this.parent.updateConnectionStatusImage(true);
-                                } else {
-                                    StatusPanelUi.this.parent.updateConnectionStatusImage(false);
-                                }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                FailureHandler.handle(caught);
+                                StatusPanelUi.this.statusGridProvider.flush();
+                                EntryClassUi.hideWaitModal();
                             }
-                            connectionNameIndex++;
 
-                            if (!title.equals(resultPair.getGroup())) {
-                                title = resultPair.getGroup();
+                            @Override
+                            public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                                String title = "cloudStatus";
                                 StatusPanelUi.this.statusGridProvider.getList()
                                         .add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));
+
+                                StatusPanelUi.this.parent.updateConnectionStatusImage(false);
+
+                                int connectionNameIndex = 0;
+
+                                for (GwtGroupedNVPair resultPair : result) {
+                                    if ("Connection Name".equals(resultPair.getName())
+                                            && resultPair.getValue().endsWith("CloudService")) {
+                                        GwtGroupedNVPair connectionStatus = result.get(connectionNameIndex + 1); // done
+                                                                                                                 // based
+                                        // on the idea
+                                        // that in the
+                                        // pairs data
+                                        // connection
+                                        // name is
+                                        // before
+                                        // connection
+                                        // status
+
+                                        if ("Service Status".equals(connectionStatus.getName())
+                                                && "CONNECTED".equals(connectionStatus.getValue())) {
+                                            StatusPanelUi.this.parent.updateConnectionStatusImage(true);
+                                        } else {
+                                            StatusPanelUi.this.parent.updateConnectionStatusImage(false);
+                                        }
+                                    }
+                                    connectionNameIndex++;
+
+                                    if (!title.equals(resultPair.getGroup())) {
+                                        title = resultPair.getGroup();
+                                        StatusPanelUi.this.statusGridProvider.getList()
+                                                .add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));
+                                    }
+                                    StatusPanelUi.this.statusGridProvider.getList().add(resultPair);
+                                }
+                                int size = StatusPanelUi.this.statusGridProvider.getList().size();
+                                StatusPanelUi.this.statusGrid.setVisibleRange(0, size);
+                                StatusPanelUi.this.statusGridProvider.flush();
+                                EntryClassUi.hideWaitModal();
                             }
-                            StatusPanelUi.this.statusGridProvider.getList().add(resultPair);
-                        }
-                        int size = StatusPanelUi.this.statusGridProvider.getList().size();
-                        StatusPanelUi.this.statusGrid.setVisibleRange(0, size);
-                        StatusPanelUi.this.statusGridProvider.flush();
-                        EntryClassUi.hideWaitModal();
-                    }
-                });
+                        });
             }
         });
     }

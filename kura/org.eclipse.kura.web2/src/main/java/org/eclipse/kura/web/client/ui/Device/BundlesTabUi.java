@@ -16,7 +16,10 @@ import java.util.ArrayList;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.ForwardedEventTopic;
+import org.eclipse.kura.web.shared.model.GwtEventInfo;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
@@ -45,6 +48,8 @@ public class BundlesTabUi extends Composite {
 
     interface BundlesTabUiUiBinder extends UiBinder<Widget, BundlesTabUi> {
     }
+
+    private boolean isRequestRunning = false;
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final ValidationMessages msgs = GWT.create(ValidationMessages.class);
@@ -110,6 +115,23 @@ public class BundlesTabUi extends Composite {
             }
         });
         // loadBundlesData();
+
+        EventService.Handler onBundleUpdatedHandler = new EventService.Handler() {
+
+            @Override
+            public void handleEvent(GwtEventInfo eventInfo) {
+                if (BundlesTabUi.this.isVisible() && BundlesTabUi.this.isAttached()) {
+                    loadBundlesData();
+                }
+            }
+        };
+
+        EventService.subscribe(ForwardedEventTopic.BUNDLE_INSTALLED, onBundleUpdatedHandler);
+        EventService.subscribe(ForwardedEventTopic.BUNDLE_RESOLVED, onBundleUpdatedHandler);
+        EventService.subscribe(ForwardedEventTopic.BUNDLE_STARTED, onBundleUpdatedHandler);
+        EventService.subscribe(ForwardedEventTopic.BUNDLE_STOPPED, onBundleUpdatedHandler);
+        EventService.subscribe(ForwardedEventTopic.BUNDLE_UNINSTALLED, onBundleUpdatedHandler);
+        EventService.subscribe(ForwardedEventTopic.BUNDLE_UNRESOLVED, onBundleUpdatedHandler);
     }
 
     private void updateButtons() {
@@ -241,13 +263,19 @@ public class BundlesTabUi extends Composite {
 
     public void loadBundlesData() {
 
-        this.bundlesDataProvider.getList().clear();
+        if (this.isRequestRunning) {
+            return;
+        }
 
+        this.isRequestRunning = true;
         EntryClassUi.showWaitModal();
+
+        this.bundlesDataProvider.getList().clear();
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onFailure(Throwable ex) {
+                BundlesTabUi.this.isRequestRunning = false;
                 EntryClassUi.hideWaitModal();
                 FailureHandler.handle(ex);
             }
@@ -258,22 +286,22 @@ public class BundlesTabUi extends Composite {
 
                     @Override
                     public void onFailure(Throwable caught) {
+                        BundlesTabUi.this.isRequestRunning = false;
                         EntryClassUi.hideWaitModal();
                         FailureHandler.handle(caught);
                         BundlesTabUi.this.bundlesDataProvider.flush();
-
                     }
 
                     @Override
                     public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                        EntryClassUi.hideWaitModal();
+                        BundlesTabUi.this.isRequestRunning = false;
                         for (GwtGroupedNVPair resultPair : result) {
                             BundlesTabUi.this.bundlesDataProvider.getList().add(resultPair);
                         }
                         int size = BundlesTabUi.this.bundlesDataProvider.getList().size();
                         BundlesTabUi.this.bundlesGrid.setVisibleRange(0, size);
                         BundlesTabUi.this.bundlesDataProvider.flush();
-                        EntryClassUi.hideWaitModal();
-
                     }
                 });
             }

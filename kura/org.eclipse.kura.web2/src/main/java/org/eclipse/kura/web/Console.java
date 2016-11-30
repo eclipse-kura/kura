@@ -23,6 +23,7 @@ import org.eclipse.kura.web.server.GwtCertificatesServiceImpl;
 import org.eclipse.kura.web.server.GwtCloudServiceImpl;
 import org.eclipse.kura.web.server.GwtComponentServiceImpl;
 import org.eclipse.kura.web.server.GwtDeviceServiceImpl;
+import org.eclipse.kura.web.server.GwtEventServiceImpl;
 import org.eclipse.kura.web.server.GwtNetworkServiceImpl;
 import org.eclipse.kura.web.server.GwtPackageServiceImpl;
 import org.eclipse.kura.web.server.GwtSecurityServiceImpl;
@@ -69,6 +70,7 @@ public class Console implements ConfigurableComponent {
 
     private EventAdmin m_eventAdmin;
     private AuthenticationManager authMgr;
+    private GwtEventServiceImpl eventService;
 
     // ----------------------------------------------------------------
     //
@@ -159,6 +161,9 @@ public class Console implements ConfigurableComponent {
 
                 String registeredUsername = (String) properties.get(CONSOLE_USERNAME);
                 this.authMgr = new AuthenticationManager(registeredUsername, propertyPassword);
+
+                this.eventService = new GwtEventServiceImpl();
+
                 initHTTPService(this.authMgr, servletRoot);
 
                 Map<String, Object> props = new HashMap<String, Object>();
@@ -166,6 +171,7 @@ public class Console implements ConfigurableComponent {
                 EventProperties eventProps = new EventProperties(props);
                 s_logger.info("postInstalledEvent() :: posting KuraConfigReadyEvent");
                 this.m_eventAdmin.postEvent(new Event(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC, eventProps));
+
             } else {
                 s_logger.info("Web interface disabled in Kura properties file.");
             }
@@ -236,7 +242,8 @@ public class Console implements ConfigurableComponent {
         this.m_httpService.unregister(servletRoot + "/skin");
         this.m_httpService.unregister(servletRoot + "/wires");
         this.m_httpService.unregister("/sse");
-
+        this.eventService.stop();
+        this.m_httpService.unregister(servletRoot + "/event");
     }
 
     public static BundleContext getBundleContext() {
@@ -279,5 +286,8 @@ public class Console implements ConfigurableComponent {
         this.m_httpService.registerServlet(servletRoot + "/cloudservices", new GwtCloudServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/wires", new GwtWireServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet("/sse", new EventHandlerServlet(), null, httpCtx);
+        this.m_httpService.registerServlet(servletRoot + "/event", this.eventService, null, httpCtx);
+        this.eventService.start();
     }
+
 }

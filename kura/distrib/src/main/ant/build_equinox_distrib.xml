@@ -9,9 +9,8 @@
 
     Contributors:
       Eurotech
-      Red Hat Inc - minor fixes on startup scripts, fix issue #603,
-      	 - Add Fedora support to RPi (#552), fix issue #476
-         - fix issue #640
+      Red Hat Inc 
+      
 -->
 <project name="build_equinox_distrib" default="dist-linux" basedir="../../../">
 
@@ -152,6 +151,9 @@
 
 		<!-- Set web UI port -->
 		<antcall target="set-http-port" />
+
+		<!-- Copy selinux policy change -->
+		<copy file="src/main/resources/${build.name}/selinuxKura.pp" tofile="${project.build.directory}/${build.output.name}/selinuxKura.pp" failonerror="false" />
 
 		<!-- Create the Kura start scripts -->
 		<echo file="${project.build.directory}/${build.output.name}/start_kura.sh" append="false"><![CDATA[#!/bin/sh
@@ -419,6 +421,9 @@ fi]]>
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/ip-up.local"
                         prefix="${build.output.name}/install" />
+                        
+			<zipfileset file="${project.build.directory}/${build.output.name}/selinuxKura.pp" 
+                prefix="${build.output.name}/install" />
 
 			<zipfileset file="${project.build.directory}/${build.output.name}/start_kura.sh"
                         fullpath="${build.output.name}/bin/start_kura.sh" filemode="777" />

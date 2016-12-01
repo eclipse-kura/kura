@@ -6,7 +6,7 @@
     xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0 http://karaf.apache.org/xmlns/features/v1.4.0"
     >
     
-    <repository>mvn:org.apache.camel.karaf/apache-camel/2.18.0/xml/features</repository>
+    <repository>mvn:org.apache.camel.karaf/apache-camel/2.17.2/xml/features</repository>
     
     <feature name="kura-core">
         <bundle dependency="true">mvn:org.osgi/org.osgi.service.wireadmin/1.0.1</bundle>
@@ -16,6 +16,16 @@
         <feature dependency="true">eventadmin</feature>
         
         <feature dependency="true">kura-runtime</feature>
+        
+        <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.api/${org.eclipse.kura.api.version}</bundle>
+        <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.core/${org.eclipse.kura.core.version}</bundle>
+        <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.core.cloud/${org.eclipse.kura.core.cloud.version}</bundle>
+        <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.core.comm/${org.eclipse.kura.core.comm.version}</bundle>
+        <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.core.configuration/${org.eclipse.kura.core.configuration.version}</bundle>
+        <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.core.crypto/${org.eclipse.kura.core.crypto.version}</bundle>
+        <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.core.net/${org.eclipse.kura.core.net.version}</bundle>
+        <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.core.status/${org.eclipse.kura.core.status.version}</bundle>
+        <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.deployment.agent/${org.eclipse.kura.deployment.agent.version}</bundle>
     </feature>
     
     <feature name="kura-camel" version="${project.version}" description="Eclipse Kura :: Apache Camel components">
@@ -23,8 +33,8 @@
         <feature dependency="true">camel-scr</feature>
         <feature dependency="true">kura-core</feature>
         
-        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.camel/1.1.0-SNAPSHOT</bundle>
-        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.camel.cloud.factory/1.0.0-SNAPSHOT</bundle>
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.camel/${org.eclipse.kura.camel.version}</bundle>
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.camel.cloud.factory/${org.eclipse.kura.camel.cloud.factory.version}</bundle>
     </feature>
     
     <!-- Examples -->
@@ -32,20 +42,20 @@
     <feature name="kura-example-publisher" version="${project.version}" description="Eclipse Kura Examples :: Publisher">
         <feature dependency="true">kura-core</feature>
     
-        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.example.publisher/1.0.2-SNAPSHOT</bundle>
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.example.publisher/${org.eclipse.kura.example.publisher.version}</bundle>
     </feature>
     
     <feature name="kura-example-camel-aggregation" version="${project.version}" description="Eclipse Kura Examples :: Camel :: Aggregation">
         <feature dependency="true">kura-core</feature>
         <feature dependency="true">kura-camel</feature>
     
-        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.example.camel.aggregation/1.1.0-SNAPSHOT</bundle>
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.example.camel.aggregation/${org.eclipse.kura.example.camel.aggregation.version}</bundle>
     </feature>
     
     <feature name="kura-example-camel-quickstart" version="${project.version}" description="Eclipse Kura Examples :: Camel :: Quickstart">
         <feature dependency="true">kura-core</feature>
         <feature dependency="true">kura-camel</feature>
     
-        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.example.camel.quickstart/1.1.0-SNAPSHOT</bundle>
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.example.camel.quickstart/${org.eclipse.kura.example.camel.quickstart.version}</bundle>
     </feature>
 </features>

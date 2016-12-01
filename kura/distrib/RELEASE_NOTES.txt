@@ -1,5 +1,11 @@
 Eclipse Kura - 2.1.0
 -------------------------------------------------------------------------
+Added Features :
+  * Apache Camel Integration
+  * New UI for Cloud Services
+  * Support for Raspbian on Raspberry Pi 3
+  * Support for Fedora on Raspberry Pi 2 and 3
+
 Bug Fixes :
   * Fixed github issues:
     * #851: [Web-UI] Label is sent instead of value for metatype parameters with options
@@ -119,6 +125,8 @@ Bug Fixes :
 
 
 Know Issues :
+  * The implementation of the CryptoService performs encryption using a
+    password that is hardcoded and published.
   * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
   * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
     "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".

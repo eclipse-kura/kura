@@ -422,7 +422,8 @@ fi]]>
 			<zipfileset file="src/main/resources/common/ip-up.local"
                         prefix="${build.output.name}/install" />
                         
-            <zipfileset file="${project.build.directory}/${build.output.name}/selinuxKura.pp" prefix="${build.output.name}/install" />
+			<zipfileset file="${project.build.directory}/${build.output.name}/selinuxKura.pp" 
+                prefix="${build.output.name}/install" />
 
 			<zipfileset file="${project.build.directory}/${build.output.name}/start_kura.sh"
                         fullpath="${build.output.name}/bin/start_kura.sh" filemode="777" />

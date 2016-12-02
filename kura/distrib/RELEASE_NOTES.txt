@@ -11,6 +11,8 @@ Bug Fixes :
     * #851: [Web-UI] Label is sent instead of value for metatype parameters with options
     * #776: Serialization issue in cloud window
     * #753: libhidapi not correctly compiled for armv5
+    * #743: WLAN not detected as WLAN on Fedberry
+    * #742: Unable to establish stable network connection on Fedberry
     * #732: Unable to configure CloudService instance when component gets unregistered
     * #724: [Release 2.1.0] Check API packages
     * #716: Create a simple Camel Java DSL based example publisher
@@ -148,8 +150,6 @@ Know Issues :
   * #778: [Net] Refactor needed in org.eclipse.kura.core.net
   * #752: [DbDataStore] repair is very slow on big tables
   * #751: [DbDataStore] defrag and checkpoint are not per-table operations
-  * #743: WLAN not detected as WLAN on Fedberry
-  * #742: Unable to establish stable network connection on Fedberry
   * #737: Fedora distribution fails to start up
   * #736: Kura installer continues despite errors occurred
   * #725: Serial receive timeout is not forwarded to javax.comm.CommPort

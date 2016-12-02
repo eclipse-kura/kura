@@ -43,7 +43,8 @@ public class CryptoServiceImpl implements CryptoService {
     private static final Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
 
     private static final String ALGORITHM = "AES";
-    private static final byte[] SECRET_KEY = "rv;ipse329183!@#".getBytes();
+    private static final byte[] SECRET_KEY = System
+            .getProperty("org.eclipse.kura.core.crypto.secretKey", "rv;ipse329183!@#").getBytes();
 
     private String keystorePasswordPath;
 
@@ -125,7 +126,8 @@ public class CryptoServiceImpl implements CryptoService {
 
     @Override
     @Deprecated
-    public String encryptAes(String value) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    public String encryptAes(String value) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+            IllegalBlockSizeException, BadPaddingException {
         char[] encryptedValue = null;
         try {
             encryptedValue = encryptAes(value.toCharArray());
@@ -149,8 +151,8 @@ public class CryptoServiceImpl implements CryptoService {
 
     @Override
     @Deprecated
-    public String decryptAes(String encryptedValue)
-            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException {
+    public String decryptAes(String encryptedValue) throws NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidKeyException, IOException, IllegalBlockSizeException, BadPaddingException {
         try {
             return new String(decryptAes(encryptedValue.toCharArray()));
         } catch (KuraException e) {

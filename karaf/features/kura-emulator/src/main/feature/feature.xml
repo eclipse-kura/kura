@@ -8,6 +8,11 @@
     
     <feature name="kura-emulator">
         <feature dependency="true">kura-core</feature>
+        
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.emulator/${org.eclipse.kura.emulator.version}</bundle>
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.emulator.clock/${org.eclipse.kura.emulator.clock.version}</bundle>
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.emulator.gpio/${org.eclipse.kura.emulator.gpio.version}</bundle>
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.emulator.net/${org.eclipse.kura.emulator.net.version}</bundle>
     </feature>
     
 </features>

@@ -40,30 +40,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.emulator</artifactId>
-            <version>[1.0,2.0)</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.emulator.clock</artifactId>
-            <version>[1.0,2.0)</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.emulator.gpio</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.emulator.net</artifactId>
-            <version>[1.0,2.0)</version>
-        </dependency>
-
     </dependencies>
 
     <build>

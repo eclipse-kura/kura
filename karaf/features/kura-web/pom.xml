@@ -73,25 +73,6 @@
 			</exclusions>
 		</dependency>
 
-		<dependency>
-			<groupId>com.gwt</groupId>
-			<artifactId>com.gwt.user</artifactId>
-			<version>1.0.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>*</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
-			<scope>compile</scope>
-		</dependency>
-
 	</dependencies>
 
 	<build>

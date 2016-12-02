@@ -11,8 +11,16 @@
         
         <bundle dependency="true">mvn:commons-net/commons-net/3.5</bundle>
         
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.linux.bluetooth/${org.eclipse.kura.linux.bluetooth.version}</bundle>
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.linux.clock/${org.eclipse.kura.linux.clock.version}</bundle>
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.linux.command/${org.eclipse.kura.linux.command.version}</bundle>
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.linux.gpio/${org.eclipse.kura.linux.gpio.version}</bundle>
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.linux.net/${org.eclipse.kura.linux.net.version}</bundle>
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.linux.position/${org.eclipse.kura.linux.position.version}</bundle>
         <bundle>mvn:org.eclipse.kura/org.eclipse.kura.linux.usb/${org.eclipse.kura.linux.usb.version}</bundle>
         <bundle>mvn:org.eclipse.kura/org.eclipse.kura.linux.watchdog/${org.eclipse.kura.linux.watchdog.version}</bundle>
+        
+        <bundle>mvn:org.eclipse.kura/jdk.dio/${jdk.dio.version}</bundle>
     </feature>
     
     <feature name="kura-linux-armv6hf" version="${project.version}" description="Eclipse Kura :: Linux :: ARMv6 HF">
@@ -22,7 +30,7 @@
     
     <feature name="kura-linux-armv6hf-natives" version="${project.version}" hidden="true">
         <bundle>mvn:org.eclipse.kura/org.eclipse.kura.linux.usb.armv6hf/${org.eclipse.kura.linux.usb.version}</bundle>
-        <bundle>mvn:org.eclipse.kura/jdk.dio.armv6hf/1.0.6-SNAPSHOT</bundle>
+        <bundle>mvn:org.eclipse.kura/jdk.dio.armv6hf/${jdk.dio.version}</bundle>
     </feature>
     
     <feature name="kura-linux-x86_64" version="${project.version}" description="Eclipse Kura :: Linux :: x86-64">
@@ -32,7 +40,7 @@
     
     <feature name="kura-linux-x86_64-natives" version="${project.version}" hidden="true">
         <bundle>mvn:org.eclipse.kura/org.eclipse.kura.linux.usb.x86_64/${org.eclipse.kura.linux.usb.version}</bundle>
-        <bundle>mvn:org.eclipse.kura/jdk.dio.x86_64/1.0.6-SNAPSHOT</bundle>
+        <bundle>mvn:org.eclipse.kura/jdk.dio.x86_64/${jdk.dio.version}</bundle>
     </feature>
     
 </features>

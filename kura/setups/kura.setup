@@ -26,21 +26,21 @@
       name="Choose developer type">
     <setupTask
         xsi:type="setup:VariableTask"
-        name="kura.developerType"
+        name="kura.developer.type"
         storageURI="scope://Workspace"
         label="Developer Type">
       <choice
-          value="user"
-          label="User"/>
-      <choice
           value="developer"
           label="Developer"/>
+      <choice
+          value="user"
+          label="User"/>
       <description>Select which type of developer for Kura you are</description>
     </setupTask>
     <setupTask
         xsi:type="setup:EclipseIniTask"
-        option="-Dkura.developerType="
-        value="${kura.developerType}"
+        option="-Dkura.developer.type="
+        value="${kura.developer.type}"
         vm="true"/>
   </setupTask>
   <setupTask
@@ -189,7 +189,7 @@
       name="Developer Type">
     <setupTask
         xsi:type="setup:CompoundTask"
-        filter="(kura.developerType=user)"
+        filter="(kura.developer.type=user)"
         name="User">
       <setupTask
           xsi:type="maven:MavenImportTask">
@@ -203,7 +203,7 @@
     </setupTask>
     <setupTask
         xsi:type="setup:CompoundTask"
-        filter="(kura.developerType=developer)"
+        filter="(kura.developer.type=developer)"
         name="Developer">
       <setupTask
           xsi:type="maven:MavenImportTask">

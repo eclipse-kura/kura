@@ -127,6 +127,8 @@ Bug Fixes :
 Know Issues :
   * The implementation of the CryptoService performs encryption using a
     password that is hardcoded and published.
+  * Kura can be run in a Java 8 VM, but current OSGi container does not support bundles with manifests that specify
+    a "Bundle-RequiredExecutionEnvironment" equal to "JavaSE-1.8".
   * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
   * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
     "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".

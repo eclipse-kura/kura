@@ -69,7 +69,7 @@ public class LinuxNamed {
             s_procString = "/usr/sbin/named";
             s_logFileName = "/var/log/named.log";
             s_rfc1912ZonesFilename = "/etc/bind/named.rfc1912.zones";
-        } else if (OS_VERSION.equals(
+        } else if (OS_VERSION.equals(KuraConstants.Fedora_Pi.getImageName()) || OS_VERSION.equals(
                 KuraConstants.Reliagate_20_26.getImageName() + "_" + KuraConstants.Reliagate_20_26.getImageVersion())) {
             s_persistentConfigFileName = "/etc/named.conf";
             s_procString = "named -u named -t";

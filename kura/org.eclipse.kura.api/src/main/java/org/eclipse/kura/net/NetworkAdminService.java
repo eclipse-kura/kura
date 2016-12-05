@@ -21,16 +21,13 @@ import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiHotspotInfo;
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Service API for getting and setting network interface configurations.
  *
  * @author eurotech
  *
- * @noimplement This interface is not intended to be implemented by clients.
  */
-@ProviderType
 public interface NetworkAdminService {
 
     /**

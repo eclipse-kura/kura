@@ -20,13 +20,8 @@ import java.io.OutputStream;
 import javax.microedition.io.Connection;
 import javax.microedition.io.ConnectionNotFoundException;
 
-import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.io.ConnectorService;
 
-/**
- * @noimplement This interface is not intended to be implemented by clients.
- */
-@ProviderType
 public interface BluetoothConnector extends ConnectorService {
 
     /**

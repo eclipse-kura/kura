@@ -19,7 +19,6 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
-import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.component.ComponentContext;
 
 /**
@@ -59,10 +58,7 @@ import org.osgi.service.component.ComponentContext;
  * to implement the {@link ConfigurableComponent} interface.
  *
  * @since {@link org.eclipse.kura.cloud.factory} 1.0.0
- * 
- * @noimplement This interface is not intended to be implemented by clients.
  */
-@ProviderType
 public interface CloudServiceFactory {
 
     /**

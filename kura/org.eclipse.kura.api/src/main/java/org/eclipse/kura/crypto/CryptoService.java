@@ -21,15 +21,12 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import org.eclipse.kura.KuraException;
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The CryptoService is used to provide AES encrypt and decrypt functionality, Base64 encoding and
  * decoding, and SHA1 hash generation.
  *
- * @noimplement This interface is not intended to be implemented by clients.
  */
-@ProviderType
 public interface CryptoService {
 
     /**

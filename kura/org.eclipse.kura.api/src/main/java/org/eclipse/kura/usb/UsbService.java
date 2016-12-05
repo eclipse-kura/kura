@@ -16,14 +16,10 @@ import java.util.List;
 import javax.usb.UsbServices;
 
 import org.eclipse.kura.KuraException;
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * OSGi interface for getting JSR-80 javax.usb.UsbServices currently available in the system.
- * 
- * @noimplement This interface is not intended to be implemented by clients.
  */
-@ProviderType
 public interface UsbService {
 
     /**

@@ -14,12 +14,6 @@ package org.eclipse.kura.bluetooth;
 import java.util.List;
 import java.util.UUID;
 
-import org.osgi.annotation.versioning.ProviderType;
-
-/**
- * @noimplement This interface is not intended to be implemented by clients.
- */
-@ProviderType
 public interface BluetoothGattService {
 
     /*

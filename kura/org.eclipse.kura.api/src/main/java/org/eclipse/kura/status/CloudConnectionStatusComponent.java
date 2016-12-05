@@ -11,15 +11,11 @@
  *******************************************************************************/
 package org.eclipse.kura.status;
 
-import org.osgi.annotation.versioning.ProviderType;
-
 /**
  * This interface must be implemented by classes which want to trigger a status change on the
  * {@link CloudConnectionStatusService}
  *
- * @noimplement This interface is not intended to be implemented by clients.
  */
-@ProviderType
 public interface CloudConnectionStatusComponent {
 
     /**

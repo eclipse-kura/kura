@@ -11,14 +11,10 @@
  *******************************************************************************/
 package org.eclipse.kura.system;
 
-import org.osgi.annotation.versioning.ProviderType;
-
 /**
  * Service to perform basic system tasks.
  *
- * @noimplement This interface is not intended to be implemented by clients.
  */
-@ProviderType
 public interface SystemAdminService {
 
     /**

@@ -11,15 +11,12 @@ package org.eclipse.kura.driver;
 
 import java.util.List;
 
-import org.osgi.annotation.versioning.ProviderType;
-
 /**
  * The interface DriverService is an utility service API to provide useful
  * methods for drivers.
  *
  * @noimplement This interface is not intended to be implemented by clients.
  */
-@ProviderType
 public interface DriverService {
 
     /**

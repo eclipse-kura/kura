@@ -8,6 +8,8 @@ Added Features :
 
 Bug Fixes :
   * Fixed github issues:
+    * #860: [Kura 2.1.0 QA] JUnit in Raspberry Pi 3's installation package
+    * #859: [Kura 2.1.0 QA] Installation warnings/errors on Raspberry Pi 3
     * #851: [Web-UI] Label is sent instead of value for metatype parameters with options
     * #776: Serialization issue in cloud window
     * #753: libhidapi not correctly compiled for armv5

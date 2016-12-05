@@ -1,0 +1,423 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.eclipse.kura.karaf</groupId>
+        <artifactId>deployment</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>..</relativePath>
+    </parent>
+
+    <groupId>org.eclipse.kura.karaf.targets</groupId>
+    <artifactId>targets</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>docker-emulator-fedora</module>
+        <module>fedberry-24</module>
+        <module>rhel-7-x86_64</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>framework</artifactId>
+            <version>${karaf.version}</version>
+            <type>kar</type>
+            <scope></scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>framework</artifactId>
+            <version>${karaf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>standard</artifactId>
+            <version>${karaf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>compile</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>spring</artifactId>
+            <version>${karaf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.kura.karaf</groupId>
+            <artifactId>kura-runtime</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.kura.karaf</groupId>
+            <artifactId>kura-core</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.kura.karaf</groupId>
+            <artifactId>kura-web</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+
+        <resources>
+            <resource>
+                <targetPath>${project.build.directory}/root</targetPath>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <targetPath>${project.build.directory}/root</targetPath>
+                <directory>src/main/resources-filtered</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <targetPath>${project.build.directory}/root</targetPath>
+                <directory>${project.build.directory}/maven-shared-archive-resources/root/plain</directory>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <startupFeatures>
+                        <feature>eventadmin</feature>
+                    </startupFeatures>
+                    
+                    <bootFeatures>
+                        <feature>standard</feature>
+                        <feature>webconsole</feature>
+
+                        <feature>kura-runtime</feature>
+                        <feature>kura-core</feature>
+                        <feature>kura-camel</feature>
+                        
+                        <feature>kura-web</feature>
+                    </bootFeatures>
+                    <installedFeatures>
+                        <feature>wrapper</feature>
+                        <feature>kura-example-publisher</feature>
+                        <feature>kura-example-camel-aggregation</feature>
+                        <feature>kura-example-camel-quickstart</feature>
+                    </installedFeatures>
+
+                    <javase>1.8</javase>
+
+                    <archiveTarGz>false</archiveTarGz>
+                    <archiveZip>false</archiveZip>
+                    
+                    <includeBuildOutputDirectory>false</includeBuildOutputDirectory>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+
+        <profile>
+            <id>prepare-distribution</id>
+            <activation>
+                <file>
+                    <exists>target.properties</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- copy over and cleanup karaf distribution -->
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>prepare-by-ant</id>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <phase>prepare-package</phase>
+                                <configuration>
+                                    <target>
+                                        <mkdir dir="${project.build.directory}/distribution" />
+                                        <copy todir="${project.build.directory}/distribution">
+                                            <fileset dir="${project.build.directory}/assembly">
+                                                <exclude name="bin/*.bat" />
+                                                <exclude name="bin/contrib/**" />
+                                            </fileset>
+                                        </copy>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>rpm</id>
+            <activation>
+                <file>
+                    <exists>markers/rpm</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>de.dentrassi.maven</groupId>
+                        <artifactId>rpm</artifactId>
+                        <configuration>
+
+                            <packageName>eclipse-kura-${project.artifactId}</packageName>
+
+                            <rulesets>
+                                <ruleset>
+                                    <id>karaf-rules</id>
+                                    <rules>
+                                        <rule>
+                                            <mode>0755</mode>
+                                            <when>
+                                                <prefix>/opt/eclipse/kura/bin</prefix>
+                                            </when>
+                                        </rule>
+                                        <rule>
+                                            <configuration>true</configuration>
+                                            <when>
+                                                <prefix>/opt/eclipse/kura/etc</prefix>
+                                            </when>
+                                        </rule>
+                                        <rule>
+                                            <configuration>true</configuration>
+                                            <when>
+                                                <prefix>/etc</prefix>
+                                            </when>
+                                        </rule>
+                                    </rules>
+                                </ruleset>
+                            </rulesets>
+
+                            <requires>
+                                <require>jre-1.8.0-headless</require>
+                                <require>procps</require>
+                                <require>systemd-libs</require>
+                            </requires>
+
+                            <entries>
+
+                                <entry>
+                                    <name>/opt/eclipse/kura</name>
+                                    <directory>true</directory>
+                                </entry>
+
+                                <entry>
+                                    <name>/etc/kura</name>
+                                    <directory>true</directory>
+                                </entry>
+
+                                <entry>
+                                    <name>/var/kura</name>
+                                    <directory>true</directory>
+                                </entry>
+
+                                <entry>
+                                    <name>/var/kura/data</name>
+                                    <directory>true</directory>
+                                </entry>
+
+                                <entry>
+                                    <name>/var/kura/snapshots</name>
+                                    <directory>true</directory>
+                                </entry>
+
+                                <entry>
+                                    <name>/var/kura/packages</name>
+                                    <directory>true</directory>
+                                </entry>
+                            
+                                <!-- the main karaf distribution -->
+
+                                <entry>
+                                    <name>/opt/eclipse/kura</name>
+                                    <collect>
+                                        <from>${project.build.directory}/distribution</from>
+                                    </collect>
+                                    <ruleset>karaf-rules</ruleset>
+                                </entry>
+
+                                <entry>
+                                    <name>/</name>
+                                    <collect>
+                                        <from>${project.build.directory}/root</from>
+                                        <directories>false</directories>
+                                    </collect>
+                                </entry>
+                                
+                                <!-- workaround for issue #321 -->
+                                <entry>
+                                    <name>/lib64/libudev.so.0</name>
+                                    <linkTo>/lib64/libudev.so.1</linkTo>
+                                </entry>
+                                
+                            </entries>
+                            
+                            <skipSigning>true</skipSigning>
+                        </configuration>
+                        
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>rpm</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>systemd</id>
+            <activation>
+                <file>
+                    <exists>markers/systemd</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-remote-resources-plugin</artifactId>
+                        <configuration>
+                            <resourceBundles combine.children="append">
+                                <resourceBundle>org.eclipse.kura.karaf.fragments:systemd:${project.version}</resourceBundle>
+                            </resourceBundles>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>process</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
+        <profile>
+            <id>raspberry-pi-2</id>
+            <activation>
+                <file>
+                    <exists>markers/raspberry-pi-2</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-remote-resources-plugin</artifactId>
+                        <configuration>
+                            <resourceBundles combine.children="append">
+                                <resourceBundle>org.eclipse.kura.karaf.fragments:raspberry-pi-2:${project.version}</resourceBundle>
+                            </resourceBundles>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>process</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>base</id>
+            <activation>
+                <file>
+                    <exists>markers/base</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-remote-resources-plugin</artifactId>
+                        <configuration>
+                            <resourceBundles combine.children="append">
+                                <resourceBundle>org.eclipse.kura.karaf.fragments:base:${project.version}</resourceBundle>
+                            </resourceBundles>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>process</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.polago.maven.plugins</groupId>
+                        <artifactId>merge-properties-maven-plugin</artifactId>
+                        <version>1.0.1</version>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/root/etc/kura</outputDirectory>
+                            <outputFile>kura.properties</outputFile>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources-filtered-merged</directory>
+                                    <includes>
+                                        <include>**/etc/kura/kura.properties</include>
+                                    </includes>
+                                    <filtering>true</filtering>
+                                </resource>
+                                <resource>
+                                    <directory>${project.build.directory}/maven-shared-archive-resources/root/merged</directory>
+                                    <includes>
+                                        <include>**/etc/kura/kura.properties</include>
+                                    </includes>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>merge-kura-properties</id>
+                                <goals>
+                                    <goal>merge</goal>
+                                </goals>
+                                <phase>prepare-package</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

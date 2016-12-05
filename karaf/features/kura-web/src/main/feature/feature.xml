@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features
+    xmlns="http://karaf.apache.org/xmlns/features/v1.4.0"
+    name="kura-web"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0 http://karaf.apache.org/xmlns/features/v1.4.0"
+    >
+    <feature name="kura-web">
+        <feature dependency="true">webconsole</feature>
+        <feature dependency="true">kura-core</feature>
+        <bundle dependency="true">mvn:commons-fileupload/commons-fileupload/1.2.2</bundle>
+        <bundle dependency="true">mvn:commons-net/commons-net/3.1</bundle>
+        <bundle dependency="true">mvn:commons-io/commons-io/2.4</bundle>
+        
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.web2/${org.eclipse.kura.web2.version}</bundle>
+        
+        <bundle>mvn:com.gwt/com.gwt.user/${com.gwt.user.version}</bundle>
+    </feature>
+</features>

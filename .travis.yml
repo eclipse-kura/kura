@@ -6,8 +6,17 @@ jdk:
   - oraclejdk8
 
 before_script:
+  - echo ==== Setting up toolchain.xml ====
   - ls /usr/lib/jvm
   - cp kura/setups/toolchains/toolchains-travis.xml ~/.m2/toolchains.xml
+  - echo ==== Setting up Maven 3.3 for Travis ====
+  - wget -O maven.tar.gz http://www-eu.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
+  - mkdir maven
+  - cd maven ; tar --strip-components 1 -xzf ../maven.tar.gz ; cd ..
+  - chmod a+x maven/bin/mvn
+  - export M2_HOME=$PWD/maven
+  - export PATH=$PWD/maven/bin:${PATH}
+  - hash -r
 
 script: RUN_TESTS=true ./build-all.sh -Pbree
 

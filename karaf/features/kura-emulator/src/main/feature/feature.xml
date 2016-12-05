@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features
+    xmlns="http://karaf.apache.org/xmlns/features/v1.4.0"
+    name="kura-emulator"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0 http://karaf.apache.org/xmlns/features/v1.4.0"
+    >
+    
+    <feature name="kura-emulator">
+        <feature dependency="true">kura-core</feature>
+        
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.emulator/${org.eclipse.kura.emulator.version}</bundle>
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.emulator.clock/${org.eclipse.kura.emulator.clock.version}</bundle>
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.emulator.gpio/${org.eclipse.kura.emulator.gpio.version}</bundle>
+        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.emulator.net/${org.eclipse.kura.emulator.net.version}</bundle>
+    </feature>
+    
+</features>

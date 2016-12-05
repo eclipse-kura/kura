@@ -1,0 +1,223 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.eclipse.kura.karaf</groupId>
+        <artifactId>karaf</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>..</relativePath>
+    </parent>
+
+    <artifactId>emulator-instance</artifactId>
+    <packaging>karaf-assembly</packaging>
+    <name>Local Karaf emulator assembly</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>framework</artifactId>
+            <version>${karaf.version}</version>
+            <type>kar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>framework</artifactId>
+            <version>${karaf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>standard</artifactId>
+            <version>${karaf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>spring</artifactId>
+            <version>${karaf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.kura.karaf</groupId>
+            <artifactId>kura-runtime</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.kura.karaf</groupId>
+            <artifactId>kura-core</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.kura.karaf</groupId>
+            <artifactId>kura-web</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.kura.karaf</groupId>
+            <artifactId>kura-emulator</artifactId>
+            <version>${project.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <startLevel>80</startLevel>
+                    <aggregateFeatures>false</aggregateFeatures>
+                    <addTransitiveFeatures>false</addTransitiveFeatures>
+
+                    <installedFeatures>
+                        <feature>wrapper</feature>
+                    </installedFeatures>
+                    <bootFeatures>
+                        <feature>framework</feature>
+                        <feature>jaas</feature>
+                        <feature>shell</feature>
+                        <feature>feature</feature>
+                        <feature>ssh</feature>
+                        <feature>management</feature>
+                        <feature>bundle</feature>
+                        <feature>config</feature>
+                        <feature>deployer</feature>
+                        <feature>diagnostic</feature>
+                        <feature>instance</feature>
+                        <feature>kar</feature>
+                        <feature>log</feature>
+                        <feature>package</feature>
+                        <feature>service</feature>
+                        <feature>system</feature>
+
+                        <feature>webconsole</feature>
+
+                        <feature>kura-runtime</feature>
+                        <feature>kura-core</feature>
+                        <feature>kura-emulator</feature>
+                        <feature>kura-web</feature>
+                    </bootFeatures>
+                    <javase>1.8</javase>
+
+                    <aggregateFeatures>true</aggregateFeatures>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>run</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <configuration>
+                            <mainClass>org.apache.karaf.main.Main</mainClass>
+                            <workingDirectory>target/assembly</workingDirectory>
+                            <systemProperties>
+                                <systemProperty>
+                                    <key>karaf.startLocalConsole</key>
+                                    <value>true</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>karaf.startRemoteShell</key>
+                                    <value>true</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>karaf.home</key>
+                                    <value>${project.build.directory}/assembly</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>karaf.instances</key>
+                                    <value>${project.build.directory}/assembly/instances</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>karaf.base</key>
+                                    <value>${project.build.directory}/assembly</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>karaf.data</key>
+                                    <value>${project.build.directory}/assembly/data</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>karaf.etc</key>
+                                    <value>${project.build.directory}/assembly/etc</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>karaf.restart.jvm.supported</key>
+                                    <value>false</value>
+                                </systemProperty>
+
+                                <!-- Kura properties -->
+
+                                <systemProperty>
+                                    <key>kura.data</key>
+                                    <value>${project.build.directory}/assembly/kura/data</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>kura.snapshots</key>
+                                    <value>${project.build.directory}/assembly/kura/snapshots</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>kura.tmp</key>
+                                    <value>${project.build.directory}/assembly/kura/tmp</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>kura.have.net.admin</key>
+                                    <value>false</value>
+                                </systemProperty>
+
+                                <systemProperty>
+                                    <key>kura.plugins</key>
+                                    <value>${project.build.directory}/assembly/kura/plugins</value>
+                                </systemProperty>
+
+                                <systemProperty>
+                                    <key>dpa.configuration</key>
+                                    <value>${project.build.directory}/assembly/etc/dpa.properties</value>
+                                </systemProperty>
+
+                                <systemProperty>
+                                    <key>db.service.hsqldb.url</key>
+                                    <value>jdbc:hsqldb:file:${project.build.directory}/assembly/kura/data/db/data;hsqldb.lock_file=false</value>
+                                </systemProperty>
+
+                            </systemProperties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

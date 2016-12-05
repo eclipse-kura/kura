@@ -14,7 +14,6 @@ package org.eclipse.kura.configuration;
 import java.util.Map;
 
 import org.eclipse.kura.configuration.metatype.OCD;
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The ComponentConfiguration groups all the information related to the Configuration of a Component.
@@ -23,10 +22,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * does not provide access to certain aspects such as the required attribute,
  * the min and max values. Instead it returns the raw ObjectClassDefintion as parsed
  * from the MetaType Information XML resource associated to this Component.
- * 
- * @noimplement This interface is not intended to be implemented by clients.
  */
-@ProviderType
 public interface ComponentConfiguration {
 
     /**

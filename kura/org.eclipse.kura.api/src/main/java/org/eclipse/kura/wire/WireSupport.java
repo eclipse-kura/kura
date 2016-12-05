@@ -11,7 +11,6 @@ package org.eclipse.kura.wire;
 
 import java.util.List;
 
-import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.wireadmin.Consumer;
 import org.osgi.service.wireadmin.Producer;
 
@@ -22,7 +21,6 @@ import org.osgi.service.wireadmin.Producer;
  *
  * @noimplement This interface is not intended to be implemented by clients.
  */
-@ProviderType
 public interface WireSupport extends Producer, Consumer {
 
     /**

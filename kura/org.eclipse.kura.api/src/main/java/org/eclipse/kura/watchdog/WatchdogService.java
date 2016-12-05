@@ -13,16 +13,11 @@ package org.eclipse.kura.watchdog;
 
 import java.util.List;
 
-import org.osgi.annotation.versioning.ProviderType;
-
 /**
  * This interface provides methods for starting, stopping, and updating a
  * hardware watchdog present on the system. Updating the watchdog, once
  * started, prevents the system from rebooting.
- * 
- * @noimplement This interface is not intended to be implemented by clients.
  */
-@ProviderType
 public interface WatchdogService {
 
     /**

@@ -12,14 +12,11 @@
 package org.eclipse.kura.net.modem;
 
 import org.eclipse.kura.net.NetInterfaceAddress;
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Modem Interface Address represents the modem state
- * 
- * @noimplement This interface is not intended to be implemented by clients.
+ *
  */
-@ProviderType
 public interface ModemInterfaceAddress extends NetInterfaceAddress {
 
     /**

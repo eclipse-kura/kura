@@ -16,7 +16,6 @@ import java.util.List;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The NetworkService allows to browse and configure the network interfaces of the system.
@@ -24,10 +23,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * NetworkService extends what is offered by the standard Java APIs by offering information
  * like the NetworkInterface type - e.g. wired vs wireless vs modem - and additional information
  * regarding the address of a NetworkInterface - e.g. its getway address, DNS, and so on.
- * 
- * @noimplement This interface is not intended to be implemented by clients.
  */
-@ProviderType
 public interface NetworkService {
 
     /**

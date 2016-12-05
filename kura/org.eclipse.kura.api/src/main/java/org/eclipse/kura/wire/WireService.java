@@ -13,7 +13,6 @@ import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This WireService interface provides all necessary service API methods to
@@ -21,7 +20,6 @@ import org.osgi.annotation.versioning.ProviderType;
  *
  * @noimplement This interface is not intended to be implemented by clients.
  */
-@ProviderType
 public interface WireService {
 
     /**

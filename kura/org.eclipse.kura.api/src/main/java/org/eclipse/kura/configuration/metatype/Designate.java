@@ -18,8 +18,6 @@
 
 package org.eclipse.kura.configuration.metatype;
 
-import org.osgi.annotation.versioning.ProviderType;
-
 /**
  * <p>
  * Java class for Tdesignate complex type.
@@ -46,9 +44,8 @@ import org.osgi.annotation.versioning.ProviderType;
  * &lt;/complexType>
  * </pre>
  *
- * @noimplement This interface is not intended to be implemented by clients.
+ *
  */
-@ProviderType
 public interface Designate {
 
     /**

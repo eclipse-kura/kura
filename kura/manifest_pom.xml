@@ -242,31 +242,7 @@
                 <updatePolicy>always</updatePolicy>
             </snapshots>
         </repository>
-        <!--
-            See Github issue #1755
-            https://github.com/bndtools/bnd/issues/1755
-        -->
-        <repository>
-            <id>repo.eclipse.org</id>
-            <name>Eclipse Kura Repository - Releases</name>
-            <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
-        </repository>
     </repositories>
-
-    <!-- 
-        See Github issue #1726 
-        https://github.com/bndtools/bnd/issues/1726
-    -->
-    <pluginRepositories>
-        <pluginRepository>
-            <id>bnd-snapshots</id>
-            <url>https://bndtools.ci.cloudbees.com/job/bnd.master/lastSuccessfulBuild/artifact/dist/bundles/</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
 
     <build>
         <extensions>
@@ -593,24 +569,8 @@
                         <strictVersions>true</strictVersions>
                         <format>${kura.build.version}</format>
                     </configuration>
-                </plugin>               
-                <plugin>
-                    <groupId>biz.aQute.bnd</groupId>
-                    <artifactId>bnd-baseline-maven-plugin</artifactId>
-                    <version>3.4.0-SNAPSHOT</version>
-                    <configuration>
-                        <continueOnError>false</continueOnError>
-                        <fullReport>true</fullReport>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>baseline</id>
-                            <goals>
-                                <goal>baseline</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                 </plugin>
+
         		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>

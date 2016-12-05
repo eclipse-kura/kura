@@ -16,7 +16,6 @@ import java.util.List;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.message.KuraPayload;
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The CloudClient is designed to be used by single application bundles.
@@ -75,10 +74,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * Note that the default subscription of a CloudClient allows remote servers
  * or applications running on other devices to publish messages addressed
  * to specific applications running on specific devices.
- * 
- * @noimplement This interface is not intended to be implemented by clients.
  */
-@ProviderType
 public interface CloudClient {
 
     /**

@@ -14,14 +14,11 @@ package org.eclipse.kura.command;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
-import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This interface provides methods for running system commands from the web console.
  *
- * @noimplement This interface is not intended to be implemented by clients.
  */
-@ProviderType
 public interface PasswordCommandService {
 
     /**

@@ -13,17 +13,12 @@ package org.eclipse.kura.net;
 
 import java.util.List;
 
-import org.osgi.annotation.versioning.ProviderType;
-
 /**
  * Interface for network interface 'connection info'. At runtime an interface may be associated with
  * gateways or DNS but the interface itself may not be active. If this is the case the ConnectionInfo
  * class is used to keep all relevant information in the event that this interface should become the
  * active one. This is necessary because many operating systems to not persist this information.
- * 
- * @noimplement This interface is not intended to be implemented by clients.
  */
-@ProviderType
 public interface ConnectionInfo {
 
     /**

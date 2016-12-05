@@ -17,12 +17,15 @@ import java.util.Enumeration;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraTopic;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The CertificatesService is used to manage the storage, listing and retrieval of public certificates
  * from a key store.
  *
+ * @noimplement This interface is not intended to be implemented by clients. 
  */
+@ProviderType
 public interface CertificatesService {
 
     /**

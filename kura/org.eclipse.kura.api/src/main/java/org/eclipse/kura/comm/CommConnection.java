@@ -16,6 +16,7 @@ import java.io.IOException;
 import javax.microedition.io.StreamConnection;
 
 import org.eclipse.kura.KuraException;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This is the primary control class for a Serial port. An instance of
@@ -112,7 +113,10 @@ import org.eclipse.kura.KuraException;
  *			return;
  *		}
  * </pre>
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface CommConnection extends StreamConnection {
 
     /**

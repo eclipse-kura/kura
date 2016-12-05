@@ -13,7 +13,12 @@ package org.eclipse.kura.cloud;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.message.KuraPayload;
+import org.osgi.annotation.versioning.ProviderType;
 
+/**
+ * @noimplement This interface is not intended to be implemented by clients.
+ */
+@ProviderType
 public interface CloudPayloadProtoBufEncoder {
 
     /**

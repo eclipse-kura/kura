@@ -16,7 +16,12 @@ import java.util.List;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.net.NetConfig;
+import org.osgi.annotation.versioning.ProviderType;
 
+/**
+ * @noimplement This interface is not intended to be implemented by clients.
+ */
+@ProviderType
 public interface CellularModem {
 
     public enum SerialPortType {

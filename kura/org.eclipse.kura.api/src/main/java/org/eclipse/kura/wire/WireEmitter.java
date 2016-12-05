@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.kura.wire;
 
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.wireadmin.Producer;
 
 /**
@@ -18,5 +19,6 @@ import org.osgi.service.wireadmin.Producer;
  *
  * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface WireEmitter extends WireComponent, Producer {
 }

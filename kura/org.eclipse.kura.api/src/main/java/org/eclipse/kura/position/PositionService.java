@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.position;
 
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.util.position.Position;
 
 /**
@@ -26,7 +27,9 @@ import org.osgi.util.position.Position;
  * @see org.osgi.util.position.Position Position
  * @see org.osgi.util.measurement.Measurement Measurement
  *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface PositionService {
 
     /**

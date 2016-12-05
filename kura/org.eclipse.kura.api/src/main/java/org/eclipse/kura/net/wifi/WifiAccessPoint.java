@@ -14,9 +14,14 @@ package org.eclipse.kura.net.wifi;
 import java.util.EnumSet;
 import java.util.List;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * The WifiAccessPoint models an access point for a Wifi network.
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface WifiAccessPoint {
 
     /**

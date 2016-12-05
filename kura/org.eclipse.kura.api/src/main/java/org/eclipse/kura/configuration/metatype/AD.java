@@ -20,6 +20,8 @@ package org.eclipse.kura.configuration.metatype;
 
 import java.util.List;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * <p>
  * Java class for Tad complex type.
@@ -50,8 +52,9 @@ import java.util.List;
  * &lt;/complexType>
  * </pre>
  *
- *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface AD {
 
     /**

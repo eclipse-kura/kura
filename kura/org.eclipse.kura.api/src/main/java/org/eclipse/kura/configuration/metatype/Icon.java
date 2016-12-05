@@ -20,6 +20,8 @@ package org.eclipse.kura.configuration.metatype;
 
 import java.math.BigInteger;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * <p>
  * Java class for Ticon complex type.
@@ -42,8 +44,9 @@ import java.math.BigInteger;
  * &lt;/complexType>
  * </pre>
  *
- *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface Icon {
 
     /**

@@ -19,6 +19,7 @@ import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.data.listener.DataServiceListener;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The DataService provides the ability of connecting to a remote
@@ -44,7 +45,10 @@ import org.eclipse.kura.data.listener.DataServiceListener;
  * The whiteboard pattern {@link http://www.osgi.org/wiki/uploads/Links/whiteboard.pdf}
  * is used to notify the service users about events such as message arrived, connection lost etc.
  * {@see DataServiceListener}
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface DataService {
 
     /**

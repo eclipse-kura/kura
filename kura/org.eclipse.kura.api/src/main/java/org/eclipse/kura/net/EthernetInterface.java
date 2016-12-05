@@ -11,9 +11,12 @@
  *******************************************************************************/
 package org.eclipse.kura.net;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * Network interface for Ethernet cards.
  */
+@ProviderType
 public interface EthernetInterface<T extends NetInterfaceAddress> extends NetInterface<T> {
 
     /**

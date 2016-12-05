@@ -11,9 +11,14 @@
  *******************************************************************************/
 package org.eclipse.kura.net;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * Marker interface for IPv6-based configurations of network interfaces
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface NetConfig6 extends NetConfig {
 
 }

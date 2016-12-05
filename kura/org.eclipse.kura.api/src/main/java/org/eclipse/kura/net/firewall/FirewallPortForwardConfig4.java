@@ -11,12 +11,16 @@
  *******************************************************************************/
 package org.eclipse.kura.net.firewall;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * Marker interface for IPv4 firewall port forward configurations
  *
  * @author eurotech
  *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface FirewallPortForwardConfig4 extends FirewallPortForwardConfig {
 
 }

@@ -21,12 +21,16 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.framework.Bundle;
 
 /**
  * Service to provide basic system information including Operating System
  * information, JVM information and filesystem information.
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface SystemService {
 
     public static final String KURA_CONFIG = "kura.configuration";

@@ -343,20 +343,9 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             public void onChange(ChangeEvent event) {
                 setDirty(true);
                 TabTcpIpUi.this.tabs.adjustInterfaceTabs();
-                // TODO: to disable if disabled selected
-                // if (VMSGS.netIPv4StatusDisabled().equals(status.getSelectedValue())) {
-                // // Using DHCP selected
-                // configure.setEnabled(false);
-                // ip.setEnabled(false);
-                // subnet.setEnabled(false);
-                // gateway.setEnabled(false);
-                // renew.setEnabled(false);
-                // dnsRead.setVisible(false);
-                // dns.setVisible(false);
-                //
-                // } else {
+
                 refreshForm();
-                // }
+                resetValidations();
 
                 // Check for other WAN interfaces if current interface is
                 // changed to WAN

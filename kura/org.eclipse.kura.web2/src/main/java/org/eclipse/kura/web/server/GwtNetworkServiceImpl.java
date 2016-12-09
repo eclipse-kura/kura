@@ -316,16 +316,13 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                     StringBuffer sb = new StringBuffer();
                                     List<IP4Address> dnsServers = ((NetConfigIP4) netConfig).getDnsServers();
                                     if (dnsServers != null && !dnsServers.isEmpty()) {
-                                        String sep = "";
                                         for (IP4Address dnsServer : dnsServers) {
                                             if (!dnsServer.getHostAddress().equals("127.0.0.1")) {
-                                                sb.append(sep).append(dnsServer.getHostAddress());
-                                                sep = "\n";
+                                                sb.append(' ').append(dnsServer.getHostAddress());
                                             }
                                         }
-
                                         s_logger.debug("DNS Servers: {}", sb);
-                                        gwtNetConfig.setDnsServers(sb.toString());
+                                        gwtNetConfig.setDnsServers(sb.toString().trim());
                                     } else {
                                         s_logger.debug("DNS Servers: [empty String]");
                                         gwtNetConfig.setDnsServers("");
@@ -726,6 +723,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public void updateNetInterfaceConfigurations(GwtXSRFToken xsrfToken, GwtNetInterfaceConfig config)
             throws GwtKuraException {
+    	
         checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
 

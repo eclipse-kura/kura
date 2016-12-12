@@ -18,6 +18,7 @@
         <feature dependency="true">kura-runtime</feature>
         
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.api/${org.eclipse.kura.api.version}</bundle>
+        
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.core/${org.eclipse.kura.core.version}</bundle>
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.core.cloud/${org.eclipse.kura.core.cloud.version}</bundle>
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.core.comm/${org.eclipse.kura.core.comm.version}</bundle>
@@ -25,7 +26,16 @@
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.core.crypto/${org.eclipse.kura.core.crypto.version}</bundle>
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.core.net/${org.eclipse.kura.core.net.version}</bundle>
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.core.status/${org.eclipse.kura.core.status.version}</bundle>
+        
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.deployment.agent/${org.eclipse.kura.deployment.agent.version}</bundle>
+        
+        <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.localization/${org.eclipse.kura.localization.version}</bundle>
+        <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.localization.resources/${org.eclipse.kura.localization.resources.version}</bundle>
+        
+        <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.util/${org.eclipse.kura.util.version}</bundle>
+        
+        <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.asset.provider/${org.eclipse.kura.asset.provider.version}</bundle>
+        <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.wire.provider/${org.eclipse.kura.wire.provider.version}</bundle>
     </feature>
     
     <feature name="kura-camel" version="${project.version}" description="Eclipse Kura :: Apache Camel components">

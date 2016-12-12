@@ -52,27 +52,6 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.eclipse.kura</groupId>
-			<artifactId>org.eclipse.kura.web2</artifactId>
-			<version>2.0.2-SNAPSHOT</version>
-			<type>jar</type>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.osgi</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.gwtbootstrap3</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
 	</dependencies>
 
 	<build>
@@ -90,6 +69,7 @@
 						<configuration>
 							<descriptors>
 								<descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
+								<descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
 								<descriptor>mvn:org.eclipse.kura.karaf/kura-runtime/${project.version}/xml/features</descriptor>
 								<descriptor>mvn:org.eclipse.kura.karaf/kura-core/${project.version}/xml/features</descriptor>
 								<descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
@@ -101,8 +81,7 @@
 							</framework>
 							<ignoreMissingConditions>true</ignoreMissingConditions>
 							<features>
-								<feature>scr</feature>
-								<feature>eventadmin</feature>
+								<feature>kura-web</feature>
 							</features>
 						</configuration>
 					</execution>

@@ -209,14 +209,9 @@
           xsi:type="maven:MavenImportTask">
         <sourceLocator
             rootFolder="${git.clone.location}/kura"
-            locateNestedProjects="true">
-          <predicate
-              xsi:type="predicates:NotPredicate">
-            <operand
-                xsi:type="predicates:NamePredicate"
-                pattern="org.eclipse.kura.web"/>
-          </predicate>
-        </sourceLocator>
+            locateNestedProjects="true"/>
+        <sourceLocator
+            rootFolder="${git.clone.location}/karaf"/>
       </setupTask>
       <setupTask
           xsi:type="launching:LaunchTask"

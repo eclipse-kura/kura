@@ -35,6 +35,10 @@
     .help {
     	height: 300px;
     }
+    
+    .scrollable {
+		overflow-x: auto;
+	}
     </ui:style>
 
     <b:Container fluid="true">
@@ -211,10 +215,10 @@
             <b:ModalBody>
                 <b:Panel>
                     <b:PanelHeader ui:field="ssidTitle" />
-                    <b:PanelBody>
+                    <b:PanelBody addStyleNames='{style.scrollable}'>
                         <gwt:CellTable bordered="true"
                             condensed="true" striped="true" hover="true"
-                            height="100%" width="100%" ui:field="ssidGrid" />
+                            ui:field="ssidGrid" />
                         <b:Alert type="INFO" ui:field="searching">
                             <b.html:Text ui:field="searchingText" />
                         </b:Alert>

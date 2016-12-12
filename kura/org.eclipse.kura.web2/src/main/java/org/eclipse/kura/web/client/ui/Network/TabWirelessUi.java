@@ -1313,7 +1313,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     private void initModal() {
         this.ssidModal.setTitle("Wireless Networks");
-        this.ssidTitle.setText("Available Networks in the Range");
+        this.ssidTitle.setText("Available networks in range");
         this.ssidModal.show();
 
         this.searchingText.setText(MSGS.netWifiAlertScanning());

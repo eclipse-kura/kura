@@ -59,7 +59,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
     }
 
     private Modal modal;
-    private final GwtConfigComponent originalConfig;
+    private GwtConfigComponent originalConfig;
 
     @UiField
     Button applyConnectionEdit;
@@ -229,6 +229,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                                         CloudServiceConfigurationUi.this.applyConnectionEdit.setEnabled(false);
                                         CloudServiceConfigurationUi.this.resetConnectionEdit.setEnabled(false);
                                         setDirty(false);
+                                        originalConfig = CloudServiceConfigurationUi.this.m_configurableComponent;
                                         EntryClassUi.hideWaitModal();
                                     }
                                 });

@@ -53,7 +53,7 @@ public class CryptoServiceImpl implements CryptoService {
     public void setSystemService(SystemService systemService) {
         this.m_systemService = systemService;
     }
-    
+
     public void unsetSystemService(SystemService systemService) {
         this.m_systemService = null;
     }
@@ -105,7 +105,7 @@ public class CryptoServiceImpl implements CryptoService {
 
         }
 
-        if (convertedData != null) {
+        if (convertedData != null && convertedData instanceof byte[]) {
             return (byte[]) convertedData;
         }
         return null;
@@ -170,6 +170,9 @@ public class CryptoServiceImpl implements CryptoService {
             c.init(Cipher.DECRYPT_MODE, key);
             String internalStringValue = new String(encryptedValue);
             byte[] decodedValue = base64Decode(internalStringValue);
+            if (encryptedValue.length > 0 && decodedValue.length == 0) {
+                throw new KuraException(KuraErrorCode.DECODER_ERROR);
+            }
             byte[] decryptedBytes = c.doFinal(decodedValue);
             String decryptedValue = new String(decryptedBytes);
             return decryptedValue.toCharArray();

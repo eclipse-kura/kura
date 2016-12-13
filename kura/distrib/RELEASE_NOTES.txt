@@ -8,9 +8,21 @@ Added Features :
 
 Bug Fixes :
   * Fixed github issues:
+    * #909: [Kura 2.1.0 QA] SSID selection dialog too small
+    * #903: [Kura 2.1.0 QA] Impossible to enter multiple DNS servers
+    * #901: [Kura 2.1.0 QA] changing username/password locks out admin access
+    * #900: [Kura 2.1.0 QA] usbutils missing in fedberry README
+    * #895: [Kura 2.1.0 QA] Refreshing configuration in web UI
+    * #883: Invalid field validation state when switching from WAN to LAN
+    * #879: [Kura 2.1.0 QA] Raspberry Pi 3 nameserver
+    * #877: [Kura 2.1.0 QA] eth0 netmask configuration
+    * #876: [Kura 2.1.0 QA] Disabling eth0 interface doesn't work properly
+    * #874: [Kura 2.1.0 QA] eth0 DNS server configuration
+    * #867: [Kura 2.1.0 QA] Ethernet interface gateway configuration on Raspberry Pi 3
     * #860: [Kura 2.1.0 QA] JUnit in Raspberry Pi 3's installation package
     * #859: [Kura 2.1.0 QA] Installation warnings/errors on Raspberry Pi 3
     * #851: [Web-UI] Label is sent instead of value for metatype parameters with options
+    * #835: [Kura 2.1.0] Bind/Named service doesn't work properly on Fedora
     * #776: Serialization issue in cloud window
     * #753: libhidapi not correctly compiled for armv5
     * #743: WLAN not detected as WLAN on Fedberry
@@ -85,6 +97,8 @@ Bug Fixes :
     * #119: [Camel] Migrate CamelRouter tests from Rhiot to Kura
 
   * Merged no issue-related Pull Requests:
+    * #928: [Web-Ui] Fixed typo in the network config section
+    * #898: Solved modem reset failure.
     * #855: Modified wrong entry in snapshot 0s
 	* #816: Set the 'kura.ui.service.hide' property
     * #810: Remaining changes to Camel Web UI
@@ -133,6 +147,7 @@ Know Issues :
     password that is hardcoded and published.
   * Kura can be run in a Java 8 VM, but current OSGi container does not support bundles with manifests that specify
     a "Bundle-RequiredExecutionEnvironment" equal to "JavaSE-1.8".
+  * The old GPS position will continue to be shown in the status overview even after the disabling of the static position reporting.
   * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
   * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
     "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".

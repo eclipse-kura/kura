@@ -11,7 +11,7 @@
 
     <artifactId>emulator-instance</artifactId>
     <packaging>karaf-assembly</packaging>
-    <name>Local Karaf emulator assembly</name>
+    <name>Eclipse Kura :: Karaf :: Emulator</name>
 
     <dependencies>
         <dependency>
@@ -20,29 +20,32 @@
             <version>${karaf.version}</version>
             <type>kar</type>
         </dependency>
+        
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>framework</artifactId>
             <version>${karaf.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
-            <scope>runtime</scope>
+            <scope>compile</scope>
         </dependency>
+        
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>standard</artifactId>
             <version>${karaf.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
-            <scope>runtime</scope>
+            <scope>compile</scope>
         </dependency>
+        
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>spring</artifactId>
             <version>${karaf.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
-            <scope>runtime</scope>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -93,6 +96,10 @@
                     <startLevel>80</startLevel>
                     <aggregateFeatures>false</aggregateFeatures>
                     <addTransitiveFeatures>false</addTransitiveFeatures>
+
+                    <startupFeatures>
+                        <feature>eventadmin</feature>
+                    </startupFeatures>
 
                     <installedFeatures>
                         <feature>wrapper</feature>

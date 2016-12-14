@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.web2
-Bundle-SymbolicName: org.eclipse.kura.web;singleton:=true
+Bundle-SymbolicName: org.eclipse.kura.web2;singleton:=true
 Bundle-Version: 2.0.3.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v1.0

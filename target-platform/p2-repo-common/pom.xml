@@ -107,7 +107,7 @@
 									<version>${org.hamcrest.core.version}</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>org.usb4java</groupId>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.usb4java</artifactId>
 									<version>${org.usb4java.version}</version>
 								</artifactItem>
@@ -187,7 +187,7 @@
 								    <version>${commons-exec.version}</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>usb4java</groupId>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>usb4java-javax</artifactId>
 									<version>${usb4java-javax.version}</version>
 								</artifactItem>

@@ -113,13 +113,17 @@
 
     <properties>
         <tycho-version>0.26.0</tycho-version>
+
+        <!-- SCM: Note that we are in the "kura" sub-dir here already -->
+        <tycho.scmUrl>scm:git:ssh://github.com/eclipse/kura/kura</tycho.scmUrl>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <kura.basedir>${project.basedir}</kura.basedir>
         <kura.build.version>${maven.build.timestamp}</kura.build.version>
 
-		<!-- Jacoco version -->
+        <!-- Jacoco version -->
         <jacoco.version>0.6.4.201312101107</jacoco.version>
         <jacoco.reportDir>target/jacoco/</jacoco.reportDir>
         <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
@@ -139,7 +143,7 @@
             <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
-
+    
     <profiles>
         <profile>
             <id>default</id>
@@ -377,6 +381,18 @@
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-packaging-plugin</artifactId>
+                <configuration>
+                    <sourceReferences>
+                        <generate>true</generate>
+                    </sourceReferences>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.eclipse.tycho.extras</groupId>
+                        <artifactId>tycho-sourceref-jgit</artifactId>
+                        <version>${tycho-version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>

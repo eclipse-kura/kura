@@ -354,6 +354,8 @@ fi]]>
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/monitrc.raspbian"
                         prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/${build.name}/kura-tmpfiles.conf"
+                        prefix="${build.output.name}/install" />
 
 
 			<zipfileset file="src/main/resources/common/logrotate.conf"

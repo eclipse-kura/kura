@@ -296,6 +296,7 @@ public abstract class AbstractServicesUi extends Composite {
             if (param.isRequired()) {
                 formLabel.setShowRequiredIndicator(true);
             }
+            formLabel.setTitle(param.getId());
             formGroup.add(formLabel);
 
             InlineHelpBlock ihb = new InlineHelpBlock();
@@ -361,6 +362,7 @@ public abstract class AbstractServicesUi extends Composite {
             if (param.isRequired()) {
                 formLabel.setShowRequiredIndicator(true);
             }
+            formLabel.setTitle(param.getId());
             formGroup.add(formLabel);
 
             if (param.getDescription() != null) {
@@ -426,6 +428,7 @@ public abstract class AbstractServicesUi extends Composite {
             if (param.isRequired()) {
                 formLabel.setShowRequiredIndicator(true);
             }
+            formLabel.setTitle(param.getId());
             formGroup.add(formLabel);
 
             if (param.getDescription() != null) {

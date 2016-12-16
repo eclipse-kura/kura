@@ -6,6 +6,8 @@ Bundle-Version: 1.0.7.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: javax.comm,
+ javax.xml.parsers, 
+ javax.xml.stream,
  junit.framework,
  org.eclipse.kura.cloud;version="[1.0,2.0)",
  org.eclipse.kura.comm;version="[1.0,2.0)",
@@ -24,7 +26,9 @@ Import-Package: javax.comm,
  org.osgi.service.deploymentadmin;version="1.1.0",
  org.osgi.service.event,
  org.osgi.service.io;version="1.0.0",
- org.slf4j;version="1.6.4"
+ org.slf4j;version="1.6.4",
+ org.w3c.dom,
+ org.xml.sax
 Fragment-Host: org.eclipse.kura.core
 Bundle-ActivationPolicy: lazy
 Comment: org.eclipse.kura.emulator is needed as we need to start-up the emulator to run the tests!!

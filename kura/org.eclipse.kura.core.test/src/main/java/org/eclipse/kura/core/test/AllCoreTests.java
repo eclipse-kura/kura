@@ -19,6 +19,7 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.system.SystemService;
+import io.moquette.server.Server;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -73,6 +74,9 @@ public class AllCoreTests {
     public static void setUpClass() throws Exception {
         s_logger.info("setUpClass...");
 
+        // start Moquette
+        Server.main(new String[] {});
+
         // Wait for OSGi dependencies
         s_logger.info("Setting Up The Testcase....");
         try {
@@ -82,7 +86,6 @@ public class AllCoreTests {
         }
 
         try {
-
             // update the settings
             ComponentConfiguration mqttConfig = s_configService
                     .getComponentConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport");
@@ -96,16 +99,19 @@ public class AllCoreTests {
             s_logger.info("Changing cloud credentials...");
             mqttProps.put("broker-url", "mqtt://localhost:1883/");
             mqttProps.put("topic.context.account-name", "ethdev");
-            mqttProps.put("username", "ethdev_broker");
-            mqttProps.put("password", "We!come12345");
+            mqttProps.put("username", "");
+            mqttProps.put("password", "");
 
             // cloudbees fails in getting the primary MAC address
             // we need to compensate for it.
-            String clientId = "cloudbees-kura";
+            String clientId = null;
             try {
                 clientId = s_sysService.getPrimaryMacAddress();
             } catch (Throwable t) {
                 // ignore.
+            }
+            if (clientId == null || clientId.isEmpty()) {
+                clientId = "cloudbees-kura";
             }
             mqttProps.put("client-id", clientId);
             s_configService.updateConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport",

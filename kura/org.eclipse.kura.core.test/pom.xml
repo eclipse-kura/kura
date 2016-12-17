@@ -423,6 +423,10 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
+                            <artifactId>slf4j.log4j12</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
                             <artifactId>com.google.protobuf</artifactId>
                         </dependency>
                         <dependency>

@@ -84,3 +84,8 @@ update-rc.d kura defaults
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
+
+# execute patch_sysctl.sh from installer install folder
+chmod 700 ${INSTALL_DIR}/kura/install/patch_sysctl.sh 
+${INSTALL_DIR}/kura/install/patch_sysctl.sh ${INSTALL_DIR}/kura/install/sysctl.kura.conf /etc/sysctl.conf
+sysctl -p

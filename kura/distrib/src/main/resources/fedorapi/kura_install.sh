@@ -102,3 +102,8 @@ cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 
 # Setup tmpfiles.d
 cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /usr/lib/tmpfiles.d/kura.conf
+
+# execute patch_sysctl.sh from installer install folder
+chmod 700 ${INSTALL_DIR}/kura/install/patch_sysctl.sh 
+${INSTALL_DIR}/kura/install/patch_sysctl.sh ${INSTALL_DIR}/kura/install/sysctl.kura.conf /etc/sysctl.conf
+sysctl -p

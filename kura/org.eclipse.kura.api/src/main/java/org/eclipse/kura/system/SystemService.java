@@ -52,6 +52,7 @@ public interface SystemService {
     public static final String KEY_PRIMARY_NET_IFACE = "kura.primary.network.interface";
     public static final String KEY_KURA_HOME_DIR = "kura.home";
     public static final String KEY_KURA_PLUGINS_DIR = "kura.plugins";
+    public static final String KEY_KURA_PACKAGES_DIR = "kura.packages";
     public static final String KEY_KURA_DATA_DIR = "kura.data";
     public static final String KEY_KURA_TMP_DIR = "kura.tmp";
     public static final String KEY_KURA_SNAPSHOTS_DIR = "kura.snapshots";

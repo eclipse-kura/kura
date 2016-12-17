@@ -12,6 +12,7 @@
 package org.eclipse.kura.core.net;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -228,4 +229,110 @@ public abstract class AbstractNetInterface<T extends NetInterfaceAddress> implem
 
         return sb.toString();
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (autoConnect ? 1231 : 1237);
+		result = prime * result + ((driver == null) ? 0 : driver.hashCode());
+		result = prime * result + ((driverVersion == null) ? 0 : driverVersion.hashCode());
+		result = prime * result + ((firmwareVersion == null) ? 0 : firmwareVersion.hashCode());
+		result = prime * result + Arrays.hashCode(hardwareAddress);
+		result = prime * result + ((interfaceAddresses == null) ? 0 : interfaceAddresses.hashCode());
+		result = prime * result + (loopback ? 1231 : 1237);
+		result = prime * result + mtu;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + (pointToPoint ? 1231 : 1237);
+		result = prime * result + ((state == null) ? 0 : state.hashCode());
+		result = prime * result + (supportsMulticast ? 1231 : 1237);
+		result = prime * result + (up ? 1231 : 1237);
+		result = prime * result + ((usbDevice == null) ? 0 : usbDevice.hashCode());
+		result = prime * result + (virtual ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof AbstractNetInterface)) {
+			return false;
+		}
+		AbstractNetInterface other = (AbstractNetInterface) obj;
+		if (autoConnect != other.autoConnect) {
+			return false;
+		}
+		if (driver == null) {
+			if (other.driver != null) {
+				return false;
+			}
+		} else if (!driver.equals(other.driver)) {
+			return false;
+		}
+		if (driverVersion == null) {
+			if (other.driverVersion != null) {
+				return false;
+			}
+		} else if (!driverVersion.equals(other.driverVersion)) {
+			return false;
+		}
+		if (firmwareVersion == null) {
+			if (other.firmwareVersion != null) {
+				return false;
+			}
+		} else if (!firmwareVersion.equals(other.firmwareVersion)) {
+			return false;
+		}
+		if (!Arrays.equals(hardwareAddress, other.hardwareAddress)) {
+			return false;
+		}
+		if (interfaceAddresses == null) {
+			if (other.interfaceAddresses != null) {
+				return false;
+			}
+		} else if (!interfaceAddresses.equals(other.interfaceAddresses)) {
+			return false;
+		}
+		if (loopback != other.loopback) {
+			return false;
+		}
+		if (mtu != other.mtu) {
+			return false;
+		}
+		if (name == null) {
+			if (other.name != null) {
+				return false;
+			}
+		} else if (!name.equals(other.name)) {
+			return false;
+		}
+		if (pointToPoint != other.pointToPoint) {
+			return false;
+		}
+		if (state != other.state) {
+			return false;
+		}
+		if (supportsMulticast != other.supportsMulticast) {
+			return false;
+		}
+		if (up != other.up) {
+			return false;
+		}
+		if (usbDevice == null) {
+			if (other.usbDevice != null) {
+				return false;
+			}
+		} else if (!usbDevice.equals(other.usbDevice)) {
+			return false;
+		}
+		if (virtual != other.virtual) {
+			return false;
+		}
+		return true;
+	}
 }

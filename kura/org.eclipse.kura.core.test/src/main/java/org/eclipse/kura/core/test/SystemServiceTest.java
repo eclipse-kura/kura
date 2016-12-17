@@ -69,11 +69,13 @@ public class SystemServiceTest extends TestCase {
         String actual = systemService.getPrimaryMacAddress();
         System.out.println("MAC: " + actual);
 
-        Pattern regex = Pattern.compile("[0-9a-fA-F:]{12}");
-        Matcher match = regex.matcher(actual);
+        if (actual != null && !actual.isEmpty()) {
+            Pattern regex = Pattern.compile("[0-9a-fA-F:]{12}");
+            Matcher match = regex.matcher(actual);
 
-        assertEquals("getPrimaryMacAddress() length", 17, actual.length());
-        assertTrue("getPrimaryMacAddress() is string with colons", match.find());
+            assertEquals("getPrimaryMacAddress() length", 17, actual.length());
+            assertTrue("getPrimaryMacAddress() is string with colons", match.find());
+        }
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })

@@ -15,6 +15,9 @@ import java.lang.reflect.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Collection of methods for testing private methods and fields.
+ */
 public class TestUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(TestUtil.class);
@@ -39,6 +42,14 @@ public class TestUtil {
         return field;
     }
 
+    /**
+     * Returns the current value of a (private) field in an object.
+     *
+     * @param svc
+     * @param fieldName
+     * @return
+     * @throws NoSuchFieldException
+     */
     public static Object getFieldValue(Object svc, String fieldName) throws NoSuchFieldException {
         Object result = null;
 
@@ -59,26 +70,52 @@ public class TestUtil {
     private static Method getMethod(Object svc, String methodName, Class... paramTypes) throws NoSuchMethodException {
         Method method = null;
         Class<?> clazz = svc.getClass();
-        hwile: while (!(clazz == Object.class || method != null)) {
+        while (!(clazz == Object.class || method != null)) {
             Method[] methods = clazz.getDeclaredMethods();
             for (Method m : methods) {
-                if (m.getName().compareTo(methodName) == 0) {
-                    method = m;
-                    break hwile;
+                if (m.getName().compareTo(methodName) == 0 && checkParameterTypes(m, paramTypes)) {
+                    return m;
                 }
             }
             clazz = clazz.getSuperclass();
         }
 
-        if (method == null) {
-            throw new NoSuchMethodException(String.format("Method not found: %s", methodName));
-        }
-
-        return method;
+        throw new NoSuchMethodException(String.format("Method not found: %s", methodName));
     }
 
-    public static Object invokePrivate(Object svc, String methodName, Object... params) throws Throwable {
-        Method method = getMethod(svc, methodName);
+    private static boolean checkParameterTypes(Method m, Class... paramTypes) {
+        if (paramTypes == null || paramTypes.length == 0) {
+            return true;
+        }
+
+        if (m.getParameterTypes().length != paramTypes.length) {
+            return false;
+        }
+
+        Class<?>[] foundParamTypes = m.getParameterTypes();
+        for (int i = 0; i < foundParamTypes.length; i++) {
+            if (foundParamTypes[i] != paramTypes[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Invokes a (private) method on an object.
+     *
+     * @param svc
+     * @param methodName
+     * @param paramTypes
+     * @param params
+     * @return
+     * @throws Throwable
+     */
+    public static Object invokePrivate(Object svc, String methodName, Class<?>[] paramTypes, Object... params)
+            throws Throwable {
+
+        Method method = getMethod(svc, methodName, paramTypes);
 
         method.setAccessible(true);
 
@@ -96,6 +133,27 @@ public class TestUtil {
         return null;
     }
 
+    /**
+     * Invokes a (private) method on an object.
+     *
+     * @param svc
+     * @param methodName
+     * @param params
+     * @return
+     * @throws Throwable
+     */
+    public static Object invokePrivate(Object svc, String methodName, Object... params) throws Throwable {
+        return invokePrivate(svc, methodName, null, params);
+    }
+
+    /**
+     * Sets a value of a (private) field.
+     *
+     * @param svc
+     * @param fieldName
+     * @param value
+     * @throws NoSuchFieldException
+     */
     public static void setFieldValue(Object svc, String fieldName, Object value) throws NoSuchFieldException {
         Field field = getField(svc, fieldName);
 

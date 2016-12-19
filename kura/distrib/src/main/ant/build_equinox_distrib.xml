@@ -362,6 +362,11 @@ fi]]>
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/kura.logrotate"
                         prefix="${build.output.name}/install" />
+                        
+            <zipfileset file="src/main/resources/common/sysctl.kura.conf"
+                         prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/patch_sysctl.sh"
+                         prefix="${build.output.name}/install" />
 
 			<zipfileset file="src/main/resources/common/hostapd.conf"
                         prefix="${build.output.name}/install" />

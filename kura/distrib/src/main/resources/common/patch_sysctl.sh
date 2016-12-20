@@ -17,5 +17,11 @@ if ! [ x"$1" != "x" ] || ! [ x"$2" != "x" ] || ! [ -a $1 ] || ! [ -a $2 ]; then
 	exit 1
 fi
 
+if [ -e /etc/fedora-release ]; then
+	touch /etc/modules-load.d/ipv6.conf
+	sed -i '/ipv6.*/d' /etc/modules-load.d/ipv6.conf
+	echo "ipv6 " >> /etc/modules-load.d/ipv6.conf
+fi
+
 eval sed -i `grep -v "^#" $1 | sed "s|\(.*\)=.*|-e '\/\1\/d'|"` $2
 grep -v "^#" $1 >> $2

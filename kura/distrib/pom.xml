@@ -1914,8 +1914,10 @@
 											file="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/artifacts.xml" />
 										<delete
 											file="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/content.xml" />
+                                        <delete
+                                            dir="${project.build.directory}/staging/target-definition/target" />
 
-										<copy
+										<copy overwrite="true"
 											file="src/main/resources/common/projects/target_definition.project"
 											tofile="${project.build.directory}/staging/target-definition/.project" />
 										<copy file="src/main/resources/common/kura-equinox_3.8.1.target"
@@ -2005,7 +2007,7 @@
 										<copy
 											file="src/main/resources/common/classpaths/emulator.classpath"
 											tofile="${project.build.directory}/staging/emulator/emulator.classpath" />
-										<copy file="src/main/resources/common/projects/emulator.project"
+										<copy overwrite="true" file="src/main/resources/common/projects/emulator.project"
 											tofile="${project.build.directory}/staging/emulator/.project" />
 										<replace file="${project.build.directory}/staging/emulator/src/main/resources/kura.properties"
 												 token="kura.version=kura_emulator" value="kura.version=KURA_${kura.version}" />
@@ -2041,7 +2043,7 @@
 										<copy
 											file="src/main/resources/common/classpaths/demo_heater.classpath"
 											tofile="${project.build.directory}/staging/demo_heater/demo_heater.classpath" />
-										<copy file="src/main/resources/common/projects/demo_heater.project"
+										<copy overwrite="true" file="src/main/resources/common/projects/demo_heater.project"
 											tofile="${project.build.directory}/staging/demo_heater/.project" />
 										<move
 											file="${project.build.directory}/staging/demo_heater/demo_heater.classpath"
@@ -2059,7 +2061,7 @@
 										<copy
 											file="src/main/resources/common/classpaths/beacon.classpath"
 											tofile="${project.build.directory}/staging/beacon/beacon.classpath" />
-										<copy file="src/main/resources/common/projects/beacon.project"
+										<copy overwrite="true" file="src/main/resources/common/projects/beacon.project"
 											tofile="${project.build.directory}/staging/beacon/.project" />
 										<move
 											file="${project.build.directory}/staging/beacon/beacon.classpath"
@@ -2077,7 +2079,7 @@
 										<copy
 											file="src/main/resources/common/classpaths/tisensortag.classpath"
 											tofile="${project.build.directory}/staging/tisensortag/tisensortag.classpath" />
-										<copy file="src/main/resources/common/projects/tisensortag.project"
+										<copy overwrite="true" file="src/main/resources/common/projects/tisensortag.project"
 											tofile="${project.build.directory}/staging/tisensortag/.project" />
 										<move
 											file="${project.build.directory}/staging/tisensortag/tisensortag.classpath"
@@ -2095,11 +2097,65 @@
 										<copy
 											file="src/main/resources/common/classpaths/publisher.classpath"
 											tofile="${project.build.directory}/staging/publisher/publisher.classpath" />
-										<copy file="src/main/resources/common/projects/publisher.project"
+										<copy overwrite="true" file="src/main/resources/common/projects/publisher.project"
 											tofile="${project.build.directory}/staging/publisher/.project" />
 										<move
 											file="${project.build.directory}/staging/publisher/publisher.classpath"
 											tofile="${project.build.directory}/staging/publisher/.classpath" />
+                                            
+                                        <!-- Stage the org.eclipse.kura.example.camel.quickstart Project -->
+                                        <copy todir="${project.build.directory}/staging/camel_quickstart">
+                                            <fileset dir="../examples/org.eclipse.kura.example.camel.quickstart" />
+                                        </copy>
+                                        <delete
+                                            file="${project.build.directory}/staging/camel_quickstart/pom.xml" />
+                                        <delete dir="${project.build.directory}/staging/camel_quickstart/bin" />
+                                        <delete
+                                            dir="${project.build.directory}/staging/camel_quickstart/target" />
+                                        <copy
+                                            file="src/main/resources/common/classpaths/camel_quickstart.classpath"
+                                            tofile="${project.build.directory}/staging/camel_quickstart/camel_quickstart.classpath" />
+                                        <copy overwrite="true" file="src/main/resources/common/projects/camel_quickstart.project"
+                                            tofile="${project.build.directory}/staging/camel_quickstart/.project" />
+                                        <move
+                                            file="${project.build.directory}/staging/camel_quickstart/camel_quickstart.classpath"
+                                            tofile="${project.build.directory}/staging/camel_quickstart/.classpath" />
+                                            
+                                        <!-- Stage the org.eclipse.kura.example.camel.publisher Project -->
+                                        <copy todir="${project.build.directory}/staging/camel_publisher">
+                                            <fileset dir="../examples/org.eclipse.kura.example.camel.publisher" />
+                                        </copy>
+                                        <delete
+                                            file="${project.build.directory}/staging/camel_publisher/pom.xml" />
+                                        <delete dir="${project.build.directory}/staging/camel_publisher/bin" />
+                                        <delete
+                                            dir="${project.build.directory}/staging/camel_publisher/target" />
+                                        <copy
+                                            file="src/main/resources/common/classpaths/camel_publisher.classpath"
+                                            tofile="${project.build.directory}/staging/camel_publisher/camel_publisher.classpath" />
+                                        <copy overwrite="true" file="src/main/resources/common/projects/camel_publisher.project"
+                                            tofile="${project.build.directory}/staging/camel_publisher/.project" />
+                                        <move
+                                            file="${project.build.directory}/staging/camel_publisher/camel_publisher.classpath"
+                                            tofile="${project.build.directory}/staging/camel_publisher/.classpath" />
+                                            
+                                        <!-- Stage the org.eclipse.kura.example.camel.aggregation Project -->
+                                        <copy todir="${project.build.directory}/staging/camel_aggregation">
+                                            <fileset dir="../examples/org.eclipse.kura.example.camel.aggregation" />
+                                        </copy>
+                                        <delete
+                                            file="${project.build.directory}/staging/camel_aggregation/pom.xml" />
+                                        <delete dir="${project.build.directory}/staging/camel_aggregation/bin" />
+                                        <delete
+                                            dir="${project.build.directory}/staging/camel_aggregation/target" />
+                                        <copy
+                                            file="src/main/resources/common/classpaths/camel_aggregation.classpath"
+                                            tofile="${project.build.directory}/staging/camel_aggregation/camel_aggregation.classpath" />
+                                        <copy overwrite="true" file="src/main/resources/common/projects/camel_aggregation.project"
+                                            tofile="${project.build.directory}/staging/camel_aggregation/.project" />
+                                        <move
+                                            file="${project.build.directory}/staging/camel_aggregation/camel_aggregation.classpath"
+                                            tofile="${project.build.directory}/staging/camel_aggregation/.classpath" />
 
 										<!-- Create the archive file with the components -->
 										<zip destfile="${project.build.directory}/${zip_workspace.prefix}.zip">
@@ -2118,6 +2174,12 @@
 												prefix="org.eclipse.kura.example.ble.tisensortag/" />
 											<zipfileset dir="${project.build.directory}/staging/publisher/"
 												prefix="org.eclipse.kura.example.publisher/" />
+                                            <zipfileset dir="${project.build.directory}/staging/camel_quickstart/"
+                                                prefix="org.eclipse.kura.example.camel.quickstart/" />
+                                            <zipfileset dir="${project.build.directory}/staging/camel_publisher/"
+                                                prefix="org.eclipse.kura.example.camel.publisher/" />
+                                            <zipfileset dir="${project.build.directory}/staging/camel_aggregation/"
+                                                prefix="org.eclipse.kura.example.camel.aggregation/" />
 										</zip>
 									</target>
 								</configuration>

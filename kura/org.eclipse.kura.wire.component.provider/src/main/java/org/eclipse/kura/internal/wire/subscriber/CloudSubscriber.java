@@ -5,11 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.subscriber;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.wire.SeverityLevel.ERROR;
 import static org.eclipse.kura.wire.SeverityLevel.INFO;
 
@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -150,11 +149,11 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
      * @return the Wire Record
      * @throws IOException
      *             if the byte array conversion fails
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the payload provided is null
      */
     private WireRecord buildWireRecord(final KuraPayload payload) throws IOException {
-        checkNull(payload, s_message.payloadNonNull());
+        requireNonNull(payload, s_message.payloadNonNull());
         final List<WireField> wireFields = CollectionUtil.newArrayList();
 
         final String flag = "asset_flag";

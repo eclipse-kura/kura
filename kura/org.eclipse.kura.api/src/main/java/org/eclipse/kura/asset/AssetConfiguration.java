@@ -5,15 +5,14 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.asset;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 import org.eclipse.kura.type.DataType;
@@ -99,13 +98,13 @@ public final class AssetConfiguration {
      *            the driver PID
      * @param channels
      *            the map of all channel configurations
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the arguments is null
      */
     public AssetConfiguration(final String description, final String driverPid, final Map<Long, Channel> channels) {
-        checkNull(description, "Asset description cannot be null");
-        checkNull(driverPid, "Asset driver PID cannot be null");
-        checkNull(channels, "Asset channel configurations cannot be null");
+        requireNonNull(description, "Asset description cannot be null");
+        requireNonNull(driverPid, "Asset driver PID cannot be null");
+        requireNonNull(channels, "Asset channel configurations cannot be null");
 
         this.assetDescription = description;
         this.driverPid = driverPid;
@@ -144,11 +143,11 @@ public final class AssetConfiguration {
      *
      * @param description
      *            the new asset description
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     public void setAssetDescription(final String description) {
-        checkNull(description, "Asset description cannot be null");
+        requireNonNull(description, "Asset description cannot be null");
         this.assetDescription = description;
     }
 

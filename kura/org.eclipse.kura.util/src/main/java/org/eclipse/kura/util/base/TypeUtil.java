@@ -5,17 +5,16 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.util.base;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.UtilMessages;
 
@@ -56,11 +55,11 @@ public final class TypeUtil {
      * @return the byte array
      * @throws IOException
      *             if the access to byte stream fails
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     public static byte[] objectToByteArray(final Object value) throws IOException {
-        checkNull(value, s_message.valueNonNull());
+        requireNonNull(value, s_message.valueNonNull());
         final ByteArrayOutputStream b = new ByteArrayOutputStream();
         final ObjectOutputStream o = new ObjectOutputStream(b);
         o.writeObject(value);

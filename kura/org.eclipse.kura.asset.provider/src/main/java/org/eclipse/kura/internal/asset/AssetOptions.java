@@ -5,12 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.asset;
 
-import static org.eclipse.kura.Preconditions.checkCondition;
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DESC_PROP;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_POSTFIX;
@@ -36,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.ChannelType;
@@ -76,11 +74,11 @@ public final class AssetOptions {
      *
      * @param properties
      *            the configured properties
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     public AssetOptions(final Map<String, Object> properties) {
-        checkNull(properties, s_message.propertiesNonNull());
+        requireNonNull(properties, s_message.propertiesNonNull());
         this.extractProperties(properties);
     }
 
@@ -89,11 +87,11 @@ public final class AssetOptions {
      *
      * @param channel
      *            the channel to be inserted
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the arguments is null
      */
     private void addChannel(final Channel channel) {
-        checkNull(channel, s_message.channelNonNull());
+        requireNonNull(channel, s_message.channelNonNull());
         this.channels.put(channel.getId(), channel);
     }
 
@@ -103,11 +101,11 @@ public final class AssetOptions {
      *
      * @param properties
      *            the properties to retrieve the channels from
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     private void checkChannelAvailability(final Map<String, Object> properties) {
-        checkNull(properties, s_message.propertiesNonNull());
+        requireNonNull(properties, s_message.propertiesNonNull());
         final Set<Long> channelIds = this.retrieveChannelIds(properties);
         for (final long channelId : channelIds) {
             final Channel channel = this.retrieveChannel(channelId, properties);
@@ -120,11 +118,11 @@ public final class AssetOptions {
      *
      * @param properties
      *            the provided properties
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     private void extractProperties(final Map<String, Object> properties) {
-        checkNull(properties, s_message.propertiesNonNull());
+        requireNonNull(properties, s_message.propertiesNonNull());
         try {
             if (properties.containsKey(ASSET_DRIVER_PROP.value())) {
                 this.driverPid = (String) properties.get(ASSET_DRIVER_PROP.value());
@@ -155,12 +153,12 @@ public final class AssetOptions {
      * @param channelTypePropertyKey
      *            the key to read from the provided properties
      * @return the Channel Type
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the arguments is null
      */
     private ChannelType getChannelType(final Map<String, Object> properties, final String channelTypePropertyKey) {
-        checkNull(properties, s_message.propertiesNonNull());
-        checkNull(channelTypePropertyKey, s_message.channelKeyNonNull());
+        requireNonNull(properties, s_message.propertiesNonNull());
+        requireNonNull(channelTypePropertyKey, s_message.channelKeyNonNull());
 
         if (properties.containsKey(channelTypePropertyKey)) {
             final String channelTypeProp = (String) properties.get(channelTypePropertyKey);
@@ -185,12 +183,12 @@ public final class AssetOptions {
      * @param channelValueTypePropertyKey
      *            the key to read from the provided properties
      * @return the Channel Type
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the arguments is null
      */
     private DataType getDataType(final Map<String, Object> properties, final String channelValueTypePropertyKey) {
-        checkNull(properties, s_message.propertiesNonNull());
-        checkNull(channelValueTypePropertyKey, s_message.channelValueTypeNonNull());
+        requireNonNull(properties, s_message.propertiesNonNull());
+        requireNonNull(channelValueTypePropertyKey, s_message.channelValueTypeNonNull());
 
         if (properties.containsKey(channelValueTypePropertyKey)) {
             final String dataTypeProp = (String) properties.get(channelValueTypePropertyKey);
@@ -233,13 +231,17 @@ public final class AssetOptions {
      * @param properties
      *            the properties to retrieve channel from
      * @return the specific channel
-     * @throws KuraRuntimeException
-     *             if the properties is null or the channel identifier is less
+     * @throws NullPointerException
+     *             if the properties is null
+     * @throws IllegalArgumentException
+     *             the channel identifier is less
      *             than or equal to zero
      */
     private Channel retrieveChannel(final long channelId, final Map<String, Object> properties) {
-        checkCondition(channelId <= 0, s_message.channelIdNotLessThanZero());
-        checkNull(properties, s_message.propertiesNonNull());
+        if (channelId <= 0) {
+            throw new IllegalArgumentException(s_message.channelIdNotLessThanZero());
+        }
+        requireNonNull(properties, s_message.propertiesNonNull());
 
         s_logger.debug(s_message.retrievingChannel());
         String channelName = null;
@@ -289,11 +291,11 @@ public final class AssetOptions {
      * @param properties
      *            the properties to parse
      * @return the list of channel IDs
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     private Set<Long> retrieveChannelIds(final Map<String, Object> properties) {
-        checkNull(properties, s_message.propertiesNonNull());
+        requireNonNull(properties, s_message.propertiesNonNull());
         final Set<Long> channelIds = CollectionUtil.newHashSet();
         for (final Map.Entry<String, Object> entry : properties.entrySet()) {
             final String key = entry.getKey();
@@ -319,11 +321,11 @@ public final class AssetOptions {
      *
      * @param properties
      *            the new properties
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     public void update(final Map<String, Object> properties) {
-        checkNull(properties, s_message.propertiesNonNull());
+        requireNonNull(properties, s_message.propertiesNonNull());
         this.extractProperties(properties);
     }
 

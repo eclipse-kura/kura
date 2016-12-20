@@ -5,11 +5,13 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.util.service;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
+
+import java.util.Collection;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
@@ -45,20 +47,19 @@ public final class ServiceUtil {
      * @param filter
      *            valid OSGi filter (can be <code>null</code>)
      * @return non-<code>null</code> array of references to matching services
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the filter syntax is wrong (even though filter is
      *             nullable) or bundle syntax or class instance name is null
      */
+    @SuppressWarnings("unchecked")
     public static <T> ServiceReference<T>[] getServiceReferences(final BundleContext bundleContext,
             final Class<T> clazz, final String filter) {
-        checkNull(bundleContext, s_message.bundleContextNonNull());
-        checkNull(clazz, s_message.clazzNonNull());
+        requireNonNull(bundleContext, s_message.bundleContextNonNull());
+        requireNonNull(clazz, s_message.clazzNonNull());
 
         try {
-            final ServiceReference<?>[] refs = bundleContext.getServiceReferences(clazz.getName(), filter);
-            @SuppressWarnings("unchecked")
-            final ServiceReference<T>[] reference = (refs == null ? new ServiceReference[0] : refs);
-            return reference;
+            final Collection<ServiceReference<T>> refs = bundleContext.getServiceReferences(clazz, filter);
+            return refs.toArray(new ServiceReference[0]);
         } catch (final InvalidSyntaxException ise) {
             throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, ThrowableUtil.stackTraceAsString(ise));
         }
@@ -71,12 +72,12 @@ public final class ServiceUtil {
      *            OSGi bundle context
      * @param refs
      *            the array of all service references
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the arguments is null
      */
     public static void ungetServiceReferences(final BundleContext bundleContext, final ServiceReference<?>[] refs) {
-        checkNull(bundleContext, s_message.bundleContextNonNull());
-        checkNull(refs, s_message.referencesNonNull());
+        requireNonNull(bundleContext, s_message.bundleContextNonNull());
+        requireNonNull(refs, s_message.referencesNonNull());
 
         for (final ServiceReference<?> ref : refs) {
             bundleContext.ungetService(ref);

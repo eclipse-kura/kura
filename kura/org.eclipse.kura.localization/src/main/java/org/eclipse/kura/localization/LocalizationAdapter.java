@@ -5,15 +5,13 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.localization;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Locale;
-
-import org.eclipse.kura.KuraRuntimeException;
 
 import com.github.rodionmoiseev.c10n.C10N;
 import com.github.rodionmoiseev.c10n.annotations.DefaultC10NAnnotations;
@@ -59,12 +57,12 @@ public final class LocalizationAdapter {
      *            the generic type
      * @param clazz
      *            the message resource
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      * @return the instance of the C10N resource
      */
     public static <T> T adapt(final Class<T> clazz) {
-        checkNull(clazz, "Class instance of localization resource cannot be null");
+        requireNonNull(clazz, "Class instance of localization resource cannot be null");
         return C10N.get(clazz, getSystemLocale());
     }
 

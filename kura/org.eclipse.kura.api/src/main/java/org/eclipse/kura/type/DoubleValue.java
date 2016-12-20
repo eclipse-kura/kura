@@ -9,9 +9,8 @@
  *******************************************************************************/
 package org.eclipse.kura.type;
 
-import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.type.DataType.DOUBLE;
-
+import static java.util.Objects.requireNonNull;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
@@ -41,7 +40,7 @@ public final class DoubleValue implements TypedValue<Double> {
     /** {@inheritDoc} */
     @Override
     public int compareTo(final TypedValue<Double> otherTypedValue) {
-        checkNull(otherTypedValue, "Typed Value cannot be null");
+        requireNonNull(otherTypedValue, "Typed Value cannot be null");
         return Double.valueOf(this.value).compareTo(otherTypedValue.getValue());
     }
 

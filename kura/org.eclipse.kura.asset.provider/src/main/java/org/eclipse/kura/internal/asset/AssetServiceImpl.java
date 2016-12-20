@@ -5,11 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.asset;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public final class AssetServiceImpl implements AssetService {
     /** {@inheritDoc} */
     @Override
     public Asset getAsset(final String assetPid) {
-        checkNull(assetPid, s_message.assetPidNonNull());
+        requireNonNull(assetPid, s_message.assetPidNonNull());
         final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         final ServiceReference<Asset>[] refs = ServiceUtil.getServiceReferences(context, Asset.class, null);
         try {
@@ -54,7 +54,7 @@ public final class AssetServiceImpl implements AssetService {
     /** {@inheritDoc} */
     @Override
     public String getAssetPid(final Asset asset) {
-        checkNull(asset, s_message.assetNonNull());
+        requireNonNull(asset, s_message.assetNonNull());
         final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         final ServiceReference<Asset>[] refs = ServiceUtil.getServiceReferences(context, Asset.class, null);
         try {

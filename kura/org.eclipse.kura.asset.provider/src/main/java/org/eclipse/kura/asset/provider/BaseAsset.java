@@ -5,12 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.asset.provider;
 
-import static org.eclipse.kura.Preconditions.checkCondition;
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DESC_PROP;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_POSTFIX;
@@ -37,7 +36,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Extensible;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
@@ -150,11 +148,11 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      *
      * @param driverId
      *            the identifier of the driver
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if driver id provided is null
      */
     private synchronized void attachDriver(final String driverId) {
-        checkNull(driverId, s_message.driverPidNonNull());
+        requireNonNull(driverId, s_message.driverPidNonNull());
         s_logger.debug(s_message.driverAttach());
         try {
             final DriverTrackerCustomizer driverTrackerCustomizer = new DriverTrackerCustomizer(
@@ -181,12 +179,12 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      *            properties. The driver specific properties in the channel will
      *            use the {@code x.CH.DRIVER.} prefix)
      * @return the new attribute definition
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the provided arguments is null
      */
     private Tad cloneAd(final Tad oldAd, final String prefix) {
-        checkNull(oldAd, s_message.oldAdNonNull());
-        checkNull(prefix, s_message.adPrefixNonNull());
+        requireNonNull(oldAd, s_message.oldAdNonNull());
+        requireNonNull(prefix, s_message.adPrefixNonNull());
 
         String pref = prefix;
         final String oldAdId = oldAd.getId();
@@ -252,14 +250,18 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      * @param driverRecord
      *            the specific driver record
      * @return the found asset record or null
-     * @throws KuraRuntimeException
-     *             if any of the arguments is null or the provided list is empty
+     * @throws NullPointerException
+     *             if any of the arguments is null
+     * @throws IllegalArgumentException
+     *             the provided list is empty
      */
     private AssetRecord getAssetRecordByDriverRecord(final List<AssetRecord> assetRecords,
             final DriverRecord driverRecord) {
-        checkNull(assetRecords, s_message.assetRecordsNonNull());
-        checkCondition(assetRecords.isEmpty(), s_message.assetRecordsNonEmpty());
-        checkNull(driverRecord, s_message.driverRecordNonNull());
+        requireNonNull(assetRecords, s_message.assetRecordsNonNull());
+        if (assetRecords.isEmpty()) {
+            throw new IllegalArgumentException(s_message.assetRecordsNonEmpty());
+        }
+        requireNonNull(driverRecord, s_message.driverRecordNonNull());
 
         for (final AssetRecord assetRecord : assetRecords) {
             final Map<String, Object> driverConfig = driverRecord.getChannelConfig();
@@ -389,11 +391,11 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      *            the attribute ID to check
      * @return true if the attribute definition belongs to a driver, otherwise
      *         false
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     private boolean isDriverAttrbuteDefinition(final String oldAdId) {
-        checkNull(oldAdId, s_message.oldAdNonNull());
+        requireNonNull(oldAdId, s_message.oldAdNonNull());
         return (oldAdId != ASSET_DESC_PROP.value()) && (oldAdId != ASSET_DRIVER_PROP.value())
                 && (oldAdId != NAME.value()) && (oldAdId != TYPE.value()) && (oldAdId != VALUE_TYPE.value())
                 && (oldAdId != SEVERITY_LEVEL.value());
@@ -409,13 +411,13 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      *            the provided asset record
      * @throws KuraException
      *             if any driver flag is error specific
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the arguments is null
      */
     private void prepareAssetRecord(final DriverRecord driverRecord, final AssetRecord assetRecord)
             throws KuraException {
-        checkNull(driverRecord, s_message.driverRecordNonNull());
-        checkNull(assetRecord, s_message.assetRecordNonNull());
+        requireNonNull(driverRecord, s_message.driverRecordNonNull());
+        requireNonNull(assetRecord, s_message.assetRecordNonNull());
 
         final DriverStatus status = driverRecord.getDriverStatus();
         final DriverFlag driverFlag = status.getDriverFlag();
@@ -447,7 +449,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     /** {@inheritDoc} */
     @Override
     public List<AssetRecord> read(final List<Long> channelIds) throws KuraException {
-        checkNull(this.driver, s_message.driverNonNull());
+        requireNonNull(this.driver, s_message.driverNonNull());
         s_logger.debug(s_message.readingChannels());
         final List<AssetRecord> assetRecords = CollectionUtil.newArrayList();
         final List<DriverRecord> driverRecords = CollectionUtil.newArrayList();
@@ -497,13 +499,14 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     /** {@inheritDoc} */
     @Override
     public void registerAssetListener(final long channelId, final AssetListener assetListener) throws KuraException {
-        checkCondition(channelId <= 0, s_message.channelIdNotLessThanZero());
-        checkNull(assetListener, s_message.listenerNonNull());
-        checkNull(this.driver, s_message.driverNonNull());
+        if (channelId <= 0) {
+            throw new IllegalArgumentException(s_message.channelIdNotLessThanZero());
+        }
+        requireNonNull(assetListener, s_message.listenerNonNull());
+        requireNonNull(this.driver, s_message.driverNonNull());
 
         s_logger.debug(s_message.registeringListener());
         final Map<Long, Channel> channels = this.assetConfiguration.getAssetChannels();
-        checkCondition(channelId == 0, s_message.channelUnavailable());
 
         /**
          * This is a basic driver listener used to listen for driver events so
@@ -524,18 +527,18 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
              *
              * @param assetListener
              *            the asset listener
-             * @throws KuraRuntimeException
+             * @throws NullPointerException
              *             if the argument is null
              */
             BaseDriverListener(final AssetListener assetListener) {
-                checkNull(assetListener, s_message.listenerNonNull());
+                requireNonNull(assetListener, s_message.listenerNonNull());
                 this.assetListener = assetListener;
             }
 
             /** {@inheritDoc} */
             @Override
             public void onDriverEvent(final DriverEvent event) {
-                checkNull(event, s_message.driverEventNonNull());
+                requireNonNull(event, s_message.driverEventNonNull());
                 final DriverRecord driverRecord = event.getDriverRecord();
                 final Map<String, Object> driverRecordConf = driverRecord.getChannelConfig();
                 long channelId = 0;
@@ -579,11 +582,11 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      * @param channels
      *            the properties to parse
      * @return the list of channel IDs
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     private Set<String> retrieveChannelPrefixes(final Map<Long, Channel> channels) {
-        checkNull(channels, s_message.propertiesNonNull());
+        requireNonNull(channels, s_message.propertiesNonNull());
         final Set<String> channelPrefixes = CollectionUtil.newHashSet();
         for (final Map.Entry<Long, Channel> entry : channels.entrySet()) {
             final Long key = entry.getKey();
@@ -622,8 +625,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     /** {@inheritDoc} */
     @Override
     public void unregisterAssetListener(final AssetListener assetListener) throws KuraException {
-        checkNull(assetListener, s_message.listenerNonNull());
-        checkNull(this.driver, s_message.driverNonNull());
+        requireNonNull(assetListener, s_message.listenerNonNull());
+        requireNonNull(this.driver, s_message.driverNonNull());
 
         s_logger.debug(s_message.unregisteringListener());
         this.monitor.lock();
@@ -659,7 +662,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     /** {@inheritDoc} */
     @Override
     public List<AssetRecord> write(final List<AssetRecord> assetRecords) throws KuraException {
-        checkNull(this.driver, s_message.driverNonNull());
+        requireNonNull(this.driver, s_message.driverNonNull());
         s_logger.debug(s_message.writing());
         final List<DriverRecord> driverRecords = CollectionUtil.newArrayList();
         final Map<Long, Channel> channels = this.assetConfiguration.getAssetChannels();
@@ -701,7 +704,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
         for (final DriverRecord driverRecord : driverRecords) {
             final AssetRecord assetRecord = this.getAssetRecordByDriverRecord(assetRecords, driverRecord);
-            checkNull(assetRecord, s_message.assetRecordNonNull());
+            requireNonNull(assetRecord, s_message.assetRecordNonNull());
             this.prepareAssetRecord(driverRecord, assetRecord);
         }
         s_logger.debug(s_message.writingDone());

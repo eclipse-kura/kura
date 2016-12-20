@@ -5,11 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.type;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.type.DataType.BOOLEAN;
 
 import org.eclipse.kura.annotation.Immutable;
@@ -35,14 +35,13 @@ public final class BooleanValue implements TypedValue<Boolean> {
      *            the value
      */
     public BooleanValue(final boolean value) {
-        checkNull(value, "Provided Typed Value cannot be null");
         this.value = value;
     }
 
     /** {@inheritDoc} */
     @Override
     public int compareTo(final TypedValue<Boolean> otherTypedValue) {
-        checkNull(otherTypedValue, "Typed Value cannot be null");
+        requireNonNull(otherTypedValue, "Typed Value cannot be null");
         return (this.value == otherTypedValue.getValue()) ? 0 : (this.value ? 1 : -1);
     }
 

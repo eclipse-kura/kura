@@ -5,16 +5,15 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.asset.cloudlet;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
 import java.util.Map;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.localization.LocalizationAdapter;
@@ -55,12 +54,12 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
      *            the bundle context
      * @throws InvalidSyntaxException
      *             the invalid syntax exception
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the arguments is null
      */
     AssetTrackerCustomizer(final BundleContext context, final AssetService assetService) throws InvalidSyntaxException {
-        checkNull(context, s_message.bundleContextNonNull());
-        checkNull(context, s_message.assetServiceNonNull());
+        requireNonNull(context, s_message.bundleContextNonNull());
+        requireNonNull(context, s_message.assetServiceNonNull());
 
         this.assets = CollectionUtil.newConcurrentHashMap();
         this.context = context;
@@ -83,12 +82,12 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
      *
      * @param service
      *            the asset service instance
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if provided service is null
      * @return Asset service instance
      */
     private Asset addService(final Asset service) {
-        checkNull(service, s_message.assetServiceNonNull());
+        requireNonNull(service, s_message.assetServiceNonNull());
         final String assetPid = this.assetService.getAssetPid(service);
         this.assets.put(assetPid, service);
         return service;

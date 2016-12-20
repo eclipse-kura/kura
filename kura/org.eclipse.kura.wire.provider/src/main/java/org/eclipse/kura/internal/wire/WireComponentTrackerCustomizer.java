@@ -5,17 +5,16 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.util.base.ThrowableUtil;
@@ -65,13 +64,13 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
      *            the wire service
      * @throws InvalidSyntaxException
      *             the invalid syntax exception
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the arguments is null
      */
     WireComponentTrackerCustomizer(final BundleContext context, final WireServiceImpl wireService)
             throws InvalidSyntaxException {
-        checkNull(context, s_message.bundleContextNonNull());
-        checkNull(wireService, s_message.wireServiceNonNull());
+        requireNonNull(context, s_message.bundleContextNonNull());
+        requireNonNull(wireService, s_message.wireServiceNonNull());
 
         this.wireEmitters = CollectionUtil.newArrayList();
         this.wireReceivers = CollectionUtil.newArrayList();
@@ -153,11 +152,11 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
      *
      * @param pid
      *            the wire component PID
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     private void removeWireComponent(final String pid) {
-        checkNull(pid, s_message.pidNonNull());
+        requireNonNull(pid, s_message.pidNonNull());
         for (final WireConfiguration wireConfiguration : this.wireService.getWireConfigurations()) {
             if ((wireConfiguration.getWire() != null) && (pid.equals(wireConfiguration.getEmitterPid())
                     || (pid.equals(wireConfiguration.getReceiverPid())))) {

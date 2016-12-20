@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.wire;
 
@@ -33,6 +33,8 @@ public interface WireSupport extends Producer, Consumer {
      *
      * @param wireRecords
      *            the Wire Records to emit
+     * @throws NullPointerException
+     *             if the argument is null
      */
     public void emit(List<WireRecord> wireRecords);
 
@@ -44,6 +46,8 @@ public interface WireSupport extends Producer, Consumer {
      *
      * @param records
      *            the list of Wire Records to filter
+     * @throws NullPointerException
+     *             if the argument is null
      * @return the list of filtered Wire Records
      */
     public List<WireRecord> filter(List<WireRecord> records);

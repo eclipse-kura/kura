@@ -9,9 +9,8 @@
  *******************************************************************************/
 package org.eclipse.kura.type;
 
-import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.type.DataType.STRING;
-
+import static java.util.Objects.requireNonNull;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.annotation.ThreadSafe;
@@ -42,7 +41,7 @@ public final class StringValue implements TypedValue<String> {
     /** {@inheritDoc} */
     @Override
     public int compareTo(final TypedValue<String> otherTypedValue) {
-        checkNull(otherTypedValue, "Typed Value cannot be null");
+        requireNonNull(otherTypedValue, "Typed Value cannot be null");
         return this.value.compareTo(otherTypedValue.getValue());
     }
 

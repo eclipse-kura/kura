@@ -5,11 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
@@ -53,7 +53,7 @@ public final class WireHelperServiceImpl implements WireHelperService {
     /** {@inheritDoc} */
     @Override
     public String getPid(final WireComponent wireComponent) {
-        checkNull(wireComponent, s_message.wireComponentNonNull());
+        requireNonNull(wireComponent, s_message.wireComponentNonNull());
         final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         final ServiceReference<?>[] refs = ServiceUtil.getServiceReferences(context, WireComponent.class, null);
         try {
@@ -72,7 +72,7 @@ public final class WireHelperServiceImpl implements WireHelperService {
     /** {@inheritDoc} */
     @Override
     public String getServicePid(final String wireComponentPid) {
-        checkNull(wireComponentPid, s_message.wireComponentPidNonNull());
+        requireNonNull(wireComponentPid, s_message.wireComponentPidNonNull());
         final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         final ServiceReference<?>[] refs = ServiceUtil.getServiceReferences(context, WireComponent.class, null);
         try {
@@ -90,7 +90,7 @@ public final class WireHelperServiceImpl implements WireHelperService {
     /** {@inheritDoc} */
     @Override
     public String getServicePid(final WireComponent wireComponent) {
-        checkNull(wireComponent, s_message.wireComponentNonNull());
+        requireNonNull(wireComponent, s_message.wireComponentNonNull());
         final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         final ServiceReference<?>[] refs = ServiceUtil.getServiceReferences(context, WireComponent.class, null);
         try {
@@ -109,7 +109,7 @@ public final class WireHelperServiceImpl implements WireHelperService {
     /** {@inheritDoc} */
     @Override
     public boolean isEmitter(final String wireComponentPid) {
-        checkNull(wireComponentPid, s_message.wireComponentPidNonNull());
+        requireNonNull(wireComponentPid, s_message.wireComponentPidNonNull());
         final BundleContext context = FrameworkUtil.getBundle(WireHelperServiceImpl.class).getBundleContext();
         final ServiceReference<?>[] refs = ServiceUtil.getServiceReferences(context, WireComponent.class, null);
         try {
@@ -130,7 +130,7 @@ public final class WireHelperServiceImpl implements WireHelperService {
     /** {@inheritDoc} */
     @Override
     public boolean isReceiver(final String wireComponentPid) {
-        checkNull(wireComponentPid, s_message.wireComponentPidNonNull());
+        requireNonNull(wireComponentPid, s_message.wireComponentPidNonNull());
         final BundleContext context = FrameworkUtil.getBundle(WireHelperServiceImpl.class).getBundleContext();
         final ServiceReference<?>[] refs = ServiceUtil.getServiceReferences(context, WireComponent.class, null);
         try {

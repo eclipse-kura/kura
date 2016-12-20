@@ -5,11 +5,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.asset.listener;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.AssetEvent;
 
 /**
@@ -22,6 +21,7 @@ import org.eclipse.kura.asset.AssetEvent;
  *
  * @see AssetEvent
  */
+@FunctionalInterface
 public interface AssetListener {
 
     /**
@@ -29,7 +29,7 @@ public interface AssetListener {
      *
      * @param event
      *            the fired asset event
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if event is null
      */
     public void onAssetEvent(AssetEvent event);

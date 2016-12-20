@@ -5,13 +5,12 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.driver;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.annotation.ThreadSafe;
@@ -40,11 +39,11 @@ public final class DriverStatus {
      *
      * @param driverFlag
      *            the driver flag
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the driver flag is null
      */
     public DriverStatus(final DriverFlag driverFlag) {
-        checkNull(driverFlag, "Driver Flag cannot be null");
+        requireNonNull(driverFlag, "Driver Flag cannot be null");
         this.driverFlag = driverFlag;
         this.exceptionMessage = null;
         this.exception = null;
@@ -59,12 +58,12 @@ public final class DriverStatus {
      *            the exception message
      * @param exception
      *            the exception
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the driver flag is null
      */
     public DriverStatus(final DriverFlag driverFlag, @Nullable final String exceptionMessage,
             @Nullable final Exception exception) {
-        checkNull(driverFlag, "Driver Flag cannot be null");
+        requireNonNull(driverFlag, "Driver Flag cannot be null");
         this.driverFlag = driverFlag;
         this.exceptionMessage = exceptionMessage;
         this.exception = exception;

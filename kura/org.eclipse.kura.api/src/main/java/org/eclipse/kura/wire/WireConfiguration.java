@@ -10,8 +10,7 @@
 
 package org.eclipse.kura.wire;
 
-import static org.eclipse.kura.Preconditions.checkNull;
-
+import static java.util.Objects.requireNonNull;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.annotation.Nullable;
@@ -51,8 +50,8 @@ public final class WireConfiguration {
      *             if any of the arguments is null (except filter)
      */
     public WireConfiguration(final String emitterPid, final String receiverPid, @Nullable final String filter) {
-        checkNull(emitterPid, "Emitter PID cannot be null");
-        checkNull(receiverPid, "Receiver PID cannot be null");
+        requireNonNull(emitterPid, "Emitter PID cannot be null");
+        requireNonNull(receiverPid, "Receiver PID cannot be null");
 
         this.emitterPid = emitterPid;
         this.receiverPid = receiverPid;

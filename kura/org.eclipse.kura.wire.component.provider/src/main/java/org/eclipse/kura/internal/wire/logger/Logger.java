@@ -5,11 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.logger;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import java.util.Map;
@@ -86,7 +86,7 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
     /** {@inheritDoc} */
     @Override
     public void onWireReceive(final WireEnvelope wireEnvelope) {
-        checkNull(wireEnvelope, s_message.wireEnvelopeNonNull());
+        requireNonNull(wireEnvelope, s_message.wireEnvelopeNonNull());
         s_logger.info(s_message.wireEnvelopeReceived(wireEnvelope.getEmitterPid()));
         // filtering list of wire records based on the provided severity level
         final List<WireRecord> records = this.wireSupport.filter(wireEnvelope.getRecords());
@@ -96,7 +96,7 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
     /** {@inheritDoc} */
     @Override
     public void producersConnected(final Wire[] wires) {
-        checkNull(wires, s_message.wiresNonNull());
+        requireNonNull(wires, s_message.wiresNonNull());
         this.wireSupport.producersConnected(wires);
     }
 

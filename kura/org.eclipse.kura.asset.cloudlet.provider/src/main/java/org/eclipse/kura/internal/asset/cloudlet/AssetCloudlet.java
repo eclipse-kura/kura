@@ -9,16 +9,13 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.asset.cloudlet;
 
-import static org.eclipse.kura.Preconditions.checkNull;
-
+import static java.util.Objects.requireNonNull;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.AssetFlag;
@@ -254,11 +251,11 @@ public final class AssetCloudlet extends Cloudlet {
      *
      * @param respPayload
      *            the response to prepare
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     private void getAllAssets(final KuraResponsePayload respPayload) {
-        checkNull(respPayload, s_message.respPayloadNonNull());
+        requireNonNull(respPayload, s_message.respPayloadNonNull());
         int i = 0;
         for (final Map.Entry<String, Asset> assetEntry : this.assets.entrySet()) {
             respPayload.addMetric(String.valueOf(++i), assetEntry.getKey());
@@ -272,12 +269,12 @@ public final class AssetCloudlet extends Cloudlet {
      *            the response to prepare
      * @param assetPid
      *            the provided Asset PID
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the argument is null
      */
     private void getAllChannelsByAssetPid(final KuraResponsePayload respPayload, final String assetPid) {
-        checkNull(respPayload, s_message.respPayloadNonNull());
-        checkNull(assetPid, s_message.assetPidNonNull());
+        requireNonNull(respPayload, s_message.respPayloadNonNull());
+        requireNonNull(assetPid, s_message.assetPidNonNull());
 
         final Asset asset = this.assets.get(assetPid);
         final AssetConfiguration configuration = asset.getAssetConfiguration();
@@ -295,12 +292,12 @@ public final class AssetCloudlet extends Cloudlet {
      *            the response payload to prepare
      * @param assetRecords
      *            the list of asset records
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the arguments is null
      */
     private void prepareResponse(final KuraResponsePayload respPayload, final List<AssetRecord> assetRecords) {
-        checkNull(respPayload, s_message.respPayloadNonNull());
-        checkNull(assetRecords, s_message.assetRecordsNonNull());
+        requireNonNull(respPayload, s_message.respPayloadNonNull());
+        requireNonNull(assetRecords, s_message.assetRecordsNonNull());
 
         for (final AssetRecord assetRecord : assetRecords) {
             final TypedValue<?> assetValue = assetRecord.getValue();
@@ -332,14 +329,14 @@ public final class AssetCloudlet extends Cloudlet {
      *            the Asset PID
      * @param channelId
      *            the channel ID (might contain {@code -} for multiple reads)
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the arguments is null
      */
     private void readChannelsByIds(final KuraResponsePayload respPayload, final String assetPid,
             final String channelId) {
-        checkNull(respPayload, s_message.respPayloadNonNull());
-        checkNull(assetPid, s_message.assetPidNonNull());
-        checkNull(channelId, s_message.channelIdNonNull());
+        requireNonNull(respPayload, s_message.respPayloadNonNull());
+        requireNonNull(assetPid, s_message.assetPidNonNull());
+        requireNonNull(channelId, s_message.channelIdNonNull());
 
         final String channelDelim = ",";
         Set<String> channelIds = null;
@@ -368,6 +365,7 @@ public final class AssetCloudlet extends Cloudlet {
                 assetRecords = asset.read(channelIdsToRead);
             } catch (final KuraException e) {
                 // if connection exception occurs
+                s_logger.warn(s_message.connectionException() + e);
                 respPayload.addMetric(s_message.errorMessage(), s_message.connectionException());
             }
             if (assetRecords != null) {
@@ -410,15 +408,15 @@ public final class AssetCloudlet extends Cloudlet {
      *            the value to wrap
      * @param userType
      *            the type to use
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the provided arguments is null
      * @throws NumberFormatException
      *             if the provided value cannot be parsed
      */
     private void wrapValue(final AssetRecord assetRecord, final String userValue, final String userType) {
-        checkNull(assetRecord, s_message.assetRecordNonNull());
-        checkNull(userValue, s_message.valueNonNull());
-        checkNull(userType, s_message.typeNonNull());
+        requireNonNull(assetRecord, s_message.assetRecordNonNull());
+        requireNonNull(userValue, s_message.valueNonNull());
+        requireNonNull(userType, s_message.typeNonNull());
 
         TypedValue<?> value = null;
         try {

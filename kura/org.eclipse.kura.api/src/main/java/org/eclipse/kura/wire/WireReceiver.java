@@ -5,11 +5,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.wire;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.osgi.service.wireadmin.Consumer;
 
 /**
@@ -26,7 +25,7 @@ public interface WireReceiver extends WireComponent, Consumer {
      *
      * @param wireEnvelope
      *            the received wire envelope
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     public void onWireReceive(WireEnvelope wireEnvelope);

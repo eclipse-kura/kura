@@ -9,9 +9,8 @@
  *******************************************************************************/
 package org.eclipse.kura.type;
 
-import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.type.DataType.LONG;
-
+import static java.util.Objects.requireNonNull;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
@@ -41,7 +40,7 @@ public final class LongValue implements TypedValue<Long> {
     /** {@inheritDoc} */
     @Override
     public int compareTo(final TypedValue<Long> otherTypedValue) {
-        checkNull(otherTypedValue, "Typed Value cannot be null");
+        requireNonNull(otherTypedValue, "Typed Value cannot be null");
         return Long.valueOf(this.value).compareTo(otherTypedValue.getValue());
     }
 

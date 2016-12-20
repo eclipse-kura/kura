@@ -5,16 +5,14 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.timer;
 
-import static org.eclipse.kura.Preconditions.checkCondition;
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
@@ -175,11 +173,11 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
      *            the CRON expression
      * @throws SchedulerException
      *             if scheduling fails
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     private void scheduleCronInterval(final String expression) throws SchedulerException {
-        checkNull(expression, s_message.cronExpressionNonNull());
+        requireNonNull(expression, s_message.cronExpressionNonNull());
         ++id;
         if (this.jobKey != null) {
             this.scheduler.deleteJob(this.jobKey);
@@ -205,11 +203,13 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
      *            the interval
      * @throws SchedulerException
      *             if scheduling fails
-     * @throws KuraRuntimeException
+     * @throws IllegalArgumentException
      *             if the interval is less than or equal to zero
      */
     private void scheduleSimpleInterval(final int interval) throws SchedulerException {
-        checkCondition(interval <= 0, s_message.intervalNonLessThanEqualToZero());
+        if (interval <= 0) {
+            throw new IllegalArgumentException(s_message.intervalNonLessThanEqualToZero());
+        }
         ++id;
         if (this.jobKey != null) {
             this.scheduler.deleteJob(this.jobKey);

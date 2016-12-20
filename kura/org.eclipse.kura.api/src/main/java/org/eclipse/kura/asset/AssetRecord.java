@@ -5,14 +5,12 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.asset;
 
-import static org.eclipse.kura.Preconditions.checkCondition;
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.TypedValue;
 
@@ -47,11 +45,13 @@ public final class AssetRecord {
      *
      * @param channelId
      *            the channel identifier
-     * @throws KuraRuntimeException
+     * @throws IllegalArgumentException
      *             if the channel identifier is less than or equal to zero
      */
     public AssetRecord(final long channelId) {
-        checkCondition(channelId <= 0, "Channel ID cannot be zero or less");
+        if (channelId <= 0) {
+            throw new IllegalArgumentException("Channel ID cannot be zero or less");
+        }
         this.channelId = channelId;
     }
 
@@ -140,11 +140,11 @@ public final class AssetRecord {
      *
      * @param assetStatus
      *            the new asset status
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     public void setAssetStatus(final AssetStatus assetStatus) {
-        checkNull(assetStatus, "Asset status cannot be null");
+        requireNonNull(assetStatus, "Asset status cannot be null");
         this.assetStatus = assetStatus;
     }
 
@@ -163,11 +163,11 @@ public final class AssetRecord {
      *
      * @param value
      *            the new value
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     public void setValue(final TypedValue<?> value) {
-        checkNull(value, "Value type cannot be null");
+        requireNonNull(value, "Value type cannot be null");
         this.value = value;
     }
 

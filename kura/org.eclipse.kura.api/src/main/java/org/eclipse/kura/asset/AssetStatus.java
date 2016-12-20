@@ -9,9 +9,7 @@
  *******************************************************************************/
 package org.eclipse.kura.asset;
 
-import static org.eclipse.kura.Preconditions.checkNull;
-
-import org.eclipse.kura.KuraRuntimeException;
+import static java.util.Objects.requireNonNull;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.annotation.ThreadSafe;
@@ -40,11 +38,11 @@ public final class AssetStatus {
      *
      * @param assetFlag
      *            the asset flag
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the asset flag is null
      */
     public AssetStatus(final AssetFlag assetFlag) {
-        checkNull(assetFlag, "Asset Flag cannot be null");
+        requireNonNull(assetFlag, "Asset Flag cannot be null");
         this.assetFlag = assetFlag;
         this.exceptionMessage = null;
         this.exception = null;
@@ -59,12 +57,12 @@ public final class AssetStatus {
      *            the exception message
      * @param exception
      *            the exception
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the asset flag is null
      */
     public AssetStatus(final AssetFlag assetFlag, @Nullable final String exceptionMessage,
             @Nullable final Exception exception) {
-        checkNull(assetFlag, "Driver Flag cannot be null");
+        requireNonNull(assetFlag, "Driver Flag cannot be null");
         this.assetFlag = assetFlag;
         this.exceptionMessage = exceptionMessage;
         this.exception = exception;

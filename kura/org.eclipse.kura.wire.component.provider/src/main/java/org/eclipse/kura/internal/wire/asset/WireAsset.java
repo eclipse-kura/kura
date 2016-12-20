@@ -5,12 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.asset;
 
-import static org.eclipse.kura.Preconditions.checkCondition;
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.asset.AssetFlag.FAILURE;
 import static org.eclipse.kura.asset.ChannelType.READ;
 import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetFlag;
 import org.eclipse.kura.asset.AssetRecord;
@@ -155,12 +153,16 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * @param records
      *            the list of Wire Records
      * @return the list of channel IDs
-     * @throws KuraRuntimeException
-     *             if argument is null or empty
+     * @throws NullPointerException
+     *             if argument is null
+     * @throws IllegalArgumentException
+     *             if argument is empty
      */
     private List<Long> determineReadingChannels(final List<WireRecord> records) {
-        checkNull(records, s_message.wireRecordsNonNull());
-        checkCondition(records.isEmpty(), s_message.wireRecordsNonEmpty());
+        requireNonNull(records, s_message.wireRecordsNonNull());
+        if (records.isEmpty()) {
+            throw new IllegalArgumentException(s_message.wireRecordsNonEmpty());
+        }
 
         final List<Long> channelsToRead = CollectionUtil.newArrayList();
         final Map<Long, Channel> channels = this.assetConfiguration.getAssetChannels();
@@ -179,12 +181,16 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * @param records
      *            the list of Wire Records to parse
      * @return list of Asset Records containing the values to be written
-     * @throws KuraRuntimeException
-     *             if argument is null or empty
+     * @throws NullPointerException
+     *             if argument is null
+     * @throws IllegalArgumentException
+     *             if argument is empty
      */
     private List<AssetRecord> determineWritingChannels(final List<WireRecord> records) {
-        checkNull(records, s_message.wireRecordsNonNull());
-        checkCondition(records.isEmpty(), s_message.wireRecordsNonEmpty());
+        requireNonNull(records, s_message.wireRecordsNonNull());
+        if (records.isEmpty()) {
+            throw new IllegalArgumentException(s_message.wireRecordsNonEmpty());
+        }
 
         final List<AssetRecord> assetRecordsToWriteChannels = CollectionUtil.newArrayList();
         final Map<Long, Channel> channels = this.assetConfiguration.getAssetChannels();
@@ -216,12 +222,16 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * @param assetRecords
      *            the list of asset records conforming to the aforementioned
      *            specification
-     * @throws KuraRuntimeException
-     *             if provided records list is null or it is empty
+     * @throws NullPointerException
+     *             if provided records list is null
+     * @throws IllegalArgumentException
+     *             if provided records list is empty
      */
     private void emitAssetRecords(final List<AssetRecord> assetRecords) {
-        checkNull(assetRecords, s_message.assetRecordsNonNull());
-        checkCondition(assetRecords.isEmpty(), s_message.assetRecordsNonEmpty());
+        requireNonNull(assetRecords, s_message.assetRecordsNonNull());
+        if (assetRecords.isEmpty()) {
+            throw new IllegalArgumentException(s_message.assetRecordsNonEmpty());
+        }
 
         final List<WireRecord> wireRecords = CollectionUtil.newArrayList();
         for (final AssetRecord assetRecord : assetRecords) {
@@ -296,10 +306,12 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      *
      * @param wireEnvelope
      *            the received wire envelope
+     * @throws NullPointerException
+     *             if Wire Envelope is null
      */
     @Override
     public void onWireReceive(final WireEnvelope wireEnvelope) {
-        checkNull(wireEnvelope, s_message.wireEnvelopeNonNull());
+        requireNonNull(wireEnvelope, s_message.wireEnvelopeNonNull());
         s_logger.debug(s_message.wireEnvelopeReceived() + this.wireSupport);
 
         // filtering list of wire records based on the provided severity level
@@ -326,12 +338,12 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * @param value
      *            the value
      * @return the asset record
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the provided arguments is null
      */
     private AssetRecord prepareAssetRecord(final Channel channel, final TypedValue<?> value) {
-        checkNull(channel, s_message.channelNonNull());
-        checkNull(value, s_message.valueNonNull());
+        requireNonNull(channel, s_message.channelNonNull());
+        requireNonNull(value, s_message.valueNonNull());
 
         final AssetRecord assetRecord = new AssetRecord(channel.getId());
         assetRecord.setValue(value);
@@ -349,11 +361,11 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      *
      * @param channelsToRead
      *            the list of {@link Channel} IDs
-     * @throws KuraRuntimeException
-     *             if the provided list is null           
+     * @throws NullPointerException
+     *             if the provided list is null
      */
     private void readChannels(final List<Long> channelsToRead) {
-    	checkNull(channelsToRead, s_message.channelIdsNonNull());
+        requireNonNull(channelsToRead, s_message.channelIdsNonNull());
         try {
             List<AssetRecord> recentlyReadRecords = null;
             if (!channelsToRead.isEmpty()) {
@@ -403,11 +415,11 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      *
      * @param assetRecordsToWriteChannels
      *            the list of {@link AssetRecord}s
-     * @throws KuraRuntimeException
-     *             if the provided list is null           
+     * @throws NullPointerException
+     *             if the provided list is null
      */
     private void writeChannels(final List<AssetRecord> assetRecordsToWriteChannels) {
-    	checkNull(assetRecordsToWriteChannels, s_message.assetRecordsNonNull());
+        requireNonNull(assetRecordsToWriteChannels, s_message.assetRecordsNonNull());
         try {
             if (!assetRecordsToWriteChannels.isEmpty()) {
                 this.write(assetRecordsToWriteChannels);

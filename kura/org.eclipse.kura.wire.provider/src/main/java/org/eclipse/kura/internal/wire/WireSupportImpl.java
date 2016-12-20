@@ -5,11 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.wire.SeverityLevel.CONFIG;
 import static org.eclipse.kura.wire.SeverityLevel.ERROR;
 import static org.eclipse.kura.wire.SeverityLevel.INFO;
@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;
@@ -73,14 +72,14 @@ final class WireSupportImpl implements WireSupport {
      *            the Wire Helper service
      * @param eventAdmin
      *            the Event Admin service
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the arguments is null
      */
     WireSupportImpl(final WireComponent wireSupporter, final WireHelperService wireHelperService,
             final EventAdmin eventAdmin) {
-        checkNull(wireSupporter, s_message.wireSupportedComponentNonNull());
-        checkNull(wireHelperService, s_message.wireHelperServiceNonNull());
-        checkNull(eventAdmin, s_message.eventAdminNonNull());
+        requireNonNull(wireSupporter, s_message.wireSupportedComponentNonNull());
+        requireNonNull(wireHelperService, s_message.wireHelperServiceNonNull());
+        requireNonNull(eventAdmin, s_message.eventAdminNonNull());
 
         this.outgoingWires = CollectionUtil.newArrayList();
         this.incomingWires = CollectionUtil.newArrayList();
@@ -98,7 +97,7 @@ final class WireSupportImpl implements WireSupport {
     /** {@inheritDoc} */
     @Override
     public synchronized void emit(final List<WireRecord> wireRecords) {
-        checkNull(wireRecords, s_message.wireRecordsNonNull());
+        requireNonNull(wireRecords, s_message.wireRecordsNonNull());
         if (this.wireSupporter instanceof WireEmitter) {
             final String emitterPid = this.wireHelperService.getServicePid(this.wireSupporter);
             final String pid = this.wireHelperService.getPid(this.wireSupporter);
@@ -115,6 +114,7 @@ final class WireSupportImpl implements WireSupport {
     /** {@inheritDoc} */
     @Override
     public List<WireRecord> filter(final List<WireRecord> records) {
+        requireNonNull(records, s_message.wireRecordsNonNull());
         final SeverityLevel level = this.getSeverityLevel();
         // If the severity level is SEVERE, then all wire fields remain
         if ((level == null) || (level == SEVERE)) {
@@ -213,7 +213,7 @@ final class WireSupportImpl implements WireSupport {
     /** {@inheritDoc} */
     @Override
     public void updated(final Wire wire, final Object value) {
-        checkNull(wire, s_message.wireNonNull());
+        requireNonNull(wire, s_message.wireNonNull());
         if ((value instanceof WireEnvelope) && (this.wireSupporter instanceof WireReceiver)) {
             ((WireReceiver) this.wireSupporter).onWireReceive((WireEnvelope) value);
         }

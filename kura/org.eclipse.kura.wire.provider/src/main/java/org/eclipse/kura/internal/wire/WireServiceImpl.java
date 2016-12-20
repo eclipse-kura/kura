@@ -5,11 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.internal.wire.WireServiceOptions.SEPARATOR;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_CONSUMER_PID;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_PRODUCER_PID;
@@ -137,8 +137,8 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
     @Override
     public WireConfiguration createWireConfiguration(final String emitterPid, final String receiverPid)
             throws KuraException {
-        checkNull(emitterPid, s_message.emitterPidNonNull());
-        checkNull(receiverPid, s_message.receiverPidNonNull());
+        requireNonNull(emitterPid, s_message.emitterPidNonNull());
+        requireNonNull(receiverPid, s_message.receiverPidNonNull());
 
         s_logger.info(s_message.creatingWire(emitterPid, receiverPid));
         WireConfiguration conf = null;
@@ -233,7 +233,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
     /** {@inheritDoc} */
     @Override
     public void deleteWireConfiguration(final WireConfiguration wireConfiguration) {
-        checkNull(wireConfiguration, s_message.wireConfigurationNonNull());
+        requireNonNull(wireConfiguration, s_message.wireConfigurationNonNull());
         s_logger.info(s_message.removingWires());
         try {
             final Wire[] wiresList = this.wireAdmin.getWires(null);
@@ -275,11 +275,11 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
      *
      * @param properties
      *            the provided properties to parse
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if argument is null
      */
     private void extractProperties(final Map<String, Object> properties) {
-        checkNull(properties, s_message.propertiesNonNull());
+        requireNonNull(properties, s_message.propertiesNonNull());
         s_logger.debug(s_message.exectractingProp());
         // clear the configurations first
         if (this.options != null) {

@@ -5,11 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.filter;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.wire.SeverityLevel.INFO;
 
 import java.sql.Connection;
@@ -182,7 +182,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
      */
     @Override
     public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {
-        checkNull(wireEnvelope, s_message.wireEnvelopeNonNull());
+        requireNonNull(wireEnvelope, s_message.wireEnvelopeNonNull());
         s_logger.debug(s_message.wireEnvelopeReceived() + wireEnvelope);
         this.wireSupport.emit(this.cache.get(this.cache.getLastRefreshedTime().getTimeInMillis()));
     }

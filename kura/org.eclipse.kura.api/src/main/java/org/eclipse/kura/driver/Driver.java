@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.driver;
 
@@ -131,8 +131,10 @@ public interface Driver {
      *         value in case of success or the reason of failure
      * @throws ConnectionException
      *             if the connection to the field device is interrupted
-     * @throws KuraRuntimeException
-     *             if argument is null or empty
+     * @throws NullPointerException
+     *             if argument is null
+     * @throws IllegalArgumentException
+     *             if argument is empty
      */
     public List<DriverRecord> read(List<DriverRecord> records) throws ConnectionException;
 
@@ -146,11 +148,12 @@ public interface Driver {
      *            the listener
      * @throws ConnectionException
      *             if the connection to the field device is interrupted
+     * @throws NullPointerException
+     *             any of the arguments is null
      * @throws KuraRuntimeException
      *             if the method is not implemented by the driver then specific
      *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-     *             needs to be set in the thrown {@link KuraRuntimeException} or
-     *             any of the arguments is null
+     *             needs to be set in the thrown {@link KuraRuntimeException}
      */
     public void registerDriverListener(Map<String, Object> channelConfig, DriverListener listener)
             throws ConnectionException;
@@ -163,11 +166,12 @@ public interface Driver {
      *            the listener to unregister
      * @throws ConnectionException
      *             if the connection to the field device is interrupted
+     * @throws NullPointerException
+     *             if the argument is null
      * @throws KuraRuntimeException
      *             if the method is not implemented by the driver then specific
      *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-     *             needs to be set in the thrown {@link KuraRuntimeException} or
-     *             the provided argument is null
+     *             needs to be set in the thrown {@link KuraRuntimeException}
      */
     public void unregisterDriverListener(DriverListener listener) throws ConnectionException;
 
@@ -188,11 +192,14 @@ public interface Driver {
      *         write operations
      * @throws ConnectionException
      *             if the connection to the field device is interrupted
+     * @throws NullPointerException
+     *             if the argument is null
+     * @throws IllegalArgumentException
+     *             if the provided list is empty
      * @throws KuraRuntimeException
      *             if the method is not implemented by the driver then specific
      *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
-     *             needs to be set in the thrown {@link KuraRuntimeException} or
-     *             the provided argument is null or empty
+     *             needs to be set in the thrown {@link KuraRuntimeException}
      */
     public List<DriverRecord> write(List<DriverRecord> records) throws ConnectionException;
 

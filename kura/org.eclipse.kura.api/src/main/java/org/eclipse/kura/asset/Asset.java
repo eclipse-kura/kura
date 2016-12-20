@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.asset;
 
@@ -62,8 +62,10 @@ public interface Asset {
      *             if the connection to the asset was interrupted, then error
      *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
      *             in the thrown {@link KuraException}.
-     * @throws KuraRuntimeException
-     *             if argument is null or empty
+     * @throws NullPointerException
+     *             if argument is null
+     * @throws IllegalArgumentException
+     *             if the argument is empty
      * @return the list of asset records which comprises the currently read
      *         value in case of success or the reason of failure
      */
@@ -90,8 +92,10 @@ public interface Asset {
      *             needs to be set in the thrown {@link KuraException}. For any
      *             other internal exception, then error code
      *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
-     * @throws KuraRuntimeException
-     *             if any of the arguments is null or channel ID is less than or
+     * @throws NullPointerException
+     *             if any of the arguments is null
+     * @throws IllegalArgumentException
+     *             channel ID is less than or
      *             equal to zero
      */
     public void registerAssetListener(long channelId, AssetListener assetListener) throws KuraException;
@@ -109,7 +113,7 @@ public interface Asset {
      * @throws KuraException
      *             For any other internal exception, then error code
      *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if argument is null
      */
     public void unregisterAssetListener(AssetListener assetListener) throws KuraException;
@@ -136,8 +140,10 @@ public interface Asset {
      *             if the connection to the asset was interrupted, then error
      *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
      *             in the thrown {@link KuraException}
-     * @throws KuraRuntimeException
-     *             if argument is null or empty
+     * @throws NullPointerException
+     *             if argument is null
+     * @throws IllegalArgumentException
+     *             if the argument is empty
      * @return the list of asset records which comprises the status of the write
      *         operations
      */

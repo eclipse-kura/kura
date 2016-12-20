@@ -5,18 +5,17 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;
@@ -47,27 +46,12 @@ final class WireServiceOptions {
      *
      * @param configurations
      *            the list of Wire Configurations
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if provided configurations is null
      */
     private WireServiceOptions(final List<WireConfiguration> configurations) {
-        checkNull(configurations, s_message.configurationNonNull());
+        requireNonNull(configurations, s_message.configurationNonNull());
         this.wireConfigurations = configurations;
-    }
-
-    /**
-     * Gets the wire configurations.
-     *
-     * @return the wire configurations
-     */
-    List<WireConfiguration> getWireConfigurations() {
-        return this.wireConfigurations;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String toString() {
-        return "WireServiceOptions [m_wireConfigurations=" + this.wireConfigurations + "]";
     }
 
     /**
@@ -78,11 +62,11 @@ final class WireServiceOptions {
      * @param helperService
      *            the Wire Helper Service instance
      * @return the wire service options
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if provided properties is null
      */
     static WireServiceOptions getInstance(final Map<String, Object> properties) {
-        checkNull(properties, s_message.wireServicePropNonNull());
+        requireNonNull(properties, s_message.wireServicePropNonNull());
         final List<WireConfiguration> wireConfs = CollectionUtil.newCopyOnWriteArrayList();
         final Set<Long> wireIds = CollectionUtil.newHashSet();
         for (final Map.Entry<String, Object> entry : properties.entrySet()) {
@@ -121,6 +105,21 @@ final class WireServiceOptions {
             wireConfs.add(configuration);
         }
         return new WireServiceOptions(wireConfs);
+    }
+
+    /**
+     * Gets the wire configurations.
+     *
+     * @return the wire configurations
+     */
+    List<WireConfiguration> getWireConfigurations() {
+        return this.wireConfigurations;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String toString() {
+        return "WireServiceOptions [m_wireConfigurations=" + this.wireConfigurations + "]";
     }
 
 }

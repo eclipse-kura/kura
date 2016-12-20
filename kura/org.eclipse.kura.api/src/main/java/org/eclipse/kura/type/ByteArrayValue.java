@@ -9,11 +9,9 @@
  *******************************************************************************/
 package org.eclipse.kura.type;
 
-import static org.eclipse.kura.Preconditions.checkNull;
 import static org.eclipse.kura.type.DataType.BYTE_ARRAY;
-
+import static java.util.Objects.requireNonNull;
 import java.util.Arrays;
-
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
@@ -35,16 +33,18 @@ public final class ByteArrayValue implements TypedValue<byte[]> {
      *
      * @param value
      *            the value
+     * @throws NullPointerException
+     *             if the argument is null
      */
     public ByteArrayValue(final byte[] value) {
-        checkNull(value, "Provided Typed Value cannot be null");
+        requireNonNull(value, "Provided Typed Value cannot be null");
         this.value = value;
     }
 
     /** {@inheritDoc} */
     @Override
     public int compareTo(final TypedValue<byte[]> otherTypedValue) {
-        checkNull(otherTypedValue, "Typed Value cannot be null");
+        requireNonNull(otherTypedValue, "Typed Value cannot be null");
         final byte[] otherValue = otherTypedValue.getValue();
         for (int i = 0, j = 0; (i < this.value.length) && (j < otherValue.length); i++, j++) {
             final int a = this.value[i] & 0xff;

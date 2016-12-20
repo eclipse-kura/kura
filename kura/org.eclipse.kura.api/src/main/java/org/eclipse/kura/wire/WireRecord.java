@@ -9,15 +9,12 @@
  *******************************************************************************/
 package org.eclipse.kura.wire;
 
-import static org.eclipse.kura.Preconditions.checkNull;
-
+import static java.util.Objects.requireNonNull;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.annotation.ThreadSafe;
@@ -48,12 +45,12 @@ public final class WireRecord {
      *            the timestamp
      * @param fields
      *            the wire fields
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the argument is null
      */
     public WireRecord(final Timestamp timestamp, final List<WireField> fields) {
-        checkNull(timestamp, "Timestamp cannot be null");
-        checkNull(fields, "Wire fields cannot be null");
+        requireNonNull(timestamp, "Timestamp cannot be null");
+        requireNonNull(fields, "Wire fields cannot be null");
 
         this.timestamp = timestamp;
         this.position = null;
@@ -69,12 +66,12 @@ public final class WireRecord {
      *            the position
      * @param fields
      *            the wire fields
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the argument is null (except position)
      */
     public WireRecord(final Timestamp timestamp, @Nullable final Position position, final List<WireField> fields) {
-        checkNull(timestamp, "Timestamp cannot be null");
-        checkNull(fields, "Wire fields cannot be null");
+        requireNonNull(timestamp, "Timestamp cannot be null");
+        requireNonNull(fields, "Wire fields cannot be null");
 
         this.timestamp = timestamp;
         this.position = position;
@@ -86,11 +83,11 @@ public final class WireRecord {
      *
      * @param fields
      *            the wire fields
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the argument is null
      */
     public WireRecord(final WireField... fields) {
-        checkNull(fields, "Wire fields cannot be null");
+        requireNonNull(fields, "Wire fields cannot be null");
         this.timestamp = new Timestamp(new Date().getTime());
         this.position = null;
         this.fields = Collections.unmodifiableList(Arrays.asList(fields));

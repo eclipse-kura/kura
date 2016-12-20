@@ -5,11 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.common;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -45,12 +45,25 @@ public final class DbServiceHelper {
      *
      * @param dbService
      *            the DB service
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if argument is null
      */
     private DbServiceHelper(final DbService dbService) {
-        checkNull(dbService, s_message.dbServiceNonNull());
+        requireNonNull(dbService, s_message.dbServiceNonNull());
         this.dbService = dbService;
+    }
+
+    /**
+     * Gets the single instance of DB Service Helper.
+     *
+     * @param dbService
+     *            the DB service
+     * @return single instance of Service Helper
+     * @throws KuraRuntimeException
+     *             if argument is null
+     */
+    public static DbServiceHelper getInstance(final DbService dbService) {
+        return new DbServiceHelper(dbService);
     }
 
     /**
@@ -58,11 +71,11 @@ public final class DbServiceHelper {
      *
      * @param conn
      *            the connection instance to be closed
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if argument is null
      */
     public void close(final Connection conn) {
-        checkNull(conn, s_message.connectionNonNull());
+        requireNonNull(conn, s_message.connectionNonNull());
         s_logger.debug(s_message.closingConnection() + conn);
         this.dbService.close(conn);
         s_logger.debug(s_message.closingConnectionDone());
@@ -101,11 +114,11 @@ public final class DbServiceHelper {
      *            the extra parameters needed for the query
      * @throws SQLException
      *             the SQL exception
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if SQL query argument is null
      */
     public synchronized void execute(final String sql, final Integer... params) throws SQLException {
-        checkNull(sql, s_message.sqlQueryNonNull());
+        requireNonNull(sql, s_message.sqlQueryNonNull());
         s_logger.debug(s_message.execSql() + sql);
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -143,11 +156,11 @@ public final class DbServiceHelper {
      *
      * @param conn
      *            the connection instance
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if argument is null
      */
     public void rollback(final Connection conn) {
-        checkNull(conn, s_message.connectionNonNull());
+        requireNonNull(conn, s_message.connectionNonNull());
         s_logger.debug(s_message.rollback() + conn);
         this.dbService.rollback(conn);
         s_logger.debug(s_message.rollbackDone());
@@ -164,26 +177,13 @@ public final class DbServiceHelper {
      * @param string
      *            the string to be sanitized
      * @return the escaped string
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if argument is null
      */
     public String sanitizeSqlTableAndColumnName(final String string) {
-        checkNull(string, s_message.stringNonNull());
+        requireNonNull(string, s_message.stringNonNull());
         s_logger.debug(s_message.sanitize() + string);
         return string.replaceAll("(?=[]\\[+&|!(){}^\"~*?:\\\\-])", "_");
-    }
-
-    /**
-     * Gets the single instance of DB Service Helper.
-     *
-     * @param dbService
-     *            the DB service
-     * @return single instance of Service Helper
-     * @throws KuraRuntimeException
-     *             if argument is null
-     */
-    public static DbServiceHelper getInstance(final DbService dbService) {
-        return new DbServiceHelper(dbService);
     }
 
 }

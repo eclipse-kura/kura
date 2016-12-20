@@ -5,11 +5,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.driver.listener;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.driver.DriverEvent;
 
 /**
@@ -22,6 +21,7 @@ import org.eclipse.kura.driver.DriverEvent;
  *
  * @see DriverEvent
  */
+@FunctionalInterface
 public interface DriverListener {
 
     /**
@@ -29,7 +29,7 @@ public interface DriverListener {
      *
      * @param event
      *            the fired driver event
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if event is null
      */
     public void onDriverEvent(DriverEvent event);

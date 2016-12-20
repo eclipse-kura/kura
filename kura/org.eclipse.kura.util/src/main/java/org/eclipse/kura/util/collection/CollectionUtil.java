@@ -5,12 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.util.collection;
 
-import static org.eclipse.kura.Preconditions.checkCondition;
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.UtilMessages;
 
@@ -51,13 +49,13 @@ public final class CollectionUtil {
      *
      * @param dictionary
      *            The legacy {@link Dictionary} object to transform
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if argument is null
      * @return the {@link Map} instance wrapping all the key-value association
      *         from the {@link Dictionary}
      */
     public static <K, V> Map<K, V> dictionaryToMap(final Dictionary<K, V> dictionary) {
-        checkNull(dictionary, s_message.dictionaryNonNull());
+        requireNonNull(dictionary, s_message.dictionaryNonNull());
         final Map<K, V> map = new HashMap<K, V>(dictionary.size());
         final Enumeration<K> keys = dictionary.keys();
         while (keys.hasMoreElements()) {
@@ -88,11 +86,13 @@ public final class CollectionUtil {
      * @param initialArraySize
      *            the initial capacity
      * @return empty {@code ArrayList} instance with the provided capacity
-     * @throws KuraRuntimeException
+     * @throws IllegalArgumentException
      *             if argument is less than 0
      */
     public static <E> List<E> newArrayListWithCapacity(final int initialArraySize) {
-        checkCondition(initialArraySize < 0, s_message.initialArraySize());
+        if (initialArraySize < 0) {
+            throw new IllegalArgumentException(s_message.initialArraySize());
+        }
         return new ArrayList<E>(initialArraySize);
     }
 
@@ -119,11 +119,11 @@ public final class CollectionUtil {
      * @param map
      *            the map to contain
      * @return a new, empty {@code ConcurrentHashMap}
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if argument is null
      */
     public static <K, V> ConcurrentMap<K, V> newConcurrentHashMap(final Map<K, V> map) {
-        checkNull(map, s_message.mapNonNull());
+        requireNonNull(map, s_message.mapNonNull());
         return new ConcurrentHashMap<K, V>(map);
     }
 
@@ -162,11 +162,11 @@ public final class CollectionUtil {
      * @param map
      *            map the mappings to be inserted
      * @return a new {@code HashMap}
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if argument is null
      */
     public static <K, V> Map<K, V> newHashMap(final Map<? extends K, ? extends V> map) {
-        checkNull(map, s_message.mapNonNull());
+        requireNonNull(map, s_message.mapNonNull());
         return new HashMap<K, V>(map);
     }
 
@@ -190,11 +190,11 @@ public final class CollectionUtil {
      * @param <E>
      *            the element type
      * @return a new, empty {@code HashSet}
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if argument is null
      */
     public static <E> Set<E> newHashSet(final Collection<? extends E> collection) {
-        checkNull(collection, s_message.collectionNonNull());
+        requireNonNull(collection, s_message.collectionNonNull());
         return new HashSet<E>(collection);
     }
 

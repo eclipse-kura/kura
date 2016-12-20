@@ -9,9 +9,7 @@
  *******************************************************************************/
 package org.eclipse.kura.wire;
 
-import static org.eclipse.kura.Preconditions.checkNull;
-
-import org.eclipse.kura.KuraRuntimeException;
+import static java.util.Objects.requireNonNull;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 import org.eclipse.kura.type.TypedValue;
@@ -42,13 +40,13 @@ public final class WireField {
      *            the value
      * @param level
      *            the severity level
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the arguments is null
      */
     public WireField(final String name, final TypedValue<?> value, final SeverityLevel level) {
-        checkNull(name, "Wire field name cannot be null");
-        checkNull(value, "Wire field value type cannot be null");
-        checkNull(level, "Wire field severity level cannot be null");
+        requireNonNull(name, "Wire field name cannot be null");
+        requireNonNull(value, "Wire field value type cannot be null");
+        requireNonNull(level, "Wire field severity level cannot be null");
 
         this.name = name;
         this.value = value;

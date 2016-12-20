@@ -5,17 +5,16 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.filter;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;
@@ -50,11 +49,11 @@ final class WireRecordCache {
      *
      * @param filter
      *            the DB Wire Record filter
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if argument is null
      */
     WireRecordCache(final DbWireRecordFilter filter) {
-        checkNull(filter, s_message.dbFilterNonNull());
+        requireNonNull(filter, s_message.dbFilterNonNull());
         this.recordFilter = filter;
     }
 

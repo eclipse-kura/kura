@@ -5,11 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.store;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -25,7 +25,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.internal.wire.common.DbServiceHelper;
@@ -230,12 +229,12 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      *            the wire record
      * @throws SQLException
      *             the SQL exception
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the provided arguments is null
      */
     private void insertDataRecord(final String tableName, final WireRecord wireRecord) throws SQLException {
-        checkNull(tableName, s_message.tableNameNonNull());
-        checkNull(wireRecord, s_message.wireRecordNonNull());
+        requireNonNull(tableName, s_message.tableNameNonNull());
+        requireNonNull(wireRecord, s_message.wireRecordNonNull());
 
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
         final StringBuilder sbCols = new StringBuilder();
@@ -317,7 +316,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
     /** {@inheritDoc} */
     @Override
     public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
-        checkNull(wireEvelope, s_message.wireEnvelopeNonNull());
+        requireNonNull(wireEvelope, s_message.wireEnvelopeNonNull());
         s_logger.debug(s_message.wireEnvelopeReceived() + this.wireSupport);
         // filtering list of wire records based on the provided severity level
         final List<WireRecord> dataRecords = this.wireSupport.filter(wireEvelope.getRecords());
@@ -349,12 +348,12 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      *            the data record
      * @throws SQLException
      *             the SQL exception
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the provided arguments is null
      */
     private void reconcileColumns(final String tableName, final WireRecord wireRecord) throws SQLException {
-        checkNull(tableName, s_message.tableNameNonNull());
-        checkNull(wireRecord, s_message.wireRecordNonNull());
+        requireNonNull(tableName, s_message.tableNameNonNull());
+        requireNonNull(wireRecord, s_message.wireRecordNonNull());
 
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
         Connection conn = null;
@@ -402,11 +401,11 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      *            the table name
      * @throws SQLException
      *             the SQL exception
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the provided argument is null
      */
     private void reconcileTable(final String tableName) throws SQLException {
-        checkNull(tableName, s_message.tableNameNonNull());
+        requireNonNull(tableName, s_message.tableNameNonNull());
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
         final Connection conn = this.dbHelper.getConnection();
         try {
@@ -452,11 +451,11 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      *
      * @param wireRecord
      *            the wire record to be stored
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the provided argument is null
      */
     private void store(final WireRecord wireRecord) {
-        checkNull(wireRecord, s_message.wireRecordNonNull());
+        requireNonNull(wireRecord, s_message.wireRecordNonNull());
         boolean inserted = false;
         int retryCount = 0;
         final String tableName = this.options.getTableName();

@@ -5,14 +5,13 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.asset;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.provider.BaseAsset;
 import org.eclipse.kura.driver.Driver;
@@ -58,14 +57,14 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
      *            the driver id
      * @throws InvalidSyntaxException
      *             the invalid syntax exception
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the arguments is null
      */
     public DriverTrackerCustomizer(final BundleContext context, final Asset asset, final String driverId)
             throws InvalidSyntaxException {
-        checkNull(context, s_message.bundleContextNonNull());
-        checkNull(asset, s_message.assetNonNull());
-        checkNull(driverId, s_message.driverPidNonNull());
+        requireNonNull(context, s_message.bundleContextNonNull());
+        requireNonNull(asset, s_message.assetNonNull());
+        requireNonNull(driverId, s_message.driverPidNonNull());
 
         this.driverId = driverId;
         this.asset = asset;

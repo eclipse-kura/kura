@@ -5,11 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.asset;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
@@ -37,7 +37,7 @@ public final class DriverServiceImpl implements DriverService {
     /** {@inheritDoc} */
     @Override
     public Driver getDriver(final String driverId) {
-        checkNull(driverId, s_message.driverPidNonNull());
+        requireNonNull(driverId, s_message.driverPidNonNull());
         final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         final ServiceReference<Driver>[] refs = ServiceUtil.getServiceReferences(context, Driver.class, null);
         try {
@@ -55,7 +55,7 @@ public final class DriverServiceImpl implements DriverService {
     /** {@inheritDoc} */
     @Override
     public String getDriverPid(final Driver driver) {
-        checkNull(driver, s_message.driverNonNull());
+        requireNonNull(driver, s_message.driverNonNull());
         final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         final ServiceReference<Driver>[] refs = ServiceUtil.getServiceReferences(context, Driver.class, null);
         try {

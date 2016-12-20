@@ -5,16 +5,15 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.driver;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
@@ -179,12 +178,12 @@ public final class DriverRecord {
      *
      * @param channelConfig
      *            the channel configuration
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     public void setChannelConfig(final Map<String, Object> channelConfig) {
-        checkNull(channelConfig, "Channel configuration cannot be null");
-        this.channelConfiguration = new HashMap<String, Object>(channelConfig);
+        requireNonNull(channelConfig, "Channel configuration cannot be null");
+        this.channelConfiguration = new HashMap<>(channelConfig);
     }
 
     /**
@@ -192,11 +191,11 @@ public final class DriverRecord {
      *
      * @param status
      *            the new driver status
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     public void setDriverStatus(final DriverStatus status) {
-        checkNull(status, "Driver Status cannot be null");
+        requireNonNull(status, "Driver Status cannot be null");
         this.driverStatus = status;
     }
 
@@ -215,11 +214,11 @@ public final class DriverRecord {
      *
      * @param value
      *            the new value
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     public void setValue(final TypedValue<?> value) {
-        checkNull(value, "Value type cannot be null");
+        requireNonNull(value, "Value type cannot be null");
         this.value = value;
     }
 

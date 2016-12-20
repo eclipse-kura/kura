@@ -9,7 +9,7 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.publisher;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.internal.wire.publisher.CloudPublisherOptions.AutoConnectMode.AUTOCONNECT_MODE_OFF;
 
 import java.util.List;
@@ -18,7 +18,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -164,11 +163,11 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
      * @param wireRecord
      *            the wire record
      * @return the JSON instance
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the wire record provided is null
      */
     private JsonObject buildJsonObject(final WireRecord wireRecord) {
-        checkNull(wireRecord, s_message.wireRecordNonNull());
+        requireNonNull(wireRecord, s_message.wireRecordNonNull());
         final JsonObject jsonObject = Json.object();
         if (wireRecord.getTimestamp() != null) {
             jsonObject.add(s_message.timestamp(), wireRecord.getTimestamp().getTime());
@@ -184,16 +183,16 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
     }
 
     /**
-     * Builds the kura payload from the provided wire record.
+     * Builds the Kura payload from the provided wire record.
      *
      * @param wireRecord
      *            the wire record
-     * @return the kura payload
-     * @throws KuraRuntimeException
+     * @return the Kura payload
+     * @throws NullPointerException
      *             if the wire record provided is null
      */
     private KuraPayload buildKuraPayload(final WireRecord wireRecord) {
-        checkNull(wireRecord, s_message.wireRecordNonNull());
+        requireNonNull(wireRecord, s_message.wireRecordNonNull());
         final KuraPayload kuraPayload = new KuraPayload();
 
         if (wireRecord.getTimestamp() != null) {
@@ -210,16 +209,16 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
     }
 
     /**
-     * Builds the kura position from the OSGi position instance.
+     * Builds the Kura position from the OSGi position instance.
      *
      * @param position
      *            the OSGi position instance
-     * @return the kura position
-     * @throws KuraRuntimeException
+     * @return the Kura position
+     * @throws NullPointerException
      *             if the position provided is null
      */
     private KuraPosition buildKuraPosition(final Position position) {
-        checkNull(position, s_message.positionNonNull());
+        requireNonNull(position, s_message.positionNonNull());
         final KuraPosition kuraPosition = new KuraPosition();
         if (position.getLatitude() != null) {
             kuraPosition.setLatitude(position.getLatitude().getValue());
@@ -240,16 +239,16 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
     }
 
     /**
-     * Builds the kura position from the OSGi position instance.
+     * Builds the Kura position from the OSGi position instance.
      *
      * @param position
      *            the OSGi position instance
-     * @return the kura position
-     * @throws KuraRuntimeException
+     * @return the Kura position
+     * @throws NullPointerException
      *             if position provided is null
      */
     private JsonObject buildKuraPositionForJson(final Position position) {
-        checkNull(position, s_message.positionNonNull());
+        requireNonNull(position, s_message.positionNonNull());
         final JsonObject jsonObject = Json.object();
         if (position.getLatitude() != null) {
             jsonObject.add(s_message.latitude(), position.getLatitude().getValue());
@@ -350,7 +349,7 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
     /** {@inheritDoc} */
     @Override
     public void onWireReceive(final WireEnvelope wireEnvelope) {
-        checkNull(wireEnvelope, s_message.wireEnvelopeNonNull());
+        requireNonNull(wireEnvelope, s_message.wireEnvelopeNonNull());
         s_logger.info(s_message.wireEnvelopeReceived(wireEnvelope.getEmitterPid()));
         // filtering list of wire records based on the provided severity level
         final List<WireRecord> records = this.wireSupport.filter(wireEnvelope.getRecords());
@@ -361,7 +360,7 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
     /** {@inheritDoc} */
     @Override
     public void producersConnected(final Wire[] wires) {
-        checkNull(wires, s_message.wiresNonNull());
+        requireNonNull(wires, s_message.wiresNonNull());
         this.wireSupport.producersConnected(wires);
     }
 
@@ -372,8 +371,8 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
      *            the provided list of Wire Records
      */
     private void publish(final List<WireRecord> wireRecords) {
-        checkNull(this.cloudClient, s_message.cloudClientNonNull());
-        checkNull(wireRecords, s_message.wireRecordsNonNull());
+        requireNonNull(this.cloudClient, s_message.cloudClientNonNull());
+        requireNonNull(wireRecords, s_message.wireRecordsNonNull());
 
         final AutoConnectMode autoConnectMode = this.options.getAutoConnectMode();
         final boolean autoConnectEnabled = this.dataService.isAutoConnectEnabled();
@@ -422,11 +421,11 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
     /**
      * Stop publishing.
      *
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if cloud client is null
      */
     private void stopPublishing() {
-        checkNull(this.cloudClient, s_message.cloudClientNonNull());
+        requireNonNull(this.cloudClient, s_message.cloudClientNonNull());
         if (this.dataService.isConnected() && !this.dataService.isAutoConnectEnabled()) {
             final AutoConnectMode autoConnMode = this.options.getAutoConnectMode();
             switch (autoConnMode) {

@@ -5,15 +5,14 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.util.base;
 
-import static org.eclipse.kura.Preconditions.checkNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Iterator;
 
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.UtilMessages;
@@ -49,12 +48,12 @@ public final class StringUtil {
      * @param tokens
      *            an array objects to be joined. Strings will be formed from the
      *            objects by calling object.toString().
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the arguments is null
      */
     public static String join(final CharSequence delimiter, final Iterable<?> tokens) {
-        checkNull(delimiter, s_message.delimiterNonNull());
-        checkNull(tokens, s_message.iterableNonNull());
+        requireNonNull(delimiter, s_message.delimiterNonNull());
+        requireNonNull(tokens, s_message.iterableNonNull());
 
         final StringBuilder sb = new StringBuilder();
         final Iterator<?> it = tokens.iterator();

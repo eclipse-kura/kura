@@ -28,7 +28,7 @@ Import-Package: org.eclipse.kura;version="[1.2,2.0)",
  org.osgi.util.measurement;version="1.0.1",
  org.osgi.util.position;version="1.0.1",
  org.slf4j;version="1.6.4"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: lib/quartz-2.2.3.jar,

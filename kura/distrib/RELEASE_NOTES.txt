@@ -8,11 +8,17 @@ Added Features :
 
 Bug Fixes :
   * Fixed github issues:
+    * #958: [Kura 2.1.0 QA] Wrong labels in UI's DHCP&NAT configuration
+    * #956: [Sec] Kura firewall rules bypassed with IPv6
+    * #941: [Kura 2.1.0 QA] Raspberry Pi 3 no-net installer
+    * #917: [Kura 2.1.0 QA] Wrong range messages
+    * #912: [Kura 2.1.0 QA] Exceptions while deploying example service
     * #909: [Kura 2.1.0 QA] SSID selection dialog too small
     * #903: [Kura 2.1.0 QA] Impossible to enter multiple DNS servers
     * #901: [Kura 2.1.0 QA] changing username/password locks out admin access
     * #900: [Kura 2.1.0 QA] usbutils missing in fedberry README
     * #895: [Kura 2.1.0 QA] Refreshing configuration in web UI
+    * #893: [Kura 2.1.0 QA] GPIO example bundle configuration
     * #883: Invalid field validation state when switching from WAN to LAN
     * #879: [Kura 2.1.0 QA] Raspberry Pi 3 nameserver
     * #877: [Kura 2.1.0 QA] eth0 netmask configuration
@@ -23,6 +29,7 @@ Bug Fixes :
     * #859: [Kura 2.1.0 QA] Installation warnings/errors on Raspberry Pi 3
     * #851: [Web-UI] Label is sent instead of value for metatype parameters with options
     * #835: [Kura 2.1.0] Bind/Named service doesn't work properly on Fedora
+    * #793: [Kura 2.1.0] QA for the User Workspace
     * #776: Serialization issue in cloud window
     * #753: libhidapi not correctly compiled for armv5
     * #743: WLAN not detected as WLAN on Fedberry
@@ -97,6 +104,7 @@ Bug Fixes :
     * #119: [Camel] Migrate CamelRouter tests from Rhiot to Kura
 
   * Merged no issue-related Pull Requests:
+    * #962: Added libudev for rhel based devices
     * #928: [Web-Ui] Fixed typo in the network config section
     * #898: Solved modem reset failure.
     * #855: Modified wrong entry in snapshot 0s

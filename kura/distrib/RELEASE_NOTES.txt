@@ -32,6 +32,7 @@ Bug Fixes :
     * #835: [Kura 2.1.0] Bind/Named service doesn't work properly on Fedora
     * #793: [Kura 2.1.0] QA for the User Workspace
     * #776: Serialization issue in cloud window
+    * #767: Change Housekeeping schedule from scheduleAtFixedRate to scheduleWithFixedDelay
     * #753: libhidapi not correctly compiled for armv5
     * #743: WLAN not detected as WLAN on Fedberry
     * #742: Unable to establish stable network connection on Fedberry

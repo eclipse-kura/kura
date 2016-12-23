@@ -25,69 +25,70 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Defines Telit HE910 Modem Factory
- * 
+ *
  * @author ilya.binshtok
  *
  */
 public class TelitHe910ModemFactory implements CellularModemFactory {
-	
-    //private static final Logger s_logger = LoggerFactory.getLogger(TelitHe910ModemFactory.class);
-    
+
+    // private static final Logger s_logger = LoggerFactory.getLogger(TelitHe910ModemFactory.class);
+
     private static TelitHe910ModemFactory s_factoryInstance = null;
-    
-	private static ModemTechnologyType s_type = ModemTechnologyType.HSDPA;
-	
-	private BundleContext s_bundleContext = null;
-	private Hashtable<String, TelitHe910> m_modemServices = null;
-	
-	private ConnectionFactory m_connectionFactory = null;
-	
-	private TelitHe910ModemFactory() {
-		s_bundleContext = FrameworkUtil.getBundle(NetworkConfigurationService.class).getBundleContext();
-		
-		ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<ConnectionFactory, ConnectionFactory>(s_bundleContext, ConnectionFactory.class, null);
-		serviceTracker.open(true);
-		m_connectionFactory = serviceTracker.getService();
-		
-		m_modemServices = new Hashtable<String, TelitHe910>();
-	}
-	
-	public static TelitHe910ModemFactory getInstance() {
-	    if(s_factoryInstance == null) {
-	        s_factoryInstance = new TelitHe910ModemFactory();
-	    }
-	    return s_factoryInstance;
-	}
 
-	@Override
-	public CellularModem obtainCellularModemService(ModemDevice modemDevice, String platform) throws Exception {
-		
-		String key = modemDevice.getProductName();
-		TelitHe910 telitHe910 = m_modemServices.get(key);
+    private static ModemTechnologyType s_type = ModemTechnologyType.HSDPA;
 
-		if (telitHe910 == null) {
-			telitHe910 = new TelitHe910(modemDevice, platform, m_connectionFactory);
-			m_modemServices.put(key, telitHe910);
-		} else {
-			telitHe910.setModemDevice(modemDevice);
-		}
-		
-		return telitHe910;
-	}
+    private BundleContext s_bundleContext = null;
+    private Hashtable<String, TelitHe910> m_modemServices = null;
 
-	@Override
-	public Hashtable<String, ? extends CellularModem> getModemServices() {
-		return m_modemServices;
-	}
+    private ConnectionFactory m_connectionFactory = null;
 
-	@Override
-	public void releaseModemService(String usbPortAddress) {
-	    m_modemServices.remove(usbPortAddress);
-	}
+    private TelitHe910ModemFactory() {
+        this.s_bundleContext = FrameworkUtil.getBundle(NetworkConfigurationService.class).getBundleContext();
 
-	@Override
-	@Deprecated
-	public ModemTechnologyType getType() {
-		return s_type;
-	}
+        ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<ConnectionFactory, ConnectionFactory>(
+                this.s_bundleContext, ConnectionFactory.class, null);
+        serviceTracker.open(true);
+        this.m_connectionFactory = serviceTracker.getService();
+
+        this.m_modemServices = new Hashtable<String, TelitHe910>();
+    }
+
+    public static TelitHe910ModemFactory getInstance() {
+        if (s_factoryInstance == null) {
+            s_factoryInstance = new TelitHe910ModemFactory();
+        }
+        return s_factoryInstance;
+    }
+
+    @Override
+    public CellularModem obtainCellularModemService(ModemDevice modemDevice, String platform) throws Exception {
+
+        String key = modemDevice.getProductName();
+        TelitHe910 telitHe910 = this.m_modemServices.get(key);
+
+        if (telitHe910 == null) {
+            telitHe910 = new TelitHe910(modemDevice, platform, this.m_connectionFactory);
+            this.m_modemServices.put(key, telitHe910);
+        } else {
+            telitHe910.setModemDevice(modemDevice);
+        }
+
+        return telitHe910;
+    }
+
+    @Override
+    public Hashtable<String, ? extends CellularModem> getModemServices() {
+        return this.m_modemServices;
+    }
+
+    @Override
+    public void releaseModemService(String usbPortAddress) {
+        this.m_modemServices.remove(usbPortAddress);
+    }
+
+    @Override
+    @Deprecated
+    public ModemTechnologyType getType() {
+        return s_type;
+    }
 }

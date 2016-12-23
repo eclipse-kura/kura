@@ -142,7 +142,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.linux.net</artifactId>
-                                    <version>1.0.11-SNAPSHOT</version>
+                                    <version>1.0.10</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -172,7 +172,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.net.admin</artifactId>
-                                    <version>1.0.11-SNAPSHOT</version>
+                                    <version>1.0.10</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>

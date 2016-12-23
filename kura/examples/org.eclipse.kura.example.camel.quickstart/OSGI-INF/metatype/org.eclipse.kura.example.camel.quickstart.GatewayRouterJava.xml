@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.example.camel.quickstart.GatewayRouterJava"
+         name="Camel Kura quickstart Java" description="Configurable Camel-based Kura gateway">
+        
+        <Icon resource="OSGI-INF/logo.png" size="32" />
+            
+        <AD id="enabled"
+            name="Enable service"
+            description="If the service is enabled it will publish data"
+            type="Boolean"
+            cardinality="1"
+            required="true"
+            default="true"
+            />
+        
+        <AD id="cloudService"
+            name="Cloud Service PID"
+            description="The service PID of the Cloud Service to use"
+            type="String"
+            cardinality="1"
+            required="false"
+            default="org.eclipse.kura.cloud.CloudService"
+            />
+        
+        <AD id="temperature.max"
+            name="Maximum Temperature"
+            description="The maximum value for the random temperature"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="20"
+            />
+
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.example.camel.quickstart.GatewayRouterJava">
+        <Object ocdref="org.eclipse.kura.example.camel.quickstart.GatewayRouterJava"/>
+    </Designate>
+</MetaData>

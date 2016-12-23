@@ -13,17 +13,17 @@ package org.eclipse.kura.net.admin.modem;
 
 public enum PppState {
 
-	NOT_CONNECTED(0),
-	IN_PROGRESS(1),
-	CONNECTED(2);
-	
-	private int m_state = 0;
-	
-	private PppState (int state) {
-		m_state = state;
-	}
-	
-	public int getState () {
-		return m_state;
-	}
+    NOT_CONNECTED(0),
+    IN_PROGRESS(1),
+    CONNECTED(2);
+
+    private int m_state = 0;
+
+    private PppState(int state) {
+        this.m_state = state;
+    }
+
+    public int getState() {
+        return this.m_state;
+    }
 }

@@ -19,95 +19,101 @@ import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterfaceType;
 
 public class InterfaceState {
-	
-	private String m_name;
-    private boolean m_up;
+
+    private final String m_name;
+    private final boolean m_up;
     protected boolean m_link;
-    private IPAddress m_ipAddress;
+    private final IPAddress m_ipAddress;
 
     public InterfaceState(String interfaceName, boolean up, boolean link, IPAddress ipAddress) {
-    	m_name = interfaceName;
-        m_up = up;
-        m_link = link;
-        m_ipAddress = ipAddress;
+        this.m_name = interfaceName;
+        this.m_up = up;
+        this.m_link = link;
+        this.m_ipAddress = ipAddress;
     }
-    
+
     public InterfaceState(NetInterfaceType type, String interfaceName) throws KuraException {
-        m_name = interfaceName;
-        m_up = LinuxNetworkUtil.hasAddress(interfaceName);
-        m_link = LinuxNetworkUtil.isLinkUp(type, interfaceName);
-        
+        this.m_name = interfaceName;
+        this.m_up = LinuxNetworkUtil.hasAddress(interfaceName);
+        this.m_link = LinuxNetworkUtil.isLinkUp(type, interfaceName);
+
         ConnectionInfo connInfo = new ConnectionInfoImpl(interfaceName);
-        m_ipAddress = connInfo.getIpAddress();
+        this.m_ipAddress = connInfo.getIpAddress();
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((m_name != null) ? m_name.hashCode() : 0);
-        result = prime * result + (m_link ? 1231 : 1237);
-        result = prime * result + (m_up ? 1231 : 1237);
-        result = prime * result + ((m_ipAddress != null) ? m_ipAddress.hashCode() : 0);
+        result = prime * result + (this.m_name != null ? this.m_name.hashCode() : 0);
+        result = prime * result + (this.m_link ? 1231 : 1237);
+        result = prime * result + (this.m_up ? 1231 : 1237);
+        result = prime * result + (this.m_ipAddress != null ? this.m_ipAddress.hashCode() : 0);
         return result;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         InterfaceState other = (InterfaceState) obj;
-        if (m_name != null) {
-        	if(!m_name.equals(other.m_name)) {
-        		return false;
-        	}
+        if (this.m_name != null) {
+            if (!this.m_name.equals(other.m_name)) {
+                return false;
+            }
         } else if (other.m_name != null) {
-        	return false;
+            return false;
         }
-        if (m_link != other.m_link)
+        if (this.m_link != other.m_link) {
             return false;
-        if (m_up != other.m_up)
+        }
+        if (this.m_up != other.m_up) {
             return false;
-        if (m_ipAddress != null) {
-        	if(!m_ipAddress.equals(other.m_ipAddress)) {
-        		return false;
-        	}
+        }
+        if (this.m_ipAddress != null) {
+            if (!this.m_ipAddress.equals(other.m_ipAddress)) {
+                return false;
+            }
         } else if (other.m_ipAddress != null) {
-        	return false;
+            return false;
         }
-        
+
         return true;
     }
 
-	public String getName() {
-		return m_name;
-	}
+    public String getName() {
+        return this.m_name;
+    }
 
-	public boolean isUp() {
-		return m_up;
-	}
+    public boolean isUp() {
+        return this.m_up;
+    }
 
-	public boolean isLinkUp() {
-		return m_link;
-	}
-	
-	public IPAddress getIpAddress() {
-		return m_ipAddress;
-	}
-	
-	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append(m_name);
-		sb.append(" -- Link Up?: ");
-		sb.append(m_link);
-		sb.append(", Is Up?: ");
-		sb.append(m_up);
-		sb.append(", IP Address: ");
-		sb.append(m_ipAddress);
-		return sb.toString();
-	}
+    public boolean isLinkUp() {
+        return this.m_link;
+    }
+
+    public IPAddress getIpAddress() {
+        return this.m_ipAddress;
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append(this.m_name);
+        sb.append(" -- Link Up?: ");
+        sb.append(this.m_link);
+        sb.append(", Is Up?: ");
+        sb.append(this.m_up);
+        sb.append(", IP Address: ");
+        sb.append(this.m_ipAddress);
+        return sb.toString();
+    }
 }

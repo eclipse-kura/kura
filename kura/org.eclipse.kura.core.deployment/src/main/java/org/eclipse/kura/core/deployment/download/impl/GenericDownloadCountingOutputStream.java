@@ -25,126 +25,128 @@ import org.eclipse.kura.ssl.SslManagerService;
 
 public class GenericDownloadCountingOutputStream extends CountingOutputStream {
 
-	private int propResolution;
-	private int propBufferSize;
-	private int propConnectTimeout = 5000;
-	private int propReadTimeout = 6000;
-	private int propBlockDelay = 1000;
+    private int propResolution;
+    private int propBufferSize;
+    private int propConnectTimeout = 5000;
+    private int propReadTimeout = 6000;
+    private int propBlockDelay = 1000;
 
-	long totalBytes;
+    long totalBytes;
 
-	final DeploymentPackageDownloadOptions options;
-	final SslManagerService m_sslManagerService;
-	final ProgressListener pl;
-	final int m_alreadyDownloaded;
-	final String m_downloadURL;
+    final DeploymentPackageDownloadOptions options;
+    final SslManagerService m_sslManagerService;
+    final ProgressListener pl;
+    final int m_alreadyDownloaded;
+    final String m_downloadURL;
 
-	InputStream is = null;
+    InputStream is = null;
 
-	private long m_currentStep = 1;
-	//private long previous;
-	private DOWNLOAD_STATUS m_downloadStatus = DOWNLOAD_STATUS.FAILED;
-	
-	
-	public GenericDownloadCountingOutputStream(DownloadOptions downloadOptions) {
-		super(downloadOptions.getOut());
-		this.options = downloadOptions.getRequestOptions();
-		this.m_sslManagerService = downloadOptions.getSslManagerService();
-		this.pl = downloadOptions.getCallback();
-		this.m_downloadURL = downloadOptions.getDownloadURL();
-		this.m_alreadyDownloaded = downloadOptions.getAlreadyDownloaded();
-	}
-	
-	public DOWNLOAD_STATUS getDownloadTransferStatus(){
-		return m_downloadStatus;
-	}
-	
-	public Long getDownloadTransferProgressPercentage(){
-		Long percentage= (long) Math.floor((((Long) getByteCount()).doubleValue() / ((Long) totalBytes).doubleValue()) * 100);
-		if(percentage < 0){
-			return (long)50;
-		}
-		return percentage;
-	}
-	
-	public Long getTotalBytes(){
-		return totalBytes;
-	}
-	
-	public void setTotalBytes(long totalBytes){
-		this.totalBytes= totalBytes;
-	}
+    private long m_currentStep = 1;
+    // private long previous;
+    private DOWNLOAD_STATUS m_downloadStatus = DOWNLOAD_STATUS.FAILED;
 
-	@Override
-	protected void afterWrite(int n) throws IOException {
-		super.afterWrite(n);
-		if(propResolution == 0 && getTotalBytes() > 0) {
-			propResolution= Math.round((totalBytes / 100) * 5);
-		} else if (propResolution == 0) {
-			propResolution= 1024 * 256;
-		}
-		if (getByteCount() >= m_currentStep * propResolution) {
-			//System.out.println("Bytes read: "+ (getByteCount() - previous));
-			//previous = getByteCount();
-			m_currentStep++;
-			postProgressEvent(options.getClientId(), getByteCount(), totalBytes, DOWNLOAD_STATUS.IN_PROGRESS, null);
-		}
-		try {
-			Thread.sleep(propBlockDelay);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
+    public GenericDownloadCountingOutputStream(DownloadOptions downloadOptions) {
+        super(downloadOptions.getOut());
+        this.options = downloadOptions.getRequestOptions();
+        this.m_sslManagerService = downloadOptions.getSslManagerService();
+        this.pl = downloadOptions.getCallback();
+        this.m_downloadURL = downloadOptions.getDownloadURL();
+        this.m_alreadyDownloaded = downloadOptions.getAlreadyDownloaded();
+    }
 
-	protected void postProgressEvent(String clientId, long progress, long total, DOWNLOAD_STATUS status, String errorMessage) {
-		Long perc = getDownloadTransferProgressPercentage();
-		m_downloadStatus = status;
-		ProgressEvent pe= new ProgressEvent(this, options, ((Long) total).intValue(), ((Long) perc).intValue(), 
-											getDownloadTransferStatus().getStatusString(), m_alreadyDownloaded);
-		if(errorMessage != null){
-			pe.setExceptionMessage(errorMessage);
-		}
-		pl.progressChanged(pe);
-		
-	}
-	
-	protected void setResolution(int resolution) {
-		propResolution = resolution;
-	}
+    public DOWNLOAD_STATUS getDownloadTransferStatus() {
+        return this.m_downloadStatus;
+    }
 
-	protected void setBufferSize(int size) {
-		propBufferSize = size;
-	}
+    public Long getDownloadTransferProgressPercentage() {
+        Long percentage = (long) Math
+                .floor(((Long) getByteCount()).doubleValue() / ((Long) this.totalBytes).doubleValue() * 100);
+        if (percentage < 0) {
+            return (long) 50;
+        }
+        return percentage;
+    }
 
-	protected void setConnectTimeout(int timeout) {
-		propConnectTimeout = timeout;
-	}
+    public Long getTotalBytes() {
+        return this.totalBytes;
+    }
 
-	protected void setReadTimeout(int timeout) {
-		propReadTimeout = timeout;
-	}
-	
-	protected void setBlockDelay(int delay) {
-		propBlockDelay = delay;
-	}
-	
-	protected int getResolution() {
-		return propResolution;
-	}
+    public void setTotalBytes(long totalBytes) {
+        this.totalBytes = totalBytes;
+    }
 
-	protected int getBufferSize() {
-		return propBufferSize;
-	}
-	
-	protected int getConnectTimeout() {
-		return propConnectTimeout;
-	}
+    @Override
+    protected void afterWrite(int n) throws IOException {
+        super.afterWrite(n);
+        if (this.propResolution == 0 && getTotalBytes() > 0) {
+            this.propResolution = Math.round(this.totalBytes / 100 * 5);
+        } else if (this.propResolution == 0) {
+            this.propResolution = 1024 * 256;
+        }
+        if (getByteCount() >= this.m_currentStep * this.propResolution) {
+            // System.out.println("Bytes read: "+ (getByteCount() - previous));
+            // previous = getByteCount();
+            this.m_currentStep++;
+            postProgressEvent(this.options.getClientId(), getByteCount(), this.totalBytes, DOWNLOAD_STATUS.IN_PROGRESS,
+                    null);
+        }
+        try {
+            Thread.sleep(this.propBlockDelay);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
-	protected int getPropReadTimeout() {
-		return propReadTimeout;
-	}
+    protected void postProgressEvent(String clientId, long progress, long total, DOWNLOAD_STATUS status,
+            String errorMessage) {
+        Long perc = getDownloadTransferProgressPercentage();
+        this.m_downloadStatus = status;
+        ProgressEvent pe = new ProgressEvent(this, this.options, ((Long) total).intValue(), perc.intValue(),
+                getDownloadTransferStatus().getStatusString(), this.m_alreadyDownloaded);
+        if (errorMessage != null) {
+            pe.setExceptionMessage(errorMessage);
+        }
+        this.pl.progressChanged(pe);
 
-	protected int getPropBlockDelay() {
-		return propBlockDelay;
-	}
+    }
+
+    protected void setResolution(int resolution) {
+        this.propResolution = resolution;
+    }
+
+    protected void setBufferSize(int size) {
+        this.propBufferSize = size;
+    }
+
+    protected void setConnectTimeout(int timeout) {
+        this.propConnectTimeout = timeout;
+    }
+
+    protected void setReadTimeout(int timeout) {
+        this.propReadTimeout = timeout;
+    }
+
+    protected void setBlockDelay(int delay) {
+        this.propBlockDelay = delay;
+    }
+
+    protected int getResolution() {
+        return this.propResolution;
+    }
+
+    protected int getBufferSize() {
+        return this.propBufferSize;
+    }
+
+    protected int getConnectTimeout() {
+        return this.propConnectTimeout;
+    }
+
+    protected int getPropReadTimeout() {
+        return this.propReadTimeout;
+    }
+
+    protected int getPropBlockDelay() {
+        return this.propBlockDelay;
+    }
 }

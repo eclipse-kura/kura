@@ -15,94 +15,93 @@ import java.util.List;
 
 /**
  * This interface provides methods for starting, stopping, and updating a
- * hardware watchdog present on the system.  Updating the watchdog, once 
+ * hardware watchdog present on the system. Updating the watchdog, once
  * started, prevents the system from rebooting.
  */
 public interface WatchdogService {
-	
-	/**
-	 * Starts the hardware watchdog on the device.  If a timeout value has not been
-	 * set, the watchdog will use its default timeout.<br>
-	 * This call is no longer used. The life-cycle of the watchdog is controlled
-	 * by the configuration parameters of the WatchdogSerivce. The API call
-	 * is retained for compatibility reasons.
-	 */
-    @Deprecated
-	public void startWatchdog();
-	
-	/**
-	 * Stops the hardware Watchdog on the device
+
+    /**
+     * Starts the hardware watchdog on the device. If a timeout value has not been
+     * set, the watchdog will use its default timeout.<br>
      * This call is no longer used. The life-cycle of the watchdog is controlled
      * by the configuration parameters of the WatchdogSerivce. The API call
      * is retained for compatibility reasons.
-	 */
+     */
     @Deprecated
-	public void stopWatchdog();
-	
-	/**
-	 * Returns the timeout value for the hardware watchdog in increments of milliseconds.
-	 * 
-	 * @return		An int representing the hardware timeout value in milliseconds. 
-	 */
-	public int getHardwareTimeout();
-	
-	/**
-	 * Register a critical service with the Critical Service Check-in. 
-	 * Once registered, the critical service must call the checkin() 
-	 * method (at a frequency higher than 1/timeout) to prevent a system reboot.
-	 * 
-	 * @param criticalService	A <code>CriticalService</code> to be registered.
-	 * @param timeout			A timeout value that the critical service cannot exceed
-	 * 							between updates without generating a system reboot.  The
-	 * 							time is expressed in seconds.
-	 */
-	@Deprecated
-	public void registerCriticalService(CriticalComponent criticalComponent);
-	
-	/**
-	 * Unregister a critical service with the Critical Service Check-in.
-	 * Once unregistered, the critical service will no longer call the 
-	 * checkin() method.
-	 * 
-	 * @param criticalService	A <code>CriticalService</code> to be unregistered.
-	 */
-    @Deprecated
-	public void unregisterCriticalService(CriticalComponent criticalComponent);
-	
+    public void startWatchdog();
+
     /**
-     * Register a critical component with the WatchdogService Check-in. 
-     * Once registered, the critical component must call the checkin() 
+     * Stops the hardware Watchdog on the device
+     * This call is no longer used. The life-cycle of the watchdog is controlled
+     * by the configuration parameters of the WatchdogSerivce. The API call
+     * is retained for compatibility reasons.
+     */
+    @Deprecated
+    public void stopWatchdog();
+
+    /**
+     * Returns the timeout value for the hardware watchdog in increments of milliseconds.
+     *
+     * @return An int representing the hardware timeout value in milliseconds.
+     */
+    public int getHardwareTimeout();
+
+    /**
+     * Register a critical service with the Critical Service Check-in.
+     * Once registered, the critical service must call the checkin()
      * method (at a frequency higher than 1/timeout) to prevent a system reboot.
-     * 
-     * @param CriticalComponent The CriticalComponent to be registered.
-     * @param timeout           A timeout value that the critical service cannot exceed
-     *                          between updates without generating a system reboot.  The
-     *                          time is expressed in seconds.
+     *
+     * @param criticalComponent
+     *            The CriticalComponent to be registered.
+     */
+    @Deprecated
+    public void registerCriticalService(CriticalComponent criticalComponent);
+
+    /**
+     * Unregister a critical service with the Critical Service Check-in.
+     * Once unregistered, the critical service will no longer call the
+     * checkin() method.
+     *
+     * @param criticalComponent
+     *            The CriticalComponent to be unregistered.
+     */
+    @Deprecated
+    public void unregisterCriticalService(CriticalComponent criticalComponent);
+
+    /**
+     * Register a critical component with the WatchdogService Check-in.
+     * Once registered, the critical component must call the checkin()
+     * method (at a frequency higher than 1/timeout) to prevent a system reboot.
+     *
+     * @param criticalComponent
+     *            The CriticalComponent to be registered.
      */
     public void registerCriticalComponent(CriticalComponent criticalComponent);
-    
+
     /**
      * Unregister a critical component with the WatchdogService Check-in.
-     * Once unregistered, the critical component will no longer call the 
+     * Once unregistered, the critical component will no longer call the
      * checkin() method.
-     * 
-     * @param CriticalComponent  The CriticalComponent to be unregistered.
+     *
+     * @param criticalComponent
+     *            The CriticalComponent to be unregistered.
      */
     public void unregisterCriticalComponent(CriticalComponent criticalComponent);
 
     /**
-	 * Returns the list of the currently registered CriticalComponents
-	 * 
-	 * @return	A List of CriticalComponents
-	 */
-	public List<CriticalComponent> getCriticalComponents();
-	
-	/**
-	 * This method is used to notify the Watchdog Service that a critical service
-	 * has 'checked in' and the reboot timer should be reset.
-	 * 
-	 * @param criticalComponent	The criticalComponent to be updated.
-	 */
-	public void checkin(CriticalComponent criticalComponent);
-	
+     * Returns the list of the currently registered CriticalComponents
+     *
+     * @return A List of CriticalComponents
+     */
+    public List<CriticalComponent> getCriticalComponents();
+
+    /**
+     * This method is used to notify the Watchdog Service that a critical service
+     * has 'checked in' and the reboot timer should be reset.
+     *
+     * @param criticalComponent
+     *            The criticalComponent to be updated.
+     */
+    public void checkin(CriticalComponent criticalComponent);
+
 }

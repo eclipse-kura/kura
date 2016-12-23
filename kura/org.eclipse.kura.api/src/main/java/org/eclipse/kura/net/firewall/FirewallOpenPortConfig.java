@@ -18,50 +18,51 @@ import org.eclipse.kura.net.NetworkPair;
 
 /**
  * Marker interface for firewall open port configurations
- * 
+ *
  * @author eurotech
  *
  */
 public interface FirewallOpenPortConfig extends NetConfig {
 
-	/**
-	 * Gets the port that is open for inbound connections
-	 * 
-	 * @return		The port number representing the inbound network port
-	 */
-	public int getPort();
-	
-	/**
-	 * Gets range of ports that are open for inbound connections
-	 * 
-	 * @return		The port range representing the inbound network port
-	 */
-	public String getPortRange();
+    /**
+     * Gets the port that is open for inbound connections
+     *
+     * @return The port number representing the inbound network port
+     */
+    public int getPort();
 
-	/**
-	 * Gets the type of network protocol (TCP or UDP) that is open for inbound connections
-	 * 
-	 * @return		The NetProtocol type associated with this interface
-	 */
-	public NetProtocol getProtocol();
+    /**
+     * Gets range of ports that are open for inbound connections
+     *
+     * @return The port range representing the inbound network port
+     */
+    public String getPortRange();
 
-	/**
-	 * Gets the (optional) permitted remote network that can make inbound connections
-	 * 
-	 * @return		The NetworkPair representing the permitted network
-	 */
-	public NetworkPair<? extends IPAddress> getPermittedNetwork();
+    /**
+     * Gets the type of network protocol (TCP or UDP) that is open for inbound connections
+     *
+     * @return The NetProtocol type associated with this interface
+     */
+    public NetProtocol getProtocol();
 
-	/**
-	 * Gets the (optional) permitted MAC address that is allowed to make inbound connections
-	 * 
-	 * @return		The MAC address that is allowed to make inbound connections
-	 */
-	public String getPermittedMac();
+    /**
+     * Gets the (optional) permitted remote network that can make inbound connections
+     *
+     * @return The NetworkPair representing the permitted network
+     */
+    public NetworkPair<? extends IPAddress> getPermittedNetwork();
 
-	/** Gets the (optional) permitted source port range that is allowed to make inbound connections
-	 * 
-	 * @return		The source port range that is allowed to make inbound connections
-	 */
-	public String getSourcePortRange();
+    /**
+     * Gets the (optional) permitted MAC address that is allowed to make inbound connections
+     *
+     * @return The MAC address that is allowed to make inbound connections
+     */
+    public String getPermittedMac();
+
+    /**
+     * Gets the (optional) permitted source port range that is allowed to make inbound connections
+     *
+     * @return The source port range that is allowed to make inbound connections
+     */
+    public String getSourcePortRange();
 }

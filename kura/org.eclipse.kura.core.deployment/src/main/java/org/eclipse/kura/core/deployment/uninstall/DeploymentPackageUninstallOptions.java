@@ -19,49 +19,49 @@ import org.eclipse.kura.core.deployment.DeploymentPackageOptions;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 
-public class DeploymentPackageUninstallOptions extends DeploymentPackageOptions{
+public class DeploymentPackageUninstallOptions extends DeploymentPackageOptions {
 
-	// Metrics in RESOURCE_INSTALL
-	public DeploymentPackageUninstallOptions(String deployUrl, String dpName, String dpVersion) {
-		super(dpName, dpVersion);
-	}
+    // Metrics in RESOURCE_INSTALL
+    public DeploymentPackageUninstallOptions(String deployUrl, String dpName, String dpVersion) {
+        super(dpName, dpVersion);
+    }
 
-	public DeploymentPackageUninstallOptions(KuraPayload request) throws KuraException {
+    public DeploymentPackageUninstallOptions(KuraPayload request) throws KuraException {
 
-		super(null,null);
+        super(null, null);
 
-		super.setDpName((String) request.getMetric(METRIC_DP_NAME));
-		if (super.getDpName() == null) {
-			throw new KuraInvalidMessageException("Missing deployment package name!");
-		}
-		
-		super.setJobId((Long) request.getMetric(METRIC_JOB_ID));
-		if (super.getJobId() == null) {
-			throw new KuraInvalidMessageException("Missing jobId!");
-		}
-		
-		try {
-			Object metric = request.getMetric(METRIC_DP_VERSION);
-			if (metric != null) {
-				super.setDpVersion((String) metric);
-			}
-					
-			metric = request.getMetric(METRIC_DP_REBOOT);
-			if (metric != null) {
-				super.setReboot((Boolean) metric);
-			}
-			metric = request.getMetric(METRIC_DP_REBOOT_DELAY);
-			if (metric != null) {
-				super.setRebootDelay((Integer) metric);
-			}
-		
-			metric = request.getMetric(KuraRequestPayload.REQUESTER_CLIENT_ID);
-			if (metric != null) {
-				super.setRequestClientId((String) metric);
-			}
+        super.setDpName((String) request.getMetric(METRIC_DP_NAME));
+        if (super.getDpName() == null) {
+            throw new KuraInvalidMessageException("Missing deployment package name!");
+        }
 
-		} catch (Exception ex) {
-			throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
-		}
-	}
+        super.setJobId((Long) request.getMetric(METRIC_JOB_ID));
+        if (super.getJobId() == null) {
+            throw new KuraInvalidMessageException("Missing jobId!");
+        }
+
+        try {
+            Object metric = request.getMetric(METRIC_DP_VERSION);
+            if (metric != null) {
+                super.setDpVersion((String) metric);
+            }
+
+            metric = request.getMetric(METRIC_DP_REBOOT);
+            if (metric != null) {
+                super.setReboot((Boolean) metric);
+            }
+            metric = request.getMetric(METRIC_DP_REBOOT_DELAY);
+            if (metric != null) {
+                super.setRebootDelay((Integer) metric);
+            }
+
+            metric = request.getMetric(KuraRequestPayload.REQUESTER_CLIENT_ID);
+            if (metric != null) {
+                super.setRequestClientId((String) metric);
+            }
+
+        } catch (Exception ex) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
+        }
+    }
 }

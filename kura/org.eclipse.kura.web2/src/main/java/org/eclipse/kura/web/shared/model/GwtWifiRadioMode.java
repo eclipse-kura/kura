@@ -12,29 +12,30 @@
 package org.eclipse.kura.web.shared.model;
 
 public enum GwtWifiRadioMode {
-	netWifiRadioModeBGN,
-	netWifiRadioModeBG,
-	netWifiRadioModeB,
-	netWifiRadioModeA;
-	
-	/**
-	 * Return mode based on given string
-	 * 
-	 * @param mode - "a", "b", "g", or "n"
-	 * @return
-	 */
-	public static GwtWifiRadioMode getRadioMode(String mode) {
+    netWifiRadioModeBGN,
+    netWifiRadioModeBG,
+    netWifiRadioModeB,
+    netWifiRadioModeA;
 
-		if ("a".equals(mode)) {
-			return GwtWifiRadioMode.netWifiRadioModeA;
-		} else if ("b".equals(mode)) {
-			return GwtWifiRadioMode.netWifiRadioModeB;
-		} else if ("g".equals(mode)) {
-			return GwtWifiRadioMode.netWifiRadioModeBG;
-		} else if ("n".equals(mode)) {
-			return GwtWifiRadioMode.netWifiRadioModeBGN;
-		}
-		
-		return null;
-	}
+    /**
+     * Return mode based on given string
+     *
+     * @param mode
+     *            - "a", "b", "g", or "n"
+     * @return
+     */
+    public static GwtWifiRadioMode getRadioMode(String mode) {
+
+        if ("a".equals(mode)) {
+            return GwtWifiRadioMode.netWifiRadioModeA;
+        } else if ("b".equals(mode)) {
+            return GwtWifiRadioMode.netWifiRadioModeB;
+        } else if ("g".equals(mode)) {
+            return GwtWifiRadioMode.netWifiRadioModeBG;
+        } else if ("n".equals(mode)) {
+            return GwtWifiRadioMode.netWifiRadioModeBGN;
+        }
+
+        return null;
+    }
 }

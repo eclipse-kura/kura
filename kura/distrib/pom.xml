@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2016 Eurotech and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -10,19 +10,21 @@
 
     Contributors:
       Eurotech
+      Red Hat Inc. - Add support for Fedora on RPi (#552)
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>kura</artifactId>
+		<artifactId>kura-pom-first</artifactId>
 		<groupId>org.eclipse.kura</groupId>
-		<version>2.0.2</version>
+		<version>2.1.0</version>
 		<relativePath>../pom_pom.xml</relativePath>
 	</parent>
 
 	<artifactId>distrib</artifactId>
+	<packaging>pom</packaging>
 
 	<name>distrib</name>
 	<url>http://maven.apache.org</url>
@@ -96,10 +98,15 @@
 									<artifactId>org.eclipse.kura.camel</artifactId>
 									<version>${org.eclipse.kura.camel.version}</version>
 								</artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.camel.cloud.factory</artifactId>
+                                    <version>${org.eclipse.kura.camel.cloud.factory.version}</version>
+                                </artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.camel.sun.misc</artifactId>
-									<version>${org.eclipse.kura.camel.sun.misc.version}</version>
+									<artifactId>org.eclipse.kura.camel.xml</artifactId>
+									<version>${org.eclipse.kura.camel.xml.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
@@ -261,6 +268,16 @@
 									<artifactId>org.eclipse.kura.example.camel.quickstart</artifactId>
 									<version>${org.eclipse.kura.example.camel.quickstart.version}</version>
 								</artifactItem>
+								<!--<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.command</artifactId>
+									<version>${org.eclipse.kura.windows.command.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.windows.clock</artifactId>
+									<version>${org.eclipse.kura.windows.clock.version}</version>
+								</artifactItem>-->
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -358,7 +375,8 @@
 							<tasks>
 							    <move file="target/plugins/org.eclipse.kura.api.jar" tofile="target/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"/>
 								<move file="target/plugins/org.eclipse.kura.camel.jar" tofile="target/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"/>
-								<move file="target/plugins/org.eclipse.kura.camel.sun.misc.jar" tofile="target/plugins/org.eclipse.kura.camel.sun.misc_${org.eclipse.kura.camel.sun.misc.version}.jar"/>
+								<move file="target/plugins/org.eclipse.kura.camel.cloud.factory.jar" tofile="target/plugins/org.eclipse.kura.camel.cloud.factory_${org.eclipse.kura.camel.cloud.factory.version}.jar"/>
+								<move file="target/plugins/org.eclipse.kura.camel.xml.jar" tofile="target/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar"/>
 								<move file="target/plugins/org.eclipse.kura.core.jar" tofile="target/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.certificates.jar" tofile="target/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.cloud.jar" tofile="target/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"/>
@@ -393,9 +411,10 @@
   								<move file="target/plugins/org.eclipse.kura.emulator.position.jar" tofile="target/plugins/org.eclipse.kura.emulator.position_${org.eclipse.kura.emulator.position.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.usb.jar" tofile="target/plugins/org.eclipse.kura.emulator.usb_${org.eclipse.kura.emulator.usb.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.emulator.watchdog.jar" tofile="target/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar" />
-  								
   								<move file="target/plugins/org.eclipse.kura.example.camel.aggregation.jar" tofile="target/plugins/org.eclipse.kura.example.camel.aggregation_${org.eclipse.kura.example.camel.aggregation.version}.jar" failonerror="false"/>
 								<move file="target/plugins/org.eclipse.kura.example.camel.quickstart.jar" tofile="target/plugins/org.eclipse.kura.example.camel.quickstart_${org.eclipse.kura.example.camel.quickstart.version}.jar" failonerror="false"/>
+							    <!--<move file="target/plugins/org.eclipse.kura.windows.command.jar" tofile="target/plugins/org.eclipse.kura.windows.command_${org.eclipse.kura.windows.command.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.windows.clock.jar" tofile="target/plugins/org.eclipse.kura.windows.clock_${org.eclipse.kura.windows.clock.version}.jar"/>-->
 							</tasks>
 						</configuration>
 					</execution>
@@ -456,7 +475,8 @@
 									<include name="pom.xml"/>
 								</replace>
 								<!-- execute script to add artifacts to pom file -->
-								<exec executable="src/main/sh/generate_kura_bundles_pom.sh" output="RELEASE_INFO/${project.version}/kura-bundles/pom.xml" append="true">
+								<exec executable="bash" output="RELEASE_INFO/${project.version}/kura-bundles/pom.xml" append="true">
+									<arg value="src/main/sh/generate_kura_bundles_pom.sh" />
 									<arg value="RELEASE_INFO/${project.version}/config/kura.build.properties" />
 								</exec>
 
@@ -473,10 +493,12 @@
 								<replace token="&lt;/artifactItems&gt;" value="&lt;/artifactItems&gt;&lt;stripVersion&gt;true&lt;/stripVersion&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-common">
 									<include name="pom.xml"/>
 								</replace>
-								<!-- execute script to add artifacts to pom file -->
-								<exec executable="src/main/sh/generate_p2_repo_pom.sh" output="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml">
+								<!-- execute script to add artifacts to pom file - need to have different input/output files (Win) -->
+								<exec executable="bash" output="RELEASE_INFO/${project.version}/p2-repo-common/pom_.xml">
+									<arg value="src/main/sh/generate_p2_repo_pom.sh" />
 									<arg value="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" />
 								</exec>
+								<move file="RELEASE_INFO/${project.version}/p2-repo-common/pom_.xml" tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml"/>
 
 								<!-- Copy target-platform/p2-repo-equinox_3.8.1/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml -->
 								<copy
@@ -491,10 +513,45 @@
 								<replace token="&lt;/artifactItems&gt;" value="&lt;/artifactItems&gt;&lt;stripVersion&gt;true&lt;/stripVersion&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1">
 									<include name="pom.xml"/>
 								</replace>
-								<!-- execute script to add artifacts to pom file -->
-								<exec executable="src/main/sh/generate_p2_repo_pom.sh" output="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml">
+								<!-- execute script to add artifacts to pom file - need to have different input/output files (Win) -->
+								<exec executable="bash" output="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom_.xml">
+									<arg value="src/main/sh/generate_p2_repo_pom.sh" />
 									<arg value="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml" />
 								</exec>
+								<move file="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom_.xml" tofile="RELEASE_INFO/${project.version}/p2-repo-equinox_3.8.1/pom.xml"/>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>calc-checksums</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<checksum algorithm="md5">
+									<fileset dir="${basedir}/target/">
+										<include name="*.deb" />
+										<include name="*.dp" />
+										<include name="*.zip"/>
+										<include name="kura_${project.version}_*.sh"/>
+										<include name="kura_${project.version}_*.dp"/>
+										<exclude name="kura_${project.version}_*.dp" />
+										<exclude name="kura_${project.version}_*.zip"/>
+									</fileset>
+								</checksum>
+								<checksum algorithm="SHA-1">
+									<fileset dir="${basedir}/target/">
+										<include name="*.deb" />
+										<include name="*.dp" />
+										<include name="*.zip"/>
+										<include name="kura_${project.version}_*.sh"/>
+										<include name="kura_${project.version}_*.dp"/>
+										<exclude name="kura_${project.version}_*.dp" />
+										<exclude name="kura_${project.version}_*.zip"/>
+									</fileset>
+								</checksum>
 							</target>
 						</configuration>
 					</execution>
@@ -682,7 +739,7 @@
                         <executions>
                             <execution>
                                 <id>intel-edison-jars</id>
-                                <phase>install</phase>
+                                <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
@@ -747,7 +804,7 @@
                         <executions>
                             <execution>
                                 <id>intel-edison-nn-jars</id>
-                                <phase>install</phase>
+                                <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
@@ -815,7 +872,7 @@
 						<executions>
 							<execution>
 								<id>beaglebone-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -865,7 +922,7 @@
 						<executions>
 							<execution>
 								<id>beaglebone-deb</id>
-								<phase>install</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
@@ -887,34 +944,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-        				<groupId>net.ju-n.maven.plugins</groupId>
-        				<artifactId>checksum-maven-plugin</artifactId>
-        				<version>1.3</version>
-        				<executions>
-          					<execution>
-          						<id>beaglebone-deb-checksums</id>
-								<phase>install</phase>
-            					<goals>
-              						<goal>files</goal>
-            					</goals>
-          					</execution>
-        				</executions>
-        				<configuration>
-          					<algorithms>
-             					<algorithm>MD5</algorithm>
-             					<algorithm>SHA-1</algorithm>
-             				</algorithms>
-             				<fileSets>
-  								<fileSet>
-    								<directory>${basedir}/target</directory>
-    								<includes>
-      									<include>*.deb</include>
-    								</includes>
-  								</fileSet>
-							</fileSets>
-        				</configuration>
-      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -958,7 +987,7 @@
 						<executions>
 							<execution>
 								<id>beaglebone-nn-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -988,7 +1017,7 @@
 						<executions>
 							<execution>
 								<id>beaglebone-nn-deb</id>
-								<phase>install</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
@@ -1010,34 +1039,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-        				<groupId>net.ju-n.maven.plugins</groupId>
-        				<artifactId>checksum-maven-plugin</artifactId>
-        				<version>1.3</version>
-        				<executions>
-          					<execution>
-          						<id>beaglebone-nn-deb-checksums</id>
-								<phase>install</phase>
-            					<goals>
-              						<goal>files</goal>
-            					</goals>
-          					</execution>
-        				</executions>
-        				<configuration>
-          					<algorithms>
-             					<algorithm>MD5</algorithm>
-             					<algorithm>SHA-1</algorithm>
-             				</algorithms>
-             				<fileSets>
-  								<fileSet>
-    								<directory>${basedir}/target</directory>
-    								<includes>
-      									<include>*.deb</include>
-    								</includes>
-  								</fileSet>
-							</fileSets>
-        				</configuration>
-      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1081,7 +1082,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1121,7 +1122,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-deb</id>
-								<phase>install</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
@@ -1143,34 +1144,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-        				<groupId>net.ju-n.maven.plugins</groupId>
-        				<artifactId>checksum-maven-plugin</artifactId>
-        				<version>1.3</version>
-        				<executions>
-          					<execution>
-          						<id>raspberry-pi-deb-checksums</id>
-								<phase>install</phase>
-            					<goals>
-              						<goal>files</goal>
-            					</goals>
-          					</execution>
-        				</executions>
-        				<configuration>
-          					<algorithms>
-             					<algorithm>MD5</algorithm>
-             					<algorithm>SHA-1</algorithm>
-             				</algorithms>
-             				<fileSets>
-  								<fileSet>
-    								<directory>${basedir}/target</directory>
-    								<includes>
-      									<include>*.deb</include>
-    								</includes>
-  								</fileSet>
-							</fileSets>
-        				</configuration>
-      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1213,7 +1186,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-nn-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1242,7 +1215,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-nn-deb</id>
-								<phase>install</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
@@ -1264,34 +1237,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-        				<groupId>net.ju-n.maven.plugins</groupId>
-        				<artifactId>checksum-maven-plugin</artifactId>
-        				<version>1.3</version>
-        				<executions>
-          					<execution>
-          						<id>raspberry-pi-nn-deb-checksums</id>
-								<phase>install</phase>
-            					<goals>
-              						<goal>files</goal>
-            					</goals>
-          					</execution>
-        				</executions>
-        				<configuration>
-          					<algorithms>
-             					<algorithm>MD5</algorithm>
-             					<algorithm>SHA-1</algorithm>
-             				</algorithms>
-             				<fileSets>
-  								<fileSet>
-    								<directory>${basedir}/target</directory>
-    								<includes>
-      									<include>*.deb</include>
-    								</includes>
-  								</fileSet>
-							</fileSets>
-        				</configuration>
-      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1335,7 +1280,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-bplus-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1375,7 +1320,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-bplus-deb</id>
-								<phase>install</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
@@ -1397,34 +1342,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-        				<groupId>net.ju-n.maven.plugins</groupId>
-        				<artifactId>checksum-maven-plugin</artifactId>
-        				<version>1.3</version>
-        				<executions>
-          					<execution>
-          						<id>raspberry-pi-bplus-deb-checksums</id>
-								<phase>install</phase>
-            					<goals>
-              						<goal>files</goal>
-            					</goals>
-          					</execution>
-        				</executions>
-        				<configuration>
-          					<algorithms>
-             					<algorithm>MD5</algorithm>
-             					<algorithm>SHA-1</algorithm>
-             				</algorithms>
-             				<fileSets>
-  								<fileSet>
-    								<directory>${basedir}/target</directory>
-    								<includes>
-      									<include>*.deb</include>
-    								</includes>
-  								</fileSet>
-							</fileSets>
-        				</configuration>
-      				</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -1467,7 +1384,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-bplus-nn-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1496,7 +1413,7 @@
 						<executions>
 							<execution>
 								<id>raspberry-pi-bplus-nn-deb</id>
-								<phase>install</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
@@ -1518,40 +1435,12 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-        				<groupId>net.ju-n.maven.plugins</groupId>
-        				<artifactId>checksum-maven-plugin</artifactId>
-        				<version>1.3</version>
-        				<executions>
-          					<execution>
-          						<id>raspberry-pi-bplus-nn-deb-checksums</id>
-								<phase>install</phase>
-            					<goals>
-              						<goal>files</goal>
-            					</goals>
-          					</execution>
-        				</executions>
-        				<configuration>
-          					<algorithms>
-             					<algorithm>MD5</algorithm>
-             					<algorithm>SHA-1</algorithm>
-             				</algorithms>
-             				<fileSets>
-  								<fileSet>
-    								<directory>${basedir}/target</directory>
-    								<includes>
-      									<include>*.deb</include>
-    								</includes>
-  								</fileSet>
-							</fileSets>
-        				</configuration>
-      				</plugin>
 				</plugins>
 			</build>
 		</profile>
 
 		<profile>
-			<id>raspberry-pi-2</id>
+			<id>raspberry-pi-2-3</id>
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, wireless-tools, default-jre-headless | java7-runtime-headless</project.raspbian.dependencies>
 <!--
@@ -1588,8 +1477,8 @@
 						<version>1.7</version>
 						<executions>
 							<execution>
-								<id>raspberry-pi-2-jars</id>
-								<phase>install</phase>
+								<id>raspberry-pi-2-3-jars</id>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1618,14 +1507,14 @@
 						<version>1.0</version>
 						<executions>
 							<execution>
-								<id>raspberry-pi-2-deb</id>
-								<phase>install</phase>
+								<id>raspberry-pi-2-3-deb</id>
+								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2_installer.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-3_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control</controlDir>
 									<dataSet>
 										<data>
@@ -1641,40 +1530,12 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-        				<groupId>net.ju-n.maven.plugins</groupId>
-        				<artifactId>checksum-maven-plugin</artifactId>
-        				<version>1.3</version>
-        				<executions>
-          					<execution>
-          						<id>raspberry-pi-2-deb-checksums</id>
-								<phase>install</phase>
-            					<goals>
-              						<goal>files</goal>
-            					</goals>
-          					</execution>
-        				</executions>
-        				<configuration>
-          					<algorithms>
-             					<algorithm>MD5</algorithm>
-             					<algorithm>SHA-1</algorithm>
-             				</algorithms>
-             				<fileSets>
-  								<fileSet>
-    								<directory>${basedir}/target</directory>
-    								<includes>
-      									<include>*.deb</include>
-    								</includes>
-  								</fileSet>
-							</fileSets>
-        				</configuration>
-      				</plugin>
 				</plugins>
 			</build>
 		</profile>
 
 		<profile>
-			<id>raspberry-pi-2-nn</id>
+			<id>raspberry-pi-2-3-nn</id>
 			<properties>
 				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet, default-jre-headless | java7-runtime-headless</project.raspbian.dependencies.nn>
 <!--
@@ -1711,8 +1572,8 @@
 						<version>1.7</version>
 						<executions>
 							<execution>
-								<id>raspberry-pi-2-nn-jars</id>
-								<phase>install</phase>
+								<id>raspberry-pi-2-3-nn-jars</id>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1741,14 +1602,14 @@
 						<version>1.0</version>
 						<executions>
 							<execution>
-								<id>raspberry-pi-2-nn-deb</id>
-								<phase>install</phase>
+								<id>raspberry-pi-2-3-nn-deb</id>
+								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-nn_installer.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-3-nn_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control_nn</controlDir>
 									<dataSet>
 										<data>
@@ -1764,38 +1625,192 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-        				<groupId>net.ju-n.maven.plugins</groupId>
-        				<artifactId>checksum-maven-plugin</artifactId>
-        				<version>1.3</version>
-        				<executions>
-          					<execution>
-          						<id>raspberry-pi-2-nn-deb-checksums</id>
-								<phase>install</phase>
-            					<goals>
-              						<goal>files</goal>
-            					</goals>
-          					</execution>
-        				</executions>
-        				<configuration>
-          					<algorithms>
-             					<algorithm>MD5</algorithm>
-             					<algorithm>SHA-1</algorithm>
-             				</algorithms>
-             				<fileSets>
-  								<fileSet>
-    								<directory>${basedir}/target</directory>
-    								<includes>
-      									<include>*.deb</include>
-    								</includes>
-  								</fileSet>
-							</fileSets>
-        				</configuration>
-      				</plugin>
 				</plugins>
 			</build>
 		</profile>
 
+		<profile>
+			<id>fedorapi</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+					</resource>
+				</resources>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>buildnumber-maven-plugin</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<phase>validate</phase>
+								<goals>
+									<goal>create-timestamp</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>fedorapi-jars</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="fedorapi" />
+										<property name="target.device" value="raspberry-pi" />
+										<property name="kura.os.version" value="fedora" />
+										<property name="kura.arch" value="armv7_hf" />
+										<property name="kura.mem.size" value="512m" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
+												 target="dist-linux" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>fedorapi-nn</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+					</resource>
+				</resources>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>buildnumber-maven-plugin</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<phase>validate</phase>
+								<goals>
+									<goal>create-timestamp</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>fedorapi-nn-jars</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="raspberry-pi-2-nn" />
+										<property name="target.device" value="raspberry-pi-2-nn" />
+										<property name="kura.os.version" value="raspbian" />
+										<property name="kura.arch" value="armv7_hf" />
+										<property name="kura.mem.size" value="512m" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
+												 target="dist-linux" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+
+		<profile>
+			<id>Win64-nn</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+					</resource>
+				</resources>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>buildnumber-maven-plugin</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<phase>validate</phase>
+								<goals>
+									<goal>create-timestamp</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>Win64-nn-jars</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="Win64-nn" />
+										<property name="target.device" value="Win64" />
+										<property name="kura.os.version" value="Windows 64" />
+										<property name="kura.arch" value="x64" />
+										<property name="kura.mem.size" value="256m" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
+											target="dist-windows" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>	
+
+		
 		<profile>
 			<id>dev-env</id>
 			<activation>
@@ -1890,13 +1905,19 @@
 										<delete
 											file="${project.build.directory}/staging/target-definition/pom.xml" />
 										<delete
+											dir="${project.build.directory}/staging/target-definition/common/source" />
+										<delete
 											file="${project.build.directory}/staging/target-definition/kura-equinox_3.8.1.target" />
+										<delete
+											dir="${project.build.directory}/staging/target-definition/equinox_3.8.1/source" />
 										<delete
 											file="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/artifacts.xml" />
 										<delete
 											file="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/content.xml" />
+                                        <delete
+                                            dir="${project.build.directory}/staging/target-definition/target" />
 
-										<copy
+										<copy overwrite="true"
 											file="src/main/resources/common/projects/target_definition.project"
 											tofile="${project.build.directory}/staging/target-definition/.project" />
 										<copy file="src/main/resources/common/kura-equinox_3.8.1.target"
@@ -1915,6 +1936,12 @@
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"
+											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.camel.cloud.factory_${org.eclipse.kura.camel.cloud.factory.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
+										<copy
+											file="${project.build.directory}/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar"
 											todir="${project.build.directory}/staging/target-definition/equinox_3.8.1/repository/plugins" />
 										<copy
 											file="${project.build.directory}/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"
@@ -1980,7 +2007,7 @@
 										<copy
 											file="src/main/resources/common/classpaths/emulator.classpath"
 											tofile="${project.build.directory}/staging/emulator/emulator.classpath" />
-										<copy file="src/main/resources/common/projects/emulator.project"
+										<copy overwrite="true" file="src/main/resources/common/projects/emulator.project"
 											tofile="${project.build.directory}/staging/emulator/.project" />
 										<replace file="${project.build.directory}/staging/emulator/src/main/resources/kura.properties"
 												 token="kura.version=kura_emulator" value="kura.version=KURA_${kura.version}" />
@@ -2016,7 +2043,7 @@
 										<copy
 											file="src/main/resources/common/classpaths/demo_heater.classpath"
 											tofile="${project.build.directory}/staging/demo_heater/demo_heater.classpath" />
-										<copy file="src/main/resources/common/projects/demo_heater.project"
+										<copy overwrite="true" file="src/main/resources/common/projects/demo_heater.project"
 											tofile="${project.build.directory}/staging/demo_heater/.project" />
 										<move
 											file="${project.build.directory}/staging/demo_heater/demo_heater.classpath"
@@ -2034,7 +2061,7 @@
 										<copy
 											file="src/main/resources/common/classpaths/beacon.classpath"
 											tofile="${project.build.directory}/staging/beacon/beacon.classpath" />
-										<copy file="src/main/resources/common/projects/beacon.project"
+										<copy overwrite="true" file="src/main/resources/common/projects/beacon.project"
 											tofile="${project.build.directory}/staging/beacon/.project" />
 										<move
 											file="${project.build.directory}/staging/beacon/beacon.classpath"
@@ -2052,7 +2079,7 @@
 										<copy
 											file="src/main/resources/common/classpaths/tisensortag.classpath"
 											tofile="${project.build.directory}/staging/tisensortag/tisensortag.classpath" />
-										<copy file="src/main/resources/common/projects/tisensortag.project"
+										<copy overwrite="true" file="src/main/resources/common/projects/tisensortag.project"
 											tofile="${project.build.directory}/staging/tisensortag/.project" />
 										<move
 											file="${project.build.directory}/staging/tisensortag/tisensortag.classpath"
@@ -2070,11 +2097,65 @@
 										<copy
 											file="src/main/resources/common/classpaths/publisher.classpath"
 											tofile="${project.build.directory}/staging/publisher/publisher.classpath" />
-										<copy file="src/main/resources/common/projects/publisher.project"
+										<copy overwrite="true" file="src/main/resources/common/projects/publisher.project"
 											tofile="${project.build.directory}/staging/publisher/.project" />
 										<move
 											file="${project.build.directory}/staging/publisher/publisher.classpath"
 											tofile="${project.build.directory}/staging/publisher/.classpath" />
+                                            
+                                        <!-- Stage the org.eclipse.kura.example.camel.quickstart Project -->
+                                        <copy todir="${project.build.directory}/staging/camel_quickstart">
+                                            <fileset dir="../examples/org.eclipse.kura.example.camel.quickstart" />
+                                        </copy>
+                                        <delete
+                                            file="${project.build.directory}/staging/camel_quickstart/pom.xml" />
+                                        <delete dir="${project.build.directory}/staging/camel_quickstart/bin" />
+                                        <delete
+                                            dir="${project.build.directory}/staging/camel_quickstart/target" />
+                                        <copy
+                                            file="src/main/resources/common/classpaths/camel_quickstart.classpath"
+                                            tofile="${project.build.directory}/staging/camel_quickstart/camel_quickstart.classpath" />
+                                        <copy overwrite="true" file="src/main/resources/common/projects/camel_quickstart.project"
+                                            tofile="${project.build.directory}/staging/camel_quickstart/.project" />
+                                        <move
+                                            file="${project.build.directory}/staging/camel_quickstart/camel_quickstart.classpath"
+                                            tofile="${project.build.directory}/staging/camel_quickstart/.classpath" />
+                                            
+                                        <!-- Stage the org.eclipse.kura.example.camel.publisher Project -->
+                                        <copy todir="${project.build.directory}/staging/camel_publisher">
+                                            <fileset dir="../examples/org.eclipse.kura.example.camel.publisher" />
+                                        </copy>
+                                        <delete
+                                            file="${project.build.directory}/staging/camel_publisher/pom.xml" />
+                                        <delete dir="${project.build.directory}/staging/camel_publisher/bin" />
+                                        <delete
+                                            dir="${project.build.directory}/staging/camel_publisher/target" />
+                                        <copy
+                                            file="src/main/resources/common/classpaths/camel_publisher.classpath"
+                                            tofile="${project.build.directory}/staging/camel_publisher/camel_publisher.classpath" />
+                                        <copy overwrite="true" file="src/main/resources/common/projects/camel_publisher.project"
+                                            tofile="${project.build.directory}/staging/camel_publisher/.project" />
+                                        <move
+                                            file="${project.build.directory}/staging/camel_publisher/camel_publisher.classpath"
+                                            tofile="${project.build.directory}/staging/camel_publisher/.classpath" />
+                                            
+                                        <!-- Stage the org.eclipse.kura.example.camel.aggregation Project -->
+                                        <copy todir="${project.build.directory}/staging/camel_aggregation">
+                                            <fileset dir="../examples/org.eclipse.kura.example.camel.aggregation" />
+                                        </copy>
+                                        <delete
+                                            file="${project.build.directory}/staging/camel_aggregation/pom.xml" />
+                                        <delete dir="${project.build.directory}/staging/camel_aggregation/bin" />
+                                        <delete
+                                            dir="${project.build.directory}/staging/camel_aggregation/target" />
+                                        <copy
+                                            file="src/main/resources/common/classpaths/camel_aggregation.classpath"
+                                            tofile="${project.build.directory}/staging/camel_aggregation/camel_aggregation.classpath" />
+                                        <copy overwrite="true" file="src/main/resources/common/projects/camel_aggregation.project"
+                                            tofile="${project.build.directory}/staging/camel_aggregation/.project" />
+                                        <move
+                                            file="${project.build.directory}/staging/camel_aggregation/camel_aggregation.classpath"
+                                            tofile="${project.build.directory}/staging/camel_aggregation/.classpath" />
 
 										<!-- Create the archive file with the components -->
 										<zip destfile="${project.build.directory}/${zip_workspace.prefix}.zip">
@@ -2093,17 +2174,13 @@
 												prefix="org.eclipse.kura.example.ble.tisensortag/" />
 											<zipfileset dir="${project.build.directory}/staging/publisher/"
 												prefix="org.eclipse.kura.example.publisher/" />
+                                            <zipfileset dir="${project.build.directory}/staging/camel_quickstart/"
+                                                prefix="org.eclipse.kura.example.camel.quickstart/" />
+                                            <zipfileset dir="${project.build.directory}/staging/camel_publisher/"
+                                                prefix="org.eclipse.kura.example.camel.publisher/" />
+                                            <zipfileset dir="${project.build.directory}/staging/camel_aggregation/"
+                                                prefix="org.eclipse.kura.example.camel.aggregation/" />
 										</zip>
-										<checksum algorithm="md5">
-    										<fileset dir="./target/" >
-    											<include name="${zip_workspace.prefix}.zip"/>
-    										</fileset>
-										</checksum>
-										<checksum algorithm="SHA-1">
-    										<fileset dir="./target/" >
-    											<include name="${zip_workspace.prefix}.zip"/>
-    										</fileset>
-										</checksum>
 									</target>
 								</configuration>
 							</execution>

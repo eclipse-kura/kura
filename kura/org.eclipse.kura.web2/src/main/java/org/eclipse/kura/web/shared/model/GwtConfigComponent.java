@@ -19,14 +19,14 @@ import org.eclipse.kura.web.client.util.KuraBaseModel;
 
 public class GwtConfigComponent extends KuraBaseModel implements Serializable {
 
-	private static final long serialVersionUID = -6388356998309026758L;
+    private static final long serialVersionUID = -6388356998309026758L;
 
-	private List<GwtConfigParameter> m_parameters;
-	
-	public GwtConfigComponent() {
-		m_parameters = new ArrayList<GwtConfigParameter>();
-	}
-	
+    private List<GwtConfigParameter> m_parameters;
+
+    public GwtConfigComponent() {
+        this.m_parameters = new ArrayList<GwtConfigParameter>();
+    }
+
     public String getComponentId() {
         return get("componentId");
     }
@@ -59,20 +59,20 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
         set("componentIcon", componentIcon);
     }
 
-	public List<GwtConfigParameter> getParameters() {
-		return m_parameters;
-	}
+    public List<GwtConfigParameter> getParameters() {
+        return this.m_parameters;
+    }
 
-	public void setParameters(List<GwtConfigParameter> parameters) {
-		m_parameters = parameters;
-	}
-	
-	public GwtConfigParameter getParameter(String id) {
-		for (GwtConfigParameter param : m_parameters) {
-			if (param.getId().equals(id)) {
-				return param;
-			}
-		}
-		return null;
-	}
+    public void setParameters(List<GwtConfigParameter> parameters) {
+        this.m_parameters = parameters;
+    }
+
+    public GwtConfigParameter getParameter(String id) {
+        for (GwtConfigParameter param : this.m_parameters) {
+            if (param.getId().equals(id)) {
+                return param;
+            }
+        }
+        return null;
+    }
 }

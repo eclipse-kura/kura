@@ -18,22 +18,23 @@ import org.eclipse.kura.KuraException;
 
 public class DhcpServerFactory {
 
-	private static Map<String, DhcpServerImpl> dhcpServers;
-	
-	private DhcpServerFactory() {
-	}
+    private static Map<String, DhcpServerImpl> dhcpServers;
 
-	public static DhcpServerImpl getInstance(String interfaceName, boolean enabled, boolean passDns) throws KuraException {
-		if(dhcpServers == null) {
-			dhcpServers = new Hashtable<String, DhcpServerImpl>();
-		}
-		
-		DhcpServerImpl dhcpServer = dhcpServers.get(interfaceName);
-		if(dhcpServer == null) {
-			dhcpServer = new DhcpServerImpl(interfaceName, enabled, passDns);
-			dhcpServers.put(interfaceName, dhcpServer);
-		}
-		
-		return dhcpServer;
-	}
+    private DhcpServerFactory() {
+    }
+
+    public static DhcpServerImpl getInstance(String interfaceName, boolean enabled, boolean passDns)
+            throws KuraException {
+        if (dhcpServers == null) {
+            dhcpServers = new Hashtable<String, DhcpServerImpl>();
+        }
+
+        DhcpServerImpl dhcpServer = dhcpServers.get(interfaceName);
+        if (dhcpServer == null) {
+            dhcpServer = new DhcpServerImpl(interfaceName, enabled, passDns);
+            dhcpServers.put(interfaceName, dhcpServer);
+        }
+
+        return dhcpServer;
+    }
 }

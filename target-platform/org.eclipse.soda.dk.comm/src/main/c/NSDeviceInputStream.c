@@ -31,7 +31,7 @@ extern int w32DeviceInputStream_getReadCountNC(JNIEnv *, jobject);
 JNIEXPORT jint JNICALL Java_org_eclipse_soda_dk_comm_NSDeviceInputStream_readDeviceOneByteNC
   (JNIEnv *jenv, jobject jobj) {
 #ifdef WIN32
-	return (int)(unsigned char)w32DeviceInputStream_readDeviceOneByteNC(jenv, jobj);
+	return /*(int)(unsigned char)*/w32DeviceInputStream_readDeviceOneByteNC(jenv, jobj);
 #else
 #if _WIN32_WCE>=400
 	return (int)(unsigned char)w32DeviceInputStream_readDeviceOneByteNC(jenv, jobj);

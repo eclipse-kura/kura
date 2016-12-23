@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2016 Red Hat Inc and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Red Hat Inc - Initial API and implementation
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.camel.cloud.factory.CamelFactory"
+         name="Camel Cloud Client" 
+         description="Camel Cloud Client factory">
+        
+         <AD id="xml"
+            name="Router XML"
+            type="String"
+            cardinality="1"
+            required="true"
+            description="The camel XML router configuration|TextArea"/>
+            
+        <AD id="initCode"
+            name="JavaScript init code"
+            type="String"
+            cardinality="1"
+            required="false"
+            description="JavaScript code which is called when the router is initialized first. The camel context is avaiable in the variable 'camelContext'.|TextArea"/>
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.camel.cloud.factory.CamelFactory" factoryPid="org.eclipse.kura.camel.cloud.factory.CamelFactory">
+        <Object ocdref="org.eclipse.kura.camel.cloud.factory.CamelFactory"/>
+    </Designate>
+</MetaData>

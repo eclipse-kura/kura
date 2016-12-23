@@ -225,7 +225,6 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
         }
     }
 
-
     public boolean isScanRunning() {
         return this.m_scanRunning;
     }

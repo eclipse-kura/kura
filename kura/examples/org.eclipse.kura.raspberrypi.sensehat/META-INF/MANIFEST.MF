@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.raspberrypi.sensehat
 Bundle-SymbolicName: org.eclipse.kura.raspberrypi.sensehat;singleton:=true
-Bundle-Version: 1.0.1.qualifier
+Bundle-Version: 1.0.1
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
 Import-Package: jdk.dio;version="[1.0.2,2.0.0)",
@@ -16,3 +16,4 @@ Export-Package: org.eclipse.kura.raspberrypi.sensehat;version="1.0.1",
  org.eclipse.kura.raspberrypi.sensehat.ledmatrix;version="1.0.1",
  org.eclipse.kura.raspberrypi.sensehat.sensors;version="1.0.1",
  org.eclipse.kura.raspsberrypi.sensehat.joystick;version="1.0.1"
+Bundle-ActivationPolicy: lazy

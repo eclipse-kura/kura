@@ -11,16 +11,15 @@
  *******************************************************************************/
 package org.eclipse.kura.core.deployment.xml;
 
-
 public class XmlBundles {
-	
-	private XmlBundle[] bundles;
 
-	public XmlBundle[] getBundles() {
-		return bundles;
-	}
+    private XmlBundle[] bundles;
 
-	public void setBundles(XmlBundle[] bundles) {
-		this.bundles = bundles;
-	}
+    public XmlBundle[] getBundles() {
+        return this.bundles;
+    }
+
+    public void setBundles(XmlBundle[] bundles) {
+        this.bundles = bundles;
+    }
 }

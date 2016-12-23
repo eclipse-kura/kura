@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
+    name="org.eclipse.kura.example.camel.quickstart.GatewayRouterXml"
+	configuration-policy="require" enabled="true" immediate="true"
+    activate="activate" deactivate="deactivate" modified="modified">
+	<implementation class="org.eclipse.kura.example.camel.quickstart.GatewayRouterXml"/>
+	<service>
+  		<provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+	</service>
+	<property name="service.pid" type="String" value="org.eclipse.kura.example.camel.quickstart.GatewayRouterXml"/>
+	<reference bind="setCloudService" cardinality="1..1" interface="org.eclipse.kura.cloud.CloudService" name="CloudService" policy="static"/>
+</scr:component>

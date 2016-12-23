@@ -13,6 +13,6 @@ package org.eclipse.kura.web.shared.model;
 
 public enum GwtNetProtocol {
 
-	tcp,
-	udp
+    tcp,
+    udp
 }

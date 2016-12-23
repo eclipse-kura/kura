@@ -6,12 +6,12 @@ package org.eclipse.kura.bluetooth;
  *
  */
 public interface BluetoothBeaconScanListener {
-	
-	/**
-	 * Fired when bluetooth beacon data is received
-	 * 
-	 * @param beaconData
-	 */
-	public void onBeaconDataReceived(BluetoothBeaconData beaconData);
-	
+
+    /**
+     * Fired when bluetooth beacon data is received
+     *
+     * @param beaconData
+     */
+    public void onBeaconDataReceived(BluetoothBeaconData beaconData);
+
 }

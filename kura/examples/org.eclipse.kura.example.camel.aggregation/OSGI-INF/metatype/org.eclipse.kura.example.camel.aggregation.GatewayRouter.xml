@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2016 Red Hat Inc and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Red Hat Inc - Initial API and implementation
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.example.camel.aggregation.GatewayRouter"
+         name="Camel Aggregation Example"
+         description="A Camel example application showing configuration and aggregation">
+        
+        <Icon resource="OSGI-INF/logo.png" size="32" />
+
+        <AD id="minimum"
+        	name="minimum"
+            description="Lower limit"
+            type="Integer"
+            cardinality="1"
+            required="true"
+            default="0"/>
+            
+        <AD id="maximum"
+        	name="maximum"
+            description="Upper limit"
+            type="Integer"
+            cardinality="1"
+            required="true"
+            default="50"/>
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.example.camel.aggregation.GatewayRouter">
+        <Object ocdref="org.eclipse.kura.example.camel.aggregation.GatewayRouter"/>
+    </Designate>
+</MetaData>

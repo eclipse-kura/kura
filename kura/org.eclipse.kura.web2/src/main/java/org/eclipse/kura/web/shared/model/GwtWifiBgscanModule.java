@@ -13,7 +13,7 @@ package org.eclipse.kura.web.shared.model;
 
 public enum GwtWifiBgscanModule {
 
-	netWifiBgscanMode_NONE,
-	netWifiBgscanMode_SIMPLE,
-	netWifiBgscanMode_LEARN
+    netWifiBgscanMode_NONE,
+    netWifiBgscanMode_SIMPLE,
+    netWifiBgscanMode_LEARN
 }

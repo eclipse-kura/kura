@@ -29,7 +29,6 @@ import org.gwtbootstrap3.client.ui.TextArea;
 import org.gwtbootstrap3.client.ui.base.form.AbstractForm.SubmitCompleteEvent;
 import org.gwtbootstrap3.client.ui.base.form.AbstractForm.SubmitCompleteHandler;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
-import org.gwtbootstrap3.client.ui.gwt.FormPanel;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
@@ -46,220 +45,231 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class DeviceCertsTabUi extends Composite implements Tab {
 
-	private static DeviceCertsTabUiUiBinder uiBinder = GWT.create(DeviceCertsTabUiUiBinder.class);
+    private static DeviceCertsTabUiUiBinder uiBinder = GWT.create(DeviceCertsTabUiUiBinder.class);
 
-	interface DeviceCertsTabUiUiBinder extends UiBinder<Widget, DeviceCertsTabUi> {
-	}
-	
-	private static final Messages MSGS = GWT.create(Messages.class);
+    interface DeviceCertsTabUiUiBinder extends UiBinder<Widget, DeviceCertsTabUi> {
+    }
 
-	private final static String SERVLET_URL = "/" + GWT.getModuleName() + "/file/certificate";
+    private static final Messages MSGS = GWT.create(Messages.class);
 
-	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-	private final GwtCertificatesServiceAsync gwtCertificatesService = GWT.create(GwtCertificatesService.class);
+    private final static String SERVLET_URL = "/" + GWT.getModuleName() + "/file/certificate";
 
-	private boolean dirty;
-	
-	@UiField
-	HTMLPanel description;
-	@UiField
-	Form deviceSslCertsForm;
-	@UiField
-	FormGroup groupStorageAliasForm;
-	@UiField
-	FormGroup groupPrivateKeyForm;
-	@UiField
-	FormGroup groupCertForm;
-	@UiField
-	FormLabel storageAliasLabel;
-	@UiField
-	FormLabel privateKeyLabel;
-	@UiField
-	FormLabel certificateLabel;
-	@UiField
-	Input storageAliasInput;
-	@UiField
-	TextArea privateKeyInput;
-	@UiField
-	TextArea certificateInput;
-	@UiField
-	Button reset;
-	@UiField
-	Button apply;
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private final GwtCertificatesServiceAsync gwtCertificatesService = GWT.create(GwtCertificatesService.class);
 
-	public DeviceCertsTabUi() {
-		initWidget(uiBinder.createAndBindUi(this));
-		initForm();
-		
-		setDirty(false);
-		apply.setEnabled(false);
-		reset.setEnabled(false);
-	}
+    private boolean dirty;
 
-	@Override
-	public void setDirty(boolean flag) {
-		dirty = flag;
-	}
+    @UiField
+    HTMLPanel description;
+    @UiField
+    Form deviceSslCertsForm;
+    @UiField
+    FormGroup groupStorageAliasForm;
+    @UiField
+    FormGroup groupPrivateKeyForm;
+    @UiField
+    FormGroup groupCertForm;
+    @UiField
+    FormLabel storageAliasLabel;
+    @UiField
+    FormLabel privateKeyLabel;
+    @UiField
+    FormLabel certificateLabel;
+    @UiField
+    Input storageAliasInput;
+    @UiField
+    TextArea privateKeyInput;
+    @UiField
+    TextArea certificateInput;
+    @UiField
+    Button reset;
+    @UiField
+    Button apply;
 
-	@Override
-	public boolean isDirty() {
-		return dirty;
-	}
+    public DeviceCertsTabUi() {
+        initWidget(uiBinder.createAndBindUi(this));
+        initForm();
 
-	@Override
-	public boolean isValid() {
-		boolean validAlias= isAliasValid();
-		boolean validPrivateKey= isPrivateKeyValid();
-		boolean validDeviceCert= isDeviceCertValid();
-		if (	validAlias      && 
-				validPrivateKey && 
-				validDeviceCert ) {
-			return true;
-		}
-		return false;
-	}
+        setDirty(false);
+        this.apply.setEnabled(false);
+        this.reset.setEnabled(false);
+    }
 
-	@Override
-	public void refresh() {
-		if (isDirty()) {
-			setDirty(false);
-			reset();
-		}
-	}
-	
-	private void initForm() {
-		deviceSslCertsForm.setAction(SERVLET_URL);
-		deviceSslCertsForm.setEncoding(FormPanel.ENCODING_MULTIPART);
-		deviceSslCertsForm.setMethod(FormPanel.METHOD_POST);
-		StringBuilder title= new StringBuilder();
-		title.append("<p>");
-		title.append(MSGS.settingsMAuthDescription1());
-		title.append(" ");
-		title.append(MSGS.settingsMAuthDescription2());
-		title.append("</p>");
-		description.add(new Span(title.toString()));
-		deviceSslCertsForm.addSubmitCompleteHandler(new SubmitCompleteHandler(){
-			@Override
-			public void onSubmitComplete(SubmitCompleteEvent event) {
-				gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
-					@Override
-					public void onFailure(Throwable ex) {
-						FailureHandler.handle(ex);
-						EntryClassUi.hideWaitModal();
-					}
+    @Override
+    public void setDirty(boolean flag) {
+        this.dirty = flag;
+    }
 
-					@Override
-					public void onSuccess(GwtXSRFToken token) {	
-						gwtCertificatesService.storePublicPrivateKeys(token, privateKeyInput.getValue(), certificateInput.getValue(), null, storageAliasInput.getValue(), new AsyncCallback<Integer>() {
-							public void onFailure(Throwable caught) {
-								FailureHandler.handle(caught);
-								EntryClassUi.hideWaitModal();
-							}
+    @Override
+    public boolean isDirty() {
+        return this.dirty;
+    }
 
-							public void onSuccess(Integer certsStored) {
-								reset();
-								setDirty(false);
-								apply.setEnabled(false);
-								reset.setEnabled(false);
-								EntryClassUi.hideWaitModal();
-							}
-						});
-					}});
-			}
-		}
-		);
-		
-		storageAliasLabel.setText(MSGS.settingsStorageAliasLabel());
-		storageAliasInput.addChangeHandler(new ChangeHandler() {
-			@Override
-			public void onChange(ChangeEvent event) {
-				isAliasValid();
-				setDirty(true);
-				apply.setEnabled(true);
-				reset.setEnabled(true);
-			}
-		});
-		
-		privateKeyLabel.setText(MSGS.settingsPrivateCertLabel());
-		privateKeyInput.setVisibleLines(20);
-		privateKeyInput.addChangeHandler(new ChangeHandler() {
-			@Override
-			public void onChange(ChangeEvent event) {
-				isPrivateKeyValid();
-				setDirty(true);
-				apply.setEnabled(true);
-				reset.setEnabled(true);
-			}
-		});
+    @Override
+    public boolean isValid() {
+        boolean validAlias = isAliasValid();
+        boolean validPrivateKey = isPrivateKeyValid();
+        boolean validDeviceCert = isDeviceCertValid();
+        if (validAlias && validPrivateKey && validDeviceCert) {
+            return true;
+        }
+        return false;
+    }
 
-		certificateLabel.setText(MSGS.settingsPublicCertLabel());
-		certificateInput.setVisibleLines(20);
-		certificateInput.addChangeHandler(new ChangeHandler() {
-			@Override
-			public void onChange(ChangeEvent event) {
-				isDeviceCertValid();
-				setDirty(true);
-				apply.setEnabled(true);
-				reset.setEnabled(true);
-			}
-		});
+    @Override
+    public void refresh() {
+        if (isDirty()) {
+            setDirty(false);
+            reset();
+        }
+    }
 
-		reset.setText(MSGS.reset());
-		reset.addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {
-				reset();
-				setDirty(false);
-				apply.setEnabled(false);
-				reset.setEnabled(false);
-			}
-		});
+    private void initForm() {
+        this.deviceSslCertsForm.setAction(SERVLET_URL);
+        this.deviceSslCertsForm.setEncoding(com.google.gwt.user.client.ui.FormPanel.ENCODING_MULTIPART);
+        this.deviceSslCertsForm.setMethod(com.google.gwt.user.client.ui.FormPanel.METHOD_POST);
+        StringBuilder title = new StringBuilder();
+        title.append("<p>");
+        title.append(MSGS.settingsMAuthDescription1());
+        title.append(" ");
+        title.append(MSGS.settingsMAuthDescription2());
+        title.append("</p>");
+        this.description.add(new Span(title.toString()));
+        this.deviceSslCertsForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
 
-		apply.setText(MSGS.apply());
-		apply.addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {
-				if(isValid()){
-					EntryClassUi.showWaitModal();
-					deviceSslCertsForm.submit();
-				}				
-			}
-		});
-	}
-	
-	private void reset() {
-		storageAliasInput.setText("");
-		privateKeyInput.setText("");
-		certificateInput.setText("");
-	}
-	
-	private boolean isAliasValid() {
-		if(storageAliasInput.getText() == null || "".equals(storageAliasInput.getText().trim())){
-			groupStorageAliasForm.setValidationState(ValidationState.ERROR);
-			return false;
-		}else {
-			groupStorageAliasForm.setValidationState(ValidationState.NONE);
-			return true;
-		}
-	}
-	
-	private boolean isPrivateKeyValid() {
-		if(certificateInput.getText() == null ||  "".equals(certificateInput.getText().trim())){
-			groupCertForm.setValidationState(ValidationState.ERROR);
-			return false;
-		}else {
-			groupCertForm.setValidationState(ValidationState.NONE);
-			return true;
-		}
-	}
+            @Override
+            public void onSubmitComplete(SubmitCompleteEvent event) {
+                DeviceCertsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-	private boolean isDeviceCertValid() {
-		if(certificateInput.getText() == null ||  "".equals(certificateInput.getText().trim())){
-			groupCertForm.setValidationState(ValidationState.ERROR);
-			return false;
-		}else {
-			groupCertForm.setValidationState(ValidationState.NONE);
-			return true;
-		}
-	}
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex);
+                        EntryClassUi.hideWaitModal();
+                    }
+
+                    @Override
+                    public void onSuccess(GwtXSRFToken token) {
+                        DeviceCertsTabUi.this.gwtCertificatesService.storePublicPrivateKeys(token,
+                                DeviceCertsTabUi.this.privateKeyInput.getValue(),
+                                DeviceCertsTabUi.this.certificateInput.getValue(), null,
+                                DeviceCertsTabUi.this.storageAliasInput.getValue(), new AsyncCallback<Integer>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                FailureHandler.handle(caught);
+                                EntryClassUi.hideWaitModal();
+                            }
+
+                            @Override
+                            public void onSuccess(Integer certsStored) {
+                                reset();
+                                setDirty(false);
+                                DeviceCertsTabUi.this.apply.setEnabled(false);
+                                DeviceCertsTabUi.this.reset.setEnabled(false);
+                                EntryClassUi.hideWaitModal();
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        this.storageAliasLabel.setText(MSGS.settingsStorageAliasLabel());
+        this.storageAliasInput.addChangeHandler(new ChangeHandler() {
+
+            @Override
+            public void onChange(ChangeEvent event) {
+                isAliasValid();
+                setDirty(true);
+                DeviceCertsTabUi.this.apply.setEnabled(true);
+                DeviceCertsTabUi.this.reset.setEnabled(true);
+            }
+        });
+
+        this.privateKeyLabel.setText(MSGS.settingsPrivateCertLabel());
+        this.privateKeyInput.setVisibleLines(20);
+        this.privateKeyInput.addChangeHandler(new ChangeHandler() {
+
+            @Override
+            public void onChange(ChangeEvent event) {
+                isPrivateKeyValid();
+                setDirty(true);
+                DeviceCertsTabUi.this.apply.setEnabled(true);
+                DeviceCertsTabUi.this.reset.setEnabled(true);
+            }
+        });
+
+        this.certificateLabel.setText(MSGS.settingsPublicCertLabel());
+        this.certificateInput.setVisibleLines(20);
+        this.certificateInput.addChangeHandler(new ChangeHandler() {
+
+            @Override
+            public void onChange(ChangeEvent event) {
+                isDeviceCertValid();
+                setDirty(true);
+                DeviceCertsTabUi.this.apply.setEnabled(true);
+                DeviceCertsTabUi.this.reset.setEnabled(true);
+            }
+        });
+
+        this.reset.setText(MSGS.reset());
+        this.reset.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                reset();
+                setDirty(false);
+                DeviceCertsTabUi.this.apply.setEnabled(false);
+                DeviceCertsTabUi.this.reset.setEnabled(false);
+            }
+        });
+
+        this.apply.setText(MSGS.apply());
+        this.apply.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (isValid()) {
+                    EntryClassUi.showWaitModal();
+                    DeviceCertsTabUi.this.deviceSslCertsForm.submit();
+                }
+            }
+        });
+    }
+
+    private void reset() {
+        this.storageAliasInput.setText("");
+        this.privateKeyInput.setText("");
+        this.certificateInput.setText("");
+    }
+
+    private boolean isAliasValid() {
+        if (this.storageAliasInput.getText() == null || "".equals(this.storageAliasInput.getText().trim())) {
+            this.groupStorageAliasForm.setValidationState(ValidationState.ERROR);
+            return false;
+        } else {
+            this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
+            return true;
+        }
+    }
+
+    private boolean isPrivateKeyValid() {
+        if (this.certificateInput.getText() == null || "".equals(this.certificateInput.getText().trim())) {
+            this.groupCertForm.setValidationState(ValidationState.ERROR);
+            return false;
+        } else {
+            this.groupCertForm.setValidationState(ValidationState.NONE);
+            return true;
+        }
+    }
+
+    private boolean isDeviceCertValid() {
+        if (this.certificateInput.getText() == null || "".equals(this.certificateInput.getText().trim())) {
+            this.groupCertForm.setValidationState(ValidationState.ERROR);
+            return false;
+        } else {
+            this.groupCertForm.setValidationState(ValidationState.NONE);
+            return true;
+        }
+    }
 }

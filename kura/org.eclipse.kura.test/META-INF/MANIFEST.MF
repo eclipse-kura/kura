@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.test
 Bundle-SymbolicName: org.eclipse.kura.test;singleton:=true
-Bundle-Version: 1.0.2.qualifier
-Bundle-Vendor: EUROTECH
+Bundle-Version: 1.0.2
+Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml
 Import-Package: junit.framework,
@@ -19,3 +19,4 @@ Import-Package: junit.framework,
  org.osgi.util.tracker;version="1.5.1",
  org.slf4j;version="1.6.4"
 Export-Package: org.eclipse.kura.test.annotation; version="1.0.0"
+Bundle-ActivationPolicy: lazy

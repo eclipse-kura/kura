@@ -1,0 +1,14 @@
+language: java
+
+sudo: false
+
+jdk:
+  - oraclejdk8
+
+before_script:
+  - ls /usr/lib/jvm
+  - cp kura/setups/toolchains/toolchains-travis.xml ~/.m2/toolchains.xml
+
+script: ./build-all.sh -Pbree
+
+

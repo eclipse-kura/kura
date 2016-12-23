@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.camel.xml.XmlRouterComponent"
+         name="Camel XML router" description="Configurable Camel-based XML router">
+        
+        <Icon resource="OSGI-INF/logo.png" size="32" />
+
+        <AD id="xml.data" name="Router XML"
+            description="Camel XML route definitions|TextArea"
+            type="String"
+            cardinality="1"
+            required="false"
+            max="2147483647"
+            default='&lt;routes xmlns=&quot;http://camel.apache.org/schema/spring&quot;&gt;&#10;
+	&lt;route id=&quot;route1&quot;&gt;&#10;
+        &lt;from uri=&quot;kura-cloud:myapp/xmltopic&quot;/&gt;&#10;
+        &lt;to uri=&quot;log:MESSAGE_FROM_CLOUD&quot;/&gt;&#10;
+    &lt;/route&gt;&#10;
+&lt;/routes&gt;'/>
+
+        <AD id="component.prereqs" name="Required Camel Components"
+            description="A comma separated list of Camel components which are required in order to start up this setup"
+            type="String"
+            cardinality="1"
+            required="false"
+            max="2147483647"
+            default="kura-cloud"
+            />
+        
+        <AD id="cloudService.prereqs" name="Cloud Service Mappings"
+            description="A comma separated list of entries in the format filter=name or kura-pid=name, mapping cloud service instances to component names"
+            type="String"
+            cardinality="1"
+            required="false"
+            max="2147483647"
+            default="cloud=org.eclipse.kura.cloud.CloudService"
+            />
+            
+        <AD id="initCode"
+            name="JavaScript init code"
+            type="String"
+            cardinality="1"
+            required="false"
+            description="JavaScript code which is called when the router is initialized first. The camel context is avaiable in the variable 'camelContext'.|TextArea"/>
+
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.camel.xml.XmlRouterComponent">
+        <Object ocdref="org.eclipse.kura.camel.xml.XmlRouterComponent"/>
+    </Designate>
+</MetaData>

@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.protocol.modbus.test
 Bundle-SymbolicName: org.eclipse.kura.protocol.modbus.test;singleton:=true
-Bundle-Version: 1.0.3.qualifier
-Bundle-Vendor: EUROTECH
+Bundle-Version: 1.0.3
+Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Unit-Test: true
 Import-Package: org.eclipse.kura.protocol.modbus; version="[1.0,2.0)",

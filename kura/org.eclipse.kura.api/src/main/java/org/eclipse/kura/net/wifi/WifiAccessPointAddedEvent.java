@@ -18,34 +18,36 @@ import org.osgi.service.event.Event;
 /**
  * Emitted when a new access point is found by the device.
  */
-public class WifiAccessPointAddedEvent extends Event 
-{
-	/** Topic of the WifiAccessPointAddedEvent */
-	public static final String NETWORK_EVENT_ACCESSPOINT_ADDED_TOPIC = "org/eclipse/kura/net/NetworkEvent/AccessPoint/ADDED";
-	
-	/** Name of the property to access the network interface name */
-	public static final String NETWORK_EVENT_INTERFACE_PROPERTY  = "network.interface";
+public class WifiAccessPointAddedEvent extends Event {
 
-	/** Name of the property to access the access point */
-	public static final String NETWORK_EVENT_ACCESS_POINT_PROPERTY = "network.access.point";
+    /** Topic of the WifiAccessPointAddedEvent */
+    public static final String NETWORK_EVENT_ACCESSPOINT_ADDED_TOPIC = "org/eclipse/kura/net/NetworkEvent/AccessPoint/ADDED";
 
-	public WifiAccessPointAddedEvent(Map<String, ?> properties) {
-		super(NETWORK_EVENT_ACCESSPOINT_ADDED_TOPIC, properties);
-	}
-	
-	/**
-	 * Returns the network interface name.
-	 * @return
-	 */
-	public String getInterfaceName() {
-		return (String) getProperty(NETWORK_EVENT_INTERFACE_PROPERTY);
-	}
+    /** Name of the property to access the network interface name */
+    public static final String NETWORK_EVENT_INTERFACE_PROPERTY = "network.interface";
 
-	/**
-	 * Returns the name of the added access point.
-	 * @return
-	 */
-	public WifiAccessPoint getAccessPoint() {
-		return (WifiAccessPoint) getProperty(NETWORK_EVENT_ACCESS_POINT_PROPERTY);
-	}
+    /** Name of the property to access the access point */
+    public static final String NETWORK_EVENT_ACCESS_POINT_PROPERTY = "network.access.point";
+
+    public WifiAccessPointAddedEvent(Map<String, ?> properties) {
+        super(NETWORK_EVENT_ACCESSPOINT_ADDED_TOPIC, properties);
+    }
+
+    /**
+     * Returns the network interface name.
+     *
+     * @return
+     */
+    public String getInterfaceName() {
+        return (String) getProperty(NETWORK_EVENT_INTERFACE_PROPERTY);
+    }
+
+    /**
+     * Returns the name of the added access point.
+     *
+     * @return
+     */
+    public WifiAccessPoint getAccessPoint() {
+        return (WifiAccessPoint) getProperty(NETWORK_EVENT_ACCESS_POINT_PROPERTY);
+    }
 }

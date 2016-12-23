@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.example.camel.quickstart.GatewayRouterXml"
+         name="Camel Kura quickstart XML" description="Configurable Camel-based Kura gateway">
+        
+        <Icon resource="OSGI-INF/logo.png" size="32" />
+
+        <AD id="camel.route.xml" name="Camel router XML"
+            description="Camel XML route definition|TextArea"
+            type="String" max="10000" cardinality="0" required="false" default='&lt;routes xmlns=&quot;http://camel.apache.org/schema/spring&quot;&gt;&#10;
+	&lt;route id=&quot;cloudConsumer&quot;&gt;&#10;
+        &lt;from uri=&quot;kura-cloud:myapp/xmltopic&quot;/&gt;&#10;
+        &lt;to uri=&quot;log:MESSAGE_SENT_TO_CLOUD&quot;/&gt;&#10;
+    &lt;/route&gt;&#10;
+&lt;/routes&gt;'/>
+
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.example.camel.quickstart.GatewayRouterXml">
+        <Object ocdref="org.eclipse.kura.example.camel.quickstart.GatewayRouterXml"/>
+    </Designate>
+</MetaData>

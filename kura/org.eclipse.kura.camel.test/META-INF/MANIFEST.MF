@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Unit tests for 'org.eclipse.kura.camel'
+Bundle-SymbolicName: org.eclipse.kura.camel.test
+Bundle-Version: 1.0.0.qualifier
+Fragment-Host: org.eclipse.kura.camel;bundle-version="1.1.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Require-Bundle: org.junit;bundle-version="4.10.0"
+Import-Package: org.apache.commons.io;version="2.4.0"

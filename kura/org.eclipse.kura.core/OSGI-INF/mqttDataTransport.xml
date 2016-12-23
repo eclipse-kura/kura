@@ -19,6 +19,9 @@
       <provide interface="org.eclipse.kura.ssl.SslServiceListener"/>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
+   
+   <property name="kura.ui.service.hide" type="Boolean" value="true"/>
+   
    <reference name="SystemService" 
               policy="static"
               cardinality="1..1"

@@ -19,75 +19,76 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 
 public class NetInterfaceAddressConfigImpl extends NetInterfaceAddressImpl implements NetInterfaceAddressConfig {
 
-	private List<NetConfig> m_configs;
-	
-	public NetInterfaceAddressConfigImpl() {
-		super();
-	}
-	
-	public NetInterfaceAddressConfigImpl(NetInterfaceAddress other) {
-	    super(other);
-	}
+    private List<NetConfig> m_configs;
 
-	@Override
-	public List<NetConfig> getConfigs() {
-		return m_configs;
-	}
+    public NetInterfaceAddressConfigImpl() {
+        super();
+    }
 
-	public void setNetConfigs(List<NetConfig> configs) {
-		m_configs = configs;
-	}
-	
-	public boolean equals(Object obj) {
-			
-		if (this == obj) {
-			return true;
-		}
-	    
-		/*
-        if(!super.equals(obj)) {
+    public NetInterfaceAddressConfigImpl(NetInterfaceAddress other) {
+        super(other);
+    }
+
+    @Override
+    public List<NetConfig> getConfigs() {
+        return this.m_configs;
+    }
+
+    public void setNetConfigs(List<NetConfig> configs) {
+        this.m_configs = configs;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+
+        if (this == obj) {
+            return true;
+        }
+
+        /*
+         * if(!super.equals(obj)) {
+         * return false;
+         * }
+         */
+        if (!(obj instanceof NetInterfaceAddressConfigImpl)) {
             return false;
         }
-		*/
-	    if(!(obj instanceof NetInterfaceAddressConfigImpl)) {
-	        return false;
-	    }
-	    
-	    NetInterfaceAddressConfigImpl other = (NetInterfaceAddressConfigImpl) obj;
-	    
-	    List<NetConfig> thisNetConfigs = getConfigs();
-	    List<NetConfig> otherNetConfigs = other.getConfigs();
-	    
-	    if(thisNetConfigs.size() != otherNetConfigs.size()) {
-	    	return false;
-	    }
-        if(!thisNetConfigs.containsAll(otherNetConfigs)) {
+
+        NetInterfaceAddressConfigImpl other = (NetInterfaceAddressConfigImpl) obj;
+
+        List<NetConfig> thisNetConfigs = getConfigs();
+        List<NetConfig> otherNetConfigs = other.getConfigs();
+
+        if (thisNetConfigs.size() != otherNetConfigs.size()) {
             return false;
         }
-        if(!otherNetConfigs.containsAll(thisNetConfigs)) {
+        if (!thisNetConfigs.containsAll(otherNetConfigs)) {
             return false;
         }
-	    
-	    return true;
-	}
-	
-	@Override
-	public String toString() {
-		if(m_configs != null) {
-			StringBuffer sb = new StringBuffer();
-			for(NetConfig netConfig : m_configs) {
-				sb.append("NetConfig: ");
-				if(netConfig != null) {
-					sb.append(netConfig.toString());
-				} else {
-					sb.append("null");
-				}
-				sb.append(" - ");
-			}
-			
-			return sb.toString();
-		} else {
-			return "NetConfig: no configurations";
-		}
-	}
+        if (!otherNetConfigs.containsAll(thisNetConfigs)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        if (this.m_configs != null) {
+            StringBuffer sb = new StringBuffer();
+            for (NetConfig netConfig : this.m_configs) {
+                sb.append("NetConfig: ");
+                if (netConfig != null) {
+                    sb.append(netConfig.toString());
+                } else {
+                    sb.append("null");
+                }
+                sb.append(" - ");
+            }
+
+            return sb.toString();
+        } else {
+            return "NetConfig: no configurations";
+        }
+    }
 }

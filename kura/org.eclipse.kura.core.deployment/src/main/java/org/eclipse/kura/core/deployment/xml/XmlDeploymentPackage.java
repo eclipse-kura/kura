@@ -11,36 +11,35 @@
  *******************************************************************************/
 package org.eclipse.kura.core.deployment.xml;
 
-
 public class XmlDeploymentPackage {
-	
-	private String name;
-	
-	private String version;
-	
-	private XmlBundleInfo[] bundleInfos;
 
-	public String getName() {
-		return name;
-	}
+    private String name;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    private String version;
 
-	public String getVersion() {
-		return version;
-	}
+    private XmlBundleInfo[] bundleInfos;
 
-	public void setVersion(String version) {
-		this.version = version;
-	}
+    public String getName() {
+        return this.name;
+    }
 
-	public XmlBundleInfo[] getBundleInfos() {
-		return bundleInfos;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setBundleInfos(XmlBundleInfo[] bundleInfos) {
-		this.bundleInfos = bundleInfos;
-	}
+    public String getVersion() {
+        return this.version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public XmlBundleInfo[] getBundleInfos() {
+        return this.bundleInfos;
+    }
+
+    public void setBundleInfos(XmlBundleInfo[] bundleInfos) {
+        this.bundleInfos = bundleInfos;
+    }
 }

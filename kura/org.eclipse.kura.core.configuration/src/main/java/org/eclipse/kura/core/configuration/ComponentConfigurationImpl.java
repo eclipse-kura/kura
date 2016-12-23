@@ -16,50 +16,50 @@ import java.util.Map;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 
-public class ComponentConfigurationImpl implements ComponentConfiguration 
-{
-	protected String pid;
-	
-	protected Tocd definition;
+public class ComponentConfigurationImpl implements ComponentConfiguration {
 
-	protected Map<String,Object> properties;
+    protected String pid;
 
-	// Required by JAXB
-	public ComponentConfigurationImpl()
-	{}
-	
-	public ComponentConfigurationImpl(String pid,
-									  Tocd  definition, 
-									  Map<String,Object> properties)
-	{
-		super();
-		this.pid = pid;
-		this.definition = definition;
-		this.properties = properties;
-	}
+    protected Tocd definition;
 
-	public String getPid() {
-		return pid;
-	}
-	
-	public Tocd  getDefinition() {
-		return definition;
-	}
+    protected Map<String, Object> properties;
 
-	public Map<String,Object> getConfigurationProperties() {
-		return properties;
-	}
+    // Required by JAXB
+    public ComponentConfigurationImpl() {
+    }
 
-	public void setPid(String pid) {
-		this.pid = pid;
-	}
+    public ComponentConfigurationImpl(String pid, Tocd definition, Map<String, Object> properties) {
+        super();
+        this.pid = pid;
+        this.definition = definition;
+        this.properties = properties;
+    }
 
-	public void setDefinition(Tocd definition) {
-		this.definition = definition;
-	}
+    @Override
+    public String getPid() {
+        return this.pid;
+    }
 
-	public void setProperties(Map<String, Object> properties) {
-		this.properties = properties;
-	}	
+    @Override
+    public Tocd getDefinition() {
+        return this.definition;
+    }
+
+    @Override
+    public Map<String, Object> getConfigurationProperties() {
+        return this.properties;
+    }
+
+    public void setPid(String pid) {
+        this.pid = pid;
+    }
+
+    public void setDefinition(Tocd definition) {
+        this.definition = definition;
+    }
+
+    public void setProperties(Map<String, Object> properties) {
+        this.properties = properties;
+    }
 
 }

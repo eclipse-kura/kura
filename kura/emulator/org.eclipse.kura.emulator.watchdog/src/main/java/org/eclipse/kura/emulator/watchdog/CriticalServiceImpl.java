@@ -13,39 +13,41 @@ package org.eclipse.kura.emulator.watchdog;
 
 public class CriticalServiceImpl {
 
-	private String name;
-	private long timeout;
-	private long updated;
-	
-	/**
-	 * 
-	 * @param name
-	 * @param timeout		timeout for reporting interval in seconds
-	 */
-	public CriticalServiceImpl(String name, long timeout) {
-		this.name = name;
-		this.timeout = timeout;
-		this.updated = System.currentTimeMillis();
-	}
-	
-	public String getName() {
-		return name;
-	}
-	
-	public long getTimeout() {
-		return timeout;
-	}
-	
-	public boolean isTimedOut() {
-		long current = System.currentTimeMillis();
-		return timeout < (current - updated);
-	}
-	
-	public void update() {
-		updated = System.currentTimeMillis();
-	}
-	
-	public String toString() {
-		return "Service Name:  " + name + ", Timeout(ms):  " + timeout;
-	}
+    private final String name;
+    private final long timeout;
+    private long updated;
+
+    /**
+     * 
+     * @param name
+     * @param timeout
+     *            timeout for reporting interval in seconds
+     */
+    public CriticalServiceImpl(String name, long timeout) {
+        this.name = name;
+        this.timeout = timeout;
+        this.updated = System.currentTimeMillis();
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public long getTimeout() {
+        return this.timeout;
+    }
+
+    public boolean isTimedOut() {
+        long current = System.currentTimeMillis();
+        return this.timeout < current - this.updated;
+    }
+
+    public void update() {
+        this.updated = System.currentTimeMillis();
+    }
+
+    @Override
+    public String toString() {
+        return "Service Name:  " + this.name + ", Timeout(ms):  " + this.timeout;
+    }
 }

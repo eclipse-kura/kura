@@ -20,103 +20,97 @@ import org.eclipse.kura.KuraException;
 /**
  * Configuration for a network interface based on IPv4 addresses.
  */
-public class NetConfigIP4 extends NetConfigIP<IP4Address> implements NetConfig4
-{
+public class NetConfigIP4 extends NetConfigIP<IP4Address>implements NetConfig4 {
 
-	private List<IP4Address> 	winsServers;
+    private List<IP4Address> winsServers;
 
-	/**
-	 * Constructor for a Configuration for a 
-	 * network interface based on IPv4 addresses.
-	 * @param address - address to be assigned to the interface
-	 * @param networkPrefixLength - prefix to be used for the interface 
-	 * @param gateway - gateway to be associated with the interface
-	 */
-	public NetConfigIP4(NetInterfaceStatus status, boolean autoConnect)
-	{
-		super(status, autoConnect);
-		this.winsServers         = new ArrayList<IP4Address>();
-	}
-	
-	/**
-	 * Constructor for a DHCP Configration for a
-	 * network interface nased on IPv4 addresses.
-	 * @param dhcp whether or not DHCP client mode should be used
-	 */
-	public NetConfigIP4(NetInterfaceStatus status, boolean autoConnect, boolean dhcp) {
-		super(status, autoConnect, dhcp);
-		this.winsServers         = new ArrayList<IP4Address>();
-	}
-	
-	public NetConfigIP4(NetInterfaceStatus status, boolean autoConnect, IP4Address address, short networkPrefixLength, IP4Address gateway) throws KuraException {
-		super(status, autoConnect, address, networkPrefixLength, gateway);
-		this.winsServers         = new ArrayList<IP4Address>();
-	}
-	
-	public NetConfigIP4(NetInterfaceStatus status, boolean autoConnect, IP4Address address, IP4Address subnetMask, IP4Address gateway) throws KuraException {
-		super(status, autoConnect, address, subnetMask, gateway);
-		this.winsServers         = new ArrayList<IP4Address>();
-	}
+    public NetConfigIP4(NetInterfaceStatus status, boolean autoConnect) {
+        super(status, autoConnect);
+        this.winsServers = new ArrayList<IP4Address>();
+    }
 
-	/**
-	 * Returns the list of Windows Servers to be associated with the interface 
-	 * @return
-	 */
-	public List<IP4Address> getWinsServers() {
-		if(winsServers != null) {
-			return Collections.unmodifiableList(winsServers);
-		} else {
-			return null;
-		}
-	}
+    public NetConfigIP4(NetInterfaceStatus status, boolean autoConnect, boolean dhcp) {
+        super(status, autoConnect, dhcp);
+        this.winsServers = new ArrayList<IP4Address>();
+    }
 
-	/**
-	 * Sets the list of Windows Servers to be associated with the interface
-	 * @param winsServers
-	 */
-	public void setWinsServers(List<IP4Address> winsServers) {
-		this.winsServers = winsServers;
-	}
-	
-	@Override
-	public boolean isValid() {
-		return super.isValid();
-	}
+    public NetConfigIP4(NetInterfaceStatus status, boolean autoConnect, IP4Address address, short networkPrefixLength,
+            IP4Address gateway) throws KuraException {
+        super(status, autoConnect, address, networkPrefixLength, gateway);
+        this.winsServers = new ArrayList<IP4Address>();
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("NetConfigIP4 [winsServers=");
-		builder.append(winsServers);
-		builder.append(", super.toString()=");
-		builder.append(super.toString());
-		builder.append("]");
-		return builder.toString();
-	}
+    public NetConfigIP4(NetInterfaceStatus status, boolean autoConnect, IP4Address address, IP4Address subnetMask,
+            IP4Address gateway) throws KuraException {
+        super(status, autoConnect, address, subnetMask, gateway);
+        this.winsServers = new ArrayList<IP4Address>();
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result
-				+ ((winsServers == null) ? 0 : winsServers.hashCode());
-		return result;
-	}
+    /**
+     * Returns the list of Windows Servers to be associated with the interface
+     *
+     * @return
+     */
+    public List<IP4Address> getWinsServers() {
+        if (this.winsServers != null) {
+            return Collections.unmodifiableList(this.winsServers);
+        } else {
+            return null;
+        }
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		NetConfigIP4 other = (NetConfigIP4) obj;
-		if (winsServers == null) {
-			if (other.winsServers != null)
-				return false;
-		} else if (!winsServers.equals(other.winsServers))
-			return false;
-		return true;
-	}	
+    /**
+     * Sets the list of Windows Servers to be associated with the interface
+     *
+     * @param winsServers
+     */
+    public void setWinsServers(List<IP4Address> winsServers) {
+        this.winsServers = winsServers;
+    }
+
+    @Override
+    public boolean isValid() {
+        return super.isValid();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("NetConfigIP4 [winsServers=");
+        builder.append(this.winsServers);
+        builder.append(", super.toString()=");
+        builder.append(super.toString());
+        builder.append("]");
+        return builder.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + (this.winsServers == null ? 0 : this.winsServers.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        NetConfigIP4 other = (NetConfigIP4) obj;
+        if (this.winsServers == null) {
+            if (other.winsServers != null) {
+                return false;
+            }
+        } else if (!this.winsServers.equals(other.winsServers)) {
+            return false;
+        }
+        return true;
+    }
 }

@@ -15,21 +15,21 @@ import java.io.Serializable;
 
 public class GwtBundleInfo extends GwtBaseModel implements Serializable {
 
-	private static final long serialVersionUID = -7285859217584861659L;
+    private static final long serialVersionUID = -7285859217584861659L;
 
-	public void setName(String name) {
-		set("name", name);
-	}
-	
-	public String getName() {
-		return (String) get("name");
-	}
-	
-	public void setVersion(String version) {
-		set("version", version);
-	}
-	
-	public String getVersion() {
-		return (String) get("version");
-	}
+    public void setName(String name) {
+        set("name", name);
+    }
+
+    public String getName() {
+        return (String) get("name");
+    }
+
+    public void setVersion(String version) {
+        set("version", version);
+    }
+
+    public String getVersion() {
+        return (String) get("version");
+    }
 }

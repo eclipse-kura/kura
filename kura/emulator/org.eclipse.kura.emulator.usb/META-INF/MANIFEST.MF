@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.emulator.usb
 Bundle-SymbolicName: org.eclipse.kura.emulator.usb;singleton:=true
-Bundle-Version: 1.0.1.qualifier
-Bundle-Vendor: EUROTECH
+Bundle-Version: 1.0.2
+Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.eclipse.kura.emulator.usb; version="1.0.0"
 Service-Component: OSGI-INF/*.xml

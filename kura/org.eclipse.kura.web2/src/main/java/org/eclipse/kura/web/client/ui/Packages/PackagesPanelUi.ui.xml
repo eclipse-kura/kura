@@ -1,112 +1,130 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 
-<!-- Copyright (c) 2011, 2016 Eurotech and/or its affiliates All rights reserved. 
-	This program and the accompanying materials are made available under the 
-	terms of the Eclipse Public License v1.0 which accompanies this distribution, 
-	and is available at http://www.eclipse.org/legal/epl-v10.html Contributors: 
-	Eurotech -->
+<!--
+
+    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
 
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
+    xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
-	<ui:style>
-	.important {
-		font-weight: bold;
-	}
-	
-	.center-panel {
-		margin: auto;
-		font-size: 11px;
-		font-weight: normal;
-	}
-	</ui:style>
+    <ui:style>
+    .important {
+    	font-weight: bold;
+    }
+    
+    .center-panel {
+    	margin: auto;
+    	font-size: 11px;
+    	font-weight: normal;
+    }
+    </ui:style>
 
 
-	<b:Container fluid="true">
+    <b:Container fluid="true">
 		<!-- <b:Column size="MD_12"> height: 100vh; -->
-		<b:Row>
-			<b:Panel>
-				<b:ButtonGroup size="SMALL">
-					<b:Button ui:field="packagesRefresh" addStyleNames="fa fa-refresh"></b:Button>
-					<b:Button ui:field="packagesInstall" addStyleNames="fa fa-plus"></b:Button>
-					<b:Button ui:field="packagesUninstall" addStyleNames="fa fa-minus"></b:Button>
-				</b:ButtonGroup>
-			</b:Panel>
-		</b:Row>
+        <b:Row>
+            <b:Panel>
+                <b:ButtonGroup size="SMALL">
+                    <b:Button ui:field="packagesRefresh"
+                        addStyleNames="fa fa-refresh"></b:Button>
+                    <b:Button ui:field="packagesInstall"
+                        addStyleNames="fa fa-plus"></b:Button>
+                    <b:Button ui:field="packagesUninstall"
+                        addStyleNames="fa fa-minus"></b:Button>
+                </b:ButtonGroup>
+            </b:Panel>
+        </b:Row>
 
-		<b:Row>
-			<b:Well size="SMALL">
-				<gwt:CellTable bordered="true" condensed="true" striped="true"
-					hover="true" width="100%" height="100%" ui:field="packagesGrid" addStyleNames="{style.center-panel}" />
-				<b:Alert type="WARNING" ui:field="notification" />
-			</b:Well>
-		</b:Row>
+        <b:Row>
+            <b:Well size="SMALL">
+                <gwt:CellTable bordered="true" condensed="true"
+                    striped="true" hover="true" width="100%" height="100%"
+                    ui:field="packagesGrid" addStyleNames="{style.center-panel}" />
+                <b:Alert type="WARNING" ui:field="notification" />
+            </b:Well>
+        </b:Row>
 
 		<!-- MODAL -->
-		<b:Modal title="Upload" closable="true" fade="true" b:id="uploadModal"
-			ui:field="uploadModal">
-			<b:ModalBody>
-				<b:Well>
-					<b:Container fluid="true">
+        <b:Modal title="Upload" closable="true" fade="true"
+            b:id="uploadModal" ui:field="uploadModal">
+            <b:ModalBody>
+                <b:Well>
+                    <b:Container fluid="true">
 
-						<b:NavTabs>
-							<b:TabListItem active="true" dataTarget="#tab1"
-								ui:field="fileLabel" />
-							<b:TabListItem dataTarget="#tab2" text="URL" />
-						</b:NavTabs>
-						<b:TabContent>
+                        <b:NavTabs>
+                            <b:TabListItem active="true"
+                                dataTarget="#tab1" ui:field="fileLabel" />
+                            <b:TabListItem dataTarget="#tab2"
+                                text="URL" />
+                        </b:NavTabs>
+                        <b:TabContent>
 
-							<b:TabPane fade="true" in="true" active="true" b:id="tab1">
-								<g:FormPanel ui:field="packagesFormFile">
-									<b:FieldSet>
-										<b:FormGroup>
-											<b:FormLabel>File</b:FormLabel>
-											<g:FileUpload ui:field="filePath"></g:FileUpload>
-										</b:FormGroup>
-										<b:ButtonGroup pull="RIGHT">
-											<b:Button ui:field="fileCancel">Cancel</b:Button>
-											<b:Button ui:field="fileSubmit">Submit</b:Button>
-										</b:ButtonGroup>
-										<g:Hidden ui:field="xsrfTokenFieldFile"></g:Hidden>
-									</b:FieldSet>
-								</g:FormPanel>
-							</b:TabPane>
+                            <b:TabPane fade="true" in="true"
+                                active="true" b:id="tab1">
+                                <g:FormPanel ui:field="packagesFormFile">
+                                    <b:FieldSet>
+                                        <b:FormGroup>
+                                            <b:FormLabel>File</b:FormLabel>
+                                            <g:FileUpload
+                                                ui:field="filePath"></g:FileUpload>
+                                        </b:FormGroup>
+                                        <b:ButtonGroup
+                                            pull="RIGHT">
+                                            <b:Button ui:field="fileCancel">Cancel</b:Button>
+                                            <b:Button ui:field="fileSubmit">Submit</b:Button>
+                                        </b:ButtonGroup>
+                                        <g:Hidden ui:field="xsrfTokenFieldFile"></g:Hidden>
+                                    </b:FieldSet>
+                                </g:FormPanel>
+                            </b:TabPane>
 
-							<b:TabPane fade="true" b:id="tab2">
-								<g:FormPanel ui:field="packagesFormUrl">
-									<b:FieldSet>
-										<b:FormGroup>
-											<b:FormLabel for="formUrl">URL</b:FormLabel>
-											<b:TextBox b:id="formUrl" ui:field="formUrl" />
-										</b:FormGroup>
-										<b:ButtonGroup pull="RIGHT">
-											<b:Button ui:field="urlCancel">Cancel</b:Button>
-											<b:Button ui:field="urlSubmit">Submit</b:Button>
-										</b:ButtonGroup>
-										<g:Hidden ui:field="xsrfTokenFieldUrl"></g:Hidden>
-									</b:FieldSet>
-								</g:FormPanel>
-							</b:TabPane>
+                            <b:TabPane fade="true" b:id="tab2">
+                                <g:FormPanel ui:field="packagesFormUrl">
+                                    <b:FieldSet>
+                                        <b:FormGroup>
+                                            <b:FormLabel
+                                                for="formUrl">URL</b:FormLabel>
+                                            <b:TextBox b:id="formUrl"
+                                                ui:field="formUrl" />
+                                        </b:FormGroup>
+                                        <b:ButtonGroup
+                                            pull="RIGHT">
+                                            <b:Button ui:field="urlCancel">Cancel</b:Button>
+                                            <b:Button ui:field="urlSubmit">Submit</b:Button>
+                                        </b:ButtonGroup>
+                                        <g:Hidden ui:field="xsrfTokenFieldUrl"></g:Hidden>
+                                    </b:FieldSet>
+                                </g:FormPanel>
+                            </b:TabPane>
 
-						</b:TabContent>
-					</b:Container>
-				</b:Well>
-			</b:ModalBody>
-		</b:Modal>
-		
-		<b:Modal closable="true" dataKeyboard="true" ui:field="uploadErrorModal">
-			<b:ModalBody>
-				<b:Panel>
-					<b:PanelBody>
-						<b:Alert type="WARNING">
-							<b.html:Text
-								ui:field="uploadErrorText" />
-						</b:Alert>
-					</b:PanelBody>
-				</b:Panel>
-			</b:ModalBody>
-		</b:Modal>
+                        </b:TabContent>
+                    </b:Container>
+                </b:Well>
+            </b:ModalBody>
+        </b:Modal>
+
+        <b:Modal closable="true" dataKeyboard="true" ui:field="uploadErrorModal">
+            <b:ModalBody>
+                <b:Panel>
+                    <b:PanelBody>
+                        <b:Alert type="WARNING">
+                            <b.html:Text ui:field="uploadErrorText" />
+                        </b:Alert>
+                    </b:PanelBody>
+                </b:Panel>
+            </b:ModalBody>
+        </b:Modal>
 		<!-- </b:Column> -->
-	</b:Container>
+    </b:Container>
 </ui:UiBinder> 

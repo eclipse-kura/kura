@@ -19,7 +19,7 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>2.0.2</version>
+		<version>2.1.0</version>
 		<relativePath>../manifest_pom.xml</relativePath>
 	</parent>
 
@@ -28,6 +28,6 @@
 	</properties>
 
 	<artifactId>org.eclipse.kura.core.log</artifactId>
-	<version>1.0.2-SNAPSHOT</version>
+	<version>1.0.2</version>
 	<packaging>eclipse-plugin</packaging>
 </project>

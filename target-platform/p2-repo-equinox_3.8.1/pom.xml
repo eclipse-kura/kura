@@ -6,10 +6,9 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>target-platform</artifactId>
-		<version>2.0.2</version>
+		<version>2.1.0</version>
 	</parent>
 
-	<groupId>org.eclipse.kura</groupId>
 	<artifactId>p2-repo-equinox_3.8.1</artifactId>
 	<version>1.0.0</version>
 	<packaging>pom</packaging>
@@ -62,7 +61,6 @@
                             <artifactId>org.apache.felix.dependencymanager</artifactId>
                             <version>${org.apache.felix.dependencymanager.version}</version>
                         </artifactItem>
-
                         <artifactItem>
                             <groupId>org.apache.felix</groupId>
                             <artifactId>org.apache.felix.deploymentadmin</artifactId>
@@ -234,7 +232,82 @@
                             <version>${osgi.cmpn.version}</version>
                         </artifactItem>
 							</artifactItems>
+							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!--  rename bundles with version appended -->
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>setup</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+							    <move file="target/source/plugins/javax.servlet.jar" tofile="target/source/plugins/javax.servlet_${javax.servlet.version}.jar"/>
+								<move file="target/source/plugins/org.apache.felix.dependencymanager.jar" tofile="target/source/plugins/org.apache.felix.dependencymanager_${org.apache.felix.dependencymanager.version}.jar"/>
+								<move file="target/source/plugins/org.apache.felix.deploymentadmin.jar" tofile="target/source/plugins/org.apache.felix.deploymentadmin_${org.apache.felix.deploymentadmin.version}.jar"/>
+								<move file="target/source/plugins/org.apache.felix.gogo.command.jar" tofile="target/source/plugins/org.apache.felix.gogo.command_${org.apache.felix.gogo.command.version}.jar"/>
+								<move file="target/source/plugins/org.apache.felix.gogo.runtime.jar" tofile="target/source/plugins/org.apache.felix.gogo.runtime_${org.apache.felix.gogo.runtime.version}.jar"/>
+								<move file="target/source/plugins/org.apache.felix.gogo.shell.jar" tofile="target/source/plugins/org.apache.felix.gogo.shell_${org.apache.felix.gogo.shell.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.core.contenttype.jar" tofile="target/source/plugins/org.eclipse.core.contenttype_${org.eclipse.core.contenttype.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.core.jobs.jar" tofile="target/source/plugins/org.eclipse.core.jobs_${org.eclipse.core.jobs.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.core.runtime.jar" tofile="target/source/plugins/org.eclipse.core.runtime_${org.eclipse.core.runtime.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.equinox.app.jar" tofile="target/source/plugins/org.eclipse.equinox.app_${org.eclipse.equinox.app.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.equinox.cm.jar" tofile="target/source/plugins/org.eclipse.equinox.cm_${org.eclipse.equinox.cm.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.equinox.common.jar" tofile="target/source/plugins/org.eclipse.equinox.common_${org.eclipse.equinox.common.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.equinox.console.jar" tofile="target/source/plugins/org.eclipse.equinox.console_${org.eclipse.equinox.console.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.equinox.ds.jar" tofile="target/source/plugins/org.eclipse.equinox.ds_${org.eclipse.equinox.ds.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.equinox.event.jar" tofile="target/source/plugins/org.eclipse.equinox.event_${org.eclipse.equinox.event.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.equinox.http.jetty.jar" tofile="target/source/plugins/org.eclipse.equinox.http.jetty_${org.eclipse.equinox.http.jetty.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.equinox.http.registry.jar" tofile="target/source/plugins/org.eclipse.equinox.http.registry_${org.eclipse.equinox.http.registry.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.equinox.http.servlet.jar" tofile="target/source/plugins/org.eclipse.equinox.http.servlet_${org.eclipse.equinox.http.servlet.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.equinox.io.jar" tofile="target/source/plugins/org.eclipse.equinox.io_${org.eclipse.equinox.io.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.equinox.launcher.jar" tofile="target/source/plugins/org.eclipse.equinox.launcher_${org.eclipse.equinox.launcher.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.equinox.metatype.jar" tofile="target/source/plugins/org.eclipse.equinox.metatype_${org.eclipse.equinox.metatype.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.equinox.preferences.jar" tofile="target/source/plugins/org.eclipse.equinox.preferences_${org.eclipse.equinox.preferences.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.equinox.registry.jar" tofile="target/source/plugins/org.eclipse.equinox.registry_${org.eclipse.equinox.registry.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.equinox.util.jar" tofile="target/source/plugins/org.eclipse.equinox.util_${org.eclipse.equinox.util.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.jetty.continuation.jar" tofile="target/source/plugins/org.eclipse.jetty.continuation_${org.eclipse.jetty.continuation.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.jetty.http.jar" tofile="target/source/plugins/org.eclipse.jetty.http_${org.eclipse.jetty.http.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.jetty.io.jar" tofile="target/source/plugins/org.eclipse.jetty.io_${org.eclipse.jetty.io.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.jetty.security.jar" tofile="target/source/plugins/org.eclipse.jetty.security_${org.eclipse.jetty.security.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.jetty.server.jar" tofile="target/source/plugins/org.eclipse.jetty.server_${org.eclipse.jetty.server.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.jetty.servlet.jar" tofile="target/source/plugins/org.eclipse.jetty.servlet_${org.eclipse.jetty.servlet.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.jetty.util.jar" tofile="target/source/plugins/org.eclipse.jetty.util_${org.eclipse.jetty.util.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.osgi.services.jar" tofile="target/source/plugins/org.eclipse.osgi.services_${org.eclipse.osgi.services.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.osgi.util.jar" tofile="target/source/plugins/org.eclipse.osgi.util_${org.eclipse.osgi.util.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.osgi.jar" tofile="target/source/plugins/org.eclipse.osgi_${org.eclipse.osgi.version}.jar"/>
+								<move file="target/source/plugins/org.knowhowlab.osgi.monitoradmin.jar" tofile="target/source/plugins/org.knowhowlab.osgi.monitoradmin_${org.knowhowlab.osgi.monitoradmin.version}.jar"/>
+								<move file="target/source/plugins/osgi.cmpn.jar" tofile="target/source/plugins/osgi.cmpn_${osgi.cmpn.version}.jar"/>
+									
+							</tasks>
+						</configuration>
+					</execution>
+					
+					<execution>
+						<id>install-equinox</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<delete dir="../../kura/target-definition/equinox_3.8.1/" />
+								<mkdir dir="../../kura/target-definition/equinox_3.8.1/repository" />
+								<copy todir="../../kura/target-definition/equinox_3.8.1/repository">
+									<fileset dir="${project.build.directory}/repository" />
+								</copy>
+								<copy todir="../../kura/target-definition/equinox_3.8.1/source">
+									<fileset dir="${project.build.directory}/source" />
+								</copy>
+							</tasks>
 						</configuration>
 					</execution>
 				</executions>
@@ -255,27 +328,6 @@
 					<compress>false</compress>
 					<!-- additional arguments example <additionalArgs>-configs win32.win32.x86</additionalArgs> -->
 				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>install-equinox</id>
-						<phase>install</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-								<delete dir="../../kura/target-definition/equinox_3.8.1/" />
-								<mkdir dir="../../kura/target-definition/equinox_3.8.1/repository" />
-								<copy todir="../../kura/target-definition/equinox_3.8.1/repository">
-									<fileset dir="${project.build.directory}/repository" />
-								</copy>
-							</tasks>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 			
 			<plugin>

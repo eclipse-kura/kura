@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Red Hat and/or its affiliates
+ * Copyright (c) 2011, 2016 Red Hat and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,8 @@
  *
  *******************************************************************************/
 package org.eclipse.kura.camel.cloud;
+
+import static org.eclipse.kura.camel.internal.utils.KuraServiceFactory.retrieveService;
 
 import java.util.Map;
 
@@ -18,9 +20,12 @@ import org.eclipse.kura.camel.internal.cloud.CloudClientCache;
 import org.eclipse.kura.camel.internal.cloud.CloudClientCacheImpl;
 import org.eclipse.kura.cloud.CloudService;
 
-import static org.eclipse.kura.camel.utils.KuraServiceFactory.retrieveService;
-
+/**
+ * The Camel component for providing "kura-cloud"
+ */
 public class KuraCloudComponent extends UriEndpointComponent {
+
+    public static final String DEFAULT_NAME = "kura-cloud";
 
     private CloudService cloudService;
     private CloudClientCache cache;
@@ -31,19 +36,24 @@ public class KuraCloudComponent extends UriEndpointComponent {
 
     // Constructors
 
-    public KuraCloudComponent(CamelContext context) {
+    public KuraCloudComponent(final CamelContext context) {
         super(context, KuraCloudEndpoint.class);
+    }
+
+    public KuraCloudComponent(final CamelContext context, final CloudService cloudService) {
+        super(context, KuraCloudEndpoint.class);
+        this.cloudService = cloudService;
     }
 
     @Override
     protected void doStart() throws Exception {
-        final CloudService cloudService = getCloudService();
+        final CloudService cloudService = lookupCloudService();
 
         if (cloudService == null) {
             throw new IllegalStateException(
                     "'cloudService' is not set and not found in Camel context service registry");
         }
-        
+
         this.cache = new CloudClientCacheImpl(cloudService);
 
         super.doStart();
@@ -52,10 +62,9 @@ public class KuraCloudComponent extends UriEndpointComponent {
     @Override
     protected void doStop() throws Exception {
         super.doStop();
-        if ( cache != null ) 
-        {
-            cache.close ();
-            cache = null;
+        if (this.cache != null) {
+            this.cache.close();
+            this.cache = null;
         }
     }
 
@@ -65,7 +74,7 @@ public class KuraCloudComponent extends UriEndpointComponent {
     protected Endpoint createEndpoint(String uri, String remain, Map<String, Object> parameters) throws Exception {
         final KuraCloudEndpoint kuraCloudEndpoint = new KuraCloudEndpoint(uri, this, this.cache);
 
-        String[] res = remain.split("/", 2);
+        final String[] res = remain.split("/", 2);
         if (res.length < 2) {
             throw new IllegalArgumentException("Wrong kura-cloud URI format. Should be: kura-cloud:app/topic");
         }
@@ -77,15 +86,10 @@ public class KuraCloudComponent extends UriEndpointComponent {
         return kuraCloudEndpoint;
     }
 
-    private CloudService getCloudService() {
-        if(cloudService == null) {
-            cloudService = retrieveService(CloudService.class, getCamelContext().getRegistry());
+    protected CloudService lookupCloudService() {
+        if (this.cloudService == null) {
+            this.cloudService = retrieveService(CloudService.class, getCamelContext().getRegistry());
         }
-        return cloudService;
+        return this.cloudService;
     }
-
-    public void setCloudService(CloudService cloudService) {
-        this.cloudService = cloudService;
-    }
-
 }

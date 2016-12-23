@@ -11,7 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.clock;
 
-public interface ClockSyncListener 
-{
-	public void onClockUpdate(long offset);
+public interface ClockSyncListener {
+
+    public void onClockUpdate(long offset);
 }

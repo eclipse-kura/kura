@@ -10,21 +10,25 @@
  *     Eurotech
  *******************************************************************************/
 package org.eclipse.kura.protocol.modbus;
+
 /**
- * This static class is provided only for completeness.  Currently the
+ * This static class is provided only for completeness. Currently the
  * Modbus protocol only supports RTU mode communications.
  * <p>
- * The Field values, not the field names should be used in configuration files. 
- * 
+ * The Field values, not the field names should be used in configuration files.
+ *
  *
  */
 public class ModbusTransmissionMode {
-	/**
-	 * 
-	 */
-	private ModbusTransmissionMode(){};
-	public static final String RTU="RTU";
-	public static final String ASCII="ASCII";
-	public static final int RTU_MODE=0;
-	public static final int ASCII_MODE=1;
+
+    /**
+     *
+     */
+    private ModbusTransmissionMode() {
+    };
+
+    public static final String RTU = "RTU";
+    public static final String ASCII = "ASCII";
+    public static final int RTU_MODE = 0;
+    public static final int ASCII_MODE = 1;
 }

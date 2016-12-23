@@ -15,36 +15,36 @@ import org.eclipse.kura.KuraException;
 
 public interface IModemLinkService {
 
-	public static final String SERVICE_NAME = IModemLinkService.class.getName();
+    public static final String SERVICE_NAME = IModemLinkService.class.getName();
 
-	/**
-	* Connect request with default timeout 
-	* 
-	* @throws KuraException
-	*/
-	public void connect() throws KuraException;
-	
-	/**
-	* Disconnect request
-	*
-	* @throws KuraException
-	*/
-	public void disconnect () throws KuraException;
-	
-	public PppState getPppState () throws KuraException;
-	
-	/**
-	* Reports IP address of cellular interface
-	*
-	* @return IP address as <code>String</code>
-	* @throws KuraException
-	*/
-	public String getIPaddress() throws KuraException;
-	
-	/**
-	* Reports name of network interface
-	*
-	* @return network interface name as <code>String</code>
-	*/
-	public String getIfaceName();
+    /**
+     * Connect request with default timeout
+     *
+     * @throws KuraException
+     */
+    public void connect() throws KuraException;
+
+    /**
+     * Disconnect request
+     *
+     * @throws KuraException
+     */
+    public void disconnect() throws KuraException;
+
+    public PppState getPppState() throws KuraException;
+
+    /**
+     * Reports IP address of cellular interface
+     *
+     * @return IP address as <code>String</code>
+     * @throws KuraException
+     */
+    public String getIPaddress() throws KuraException;
+
+    /**
+     * Reports name of network interface
+     *
+     * @return network interface name as <code>String</code>
+     */
+    public String getIfaceName();
 }

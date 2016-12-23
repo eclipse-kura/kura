@@ -36,101 +36,108 @@ import com.google.gwt.view.client.ListDataProvider;
 
 public class ProfileTabUi extends Composite {
 
-	private static ProfileTabUiUiBinder uiBinder = GWT.create(ProfileTabUiUiBinder.class);
+    private static ProfileTabUiUiBinder uiBinder = GWT.create(ProfileTabUiUiBinder.class);
 
-	interface ProfileTabUiUiBinder extends UiBinder<Widget, ProfileTabUi> {
-	}
+    interface ProfileTabUiUiBinder extends UiBinder<Widget, ProfileTabUi> {
+    }
 
-	private static final ValidationMessages msgs = GWT.create(ValidationMessages.class);
+    private static final ValidationMessages msgs = GWT.create(ValidationMessages.class);
 
-	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 
-	@UiField
-	CellTable<GwtGroupedNVPair> profileGrid = new CellTable<GwtGroupedNVPair>();
-	private ListDataProvider<GwtGroupedNVPair> profileDataProvider = new ListDataProvider<GwtGroupedNVPair>();
+    @UiField
+    CellTable<GwtGroupedNVPair> profileGrid = new CellTable<GwtGroupedNVPair>();
+    private final ListDataProvider<GwtGroupedNVPair> profileDataProvider = new ListDataProvider<GwtGroupedNVPair>();
 
-	public ProfileTabUi() {
-		initWidget(uiBinder.createAndBindUi(this));
+    public ProfileTabUi() {
+        initWidget(uiBinder.createAndBindUi(this));
 
-		profileGrid.setRowStyles(new RowStyles<GwtGroupedNVPair>() {
-			@Override
-			public String getStyleNames(GwtGroupedNVPair row, int rowIndex) {
-				return row.getValue().contains("  ") ? "rowHeader" : " ";
-			}
-		});
+        this.profileGrid.setRowStyles(new RowStyles<GwtGroupedNVPair>() {
 
-		loadProfileTable(profileGrid, profileDataProvider);
-	}
+            @Override
+            public String getStyleNames(GwtGroupedNVPair row, int rowIndex) {
+                return row.getValue().contains("  ") ? "rowHeader" : " ";
+            }
+        });
 
-	private void loadProfileTable(CellTable<GwtGroupedNVPair> profileGrid2, ListDataProvider<GwtGroupedNVPair> dataProvider) {
-						
-		TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
-			@Override
-			public String getValue(GwtGroupedNVPair object) {
-				return msgs.getString(object.getName());
-			}
-		};
-		col1.setCellStyleNames("status-table-row");
-		profileGrid2.addColumn(col1);
+        loadProfileTable(this.profileGrid, this.profileDataProvider);
+    }
 
-		TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
-			@Override
-			public String getValue(GwtGroupedNVPair object) {
-				return String.valueOf(object.getValue());
-			}
-		};
-		col2.setCellStyleNames("status-table-row");
-		profileGrid2.addColumn(col2);
+    private void loadProfileTable(CellTable<GwtGroupedNVPair> profileGrid2,
+            ListDataProvider<GwtGroupedNVPair> dataProvider) {
 
-		dataProvider.addDataDisplay(profileGrid2);
-	}
+        TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
 
-	public void loadProfileData() {
-		profileDataProvider.getList().clear();
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return msgs.getString(object.getName());
+            }
+        };
+        col1.setCellStyleNames("status-table-row");
+        profileGrid2.addColumn(col1);
 
-		EntryClassUi.showWaitModal();
-		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+        TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
 
-			@Override
-			public void onFailure(Throwable ex) {
-				EntryClassUi.hideWaitModal();
-				FailureHandler.handle(ex);
-			}
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return String.valueOf(object.getValue());
+            }
+        };
+        col2.setCellStyleNames("status-table-row");
+        profileGrid2.addColumn(col2);
 
-			@Override
-			public void onSuccess(GwtXSRFToken token) {
-				gwtDeviceService.findDeviceConfiguration(token, new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+        dataProvider.addDataDisplay(profileGrid2);
+    }
 
-					@Override
-					public void onFailure(Throwable caught) {
-						EntryClassUi.hideWaitModal();
-						profileDataProvider.getList().clear();
-						FailureHandler.handle(caught);
-						profileDataProvider.flush();
+    public void loadProfileData() {
+        this.profileDataProvider.getList().clear();
 
-					}
+        EntryClassUi.showWaitModal();
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-					@Override
-					public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-						String oldGroup = "devInfo";
-						profileDataProvider.getList().add(new GwtGroupedNVPair("devInfo","devInfo","  "));
-						for (GwtGroupedNVPair resultPair : result) {
-							if (!oldGroup.equals(resultPair.getGroup())) {
-								profileDataProvider.getList().add(new GwtGroupedNVPair(resultPair.getGroup(), resultPair.getGroup(), "  "));
-								oldGroup = resultPair.getGroup();
-							}
-							profileDataProvider.getList().add(resultPair);
-						}
-						int size= profileDataProvider.getList().size();
-						profileGrid.setVisibleRange(0, size);
-						profileDataProvider.flush();
-						EntryClassUi.hideWaitModal();
-					}
-				});
-			}
-		
-		});
-	}
+            @Override
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                ProfileTabUi.this.gwtDeviceService.findDeviceConfiguration(token,
+                        new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        ProfileTabUi.this.profileDataProvider.getList().clear();
+                        FailureHandler.handle(caught);
+                        ProfileTabUi.this.profileDataProvider.flush();
+
+                    }
+
+                    @Override
+                    public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                        String oldGroup = "devInfo";
+                        ProfileTabUi.this.profileDataProvider.getList()
+                                .add(new GwtGroupedNVPair("devInfo", "devInfo", "  "));
+                        for (GwtGroupedNVPair resultPair : result) {
+                            if (!oldGroup.equals(resultPair.getGroup())) {
+                                ProfileTabUi.this.profileDataProvider.getList()
+                                        .add(new GwtGroupedNVPair(resultPair.getGroup(), resultPair.getGroup(), "  "));
+                                oldGroup = resultPair.getGroup();
+                            }
+                            ProfileTabUi.this.profileDataProvider.getList().add(resultPair);
+                        }
+                        int size = ProfileTabUi.this.profileDataProvider.getList().size();
+                        ProfileTabUi.this.profileGrid.setVisibleRange(0, size);
+                        ProfileTabUi.this.profileDataProvider.flush();
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
+            }
+
+        });
+    }
 
 }

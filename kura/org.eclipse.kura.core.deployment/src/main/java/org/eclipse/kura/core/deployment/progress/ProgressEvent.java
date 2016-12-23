@@ -18,68 +18,69 @@ import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOption
 
 public class ProgressEvent extends EventObject {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4316652505853478843L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = -4316652505853478843L;
 
-	String clientId;
-	int transferSize;
-	int transferProgress;
-	String transferStatus;
-	String requesterClientId;
-	long jobId;
-	String exceptionMessage = null;
-	int downloadIndex;
-	
-	public ProgressEvent(Object source, DeploymentPackageDownloadOptions options, int transferSize, int transferProgress, String trasnferStatus, int downloadIndex) {
-		super(source);
-		this.clientId = options.getClientId();
-		this.transferSize = transferSize;
-		this.transferProgress = transferProgress;
-		this.transferStatus = trasnferStatus;
-		this.requesterClientId = options.getRequestClientId();
-		this.jobId= options.getJobId();
-		this.downloadIndex = downloadIndex;
-	}
+    String clientId;
+    int transferSize;
+    int transferProgress;
+    String transferStatus;
+    String requesterClientId;
+    long jobId;
+    String exceptionMessage = null;
+    int downloadIndex;
 
-	public String getClientId() {
-		return clientId;
-	}
+    public ProgressEvent(Object source, DeploymentPackageDownloadOptions options, int transferSize,
+            int transferProgress, String trasnferStatus, int downloadIndex) {
+        super(source);
+        this.clientId = options.getClientId();
+        this.transferSize = transferSize;
+        this.transferProgress = transferProgress;
+        this.transferStatus = trasnferStatus;
+        this.requesterClientId = options.getRequestClientId();
+        this.jobId = options.getJobId();
+        this.downloadIndex = downloadIndex;
+    }
 
-	public int getTransferSize() {
-		return transferSize;
-	}
+    public String getClientId() {
+        return this.clientId;
+    }
 
-	public int getTransferProgress() {
-		return transferProgress;
-	}
+    public int getTransferSize() {
+        return this.transferSize;
+    }
 
-	public String getTransferStatus() {
-		return transferStatus;
-	}
+    public int getTransferProgress() {
+        return this.transferProgress;
+    }
 
-	public String getRequesterClientId() {
-		return requesterClientId;
-	}
-	
-	public long getJobId() {
-		return jobId;
-	}
-	
-	public void setExceptionMessage(String exceptionMessage){
-		this.exceptionMessage= exceptionMessage;
-	}
+    public String getTransferStatus() {
+        return this.transferStatus;
+    }
 
-	public String getExceptionMessage(){
-		return exceptionMessage;
-	}
-	
-	public void setDownloadIndex(int downloadIndex){
-		this.downloadIndex = downloadIndex;
-	}
-	
-	public int getDownloadIndex() {
-		return downloadIndex;
-	}
+    public String getRequesterClientId() {
+        return this.requesterClientId;
+    }
+
+    public long getJobId() {
+        return this.jobId;
+    }
+
+    public void setExceptionMessage(String exceptionMessage) {
+        this.exceptionMessage = exceptionMessage;
+    }
+
+    public String getExceptionMessage() {
+        return this.exceptionMessage;
+    }
+
+    public void setDownloadIndex(int downloadIndex) {
+        this.downloadIndex = downloadIndex;
+    }
+
+    public int getDownloadIndex() {
+        return this.downloadIndex;
+    }
 }

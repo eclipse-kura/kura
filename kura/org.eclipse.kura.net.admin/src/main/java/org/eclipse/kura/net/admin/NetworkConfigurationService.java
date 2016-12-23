@@ -14,13 +14,12 @@ package org.eclipse.kura.net.admin;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 
-
 public interface NetworkConfigurationService {
-    
+
     public static final String PID = "org.eclipse.kura.net.admin.NetworkConfigurationService";
-    
+
     public void setNetworkConfiguration(NetworkConfiguration networkConfiguration) throws KuraException;
-    
+
     public NetworkConfiguration getNetworkConfiguration() throws KuraException;
-    
+
 }

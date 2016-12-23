@@ -13,10 +13,10 @@ package org.eclipse.kura.web.client.util;
 
 public class Constants {
 
-	public static final int    LABEL_WIDTH_FORM           = 170;
-	public static final int    LABEL_WIDTH_FORM_SMALL     = 25;
-	public static final int    LABEL_WIDTH_CONFIG_FORM    = 250;
-	public static final int    LABEL_WIDTH_INFO           = 150;
-	
-	public static final String LABEL_MARGIN_TOP_SEPARATOR = "25px";
+    public static final int LABEL_WIDTH_FORM = 170;
+    public static final int LABEL_WIDTH_FORM_SMALL = 25;
+    public static final int LABEL_WIDTH_CONFIG_FORM = 250;
+    public static final int LABEL_WIDTH_INFO = 150;
+
+    public static final String LABEL_MARGIN_TOP_SEPARATOR = "25px";
 }

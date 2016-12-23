@@ -12,53 +12,53 @@
 package org.eclipse.kura.bluetooth.listener;
 
 public class AdvertisingReportRecord {
-	private int eventType;
-	private int addressType;
-	private String address;
-	private byte [] reportData;
-	private int length;
-	
-	public AdvertisingReportRecord() {
 
-	}
+    private int eventType;
+    private int addressType;
+    private String address;
+    private byte[] reportData;
+    private int length;
 
-	public int getEventType() {
-		return eventType;
-	}
+    public AdvertisingReportRecord() {
+    }
 
-	public void setEventType(int eventType) {
-		this.eventType = eventType;
-	}
+    public int getEventType() {
+        return this.eventType;
+    }
 
-	public int getAddressType() {
-		return addressType;
-	}
+    public void setEventType(int eventType) {
+        this.eventType = eventType;
+    }
 
-	public void setAddressType(int addressType) {
-		this.addressType = addressType;
-	}
+    public int getAddressType() {
+        return this.addressType;
+    }
 
-	public String getAddress() {
-		return address;
-	}
+    public void setAddressType(int addressType) {
+        this.addressType = addressType;
+    }
 
-	public void setAddress(String address) {
-		this.address = address;
-	}
+    public String getAddress() {
+        return this.address;
+    }
 
-	public byte [] getReportData() {
-		return reportData;
-	}
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-	public void setReportData(byte [] reportData) {
-		this.reportData = reportData;
-	}
+    public byte[] getReportData() {
+        return this.reportData;
+    }
 
-	public int getLength() {
-		return length;
-	}
+    public void setReportData(byte[] reportData) {
+        this.reportData = reportData;
+    }
 
-	public void setLength(int length) {
-		this.length = length;
-	}
+    public int getLength() {
+        return this.length;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
+    }
 }

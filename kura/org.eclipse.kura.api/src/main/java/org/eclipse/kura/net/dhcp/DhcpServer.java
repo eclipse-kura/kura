@@ -15,17 +15,17 @@ import org.eclipse.kura.KuraException;
 
 /**
  * Represents a DHCP server.
- * 
+ *
  * @author eurotech
  *
  */
 public interface DhcpServer {
 
-	/**
-	 * Returns whether or not the DhcpServer is actively running or not
-	 * 
-	 * @return	a boolean denoting whether or not the DhcpServer is running or not
-	 * @throws KuraException
-	 */
-	public boolean isRunning() throws KuraException;
+    /**
+     * Returns whether or not the DhcpServer is actively running or not
+     *
+     * @return a boolean denoting whether or not the DhcpServer is running or not
+     * @throws KuraException
+     */
+    public boolean isRunning() throws KuraException;
 }

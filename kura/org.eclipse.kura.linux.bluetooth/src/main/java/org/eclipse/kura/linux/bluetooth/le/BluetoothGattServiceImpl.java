@@ -19,46 +19,44 @@ import org.eclipse.kura.bluetooth.BluetoothGattService;
 
 public class BluetoothGattServiceImpl implements BluetoothGattService {
 
-	private UUID m_uuid;
-	private String m_startHandle;
-	private String m_endHandle;
-	
-	public BluetoothGattServiceImpl(String uuid, String startHandle, String endHandle) {
-		m_uuid = UUID.fromString(uuid);
-		m_startHandle = startHandle;
-		m_endHandle = endHandle;
-	}
-	
-	// --------------------------------------------------------------------
-	//
-	//  BluetoothGattService API
-	//
-	// --------------------------------------------------------------------
+    private final UUID m_uuid;
+    private final String m_startHandle;
+    private final String m_endHandle;
 
-	@Override
-	public BluetoothGattCharacteristic getCharacteristic(UUID uuid) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public BluetoothGattServiceImpl(String uuid, String startHandle, String endHandle) {
+        this.m_uuid = UUID.fromString(uuid);
+        this.m_startHandle = startHandle;
+        this.m_endHandle = endHandle;
+    }
 
-	@Override
-	public List<BluetoothGattCharacteristic> getCharacterisitcs() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    // --------------------------------------------------------------------
+    //
+    // BluetoothGattService API
+    //
+    // --------------------------------------------------------------------
 
-	@Override
-	public UUID getUuid() {
-		return m_uuid;
-	}
+    @Override
+    public BluetoothGattCharacteristic getCharacteristic(UUID uuid) {
+        return null;
+    }
 
-	@Override
-	public String getStartHandle() {
-		return m_startHandle;
-	}
+    @Override
+    public List<BluetoothGattCharacteristic> getCharacterisitcs() {
+        return null;
+    }
 
-	@Override
-	public String getEndHandle() {
-		return m_endHandle;
-	}
+    @Override
+    public UUID getUuid() {
+        return this.m_uuid;
+    }
+
+    @Override
+    public String getStartHandle() {
+        return this.m_startHandle;
+    }
+
+    @Override
+    public String getEndHandle() {
+        return this.m_endHandle;
+    }
 }

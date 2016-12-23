@@ -15,21 +15,21 @@ import java.io.Serializable;
 
 public class GwtSettings extends GwtBaseModel implements Serializable {
 
-	private static final long serialVersionUID = -7285859217584861659L;
+    private static final long serialVersionUID = -7285859217584861659L;
 
-	public void setPasswordCurrent(String pwdCurrent) {
-		set("pwdCurrent", pwdCurrent);
-	}
-	
-	public String getPasswordCurrent() {
-		return (String) get("pwdCurrent");
-	}
-	
-	public void setPasswordNew(String pwdNew) {
-		set("pwdNew", pwdNew);
-	}
-	
-	public String getPasswordNew() {
-		return (String) get("pwdNew");
-	}
+    public void setPasswordCurrent(String pwdCurrent) {
+        set("pwdCurrent", pwdCurrent);
+    }
+
+    public String getPasswordCurrent() {
+        return (String) get("pwdCurrent");
+    }
+
+    public void setPasswordNew(String pwdNew) {
+        set("pwdNew", pwdNew);
+    }
+
+    public String getPasswordNew() {
+        return (String) get("pwdNew");
+    }
 }

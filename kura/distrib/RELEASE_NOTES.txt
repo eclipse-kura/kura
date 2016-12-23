@@ -1,3 +1,225 @@
+Eclipse Kura - 2.1.0
+-------------------------------------------------------------------------
+Added Features :
+  * Apache Camel Integration
+  * New UI for Cloud Services
+  * Support for Raspbian on Raspberry Pi 3
+  * Support for Fedora on Raspberry Pi 2 and 3
+
+Bug Fixes :
+  * Fixed github issues:
+    * #958: [Kura 2.1.0 QA] Wrong labels in UI's DHCP&NAT configuration
+    * #956: [Sec] Kura firewall rules bypassed with IPv6
+    * #941: [Kura 2.1.0 QA] Raspberry Pi 3 no-net installer
+    * #930: [Kura 2.1.0 QA] Problems with installation of Kura on BeagleBone Black
+    * #917: [Kura 2.1.0 QA] Wrong range messages
+    * #912: [Kura 2.1.0 QA] Exceptions while deploying example service
+    * #909: [Kura 2.1.0 QA] SSID selection dialog too small
+    * #903: [Kura 2.1.0 QA] Impossible to enter multiple DNS servers
+    * #901: [Kura 2.1.0 QA] changing username/password locks out admin access
+    * #900: [Kura 2.1.0 QA] usbutils missing in fedberry README
+    * #895: [Kura 2.1.0 QA] Refreshing configuration in web UI
+    * #893: [Kura 2.1.0 QA] GPIO example bundle configuration
+    * #883: Invalid field validation state when switching from WAN to LAN
+    * #879: [Kura 2.1.0 QA] Raspberry Pi 3 nameserver
+    * #877: [Kura 2.1.0 QA] eth0 netmask configuration
+    * #876: [Kura 2.1.0 QA] Disabling eth0 interface doesn't work properly
+    * #874: [Kura 2.1.0 QA] eth0 DNS server configuration
+    * #867: [Kura 2.1.0 QA] Ethernet interface gateway configuration on Raspberry Pi 3
+    * #860: [Kura 2.1.0 QA] JUnit in Raspberry Pi 3's installation package
+    * #859: [Kura 2.1.0 QA] Installation warnings/errors on Raspberry Pi 3
+    * #851: [Web-UI] Label is sent instead of value for metatype parameters with options
+    * #835: [Kura 2.1.0] Bind/Named service doesn't work properly on Fedora
+    * #793: [Kura 2.1.0] QA for the User Workspace
+    * #776: Serialization issue in cloud window
+    * #767: Change Housekeeping schedule from scheduleAtFixedRate to scheduleWithFixedDelay
+    * #753: libhidapi not correctly compiled for armv5
+    * #743: WLAN not detected as WLAN on Fedberry
+    * #742: Unable to establish stable network connection on Fedberry
+    * #732: Unable to configure CloudService instance when component gets unregistered
+    * #724: [Release 2.1.0] Check API packages
+    * #716: Create a simple Camel Java DSL based example publisher
+    * #692: Drop default to 255 characters on data entry
+    * #691: NPE when CloudService isn't configured
+    * #683: Control Prefix in Request/Response
+    * #660: [kura-build] jdk.dio deployment fails in Hudson
+    * #649: Missing copyright headers
+    * #642: Raspbian Pi3
+    * #641: [Camel] KuraCloudConsumer - Failed to subscribe exception
+    * #640: [Modem] NoClassDefFoundError: Could not initialize class org.eclipse.kura.linux.net.modem.SupportedUsbModems
+    * #635: ExecCommand in org.eclipse.kura.linux.bluetooth.BluetoothAdapterImpl Index Out Of Bounds
+    * #627: Fix Bundle-Vendor to "Eclipse Kura"
+    * #619: Duplicate version of maven-antrun-plugin
+    * #618: Recent CR/LF fix causes 182 file modification pending
+    * #613: Recent addition of checkstyle fails the build
+    * #603: Can "json 20090211" be removed?
+    * #599: WebUI fails completely is `PositionService` is not registered
+    * #596: Replace all calls to ConfigurationAdmin.getConfiguration(String)
+    * #595: ComponentMetaTypeBundleTracker is processing every bundle twice on startup
+    * #592: Again Java 7 code in BREE 6 bundle
+    * #589: [Camel] Camel related exceptions on Kura startup
+    * #581: Missing Package Info in few packages in API Bundle
+    * #573: Commit 41c3180 breaks data entry
+    * #571: Convert files from dos 2 unix format
+    * #564: [Configuration] ConfigurationService doesn't set properly the kura.service.pid
+    * #562: Services UI not getting updated with new properties
+    * #557: Add SLF4J jcl-over-slf4j
+    * #548: Kura 2 Webui on BeagleboneBlack Problem
+    * #544: Web UI shows red-connector although state is CONNECTED
+    * #540: [Web UI] Empty Integer field in a configuration (not required) is causing a NumberFormatException
+    * #539: [Cloud] Required changes in CloudServiceFactory
+    * #521: Device -> Threads shows empty list
+    * #515: [Web UI] Implement Cloud Services UI
+    * #511: Upgrade SLF4J to 1.7.21
+    * #509: [Web 2] ServicesUi validation
+    * #497: SystemServiceImpl uses method from Java 7 but declares a BREE of Java 6
+    * #496: mToolkit Eclipse Plugin does not work under Eclipse Neon
+    * #488: Command cloud App Null Pointer Exception
+    * #485: Change b02bc9a7615ca559349f2b05485ea84fd80d6e77 breaks deployment of "sun.misc" bundles
+    * #473: org.eclipse.kura.linux.net.modem.ModemDriver uses Java 7 API but has BREE of Java 6
+    * #467: Web UI cannot handle Integer with cardinality 0/optional
+    * #465: CloudService.isConnected not shown in Web UI
+    * #461: Registering a component which has a PID without dot crashes the Web UI 2
+    * #451: setting a payload metric to null should throw an exception immediately
+    * #444: Multiple Cloud Support - Web UI does not allow to select new installed cloud service
+    * #419: Migrate ASF camel-kura code to Eclipse
+    * #403: Fix javadoc for the getKuraVersion() method of the SystemService.
+    * #396: iwScanTool fails to parse scan results
+    * #343: [Web2]: Setting the "name" property to anything different than the "id" sets an empty value
+    * #342: [Configuration] Support multiple configurations for SelfConfiguringComponentS
+    * #339: [Web UI] The Disconnect button in the Status menu disconnects all connections
+    * #337: [Web2]: Field validation errors not shown
+    * #326: org.eclipse.kura.web2 is missing about.html
+    * #321: No support for systemd based systems
+    * #318: There should be Oomph based setups for Kura
+    * #315: The Kura documentation should mention the default login credentials admin/admin
+    * #314: The Camel Quickstart example is not working
+    * #281: Add XML routes configuration per Camel CloudService
+    * #265: Camel Examples: review
+    * #262: Maven failure when dev-env isn't built
+    * #257: KuraComponent can't resolve its collaborators
+    * #234: [Web UI] web2 network configuration glitch
+    * #231: Create Maven plugin capable of wrapping regular bundles in DP packages
+    * #221: [Camel] Do we need a Camel API in the org.eclipse.kura.api bundle?
+    * #216: [Test] Test Kura on RaspberryPi 3
+    * #205: All languages from Camel Core should be loaded by CamelRouter
+    * #204: All data formats from Camel Core should be loaded by CamelRouter
+    * #189: [Camel] Camel integration in the Kura CloudService
+    * #119: [Camel] Migrate CamelRouter tests from Rhiot to Kura
+
+  * Merged no issue-related Pull Requests:
+    * #962: Added libudev for rhel based devices
+    * #928: [Web-Ui] Fixed typo in the network config section
+    * #898: Solved modem reset failure.
+    * #855: Modified wrong entry in snapshot 0s
+	* #816: Set the 'kura.ui.service.hide' property
+    * #810: Remaining changes to Camel Web UI
+    * #805: Prepend kura- to modem log files.
+    * #802: Try a fix for the startup exception, missing "kura-cloud"
+    * #798: Add Fedora 24 based ARM7 native library
+    * #765: Reverts change in commit 7704d180296551b0acb68044f7cd6b4c3e77f56a
+    * #761: Allow camel component to be initialized
+    * #756: Allow Camel modules to gracefully handle missing dependencies
+    * #755: Allow automatic conversion from Map to KuraPayload
+    * #745: Solved possible IllegalArgumentException due to null pid
+    * #744: Fixed wifi scan in AP mode
+    * #739: Solved possible 404 error when downloading snapshot
+    * #730: WiFi switching between Station and Access Point is unreliable
+    * #720: Fix wifi issues 2.1.0
+    * #717: Lower camel imports to 2.17.0
+    * #700: Fix Watchdog disabling bug in WatchdogService.
+    * #699: Add DependencyManagement to Camel Examples
+    * #698: Fix ble process leak
+    * #697: Export ConfigurableComponent in service xml
+    * #694: Fix Camel imports
+    * #662: Implement a workaround for issue #590
+    * #643: Clean up imports for Camel
+    * #630: Minor cleanups to the Linux ClockServiceImpl
+    * #625: Kura should not publish modified artifacts under "org.eclipse" namespace
+    * #624: Let example services export ConfigurableComponent
+    * #607: Start the Web UI component immediately
+    * #605: Fix a few resource leaks
+    * #602: Initial support for building a version for PC Engines APU / Debian 8
+    * #594: Implement missing method 'unsetSystemService'
+    * #578: Cleanup dead code
+    * #563: clean up some source code issues
+    * #560: Fixed bug on ConfigurationService about kura.service.pid
+    * #552: Support for RPi running Fedora via Fedberry, Pidora, etc.
+    * #546: Minor fixes for the startup scripts
+    * #542: Re-use existing code to parse kura.properties
+    * #530: Fix service leak in ComponentUtil
+    * #528: Fix the lookup of the default value, now done by id.
+    * #513: Follow Eclipse trademark guidelines
+    * #508: Refactor Camel router
+    * #501: Enh build deploy
+
+
+Know Issues :
+  * The implementation of the CryptoService performs encryption using a
+    password that is hardcoded and published.
+  * Kura can be run in a Java 8 VM, but current OSGi container does not support bundles with manifests that specify
+    a "Bundle-RequiredExecutionEnvironment" equal to "JavaSE-1.8".
+  * The old GPS position will continue to be shown in the status overview even after the disabling of the static position reporting.
+  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
+  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
+    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
+    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)
+    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on
+    gatttool and the BLE connection failes.
+  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
+    AccessPoint WiFi mode not working for Broadcom chipset.
+  * Hardware watchdog: not implemented on all platforms
+  * Only one WAN interface is currently supported. A warning in displayed
+    in the WEB UI if the user attempts to enable more than one WAN interface
+  * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network
+    interface which happened even if network configuration hasn't been modified.
+  * #948: [Kura 2.1.0 QA] NET-ETH0-014 Wrong lease time in DHCP mode
+  * #923: [Kura 2.1.0 QA] eth0 search domain configuration and storage
+  * #918: [Kura 2.1.0 QA] DEN-POS-002 Position service keeps reporting old position
+  * #916: [Kura 2.1.0 QA] DEN-CONF-005 Wrong range limit for "long"
+  * #915: [Kura 2.1.0 QA] DEN-CONF-005: Internal message when a "too big" number is entered
+  * #914: [Web UI] Fixed fields can be edited
+  * #911: [Kura 2.1.0 QA] SSID selection not always shows all SSIDs
+  * #910: [Kura 2.1.0 QA] Unable to use WLAN as WAN interface
+  * #908: [Kura 2.1.0 QA] Web UI shows its own WLAN for connecting
+  * #890: [Kura 2.1.0 QA] Snapshot management in web UI
+  * #889: [Kura 2.1.0 QA] Denali Configuration ExamplePublisher error descriptions
+  * #778: [Net] Refactor needed in org.eclipse.kura.core.net
+  * #752: [DbDataStore] repair is very slow on big tables
+  * #751: [DbDataStore] defrag and checkpoint are not per-table operations
+  * #737: Fedora distribution fails to start up
+  * #736: Kura installer continues despite errors occurred
+  * #725: Serial receive timeout is not forwarded to javax.comm.CommPort
+  * #721: Unnecessary toggles eth0 interface when wlan0 interface is disabled on Raspberry Pi.
+  * #696: FileServlet fails with NPE when there is no MetaTypeInformation
+  * #664: Misconfiguration of eth0 (as dhcp server) filling /var/log directory and finally crashing kura
+  * #654: Clean up static initialization around "modem" functionality
+  * #651: Call to "exit()" in native code
+  * #650: Possible bug in "LinuxUdev.c"
+  * #645: Clean up internal dependencies in Kura
+  * #572: Unreadable errors in Web UI
+  * #558: Update of DPs seems not to work
+  * #553: [Modbus] Refactoring of Modbus example
+  * #550: [Modbus] String evaluation returns false
+  * #547: [Configuration] Configuration Service may miss configuration-policy=optional components
+  * #522: [Net] Modem monitor should monitor interfaces, not modems
+  * #520: [Net] PppFactory is not a factory and its design is wrong
+  * #518: [Net] Modem monitor concurrency issue with multiple modems
+  * #406: Replace System.get* with calls to SystemService.getProperties
+  * #362: Uninstaller leaves most of the files
+  * #329: [DEPLOY-V2] Review/refactoring needed
+  * #311: [Multiple Cloud Connections] Spurious component reactivations upon configuration change
+  * #307: CloudCallService overrides client ID
+  * #297: [Status led] What connection instance controls the status led?
+  * #288: [Modbus] Implement the MBAP header for TCP/IP communication
+  * #253: Check if bundle contexes correctly unget services after invoking getService
+  * #235: LinuxNetworkUtil#toolExists() should check for tool's existence in PATH
+  * #222: CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
+  * #172: Modem: manually killing pppd with Kura running never triggers a modem reset
+  * #108: CloudCallServiceImpl - call methods setting requester.client.id to #client-id sends response to local device
+  * #104: org.eclipse.kura.linux.net.ConnectionInfoImpl is IPv4 only
+
+
 Eclipse Kura - 2.0.2
 -------------------------------------------------------------------------
 Bug Fixes :
@@ -8,17 +230,17 @@ Bug Fixes :
 
 Know Issues :
   * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was 
-    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux". 
-    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease) 
-    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on 
+  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
+    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
+    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)
+    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on
     gatttool and the BLE connection failes.
   * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
     AccessPoint WiFi mode not working for Broadcom chipset.
   * Hardware watchdog: not implemented on all platforms
   * Only one WAN interface is currently supported. A warning in displayed
     in the WEB UI if the user attempts to enable more than one WAN interface
-  * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network 
+  * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network
     interface which happened even if network configuration hasn't been modified.
   * #467: Web UI cannot handle Integer with cardinality 0/optional
   * #465: CloudService.isConnected not shown in Web UI
@@ -51,9 +273,10 @@ Know Issues :
   * #104: org.eclipse.kura.linux.net.ConnectionInfoImpl is IPv4 only
   * #77: Data Service will not connect for other locale than an english one
 
+
 Eclipse Kura - 2.0.1
 -------------------------------------------------------------------------
-  
+
 Bug Fixes :
   * Fixed github issues:
     * #473: org.eclipse.kura.linux.net.modem.ModemDriver uses Java 7 API but has BREE of Java 6
@@ -65,14 +288,14 @@ Bug Fixes :
     * #338: [Web2]: String input forced to a maximum length of 255
     * #316: Debian package should declare dependency on java
     * #296: [Web UI] Status | Connection: if the connection username is not set, "null" is shown
-    * #290: [Web UI] Refresh button in network configuration deselects the currently selected interface 
-    * #289: [Web UI] Wireless Password disappears after verification 
+    * #290: [Web UI] Refresh button in network configuration deselects the currently selected interface
+    * #289: [Web UI] Wireless Password disappears after verification
     * #275: [Dev Env] Add org.eclipse.kura.linux.bluetooth to the target-platform.
     * #242: [Web UI] Help is not always visible in the new web ui
-    
+
   * Merged no issue-related Pull Requests:
     * #489: Modified check for crypto value in isDefaultPassword.
-    * #484: Modified wrong references in some snapshots, modified sslManager service to perform a 
+    * #484: Modified wrong references in some snapshots, modified sslManager service to perform a
             different check for the default password and the password change.
     * #483: Modified launch configurations.
     * #480: Fix firewall issues
@@ -98,22 +321,22 @@ Bug Fixes :
     * #328: Fix output of executed commands
     * #325: Fix a possible Context Class Loader leak
     * #320: Provide Oomph setup and clean up build issue
-    
-  
+
+
 
 Know Issues :
   * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was 
-    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux". 
-    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease) 
-    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on 
+  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
+    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
+    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)
+    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on
     gatttool and the BLE connection failes.
   * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
     AccessPoint WiFi mode not working for Broadcom chipset.
   * Hardware watchdog: not implemented on all platforms
   * Only one WAN interface is currently supported. A warning in displayed
     in the WEB UI if the user attempts to enable more than one WAN interface
-  * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network 
+  * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network
     interface which happened even if network configuration hasn't been modified.
   * #467: Web UI cannot handle Integer with cardinality 0/optional
   * #465: CloudService.isConnected not shown in Web UI
@@ -157,19 +380,19 @@ Added Features :
   * Updated bluetooth APIs and added support for Bluez 5.x
   * Initial integration of RedHat's Camel stack
   * Created a Kura applications section inside the Eclipse marketplace and added support in the local web UI for the application
-    install via drag-and-drop 
+    install via drag-and-drop
   * Created SenseHat example project
   * Updated the SensorTag Example project exposing buzzer and leds
   * Created the beacon.scanner project
   * Native libraries now support x86_64
   * Reviewed/refactored the GPS position service
-  
+
 Bug Fixes :
   * Fixed github issues #78, #82, #96, #98, #112, #113, #114, #116, #120, #121, #127, #128, #129, #131,
     #134, #138, #139, #141, #143, #167, #169, #177, #179, #182, #184, #187, #188, #193, #198, #199, #201,
     #202, #203, #209, #212, #214, #215, #218, #227, #228, #229, #230, #233, #238, #241, #250, #252, #254,
     #255, #256, #258, #260, #267, #270, #271, #272, #279, #284, #302, #309
-  
+
 
 Know Issues :
   * Multiple connections: updating a service (e.g. MqttDataTransport) of a connection
@@ -200,8 +423,8 @@ Added Features :
   * Modified the Web UI adding a check in order to block SSIDs longer than 32 characters
   * Rolled-back Web UI filtering of SSID
   * Added some security headers to the Web UI
-  * Refactored security related tabs in the Web UI 
-  * Added property to the WatchdogService to specify the watchdog device  
+  * Refactored security related tabs in the Web UI
+  * Added property to the WatchdogService to specify the watchdog device
   * Modified build in order to include checks for Java 8 compact 2 compliance
   * Introduced new deployment application (named DEPLOY-V2) that improves updates download from the cloud platform
   * New firewall management, now based on iptables-save and iptables-restore
@@ -215,7 +438,7 @@ Added Features :
   * Improvements to the Development Environment
   * ConfigurationService: treat an OSGi ManagedService as a ConfigurableComponent
   * Updated documentation
-  
+
 Bug Fixes :
   * Fixed github issue #80
   * Fixed github issue #84
@@ -243,7 +466,7 @@ Know Issues :
     in the WEB UI if the user attempts to enable more than one WAN interface
   * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by
     ppp0 interface. Both ppp0 and HE910 interfaces are shown in the Web Admin.
-  * Web UI may hang when configuration snapshot is apploaded. This happens because HTTP connection is lost due to toogling of the network interface which happened even if network configuration hasn't been mo	   dified. 
+  * Web UI may hang when configuration snapshot is apploaded. This happens because HTTP connection is lost due to toogling of the network interface which happened even if network configuration hasn't been mo	   dified.
 
 
 

@@ -16,23 +16,23 @@ import java.util.UUID;
 
 public interface BluetoothGattService {
 
-	/*
-	 * Get characteristic based on UUID
-	 */
-	public BluetoothGattCharacteristic getCharacteristic(UUID uuid);
-	
-	/*
-	 * Get list of characteristics of the service
-	 */
-	public List<BluetoothGattCharacteristic> getCharacterisitcs();
-	
-	/*
-	 * Return the UUID of this service
-	 */
-	public UUID getUuid();
+    /*
+     * Get characteristic based on UUID
+     */
+    public BluetoothGattCharacteristic getCharacteristic(UUID uuid);
 
-	public String getStartHandle();
-	
-	public String getEndHandle();
-	
+    /*
+     * Get list of characteristics of the service
+     */
+    public List<BluetoothGattCharacteristic> getCharacterisitcs();
+
+    /*
+     * Return the UUID of this service
+     */
+    public UUID getUuid();
+
+    public String getStartHandle();
+
+    public String getEndHandle();
+
 }

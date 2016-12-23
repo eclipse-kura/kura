@@ -11,16 +11,15 @@
  *******************************************************************************/
 package org.eclipse.kura.net;
 
-
 /**
  * Marker interface for all network configuration classes
  */
 public interface NetConfig {
 
-	/**
-	 * Checks whether or not this configuration is valid.
-	 * 
-	 * @return		true if the configuration is valid, otherwise false
-	 */
-	public boolean isValid();
+    /**
+     * Checks whether or not this configuration is valid.
+     *
+     * @return true if the configuration is valid, otherwise false
+     */
+    public boolean isValid();
 }

@@ -35,90 +35,90 @@ import com.google.gwt.view.client.ListDataProvider;
 
 public class ThreadsTabUi extends Composite {
 
-	private static ThreadsTabUiUiBinder uiBinder = GWT.create(ThreadsTabUiUiBinder.class);
+    private static ThreadsTabUiUiBinder uiBinder = GWT.create(ThreadsTabUiUiBinder.class);
 
-	interface ThreadsTabUiUiBinder extends UiBinder<Widget, ThreadsTabUi> {
-	}
+    interface ThreadsTabUiUiBinder extends UiBinder<Widget, ThreadsTabUi> {
+    }
 
-	private static final Messages MSGS = GWT.create(Messages.class);
+    private static final Messages MSGS = GWT.create(Messages.class);
 
-	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-	private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 
-	@UiField
-	CellTable<GwtGroupedNVPair> threadsGrid = new CellTable<GwtGroupedNVPair>();
-	private ListDataProvider<GwtGroupedNVPair> threadsDataProvider = new ListDataProvider<GwtGroupedNVPair>();
+    @UiField
+    CellTable<GwtGroupedNVPair> threadsGrid = new CellTable<GwtGroupedNVPair>();
+    private final ListDataProvider<GwtGroupedNVPair> threadsDataProvider = new ListDataProvider<GwtGroupedNVPair>();
 
+    public ThreadsTabUi() {
+        initWidget(uiBinder.createAndBindUi(this));
+        loadProfileTable(this.threadsGrid, this.threadsDataProvider);
+        // loadThreadsData();
+    }
 
-	public ThreadsTabUi() {
-		initWidget(uiBinder.createAndBindUi(this));
-		loadProfileTable(threadsGrid, threadsDataProvider);
-		//loadThreadsData();
-	}
+    private void loadProfileTable(CellTable<GwtGroupedNVPair> threadsGrid2,
 
+    ListDataProvider<GwtGroupedNVPair> dataProvider) {
 
-	private void loadProfileTable(CellTable<GwtGroupedNVPair> threadsGrid2,
+        TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
 
-			ListDataProvider<GwtGroupedNVPair> dataProvider) {
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return object.getName();
+            }
+        };
+        col1.setCellStyleNames("status-table-row");
+        threadsGrid2.addColumn(col1, MSGS.deviceThreadName());
 
-		TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
-			@Override
-			public String getValue(GwtGroupedNVPair object) {
-				return object.getName();
-			}
-		};
-		col1.setCellStyleNames("status-table-row");
-		threadsGrid2.addColumn(col1, MSGS.deviceThreadName());
+        TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
 
-		TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
-			@Override
-			public String getValue(GwtGroupedNVPair object) {
-				return String.valueOf(object.getValue());
-			}
-		};
-		col2.setCellStyleNames("status-table-row");
-		threadsGrid2.addColumn(col2, MSGS.deviceThreadInfo());
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return String.valueOf(object.getValue());
+            }
+        };
+        col2.setCellStyleNames("status-table-row");
+        threadsGrid2.addColumn(col2, MSGS.deviceThreadInfo());
 
-		dataProvider.addDataDisplay(threadsGrid2);
-	}
+        dataProvider.addDataDisplay(threadsGrid2);
+    }
 
-	public void loadThreadsData() {
-		threadsDataProvider.getList().clear();
+    public void loadThreadsData() {
+        this.threadsDataProvider.getList().clear();
 
-		EntryClassUi.showWaitModal();
-		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+        EntryClassUi.showWaitModal();
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-			@Override
-			public void onFailure(Throwable ex) {
-				EntryClassUi.hideWaitModal();
-				FailureHandler.handle(ex);
-			}
+            @Override
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
 
-			@Override
-			public void onSuccess(GwtXSRFToken token) {
-				gwtDeviceService.findThreads(token, new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                ThreadsTabUi.this.gwtDeviceService.findThreads(token, new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
 
-					@Override
-					public void onFailure(Throwable caught) {
-						EntryClassUi.hideWaitModal();
-						threadsDataProvider.getList().clear();
-						FailureHandler.handle(caught);
-						threadsDataProvider.flush();
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        ThreadsTabUi.this.threadsDataProvider.getList().clear();
+                        FailureHandler.handle(caught);
+                        ThreadsTabUi.this.threadsDataProvider.flush();
 
-					}
+                    }
 
-					@Override
-					public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-						for (GwtGroupedNVPair resultPair : result) {
-							threadsDataProvider.getList().add(resultPair);
-						}		
-						int size= threadsDataProvider.getList().size();
-						threadsGrid.setVisibleRange(0, size);
-						threadsDataProvider.flush();
-						EntryClassUi.hideWaitModal();
-					}
-				});
-			}
-		});
-	}
+                    @Override
+                    public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                        for (GwtGroupedNVPair resultPair : result) {
+                            ThreadsTabUi.this.threadsDataProvider.getList().add(resultPair);
+                        }
+                        int size = ThreadsTabUi.this.threadsDataProvider.getList().size();
+                        ThreadsTabUi.this.threadsGrid.setVisibleRange(0, size);
+                        ThreadsTabUi.this.threadsDataProvider.flush();
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
+            }
+        });
+    }
 }

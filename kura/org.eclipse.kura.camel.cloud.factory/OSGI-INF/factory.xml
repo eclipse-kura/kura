@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" immediate="true" modified="modified" name="org.eclipse.kura.camel.cloud.factory.CamelFactory">
+   <implementation class="org.eclipse.kura.camel.cloud.factory.internal.CamelFactory"/>
+   <service>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+   </service>
+   <property name="kura.ui.service.hide" type="Boolean" value="true"/>
+</scr:component>

@@ -13,7 +13,7 @@ package org.eclipse.kura.net.firewall;
 
 /**
  * Marker interface for IPv4 firewall port forward configurations
- * 
+ *
  * @author eurotech
  *
  */

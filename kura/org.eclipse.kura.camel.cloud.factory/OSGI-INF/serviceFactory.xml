@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" configuration-policy="optional" immediate="true" name="org.eclipse.kura.camel.cloud.factory.CamelCloudServiceFactory">
+   <implementation class="org.eclipse.kura.camel.cloud.factory.internal.CamelCloudServiceFactory"/>
+   <service>
+      <provide interface="org.eclipse.kura.cloud.factory.CloudServiceFactory"/>
+   </service>
+   <property name="service.pid" type="String" value="org.eclipse.kura.camel.cloud.factory.CamelManager"/>
+   <reference bind="setConfigurationService" cardinality="1..1" interface="org.eclipse.kura.configuration.ConfigurationService" name="ConfigurationService" policy="static"/>
+</scr:component>

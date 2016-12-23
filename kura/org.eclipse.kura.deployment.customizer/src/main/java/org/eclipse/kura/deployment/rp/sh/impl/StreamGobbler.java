@@ -11,51 +11,56 @@
  *******************************************************************************/
 package org.eclipse.kura.deployment.rp.sh.impl;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 class StreamGobbler extends Thread {
-	InputStream is;
-	String type;
-	StringBuilder sb;
 
-	public StreamGobbler(InputStream is, String type) {
-		this.is = is;
-		this.type = type;
-		this.sb = new StringBuilder();
-	}
+    InputStream is;
+    String type;
+    StringBuilder sb;
 
-	public String getStreamAsString() {
-		return sb.toString();
-	}
+    public StreamGobbler(InputStream is, String type) {
+        this.is = is;
+        this.type = type;
+        this.sb = new StringBuilder();
+    }
 
-	public void run() {
-		InputStreamReader isr = new InputStreamReader(is);
-		BufferedReader br = new BufferedReader(isr);
+    public String getStreamAsString() {
+        return this.sb.toString();
+    }
 
-		try	{
-			final int BUF_LEN = 1024;
-			final int MAX_BYTES = 100 * BUF_LEN;
-			int count = 0;
-			char[] cbuf = new char[BUF_LEN];
-			int read = -1;
+    @Override
+    public void run() {
+        InputStreamReader isr = new InputStreamReader(this.is);
+        BufferedReader br = new BufferedReader(isr);
 
-			while ((read = br.read(cbuf)) != -1) {
-				//System.out.println(type + ">number of bytes read: " + read);
-				
-				if (count < MAX_BYTES) {
-					count += read; // might slightly exceed MAX_BYTES
-					sb.append(cbuf, 0, read);
-				}
-			}
-		} catch (IOException ioe) {
-			// ioe.printStackTrace();
-		} finally {
-			try {
-				br.close();
-				is.close(); // Just in case...
-			} catch (IOException e) {
-				// Ignore
-			}
-		}
-	}
+        try {
+            final int BUF_LEN = 1024;
+            final int MAX_BYTES = 100 * BUF_LEN;
+            int count = 0;
+            char[] cbuf = new char[BUF_LEN];
+            int read = -1;
+
+            while ((read = br.read(cbuf)) != -1) {
+                // System.out.println(type + ">number of bytes read: " + read);
+
+                if (count < MAX_BYTES) {
+                    count += read; // might slightly exceed MAX_BYTES
+                    this.sb.append(cbuf, 0, read);
+                }
+            }
+        } catch (IOException ioe) {
+            // ioe.printStackTrace();
+        } finally {
+            try {
+                br.close();
+                this.is.close(); // Just in case...
+            } catch (IOException e) {
+                // Ignore
+            }
+        }
+    }
 }

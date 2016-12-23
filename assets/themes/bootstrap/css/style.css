@@ -1,7 +1,11 @@
 
 
 body {
-  padding-top: 70px;
+  position: fixed;
+  top: 50px;
+  width: 100%;
+  bottom: 0;
+  overflow: hidden;
 }
 
 td, thead {
@@ -15,6 +19,7 @@ p img {
 
 .navbar-default {
     background-color: #4b8fd0;
+    margin-bottom: 0;
 }
 
 .navbar-default .navbar-header .navbar-brand {
@@ -26,7 +31,19 @@ p img {
 }
 
 #navigation {
-  min-width: 225px; 
+  padding-top: 25px;
+}
+
+@media (max-width: 992px) {
+  #navigation {
+    width: 100% !important;
+  }
+}
+
+@media (min-width: 992px) {
+  #navigation {
+    width: 25% !important;
+  }
 }
 
 #navigation li a {
@@ -34,7 +51,32 @@ p img {
   padding: 3px 15px;
 }
 
+.main-container {
+  height: 100%;
+}
 
+.main-content {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.icon-bar {
+  color: white !important;
+  background-color: white !important;
+}
+
+.navbar-toggle {
+  border: none;
+  border-radius: 0;
+}
+
+.navbar-toggle:hover, .navbar-toggle:active, .navbar-toggle:focus {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+footer {
+  height: 50px;
+}
 /* Custom container */
 .container-narrow {
   margin: 0 auto;
@@ -100,9 +142,3 @@ p img {
   background: #57A957;
   border: 1px solid #4c964d;
   color: #FFF; }
-
-@media (max-width: 1000px){
-  .affix{
-      position:static;
-  }
-}

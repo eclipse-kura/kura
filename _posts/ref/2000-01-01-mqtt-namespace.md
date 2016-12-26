@@ -159,7 +159,7 @@ Eclipse Kura payload definition can be found at the following link:
 Once the response for a given request is received, the requester
 unsubscribes from the REPLY topic.
 
-###<span id="mqtt-requestresponse-example" class="anchor"></span>MQTT Request/Response Example
+### <span id="mqtt-requestresponse-example" class="anchor"></span>MQTT Request/Response Example
 
 The following sample request/response conversation shows the device
 configuration being provided for an application:

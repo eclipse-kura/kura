@@ -204,14 +204,14 @@ the gateway device. If a response is not received within the timeout
 interval, the server can expect that either the device or the
 application is offline.
 
-##MQTT Remote Resource Management
+## MQTT Remote Resource Management
 
 A remote server interacts with the application’s resources through
 *read*, *create* and *update*, *delete,* and *execute* operations. These
 operations are based on the previously described request/response
 conversations.
 
-###Read Resources
+### Read Resources
 
 An MQTT message published on the following topic is a read request for
 the resource identified by the **resource_id**:
@@ -235,7 +235,7 @@ Similarly, a read request issued to the topic
 with the latest value for only a temperature sensor that is being
 managed by the application.
 
-###Create or Update Resources
+### Create or Update Resources
 
 An MQTT message published on the following topic is a create or update
 request for the resource identified by the **resource_id**:
@@ -253,7 +253,7 @@ example, to set the value for an actuator, a message can be published to
 the topic "**$EDC/account_name/client_id/app_id/PUT/actuator/1**"
 with the new value suplliied in the message payload.
 
-###Delete Resources
+### Delete Resources
 
 An MQTT message published on the following topic is a delete request for
 the resource identified by the **resource_id**:
@@ -275,7 +275,7 @@ The receiving application executes the specified resource, if it exists,
 and responds with a REPLY message. The semantics of the execute
 operation is application specific.
 
-###Other Operations
+### Other Operations
 
 The IOT application may respond to certain commands, such as taking a
 snapshot of its configuration or executing an OS-level command. The
@@ -287,7 +287,7 @@ An MQTT message published with this topic triggers the execution of the
 associated command. The EXEC message may contain properties in the MQTT
 payload that can be used to parameterize the command execution.
 
-##MQTT Unsolicited Events
+## MQTT Unsolicited Events
 
 IOT applications have the ability to send unsolicited messages to a
 remote server using events to periodically report data readings from
@@ -301,7 +301,7 @@ unsolicited data observations for a given resource:
 
 *  **account_name/client_id/app_id/resource_id**
 
-##Discoverability
+## Discoverability
 
 The MQTT namespace guidelines in this document do not address remote
 discoverability of a given device’s applications and its resources. The
@@ -309,7 +309,7 @@ described interaction pattern can be easily adopted to define an
 application whose only responsibility is reporting the device profile in
 terms of installed applications and available resources.
 
-##Remote OSGi Management via MQTT
+## Remote OSGi Management via MQTT
 
 The concepts previously described have been applied to develop a
 solution that allows for the remote management of certain aspects of an
@@ -332,7 +332,7 @@ The applicability of the remote management solution, as inspired by the
 OSGi component model, can be extended beyond OSGi as the contract with
 the managing server based on MQTT topics and XML payloads.
 
-###Remote OSGi ConfigurationAdmin Interactions via MQTT
+### Remote OSGi ConfigurationAdmin Interactions via MQTT
 
 An application bundle is installed in the gateway to allow for remote
 management of the configuration properties of the services running in

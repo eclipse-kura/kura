@@ -43,10 +43,10 @@
         </div>
       </div>
     </nav>
-    <div class="container" style="padding-bottom: 40px;">
-      <div class="row">
-        <div id="navigation" class="col-md-3 collapse navbar-collapse navbar-ex1-collapse" style="font-size: 1em; font-weight: bold; margin-right: 50px;">
-          <ul data-spy="affix" class="list-unstyled">
+    <div class="container main-container">
+      <div class="row main-container">
+        <div id="navigation" class="col-md-3 collapse navbar-collapse navbar-ex1-collapse" style="font-size: 1em; font-weight: bold;">
+          <ul class="list-unstyled">
             {% for section in site.sections %}
               {% assign attr = section[0] %}
               {% assign label = section[1] %}
@@ -60,18 +60,18 @@
             {% endfor %}
           </ul>
         </div>
-        <div class="col-md-9">
+        <div class="col-md-9 main-content">
           {{ content }}
+          <hr>
+          <footer>
+            <p>
+              <span class="pull-right text-muted">
+                Documentation for Eclipse Kura™
+              </span>
+            </p>
+          </footer>
         </div>
       </div>
-      <hr>
-      <footer>
-        <p>
-          <span class="pull-right text-muted">
-            Documentation for Eclipse Kura™
-          </span>
-        </p>
-      </footer>
     </div>
 
     <script src="{{site.baseurl}}/assets/themes/bootstrap/resources/jquery/jquery.min.js"></script>

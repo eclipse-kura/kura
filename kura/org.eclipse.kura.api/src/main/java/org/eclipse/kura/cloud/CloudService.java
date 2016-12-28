@@ -47,7 +47,7 @@ public interface CloudService {
      * <br>
      * If the bundle using the CloudClient relies on subscriptions,
      * it is responsibility of the application to implement the
-     * {@link CloudClientListener#connectionRestored} callback method
+     * {@link CloudClientListener#onConnectionEstablished()} callback method
      * in the CloudCallbackHandler to restore the subscriptions it needs.
      *
      * @param appId

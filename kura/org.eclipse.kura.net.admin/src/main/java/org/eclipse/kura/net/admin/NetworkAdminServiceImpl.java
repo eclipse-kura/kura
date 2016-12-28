@@ -63,6 +63,7 @@ import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkAdminService;
 import org.eclipse.kura.net.admin.event.FirewallConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
+import org.eclipse.kura.net.admin.monitor.WifiInterfaceState;
 import org.eclipse.kura.net.admin.visitor.linux.WpaSupplicantConfigWriter;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
@@ -945,13 +946,39 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         try {
             NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
 
-            if (!LinuxNetworkUtil.hasAddress(interfaceName)
-                    || type == NetInterfaceType.WIFI && !LinuxNetworkUtil.isLinkUp(interfaceName)) {
+            NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
+            WifiMode wifiMode = WifiMode.UNKNOWN;
+            WifiConfig wifiConfig = null;
+            WifiInterfaceState wifiInterfaceState = null;
+            if (type == NetInterfaceType.WIFI) {
+                List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> wifiNetInterfaceConfigs = getWifiInterfaceConfigs();
+
+                List<? extends NetInterfaceAddressConfig> wifiNetInterfaceAddressConfigs = getWifiNetInterfaceAddressConfigs(
+                        interfaceName, wifiNetInterfaceConfigs);
+
+                WifiInterfaceAddressConfig wifiInterfaceAddressConfig = getWifiAddressConfig(
+                        wifiNetInterfaceAddressConfigs);
+
+                wifiMode = wifiInterfaceAddressConfig.getMode();
+                wifiInterfaceState = new WifiInterfaceState(interfaceName, wifiMode);
+
+                for (NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
+                    if (netConfig instanceof NetConfigIP4) {
+                        status = ((NetConfigIP4) netConfig).getStatus();
+                        s_logger.debug("Interface status is set to {}", status);
+                    } else if (netConfig instanceof WifiConfig && ((WifiConfig) netConfig).getMode() == wifiMode) {
+                        wifiConfig = (WifiConfig) netConfig;
+                    }
+                }
+            }
+
+            if (!LinuxNetworkUtil.hasAddress(interfaceName) || ((type == NetInterfaceType.WIFI)
+                    && (wifiInterfaceState != null) && !wifiInterfaceState.isLinkUp())) {
 
                 s_logger.info("bringing interface {} up", interfaceName);
 
                 if (type == NetInterfaceType.WIFI) {
-                    enableWifiInterface(interfaceName);
+                    enableWifiInterface(interfaceName, status, wifiMode, wifiConfig);
                 }
                 if (dhcp) {
                     renewDhcpLease(interfaceName);
@@ -972,6 +999,45 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
+
+    }
+
+    private WifiInterfaceAddressConfig getWifiAddressConfig(
+            List<? extends NetInterfaceAddressConfig> wifiNetInterfaceAddressConfigs) {
+        for (NetInterfaceAddressConfig wifiNetInterfaceAddressConfig : wifiNetInterfaceAddressConfigs) {
+            if (wifiNetInterfaceAddressConfig instanceof WifiInterfaceAddressConfig) {
+                return (WifiInterfaceAddressConfig) wifiNetInterfaceAddressConfig;
+            }
+        }
+        return null;
+    }
+
+    private List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getWifiInterfaceConfigs()
+            throws KuraException {
+        List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = getNetworkInterfaceConfigs();
+
+        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> wifiNetInterfaceConfigs = new ArrayList<NetInterfaceConfig<? extends NetInterfaceAddressConfig>>();
+        for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
+            if (netInterfaceConfig.getType() == NetInterfaceType.WIFI) {
+                wifiNetInterfaceConfigs.add(netInterfaceConfig);
+            }
+        }
+
+        return wifiNetInterfaceConfigs;
+    }
+
+    private List<? extends NetInterfaceAddressConfig> getWifiNetInterfaceAddressConfigs(String interfaceName,
+            List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> wifiNetInterfaceConfigs) {
+        List<? extends NetInterfaceAddressConfig> wifiNetInterfaceAddresses = null;
+
+        for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> wifiNetInterfaceConfig : wifiNetInterfaceConfigs) {
+            if (wifiNetInterfaceConfig.getName().equals(interfaceName)) {
+                wifiNetInterfaceAddresses = wifiNetInterfaceConfig.getNetInterfaceAddresses();
+                break;
+            }
+        }
+
+        return wifiNetInterfaceAddresses;
     }
 
     @Override
@@ -1137,6 +1203,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
         try {
             if (wifiMode == WifiMode.MASTER) {
+                reloadKernelModule(ifaceName, WifiMode.INFRA);
                 WpaSupplicantConfigWriter wpaSupplicantConfigWriter = WpaSupplicantConfigWriter.getInstance();
                 wpaSupplicantConfigWriter.generateTempWpaSupplicantConf();
 
@@ -1278,6 +1345,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                     s_logger.debug("getWifiHotspots() :: stoping temporary instance of wpa_supplicant");
                     WpaSupplicantManager.stop(ifaceName);
                 }
+                reloadKernelModule(ifaceName, WifiMode.MASTER);
             }
         } catch (Throwable t) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, t, "scan operation has failed");
@@ -1539,7 +1607,10 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     // Private Methods
     //
     // ----------------------------------------------------------------
-    private void enableWifiInterface(String ifaceName) throws KuraException {
+
+    // TODO: simplify method signature. Probably we could take the mode from the wifiConfig.
+    private void enableWifiInterface(String ifaceName, NetInterfaceStatus status, WifiMode wifiMode,
+            WifiConfig wifiConfig) throws KuraException {
 
         // ignore mon.* interface
         if (ifaceName.startsWith("mon.")) {
@@ -1548,37 +1619,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         // ignore redpine vlan interface
         if (ifaceName.startsWith("rpine")) {
             return;
-        }
-
-        NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
-        WifiMode wifiMode = WifiMode.UNKNOWN;
-        WifiConfig wifiConfig = null;
-
-        List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = getNetworkInterfaceConfigs();
-        for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-            if (netInterfaceConfig.getName().equals(ifaceName)) {
-                List<? extends NetInterfaceAddressConfig> netInterfaceAddresses = netInterfaceConfig
-                        .getNetInterfaceAddresses();
-                if (netInterfaceAddresses != null) {
-                    for (NetInterfaceAddressConfig netInterfaceAddress : netInterfaceAddresses) {
-                        if (netInterfaceAddress instanceof WifiInterfaceAddressConfig) {
-                            wifiMode = ((WifiInterfaceAddressConfig) netInterfaceAddress).getMode();
-
-                            for (NetConfig netConfig : netInterfaceAddress.getConfigs()) {
-                                if (netConfig instanceof NetConfigIP4) {
-                                    status = ((NetConfigIP4) netConfig).getStatus();
-                                    s_logger.debug("Interface status is set to {}", status);
-                                } else if (netConfig instanceof WifiConfig) {
-                                    if (((WifiConfig) netConfig).getMode() == wifiMode) {
-                                        wifiConfig = (WifiConfig) netConfig;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                break;
-            }
         }
 
         s_logger.debug("Configuring {} for {} mode", ifaceName, wifiMode);
@@ -1673,4 +1713,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     private int frequencyMhz2Channel(int frequency) {
         return (frequency - 2407) / 5;
     }
+
+    private void reloadKernelModule(String interfaceName, WifiMode wifiMode) throws KuraException {
+        s_logger.info("monitor() :: reload {} using kernel module for WiFi mode {}", interfaceName, wifiMode);
+        LinuxNetworkUtil.unloadKernelModule(interfaceName);
+        LinuxNetworkUtil.loadKernelModule(interfaceName, wifiMode);
+    }
+
 }

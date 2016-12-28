@@ -31,14 +31,15 @@ public interface PositionService {
 
     /**
      * Returns the current geographic position.<br>
-     * The org.osgi.util.measurement.Measurement class is used to represent the values that make up a position :<br>
-     * <li>getLongitude() : returns the longitude of this position in radians.</li>
-     * <li>getLatitude() : returns the latitude of this position in radians.</li>
-     * <li>getSpeed() : returns the ground speed of this position in meters per second.</li>
+     * The org.osgi.util.measurement.Measurement class is used to represent the values that make up a position:
+     * <ul>
+     * <li>getLongitude() : returns the longitude of this position in radians.
+     * <li>getLatitude() : returns the latitude of this position in radians.
+     * <li>getSpeed() : returns the ground speed of this position in meters per second.
      * <li>getTrack() : Returns the track of this position in radians as a compass heading. The track is the
      * extrapolation of
-     * previous previously measured positions to a future position.</li>
-     * <br>
+     * previous previously measured positions to a future position.
+     * </ul>
      *
      * @see org.osgi.util.position.Position Position
      */
@@ -46,11 +47,13 @@ public interface PositionService {
 
     /**
      * Returns the current NMEA geographic position.
-     * <li>getLongitude() : returns the longitude of this position in degrees.</li>
-     * <li>getLatitude() : returns the latitude of this position in degrees.</li>
-     * <li>getSpeedKmh() : returns the ground speed of this position in km/h.</li>
-     * <li>getSpeedMph() : returns the ground speed of this position in mph.</li>
+     * <ul>
+     * <li>getLongitude() : returns the longitude of this position in degrees.
+     * <li>getLatitude() : returns the latitude of this position in degrees.
+     * <li>getSpeedKmh() : returns the ground speed of this position in km/h.
+     * <li>getSpeedMph() : returns the ground speed of this position in mph.
      * <li>getTrack() : Returns the track of this position in degrees as a compass heading.
+     * </ul>
      *
      * @see org.eclipse.kura.position.NmeaPosition NmeaPosition
      */

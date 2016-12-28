@@ -14,13 +14,13 @@ package org.eclipse.kura.gpio;
 import java.io.IOException;
 
 /**
- * The <b>KuraGPIOPin</b> class is used to access the GPIO resource.<br/>
+ * The <b>KuraGPIOPin</b> class is used to access the GPIO resource.<br>
  * The pin can be programmed either as an input or as an output. The way this is handled is implementation dependent.
- * <br/>
- * <br/>
+ * <br>
+ * <br>
  * Pins must be opened and closed before setting or getting values. Implementations, however, could automatically open a
- * pin if it is closed when accessing it, or automatically close it when it is not needed anymore.<br/>
- * <br/>
+ * pin if it is closed when accessing it, or automatically close it when it is not needed anymore.<br>
+ * <br>
  * Status of input pins can be retrieved either with a call to {@link #getValue()} or by attaching a
  * {@link PinStatusListener}
  * to the pin.
@@ -57,7 +57,7 @@ public interface KuraGPIOPin {
 
     /**
      * Adds a {@link PinStatusListener} to this input pin. The listener will be notified when the status of this input
-     * changes.<br/>
+     * changes.<br>
      * Attaching a listener to an output pin should not raise an exception, but will have no result.
      *
      * @param listener
@@ -70,8 +70,8 @@ public interface KuraGPIOPin {
     public void addPinStatusListener(PinStatusListener listener) throws KuraClosedDeviceException, IOException;
 
     /**
-     * Removes a {@link PinStatusListener} from this input pin.<br/>
-     * If the pin has no listeners attached, this method should fail silently.<br/>
+     * Removes a {@link PinStatusListener} from this input pin.<br>
+     * If the pin has no listeners attached, this method should fail silently.<br>
      *
      * @param listener
      *            Listener to be removed from this pin
@@ -95,8 +95,8 @@ public interface KuraGPIOPin {
     public void open() throws KuraGPIODeviceException, KuraUnavailableDeviceException, IOException;
 
     /**
-     * Closes this pin and deallocates the resources needed to communicate with it.<br/>
-     * <br/>
+     * Closes this pin and deallocates the resources needed to communicate with it.<br>
+     * <br>
      * If there is a {@link PinStatusListener} attached to this pin, the implementation should remove it
      * before closing the resource.
      *
@@ -107,13 +107,13 @@ public interface KuraGPIOPin {
 
     /**
      *
-     * @return {@link KuraGPIOPinDirection} representing the direction (Input/Output) of the PIN
+     * @return {@link KuraGPIODirection} representing the direction (Input/Output) of the PIN
      */
     public KuraGPIODirection getDirection();
 
     /**
      *
-     * @return {@link KuraGPIOMode} representing the mode of the pun.<br/>
+     * @return {@link KuraGPIOMode} representing the mode of the pun.<br>
      *         Open Drain / Push Pull for outputs, Pull Up / Pull Down for inputs.
      */
     public KuraGPIOMode getMode();

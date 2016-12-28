@@ -11,4 +11,5 @@
    </property>
    <property name="kura.ui.csf.pid.default" type="String" value="org.eclipse.kura.cloud.CloudService-2"/>
    <property name="kura.ui.csf.pid.regex" type="String" value="org.eclipse.kura.cloud.CloudService\-[a-zA-Z0-9]+"/>
+   <property name="service.pid" type="String" value="org.eclipse.kura.core.cloud.factory.DefaultCloudServiceFactory"/>
 </scr:component>

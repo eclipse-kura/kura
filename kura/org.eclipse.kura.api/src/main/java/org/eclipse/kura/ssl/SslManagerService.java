@@ -135,7 +135,7 @@ public interface SslManagerService {
      * deleted from such store.
      * Otherwise the certificate will be deleted from the default Java VM trust store.
      *
-     * @param cn
+     * @param alias
      */
     public void deleteTrustCertificate(String alias) throws GeneralSecurityException, IOException;
 

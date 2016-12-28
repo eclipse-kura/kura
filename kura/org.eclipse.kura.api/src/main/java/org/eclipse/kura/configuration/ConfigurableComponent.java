@@ -13,7 +13,7 @@ package org.eclipse.kura.configuration;
 
 /**
  * Marker interface for all Service Component that wants to expose the Configuration through the ConfigurationService.
- * The Configuration Service tracks all OSGi Components which implement the {@see ConfigurableComponent} marker
+ * The Configuration Service tracks all OSGi Components which implement the {@link ConfigurableComponent} marker
  * interface.
  * When a ConfigurableComponent is registered, the Configuration Service will call its "update"
  * method with the latest saved configuration as returned the ConfigurationAdmin or, if none

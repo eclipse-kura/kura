@@ -68,7 +68,7 @@ public class ModemConfig implements NetConfig {
      * @param profileID
      *            - PDP profile ID as {@link int}
      * @param pdpType
-     *            - PDP type as {@link PDP_Type}
+     *            - PDP type as {@link PdpType}
      * @param dataCompression
      *            - PDP data compression as {@link int}
      * @param headerCompresion
@@ -338,7 +338,7 @@ public class ModemConfig implements NetConfig {
     /**
      * Reports PDP type.
      *
-     * @return PDP type as {@link PDP_Type}
+     * @return PDP type as {@link PdpType}
      */
     public PdpType getPdpType() {
         return this.m_pdpType;
@@ -348,7 +348,7 @@ public class ModemConfig implements NetConfig {
      * Sets PDP type.
      *
      * @param pdpType
-     *            - PDP type as {@link PDP_Type}
+     *            - PDP type as {@link PdpType}
      */
     public void setPdpType(PdpType pdpType) {
         this.m_pdpType = pdpType;
@@ -385,7 +385,7 @@ public class ModemConfig implements NetConfig {
     /**
      * Sets PDP IP address.
      *
-     * @param ip
+     * @param address
      *            - IP address as {@link IPAddress}
      */
     public void setIpAddress(IPAddress address) {
@@ -423,7 +423,7 @@ public class ModemConfig implements NetConfig {
     /**
      * Sets a value of numeric parameter that supports PDP header compression.
      *
-     * @param -
+     * @param headerCompression
      *            headerCompression PDP header compression as {@link int}
      */
     public void setHeaderCompression(int headerCompression) {

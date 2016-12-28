@@ -82,7 +82,6 @@ public interface ModemInterface<T extends ModemInterfaceAddress> extends NetInte
     /**
      * Reports modem's power mode. (e.g. ONLINE, OFFLINE, LOW_POWER)
      *
-     * @throws KuraException
      * @return modem power mode
      */
     public ModemPowerMode getPowerMode();

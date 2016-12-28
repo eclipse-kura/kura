@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.clock;
 
-import java.util.Collections;
 import java.util.Map;
 
 import org.osgi.service.event.Event;
@@ -24,8 +23,6 @@ public class ClockEvent extends Event {
 
     /** Topic of the ClockEvent */
     public static final String CLOCK_EVENT_TOPIC = "org/eclipse/kura/clock";
-
-    public static final ClockEvent EMPTY = new ClockEvent(Collections.<String, Object> emptyMap());
 
     public ClockEvent(Map<String, ?> properties) {
         super(CLOCK_EVENT_TOPIC, properties);

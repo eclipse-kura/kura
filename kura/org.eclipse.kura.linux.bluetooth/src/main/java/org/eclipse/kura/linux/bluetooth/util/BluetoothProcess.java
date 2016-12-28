@@ -104,6 +104,20 @@ public class BluetoothProcess {
                 }
             }
         });
+        
+        // process the error stream
+        this.m_futureErrorGobbler = s_streamGobblers.submit(new Runnable() {
+
+            @Override
+            public void run() {
+                Thread.currentThread().setName("BluetoothProcess BTSnoop ErrorStream Gobbler");
+                try {
+                    readBTErrorStreamFully(BluetoothProcess.this.m_process.getErrorStream(), listener);
+                } catch (IOException e) {
+                    s_logger.warn("Error in processing the error stream : ", e);
+                }
+            }
+        });
 
     }
 
@@ -118,6 +132,9 @@ public class BluetoothProcess {
     public void destroyBTSnoop() {
         if (this.m_process != null) {
             this.btSnoopReady = false;
+            closeStreams();
+            this.m_process.destroy();
+            this.m_process = null;
         }
     }
 
@@ -151,18 +168,30 @@ public class BluetoothProcess {
         this.parser.setInputStream(is);
 
         while (this.btSnoopReady) {
-            byte[] packet = this.parser.readRecord();
-            listener.processBTSnoopRecord(packet);
+            if (is != null) {
+                byte[] packet = this.parser.readRecord();
+                listener.processBTSnoopRecord(packet);
+            }
         }
-
-        closeStreams();
-        this.m_process.destroy();
-        this.m_process = null;
 
         s_logger.debug("End of stream!");
     }
 
     private void readErrorStreamFully(InputStream is, BluetoothProcessListener listener) throws IOException {
+        int ch;
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        BufferedReader br = null;
+        br = new BufferedReader(new InputStreamReader(is));
+        while ((ch = br.read()) != -1) {
+            stringBuilder.append((char) ch);
+        }
+        listener.processErrorStream(stringBuilder.toString());
+        s_logger.debug("End of stream!");
+    }
+    
+    private void readBTErrorStreamFully(InputStream is, BTSnoopListener listener) throws IOException {
         int ch;
 
         StringBuilder stringBuilder = new StringBuilder();

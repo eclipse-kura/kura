@@ -26,7 +26,7 @@ public interface RoutingAgentService {
      * Sets interface priorities
      *
      * @param priorities
-     *            - list of interface priorities as {@link Map<String, Integer>}
+     *            - list of interface priorities as {@link Map}
      */
     public void setPriorities(Map<String, Integer> priorities);
 

@@ -14,8 +14,8 @@ package org.eclipse.kura.data;
 /**
  * Implementors of this interface will be able to handle {@link DataService}
  * events such as notifications of connection establishing, message arrival, etc.
- * In order to detect implementors, the {@link DataService} uses the The
- * whiteboard pattern {@link http://www.osgi.org/wiki/uploads/Links/whiteboard.pdf}.
+ * In order to detect implementors, the {@link DataService} uses the the
+ * <a href="http://www.osgi.org/wiki/uploads/Links/whiteboard.pdf">whiteboard pattern</a>.
  * <br>
  * All registered listeners are called synchronously by the {@link DataService} at the occurrence of the event.
  * It expected that implementers of this interface do NOT perform long running tasks in the implementation of this

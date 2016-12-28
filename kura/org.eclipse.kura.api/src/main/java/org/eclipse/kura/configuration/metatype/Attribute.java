@@ -28,22 +28,20 @@ import java.util.List;
  * The following schema fragment specifies the expected content contained within this class.
  *
  * <pre>
- * &lt;complexType name="Tattribute">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="Value" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;any processContents='lax' namespace='##other' maxOccurs="unbounded" minOccurs="0"/>
- *       &lt;/sequence>
- *       &lt;attribute name="adref" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="content" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;anyAttribute/>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="Tattribute"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="Value" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;any processContents='lax' namespace='##other' maxOccurs="unbounded" minOccurs="0"/&gt;
+ *       &lt;/sequence&gt;
+ *       &lt;attribute name="adref" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="content" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;anyAttribute/&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
- *
- *
  */
 public interface Attribute {
 

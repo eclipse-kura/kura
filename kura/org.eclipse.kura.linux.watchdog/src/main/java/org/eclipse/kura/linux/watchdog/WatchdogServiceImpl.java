@@ -42,10 +42,9 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     private int pingInterval = 2000;	// milliseconds
     private static ArrayList<CriticalComponentImpl> s_criticalServiceList;
-    private boolean m_configEnabled = false;	// initialized in properties, if false -> no watchdog
-    private boolean m_enabled;
-    private boolean m_watchdogToStop = false;
-    private boolean m_serviceToStop = false;
+    private volatile boolean m_configEnabled = false;	// initialized in properties, if false -> no watchdog
+    private volatile boolean m_enabled;
+    private volatile boolean m_watchdogToStop = false;
     private String watchdogDevice = "/dev/watchdog";
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
@@ -71,7 +70,6 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         }
         s_criticalServiceList = new ArrayList<CriticalComponentImpl>();
         this.m_enabled = false;
-        this.m_serviceToStop = false;
 
         this.m_pollThreadExecutor = Executors.newSingleThreadScheduledExecutor();
 
@@ -87,28 +85,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             s_pollThreadTask = null;
         }
 
-        if (this.m_enabled) {
-            File f = null;
-            FileWriter bw = null;
-            try {
-                f = new File(this.watchdogDevice);
-                bw = new FileWriter(f);
-                bw.write('V');
-                this.m_enabled = false;
-                this.m_serviceToStop = true;
-                s_logger.info("watchdog stopped");
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    if (bw != null) {
-                        bw.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        disableWatchdog();
 
         if (this.m_pollThreadExecutor != null) {
             s_logger.debug("Terminating WatchdogServiceImpl Thread ...");
@@ -140,7 +117,9 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             }
             if (!this.m_configEnabled) {
                 if (this.m_enabled) {
+                    // stop the watchdog
                     this.m_watchdogToStop = true;
+                    disableWatchdog();
                 }
                 return;
             }
@@ -210,8 +189,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     public void unregisterCriticalComponent(CriticalComponent criticalComponent) {
         synchronized (s_criticalServiceList) {
             for (int i = 0; i < s_criticalServiceList.size(); i++) {
-                if (criticalComponent.getCriticalComponentName()
-                        .compareTo(s_criticalServiceList.get(i).getName()) == 0) {
+                if (criticalComponent.getCriticalComponentName().compareTo(s_criticalServiceList.get(i).getName()) == 0) {
                     s_criticalServiceList.remove(i);
                     s_logger.debug("Critical service " + criticalComponent.getCriticalComponentName() + " removed, "
                             + System.currentTimeMillis());
@@ -245,26 +223,8 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private void doWatchdogLoop() {
         if (this.m_enabled) {
             if (this.m_watchdogToStop) {
-                File f = null;
-                FileWriter bw = null;
-                try {
-                    f = new File(this.watchdogDevice);
-                    bw = new FileWriter(f);
-                    bw.write('V');
-                    s_logger.info("watchdog stopped");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        if (bw != null) {
-                            bw.close();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+                disableWatchdog();
                 this.m_watchdogToStop = false;
-                this.m_enabled = false;
             } else {
                 boolean failure = false;
                 // Critical Services
@@ -289,15 +249,14 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
                         bw.flush();
                         s_logger.debug("watchdog refreshed");
                     } catch (IOException e) {
-                        s_logger.info("IOException : " + e.getMessage());
-                        e.printStackTrace();
+                        s_logger.error("IOException on refresh watchdog", e);
                     } finally {
                         try {
                             if (bw != null) {
                                 bw.close();
                             }
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            s_logger.error("IOException on closing watchdog file", e);
                         }
                     }
                 }
@@ -316,15 +275,39 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
                     this.m_enabled = true;
                     s_logger.info("watchdog started");
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    s_logger.error("IOException on start watchdog", e);
                 } finally {
                     try {
                         if (bw != null) {
                             bw.close();
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        s_logger.error("IOException on closing watchdog file", e);
                     }
+                }
+            }
+        }
+    }
+
+    private void disableWatchdog() {
+        if (this.m_enabled) {
+            File f = null;
+            FileWriter bw = null;
+            try {
+                f = new File(this.watchdogDevice);
+                bw = new FileWriter(f);
+                bw.write('V');
+                this.m_enabled = false;
+                s_logger.info("watchdog disabled");
+            } catch (IOException e) {
+                s_logger.error("IOException on disable watchdog", e);
+            } finally {
+                try {
+                    if (bw != null) {
+                        bw.close();
+                    }
+                } catch (IOException e) {
+                    s_logger.error("IOException on closing watchdog file", e);
                 }
             }
         }

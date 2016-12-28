@@ -51,12 +51,8 @@ public interface WatchdogService {
      * Once registered, the critical service must call the checkin()
      * method (at a frequency higher than 1/timeout) to prevent a system reboot.
      *
-     * @param criticalService
-     *            A <code>CriticalService</code> to be registered.
-     * @param timeout
-     *            A timeout value that the critical service cannot exceed
-     *            between updates without generating a system reboot. The
-     *            time is expressed in seconds.
+     * @param criticalComponent
+     *            The CriticalComponent to be registered.
      */
     @Deprecated
     public void registerCriticalService(CriticalComponent criticalComponent);
@@ -66,8 +62,8 @@ public interface WatchdogService {
      * Once unregistered, the critical service will no longer call the
      * checkin() method.
      *
-     * @param criticalService
-     *            A <code>CriticalService</code> to be unregistered.
+     * @param criticalComponent
+     *            The CriticalComponent to be unregistered.
      */
     @Deprecated
     public void unregisterCriticalService(CriticalComponent criticalComponent);
@@ -77,12 +73,8 @@ public interface WatchdogService {
      * Once registered, the critical component must call the checkin()
      * method (at a frequency higher than 1/timeout) to prevent a system reboot.
      *
-     * @param CriticalComponent
+     * @param criticalComponent
      *            The CriticalComponent to be registered.
-     * @param timeout
-     *            A timeout value that the critical service cannot exceed
-     *            between updates without generating a system reboot. The
-     *            time is expressed in seconds.
      */
     public void registerCriticalComponent(CriticalComponent criticalComponent);
 
@@ -91,7 +83,7 @@ public interface WatchdogService {
      * Once unregistered, the critical component will no longer call the
      * checkin() method.
      *
-     * @param CriticalComponent
+     * @param criticalComponent
      *            The CriticalComponent to be unregistered.
      */
     public void unregisterCriticalComponent(CriticalComponent criticalComponent);

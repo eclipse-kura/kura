@@ -17,11 +17,7 @@ such as the [Raspberry Pi installation guide](https://www.raspberrypi.org/docume
 but after this step you could configure wifi and repeat the discovery step.
 1. Install pre-requisites:
       ```
-      dnf -y install unzip psmisc tar telnet bind iptables iptables-services dhcp hostapd dos2unix java-1.8.0-openjdk-headless
-      ```
-1. Create symlink for older libudev 
-      ```
-      ln -s /usr/lib/libudev.so.1 /usr/lib/libudev.so.0
+      dnf -y install unzip psmisc tar telnet bind iptables iptables-services dhcp hostapd dos2unix wireless-tools net-tools usbutils java-1.8.0-openjdk-headless
       ``` 
 1. Copy kura_2.1.0_fedorapi_installer.sh to the Fedora machine
 1. Run kura_2.1.0_fedorapi_installer.sh as root to install

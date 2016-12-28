@@ -32,7 +32,7 @@ import org.eclipse.kura.message.KuraPayload;
  * <br>
  * If the bundle using the CloudClient relies on custom subscriptions
  * beyond the default ones, it is responsibility of the application to implement
- * the {@link CloudClientListener#connectionRestored} callback method in the
+ * the {@link CloudClientListener#onConnectionEstablished()} callback method in the
  * CloudCallbackHandler to restore the subscriptions it needs.
  * <br>
  * The <b>CloudClient.release method will unsubscribe</b> all subscriptions
@@ -383,7 +383,7 @@ public interface CloudClient {
      * will receive events when a client publication has arrived, and
      * when a publish has been fully acknowledged by the remote server.
      *
-     * @param cloudCallbackHandler
+     * @param cloudClientListener
      *            An implementation of the CloudCallbackHandler interface.
      */
     public void addCloudClientListener(CloudClientListener cloudClientListener);
@@ -406,7 +406,7 @@ public interface CloudClient {
     /**
      * Finds the list of identifiers of messages that are still in-flight
      * (messages published but not confirmed yet).
-     * This only applies to messages published with QoS > 0.
+     * This only applies to messages published with QoS &gt; 0.
      *
      * @return
      * @throws KuraException
@@ -415,7 +415,7 @@ public interface CloudClient {
 
     /**
      * Finds the list of identifiers of in-flight messages that have been dropped.
-     * This only applies to messages published with QoS > 0.
+     * This only applies to messages published with QoS &gt; 0.
      * On the establishment of a new connection, the service can be configured
      * either to republish or drop in-flight messages.
      * The former option can be used if service users tolerate publishing message

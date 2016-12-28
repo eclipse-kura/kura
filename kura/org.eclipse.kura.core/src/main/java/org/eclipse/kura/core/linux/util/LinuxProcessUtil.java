@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - Clean up kura properties handling
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.linux.util;
 
@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.system.SystemService;
@@ -35,32 +36,6 @@ public class LinuxProcessUtil {
 
     private static final String PLATFORM_INTEL_EDISON = "intel-edison";
     private static volatile Boolean usingBusybox;
-
-    private static boolean isUsingBusyBox() {
-        if (usingBusybox != null) {
-            return usingBusybox;
-        }
-
-        final BundleContext ctx = FrameworkUtil.getBundle(LinuxProcessUtil.class).getBundleContext();
-
-        final ServiceReference<SystemService> systemServiceRef = ctx.getServiceReference(SystemService.class);
-        if (systemServiceRef == null) {
-            throw new IllegalStateException("Unable to find instance of: " + SystemService.class.getName());
-        }
-
-        final SystemService service = ctx.getService(systemServiceRef);
-        if (service == null) {
-            throw new IllegalStateException("Unable to get instance of: " + SystemService.class.getName());
-        }
-
-        try {
-            usingBusybox = PLATFORM_INTEL_EDISON.equals(service.getPlatform());
-        } finally {
-            ctx.ungetService(systemServiceRef);
-        }
-
-        return usingBusybox;
-    }
 
     public static int start(String command, boolean wait, boolean background) throws Exception {
         SafeProcess proc = null;
@@ -296,34 +271,6 @@ public class LinuxProcessUtil {
         return stop(pid, true);
     }
 
-    private static boolean stop(int pid, boolean kill) {
-        try {
-            StringBuffer cmd = new StringBuffer();
-            cmd.append("kill ");
-            if (kill) {
-                cmd.append("-9 ");
-            }
-            cmd.append(pid);
-
-            if (kill) {
-                logger.info("attempting to kill -9 pid " + pid);
-            } else {
-                logger.info("attempting to kill pid " + pid);
-            }
-
-            if (start(cmd.toString()) == 0) {
-                logger.info("successfully killed pid " + pid);
-                return true;
-            } else {
-                logger.warn("failed to kill pid " + pid);
-                return false;
-            }
-        } catch (Exception e) {
-            logger.warn("failed to kill pid " + pid);
-            return false;
-        }
-    }
-
     public static boolean killAll(String command) {
         try {
             logger.info("attempting to kill process " + command);
@@ -356,5 +303,181 @@ public class LinuxProcessUtil {
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * This method takes a pid and returns a boolean that defines if the corresponding process is running or not in the
+     * host system.
+     * 
+     * @param pid
+     *            integer representing the process id that has to be verified.
+     * @return true if the process in running in the system, false otherwise.
+     * @throws IOException
+     *             if an I/O or execution error occurs
+     */
+    public static boolean isProcessRunning(int pid) throws IOException {
+        boolean isRunning = false;
+
+        SafeProcess proc = null;
+        BufferedReader br = null;
+        try {
+            logger.trace("searching process list for pid{}", pid);
+            if (isUsingBusyBox()) {
+                proc = ProcessUtil.exec("ps");
+            } else {
+                proc = ProcessUtil.exec("ps -ax");
+            }
+            proc.waitFor();
+
+            // get the output
+            br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            br.readLine(); // skip first line: PID TTY STAT TIME COMMAND
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                if (parsePid(line) == pid) {
+                    isRunning = true;
+                    break;
+                }
+            }
+            return isRunning;
+        } catch (InterruptedException e) {
+            throw new IOException(e);
+        } finally {
+            if (br != null) {
+                br.close();
+            }
+            if (proc != null) {
+                ProcessUtil.destroy(proc);
+            }
+        }
+    }
+
+    /**
+     * This method tries first to stop a process specified by the passed PID. If, aster this first step, the process is
+     * still alive, the code invokes a kill operation.
+     *
+     * @param pid
+     *            An int representing the linux pid.
+     * @throws KuraException
+     *             Thrown if one of the executed operations generate an exception.
+     * @since {@link org.eclipse.kura.core.linux.util} 1.1.0
+     */
+    public static void stopAndKill(int pid) throws KuraException {
+        try {
+            if (pid >= 0) {
+                logger.info("stopping pid={}", pid);
+
+                boolean exists = stop(pid);
+                if (!exists) {
+                    logger.warn("stopping pid={} has failed", pid);
+                } else {
+                    exists = waitProcess(pid, 500, 5000);
+                }
+
+                if (exists) {
+                    logger.info("killing pid={}", pid);
+                    exists = kill(pid);
+                    if (!exists) {
+                        logger.warn("killing pid={} has failed", pid);
+                    } else {
+                        exists = waitProcess(pid, 500, 5000);
+                    }
+                }
+
+                if (exists) {
+                    logger.warn("Failed to stop process with pid {}", pid);
+                }
+            }
+        } catch (Exception e) {
+            throw KuraException.internalError(e);
+        }
+    }
+
+    //
+    // Private Methods
+    //
+    private static boolean isUsingBusyBox() {
+        if (usingBusybox != null) {
+            return usingBusybox;
+        }
+
+        final BundleContext ctx = FrameworkUtil.getBundle(LinuxProcessUtil.class).getBundleContext();
+
+        final ServiceReference<SystemService> systemServiceRef = ctx.getServiceReference(SystemService.class);
+        if (systemServiceRef == null) {
+            throw new IllegalStateException("Unable to find instance of: " + SystemService.class.getName());
+        }
+
+        final SystemService service = ctx.getService(systemServiceRef);
+        if (service == null) {
+            throw new IllegalStateException("Unable to get instance of: " + SystemService.class.getName());
+        }
+
+        try {
+            usingBusybox = PLATFORM_INTEL_EDISON.equals(service.getPlatform());
+        } finally {
+            ctx.ungetService(systemServiceRef);
+        }
+
+        return usingBusybox;
+    }
+
+    private static boolean stop(int pid, boolean kill) {
+        boolean result = false;
+        try {
+            if (isProcessRunning(pid)) {
+                StringBuffer cmd = new StringBuffer();
+                cmd.append("kill ");
+                if (kill) {
+                    cmd.append("-9 ");
+                }
+                cmd.append(pid);
+
+                if (kill) {
+                    logger.info("attempting to kill -9 pid {}", pid);
+                } else {
+                    logger.info("attempting to kill pid {}", pid);
+                }
+
+                if (start(cmd.toString()) == 0) {
+                    logger.info("successfully killed pid {}", pid);
+                    result = true;
+                } else {
+                    logger.warn("failed to kill pid {}", pid);
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("failed to kill pid {}", pid);
+        }
+        return result;
+    }
+
+    private static boolean waitProcess(int pid, long poll, long timeout) {
+        boolean exists = false;
+        try {
+            final long startTime = System.currentTimeMillis();
+            long now;
+            do {
+                Thread.sleep(poll);
+                exists = isProcessRunning(pid);
+                now = System.currentTimeMillis();
+            } while (exists && now - startTime < timeout);
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
+            logger.warn("Failed waiting for pid {} to exit - {}", pid, e);
+        }
+
+        return exists;
+    }
+
+    private static int parsePid(String line) {
+        StringTokenizer st = new StringTokenizer(line);
+        int processID = -1;
+        try {
+            processID = Integer.parseInt(st.nextToken());
+        } catch (NumberFormatException e) {
+            logger.warn("getPid() :: NumberFormatException reading PID - {}", e);
+        }
+        return processID;
     }
 }

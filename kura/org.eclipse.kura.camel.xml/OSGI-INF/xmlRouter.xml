@@ -5,5 +5,4 @@
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
-   <reference cardinality="1..1" interface="org.apache.camel.spi.ComponentResolver" name="ComponentResolver" policy="static" target="(component=kura-cloud)"/>
 </scr:component>

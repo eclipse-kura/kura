@@ -54,24 +54,9 @@ public class PppLinux {
         if (pid >= 0) {
             s_logger.info("stopping {} pid={}", iface, pid);
 
-            boolean exists = LinuxProcessUtil.stop(pid);
-            if (!exists) {
-                s_logger.warn("stopping {} pid={} failed", iface, pid);
-            } else {
-                exists = waitProcess(pid, 500, 5000);
-            }
+            LinuxProcessUtil.stopAndKill(pid);
 
-            if (exists) {
-                s_logger.info("killing {} pid={}", iface, pid);
-                exists = LinuxProcessUtil.kill(pid);
-                if (!exists) {
-                    s_logger.warn("killing {} pid={} failed", iface, pid);
-                } else {
-                    exists = waitProcess(pid, 500, 5000);
-                }
-            }
-
-            if (exists) {
+            if (LinuxProcessUtil.stop(pid)) {
                 s_logger.warn("Failed to disconnect {}", iface);
             } else {
                 deleteLock(port);
@@ -143,26 +128,6 @@ public class PppLinux {
             }
         }
         return pid;
-    }
-
-    // Only call this method after a call to stop or kill.
-    // FIXME: this is an utility method that should be moved in a suitable package.
-    private static boolean waitProcess(int pid, long poll, long timeout) {
-        boolean exists = true;
-        try {
-            final long startTime = System.currentTimeMillis();
-            long now;
-            do {
-                Thread.sleep(poll);
-                exists = LinuxProcessUtil.stop(pid);
-                now = System.currentTimeMillis();
-            } while (exists && now - startTime < timeout);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            s_logger.warn("Interrupted waiting for pid {} to exit", pid);
-        }
-
-        return exists;
     }
 
     private static void deleteLock(String port) {

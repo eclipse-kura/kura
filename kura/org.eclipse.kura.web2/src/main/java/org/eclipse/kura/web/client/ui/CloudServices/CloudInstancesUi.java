@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.CloudServices;
 
@@ -235,47 +236,58 @@ public class CloudInstancesUi extends Composite {
 
     private void initConnectionsTable() {
 
-        TextColumn<GwtCloudConnectionEntry> col1 = new TextColumn<GwtCloudConnectionEntry>() {
+        {
+            TextColumn<GwtCloudConnectionEntry> col = new TextColumn<GwtCloudConnectionEntry>() {
 
-            @Override
-            public String getValue(GwtCloudConnectionEntry object) {
-                if (object.isConnected()) {
-                    return MSG.connected();
-                } else {
-                    return MSG.disconnected();
+                @Override
+                public String getValue(GwtCloudConnectionEntry object) {
+                    switch (object.getState()) {
+                    case UNREGISTERED:
+                        return MSG.unregistered();
+                    case CONNECTED:
+                        return MSG.connected();
+                    case DISCONNECTED:
+                        return MSG.disconnected();
+                    default:
+                        return object.getState().toString();
+                    }
                 }
-            }
-        };
-        col1.setCellStyleNames("status-table-row");
-        this.connectionsGrid.addColumn(col1, MSG.netIPv4Status());
+            };
+            col.setCellStyleNames("status-table-row");
+            this.connectionsGrid.addColumn(col, MSG.netIPv4Status());
+        }
 
-        TextColumn<GwtCloudConnectionEntry> col2 = new TextColumn<GwtCloudConnectionEntry>() {
+        {
+            TextColumn<GwtCloudConnectionEntry> col = new TextColumn<GwtCloudConnectionEntry>() {
 
-            @Override
-            public String getValue(GwtCloudConnectionEntry object) {
-                if (object.getCloudFactoryPid() != null) {
-                    return String.valueOf(object.getCloudFactoryPid());
-                } else {
-                    return "";
+                @Override
+                public String getValue(GwtCloudConnectionEntry object) {
+                    if (object.getCloudFactoryPid() != null) {
+                        return String.valueOf(object.getCloudFactoryPid());
+                    } else {
+                        return "";
+                    }
                 }
-            }
-        };
-        col2.setCellStyleNames("status-table-row");
-        this.connectionsGrid.addColumn(col2, MSG.connectionCloudFactoryLabel());
+            };
+            col.setCellStyleNames("status-table-row");
+            this.connectionsGrid.addColumn(col, MSG.connectionCloudFactoryLabel());
+        }
 
-        TextColumn<GwtCloudConnectionEntry> col3 = new TextColumn<GwtCloudConnectionEntry>() {
+        {
+            TextColumn<GwtCloudConnectionEntry> col = new TextColumn<GwtCloudConnectionEntry>() {
 
-            @Override
-            public String getValue(GwtCloudConnectionEntry object) {
-                if (object.getCloudServicePid() != null) {
-                    return String.valueOf(object.getCloudServicePid());
-                } else {
-                    return "";
+                @Override
+                public String getValue(GwtCloudConnectionEntry object) {
+                    if (object.getCloudServicePid() != null) {
+                        return String.valueOf(object.getCloudServicePid());
+                    } else {
+                        return "";
+                    }
                 }
-            }
-        };
-        col3.setCellStyleNames("status-table-row");
-        this.connectionsGrid.addColumn(col3, MSG.connectionCloudServiceLabel());
+            };
+            col.setCellStyleNames("status-table-row");
+            this.connectionsGrid.addColumn(col, MSG.connectionCloudServiceLabel());
+        }
 
         this.cloudServicesDataProvider.addDataDisplay(this.connectionsGrid);
     }
@@ -484,7 +496,7 @@ public class CloudInstancesUi extends Composite {
     }
 
     private void getSuggestedCloudServicePid(final String factoryPid) {
-        this.gwtCloudService.getSuggestedCloudServicePid(factoryPid, new AsyncCallback<String>() {
+        this.gwtCloudService.findSuggestedCloudServicePid(factoryPid, new AsyncCallback<String>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -508,7 +520,7 @@ public class CloudInstancesUi extends Composite {
     }
 
     private void getCloudServicePidRegex(final String factoryPid) {
-        this.gwtCloudService.getCloudServicePidRegex(factoryPid, new AsyncCallback<String>() {
+        this.gwtCloudService.findCloudServicePidRegex(factoryPid, new AsyncCallback<String>() {
 
             @Override
             public void onFailure(Throwable caught) {

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.deployment.update
 Bundle-SymbolicName: org.eclipse.kura.deployment.update;singleton:=true
-Bundle-Version: 1.0.3.qualifier
+Bundle-Version: 1.0.3
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

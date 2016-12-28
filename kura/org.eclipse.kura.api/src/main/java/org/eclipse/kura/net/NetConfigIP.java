@@ -239,8 +239,6 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      * Sets the list of Name Servers to be associated to the interface.
      * The addresses are IP4Address or IP6Address depending on
      * the NetConfigIP instance used. This is only used if dhcp is set to false.
-     *
-     * @return list of address for the DNS Servers
      */
     public void setDnsServers(List<T> dnsServers) {
         this.m_dnsServers = dnsServers;

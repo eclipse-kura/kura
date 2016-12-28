@@ -2,17 +2,18 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.camel
 Bundle-SymbolicName: org.eclipse.kura.camel;singleton:=true
-Bundle-Version: 1.1.0.qualifier
+Bundle-Version: 1.1.0
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
-Import-Package: org.apache.camel;version="[2.17.2,3.0.0)",
- org.apache.camel.builder;version="[2.17.2,3.0.0)",
- org.apache.camel.core.osgi;version="[2.17.2,3.0.0)",
- org.apache.camel.impl;version="[2.17.2,3.0.0)",
- org.apache.camel.model;version="[2.17.2,3.0.0)",
- org.apache.camel.spi;version="[2.17.2,3.0.0)",
+Import-Package: javax.script,
+ org.apache.camel;version="[2.17.0,3.0.0)",
+ org.apache.camel.builder;version="[2.17.0,3.0.0)",
+ org.apache.camel.core.osgi;version="[2.17.0,3.0.0)",
+ org.apache.camel.impl;version="[2.17.0,3.0.0)",
+ org.apache.camel.model;version="[2.17.0,3.0.0)",
+ org.apache.camel.spi;version="[2.17.0,3.0.0)",
  org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.cloud;version="[1.0,2.0)",
  org.eclipse.kura.configuration;version="[1.0,2.0)",
@@ -22,6 +23,7 @@ Import-Package: org.apache.camel;version="[2.17.2,3.0.0)",
  org.osgi.util.tracker;version="1.5.0",
  org.slf4j;version="1.7.0"
 Export-Package: org.eclipse.kura.camel;version="1.1.0",
+ org.eclipse.kura.camel.bean;version="1.1.0";uses:="org.eclipse.kura.message",
  org.eclipse.kura.camel.camelcloud;version="1.1.0";uses:="org.apache.camel,org.eclipse.kura.cloud",
  org.eclipse.kura.camel.cloud;version="1.1.0";
   uses:="org.apache.camel,
@@ -42,5 +44,8 @@ Export-Package: org.eclipse.kura.camel;version="1.1.0",
    org.apache.camel.builder,
    org.apache.camel,
    org.apache.camel.spi,
-   org.apache.camel.model"
+   javax.script,
+   org.apache.camel.model",
+ org.eclipse.kura.camel.type;version="1.1.0";uses:="org.eclipse.kura.message",
+ org.eclipse.kura.camel.utils;version="1.1.0";uses:="org.apache.camel"
 Service-Component: OSGI-INF/*.xml

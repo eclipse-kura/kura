@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 
+import org.apache.camel.CamelContext;
 import org.apache.camel.Route;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.commons.io.IOUtils;
@@ -41,6 +42,10 @@ public abstract class AbstractRouterTest {
     @After
     public void after() throws Exception {
         this.router.stop();
+    }
+
+    protected CamelContext getCamelContext() {
+        return this.router.getCamelContext();
     }
 
     protected Route firstRoute() {

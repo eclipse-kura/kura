@@ -498,7 +498,7 @@
             <esf:property name="encode.gzip" array="false" encrypted="false" type="Boolean">
                 <esf:value>true</esf:value>
             </esf:property>
-            <esf:property name="device.display-name" array="false" encrypted="false" type="String">
+            <esf:property name="device.custom-name" array="false" encrypted="false" type="String">
                 <esf:value>Beaglebone</esf:value>
             </esf:property>
         </esf:properties>

@@ -24,21 +24,12 @@
             required="true"
             description="The camel XML router configuration|TextArea"/>
             
-         <AD id="serviceRanking"
-            name="Service Ranking"
-            type="Integer"
-            cardinality="0"
-            required="false"
-            description="The service ranking. A higher number will have more priority."/>
-        
-		 <AD id="delete"
-            name="Delete"
-            type="Boolean"
+        <AD id="initCode"
+            name="JavaScript init code"
+            type="String"
             cardinality="1"
-            required="true"
-            default="false"
-            description="Select if you want to delete this configuration."/>
-                    
+            required="false"
+            description="JavaScript code which is called when the router is initialized first. The camel context is avaiable in the variable 'camelContext'.|TextArea"/>
     </OCD>
 
     <Designate pid="org.eclipse.kura.camel.cloud.factory.CamelFactory" factoryPid="org.eclipse.kura.camel.cloud.factory.CamelFactory">

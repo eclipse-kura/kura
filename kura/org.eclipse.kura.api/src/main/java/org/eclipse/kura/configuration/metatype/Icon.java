@@ -28,21 +28,19 @@ import java.math.BigInteger;
  * The following schema fragment specifies the expected content contained within this class.
  *
  * <pre>
- * &lt;complexType name="Ticon">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;any processContents='lax' maxOccurs="unbounded" minOccurs="0"/>
- *       &lt;/sequence>
- *       &lt;attribute name="resource" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="size" use="required" type="{http://www.w3.org/2001/XMLSchema}positiveInteger" />
- *       &lt;anyAttribute/>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="Ticon"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;any processContents='lax' maxOccurs="unbounded" minOccurs="0"/&gt;
+ *       &lt;/sequence&gt;
+ *       &lt;attribute name="resource" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="size" use="required" type="{http://www.w3.org/2001/XMLSchema}positiveInteger" /&gt;
+ *       &lt;anyAttribute/&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
- *
- *
  */
 public interface Icon {
 

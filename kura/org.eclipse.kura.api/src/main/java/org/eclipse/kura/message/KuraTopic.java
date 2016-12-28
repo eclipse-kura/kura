@@ -11,10 +11,13 @@
  *******************************************************************************/
 package org.eclipse.kura.message;
 
+import org.eclipse.kura.cloud.CloudService;
+
 /**
  * Models a topic for messages posted to the Kura platform.
- * Topic are expected to be in the form of "account/asset/<application_specific>";
- * system topic starts with the $EDC account.
+ * Topics are expected to be in the form of "account/asset/&lt;application_specific&gt;";
+ * The system control topic prefix is defined in the {@link CloudService} and defaults
+ * to $EDC.
  */
 public class KuraTopic {
 
@@ -27,6 +30,10 @@ public class KuraTopic {
     private String m_applicationTopic;
 
     public KuraTopic(String fullTopic) {
+        this(fullTopic, "$");
+    }
+    
+    public KuraTopic(String fullTopic, String controlPrefix) {
         this.m_fullTopic = fullTopic;
         if (fullTopic.compareTo("#") == 0) {
             return;
@@ -40,7 +47,7 @@ public class KuraTopic {
         // prefix
         int index = 0;
         int offset = 0; // skip a slash
-        if (this.m_topicParts[0].startsWith("$")) {
+        if (this.m_topicParts[0].startsWith(controlPrefix)) {
             this.m_prefix = this.m_topicParts[index];
             offset += this.m_prefix.length() + 1;
             index++;

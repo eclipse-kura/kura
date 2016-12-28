@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.camel.component;
 
+import java.util.Map;
+
 import org.apache.camel.CamelContext;
 import org.eclipse.kura.camel.runner.BeforeStart;
 import org.eclipse.kura.camel.runner.CamelRunner;
@@ -33,7 +35,7 @@ public abstract class AbstractCamelComponent {
 
     protected CamelRunner runner;
 
-    protected void start() throws Exception {
+    protected void start(final Map<String, Object> properties) throws Exception {
         logger.info("Starting camel router");
 
         // create and configure
@@ -48,11 +50,26 @@ public abstract class AbstractCamelComponent {
             }
         });
 
+        customizeBuilder(builder, properties);
+
         this.runner = builder.build();
 
         // start
 
         this.runner.start();
+    }
+
+    /**
+     * Customize the builder before it creates the runner
+     * <br>
+     * The default implementation is empty
+     *
+     * @param builder
+     *            the builder
+     * @param properties
+     *            the properties provided to the {@link #start(Map)} method
+     */
+    protected void customizeBuilder(final Builder builder, final Map<String, Object> properties) {
     }
 
     protected void stop() throws Exception {

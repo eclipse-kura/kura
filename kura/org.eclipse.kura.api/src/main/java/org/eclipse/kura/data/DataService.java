@@ -41,9 +41,9 @@ import org.eclipse.kura.data.listener.DataServiceListener;
  * Dependently on the store configuration there are certain guarantees that stored
  * messages are not lost due to sudden crashes or power outages.
  * <br>
- * The whiteboard pattern {@link http://www.osgi.org/wiki/uploads/Links/whiteboard.pdf}
+ * The <a href="http://www.osgi.org/wiki/uploads/Links/whiteboard.pdf">whiteboard pattern</a>
  * is used to notify the service users about events such as message arrived, connection lost etc.
- * {@see DataServiceListener}
+ * through the {@link DataServiceListener}.
  */
 public interface DataService {
 
@@ -117,9 +117,9 @@ public interface DataService {
      * <ul>
      * <li>For messages published at QoS = 0, receiving the confirm just means that
      * the message is about to be transmitted on the wire without any guarantee
-     * that it eventually will.</li>
-     * <li>For messages published at QoS > 0, receiving the confirm means that the
-     * broker acknowledged the message.</li>
+     * that it eventually will.
+     * <li>For messages published at QoS &gt; 0, receiving the confirm means that the
+     * broker acknowledged the message.
      * </ul>
      *
      * Priority level 0 (highest) should be used sparingly and reserved for
@@ -164,7 +164,7 @@ public interface DataService {
     /**
      * Finds the list of identifiers of messages that are still in-flight
      * (messages published but not confirmed yet).
-     * This only applies to messages published with QoS > 0.
+     * This only applies to messages published with QoS &gt; 0.
      * Given the service has no means of knowing who
      * published the message, a regex topic must be specified in order to find
      * only the relevant identifiers.
@@ -177,7 +177,7 @@ public interface DataService {
 
     /**
      * Finds the list of identifiers of in-flight messages that have been dropped.
-     * This only applies to messages published with QoS > 0.
+     * This only applies to messages published with QoS &gt; 0.
      * On the establishment of a new connection, the service can be configured
      * either to republish or drop in-flight messages.
      * The former option can be used if service users tolerate publishing message

@@ -50,7 +50,6 @@ import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.NavPills;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
-import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.IconSize;

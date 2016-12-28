@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.kura.example.camel.quickstart
-Bundle-Version: 1.1.0.qualifier
+Bundle-Version: 1.1.0
 Bundle-Name: Camel Quickstart
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Service-Component: OSGI-INF/*.xml

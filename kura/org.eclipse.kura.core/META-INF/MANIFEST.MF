@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.core
 Bundle-SymbolicName: org.eclipse.kura.core;singleton:=true
-Bundle-Version: 1.0.10.qualifier
+Bundle-Version: 1.0.10
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: org.eclipse.kura.core.linux.util; version="1.0.0", org.eclipse.kura.core.util; version="1.1.0"
+Export-Package: org.eclipse.kura.core.linux.util; version="1.1.0", org.eclipse.kura.core.util; version="1.1.0"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.crypto,

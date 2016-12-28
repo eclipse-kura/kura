@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.clock;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
@@ -27,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ClockServiceImpl implements ConfigurableComponent, ClockService, ClockSyncListener {
+
+    private static final ClockEvent EMPTY_EVENT = new ClockEvent(Collections.<String, Object> emptyMap());
 
     private static final String PROP_CLOCK_PROVIDER = "clock.provider";
     private static final String PROP_CLOCK_SET_HWCLOCK = "clock.set.hwclock";
@@ -226,7 +229,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 
         // Raise the event
         if (bClockUpToDate) {
-            this.eventAdmin.postEvent(ClockEvent.EMPTY);
+            this.eventAdmin.postEvent(EMPTY_EVENT);
         }
     }
 }

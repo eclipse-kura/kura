@@ -9,10 +9,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
-import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,7 +29,6 @@ import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Icon;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Option;
-import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.KuraExceptionHandler;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -42,14 +38,12 @@ import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
-import org.eclipse.kura.wire.WireHelperService;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-
 public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements GwtComponentService {
 
-	private static final String KURA_SERVICE_PID = ConfigurationService.KURA_SERVICE_PID;
+    private static final String KURA_SERVICE_PID = ConfigurationService.KURA_SERVICE_PID;
     private static final String SERVICE_FACTORY_PID = "service.factoryPid";
     private static final String KURA_UI_SERVICE_HIDE = "kura.ui.service.hide";
 
@@ -163,7 +157,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             KuraExceptionHandler.handle(t);
         }
     }
-    
+
     @Override
     public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
@@ -174,7 +168,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             throw new GwtKuraException("A component with the same name already exists!");
         }
     }
-    
+
     @Override
     public void deleteFactoryConfiguration(GwtXSRFToken xsrfToken, String pid, boolean takeSnapshot)
             throws GwtKuraException {
@@ -187,26 +181,28 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             throw new GwtKuraException("Could not delete component configuration!");
         }
     }
-    
+
     @Override
     public List<String> findFactoryComponents(GwtXSRFToken xsrfToken) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         List<String> result = new ArrayList<>();
         List<String> servicesToBeHidden = new ArrayList<>();
-        // finding all wire components to remove from the list as these factory instances
+        // finding all wire components to remove from the list as these factory
+        // instances
         // are only shown in Kura Wires UI
         List<String> allWireComponents = findWireComponents();
         // finding services with kura.service.ui.hide property
         fillServicesToHideList(servicesToBeHidden);
         // get all the factory PIDs tracked by Configuration Service
         result.addAll(cs.getFactoryComponentPids());
-        // remove all the wire components and the services to be hidden as these are shown in different UI
+        // remove all the wire components and the services to be hidden as these
+        // are shown in different UI
         result.removeAll(allWireComponents);
         result.removeAll(servicesToBeHidden);
         return result;
     }
-    
+
     @Override
     public GwtConfigComponent findWireComponentConfigurationFromPid(GwtXSRFToken xsrfToken, String pid,
             String factoryPid, Map<String, Object> extraProps) throws GwtKuraException {
@@ -227,7 +223,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                         // wait for the services to be up
                         TimeUnit.MILLISECONDS.sleep(500);
                         conf = cs.getComponentConfiguration(temporaryName);
-                        comp = this.convertComponentConfigurationByOcd(conf);
+                        comp = createGwtComponentConfiguration(conf);
                         return comp;
                     } catch (Exception ex) {
                         throw new GwtKuraException(ex.getMessage());
@@ -236,7 +232,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                     }
                 }
             }
-            comp = this.convertComponentConfigurationByOcd(conf);
+            comp = createGwtComponentConfiguration(conf);
         } catch (KuraException e) {
             throw new GwtKuraException("Could not retrieve component configuration!");
         }

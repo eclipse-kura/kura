@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.linux.net
 Bundle-SymbolicName: org.eclipse.kura.linux.net;singleton:=true
-Bundle-Version: 1.0.12
+Bundle-Version: 1.0.13.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Service-Component: OSGI-INF/*.xml

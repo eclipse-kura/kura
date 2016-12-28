@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Example Camel Publisher
 Bundle-SymbolicName: org.eclipse.kura.example.camel.publisher
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.1.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy

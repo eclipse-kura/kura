@@ -1,3 +1,26 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ *******************************************************************************/
+/*******************************************
+ This code is meant to be a teaching
+ resource. It can be used for anyone for
+ any reason, including embedding into
+ a commercial product.
+ 
+ The document describing this file, and
+ updated versions can be found at:
+    http://www.signal11.us/oss/udev/
+
+ Alan Ott
+ Signal 11 Software
+*******************************************/
+
 #include "LinuxUdev.h"
 
 JNIEXPORT jobject JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_getUsbDevices(JNIEnv *env, jclass LinuxUdevNative, jstring deviceClass) {

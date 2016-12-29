@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eclipse.kura</groupId>
 	<artifactId>target-platform</artifactId>
-	<version>2.1.0-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 
@@ -16,9 +16,9 @@
 		<module>org.usb4java</module>
 		<module>usb4java-javax</module>
 		<module>org.eclipse.soda.dk.comm</module>
-		<module>org.eclipse.kura.windows.system</module>
+		<!--<module>org.eclipse.kura.windows.system</module>
 		<module>org.eclipse.kura.windows.service</module>
-		<module>org.eclipse.kura.windows.launcher</module>
+		<module>org.eclipse.kura.windows.launcher</module>-->
 		<module>jdk.dio-parent</module>
 		<module>com.gwt.user</module>
 		<module>p2-repo-common</module>
@@ -53,6 +53,16 @@
 		<repository>
 			<id>Eclipse Paho Repo</id>
 			<url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
+		</repository>
+		<repository>
+			<id>Kura Releases</id>
+			<name>Kura Repository - Releases</name>
+			<url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+		</repository>
+		<repository>
+			<id>Kura Snapshots</id>
+			<name>Kura Repository - Snapshots</name>
+			<url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
 		</repository>
 	</repositories>
 

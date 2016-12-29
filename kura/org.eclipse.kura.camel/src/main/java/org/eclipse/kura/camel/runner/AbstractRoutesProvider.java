@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.kura.camel.runner;
 
+import static org.eclipse.kura.camel.runner.CamelRunner.removeMissingRoutes;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.model.RoutesDefinition;
 
@@ -20,7 +22,8 @@ public abstract class AbstractRoutesProvider implements RoutesProvider {
 
         final RoutesDefinition routes = getRoutes(camelContext);
 
-        CamelRunner.removeMissingRoutes(camelContext, routes.getRoutes());
+        removeMissingRoutes(camelContext, routes.getRoutes());
+
         camelContext.addRouteDefinitions(routes.getRoutes());
     }
 

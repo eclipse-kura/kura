@@ -61,8 +61,9 @@ public class ServicesUi extends AbstractServicesUi {
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
-    private boolean dirty, initialized;
-    private final GwtConfigComponent originalConfig;
+    private boolean dirty;
+    private boolean initialized;
+    private GwtConfigComponent originalConfig;
 
     NavPills menu;
     PanelBody content;
@@ -203,7 +204,7 @@ public class ServicesUi extends AbstractServicesUi {
             footer.add(group);
             this.modal.add(footer);
             this.modal.show();
-        }                   // end is dirty
+        }
     }
     
     public void delete(){
@@ -348,6 +349,7 @@ public class ServicesUi extends AbstractServicesUi {
                                         ServicesUi.this.apply.setEnabled(false);
                                         ServicesUi.this.reset.setEnabled(false);
                                         setDirty(false);
+                                        originalConfig = ServicesUi.this.m_configurableComponent;
                                         ServicesUi.this.entryClass.fetchAvailableServices();
                                         EntryClassUi.hideWaitModal();
                                     }
@@ -371,14 +373,11 @@ public class ServicesUi extends AbstractServicesUi {
                 footer.add(group);
                 this.modal.add(footer);
                 this.modal.show();
-
-                // ----
-
-            }                   // end isDirty()
+            }
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");
             this.incompleteFieldsModal.show();
-        }                   // end else isValid
+        }
     }
 
     private GwtConfigComponent getUpdatedConfiguration() {

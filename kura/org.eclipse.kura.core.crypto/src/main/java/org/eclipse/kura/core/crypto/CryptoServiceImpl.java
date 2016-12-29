@@ -108,6 +108,9 @@ public class CryptoServiceImpl implements CryptoService {
             c.init(Cipher.DECRYPT_MODE, key);
             String internalStringValue = new String(encryptedValue);
             byte[] decodedValue = base64Decode(internalStringValue);
+            if (encryptedValue.length > 0 && decodedValue.length == 0) {
+                throw new KuraException(KuraErrorCode.DECODER_ERROR);
+            }
             byte[] decryptedBytes = c.doFinal(decodedValue);
             String decryptedValue = new String(decryptedBytes);
             return decryptedValue.toCharArray();

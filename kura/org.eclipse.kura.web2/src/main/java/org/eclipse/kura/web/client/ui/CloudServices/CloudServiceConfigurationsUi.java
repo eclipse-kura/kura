@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.CloudServices;
 
@@ -44,7 +45,6 @@ import com.google.gwt.user.client.ui.Widget;
 public class CloudServiceConfigurationsUi extends Composite {
 
     private static final Logger logger = Logger.getLogger(CloudServiceConfigurationsUi.class.getSimpleName());
-    private static final String KURA_CLOUD_SERVICE_FACTORY_PID = "kura.cloud.service.factory.pid";
 
     private static CloudServiceConfigurationsUiUiBinder uiBinder = GWT
             .create(CloudServiceConfigurationsUiUiBinder.class);
@@ -117,39 +117,7 @@ public class CloudServiceConfigurationsUi extends Composite {
         this.connectionNavtabs.clear();
         this.connectionTabContent.clear();
 
-        final String selectedCloudServicePid = selection.getCloudServicePid();
-
-        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(Throwable ex) {
-                FailureHandler.handle(ex, EntryClassUi.class.getName());
-            }
-
-            @Override
-            public void onSuccess(GwtXSRFToken token) {
-                CloudServiceConfigurationsUi.this.gwtComponentService.findComponentConfiguration(token,
-                        selectedCloudServicePid, new AsyncCallback<List<GwtConfigComponent>>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        logger.log(Level.SEVERE, ex.getMessage(), ex);
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(List<GwtConfigComponent> result) {
-                        for (GwtConfigComponent pair : result) {
-                            if (selectedCloudServicePid.equals(pair.getComponentId())
-                                    && pair.getParameter(KURA_CLOUD_SERVICE_FACTORY_PID) != null) {
-                                String factoryPid = pair.getParameter(KURA_CLOUD_SERVICE_FACTORY_PID).getValue();
-                                getCloudStackConfigurations(factoryPid, selectedCloudServicePid);
-                            }
-                        }
-                    }
-                });
-            }
-        });
+        getCloudStackConfigurations(selection.getCloudFactoryPid(), selection.getCloudServicePid());
     }
 
     public TabListItem getSelectedTab() {
@@ -161,6 +129,7 @@ public class CloudServiceConfigurationsUi extends Composite {
     }
 
     private void getCloudStackConfigurations(String factoryPid, String cloudServicePid) {
+
         this.gwtCloudService.findStackPidsByFactory(factoryPid, cloudServicePid, new AsyncCallback<List<String>>() {
 
             @Override
@@ -176,50 +145,42 @@ public class CloudServiceConfigurationsUi extends Composite {
                 CloudServiceConfigurationsUi.this.gwtXSRFService
                         .generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        CloudServiceConfigurationsUi.this.gwtComponentService.findFilteredComponentConfigurations(token,
-                                new AsyncCallback<List<GwtConfigComponent>>() {
-
                             @Override
                             public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
                                 FailureHandler.handle(ex, EntryClassUi.class.getName());
                             }
 
                             @Override
-                            public void onSuccess(List<GwtConfigComponent> result) {
-                                boolean isFirstEntry = true;
-                                for (GwtConfigComponent pair : result) {
-                                    if (pidsResult.contains(pair.getComponentId())) {
-                                        renderTabs(pair, isFirstEntry);
-                                        isFirstEntry = false;
-                                    }
-                                }
+                            public void onSuccess(GwtXSRFToken token) {
+                                CloudServiceConfigurationsUi.this.gwtComponentService
+                                        .findFilteredComponentConfigurations(token,
+                                                new AsyncCallback<List<GwtConfigComponent>>() {
+
+                                                    @Override
+                                                    public void onFailure(Throwable ex) {
+                                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                                    }
+
+                                                    @Override
+                                                    public void onSuccess(List<GwtConfigComponent> result) {
+                                                        boolean isFirstEntry = true;
+                                                        for (GwtConfigComponent pair : result) {
+                                                            if (pidsResult.contains(pair.getComponentId())) {
+                                                                renderTabs(pair, isFirstEntry);
+                                                                isFirstEntry = false;
+                                                            }
+                                                        }
+                                                    }
+                                                });
                             }
                         });
-                    }
-                });
             }
         });
     }
 
     private void renderTabs(GwtConfigComponent config, boolean isFirstEntry) {
-        String selectedCloudServicePid = config.getComponentId();
-        String name0;
-        int start = selectedCloudServicePid.lastIndexOf('.');
-        int substringIndex = start + 1;
-        if (start != -1 && substringIndex < selectedCloudServicePid.length()) {
-            name0 = selectedCloudServicePid.substring(substringIndex);
-        } else {
-            name0 = selectedCloudServicePid;
-        }
-        final String simplifiedComponentName = name0;
+        final String simplifiedComponentName = getSimplifiedComponentName(config);
         TabListItem item = new TabListItem(simplifiedComponentName);
         item.setDataTarget("#" + simplifiedComponentName);
         item.addClickHandler(new ClickHandler() {
@@ -248,4 +209,16 @@ public class CloudServiceConfigurationsUi extends Composite {
         serviceConfigurationBinder.renderForm();
     }
 
+    private String getSimplifiedComponentName(GwtConfigComponent config) {
+        String selectedCloudServicePid = config.getComponentId();
+        String tempName;
+        int start = selectedCloudServicePid.lastIndexOf('.');
+        int substringIndex = start + 1;
+        if (start != -1 && substringIndex < selectedCloudServicePid.length()) {
+            tempName = selectedCloudServicePid.substring(substringIndex);
+        } else {
+            tempName = selectedCloudServicePid;
+        }
+        return tempName;
+    }
 }

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.kura.example.camel.quickstart;
 
+import static java.util.Collections.singletonMap;
 import static org.eclipse.kura.camel.component.Configuration.asInt;
 
 import java.util.Map;
@@ -167,11 +168,13 @@ public class GatewayRouterJava implements ConfigurableComponent {
 
                     @Override
                     public void process(Exchange exchange) throws Exception {
-                        KuraPayload payload = new KuraPayload();
-                        payload.addMetric("temperature", new Random().nextInt(maxTemp));
-                        exchange.getIn().setBody(payload);
+                        final int value = new Random().nextInt(maxTemp);
+                        final Map<String, Integer> data = singletonMap("temperature", value);
+                        exchange.getIn().setBody(data);
                     }
-                }).to("cloud:myapp/topic").id("temp-heartbeat");
+                }) //
+                        .convertBodyTo(KuraPayload.class) //
+                        .to("cloud:myapp/topic").id("temp-heartbeat");
 
                 from("cloud:myapp/topic") //
                         .choice() //

@@ -1138,8 +1138,8 @@ public class LinuxNetworkUtil {
                         String ssidStr = st.nextToken();
                         if (ssidStr.startsWith("\"") && ssidStr.endsWith("\"")) {
                             ssid = ssidStr.substring(lineSub.indexOf('"') + 1, lineSub.lastIndexOf('"')); // get value
- // between
- // quotes
+                            // between
+                            // quotes
                         }
                     }
                     return ssid;
@@ -1542,13 +1542,55 @@ public class LinuxNetworkUtil {
     }
 
     public static boolean isKernelModuleLoadedForMode(String interfaceName, WifiMode wifiMode) throws KuraException {
-        // FIXME: how to find the right kernel module by interface name?
+        boolean result = false;
+
         // Assume for now the interface name does not change.
         if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(TARGET_NAME) && "wlan0".equals(interfaceName)) {
-            return false;
+            SafeProcess proc = null;
+            BufferedReader br = null;
+            String cmd = "systool -vm bcmdhd";
+            try {
+                s_logger.debug("Executing '{}'", cmd);
+                proc = ProcessUtil.exec(cmd);
+                if ((proc.waitFor()) != 0) {
+                    throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
+                }
+
+                // get the output
+                br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+                String line = null;
+                while ((line = br.readLine()) != null) {
+                    if (line.contains("op_mode") && compareModes(line, wifiMode)) {
+                        result = true;
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'" + cmd + "' failed");
+            } catch (InterruptedException e) {
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'" + cmd + "' interrupted");
+            } finally {
+                if (br != null) {
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                        s_logger.warn("Failed to close process input stream", e);
+                    }
+                }
+                if (proc != null) {
+                    proc.destroy();
+                }
+            }
         } else {
-            return true;
+            result = true;
         }
+        return result;
+    }
+
+    private static boolean compareModes(String line, WifiMode wifiMode) {
+        return (line.contains("0") && wifiMode.equals(WifiMode.INFRA))
+                || (line.contains("2") && wifiMode.equals(WifiMode.MASTER));
+
     }
 
     public static boolean isWifiDeviceOn(String interfaceName) {

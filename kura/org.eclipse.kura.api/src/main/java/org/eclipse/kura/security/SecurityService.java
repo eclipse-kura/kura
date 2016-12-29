@@ -19,16 +19,16 @@ public interface SecurityService {
     /**
      * This method allows the reload of the security policy's fingerprint
      *
-     * @throw KuraException in case an error is raised during the calculation of the fingerprint
-     *        and the consequent storage.
+     * @throws KuraException in case an error is raised during the calculation of the fingerprint
+     *         and the consequent storage.
      */
     public void reloadSecurityPolicyFingerprint() throws KuraException;
 
     /**
      * This method allows the reload of the command line fingerprint
      *
-     * @throw KuraException in case an error is raised during the calculation of the fingerprint
-     *        and the consequent storage.
+     * @throws KuraException in case an error is raised during the calculation of the fingerprint
+     *         and the consequent storage.
      */
     public void reloadCommandLineFingerprint() throws KuraException;
 

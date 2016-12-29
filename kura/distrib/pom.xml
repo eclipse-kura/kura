@@ -20,7 +20,7 @@
 	<parent>
 		<artifactId>kura-pom-first</artifactId>
 		<groupId>org.eclipse.kura</groupId>
-		<version>2.1.0-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 		<relativePath>../pom_pom.xml</relativePath>
 	</parent>
 
@@ -299,7 +299,7 @@
 									<artifactId>org.eclipse.kura.example.camel.quickstart</artifactId>
 									<version>${org.eclipse.kura.example.camel.quickstart.version}</version>
 								</artifactItem>
-								<artifactItem>
+								<!--<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.windows.command</artifactId>
 									<version>${org.eclipse.kura.windows.command.version}</version>
@@ -308,12 +308,8 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.windows.clock</artifactId>
 									<version>${org.eclipse.kura.windows.clock.version}</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.windows.clock</artifactId>
-									<version>${org.eclipse.kura.windows.clock.version}</version>
-								</artifactItem>
+
+								</artifactItem>-->
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.asset.provider</artifactId>
@@ -469,8 +465,6 @@
   								<move file="target/plugins/org.eclipse.kura.emulator.watchdog.jar" tofile="target/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.example.camel.aggregation.jar" tofile="target/plugins/org.eclipse.kura.example.camel.aggregation_${org.eclipse.kura.example.camel.aggregation.version}.jar" failonerror="false"/>
 								<move file="target/plugins/org.eclipse.kura.example.camel.quickstart.jar" tofile="target/plugins/org.eclipse.kura.example.camel.quickstart_${org.eclipse.kura.example.camel.quickstart.version}.jar" failonerror="false"/>
-							    <move file="target/plugins/org.eclipse.kura.windows.command.jar" tofile="target/plugins/org.eclipse.kura.windows.command_${org.eclipse.kura.windows.command.version}.jar"/>
-							    <move file="target/plugins/org.eclipse.kura.windows.clock.jar" tofile="target/plugins/org.eclipse.kura.windows.clock_${org.eclipse.kura.windows.clock.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.wire.component.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.wire.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar"/>
 							</tasks>
@@ -1650,7 +1644,7 @@
 		</profile>
 
 		<profile>
-			<id>raspberry-pi-2</id>
+			<id>raspberry-pi-2-3</id>
 			<properties>
 				<project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, wireless-tools, default-jre-headless | java7-runtime-headless</project.raspbian.dependencies>
 <!--
@@ -1687,7 +1681,7 @@
 						<version>1.7</version>
 						<executions>
 							<execution>
-								<id>raspberry-pi-2-jars</id>
+								<id>raspberry-pi-2-3-jars</id>
 								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
@@ -1718,14 +1712,14 @@
 						<version>1.0</version>
 						<executions>
 							<execution>
-								<id>raspberry-pi-2-deb</id>
+								<id>raspberry-pi-2-3-deb</id>
 								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2_installer.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-3_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control</controlDir>
 									<dataSet>
 										<data>
@@ -1746,7 +1740,7 @@
 		</profile>
 
 		<profile>
-			<id>raspberry-pi-2-nn</id>
+			<id>raspberry-pi-2-3-nn</id>
 			<properties>
 				<project.raspbian.dependencies.nn>dos2unix, unzip, telnet, default-jre-headless | java7-runtime-headless</project.raspbian.dependencies.nn>
 <!--
@@ -1783,7 +1777,7 @@
 						<version>1.7</version>
 						<executions>
 							<execution>
-								<id>raspberry-pi-2-nn-jars</id>
+								<id>raspberry-pi-2-3-nn-jars</id>
 								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
@@ -1814,14 +1808,14 @@
 						<version>1.0</version>
 						<executions>
 							<execution>
-								<id>raspberry-pi-2-nn-deb</id>
+								<id>raspberry-pi-2-3-nn-deb</id>
 								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
 								<configuration>
 									<verbose>true</verbose>
-									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-nn_installer.deb</deb>
+									<deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-3-nn_installer.deb</deb>
 									<controlDir>${basedir}/src/main/deb/control_nn</controlDir>
 									<dataSet>
 										<data>
@@ -2127,8 +2121,10 @@
 											file="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/artifacts.xml" />
 										<delete
 											file="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/content.xml" />
+                                        <delete
+                                            dir="${project.build.directory}/staging/target-definition/target" />
 
-										<copy
+										<copy overwrite="true"
 											file="src/main/resources/common/projects/target_definition.project"
 											tofile="${project.build.directory}/staging/target-definition/.project" />
 										<copy file="src/main/resources/common/kura-equinox_3.11.1.target"
@@ -2214,7 +2210,7 @@
 										<copy
 											file="src/main/resources/common/classpaths/emulator.classpath"
 											tofile="${project.build.directory}/staging/emulator/emulator.classpath" />
-										<copy file="src/main/resources/common/projects/emulator.project"
+										<copy overwrite="true" file="src/main/resources/common/projects/emulator.project"
 											tofile="${project.build.directory}/staging/emulator/.project" />
 										<replace file="${project.build.directory}/staging/emulator/src/main/resources/kura.properties"
 												 token="kura.version=kura_emulator" value="kura.version=KURA_${kura.version}" />
@@ -2250,7 +2246,7 @@
 										<copy
 											file="src/main/resources/common/classpaths/demo_heater.classpath"
 											tofile="${project.build.directory}/staging/demo_heater/demo_heater.classpath" />
-										<copy file="src/main/resources/common/projects/demo_heater.project"
+										<copy overwrite="true" file="src/main/resources/common/projects/demo_heater.project"
 											tofile="${project.build.directory}/staging/demo_heater/.project" />
 										<move
 											file="${project.build.directory}/staging/demo_heater/demo_heater.classpath"
@@ -2268,7 +2264,7 @@
 										<copy
 											file="src/main/resources/common/classpaths/beacon.classpath"
 											tofile="${project.build.directory}/staging/beacon/beacon.classpath" />
-										<copy file="src/main/resources/common/projects/beacon.project"
+										<copy overwrite="true" file="src/main/resources/common/projects/beacon.project"
 											tofile="${project.build.directory}/staging/beacon/.project" />
 										<move
 											file="${project.build.directory}/staging/beacon/beacon.classpath"
@@ -2286,7 +2282,7 @@
 										<copy
 											file="src/main/resources/common/classpaths/tisensortag.classpath"
 											tofile="${project.build.directory}/staging/tisensortag/tisensortag.classpath" />
-										<copy file="src/main/resources/common/projects/tisensortag.project"
+										<copy overwrite="true" file="src/main/resources/common/projects/tisensortag.project"
 											tofile="${project.build.directory}/staging/tisensortag/.project" />
 										<move
 											file="${project.build.directory}/staging/tisensortag/tisensortag.classpath"
@@ -2304,11 +2300,65 @@
 										<copy
 											file="src/main/resources/common/classpaths/publisher.classpath"
 											tofile="${project.build.directory}/staging/publisher/publisher.classpath" />
-										<copy file="src/main/resources/common/projects/publisher.project"
+										<copy overwrite="true" file="src/main/resources/common/projects/publisher.project"
 											tofile="${project.build.directory}/staging/publisher/.project" />
 										<move
 											file="${project.build.directory}/staging/publisher/publisher.classpath"
 											tofile="${project.build.directory}/staging/publisher/.classpath" />
+                                            
+                                        <!-- Stage the org.eclipse.kura.example.camel.quickstart Project -->
+                                        <copy todir="${project.build.directory}/staging/camel_quickstart">
+                                            <fileset dir="../examples/org.eclipse.kura.example.camel.quickstart" />
+                                        </copy>
+                                        <delete
+                                            file="${project.build.directory}/staging/camel_quickstart/pom.xml" />
+                                        <delete dir="${project.build.directory}/staging/camel_quickstart/bin" />
+                                        <delete
+                                            dir="${project.build.directory}/staging/camel_quickstart/target" />
+                                        <copy
+                                            file="src/main/resources/common/classpaths/camel_quickstart.classpath"
+                                            tofile="${project.build.directory}/staging/camel_quickstart/camel_quickstart.classpath" />
+                                        <copy overwrite="true" file="src/main/resources/common/projects/camel_quickstart.project"
+                                            tofile="${project.build.directory}/staging/camel_quickstart/.project" />
+                                        <move
+                                            file="${project.build.directory}/staging/camel_quickstart/camel_quickstart.classpath"
+                                            tofile="${project.build.directory}/staging/camel_quickstart/.classpath" />
+                                            
+                                        <!-- Stage the org.eclipse.kura.example.camel.publisher Project -->
+                                        <copy todir="${project.build.directory}/staging/camel_publisher">
+                                            <fileset dir="../examples/org.eclipse.kura.example.camel.publisher" />
+                                        </copy>
+                                        <delete
+                                            file="${project.build.directory}/staging/camel_publisher/pom.xml" />
+                                        <delete dir="${project.build.directory}/staging/camel_publisher/bin" />
+                                        <delete
+                                            dir="${project.build.directory}/staging/camel_publisher/target" />
+                                        <copy
+                                            file="src/main/resources/common/classpaths/camel_publisher.classpath"
+                                            tofile="${project.build.directory}/staging/camel_publisher/camel_publisher.classpath" />
+                                        <copy overwrite="true" file="src/main/resources/common/projects/camel_publisher.project"
+                                            tofile="${project.build.directory}/staging/camel_publisher/.project" />
+                                        <move
+                                            file="${project.build.directory}/staging/camel_publisher/camel_publisher.classpath"
+                                            tofile="${project.build.directory}/staging/camel_publisher/.classpath" />
+                                            
+                                        <!-- Stage the org.eclipse.kura.example.camel.aggregation Project -->
+                                        <copy todir="${project.build.directory}/staging/camel_aggregation">
+                                            <fileset dir="../examples/org.eclipse.kura.example.camel.aggregation" />
+                                        </copy>
+                                        <delete
+                                            file="${project.build.directory}/staging/camel_aggregation/pom.xml" />
+                                        <delete dir="${project.build.directory}/staging/camel_aggregation/bin" />
+                                        <delete
+                                            dir="${project.build.directory}/staging/camel_aggregation/target" />
+                                        <copy
+                                            file="src/main/resources/common/classpaths/camel_aggregation.classpath"
+                                            tofile="${project.build.directory}/staging/camel_aggregation/camel_aggregation.classpath" />
+                                        <copy overwrite="true" file="src/main/resources/common/projects/camel_aggregation.project"
+                                            tofile="${project.build.directory}/staging/camel_aggregation/.project" />
+                                        <move
+                                            file="${project.build.directory}/staging/camel_aggregation/camel_aggregation.classpath"
+                                            tofile="${project.build.directory}/staging/camel_aggregation/.classpath" />
 
 										<!-- Create the archive file with the components -->
 										<zip destfile="${project.build.directory}/${zip_workspace.prefix}.zip">
@@ -2327,6 +2377,12 @@
 												prefix="org.eclipse.kura.example.ble.tisensortag/" />
 											<zipfileset dir="${project.build.directory}/staging/publisher/"
 												prefix="org.eclipse.kura.example.publisher/" />
+                                            <zipfileset dir="${project.build.directory}/staging/camel_quickstart/"
+                                                prefix="org.eclipse.kura.example.camel.quickstart/" />
+                                            <zipfileset dir="${project.build.directory}/staging/camel_publisher/"
+                                                prefix="org.eclipse.kura.example.camel.publisher/" />
+                                            <zipfileset dir="${project.build.directory}/staging/camel_aggregation/"
+                                                prefix="org.eclipse.kura.example.camel.aggregation/" />
 										</zip>
 									</target>
 								</configuration>

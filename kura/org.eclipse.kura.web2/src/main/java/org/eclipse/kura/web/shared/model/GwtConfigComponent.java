@@ -59,11 +59,17 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
     }
 
     public boolean isFactoryComponent() {
-        return this.get("factoryComponent");
+        if (this.get("factoryComponent") != null) {
+            return this.get("factoryComponent");
+        }
+        return false;
     }
 
     public boolean isWireComponent() {
-        return this.get("isWireComponent");
+        if (this.get("isWireComponent") != null) {
+            return this.get("isWireComponent");
+        }
+        return false;
     }
 
     public void setComponentDescription(final String componentDescription) {

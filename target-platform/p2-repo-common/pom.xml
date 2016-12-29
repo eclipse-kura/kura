@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>target-platform</artifactId>
-		<version>2.1.0-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>p2-repo-common</artifactId>
@@ -52,7 +52,7 @@
 						<configuration>
 							<artifactItems>
 								<artifactItem>
-									<groupId>com.codeminders</groupId>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>com.codeminders.hidapi</artifactId>
 									<version>${com.codeminders.hidapi.version}</version>
 								</artifactItem>
@@ -226,7 +226,7 @@
 									<artifactId>camel-kura</artifactId>
 									<version>${org.apache.camel.camel-kura.version}</version>
 								</artifactItem>
-								<artifactItem>
+								<!--<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.windows.system</artifactId>
 									<version>${org.eclipse.kura.windows.system.version}</version>
@@ -235,7 +235,8 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.windows.launcher</artifactId>
 									<version>${org.eclipse.kura.windows.launcher.version}</version>
-								</artifactItem>
+
+								</artifactItem>-->
 								<artifactItem>
 									<groupId>org.mockito</groupId>
 									<artifactId>mockito-core</artifactId>
@@ -249,6 +250,76 @@
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!--  rename bundles with version appended -->
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>setup</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+							    <move file="target/source/plugins/com.codeminders.hidapi.jar" tofile="target/source/plugins/com.codeminders.hidapi_${com.codeminders.hidapi.version}.jar"/>
+								<move file="target/source/plugins/org.apache.commons.net.jar" tofile="target/source/plugins/org.apache.commons.net_${org.apache.commons.net.version}.jar"/>
+								<move file="target/source/plugins/commons-exec.jar" tofile="target/source/plugins/org.apache.commons.exec_${org.apache.commons.exec.version}.jar"/>
+								<move file="target/source/plugins/com.google.protobuf.jar" tofile="target/source/plugins/com.google.protobuf_${com.google.protobuf.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.paho.client.mqttv3.jar" tofile="target/source/plugins/org.eclipse.paho.client.mqttv3_${org.eclipse.paho.client.mqttv3.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.kura.camel.sun.misc.jar" tofile="target/source/plugins/org.eclipse.kura.camel.sun.misc_${org.eclipse.kura.camel.sun.misc.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.kura.sun.misc.jar" tofile="target/source/plugins/org.eclipse.kura.sun.misc_${org.eclipse.kura.sun.misc.version}.jar"/>
+								<move file="target/source/plugins/org.tigris.mtoolkit.iagent.rpc.jar" tofile="target/source/plugins/org.tigris.mtoolkit.iagent.rpc_${org.tigris.mtoolkit.iagent.rpc.version}.jar"/>
+								<move file="target/source/plugins/com.gwt.user.jar" tofile="target/source/plugins/com.gwt.user_${com.gwt.user.version}.jar"/>
+								<move file="target/source/plugins/org.hamcrest.core.jar" tofile="target/source/plugins/org.hamcrest.core_${org.hamcrest.core.version}.jar"/>
+								<move file="target/source/plugins/org.usb4java.jar" tofile="target/source/plugins/org.usb4java_${org.usb4java.version}.jar"/>
+								<move file="target/source/plugins/org.hsqldb.hsqldb.jar" tofile="target/source/plugins/org.hsqldb.hsqldb_${org.hsqldb.hsqldb.version}.jar"/>
+								<move file="target/source/plugins/jdk.dio.jar" tofile="target/source/plugins/jdk.dio_${jdk.dio.version}.jar"/>
+								<move file="target/source/plugins/slf4j-api.jar" tofile="target/source/plugins/slf4j.api_${slf4j.api.version}.jar"/>
+								<move file="target/source/plugins/log4j.jar" tofile="target/source/plugins/log4j_${log4j.version}.jar"/>
+								<move file="target/source/plugins/org.junit.jar" tofile="target/source/plugins/org.junit_${org.junit.version}.jar"/>
+								<move file="target/source/plugins/slf4j-jdk14.jar" tofile="target/source/plugins/slf4j.jdk14_${slf4j.jdk14.version}.jar"/>
+								<move file="target/source/plugins/log4j.apache-log4j-extras.jar" tofile="target/source/plugins/log4j.apache-log4j-extras_${log4j.apache-log4j-extras.version}.jar"/>
+								<move file="target/source/plugins/slf4j-log4j12.jar" tofile="target/source/plugins/slf4j.log4j12_${slf4j.log4j12.version}.jar"/>
+								<move file="target/source/plugins/jcl-over-slf4j.jar" tofile="target/source/plugins/jcl-over-slf4j_${jcl.over.slf4j.version}.jar"/>
+								<move file="target/source/plugins/org.apache.commons.fileupload.jar" tofile="target/source/plugins/org.apache.commons.fileupload_${org.apache.commons.fileupload.version}.jar"/>
+								<move file="target/source/plugins/usb4java-javax.jar" tofile="target/source/plugins/usb4java-javax_${usb4java-javax.version}.jar"/>
+								<move file="target/source/plugins/org.apache.commons.io.jar" tofile="target/source/plugins/org.apache.commons.io_${org.apache.commons.io.version}.jar"/>
+								<move file="target/source/plugins/org.apache.commons.lang3.jar" tofile="target/source/plugins/org.apache.commons.lang3_${org.apache.commons.lang3.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.soda.dk.comm.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm_${org.eclipse.soda.dk.comm.version}.jar"/>
+								<move file="target/source/plugins/camel-core.jar" tofile="target/source/plugins/org.apache.camel.camel-core_${org.apache.camel.camel-core.version}.jar"/>
+								<move file="target/source/plugins/camel-stream.jar" tofile="target/source/plugins/org.apache.camel.camel-stream_${org.apache.camel.camel-stream.version}.jar"/>
+								<move file="target/source/plugins/camel-core-osgi.jar" tofile="target/source/plugins/org.apache.camel.camel-core-osgi_${org.apache.camel.camel-core-osgi.version}.jar"/>
+								<move file="target/source/plugins/camel-kura.jar" tofile="target/source/plugins/org.apache.camel.camel-kura_${org.apache.camel.camel-kura.version}.jar"/>
+								<move file="target/source/plugins/mockito-core.jar" tofile="target/source/plugins/mockito-core_${mockito-core.version}.jar"/>
+								<move file="target/source/plugins/objenesis.jar" tofile="target/source/plugins/objenesis_${objenesis.version}.jar"/>
+								<move file="target/source/plugins/minimal-json.jar" tofile="target/source/plugins/minimal-json_${com.eclipsesource.minimal-json.version}.jar"/>
+								<!--<move file="target/source/plugins/org.eclipse.kura.windows.system.jar" tofile="target/source/plugins/org.eclipse.kura.windows.system_${org.eclipse.kura.windows.system.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.kura.windows.launcher.jar" tofile="target/source/plugins/org.eclipse.kura.windows.launcher_${org.eclipse.kura.windows.launcher.version}.jar"/>-->
+							</tasks>
+						</configuration>
+					</execution>
+					<execution>
+						<id>install-commons</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<delete dir="../../kura/target-definition/common/" />
+								<mkdir dir="../../kura/target-definition/common/repository" />
+								<copy todir="../../kura/target-definition/common/repository">
+									<fileset dir="${project.build.directory}/repository" />
+								</copy>
+								<copy todir="../../kura/target-definition/common/source">
+									<fileset dir="${project.build.directory}/source" />
+								</copy>
+							</tasks>
 						</configuration>
 					</execution>
 				</executions>
@@ -269,28 +340,6 @@
 					<compress>false</compress>
 				</configuration>
 			</plugin>
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>install-commons</id>
-						<phase>install</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-								<delete dir="../../kura/target-definition/common/" />
-								<mkdir dir="../../kura/target-definition/common/repository" />
-								<copy todir="../../kura/target-definition/common/repository">
-									<fileset dir="${project.build.directory}/repository" />
-								</copy>
-							</tasks>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>

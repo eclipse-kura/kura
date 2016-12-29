@@ -32,7 +32,7 @@ public abstract class IPAddress {
      * Returns an InetAddress object given the raw IP address.
      * The argument is in network byte order: the highest order byte of the address is in getAddress()[0].
      * This method doesn't block, i.e. no reverse name service lookup is performed.
-     * <br/>
+     * <br>
      * IPv4 address byte array must be 4 bytes long and IPv6 byte array must be 16 bytes long
      *
      * @param addr

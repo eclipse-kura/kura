@@ -906,7 +906,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 StringBuilder entireFile = new StringBuilder();
                 while ((line = br.readLine()) != null) {
                     entireFile.append(line);
-                }     // end while
+                }        // end while
                 xmlConfigs = XmlUtil.unmarshal(entireFile.toString(), XmlComponentConfigurations.class);
             } finally {
                 if (br != null) {
@@ -1019,10 +1019,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
             Tocd ocd = getOCDForPid(pid);
 
-            Configuration cfg = this.m_configurationAdmin.getConfiguration(this.m_servicePidByPid.get(pid), "?");
-            Map<String, Object> props = CollectionsUtil.dictionaryToMap(cfg.getProperties(), ocd);
+            String servicePid = this.m_servicePidByPid.get(pid);
 
-            cc = new ComponentConfigurationImpl(pid, ocd, props);
+            if (servicePid != null) {
+                Configuration cfg = this.m_configurationAdmin.getConfiguration(servicePid, "?");
+                Map<String, Object> props = CollectionsUtil.dictionaryToMap(cfg.getProperties(), ocd);
+
+                cc = new ComponentConfigurationImpl(pid, ocd, props);
+            }
         } catch (Exception e) {
             s_logger.error("Error getting Configuration for component: " + pid + ". Ignoring it.", e);
         }

@@ -440,7 +440,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
         s_logger.info("Message arrived on topic: {}", topic);
 
         // notify listeners
-        KuraTopic kuraTopic = new KuraTopic(topic);
+        KuraTopic kuraTopic = new KuraTopic(topic, m_options.getTopicControlPrefix());
         if (TOPIC_MQTT_APP.equals(kuraTopic.getApplicationId()) || TOPIC_BA_APP.equals(kuraTopic.getApplicationId())) {
             s_logger.info("Ignoring feedback message from " + topic);
         } else {
@@ -508,7 +508,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
         }
 
         // notify listeners
-        KuraTopic kuraTopic = new KuraTopic(topic);
+        KuraTopic kuraTopic = new KuraTopic(topic, m_options.getTopicControlPrefix());
         for (CloudClientImpl cloudClient : this.m_cloudClients) {
             if (cloudClient.getApplicationId().equals(kuraTopic.getApplicationId())) {
                 cloudClient.onMessagePublished(messageId, kuraTopic.getApplicationTopic());
@@ -527,7 +527,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
         }
 
         // notify listeners
-        KuraTopic kuraTopic = new KuraTopic(topic);
+        KuraTopic kuraTopic = new KuraTopic(topic, m_options.getTopicControlPrefix());
         for (CloudClientImpl cloudClient : this.m_cloudClients) {
             if (cloudClient.getApplicationId().equals(kuraTopic.getApplicationId())) {
                 cloudClient.onMessageConfirmed(messageId, kuraTopic.getApplicationTopic());

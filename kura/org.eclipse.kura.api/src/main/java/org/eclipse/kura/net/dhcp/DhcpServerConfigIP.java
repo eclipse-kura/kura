@@ -228,7 +228,7 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
     /**
      * sets the ending IPAddress in the pool for the DHCP clients
      *
-     * @param m_rangeEnd
+     * @param rangeEnd
      *            the ending IPAddress
      */
     public void setRangeEnd(T rangeEnd) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2016 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat
  *******************************************************************************/
 package org.eclipse.kura.web.shared.model;
 
@@ -17,20 +18,17 @@ import org.eclipse.kura.web.client.util.KuraBaseModel;
 
 public class GwtCloudConnectionEntry extends KuraBaseModel implements Serializable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 3373858744219238675L;
 
     public GwtCloudConnectionEntry() {
     }
 
-    public boolean isConnected() {
-        return get("connectionStatus");
+    public GwtCloudConnectionState getState() {
+        return get("state");
     }
 
-    public void setConnectionStatus(boolean isConnected) {
-        set("connectionStatus", isConnected);
+    public void setState(GwtCloudConnectionState state) {
+        set("state", state);
     }
 
     public String getCloudFactoryPid() {

@@ -52,13 +52,14 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
 
-    private boolean dirty, initialized;
+    private boolean dirty;
+    private boolean initialized;
 
     interface ServiceConfigurationUiUiBinder extends UiBinder<Widget, CloudServiceConfigurationUi> {
     }
 
     private Modal modal;
-    private final GwtConfigComponent originalConfig;
+    private GwtConfigComponent originalConfig;
 
     @UiField
     Button applyConnectionEdit;
@@ -124,9 +125,8 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
     @Override
     protected void reset() {
         if (isDirty()) {
-            // Modal
             showDirtyModal();
-        }        // end is dirty
+        }
     }
 
     @Override
@@ -229,6 +229,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                                         CloudServiceConfigurationUi.this.applyConnectionEdit.setEnabled(false);
                                         CloudServiceConfigurationUi.this.resetConnectionEdit.setEnabled(false);
                                         setDirty(false);
+                                        originalConfig = CloudServiceConfigurationUi.this.m_configurableComponent;
                                         EntryClassUi.hideWaitModal();
                                     }
                                 });
@@ -251,14 +252,11 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                 footer.add(group);
                 this.modal.add(footer);
                 this.modal.show();
-
-                // ----
-
-            }                         // end isDirty()
+            }
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");
             this.incompleteFieldsModal.show();
-        }                         // end else isValid
+        }
     }
 
     private GwtConfigComponent getUpdatedConfiguration() {

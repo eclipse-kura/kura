@@ -8,8 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - Fix logging calls
- *          - Fix possible NPE, Fix generics, Fix issue #599
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
@@ -191,8 +190,6 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
             final DataService dataService = ServiceLocator.getInstance().getService(dataServiceReference);
             try {
                 if (dataService != null) {
-                    pairs.add(new GwtGroupedNVPair("cloudStatus", "Connection Status",
-                            dataService.isConnected() ? "CONNECTED" : "DISCONNECTED"));
                     pairs.add(new GwtGroupedNVPair("cloudStatus", "Auto-connect",
                             dataService.isAutoConnectEnabled()
                                     ? "ON (Retry Interval is " + Integer.toString(dataService.getRetryInterval()) + "s)"
@@ -303,10 +300,10 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         return pairs;
     }
 
-    private List<GwtGroupedNVPair> getPositionStatus() {
+    private List<GwtGroupedNVPair> getPositionStatus() throws GwtKuraException {
         final List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
-        ServiceLocator.withOptionalService(PositionService.class, new ServiceFunction<PositionService, Void>() {
+        ServiceLocator.applyToServiceOptionally(PositionService.class, new ServiceFunction<PositionService, Void>() {
 
             @Override
             public Void apply(PositionService positionService) {

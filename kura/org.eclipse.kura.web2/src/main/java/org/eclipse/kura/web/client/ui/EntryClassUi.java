@@ -532,23 +532,23 @@ public class EntryClassUi extends Composite {
                 EntryClassUi.this.gwtComponentService.findServicesConfigurations(token,
                         new AsyncCallback<List<GwtConfigComponent>>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                    }
 
-                            @Override
-                            public void onSuccess(List<GwtConfigComponent> result) {
-                                EntryClassUi.this.servicesMenu.clear();
-                                for (GwtConfigComponent pair : result) {
-                                    if (!pair.isWireComponent()) {
-                                        EntryClassUi.this.servicesMenu
-                                                .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
-                                    }
-                                }
+                    @Override
+                    public void onSuccess(List<GwtConfigComponent> result) {
+                        EntryClassUi.this.servicesMenu.clear();
+                        for (GwtConfigComponent pair : result) {
+                            if (!pair.isWireComponent()) {
+                                EntryClassUi.this.servicesMenu
+                                        .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
                             }
-                        });
+                        }
+                    }
+                });
             }
         });
     }
@@ -661,24 +661,24 @@ public class EntryClassUi extends Composite {
                     gwtComponentService.findComponentConfigurations(token,
                             new AsyncCallback<List<GwtConfigComponent>>() {
 
-                                @Override
-                                public void onFailure(Throwable ex) {
-                                    logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                    FailureHandler.handle(ex, EntryClassUi.class.getName());
-                                }
+                        @Override
+                        public void onFailure(Throwable ex) {
+                            logger.log(Level.SEVERE, ex.getMessage(), ex);
+                            FailureHandler.handle(ex, EntryClassUi.class.getName());
+                        }
 
-                                @Override
-                                public void onSuccess(List<GwtConfigComponent> result) {
-                                    servicesMenu.clear();
-                                    for (GwtConfigComponent pair : result) {
-                                        String filter = event.getValue().toString();
-                                        String compName = pair.getComponentName();
-                                        if (!pair.isWireComponent() && compName.toLowerCase().contains(filter)) {
-                                            servicesMenu.add(new ServicesAnchorListItem(pair, ui));
-                                        }
-                                    }
+                        @Override
+                        public void onSuccess(List<GwtConfigComponent> result) {
+                            servicesMenu.clear();
+                            for (GwtConfigComponent pair : result) {
+                                String filter = event.getValue().toString();
+                                String compName = pair.getComponentName();
+                                if (!pair.isWireComponent() && compName.toLowerCase().contains(filter)) {
+                                    servicesMenu.add(new ServicesAnchorListItem(pair, ui));
                                 }
-                            });
+                            }
+                        }
+                    });
                 }
             });
         }

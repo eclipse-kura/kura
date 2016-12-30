@@ -107,15 +107,19 @@ public class SupportedUsbModems {
 
     public static boolean isAttached(String vendor, String product) throws Exception {
         final String lsusbCmd = formLsusbCommand(vendor, product); // e.g. lsusb -d 1bc7:1010
-        final List<String> lines = execute(lsusbCmd);
+        try {
+            final List<String> lines = execute(lsusbCmd);
 
-        for (final String line : lines) {
-            final LsusbEntry lsusbEntry = getLsusbEntry(line);
-            if (lsusbEntry != null && vendor != null && product != null && vendor.equals(lsusbEntry.m_vendor)
-                    && product.equals(lsusbEntry.m_product)) {
-                s_logger.info("The '{}' command detected {}", lsusbCmd, lsusbEntry);
-                return true;
+            for (final String line : lines) {
+                final LsusbEntry lsusbEntry = getLsusbEntry(line);
+                if (lsusbEntry != null && vendor != null && product != null && vendor.equals(lsusbEntry.m_vendor)
+                        && product.equals(lsusbEntry.m_product)) {
+                    s_logger.info("The '{}' command detected {}", lsusbCmd, lsusbEntry);
+                    return true;
+                }
             }
+        } catch (ExecuteException e) {
+            s_logger.debug("Lsusb command returned with ExecuteException: ", e);
         }
         return false;
     }

@@ -30,6 +30,7 @@ import org.apache.camel.impl.SimpleRegistry;
 import org.apache.camel.model.OptionalIdentifiedDefinition;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.RoutesDefinition;
+import org.apache.camel.spi.ComponentResolver;
 import org.apache.camel.spi.Registry;
 import org.eclipse.kura.camel.cloud.KuraCloudComponent;
 import org.eclipse.kura.cloud.CloudService;
@@ -65,7 +66,7 @@ public class CamelRunner {
 
             @Override
             public CamelContext createContext(final Registry registry) {
-                return new OsgiDefaultCamelContext(bundleContext);
+                return new OsgiDefaultCamelContext(bundleContext, registry);
             }
         };
     }
@@ -309,6 +310,31 @@ public class CamelRunner {
             return cloudService(String.format("(%s=%s)", attribute, value));
         }
 
+        /**
+         * Require a Camel component to be registered with OSGi before starting
+         *
+         * @param componentName
+         *            the component name (e.g. "timer")
+         * @return the builder instance
+         */
+        public Builder requireComponent(final String componentName) {
+            try {
+                final String filterString = String.format("(&(%s=%s)(%s=%s))", Constants.OBJECTCLASS,
+                        ComponentResolver.class.getName(), "component", componentName);
+                final Filter filter = FrameworkUtil.createFilter(filterString);
+                dependOn(filter, new ServiceConsumer<Object, CamelContext>() {
+
+                    @Override
+                    public void consume(final CamelContext context, final Object service) {
+                    }
+                });
+            } catch (InvalidSyntaxException e) {
+                throw new IllegalArgumentException(String.format("Illegal component name: '%s'", componentName), e);
+            }
+
+            return this;
+        }
+
         public static ServiceConsumer<CloudService, CamelContext> addAsCloudComponent(final String componentName) {
             return new ServiceConsumer<CloudService, CamelContext>() {
 
@@ -537,6 +563,20 @@ public class CamelRunner {
     }
 
     /**
+     * Remove all routes of a context
+     *
+     * @param context
+     *            the context to work on
+     */
+    public static void removeAllRoutes(final CamelContext context) {
+        Objects.requireNonNull(context);
+
+        // remove all routes
+
+        removeRoutes(context, fromDefs(context.getRouteDefinitions()));
+    }
+
+    /**
      * Clear all routes from the context
      */
     public void clearRoutes() {
@@ -565,7 +605,7 @@ public class CamelRunner {
     /**
      * Replace the current set of route with an new one
      *
-     * @param routes
+     * @param xml
      *            the new set of routes
      */
     public void setRoutes(final String xml) throws Exception {
@@ -594,7 +634,7 @@ public class CamelRunner {
     /**
      * Replace the current set of route with an new one
      *
-     * @param routes
+     * @param routeBuilder
      *            the new set of routes
      */
     public void setRoutes(final RouteBuilder routeBuilder) throws Exception {
@@ -635,7 +675,7 @@ public class CamelRunner {
      * <strong>Note: </strong> This method may return {@code null} even after the {@link #start()} method was called
      * if there are unresolved dependencies for the runner.
      * </p>
-     * 
+     *
      * @return the camel context, if the camel context is currently not running then {@code null} is being returned
      */
     public CamelContext getCamelContext() {

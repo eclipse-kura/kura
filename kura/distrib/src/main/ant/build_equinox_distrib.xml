@@ -10,7 +10,7 @@
     Contributors:
       Eurotech
       Red Hat Inc
-
+      
 -->
 <project name="build_equinox_distrib" default="dist-linux" basedir="../../../">
 
@@ -151,6 +151,9 @@
 
 		<!-- Set web UI port -->
 		<antcall target="set-http-port" />
+
+		<!-- Copy selinux policy change -->
+		<copy file="src/main/resources/${build.name}/selinuxKura.pp" tofile="${project.build.directory}/${build.output.name}/selinuxKura.pp" failonerror="false" />
 
 		<!-- Create the Kura start scripts -->
 		<echo file="${project.build.directory}/${build.output.name}/start_kura.sh" append="false"><![CDATA[#!/bin/sh
@@ -350,12 +353,19 @@ fi]]>
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/monitrc.raspbian"
                         prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/${build.name}/kura-tmpfiles.conf"
+                        prefix="${build.output.name}/install" />
 
 
 			<zipfileset file="src/main/resources/common/logrotate.conf"
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/kura.logrotate"
                         prefix="${build.output.name}/install" />
+                        
+            <zipfileset file="src/main/resources/common/sysctl.kura.conf"
+                         prefix="${build.output.name}/install" />
+            <zipfileset file="src/main/resources/common/patch_sysctl.sh"
+                         prefix="${build.output.name}/install" />
 
 			<zipfileset file="src/main/resources/common/hostapd.conf"
                         prefix="${build.output.name}/install" />
@@ -417,6 +427,9 @@ fi]]>
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/ip-up.local"
                         prefix="${build.output.name}/install" />
+                        
+			<zipfileset file="${project.build.directory}/${build.output.name}/selinuxKura.pp" 
+                prefix="${build.output.name}/install" />
 
 			<zipfileset file="${project.build.directory}/${build.output.name}/start_kura.sh"
                         fullpath="${build.output.name}/bin/start_kura.sh" filemode="777" />
@@ -797,7 +810,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			
 			<!-- copy common bundles -->
 			<fileset dir="../target-definition/common/repository/plugins">
-				<exclude name="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*,com.gwt.user_*"/>
+				<exclude name="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*,com.gwt.user_*,org.junit*"/>
 				<!-- exclude source bundles -->
 				<exclude name="*.source_*.jar"/>
 			</fileset>

@@ -61,10 +61,6 @@ public interface NetworkAdminService {
      *            - specifies the auto-connect value for the interface
      * @param mtu
      *            - required MTU for the interface, -1 to keep the automatic default
-     * @param netConfig4
-     *            - the IPv4 configuration
-     * @param netConfig6
-     *            - the IPv6 configuration
      * @throws KuraException
      */
     public void updateEthernetInterfaceConfig(String interfaceName, boolean autoConnect, int mtu,
@@ -77,12 +73,6 @@ public interface NetworkAdminService {
      *            - name of the wifi interface
      * @param autoConnect
      *            - specifies the auto-connect value for the interface
-     * @param mtu
-     *            - required MTU for the interface, -1 to keep the automatic default
-     * @param netConfig4
-     *            - the IPv4 configuration
-     * @param netConfig6
-     *            - the IPv6 configuration
      * @throws KuraException
      */
     public void updateWifiInterfaceConfig(String interfaceName, boolean autoConnect, WifiAccessPoint accessPoint,

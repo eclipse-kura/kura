@@ -27,22 +27,21 @@ package org.eclipse.kura.configuration.metatype;
  * <p>
  *
  * <pre>
- * &lt;simpleType name="Tscalar">
- *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="String"/>
- *     &lt;enumeration value="Long"/>
- *     &lt;enumeration value="Double"/>
- *     &lt;enumeration value="Float"/>
- *     &lt;enumeration value="Integer"/>
- *     &lt;enumeration value="Byte"/>
- *     &lt;enumeration value="Char"/>
- *     &lt;enumeration value="Boolean"/>
- *     &lt;enumeration value="Short"/>
- *     &lt;enumeration value="Password"/>
- *   &lt;/restriction>
- * &lt;/simpleType>
+ * &lt;simpleType name="Tscalar"&gt;
+ *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
+ *     &lt;enumeration value="String"/&gt;
+ *     &lt;enumeration value="Long"/&gt;
+ *     &lt;enumeration value="Double"/&gt;
+ *     &lt;enumeration value="Float"/&gt;
+ *     &lt;enumeration value="Integer"/&gt;
+ *     &lt;enumeration value="Byte"/&gt;
+ *     &lt;enumeration value="Char"/&gt;
+ *     &lt;enumeration value="Boolean"/&gt;
+ *     &lt;enumeration value="Short"/&gt;
+ *     &lt;enumeration value="Password"/&gt;
+ *   &lt;/restriction&gt;
+ * &lt;/simpleType&gt;
  * </pre>
- *
  */
 public enum Scalar {
 

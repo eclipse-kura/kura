@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+# Copyright (c) 2011, 2016 Eurotech and/or its affiliates
 #
 #  All rights reserved. This program and the accompanying materials
 #  are made available under the terms of the Eclipse Public License v1.0
@@ -72,6 +72,11 @@ cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura.sh
 sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura_background.sh
 sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura_debug.sh
+
+# setup snapshot_0 recovery folder
+if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
+    mkdir ${INSTALL_DIR}/kura/.data
+fi
 
 #set up recover default configuration script
 cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/.data/.recoverDefaultConfig.sh

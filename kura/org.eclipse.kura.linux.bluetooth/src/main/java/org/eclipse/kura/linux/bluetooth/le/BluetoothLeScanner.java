@@ -147,44 +147,6 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
     }
 
     @Override
-    public void processErrorStream(String string) {
-    }
-
-    // --------------------------------------------------------------------
-    //
-    // Private methods
-    //
-    // --------------------------------------------------------------------
-    private void processLine(String line) {
-        String name;
-        String address;
-        s_logger.info(line);
-        if (line.contains("Set scan parameters failed:")) {
-            s_logger.error("Error : " + line);
-        } else {
-            // Results from hcitool lescan should be in form:
-            // <mac_address> <device_name>
-            String[] results = line.split("\\s", 2);
-            if (results.length == 2) {
-                address = results[0].trim();
-                name = results[1].trim();
-
-                if (address.matches(MAC_REGEX)) {
-                    if (this.m_devices.containsKey(address)) {
-                        if (!name.equals("(unknown)") && !this.m_devices.get(address).equals(name)) {
-                            s_logger.debug("Updating device: {} - {}", address, name);
-                            this.m_devices.put(address, name);
-                        }
-                    } else {
-                        s_logger.debug("Device found: {} - {}", address, name);
-                        this.m_devices.put(address, name);
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
     public void processBTSnoopRecord(byte[] record) {
 
         try {
@@ -223,6 +185,44 @@ public class BluetoothLeScanner implements BluetoothProcessListener, BTSnoopList
             s_logger.error("Error processing advertising report", e);
         }
 
+    }
+    
+    @Override
+    public void processErrorStream(String string) {
+    }
+
+    // --------------------------------------------------------------------
+    //
+    // Private methods
+    //
+    // --------------------------------------------------------------------
+    private void processLine(String line) {
+        String name;
+        String address;
+        s_logger.info(line);
+        if (line.contains("Set scan parameters failed:")) {
+            s_logger.error("Error : " + line);
+        } else {
+            // Results from hcitool lescan should be in form:
+            // <mac_address> <device_name>
+            String[] results = line.split("\\s", 2);
+            if (results.length == 2) {
+                address = results[0].trim();
+                name = results[1].trim();
+
+                if (address.matches(MAC_REGEX)) {
+                    if (this.m_devices.containsKey(address)) {
+                        if (!name.equals("(unknown)") && !this.m_devices.get(address).equals(name)) {
+                            s_logger.debug("Updating device: {} - {}", address, name);
+                            this.m_devices.put(address, name);
+                        }
+                    } else {
+                        s_logger.debug("Device found: {} - {}", address, name);
+                        this.m_devices.put(address, name);
+                    }
+                }
+            }
+        }
     }
 
     public boolean isScanRunning() {

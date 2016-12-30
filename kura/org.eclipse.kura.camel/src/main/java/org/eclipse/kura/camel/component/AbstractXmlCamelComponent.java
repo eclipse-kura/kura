@@ -58,11 +58,14 @@ public abstract class AbstractXmlCamelComponent extends AbstractCamelComponent i
     @Activate
     protected void activate(final BundleContext context, final Map<String, Object> properties) throws Exception {
         try {
-            start();
-            modified(properties);
+            start(properties);
+
+            // apply current routes
+            applyRoutes(properties);
         } catch (Exception e) {
             logger.warn("Problem activating component", e);
-            throw e;
+            // we need to suppress exceptions during start
+            // otherwise Kura cannot configure us anymore
         }
     }
 
@@ -80,11 +83,27 @@ public abstract class AbstractXmlCamelComponent extends AbstractCamelComponent i
     protected void modified(final Map<String, Object> properties) throws Exception {
         logger.debug("Updating properties: {}", properties);
         try {
-            this.runner.setRoutes(asString(properties, this.xmlDataProperty));
+            if (isRestartNeeded(properties)) {
+                logger.info("Need restart");
+                stop();
+                start(properties);
+            }
+
+            // apply current routes
+
+            applyRoutes(properties);
         } catch (Exception e) {
             logger.warn("Problem updating component", e);
             throw e;
         }
+    }
+
+    private void applyRoutes(final Map<String, Object> properties) throws Exception {
+        this.runner.setRoutes(asString(properties, this.xmlDataProperty));
+    }
+
+    protected boolean isRestartNeeded(final Map<String, Object> properties) {
+        return false;
     }
 
 }

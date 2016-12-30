@@ -65,7 +65,6 @@ import org.eclipse.kura.KuraException;
  *			StringBuffer sb = new StringBuffer();
  *			int c;
  *			while((c = isTwo.read()) != 0xa) {
- *				//System.out.println("port 2: read byte: 0x" + Integer.toHexString(c) + " -> " + (char)c);
  *				sb.append((char)c);
  *			}
  *			System.out.println("Port 2: Read from serial port two: " + sb.toString());
@@ -74,7 +73,6 @@ import org.eclipse.kura.KuraException;
  *			osTwo.write(array);
  *			sb = new StringBuffer();
  *			while((c = isOne.read()) != 0xa) {
- *				//System.out.println("port 1: read byte: 0x" + Integer.toHexString(c) + " -> " + (char)c);
  *				sb.append((char)c);
  *			}
  *			System.out.println("Port 1: Read from serial port: " + sb.toString());

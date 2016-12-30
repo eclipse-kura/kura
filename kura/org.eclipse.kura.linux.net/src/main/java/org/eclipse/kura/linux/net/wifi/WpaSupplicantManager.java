@@ -71,8 +71,13 @@ public class WpaSupplicantManager {
 
             // start wpa_supplicant
             String wpaSupplicantCommand = formSupplicantStartCommand(interfaceName, configFile);
-            s_logger.debug("starting wpa_supplicant -> {}", wpaSupplicantCommand);
-            LinuxProcessUtil.start(wpaSupplicantCommand);
+            s_logger.info("starting wpa_supplicant for the {} interface -> {}", interfaceName, wpaSupplicantCommand);
+            int stat = LinuxProcessUtil.start(wpaSupplicantCommand);
+            if (stat != 0 && stat != 255) {
+                s_logger.error("failed to start wpa_supplicant for the {} interface for unknown reason - errorCode={}",
+                        interfaceName, stat);
+                throw KuraException.internalError("failed to start hostapd for unknown reason");
+            }
         } catch (Exception e) {
             s_logger.error("Exception while enabling WPA Supplicant!", e);
             throw KuraException.internalError(e);
@@ -93,30 +98,6 @@ public class WpaSupplicantManager {
             sb.append(ifaceName);
             sb.append(" -c ");
             sb.append(configFile);
-        }
-
-        return sb.toString();
-    }
-
-    /*
-     * This method forms wpa_supplicant start command
-     */
-    private static String formSupplicantStopCommand(String ifaceName) throws KuraException {
-
-        StringBuilder sb = new StringBuilder();
-        if (s_isIntelEdison) {
-            sb.append("systemctl stop wpa_supplicant");
-        } else {
-            // sb.append("killall wpa_supplicant");
-            int pid;
-            try {
-                pid = getPid(ifaceName);
-                if (pid > 0) {
-                    sb.append("kill -9 ").append(pid);
-                }
-            } catch (KuraException e) {
-                throw KuraException.internalError(e);
-            }
         }
 
         return sb.toString();
@@ -163,19 +144,18 @@ public class WpaSupplicantManager {
 
     /**
      * Stops all instances of wpa_supplicant
-     *
+     * 
      * @throws Exception
      */
     public static void stop(String ifaceName) throws KuraException {
         try {
-            // kill wpa_supplicant
-            s_logger.debug("stopping wpa_supplicant");
-            String cmd = formSupplicantStopCommand(ifaceName);
-            if (cmd != null && !cmd.isEmpty()) {
-                LinuxProcessUtil.start(cmd);
-                if (ifaceName != null) {
-                    LinuxNetworkUtil.disableInterface(ifaceName);
-                }
+            if (!s_isIntelEdison) {
+                LinuxProcessUtil.stopAndKill(getPid(ifaceName));
+            } else {
+                LinuxProcessUtil.start("systemctl stop hostapd");
+            }
+            if (ifaceName != null) {
+                LinuxNetworkUtil.disableInterface(ifaceName);
                 Thread.sleep(1000);
             }
         } catch (Exception e) {

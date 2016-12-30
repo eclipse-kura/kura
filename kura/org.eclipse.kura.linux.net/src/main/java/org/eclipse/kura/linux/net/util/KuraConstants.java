@@ -24,6 +24,7 @@ public enum KuraConstants {
     ReliaGATE_50_21_Ubuntu("ubuntu", "14.04", "reliagate-50-21"),
     Reliagate_10_11("yocto", "1.2.1", "reliagate-10-11"),
     Reliagate_20_25("yocto", "1.2.1", "reliagate-20-25"),
+    Reliagate_20_26("rhel", "7.3", "reliagate-20-26"),
     Fedora_Pi("fedora", "2x", "raspberry-pi");
 
     private String m_imageName;

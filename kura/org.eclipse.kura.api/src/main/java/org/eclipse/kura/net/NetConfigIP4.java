@@ -24,29 +24,11 @@ public class NetConfigIP4 extends NetConfigIP<IP4Address>implements NetConfig4 {
 
     private List<IP4Address> winsServers;
 
-    /**
-     * Constructor for a Configuration for a
-     * network interface based on IPv4 addresses.
-     *
-     * @param address
-     *            - address to be assigned to the interface
-     * @param networkPrefixLength
-     *            - prefix to be used for the interface
-     * @param gateway
-     *            - gateway to be associated with the interface
-     */
     public NetConfigIP4(NetInterfaceStatus status, boolean autoConnect) {
         super(status, autoConnect);
         this.winsServers = new ArrayList<IP4Address>();
     }
 
-    /**
-     * Constructor for a DHCP Configration for a
-     * network interface nased on IPv4 addresses.
-     *
-     * @param dhcp
-     *            whether or not DHCP client mode should be used
-     */
     public NetConfigIP4(NetInterfaceStatus status, boolean autoConnect, boolean dhcp) {
         super(status, autoConnect, dhcp);
         this.winsServers = new ArrayList<IP4Address>();

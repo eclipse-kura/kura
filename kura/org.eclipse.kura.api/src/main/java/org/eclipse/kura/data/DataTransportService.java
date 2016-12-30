@@ -23,10 +23,9 @@ import org.eclipse.kura.data.transport.listener.DataTransportListener;
  * remote broker, publish messages, subscribe to topics, receive messages on the
  * subscribed topics, and disconnect from the remote message broker.
  *
- * The whiteboard pattern {@link http://www.osgi.org/wiki/uploads/Links/whiteboard.pdf}
+ * The <a href="http://www.osgi.org/wiki/uploads/Links/whiteboard.pdf">whiteboard pattern</a>
  * is used to notify the service users about events such as message arrived, connection lost etc.
- *
- * {@see DataTransportListener}
+ * through the {@link DataTransportListener}
  */
 public interface DataTransportService {
 

@@ -133,7 +133,7 @@ public interface CryptoService {
      *            A String that represents a unique identifier of the specified keystore.
      * @param password
      *            A char array that represents the password of the specified keystore.
-     * @throws IOException
+     * @throws KuraException
      */
     public void setKeyStorePassword(String keyStorePath, char[] password) throws KuraException;
 

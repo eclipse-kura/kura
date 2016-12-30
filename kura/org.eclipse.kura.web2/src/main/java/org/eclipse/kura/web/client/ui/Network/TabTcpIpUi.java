@@ -359,20 +359,9 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             public void onChange(ChangeEvent event) {
                 setDirty(true);
                 TabTcpIpUi.this.tabs.adjustInterfaceTabs();
-                // TODO: to disable if disabled selected
-                // if (VMSGS.netIPv4StatusDisabled().equals(status.getSelectedValue())) {
-                // // Using DHCP selected
-                // configure.setEnabled(false);
-                // ip.setEnabled(false);
-                // subnet.setEnabled(false);
-                // gateway.setEnabled(false);
-                // renew.setEnabled(false);
-                // dnsRead.setVisible(false);
-                // dns.setVisible(false);
-                //
-                // } else {
+
                 refreshForm();
-                // }
+                resetValidations();
 
                 // Check for other WAN interfaces if current interface is
                 // changed to WAN
@@ -574,6 +563,31 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             @Override
             public void onChange(ChangeEvent event) {
                 setDirty(true);
+                
+                if (TabTcpIpUi.this.dns.getText().trim().length() == 0) {
+        			TabTcpIpUi.this.groupDns.setValidationState(ValidationState.NONE);
+        			TabTcpIpUi.this.helpDns.setText("");
+            		return;
+        		}
+        
+        		String regex = "[\\s,;\\n\\t]+";
+        		String[] aDnsServers = TabTcpIpUi.this.dns.getText().trim().split(regex);
+        		boolean validDnsList = true;
+        		for (String dnsEntry : aDnsServers) {
+        			if ((dnsEntry.length() > 0) && !dnsEntry.matches(FieldType.IPv4_ADDRESS.getRegex())) {
+        				validDnsList = false;
+        				break;
+        			}
+        		}
+        		if (!validDnsList) {
+        			TabTcpIpUi.this.groupDns.setValidationState(ValidationState.ERROR);
+                    TabTcpIpUi.this.helpDns.setText(MSGS.netIPv4InvalidAddress());
+        		} else {
+        			TabTcpIpUi.this.groupDns.setValidationState(ValidationState.NONE);
+                    TabTcpIpUi.this.helpDns.setText("");
+        		}
+                
+        		/*
                 if (!TabTcpIpUi.this.dns.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
                         && TabTcpIpUi.this.dns.getText().trim().length() > 0) {
                     TabTcpIpUi.this.groupDns.setValidationState(ValidationState.ERROR);
@@ -582,6 +596,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                     TabTcpIpUi.this.groupDns.setValidationState(ValidationState.NONE);
                     TabTcpIpUi.this.helpDns.setText("");
                 }
+                */
             }
         });
 
@@ -733,23 +748,34 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                     this.subnet.setEnabled(false);
                     this.gateway.setEnabled(false);
                     this.renew.setEnabled(true);
+                    if (this.status.getSelectedValue().equals(IPV4_STATUS_WAN_MESSAGE)) {
+                    	this.dns.setEnabled(true);
+                    	this.search.setEnabled(true);
+                    } else {
+                    	this.dns.setEnabled(false);
+                    	this.search.setEnabled(false);
+                    }
                 } else {
                     this.ip.setEnabled(true);
                     this.subnet.setEnabled(true);
-                    this.gateway.setEnabled(true);
+                    //this.gateway.setEnabled(true);
 
                     if (this.status.getSelectedValue().equals(IPV4_STATUS_WAN_MESSAGE)) {
-                        // enable gateway field
                         this.gateway.setEnabled(true);
+                        this.dns.setEnabled(true);
+                        this.search.setEnabled(true);
                     } else {
                         this.gateway.setText("");
                         this.gateway.setEnabled(false);
+                        this.dns.setEnabled(false);
+                        this.search.setEnabled(false);
                     }
                     this.renew.setEnabled(false);
                 }
+                /*
                 this.dns.setEnabled(true);
                 this.search.setEnabled(true);
-
+				*/
             }
         }
 

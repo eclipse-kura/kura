@@ -259,7 +259,7 @@ public class BluetoothAdapterImpl implements BluetoothAdapter {
         cmd[0] = "cmd";
         cmd[1] = ogf;
         cmd[2] = ocf;
-        for (int i = 0; i < cmd.length; i++) {
+        for (int i = 0; i < paramArray.length; i++) {
             cmd[i + 3] = paramArray[i];
         }
 

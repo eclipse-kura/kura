@@ -165,7 +165,6 @@ public class StatusPanelUi extends Composite {
                 StatusPanelUi.this.gwtStatusService.getDeviceConfig(token,
                         StatusPanelUi.this.currentSession.isNetAdminAvailable(),
                         new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
-
                             @Override
                             public void onFailure(Throwable caught) {
                                 FailureHandler.handle(caught);

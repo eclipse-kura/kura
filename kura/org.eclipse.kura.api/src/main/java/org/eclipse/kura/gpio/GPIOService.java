@@ -14,9 +14,9 @@ package org.eclipse.kura.gpio;
 import java.util.Map;
 
 /**
- * The GPIOService is used to access available GPIO resources on the system.<br/>
- * {@link KuraGPIOPin}s can be accessed by name or by terminal index.<br/>
- * <br/>
+ * The GPIOService is used to access available GPIO resources on the system.<br>
+ * {@link KuraGPIOPin}s can be accessed by name or by terminal index.<br>
+ * <br>
  * Operations on the pins can be done using the acquired {@link KuraGPIOPin} class.
  */
 public interface GPIOService {

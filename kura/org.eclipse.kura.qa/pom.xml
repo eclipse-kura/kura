@@ -19,7 +19,7 @@
   <parent>
     <artifactId>kura</artifactId>
     <groupId>org.eclipse.kura</groupId>
-    <version>2.1.0-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <relativePath>../pom_pom.xml</relativePath>
   </parent>
 

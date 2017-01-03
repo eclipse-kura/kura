@@ -794,7 +794,7 @@
 						<executions>
 							<execution>
 								<id>apu-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -844,7 +844,7 @@
 						<executions>
 							<execution>
 								<id>apu-deb</id>
-								<phase>install</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jdeb</goal>
 								</goals>
@@ -1868,7 +1868,7 @@
 						<executions>
 							<execution>
 								<id>fedorapi-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1880,12 +1880,13 @@
 										<property name="project.build.directory" value="${project.build.directory}" />
 										<property name="build.name" value="fedorapi" />
 										<property name="target.device" value="raspberry-pi" />
+										<property name="native.tag" value="armv6hf"/>
 										<property name="kura.os.version" value="fedora" />
 										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="512m" />
 										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
-												 target="dist-linux" />
+											target="dist-linux" />
 									</target>
 								</configuration>
 							</execution>
@@ -1928,7 +1929,7 @@
 						<executions>
 							<execution>
 								<id>fedorapi-nn-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1938,14 +1939,15 @@
 										<property name="project.version" value="${project.version}" />
 										<property name="project.build.profile" value="${project.build.profile}" />
 										<property name="project.build.directory" value="${project.build.directory}" />
-										<property name="build.name" value="raspberry-pi-2-nn" />
-										<property name="target.device" value="raspberry-pi-2-nn" />
-										<property name="kura.os.version" value="raspbian" />
+										<property name="build.name" value="fedorapi-nn" />
+										<property name="target.device" value="raspberry-pi-nn" />
+										<property name="native.tag" value="armv6hf"/>
+										<property name="kura.os.version" value="fedora" />
 										<property name="kura.arch" value="armv7_hf" />
 										<property name="kura.mem.size" value="512m" />
 										<property name="kura.install.dir" value="/opt/eclipse" />
 										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
-												 target="dist-linux" />
+											target="dist-linux" />
 									</target>
 								</configuration>
 							</execution>

@@ -39,8 +39,12 @@
             </snapshots>
         </repository>
         <repository>
-            <id>Eclipse Paho Repo</id>
+            <id>eclipse.paho</id>
             <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
+        </repository>
+        <repository>
+            <id>eclipse.kura</id>
+            <url>https://repo.eclipse.org/content/groups/kura/</url>
         </repository>
     </repositories>
 

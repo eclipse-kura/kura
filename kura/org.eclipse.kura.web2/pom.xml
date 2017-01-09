@@ -97,7 +97,7 @@
 				<configuration>
 					<additionalFileSets>
 						<fileSet>
-							<directory>www</directory>
+							<directory>src/main/webapp</directory>
 							<prefix>www/</prefix>
 							<excludes>
 								<exclude>**/WEB-INF/**</exclude>

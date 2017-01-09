@@ -687,7 +687,7 @@ public class ConfigurationServiceTest {
 
         when(allPidsMock.contains(Mockito.anyObject())).thenThrow(new RuntimeException());
 
-        cs.registerSelfConfiguringComponent(pid);
+        cs.registerSelfConfiguringComponent(pid, pid);
 
         verify(allPidsMock, times(0)).contains(Mockito.anyObject());
     }
@@ -712,7 +712,7 @@ public class ConfigurationServiceTest {
         assertEquals("empty service pids", 0, spbp.size());
         assertEquals("empty activated configured components", 0, asc.size());
 
-        cs.registerSelfConfiguringComponent(pid);
+        cs.registerSelfConfiguringComponent(pid, pid);
 
         verify(allPidsMock, times(1)).contains(pid);
         verify(allPidsMock, times(1)).add(pid);
@@ -741,13 +741,13 @@ public class ConfigurationServiceTest {
         assertEquals("empty service pids", 0, spbp.size());
         assertEquals("empty activated configured components", 0, asc.size());
 
-        cs.registerSelfConfiguringComponent(pid);
+        cs.registerSelfConfiguringComponent(pid, pid);
 
         verify(allPidsMock, times(1)).contains(pid);
         verify(allPidsMock, times(0)).add(pid);
 
-        assertEquals("not added pid to service pids", 0, spbp.size());
-        assertEquals("not added pid to activated configured components", 0, asc.size());
+        assertEquals("not added pid to service pids", 1, spbp.size());
+        assertEquals("not added pid to activated configured components", 1, asc.size());
     }
 
     @Test

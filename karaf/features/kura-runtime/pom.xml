@@ -53,7 +53,7 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.soda.dk.comm</artifactId>
-            <version>1.2.3-SNAPSHOT</version>
+            <version>1.2.4-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.eclipse.tycho</groupId>

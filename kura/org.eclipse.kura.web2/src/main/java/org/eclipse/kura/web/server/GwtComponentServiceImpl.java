@@ -44,6 +44,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 
 public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements GwtComponentService {
 
+    private static final String DRIVER_PID = "driver.pid";
     private static final String KURA_SERVICE_PID = ConfigurationService.KURA_SERVICE_PID;
     private static final String SERVICE_FACTORY_PID = "service.factoryPid";
     private static final String KURA_UI_SERVICE_HIDE = "kura.ui.service.hide";
@@ -53,12 +54,12 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     @Override
     public List<GwtConfigComponent> findServicesConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-        List<String> hidePidsList = new ArrayList<String>();
+        List<String> hidePidsList = new ArrayList<>();
 
         // identify the services to hide by component configuration property
         fillServicesToHideList(hidePidsList);
 
-        List<GwtConfigComponent> gwtComponentConfigs = new ArrayList<GwtConfigComponent>();
+        List<GwtConfigComponent> gwtComponentConfigs = new ArrayList<>();
         for (GwtConfigComponent gwtComponentConfig : findFilteredComponentConfigurationsInternal()) {
             String componentPid = gwtComponentConfig.getComponentId();
             if (hidePidsList.contains(componentPid) || componentPid.endsWith("SystemPropertiesService")
@@ -109,7 +110,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         try {
 
             // Build the new properties
-            Map<String, Object> properties = new HashMap<String, Object>();
+            Map<String, Object> properties = new HashMap<>();
             ComponentConfiguration backupCC = cs.getComponentConfiguration(gwtCompConfig.getComponentId());
             Map<String, Object> backupConfigProp = backupCC.getConfigurationProperties();
             for (GwtConfigParameter gwtConfigParam : gwtCompConfig.getParameters()) {
@@ -189,14 +190,18 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         List<String> result = new ArrayList<>();
         List<String> servicesToBeHidden = new ArrayList<>();
+
         // finding all wire components to remove from the list as these factory
         // instances
         // are only shown in Kura Wires UI
         List<String> allWireComponents = findWireComponents();
+
         // finding services with kura.service.ui.hide property
         fillServicesToHideList(servicesToBeHidden);
+
         // get all the factory PIDs tracked by Configuration Service
         result.addAll(cs.getFactoryComponentPids());
+
         // remove all the wire components and the services to be hidden as these
         // are shown in different UI
         result.removeAll(allWireComponents);
@@ -329,7 +334,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     }
 
     private Object[] getObjectValue(GwtConfigParameter gwtConfigParam, String[] defaultValues) {
-        List<Object> values = new ArrayList<Object>();
+        List<Object> values = new ArrayList<>();
         GwtConfigParameterType type = gwtConfigParam.getType();
         switch (type) {
         case BOOLEAN:
@@ -437,7 +442,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         Collection<ServiceReference<SelfConfiguringComponent>> selfConfiguringComponentReferences = ServiceLocator
                 .getInstance().getServiceReferences(SelfConfiguringComponent.class, null);
 
-        List<ServiceReference<?>> componentReferences = new ArrayList<ServiceReference<?>>();
+        List<ServiceReference<?>> componentReferences = new ArrayList<>();
         componentReferences.addAll(configurableComponentReferences);
         componentReferences.addAll(selfConfiguringComponentReferences);
 
@@ -453,11 +458,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
     private List<GwtConfigComponent> findFilteredComponentConfigurationsInternal() throws GwtKuraException {
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
-        List<GwtConfigComponent> gwtConfigs = new ArrayList<GwtConfigComponent>();
+        List<GwtConfigComponent> gwtConfigs = new ArrayList<>();
         try {
 
             List<ComponentConfiguration> configs = cs.getComponentConfigurations();
-            // sort the list alphabetically by service name
             sortConfigurationsByName(configs);
 
             for (ComponentConfiguration config : configs) {
@@ -472,7 +476,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
     private List<GwtConfigComponent> findComponentConfigurationInternal(String componentPid) throws GwtKuraException {
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
-        List<GwtConfigComponent> gwtConfigs = new ArrayList<GwtConfigComponent>();
+        List<GwtConfigComponent> gwtConfigs = new ArrayList<>();
         try {
             ComponentConfiguration config = cs.getComponentConfiguration(componentPid);
 
@@ -488,7 +492,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     private List<GwtConfigComponent> findFilteredComponentConfigurationInternal(String componentPid)
             throws GwtKuraException {
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
-        List<GwtConfigComponent> gwtConfigs = new ArrayList<GwtConfigComponent>();
+        List<GwtConfigComponent> gwtConfigs = new ArrayList<>();
         try {
             ComponentConfiguration config = cs.getComponentConfiguration(componentPid);
 
@@ -513,10 +517,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             gwtConfigComponent.setComponentName(baseGwtConfig.getComponentName());
             gwtConfigComponent.setProperties(baseGwtConfig.getProperties());
 
-            List<GwtConfigParameter> gwtParams = new ArrayList<GwtConfigParameter>();
+            List<GwtConfigParameter> gwtParams = new ArrayList<>();
             gwtConfigComponent.setParameters(gwtParams);
 
-            List<GwtConfigParameter> nonMetatypeConfigParameters = new ArrayList<GwtConfigParameter>();
+            List<GwtConfigParameter> nonMetatypeConfigParameters = new ArrayList<>();
 
             if (config.getConfigurationProperties() != null) {
 
@@ -530,11 +534,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
     private List<GwtConfigComponent> findComponentConfigurationsInternal() throws GwtKuraException {
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
-        List<GwtConfigComponent> gwtConfigs = new ArrayList<GwtConfigComponent>();
+        List<GwtConfigComponent> gwtConfigs = new ArrayList<>();
         try {
 
             List<ComponentConfiguration> configs = cs.getComponentConfigurations();
-            // sort the list alphabetically by service name
             sortConfigurationsByName(configs);
 
             for (ComponentConfiguration config : configs) {
@@ -559,8 +562,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             gwtConfig.setComponentId(config.getPid());
 
             Map<String, Object> props = config.getConfigurationProperties();
-            if (props != null && props.get("driver.pid") != null) {
-                gwtConfig.set("driver.pid", props.get("driver.pid"));
+            if (props != null && props.get(DRIVER_PID) != null) {
+                gwtConfig.set(DRIVER_PID, props.get(DRIVER_PID));
             }
 
             if ((props != null) && (props.get(SERVICE_FACTORY_PID) != null)) {
@@ -582,7 +585,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                 gwtConfig.setComponentIcon(icon.getResource());
             }
 
-            List<GwtConfigParameter> gwtParams = new ArrayList<GwtConfigParameter>();
+            List<GwtConfigParameter> gwtParams = new ArrayList<>();
             gwtConfig.setParameters(gwtParams);
 
             if (config.getConfigurationProperties() != null) {
@@ -594,9 +597,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     }
 
     private List<GwtConfigParameter> getNonMetatypeProperties(ComponentConfiguration config) {
-        List<GwtConfigParameter> gwtParams = new ArrayList<GwtConfigParameter>();
+        List<GwtConfigParameter> gwtParams = new ArrayList<>();
         for (Map.Entry<String, Object> entry : config.getConfigurationProperties().entrySet()) {
-            // if (!addedIds.contains(entry.getKey())) {
             GwtConfigParameter gwtParam = new GwtConfigParameter();
             gwtParam.setId(entry.getKey());
             Object value = entry.getValue();
@@ -621,7 +623,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     }
 
     private List<GwtConfigParameter> getADProperties(ComponentConfiguration config) {
-        List<GwtConfigParameter> gwtParams = new ArrayList<GwtConfigParameter>();
+        List<GwtConfigParameter> gwtParams = new ArrayList<>();
         OCD ocd = config.getDefinition();
         for (AD ad : ocd.getAD()) {
             GwtConfigParameter gwtParam = new GwtConfigParameter();
@@ -632,7 +634,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             gwtParam.setRequired(ad.isRequired());
             gwtParam.setCardinality(ad.getCardinality());
             if (ad.getOption() != null && !ad.getOption().isEmpty()) {
-                Map<String, String> options = new HashMap<String, String>();
+                Map<String, String> options = new HashMap<>();
                 for (Option option : ad.getOption()) {
                     options.put(option.getLabel(), option.getValue());
                 }
@@ -655,7 +657,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                     // this could be an array value
                     if (value instanceof Object[]) {
                         Object[] objValues = (Object[]) value;
-                        List<String> strValues = new ArrayList<String>();
+                        List<String> strValues = new ArrayList<>();
                         for (Object v : objValues) {
                             if (v != null) {
                                 if (gwtParam.getType().equals(GwtConfigParameterType.PASSWORD)) {

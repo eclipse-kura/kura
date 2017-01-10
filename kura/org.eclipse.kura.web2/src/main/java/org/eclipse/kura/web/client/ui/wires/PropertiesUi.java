@@ -1054,42 +1054,40 @@ public class PropertiesUi extends Composite {
         // sense. But it seems that, if not in
         // debug, all the browsers are able to
         // display the double value as expected
-        if (param.getType() != null) {
-            switch (param.getType()) {
-            case LONG:
-                if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
-                    formattedValue = String.valueOf(Long.parseLong(param.getValue()));
-                }
-                break;
-            case DOUBLE:
-                if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
-                    formattedValue = String.valueOf(Double.parseDouble(param.getValue()));
-                }
-                break;
-            case FLOAT:
-                if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
-                    formattedValue = String.valueOf(Float.parseFloat(param.getValue()));
-                }
-                break;
-            case SHORT:
-                if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
-                    formattedValue = String.valueOf(Short.parseShort(param.getValue()));
-                }
-                break;
-            case BYTE:
-                if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
-                    formattedValue = String.valueOf(Byte.parseByte(param.getValue()));
-                }
-                break;
-            case INTEGER:
-                if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
-                    formattedValue = String.valueOf(Integer.parseInt(param.getValue()));
-                }
-                break;
-            default:
-                formattedValue = param.getValue();
-                break;
+        switch (param.getType()) {
+        case LONG:
+            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+                formattedValue = String.valueOf(Long.parseLong(param.getValue()));
             }
+            break;
+        case DOUBLE:
+            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+                formattedValue = String.valueOf(Double.parseDouble(param.getValue()));
+            }
+            break;
+        case FLOAT:
+            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+                formattedValue = String.valueOf(Float.parseFloat(param.getValue()));
+            }
+            break;
+        case SHORT:
+            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+                formattedValue = String.valueOf(Short.parseShort(param.getValue()));
+            }
+            break;
+        case BYTE:
+            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+                formattedValue = String.valueOf(Byte.parseByte(param.getValue()));
+            }
+            break;
+        case INTEGER:
+            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+                formattedValue = String.valueOf(Integer.parseInt(param.getValue()));
+            }
+            break;
+        default:
+            formattedValue = param.getValue();
+            break;
         }
 
         if (param.getValue() != null) {

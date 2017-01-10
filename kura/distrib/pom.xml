@@ -1899,7 +1899,7 @@
 		<profile>
 			<id>fedorapi-nn</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>
 			<build>
 				<resources>

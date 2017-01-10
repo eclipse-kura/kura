@@ -161,7 +161,7 @@ public class PropertiesUi extends Composite {
         this.channelsDataProvider.addDataDisplay(this.channelTable);
         this.channelPanel.setVisible(false);
         this.btn_remove.setEnabled(false);
-        
+
         this.nonValidatedCells = new HashSet<String>();
         this.hasDriver = this.m_configurableComponent.get("driver.pid") != null;
         this.isWireAsset = (this.m_configurableComponent.getFactoryId() != null)
@@ -227,36 +227,36 @@ public class PropertiesUi extends Composite {
                 PropertiesUi.this.btn_remove.setEnabled(PropertiesUi.this.selectionModel.getSelectedObject() != null);
             }
         });
-        
+
         this.renderForm();
         this.initInvalidDataModal();
-        
+
         this.setDirty(false);
 
         if (this.hasDriver) {
             // Retrieve base Driver descriptor
             this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-    
+
                 @Override
                 public void onFailure(final Throwable caught) {
                     FailureHandler.handle(caught);
                 }
-    
+
                 @Override
                 public void onSuccess(final GwtXSRFToken result) {
                     PropertiesUi.this.gwtWireService.getGwtBaseChannelDescriptor(result,
                             new AsyncCallback<GwtConfigComponent>() {
-    
-                                @Override
-                                public void onFailure(final Throwable caught) {
-                                    FailureHandler.handle(caught);
-                                }
-    
-                                @Override
-                                public void onSuccess(final GwtConfigComponent result) {
-                                    PropertiesUi.this.m_baseDriverDescriptor = result;
-                                }
-                            });
+
+                        @Override
+                        public void onFailure(final Throwable caught) {
+                            FailureHandler.handle(caught);
+                        }
+
+                        @Override
+                        public void onSuccess(final GwtConfigComponent result) {
+                            PropertiesUi.this.m_baseDriverDescriptor = result;
+                        }
+                    });
                 }
             });
         }
@@ -784,9 +784,16 @@ public class PropertiesUi extends Composite {
             listBox.addItem(entry.getKey());
 
             final boolean hasDefault = param.getDefault() != null;
-            final boolean setDefault = param.getDefault().equals(entry.getValue());
+            boolean setDefault = false;
             final boolean hasValue = param.getValue() != null;
-            final boolean setValue = param.getValue().equals(entry.getValue());
+            boolean setValue = false;
+
+            if (param.getDefault() != null) {
+                setDefault = param.getDefault().equals(entry.getValue());
+            }
+            if (param.getValue() != null) {
+                setValue = param.getValue().equals(entry.getValue());
+            }
 
             if (!valueFound) {
                 if (hasDefault && setDefault) {
@@ -822,9 +829,9 @@ public class PropertiesUi extends Composite {
         final Map<String, String> options = param.getOptions();
         if ((options != null) && (options.size() > 0)) {
             this.renderChoiceField(param, isFirstInstance, formGroup);
-        } else if (param.getType().equals(GwtConfigParameterType.BOOLEAN)) {
+        } else if (param.getType() != null && param.getType().equals(GwtConfigParameterType.BOOLEAN)) {
             this.renderBooleanField(param, isFirstInstance, formGroup);
-        } else if (param.getType().equals(GwtConfigParameterType.PASSWORD)) {
+        } else if (param.getType() != null && param.getType().equals(GwtConfigParameterType.PASSWORD)) {
             this.renderPasswordField(param, isFirstInstance, formGroup);
         } else {
             this.renderTextField(param, isFirstInstance, formGroup, isReadOnly);
@@ -873,58 +880,53 @@ public class PropertiesUi extends Composite {
                             PropertiesUi.this.m_configurableComponent.get("driver.pid").toString(),
                             new AsyncCallback<GwtConfigComponent>() {
 
+                        @Override
+                        public void onFailure(final Throwable caught) {
+                            FailureHandler.handle(caught);
+                        }
+
+                        @Override
+                        public void onSuccess(final GwtConfigComponent result) {
+                            PropertiesUi.this.m_driverDescriptor = result;
+                            PropertiesUi.this.addDefaultColumns();
+                            for (final GwtConfigParameter param : result.getParameters()) {
+                                PropertiesUi.this.channelTable.addColumn(PropertiesUi.this.getColumnFromParam(param),
+                                        new TextHeader(param.getName()));
+                            }
+
+                            PropertiesUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
                                 @Override
                                 public void onFailure(final Throwable caught) {
                                     FailureHandler.handle(caught);
                                 }
 
                                 @Override
-                                public void onSuccess(final GwtConfigComponent result) {
-                                    PropertiesUi.this.m_driverDescriptor = result;
-                                    PropertiesUi.this.addDefaultColumns();
-                                    for (final GwtConfigParameter param : result.getParameters()) {
-                                        PropertiesUi.this.channelTable.addColumn(
-                                                PropertiesUi.this.getColumnFromParam(param),
-                                                new TextHeader(param.getName()));
-                                    }
+                                public void onSuccess(final GwtXSRFToken result) {
+                                    PropertiesUi.this.gwtWireService.getGwtChannels(result,
+                                            PropertiesUi.this.m_driverDescriptor,
+                                            PropertiesUi.this.m_configurableComponent,
+                                            new AsyncCallback<List<GwtChannelInfo>>() {
 
-                                    PropertiesUi.this.gwtXSRFService
-                                            .generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+                                        @Override
+                                        public void onFailure(final Throwable caught) {
+                                            FailureHandler.handle(caught);
+                                        }
 
-                                                @Override
-                                                public void onFailure(final Throwable caught) {
-                                                    FailureHandler.handle(caught);
-                                                }
+                                        @Override
+                                        public void onSuccess(final List<GwtChannelInfo> result) {
+                                            PropertiesUi.this.channelsDataProvider.getList().clear();
+                                            PropertiesUi.this.channelsDataProvider.getList().addAll(result);
+                                            PropertiesUi.this.channelsDataProvider.refresh();
 
-                                                @Override
-                                                public void onSuccess(final GwtXSRFToken result) {
-                                                    PropertiesUi.this.gwtWireService.getGwtChannels(result,
-                                                            PropertiesUi.this.m_driverDescriptor,
-                                                            PropertiesUi.this.m_configurableComponent,
-                                                            new AsyncCallback<List<GwtChannelInfo>>() {
+                                            PropertiesUi.this.channelPanel.setVisible(true);
 
-                                                                @Override
-                                                                public void onFailure(final Throwable caught) {
-                                                                    FailureHandler.handle(caught);
-                                                                }
-
-                                                                @Override
-                                                                public void onSuccess(
-                                                                        final List<GwtChannelInfo> result) {
-                                                                    PropertiesUi.this.channelsDataProvider.getList()
-                                                                            .clear();
-                                                                    PropertiesUi.this.channelsDataProvider.getList()
-                                                                            .addAll(result);
-                                                                    PropertiesUi.this.channelsDataProvider.refresh();
-
-                                                                    PropertiesUi.this.channelPanel.setVisible(true);
-
-                                                                }
-                                                            });
-                                                }
-                                            });
+                                        }
+                                    });
                                 }
                             });
+                        }
+                    });
                 }
             });
         }
@@ -1035,7 +1037,7 @@ public class PropertiesUi extends Composite {
 
         final TextBox textBox = new TextBox();
         textBox.setReadOnly(isReadOnly);
-        if (param.getDescription().contains("\u200B\u200B\u200B\u200B\u200B")) {
+        if (param.getDescription() != null && param.getDescription().contains("\u200B\u200B\u200B\u200B\u200B")) {
             textBox.setHeight("120px");
         }
 
@@ -1044,40 +1046,42 @@ public class PropertiesUi extends Composite {
         // sense. But it seems that, if not in
         // debug, all the browsers are able to
         // display the double value as expected
-        switch (param.getType()) {
-        case LONG:
-            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
-                formattedValue = String.valueOf(Long.parseLong(param.getValue()));
+        if (param.getType() != null) {
+            switch (param.getType()) {
+            case LONG:
+                if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+                    formattedValue = String.valueOf(Long.parseLong(param.getValue()));
+                }
+                break;
+            case DOUBLE:
+                if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+                    formattedValue = String.valueOf(Double.parseDouble(param.getValue()));
+                }
+                break;
+            case FLOAT:
+                if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+                    formattedValue = String.valueOf(Float.parseFloat(param.getValue()));
+                }
+                break;
+            case SHORT:
+                if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+                    formattedValue = String.valueOf(Short.parseShort(param.getValue()));
+                }
+                break;
+            case BYTE:
+                if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+                    formattedValue = String.valueOf(Byte.parseByte(param.getValue()));
+                }
+                break;
+            case INTEGER:
+                if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+                    formattedValue = String.valueOf(Integer.parseInt(param.getValue()));
+                }
+                break;
+            default:
+                formattedValue = param.getValue();
+                break;
             }
-            break;
-        case DOUBLE:
-            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
-                formattedValue = String.valueOf(Double.parseDouble(param.getValue()));
-            }
-            break;
-        case FLOAT:
-            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
-                formattedValue = String.valueOf(Float.parseFloat(param.getValue()));
-            }
-            break;
-        case SHORT:
-            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
-                formattedValue = String.valueOf(Short.parseShort(param.getValue()));
-            }
-            break;
-        case BYTE:
-            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
-                formattedValue = String.valueOf(Byte.parseByte(param.getValue()));
-            }
-            break;
-        case INTEGER:
-            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
-                formattedValue = String.valueOf(Integer.parseInt(param.getValue()));
-            }
-            break;
-        default:
-            formattedValue = param.getValue();
-            break;
         }
 
         if (param.getValue() != null) {

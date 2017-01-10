@@ -13,7 +13,6 @@
 package org.eclipse.kura.protocol.modbus;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -44,25 +43,21 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 
     private static final Logger s_logger = LoggerFactory.getLogger(ModbusProtocolDevice.class);
 
-    private static final String GPIO_BASE_PATH = "/sys/class/gpio/";
-    private static final String GPIO_EXPORT_PATH = "export";
-
     private ConnectionFactory m_connectionFactory;
     private UsbService m_usbService;
 
     static final String PROTOCOL_NAME = "modbus";
-    public static final String PROTOCOL_CONNECTION_TYPE_SERIAL = "SERIAL";
-    public static final String SERIAL_232 = "RS232";
-    public static final String SERIAL_485 = "RS485";
-    public static final String PROTOCOL_CONNECTION_TYPE_ETHER_TCP = "ETHERTCP";
+    public static final String PROTOCOL_CONNECTION_TYPE_SERIAL = "RS232";
+    public static final String PROTOCOL_CONNECTION_TYPE_ETHER_RTU = "TCP-RTU";
+    public static final String PROTOCOL_CONNECTION_TYPE_ETHER_TCP = "TCP/IP";
     private int m_respTout;
     private int m_txMode;
-    private boolean m_serial485 = false;
     private boolean m_connConfigd = false;
     private boolean m_protConfigd = false;
     private String m_connType = null;
     private Communicate m_comm;
     private Properties m_modbusProperties = null;
+    private static int transactionIndex = 0;
 
     public void setConnectionFactory(ConnectionFactory connectionFactory) {
         this.m_connectionFactory = connectionFactory;
@@ -123,39 +118,35 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
         try {
             disconnect();
         } catch (ModbusProtocolException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            s_logger.error("ModbusProtocolException :  {}", e.getCode());
         }
     }
 
     /**
-     * two connection types are available, PROTOCOL_CONNECTION_TYPE_SERIAL (SERIAL MODE 232 or 485)
-     * and
-     * PROTOCOL_CONNECTION_TYPE_ETHER_TCP. The required properties for the
-     * connection will vary with each connection.
+     * two connection types are available:
+     * <ul>
+     * <li> serial mode (PROTOCOL_CONNECTION_TYPE_SERIAL)
+     * 
+     * <li> Ethernet with 2 possible modes : RTU over TCP/IP (PROTOCOL_CONNECTION_TYPE_ETHER_RTU) or real MODBUS-TCP/IP
+     * (PROTOCOL_CONNECTION_TYPE_ETHER_TCP). 
+     * <ul>
      * <p>
-     * <h3>PROTOCOL_CONNECTION_TYPE_SERIAL</h3>
-     * see {@link org.eclipse.kura.comm.CommConnection CommConnection} package for more
-     * detail.
-     * <table summary="" border="1">
+     * <h4>PROTOCOL_CONNECTION_TYPE_SERIAL</h4>
+     * see {@link org.eclipse.kura.comm.CommConnection CommConnection} package for more detail.
+     * <table border="1">
      * <tr>
      * <th>Key</th>
      * <th>Description</th>
      * </tr>
      * <tr>
      * <td>connectionType</td>
-     * <td>"SERIAL" (from PROTOCOL_CONNECTION_TYPE_SERIAL). This parameter
-     * indicates the connection type for the configuration. See
-     * {@link org.eclipse.kura.comm.CommConnection CommConnection} for more details on serial
-     * port configuration.
+     * <td>"RS232" (from PROTOCOL_CONNECTION_TYPE_SERIAL). This parameter indicates the connection type for the
+     * configuration. See {@link org.eclipse.kura.comm.CommConnection CommConnection} for more details on serial port
+     * configuration.
      * </tr>
      * <tr>
      * <td>port</td>
      * <td>the actual device port, such as "/dev/ttyUSB0" in linux</td>
-     * </tr>
-     * <tr>
-     * <td>serialMode</td>
-     * <td>SERIAL_232 or SERIAL_485</td>
      * </tr>
      * <tr>
      * <td>baudRate</td>
@@ -175,19 +166,18 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
      * </tr>
      * </table>
      * <p>
-     * <h3>PROTOCOL_CONNECTION_TYPE_ETHER_TCP</h3>
-     * The Ethernet mode merely opens a socket and sends the full RTU mode
-     * Modbus packet over that socket connection and expects to receive a full
-     * RTU mode Modbus response, including the CRC bytes.
-     * <table summary="" border="1">
+     * <h4>PROTOCOL_CONNECTION_TYPE_ETHER_TCP</h4>
+     * The Ethernet mode merely opens a socket and sends the full RTU mode Modbus packet over that socket connection and
+     * expects to receive a full RTU mode Modbus response, including the CRC bytes.
+     * <table border="1">
      * <tr>
      * <th>Key</th>
      * <th>Description</th>
      * </tr>
      * <tr>
      * <td>connectionType</td>
-     * <td>"ETHERTCP" (from PROTOCOL_CONNECTION_TYPE_ETHER_TCP). This parameter
-     * indicates the connection type for the configurator.
+     * <td>"ETHERTCP" (from PROTOCOL_CONNECTION_TYPE_ETHER_TCP). This parameter indicates the connection type for the
+     * configurator.
      * </tr>
      * <tr>
      * <td>ipAddress</td>
@@ -232,12 +222,13 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
             this.m_connConfigd = false;
         }
 
-        if (this.m_connType.equals(PROTOCOL_CONNECTION_TYPE_SERIAL)) {
+        if (PROTOCOL_CONNECTION_TYPE_SERIAL.equals(this.m_connType)) {
             if (!serialPortExists()) {
                 throw new ModbusProtocolException(ModbusProtocolErrorCode.NOT_AVAILABLE);
             }
             this.m_comm = new SerialCommunicate(this.m_connectionFactory, connectionConfig);
-        } else if (this.m_connType.equals(PROTOCOL_CONNECTION_TYPE_ETHER_TCP)) {
+        } else if (PROTOCOL_CONNECTION_TYPE_ETHER_TCP.equals(this.m_connType)
+                || PROTOCOL_CONNECTION_TYPE_ETHER_RTU.equals(this.m_connType)) {
             this.m_comm = new EthernetCommunicate(this.m_connectionFactory, connectionConfig);
         } else {
             throw new ModbusProtocolException(ModbusProtocolErrorCode.INVALID_CONFIGURATION);
@@ -248,7 +239,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 
     /**
      * get the name "modbus" for this protocol
-     *
+     * 
      * @return "modbus"
      */
     @Override
@@ -300,7 +291,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
     /**
      * Installation of a serial connection to communicate, using javax.comm.SerialPort
      * <p>
-     * <table summary="" border="1">
+     * <table border="1">
      * <tr>
      * <th>Key</th>
      * <th>Description</th>
@@ -330,8 +321,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
      * <td>only RTU mode supported, bitsPerWord must be 8</td>
      * </tr>
      * </table>
-     * see {@link org.eclipse.kura.comm.CommConnection CommConnection} package for more
-     * detail.
+     * see {@link org.eclipse.kura.comm.CommConnection CommConnection} package for more detail.
      */
     private final class SerialCommunicate extends Communicate {
 
@@ -339,19 +329,15 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
         OutputStream out;
         CommConnection conn = null;
 
-        FileWriter gpioModeSwitch;
-
         public SerialCommunicate(ConnectionFactory connFactory, Properties connectionConfig)
                 throws ModbusProtocolException {
-            s_logger.debug("Configure serial connection");
+            s_logger.info("Configure serial connection");
 
             String sPort;
             String sBaud;
             String sStop;
             String sParity;
             String sBits;
-            String gpioSwitchPin = null;
-            String gpioRsModePin = null;
 
             if ((sPort = connectionConfig.getProperty("port")) == null
                     || (sBaud = connectionConfig.getProperty("baudRate")) == null
@@ -365,15 +351,6 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
             int stop = Integer.valueOf(sStop).intValue();
             int parity = Integer.valueOf(sParity).intValue();
             int bits = Integer.valueOf(sBits).intValue();
-            if (connectionConfig.getProperty("serialMode") != null) {
-                ModbusProtocolDevice.this.m_serial485 = connectionConfig.getProperty("serialMode") == SERIAL_485;
-                if (ModbusProtocolDevice.this.m_serial485) {
-                    if ((gpioSwitchPin = connectionConfig.getProperty("serialGPIOswitch")) == null
-                            || (gpioRsModePin = connectionConfig.getProperty("serialGPIOrsmode")) == null) {
-                        throw new ModbusProtocolException(ModbusProtocolErrorCode.INVALID_CONFIGURATION);
-                    }
-                }
-            }
 
             String uri = new CommURI.Builder(sPort).withBaudRate(baud).withDataBits(bits).withStopBits(stop)
                     .withParity(parity).withTimeout(2000).build().toString();
@@ -381,152 +358,17 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
             try {
                 this.conn = (CommConnection) connFactory.createConnection(uri, 1, false);
             } catch (IOException e1) {
-                throw new ModbusProtocolException(ModbusProtocolErrorCode.CONNECTION_FAILURE, e1);
-            }
-            if (ModbusProtocolDevice.this.m_serial485) {
-                setupSerialGpio(gpioRsModePin, gpioSwitchPin);
+                throw new ModbusProtocolException(ModbusProtocolErrorCode.CONNECTION_FAILURE, e1.getMessage());
             }
 
             // get the streams
             try {
                 this.in = this.conn.openInputStream();
                 this.out = this.conn.openOutputStream();
-                if (ModbusProtocolDevice.this.m_serial485) {
-                    this.gpioModeSwitch = new FileWriter(new File("/sys/class/gpio/" + gpioSwitchPin + "/value"));
-                }
             } catch (Exception e) {
                 throw new ModbusProtocolException(ModbusProtocolErrorCode.CONNECTION_FAILURE, e);
             }
-        }
-
-        /**
-         * Initializes the GPIO Serial Ports to RS485 mode with output direction.
-         * Communication can then be switched to RX or TX.
-         *
-         * @param gpioRsMode
-         * @param gpioSwitch
-         * @throws ModbusProtocolException
-         */
-        private void setupSerialGpio(String gpioRsMode, String gpioSwitch) throws ModbusProtocolException {
-            final String[] requiredGpio = { gpioRsMode, /* port 3 RS mode */
-                    gpioSwitch /* port TX<->RX switch */
-            };
-
-            for (String gpio : requiredGpio) {
-                File gpioFile = new File(GPIO_BASE_PATH + gpio);
-                if (!gpioFile.exists()) {
-                    // # Pin is not exported, so do it now
-                    FileWriter fwExport = null;
-                    try {
-                        fwExport = new FileWriter(new File(GPIO_BASE_PATH + GPIO_EXPORT_PATH));
-                        // write only the PIN number
-                        fwExport.write(gpio.replace("gpio", ""));
-                        fwExport.flush();
-                        s_logger.debug("Exported GPIO {}", gpio);
-
-                    } catch (IOException e) {
-                        s_logger.error("Exporting Error", e);
-                    } finally {
-                        if (fwExport != null) {
-                            try {
-                                fwExport.close();
-                            } catch (IOException e) {
-                                s_logger.error("Error closing export file", e);
-                            }
-                        }
-                    }
-                    // wait a little after exporting
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
-
-                // After exporting the pin, set the direction to "out"
-                FileWriter fwDirection = null;
-                try {
-                    fwDirection = new FileWriter(new File(GPIO_BASE_PATH + gpio + "/direction"));
-                    fwDirection.write("out");
-                    fwDirection.flush();
-                    s_logger.debug("Direction GPIO {}", gpio);
-
-                } catch (IOException e) {
-                    s_logger.error("Direction Error", e);
-                } finally {
-                    if (fwDirection != null) {
-                        try {
-                            fwDirection.close();
-                        } catch (IOException e) {
-                            s_logger.error("Error closing export file", e);
-                        }
-                    }
-                }
-
-                // Switch to RS485 mode
-                FileWriter fwValue = null;
-                try {
-                    fwValue = new FileWriter(new File(GPIO_BASE_PATH + gpio + "/value"));
-                    fwValue.write("1");
-                    fwValue.flush();
-                    s_logger.debug("Value GPIO {}", gpio);
-
-                } catch (IOException e) {
-                    s_logger.error("Value Error", e);
-                } finally {
-                    if (fwValue != null) {
-                        try {
-                            fwValue.close();
-                        } catch (IOException e) {
-                            s_logger.error("Error closing value file", e);
-                        }
-                    }
-                }
-
-            }
-
-        }
-
-        /**
-         * Sets the GPIO Serial port to Transmit mode. Data can be written to OutputStream.
-         *
-         * @throws InterruptedException
-         */
-        private void switchTX() throws ModbusProtocolException {
-            try {
-                this.gpioModeSwitch.write("1");
-                this.gpioModeSwitch.flush();
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    throw new ModbusProtocolException(ModbusProtocolErrorCode.CONNECTION_FAILURE,
-                            "switchTX interrupted");
-                }
-            } catch (IOException e) {
-                throw new ModbusProtocolException(ModbusProtocolErrorCode.CONNECTION_FAILURE,
-                        "switchTX IOException " + e.getMessage());
-            }
-        }
-
-        /**
-         * Sets the GPIO Serial port to Receive mode. Data can be read from InputStream.
-         *
-         * @throws InterruptedException
-         */
-        private void switchRX() throws ModbusProtocolException {
-            try {
-                this.gpioModeSwitch.write("0");
-                this.gpioModeSwitch.flush();
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    throw new ModbusProtocolException(ModbusProtocolErrorCode.CONNECTION_FAILURE,
-                            "switchRX interrupted");
-                }
-            } catch (IOException e) {
-                throw new ModbusProtocolException(ModbusProtocolErrorCode.CONNECTION_FAILURE,
-                        "switchRX IOException " + e.getMessage());
-            }
+            s_logger.info("Serial connection connected");
         }
 
         @Override
@@ -546,15 +388,6 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
                     throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE, e.getMessage());
                 }
                 this.conn = null;
-            }
-            if (ModbusProtocolDevice.this.m_serial485) {
-                if (this.gpioModeSwitch != null) {
-                    try {
-                        this.gpioModeSwitch.close();
-                    } catch (IOException e) {
-                        throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE, e.getMessage());
-                    }
-                }
             }
         }
 
@@ -653,24 +486,15 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
                 synchronized (this.out) {
                     synchronized (this.in) {
                         // flush input
-                        if (ModbusProtocolDevice.this.m_serial485) {
-                            switchRX();
-                        }
                         while (this.in.available() > 0) {
                             this.in.read();
                         }
                         // send all data
-                        if (ModbusProtocolDevice.this.m_serial485) {
-                            switchTX();
-                        }
                         this.out.write(cmd, 0, cmd.length);
                         this.out.flush();
                         // outputStream.waitAllSent(respTout);
 
                         // wait for and process response
-                        if (ModbusProtocolDevice.this.m_serial485) {
-                            switchRX();
-                        }
                         byte[] response = new byte[262]; // response buffer
                         int respIndex = 0;
                         int minimumLength = 5; // default minimum message length
@@ -820,14 +644,16 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
         Socket socket;
         int port;
         String ipAddress;
+        String connType;
         boolean connected = false;
 
         public EthernetCommunicate(ConnectionFactory connFactory, Properties connectionConfig)
                 throws ModbusProtocolException {
             s_logger.debug("Configure TCP connection");
             String sPort;
+            this.connType = connectionConfig.getProperty("connectionType");
 
-            if ((sPort = connectionConfig.getProperty("port")) == null
+            if ((sPort = connectionConfig.getProperty("ethport")) == null
                     || (this.ipAddress = connectionConfig.getProperty("ipAddress")) == null) {
                 throw new ModbusProtocolException(ModbusProtocolErrorCode.INVALID_CONFIGURATION);
             }
@@ -898,15 +724,38 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
         public byte[] msgTransaction(byte[] msg) throws ModbusProtocolException {
             byte[] cmd = null;
 
+            // ---------------------------------------------- Send Message
+            // ---------------------------------------------------
             if (ModbusProtocolDevice.this.m_txMode == ModbusTransmissionMode.RTU_MODE) {
-                cmd = new byte[msg.length + 2];
-                for (int i = 0; i < msg.length; i++) {
-                    cmd[i] = msg[i];
+                if (PROTOCOL_CONNECTION_TYPE_ETHER_TCP.equals(this.connType)) {
+                    cmd = new byte[msg.length + 2 + 6];
+                    // build MBAP header
+                    int index = getNextTransactionIndex();
+                    cmd[0] = (byte) (index >> 8);
+                    cmd[1] = (byte) index;
+                    cmd[2] = 0;
+                    cmd[3] = 0;
+                    // length
+                    int len = msg.length;
+                    cmd[4] = (byte) (len >> 8);
+                    cmd[5] = (byte) len;
+                    for (int i = 0; i < msg.length; i++) {
+                        cmd[i + 6] = msg[i];
+                    }
+                    // Add crc calculation to end of message
+                    int crc = Crc16.getCrc16(msg, msg.length, 0x0ffff);
+                    cmd[msg.length + 6] = (byte) crc;
+                    cmd[msg.length + 1 + 6] = (byte) (crc >> 8);
+                } else {
+                    cmd = new byte[msg.length + 2];
+                    for (int i = 0; i < msg.length; i++) {
+                        cmd[i] = msg[i];
+                    }
+                    // Add crc calculation to end of message
+                    int crc = Crc16.getCrc16(msg, msg.length, 0x0ffff);
+                    cmd[msg.length] = (byte) crc;
+                    cmd[msg.length + 1] = (byte) (crc >> 8);
                 }
-                // Add crc calculation to end of message
-                int crc = Crc16.getCrc16(msg, msg.length, 0x0ffff);
-                cmd[msg.length] = (byte) crc;
-                cmd[msg.length + 1] = (byte) (crc >> 8);
             } else {
                 throw new ModbusProtocolException(ModbusProtocolErrorCode.METHOD_NOT_SUPPORTED,
                         "Only RTU over TCP/IP supported");
@@ -932,88 +781,112 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
                 // Assume this means the socket is closed...make sure it is
                 s_logger.error("Socket disconnect in send: " + e);
                 disconnect();
-                throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,
-                        "Send failure: " + e.getMessage());
+                throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE, "Send failure: "
+                        + e.getMessage());
             }
 
+            // ---------------------------------------------- Receive response
+            // ---------------------------------------------------
             // wait for and process response
+
+            boolean endFrame = false;
             byte[] response = new byte[262]; // response buffer
             int respIndex = 0;
             int minimumLength = 5; // default minimum message length
-            while (true) {
-                while (respIndex < minimumLength) {
-                    try {
-                        this.socket.setSoTimeout(ModbusProtocolDevice.this.m_respTout);
-                        int resp = this.inputStream.read(response, respIndex, minimumLength - respIndex);
-                        if (resp > 0) {
-                            respIndex += resp;
+            if (PROTOCOL_CONNECTION_TYPE_ETHER_TCP.equals(this.connType)) {
+                minimumLength += 6;
+            }
+            while (!endFrame) {
+                try {
+                    this.socket.setSoTimeout(ModbusProtocolDevice.this.m_respTout);
+                    int resp = this.inputStream.read(response, respIndex, 1);
+                    if (resp > 0) {
+                        respIndex += resp;
+                        if (PROTOCOL_CONNECTION_TYPE_ETHER_TCP.equals(this.connType)) {
+                            if (respIndex == 7) {
+                                // test modbus id
+                                if (response[6] != msg[0]) {
+                                    throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,
+                                            "incorrect modbus id " + String.format("%02X", response[6]));
+                                }
+                            } else if (respIndex == 8) {
+                                // test function number
+                                if ((response[7] & 0x7f) != msg[1]) {
+                                    throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,
+                                            "incorrect function number " + String.format("%02X", response[7]));
+                                }
+                            } else if (respIndex == 9) {
+                                // Check first for an Exception response
+                                if ((response[7] & 0x80) == 0x80) {
+                                    if (Crc16.getCrc16(response, respIndex, 0xffff) == 0) {
+                                        throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,
+                                                "Modbus responds an error = " + String.format("%02X", response[8]));
+                                    }
+                                } else {
+                                    if (response[7] == ModbusFunctionCodes.FORCE_SINGLE_COIL
+                                            || response[7] == ModbusFunctionCodes.PRESET_SINGLE_REG
+                                            || response[7] == ModbusFunctionCodes.FORCE_MULTIPLE_COILS
+                                            || response[7] == ModbusFunctionCodes.PRESET_MULTIPLE_REGS) {
+                                        minimumLength = 14;
+                                    } else {
+                                        // bytes count
+                                        minimumLength = response[8] + 11;
+                                    }
+                                }
+                            } else if (respIndex == minimumLength) {
+                                endFrame = true;
+                            }
                         } else {
-                            s_logger.error("Socket disconnect in recv");
-                            disconnect();
-                            throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,
-                                    "Recv failure");
+
                         }
-                    } catch (SocketTimeoutException e) {
-                        String failMsg = "Recv timeout";
-                        s_logger.warn(failMsg);
-                        throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE, failMsg);
-                    } catch (IOException e) {
-                        s_logger.error("Socket disconnect in recv: " + e);
+                    } else {
+                        s_logger.error("Socket disconnect in recv");
                         disconnect();
                         throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE, "Recv failure");
                     }
+                } catch (SocketTimeoutException e) {
+                    String failMsg = "Recv timeout";
+                    s_logger.warn(failMsg);
+                    throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE, failMsg);
+                } catch (IOException e) {
+                    s_logger.error("Socket disconnect in recv: " + e);
+                    disconnect();
+                    throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE, "Recv failure");
                 }
 
-                // Check first for an Exception response
-                if ((response[1] & 0x80) == 0x80) {
-                    if (Crc16.getCrc16(response, 5, 0xffff) == 0) {
-                        throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,
-                                "Resp exception = " + Byte.toString(response[2]));
-                    }
-                } else {
-                    // then check for a valid message
-                    switch (response[1]) {
-                    case ModbusFunctionCodes.FORCE_SINGLE_COIL:
-                    case ModbusFunctionCodes.PRESET_SINGLE_REG:
-                    case ModbusFunctionCodes.FORCE_MULTIPLE_COILS:
-                    case ModbusFunctionCodes.PRESET_MULTIPLE_REGS:
-                        if (respIndex < 8) {
-                            // wait for more data
-                            minimumLength = 8;
-                        } else if (Crc16.getCrc16(response, 8, 0xffff) == 0) {
-                            byte[] ret = new byte[8];
-                            for (int i = 0; i < 8; i++) {
-                                ret[i] = response[i];
-                            }
-                            return ret;
-                        }
-                        break;
-                    case ModbusFunctionCodes.READ_COIL_STATUS:
-                    case ModbusFunctionCodes.READ_INPUT_STATUS:
-                    case ModbusFunctionCodes.READ_INPUT_REGS:
-                    case ModbusFunctionCodes.READ_HOLDING_REGS:
-                        int byteCnt = (response[2] & 0xff) + 5;
-                        if (respIndex < byteCnt) {
-                            // wait for more data
-                            minimumLength = byteCnt;
-                        } else if (Crc16.getCrc16(response, byteCnt, 0xffff) == 0) {
-                            byte[] ret = new byte[byteCnt];
-                            for (int i = 0; i < byteCnt; i++) {
-                                ret[i] = response[i];
-                            }
-                            return ret;
-                        }
-                    }
-                }
-
-                /*
-                 * if required length then must have failed, drop first byte and
-                 * try again
-                 */
-                if (respIndex >= minimumLength) {
-                    throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE, "Error in recv");
-                }
             }
+
+            // then check for a valid message
+            switch (response[7]) {
+            case ModbusFunctionCodes.FORCE_SINGLE_COIL:
+            case ModbusFunctionCodes.PRESET_SINGLE_REG:
+            case ModbusFunctionCodes.FORCE_MULTIPLE_COILS:
+            case ModbusFunctionCodes.PRESET_MULTIPLE_REGS:
+                // if (Crc16.getCrc16(response, 14, 0xffff) == 0) {
+                byte[] ret = new byte[8];
+                for (int i = 6; i < 14; i++) {
+                    ret[i - 6] = response[i];
+                }
+                return ret;
+                // }
+                // else
+                // throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,"CRC16 error");
+            case ModbusFunctionCodes.READ_COIL_STATUS:
+            case ModbusFunctionCodes.READ_INPUT_STATUS:
+            case ModbusFunctionCodes.READ_INPUT_REGS:
+            case ModbusFunctionCodes.READ_HOLDING_REGS:
+                int byteCnt = (response[8] & 0xff) + 5 + 6;
+                // if (Crc16.getCrc16(response, byteCnt, 0xffff) == 0) {
+                ret = new byte[byteCnt - 6];
+                for (int i = 6; i < byteCnt; i++) {
+                    ret[i - 6] = response[i];
+                }
+                return ret;
+                // }
+                // else
+                // throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,"CRC16 error");
+            }
+            return null;
         }
     }
 
@@ -1274,6 +1147,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 
     @Override
     public int[] readInputRegisters(int unitAddr, int dataAddress, int count) throws ModbusProtocolException {
+
         if (!this.m_connConfigd) {
             throw new ModbusProtocolException(ModbusProtocolErrorCode.NOT_CONNECTED);
         }
@@ -1536,4 +1410,18 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 
         return mce;
     }
+
+    /**
+     * Calculates and returns the next transaction index for Modbus TCP.
+     * 
+     * @return the next transaction index.
+     */
+    private int getNextTransactionIndex() {
+        transactionIndex++;
+        if (transactionIndex > 0xffff) {
+            transactionIndex = 0;
+        }
+        return transactionIndex;
+    }
+
 }

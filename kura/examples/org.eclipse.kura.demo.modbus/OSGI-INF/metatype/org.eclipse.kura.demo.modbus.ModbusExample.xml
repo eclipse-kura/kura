@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2017 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -19,53 +19,93 @@
               
         <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/modbus.png" size="32"/>
         
-        <AD id="port"
-            name="port"
+        <AD id="protocol"
+            name="protocol"
             type="String"
             cardinality="0"
-            required="true"
+            required="false"
+            default="RS232"
+            description="Type of connection : Serial Mode (RS232), TCP-RTU for TCP-encapsulated Modbus, or ModbusTCP/IP for the full TCP/IP implementation.">
+            <Option label="RS-232" value="RS232"/>
+            <Option label="TCP-RTU" value="TCP-RTU"/>
+            <Option label="TCP/IP" value="TCP/IP"/>
+		</AD>
+
+        <AD id="serial.port"
+            name="serial.port"
+            type="String"
+            cardinality="0"
+            required="false"
             default="/dev/ttyUSB0"
             description="Serial Port Name."/>
         
-        <AD id="baudRate"  
-            name="baudRate"
+        <AD id="serial.baudrate"  
+            name="serial.baudrate"
             type="String"
             cardinality="0" 
             required="false"
             default="9600" 
-            description="The baud rate of the serial connection."/>
+            description="The baud rate of the serial connection.">
+            <Option label="110" value="110"/>
+            <Option label="300" value="300"/>
+            <Option label="600" value="600"/>
+            <Option label="1200" value="1200"/>
+            <Option label="2400" value="2400"/>
+            <Option label="4800" value="4800"/>
+            <Option label="9600" value="9600"/>
+            <Option label="14400" value="14400"/>
+            <Option label="19200" value="19200"/>
+            <Option label="28800" value="28800"/>
+            <Option label="38400" value="38400"/>
+            <Option label="56000" value="56000"/>
+            <Option label="57600" value="57600"/>
+            <Option label="115200" value="115200"/>
+            <Option label="128000" value="128000"/>
+            <Option label="153600" value="153600"/>
+            <Option label="230400" value="230400"/>
+            <Option label="256000" value="256000"/>
+            <Option label="460800" value="460800"/>
+            <Option label="921600" value="921600"/>
+		</AD>
 
-        <AD id="bitsPerWord"  
-            name="bitsPerWord"
+        <AD id="serial.data-bits"  
+            name="serial.data-bits"
             type="String"
             cardinality="0" 
             required="false"
             default="8" 
-            description="The number of bits per word or the 'data bits' for the serial connection."/>
+            description="The number of bits per word or the 'data bits' for the serial connection.">
+            <Option label="5" value="5"/>
+            <Option label="6" value="6"/>
+            <Option label="7" value="7"/>
+            <Option label="8" value="8"/>
+		</AD>
 
-        <AD id="stopBits"  
-            name="stopBits"
+        <AD id="serial.stop-bits"  
+            name="serial.stop-bits"
             type="String"
             cardinality="0" 
             required="false"
             default="1" 
-            description="The stop bits for the serial connection."/>
+            description="The stop bits for the serial connection.">
+            <Option label="1" value="1"/>
+            <Option label="2" value="2"/>
+            <Option label="1.5" value="3"/>
+        </AD>
 
-        <AD id="parity"  
-            name="parity"
+        <AD id="serial.parity"  
+            name="serial.parity"
             type="String"
             cardinality="0" 
             required="false"
             default="0" 
-            description="The parity for the serial connection."/>
-
-        <AD id="controlTopic"  
-            name="controlTopic"
-            type="String"
-            cardinality="0" 
-            required="false"
-            default="/modbus/manager" 
-            description="The control topic for the device connected."/>
+            description="The parity for the serial connection.">
+            <Option label="None" value="0"/>
+            <Option label="Odd" value="1"/>
+            <Option label="Even" value="2"/>
+            <Option label="Mark" value="3"/>
+            <Option label="Space" value="4"/>
+        </AD>
 
         <AD id="slaveAddr" 
             name="slaveAddr"
@@ -74,6 +114,63 @@
             required="true"
             default="1" 
             description="The modbus address of the device to be queried."/>
+            
+        <AD id="ipAddress"  
+            name="ipAddress"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="" 
+            description="IP address of Modbus server (TCP mode only)."/>
+
+         <AD id="tcp.port"  
+            name="tcp.port"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="502" 
+            description="TCP port for Modbus TCP (usually 502)."/>
+
+        <AD id="publishTopic"  
+            name="publishTopic"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="" 
+            description="The topic to publish data to the Cloud, if empty no publish will occur."/>
+
+        <AD id="pollInterval"  
+            name="pollInterval"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="1000" 
+            description="Interval in milliseconds between 2 polls of the modbus device."/>
+
+        <AD id="publishInterval"  
+            name="publishInterval"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="10" 
+            description="Interval in seconds between 2 publishes."/>
+
+        <AD id="inputAddress"  
+            name="inputAddress"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="" 
+            description="Address in decimal of the discrete input to read. Leave empty if no input."/>
+
+        <AD id="registerAddress"  
+            name="registerAddress"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="" 
+            description="Address in decimal of the register to read. Leave empty if no input."/>
+
     </OCD>
     <Designate pid="org.eclipse.kura.demo.modbus.ModbusExample">
         <Object ocdref="org.eclipse.kura.demo.modbus.ModbusExample"/>

@@ -51,6 +51,7 @@ import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.TextBox;
+import org.gwtbootstrap3.client.ui.base.TextBoxBase;
 import org.gwtbootstrap3.client.ui.constants.InputType;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
@@ -347,7 +348,7 @@ public class PropertiesUi extends Composite {
         final Iterator<GwtConfigParameter> it = params.iterator();
         while (it.hasNext()) {
             final GwtConfigParameter p = it.next();
-            if (p.getName().contains(".CH.")) {
+            if (p.getName() != null && p.getName().contains(".CH.")) {
                 final String[] tokens = p.getName().split("\\.");
                 if ((tokens.length > 2) && tokens[1].trim().equals("CH")) {
                     it.remove();
@@ -379,29 +380,36 @@ public class PropertiesUi extends Composite {
         return newParam;
     }
 
-    private void fillUpdatedConfiguration(final FormGroup fg) {
+    protected void fillUpdatedConfiguration(FormGroup fg) {
         GwtConfigParameter param = new GwtConfigParameter();
-        final List<String> multiFieldValues = new ArrayList<String>();
-        final int fgwCount = fg.getWidgetCount();
+        List<String> multiFieldValues = new ArrayList<String>();
+        int fgwCount = fg.getWidgetCount();
         for (int i = 0; i < fgwCount; i++) {
-            if (fg.getWidget(i) instanceof FormLabel) {
-                final String id = ((FormLabel) fg.getWidget(i)).getText();
-                param = this.m_configurableComponent.getParameter(id.trim().replaceAll("\\*$", ""));
-            } else if ((fg.getWidget(i) instanceof ListBox) || (fg.getWidget(i) instanceof Input)
-                    || (fg.getWidget(i) instanceof TextBox)) {
+            logger.fine("Widget: " + fg.getClass());
 
-                final String value = this.getUpdatedFieldConfiguration(param, fg.getWidget(i));
+            if (fg.getWidget(i) instanceof FormLabel) {
+                param = this.m_configurableComponent.getParameter(fg.getWidget(i).getTitle());
+                logger.fine("Param: " + fg.getTitle() + " -> " + param);
+
+            } else if (fg.getWidget(i) instanceof ListBox || fg.getWidget(i) instanceof Input
+                    || fg.getWidget(i) instanceof TextBoxBase) {
+
+                if (param == null) {
+                    errorLogger.warning("Missing parameter");
+                    continue;
+                }
+                String value = getUpdatedFieldConfiguration(param, fg.getWidget(i));
                 if (value == null) {
                     continue;
                 }
-                if ((param.getCardinality() == 0) || (param.getCardinality() == 1) || (param.getCardinality() == -1)) {
+                if (param.getCardinality() == 0 || param.getCardinality() == 1 || param.getCardinality() == -1) {
                     param.setValue(value);
                 } else {
                     multiFieldValues.add(value);
                 }
             }
         }
-        if (!multiFieldValues.isEmpty()) {
+        if (!multiFieldValues.isEmpty() && param != null) {
             param.setValues(multiFieldValues.toArray(new String[] {}));
         }
     }
@@ -551,10 +559,10 @@ public class PropertiesUi extends Composite {
         return this.m_configurableComponent;
     }
 
-    private String getUpdatedFieldConfiguration(final GwtConfigParameter param, final Widget wg) {
-        final Map<String, String> options = param.getOptions();
-        if ((options != null) && (options.size() > 0)) {
-            final Map<String, String> oMap = param.getOptions();
+    private String getUpdatedFieldConfiguration(GwtConfigParameter param, Widget wg) {
+        Map<String, String> options = param.getOptions();
+        if (options != null && options.size() > 0) {
+            Map<String, String> oMap = param.getOptions();
             if (wg instanceof ListBox) {
                 return oMap.get(((ListBox) wg).getSelectedItemText());
             } else {
@@ -572,8 +580,8 @@ public class PropertiesUi extends Composite {
             case INTEGER:
             case CHAR:
             case STRING:
-                final TextBox tb = (TextBox) wg;
-                final String value = tb.getText();
+                TextBoxBase tb = (TextBoxBase) wg;
+                String value = tb.getText();
                 if (value != null) {
                     return value;
                 } else {

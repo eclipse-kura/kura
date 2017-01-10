@@ -85,18 +85,17 @@
         
         <module>org.eclipse.kura.web2</module>
         
-        <!-- test setup broken
         <module>org.eclipse.kura.core.test</module>
-        
+
+        <!-- 
         <module>org.eclipse.kura.windows.command</module>
-        <module>org.eclipse.kura.windows.clock</module> -->
+        <module>org.eclipse.kura.windows.clock</module>
+        -->
 
         <module>org.eclipse.kura.wire.component.provider</module>
         <module>org.eclipse.kura.wire.provider</module>
-        
-        <!-- test setup broken
+
         <module>org.eclipse.kura.wire.provider.test</module>
-        -->
 
         <module>features</module>
         
@@ -238,6 +237,11 @@
             <id>p2-repo-common</id>
             <layout>p2</layout>
             <url>file:////${kura.basedir}/target-definition/common/repository/</url>
+        </repository>
+        <repository>
+            <id>p2-repo-test-deps</id>
+            <layout>p2</layout>
+            <url>file:////${kura.basedir}/target-definition/test-deps/repository/</url>
         </repository>
         <repository>
             <id>kura_addons</id>

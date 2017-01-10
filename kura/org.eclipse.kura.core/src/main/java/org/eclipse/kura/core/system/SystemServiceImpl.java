@@ -232,9 +232,9 @@ public class SystemServiceImpl implements SystemService {
                 updateTriggered = true;
                 s_logger.warn("Overridding invalid kura.plugins location");
             }
-            if (kuraDefaults.getProperty("kura.packages") != null
-                    && kuraDefaults.getProperty("kura.packages").trim().equals("kura/packages")) {
-                kuraDefaults.setProperty("kura.packages", "/opt/eclipse/kura/kura/packages");
+            if (kuraDefaults.getProperty(KEY_KURA_PACKAGES_DIR) != null
+                    && kuraDefaults.getProperty(KEY_KURA_PACKAGES_DIR).trim().equals("kura/packages")) {
+                kuraDefaults.setProperty(KEY_KURA_PACKAGES_DIR, "/opt/eclipse/kura/kura/packages");
                 updateTriggered = true;
                 s_logger.warn("Overridding invalid kura.packages location");
             }
@@ -362,6 +362,9 @@ public class SystemServiceImpl implements SystemService {
             }
             if (System.getProperty(KEY_KURA_PLUGINS_DIR) != null) {
                 this.m_kuraProperties.put(KEY_KURA_PLUGINS_DIR, System.getProperty(KEY_KURA_PLUGINS_DIR));
+            }
+            if (System.getProperty(KEY_KURA_PACKAGES_DIR) != null) {
+                this.m_kuraProperties.put(KEY_KURA_PACKAGES_DIR, System.getProperty(KEY_KURA_PACKAGES_DIR));
             }
             if (System.getProperty(KEY_KURA_DATA_DIR) != null) {
                 this.m_kuraProperties.put(KEY_KURA_DATA_DIR, System.getProperty(KEY_KURA_DATA_DIR));

@@ -98,7 +98,7 @@ public final class WireServiceCommandProvider {
      * @param wireHelperService
      *            the new Wire Helper Service
      */
-    public synchronized void unbindWireHelperService(final WireService wireHelperService) {
+    public synchronized void unbindWireService(final WireService wireHelperService) {
         if (this.wireService == wireHelperService) {
             this.wireService = null;
         }

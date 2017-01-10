@@ -28,6 +28,11 @@
 			<layout>p2</layout>
 			<url>file:////${basedir}/../../../target-platform/p2-repo-common/target/repository/</url>
 		</repository>
+		<repository>
+			<id>p2-repo-test-deps</id>
+			<layout>p2</layout>
+			<url>file:////${basedir}/../../../target-platform/p2-repo-test-deps/target/repository/</url>
+		</repository>
 	</repositories>
 
 	<modules>

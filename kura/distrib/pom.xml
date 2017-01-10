@@ -1868,7 +1868,7 @@
 						<executions>
 							<execution>
 								<id>fedorapi-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
@@ -1928,7 +1928,7 @@
 						<executions>
 							<execution>
 								<id>fedorapi-nn-jars</id>
-								<phase>install</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>

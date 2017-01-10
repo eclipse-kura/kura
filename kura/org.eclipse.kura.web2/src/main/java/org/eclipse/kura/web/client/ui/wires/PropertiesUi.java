@@ -837,9 +837,9 @@ public class PropertiesUi extends Composite {
         final Map<String, String> options = param.getOptions();
         if ((options != null) && (options.size() > 0)) {
             this.renderChoiceField(param, isFirstInstance, formGroup);
-        } else if (param.getType() != null && param.getType().equals(GwtConfigParameterType.BOOLEAN)) {
+        } else if (param.getType().equals(GwtConfigParameterType.BOOLEAN)) {
             this.renderBooleanField(param, isFirstInstance, formGroup);
-        } else if (param.getType() != null && param.getType().equals(GwtConfigParameterType.PASSWORD)) {
+        } else if (param.getType().equals(GwtConfigParameterType.PASSWORD)) {
             this.renderPasswordField(param, isFirstInstance, formGroup);
         } else {
             this.renderTextField(param, isFirstInstance, formGroup, isReadOnly);

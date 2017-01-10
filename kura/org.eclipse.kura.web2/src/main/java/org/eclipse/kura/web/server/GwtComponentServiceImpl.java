@@ -224,7 +224,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                         // wait for the services to be up
                         TimeUnit.MILLISECONDS.sleep(500);
                         conf = cs.getComponentConfiguration(temporaryName);
-                        comp = createGwtComponentConfiguration(conf);
+                        comp = createMetatypeOnlyGwtComponentConfiguration(conf);
                         return comp;
                     } catch (Exception ex) {
                         throw new GwtKuraException(ex.getMessage());
@@ -233,7 +233,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                     }
                 }
             }
-            comp = createGwtComponentConfiguration(conf);
+            comp = createMetatypeOnlyGwtComponentConfiguration(conf);
         } catch (KuraException e) {
             throw new GwtKuraException("Could not retrieve component configuration!");
         }
@@ -461,11 +461,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             sortConfigurationsByName(configs);
 
             for (ComponentConfiguration config : configs) {
-                GwtConfigComponent gwtConfigComponent = createGwtComponentConfiguration(config);
-                GwtConfigComponent cleanedGwtConfigComponent = removeNoMetatypeProperties(gwtConfigComponent, config);
-                if (cleanedGwtConfigComponent != null) {
-                    gwtConfigs.add(cleanedGwtConfigComponent);
-                }
+                GwtConfigComponent gwtConfigComponent = createMetatypeOnlyGwtComponentConfiguration(config);
+                gwtConfigs.add(gwtConfigComponent);
             }
         } catch (Throwable t) {
             KuraExceptionHandler.handle(t);
@@ -479,8 +476,9 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         try {
             ComponentConfiguration config = cs.getComponentConfiguration(componentPid);
 
-            GwtConfigComponent gwtConfigComponent = createGwtComponentConfiguration(config);
-            gwtConfigs.add(gwtConfigComponent);
+            GwtConfigComponent gwtConfigComponent = createMetatypeOnlyGwtComponentConfiguration(config);
+            GwtConfigComponent fullGwtConfigComponent = addNonMetatypeProperties(gwtConfigComponent, config);
+            gwtConfigs.add(fullGwtConfigComponent);
         } catch (Throwable t) {
             KuraExceptionHandler.handle(t);
         }
@@ -494,40 +492,40 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         try {
             ComponentConfiguration config = cs.getComponentConfiguration(componentPid);
 
-            GwtConfigComponent gwtConfigComponent = createGwtComponentConfiguration(config);
-            GwtConfigComponent cleanedGwtConfigComponent = removeNoMetatypeProperties(gwtConfigComponent, config);
-            if (cleanedGwtConfigComponent != null) {
-                gwtConfigs.add(cleanedGwtConfigComponent);
-            }
+            GwtConfigComponent gwtConfigComponent = createMetatypeOnlyGwtComponentConfiguration(config);
+            gwtConfigs.add(gwtConfigComponent);
         } catch (Throwable t) {
             KuraExceptionHandler.handle(t);
         }
         return gwtConfigs;
     }
 
-    private GwtConfigComponent removeNoMetatypeProperties(GwtConfigComponent gwtConfig, ComponentConfiguration config) {
-        GwtConfigComponent cleanedConfigComponent = null;
+    private GwtConfigComponent addNonMetatypeProperties(GwtConfigComponent baseGwtConfig,
+            ComponentConfiguration config) {
+        GwtConfigComponent gwtConfigComponent = null;
         OCD ocd = config.getDefinition();
-        if (ocd != null && gwtConfig != null) {
-            cleanedConfigComponent = new GwtConfigComponent();
+        if (ocd != null && baseGwtConfig != null) {
+            gwtConfigComponent = new GwtConfigComponent();
 
-            cleanedConfigComponent.setComponentDescription(gwtConfig.getComponentDescription());
-            cleanedConfigComponent.setComponentId(gwtConfig.getComponentId());
-            cleanedConfigComponent.setComponentIcon(gwtConfig.getComponentIcon());
-            cleanedConfigComponent.setComponentName(gwtConfig.getComponentName());
-            cleanedConfigComponent.setProperties(gwtConfig.getProperties());
+            gwtConfigComponent.setComponentDescription(baseGwtConfig.getComponentDescription());
+            gwtConfigComponent.setComponentId(baseGwtConfig.getComponentId());
+            gwtConfigComponent.setComponentIcon(baseGwtConfig.getComponentIcon());
+            gwtConfigComponent.setComponentName(baseGwtConfig.getComponentName());
+            gwtConfigComponent.setProperties(baseGwtConfig.getProperties());
 
-            List<GwtConfigParameter> cleanedConfigParameters = new ArrayList<GwtConfigParameter>();
+            List<GwtConfigParameter> gwtParams = new ArrayList<GwtConfigParameter>();
+            gwtConfigComponent.setParameters(gwtParams);
 
-            for (AD ad : ocd.getAD()) {
-                GwtConfigParameter parameter = gwtConfig.getParameter(ad.getId());
-                if (parameter != null) {
-                    cleanedConfigParameters.add(parameter);
-                }
+            List<GwtConfigParameter> nonMetatypeConfigParameters = new ArrayList<GwtConfigParameter>();
+
+            if (config.getConfigurationProperties() != null) {
+
+                List<GwtConfigParameter> nonMetatypeProps = getNonMetatypeProperties(config);
+                nonMetatypeConfigParameters.addAll(nonMetatypeProps);
             }
-            cleanedConfigComponent.setParameters(cleanedConfigParameters);
+            gwtConfigComponent.setParameters(nonMetatypeConfigParameters);
         }
-        return cleanedConfigComponent;
+        return gwtConfigComponent;
     }
 
     private List<GwtConfigComponent> findComponentConfigurationsInternal() throws GwtKuraException {
@@ -540,7 +538,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             sortConfigurationsByName(configs);
 
             for (ComponentConfiguration config : configs) {
-                GwtConfigComponent gwtConfigComponent = createGwtComponentConfiguration(config);
+                GwtConfigComponent gwtConfigComponent = createMetatypeOnlyGwtComponentConfiguration(config);
                 gwtConfigs.add(gwtConfigComponent);
             }
         } catch (Throwable t) {
@@ -549,7 +547,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         return gwtConfigs;
     }
 
-    private GwtConfigComponent createGwtComponentConfiguration(ComponentConfiguration config) throws GwtKuraException {
+    private GwtConfigComponent createMetatypeOnlyGwtComponentConfiguration(ComponentConfiguration config)
+            throws GwtKuraException {
         WireHelperService wireHelperService = ServiceLocator.getInstance().getService(WireHelperService.class);
         GwtConfigComponent gwtConfig = null;
 
@@ -589,44 +588,34 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             if (config.getConfigurationProperties() != null) {
                 List<GwtConfigParameter> metatypeProps = getADProperties(config);
                 gwtParams.addAll(metatypeProps);
-
-                List<String> addedIds = new ArrayList<String>();
-                for (GwtConfigParameter gwtParam : gwtParams) {
-                    addedIds.add(gwtParam.getId());
-                }
-
-                List<GwtConfigParameter> nonMetatypeProps = getNonMetatypeProperties(config, addedIds);
-                gwtParams.addAll(nonMetatypeProps);
             }
         }
         return gwtConfig;
     }
 
-    private List<GwtConfigParameter> getNonMetatypeProperties(ComponentConfiguration config, List<String> addedIds) {
+    private List<GwtConfigParameter> getNonMetatypeProperties(ComponentConfiguration config) {
         List<GwtConfigParameter> gwtParams = new ArrayList<GwtConfigParameter>();
         for (Map.Entry<String, Object> entry : config.getConfigurationProperties().entrySet()) {
-            if (!addedIds.contains(entry.getKey())) {
-                GwtConfigParameter gwtParam = new GwtConfigParameter();
-                gwtParam.setId(entry.getKey());
-                Object value = entry.getValue();
+            // if (!addedIds.contains(entry.getKey())) {
+            GwtConfigParameter gwtParam = new GwtConfigParameter();
+            gwtParam.setId(entry.getKey());
+            Object value = entry.getValue();
 
-                // this could be an array value
-                if (value != null && value instanceof Object[]) {
-                    Object[] objValues = (Object[]) value;
-                    List<String> strValues = new ArrayList<String>();
-                    for (Object v : objValues) {
-                        if (v != null) {
-                            strValues.add(String.valueOf(v));
-                        }
+            // this could be an array value
+            if (value != null && value instanceof Object[]) {
+                Object[] objValues = (Object[]) value;
+                List<String> strValues = new ArrayList<>();
+                for (Object v : objValues) {
+                    if (v != null) {
+                        strValues.add(String.valueOf(v));
                     }
-                    gwtParam.setValues(strValues.toArray(new String[] {}));
-                } else if (value != null) {
-                    gwtParam.setValue(String.valueOf(value));
                 }
-
-                gwtParams.add(gwtParam);
+                gwtParam.setValues(strValues.toArray(new String[] {}));
+            } else if (value != null) {
+                gwtParam.setValue(String.valueOf(value));
             }
 
+            gwtParams.add(gwtParam);
         }
         return gwtParams;
     }

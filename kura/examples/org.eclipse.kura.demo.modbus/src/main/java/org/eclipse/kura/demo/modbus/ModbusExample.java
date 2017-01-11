@@ -75,8 +75,6 @@ public class ModbusExample implements ConfigurableComponent, CloudClientListener
     private String m_topic = "";
     private long startPublish = 0;
 
-    private String inputAddress = "";
-    private String registerAddress = "";
     private int inputaddr = 0;
     private int registeraddr = 0;
 
@@ -175,19 +173,17 @@ public class ModbusExample implements ConfigurableComponent, CloudClientListener
                 this.m_topic = (String) this.m_properties.get(PUBLISH_TOPIC_PROP_NAME);
             }
             if (this.m_properties.get(PUBLISH_INTERVAL) != null) {
-                this.m_publish_interval = Integer.valueOf((String) this.m_properties.get(PUBLISH_INTERVAL));
+                this.m_publish_interval = (Integer) this.m_properties.get(PUBLISH_INTERVAL);
             }
 
             if (this.m_properties.get(INPUT_ADDRESS) != null) {
-                inputAddress = (String) this.m_properties.get(INPUT_ADDRESS);
-                inputaddr = Integer.valueOf(inputAddress);
+                inputaddr = (Integer) this.m_properties.get(INPUT_ADDRESS);
             }
-            else inputAddress="";
+            else inputaddr=0;
             if (this.m_properties.get(REGISTER_ADDRESS) != null) {
-                registerAddress = (String) this.m_properties.get(REGISTER_ADDRESS);
-                registeraddr = Integer.valueOf(registerAddress);
+                registeraddr = (Integer) this.m_properties.get(REGISTER_ADDRESS);
             }
-            else registerAddress="";
+            else registeraddr=0;
 
             if (!this.configured) {
                 try {
@@ -202,7 +198,7 @@ public class ModbusExample implements ConfigurableComponent, CloudClientListener
             // schedule a new worker based on the properties of the service
             int pubrate = 1000;
             if (this.m_properties.get(POLL_INTERVAL) != null) {
-                pubrate = Integer.valueOf((String) this.m_properties.get(POLL_INTERVAL));
+                pubrate = (Integer) this.m_properties.get(POLL_INTERVAL);
             }
             s_logger.info("scheduleAtFixedRate {}", pubrate);
             this.m_handle = this.m_worker.scheduleAtFixedRate(new Runnable() {
@@ -262,17 +258,18 @@ public class ModbusExample implements ConfigurableComponent, CloudClientListener
             // Allocate a new payload
             KuraPayload payload = new KuraPayload();
             
-            if(!inputAddress.isEmpty()){
+            if(inputaddr>0){
                 boolean[] dicreteInputs = this.m_protocolDevice.readDiscreteInputs(this.m_slaveAddr, inputaddr, 1);
                 StringBuilder sb = new StringBuilder().append("Input ").append(inputaddr).append(" = ");                    
                 sb.append(dicreteInputs[0]);
                 s_logger.info(sb.toString());
                 payload.addMetric("input" , Boolean.valueOf(dicreteInputs[0]));
             }
-            if(!registerAddress.isEmpty()){                
+            if(registeraddr>0){                
                 int[] analogInputs = this.m_protocolDevice.readInputRegisters(this.m_slaveAddr, registeraddr, 1);
-                StringBuilder sb = new StringBuilder().append("Register ").append(registerAddress).append(" = ");                    
-                sb.append(analogInputs[0]);
+                short val = (short)analogInputs[0];
+                StringBuilder sb = new StringBuilder().append("Register ").append(registeraddr).append(" = ");                    
+                sb.append(val);
                 s_logger.info(sb.toString());
                 payload.addMetric("register" , Integer.valueOf(analogInputs[0]));
             }
@@ -338,7 +335,10 @@ public class ModbusExample implements ConfigurableComponent, CloudClientListener
 
         boolean isTCP = "TCP-RTU".equals(modbusProtocol) || "TCP/IP".equals(modbusProtocol);
         if (isTCP) {
-            prop.setProperty("ethport", (String) this.m_properties.get(ETHERNET_TCP_PORT));
+            if (this.m_properties.get(ETHERNET_TCP_PORT) != null){
+                int iport = (Integer) this.m_properties.get(ETHERNET_TCP_PORT);
+                prop.setProperty("ethport", String.valueOf(iport));
+            }
             prop.setProperty("ipAddress", (String) this.m_properties.get(ETHERNET_IP_ADDRESS));
         } else {
             if (this.m_properties != null) {

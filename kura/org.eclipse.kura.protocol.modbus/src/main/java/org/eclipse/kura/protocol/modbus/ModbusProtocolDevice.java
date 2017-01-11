@@ -688,6 +688,9 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
 
         @Override
         public void disconnect() {
+            if(this.socket==null){
+                return;
+            }
             if (ModbusProtocolDevice.this.m_connConfigd) {
                 if (this.connected) {
                     try {
@@ -841,7 +844,6 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
                         }
                     } else {
                         s_logger.error("Socket disconnect in recv");
-                        disconnect();
                         throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE, "Recv failure");
                     }
                 } catch (SocketTimeoutException e) {
@@ -850,7 +852,6 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
                     throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE, failMsg);
                 } catch (IOException e) {
                     s_logger.error("Socket disconnect in recv: " + e);
-                    disconnect();
                     throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE, "Recv failure");
                 }
 

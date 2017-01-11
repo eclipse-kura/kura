@@ -125,10 +125,12 @@
 
          <AD id="tcp.port"  
             name="tcp.port"
-            type="String"
+            type="Integer"
             cardinality="0" 
             required="false"
             default="502" 
+            min="1"
+            max="65535"
             description="TCP port for Modbus TCP (usually 502)."/>
 
         <AD id="publishTopic"  
@@ -141,7 +143,7 @@
 
         <AD id="pollInterval"  
             name="pollInterval"
-            type="String"
+            type="Integer"
             cardinality="0" 
             required="true"
             default="1000" 
@@ -149,7 +151,7 @@
 
         <AD id="publishInterval"  
             name="publishInterval"
-            type="String"
+            type="Integer"
             cardinality="0" 
             required="true"
             default="10" 
@@ -157,19 +159,21 @@
 
         <AD id="inputAddress"  
             name="inputAddress"
-            type="String"
+            type="Integer"
             cardinality="0" 
             required="false"
-            default="" 
-            description="Address in decimal of the discrete input to read. Leave empty if no input."/>
+            default="0" 
+            min="0"
+            description="Address in decimal of the discrete input to read. Leave 0 if no input."/>
 
         <AD id="registerAddress"  
             name="registerAddress"
-            type="String"
+            type="Integer"
             cardinality="0" 
             required="false"
-            default="" 
-            description="Address in decimal of the register to read. Leave empty if no input."/>
+            default="0" 
+            min="0"
+            description="Address in decimal of the register to read. Leave 0 if no input."/>
 
     </OCD>
     <Designate pid="org.eclipse.kura.demo.modbus.ModbusExample">

@@ -287,7 +287,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 
         final Set<Integer> channelIndexes = new HashSet<Integer>();
         for (final GwtConfigParameter param : asset.getParameters()) {
-            if (param.getName().endsWith("CH.name")) {
+            if (param != null && param.getName() != null && param.getName().endsWith("CH.name")) {
                 final String[] tokens = param.getName().split("\\.");
                 channelIndexes.add(Integer.parseInt(tokens[0]));
             }

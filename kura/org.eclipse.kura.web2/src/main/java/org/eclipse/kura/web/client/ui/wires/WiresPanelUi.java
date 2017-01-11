@@ -207,7 +207,7 @@ public class WiresPanelUi extends Composite {
     }-*/;
 
     private static void fillProperties(final GwtConfigComponent config, final String pid) {
-        if ((config.getFactoryId() != null) && config.getFactoryId().contains("WireAsset")) {
+        if (config != null && config.getFactoryId() != null && config.getFactoryId().contains("WireAsset")) {
             config.getProperties().put("driver.pid", getDriver(pid));
         }
         render(config, pid);
@@ -461,24 +461,24 @@ public class WiresPanelUi extends Composite {
                     gwtComponentService.findWireComponentConfigurationFromPid(token, pid, factoryPid, temporaryMap,
                             new AsyncCallback<GwtConfigComponent>() {
 
-                                @Override
-                                public void onFailure(final Throwable caught) {
-                                    EntryClassUi.hideWaitModal();
-                                    FailureHandler.handle(caught);
-                                }
+                        @Override
+                        public void onFailure(final Throwable caught) {
+                            EntryClassUi.hideWaitModal();
+                            FailureHandler.handle(caught);
+                        }
 
-                                @Override
-                                public void onSuccess(final GwtConfigComponent result) {
-                                    // Component configuration retrieved
-                                    // from the Configuration Service
-                                    fillProperties(result, pid);
-                                    m_configs.put(pid, result);
-                                    if (m_propertiesUis.containsKey(pid)) {
-                                        m_propertiesUis.remove(pid);
-                                    }
-                                    EntryClassUi.hideWaitModal();
-                                }
-                            });
+                        @Override
+                        public void onSuccess(final GwtConfigComponent result) {
+                            // Component configuration retrieved
+                            // from the Configuration Service
+                            fillProperties(result, pid);
+                            m_configs.put(pid, result);
+                            if (m_propertiesUis.containsKey(pid)) {
+                                m_propertiesUis.remove(pid);
+                            }
+                            EntryClassUi.hideWaitModal();
+                        }
+                    });
                 }
             });
         }
@@ -507,27 +507,27 @@ public class WiresPanelUi extends Composite {
                 gwtWireService.updateWireConfiguration(token, obj, m_configs,
                         new AsyncCallback<GwtWiresConfiguration>() {
 
-                            @Override
-                            public void onFailure(final Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
+                    @Override
+                    public void onFailure(final Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
 
-                            @Override
-                            public void onSuccess(final GwtWiresConfiguration result) {
-                                internalLoad(result);
-                                EntryClassUi.hideWaitModal();
-                                btnSave.setEnabled(false);
-                                btnSave.setText("Save");
-                                isDirty = false;
-                                if ((m_configs != null) && !m_configs.isEmpty()) {
-                                    m_configs.clear();
-                                }
-                                if ((m_propertiesUis != null) && !m_propertiesUis.isEmpty()) {
-                                    m_propertiesUis.clear();
-                                }
-                            }
-                        });
+                    @Override
+                    public void onSuccess(final GwtWiresConfiguration result) {
+                        internalLoad(result);
+                        EntryClassUi.hideWaitModal();
+                        btnSave.setEnabled(false);
+                        btnSave.setText("Save");
+                        isDirty = false;
+                        if ((m_configs != null) && !m_configs.isEmpty()) {
+                            m_configs.clear();
+                        }
+                        if ((m_propertiesUis != null) && !m_propertiesUis.isEmpty()) {
+                            m_propertiesUis.clear();
+                        }
+                    }
+                });
             }
         });
 
@@ -632,7 +632,7 @@ public class WiresPanelUi extends Composite {
         }
         if (item != null) {
             propertiesPanelBody.clear();
-            
+
             if (!m_propertiesUis.containsKey(pid)) {
                 propertiesUi = new PropertiesUi(item, pid);
                 m_propertiesUis.put(pid, propertiesUi);
@@ -643,7 +643,7 @@ public class WiresPanelUi extends Composite {
             if (pid == null) {
                 pid = "";
             }
-            
+
             if (propertiesUi.isDirty()) {
                 propertiesPanelHeader.setText(getFormattedPid(item.getFactoryId()) + " - " + pid + "*");
             } else {

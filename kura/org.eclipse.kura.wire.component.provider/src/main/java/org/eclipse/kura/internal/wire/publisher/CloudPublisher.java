@@ -376,7 +376,7 @@ public final class CloudPublisher implements WireReceiver, DataServiceListener, 
 
         final AutoConnectMode autoConnectMode = this.options.getAutoConnectMode();
         final boolean autoConnectEnabled = this.dataService.isAutoConnectEnabled();
-        if ((AUTOCONNECT_MODE_OFF != autoConnectMode) && !autoConnectEnabled) {
+        if ((AUTOCONNECT_MODE_OFF != autoConnectMode) && autoConnectEnabled) {
             try {
                 final boolean connected = this.dataService.isConnected();
                 if (!connected) {

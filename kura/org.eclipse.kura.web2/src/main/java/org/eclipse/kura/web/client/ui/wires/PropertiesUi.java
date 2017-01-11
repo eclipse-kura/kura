@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,13 +46,16 @@ import org.gwtbootstrap3.client.ui.FieldSet;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.HelpBlock;
+import org.gwtbootstrap3.client.ui.InlineHelpBlock;
 import org.gwtbootstrap3.client.ui.InlineRadio;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.Panel;
+import org.gwtbootstrap3.client.ui.TextArea;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.base.TextBoxBase;
+import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.client.ui.constants.InputType;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
@@ -510,12 +514,12 @@ public class PropertiesUi extends Composite {
 
     // Get updated parameters
     GwtConfigComponent getUpdatedConfiguration() {
-        final Iterator<Widget> it = this.fields.iterator();
+        Iterator<Widget> it = this.fields.iterator();
         while (it.hasNext()) {
-            final Widget w = it.next();
+            Widget w = it.next();
             if (w instanceof FormGroup) {
-                final FormGroup fg = (FormGroup) w;
-                this.fillUpdatedConfiguration(fg);
+                FormGroup fg = (FormGroup) w;
+                fillUpdatedConfiguration(fg);
             }
         }
 
@@ -768,50 +772,38 @@ public class PropertiesUi extends Composite {
         this.valid.put(param.getName(), true);
 
         if (isFirstInstance) {
-            final FormLabel formLabel = new FormLabel();
+            FormLabel formLabel = new FormLabel();
+            formLabel.setText(param.getName());
             if (param.isRequired()) {
-                formLabel.setText(param.getName() + "*");
-            } else {
-                formLabel.setText(param.getName());
+                formLabel.setShowRequiredIndicator(true);
             }
+            formLabel.setTitle(param.getId());
             formGroup.add(formLabel);
 
             if (param.getDescription() != null) {
-                final HelpBlock toolTip = new HelpBlock();
-                toolTip.setText(param.getDescription());
+                HelpBlock toolTip = new HelpBlock();
+                toolTip.setText(getDescription(param));
                 formGroup.add(toolTip);
             }
         }
 
-        final ListBox listBox = new ListBox();
+        ListBox listBox = new ListBox();
 
         final Map<String, String> oMap = param.getOptions();
         int i = 0;
         boolean valueFound = false;
-        for (final Map.Entry<String, String> entry : oMap.entrySet()) {
-            listBox.addItem(entry.getKey());
-
-            final boolean hasDefault = param.getDefault() != null;
-            boolean setDefault = false;
-            final boolean hasValue = param.getValue() != null;
-            boolean setValue = false;
-
-            if (param.getDefault() != null) {
-                setDefault = param.getDefault().equals(entry.getValue());
-            }
-            if (param.getValue() != null) {
-                setValue = param.getValue().equals(entry.getValue());
+        for (Entry<String, String> current : oMap.entrySet()) {
+            String label = current.getKey();
+            String value = current.getValue();
+            listBox.addItem(label, value);
+            if (param.getDefault() != null && value.equals(param.getDefault())) {
+                listBox.setSelectedIndex(i);
             }
 
-            if (!valueFound) {
-                if (hasDefault && setDefault) {
-                    listBox.setSelectedIndex(i);
-                } else if (hasValue && setValue) {
-                    listBox.setSelectedIndex(i);
-                    valueFound = true;
-                }
+            if (param.getValue() != null && value.equals(param.getValue())) {
+                listBox.setSelectedIndex(i);
+                // valueFound = true;
             }
-
             i++;
         }
 
@@ -828,6 +820,29 @@ public class PropertiesUi extends Composite {
         formGroup.add(listBox);
 
         this.fields.add(formGroup);
+    }
+
+    private String getDescription(final GwtConfigParameter param) {
+        if (param == null || param.getDescription() == null) {
+            return null;
+        }
+
+        final String[] result = splitDescription(param.getDescription());
+        if (result.length > 0) {
+            return result[0];
+        }
+        return "";
+    }
+
+    private static String[] splitDescription(final String description) {
+        final int idx = description.lastIndexOf('|');
+        if (idx < 0) {
+            return new String[] { description };
+        }
+        if (idx < 1) {
+            return new String[] { "", description.substring(idx + 1) };
+        }
+        return new String[] { description.substring(0, idx), description.substring(idx + 1) };
     }
 
     // passes the parameter to the corresponding method depending on the type of
@@ -1027,27 +1042,27 @@ public class PropertiesUi extends Composite {
     private void renderTextField(final GwtConfigParameter param, final boolean isFirstInstance,
             final FormGroup formGroup, final boolean isReadOnly) {
 
-        this.valid.put(param.getName(), true);
+        this.valid.put(param.getId(), true);
 
         if (isFirstInstance) {
-            final FormLabel formLabel = new FormLabel();
+            FormLabel formLabel = new FormLabel();
+            formLabel.setText(param.getName());
             if (param.isRequired()) {
-                formLabel.setText(param.getName() + "*");
-            } else {
-                formLabel.setText(param.getName());
+                formLabel.setShowRequiredIndicator(true);
             }
+            formLabel.setTitle(param.getId());
             formGroup.add(formLabel);
 
-            final HelpBlock tooltip = new HelpBlock();
-            tooltip.setText(param.getDescription());
+            InlineHelpBlock ihb = new InlineHelpBlock();
+            ihb.setIconType(IconType.EXCLAMATION_TRIANGLE);
+            formGroup.add(ihb);
+
+            HelpBlock tooltip = new HelpBlock();
+            tooltip.setText(getDescription(param));
             formGroup.add(tooltip);
         }
 
-        final TextBox textBox = new TextBox();
-        textBox.setReadOnly(isReadOnly);
-        if (param.getDescription() != null && param.getDescription().contains("\u200B\u200B\u200B\u200B\u200B")) {
-            textBox.setHeight("120px");
-        }
+        final TextBoxBase textBox = createTextBox(param);
 
         String formattedValue = new String();
         // TODO: Probably this formatting step has no
@@ -1056,32 +1071,32 @@ public class PropertiesUi extends Composite {
         // display the double value as expected
         switch (param.getType()) {
         case LONG:
-            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+            if (param.getValue() != null && !"".equals(param.getValue().trim())) {
                 formattedValue = String.valueOf(Long.parseLong(param.getValue()));
             }
             break;
         case DOUBLE:
-            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+            if (param.getValue() != null && !"".equals(param.getValue().trim())) {
                 formattedValue = String.valueOf(Double.parseDouble(param.getValue()));
             }
             break;
         case FLOAT:
-            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+            if (param.getValue() != null && !"".equals(param.getValue().trim())) {
                 formattedValue = String.valueOf(Float.parseFloat(param.getValue()));
             }
             break;
         case SHORT:
-            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+            if (param.getValue() != null && !"".equals(param.getValue().trim())) {
                 formattedValue = String.valueOf(Short.parseShort(param.getValue()));
             }
             break;
         case BYTE:
-            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+            if (param.getValue() != null && !"".equals(param.getValue().trim())) {
                 formattedValue = String.valueOf(Byte.parseByte(param.getValue()));
             }
             break;
         case INTEGER:
-            if ((param.getValue() != null) && !"".equals(param.getValue().trim())) {
+            if (param.getValue() != null && !"".equals(param.getValue().trim())) {
                 formattedValue = String.valueOf(Integer.parseInt(param.getValue()));
             }
             break;
@@ -1096,7 +1111,7 @@ public class PropertiesUi extends Composite {
             textBox.setText("");
         }
 
-        if ((param.getMin() != null) && param.getMin().equals(param.getMax())) {
+        if (param.getMin() != null && param.getMin().equals(param.getMax())) {
             textBox.setReadOnly(true);
             textBox.setEnabled(false);
         }
@@ -1114,6 +1129,48 @@ public class PropertiesUi extends Composite {
             }
         });
         this.fields.add(formGroup);
+    }
+
+    private TextBoxBase createTextBox(final GwtConfigParameter param) {
+        if (param.getDescription() != null && param.getDescription().contains("\u200B\u200B\u200B\u200B\u200B")) {
+            final TextArea result = createTextArea();
+            result.setHeight("120px");
+            return result;
+        }
+        if (isTextArea(param)) {
+            return createTextArea();
+        }
+        return new TextBox();
+    }
+
+    private TextArea createTextArea() {
+        final TextArea textArea = new TextArea();
+        textArea.setVisibleLines(10);
+        textArea.setCharacterWidth(120);
+        return textArea;
+    }
+
+    private boolean isTextArea(final GwtConfigParameter param) {
+        if (param == null) {
+            return false;
+        }
+
+        if (param.getType() != GwtConfigParameterType.STRING) {
+            return false;
+        }
+
+        final String description = param.getDescription();
+
+        if (description == null) {
+            return false;
+        }
+
+        final String[] result = splitDescription(description);
+        if (result.length < 2 || result[1] == null) {
+            return false;
+        }
+
+        return result[1].equalsIgnoreCase("TextArea");
     }
 
     public void setDirty(final boolean flag) {

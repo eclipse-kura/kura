@@ -22,6 +22,20 @@ import org.eclipse.kura.KuraException;
 public interface CanConnectionService {
 
     /**
+     * Establishes a RAW CAN socket connection
+     * 
+     * @throws IOException
+     */
+    public void connectCanSocket() throws IOException;
+    
+    /**
+     * Disconnects a CAN socket connection
+     * 
+     * @throws IOException
+     */
+    public void disconnectCanSocket() throws IOException;
+    
+    /**
      * Sends an array of bytes on a CAN socket
      *
      * @param ifName
@@ -50,5 +64,5 @@ public interface CanConnectionService {
      * @throws KuraException
      * @throws IOException
      */
-    public CanMessage receiveCanMessage(int can_id, int can_mask) throws KuraException, IOException;
+    public CanMessage receiveCanMessage(int can_id, int can_mask) throws IOException;
 }

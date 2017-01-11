@@ -658,27 +658,7 @@ public class EntryClassUi extends Composite {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
-                    gwtComponentService.findComponentConfigurations(token,
-                            new AsyncCallback<List<GwtConfigComponent>>() {
-
-                        @Override
-                        public void onFailure(Throwable ex) {
-                            logger.log(Level.SEVERE, ex.getMessage(), ex);
-                            FailureHandler.handle(ex, EntryClassUi.class.getName());
-                        }
-
-                        @Override
-                        public void onSuccess(List<GwtConfigComponent> result) {
-                            servicesMenu.clear();
-                            for (GwtConfigComponent pair : result) {
-                                String filter = event.getValue().toString();
-                                String compName = pair.getComponentName();
-                                if (!pair.isWireComponent() && compName.toLowerCase().contains(filter)) {
-                                    servicesMenu.add(new ServicesAnchorListItem(pair, ui));
-                                }
-                            }
-                        }
-                    });
+                    fetchAvailableServices();
                 }
             });
         }

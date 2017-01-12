@@ -86,7 +86,6 @@
         <module>org.eclipse.kura.web2</module>
         
         <module>org.eclipse.kura.core.test</module>
-        <module>org.eclipse.kura.core.configuration.test</module>
 
         <!-- 
         <module>org.eclipse.kura.windows.command</module>

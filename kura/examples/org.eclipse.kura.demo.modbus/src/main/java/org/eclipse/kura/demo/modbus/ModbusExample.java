@@ -169,6 +169,11 @@ public class ModbusExample implements ConfigurableComponent, CloudClientListener
 
             this.m_properties = properties;
             modbusProperties = getModbusProperties();
+            if(modbusProperties==null){
+                s_logger.error("Something is wrong in the properties, program cannot continue");
+                return;
+            }
+            
             if (this.m_properties.get(PUBLISH_TOPIC_PROP_NAME) != null) {
                 this.m_topic = (String) this.m_properties.get(PUBLISH_TOPIC_PROP_NAME);
             }
@@ -179,11 +184,9 @@ public class ModbusExample implements ConfigurableComponent, CloudClientListener
             if (this.m_properties.get(INPUT_ADDRESS) != null) {
                 inputaddr = (Integer) this.m_properties.get(INPUT_ADDRESS);
             }
-            else inputaddr=0;
             if (this.m_properties.get(REGISTER_ADDRESS) != null) {
                 registeraddr = (Integer) this.m_properties.get(REGISTER_ADDRESS);
             }
-            else registeraddr=0;
 
             if (!this.configured) {
                 try {
@@ -321,17 +324,19 @@ public class ModbusExample implements ConfigurableComponent, CloudClientListener
 
         Properties prop = new Properties();
 
-        String modbusProtocol = (String) this.m_properties.get(MODBUS_PROTOCOL);
-        if (modbusProtocol == null) {
-            return null;
+        String modbusProtocol = null;
+        if (this.m_properties.get(MODBUS_SLAVE_ADDRESS) != null) {
+            modbusProtocol=(String) this.m_properties.get(MODBUS_PROTOCOL);
         }
+        else
+            return null;
         prop.setProperty("connectionType", modbusProtocol);
 
-        String Slave = "1";
+        String slave = "1";
         if (this.m_properties.get(MODBUS_SLAVE_ADDRESS) != null) {
-            Slave = (String) this.m_properties.get(MODBUS_SLAVE_ADDRESS);
+            slave = (String) this.m_properties.get(MODBUS_SLAVE_ADDRESS);
         }
-        prop.setProperty("slaveAddr", Slave);
+        prop.setProperty("slaveAddr", slave);
 
         boolean isTCP = "TCP-RTU".equals(modbusProtocol) || "TCP/IP".equals(modbusProtocol);
         if (isTCP) {
@@ -390,7 +395,7 @@ public class ModbusExample implements ConfigurableComponent, CloudClientListener
         prop.setProperty("mode", "0");
         prop.setProperty("transmissionMode", "RTU");
         prop.setProperty("respTimeout", "1000");
-        this.m_slaveAddr = Integer.valueOf(Slave);
+        this.m_slaveAddr = Integer.valueOf(slave);
         
         return prop;
     }
@@ -402,37 +407,31 @@ public class ModbusExample implements ConfigurableComponent, CloudClientListener
     // ----------------------------------------------------------------
     @Override
     public void onConnectionEstablished() {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void onConnectionLost() {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void onControlMessageArrived(String arg0, String arg1, KuraPayload arg2, int arg3, boolean arg4) {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void onMessageArrived(String arg0, String arg1, KuraPayload arg2, int arg3, boolean arg4) {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void onMessageConfirmed(int arg0, String arg1) {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void onMessagePublished(int arg0, String arg1) {
-        // TODO Auto-generated method stub
 
     }
 

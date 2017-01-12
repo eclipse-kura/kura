@@ -453,6 +453,8 @@
       <dropinLocation
           rootFolder="${git.clone.location}/target-platform/p2-repo-equinox_3.11.1/target/repository"/>
       <dropinLocation
+          rootFolder="${git.clone.location}/target-platform/p2-repo-test-deps/target/repository"/>
+      <dropinLocation
           rootFolder="${git.clone.location}/target-platform/usb4java-javax/target"
           recursive="false"/>
       <dropinLocation
@@ -470,6 +472,27 @@
         <operand
             xsi:type="predicates:NamePredicate"
             pattern="org.eclipse.kura.*"/>
+      </predicate>
+    </workingSet>
+    <workingSet
+        name="Karaf">
+      <predicate
+          xsi:type="predicates:OrPredicate">
+        <operand
+            xsi:type="predicates:LocationPredicate"
+            pattern=".*\/karaf\/.*"/>
+        <operand
+            xsi:type="predicates:NamePredicate"
+            pattern="karaf"/>
+      </predicate>
+    </workingSet>
+    <workingSet
+        name="Target Platform">
+      <predicate
+          xsi:type="predicates:OrPredicate">
+        <operand
+            xsi:type="predicates:LocationPredicate"
+            pattern=".*/target-platform.*"/>
       </predicate>
     </workingSet>
     <description>The dynamic working sets for ${scope.project.label}</description>
@@ -507,11 +530,6 @@
           xsi:type="launching:LaunchTask"
           launcher="setups/launchers/build-full.launch">
         <description>Build Kura Core</description>
-      </setupTask>
-      <setupTask
-          xsi:type="launching:LaunchTask"
-          launcher="setups/launchers/build-web-ui-2.launch">
-        <description>Rebuild the Kura Web UI 2</description>
       </setupTask>
     </setupTask>
   </setupTask>

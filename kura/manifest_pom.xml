@@ -28,6 +28,7 @@
         
         <module>org.eclipse.kura.asset.cloudlet.provider</module>
         <module>org.eclipse.kura.asset.provider</module>
+        <module>org.eclipse.kura.asset.provider.default</module>
         
         <!-- test setup broken 
         <module>org.eclipse.kura.asset.provider.test</module>

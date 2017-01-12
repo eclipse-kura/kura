@@ -1,19 +1,24 @@
+# Eclipse Kura on Apache Karaf
+
 This is an experimental Karaf setup.
 
-# Building a Karaf distribution
+At the moment it is not possible to install Kura as a Karaf feature.
+It is necessary to create a new Karaf distribution with all Kura components
+provisioned. 
 
-* Be sure to have run a full build of Kura before in order to have
-  all the Maven artifacts installed in your local Maven repository.
-  You can use `cd .. ; ./build-all.sh`
-  
-* Run `mvn clean install` in order to generate a Karaf distribution in `emulator-instance`
+## Building a Karaf distribution
 
-* Run `cd emulator-instance; mvn exec:java -Prun` in order to run the local Karaf distribution
+In order to build any Karaf distribution for Kura you will need
+to perform a local build of Kura first. The easiest way to make
+a full build (including Karaf) is to simply run the `build-all.sh` script
+in the root of the repository.
 
-# Building Karaf based targets
+## Running the emulator
 
-** This is extra-experimental and subject to change **
+The emulator is a ready to run Karaf setup which can be started from the
+command line using Maven:
 
-
-    cd deployment
-    mvn clean package
+    cd emulator-instance
+    mvn exec:java -Prun
+    
+For more information see the [README of the emulator project](emulator-instance/README.md).

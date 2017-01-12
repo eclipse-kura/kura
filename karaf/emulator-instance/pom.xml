@@ -192,6 +192,10 @@
                                     <value>${project.build.directory}/assembly/kura/data</value>
                                 </systemProperty>
                                 <systemProperty>
+                                    <key>kura.packages</key>
+                                    <value>${project.build.directory}/assembly/kura/packages</value>
+                                </systemProperty>
+                                <systemProperty>
                                     <key>kura.snapshots</key>
                                     <value>${project.build.directory}/assembly/kura/snapshots</value>
                                 </systemProperty>

@@ -6,6 +6,10 @@
     xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0 http://karaf.apache.org/xmlns/features/v1.4.0">
 
     <feature name="kura-runtime">
+
+        <bundle dependency="true">mvn:org.osgi/org.osgi.service.wireadmin/1.0.1</bundle>
+        <bundle start-level="10">mvn:org.eclipse.platform/org.eclipse.equinox.wireadmin/1.0.600</bundle>
+
         <bundle dependency="true">mvn:commons-io/commons-io/2.4</bundle>
         <bundle dependency="true">mvn:org.osgi/org.osgi.service.repository/1.1.0</bundle>
         <bundle dependency="true">mvn:com.eclipsesource.minimal-json/minimal-json/0.9.4</bundle>

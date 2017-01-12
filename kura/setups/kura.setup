@@ -425,11 +425,8 @@
           <projectFactory
               xsi:type="resources:MavenProjectFactory"/>
           <predicate
-              xsi:type="predicates:NotPredicate">
-            <operand
-                xsi:type="predicates:NamePredicate"
-                pattern="org.eclipse.soda.dk.comm"/>
-          </predicate>
+              xsi:type="predicates:LocationPredicate"
+              pattern=".*/target-platform$"/>
         </sourceLocator>
       </setupTask>
       <setupTask
@@ -495,6 +492,16 @@
             pattern=".*/target-platform.*"/>
       </predicate>
     </workingSet>
+    <workingSet
+        name="Features"
+        id="">
+      <predicate
+          xsi:type="predicates:OrPredicate">
+        <operand
+            xsi:type="predicates:NamePredicate"
+            pattern=".*\.feature$"/>
+      </predicate>
+    </workingSet>
     <description>The dynamic working sets for ${scope.project.label}</description>
   </setupTask>
   <setupTask
@@ -519,15 +526,25 @@
         filter="(kura.developer.type=developer)"
         name="Developer">
       <setupTask
-          xsi:type="maven:MavenImportTask">
+          xsi:type="maven:MavenImportTask"
+          id="import.core"
+          projectNameTemplate="">
         <sourceLocator
             rootFolder="${git.clone.location}/kura"
-            locateNestedProjects="true"/>
+            locateNestedProjects="true">
+          <predicate
+              xsi:type="predicates:NotPredicate">
+            <operand
+                xsi:type="predicates:LocationPredicate"
+                pattern=".*/features/.*"/>
+          </predicate>
+        </sourceLocator>
         <sourceLocator
             rootFolder="${git.clone.location}/karaf"/>
       </setupTask>
       <setupTask
           xsi:type="launching:LaunchTask"
+          predecessor="import.core"
           launcher="setups/launchers/build-full.launch">
         <description>Build Kura Core</description>
       </setupTask>

@@ -14,4 +14,11 @@
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" immediate="true" name="org.eclipse.kura.log.LoggerService">
    <implementation class="org.eclipse.kura.core.log.LoggerCommandProvider"/>
+   <property name="osgi.command.scope" type="String" value="kura"/>
+   <property name="osgi.command.function" type="String">setkuraloglevel
+getkuraloglevel
+   </property>
+   <service>
+      <provide interface="org.eclipse.kura.core.log.LoggerCommandProvider"/>
+   </service>
 </scr:component>

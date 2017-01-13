@@ -22,15 +22,18 @@ import java.util.Map;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 import org.eclipse.kura.type.TypedValue;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The Class WireRecord represents a record to be transmitted during wire
  * communication between wire emitter and wire receiver
  *
  * @noextend This class is not intended to be extended by clients.
+ * @since 1.2
  */
 @Immutable
 @ThreadSafe
+@ProviderType
 public class WireRecord {
 
     private final Map<String, TypedValue<?>> properties;

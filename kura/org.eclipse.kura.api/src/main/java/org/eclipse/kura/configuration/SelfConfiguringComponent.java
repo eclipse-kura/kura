@@ -12,6 +12,7 @@
 package org.eclipse.kura.configuration;
 
 import org.eclipse.kura.KuraException;
+import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * A SelfConfiguringComponent is a configurable component which maintains its state.
@@ -25,6 +26,7 @@ import org.eclipse.kura.KuraException;
  * An example of a SelfConfiguringComponent is the NetworkService whose state
  * is kept in the operating system instead of in the ConfigurationService.
  */
+@ConsumerType
 public interface SelfConfiguringComponent {
 
     /**

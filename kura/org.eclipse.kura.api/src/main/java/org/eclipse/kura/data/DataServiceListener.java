@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.data;
 
+import org.osgi.annotation.versioning.ConsumerType;
+
 /**
  * Implementors of this interface will be able to handle {@link DataService}
  * events such as notifications of connection establishing, message arrival, etc.
@@ -26,6 +28,7 @@ package org.eclipse.kura.data;
  *             to register a listener to a DataService.
  */
 @Deprecated
+@ConsumerType
 public interface DataServiceListener {
 
     /**

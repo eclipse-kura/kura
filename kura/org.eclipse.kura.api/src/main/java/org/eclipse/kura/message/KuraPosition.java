@@ -13,12 +13,17 @@ package org.eclipse.kura.message;
 
 import java.util.Date;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * EdcPosition is a data structure to capture a geo location. It can be
  * associated to an EdcPayload to geotag an EdcMessage before sending to the
  * Everyware Cloud. Refer to the description of each of the fields for more
  * information on the model of EdcPosition.
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class KuraPosition {
 
     /**

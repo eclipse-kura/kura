@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.data;
 
+import org.osgi.annotation.versioning.ConsumerType;
+
 /**
  * Listener interface to be implemented by applications that needs to be notified of events in the
  * {@link DataTransportService}.
@@ -23,6 +25,7 @@ package org.eclipse.kura.data;
  *             to register a listener to a DataTransportService.
  */
 @Deprecated
+@ConsumerType
 public interface DataTransportListener {
 
     /**

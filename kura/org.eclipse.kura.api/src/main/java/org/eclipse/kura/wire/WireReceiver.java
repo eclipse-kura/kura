@@ -9,13 +9,16 @@
  *******************************************************************************/
 package org.eclipse.kura.wire;
 
+import org.osgi.annotation.versioning.ConsumerType;
 import org.osgi.service.wireadmin.Consumer;
 
 /**
  * The WireReceiver interface Represents a wire component which is a data
  * consumer that can receive produced or emitted values from upstream
  * {@link WireEmitter}.
+ * @since 1.2
  */
+@ConsumerType
 public interface WireReceiver extends WireComponent, Consumer {
 
     /**

@@ -15,10 +15,14 @@ import java.util.List;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.NetInterface;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Network interface for modems.
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface ModemInterface<T extends ModemInterfaceAddress> extends NetInterface<T> {
 
     /**

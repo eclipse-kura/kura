@@ -13,8 +13,13 @@ package org.eclipse.kura.net.modem;
 
 import java.util.Map;
 
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.event.Event;
 
+/**
+ * @noextend This class is not intended to be subclassed by clients.
+ */
+@ProviderType
 public class ModemGpsEnabledEvent extends Event {
 
     /** Topic of the ModemGpsEnabledEvent */

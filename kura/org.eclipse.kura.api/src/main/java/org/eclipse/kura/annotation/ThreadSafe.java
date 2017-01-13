@@ -21,6 +21,7 @@ import java.lang.annotation.Target;
  * inherently means that there should not be any sequence of operations followed
  * which could potentially render the instance of the annotated type into an
  * invalid state.
+ * @since 1.2
  */
 @Documented
 @Target(TYPE)

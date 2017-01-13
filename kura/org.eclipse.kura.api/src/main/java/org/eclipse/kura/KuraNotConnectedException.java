@@ -11,12 +11,17 @@
  *******************************************************************************/
 package org.eclipse.kura;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 
 /**
  * KuraNotConnectedException is raised when the attempted operation requires 
  * an active connection to the remote server while the current state is
- * disconnected.  
+ * disconnected. 
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class KuraNotConnectedException extends KuraException 
 {
 	private static final long serialVersionUID = 5894832757268538532L;

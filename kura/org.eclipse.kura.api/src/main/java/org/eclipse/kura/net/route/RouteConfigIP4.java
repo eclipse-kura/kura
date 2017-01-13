@@ -13,10 +13,14 @@ package org.eclipse.kura.net.route;
 
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Implementation of IPv4 route configurations
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class RouteConfigIP4 extends RouteConfigIP<IP4Address>implements RouteConfig4 {
 
     public RouteConfigIP4(IP4Address destination, IP4Address gateway, IP4Address netmask, String interfaceName,

@@ -17,14 +17,17 @@ import static org.eclipse.kura.type.DataType.FLOAT;
 
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This class represents a {@link Float} value as a {@link TypedValue}.
  *
  * @noextend This class is not intended to be extended by clients.
+ * @since 1.2
  */
 @Immutable
 @ThreadSafe
+@ProviderType
 public class FloatValue implements TypedValue<Float> {
 
     /**

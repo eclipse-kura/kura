@@ -14,6 +14,7 @@ package org.eclipse.kura.clock;
 import java.util.Date;
 
 import org.eclipse.kura.KuraException;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The ClockService is used to configure how to sych the hardware clock with a remote network service.
@@ -23,7 +24,10 @@ import org.eclipse.kura.KuraException;
  * It can also be extended to synchronize the clock through a native Linux NTPD service,
  * using the clock acquired from a GPS signal provided by the Position Service, or
  * through the a cellular carrier.
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface ClockService {
 
     /**

@@ -11,9 +11,14 @@
  *******************************************************************************/
 package org.eclipse.kura.net.dhcp;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * Marker interface for IPv6-based configurations of DHCP Servers
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface DhcpServerConfig6 extends DhcpServerConfig {
 
 }

@@ -14,15 +14,18 @@ package org.eclipse.kura.net.dhcp;
 import java.util.List;
 
 import org.eclipse.kura.net.IPAddress;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The abstract representation of a 'networking' portion of DhcpServerConfig object.
  *
- * @author eurotech
- *
  * @param <T>
  *            is the an appropriate subclass of IPAddress
+ *
+ * @noextend This class is not intended to be subclassed by clients.
+ * @since 1.2
  */
+@ProviderType
 public abstract class DhcpServerCfgIP<T extends IPAddress> {
 
     private T subnet;

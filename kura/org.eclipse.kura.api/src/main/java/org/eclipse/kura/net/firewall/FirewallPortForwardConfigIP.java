@@ -15,14 +15,16 @@ import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkPair;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The base class for firewall port forward configurations
  *
- * @author eurotech
- *
  * @param <T>
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implements FirewallPortForwardConfig {
 
     /** The interface name on which this configuration will listen for inbound connections **/

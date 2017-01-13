@@ -15,6 +15,7 @@ import java.util.Set;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.listener.AssetListener;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This interface Asset provides higher level abstraction to operate or
@@ -29,7 +30,9 @@ import org.eclipse.kura.asset.listener.AssetListener;
  * @see AssetConfiguration
  *
  * @noimplement This interface is not intended to be implemented by clients.
+ * @since 1.2
  */
+@ProviderType
 public interface Asset {
 
     /**

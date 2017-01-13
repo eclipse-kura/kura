@@ -12,11 +12,14 @@
 package org.eclipse.kura.command;
 
 import org.eclipse.kura.KuraException;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This interface provides methods for running system commands from the web console.
  *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface CommandService {
 
     public String execute(String cmd) throws KuraException;

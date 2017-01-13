@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.configuration;
 
+import org.osgi.annotation.versioning.ConsumerType;
+
 /**
  * Marker interface for all Service Component that wants to expose the Configuration through the ConfigurationService.
  * The Configuration Service tracks all OSGi Components which implement the {@link ConfigurableComponent} marker
@@ -26,5 +28,6 @@ package org.eclipse.kura.configuration;
  * must be named as the name of the Declarative Service Component.
  * <br>
  */
+@ConsumerType
 public interface ConfigurableComponent {
 }

@@ -11,9 +11,14 @@
  *******************************************************************************/
 package org.eclipse.kura.net.route;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * Marker interface for IPv6 route configs
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface RouteConfig6 extends RouteConfig {
 
 }

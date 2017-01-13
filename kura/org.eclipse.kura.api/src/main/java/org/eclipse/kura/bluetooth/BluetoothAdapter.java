@@ -12,11 +12,14 @@
 package org.eclipse.kura.bluetooth;
 
 import org.eclipse.kura.bluetooth.listener.BluetoothAdvertisementScanListener;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * BluetoothAdapter represents the physical Bluetooth adapter on the host machine (ex: hci0).
  *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface BluetoothAdapter {
 
     /**
@@ -83,7 +86,7 @@ public interface BluetoothAdapter {
      * @param listener
      *            Interface for collecting beacon data.
      *
-     * @since {@link org.eclipse.kura.bluetooth} 1.3.0
+     * @since 1.0.9
      *
      */
     public void startAdvertisementScan(String companyName, BluetoothAdvertisementScanListener listener);

@@ -11,6 +11,12 @@
  *******************************************************************************/
 package org.eclipse.kura.position;
 
+import org.osgi.annotation.versioning.ProviderType;
+
+/**
+ * @noextend This class is not intended to be subclassed by clients.
+ */
+@ProviderType
 public class PositionException extends Exception {
 
     private static final long serialVersionUID = 2611760893640245224L;

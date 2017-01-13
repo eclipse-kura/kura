@@ -13,11 +13,15 @@ package org.eclipse.kura.net;
 
 import java.util.Map;
 
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.event.Event;
 
 /**
  * An event raised when a new network interface has been added to the system.
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class NetInterfaceAddedEvent extends Event {
 
     /** Topic of the NetworkInterfaceAddedEvent */

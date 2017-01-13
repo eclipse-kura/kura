@@ -11,9 +11,14 @@
  *******************************************************************************/
 package org.eclipse.kura.usb;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * Base class for USB devices
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public abstract class AbstractUsbDevice implements UsbDevice {
 
     /** The vendor ID of the USB device **/

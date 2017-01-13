@@ -11,9 +11,14 @@
  *******************************************************************************/
 package org.eclipse.kura.net;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * This class represents an Internet Protocol version 4 (IPv4) address.
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class IP4Address extends IPAddress {
 
     IP4Address(byte[] addr, java.net.InetAddress jnAddress) {

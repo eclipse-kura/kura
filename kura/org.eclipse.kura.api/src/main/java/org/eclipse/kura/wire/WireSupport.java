@@ -15,6 +15,7 @@ package org.eclipse.kura.wire;
 
 import java.util.List;
 
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.wireadmin.Consumer;
 import org.osgi.service.wireadmin.Producer;
 
@@ -24,7 +25,9 @@ import org.osgi.service.wireadmin.Producer;
  * wire related operations for instance, emit and receive {@link WireRecord}s.
  *
  * @noimplement This interface is not intended to be implemented by clients.
+ * @since 1.2
  */
+@ProviderType
 public interface WireSupport extends Producer, Consumer {
 
     /**

@@ -56,23 +56,23 @@ public enum KuraErrorCode {
     /**
      * Error executing an OS command.
      * 
-     * @since {@link org.eclipse.kura} 1.1.0
+     * @since 1.0.8
      */
     OS_COMMAND_ERROR,
     /**
-     * @since {@link org.eclipse.kura} 1.2.0
+     * @since 1.0.8
      */
     INVALID_PARAMETER,
     /**
      * Error executing process
      * 
-     * @since {@link org.eclipse.kura} 1.3.0
+     * @since 1.2
      */
     PROCESS_EXECUTION_ERROR,
     /**
      * Error processing a subscribe/unsubscribe operation
      * 
-     * @since {@link org.eclipse.kura} 1.3.0
+     * @since 1.2
      */
     SUBSCRIPTION_ERROR
 }

@@ -13,11 +13,14 @@ package org.eclipse.kura.net.modem;
 
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Modem configuration representation
  *
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class ModemConfig implements NetConfig {
 
     /**

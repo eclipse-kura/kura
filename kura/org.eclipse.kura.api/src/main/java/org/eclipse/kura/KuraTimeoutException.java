@@ -11,10 +11,15 @@
  *******************************************************************************/
 package org.eclipse.kura;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 
 /**
  * KuraTimeoutException is raised when the attempted operation failed to respond before the timeout exprises.
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class KuraTimeoutException extends KuraException 
 {
 	private static final long serialVersionUID = -3042470573773974746L;

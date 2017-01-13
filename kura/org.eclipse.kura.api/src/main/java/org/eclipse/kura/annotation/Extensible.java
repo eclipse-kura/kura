@@ -19,6 +19,7 @@ import java.lang.annotation.Target;
 /**
  * This annotation denotes that the annotated type can be extended by others for
  * special purpose functionalities
+ * @since 1.2
  */
 @Target(TYPE)
 @Retention(RUNTIME)

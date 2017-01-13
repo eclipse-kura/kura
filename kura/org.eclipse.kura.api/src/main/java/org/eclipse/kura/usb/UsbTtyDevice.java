@@ -11,9 +11,14 @@
  *******************************************************************************/
 package org.eclipse.kura.usb;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * Representation of USB TTY devices
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class UsbTtyDevice extends AbstractUsbDevice {
 
     /** The device node of the TTY device **/

@@ -11,6 +11,12 @@
  *******************************************************************************/
 package org.eclipse.kura;
 
+import org.osgi.annotation.versioning.ProviderType;
+
+/**
+ * @noextend This class is not intended to be subclassed by clients.
+ */
+@ProviderType
 public class KuraInvalidMessageException extends KuraRuntimeException 
 {
 	private static final long serialVersionUID = -3636897647706575102L;

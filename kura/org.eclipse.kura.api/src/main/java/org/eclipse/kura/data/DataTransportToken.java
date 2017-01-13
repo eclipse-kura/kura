@@ -11,10 +11,15 @@
  *******************************************************************************/
 package org.eclipse.kura.data;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * DataTransportToken is an receipt returned by the {@link DataTransportService} after the publishing of a message.
  * Such receipt can be used to track and compare subsequence message confirmation callbacks.
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class DataTransportToken {
 
     private final int messageId;

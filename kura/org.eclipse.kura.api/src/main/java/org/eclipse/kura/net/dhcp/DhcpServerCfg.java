@@ -11,12 +11,15 @@
  *******************************************************************************/
 package org.eclipse.kura.net.dhcp;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * The configuration representing generic portion of DHCP server configuration.
- *
- * @author eurotech
- *
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
+ * @since 1.2
  */
+@ProviderType
 public class DhcpServerCfg {
 	
 	private String interfaceName;

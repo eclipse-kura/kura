@@ -10,6 +10,7 @@
 package org.eclipse.kura.driver.listener;
 
 import org.eclipse.kura.driver.DriverEvent;
+import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * The listener interface DriverListener is mainly for receiving driver events.
@@ -20,8 +21,10 @@ import org.eclipse.kura.driver.DriverEvent;
  * When the driver event occurs, that object's appropriate method is invoked.
  *
  * @see DriverEvent
+ * @since 1.2
  */
 @FunctionalInterface
+@ConsumerType
 public interface DriverListener {
 
     /**

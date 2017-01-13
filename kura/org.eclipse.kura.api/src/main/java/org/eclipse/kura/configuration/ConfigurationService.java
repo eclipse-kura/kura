@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.kura.KuraException;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The Configuration Service is used to manage the configuration of OSGi Declarative Services
@@ -84,13 +85,16 @@ import org.eclipse.kura.KuraException;
  * </ul>
  * Both properties are stored in snapshots to recreate the component instances and restore their configuration
  * at every framework restart.
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface ConfigurationService {
 
     /**
      * The name of the the Kura persistent identity property.
      *
-     * @since {@link org.eclipse.kura.configuration} 1.1.0
+     * @since 1.0.8
      */
     public static final String KURA_SERVICE_PID = "kura.service.pid";
 
@@ -99,7 +103,7 @@ public interface ConfigurationService {
      *
      * @return the list of Meta Type factory PIDs.
      *
-     * @since {@link org.eclipse.kura.configuration} 1.1.0
+     * @since 1.0.8
      */
     public Set<String> getFactoryComponentPids();
 
@@ -129,7 +133,7 @@ public interface ConfigurationService {
      * @throws KuraException
      *             if pid is null, it already exists or creation fails.
      *
-     * @since {@link org.eclipse.kura.configuration} 1.1.0
+     * @since 1.0.8
      */
     public void createFactoryConfiguration(String factoryPid, String pid, Map<String, Object> properties,
             boolean takeSnapshot) throws KuraException;
@@ -146,7 +150,7 @@ public interface ConfigurationService {
      *             if the PID is not found or if the component instance was not created
      *             via {@link #createFactoryConfiguration(String, String, Map, boolean)}.
      *
-     * @since {@link org.eclipse.kura.configuration} 1.1.0
+     * @since 1.0.8
      */
     public void deleteFactoryConfiguration(String pid, boolean takeSnapshot) throws KuraException;
 
@@ -184,7 +188,7 @@ public interface ConfigurationService {
      * @return the ComponentConfiguration of the requested Component.
      * @throws KuraException
      *
-     * @since {@link org.eclipse.kura.configuration} 1.1.0
+     * @since 1.0.8
      */
     public ComponentConfiguration getDefaultComponentConfiguration(String pid) throws KuraException;
 
@@ -240,7 +244,7 @@ public interface ConfigurationService {
      * @throws KuraException
      *             if the properties specified do not pass the validation of the ObjectClassDefinition.
      *
-     * @since {@link org.eclipse.kura.configuration} 1.1.0
+     * @since 1.0.8
      */
     public void updateConfiguration(String pid, Map<String, Object> properties, boolean takeSnapshot)
             throws KuraException;
@@ -293,7 +297,7 @@ public interface ConfigurationService {
      * @throws KuraException
      *             if the properties specified do not pass the validation of the ObjectClassDefinition
      *
-     * @since {@link org.eclipse.kura.configuration} 1.1.0
+     * @since 1.0.8
      */
     public void updateConfigurations(List<ComponentConfiguration> configs, boolean takeSnapshot) throws KuraException;
 

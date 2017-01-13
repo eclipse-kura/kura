@@ -13,9 +13,6 @@ package org.eclipse.kura.net;
 
 /**
  * Used to specify the route mode of each interface.
- *
- * @author eurotech
- *
  */
 public enum NetRouterMode {
     /** DHCP and NAT **/

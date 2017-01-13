@@ -11,12 +11,15 @@
  *******************************************************************************/
 package org.eclipse.kura.bluetooth;
 
+import org.osgi.annotation.versioning.ConsumerType;
+
 /**
  * BluetoothLeNotificationListener must be implemented by any class
  * wishing to receive notifications on Bluetooth LE
  * notification events.
  *
  */
+@ConsumerType
 public interface BluetoothLeNotificationListener {
 
     /**

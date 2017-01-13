@@ -21,13 +21,14 @@ import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiHotspotInfo;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Service API for getting and setting network interface configurations.
  *
- * @author eurotech
- *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface NetworkAdminService {
 
     /**
@@ -209,6 +210,7 @@ public interface NetworkAdminService {
      *            - name of WiFi interface
      * @return list of hotspot information.
      * @throws KuraException
+     * @since 1.2
      */
     public List<WifiHotspotInfo> getWifiHotspotList(String ifaceName) throws KuraException;
 

@@ -13,9 +13,6 @@ package org.eclipse.kura.net;
 
 /**
  * Used to store network interface types
- *
- * @author eurotech
- *
  */
 public enum NetInterfaceType {
 

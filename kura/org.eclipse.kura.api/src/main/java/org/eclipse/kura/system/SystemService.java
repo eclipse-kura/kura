@@ -21,12 +21,16 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.framework.Bundle;
 
 /**
  * Service to provide basic system information including Operating System
  * information, JVM information and filesystem information.
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface SystemService {
 
     public static final String KURA_CONFIG = "kura.configuration";
@@ -52,6 +56,9 @@ public interface SystemService {
     public static final String KEY_PRIMARY_NET_IFACE = "kura.primary.network.interface";
     public static final String KEY_KURA_HOME_DIR = "kura.home";
     public static final String KEY_KURA_PLUGINS_DIR = "kura.plugins";
+    /**
+	 * @since 1.2
+	 */
     public static final String KEY_KURA_PACKAGES_DIR = "kura.packages";
     public static final String KEY_KURA_DATA_DIR = "kura.data";
     public static final String KEY_KURA_TMP_DIR = "kura.tmp";

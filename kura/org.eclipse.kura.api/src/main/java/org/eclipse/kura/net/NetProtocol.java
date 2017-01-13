@@ -13,9 +13,6 @@ package org.eclipse.kura.net;
 
 /**
  * Used to distinguish network protocol types
- *
- * @author eurotech
- *
  */
 public enum NetProtocol {
 

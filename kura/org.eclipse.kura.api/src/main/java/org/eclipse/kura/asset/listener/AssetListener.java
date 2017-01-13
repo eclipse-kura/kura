@@ -10,6 +10,7 @@
 package org.eclipse.kura.asset.listener;
 
 import org.eclipse.kura.asset.AssetEvent;
+import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * The listener interface AssetListener is mainly for receiving asset events.
@@ -20,8 +21,10 @@ import org.eclipse.kura.asset.AssetEvent;
  * asset event occurs, that object's appropriate method is invoked.
  *
  * @see AssetEvent
+ * @since 1.2
  */
 @FunctionalInterface
+@ConsumerType
 public interface AssetListener {
 
     /**

@@ -11,10 +11,13 @@
  *******************************************************************************/
 package org.eclipse.kura.gpio;
 
+import org.osgi.annotation.versioning.ConsumerType;
+
 /**
  * This interface is used to notify status change on the Input pins
  *
  */
+@ConsumerType
 public interface PinStatusListener {
 
     /**

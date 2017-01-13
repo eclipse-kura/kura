@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.bluetooth;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * BluetoothDevice represents a Bluetooth device to which connections
  * may be made. The type of Bluetooth device will determine the
@@ -21,7 +23,9 @@ package org.eclipse.kura.bluetooth;
  * When using {@link BluetoothConnector}, A default connector is not provided
  * and will need to be implemented.
  *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface BluetoothDevice {
 
     /**

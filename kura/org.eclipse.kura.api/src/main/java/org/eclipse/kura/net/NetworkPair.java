@@ -11,16 +11,19 @@
  *******************************************************************************/
 package org.eclipse.kura.net;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * Model class for a 'network' that is specified by an IP and a mask. For example in the network
  * represented by 192.168.1.0/24 the IpAddress would be 192.168.1.0 and the mask is 24 bits or
  * 255.255.255.0. NetworkPairs are used in various components such as DHCP server configurations
  * where a network must be specified to provide addresses on.
  *
- * @author eurotech
- *
  * @param <T>
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class NetworkPair<T extends IPAddress> {
 
     /** The IP Address portion of the NetworkPair **/

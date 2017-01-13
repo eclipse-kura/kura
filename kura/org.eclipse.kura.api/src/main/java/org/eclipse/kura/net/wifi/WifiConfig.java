@@ -15,10 +15,14 @@ import java.util.Arrays;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.net.NetConfig;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Configuration for a wifi interface based on IPv4 addresses.
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class WifiConfig implements NetConfig {
 
     /** Mode for the configuration **/

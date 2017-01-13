@@ -16,13 +16,14 @@ import java.util.List;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.IP4Address;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The configuration representing a DHCP server configuration for an IPv4 network.
  *
- * @author eurotech
- *
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class DhcpServerConfigIP4 extends DhcpServerConfigIP<IP4Address>implements DhcpServerConfig4 {
 
     /**
@@ -68,6 +69,7 @@ public class DhcpServerConfigIP4 extends DhcpServerConfigIP<IP4Address>implement
      * @param dhcpServerCfg DHCP server configuration
      * @param dhcpServerCfgIP4 'network' configuration 
      * @throws KuraException
+	 * @since 1.2
      */
 	public DhcpServerConfigIP4(DhcpServerCfg dhcpServerCfg, DhcpServerCfgIP4 dhcpServerCfgIP4) throws KuraException {
 

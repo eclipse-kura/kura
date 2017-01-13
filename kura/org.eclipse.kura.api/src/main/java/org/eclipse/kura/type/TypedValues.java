@@ -15,13 +15,16 @@ package org.eclipse.kura.type;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.Nullable;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The Class TypedValues is an utility class to quickly create different
  * {@link TypedValue}
  * 
  * @noextend This class is not intended to be extended by clients.
+ * @since 1.2
  */
+@ProviderType
 public final class TypedValues {
 
     private TypedValues() {

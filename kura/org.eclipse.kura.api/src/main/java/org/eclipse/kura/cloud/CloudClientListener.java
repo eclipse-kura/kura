@@ -14,6 +14,7 @@ package org.eclipse.kura.cloud;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.message.KuraPayload;
+import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * CloudClientListener is the interface to be implemented by applications that needs to be notified of events in the
@@ -22,6 +23,7 @@ import org.eclipse.kura.message.KuraPayload;
  * The Arrived method signatures are differentiated based on whether the incoming messages have been
  * published to a data topic (by default accountName/#) or a control topic (by default $EDC/accountName/#).
  */
+@ConsumerType
 public interface CloudClientListener {
 
     /**

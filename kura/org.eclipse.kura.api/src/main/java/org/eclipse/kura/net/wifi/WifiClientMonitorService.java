@@ -12,10 +12,14 @@
 package org.eclipse.kura.net.wifi;
 
 import org.eclipse.kura.KuraException;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Marker interface for wifi client monitoring service
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface WifiClientMonitorService {
 
     public void registerListener(WifiClientMonitorListener listener);

@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.type;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * This interface wraps a Java data type with its represented value format
  *
@@ -29,7 +31,9 @@ package org.eclipse.kura.type;
  * @see DataType
  *
  * @noimplement This interface is not intended to be implemented by clients.
+ * @since 1.2
  */
+@ProviderType
 public interface TypedValue<T> extends Comparable<TypedValue<T>> {
 
     /**

@@ -25,6 +25,7 @@ import java.lang.annotation.Target;
  * If the author of the type believes that the consumer can make such
  * assumptions of thread-safety for types even though the types are not, it is
  * better to annotate the type with this annotation.
+ * @since 1.2
  */
 @Documented
 @Target(TYPE)

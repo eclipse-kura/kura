@@ -11,12 +11,15 @@
  *******************************************************************************/
 package org.eclipse.kura.bluetooth;
 
+import org.osgi.annotation.versioning.ConsumerType;
+
 /**
  * BluetoothBeaconCommandListener must be implemented by any class
  * wishing to receive notifications on Bluetooth Beacon
  * command results.
  *
  */
+@ConsumerType
 public interface BluetoothBeaconCommandListener {
 
     /**

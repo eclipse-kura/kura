@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.kura.net.wifi;
 
+import org.osgi.annotation.versioning.ConsumerType;
+
+@ConsumerType
 public interface WifiClientMonitorListener {
 
     public void setWifiSignalLevel(int signalLevel);

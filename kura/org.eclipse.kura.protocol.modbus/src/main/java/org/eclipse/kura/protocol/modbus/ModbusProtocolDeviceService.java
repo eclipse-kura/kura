@@ -93,29 +93,23 @@ public interface ModbusProtocolDeviceService {
      * @param connectionConfig
      *            (key/value pairing directly from configuration file)
      *            <ul>
-     *            <li>connectionType : PROTOCOL_CONNECTION_TYPE_SERIAL("SERIAL") or
-     *            PROTOCOL_CONNECTION_TYPE_ETHER_TCP("ETHERTCP")
+     *            <li>connectionType : serial = "RS232" or Ethernet = "TCP-RTU" = RTU over TCP/IP or 
+     *            "TCP/IP" = real MODBUS-TCP/IP
      *            </ul>
-     *            for SERIAL mode :
+     *            <br>for SERIAL mode :
      *            <ul>
      *            <li>port : Name of the port ("/dev/ttyUSB0")
      *            <li>baudRate : baudrate
      *            <li>stopBits : number of stopbits
      *            <li>parity : parity mode (0=none, 1=odd, 2=even)
      *            <li>bitsPerWord : number of bits per word
-     *            <li>serialMode : Serial Mode : SERIAL_232("RS232") or SERIAL_485("RS485").
      *            </ul>
-     *            if SERIAL_485
-     *            <ul>
-     *            <li>serialGPIOswitch : pin number as a filename in "/sys/class/gpio/"
-     *            <li>serialGPIOrsmode : pin number as a filename in "/sys/class/gpio/"
-     *            </ul>
-     *            for ETHERNET mode :
+     *            <br>for ETHERNET mode :
      *            <ul>
      *            <li>port : TCP port to be used
-     *            <li>ipAddress : the 4 octet IP address of the field device (xxx.xxx.xxx.xxx)
+     *            <li>ipAddress : the 4 bytes IP address of the field device (xxx.xxx.xxx.xxx)
      *            </ul>
-     *            Modbus properties :
+     *            <br>Modbus properties :
      *            <ul>
      *            <li>transmissionMode : modbus transmission mode, can be RTU or ASCII, in Ethernet mode only RTU is
      *            supported

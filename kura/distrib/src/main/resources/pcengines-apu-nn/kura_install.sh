@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+# Copyright (c) 2017 Om7Sense and others
 #
 #  All rights reserved. This program and the accompanying materials
 #  are made available under the terms of the Eclipse Public License v1.0
@@ -8,7 +8,7 @@
 #  http://www.eclipse.org/legal/epl-v10.html
 #
 # Contributors:
-#   Eurotech
+#   John Read Om7Sense GmbH
 #
 
 INSTALL_DIR=/opt/eclipse

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,11 +19,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder;
+import org.eclipse.kura.cloud.CloudClient;
+import org.eclipse.kura.cloud.CloudClientListener;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.data.DataService;
-import org.eclipse.kura.data.listener.DataServiceListener;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.message.KuraPayload;
@@ -38,8 +37,14 @@ import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,19 +59,63 @@ import org.slf4j.LoggerFactory;
  * Component, the user can only avail to wrap every Wire Record in the default
  * Google Protobuf Payload.
  */
-public final class CloudSubscriber implements WireEmitter, ConfigurableComponent, DataServiceListener {
+public final class CloudSubscriber implements WireEmitter, ConfigurableComponent, CloudClientListener {
+
+    /**
+     * Inner class defined to track the CloudServices as they get added, modified or removed.
+     * Specific methods can refresh the cloudService definition and setup again the Cloud Client.
+     *
+     */
+    private final class CloudSubscriberServiceTrackerCustomizer
+            implements ServiceTrackerCustomizer<CloudService, CloudService> {
+
+        @Override
+        public CloudService addingService(ServiceReference<CloudService> reference) {
+            CloudSubscriber.this.cloudService = CloudSubscriber.this.componentContext.getBundleContext()
+                    .getService(reference);
+            try {
+                // recreate the Cloud Client
+                setupCloudClient();
+                subscribeTopic();
+            } catch (KuraException e) {
+                logger.error(wireMessages.cloudClientSetupProblem() + ThrowableUtil.stackTraceAsString(e));
+            }
+            return CloudSubscriber.this.cloudService;
+        }
+
+        @Override
+        public void modifiedService(ServiceReference<CloudService> reference, CloudService service) {
+            CloudSubscriber.this.cloudService = CloudSubscriber.this.componentContext.getBundleContext()
+                    .getService(reference);
+            try {
+                // recreate the Cloud Client
+                setupCloudClient();
+                subscribeTopic();
+            } catch (KuraException e) {
+                logger.error(wireMessages.cloudClientSetupProblem() + ThrowableUtil.stackTraceAsString(e));
+            }
+        }
+
+        @Override
+        public void removedService(ServiceReference<CloudService> reference, CloudService service) {
+            CloudSubscriber.this.cloudService = null;
+        }
+    }
 
     /** The Logger instance. */
-    private static final Logger s_logger = LoggerFactory.getLogger(CloudSubscriber.class);
+    private static final Logger logger = LoggerFactory.getLogger(CloudSubscriber.class);
 
     /** Localization Resource */
-    private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
+    private static final WireMessages wireMessages = LocalizationAdapter.adapt(WireMessages.class);
+
+    private ServiceTracker<CloudService, CloudService> cloudServiceTracker;
 
     /** The cloud service. */
     private volatile CloudService cloudService;
 
-    /** The data service. */
-    private volatile DataService dataService;
+    private CloudClient cloudClient;
+
+    private final ServiceTrackerCustomizer<CloudService, CloudService> customizer = new CloudSubscriberServiceTrackerCustomizer();
 
     /** The cloud subscriber options. */
     private CloudSubscriberOptions options;
@@ -80,6 +129,8 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
     /** The wire supporter component. */
     private WireSupport wireSupport;
 
+    private ComponentContext componentContext;
+
     /**
      * OSGi Service Component callback for activation.
      *
@@ -90,43 +141,62 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
      */
     protected synchronized void activate(final ComponentContext componentContext,
             final Map<String, Object> properties) {
-        s_logger.debug(s_message.activatingCloudSubscriber());
+        logger.debug(wireMessages.activatingCloudSubscriber());
+        this.componentContext = componentContext;
         this.wireSupport = this.wireHelperService.newWireSupport(this);
         this.options = new CloudSubscriberOptions(properties);
         this.topic = this.options.getSubscribingTopic();
+        initCloudServiceTracking();
+        logger.debug(wireMessages.activatingCloudSubscriberDone());
+    }
+
+    private void subscribeTopic() throws KuraException {
+        if (this.cloudService.isConnected() && this.cloudClient != null) {
+            this.cloudClient.subscribe(this.topic, this.options.getSubscribingQos());
+        }
+    }
+
+    /**
+     * Service tracker to manage Cloud Services
+     */
+    private void initCloudServiceTracking() {
+        String selectedCloudServicePid = this.options.getCloudServicePid();
+        String filterString = String.format("(&(%s=%s)(kura.service.pid=%s))", Constants.OBJECTCLASS,
+                CloudService.class.getName(), selectedCloudServicePid);
+        Filter filter = null;
         try {
-            if (this.dataService.isConnected()) {
-                this.dataService.subscribe(this.topic, this.options.getSubscribingQos());
-            }
-        } catch (final KuraException e) {
-            s_logger.error(s_message.errorCreatingCloudClinet() + e);
+            filter = this.componentContext.getBundleContext().createFilter(filterString);
+        } catch (InvalidSyntaxException e) {
+            logger.error("Filter setup exception " + ThrowableUtil.stackTraceAsString(e));
         }
-        this.dataService.addDataServiceListener(this);
-        s_logger.debug(s_message.activatingCloudSubscriberDone());
+        this.cloudServiceTracker = new ServiceTracker<CloudService, CloudService>(
+                this.componentContext.getBundleContext(), filter, this.customizer);
+        this.cloudServiceTracker.open();
     }
 
     /**
-     * Binds the cloud service.
-     *
-     * @param cloudService
-     *            the new cloud service
+     * Closes the cloud client.
      */
-    public synchronized void bindCloudService(final CloudService cloudService) {
-        if (this.cloudService == null) {
-            this.cloudService = cloudService;
+    private void closeCloudClient() {
+        if (this.cloudClient != null) {
+            this.cloudClient.removeCloudClientListener(this);
+            this.cloudClient.release();
+            this.cloudClient = null;
         }
     }
 
     /**
-     * Binds the data service.
+     * Setup cloud client.
      *
-     * @param dataService
-     *            the new data service
+     * @throws KuraException
+     *             the kura exception
      */
-    public synchronized void bindDataService(final DataService dataService) {
-        if (this.dataService == null) {
-            this.dataService = dataService;
-        }
+    private void setupCloudClient() throws KuraException {
+        closeCloudClient();
+        // create the new CloudClient for the specified application
+        final String appId = this.options.getSubscribingApplication();
+        this.cloudClient = this.cloudService.newCloudClient(appId);
+        this.cloudClient.addCloudClientListener(this);
     }
 
     /**
@@ -153,7 +223,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
      *             if the payload provided is null
      */
     private WireRecord buildWireRecord(final KuraPayload payload) throws IOException {
-        requireNonNull(payload, s_message.payloadNonNull());
+        requireNonNull(payload, wireMessages.payloadNonNull());
         final List<WireField> wireFields = CollectionUtil.newArrayList();
 
         final String flag = "asset_flag";
@@ -218,16 +288,16 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
      *            the component context
      */
     protected synchronized void deactivate(final ComponentContext componentContext) {
-        s_logger.debug(s_message.deactivatingCloudSubscriber());
+        logger.debug(wireMessages.deactivatingCloudSubscriber());
         // close the client
         try {
-            this.unsubsribe();
-            this.dataService.removeDataServiceListener(this);
+            unsubsribe();
+            this.cloudClient.removeCloudClientListener(this);
         } catch (final KuraException e) {
-            s_logger.error(ThrowableUtil.stackTraceAsString(e));
+            logger.error(ThrowableUtil.stackTraceAsString(e));
         }
         // close the disconnect manager
-        s_logger.debug(s_message.deactivatingCloudSubscriberDone());
+        logger.debug(wireMessages.deactivatingCloudSubscriberDone());
     }
 
     /** {@inheritDoc} */
@@ -235,50 +305,10 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
     public void onConnectionEstablished() {
         try {
             if (this.topic != null) {
-                this.dataService.subscribe(this.topic, this.options.getSubscribingQos());
+                subscribeTopic();
             }
         } catch (final KuraException e) {
-            s_logger.error(s_message.errorCreatingCloudClinet() + e);
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onConnectionLost(final Throwable cause) {
-        // Not required
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onDisconnected() {
-        // Not required
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onDisconnecting() {
-        // Not required
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onMessageArrived(final String topic, final byte[] payload, final int qos, final boolean retained) {
-        KuraPayload kuraPayload = null;
-        try {
-            kuraPayload = ((CloudPayloadProtoBufDecoder) this.cloudService).buildFromByteArray(payload);
-        } catch (final KuraException e) {
-            s_logger.error(ThrowableUtil.stackTraceAsString(e));
-        }
-        if (payload != null) {
-            WireRecord record = null;
-            try {
-                record = this.buildWireRecord(kuraPayload);
-            } catch (final IOException e) {
-                s_logger.error(ThrowableUtil.stackTraceAsString(e));
-            }
-            if (record != null) {
-                this.wireSupport.emit(Arrays.asList(record));
-            }
+            logger.error(wireMessages.errorCreatingCloudClinet() + e);
         }
     }
 
@@ -301,30 +331,6 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
     }
 
     /**
-     * Unbinds cloud service.
-     *
-     * @param cloudService
-     *            the cloud service
-     */
-    public synchronized void unbindCloudService(final CloudService cloudService) {
-        if (this.cloudService == cloudService) {
-            this.cloudService = null;
-        }
-    }
-
-    /**
-     * Unbinds data service.
-     *
-     * @param dataService
-     *            the data service
-     */
-    public synchronized void unbindDataService(final DataService dataService) {
-        if (this.dataService == dataService) {
-            this.dataService = null;
-        }
-    }
-
-    /**
      * Unbinds the Wire Helper Service.
      *
      * @param wireHelperService
@@ -343,8 +349,8 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
      *             if couln't unsubscribe
      */
     private void unsubsribe() throws KuraException {
-        if (this.topic != null) {
-            this.dataService.unsubscribe(this.topic);
+        if (this.topic != null && this.cloudClient != null) {
+            this.cloudClient.unsubscribe(this.topic);
         }
         this.topic = this.options.getSubscribingTopic();
     }
@@ -356,16 +362,50 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
      *            the updated properties
      */
     public synchronized void updated(final Map<String, Object> properties) {
-        s_logger.debug(s_message.updatingCloudSubscriber());
+        logger.debug(wireMessages.updatingCloudSubscriber());
         // recreate the Cloud Client
         try {
-            this.unsubsribe();
+            unsubsribe();
         } catch (final KuraException e) {
-            s_logger.error(ThrowableUtil.stackTraceAsString(e));
+            logger.error(ThrowableUtil.stackTraceAsString(e));
         }
         // Update properties
         this.options = new CloudSubscriberOptions(properties);
-        s_logger.debug(s_message.updatingCloudSubscriberDone());
+
+        if (this.cloudServiceTracker != null) {
+            this.cloudServiceTracker.close();
+        }
+        initCloudServiceTracking();
+
+        logger.debug(wireMessages.updatingCloudSubscriberDone());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void onControlMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
+        // Not required
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void onMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
+        if (msg != null) {
+            WireRecord record = null;
+            try {
+                record = buildWireRecord(msg);
+            } catch (final IOException e) {
+                logger.error(ThrowableUtil.stackTraceAsString(e));
+            }
+            if (record != null) {
+                this.wireSupport.emit(Arrays.asList(record));
+            }
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void onConnectionLost() {
+        // Not required
     }
 
 }

@@ -17,11 +17,18 @@ import java.util.Map;
  */
 final class CloudSubscriberOptions {
 
+    private static final String CLOUD_SERVICE_PID = "cloud.service.pid";
+
     /** The Constant denoting QoS. */
     private static final String CONF_QOS = "subscribe.qos";
 
     /** The Constant denoting MQTT topic. */
     private static final String CONF_TOPIC = "subscribe.topic";
+
+    /** The Constant application to perform (either publish or subscribe). */
+    private static final String DEFAULT_APPLICATION = "WIRE-SUB-V1";
+
+    private static final String DEFAULT_CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
 
     /** The Constant denoting default QoS. */
     private static final int DEFAULT_QOS = 0;
@@ -70,6 +77,30 @@ final class CloudSubscriberOptions {
             subscribingTopic = String.valueOf(topic);
         }
         return subscribingTopic;
+    }
+
+    /**
+     * Returns the topic to be used for message subscription.
+     *
+     * @return the subscription application name
+     */
+    String getSubscribingApplication() {
+        return DEFAULT_APPLICATION;
+    }
+
+    /**
+     * Returns the kura.service.pid of the cloud service to be used to publish the generated messages
+     *
+     * @return the kura.service.pid of the cloud service to be used.
+     */
+    String getCloudServicePid() {
+        String cloudServicePid = DEFAULT_CLOUD_SERVICE_PID;
+        Object configCloudServicePid = this.properties.get(CLOUD_SERVICE_PID);
+        if ((this.properties != null) && this.properties.containsKey(CLOUD_SERVICE_PID) && configCloudServicePid != null
+                && configCloudServicePid instanceof String) {
+            cloudServicePid = (String) configCloudServicePid;
+        }
+        return cloudServicePid;
     }
 
 }

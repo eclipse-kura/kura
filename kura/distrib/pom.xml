@@ -1985,6 +1985,67 @@
 		</profile>
 
 		<profile>
+			<id>fedora25</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+					</resource>
+				</resources>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>buildnumber-maven-plugin</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<phase>validate</phase>
+								<goals>
+									<goal>create-timestamp</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>fedora25-jars</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property name="buildNumber" value="buildNumber" />
+										<property name="project.version" value="${project.version}" />
+										<property name="project.build.profile" value="${project.build.profile}" />
+										<property name="project.build.directory" value="${project.build.directory}" />
+										<property name="build.name" value="fedora25" />
+										<property name="target.device" value="raspberry-pi" />
+										<property name="native.tag" value="armv6hf"/>
+										<property name="kura.os.version" value="fedora" />
+										<property name="kura.arch" value="armv7_hf" />
+										<property name="kura.mem.size" value="512m" />
+										<property name="kura.install.dir" value="/opt/eclipse" />
+										<ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
+											target="dist-linux" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
 			<id>fedorapi</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>

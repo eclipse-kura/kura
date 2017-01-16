@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,68 +11,16 @@ package org.eclipse.kura.internal.wire.publisher;
 
 import java.util.Map;
 
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraRuntimeException;
-import org.eclipse.kura.util.base.ThrowableUtil;
-
 /**
  * The Class CloudPublisherOptions is responsible to provide all the required
  * options for the Cloud Publisher Wire Component
  */
 final class CloudPublisherOptions {
 
-    /**
-     * The different Auto Connect Modes.
-     */
-    enum AutoConnectMode {
-
-        /** The autoconnect mode off. */
-        AUTOCONNECT_MODE_OFF(0),
-        /** The autoconnect mode on and off. */
-        AUTOCONNECT_MODE_ON_AND_OFF(0),
-        /** The autoconnect mode on and stay. */
-        AUTOCONNECT_MODE_ON_AND_STAY(0),
-        /** The AUTOCONNECT ON and STAY for 1 min. */
-        AUTOCONNECT_MODE_ON_AND_STAY_1_MIN(1),
-        /** The AUTOCONNECT ON and STAY for 10 min. */
-        AUTOCONNECT_MODE_ON_AND_STAY_10_MIN(10),
-        /** The AUTOCONNECT ON and STAY for 15 min. */
-        AUTOCONNECT_MODE_ON_AND_STAY_15_MIN(15),
-        /** The AUTOCONNECT ON and STAY for 30 min. */
-        AUTOCONNECT_MODE_ON_AND_STAY_30_MIN(30),
-        /** The AUTOCONNECT ON and STAY for 5 min. */
-        AUTOCONNECT_MODE_ON_AND_STAY_5_MIN(5),
-        /** The AUTOCONNECT ON and STAY for 60 min. */
-        AUTOCONNECT_MODE_ON_AND_STAY_60_MIN(60);
-
-        /** The disconnect delay. */
-        private int disconnectDelay;
-
-        /**
-         * Instantiates a new auto connect mode.
-         *
-         * @param disconnectDelay
-         *            the disconnect delay
-         */
-        AutoConnectMode(final int disconnectDelay) {
-            this.disconnectDelay = disconnectDelay;
-        }
-
-        /**
-         * Gets the disconnect delay.
-         *
-         * @return the disconnect delay
-         */
-        int getDisconnectDelay() {
-            return this.disconnectDelay;
-        }
-    }
+    private static final String CLOUD_SERVICE_PID = "cloud.service.pid";
 
     /** The Constant denoting the publisher application. */
     private static final String CONF_APPLICATION = "publish.application";
-
-    /** The Constant denoting autoconnect mode. */
-    private static final String CONF_AUTOCONNECT_MODE = "autoconnect.mode";
 
     /** The Constant denoting message type. */
     private static final String CONF_MESSAGE_TYPE = "publish.message.type";
@@ -83,20 +31,16 @@ final class CloudPublisherOptions {
     /** The Constant denoting QoS. */
     private static final String CONF_QOS = "publish.qos";
 
-    /** The Constant denoting quiesce timeout. */
-    private static final String CONF_QUIESCE_TIMEOUT = "disconnect.quiesce.timeout";
-
     /** The Constant denoting MQTT retain */
     private static final String CONF_RETAIN = "publish.retain";
 
     /** The Constant denoting MQTT topic. */
     private static final String CONF_TOPIC = "publish.topic";
 
+    private static final String DEFAULT_CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
+
     /** The Constant application to perform (either publish or subscribe). */
     private static final String DEFAULT_APPLICATION = "PUB";
-
-    /** The Constant denoting default auto connect mode. */
-    private static final AutoConnectMode DEFAULT_AUTOCONNECT_MODE = AutoConnectMode.AUTOCONNECT_MODE_ON_AND_OFF;
 
     /** The Constant denoting default message type : Kura Payload. */
     private static final int DEFAULT_MESSAGE_TYPE = 1;
@@ -106,9 +50,6 @@ final class CloudPublisherOptions {
 
     /** The Constant denoting default QoS. */
     private static final int DEFAULT_QOS = 0;
-
-    /** The Constant DEFAULT_QUIECE_TIMEOUT. */
-    private static final int DEFAULT_QUIECE_TIMEOUT = 1000;
 
     /** The Constant denoting default MQTT retain. */
     private static final boolean DEFAULT_RETAIN = false;
@@ -127,26 +68,6 @@ final class CloudPublisherOptions {
      */
     CloudPublisherOptions(final Map<String, Object> properties) {
         this.properties = properties;
-    }
-
-    /**
-     * Returns the auto connect mode.
-     *
-     * @return the auto connect mode
-     */
-    AutoConnectMode getAutoConnectMode() {
-        AutoConnectMode autoConnectMode = DEFAULT_AUTOCONNECT_MODE;
-        final Object mode = this.properties.get(CONF_AUTOCONNECT_MODE);
-        if ((this.properties != null) && this.properties.containsKey(CONF_AUTOCONNECT_MODE) && (mode != null)
-                && (mode instanceof String)) {
-            final String autoconnectModeValue = String.valueOf(mode);
-            try {
-                autoConnectMode = AutoConnectMode.valueOf(autoconnectModeValue);
-            } catch (final IllegalArgumentException iea) {
-                throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, ThrowableUtil.stackTraceAsString(iea));
-            }
-        }
-        return autoConnectMode;
     }
 
     /**
@@ -240,18 +161,17 @@ final class CloudPublisherOptions {
     }
 
     /**
-     * Returns the Quiesce Timeout.
+     * Returns the kura.service.pid of the cloud service to be used to publish the generated messages
      *
-     * @return the connect quiesce timeout
+     * @return the kura.service.pid of the cloud service to be used.
      */
-    int getQuiesceTimeout() {
-        int quieceTimeout = DEFAULT_QUIECE_TIMEOUT;
-        final Object timeout = this.properties.get(CONF_QUIESCE_TIMEOUT);
-        if ((this.properties != null) && this.properties.containsKey(CONF_QUIESCE_TIMEOUT) && (timeout != null)
-                && (timeout instanceof Integer)) {
-            quieceTimeout = (Integer) timeout;
+    String getCloudServicePid() {
+        String cloudServicePid = DEFAULT_CLOUD_SERVICE_PID;
+        Object configCloudServicePid = this.properties.get(CLOUD_SERVICE_PID);
+        if ((this.properties != null) && this.properties.containsKey(CLOUD_SERVICE_PID) && configCloudServicePid != null
+                && configCloudServicePid instanceof String) {
+            cloudServicePid = (String) configCloudServicePid;
         }
-        return quieceTimeout;
+        return cloudServicePid;
     }
-
 }

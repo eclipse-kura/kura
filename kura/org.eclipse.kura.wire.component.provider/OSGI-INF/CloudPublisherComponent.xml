@@ -18,23 +18,11 @@
    <property name="service.pid" value="org.eclipse.kura.wire.CloudPublisher"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
-      <provide interface="org.eclipse.kura.data.listener.DataServiceListener"/>
+      <provide interface="org.eclipse.kura.cloud.CloudClientListener"/>
       <provide interface="org.eclipse.kura.wire.WireComponent"/>
       <provide interface="org.eclipse.kura.wire.WireReceiver"/>
       <provide interface="org.osgi.service.wireadmin.Consumer"/>
    </service>
-   <reference name="DataService" 
-              interface="org.eclipse.kura.data.DataService" 
-              policy="static" 
-              cardinality="1..1" 
-              bind="bindDataService" 
-              unbind="unbindDataService"/>
-   <reference name="CloudService" 
-              interface="org.eclipse.kura.cloud.CloudService" 
-              policy="static" 
-              cardinality="1..1" 
-              bind="bindCloudService" 
-              unbind="unbindCloudService"/>
    <reference bind="bindWireHelperService" 
    	          cardinality="1..1" 
    	          interface="org.eclipse.kura.wire.WireHelperService" 

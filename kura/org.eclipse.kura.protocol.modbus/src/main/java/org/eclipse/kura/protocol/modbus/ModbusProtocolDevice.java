@@ -731,7 +731,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
             // ---------------------------------------------------
             if (ModbusProtocolDevice.this.m_txMode == ModbusTransmissionMode.RTU_MODE) {
                 if (PROTOCOL_CONNECTION_TYPE_ETHER_TCP.equals(this.connType)) {
-                    cmd = new byte[msg.length + 2 + 6];
+                    cmd = new byte[msg.length + 6];
                     // build MBAP header
                     int index = getNextTransactionIndex();
                     cmd[0] = (byte) (index >> 8);
@@ -745,10 +745,7 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
                     for (int i = 0; i < msg.length; i++) {
                         cmd[i + 6] = msg[i];
                     }
-                    // Add crc calculation to end of message
-                    int crc = Crc16.getCrc16(msg, msg.length, 0x0ffff);
-                    cmd[msg.length + 6] = (byte) crc;
-                    cmd[msg.length + 1 + 6] = (byte) (crc >> 8);
+                    // No crc in Modbus TCP
                 } else {
                     cmd = new byte[msg.length + 2];
                     for (int i = 0; i < msg.length; i++) {
@@ -820,20 +817,18 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
                                 }
                             } else if (respIndex == 9) {
                                 // Check first for an Exception response
-                                if ((response[7] & 0x80) == 0x80) {
-                                    if (Crc16.getCrc16(response, respIndex, 0xffff) == 0) {
-                                        throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,
-                                                "Modbus responds an error = " + String.format("%02X", response[8]));
-                                    }
+                            	if ((response[7] & 0x80) == 0x80) {                                    
+                            		throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,
+                            				"Modbus responds an error = " + String.format("%02X", response[8]));
                                 } else {
                                     if (response[7] == ModbusFunctionCodes.FORCE_SINGLE_COIL
                                             || response[7] == ModbusFunctionCodes.PRESET_SINGLE_REG
                                             || response[7] == ModbusFunctionCodes.FORCE_MULTIPLE_COILS
                                             || response[7] == ModbusFunctionCodes.PRESET_MULTIPLE_REGS) {
-                                        minimumLength = 14;
+                                        minimumLength = 12;
                                     } else {
                                         // bytes count
-                                        minimumLength = response[8] + 11;
+                                        minimumLength = response[8] + 9;
                                     }
                                 }
                             } else if (respIndex == minimumLength) {
@@ -863,29 +858,21 @@ public class ModbusProtocolDevice implements ModbusProtocolDeviceService {
             case ModbusFunctionCodes.PRESET_SINGLE_REG:
             case ModbusFunctionCodes.FORCE_MULTIPLE_COILS:
             case ModbusFunctionCodes.PRESET_MULTIPLE_REGS:
-                // if (Crc16.getCrc16(response, 14, 0xffff) == 0) {
                 byte[] ret = new byte[8];
-                for (int i = 6; i < 14; i++) {
+                for (int i = 6; i < 12; i++) {
                     ret[i - 6] = response[i];
                 }
                 return ret;
-                // }
-                // else
-                // throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,"CRC16 error");
             case ModbusFunctionCodes.READ_COIL_STATUS:
             case ModbusFunctionCodes.READ_INPUT_STATUS:
             case ModbusFunctionCodes.READ_INPUT_REGS:
             case ModbusFunctionCodes.READ_HOLDING_REGS:
-                int byteCnt = (response[8] & 0xff) + 5 + 6;
-                // if (Crc16.getCrc16(response, byteCnt, 0xffff) == 0) {
+                int byteCnt = (response[8] & 0xff) + 3 + 6;
                 ret = new byte[byteCnt - 6];
                 for (int i = 6; i < byteCnt; i++) {
                     ret[i - 6] = response[i];
                 }
                 return ret;
-                // }
-                // else
-                // throw new ModbusProtocolException(ModbusProtocolErrorCode.TRANSACTION_FAILURE,"CRC16 error");
             }
             return null;
         }

@@ -1,13 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
+ * Contributors:
+ *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
-package org.eclipse.kura.internal.asset;
+package org.eclipse.kura.internal.asset.provider;
 
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DESC_PROP;
@@ -55,10 +58,10 @@ import org.slf4j.LoggerFactory;
 public final class AssetOptions {
 
     /** The Logger instance. */
-    private static final Logger s_logger = LoggerFactory.getLogger(AssetOptions.class);
+    private static final Logger logger = LoggerFactory.getLogger(AssetOptions.class);
 
     /** Localization Resource */
-    private static final AssetMessages s_message = LocalizationAdapter.adapt(AssetMessages.class);
+    private static final AssetMessages message = LocalizationAdapter.adapt(AssetMessages.class);
 
     /** The asset description. */
     private String assetDescription;
@@ -78,7 +81,7 @@ public final class AssetOptions {
      *             if the argument is null
      */
     public AssetOptions(final Map<String, Object> properties) {
-        requireNonNull(properties, s_message.propertiesNonNull());
+        requireNonNull(properties, message.propertiesNonNull());
         this.extractProperties(properties);
     }
 
@@ -91,7 +94,7 @@ public final class AssetOptions {
      *             if any of the arguments is null
      */
     private void addChannel(final Channel channel) {
-        requireNonNull(channel, s_message.channelNonNull());
+        requireNonNull(channel, message.channelNonNull());
         this.channels.put(channel.getId(), channel);
     }
 
@@ -105,7 +108,7 @@ public final class AssetOptions {
      *             if the argument is null
      */
     private void checkChannelAvailability(final Map<String, Object> properties) {
-        requireNonNull(properties, s_message.propertiesNonNull());
+        requireNonNull(properties, message.propertiesNonNull());
         final Set<Long> channelIds = this.retrieveChannelIds(properties);
         for (final long channelId : channelIds) {
             final Channel channel = this.retrieveChannel(channelId, properties);
@@ -122,7 +125,7 @@ public final class AssetOptions {
      *             if the argument is null
      */
     private void extractProperties(final Map<String, Object> properties) {
-        requireNonNull(properties, s_message.propertiesNonNull());
+        requireNonNull(properties, message.propertiesNonNull());
         try {
             if (properties.containsKey(ASSET_DRIVER_PROP.value())) {
                 this.driverPid = (String) properties.get(ASSET_DRIVER_PROP.value());
@@ -132,7 +135,7 @@ public final class AssetOptions {
             }
             this.checkChannelAvailability(properties);
         } catch (final Exception ex) {
-            s_logger.error(s_message.errorRetrievingChannels() + ThrowableUtil.stackTraceAsString(ex));
+            logger.error(message.errorRetrievingChannels() + ThrowableUtil.stackTraceAsString(ex));
         }
     }
 
@@ -157,8 +160,8 @@ public final class AssetOptions {
      *             if any of the arguments is null
      */
     private ChannelType getChannelType(final Map<String, Object> properties, final String channelTypePropertyKey) {
-        requireNonNull(properties, s_message.propertiesNonNull());
-        requireNonNull(channelTypePropertyKey, s_message.channelKeyNonNull());
+        requireNonNull(properties, message.propertiesNonNull());
+        requireNonNull(channelTypePropertyKey, message.channelKeyNonNull());
 
         if (properties.containsKey(channelTypePropertyKey)) {
             final String channelTypeProp = (String) properties.get(channelTypePropertyKey);
@@ -187,8 +190,8 @@ public final class AssetOptions {
      *             if any of the arguments is null
      */
     private DataType getDataType(final Map<String, Object> properties, final String channelValueTypePropertyKey) {
-        requireNonNull(properties, s_message.propertiesNonNull());
-        requireNonNull(channelValueTypePropertyKey, s_message.channelValueTypeNonNull());
+        requireNonNull(properties, message.propertiesNonNull());
+        requireNonNull(channelValueTypePropertyKey, message.channelValueTypeNonNull());
 
         if (properties.containsKey(channelValueTypePropertyKey)) {
             final String dataTypeProp = (String) properties.get(channelValueTypePropertyKey);
@@ -239,11 +242,11 @@ public final class AssetOptions {
      */
     private Channel retrieveChannel(final long channelId, final Map<String, Object> properties) {
         if (channelId <= 0) {
-            throw new IllegalArgumentException(s_message.channelIdNotLessThanZero());
+            throw new IllegalArgumentException(message.channelIdNotLessThanZero());
         }
-        requireNonNull(properties, s_message.propertiesNonNull());
+        requireNonNull(properties, message.propertiesNonNull());
 
-        s_logger.debug(s_message.retrievingChannel());
+        logger.debug(message.retrievingChannel());
         String channelName = null;
         ChannelType channelType = null;
         DataType dataType = null;
@@ -281,7 +284,7 @@ public final class AssetOptions {
         if ((channelType != null) && (dataType != null)) {
             channel = new Channel(channelId, channelName, channelType, dataType, channelConfig);
         }
-        s_logger.debug(s_message.retrievingChannelDone());
+        logger.debug(message.retrievingChannelDone());
         return channel;
     }
 
@@ -295,7 +298,7 @@ public final class AssetOptions {
      *             if the argument is null
      */
     private Set<Long> retrieveChannelIds(final Map<String, Object> properties) {
-        requireNonNull(properties, s_message.propertiesNonNull());
+        requireNonNull(properties, message.propertiesNonNull());
         final Set<Long> channelIds = CollectionUtil.newHashSet();
         for (final Map.Entry<String, Object> entry : properties.entrySet()) {
             final String key = entry.getKey();
@@ -325,7 +328,7 @@ public final class AssetOptions {
      *             if the argument is null
      */
     public void update(final Map<String, Object> properties) {
-        requireNonNull(properties, s_message.propertiesNonNull());
+        requireNonNull(properties, message.propertiesNonNull());
         this.extractProperties(properties);
     }
 

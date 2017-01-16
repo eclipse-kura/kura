@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.data.transport.mqtt;
 
@@ -83,8 +84,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     private boolean m_newSession;
     private String m_sessionId;
 
-    PersistenceType m_persistenceType;
-    MqttClientPersistence m_persistence;
+    private PersistenceType m_persistenceType;
+    private MqttClientPersistence m_persistence;
 
     private final Map<String, String> m_topicContext = new HashMap<String, String>();
     private final Map<String, Object> m_properties = new HashMap<String, Object>();

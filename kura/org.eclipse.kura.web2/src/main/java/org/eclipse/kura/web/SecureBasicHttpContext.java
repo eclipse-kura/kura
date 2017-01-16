@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,12 +8,15 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.web;
 
+import static java.util.Base64.getDecoder;
+
 import java.io.IOException;
 import java.net.URL;
-import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
 import java.util.StringTokenizer;
 
 import javax.security.auth.Subject;
@@ -21,9 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.web.server.util.ServiceLocator;
-import org.eclipse.kura.web.shared.GwtKuraException;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,16 +106,7 @@ public class SecureBasicHttpContext implements HttpContext {
             return failAuthorization(response);
         }
 
-        String base64 = tokens.nextToken();
-        String credentials = null;
-        try {
-            CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
-            credentials = cryptoService.decodeBase64(base64);
-        } catch (GwtKuraException e) {
-            throw new IOException(e.getMessage());
-        } catch (NoSuchAlgorithmException e) {
-            throw new IOException(e.getMessage());
-        }
+        final String credentials = new String ( getDecoder().decode(tokens.nextToken()), StandardCharsets.UTF_8 );
 
         int colon = credentials.indexOf(':');
         String userid = credentials.substring(0, colon);

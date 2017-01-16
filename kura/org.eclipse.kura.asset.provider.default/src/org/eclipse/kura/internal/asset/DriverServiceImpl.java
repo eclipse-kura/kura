@@ -1,11 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
+ * Contributors:
+ *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.internal.asset;
 
@@ -32,12 +35,12 @@ import org.osgi.framework.ServiceReference;
 public final class DriverServiceImpl implements DriverService {
 
     /** Localization Resource */
-    private static final AssetMessages s_message = LocalizationAdapter.adapt(AssetMessages.class);
+    private static final AssetMessages message = LocalizationAdapter.adapt(AssetMessages.class);
 
     /** {@inheritDoc} */
     @Override
     public Driver getDriver(final String driverId) {
-        requireNonNull(driverId, s_message.driverPidNonNull());
+        requireNonNull(driverId, message.driverPidNonNull());
         final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         final ServiceReference<Driver>[] refs = ServiceUtil.getServiceReferences(context, Driver.class, null);
         try {
@@ -55,7 +58,7 @@ public final class DriverServiceImpl implements DriverService {
     /** {@inheritDoc} */
     @Override
     public String getDriverPid(final Driver driver) {
-        requireNonNull(driver, s_message.driverNonNull());
+        requireNonNull(driver, message.driverNonNull());
         final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         final ServiceReference<Driver>[] refs = ServiceUtil.getServiceReferences(context, Driver.class, null);
         try {

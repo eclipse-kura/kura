@@ -61,7 +61,7 @@ public class CanConnectionServiceImpl implements CanConnectionService {
     @Override
     public void sendCanMessage(String ifName, int canId, byte[] message) throws KuraException, IOException {
         if (message.length > 8) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "CAN send : Incorrect frame length");
+            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "CAN send : Incorrect frame length");
         }
 
         try {

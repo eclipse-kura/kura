@@ -7,7 +7,7 @@ Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Unit-Test: true
 Import-Package: 
- org.eclipse.kura.protocol.can; version="[1.0,2.0)",
+ org.eclipse.kura.protocol.can; version="[2.0,3.0)",
  org.eclipse.kura; version="[1.0,2.0)",
  org.eclipse.kura.cloud; version="[1.0,2.0)",
  org.eclipse.kura.configuration; version="[1.0,2.0)",

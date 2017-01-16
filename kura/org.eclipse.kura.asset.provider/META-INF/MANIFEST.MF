@@ -27,6 +27,4 @@ Import-Package: org.eclipse.kura;version="[1.2,2.0)",
  org.osgi.service.component;version="1.2.0",
  org.osgi.util.tracker;version="1.5.0",
  org.slf4j;version="1.6.4"
-Service-Component: OSGI-INF/*.xml
-Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.kura.asset.provider;version="1.0.0"

@@ -1,13 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
+ * Contributors:
+ *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
-package org.eclipse.kura.internal.asset;
+package org.eclipse.kura.internal.asset.provider;
 
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
@@ -32,10 +35,10 @@ import org.slf4j.LoggerFactory;
 public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<Driver, Driver> {
 
     /** The Logger instance. */
-    private static final Logger s_logger = LoggerFactory.getLogger(DriverTrackerCustomizer.class);
+    private static final Logger logger = LoggerFactory.getLogger(DriverTrackerCustomizer.class);
 
     /** Localization Resource */
-    private static final AssetMessages s_message = LocalizationAdapter.adapt(AssetMessages.class);
+    private static final AssetMessages message = LocalizationAdapter.adapt(AssetMessages.class);
 
     /** The Asset Instance */
     private final Asset asset;
@@ -62,9 +65,9 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
      */
     public DriverTrackerCustomizer(final BundleContext context, final Asset asset, final String driverId)
             throws InvalidSyntaxException {
-        requireNonNull(context, s_message.bundleContextNonNull());
-        requireNonNull(asset, s_message.assetNonNull());
-        requireNonNull(driverId, s_message.driverPidNonNull());
+        requireNonNull(context, message.bundleContextNonNull());
+        requireNonNull(asset, message.assetNonNull());
+        requireNonNull(driverId, message.driverPidNonNull());
 
         this.driverId = driverId;
         this.asset = asset;
@@ -76,7 +79,7 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
     public Driver addingService(final ServiceReference<Driver> reference) {
         final Driver driver = this.context.getService(reference);
         if (reference.getProperty(KURA_SERVICE_PID).equals(this.driverId)) {
-            s_logger.info(s_message.driverFoundAdding());
+            logger.info(message.driverFoundAdding());
             ((BaseAsset) this.asset).driver = driver;
         }
         return driver;
@@ -94,7 +97,7 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
     public void removedService(final ServiceReference<Driver> reference, final Driver service) {
         this.context.ungetService(reference);
         if (reference.getProperty(KURA_SERVICE_PID).equals(this.driverId)) {
-            s_logger.info(s_message.driverRemoved() + service);
+            logger.info(message.driverRemoved() + service);
             ((BaseAsset) this.asset).driver = null;
         }
     }

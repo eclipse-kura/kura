@@ -69,15 +69,15 @@
         </dependency>
 
         <dependency>
-            <groupId>org.eclipse</groupId>
+            <groupId>org.eclipse.platform</groupId>
             <artifactId>org.eclipse.equinox.io</artifactId>
-            <version>1.0.400.v20120522-2049</version>
+            <version>1.1.100</version>
         </dependency>
 
         <dependency>
-            <groupId>org.eclipse</groupId>
+            <groupId>org.eclipse.platform</groupId>
             <artifactId>org.eclipse.equinox.util</artifactId>
-            <version>1.0.400.v20120522-2049</version>
+            <version>1.0.500</version>
         </dependency>
 
         <dependency>

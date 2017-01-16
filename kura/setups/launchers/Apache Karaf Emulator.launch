@@ -3,7 +3,7 @@
 <booleanAttribute key="M2_DEBUG_OUTPUT" value="false"/>
 <stringAttribute key="M2_GOALS" value="exec:java"/>
 <booleanAttribute key="M2_NON_RECURSIVE" value="false"/>
-<booleanAttribute key="M2_OFFLINE" value="false"/>
+<booleanAttribute key="M2_OFFLINE" value="true"/>
 <stringAttribute key="M2_PROFILES" value="run"/>
 <listAttribute key="M2_PROPERTIES"/>
 <stringAttribute key="M2_RUNTIME" value="EMBEDDED"/>
@@ -12,6 +12,11 @@
 <booleanAttribute key="M2_UPDATE_SNAPSHOTS" value="false"/>
 <stringAttribute key="M2_USER_SETTINGS" value=""/>
 <booleanAttribute key="M2_WORKSPACE_RESOLUTION" value="false"/>
+<stringAttribute key="org.eclipse.debug.core.source_locator_id" value="org.eclipse.m2e.launching.MavenSourceLocator"/>
+<stringAttribute key="org.eclipse.debug.core.source_locator_memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;sourceLookupDirector&gt;&#10;&lt;sourceContainers duplicates=&quot;false&quot;&gt;&#10;&lt;container memento=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#10;&amp;lt;javaProject name=&amp;quot;org.eclipse.kura.web2&amp;quot;/&amp;gt;&amp;#10;&quot; typeId=&quot;org.eclipse.jdt.launching.sourceContainer.javaProject&quot;/&gt;&#10;&lt;container memento=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#10;&amp;lt;project name=&amp;quot;org.eclipse.kura.web2&amp;quot; referencedProjects=&amp;quot;false&amp;quot;/&amp;gt;&amp;#10;&quot; typeId=&quot;org.eclipse.debug.core.containerType.project&quot;/&gt;&#10;&lt;container memento=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#10;&amp;lt;workspace/&amp;gt;&amp;#10;&quot; typeId=&quot;org.eclipse.debug.core.containerType.workspace&quot;/&gt;&#10;&lt;container memento=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#10;&amp;lt;folder nest=&amp;quot;false&amp;quot; path=&amp;quot;/org.eclipse.kura.web2/src/main/java&amp;quot;/&amp;gt;&amp;#10;&quot; typeId=&quot;org.eclipse.debug.core.containerType.folder&quot;/&gt;&#10;&lt;container memento=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#10;&amp;lt;default/&amp;gt;&amp;#10;&quot; typeId=&quot;org.eclipse.debug.core.containerType.default&quot;/&gt;&#10;&lt;/sourceContainers&gt;&#10;&lt;/sourceLookupDirector&gt;&#10;"/>
+<listAttribute key="org.eclipse.debug.ui.favoriteGroups">
+<listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
+</listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${project_loc:karaf}/emulator-instance"/>
 </launchConfiguration>

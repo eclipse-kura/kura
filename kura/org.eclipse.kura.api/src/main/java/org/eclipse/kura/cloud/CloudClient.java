@@ -124,6 +124,33 @@ public interface CloudClient {
     public int publish(String appTopic, KuraPayload payload, int qos, boolean retain) throws KuraException;
 
     /**
+     * Publishes a message to the remote server using the default priority 5.
+     * Before passing the message the to {@link org.eclipse.kura.data.DataService},
+     * the CloudClient will manipulate the provided topic by appending the necessary parts
+     * to achieve topic partitioning and device identification. It is also responsible to
+     * encode the {@link KuraPayload} payload into binary format.
+     * <br>
+     * The KuraStoreCapacityReachedException is thrown if the database buffer
+     * has reached its capacity for messages that are not yet published or
+     * they are still in transit.
+     *
+     * @param deviceId
+     *            A String specifying the device ID.
+     * @param appTopic
+     *            A String specifying the application portion of the topic the message is published on.
+     * @param payload
+     *            An KuraPayload representing the message to be published
+     * @param qos
+     *            An integer specifying the quality of service the message was published on.
+     * @param retain
+     *            Whether or not the broker should retain the message
+     * @return The published message's ID.
+     * @since {@link org.eclipse.kura.cloud} 1.1.0
+     */
+    public int publish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain)
+            throws KuraException;
+
+    /**
      * Publishes a message to the remote server.
      * Before passing the message the to {@link org.eclipse.kura.data.DataService},
      * the CloudClient will manipulate the provided topic by appending the necessary parts
@@ -162,6 +189,47 @@ public interface CloudClient {
             throws KuraException;
 
     /**
+     * Publishes a message to the remote server.
+     * Before passing the message the to {@link org.eclipse.kura.data.DataService},
+     * the CloudClient will manipulate the provided topic by appending the necessary parts
+     * to achieve topic partitioning and device identification. It is also responsible to
+     * encode the {@link KuraPayload} payload into binary format.
+     * <br>
+     * The priority argument can be used to control the relative ordering of this
+     * message with other messages that may be currently queued for publishing.
+     * Priority level 0 (highest) should be used sparingly and reserved for
+     * messages that should be sent with the minimum latency. Life-cycle messages
+     * (e.g. device start and stop) are an example of messages that are
+     * published by the framework with priority 0.
+     * Priority 1 messages are used by the framework to publish response messages
+     * in request/response conversations to prevent a timeout at the requester.
+     * Application should consider using priority 5 or higher.
+     * <br>
+     * The KuraStoreCapacityReachedException is thrown if the database buffer
+     * has reached its capacity for messages that are not yet published or
+     * they are still in transit. The limit does not apply to internal messages with the priority less than 2.
+     * These priority levels are reserved to the framework which uses it for life-cycle messages
+     * - birth and death certificates - and replies to request/response flows.
+     *
+     * @param deviceId
+     *            A String specifying the device ID.
+     * @param appTopic
+     *            A String specifying the application portion of the topic the message is published on.
+     * @param payload
+     *            An KuraPayload representing the message to be published
+     * @param qos
+     *            An integer specifying the quality of service the message was published on.
+     * @param retain
+     *            Whether or not the broker should retain the message
+     * @param priority
+     *            Relative ordering of this message with other messages that may be currently queued for publishing.
+     * @return The published message's ID.
+     * @since {@link org.eclipse.kura.cloud} 1.1.0
+     */
+    public int publish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain, int priority)
+            throws KuraException;
+
+    /**
      * Publishes a message to the remote server with a raw byte array payload.
      * This is the lowest level publish API exposed by the CloudClient.
      * Before passing the message the to {@link org.eclipse.kura.data.DataService},
@@ -197,6 +265,47 @@ public interface CloudClient {
      * @return The published message's ID.
      */
     public int publish(String appTopic, byte[] payload, int qos, boolean retain, int priority) throws KuraException;
+
+    /**
+     * Publishes a message to the remote server with a raw byte array payload.
+     * This is the lowest level publish API exposed by the CloudClient.
+     * Before passing the message the to {@link org.eclipse.kura.data.DataService},
+     * the CloudClient will manipulate the provided topic by appending the necessary parts
+     * to achieve topic partitioning and device identification.
+     * <br>
+     * The priority argument can be used to control the relative ordering of this
+     * message with other messages that may be currently queued for publishing.
+     * Priority level 0 (highest) should be used sparingly and reserved for
+     * messages that should be sent with the minimum latency. Life-cycle messages
+     * (e.g. device start and stop) are an example of messages that are
+     * published by the framework with priority 0.
+     * Priority 1 messages are used by the framework to publish response messages
+     * in request/response conversations to prevent a timeout at the requester.
+     * Application should consider using priority 5 or higher.
+     * <br>
+     * The KuraStoreCapacityReachedException is thrown if the database buffer
+     * has reached its capacity for messages that are not yet published or
+     * they are still in transit. The limit does not apply to internal messages with the priority less than 2.
+     * These priority levels are reserved to the framework which uses it for life-cycle messages
+     * - birth and death certificates - and replies to request/response flows.
+     *
+     * @param deviceId
+     *            A String specifying the device ID.
+     * @param appTopic
+     *            A String specifying the application portion of the topic the message is published on.
+     * @param payload
+     *            Binary payload representing the message to be published
+     * @param qos
+     *            An integer specifying the quality of service the message was published on.
+     * @param retain
+     *            Whether or not the broker should retain the message
+     * @param priority
+     *            Relative ordering of this message with other messages that may be currently queued for publishing.
+     * @return The published message's ID.
+     * @since {@link org.eclipse.kura.cloud} 1.1.0
+     */
+    public int publish(String deviceId, String appTopic, byte[] payload, int qos, boolean retain, int priority)
+            throws KuraException;
 
     /**
      * Publishes a control message to the remote server. Control messages are qualified with an
@@ -264,7 +373,7 @@ public interface CloudClient {
      * - birth and death certificates - and replies to request/response flows.
      *
      * @param deviceId
-     *            A String specifying the asset ID.
+     *            A String specifying the device ID.
      * @param appTopic
      *            A String specifying the application topic the message is published on.
      * @param payload
@@ -306,7 +415,7 @@ public interface CloudClient {
      * - birth and death certificates - and replies to request/response flows.
      *
      * @param deviceId
-     *            A String specifying the asset ID.
+     *            A String specifying the device ID.
      * @param appTopic
      *            A String specifying the application topic the message is published on.
      * @param payload
@@ -338,6 +447,24 @@ public interface CloudClient {
     public void subscribe(String appTopic, int qos) throws KuraException;
 
     /**
+     * Subscribes to a topic with the remote server. The topic is specified by two StringS: one characterizing the
+     * deviceId and the other representing the appTopic. The QoS is specified as an integer. The CloudClient will
+     * manipulate the provided topic by appending the necessary parts to achieve topic partitioning and
+     * device identification.<br>
+     * This is a synchronous call. If the subscribe fails, an exception will be thrown
+     * that will contain information about the cause of the failure.
+     *
+     * @param deviceId
+     *            A String specifying the device ID.
+     * @param appTopic
+     *            A String object containing the application topic.
+     * @param qos
+     *            An int containing the Quality of Service.
+     * @since {@link org.eclipse.kura.cloud} 1.1.0
+     */
+    public void subscribe(String deviceId, String appTopic, int qos) throws KuraException;
+
+    /**
      * Subscribes to a control topic with the remote server. The topic is specified as a String
      * object and the QoS is specified as an integer. The CloudClient will manipulate the
      * provided topic by appending the necessary parts to achieve topic partitioning and
@@ -353,6 +480,24 @@ public interface CloudClient {
     public void controlSubscribe(String appTopic, int qos) throws KuraException;
 
     /**
+     * Subscribes to a control topic with the remote server. The topic is specified by two StringS: one characterizing
+     * the deviceId and the other representing the appTopic. The QoS is specified as an integer. The CloudClient will
+     * manipulate the provided topic by appending the necessary parts to achieve topic partitioning and
+     * including control prefix and device identification.<br>
+     * This is a synchronous call. If the subscribe fails, an exception will be thrown
+     * that will contain information about the cause of the failure.
+     *
+     * @param deviceId
+     *            A String specifying the device ID.
+     * @param appTopic
+     *            A String object containing the application topic.
+     * @param qos
+     *            An int containing the Quality of Service.
+     * @since {@link org.eclipse.kura.cloud} 1.1.0
+     */
+    public void controlSubscribe(String deviceId, String appTopic, int qos) throws KuraException;
+
+    /**
      * Unubscribes to a topic with the remote server. The topic is specified as a String
      * object and the QoS is specified as an integer. The CloudClient will manipulate the
      * provided topic by appending the necessary parts to achieve topic partitioning and
@@ -366,6 +511,22 @@ public interface CloudClient {
     public void unsubscribe(String appTopic) throws KuraException;
 
     /**
+     * Unubscribes to a topic with the remote server. The topic is specified by two StringS: one characterizing
+     * the deviceId and the other representing the appTopic. The QoS is specified as an integer. The CloudClient will
+     * manipulate the provided topic by appending the necessary parts to achieve topic partitioning and
+     * device identification.<br>
+     * This is a synchronous call. If the unsubscribe fails, an exception will be thrown
+     * that will contain information about the cause of the failure.
+     *
+     * @param deviceId
+     *            A String specifying the device ID.
+     * @param appTopic
+     *            A String object containing the application topic.
+     * @since {@link org.eclipse.kura.cloud} 1.1.0
+     */
+    public void unsubscribe(String deviceId, String appTopic) throws KuraException;
+
+    /**
      * Unsubscribes to a control topic with the remote server. The topic is specified as a String
      * object and the QoS is specified as an integer. The CloudClient will manipulate the
      * provided topic by appending the necessary parts to achieve topic partitioning and
@@ -377,6 +538,22 @@ public interface CloudClient {
      *            A String object containing the application topic.
      */
     public void controlUnsubscribe(String appTopic) throws KuraException;
+
+    /**
+     * Unsubscribes to a control topic with the remote server. The topic is specified by two StringS: one characterizing
+     * the deviceId and the other representing the appTopic. The QoS is specified as an integer. The CloudClient will
+     * manipulate the provided topic by appending the necessary parts to achieve topic partitioning and
+     * including control prefix and device identification.<br>
+     * This is a synchronous call. If the unsubscribe fails, an exception will be thrown
+     * that will contain information about the cause of the failure.
+     *
+     * @param deviceId
+     *            A String specifying the device ID.
+     * @param appTopic
+     *            A String object containing the application topic.
+     * @since {@link org.eclipse.kura.cloud} 1.1.0
+     */
+    public void controlUnsubscribe(String deviceId, String appTopic) throws KuraException;
 
     /**
      * Adds a CloudCallbackHandler with this CloudClient. This handler

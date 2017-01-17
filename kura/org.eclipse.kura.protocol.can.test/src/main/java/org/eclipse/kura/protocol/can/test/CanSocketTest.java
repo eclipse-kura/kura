@@ -18,11 +18,16 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.protocol.can.CanConnectionService;
 import org.eclipse.kura.protocol.can.CanMessage;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CanSocketTest implements ConfigurableComponent {
+
+    private static final boolean IS_MAC = System.getProperty("os.name").toLowerCase().startsWith("mac");
 
     private static final Logger s_logger = LoggerFactory.getLogger(CanSocketTest.class);
 
@@ -64,28 +69,7 @@ public class CanSocketTest implements ConfigurableComponent {
             }
         }
 
-        if (this.m_pollThread != null) {
-            this.m_pollThread.interrupt();
-            try {
-                this.m_pollThread.join(100);
-            } catch (InterruptedException e) {
-                // Ignore
-            }
-            this.m_pollThread = null;
-        }
-
-        this.m_pollThread = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                if (CanSocketTest.this.m_canConnection != null) {
-                    while (!CanSocketTest.this.thread_done) {
-                        CanSocketTest.this.thread_done = doCanTest();
-                    }
-                }
-            }
-        });
-        this.m_pollThread.start();
+        startCanTestThread();
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -115,6 +99,37 @@ public class CanSocketTest implements ConfigurableComponent {
                 this.m_isMaster = (Boolean) this.m_properties.get("master");
             }
         }
+    }
+
+    @Before
+    public void setup() {
+        Assume.assumeFalse(IS_MAC);
+    }
+
+    @Test
+    public void startCanTestThread() {
+        if (this.m_pollThread != null) {
+            this.m_pollThread.interrupt();
+            try {
+                this.m_pollThread.join(100);
+            } catch (InterruptedException e) {
+                // Ignore
+            }
+            this.m_pollThread = null;
+        }
+
+        this.m_pollThread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                if (CanSocketTest.this.m_canConnection != null && !IS_MAC) {
+                    while (!CanSocketTest.this.thread_done) {
+                        CanSocketTest.this.thread_done = doCanTest();
+                    }
+                }
+            }
+        });
+        this.m_pollThread.start();
     }
 
     public boolean doCanTest() {

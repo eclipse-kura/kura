@@ -31,8 +31,68 @@
 		<kura.basedir>${project.basedir}/..</kura.basedir>
 	</properties>
 
+
+	<dependencies>
+    <dependency>
+      <groupId>org.eclipse.kura</groupId>
+      <artifactId>org.eclipse.kura.protocol.can</artifactId>
+      <version>[1.0,2.0)</version>
+    </dependency>
+  </dependencies>
+  
     <build>
     <plugins>
+    		<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<configuration>
+					<pomDependencies>consider</pomDependencies>
+					<dependency-resolution>
+						<extraRequirements>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>slf4j.log4j12</id>
+								<versionRange>(1.7,2)</versionRange>
+							</requirement>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>log4j.test.configuration</id>
+								<versionRange>1.0.0</versionRange>
+							</requirement>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>org.eclipse.equinox.cm</id>
+								<versionRange>1</versionRange>
+							</requirement>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>org.eclipse.kura.api</id>
+								<versionRange>[1.2,2.0)</versionRange>
+							</requirement>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>org.eclipse.kura.deployment.agent</id>
+								<versionRange>[1.0,2.0)</versionRange>
+							</requirement>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>org.eclipse.kura.core</id>
+								<versionRange>[1.0,2.0)</versionRange>
+							</requirement>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>org.eclipse.kura.emulator</id>
+								<versionRange>[1.0,2.0)</versionRange>
+							</requirement>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>org.eclipse.kura.test</id>
+								<versionRange>[1.0,2.0)</versionRange>
+							</requirement>
+						</extraRequirements>
+					</dependency-resolution>
+				</configuration>
+			</plugin>
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-surefire-plugin</artifactId>
@@ -243,6 +303,11 @@
 			    <level>4</level>
 			    <autoStart>true</autoStart>
 			</bundle>
+			<bundle>
+			    <id>org.eclipse.kura.protocol.can</id>
+			    <level>4</level>
+			    <autoStart>true</autoStart>
+			</bundle>
 		    </bundleStartLevel>
                     <dependencies>
                         <dependency>
@@ -384,21 +449,6 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.apache.felix.deploymentadmin</artifactId>
-                        </dependency>
-                        <dependency>
-                            <artifactId>org.eclipse.kura.api</artifactId>
-                        </dependency>
-                        <dependency>
-                            <artifactId>org.eclipse.kura.core</artifactId>
-                        </dependency>
-                        <dependency>
-                            <artifactId>org.eclipse.kura.deployment.agent</artifactId>
-                        </dependency>
-                        <dependency>
-                            <artifactId>org.eclipse.kura.emulator</artifactId>
-                        </dependency>
-                        <dependency>
-                            <artifactId>org.eclipse.kura.test</artifactId>
                         </dependency>
                     </dependencies>
                 </configuration>

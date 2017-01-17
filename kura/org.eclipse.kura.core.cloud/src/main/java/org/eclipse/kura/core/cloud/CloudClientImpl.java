@@ -100,44 +100,64 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     }
 
     @Override
-    public int publish(String topic, KuraPayload payload, int qos, boolean retain) throws KuraException {
-        boolean isControl = false;
-        String appTopic = encodeTopic(topic, isControl);
-        byte[] appPayload = this.m_cloudServiceImpl.encodePayload(payload);
-        return this.m_dataService.publish(appTopic, appPayload, qos, retain, 5);
+    public int publish(String appTopic, KuraPayload payload, int qos, boolean retain) throws KuraException {
+        CloudServiceOptions options = this.m_cloudServiceImpl.getCloudServiceOptions();
+        return publish(options.getTopicClientIdToken(), appTopic, payload, qos, retain);
     }
 
     @Override
-    public int publish(String topic, KuraPayload payload, int qos, boolean retain, int priority) throws KuraException {
+    public int publish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain)
+            throws KuraException {
         boolean isControl = false;
-        String appTopic = encodeTopic(topic, isControl);
+        String fullTopic = encodeTopic(deviceId, appTopic, isControl);
         byte[] appPayload = this.m_cloudServiceImpl.encodePayload(payload);
-        return this.m_dataService.publish(appTopic, appPayload, qos, retain, priority);
+        return this.m_dataService.publish(fullTopic, appPayload, qos, retain, 5);
+    }
+
+    @Override
+    public int publish(String appTopic, KuraPayload payload, int qos, boolean retain, int priority)
+            throws KuraException {
+        CloudServiceOptions options = this.m_cloudServiceImpl.getCloudServiceOptions();
+        return publish(options.getTopicClientIdToken(), appTopic, payload, qos, retain, priority);
+    }
+
+    @Override
+    public int publish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain, int priority)
+            throws KuraException {
+        boolean isControl = false;
+        String fullTopic = encodeTopic(deviceId, appTopic, isControl);
+        byte[] appPayload = this.m_cloudServiceImpl.encodePayload(payload);
+        return this.m_dataService.publish(fullTopic, appPayload, qos, retain, priority);
     }
 
     @Override
     public int publish(String topic, byte[] payload, int qos, boolean retain, int priority) throws KuraException {
+        CloudServiceOptions options = this.m_cloudServiceImpl.getCloudServiceOptions();
+        return publish(options.getTopicClientIdToken(), payload, qos, retain, priority);
+    }
+
+    @Override
+    public int publish(String deviceId, String appTopic, byte[] payload, int qos, boolean retain, int priority)
+            throws KuraException {
         boolean isControl = false;
-        String appTopic = encodeTopic(topic, isControl);
-        return this.m_dataService.publish(appTopic, payload, qos, retain, priority);
+        String fullTopic = encodeTopic(deviceId, appTopic, isControl);
+        return this.m_dataService.publish(fullTopic, payload, qos, retain, priority);
     }
 
     @Override
     public int controlPublish(String topic, KuraPayload payload, int qos, boolean retain, int priority)
             throws KuraException {
-        boolean isControl = true;
-        String appTopic = encodeTopic(topic, isControl);
-        byte[] appPayload = this.m_cloudServiceImpl.encodePayload(payload);
-        return this.m_dataService.publish(appTopic, appPayload, qos, retain, priority);
+        CloudServiceOptions options = this.m_cloudServiceImpl.getCloudServiceOptions();
+        return controlPublish(options.getTopicClientIdToken(), topic, payload, qos, retain, priority);
     }
 
     @Override
     public int controlPublish(String deviceId, String topic, KuraPayload payload, int qos, boolean retain, int priority)
             throws KuraException {
         boolean isControl = true;
-        String appTopic = encodeTopic(deviceId, topic, isControl);
+        String fullTopic = encodeTopic(deviceId, topic, isControl);
         byte[] appPayload = this.m_cloudServiceImpl.encodePayload(payload);
-        return this.m_dataService.publish(appTopic, appPayload, qos, retain, priority);
+        return this.m_dataService.publish(fullTopic, appPayload, qos, retain, priority);
     }
 
     @Override
@@ -149,31 +169,55 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     }
 
     @Override
-    public void subscribe(String topic, int qos) throws KuraException {
+    public void subscribe(String appTopic, int qos) throws KuraException {
+        CloudServiceOptions options = this.m_cloudServiceImpl.getCloudServiceOptions();
+        subscribe(options.getTopicClientIdToken(), appTopic, qos);
+    }
+
+    @Override
+    public void subscribe(String deviceId, String appTopic, int qos) throws KuraException {
         boolean isControl = false;
-        String appTopic = encodeTopic(topic, isControl);
-        this.m_dataService.subscribe(appTopic, qos);
+        String fullTopic = encodeTopic(deviceId, appTopic, isControl);
+        this.m_dataService.subscribe(fullTopic, qos);
     }
 
     @Override
-    public void controlSubscribe(String topic, int qos) throws KuraException {
+    public void controlSubscribe(String appTopic, int qos) throws KuraException {
+        CloudServiceOptions options = this.m_cloudServiceImpl.getCloudServiceOptions();
+        controlSubscribe(options.getTopicClientIdToken(), appTopic, qos);
+    }
+
+    @Override
+    public void controlSubscribe(String deviceId, String appTopic, int qos) throws KuraException {
         boolean isControl = true;
-        String appTopic = encodeTopic(topic, isControl);
-        this.m_dataService.subscribe(appTopic, qos);
+        String fullTopic = encodeTopic(deviceId, appTopic, isControl);
+        this.m_dataService.subscribe(fullTopic, qos);
     }
 
     @Override
-    public void unsubscribe(String topic) throws KuraException {
+    public void unsubscribe(String appTopic) throws KuraException {
+        CloudServiceOptions options = this.m_cloudServiceImpl.getCloudServiceOptions();
+        unsubscribe(options.getTopicClientIdToken(), appTopic);
+    }
+
+    @Override
+    public void unsubscribe(String deviceId, String appTopic) throws KuraException {
         boolean isControl = false;
-        String appTopic = encodeTopic(topic, isControl);
-        this.m_dataService.unsubscribe(appTopic);
+        String fullTopic = encodeTopic(deviceId, appTopic, isControl);
+        this.m_dataService.unsubscribe(fullTopic);
     }
 
     @Override
-    public void controlUnsubscribe(String topic) throws KuraException {
+    public void controlUnsubscribe(String appTopic) throws KuraException {
+        CloudServiceOptions options = this.m_cloudServiceImpl.getCloudServiceOptions();
+        controlUnsubscribe(options.getTopicClientIdToken(), appTopic);
+    }
+
+    @Override
+    public void controlUnsubscribe(String deviceId, String appTopic) throws KuraException {
         boolean isControl = true;
-        String appTopic = encodeTopic(topic, isControl);
-        this.m_dataService.unsubscribe(appTopic);
+        String fullTopic = encodeTopic(deviceId, appTopic, isControl);
+        this.m_dataService.unsubscribe(fullTopic);
     }
 
     @Override
@@ -248,11 +292,6 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     // Private methods
     //
     // ----------------------------------------------------------------
-
-    private String encodeTopic(String topic, boolean isControl) {
-        CloudServiceOptions options = this.m_cloudServiceImpl.getCloudServiceOptions();
-        return encodeTopic(options.getTopicClientIdToken(), topic, isControl);
-    }
 
     private String encodeTopic(String deviceId, String topic, boolean isControl) {
         CloudServiceOptions options = this.m_cloudServiceImpl.getCloudServiceOptions();

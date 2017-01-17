@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 
 public class CamelCloudClient implements CloudClient {
 
-    private final static Logger logger = LoggerFactory.getLogger(CamelCloudClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(CamelCloudClient.class);
 
     private final CamelCloudService cloudService;
 
@@ -103,9 +103,21 @@ public class CamelCloudClient implements CloudClient {
     }
 
     @Override
+    public int publish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain)
+            throws KuraException {
+        return doPublish(false, deviceId, appTopic, payload, qos, retain, 5);
+    }
+
+    @Override
     public int publish(String topic, KuraPayload kuraPayload, int qos, boolean retain, int priority)
             throws KuraException {
         return doPublish(false, null, topic, kuraPayload, qos, retain, priority);
+    }
+
+    @Override
+    public int publish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain, int priority)
+            throws KuraException {
+        return doPublish(false, deviceId, appTopic, payload, qos, retain, priority);
     }
 
     @Override
@@ -113,6 +125,14 @@ public class CamelCloudClient implements CloudClient {
         KuraPayload kuraPayload = new KuraPayload();
         kuraPayload.setBody(bytes);
         return publish(s, kuraPayload, i, b);
+    }
+
+    @Override
+    public int publish(String deviceId, String appTopic, byte[] payload, int qos, boolean retain, int priority)
+            throws KuraException {
+        KuraPayload kuraPayload = new KuraPayload();
+        kuraPayload.setBody(payload);
+        return publish(deviceId, appTopic, payload, qos, retain, 5);
     }
 
     @Override
@@ -141,8 +161,20 @@ public class CamelCloudClient implements CloudClient {
     }
 
     @Override
+    public void subscribe(String deviceId, String appTopic, int qos) throws KuraException {
+        // TODO Check if this needs to be implemented
+        throw new KuraException(OPERATION_NOT_SUPPORTED);
+    }
+
+    @Override
     public void controlSubscribe(String topic, int qos) throws KuraException {
         forkSubscribe(true, topic, qos);
+    }
+
+    @Override
+    public void controlSubscribe(String deviceId, String appTopic, int qos) throws KuraException {
+        // TODO Check if this needs to be implemented
+        throw new KuraException(OPERATION_NOT_SUPPORTED);
     }
 
     @Override
@@ -169,8 +201,20 @@ public class CamelCloudClient implements CloudClient {
     }
 
     @Override
+    public void unsubscribe(String deviceId, String appTopic) throws KuraException {
+        // TODO Check if this needs to be implemented
+        throw new KuraException(OPERATION_NOT_SUPPORTED);
+    }
+
+    @Override
     public void controlUnsubscribe(String topic) throws KuraException {
         unsubscribe(topic);
+    }
+
+    @Override
+    public void controlUnsubscribe(String deviceId, String appTopic) throws KuraException {
+        // TODO Check if this needs to be implemented
+        throw new KuraException(OPERATION_NOT_SUPPORTED);
     }
 
     @Override
@@ -298,5 +342,4 @@ public class CamelCloudClient implements CloudClient {
         }
         return this.baseEndpoint + topic;
     }
-
 }

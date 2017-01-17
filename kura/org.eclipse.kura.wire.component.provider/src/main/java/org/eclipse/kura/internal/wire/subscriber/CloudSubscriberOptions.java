@@ -22,8 +22,11 @@ final class CloudSubscriberOptions {
     /** The Constant denoting QoS. */
     private static final String CONF_QOS = "subscribe.qos";
 
-    /** The Constant denoting MQTT topic. */
-    private static final String CONF_TOPIC = "subscribe.topic";
+    /** The Constant denoting MQTT deviceId. */
+    private static final String CONF_DEVICE_ID_TOPIC = "subscribe.deviceId";
+
+    /** The Constant denoting MQTT app topic. */
+    private static final String CONF_APP_TOPIC = "subscribe.appTopic";
 
     /** The Constant application to perform (either publish or subscribe). */
     private static final String DEFAULT_APPLICATION = "WIRE-SUB-V1";
@@ -33,8 +36,11 @@ final class CloudSubscriberOptions {
     /** The Constant denoting default QoS. */
     private static final int DEFAULT_QOS = 0;
 
-    /** The Constant denoting default MQTT topic. */
-    private static final String DEFAULT_TOPIC = "EVENT";
+    /** The Constant denoting default MQTT deviceId. */
+    private static final String DEFAULT_DEVICE_ID_TOPIC = "EVENT";
+
+    /** The Constant denoting default MQTT app topic. */
+    private static final String DEFAULT_APP_TOPIC = "EVENT";
 
     /** The properties as associated */
     private final Map<String, Object> properties;
@@ -69,14 +75,29 @@ final class CloudSubscriberOptions {
      *
      * @return the subscribing topic
      */
-    String getSubscribingTopic() {
-        String subscribingTopic = DEFAULT_TOPIC;
-        final Object topic = this.properties.get(CONF_TOPIC);
-        if ((this.properties != null) && this.properties.containsKey(CONF_TOPIC) && (topic != null)
-                && (topic instanceof String)) {
-            subscribingTopic = String.valueOf(topic);
+    String getSubscribingAppTopic() {
+        String subscribingAppTopic = DEFAULT_APP_TOPIC;
+        final Object appTopic = this.properties.get(CONF_APP_TOPIC);
+        if ((this.properties != null) && this.properties.containsKey(CONF_APP_TOPIC) && (appTopic != null)
+                && (appTopic instanceof String)) {
+            subscribingAppTopic = String.valueOf(appTopic);
         }
-        return subscribingTopic;
+        return subscribingAppTopic;
+    }
+
+    /**
+     * Returns the deviceId to be used for message subscription.
+     *
+     * @return the deviceId
+     */
+    String getSubscribingDeviceId() {
+        String subscribingDeviceId = DEFAULT_DEVICE_ID_TOPIC;
+        final Object deviceId = this.properties.get(CONF_DEVICE_ID_TOPIC);
+        if ((this.properties != null) && this.properties.containsKey(CONF_APP_TOPIC) && (deviceId != null)
+                && (deviceId instanceof String)) {
+            subscribingDeviceId = String.valueOf(deviceId);
+        }
+        return subscribingDeviceId;
     }
 
     /**

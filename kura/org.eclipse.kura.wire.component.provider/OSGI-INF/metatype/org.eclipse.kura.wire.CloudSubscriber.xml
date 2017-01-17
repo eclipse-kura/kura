@@ -21,8 +21,17 @@
             description="Specify the pid of the Cloud Service where the subscription will be performed.">
         </AD>
 
-        <AD id="subscribe.topic"
-            name="subscribe.topic"
+        <AD id="subscribe.deviceId"
+            name="subscribe.deviceId"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="EVENT"
+            description="Subscription deviceId. It will be used to compose the final topic.">
+        </AD>
+        
+        <AD id="subscribe.appTopic"
+            name="subscribe.appTopic"
             type="String"
             cardinality="0"
             required="true"

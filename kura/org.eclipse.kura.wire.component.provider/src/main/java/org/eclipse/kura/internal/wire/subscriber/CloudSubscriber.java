@@ -120,8 +120,11 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
     /** The cloud subscriber options. */
     private CloudSubscriberOptions options;
 
-    /** The subscribed topic */
-    private String topic;
+    /** The subscribed deviceId */
+    private String deviceId;
+
+    /** The subscribed app topic */
+    private String appTopic;
 
     /** The Wire Helper Service. */
     private volatile WireHelperService wireHelperService;
@@ -145,14 +148,15 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
         this.componentContext = componentContext;
         this.wireSupport = this.wireHelperService.newWireSupport(this);
         this.options = new CloudSubscriberOptions(properties);
-        this.topic = this.options.getSubscribingTopic();
+        this.appTopic = this.options.getSubscribingAppTopic();
+        this.deviceId = this.options.getSubscribingDeviceId();
         initCloudServiceTracking();
         logger.debug(wireMessages.activatingCloudSubscriberDone());
     }
 
     private void subscribeTopic() throws KuraException {
         if (this.cloudService.isConnected() && this.cloudClient != null) {
-            this.cloudClient.subscribe(this.topic, this.options.getSubscribingQos());
+            this.cloudClient.subscribe(this.deviceId, this.appTopic, this.options.getSubscribingQos());
         }
     }
 
@@ -304,7 +308,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
     @Override
     public void onConnectionEstablished() {
         try {
-            if (this.topic != null) {
+            if (this.appTopic != null && this.deviceId != null) {
                 subscribeTopic();
             }
         } catch (final KuraException e) {
@@ -349,10 +353,11 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
      *             if couln't unsubscribe
      */
     private void unsubsribe() throws KuraException {
-        if (this.topic != null && this.cloudClient != null) {
-            this.cloudClient.unsubscribe(this.topic);
+        if (this.appTopic != null && this.deviceId != null && this.cloudClient != null) {
+            this.cloudClient.unsubscribe(this.deviceId, this.appTopic);
         }
-        this.topic = this.options.getSubscribingTopic();
+        this.appTopic = this.options.getSubscribingAppTopic();
+        this.deviceId = this.options.getSubscribingDeviceId();
     }
 
     /**
@@ -407,5 +412,4 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
     public void onConnectionLost() {
         // Not required
     }
-
 }

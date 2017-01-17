@@ -55,20 +55,17 @@ public class WifiInterfaceAddressConfigImpl extends WifiInterfaceAddressImpl imp
 
         WifiInterfaceAddressConfig other = (WifiInterfaceAddressConfig) obj;
 
-        if (!compare(getMode(), other.getMode())) {
-            return false;
-        }
-
-        if (getBitrate() != other.getBitrate()) {
-            return false;
-        }
-
-        if (!compare(getWifiAccessPoint(), other.getWifiAccessPoint())) {
-            return false;
-        }
-
         List<NetConfig> thisNetConfigs = getConfigs();
         List<NetConfig> otherNetConfigs = other.getConfigs();
+
+        if ((thisNetConfigs == null) && (otherNetConfigs == null)) {
+        	// Both configurations are null
+        	return true;
+        }
+        else if ((thisNetConfigs == null) || (otherNetConfigs == null)) {
+        	// One configuration is null but the other one is not, so a null pointer exception would be thrown below!
+            return false;
+        }
 
         if (thisNetConfigs.size() != otherNetConfigs.size()) {
             return false;

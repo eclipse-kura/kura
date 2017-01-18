@@ -12,7 +12,7 @@ Here is a (non-exclusive, non-prioritized) list of things you might be able to h
 * features (both ideas and code are welcome)
 * tests
 
-In order to get you started as fast as possible we need to go through some organizational issues first, though.
+In order to get you started as fast as possible we need to go through some organizational issues first.
 
 ## Legal Requirements
 

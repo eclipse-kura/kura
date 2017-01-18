@@ -37,6 +37,7 @@
 
 	<modules>
 		<module>org.eclipse.kura.api.feature</module>
+		<module>org.eclipse.kura.runtime.feature</module>
 	</modules>
 
 	<profiles>

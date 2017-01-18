@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ======================================================================
+      Handle upload to Maven Central
+     ====================================================================== -->
+<project name="maven-central" default="default">
+
+    <description>
+        Convert the Kura P2 repository to a simple Maven 2 repository
+    </description>
+
+    <property file="local.properties" />
+    <property file="default.properties" />
+    
+    <property name="buildBase" location="build"/>
+    <property name="outputDir" location="${buildBase}/maven2" />
+    <property name="tempDir" location="${buildBase}/temp"/>
+    
+    <property name="p2.repo" location="../org.eclipse.kura-p2/target/repository"/>
+    <property name="p2.target.platform.common" location="../../target-platform/p2-repo-common/target/repository"/>
+    <property name="p2.target.platform.equinox" location="../../target-platform/p2-repo-equinox_3.11.1/target/repository"/>
+    
+    <property name="p2tom2.configuration" location="p2tom2.properties"/>
+
+    <!-- ================================= 
+          target: default
+         ================================= -->
+    <target name="default" depends="init, build">
+    </target>
+
+    <!-- ================================= 
+          target: clean
+         ================================= -->
+    <target name="clean">
+        <delete dir="${buildBase}" />
+    </target>
+
+    <!-- ================================= 
+          target: init
+         ================================= -->
+    <target name="init">
+        <mkdir dir="${buildBase}" />
+        <mkdir dir="${buildBase}/p2tom2" />
+
+        <!-- get p2tom2 -->
+
+        <get src="${p2tom2.location}" dest="${buildBase}/p2tom2.zip" usetimestamp="true" />
+        <unzip dest="${buildBase}" src="${buildBase}/p2tom2.zip" />
+    </target>
+
+    <!-- ================================= 
+          target: build
+         ================================= -->
+    <target name="build">
+        <java classname="org.eclipse.equinox.launcher.Main" fork="true" failonerror="true" dir="${buildBase}/p2tom2">
+            <classpath>
+                <fileset dir="${buildBase}/p2tom2/plugins/">
+                    <include name="org.eclipse.equinox.launcher_*.jar" />
+                </fileset>
+            </classpath>
+
+            <arg value="-consoleLog" />
+
+            <!-- configuration -->
+            <arg value="file:${p2tom2.configuration}" />
+
+            <!-- source repo -->
+            <arg value="file:${p2.repo}" />
+
+            <!-- validation repos -->
+            <arg value="file:${p2.target.platform.common}" />
+            <arg value="file:${p2.target.platform.equinox}" />
+
+            <sysproperty key="path.p2temp" file="${tempDir}" />
+            <sysproperty key="path.output" file="${outputDir}" />
+            <sysproperty key="stripQualifier" value="true" />
+            <sysproperty key="fakeForCentral" value="true" />
+        </java>
+    </target>
+
+</project>

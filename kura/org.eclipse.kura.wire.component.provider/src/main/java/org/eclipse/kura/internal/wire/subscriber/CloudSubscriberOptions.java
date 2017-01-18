@@ -25,6 +25,9 @@ final class CloudSubscriberOptions {
     /** The Constant denoting MQTT deviceId. */
     private static final String CONF_DEVICE_ID_TOPIC = "subscribe.deviceId";
 
+    /** The Constant denoting the subscribing application. */
+    private static final String CONF_SUB_APPLICATION = "subscribe.application";
+
     /** The Constant denoting MQTT app topic. */
     private static final String CONF_APP_TOPIC = "subscribe.appTopic";
 
@@ -106,7 +109,13 @@ final class CloudSubscriberOptions {
      * @return the subscription application name
      */
     String getSubscribingApplication() {
-        return DEFAULT_APPLICATION;
+        String subscribingApp = DEFAULT_APPLICATION;
+        final Object app = this.properties.get(CONF_SUB_APPLICATION);
+        if ((this.properties != null) && this.properties.containsKey(CONF_SUB_APPLICATION) && (app != null)
+                && (app instanceof String)) {
+            subscribingApp = String.valueOf(app);
+        }
+        return subscribingApp;
     }
 
     /**

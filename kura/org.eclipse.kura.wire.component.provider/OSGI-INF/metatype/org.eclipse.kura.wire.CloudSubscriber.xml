@@ -30,6 +30,15 @@
             description="Subscription deviceId. It will be used to compose the final topic.">
         </AD>
         
+        <AD id="subscribe.application"
+            name="subscribe.application"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="APP"
+            description="Application topic prefix to be used when subscribing.">
+        </AD>
+        
         <AD id="subscribe.appTopic"
             name="subscribe.appTopic"
             type="String"

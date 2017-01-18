@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat Inc and others.
+ * Copyright (c) 2016, 2017 Red Hat Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
  * @noextend This class is not intended to be extended
  */
 public class XmlRouterComponent extends AbstractXmlCamelComponent {
+
+    private static final String TOKEN_PATTERN = "\\s*,\\s*";
 
     private static final Logger logger = LoggerFactory.getLogger(XmlRouterComponent.class);
 
@@ -147,13 +149,13 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
     }
 
     private static Map<String, String> parseCloudServiceRequirements(final String value) {
-        if (value == null) {
+        if (value == null || value.trim().isEmpty()) {
             return Collections.emptyMap();
         }
 
         final Map<String, String> result = new HashMap<>();
 
-        for (final String tok : value.split("\\s*,\\s*")) {
+        for (final String tok : value.split(TOKEN_PATTERN)) {
             logger.debug("Testing - '{}'", tok);
 
             final String[] s = tok.split("=", 2);
@@ -169,11 +171,11 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
     }
 
     private static Set<String> parseComponentRequirements(final String value) {
-        if (value == null) {
+        if (value == null || value.trim().isEmpty()) {
             return Collections.emptySet();
         }
 
-        return new HashSet<>(Arrays.asList(value.split("\\s*,\\s*")));
+        return new HashSet<>(Arrays.asList(value.split(TOKEN_PATTERN)));
     }
 
     private static String parseInitCode(final Map<String, Object> properties) {

@@ -43,6 +43,14 @@
             required="false"
             description="JavaScript code which is called when the router is initialized first. The camel context is avaiable in the variable 'camelContext'.|TextArea"/>
 
+        <AD id="disableJmx"
+            name="Disable JMX"
+            type="Boolean"
+            cardinality="1"
+            required="true"
+            default="false"
+            description="Disable the JMX integration for this Camel context"/>
+
     </OCD>
 
     <Designate pid="org.eclipse.kura.camel.xml.XmlRouterComponent">

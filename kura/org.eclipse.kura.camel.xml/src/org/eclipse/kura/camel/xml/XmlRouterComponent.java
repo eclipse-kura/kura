@@ -11,6 +11,7 @@
 package org.eclipse.kura.camel.xml;
 
 import static java.lang.String.format;
+import static org.eclipse.kura.camel.component.Configuration.asBoolean;
 import static org.eclipse.kura.camel.component.Configuration.asString;
 import static org.eclipse.kura.camel.runner.CamelRunner.createOsgiRegistry;
 import static org.eclipse.kura.camel.utils.CamelContexts.scriptInitCamelContext;
@@ -46,12 +47,15 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
 
     private static final String CLOUD_SERVICE_PREREQS = "cloudService.prereqs";
     private static final String COMPONENT_PREREQS = "component.prereqs";
+    private static final String DISABLE_JMX = "disableJmx";
     private static final String INIT_CODE = "initCode";
 
     private Set<String> requiredComponents = new HashSet<>();
 
     private Map<String, String> cloudServiceRequirements = new HashMap<>();
     private String initCode = "";
+
+    private boolean disableJmx;
 
     public XmlRouterComponent() {
         super("xml.data");
@@ -60,10 +64,14 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
     @Override
     protected void customizeBuilder(final Builder builder, final Map<String, Object> properties) {
 
+        // JMX
+
+        final boolean disableJmx = asBoolean(properties, DISABLE_JMX, false);
+        builder.disableJmx(disableJmx);
+
         // parse configuration
 
-        final Set<String> newRequiredComponents = parseComponentRequirements(
-                Configuration.asString(properties, COMPONENT_PREREQS));
+        final Set<String> newRequiredComponents = parseComponentRequirements(asString(properties, COMPONENT_PREREQS));
 
         final Map<String, String> cloudServiceRequirements = parseCloudServiceRequirements(
                 asString(properties, CLOUD_SERVICE_PREREQS));
@@ -117,16 +125,25 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
         this.requiredComponents = newRequiredComponents;
         this.cloudServiceRequirements = cloudServiceRequirements;
         this.initCode = initCode;
+        this.disableJmx = disableJmx;
     }
 
     @Override
     protected boolean isRestartNeeded(final Map<String, Object> properties) {
+
+        final boolean disableJmx = asBoolean(properties, DISABLE_JMX, false);
+
         final Set<String> newRequiredComponents = parseComponentRequirements(asString(properties, COMPONENT_PREREQS));
 
         final Map<String, String> cloudServiceRequirements = parseCloudServiceRequirements(
                 asString(properties, CLOUD_SERVICE_PREREQS));
 
         final String initCode = parseInitCode(properties);
+
+        if (this.disableJmx != disableJmx) {
+            logger.debug("Require restart due to '{}' change", DISABLE_JMX);
+            return true;
+        }
 
         if (!this.requiredComponents.equals(newRequiredComponents)) {
             logger.debug("Require restart due to '{}' change", COMPONENT_PREREQS);

@@ -318,6 +318,11 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.asset.provider.default</artifactId>
+									<version>${org.eclipse.kura.asset.provider.default.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.asset.cloudlet.provider</artifactId>
 									<version>${org.eclipse.kura.asset.cloudlet.provider.version}</version>
 								</artifactItem>
@@ -424,6 +429,7 @@
 							<tasks>
 							    <move file="target/plugins/org.eclipse.kura.api.jar" tofile="target/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"/>
 								<move file="target/plugins/org.eclipse.kura.asset.provider.jar" tofile="target/plugins/org.eclipse.kura.asset.provider_${org.eclipse.kura.asset.provider.version}.jar"/>
+								<move file="target/plugins/org.eclipse.kura.asset.provider.default.jar" tofile="target/plugins/org.eclipse.kura.asset.provider.default_${org.eclipse.kura.asset.provider.default.version}.jar"/>
 								<move file="target/plugins/org.eclipse.kura.asset.cloudlet.provider.jar" tofile="target/plugins/org.eclipse.kura.asset.cloudlet.provider_${org.eclipse.kura.asset.cloudlet.provider.version}.jar"/>
 								<move file="target/plugins/org.eclipse.kura.camel.jar" tofile="target/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"/>
 								<move file="target/plugins/org.eclipse.kura.camel.cloud.factory.jar" tofile="target/plugins/org.eclipse.kura.camel.cloud.factory_${org.eclipse.kura.camel.cloud.factory.version}.jar"/>

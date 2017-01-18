@@ -477,7 +477,6 @@ public class PropertiesUi extends Composite {
                 PropertiesUi.this.nonValidatedCells.remove(object.getId());
                 PropertiesUi.this.setNonValidated(false);
                 PropertiesUi.this.setDirty(true);
-                viewData.setValue(value);
                 PropertiesUi.this.channelTable.redraw();
                 object.set(param.getId(), value);
             }
@@ -791,7 +790,6 @@ public class PropertiesUi extends Composite {
 
         final Map<String, String> oMap = param.getOptions();
         int i = 0;
-        boolean valueFound = false;
         for (Entry<String, String> current : oMap.entrySet()) {
             String label = current.getKey();
             String value = current.getValue();
@@ -848,7 +846,7 @@ public class PropertiesUi extends Composite {
     // passes the parameter to the corresponding method depending on the type of
     // field to be rendered
     private void renderConfigParameter(final GwtConfigParameter param, final boolean isFirstInstance,
-            final FormGroup formGroup, final boolean isReadOnly) {
+            final FormGroup formGroup) {
         final Map<String, String> options = param.getOptions();
         if ((options != null) && (options.size() > 0)) {
             this.renderChoiceField(param, isFirstInstance, formGroup);
@@ -857,7 +855,7 @@ public class PropertiesUi extends Composite {
         } else if (param.getType().equals(GwtConfigParameterType.PASSWORD)) {
             this.renderPasswordField(param, isFirstInstance, formGroup);
         } else {
-            this.renderTextField(param, isFirstInstance, formGroup, isReadOnly);
+            this.renderTextField(param, isFirstInstance, formGroup);
         }
     }
 
@@ -876,11 +874,7 @@ public class PropertiesUi extends Composite {
             if (!isChannelData && !isDriverField) {
                 if ((param.getCardinality() == 0) || (param.getCardinality() == 1) || (param.getCardinality() == -1)) {
                     final FormGroup formGroup = new FormGroup();
-                    if (isDriverField) {
-                        this.renderConfigParameter(param, true, formGroup, true);
-                    } else {
-                        this.renderConfigParameter(param, true, formGroup, false);
-                    }
+                    this.renderConfigParameter(param, true, formGroup);
                 } else {
                     this.renderMultiFieldConfigParameter(param);
                 }
@@ -969,7 +963,7 @@ public class PropertiesUi extends Composite {
                 value = values[i];
             }
             mParam.setValue(value);
-            this.renderConfigParameter(mParam, isFirstInstance, formGroup, false);
+            this.renderConfigParameter(mParam, isFirstInstance, formGroup);
             if (isFirstInstance) {
                 isFirstInstance = false;
             }
@@ -1040,7 +1034,7 @@ public class PropertiesUi extends Composite {
 
     // Field Render based on Type
     private void renderTextField(final GwtConfigParameter param, final boolean isFirstInstance,
-            final FormGroup formGroup, final boolean isReadOnly) {
+            final FormGroup formGroup) {
 
         this.valid.put(param.getId(), true);
 

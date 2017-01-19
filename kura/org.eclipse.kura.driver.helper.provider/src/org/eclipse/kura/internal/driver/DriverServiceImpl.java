@@ -5,12 +5,12 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     Eurotech
- *     Amit Kumar Mondal
+ *     Red Hat Inc
  *******************************************************************************/
-package org.eclipse.kura.internal.asset;
+package org.eclipse.kura.internal.driver;
 
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;

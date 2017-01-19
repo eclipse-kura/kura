@@ -15,7 +15,7 @@
     name="org.eclipse.kura.driver.DriverService" 
     enabled="true" 
     immediate="true">
-   <implementation class="org.eclipse.kura.internal.asset.DriverServiceImpl"/>
+   <implementation class="org.eclipse.kura.internal.driver.DriverServiceImpl"/>
    <property name="service.pid" value="org.eclipse.kura.driver.DriverService"/>
    <service>
       <provide interface="org.eclipse.kura.driver.DriverService"/>

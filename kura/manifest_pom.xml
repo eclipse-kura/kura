@@ -28,7 +28,7 @@
         
         <module>org.eclipse.kura.asset.cloudlet.provider</module>
         <module>org.eclipse.kura.asset.provider</module>
-        <module>org.eclipse.kura.asset.provider.default</module>
+        <module>org.eclipse.kura.asset.helper.provider</module>
         
         <!-- test setup broken 
         <module>org.eclipse.kura.asset.provider.test</module>
@@ -54,6 +54,9 @@
         <module>org.eclipse.kura.deployment.customizer</module>
         <module>org.eclipse.kura.deployment.customizer.upgrade</module>
         <module>org.eclipse.kura.deployment.update</module>
+
+        <module>org.eclipse.kura.driver.helper.provider</module>
+
         <module>org.eclipse.kura.linux.bluetooth</module>
         <module>org.eclipse.kura.linux.clock</module>
         <module>org.eclipse.kura.linux.command</module>

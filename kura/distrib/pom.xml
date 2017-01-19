@@ -323,6 +323,16 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.asset.helper.provider</artifactId>
+									<version>${org.eclipse.kura.asset.helper.provider.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.driver.helper.provider</artifactId>
+									<version>${org.eclipse.kura.driver.helper.provider.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.localization</artifactId>
 									<version>${org.eclipse.kura.localization.version}</version>
 									</artifactItem>

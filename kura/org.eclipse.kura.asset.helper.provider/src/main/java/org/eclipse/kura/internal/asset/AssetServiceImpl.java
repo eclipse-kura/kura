@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *     Amit Kumar Mondal
  *******************************************************************************/
 package org.eclipse.kura.internal.asset;

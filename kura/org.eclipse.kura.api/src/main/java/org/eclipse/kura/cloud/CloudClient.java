@@ -120,6 +120,8 @@ public interface CloudClient {
      * @param retain
      *            Whether or not the broker should retain the message
      * @return The published message's ID.
+     * @throws KuraException
+     *             if one of the message composition or message publishing operation fails.
      */
     public int publish(String appTopic, KuraPayload payload, int qos, boolean retain) throws KuraException;
 
@@ -145,6 +147,8 @@ public interface CloudClient {
      * @param retain
      *            Whether or not the broker should retain the message
      * @return The published message's ID.
+     * @throws KuraException
+     *             if one of the message composition or message publishing operation fails.
      * @since {@link org.eclipse.kura.cloud} 1.1.0
      */
     public int publish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain)
@@ -184,6 +188,8 @@ public interface CloudClient {
      * @param priority
      *            Relative ordering of this message with other messages that may be currently queued for publishing.
      * @return The published message's ID.
+     * @throws KuraException
+     *             if one of the message composition or message publishing operation fails.
      */
     public int publish(String appTopic, KuraPayload payload, int qos, boolean retain, int priority)
             throws KuraException;
@@ -224,6 +230,8 @@ public interface CloudClient {
      * @param priority
      *            Relative ordering of this message with other messages that may be currently queued for publishing.
      * @return The published message's ID.
+     * @throws KuraException
+     *             if one of the message composition or message publishing operation fails.
      * @since {@link org.eclipse.kura.cloud} 1.1.0
      */
     public int publish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain, int priority)
@@ -263,6 +271,8 @@ public interface CloudClient {
      * @param priority
      *            Relative ordering of this message with other messages that may be currently queued for publishing.
      * @return The published message's ID.
+     * @throws KuraException
+     *             if one of the message composition or message publishing operation fails.
      */
     public int publish(String appTopic, byte[] payload, int qos, boolean retain, int priority) throws KuraException;
 
@@ -302,6 +312,8 @@ public interface CloudClient {
      * @param priority
      *            Relative ordering of this message with other messages that may be currently queued for publishing.
      * @return The published message's ID.
+     * @throws KuraException
+     *             if one of the message composition or message publishing operation fails.
      * @since {@link org.eclipse.kura.cloud} 1.1.0
      */
     public int publish(String deviceId, String appTopic, byte[] payload, int qos, boolean retain, int priority)
@@ -343,6 +355,8 @@ public interface CloudClient {
      * @param priority
      *            Relative ordering of this message with other messages that may be currently queued for publishing.
      * @return The published message's ID.
+     * @throws KuraException
+     *             if one of the message composition or message publishing operation fails.
      */
     public int controlPublish(String appTopic, KuraPayload payload, int qos, boolean retain, int priority)
             throws KuraException;
@@ -385,6 +399,8 @@ public interface CloudClient {
      * @param priority
      *            Relative ordering of this message with other messages that may be currently queued for publishing.
      * @return The published message's ID.
+     * @throws KuraException
+     *             if one of the message composition or message publishing operation fails.
      */
     public int controlPublish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain,
             int priority) throws KuraException;
@@ -419,14 +435,16 @@ public interface CloudClient {
      * @param appTopic
      *            A String specifying the application topic the message is published on.
      * @param payload
-     *            Binary payload representing the message to be published
+     *            Binary payload representing the message to be published.
      * @param qos
      *            An integer specifying the quality of service the message was published on.
      * @param retain
-     *            Whether or not the broker should retain the message
+     *            Whether or not the broker should retain the message.
      * @param priority
      *            Relative ordering of this message with other messages that may be currently queued for publishing.
      * @return The published message's ID.
+     * @throws KuraException
+     *             if one of the message composition or message publishing operation fails.
      */
     public int controlPublish(String deviceId, String appTopic, byte[] payload, int qos, boolean retain, int priority)
             throws KuraException;
@@ -443,6 +461,8 @@ public interface CloudClient {
      *            A String object containing the application topic.
      * @param qos
      *            An int containing the Quality of Service.
+     * @throws KuraException
+     *             if the subscription fails.
      */
     public void subscribe(String appTopic, int qos) throws KuraException;
 
@@ -460,6 +480,8 @@ public interface CloudClient {
      *            A String object containing the application topic.
      * @param qos
      *            An int containing the Quality of Service.
+     * @throws KuraException
+     *             if the subscription fails.
      * @since {@link org.eclipse.kura.cloud} 1.1.0
      */
     public void subscribe(String deviceId, String appTopic, int qos) throws KuraException;
@@ -476,6 +498,8 @@ public interface CloudClient {
      *            A String object containing the application topic.
      * @param qos
      *            An int containing the Quality of Service.
+     * @throws KuraException
+     *             if the subscription fails.
      */
     public void controlSubscribe(String appTopic, int qos) throws KuraException;
 
@@ -493,6 +517,8 @@ public interface CloudClient {
      *            A String object containing the application topic.
      * @param qos
      *            An int containing the Quality of Service.
+     * @throws KuraException
+     *             if the subscription fails.
      * @since {@link org.eclipse.kura.cloud} 1.1.0
      */
     public void controlSubscribe(String deviceId, String appTopic, int qos) throws KuraException;
@@ -507,6 +533,8 @@ public interface CloudClient {
      *
      * @param appTopic
      *            A String object containing the application topic.
+     * @throws KuraException
+     *             if the unsubscription fails.
      */
     public void unsubscribe(String appTopic) throws KuraException;
 
@@ -522,6 +550,8 @@ public interface CloudClient {
      *            A String specifying the device ID.
      * @param appTopic
      *            A String object containing the application topic.
+     * @throws KuraException
+     *             if the unsubscription fails.
      * @since {@link org.eclipse.kura.cloud} 1.1.0
      */
     public void unsubscribe(String deviceId, String appTopic) throws KuraException;
@@ -536,6 +566,8 @@ public interface CloudClient {
      *
      * @param appTopic
      *            A String object containing the application topic.
+     * @throws KuraException
+     *             if the unsubscription fails.
      */
     public void controlUnsubscribe(String appTopic) throws KuraException;
 
@@ -551,6 +583,8 @@ public interface CloudClient {
      *            A String specifying the device ID.
      * @param appTopic
      *            A String object containing the application topic.
+     * @throws KuraException
+     *             if the unsubscription fails.
      * @since {@link org.eclipse.kura.cloud} 1.1.0
      */
     public void controlUnsubscribe(String deviceId, String appTopic) throws KuraException;
@@ -575,8 +609,9 @@ public interface CloudClient {
     /**
      * Gets the list of identifiers of messages that have not been published yet.
      *
-     * @return
+     * @return a list of integers.
      * @throws KuraException
+     *             if the operation fails.
      */
     List<Integer> getUnpublishedMessageIds() throws KuraException;
 
@@ -585,8 +620,9 @@ public interface CloudClient {
      * (messages published but not confirmed yet).
      * This only applies to messages published with QoS &gt; 0.
      *
-     * @return
+     * @return a list of integers.
      * @throws KuraException
+     *             if the operation fails.
      */
     List<Integer> getInFlightMessageIds() throws KuraException;
 
@@ -599,8 +635,9 @@ public interface CloudClient {
      * duplicates.
      * The latter option can be used it service users tolerate losing messages.
      *
-     * @return
+     * @return a list of integers.
      * @throws KuraException
+     *             if the operation fails.
      */
     List<Integer> getDroppedInFlightMessageIds() throws KuraException;
 }

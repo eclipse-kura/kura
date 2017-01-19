@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 /**
  * Render the Content in the Wire Component Properties Panel based on Service (GwtBSConfigComponent) selected in Wire graph
@@ -22,8 +22,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -102,7 +102,13 @@ public class PropertiesUi extends Composite {
     private static ServicesUiUiBinder uiBinder = GWT.create(ServicesUiUiBinder.class);
 
     @UiField
-    Button btn_add, btn_remove, btn_download, btn_upload;
+    Button btnAdd;
+    @UiField
+    Button btnRemove;
+    @UiField
+    Button btnDownload;
+    @UiField
+    Button btnUpload;
 
     @UiField
     SimplePager channelPager;
@@ -136,48 +142,48 @@ public class PropertiesUi extends Composite {
 
     private boolean isWireAsset = false;
 
-    GwtConfigComponent m_baseDriverDescriptor;
+    private GwtConfigComponent baseDriverDescriptor;
 
-    GwtConfigComponent m_configurableComponent;
+    private final GwtConfigComponent configurableComponent;
 
-    GwtConfigComponent m_driverDescriptor;
+    private GwtConfigComponent driverDescriptor;
+
     Modal modal;
     private boolean nonValidated;
     Set<String> nonValidatedCells;
-    String pid;
+    private final String pid;
 
     final SingleSelectionModel<GwtChannelInfo> selectionModel = new SingleSelectionModel<GwtChannelInfo>();
 
     AnchorListItem service;
 
-    HashMap<String, Boolean> valid = new HashMap<String, Boolean>();
+    HashMap<String, Boolean> valid = new HashMap<>();
 
     TextBox validated;
 
     public PropertiesUi(final GwtConfigComponent addedItem, final String pid) {
-        this.initWidget(uiBinder.createAndBindUi(this));
+        initWidget(uiBinder.createAndBindUi(this));
         this.pid = pid;
-        this.m_configurableComponent = addedItem;
+        this.configurableComponent = addedItem;
         this.fields.clear();
-        this.setOriginalValues(this.m_configurableComponent);
+        setOriginalValues(this.configurableComponent);
         this.channelPager.setPageSize(5);
         this.channelPager.setDisplay(this.channelTable);
         this.channelTable.setSelectionModel(this.selectionModel);
         this.channelsDataProvider.addDataDisplay(this.channelTable);
         this.channelPanel.setVisible(false);
-        this.btn_remove.setEnabled(false);
+        this.btnRemove.setEnabled(false);
 
         this.nonValidatedCells = new HashSet<String>();
-        this.hasDriver = this.m_configurableComponent.get("driver.pid") != null;
-        this.isWireAsset = (this.m_configurableComponent.getFactoryId() != null)
-                && this.m_configurableComponent.getFactoryId().contains("WireAsset");
+        this.hasDriver = this.configurableComponent.get("driver.pid") != null;
+        this.isWireAsset = this.configurableComponent.getFactoryId() != null
+                && this.configurableComponent.getFactoryId().contains("WireAsset");
 
         if (this.hasDriver) {
-            this.channelTitle
-                    .setText(MSGS.channelTableTitle(this.m_configurableComponent.get("driver.pid").toString()));
+            this.channelTitle.setText(MSGS.channelTableTitle(this.configurableComponent.get("driver.pid").toString()));
         }
 
-        this.btn_download.addClickHandler(new ClickHandler() {
+        this.btnDownload.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(final ClickEvent event) {
@@ -193,7 +199,7 @@ public class PropertiesUi extends Composite {
             }
         });
 
-        this.btn_add.addClickHandler(new ClickHandler() {
+        this.btnAdd.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(final ClickEvent event) {
@@ -202,7 +208,7 @@ public class PropertiesUi extends Composite {
                 ci.setName("Channel " + ci.getId());
                 ci.setType("READ");
                 ci.setValueType("INTEGER");
-                for (final GwtConfigParameter param : PropertiesUi.this.m_driverDescriptor.getParameters()) {
+                for (final GwtConfigParameter param : PropertiesUi.this.driverDescriptor.getParameters()) {
                     ci.set(param.getName(), param.getDefault());
                 }
 
@@ -213,14 +219,14 @@ public class PropertiesUi extends Composite {
             }
         });
 
-        this.btn_remove.addClickHandler(new ClickHandler() {
+        this.btnRemove.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(final ClickEvent event) {
                 final GwtChannelInfo ci = PropertiesUi.this.selectionModel.getSelectedObject();
                 PropertiesUi.this.channelsDataProvider.getList().remove(ci);
                 PropertiesUi.this.channelsDataProvider.refresh();
-                PropertiesUi.this.btn_remove.setEnabled(false);
+                PropertiesUi.this.btnRemove.setEnabled(false);
                 PropertiesUi.this.setDirty(true);
             }
         });
@@ -229,14 +235,14 @@ public class PropertiesUi extends Composite {
 
             @Override
             public void onSelectionChange(final SelectionChangeEvent event) {
-                PropertiesUi.this.btn_remove.setEnabled(PropertiesUi.this.selectionModel.getSelectedObject() != null);
+                PropertiesUi.this.btnRemove.setEnabled(PropertiesUi.this.selectionModel.getSelectedObject() != null);
             }
         });
 
-        this.renderForm();
-        this.initInvalidDataModal();
+        renderForm();
+        initInvalidDataModal();
 
-        this.setDirty(false);
+        setDirty(false);
 
         if (this.hasDriver) {
             // Retrieve base Driver descriptor
@@ -259,7 +265,7 @@ public class PropertiesUi extends Composite {
 
                         @Override
                         public void onSuccess(final GwtConfigComponent result) {
-                            PropertiesUi.this.m_baseDriverDescriptor = result;
+                            PropertiesUi.this.baseDriverDescriptor = result;
                         }
                     });
                 }
@@ -297,6 +303,7 @@ public class PropertiesUi extends Composite {
             public void update(final int index, final GwtChannelInfo object, final String value) {
                 object.setName(value);
                 PropertiesUi.this.setDirty(true);
+                PropertiesUi.this.channelTable.redraw();
             }
         });
 
@@ -319,6 +326,7 @@ public class PropertiesUi extends Composite {
             public void update(final int index, final GwtChannelInfo object, final String value) {
                 object.setType(value);
                 PropertiesUi.this.setDirty(true);
+                PropertiesUi.this.channelTable.redraw();
             }
         });
         this.channelTable.addColumn(c2, new TextHeader("type"));
@@ -341,6 +349,7 @@ public class PropertiesUi extends Composite {
             public void update(final int index, final GwtChannelInfo object, final String value) {
                 object.setValueType(value);
                 PropertiesUi.this.setDirty(true);
+                PropertiesUi.this.channelTable.redraw();
             }
         });
         this.channelTable.addColumn(c3, new TextHeader("value type"));
@@ -348,13 +357,13 @@ public class PropertiesUi extends Composite {
     }
 
     private void clearChannelsFromConfig() {
-        final List<GwtConfigParameter> params = this.m_configurableComponent.getParameters();
+        final List<GwtConfigParameter> params = this.configurableComponent.getParameters();
         final Iterator<GwtConfigParameter> it = params.iterator();
         while (it.hasNext()) {
             final GwtConfigParameter p = it.next();
             if (p.getName() != null && p.getName().contains(".CH.")) {
                 final String[] tokens = p.getName().split("\\.");
-                if ((tokens.length > 2) && tokens[1].trim().equals("CH")) {
+                if (tokens.length > 2 && tokens[1].trim().equals("CH")) {
                     it.remove();
                 }
             }
@@ -392,7 +401,7 @@ public class PropertiesUi extends Composite {
             logger.fine("Widget: " + fg.getClass());
 
             if (fg.getWidget(i) instanceof FormLabel) {
-                param = this.m_configurableComponent.getParameter(fg.getWidget(i).getTitle());
+                param = this.configurableComponent.getParameter(fg.getWidget(i).getTitle());
                 logger.fine("Param: " + fg.getTitle() + " -> " + param);
 
             } else if (fg.getWidget(i) instanceof ListBox || fg.getWidget(i) instanceof Input
@@ -431,15 +440,15 @@ public class PropertiesUi extends Composite {
 
     private Column<GwtChannelInfo, String> getColumnFromParam(final GwtConfigParameter param) {
         final Map<String, String> options = param.getOptions();
-        if ((options != null) && (options.size() > 0)) {
-            return this.getSelectionInputColumn(param);
+        if (options != null && options.size() > 0) {
+            return getSelectionInputColumn(param);
         } else {
-            return this.getInputCellColumn(param);
+            return getInputCellColumn(param);
         }
     }
 
     public GwtConfigComponent getConfiguration() {
-        return this.m_configurableComponent;
+        return this.configurableComponent;
     }
 
     private Column<GwtChannelInfo, String> getInputCellColumn(final GwtConfigParameter param) {
@@ -463,9 +472,9 @@ public class PropertiesUi extends Composite {
             @Override
             public void update(final int index, final GwtChannelInfo object, final String value) {
                 ValidationData viewData = null;
-                if ((!PropertiesUi.this.invalidateType(type, value))
-                        || ((max != null) && PropertiesUi.this.invalidateMax(value, max))
-                        || ((min != null) && PropertiesUi.this.invalidateMin(value, min))) {
+                if (!PropertiesUi.this.invalidateType(type, value)
+                        || max != null && PropertiesUi.this.invalidateMax(value, max)
+                        || min != null && PropertiesUi.this.invalidateMin(value, min)) {
                     viewData = cell.getViewData(object);
                     viewData.setInvalid(true);
                     PropertiesUi.this.nonValidatedCells.add(object.getId());
@@ -489,7 +498,7 @@ public class PropertiesUi extends Composite {
     private Column<GwtChannelInfo, String> getSelectionInputColumn(final GwtConfigParameter param) {
         final String id = param.getId();
         final Map<String, String> options = param.getOptions();
-        final ArrayList<String> opts = new ArrayList<String>(options.keySet());
+        final ArrayList<String> opts = new ArrayList<>(options.keySet());
         final SelectionCell cell = new SelectionCell(opts);
         final Column<GwtChannelInfo, String> result = new Column<GwtChannelInfo, String>(cell) {
 
@@ -506,6 +515,7 @@ public class PropertiesUi extends Composite {
             public void update(final int index, final GwtChannelInfo object, final String value) {
                 PropertiesUi.this.setDirty(true);
                 object.set(param.getId(), value);
+                PropertiesUi.this.channelTable.redraw();
             }
         });
 
@@ -525,42 +535,41 @@ public class PropertiesUi extends Composite {
 
         if (this.isWireAsset) {
             this.channelsDataProvider.refresh();
-            this.clearChannelsFromConfig();
+            clearChannelsFromConfig();
 
             for (final GwtChannelInfo ci : this.channelsDataProvider.getList()) {
                 String prefix = ci.getId() + ".CH.";
 
-                final GwtConfigParameter newName = this.copyOf(this.m_baseDriverDescriptor.getParameter("name"));
+                final GwtConfigParameter newName = copyOf(this.baseDriverDescriptor.getParameter("name"));
                 newName.setName(prefix + "name");
                 newName.setId(prefix + "name");
                 newName.setValue(ci.getName());
-                this.m_configurableComponent.getParameters().add(newName);
+                this.configurableComponent.getParameters().add(newName);
 
-                final GwtConfigParameter newType = this.copyOf(this.m_baseDriverDescriptor.getParameter("type"));
+                final GwtConfigParameter newType = copyOf(this.baseDriverDescriptor.getParameter("type"));
                 newType.setName(prefix + "type");
                 newType.setId(prefix + "type");
                 newType.setValue(ci.getType());
-                this.m_configurableComponent.getParameters().add(newType);
+                this.configurableComponent.getParameters().add(newType);
 
-                final GwtConfigParameter newValueType = this
-                        .copyOf(this.m_baseDriverDescriptor.getParameter("value.type"));
+                final GwtConfigParameter newValueType = copyOf(this.baseDriverDescriptor.getParameter("value.type"));
                 newValueType.setName(prefix + "value.type");
                 newValueType.setId(prefix + "value.type");
                 newValueType.setValue(ci.getValueType());
-                this.m_configurableComponent.getParameters().add(newValueType);
+                this.configurableComponent.getParameters().add(newValueType);
 
                 prefix += "DRIVER.";
-                for (final GwtConfigParameter param : this.m_driverDescriptor.getParameters()) {
-                    final GwtConfigParameter newParam = this.copyOf(param);
+                for (final GwtConfigParameter param : this.driverDescriptor.getParameters()) {
+                    final GwtConfigParameter newParam = copyOf(param);
                     newParam.setName(prefix + param.getName());
                     newParam.setId(prefix + param.getId());
                     newParam.setValue(ci.get(param.getName()).toString());
-                    this.m_configurableComponent.getParameters().add(newParam);
+                    this.configurableComponent.getParameters().add(newParam);
                 }
             }
         }
 
-        return this.m_configurableComponent;
+        return this.configurableComponent;
     }
 
     private String getUpdatedFieldConfiguration(GwtConfigParameter param, Widget wg) {
@@ -731,7 +740,7 @@ public class PropertiesUi extends Composite {
         radioTrue.setValue(Boolean.parseBoolean(param.getValue()));
         radioFalse.setValue(!Boolean.parseBoolean(param.getValue()));
 
-        if ((param.getMin() != null) && param.getMin().equals(param.getMax())) {
+        if (param.getMin() != null && param.getMin().equals(param.getMax())) {
             radioTrue.setEnabled(false);
             radioFalse.setEnabled(false);
         }
@@ -791,7 +800,6 @@ public class PropertiesUi extends Composite {
 
         final Map<String, String> oMap = param.getOptions();
         int i = 0;
-        boolean valueFound = false;
         for (Entry<String, String> current : oMap.entrySet()) {
             String label = current.getKey();
             String value = current.getValue();
@@ -850,14 +858,14 @@ public class PropertiesUi extends Composite {
     private void renderConfigParameter(final GwtConfigParameter param, final boolean isFirstInstance,
             final FormGroup formGroup, final boolean isReadOnly) {
         final Map<String, String> options = param.getOptions();
-        if ((options != null) && (options.size() > 0)) {
-            this.renderChoiceField(param, isFirstInstance, formGroup);
+        if (options != null && options.size() > 0) {
+            renderChoiceField(param, isFirstInstance, formGroup);
         } else if (param.getType().equals(GwtConfigParameterType.BOOLEAN)) {
-            this.renderBooleanField(param, isFirstInstance, formGroup);
+            renderBooleanField(param, isFirstInstance, formGroup);
         } else if (param.getType().equals(GwtConfigParameterType.PASSWORD)) {
-            this.renderPasswordField(param, isFirstInstance, formGroup);
+            renderPasswordField(param, isFirstInstance, formGroup);
         } else {
-            this.renderTextField(param, isFirstInstance, formGroup, isReadOnly);
+            renderTextField(param, isFirstInstance, formGroup, isReadOnly);
         }
     }
 
@@ -867,22 +875,22 @@ public class PropertiesUi extends Composite {
     // GwtConfigComponent
     public void renderForm() {
         this.fields.clear();
-        for (final GwtConfigParameter param : this.m_configurableComponent.getParameters()) {
+        for (final GwtConfigParameter param : this.configurableComponent.getParameters()) {
             final String[] tokens = param.getId().split("\\.");
-            boolean isChannelData = (tokens.length > 2) && tokens[1].trim().equals("CH");
+            boolean isChannelData = tokens.length > 2 && tokens[1].trim().equals("CH");
             final boolean isDriverField = param.getId().equals("driver.pid");
 
             isChannelData = isChannelData && this.isWireAsset;
             if (!isChannelData && !isDriverField) {
-                if ((param.getCardinality() == 0) || (param.getCardinality() == 1) || (param.getCardinality() == -1)) {
+                if (param.getCardinality() == 0 || param.getCardinality() == 1 || param.getCardinality() == -1) {
                     final FormGroup formGroup = new FormGroup();
                     if (isDriverField) {
-                        this.renderConfigParameter(param, true, formGroup, true);
+                        renderConfigParameter(param, true, formGroup, true);
                     } else {
-                        this.renderConfigParameter(param, true, formGroup, false);
+                        renderConfigParameter(param, true, formGroup, false);
                     }
                 } else {
-                    this.renderMultiFieldConfigParameter(param);
+                    renderMultiFieldConfigParameter(param);
                 }
             }
 
@@ -900,7 +908,7 @@ public class PropertiesUi extends Composite {
                 @Override
                 public void onSuccess(final GwtXSRFToken result) {
                     PropertiesUi.this.gwtWireService.getGwtChannelDescriptor(result,
-                            PropertiesUi.this.m_configurableComponent.get("driver.pid").toString(),
+                            PropertiesUi.this.configurableComponent.get("driver.pid").toString(),
                             new AsyncCallback<GwtConfigComponent>() {
 
                         @Override
@@ -910,7 +918,7 @@ public class PropertiesUi extends Composite {
 
                         @Override
                         public void onSuccess(final GwtConfigComponent result) {
-                            PropertiesUi.this.m_driverDescriptor = result;
+                            PropertiesUi.this.driverDescriptor = result;
                             PropertiesUi.this.addDefaultColumns();
                             for (final GwtConfigParameter param : result.getParameters()) {
                                 PropertiesUi.this.channelTable.addColumn(PropertiesUi.this.getColumnFromParam(param),
@@ -927,8 +935,7 @@ public class PropertiesUi extends Composite {
                                 @Override
                                 public void onSuccess(final GwtXSRFToken result) {
                                     PropertiesUi.this.gwtWireService.getGwtChannels(result,
-                                            PropertiesUi.this.m_driverDescriptor,
-                                            PropertiesUi.this.m_configurableComponent,
+                                            PropertiesUi.this.driverDescriptor, PropertiesUi.this.configurableComponent,
                                             new AsyncCallback<List<GwtChannelInfo>>() {
 
                                         @Override
@@ -965,11 +972,11 @@ public class PropertiesUi extends Composite {
             // temporary set the param value to the current one in the array
             // use a value from the one passed in if we have it.
             value = null;
-            if ((values != null) && (i < values.length)) {
+            if (values != null && i < values.length) {
                 value = values[i];
             }
             mParam.setValue(value);
-            this.renderConfigParameter(mParam, isFirstInstance, formGroup, false);
+            renderConfigParameter(mParam, isFirstInstance, formGroup, false);
             if (isFirstInstance) {
                 isFirstInstance = false;
             }
@@ -1006,7 +1013,7 @@ public class PropertiesUi extends Composite {
             input.setText("");
         }
 
-        if ((param.getMin() != null) && param.getMin().equals(param.getMax())) {
+        if (param.getMin() != null && param.getMin().equals(param.getMax())) {
             input.setReadOnly(true);
             input.setEnabled(false);
         }
@@ -1019,7 +1026,7 @@ public class PropertiesUi extends Composite {
                 final Input box = (Input) event.getSource();
                 final FormGroup group = (FormGroup) box.getParent();
                 // Validation
-                if (((box.getText() == null) || "".equals(box.getText().trim())) && param.isRequired()) {
+                if ((box.getText() == null || "".equals(box.getText().trim())) && param.isRequired()) {
                     // null in required field
                     group.setValidationState(ValidationState.ERROR);
                     box.setPlaceholder("Field is required");
@@ -1177,11 +1184,11 @@ public class PropertiesUi extends Composite {
         this.dirty = flag;
         if (flag) {
             WiresPanelUi.propertiesPanelHeader.setText(
-                    WiresPanelUi.getFormattedPid(this.m_configurableComponent.getFactoryId()) + " - " + this.pid + "*");
+                    WiresPanelUi.getFormattedPid(this.configurableComponent.getFactoryId()) + " - " + this.pid + "*");
             WiresPanelUi.setDirty(true);
         } else {
             WiresPanelUi.propertiesPanelHeader.setText(
-                    WiresPanelUi.getFormattedPid(this.m_configurableComponent.getFactoryId()) + " - " + this.pid);
+                    WiresPanelUi.getFormattedPid(this.configurableComponent.getFactoryId()) + " - " + this.pid);
         }
     }
 
@@ -1189,11 +1196,11 @@ public class PropertiesUi extends Composite {
         this.nonValidated = flag;
         if (flag) {
             WiresPanelUi.propertiesPanelHeader.setText(
-                    WiresPanelUi.getFormattedPid(this.m_configurableComponent.getFactoryId()) + " - " + this.pid + "*");
+                    WiresPanelUi.getFormattedPid(this.configurableComponent.getFactoryId()) + " - " + this.pid + "*");
             WiresPanelUi.btnSave.setEnabled(false);
         } else if (this.nonValidatedCells.isEmpty()) {
             WiresPanelUi.propertiesPanelHeader.setText(
-                    WiresPanelUi.getFormattedPid(this.m_configurableComponent.getFactoryId()) + " - " + this.pid);
+                    WiresPanelUi.getFormattedPid(this.configurableComponent.getFactoryId()) + " - " + this.pid);
             WiresPanelUi.btnSave.setEnabled(true);
         }
     }
@@ -1207,14 +1214,14 @@ public class PropertiesUi extends Composite {
     // Validates all the entered values
     // TODO: validation should be done like in the old web ui: cleaner approach
     private boolean validate(final GwtConfigParameter param, final TextBox box, final FormGroup group) {
-        if (param.isRequired() && ((box.getText().trim() == null) || "".equals(box.getText().trim()))) {
+        if (param.isRequired() && (box.getText().trim() == null || "".equals(box.getText().trim()))) {
             group.setValidationState(ValidationState.ERROR);
             this.valid.put(param.getName(), false);
             box.setPlaceholder(MSGS.formRequiredParameter());
             return false;
         }
 
-        if ((box.getText().trim() != null) && !"".equals(box.getText().trim())) {
+        if (box.getText().trim() != null && !"".equals(box.getText().trim())) {
             if (param.getType().equals(GwtConfigParameterType.CHAR)) {
                 if (box.getText().trim().length() > 1) {
                     group.setValidationState(ValidationState.ERROR);
@@ -1258,13 +1265,13 @@ public class PropertiesUi extends Composite {
                     errorLogger.log(Level.SEVERE, "Configuration max value error! Applying UI defaults...");
                 }
 
-                if ((String.valueOf(box.getText().trim()).length()) < configMinValue) {
+                if (String.valueOf(box.getText().trim()).length() < configMinValue) {
                     group.setValidationState(ValidationState.ERROR);
                     this.valid.put(param.getName(), false);
                     box.setPlaceholder(MessageUtils.get(CONFIG_MIN_VALUE, configMinValue));
                     return false;
                 }
-                if ((String.valueOf(box.getText().trim()).length()) > configMaxValue) {
+                if (String.valueOf(box.getText().trim()).length() > configMaxValue) {
                     group.setValidationState(ValidationState.ERROR);
                     this.valid.put(param.getName(), false);
                     box.setPlaceholder(MessageUtils.get(CONFIG_MAX_VALUE, configMaxValue));

@@ -67,7 +67,7 @@
 									<version>${com.google.protobuf.version}</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>org.eclipse</groupId>
+									<groupId>org.eclipse.paho</groupId>
 									<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
 									<version>${org.eclipse.paho.client.mqttv3.version}</version>
 								</artifactItem>

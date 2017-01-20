@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates, and others
+    Copyright (c) 2011, 2017 Eurotech and/or its affiliates, and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -26,7 +26,7 @@
             cardinality="0" 
             required="true"
             default="mqtt://broker-url:1883/" 
-            description="URL of the mqtt broker to connect to, for example, mqtt://broker-sandbox.everyware-cloud.com:1883/ or mqtts://broker-sandbox.everyware-cloud.com:8883/."/>
+            description="URL of the mqtt broker to connect to, for example, mqtt://broker-sandbox.everyware-cloud.com:1883/, mqtts://broker-sandbox.everyware-cloud.com:8883/, ws://broker-sandbox.everyware-cloud.com:8080/ or wss://broker-sandbox.everyware-cloud.com:443/."/>
 
         <AD id="topic.context.account-name"
             name="topic.context.account-name"

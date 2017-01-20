@@ -59,38 +59,16 @@ import org.slf4j.LoggerFactory;
 public class MqttDataTransport implements DataTransportService, MqttCallback, ConfigurableComponent, SslServiceListener,
         CloudConnectionStatusComponent {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(MqttDataTransport.class);
+    private static final Logger logger = LoggerFactory.getLogger(MqttDataTransport.class);
 
     private static final String MQTT_SCHEME = "mqtt://";
     private static final String MQTTS_SCHEME = "mqtts://";
     // TODO: add mqtt+ssl for secure mqtt
 
     // '#' followed by one or more non-whitespace but not the '/'
-    private static final String TOPIC_PATTERN = "#([^\\s/]+)";
+    private static final String TOPIC_PATTERN_STRING = "#([^\\s/]+)";
 
-    private static final Pattern s_topicPattern = Pattern.compile(TOPIC_PATTERN);
-
-    private SystemService m_systemService;
-    private SslManagerService m_sslManagerService;
-    private CloudConnectionStatusService m_cloudConnectionStatusService;
-
-    private CloudConnectionStatusEnum m_notificationStatus = CloudConnectionStatusEnum.OFF;
-
-    private MqttAsyncClient m_mqttClient;
-
-    private DataTransportListenerS m_dataTransportListeners;
-
-    private MqttClientConfiguration m_clientConf;
-    private boolean m_newSession;
-    private String m_sessionId;
-
-    private PersistenceType m_persistenceType;
-    private MqttClientPersistence m_persistence;
-
-    private final Map<String, String> m_topicContext = new HashMap<String, String>();
-    private final Map<String, Object> m_properties = new HashMap<String, Object>();
-
-    private CryptoService m_cryptoService;
+    private static final Pattern TOPIC_PATTERN = Pattern.compile(TOPIC_PATTERN_STRING);
 
     private static final String MQTT_BROKER_URL_PROP_NAME = "broker-url";
     private static final String MQTT_USERNAME_PROP_NAME = "username";
@@ -122,6 +100,28 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     private static final String SSL_CERT_ALIAS = "ssl.certificate.alias";
     private static final String SSL_DEFAULT_HN_VERIFY = "use-ssl-service-config";
 
+    private SystemService systemService;
+    private SslManagerService sslManagerService;
+    private CloudConnectionStatusService cloudConnectionStatusService;
+
+    private CloudConnectionStatusEnum notificationStatus = CloudConnectionStatusEnum.OFF;
+
+    private MqttAsyncClient mqttClient;
+
+    private DataTransportListenerS dataTransportListeners;
+
+    private MqttClientConfiguration clientConf;
+    private boolean newSession;
+    private String sessionId;
+
+    private PersistenceType persistenceType;
+    private MqttClientPersistence persistence;
+
+    private final Map<String, String> topicContext = new HashMap<String, String>();
+    private final Map<String, Object> properties = new HashMap<String, Object>();
+
+    private CryptoService cryptoService;
+
     // ----------------------------------------------------------------
     //
     // Dependencies
@@ -129,35 +129,35 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     // ----------------------------------------------------------------
 
     public void setSystemService(SystemService systemService) {
-        this.m_systemService = systemService;
+        this.systemService = systemService;
     }
 
     public void unsetSystemService(SystemService systemService) {
-        this.m_systemService = null;
+        this.systemService = null;
     }
 
     public void setSslManagerService(SslManagerService sslManagerService) {
-        this.m_sslManagerService = sslManagerService;
+        this.sslManagerService = sslManagerService;
     }
 
     public void unsetSslManagerService(SslManagerService sslManagerService) {
-        this.m_sslManagerService = null;
+        this.sslManagerService = null;
     }
 
     public void setCryptoService(CryptoService cryptoService) {
-        this.m_cryptoService = cryptoService;
+        this.cryptoService = cryptoService;
     }
 
     public void unsetCryptoService(CryptoService cryptoService) {
-        this.m_cryptoService = null;
+        this.cryptoService = null;
     }
 
     public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
-        this.m_cloudConnectionStatusService = cloudConnectionStatusService;
+        this.cloudConnectionStatusService = cloudConnectionStatusService;
     }
 
     public void unsetCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
-        this.m_cloudConnectionStatusService = null;
+        this.cloudConnectionStatusService = null;
     }
 
     // ----------------------------------------------------------------
@@ -167,7 +167,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     // ----------------------------------------------------------------
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        s_logger.info("Activating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
+        logger.info("Activating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
         // We need to catch the configuration exception and activate anyway.
         // Otherwise the ConfigurationService will not be able to track us.
@@ -179,10 +179,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
                 try {
                     Password decryptedPassword = new Password(
-                            this.m_cryptoService.decryptAes(((String) value).toCharArray()));
+                            this.cryptoService.decryptAes(((String) value).toCharArray()));
                     decryptedPropertiesMap.put(key, decryptedPassword);
                 } catch (Exception e) {
-                    s_logger.info("Password is not encrypted");
+                    logger.info("Password is not encrypted");
                     decryptedPropertiesMap.put(key, new Password((String) value));
                 }
             } else {
@@ -190,23 +190,23 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             }
         }
 
-        this.m_properties.putAll(decryptedPropertiesMap);
+        this.properties.putAll(decryptedPropertiesMap);
         try {
-            this.m_clientConf = buildConfiguration(this.m_properties);
-            setupMqttSession();
+            this.clientConf = buildConfiguration(this.properties);
+            // setupMqttSession();
         } catch (RuntimeException e) {
-            s_logger.error(
+            logger.error(
                     "Invalid client configuration. Service will not be able to connect until the configuration is updated",
                     e);
         }
 
-        this.m_dataTransportListeners = new DataTransportListenerS(componentContext);
+        this.dataTransportListeners = new DataTransportListenerS(componentContext);
 
         // Do nothing waiting for the connect request from the upper layer.
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        s_logger.debug("Deactivating {}...", this.m_properties.get(ConfigurationService.KURA_SERVICE_PID));
+        logger.debug("Deactivating {}...", this.properties.get(ConfigurationService.KURA_SERVICE_PID));
 
         // Before deactivating us, the OSGi container should have first
         // deactivated all dependent components.
@@ -221,9 +221,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     }
 
     public void updated(Map<String, Object> properties) {
-        s_logger.info("Updating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
+        logger.info("Updating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
-        this.m_properties.clear();
+        this.properties.clear();
 
         HashMap<String, Object> decryptedPropertiesMap = new HashMap<String, Object>();
 
@@ -233,10 +233,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
                 try {
                     Password decryptedPassword = new Password(
-                            this.m_cryptoService.decryptAes(((String) value).toCharArray()));
+                            this.cryptoService.decryptAes(((String) value).toCharArray()));
                     decryptedPropertiesMap.put(key, decryptedPassword);
                 } catch (Exception e) {
-                    s_logger.info("Password is not encrypted");
+                    logger.info("Password is not encrypted");
                     decryptedPropertiesMap.put(key, new Password((String) value));
                 }
             } else {
@@ -244,7 +244,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             }
         }
 
-        this.m_properties.putAll(decryptedPropertiesMap);
+        this.properties.putAll(decryptedPropertiesMap);
 
         update();
     }
@@ -255,17 +255,17 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         // First notify the Listeners
         // We do nothing other than notifying the listeners which may later
         // request to disconnect and reconnect again.
-        this.m_dataTransportListeners.onConfigurationUpdating(wasConnected);
+        this.dataTransportListeners.onConfigurationUpdating(wasConnected);
 
         // Then update the configuration
         // Throwing a RuntimeException here is fine.
         // Listeners will not be notified of an invalid configuration update.
-        s_logger.info("Building new configuration...");
-        this.m_clientConf = buildConfiguration(this.m_properties);
+        logger.info("Building new configuration...");
+        this.clientConf = buildConfiguration(this.properties);
 
         // We do nothing other than notifying the listeners which may later
         // request to disconnect and reconnect again.
-        this.m_dataTransportListeners.onConfigurationUpdated(wasConnected);
+        this.dataTransportListeners.onConfigurationUpdated(wasConnected);
     }
 
     // ----------------------------------------------------------------
@@ -278,7 +278,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     public synchronized void connect() throws KuraConnectException {
         // We treat this as an application bug.
         if (isConnected()) {
-            s_logger.error("Already connected");
+            logger.error("Already connected");
             throw new IllegalStateException("Already connected");
             // TODO: define an KuraRuntimeException
         }
@@ -286,81 +286,81 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         // Attempt to setup the MQTT session
         setupMqttSession();
 
-        if (this.m_mqttClient == null) {
-            s_logger.error("Invalid configuration");
+        if (this.mqttClient == null) {
+            logger.error("Invalid configuration");
             throw new IllegalStateException("Invalid configuration");
             // TODO: define an KuraRuntimeException
         }
 
-        s_logger.info("# ------------------------------------------------------------");
-        s_logger.info("#  Connection Properties");
-        s_logger.info("#  broker    = " + this.m_clientConf.getBrokerUrl());
-        s_logger.info("#  clientId  = " + this.m_clientConf.getClientId());
-        s_logger.info("#  username  = " + this.m_clientConf.getConnectOptions().getUserName());
-        s_logger.info("#  password  = XXXXXXXXXXXXXX");
-        s_logger.info("#  keepAlive = " + this.m_clientConf.getConnectOptions().getKeepAliveInterval());
-        s_logger.info("#  timeout   = " + this.m_clientConf.getConnectOptions().getConnectionTimeout());
-        s_logger.info("#  cleanSession    = " + this.m_clientConf.getConnectOptions().isCleanSession());
-        s_logger.info(
-                "#  MQTT version    = " + getMqttVersionLabel(this.m_clientConf.getConnectOptions().getMqttVersion()));
-        s_logger.info("#  willDestination = " + this.m_clientConf.getConnectOptions().getWillDestination());
-        s_logger.info("#  willMessage     = " + this.m_clientConf.getConnectOptions().getWillMessage());
-        s_logger.info("#");
-        s_logger.info("#  Connecting...");
+        logger.info("# ------------------------------------------------------------");
+        logger.info("#  Connection Properties");
+        logger.info("#  broker    = " + this.clientConf.getBrokerUrl());
+        logger.info("#  clientId  = " + this.clientConf.getClientId());
+        logger.info("#  username  = " + this.clientConf.getConnectOptions().getUserName());
+        logger.info("#  password  = XXXXXXXXXXXXXX");
+        logger.info("#  keepAlive = " + this.clientConf.getConnectOptions().getKeepAliveInterval());
+        logger.info("#  timeout   = " + this.clientConf.getConnectOptions().getConnectionTimeout());
+        logger.info("#  cleanSession    = " + this.clientConf.getConnectOptions().isCleanSession());
+        logger.info(
+                "#  MQTT version    = " + getMqttVersionLabel(this.clientConf.getConnectOptions().getMqttVersion()));
+        logger.info("#  willDestination = " + this.clientConf.getConnectOptions().getWillDestination());
+        logger.info("#  willMessage     = " + this.clientConf.getConnectOptions().getWillMessage());
+        logger.info("#");
+        logger.info("#  Connecting...");
 
         // Register the component in the CloudConnectionStatus service
-        this.m_cloudConnectionStatusService.register(this);
+        this.cloudConnectionStatusService.register(this);
         // Update status notification service
-        this.m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.FAST_BLINKING);
+        this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.FAST_BLINKING);
 
         //
         // connect
         try {
-            IMqttToken connectToken = this.m_mqttClient.connect(this.m_clientConf.getConnectOptions());
+            IMqttToken connectToken = this.mqttClient.connect(this.clientConf.getConnectOptions());
             connectToken.waitForCompletion(getTimeToWaitMillis() * 3);
-            s_logger.info("#  Connected!");
-            s_logger.info("# ------------------------------------------------------------");
+            logger.info("#  Connected!");
+            logger.info("# ------------------------------------------------------------");
 
             // Update status notification service
-            this.m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.ON);
+            this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.ON);
 
         } catch (MqttException e) {
-            s_logger.warn("xxxxx  Connect failed. Forcing disconnect. xxxxx {}", e);
+            logger.warn("xxxxx  Connect failed. Forcing disconnect. xxxxx {}", e);
             try {
                 // prevent callbacks from a zombie client
-                this.m_mqttClient.setCallback(null);
-                this.m_mqttClient.close();
+                this.mqttClient.setCallback(null);
+                this.mqttClient.close();
             } catch (Exception de) {
-                s_logger.warn("Forced disconnect exception.", de);
+                logger.warn("Forced disconnect exception.", de);
             } finally {
-                this.m_mqttClient = null;
+                this.mqttClient = null;
             }
 
             // Update status notification service
-            this.m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
+            this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
 
             throw new KuraConnectException(e, "Cannot connect");
         } finally {
             // Always unregister from CloudConnectionStatus service so to switch to the previous state
-            this.m_cloudConnectionStatusService.unregister(this);
+            this.cloudConnectionStatusService.unregister(this);
         }
 
         // notify the listeners
-        this.m_dataTransportListeners.onConnectionEstablished(this.m_newSession);
+        this.dataTransportListeners.onConnectionEstablished(this.newSession);
     }
 
     @Override
     public boolean isConnected() {
-        if (this.m_mqttClient != null) {
-            return this.m_mqttClient.isConnected();
+        if (this.mqttClient != null) {
+            return this.mqttClient.isConnected();
         }
         return false;
     }
 
     @Override
     public String getBrokerUrl() {
-        if (this.m_clientConf != null) {
-            String brokerUrl = this.m_clientConf.getBrokerUrl();
+        if (this.clientConf != null) {
+            String brokerUrl = this.clientConf.getBrokerUrl();
             if (brokerUrl != null) {
                 return brokerUrl;
             }
@@ -370,8 +370,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
     @Override
     public String getAccountName() {
-        if (this.m_clientConf != null) {
-            String accountName = this.m_topicContext.get(TOPIC_ACCOUNT_NAME_CTX_NAME);
+        if (this.clientConf != null) {
+            String accountName = this.topicContext.get(TOPIC_ACCOUNT_NAME_CTX_NAME);
             if (accountName != null) {
                 return accountName;
             }
@@ -381,8 +381,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
     @Override
     public String getUsername() {
-        if (this.m_clientConf != null) {
-            String username = this.m_clientConf.getConnectOptions().getUserName();
+        if (this.clientConf != null) {
+            String username = this.clientConf.getConnectOptions().getUserName();
             if (username != null) {
                 return username;
             }
@@ -392,8 +392,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
     @Override
     public String getClientId() {
-        if (this.m_clientConf != null) {
-            String clientId = this.m_clientConf.getClientId();
+        if (this.clientConf != null) {
+            String clientId = this.clientConf.getClientId();
             if (clientId != null) {
                 return clientId;
             }
@@ -411,25 +411,25 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         // Don't throw an exception because the caller would not
         // be able to handle it.
         if (isConnected()) {
-            s_logger.info("Disconnecting...");
+            logger.info("Disconnecting...");
 
             //
             // notify the listeners
-            this.m_dataTransportListeners.onDisconnecting();
+            this.dataTransportListeners.onDisconnecting();
 
             try {
-                IMqttToken token = this.m_mqttClient.disconnect(quiesceTimeout);
+                IMqttToken token = this.mqttClient.disconnect(quiesceTimeout);
                 token.waitForCompletion(getTimeToWaitMillis());
-                s_logger.info("Disconnected");
+                logger.info("Disconnected");
             } catch (MqttException e) {
-                s_logger.error("Disconnect failed", e);
+                logger.error("Disconnect failed", e);
             }
 
             //
             // notify the listeners
-            this.m_dataTransportListeners.onDisconnected();
+            this.dataTransportListeners.onDisconnected();
         } else {
-            s_logger.warn("MQTT client already disconnected");
+            logger.warn("MQTT client already disconnected");
         }
     }
 
@@ -442,23 +442,23 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     @Override
     public void subscribe(String topic, int qos) throws KuraTimeoutException, KuraException, KuraNotConnectedException {
 
-        if (this.m_mqttClient == null || !this.m_mqttClient.isConnected()) {
+        if (this.mqttClient == null || !this.mqttClient.isConnected()) {
             throw new KuraNotConnectedException("Not connected");
         }
 
         topic = replaceTopicVariables(topic);
 
-        s_logger.info("Subscribing to topic: {} with QoS: {}", topic, qos);
+        logger.info("Subscribing to topic: {} with QoS: {}", topic, qos);
 
         try {
-            IMqttToken token = this.m_mqttClient.subscribe(topic, qos);
+            IMqttToken token = this.mqttClient.subscribe(topic, qos);
             token.waitForCompletion(getTimeToWaitMillis());
         } catch (MqttException e) {
             if (e.getReasonCode() == MqttException.REASON_CODE_CLIENT_TIMEOUT) {
-                s_logger.warn("Timeout subscribing to topic: {}", topic);
+                logger.warn("Timeout subscribing to topic: {}", topic);
                 throw new KuraTimeoutException("Timeout subscribing to topic: " + topic, e);
             } else {
-                s_logger.error("Cannot subscribe to topic: " + topic, e);
+                logger.error("Cannot subscribe to topic: " + topic, e);
                 throw KuraException.internalError(e, "Cannot subscribe to topic: " + topic);
             }
         }
@@ -467,23 +467,23 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     @Override
     public void unsubscribe(String topic) throws KuraTimeoutException, KuraException, KuraNotConnectedException {
 
-        if (this.m_mqttClient == null || !this.m_mqttClient.isConnected()) {
+        if (this.mqttClient == null || !this.mqttClient.isConnected()) {
             throw new KuraNotConnectedException("Not connected");
         }
 
         topic = replaceTopicVariables(topic);
 
-        s_logger.info("Unsubscribing to topic: {}", topic);
+        logger.info("Unsubscribing to topic: {}", topic);
 
         try {
-            IMqttToken token = this.m_mqttClient.unsubscribe(topic);
+            IMqttToken token = this.mqttClient.unsubscribe(topic);
             token.waitForCompletion(getTimeToWaitMillis());
         } catch (MqttException e) {
             if (e.getReasonCode() == MqttException.REASON_CODE_CLIENT_TIMEOUT) {
-                s_logger.warn("Timeout unsubscribing to topic: {}", topic);
+                logger.warn("Timeout unsubscribing to topic: {}", topic);
                 throw new KuraTimeoutException("Timeout unsubscribing to topic: " + topic, e);
             } else {
-                s_logger.error("Cannot unsubscribe to topic: " + topic, e);
+                logger.error("Cannot unsubscribe to topic: " + topic, e);
                 throw KuraException.internalError(e, "Cannot unsubscribe to topic: " + topic);
             }
         }
@@ -504,13 +504,13 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     public DataTransportToken publish(String topic, byte[] payload, int qos, boolean retain)
             throws KuraTooManyInflightMessagesException, KuraException, KuraNotConnectedException {
 
-        if (this.m_mqttClient == null || !this.m_mqttClient.isConnected()) {
+        if (this.mqttClient == null || !this.mqttClient.isConnected()) {
             throw new KuraNotConnectedException("Not connected");
         }
 
         topic = replaceTopicVariables(topic);
 
-        s_logger.info("Publishing message on topic: {} with QoS: {}", topic, qos);
+        logger.info("Publishing message on topic: {} with QoS: {}", topic, qos);
 
         MqttMessage message = new MqttMessage();
         message.setPayload(payload);
@@ -519,7 +519,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
         Integer messageId = null;
         try {
-            IMqttDeliveryToken token = this.m_mqttClient.publish(topic, message);
+            IMqttDeliveryToken token = this.mqttClient.publish(topic, message);
             // At present Paho ALWAYS allocates (gets and increments) internally
             // a message ID,
             // even for messages published with QoS == 0.
@@ -532,27 +532,27 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             // 0.
             // We don't want to rely on this and only return and confirm IDs
             // of messages published with QoS > 0.
-            s_logger.debug("Published message with ID: {}", token.getMessageId());
+            logger.debug("Published message with ID: {}", token.getMessageId());
             if (qos > 0) {
                 messageId = Integer.valueOf(token.getMessageId());
             }
         } catch (MqttPersistenceException e) {
             // This is probably an unrecoverable internal error
-            s_logger.error("Cannot publish on topic: {}", topic, e);
+            logger.error("Cannot publish on topic: {}", topic, e);
             throw new IllegalStateException("Cannot publish on topic: " + topic, e);
         } catch (MqttException e) {
             if (e.getReasonCode() == MqttException.REASON_CODE_MAX_INFLIGHT) {
-                s_logger.info("Too many inflight messages");
+                logger.info("Too many inflight messages");
                 throw new KuraTooManyInflightMessagesException(e, "Too many in-fligh messages");
             } else {
-                s_logger.error("Cannot publish on topic: " + topic, e);
+                logger.error("Cannot publish on topic: " + topic, e);
                 throw KuraException.internalError(e, "Cannot publish on topic: " + topic);
             }
         }
 
         DataTransportToken token = null;
         if (messageId != null) {
-            token = new DataTransportToken(messageId, this.m_sessionId);
+            token = new DataTransportToken(messageId, this.sessionId);
         }
 
         return token;
@@ -560,12 +560,12 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
     @Override
     public void addDataTransportListener(DataTransportListener listener) {
-        this.m_dataTransportListeners.add(listener);
+        this.dataTransportListeners.add(listener);
     }
 
     @Override
     public void removeDataTransportListener(DataTransportListener listener) {
-        this.m_dataTransportListeners.remove(listener);
+        this.dataTransportListeners.remove(listener);
     }
 
     // ---------------------------------------------------------
@@ -575,17 +575,17 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     // ---------------------------------------------------------
     @Override
     public void connectionLost(final Throwable cause) {
-        s_logger.warn("Connection Lost", cause);
+        logger.warn("Connection Lost", cause);
 
         // notify the listeners
-        this.m_dataTransportListeners.onConnectionLost(cause);
+        this.dataTransportListeners.onConnectionLost(cause);
     }
 
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {
 
         if (token == null) {
-            s_logger.error("null token");
+            logger.error("null token");
             return;
         }
 
@@ -596,7 +596,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         try {
             msg = token.getMessage();
         } catch (MqttException e) {
-            s_logger.error("Cannot get message", e);
+            logger.error("Cannot get message", e);
             return;
         }
 
@@ -608,14 +608,14 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             int qos = msg.getQos();
 
             if (qos == 0) {
-                s_logger.debug("Ignoring deliveryComplete for messages published with QoS == 0");
+                logger.debug("Ignoring deliveryComplete for messages published with QoS == 0");
                 return;
             }
         }
 
         int id = token.getMessageId();
 
-        s_logger.debug("Delivery complete for message with ID: {}", id);
+        logger.debug("Delivery complete for message with ID: {}", id);
 
         // FIXME: We should be more selective here and only call the listener
         // that actually published the message.
@@ -636,14 +636,14 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         // These confirms will be lost!
 
         // notify the listeners
-        DataTransportToken dataPublisherToken = new DataTransportToken(id, this.m_sessionId);
-        this.m_dataTransportListeners.onMessageConfirmed(dataPublisherToken);
+        DataTransportToken dataPublisherToken = new DataTransportToken(id, this.sessionId);
+        this.dataTransportListeners.onMessageConfirmed(dataPublisherToken);
     }
 
     @Override
     public void messageArrived(String topic, MqttMessage message) throws Exception {
 
-        s_logger.debug("Message arrived on topic: {}", topic);
+        logger.debug("Message arrived on topic: {}", topic);
 
         // FIXME: we should be more selective here and only call the listeners
         // actually subscribed to this topic.
@@ -654,13 +654,13 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         // messages.
 
         // notify the listeners
-        this.m_dataTransportListeners.onMessageArrived(topic, message.getPayload(), message.getQos(),
+        this.dataTransportListeners.onMessageArrived(topic, message.getPayload(), message.getQos(),
                 message.isRetained());
     }
 
     private long getTimeToWaitMillis() {
         // We use the same value for every timeout
-        return this.m_clientConf.getConnectOptions().getConnectionTimeout() * 1000L;
+        return this.clientConf.getConnectOptions().getConnectionTimeout() * 1000L;
     }
 
     // ---------------------------------------------------------
@@ -692,7 +692,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             // Configure the client ID
             clientId = (String) properties.get(MQTT_CLIENT_ID_PROP_NAME);
             if (clientId == null || clientId.trim().length() == 0) {
-                clientId = this.m_systemService.getPrimaryMacAddress();
+                clientId = this.systemService.getPrimaryMacAddress();
             }
             ValidationUtil.notEmptyOrNull(clientId, "clientId");
 
@@ -736,13 +736,13 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
             conOpt.setMqttVersion((Integer) properties.get(MQTT_DEFAULT_VERSION_PROP_NAME));
 
-            synchronized (this.m_topicContext) {
-                this.m_topicContext.clear();
+            synchronized (this.topicContext) {
+                this.topicContext.clear();
                 if (properties.get(CLOUD_ACCOUNT_NAME_PROP_NAME) != null) {
-                    this.m_topicContext.put(TOPIC_ACCOUNT_NAME_CTX_NAME,
+                    this.topicContext.put(TOPIC_ACCOUNT_NAME_CTX_NAME,
                             (String) properties.get(CLOUD_ACCOUNT_NAME_PROP_NAME));
                 }
-                this.m_topicContext.put(TOPIC_DEVICE_ID_CTX_NAME, clientId);
+                this.topicContext.put(TOPIC_DEVICE_ID_CTX_NAME, clientId);
             }
 
             String willTopic = (String) properties.get(MQTT_LWT_TOPIC_PROP_NAME);
@@ -765,14 +765,14 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
                     try {
                         payload = willPayload.getBytes("UTF-8");
                     } catch (UnsupportedEncodingException e) {
-                        s_logger.error("Unsupported encoding", e);
+                        logger.error("Unsupported encoding", e);
                     }
                 }
 
                 conOpt.setWill(willTopic, payload, willQos, willRetain);
             }
         } catch (KuraException e) {
-            s_logger.error("Invalid configuration");
+            logger.error("Invalid configuration");
             throw new IllegalStateException("Invalid MQTT client configuration", e);
         }
 
@@ -780,26 +780,26 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         // SSL
         if (brokerUrl.startsWith("ssl")) {
             try {
-                String alias = (String) this.m_properties.get(SSL_CERT_ALIAS);
+                String alias = (String) this.properties.get(SSL_CERT_ALIAS);
                 if (alias == null || "".equals(alias.trim())) {
-                    alias = this.m_topicContext.get(TOPIC_ACCOUNT_NAME_CTX_NAME);
+                    alias = this.topicContext.get(TOPIC_ACCOUNT_NAME_CTX_NAME);
                 }
 
-                String protocol = (String) this.m_properties.get(SSL_PROTOCOL);
-                String ciphers = (String) this.m_properties.get(SSL_CIPHERS);
-                String hnVerification = (String) this.m_properties.get(SSL_HN_VERIFY);
+                String protocol = (String) this.properties.get(SSL_PROTOCOL);
+                String ciphers = (String) this.properties.get(SSL_CIPHERS);
+                String hnVerification = (String) this.properties.get(SSL_HN_VERIFY);
 
                 SSLSocketFactory ssf;
                 if (SSL_DEFAULT_HN_VERIFY.equals(hnVerification)) {
-                    ssf = this.m_sslManagerService.getSSLSocketFactory(protocol, ciphers, null, null, null, alias);
+                    ssf = this.sslManagerService.getSSLSocketFactory(protocol, ciphers, null, null, null, alias);
                 } else {
-                    ssf = this.m_sslManagerService.getSSLSocketFactory(protocol, ciphers, null, null, null, alias,
+                    ssf = this.sslManagerService.getSSLSocketFactory(protocol, ciphers, null, null, null, alias,
                             Boolean.valueOf(hnVerification));
                 }
 
                 conOpt.setSocketFactory(ssf);
             } catch (Exception e) {
-                s_logger.error("SSL setup failed", e);
+                logger.error("SSL setup failed", e);
                 throw new IllegalStateException("SSL setup failed", e);
             }
         }
@@ -821,7 +821,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
     private String replaceTopicVariables(String topic) {
         boolean found;
-        Matcher topicMatcher = s_topicPattern.matcher(topic);
+        Matcher topicMatcher = TOPIC_PATTERN.matcher(topic);
         StringBuffer sb = new StringBuffer();
         do {
 
@@ -832,8 +832,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
                 // TODO: Try to get variable-name (group 1) from the context
                 String variableName = topicMatcher.group(1);
-                synchronized (this.m_topicContext) {
-                    String value = this.m_topicContext.get(variableName);
+                synchronized (this.topicContext) {
+                    String value = this.topicContext.get(variableName);
                     if (value != null) {
                         replacement = value;
                     }
@@ -848,18 +848,18 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
         String replacedTopic = sb.toString();
 
-        s_logger.debug("Replaced tokens in topic {} with: {}", topic, replacedTopic);
+        logger.debug("Replaced tokens in topic {} with: {}", topic, replacedTopic);
 
         return replacedTopic;
     }
 
     private String generateSessionId() {
-        return this.m_clientConf.getClientId() + "-" + this.m_clientConf.getBrokerUrl();
+        return this.clientConf.getClientId() + "-" + this.clientConf.getBrokerUrl();
     }
 
     private void setupMqttSession() {
 
-        if (this.m_clientConf == null) {
+        if (this.clientConf == null) {
             throw new IllegalStateException("Invalid client configuration");
         }
 
@@ -868,33 +868,33 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         // We also need to construct a new instance if the persistence type (file or memory) changes.
         // We MUST avoid to construct a new client instance every time because
         // in that case the MQTT message ID is reset to 1.
-        if (this.m_mqttClient != null) {
-            String brokerUrl = this.m_mqttClient.getServerURI();
-            String clientId = this.m_mqttClient.getClientId();
+        if (this.mqttClient != null) {
+            String brokerUrl = this.mqttClient.getServerURI();
+            String clientId = this.mqttClient.getClientId();
 
-            if (!(brokerUrl.equals(this.m_clientConf.getBrokerUrl()) && clientId.equals(this.m_clientConf.getClientId())
-                    && this.m_persistenceType == this.m_clientConf.getPersistenceType())) {
+            if (!(brokerUrl.equals(this.clientConf.getBrokerUrl()) && clientId.equals(this.clientConf.getClientId())
+                    && this.persistenceType == this.clientConf.getPersistenceType())) {
                 try {
-                    s_logger.info("Closing client...");
+                    logger.info("Closing client...");
                     // prevent callbacks from a zombie client
-                    this.m_mqttClient.setCallback(null);
-                    this.m_mqttClient.close();
-                    s_logger.info("Closed");
+                    this.mqttClient.setCallback(null);
+                    this.mqttClient.close();
+                    logger.info("Closed");
                 } catch (MqttException e) {
-                    s_logger.error("Cannot close client", e);
+                    logger.error("Cannot close client", e);
                 } finally {
-                    this.m_mqttClient = null;
+                    this.mqttClient = null;
                 }
             }
         }
 
         // Connecting with Clean Session flag set to true always starts
         // a new session.
-        boolean newSession = this.m_clientConf.getConnectOptions().isCleanSession();
+        boolean newSession = this.clientConf.getConnectOptions().isCleanSession();
 
-        if (this.m_mqttClient == null) {
+        if (this.mqttClient == null) {
 
-            s_logger.info("Creating a new client instance");
+            logger.info("Creating a new client instance");
 
             //
             // Initialize persistence. This is only useful if the client
@@ -939,51 +939,51 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             // in-flight messages because
             // Paho won't do that.
 
-            PersistenceType persistenceType = this.m_clientConf.getPersistenceType();
+            PersistenceType persistenceType = this.clientConf.getPersistenceType();
             if (persistenceType == PersistenceType.MEMORY) {
-                s_logger.info("Using memory persistence for in-flight messages");
-                this.m_persistence = new MemoryPersistence();
+                logger.info("Using memory persistence for in-flight messages");
+                this.persistence = new MemoryPersistence();
             } else {
                 StringBuffer sb = new StringBuffer();
-                sb.append(this.m_systemService.getKuraDataDirectory()).append(this.m_systemService.getFileSeparator())
+                sb.append(this.systemService.getKuraDataDirectory()).append(this.systemService.getFileSeparator())
                         .append("paho-persistence");
 
                 String dir = sb.toString();
 
-                s_logger.info("Using file persistence for in-flight messages: {}", dir);
+                logger.info("Using file persistence for in-flight messages: {}", dir);
 
                 // Look for "Close on CONNACK timeout" FIXME in this file.
                 // Make sure persistence is closed.
                 // This is needed if the previous connect attempt was
                 // forcibly terminated by closing the client.
-                if (this.m_persistence != null) {
+                if (this.persistence != null) {
                     try {
-                        this.m_persistence.close();
+                        this.persistence.close();
                     } catch (MqttPersistenceException e) {
-                        s_logger.info("Failed to close persistence. Ignoring exception " + e.getMessage());
-                        s_logger.debug("Failed to close persistence. Ignoring exception.", e);
+                        logger.info("Failed to close persistence. Ignoring exception " + e.getMessage());
+                        logger.debug("Failed to close persistence. Ignoring exception.", e);
                     }
                 }
-                this.m_persistence = new MqttDefaultFilePersistence(dir);
+                this.persistence = new MqttDefaultFilePersistence(dir);
             }
 
             //
             // Construct the MqttClient instance
             MqttAsyncClient mqttClient = null;
             try {
-                mqttClient = new MqttAsyncClient(this.m_clientConf.getBrokerUrl(), this.m_clientConf.getClientId(),
-                        this.m_persistence);
+                mqttClient = new MqttAsyncClient(this.clientConf.getBrokerUrl(), this.clientConf.getClientId(),
+                        this.persistence);
             } catch (MqttException e) {
-                s_logger.error("Client instantiation failed", e);
+                logger.error("Client instantiation failed", e);
                 throw new IllegalStateException("Client instantiation failed", e);
             }
 
             mqttClient.setCallback(this);
 
-            this.m_persistenceType = persistenceType;
-            this.m_mqttClient = mqttClient;
+            this.persistenceType = persistenceType;
+            this.mqttClient = mqttClient;
 
-            if (!this.m_clientConf.getConnectOptions().isCleanSession()) {
+            if (!this.clientConf.getConnectOptions().isCleanSession()) {
                 // This is tricky.
                 // The purpose of this code is to try to restore pending delivery tokens
                 // from the MQTT client persistence and determine if the next connection
@@ -998,15 +998,15 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
                 // Otherwise the next upper layer should decide what to do with the
                 // in-flight messages it is tracking (if any), either to republish or
                 // drop them.
-                IMqttDeliveryToken[] pendingDeliveryTokens = this.m_mqttClient.getPendingDeliveryTokens();
+                IMqttDeliveryToken[] pendingDeliveryTokens = this.mqttClient.getPendingDeliveryTokens();
                 if (pendingDeliveryTokens != null && pendingDeliveryTokens.length != 0) {
                     newSession = false;
                 }
             }
         }
 
-        this.m_newSession = newSession;
-        this.m_sessionId = generateSessionId();
+        this.newSession = newSession;
+        this.sessionId = generateSessionId();
     }
 
     private static String getMqttVersionLabel(int mqttVersion) {
@@ -1028,11 +1028,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
     @Override
     public CloudConnectionStatusEnum getNotificationStatus() {
-        return this.m_notificationStatus;
+        return this.notificationStatus;
     }
 
     @Override
     public void setNotificationStatus(CloudConnectionStatusEnum status) {
-        this.m_notificationStatus = status;
+        this.notificationStatus = status;
     }
 }

@@ -5,9 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.publisher;
+
+import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 
@@ -67,6 +69,7 @@ final class CloudPublisherOptions {
      *            the properties
      */
     CloudPublisherOptions(final Map<String, Object> properties) {
+        requireNonNull(properties, "Properties cannot be null.");
         this.properties = properties;
     }
 
@@ -78,8 +81,7 @@ final class CloudPublisherOptions {
     int getMessageType() {
         int messageType = DEFAULT_MESSAGE_TYPE;
         final Object type = this.properties.get(CONF_MESSAGE_TYPE);
-        if ((this.properties != null) && this.properties.containsKey(CONF_MESSAGE_TYPE) && (type != null)
-                && (type instanceof Integer)) {
+        if (type != null && type instanceof Integer) {
             messageType = (Integer) type;
         }
         return messageType;
@@ -93,8 +95,7 @@ final class CloudPublisherOptions {
     String getPublishingApplication() {
         String publishingApp = DEFAULT_APPLICATION;
         final Object app = this.properties.get(CONF_APPLICATION);
-        if ((this.properties != null) && this.properties.containsKey(CONF_APPLICATION) && (app != null)
-                && (app instanceof String)) {
+        if (app != null && app instanceof String) {
             publishingApp = String.valueOf(app);
         }
         return publishingApp;
@@ -108,8 +109,7 @@ final class CloudPublisherOptions {
     int getPublishingPriority() {
         int publishingPriority = DEFAULT_PRIORITY;
         final Object priority = this.properties.get(CONF_PRIORITY);
-        if ((this.properties != null) && this.properties.containsKey(CONF_PRIORITY) && (priority != null)
-                && (priority instanceof Integer)) {
+        if (priority != null && priority instanceof Integer) {
             publishingPriority = (Integer) priority;
         }
         return publishingPriority;
@@ -123,8 +123,7 @@ final class CloudPublisherOptions {
     int getPublishingQos() {
         int publishingQos = DEFAULT_QOS;
         final Object qos = this.properties.get(CONF_QOS);
-        if ((this.properties != null) && this.properties.containsKey(CONF_QOS) && (qos != null)
-                && (qos instanceof Integer)) {
+        if (qos != null && qos instanceof Integer) {
             publishingQos = (Integer) qos;
         }
         return publishingQos;
@@ -138,8 +137,7 @@ final class CloudPublisherOptions {
     boolean getPublishingRetain() {
         boolean publishingRetain = DEFAULT_RETAIN;
         final Object retain = this.properties.get(CONF_RETAIN);
-        if ((this.properties != null) && this.properties.containsKey(CONF_RETAIN) && (retain != null)
-                && (retain instanceof Integer)) {
+        if (retain != null && retain instanceof Integer) {
             publishingRetain = (Boolean) retain;
         }
         return publishingRetain;
@@ -153,8 +151,7 @@ final class CloudPublisherOptions {
     String getPublishingTopic() {
         String publishingTopic = DEFAULT_TOPIC;
         final Object topic = this.properties.get(CONF_TOPIC);
-        if ((this.properties != null) && this.properties.containsKey(CONF_TOPIC) && (topic != null)
-                && (topic instanceof String)) {
+        if (topic != null && topic instanceof String) {
             publishingTopic = String.valueOf(topic);
         }
         return publishingTopic;
@@ -168,8 +165,7 @@ final class CloudPublisherOptions {
     String getCloudServicePid() {
         String cloudServicePid = DEFAULT_CLOUD_SERVICE_PID;
         Object configCloudServicePid = this.properties.get(CLOUD_SERVICE_PID);
-        if ((this.properties != null) && this.properties.containsKey(CLOUD_SERVICE_PID) && configCloudServicePid != null
-                && configCloudServicePid instanceof String) {
+        if (configCloudServicePid != null && configCloudServicePid instanceof String) {
             cloudServicePid = (String) configCloudServicePid;
         }
         return cloudServicePid;

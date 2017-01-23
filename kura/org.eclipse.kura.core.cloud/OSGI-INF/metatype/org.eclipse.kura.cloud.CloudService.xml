@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates, and others
+    Copyright (c) 2011, 2017 Eurotech and/or its affiliates, and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -77,21 +77,25 @@
             default="false"
             description="Whether or not to republish the MQTT Birth Certificate on modem detection event"/>
             
-        <AD id="disable.default.subscriptions"
-            name="disable.default.subscriptions"
+        <AD id="enable.default.subscriptions"
+            name="enable.default.subscriptions"
             type="Boolean"
             cardinality="0"
             required="true"
-            default="false"
+            default="true"
             description="By disabling default subscriptions the gateway will not be remotely manageable"/>
             
-        <AD id="disable.republish.birth.cert.on.reconnect"
-            name="disable.republish.birth.cert.on.reconnect"
-            type="Boolean"
+        <AD id="birth.cert.policy"
+            name="birth.cert.policy"
+            type="String"
             cardinality="0"
             required="true"
-            default="false"
-            description="Disable republishing the MQTT Birth Certificate on reconnects"/>    
+            default="birth-connect-reconnect"
+            description="Specify the birth certificate policy.">
+            <Option label="Disable publishing" value="disable" />
+            <Option label="Publish birth on connect" value="birth-connect" />
+            <Option label="Publish birth on connect and reconnect" value="birth-connect-reconnect" />
+        </AD>
     </OCD>
     
     <Designate pid="org.eclipse.kura.cloud.CloudService" factoryPid="org.eclipse.kura.cloud.CloudService">

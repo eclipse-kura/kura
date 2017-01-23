@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -40,10 +40,10 @@ public class LifeCyclePayloadBuilder {
 
     private static final String UNKNOWN = "UNKNOWN";
 
-    private final CloudServiceImpl m_cloudServiceImpl;
+    private final CloudServiceImpl cloudServiceImpl;
 
     LifeCyclePayloadBuilder(CloudServiceImpl cloudServiceImpl) {
-        this.m_cloudServiceImpl = cloudServiceImpl;
+        this.cloudServiceImpl = cloudServiceImpl;
     }
 
     public KuraBirthPayload buildBirthPayload() {
@@ -57,10 +57,10 @@ public class LifeCyclePayloadBuilder {
         String acceptEncoding = buildAcceptEncoding();
 
         // build device name
-        CloudServiceOptions cso = this.m_cloudServiceImpl.getCloudServiceOptions();
+        CloudServiceOptions cso = this.cloudServiceImpl.getCloudServiceOptions();
         String deviceName = cso.getDeviceDisplayName();
         if (deviceName == null) {
-            deviceName = this.m_cloudServiceImpl.getSystemService().getDeviceName();
+            deviceName = this.cloudServiceImpl.getSystemService().getDeviceName();
         }
 
         // build birth certificate
@@ -79,22 +79,22 @@ public class LifeCyclePayloadBuilder {
                 .withOsgiFramework(deviceProfile.getOsgiFramework())
                 .withOsgiFrameworkVersion(deviceProfile.getOsgiFrameworkVersion());
 
-        if (this.m_cloudServiceImpl.m_imei != null && this.m_cloudServiceImpl.m_imei.length() > 0
-                && !this.m_cloudServiceImpl.m_imei.equals(ERROR)) {
-            birthPayloadBuilder.withModemImei(this.m_cloudServiceImpl.m_imei);
+        if (this.cloudServiceImpl.imei != null && this.cloudServiceImpl.imei.length() > 0
+                && !this.cloudServiceImpl.imei.equals(ERROR)) {
+            birthPayloadBuilder.withModemImei(this.cloudServiceImpl.imei);
         }
-        if (this.m_cloudServiceImpl.m_iccid != null && this.m_cloudServiceImpl.m_iccid.length() > 0
-                && !this.m_cloudServiceImpl.m_iccid.equals(ERROR)) {
-            birthPayloadBuilder.withModemIccid(this.m_cloudServiceImpl.m_iccid);
-        }
-
-        if (this.m_cloudServiceImpl.m_imsi != null && this.m_cloudServiceImpl.m_imsi.length() > 0
-                && !this.m_cloudServiceImpl.m_imsi.equals(ERROR)) {
-            birthPayloadBuilder.withModemImsi(this.m_cloudServiceImpl.m_imsi);
+        if (this.cloudServiceImpl.iccid != null && this.cloudServiceImpl.iccid.length() > 0
+                && !this.cloudServiceImpl.iccid.equals(ERROR)) {
+            birthPayloadBuilder.withModemIccid(this.cloudServiceImpl.iccid);
         }
 
-        if (this.m_cloudServiceImpl.m_rssi != null && this.m_cloudServiceImpl.m_rssi.length() > 0) {
-            birthPayloadBuilder.withModemRssi(this.m_cloudServiceImpl.m_rssi);
+        if (this.cloudServiceImpl.imsi != null && this.cloudServiceImpl.imsi.length() > 0
+                && !this.cloudServiceImpl.imsi.equals(ERROR)) {
+            birthPayloadBuilder.withModemImsi(this.cloudServiceImpl.imsi);
+        }
+
+        if (this.cloudServiceImpl.rssi != null && this.cloudServiceImpl.rssi.length() > 0) {
+            birthPayloadBuilder.withModemRssi(this.cloudServiceImpl.rssi);
         }
 
         if (deviceProfile.getLatitude() != null && deviceProfile.getLongitude() != null) {
@@ -109,9 +109,9 @@ public class LifeCyclePayloadBuilder {
     }
 
     public KuraDisconnectPayload buildDisconnectPayload() {
-        SystemService systemService = this.m_cloudServiceImpl.getSystemService();
-        SystemAdminService sysAdminService = this.m_cloudServiceImpl.getSystemAdminService();
-        CloudServiceOptions cloudOptions = this.m_cloudServiceImpl.getCloudServiceOptions();
+        SystemService systemService = this.cloudServiceImpl.getSystemService();
+        SystemAdminService sysAdminService = this.cloudServiceImpl.getSystemAdminService();
+        CloudServiceOptions cloudOptions = this.cloudServiceImpl.getCloudServiceOptions();
 
         // build device name
         String deviceName = cloudOptions.getDeviceDisplayName();
@@ -125,10 +125,10 @@ public class LifeCyclePayloadBuilder {
     }
 
     public KuraDeviceProfile buildDeviceProfile() {
-        SystemService systemService = this.m_cloudServiceImpl.getSystemService();
-        SystemAdminService sysAdminService = this.m_cloudServiceImpl.getSystemAdminService();
-        NetworkService networkService = this.m_cloudServiceImpl.getNetworkService();
-        PositionService positionService = this.m_cloudServiceImpl.getPositionService();
+        SystemService systemService = this.cloudServiceImpl.getSystemService();
+        SystemAdminService sysAdminService = this.cloudServiceImpl.getSystemAdminService();
+        NetworkService networkService = this.cloudServiceImpl.getNetworkService();
+        PositionService positionService = this.cloudServiceImpl.getPositionService();
 
         //
         // get the network information
@@ -262,7 +262,7 @@ public class LifeCyclePayloadBuilder {
     }
 
     private String buildApplicationIDs() {
-        String[] appIdArray = this.m_cloudServiceImpl.getCloudApplicationIdentifiers();
+        String[] appIdArray = this.cloudServiceImpl.getCloudApplicationIdentifiers();
         StringBuilder sbAppIDs = new StringBuilder();
         for (int i = 0; i < appIdArray.length; i++) {
             if (i != 0) {
@@ -275,7 +275,7 @@ public class LifeCyclePayloadBuilder {
 
     private String buildAcceptEncoding() {
         String acceptEncoding = "";
-        CloudServiceOptions options = this.m_cloudServiceImpl.getCloudServiceOptions();
+        CloudServiceOptions options = this.cloudServiceImpl.getCloudServiceOptions();
         if (options.getEncodeGzip()) {
             acceptEncoding = "gzip";
         }

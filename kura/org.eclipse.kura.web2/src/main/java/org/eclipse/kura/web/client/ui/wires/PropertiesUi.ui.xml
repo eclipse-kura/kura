@@ -57,12 +57,12 @@
 											<b.html:Strong ui:field="channelTitle">Channels Table</b.html:Strong>
 										</b:ButtonGroup>
 										<b:ButtonGroup size="SMALL" addStyleNames="pull-right">
-											<b:Button icon="DOWNLOAD" ui:field="btn_download">Download Channels</b:Button>
-											<b:Button icon="UPLOAD" ui:field="btn_upload">Upload Channels</b:Button>
+											<b:Button icon="DOWNLOAD" ui:field="btnDownload">Download Channels</b:Button>
+											<b:Button icon="UPLOAD" ui:field="btnUpload">Upload Channels</b:Button>
 										</b:ButtonGroup>
 										<b:ButtonGroup size="SMALL" addStyleNames="pull-right">
-											<b:Button icon="PLUS_SQUARE" ui:field="btn_add">Add Channel</b:Button>
-											<b:Button icon="MINUS_SQUARE" ui:field="btn_remove">Remove
+											<b:Button icon="PLUS_SQUARE" ui:field="btnAdd">Add Channel</b:Button>
+											<b:Button icon="MINUS_SQUARE" ui:field="btnRemove">Remove
 												Channel</b:Button>
 										</b:ButtonGroup>
 									</b:ButtonToolBar>

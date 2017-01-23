@@ -10,7 +10,7 @@
  *     Eurotech
  *     Red Hat Inc
  *******************************************************************************/
-package org.eclipse.kura.internal.asset;
+package org.eclipse.kura.internal.driver;
 
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;

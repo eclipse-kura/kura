@@ -30,7 +30,9 @@
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.util/${org.eclipse.kura.util.version}</bundle>
 
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.asset.cloudlet.provider/${org.eclipse.kura.asset.cloudlet.provider.version}</bundle>
+        <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.asset.helper.provider/${org.eclipse.kura.asset.helper.provider.version}</bundle>
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.asset.provider/${org.eclipse.kura.asset.provider.version}</bundle>
+        <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.driver.helper.provider/${org.eclipse.kura.driver.helper.provider.version}</bundle>
 
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.wire.component.provider/${org.eclipse.kura.wire.component.provider.version}</bundle>
         <bundle start="true" start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.wire.provider/${org.eclipse.kura.wire.provider.version}</bundle>

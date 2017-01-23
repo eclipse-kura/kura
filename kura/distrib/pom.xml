@@ -323,6 +323,16 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.asset.helper.provider</artifactId>
+									<version>${org.eclipse.kura.asset.helper.provider.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.driver.helper.provider</artifactId>
+									<version>${org.eclipse.kura.driver.helper.provider.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.localization</artifactId>
 									<version>${org.eclipse.kura.localization.version}</version>
 									</artifactItem>
@@ -425,6 +435,8 @@
 							    <move file="target/plugins/org.eclipse.kura.api.jar" tofile="target/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"/>
 								<move file="target/plugins/org.eclipse.kura.asset.provider.jar" tofile="target/plugins/org.eclipse.kura.asset.provider_${org.eclipse.kura.asset.provider.version}.jar"/>
 								<move file="target/plugins/org.eclipse.kura.asset.cloudlet.provider.jar" tofile="target/plugins/org.eclipse.kura.asset.cloudlet.provider_${org.eclipse.kura.asset.cloudlet.provider.version}.jar"/>
+								<move file="target/plugins/org.eclipse.kura.asset.helper.provider.jar" tofile="target/plugins/org.eclipse.kura.asset.helper.provider_${org.eclipse.kura.asset.helper.provider.version}.jar"/>
+								<move file="target/plugins/org.eclipse.kura.driver.helper.provider.jar" tofile="target/plugins/org.eclipse.kura.driver.helper.provider_${org.eclipse.kura.driver.helper.provider.version}.jar"/>
 								<move file="target/plugins/org.eclipse.kura.camel.jar" tofile="target/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"/>
 								<move file="target/plugins/org.eclipse.kura.camel.cloud.factory.jar" tofile="target/plugins/org.eclipse.kura.camel.cloud.factory_${org.eclipse.kura.camel.cloud.factory.version}.jar"/>
 								<move file="target/plugins/org.eclipse.kura.camel.xml.jar" tofile="target/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar"/>

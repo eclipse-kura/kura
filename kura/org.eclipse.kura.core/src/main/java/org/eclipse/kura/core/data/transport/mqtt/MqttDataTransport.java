@@ -193,7 +193,6 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         this.properties.putAll(decryptedPropertiesMap);
         try {
             this.clientConf = buildConfiguration(this.properties);
-            // setupMqttSession();
         } catch (RuntimeException e) {
             logger.error(
                     "Invalid client configuration. Service will not be able to connect until the configuration is updated",
@@ -326,15 +325,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
         } catch (MqttException e) {
             logger.warn("xxxxx  Connect failed. Forcing disconnect. xxxxx {}", e);
-            try {
-                // prevent callbacks from a zombie client
-                this.mqttClient.setCallback(null);
-                this.mqttClient.close();
-            } catch (Exception de) {
-                logger.warn("Forced disconnect exception.", de);
-            } finally {
-                this.mqttClient = null;
-            }
+            closeMqttClient();
 
             // Update status notification service
             this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
@@ -426,8 +417,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             // Please have a look at issue: https://github.com/eclipse/paho.mqtt.java/issues/244
             try {
                 Thread.sleep(1000);
-            } catch (InterruptedException e1) {
-                logger.error("Sleep Interrupted!");
+            } catch (InterruptedException e) {
+                logger.warn("Sleep Interrupted!");
             }
 
             try {
@@ -503,10 +494,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.kura.data.DataPublisherService#publish(java.lang.String
      * , byte[], int, boolean)
-     * 
+     *
      * DataConnectException this can be easily recovered connecting the service.
      * TooManyInflightMessagesException the caller SHOULD retry publishing the
      * message at a later time. RuntimeException (unchecked) all other
@@ -685,6 +676,32 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         // The SSL service was update, build a new socket connection
         update();
     }
+
+    // ---------------------------------------------------------
+    //
+    // CloudConnectionStatus Overrides
+    //
+    // ---------------------------------------------------------
+    @Override
+    public int getNotificationPriority() {
+        return CloudConnectionStatusService.PRIORITY_MEDIUM;
+    }
+
+    @Override
+    public CloudConnectionStatusEnum getNotificationStatus() {
+        return this.notificationStatus;
+    }
+
+    @Override
+    public void setNotificationStatus(CloudConnectionStatusEnum status) {
+        this.notificationStatus = status;
+    }
+
+    // ---------------------------------------------------------
+    //
+    // Private methods
+    //
+    // ---------------------------------------------------------
 
     /*
      * This method builds an internal configuration option needed by the client
@@ -886,17 +903,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
             if (!(brokerUrl.equals(this.clientConf.getBrokerUrl()) && clientId.equals(this.clientConf.getClientId())
                     && this.persistenceType == this.clientConf.getPersistenceType())) {
-                try {
-                    logger.info("Closing client...");
-                    // prevent callbacks from a zombie client
-                    this.mqttClient.setCallback(null);
-                    this.mqttClient.close();
-                    logger.info("Closed");
-                } catch (MqttException e) {
-                    logger.error("Cannot close client", e);
-                } finally {
-                    this.mqttClient = null;
-                }
+                closeMqttClient();
             }
         }
 
@@ -1021,6 +1028,20 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         this.sessionId = generateSessionId();
     }
 
+    private void closeMqttClient() {
+        try {
+            logger.info("Closing client...");
+            // prevent callbacks from a zombie client
+            this.mqttClient.setCallback(null);
+            this.mqttClient.close();
+            logger.info("Closed");
+        } catch (MqttException e) {
+            logger.warn("Cannot close client", e);
+        } finally {
+            this.mqttClient = null;
+        }
+    }
+
     private static String getMqttVersionLabel(int mqttVersion) {
 
         switch (mqttVersion) {
@@ -1031,20 +1052,5 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         default:
             return String.valueOf(mqttVersion);
         }
-    }
-
-    @Override
-    public int getNotificationPriority() {
-        return CloudConnectionStatusService.PRIORITY_MEDIUM;
-    }
-
-    @Override
-    public CloudConnectionStatusEnum getNotificationStatus() {
-        return this.notificationStatus;
-    }
-
-    @Override
-    public void setNotificationStatus(CloudConnectionStatusEnum status) {
-        this.notificationStatus = status;
     }
 }

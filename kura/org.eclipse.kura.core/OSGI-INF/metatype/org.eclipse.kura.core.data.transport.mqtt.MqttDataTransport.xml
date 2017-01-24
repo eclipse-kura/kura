@@ -26,7 +26,7 @@
             cardinality="0" 
             required="true"
             default="mqtt://broker-url:1883/" 
-            description="URL of the mqtt broker to connect to, for example, mqtt://broker-sandbox.everyware-cloud.com:1883/, mqtts://broker-sandbox.everyware-cloud.com:8883/, ws://broker-sandbox.everyware-cloud.com:8080/ or wss://broker-sandbox.everyware-cloud.com:443/."/>
+            description="URL of the mqtt broker to connect to, for example, mqtt://iot.eclipse.org:1883/, mqtts://iot.eclipse.org:8883/, ws://iot.eclipse.org:80/ws or wss://iot.eclipse.org:443/ws."/>
 
         <AD id="topic.context.account-name"
             name="topic.context.account-name"

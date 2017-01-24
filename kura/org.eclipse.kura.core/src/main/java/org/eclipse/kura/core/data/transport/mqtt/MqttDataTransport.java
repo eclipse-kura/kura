@@ -417,9 +417,21 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             // notify the listeners
             this.dataTransportListeners.onDisconnecting();
 
+            // Inserted due to an issue of paho 1.1.0 with websockets: without this sleep, it seems to be waiting for
+            // something and ends with an exception (32000 error raised by waitForCompletion).
+            // The DC message is sent with qos = 0 so paho should not be waiting for something in reply by the broker.
+            // Inserting this short delay determines that the DC and DISCONNECT messages coming from the broker will be
+            // received before paho closes the connection. Only in this way, the connection can be closed without
+            // issues.
+            // Please have a look at issue: https://github.com/eclipse/paho.mqtt.java/issues/244
             try {
-                IMqttToken token = this.mqttClient.disconnect(quiesceTimeout);
-                token.waitForCompletion(getTimeToWaitMillis());
+                Thread.sleep(1000);
+            } catch (InterruptedException e1) {
+                logger.error("Sleep Interrupted!");
+            }
+
+            try {
+                this.mqttClient.disconnect(quiesceTimeout).waitForCompletion(getTimeToWaitMillis());
                 logger.info("Disconnected");
             } catch (MqttException e) {
                 logger.error("Disconnect failed", e);

@@ -1,15 +1,17 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *
  *******************************************************************************/
 package org.eclipse.kura.wire;
-
-import org.eclipse.kura.KuraRuntimeException;
 
 /**
  * The interface WireHelperService is an service utility API to provide quick
@@ -27,7 +29,7 @@ public interface WireHelperService {
      * @return the Service PID of the provided wire component or {@code null} if
      *         the provided Wire Component PID is not associated with any
      *         available Wire Component in the OSGi service registry
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     public String getPid(final WireComponent wireComponent);
@@ -41,7 +43,7 @@ public interface WireHelperService {
      * @return the Service PID of the provided wire component or {@code null} if
      *         the provided Wire Component PID is not associated with any
      *         available Wire Component in the OSGi service registry
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     public String getServicePid(final String wireComponentPid);
@@ -55,7 +57,7 @@ public interface WireHelperService {
      * @return the Service PID of the provided wire component or {@code null} if
      *         the provided Wire Component PID is not associated with any
      *         available Wire Component in the OSGi service registry
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     public String getServicePid(final WireComponent wireComponent);
@@ -66,7 +68,7 @@ public interface WireHelperService {
      * @param wireComponentPid
      *            the wire component PID (kura.service.pid)
      * @return true if the provided Wire Component PID belongs to a Wire Emitter
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     public boolean isEmitter(final String wireComponentPid);
@@ -78,7 +80,7 @@ public interface WireHelperService {
      *            the wire component PID (kura.service.pid)
      * @return true if the provided Wire Component PID belongs to a Wire
      *         Receiver
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     public boolean isReceiver(final String wireComponentPid);
@@ -89,7 +91,7 @@ public interface WireHelperService {
      * @param wireComponent
      *            the wire component
      * @return the wire support instance
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     public WireSupport newWireSupport(WireComponent wireComponent);

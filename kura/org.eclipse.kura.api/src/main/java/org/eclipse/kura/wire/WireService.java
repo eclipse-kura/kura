@@ -1,18 +1,21 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *
  *******************************************************************************/
 package org.eclipse.kura.wire;
 
 import java.util.Set;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraRuntimeException;
 
 /**
  * This WireService interface provides all necessary service API methods to
@@ -40,7 +43,7 @@ public interface WireService {
      *             PID or the provided emitter PID does not belong to a Wire
      *             Emitter or the receiver PID does not belong to a Wire
      *             Receiver
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if any of the arguments is null
      * @return the wire instance recently created
      */
@@ -52,7 +55,7 @@ public interface WireService {
      *
      * @param wireConfiguration
      *            the wire configuration to be deleted
-     * @throws KuraRuntimeException
+     * @throws NullPointerException
      *             if the argument is null
      */
     public void deleteWireConfiguration(WireConfiguration wireConfiguration);

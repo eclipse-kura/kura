@@ -1,14 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *
  *******************************************************************************/
 package org.eclipse.kura.wire;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.kura.annotation.Immutable;
@@ -23,10 +28,12 @@ import org.osgi.service.wireadmin.Envelope;
  *
  * @see Envelope
  * @see BasicEnvelope
+ *
+ * @noextend This class is not intended to be extended by clients.
  */
 @Immutable
 @ThreadSafe
-public final class WireEnvelope extends BasicEnvelope {
+public class WireEnvelope extends BasicEnvelope {
 
     /**
      * The scope as agreed by the composite producer and consumer. This remains
@@ -62,7 +69,7 @@ public final class WireEnvelope extends BasicEnvelope {
      */
     @SuppressWarnings("unchecked")
     public List<WireRecord> getRecords() {
-        return (List<WireRecord>) this.getValue();
+        return Collections.unmodifiableList((List<WireRecord>) this.getValue());
     }
 
 }

@@ -1,26 +1,32 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *
  *******************************************************************************/
 package org.eclipse.kura.wire;
 
 import static java.util.Objects.requireNonNull;
+
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 import org.eclipse.kura.type.TypedValue;
 
 /**
- * The WireField represents an ADT (abstract data type) to be used in
- * {@link WireRecord}
+ * The WireField represents a data type to be contained in {@link WireRecord}
+ *
+ * @noextend This class is not intended to be extended by clients.
  */
 @Immutable
 @ThreadSafe
-public final class WireField {
+public class WireField {
 
     /** The severity level of the field */
     private final SeverityLevel level;

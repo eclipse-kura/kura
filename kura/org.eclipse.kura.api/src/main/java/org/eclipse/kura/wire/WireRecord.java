@@ -1,20 +1,26 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *
  *******************************************************************************/
 package org.eclipse.kura.wire;
 
 import static java.util.Objects.requireNonNull;
+
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.annotation.ThreadSafe;
@@ -23,10 +29,12 @@ import org.osgi.util.position.Position;
 /**
  * The Class WireRecord represents a record to be transmitted during wire
  * communication between wire emitter and wire receiver
+ *
+ * @noextend This class is not intended to be extended by clients.
  */
 @Immutable
 @ThreadSafe
-public final class WireRecord {
+public class WireRecord {
 
     /** The contained wire fields. */
     private final List<WireField> fields;

@@ -189,16 +189,6 @@
                                     <artifactId>org.eclipse.kura.raspberrypi.sensehat</artifactId>
                                     <version>1.0.1</version>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.windows.command</artifactId>
-                                    <version>1.0.0</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.windows.clock</artifactId>
-                                    <version>1.0.0</version>
-                                </artifactItem>
                           </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

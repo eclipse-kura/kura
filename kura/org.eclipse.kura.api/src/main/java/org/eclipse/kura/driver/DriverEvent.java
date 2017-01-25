@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
  *
  *******************************************************************************/
 package org.eclipse.kura.driver;
@@ -16,9 +20,11 @@ import org.eclipse.kura.annotation.NotThreadSafe;
 /**
  * The DriverEvent class represents an event occurred while monitoring specific
  * channel configuration by the driver
+ *
+ * @noextend This class is not intended to be extended by clients.
  */
 @NotThreadSafe
-public final class DriverEvent {
+public class DriverEvent {
 
     /**
      * Represents the driver record as triggered due to the driver monitor

@@ -1,16 +1,21 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *
  *******************************************************************************/
 
 package org.eclipse.kura.wire;
 
 import static java.util.Objects.requireNonNull;
+
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.annotation.Nullable;
@@ -19,9 +24,11 @@ import org.osgi.service.wireadmin.Wire;
 /**
  * The Class WireConfiguration represents a wiring configuration between a Wire
  * Emitter and a Wire Receiver.
+ *
+ * @noextend This class is not intended to be extended by clients.
  */
 @NotThreadSafe
-public final class WireConfiguration {
+public class WireConfiguration {
 
     /** The Wire Emitter PID. */
     private final String emitterPid;

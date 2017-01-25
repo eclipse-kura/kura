@@ -1,16 +1,22 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *
  *******************************************************************************/
 package org.eclipse.kura.asset;
 
 import static java.util.Objects.requireNonNull;
+
 import java.util.Map;
+
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.DataType;
 
@@ -20,9 +26,11 @@ import org.eclipse.kura.type.DataType;
  * operation (read/write/monitor).
  *
  * @see AssetConfiguration
+ *
+ * @noextend This class is not intended to be extended by clients.
  */
 @NotThreadSafe
-public final class Channel {
+public class Channel {
 
     /** The communication channel configuration. */
     private final Map<String, Object> configuration;

@@ -1482,10 +1482,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                     String result = attrDef.validate(stringValue);
                     if (result != null && !result.isEmpty()) {
                         throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID,
-                                attrDef.getID() + ": " + result);
+                                attrDef.getID(), stringValue, result);
                     }
                 }
-
             }
 
             // make sure all required properties are set

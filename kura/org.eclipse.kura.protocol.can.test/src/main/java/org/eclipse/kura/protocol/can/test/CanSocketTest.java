@@ -29,43 +29,42 @@ public class CanSocketTest implements ConfigurableComponent {
 
     private static final boolean IS_MAC = System.getProperty("os.name").toLowerCase().startsWith("mac");
 
-    private static final Logger s_logger = LoggerFactory.getLogger(CanSocketTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(CanSocketTest.class);
 
-    private CanConnectionService m_canConnection;
-    private Map<String, Object> m_properties;
-    private Thread m_pollThread;
-    private boolean thread_done = false;
-    private String m_ifName;
-    private int m_canId;
-    private int m_orig;
-    private boolean m_isMaster;
-    private byte indice = 0;
+    private volatile CanConnectionService canConnection;
+    private Map<String, Object> properties;
+    private Thread pollThread;
+    private String interfaceName;
+    private int canId;
+    private int orig;
+    private boolean isMaster;
+    private byte index = 0;
 
     public void setCanConnectionService(CanConnectionService canConnection) {
-        this.m_canConnection = canConnection;
+        this.canConnection = canConnection;
     }
 
     public void unsetCanConnectionService(CanConnectionService canConnection) {
-        this.m_canConnection = null;
+        this.canConnection = null;
     }
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        this.m_properties = properties;
-        s_logger.info("activating can test");
-        this.m_ifName = "can0";
-        this.m_canId = 0;
-        this.m_orig = 0;
-        this.m_isMaster = false;
+        this.properties = properties;
+        logger.info("activating can test");
+        this.interfaceName = "can0";
+        this.canId = 0;
+        this.orig = 0;
+        this.isMaster = false;
 
-        if (this.m_properties != null) {
-            if (this.m_properties.get("can.name") != null) {
-                this.m_ifName = (String) this.m_properties.get("can.name");
+        if (this.properties != null) {
+            if (this.properties.get("can.name") != null) {
+                this.interfaceName = (String) this.properties.get("can.name");
             }
-            if (this.m_properties.get("can.identifier") != null) {
-                this.m_canId = (Integer) this.m_properties.get("can.identifier");
+            if (this.properties.get("can.identifier") != null) {
+                this.canId = (Integer) this.properties.get("can.identifier");
             }
-            if (this.m_properties.get("master") != null) {
-                this.m_isMaster = (Boolean) this.m_properties.get("master");
+            if (this.properties.get("master") != null) {
+                this.isMaster = (Boolean) this.properties.get("master");
             }
         }
 
@@ -73,30 +72,22 @@ public class CanSocketTest implements ConfigurableComponent {
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        if (this.m_pollThread != null) {
-            this.m_pollThread.interrupt();
-            try {
-                this.m_pollThread.join(100);
-            } catch (InterruptedException e) {
-                // Ignore
-            }
-        }
-        this.m_pollThread = null;
+        terminatePollThread();
     }
 
     public void updated(Map<String, Object> properties) {
-        s_logger.debug("updated...");
+        logger.debug("updated...");
 
-        this.m_properties = properties;
-        if (this.m_properties != null) {
-            if (this.m_properties.get("can.name") != null) {
-                this.m_ifName = (String) this.m_properties.get("can.name");
+        this.properties = properties;
+        if (this.properties != null) {
+            if (this.properties.get("can.name") != null) {
+                this.interfaceName = (String) this.properties.get("can.name");
             }
-            if (this.m_properties.get("can.identifier") != null) {
-                this.m_canId = (Integer) this.m_properties.get("can.identifier");
+            if (this.properties.get("can.identifier") != null) {
+                this.canId = (Integer) this.properties.get("can.identifier");
             }
-            if (this.m_properties.get("master") != null) {
-                this.m_isMaster = (Boolean) this.m_properties.get("master");
+            if (this.properties.get("master") != null) {
+                this.isMaster = (Boolean) this.properties.get("master");
             }
         }
     }
@@ -108,42 +99,35 @@ public class CanSocketTest implements ConfigurableComponent {
 
     @Test
     public void startCanTestThread() {
-        if (this.m_pollThread != null) {
-            this.m_pollThread.interrupt();
-            try {
-                this.m_pollThread.join(100);
-            } catch (InterruptedException e) {
-                // Ignore
-            }
-            this.m_pollThread = null;
-        }
+        terminatePollThread();
 
-        this.m_pollThread = new Thread(new Runnable() {
+        this.pollThread = new Thread(new Runnable() {
 
             @Override
             public void run() {
-                if (CanSocketTest.this.m_canConnection != null && !IS_MAC) {
-                    while (!CanSocketTest.this.thread_done) {
-                        CanSocketTest.this.thread_done = doCanTest();
+                if (CanSocketTest.this.canConnection != null && !IS_MAC) {
+                    boolean threadDone = false;
+                    while (!threadDone) {
+                        threadDone = doCanTest();
                     }
                 }
             }
         });
-        this.m_pollThread.start();
+        this.pollThread.start();
     }
 
     public boolean doCanTest() {
         byte[] b;
         CanMessage cm = null;
-        if (this.m_isMaster) {
-            if (this.m_orig >= 0) {
+        if (this.isMaster) {
+            if (this.orig >= 0) {
                 try {
-                    testSendImpl(this.m_ifName, this.m_canId, this.m_orig);
+                    testSendImpl(this.interfaceName, this.canId, this.orig);
                 } catch (KuraException e) {
-                    s_logger.warn("CanConnection Crash : {}", e.getMessage());
+                    logger.warn("CanConnection Crash : {}", e.getMessage());
                     return false;
                 } catch (IOException e) {
-                    s_logger.warn("CanConnection Crash : {}", e.getMessage());
+                    logger.warn("CanConnection Crash : {}", e.getMessage());
                     return false;
                 }
             }
@@ -152,13 +136,11 @@ public class CanSocketTest implements ConfigurableComponent {
             } catch (InterruptedException e) {
             }
         } else {
-            s_logger.info("Wait for a request");
+            logger.info("Wait for a request");
             try {
-
-                cm = this.m_canConnection.receiveCanMessage(-1, 0x7FF);
-
+                cm = this.canConnection.receiveCanMessage(-1, 0x7FF);
             } catch (IOException e) {
-                s_logger.warn("CanConnection Crash : {}", e.getMessage());
+                logger.warn("CanConnection Crash : {}", e.getMessage());
                 return false;
             }
             b = cm.getData();
@@ -170,35 +152,47 @@ public class CanSocketTest implements ConfigurableComponent {
                 }
                 sb.append(" on id = ");
                 sb.append(cm.getCanId());
-                s_logger.info(sb.toString());
+                logger.info(sb.toString());
             } else {
-                s_logger.warn("receive=null");
+                logger.warn("receive=null");
             }
         }
         return false;
     }
 
     public void testSendImpl(String ifName, int orig, int dest) throws KuraException, IOException {
-        if (this.m_canConnection == null || orig < 0) {
+        if (this.canConnection == null || orig < 0) {
             return;
         }
         int id = 0x500 + (orig << 4) + dest;
         StringBuilder sb = new StringBuilder("Try to send can frame with message = ");
         byte btest[] = new byte[8];
         for (int i = 0; i < 8; i++) {
-            btest[i] = (byte) (this.indice + i);
+            btest[i] = (byte) (this.index + i);
             sb.append(btest[i]);
             sb.append(" ");
         }
         sb.append(" and id = ");
         sb.append(id);
-        s_logger.info(sb.toString());
+        logger.info(sb.toString());
 
-        this.m_canConnection.sendCanMessage(ifName, id, btest);
+        this.canConnection.sendCanMessage(ifName, id, btest);
 
-        this.indice++;
-        if (this.indice > 14) {
-            this.indice = 0;
+        this.index++;
+        if (this.index > 14) {
+            this.index = 0;
         }
+    }
+
+    private void terminatePollThread() {
+        if (this.pollThread != null) {
+            this.pollThread.interrupt();
+            try {
+                this.pollThread.join(100);
+            } catch (InterruptedException e) {
+                // Ignore
+            }
+        }
+        this.pollThread = null;
     }
 }

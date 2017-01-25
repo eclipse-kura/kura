@@ -13,11 +13,16 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 
+import org.eclipse.kura.localization.LocalizationAdapter;
+import org.eclipse.kura.localization.resources.WireMessages;
+
 /**
  * The Class CloudPublisherOptions is responsible to provide all the required
  * options for the Cloud Publisher Wire Component
  */
 final class CloudPublisherOptions {
+
+    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
     private static final String CLOUD_SERVICE_PID = "cloud.service.pid";
 
@@ -59,7 +64,6 @@ final class CloudPublisherOptions {
     /** The Constant denoting default MQTT topic. */
     private static final String DEFAULT_TOPIC = "EVENT";
 
-    /** The properties as associated */
     private final Map<String, Object> properties;
 
     /**
@@ -69,7 +73,7 @@ final class CloudPublisherOptions {
      *            the properties
      */
     CloudPublisherOptions(final Map<String, Object> properties) {
-        requireNonNull(properties, "Properties cannot be null.");
+        requireNonNull(properties, message.propertiesNonNull());
         this.properties = properties;
     }
 

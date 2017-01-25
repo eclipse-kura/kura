@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.core.net;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -116,7 +117,7 @@ public class WifiAccessPointImpl implements WifiAccessPoint {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("ssid=").append(this.ssid);
-        if (this.hardwareAddress != null && this.hardwareAddress.length > 0) {
+        if (this.hardwareAddress != null && this.hardwareAddress.length == 6) {
             sb.append(" :: hardwareAddress=").append(NetworkUtil.macToString(this.hardwareAddress));
         }
         sb.append(" :: frequency=").append(this.frequency).append(" :: mode=").append(this.mode);
@@ -141,4 +142,82 @@ public class WifiAccessPointImpl implements WifiAccessPoint {
         }
         return sb.toString();
     }
+    
+    @Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((bitrate == null) ? 0 : bitrate.hashCode());
+		result = prime * result + ((capabilities == null) ? 0 : capabilities.hashCode());
+		result = prime * result + (int) (frequency ^ (frequency >>> 32));
+		result = prime * result + Arrays.hashCode(hardwareAddress);
+		result = prime * result + ((mode == null) ? 0 : mode.hashCode());
+		result = prime * result + ((rsnSecurity == null) ? 0 : rsnSecurity.hashCode());
+		result = prime * result + ((ssid == null) ? 0 : ssid.hashCode());
+		result = prime * result + strength;
+		result = prime * result + ((wpaSecurity == null) ? 0 : wpaSecurity.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof WifiAccessPointImpl)) {
+			return false;
+		}
+		WifiAccessPointImpl other = (WifiAccessPointImpl) obj;
+		if (bitrate == null) {
+			if (other.bitrate != null) {
+				return false;
+			}
+		} else if (!bitrate.equals(other.bitrate)) {
+			return false;
+		}
+		if (capabilities == null) {
+			if (other.capabilities != null) {
+				return false;
+			}
+		} else if (!capabilities.equals(other.capabilities)) {
+			return false;
+		}
+		if (frequency != other.frequency) {
+			return false;
+		}
+		if (!Arrays.equals(hardwareAddress, other.hardwareAddress)) {
+			return false;
+		}
+		if (mode != other.mode) {
+			return false;
+		}
+		if (rsnSecurity == null) {
+			if (other.rsnSecurity != null) {
+				return false;
+			}
+		} else if (!rsnSecurity.equals(other.rsnSecurity)) {
+			return false;
+		}
+		if (ssid == null) {
+			if (other.ssid != null) {
+				return false;
+			}
+		} else if (!ssid.equals(other.ssid)) {
+			return false;
+		}
+		if (strength != other.strength) {
+			return false;
+		}
+		if (wpaSecurity == null) {
+			if (other.wpaSecurity != null) {
+				return false;
+			}
+		} else if (!wpaSecurity.equals(other.wpaSecurity)) {
+			return false;
+		}
+		return true;
+	}
 }

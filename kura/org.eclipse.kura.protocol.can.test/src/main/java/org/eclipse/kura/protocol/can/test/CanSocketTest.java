@@ -32,12 +32,13 @@ public class CanSocketTest implements ConfigurableComponent {
     private static final Logger logger = LoggerFactory.getLogger(CanSocketTest.class);
 
     private volatile CanConnectionService canConnection;
+    private volatile String interfaceName;
+    private volatile int canId;
+    private volatile boolean isMaster;
+
     private Map<String, Object> properties;
     private Thread pollThread;
-    private String interfaceName;
-    private int canId;
     private int orig;
-    private boolean isMaster;
     private byte index = 0;
 
     public void setCanConnectionService(CanConnectionService canConnection) {

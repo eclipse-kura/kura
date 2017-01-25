@@ -1,11 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *     Eurotech and/or its affiliates
+ *     Red Hat Inc
  *******************************************************************************/
 /*******************************************
  This code is meant to be a teaching
@@ -140,18 +143,28 @@ JNIEXPORT jobject JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_getUsb
 			}
 
 			//add it to the ArrayList
-			jboolean jbool = (*env)->CallBooleanMethod(env, objArr, mid_add, UsbDeviceObject);
-			if (jbool == NULL) return NULL;
+			const jboolean jbool = (*env)->CallBooleanMethod(env, objArr, mid_add, UsbDeviceObject);
+
+			if ( JNI_FALSE == jbool ) {
+				/* early clean up */
+
+				udev_device_unref(dev);
+				udev_enumerate_unref(enumerate);
+				udev_unref(udev);
+				(*env)->ReleaseStringUTFChars(env, deviceClass, nativeDeviceClass);
+
+				return NULL;
+			}
 
 			udev_device_unref(dev);
 		}
 	}
+
 	/* Free the enumerator object */
 	udev_enumerate_unref(enumerate);
-
 	udev_unref(udev);
 
-	//release the nativeDeviceClass
+	/* release the nativeDeviceClass */
 	(*env)->ReleaseStringUTFChars(env, deviceClass, nativeDeviceClass);
 
 	return objArr;
@@ -222,7 +235,7 @@ JNIEXPORT void JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_nativeHot
 			   select() ensured that this will not block. */
 			struct udev_device *dev = udev_monitor_receive_device(mon);
 			if (dev) {
-				char *subsystem = udev_device_get_subsystem(dev);
+				const char *subsystem = udev_device_get_subsystem(dev);
 
 				if(strcmp(subsystem,"block")==0) {
 					blockDeviceNode = (*env)->NewStringUTF(env, udev_device_get_devnode(dev));
@@ -242,7 +255,7 @@ JNIEXPORT void JNICALL Java_org_eclipse_kura_linux_usb_LinuxUdevNative_nativeHot
 */
 
 				//get the event type
-				char *action = udev_device_get_action(dev);
+				const char *action = udev_device_get_action(dev);
 				if(strcmp("add",action)==0) {
 					eventType = (*env)->NewStringUTF(env, "ATTACHED");
 				} else if(strcmp("remove",action)==0) {

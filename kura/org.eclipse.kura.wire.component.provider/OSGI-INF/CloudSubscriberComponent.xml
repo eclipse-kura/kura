@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2016 Eurotech and/or its affiliates and others
+    Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -18,23 +18,11 @@
    <property name="service.pid" value="org.eclipse.kura.wire.CloudSubscriber"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
-      <provide interface="org.eclipse.kura.data.listener.DataServiceListener"/>
+      <provide interface="org.eclipse.kura.cloud.CloudClientListener"/>
       <provide interface="org.eclipse.kura.wire.WireComponent"/>
       <provide interface="org.eclipse.kura.wire.WireEmitter"/>
       <provide interface="org.osgi.service.wireadmin.Producer"/>
    </service>
-   <reference name="CloudService" 
-              interface="org.eclipse.kura.cloud.CloudService" 
-              policy="static" 
-              cardinality="1..1" 
-              bind="bindCloudService" 
-              unbind="unbindCloudService"/>
-   <reference name="DataService" 
-              interface="org.eclipse.kura.data.DataService" 
-              policy="static" 
-              cardinality="1..1" 
-              bind="bindDataService" 
-              unbind="unbindDataService"/>
    <reference bind="bindWireHelperService" 
    	          cardinality="1..1" 
    	          interface="org.eclipse.kura.wire.WireHelperService" 

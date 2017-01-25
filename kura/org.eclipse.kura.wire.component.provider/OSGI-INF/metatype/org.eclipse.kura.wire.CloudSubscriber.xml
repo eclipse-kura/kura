@@ -12,8 +12,35 @@
          name="Subscriber" 
          description="A wire component which subscribes data from the cloud platform">
 
-        <AD id="subscribe.topic"
-            name="subscribe.topic"
+        <AD id="cloud.service.pid"
+            name="cloud.service.pid"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="org.eclipse.kura.cloud.CloudService"
+            description="Specify the pid of the Cloud Service where the subscription will be performed.">
+        </AD>
+
+        <AD id="subscribe.deviceId"
+            name="subscribe.deviceId"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="DEVICE_ID"
+            description="Subscription deviceId. It will be used to compose the final topic.">
+        </AD>
+        
+        <AD id="subscribe.application"
+            name="subscribe.application"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="APP"
+            description="Application topic prefix to be used when subscribing.">
+        </AD>
+        
+        <AD id="subscribe.appTopic"
+            name="subscribe.appTopic"
             type="String"
             cardinality="0"
             required="true"

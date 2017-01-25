@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2016 Eurotech and/or its affiliates and others
+    Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -12,32 +12,13 @@
          name="Publisher" 
          description="A wire component which publishes data to the cloud platform">
 
-        <AD id="autoconnect.mode"
-            name="autoconnect.mode"
+        <AD id="cloud.service.pid"
+            name="cloud.service.pid"
             type="String"
             cardinality="0"
             required="true"
-            default="AUTOCONNECT_MODE_OFF"
-            description="Option to control whether the a Cloud Connection should be started if an event occurs in order to publish the DataRecords; it also controls for how long such connection should be kept open after the last message is published.">
-            <Option label="Do not connect on event." value="AUTOCONNECT_MODE_OFF" />
-            <Option label="Connect on event and disconnect immediately." value="AUTOCONNECT_MODE_ON_AND_OFF" />
-            <Option label="Connect on event and disconnect 1 minute after the last publish." value="AUTOCONNECT_MODE_ON_AND_STAY_1_MIN" />
-            <Option label="Connect on event and disconnect 5 minute after the last publish." value="AUTOCONNECT_MODE_ON_AND_STAY_5_MIN" />
-            <Option label="Connect on event and disconnect 10 minute after the last publish." value="AUTOCONNECT_MODE_ON_AND_STAY_10_MIN" />
-            <Option label="Connect on event and disconnect 15 minute after the last publish." value="AUTOCONNECT_MODE_ON_AND_STAY_15_MIN" />
-            <Option label="Connect on event and disconnect 30 minute after the last publish." value="AUTOCONNECT_MODE_ON_AND_STAY_30_MIN" />
-            <Option label="Connect on event and disconnect 60 minute after the last publish." value="AUTOCONNECT_MODE_ON_AND_STAY_60_MIN" />
-            <Option label="Connect on event and stay connected indefinitely." value="AUTOCONNECT_MODE_ON_AND_STAY" />
-        </AD>
-
-        <AD id="disconnect.quiesce.timeout"
-            name="disconnect.quiesce.timeout"
-            type="Integer"
-            cardinality="0"
-            required="true"
-            default="0"
-            min="0"
-            description="Timeout used to try to complete the delivery of stored messages before forcing a disconnect of the Cloud Publisher.">
+            default="org.eclipse.kura.cloud.CloudService"
+            description="Specify the pid of the Cloud Service that has to used to publish messages to the cloud platform.">
         </AD>
 
         <AD id="publish.application"

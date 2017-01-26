@@ -14,13 +14,49 @@
 package org.eclipse.kura.wire;
 
 import static java.util.Objects.requireNonNull;
+import static org.eclipse.kura.wire.SeverityLevel.CONFIG;
+import static org.eclipse.kura.wire.SeverityLevel.INFO;
 
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
+import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
+import org.eclipse.kura.type.TypedValues;
 
 /**
- * The WireField represents a data type to be contained in {@link WireRecord}
+ * The {@code WireField} represents an associated type to be contained in {@link WireRecord}. Every
+ * {@code WireField} represents an association of a name and a value. Every {@code WireField} is
+ * also capable of denoting the {@code SeverityLevel} of this association.
+ * <br/>
+ * <br/>
+ * Using such {@code WireField}, any type of primitive data (see {@link DataType}) can be represented.
+ * For instance, a data retrieved from a measurement point from a device can be represented as the
+ * following.
+ * <br/>
+ *
+ * <pre>
+ * <code>
+ * name = LED
+ * value = true
+ * level = INFO
+ * </pre>
+ * </code>
+ * <br/>
+ * Clients are hence intended to create instances of {@code WireField} to represent their data.
+ * <br/>
+ * <br/>
+ * <b>N.B:</b> For optimized performance in Kura Wires, every {@link WireField} name is internally
+ * suffixed with {@code .v} that represents associated value if and only if the {@code WireField}
+ * associates {@link SeverityLevel#INFO} or {@link SeverityLevel#CONFIG}.
+ * <br/>
+ * <br/>
+ * Otherwise (in case of {@link SeverityLevel#SEVERE} and {@link SeverityLevel#ERROR}, name is
+ * suffixed with {@code .e}
+ *
+ * @see {@link SeverityLevel}
+ * @See {@link DataType}
+ * @see {@link TypedValue}
+ * @see {@link TypedValues}
  *
  * @noextend This class is not intended to be extended by clients.
  */
@@ -54,9 +90,9 @@ public class WireField {
         requireNonNull(value, "Wire field value type cannot be null");
         requireNonNull(level, "Wire field severity level cannot be null");
 
-        this.name = name;
-        this.value = value;
         this.level = level;
+        this.name = suffixName(name, level);
+        this.value = value;
     }
 
     /** {@inheritDoc} */
@@ -128,6 +164,27 @@ public class WireField {
         result = (prime * result) + ((this.name == null) ? 0 : this.name.hashCode());
         result = (prime * result) + ((this.value == null) ? 0 : this.value.hashCode());
         return result;
+    }
+
+    /**
+     * Suffixes the name with .v in case of INFO or CONFIG severity level, otherwise .e
+     *
+     * @param name
+     *            the name to be suffixed with
+     * @param level
+     *            the level to check
+     * @return suffixed string representation
+     * @throws NullPointerException
+     *             if any of the provided arguments is null
+     */
+    private String suffixName(final String name, final SeverityLevel level) {
+        requireNonNull(name, "Wire field name cannot be null");
+        requireNonNull(level, "Wire field severity level cannot be null");
+
+        if ((level == INFO) || (level == CONFIG)) {
+            return name + ".v";
+        }
+        return name + ".e";
     }
 
     /** {@inheritDoc} */

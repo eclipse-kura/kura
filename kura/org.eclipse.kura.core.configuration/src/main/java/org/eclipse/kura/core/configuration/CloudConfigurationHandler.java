@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,15 +8,17 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
+
+import static org.eclipse.kura.core.configuration.Configurations.decryptPasswords;
 
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -31,17 +33,17 @@ import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.util.XmlUtil;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.system.SystemService;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CloudConfigurationHandler extends Cloudlet {
 
-    private static Logger s_logger = LoggerFactory.getLogger(CloudConfigurationHandler.class);
+    private static final Logger s_logger = LoggerFactory.getLogger(CloudConfigurationHandler.class);
 
     public static final String APP_ID = "CONF-V1";
 
@@ -55,8 +57,7 @@ public class CloudConfigurationHandler extends Cloudlet {
 
     private SystemService m_systemService;
     private ConfigurationService m_configurationService;
-
-    private ComponentContext m_ctx;
+    private CryptoService cryptoService;
 
     private ScheduledExecutorService m_executor;
 
@@ -76,17 +77,21 @@ public class CloudConfigurationHandler extends Cloudlet {
         this.m_systemService = null;
     }
 
+    protected void setCryptoService(CryptoService cryptoService) {
+        this.cryptoService = cryptoService;
+    }
+
     // The dependency on the CloudService is optional so we might be activated
     // before we have the CloudService.
     @Override
     public void setCloudService(CloudService cloudService) {
         super.setCloudService(cloudService);
-        super.activate(this.m_ctx);
+        super.activate();
     }
 
     @Override
     public void unsetCloudService(CloudService cloudService) {
-        super.deactivate(this.m_ctx);
+        super.deactivate();
         super.unsetCloudService(cloudService);
     }
 
@@ -95,13 +100,12 @@ public class CloudConfigurationHandler extends Cloudlet {
     }
 
     @Override
-    protected void activate(ComponentContext componentContext) {
-        this.m_ctx = componentContext;
+    protected void activate() {
         this.m_executor = Executors.newSingleThreadScheduledExecutor();
     }
 
     @Override
-    protected void deactivate(ComponentContext componentContext) {
+    protected void deactivate() {
         this.m_executor.shutdownNow();
     }
 
@@ -199,18 +203,7 @@ public class CloudConfigurationHandler extends Cloudlet {
             //
             // marshall the response
 
-            List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
-            for (ComponentConfigurationImpl config : configs) {
-                if (config != null) {
-                    try {
-                        Map<String, Object> decryptedProperties = ((ConfigurationServiceImpl) this.m_configurationService)
-                                .decryptPasswords(config);
-                        config.setProperties(decryptedProperties);
-                    } catch (Throwable t) {
-                        s_logger.warn("Error during snapshot password decryption");
-                    }
-                }
-            }
+            xmlConfigs.setConfigurations(decryptPasswords(xmlConfigs.getConfigurations(), this.cryptoService));
 
             byte[] body = toResponseBody(xmlConfigs);
 
@@ -253,7 +246,7 @@ public class CloudConfigurationHandler extends Cloudlet {
 
         //
         // get current configuration with descriptors
-        List<ComponentConfigurationImpl> configs = new ArrayList<ComponentConfigurationImpl>();
+        List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
         try {
 
             if (pid == null) {
@@ -296,14 +289,14 @@ public class CloudConfigurationHandler extends Cloudlet {
                                 cc.getPid(), cc.getDefinition().getId());
                         continue;
                     }
-                    configs.add((ComponentConfigurationImpl) cc);
+                    configs.add(cc);
                 }
             } else {
 
                 // the configuration for a specific component has been requested.
                 ComponentConfiguration cc = this.m_configurationService.getComponentConfiguration(pid);
                 if (cc != null) {
-                    configs.add((ComponentConfigurationImpl) cc);
+                    configs.add(cc);
                 }
             }
         } catch (KuraException e) {
@@ -461,7 +454,7 @@ class UpdateConfigurationsCallable implements Callable<Void> {
         //
         // update the configuration
         try {
-            List<ComponentConfigurationImpl> configImpls = this.m_xmlConfigurations != null
+            List<ComponentConfiguration> configImpls = this.m_xmlConfigurations != null
                     ? this.m_xmlConfigurations.getConfigurations() : null;
             if (configImpls == null) {
                 return null;

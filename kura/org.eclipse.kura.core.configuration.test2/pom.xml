@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.eclipse.kura</groupId>
+		<artifactId>kura</artifactId>
+		<version>3.0.0-SNAPSHOT</version>
+		<relativePath>../manifest_pom.xml</relativePath>
+	</parent>
+
+	<artifactId>org.eclipse.kura.core.configuration.test2</artifactId>
+	<packaging>eclipse-test-plugin</packaging>
+	<version>1.0.0-SNAPSHOT</version>
+
+	<properties>
+		<kura.basedir>${project.basedir}/..</kura.basedir>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<providerHint>junit4</providerHint>
+					
+					<showEclipseLog>true</showEclipseLog>
+
+					<bundleStartLevel>
+						<bundleStartLevel>
+							<id>org.eclipse.equinox.cm</id>
+							<autoStart>true</autoStart>
+							<level>1</level>
+						</bundleStartLevel>
+						<bundleStartLevel>
+							<id>org.eclipse.equinox.metatype</id>
+							<autoStart>true</autoStart>
+							<level>1</level>
+						</bundleStartLevel>
+					</bundleStartLevel>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+			
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>target-platform-configuration</artifactId>
+                <configuration>
+                    <dependency-resolution>
+                        <extraRequirements>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>slf4j.log4j12</id>
+                                <versionRange>(1.7,2)</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>log4j.test.configuration</id>
+                                <versionRange>1.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.equinox.cm</id>
+                                <versionRange>1</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.equinox.metatype</id>
+                                <versionRange>1</versionRange>
+                            </requirement>
+                        </extraRequirements>
+                    </dependency-resolution>
+                </configuration>
+            </plugin>
+
+		</plugins>
+	</build>
+</project>

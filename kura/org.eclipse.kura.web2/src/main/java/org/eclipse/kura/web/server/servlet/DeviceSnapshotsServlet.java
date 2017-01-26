@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.web.server.servlet;
 
@@ -23,7 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
@@ -67,9 +67,9 @@ public class DeviceSnapshotsServlet extends HttpServlet {
                 List<ComponentConfiguration> configs = cs.getSnapshot(sid);
 
                 // build a list of configuration which can be marshalled in XML
-                List<ComponentConfigurationImpl> configImpls = new ArrayList<ComponentConfigurationImpl>();
+                List<ComponentConfiguration> configImpls = new ArrayList<ComponentConfiguration>();
                 for (ComponentConfiguration config : configs) {
-                    configImpls.add((ComponentConfigurationImpl) config);
+                    configImpls.add(config);
                 }
                 XmlComponentConfigurations xmlConfigs = new XmlComponentConfigurations();
                 xmlConfigs.setConfigurations(configImpls);

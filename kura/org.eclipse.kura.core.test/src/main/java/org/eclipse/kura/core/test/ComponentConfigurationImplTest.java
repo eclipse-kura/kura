@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
@@ -80,7 +82,7 @@ public class ComponentConfigurationImplTest extends TestCase {
         properties.put("prop.short", Short.MAX_VALUE);
 
         XmlComponentConfigurations xcc = new XmlComponentConfigurations();
-        List<ComponentConfigurationImpl> ccis = new ArrayList<ComponentConfigurationImpl>();
+        List<ComponentConfiguration> ccis = new ArrayList<ComponentConfiguration>();
         ComponentConfigurationImpl config = new ComponentConfigurationImpl(pid, definition, properties);
         ccis.add(config);
         xcc.setConfigurations(ccis);
@@ -114,7 +116,7 @@ public class ComponentConfigurationImplTest extends TestCase {
         properties.put("prop.short", Short.MAX_VALUE);
 
         XmlComponentConfigurations xcc = new XmlComponentConfigurations();
-        List<ComponentConfigurationImpl> ccis = new ArrayList<ComponentConfigurationImpl>();
+        List<ComponentConfiguration> ccis = new ArrayList<ComponentConfiguration>();
         ComponentConfigurationImpl config = new ComponentConfigurationImpl(pid, definition, properties);
         ccis.add(config);
         xcc.setConfigurations(ccis);

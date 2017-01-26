@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2016 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.configuration.util.serializers;
 
@@ -15,13 +16,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.XmlConfigPropertiesAdapted;
 import org.eclipse.kura.core.configuration.XmlConfigPropertiesAdapter;
 import org.eclipse.kura.core.configuration.XmlConfigPropertyAdapted;
 import org.eclipse.kura.core.configuration.XmlConfigPropertyAdapted.ConfigPropertyType;
-import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -56,10 +58,10 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
         doc.appendChild(configurations);
 
         XmlComponentConfigurations xmlCompConfig = (XmlComponentConfigurations) object;
-        List<ComponentConfigurationImpl> configsList = xmlCompConfig.getConfigurations();
+        List<ComponentConfiguration> configsList = xmlCompConfig.getConfigurations();
 
         if (configsList != null) {
-            for (ComponentConfigurationImpl config : configsList) {
+            for (ComponentConfiguration config : configsList) {
                 Element configuration = marshallConfiguration(config);
                 configurations.appendChild(configuration);
             }
@@ -77,7 +79,7 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
         NodeList configurationList = this.unmashallDoc
                 .getElementsByTagName(ESF_NAMESPACE + ":" + CONFIGURATIONS_CONFIGURATION);
 
-        List<ComponentConfigurationImpl> compConfList = new ArrayList<ComponentConfigurationImpl>();
+        List<ComponentConfiguration> compConfList = new ArrayList<ComponentConfiguration>();
         // Iterate through all the configuration elements inside configurations tag
         for (int configIndex = 0; configIndex < configurationList.getLength(); configIndex++) {
             Element configuration = (Element) configurationList.item(configIndex);
@@ -91,11 +93,11 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
     //
     // Marshaller's private methods
     //
-    private Element marshallConfiguration(ComponentConfigurationImpl config) throws Exception {
+    private Element marshallConfiguration(ComponentConfiguration config) throws Exception {
         // get ComponentConfigurationImpl Object data
         String configPid = config.getPid();
         Map<String, Object> configProperty = config.getConfigurationProperties();
-        Tocd configOCD = config.getDefinition();
+        OCD configOCD = config.getDefinition();
 
         // create configuration element
         Element configurationElement = this.mashallDoc

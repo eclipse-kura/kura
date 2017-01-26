@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2016 Eurotech and/or its affiliates and others All rights 
-    reserved. This program and the accompanying materials are made available 
-    under the terms of the Eclipse Public License v1.0 which accompanies this 
+<!-- Copyright (c) 2016 Eurotech and/or its affiliates and others All rights
+    reserved. This program and the accompanying materials are made available
+    under the terms of the Eclipse Public License v1.0 which accompanies this
     distribution, and is available at http://www.eclipse.org/legal/epl-v10.html -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.eclipse.kura</groupId>
-		<artifactId>kura</artifactId>
-		<version>3.0.0-SNAPSHOT</version>
-		<relativePath>../manifest_pom.xml</relativePath>
-	</parent>
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>kura</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+        <relativePath>../manifest_pom.xml</relativePath>
+    </parent>
 
     <artifactId>org.eclipse.kura.wire.provider.test</artifactId>
     <packaging>eclipse-test-plugin</packaging>
@@ -33,7 +33,7 @@
                     <testSuite>org.eclipse.kura.wire.provider.test</testSuite>
                     <testClass>org.eclipse.kura.wire.provider.test.WireTestsSuite</testClass>
                     <useUnlimitedThreads>true</useUnlimitedThreads>
-                    <argLine>${tycho.testArgLine}
+                    <argLine>${jacocoArgs}
                         -DbuildingWithTycho=true -Dosgi.locking=none
                         -Dequinox.ds.print=true -Djava.io.tmpdir=/tmp
                         -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
@@ -510,7 +510,7 @@
         </plugins>
         <pluginManagement>
             <plugins>
-                <!--This plugin's configuration is used to store Eclipse 
+                <!--This plugin's configuration is used to store Eclipse
                     m2e settings only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>

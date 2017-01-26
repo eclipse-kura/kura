@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<!--
   Copyright (c) 2011, 2016 Eurotech and others
   All rights reserved. This program and the accompanying materials
   are made available under the terms of the Eclipse Public License v1.0
   which accompanies this distribution, and is available at
   http://www.eclipse.org/legal/epl-v10.html
- 
+
   Contributors:
       Eurotech
       Red Hat Inc
@@ -23,17 +23,17 @@
     <modules>
         <module>target-definition</module>
         <module>org.eclipse.kura.api</module>
-        
+
         <module>org.eclipse.kura.test</module>
-        
+
         <module>org.eclipse.kura.asset.cloudlet.provider</module>
         <module>org.eclipse.kura.asset.provider</module>
         <module>org.eclipse.kura.asset.helper.provider</module>
-        
-        <!-- test setup broken 
+
+        <!-- test setup broken
         <module>org.eclipse.kura.asset.provider.test</module>
         -->
-        
+
         <module>org.eclipse.kura.camel</module>
         <module>org.eclipse.kura.camel.cloud.factory</module>
         <module>org.eclipse.kura.camel.test</module>
@@ -64,7 +64,7 @@
         <module>org.eclipse.kura.linux.net</module>
         <module>org.eclipse.kura.linux.net.test</module>
         <module>org.eclipse.kura.linux.position</module>
-		
+
         <module>org.eclipse.kura.linux.usb</module>
         <module>org.eclipse.kura.linux.usb.armv5sf</module>
         <module>org.eclipse.kura.linux.usb.armv6hf</module>
@@ -73,24 +73,24 @@
         <module>org.eclipse.kura.linux.usb.x86_64.rhel7</module>
         <module>org.eclipse.kura.linux.usb.x86_64.yocto</module>
         <module>org.eclipse.kura.linux.usb.x86.ubuntu</module>
-		
+
         <module>org.eclipse.kura.linux.watchdog</module>
 
         <module>org.eclipse.kura.localization</module>
         <module>org.eclipse.kura.localization.resources</module>
-        
+
         <module>org.eclipse.kura.net.admin</module>
         <module>org.eclipse.kura.protocol.modbus</module>
-        
+
         <module>org.eclipse.kura.stress</module>
-        
+
         <module>org.eclipse.kura.util</module>
-        
+
         <module>org.eclipse.kura.web2</module>
-        
+
         <module>org.eclipse.kura.core.test</module>
 
-        <!-- 
+        <!--
         <module>org.eclipse.kura.windows.command</module>
         <module>org.eclipse.kura.windows.clock</module>
         -->
@@ -101,15 +101,15 @@
         <module>org.eclipse.kura.wire.provider.test</module>
 
         <module>features</module>
-        
+
         <module>emulator</module>
 
         <module>examples</module>
         <module>test</module>
-        
+
         <!-- final p2 repository -->
         <module>org.eclipse.kura-p2</module>
-        
+
         <!-- A module containing log4j configuration for running unit tests -->
         <module>log4j.test.configuration</module>
     </modules>
@@ -127,7 +127,7 @@
         <kura.build.version>${maven.build.timestamp}</kura.build.version>
 
         <!-- Jacoco version -->
-        <jacoco.version>0.6.4.201312101107</jacoco.version>
+        <jacoco.version>0.7.4.201502262128</jacoco.version>
         <jacoco.reportDir>target/jacoco/</jacoco.reportDir>
         <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
@@ -146,7 +146,7 @@
             <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
-    
+
     <profiles>
         <profile>
             <id>default</id>
@@ -189,15 +189,15 @@
                 <module>org.eclipse.kura.protocol.can.test</module>
             </modules>
         </profile>
-		<profile>
-			<id>javadocs</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<modules>
-				<module>org.eclipse.kura.docs</module>
-			</modules>
-		</profile>
+        <profile>
+            <id>javadocs</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>org.eclipse.kura.docs</module>
+            </modules>
+        </profile>
         <profile>
             <id>speedup</id>
             <build>
@@ -276,17 +276,17 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>2.17</version>
                 <dependencies>
-        			<dependency>
-            			<groupId>org.slf4j</groupId>
-            			<artifactId>jcl-over-slf4j</artifactId>
-            			<version>1.7.5</version>
-        			</dependency>
-        			<dependency>
-            			<groupId>org.slf4j</groupId>
-            			<artifactId>slf4j-jdk14</artifactId>
-            			<version>1.7.5</version>
-        			</dependency>
-    			</dependencies>
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>jcl-over-slf4j</artifactId>
+                        <version>1.7.5</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-jdk14</artifactId>
+                        <version>1.7.5</version>
+                    </dependency>
+                </dependencies>
                 <executions>
                     <execution>
                         <id>checkstyle-validation</id>
@@ -317,7 +317,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.4.201502262128</version>
+                <version>${jacoco.version}</version>
                 <executions>
                     <execution>
                         <phase>process-test-classes</phase>
@@ -326,6 +326,7 @@
                         </goals>
                         <configuration>
                             <destFile>${sonar.jacoco.reportPath}</destFile>
+                            <propertyName>jacocoArgs</propertyName>
                         </configuration>
                     </execution>
                 </executions>
@@ -429,7 +430,7 @@
                     <providerHint>junit4</providerHint>
                     <parallel>both</parallel>
                     <useUnlimitedThreads>true</useUnlimitedThreads>
-                    <argLine>${tycho.testArgLine} -Deurotech.framework.mode=emulator -Dequinox.ds.print=true</argLine>
+                    <argLine>${jacocoArgs} -Deurotech.framework.mode=emulator -Dequinox.ds.print=true</argLine>
                     <dependencies>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -444,7 +445,7 @@
                 <version>3.3</version>
             </plugin>
             <plugin>
-				<!-- license:format to add license:check to check -->
+                <!-- license:format to add license:check to check -->
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <version>2.2</version>
@@ -550,7 +551,7 @@
                     </configuration>
                 </plugin>
 
-        		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>

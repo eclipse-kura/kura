@@ -353,6 +353,11 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.wire.helper.provider</artifactId>
+									<version>${org.eclipse.kura.wire.helper.provider.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.wire.provider</artifactId>
 									<version>${org.eclipse.kura.wire.provider.version}</version>
 								</artifactItem>

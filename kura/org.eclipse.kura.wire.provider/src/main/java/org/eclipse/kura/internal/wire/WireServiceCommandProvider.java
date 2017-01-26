@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,8 +7,9 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Eurotech and/or its affiliates
+ *     Eurotech
  *     Red Hat Inc
+ *     Amit Kumar Mondal
  *******************************************************************************/
 package org.eclipse.kura.internal.wire;
 
@@ -29,30 +30,42 @@ public final class WireServiceCommandProvider {
     private volatile WireService wireService;
 
     /**
+     * Binds the Wire Service.
+     *
+     * @param wireHelperService
+     *            the new Wire Helper Service
+     */
+    public synchronized void bindWireService(final WireService wireHelperService) {
+        if (this.wireService == null) {
+            this.wireService = wireHelperService;
+        }
+    }
+
+    /**
      * The command {@code createWire} creates a Wire Configuration between the
      * provided emitter PID and receiver PID
      *
      * @throws KuraException
-     *             In case of an errror
+     *             In case of an error
      */
-    @Descriptor("Creates a Wire Configuration between the provided emitter and receiver")
-    public void createWire(@Descriptor("Emitter PID") String emitterPid, @Descriptor("Receiver PID") String receiverPid)
-            throws KuraException {
+    @Descriptor("Creates a Wire Configuration between the provided Emitter and Receiver")
+    public void createWire(@Descriptor("Emitter PID") final String emitterPid,
+            @Descriptor("Receiver PID") final String receiverPid) throws KuraException {
         this.wireService.createWireConfiguration(emitterPid, receiverPid);
     }
 
     /**
      * The command {@code deleteWire} delete existing Wire Configuration between
      * the provided emitter PID and receiver PID
-     * 
+     *
      * @param emitterPid
      *            the emitter PID
      * @param receiverPid
      *            the receiver PID
      */
-    @Descriptor("Deletes the already created Wire Configuration between the provided emitter and receiver")
-    public void deleteWire(@Descriptor("Emitter PID") String emitterPid,
-            @Descriptor("Receiver PID") String receiverPid) {
+    @Descriptor("Deletes the already created Wire Configuration between the provided Emitter and Receiver")
+    public void deleteWire(@Descriptor("Emitter PID") final String emitterPid,
+            @Descriptor("Receiver PID") final String receiverPid) {
         for (final WireConfiguration configuration : this.wireService.getWireConfigurations()) {
             if (configuration.getEmitterPid().equals(emitterPid)
                     && configuration.getReceiverPid().equals(receiverPid)) {
@@ -78,18 +91,6 @@ public final class WireServiceCommandProvider {
             i++;
         }
         System.out.println("===========================================================");
-    }
-
-    /**
-     * Binds the Wire Service.
-     *
-     * @param wireHelperService
-     *            the new Wire Helper Service
-     */
-    public synchronized void bindWireService(final WireService wireHelperService) {
-        if (this.wireService == null) {
-            this.wireService = wireHelperService;
-        }
     }
 
     /**

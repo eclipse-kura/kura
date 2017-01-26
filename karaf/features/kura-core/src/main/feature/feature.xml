@@ -35,6 +35,7 @@
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.driver.helper.provider/${org.eclipse.kura.driver.helper.provider.version}</bundle>
 
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.wire.component.provider/${org.eclipse.kura.wire.component.provider.version}</bundle>
+        <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.wire.helper.provider/${org.eclipse.kura.wire.helper.provider.version}</bundle>
         <bundle start="true" start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.wire.provider/${org.eclipse.kura.wire.provider.version}</bundle>
     </feature>
 

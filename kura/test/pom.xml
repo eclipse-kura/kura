@@ -64,7 +64,9 @@ Copyright (c) 2016 Eurotech and/or its affiliates and others
                         <goals>
                             <goal>test</goal>
                         </goals>
-                        <configuration></configuration>
+                        <configuration>
+                            <argLine>${jacocoArgs}</argLine>
+                        </configuration>
                     </execution>
                 </executions>
                 <configuration></configuration>

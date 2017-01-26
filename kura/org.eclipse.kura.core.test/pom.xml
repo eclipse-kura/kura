@@ -13,19 +13,19 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.eclipse.kura</groupId>
-		<artifactId>kura</artifactId>
-		<version>3.0.0-SNAPSHOT</version>
-		<relativePath>../manifest_pom.xml</relativePath>
-	</parent>
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>kura</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+        <relativePath>../manifest_pom.xml</relativePath>
+    </parent>
 
-	<artifactId>org.eclipse.kura.core.test</artifactId>
-	<packaging>eclipse-test-plugin</packaging>
-	<version>1.0.7-SNAPSHOT</version>
+    <artifactId>org.eclipse.kura.core.test</artifactId>
+    <packaging>eclipse-test-plugin</packaging>
+    <version>1.0.7-SNAPSHOT</version>
 
     <properties>
         <kura.basedir>${project.basedir}/..</kura.basedir>
@@ -58,18 +58,18 @@
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <testSuite>org.eclipse.kura.core.test</testSuite>
                     <testClass>org.eclipse.kura.core.test.AllCoreTests</testClass>
-                    <!-- <testClass>org.eclipse.kura.core.test.CloudDeploymentHandlerTest</testClass> 
-                        <testClass>org.eclipse.kura.core.test.CloudServiceTest</testClass> <testClass>org.eclipse.kura.core.test.CommURITest</testClass> 
-                        <testClass>org.eclipse.kura.core.test.ComponentConfigurationImplTest</testClass> 
-                        <testClass>org.eclipse.kura.core.test.ConfigurationServiceTest</testClass> 
-                        <testClass>org.eclipse.kura.core.test.NetUtilTest</testClass> <testClass>org.eclipse.kura.core.test.NetworkServiceTest</testClass> 
-                        <testClass>org.eclipse.kura.core.test.SystemAdminServiceTest</testClass> 
+                    <!-- <testClass>org.eclipse.kura.core.test.CloudDeploymentHandlerTest</testClass>
+                        <testClass>org.eclipse.kura.core.test.CloudServiceTest</testClass> <testClass>org.eclipse.kura.core.test.CommURITest</testClass>
+                        <testClass>org.eclipse.kura.core.test.ComponentConfigurationImplTest</testClass>
+                        <testClass>org.eclipse.kura.core.test.ConfigurationServiceTest</testClass>
+                        <testClass>org.eclipse.kura.core.test.NetUtilTest</testClass> <testClass>org.eclipse.kura.core.test.NetworkServiceTest</testClass>
+                        <testClass>org.eclipse.kura.core.test.SystemAdminServiceTest</testClass>
                         <testClass>org.eclipse.kura.core.test.SystemServiceTest</testClass> -->
-                    <!-- Don't run tests in parallel because it breaks them 
+                    <!-- Don't run tests in parallel because it breaks them
                         <parallel>both</parallel> -->
 
                     <useUnlimitedThreads>true</useUnlimitedThreads>
-                    <argLine>${tycho.testArgLine}
+                    <argLine>${jacocoArgs}
                         -DbuildingWithTycho=true -Dosgi.locking=none
                         -Dequinox.ds.print=true -Djava.io.tmpdir=/tmp
                         -Dlog4j.configuration=file:${project.basedir}/src/main/resources/log4j.properties
@@ -77,8 +77,8 @@
                         ${moquette.vm.args}
                     </argLine>
 
-                    <!-- This can be uncommented to debug the test in the 
-                        event of a failure by telneting to port 5002 and seeing the state of the 
+                    <!-- This can be uncommented to debug the test in the
+                        event of a failure by telneting to port 5002 and seeing the state of the
                         OSGi runtime -->
                     <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
 

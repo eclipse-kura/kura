@@ -495,6 +495,9 @@ public interface WireMessages {
     @En("Table name cannot be null")
     public String tableNameNonNull();
 
+    @En("timestamp")
+    public String timestamp();
+
     @En("Starting to track Wire Components....")
     public String trackWireComponents();
 

@@ -15,6 +15,7 @@ package org.eclipse.kura.internal.wire.subscriber;
 
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.wire.SeverityLevel.INFO;
+import static org.eclipse.kura.wire.WireField.ERROR_SUFFIX;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -101,6 +102,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
             }
         }
 
+        /** {@inheritDoc} */
         @Override
         public void removedService(final ServiceReference<CloudService> reference, final CloudService service) {
             CloudSubscriber.this.cloudService = null;
@@ -191,7 +193,6 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
     private WireRecord buildWireRecord(final KuraPayload payload) throws IOException {
         requireNonNull(payload, wireMessages.payloadNonNull());
 
-        final String errorSuffix = ".e";
         final List<WireField> wireFields = CollectionUtil.newArrayList();
         SeverityLevel level = INFO;
 
@@ -199,7 +200,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
             final String metricKey = entry.getKey();
             final Object metricValue = entry.getValue();
 
-            if (metricKey.endsWith(errorSuffix)) {
+            if (metricKey.endsWith(ERROR_SUFFIX)) {
                 level = SeverityLevel.ERROR;
             }
 

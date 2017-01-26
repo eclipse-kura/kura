@@ -50,8 +50,16 @@ import org.eclipse.kura.type.TypedValues;
  * associates {@link SeverityLevel#INFO} or {@link SeverityLevel#CONFIG}.
  * <br/>
  * <br/>
- * Otherwise (in case of {@link SeverityLevel#SEVERE} and {@link SeverityLevel#ERROR}, name is
+ * Otherwise (in case of {@link SeverityLevel#SEVERE} and {@link SeverityLevel#ERROR}), name is
  * suffixed with {@code .e}
+ * <br/>
+ * <br/>
+ * For aforementioned example, the name would then be {@code LED.v} as the associated severity level
+ * is {@link SeverityLevel#INFO}
+ * <br/>
+ * <br/>
+ *
+ *
  *
  * @see {@link SeverityLevel}
  * @See {@link DataType}
@@ -63,6 +71,12 @@ import org.eclipse.kura.type.TypedValues;
 @Immutable
 @ThreadSafe
 public class WireField {
+
+    /** Suffix for Wire Field name of ERROR or SEVERE Severity Level */
+    public static final String ERROR_SUFFIX = ".e";
+
+    /** Suffix for Wire Field name of INFO or CONFIG Severity Level */
+    public static final String INFO_SUFFIX = ".v";
 
     /** The severity level of the field */
     private final SeverityLevel level;
@@ -182,9 +196,9 @@ public class WireField {
         requireNonNull(level, "Wire field severity level cannot be null");
 
         if ((level == INFO) || (level == CONFIG)) {
-            return name + ".v";
+            return name + INFO_SUFFIX;
         }
-        return name + ".e";
+        return name + ERROR_SUFFIX;
     }
 
     /** {@inheritDoc} */

@@ -89,6 +89,24 @@ Copyright (c) 2016 Eurotech and/or its affiliates and others
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>target-platform-configuration</artifactId>
+                <configuration>
+                    <pomDependencies>consider</pomDependencies>
+                    <argLine>-consoleLog</argLine>
+                    <resolver>p2</resolver>
+                    <dependency-resolution>
+                        <extraRequirements>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.hamcrest</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                        </extraRequirements>
+                    </dependency-resolution>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

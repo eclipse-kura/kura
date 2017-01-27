@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+Copyright (c) 2017 Eurotech and/or its affiliates and others
+
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/legal/epl-v10.html
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="ConfigurationServiceTest">
+   <implementation class="org.eclipse.kura.core.configuration.test.ConfigurationServiceTest"/>
+   <reference bind="bindConfigService"
+              unbind="unbindConfigService"
+              cardinality="1..1"
+              interface="org.eclipse.kura.configuration.ConfigurationService"
+              name="ConfigurationService"
+              policy="static"/>
+   <reference bind="bindSystemService"
+              unbind="unbindSystemService"
+              cardinality="1..1"
+              interface="org.eclipse.kura.system.SystemService"
+              name="SystemService"
+              policy="static"/>
+</scr:component>

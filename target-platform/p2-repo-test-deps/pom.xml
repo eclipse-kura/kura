@@ -56,6 +56,36 @@
 									<artifactId>moquette-broker</artifactId>
 									<version>${moquette-broker.version}</version>
 								</artifactItem>
+								<artifactItem>
+									<groupId>org.hamcrest</groupId>
+									<artifactId>org.hamcrest</artifactId>
+									<version>${org.hamcrest.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.hamcrest</groupId>
+									<artifactId>org.hamcrest.integration</artifactId>
+									<version>${org.hamcrest.integration.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.hamcrest</groupId>
+									<artifactId>org.hamcrest.library</artifactId>
+									<version>${org.hamcrest.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.hamcrest</groupId>
+									<artifactId>org.hamcrest.text</artifactId>
+									<version>${org.hamcrest.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.mockito</groupId>
+									<artifactId>mockito-core</artifactId>
+									<version>${mockito-core.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.objenesis</groupId>
+									<artifactId>objenesis</artifactId>
+									<version>${objenesis.version}</version>
+								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

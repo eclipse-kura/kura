@@ -166,4 +166,10 @@ public class Toption implements Option {
         return this.otherAttributes;
     }
 
+    @Override
+    public String toString() {
+        return "Toption [any=" + any + ", label=" + label + ", value=" + value + ", otherAttributes=" + otherAttributes
+                + "]";
+    }
+
 }

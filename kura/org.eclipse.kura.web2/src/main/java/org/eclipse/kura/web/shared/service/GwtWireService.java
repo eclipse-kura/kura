@@ -108,4 +108,5 @@ public interface GwtWireService extends RemoteService {
     public GwtWiresConfiguration updateWireConfiguration(GwtXSRFToken xsrfToken, String newJsonConfiguration,
             Map<String, GwtConfigComponent> configurations) throws GwtKuraException;
 
+    public String getDriverPidProp();
 }

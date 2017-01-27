@@ -132,7 +132,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
     @Override
     protected void renderForm() {
         this.connectionEditFields.clear();
-        for (GwtConfigParameter param : this.m_configurableComponent.getParameters()) {
+        for (GwtConfigParameter param : this.configurableComponent.getParameters()) {
             if (param.getCardinality() == 0 || param.getCardinality() == 1 || param.getCardinality() == -1) {
                 FormGroup formGroup = new FormGroup();
                 renderConfigParameter(param, true, formGroup);
@@ -178,7 +178,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                 this.modal.add(header);
 
                 ModalBody body = new ModalBody();
-                body.add(new Span(MSGS.deviceConfigConfirmation(this.m_configurableComponent.getComponentName())));
+                body.add(new Span(MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName())));
                 this.modal.add(body);
 
                 ModalFooter footer = new ModalFooter();
@@ -209,7 +209,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                             @Override
                             public void onSuccess(GwtXSRFToken token) {
                                 CloudServiceConfigurationUi.this.gwtComponentService.updateComponentConfiguration(token,
-                                        CloudServiceConfigurationUi.this.m_configurableComponent,
+                                        CloudServiceConfigurationUi.this.configurableComponent,
                                         new AsyncCallback<Void>() {
 
                                     @Override
@@ -229,7 +229,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                                         CloudServiceConfigurationUi.this.applyConnectionEdit.setEnabled(false);
                                         CloudServiceConfigurationUi.this.resetConnectionEdit.setEnabled(false);
                                         setDirty(false);
-                                        originalConfig = CloudServiceConfigurationUi.this.m_configurableComponent;
+                                        originalConfig = CloudServiceConfigurationUi.this.configurableComponent;
                                         EntryClassUi.hideWaitModal();
                                     }
                                 });
@@ -268,7 +268,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                 fillUpdatedConfiguration(fg);
             }
         }
-        return this.m_configurableComponent;
+        return this.configurableComponent;
     }
 
     private void showDirtyModal() {

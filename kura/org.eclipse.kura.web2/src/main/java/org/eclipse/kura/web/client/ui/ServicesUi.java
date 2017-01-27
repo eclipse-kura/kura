@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,7 +8,7 @@
  *
  *******************************************************************************/
 /*
- * Render the Content in the Main Panel corressponding to Service (GwtBSConfigComponent) selected in the Services Panel
+ * Render the Content in the Main Panel corresponding to Service (GwtBSConfigComponent) selected in the Services Panel
  *
  * Fields are rendered based on their type (Password(Input), Choice(Dropboxes) etc. with Text fields rendered
  * for both numeric and other textual field with validate() checking if value in numeric fields is numeric
@@ -119,30 +119,32 @@ public class ServicesUi extends AbstractServicesUi {
                 reset();
             }
         });
-        
+
         delete.setText(MSGS.delete());
-        delete.addClickHandler(new ClickHandler(){
+        delete.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
                 deleteModal.show();
-            }});
-        
-        deleteButton.addClickHandler(new ClickHandler(){
+            }
+        });
+
+        deleteButton.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
                 delete();
-            }});
+            }
+        });
         deleteMessage.setText(MSGS.deleteWarning());
-        
+
         renderForm();
         initInvalidDataModal();
 
         setDirty(false);
         this.apply.setEnabled(false);
         this.reset.setEnabled(false);
-        delete.setEnabled(m_configurableComponent.isFactoryComponent());
+        delete.setEnabled(configurableComponent.isFactoryComponent());
     }
 
     @Override
@@ -206,11 +208,11 @@ public class ServicesUi extends AbstractServicesUi {
             this.modal.show();
         }
     }
-    
-    public void delete(){
-        if(m_configurableComponent.isFactoryComponent()){
+
+    public void delete() {
+        if (configurableComponent.isFactoryComponent()) {
             EntryClassUi.showWaitModal();
-            gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+            gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                 @Override
                 public void onFailure(Throwable ex) {
@@ -220,7 +222,8 @@ public class ServicesUi extends AbstractServicesUi {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
-                    gwtComponentService.deleteFactoryConfiguration(token, m_configurableComponent.getComponentId(), true, new AsyncCallback<Void>() {
+                    gwtComponentService.deleteFactoryConfiguration(token, configurableComponent.getComponentId(), true,
+                            new AsyncCallback<Void>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
@@ -230,8 +233,8 @@ public class ServicesUi extends AbstractServicesUi {
 
                         @Override
                         public void onSuccess(Void result) {
-                            modal.hide();   
-                            logger.info(MSGS.info()+": " + MSGS.deviceConfigDeleted());
+                            modal.hide();
+                            logger.info(MSGS.info() + ": " + MSGS.deviceConfigDeleted());
                             apply.setEnabled(false);
                             reset.setEnabled(false);
                             setDirty(false);
@@ -251,7 +254,7 @@ public class ServicesUi extends AbstractServicesUi {
     @Override
     public void renderForm() {
         this.fields.clear();
-        for (GwtConfigParameter param : this.m_configurableComponent.getParameters()) {
+        for (GwtConfigParameter param : this.configurableComponent.getParameters()) {
             if (param.getCardinality() == 0 || param.getCardinality() == 1 || param.getCardinality() == -1) {
                 FormGroup formGroup = new FormGroup();
                 renderConfigParameter(param, true, formGroup);
@@ -300,7 +303,7 @@ public class ServicesUi extends AbstractServicesUi {
                 this.modal.add(header);
 
                 ModalBody body = new ModalBody();
-                body.add(new Span(MSGS.deviceConfigConfirmation(this.m_configurableComponent.getComponentName())));
+                body.add(new Span(MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName())));
                 this.modal.add(body);
 
                 ModalFooter footer = new ModalFooter();
@@ -330,7 +333,7 @@ public class ServicesUi extends AbstractServicesUi {
                             @Override
                             public void onSuccess(GwtXSRFToken token) {
                                 ServicesUi.this.gwtComponentService.updateComponentConfiguration(token,
-                                        ServicesUi.this.m_configurableComponent, new AsyncCallback<Void>() {
+                                        ServicesUi.this.configurableComponent, new AsyncCallback<Void>() {
 
                                     @Override
                                     public void onFailure(Throwable caught) {
@@ -349,7 +352,7 @@ public class ServicesUi extends AbstractServicesUi {
                                         ServicesUi.this.apply.setEnabled(false);
                                         ServicesUi.this.reset.setEnabled(false);
                                         setDirty(false);
-                                        originalConfig = ServicesUi.this.m_configurableComponent;
+                                        originalConfig = ServicesUi.this.configurableComponent;
                                         ServicesUi.this.entryClass.fetchAvailableServices();
                                         EntryClassUi.hideWaitModal();
                                     }
@@ -389,7 +392,7 @@ public class ServicesUi extends AbstractServicesUi {
                 fillUpdatedConfiguration(fg);
             }
         }
-        return this.m_configurableComponent;
+        return this.configurableComponent;
     }
 
     private void initInvalidDataModal() {

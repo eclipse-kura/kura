@@ -1,11 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *  
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.wires;
 
@@ -17,14 +21,11 @@ import com.google.gwt.event.dom.client.ClickHandler;
 
 public class WireComponentsAnchorListItem extends AnchorListItem {
 
-    String factoryPid;
-    WireComponentsAnchorListItem instance;
-    boolean isEmitter, isReceiver;
-    WiresPanelUi ui;
+    private boolean isEmitter;
+    private boolean isReceiver;
 
     public WireComponentsAnchorListItem(final String factoryPid, final boolean isEmitter, final boolean isReceiver) {
         super();
-        this.instance = this;
         this.isEmitter = isEmitter;
         this.isReceiver = isReceiver;
         super.setIcon(this.getFactoryIcon());
@@ -34,7 +35,7 @@ public class WireComponentsAnchorListItem extends AnchorListItem {
 
             @Override
             public void onClick(final ClickEvent event) {
-                if (factoryPid.contains("WireAsset")) {
+                if (factoryPid.contains(WiresPanelUi.WIRE_ASSET)) {
                     WiresPanelUi.driverInstanceForm.setVisible(true);
                 } else {
                     WiresPanelUi.driverInstanceForm.setVisible(false);
@@ -55,5 +56,4 @@ public class WireComponentsAnchorListItem extends AnchorListItem {
         }
         return IconType.LONG_ARROW_RIGHT;
     }
-
 }

@@ -6,6 +6,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *  
  *******************************************************************************/
 /**
  * Render the Content in the Wire Component Properties Panel based on Service (GwtBSConfigComponent) selected in Wire graph
@@ -72,38 +76,6 @@ public class PropertiesUi extends AbstractServicesUi {
     interface ServicesUiUiBinder extends UiBinder<Widget, PropertiesUi> {
     }
 
-    private static final String PROPERTIES_DRIVER_IDENTIFIER = "DRIVER";
-    private static final String PROPERTIES_CHANNEL_IDENTIFIER = "CH";
-
-    private static final String CHANNEL_VALUE_TYPE = "value.type";
-    private static final String CHANNEL_TYPE = "type";
-    private static final String CHANNEL_NAME = "name";
-
-    private static final int MAXIMUM_PAGE_SIZE = 5;
-
-    private static ServicesUiUiBinder uiBinder = GWT.create(ServicesUiUiBinder.class);
-
-    private final GwtWireServiceAsync gwtWireService = GWT.create(GwtWireService.class);
-
-    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-
-    private final ListDataProvider<GwtChannelInfo> channelsDataProvider = new ListDataProvider<>();
-
-    private final SingleSelectionModel<GwtChannelInfo> selectionModel = new SingleSelectionModel<>();
-
-    private final String pid;
-
-    private String driverPidProp = "driver.pid";
-
-    private boolean dirty;
-    private boolean isWireAsset = false;
-
-    private GwtConfigComponent baseDriverDescriptor;
-    private GwtConfigComponent driverDescriptor;
-
-    private boolean nonValidated;
-    private final Set<String> nonValidatedCells;
-
     @UiField
     Button btnAdd;
     @UiField
@@ -134,6 +106,39 @@ public class PropertiesUi extends AbstractServicesUi {
 
     @UiField
     Text incompleteFieldsText;
+
+    private static final String PROPERTIES_DRIVER_IDENTIFIER = "DRIVER";
+    private static final String PROPERTIES_CHANNEL_IDENTIFIER = "CH";
+
+    private static final String CHANNEL_VALUE_TYPE = "value.type";
+    private static final String CHANNEL_TYPE = "type";
+    private static final String CHANNEL_NAME = "name";
+
+    private static final int MAXIMUM_PAGE_SIZE = 5;
+
+    private static ServicesUiUiBinder uiBinder = GWT.create(ServicesUiUiBinder.class);
+
+    private final GwtWireServiceAsync gwtWireService = GWT.create(GwtWireService.class);
+
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+
+    private final ListDataProvider<GwtChannelInfo> channelsDataProvider = new ListDataProvider<>();
+
+    private final SingleSelectionModel<GwtChannelInfo> selectionModel = new SingleSelectionModel<>();
+
+    private final String pid;
+
+    private final Set<String> nonValidatedCells;
+
+    private String driverPidProp = "driver.pid";
+
+    private boolean dirty;
+    private boolean isWireAsset = false;
+
+    private GwtConfigComponent baseDriverDescriptor;
+    private GwtConfigComponent driverDescriptor;
+
+    private boolean nonValidated;
 
     public PropertiesUi(final GwtConfigComponent addedItem, final String pid) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -346,9 +351,7 @@ public class PropertiesUi extends AbstractServicesUi {
                                             PropertiesUi.this.channelsDataProvider.getList().clear();
                                             PropertiesUi.this.channelsDataProvider.getList().addAll(result);
                                             PropertiesUi.this.channelsDataProvider.refresh();
-
                                             PropertiesUi.this.channelPanel.setVisible(true);
-
                                         }
                                     });
                                 }
@@ -476,7 +479,6 @@ public class PropertiesUi extends AbstractServicesUi {
     //
     // Private methods
     //
-
     private void addDefaultColumns() {
 
         this.channelTable.setHeaderBuilder(new DefaultHeaderOrFooterBuilder<GwtChannelInfo>(this.channelTable, false));
@@ -637,9 +639,9 @@ public class PropertiesUi extends AbstractServicesUi {
             @Override
             public void update(final int index, final GwtChannelInfo object, final String value) {
                 ValidationData viewData;
-                if (!PropertiesUi.this.invalidateType(type, value)
-                        || max != null && PropertiesUi.this.invalidateMax(value, max)
-                        || min != null && PropertiesUi.this.invalidateMin(value, min)) {
+                if (!PropertiesUi.this.validateType(type, value)
+                        || max != null && !PropertiesUi.this.validateMax(value, max)
+                        || min != null && !PropertiesUi.this.validateMin(value, min)) {
                     viewData = cell.getViewData(object);
                     viewData.setInvalid(true);
                     PropertiesUi.this.nonValidatedCells.add(object.getId());
@@ -691,83 +693,115 @@ public class PropertiesUi extends AbstractServicesUi {
         this.incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
     }
 
-    private boolean invalidateMax(final String value, final String maximum) {
+    private boolean validateMax(final String value, final String maximum) {
         final int val = Integer.parseInt(value);
         final int max = Integer.parseInt(maximum);
-        if (val > max) {
+        if (val <= max) {
             return true;
         }
         return false;
     }
 
-    private boolean invalidateMin(final String value, final String minimum) {
+    private boolean validateMin(final String value, final String minimum) {
         final int val = Integer.parseInt(value);
         final int min = Integer.parseInt(minimum);
-        if (val < min) {
+        if (val >= min) {
             return true;
         }
         return false;
     }
 
-    private boolean invalidateType(final GwtConfigParameterType param, final String value) {
+    private boolean validateType(final GwtConfigParameterType param, final String value) {
         switch (param) {
         case STRING:
-            return true;
+            return validateIfString();
         case LONG:
-            try {
-                Long.parseLong(value);
-                return true;
-            } catch (final NumberFormatException e) {
-                return false;
-            }
+            return validateIfLong(value);
         case DOUBLE:
-            try {
-                Double.parseDouble(value);
-                return true;
-            } catch (final NumberFormatException e) {
-                return false;
-            }
+            return validateIfDouble(value);
         case FLOAT:
-            try {
-                Float.parseFloat(value);
-                return true;
-            } catch (final NumberFormatException e) {
-                return false;
-            }
+            return validateIfFloat(value);
         case INTEGER:
-            try {
-                Integer.parseInt(value);
-                return true;
-            } catch (final NumberFormatException e) {
-                return false;
-            }
+            return validateIfInteger(value);
         case BYTE:
-            try {
-                Byte.parseByte(value);
-                return true;
-            } catch (final NumberFormatException e) {
-                return false;
-            }
+            return validateIfByte(value);
         case CHAR:
             return Character.isLetter(value.charAt(0));
         case BOOLEAN:
-            try {
-                Boolean.parseBoolean(value);
-                return true;
-            } catch (final NumberFormatException e) {
-                return false;
-            }
+            return validateIfBoolean(value);
         case SHORT:
-            try {
-                Short.parseShort(value);
-                return true;
-            } catch (final NumberFormatException e) {
-                return false;
-            }
+            return validateIfShort(value);
         case PASSWORD:
             // no need
             break;
         }
         return false;
+    }
+
+    private boolean validateIfString() {
+        return true;
+    }
+
+    private boolean validateIfShort(final String value) {
+        try {
+            Short.parseShort(value);
+            return true;
+        } catch (final NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private boolean validateIfBoolean(final String value) {
+        try {
+            Boolean.parseBoolean(value);
+            return true;
+        } catch (final NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private boolean validateIfByte(final String value) {
+        try {
+            Byte.parseByte(value);
+            return true;
+        } catch (final NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private boolean validateIfInteger(final String value) {
+        try {
+            Integer.parseInt(value);
+            return true;
+        } catch (final NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private boolean validateIfFloat(final String value) {
+        try {
+            Float.parseFloat(value);
+            return true;
+        } catch (final NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private boolean validateIfDouble(final String value) {
+        try {
+            Double.parseDouble(value);
+            return true;
+        } catch (final NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private boolean validateIfLong(final String value) {
+        try {
+            Long.parseLong(value);
+            return true;
+        } catch (final NumberFormatException e) {
+            return false;
+        }
     }
 }

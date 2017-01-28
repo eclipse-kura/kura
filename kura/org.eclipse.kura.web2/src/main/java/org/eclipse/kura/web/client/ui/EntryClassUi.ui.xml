@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -229,22 +229,21 @@
             </b:Row>
           </b:Row>
         </b:Column>
-        		<b:Modal title="New Factory Component" closable="true" fade="true"
-			dataBackdrop="STATIC" dataKeyboard="true" b:id="myModal">
+        		<b:Modal closable="true" fade="true"
+			dataBackdrop="STATIC" dataKeyboard="true" ui:field="newFactoryComponentModal" b:id="newFactoryComponentModal">
 			<b:ModalBody>
 				<b:Form type="HORIZONTAL">
 					<b:FieldSet>
 						<b:FormGroup>
-							<b:FormLabel for="formFactory" addStyleNames="col-lg-2">Factory</b:FormLabel>
+							<b:FormLabel for="formFactory" addStyleNames="col-lg-2" ui:field="newFactoryComponentFormLabel"/>
 							<g:FlowPanel addStyleNames="col-lg-10">
 								<b:ListBox b:id="formFactory" ui:field="factoriesList" />
 							</g:FlowPanel>
 						</b:FormGroup>
 						<b:FormGroup>
-							<b:FormLabel for="formName" addStyleNames="col-lg-2">Name</b:FormLabel>
+							<b:FormLabel for="formName" addStyleNames="col-lg-2" ui:field="componentInstanceNameLabel"/>
 							<g:FlowPanel addStyleNames="col-lg-10">
-								<b:TextBox placeholder="Please enter an user friendly name"
-									allowBlank="false" autoComplete="false" b:id="formName"
+								<b:TextBox allowBlank="false" autoComplete="false" b:id="formName"
 									ui:field="componentName" />
 							</g:FlowPanel>
 						</b:FormGroup>
@@ -252,8 +251,8 @@
 				</b:Form>
 			</b:ModalBody>
 			<b:ModalFooter>
-				<b:Button type="PRIMARY" dataDismiss="MODAL" ui:field="buttonNewComponent">Create</b:Button>
-				<b:Button icon="REMOVE" type="PRIMARY" dataDismiss="MODAL">Cancel</b:Button>
+				<b:Button icon="REMOVE" type="PRIMARY" dataDismiss="MODAL" ui:field="buttonNewComponentCancel"/>
+                <b:Button type="PRIMARY" dataDismiss="MODAL" ui:field="buttonNewComponent"/>
 			</b:ModalFooter>
 		</b:Modal>
 		<b:Modal closable="true" fade="true" dataBackdrop="STATIC"
@@ -266,7 +265,7 @@
 				</b:Alert>
 			</b:ModalBody>
 			<b:ModalFooter>
-				<b:Button icon="REMOVE" type="PRIMARY" dataDismiss="MODAL">Cancel</b:Button>
+				<b:Button icon="REMOVE" type="PRIMARY" dataDismiss="MODAL" ui:field="errorModalDismiss"/>
 			</b:ModalFooter>
 		</b:Modal>
     </b:Container>

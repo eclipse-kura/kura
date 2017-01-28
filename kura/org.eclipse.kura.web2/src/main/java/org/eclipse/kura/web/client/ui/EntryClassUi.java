@@ -45,6 +45,7 @@ import org.gwtbootstrap3.client.shared.event.ModalHideHandler;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Column;
+import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.Icon;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
@@ -135,7 +136,17 @@ public class EntryClassUi extends Composite {
     @UiField
     Modal errorPopup;
     @UiField
+    Modal newFactoryComponentModal;
+    @UiField
+    FormLabel newFactoryComponentFormLabel;
+    @UiField
+    FormLabel componentInstanceNameLabel;
+    @UiField
     Button buttonNewComponent;
+    @UiField
+    Button buttonNewComponentCancel;
+    @UiField
+    Button errorModalDismiss;
     @UiField
     ListBox factoriesList;
     @UiField
@@ -215,6 +226,7 @@ public class EntryClassUi extends Composite {
         this.ui = this;
         initWidget(uiBinder.createAndBindUi(this));
         initWaitModal();
+        initNewComponentErrorModal();
 
         Date now = new Date();
         @SuppressWarnings("deprecation")
@@ -581,46 +593,7 @@ public class EntryClassUi extends Composite {
         // Keypress handler
         textSearch.addValueChangeHandler(changeHandler);
 
-        // New factory configuration handler
-        buttonNewComponent.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-
-                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        String factoryPid = factoriesList.getSelectedValue();
-                        String pid = componentName.getValue();
-                        if (SELECT_COMPONENT.equalsIgnoreCase(factoryPid) || "".equals(pid)) {
-                            errorAlertText.setText("Component must be selected and the name must be non-empty");
-                            errorModal.show();
-                            return;
-                        }
-                        gwtComponentService.createFactoryComponent(token, factoryPid, pid, new AsyncCallback<Void>() {
-
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
-
-                            @Override
-                            public void onSuccess(Void result) {
-                                ValueChangeEvent<String> event = new SelectValueChangeEvent(textSearch.getValue());
-                                changeHandler.onValueChange(event);
-                            }
-                        });
-                    }
-                });
-            }
-        });
+        initNewFactoryComponentModal();
 
         factoriesButton.addClickHandler(new ClickHandler() {
 
@@ -652,6 +625,56 @@ public class EntryClassUi extends Composite {
                                 for (final String servicePid : result) {
                                     factoriesList.addItem(servicePid);
                                 }
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    private void initNewFactoryComponentModal() {
+        newFactoryComponentModal.setTitle(MSGS.servicesComponentFactoryNew());
+        newFactoryComponentFormLabel.setText(MSGS.servicesComponentFactoryFactory());
+        componentInstanceNameLabel.setText(MSGS.servicesComponentFactoryName());
+        componentName.setPlaceholder(MSGS.servicesComponentFactoryNamePlaceholder());
+        buttonNewComponent.setText(MSGS.apply());
+        buttonNewComponentCancel.setText(MSGS.cancelButton());
+
+        // New factory configuration handler
+        buttonNewComponent.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+
+                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                    }
+
+                    @Override
+                    public void onSuccess(GwtXSRFToken token) {
+                        String factoryPid = factoriesList.getSelectedValue();
+                        String pid = componentName.getValue();
+                        if (SELECT_COMPONENT.equalsIgnoreCase(factoryPid) || "".equals(pid)) {
+                            errorAlertText.setText(MSGS.servicesComponentFactoryAlertNotSelected());
+                            errorModal.show();
+                            return;
+                        }
+                        gwtComponentService.createFactoryComponent(token, factoryPid, pid, new AsyncCallback<Void>() {
+
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                FailureHandler.handle(ex, EntryClassUi.class.getName());
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                ValueChangeEvent<String> event = new SelectValueChangeEvent(textSearch.getValue());
+                                changeHandler.onValueChange(event);
                             }
                         });
                     }
@@ -808,6 +831,10 @@ public class EntryClassUi extends Composite {
         waitModal.setGlassEnabled(true);
         waitModal.center();
         waitModal.hide();
+    }
+
+    private void initNewComponentErrorModal() {
+        errorModalDismiss.setText(MSGS.closeButton());
     }
 
     public static void showWaitModal() {

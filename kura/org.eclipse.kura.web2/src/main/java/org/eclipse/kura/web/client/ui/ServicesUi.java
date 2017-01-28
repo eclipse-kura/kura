@@ -81,6 +81,8 @@ public class ServicesUi extends AbstractServicesUi {
     Form form;
     @UiField
     Button deleteButton;
+    @UiField
+    Button cancelButton;
 
     @UiField
     Modal incompleteFieldsModal, deleteModal;
@@ -136,6 +138,8 @@ public class ServicesUi extends AbstractServicesUi {
                 delete();
             }
         });
+        deleteButton.setText(MSGS.delete());
+        cancelButton.setText(MSGS.cancelButton());
         deleteMessage.setText(MSGS.deleteWarning());
 
         renderForm();

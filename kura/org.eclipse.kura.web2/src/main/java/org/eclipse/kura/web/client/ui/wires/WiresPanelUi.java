@@ -9,7 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.wires;
 
@@ -36,6 +36,8 @@ import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.FormGroup;
+import org.gwtbootstrap3.client.ui.FormLabel;
+import org.gwtbootstrap3.client.ui.Heading;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.NavPills;
@@ -68,16 +70,31 @@ public class WiresPanelUi extends Composite {
     @UiField
     static Button btnDeleteGraphYes;
     @UiField
+    static Button btnDeleteGraphNo;
+    @UiField
     static Button btnDeleteYes;
+    @UiField
+    static Button btnDeleteCancel;
     @UiField
     static Button btnGraphDelete;
     @UiField
     static Button btnSave;
-
+    @UiField
+    static Button btnZoomIn;
+    @UiField
+    static Button btnZoomOut;
     @UiField
     static Button btnSaveYes;
     @UiField
+    static Button btnSaveNo;
+    @UiField
+    static FormLabel wiresComponentName;
+    @UiField
     static TextBox componentName;
+    @UiField
+    static Button btnCreateComp;
+    @UiField
+    static Button btnCancelComp;
 
     @UiField
     static Modal deleteGraphModal;
@@ -86,11 +103,15 @@ public class WiresPanelUi extends Composite {
     @UiField
     static FormGroup driverInstanceForm;
     @UiField
+    static FormLabel wiresAvailableDrivers;
+    @UiField
     static ListBox driverPids;
     @UiField
     static Strong errorAlertText;
     @UiField
     static Modal errorModal;
+    @UiField
+    static Button errorModalClose;
     @UiField
     static TextBox factoryPid;
 
@@ -103,12 +124,17 @@ public class WiresPanelUi extends Composite {
 
     @UiField
     static Alert saveGraphAlert;
+    @UiField
+    static Alert deleteModalAlert;
+    @UiField
+    static Alert deleteGraphAlert;
 
     @UiField
     static Strong saveGraphAlertText;
     @UiField
     static Modal saveModal;
-
+    @UiField
+    static Heading wiresComposerTitle;
     @UiField
     static NavPills wireComponentsMenu;
 
@@ -157,6 +183,123 @@ public class WiresPanelUi extends Composite {
         drivers = new ArrayList<>();
         propertiesUis = new HashMap<>();
         wiresPanelUi = this;
+
+        initButtons();
+        initComposer();
+        initAssetModal();
+        initComponentDeleteModal();
+        initSaveModal();
+        initGraphDeleteModal();
+        initErrorModal();
+    }
+
+    private void initButtons() {
+        btnSave.setText(MSGS.apply());
+        btnSave.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(final ClickEvent event) {
+                final List<String> pids = new ArrayList<>();
+                for (final Map.Entry<String, PropertiesUi> entry : propertiesUis.entrySet()) {
+                    final PropertiesUi ui = entry.getValue();
+                    final String componentId = ui.getConfiguration().getComponentId();
+                    if (ui.isDirty() && !ui.isNonValidated()) {
+                        pids.add(getFormattedPid(componentId));
+                    }
+                }
+                if (!pids.isEmpty()) {
+                    WiresPanelUi.saveGraphAlert.setType(AlertType.DANGER);
+                    WiresPanelUi.saveGraphAlertText.setText(MSGS.wiresSaveIfDirty());
+                } else {
+                    WiresPanelUi.saveGraphAlert.setType(AlertType.INFO);
+                    WiresPanelUi.saveGraphAlertText.setText(MSGS.wiresSave());
+                }
+                WiresPanelUi.saveModal.show();
+            }
+        });
+
+        btnZoomIn.setText(MSGS.wiresZoomIn());
+        btnZoomOut.setText(MSGS.wiresZoomOut());
+
+        btnDelete.setText(MSGS.wiresDeleteComponent());
+        btnDelete.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(final ClickEvent event) {
+                WiresPanelUi.deleteModal.show();
+            }
+        });
+
+        btnGraphDelete.setText(MSGS.wiresDeleteGraph());
+        btnGraphDelete.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(final ClickEvent event) {
+                WiresPanelUi.deleteGraphModal.show();
+            }
+        });
+    }
+
+    private void initComposer() {
+        wiresComposerTitle.setText(MSGS.wiresComposerTitle());
+    }
+
+    private void initAssetModal() {
+        wiresAvailableDrivers.setText(MSGS.wiresAvailableDrivers());
+        wiresComponentName.setText(MSGS.wiresComponentName());
+        componentName.setPlaceholder(MSGS.wiresComponentNamePlaceholder());
+        btnCreateComp.setText(MSGS.apply());
+        btnCancelComp.setText(MSGS.cancelButton());
+    }
+
+    private void initComponentDeleteModal() {
+        deleteModalAlert.setText(MSGS.wiresComponentDeleteAlert());
+        btnDeleteYes.setText(MSGS.apply());
+        btnDeleteCancel.setText(MSGS.cancelButton());
+
+        btnDeleteYes.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(final ClickEvent event) {
+                WiresPanelUi.setDirty(true);
+                WiresPanelUi.deleteModal.hide();
+            }
+        });
+    }
+
+    private void initSaveModal() {
+        btnSaveYes.setText(MSGS.apply());
+        btnSaveNo.setText(MSGS.cancelButton());
+
+        btnSaveYes.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(final ClickEvent event) {
+                for (final Map.Entry<String, PropertiesUi> entry : propertiesUis.entrySet()) {
+                    final PropertiesUi ui = entry.getValue();
+                    ui.setDirty(false);
+                }
+                WiresPanelUi.saveModal.hide();
+            }
+        });
+    }
+
+    private void initGraphDeleteModal() {
+        deleteGraphAlert.setText(MSGS.wiresGraphDeleteAlert());
+        btnDeleteGraphNo.setText(MSGS.cancelButton());
+        btnDeleteGraphYes.setText(MSGS.apply());
+        btnDeleteGraphYes.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(final ClickEvent event) {
+                WiresPanelUi.setDirty(true);
+                WiresPanelUi.deleteGraphModal.hide();
+            }
+        });
+    }
+
+    private void initErrorModal() {
+        errorModalClose.setText(MSGS.closeButton());
     }
 
     public static void clearUnsavedPanelChanges() {
@@ -365,69 +508,6 @@ public class WiresPanelUi extends Composite {
 
         factoryPid.setVisible(false);
         WiresPanelUi.btnDelete.setEnabled(false);
-        WiresPanelUi.btnDelete.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(final ClickEvent event) {
-                WiresPanelUi.deleteModal.show();
-            }
-        });
-        WiresPanelUi.btnGraphDelete.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(final ClickEvent event) {
-                WiresPanelUi.deleteGraphModal.show();
-            }
-        });
-        WiresPanelUi.btnDeleteGraphYes.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(final ClickEvent event) {
-                WiresPanelUi.setDirty(true);
-                WiresPanelUi.deleteGraphModal.hide();
-            }
-        });
-        WiresPanelUi.btnSave.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(final ClickEvent event) {
-                final List<String> pids = new ArrayList<>();
-                for (final Map.Entry<String, PropertiesUi> entry : propertiesUis.entrySet()) {
-                    final PropertiesUi ui = entry.getValue();
-                    final String componentId = ui.getConfiguration().getComponentId();
-                    if (ui.isDirty() && !ui.isNonValidated()) {
-                        pids.add(getFormattedPid(componentId));
-                    }
-                }
-                if (!pids.isEmpty()) {
-                    WiresPanelUi.saveGraphAlert.setType(AlertType.DANGER);
-                    WiresPanelUi.saveGraphAlertText.setText(MSGS.wiresSaveIfDirty());
-                } else {
-                    WiresPanelUi.saveGraphAlert.setType(AlertType.INFO);
-                    WiresPanelUi.saveGraphAlertText.setText(MSGS.wiresSave());
-                }
-                WiresPanelUi.saveModal.show();
-            }
-        });
-        WiresPanelUi.btnDeleteYes.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(final ClickEvent event) {
-                WiresPanelUi.setDirty(true);
-                WiresPanelUi.deleteModal.hide();
-            }
-        });
-        WiresPanelUi.btnSaveYes.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(final ClickEvent event) {
-                for (final Map.Entry<String, PropertiesUi> entry : propertiesUis.entrySet()) {
-                    final PropertiesUi ui = entry.getValue();
-                    ui.setDirty(false);
-                }
-                WiresPanelUi.saveModal.hide();
-            }
-        });
         WiresPanelUi.propertiesPanel.setVisible(false);
         populateDrivers();
         populateComponentsPanel();

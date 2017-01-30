@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <!--
 
-    Copyright (c) 2016 Eurotech and/or its affiliates and others
+    Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -39,18 +39,17 @@
 					<b:Panel>
 						<b:ButtonToolBar>
 							<b:ButtonGroup size="SMALL">
-								<b:Button icon="SAVE" b:id="btn-config-save" ui:field="btnSave">Save</b:Button>
+								<b:Button icon="SAVE" b:id="btn-config-save" ui:field="btnSave"/>
 							</b:ButtonGroup>
 							<b:ButtonGroup size="SMALL">
-								<b:Button icon="SEARCH_PLUS" b:id="btn-zoom-in">Zoom In</b:Button>
-								<b:Button icon="SEARCH_MINUS" b:id="btn-zoom-out">Zoom Out</b:Button>
+								<b:Button icon="SEARCH_PLUS" b:id="btn-zoom-in" ui:field="btnZoomIn"/>
+								<b:Button icon="SEARCH_MINUS" b:id="btn-zoom-out" ui:field="btnZoomOut"/>
 							</b:ButtonGroup>
 							<b:ButtonGroup size="SMALL" addStyleNames="pull-right">
 								<b:Button icon="TRASH" b:id="btn-config-delete"
-									ui:field="btnDelete">Delete Instance</b:Button>
+									ui:field="btnDelete"/>
 								<b:Button icon="TRASH" b:id="btn-delete-graph"
-									ui:field="btnGraphDelete">Delete
-									Graph</b:Button>
+									ui:field="btnGraphDelete"/>
 							</b:ButtonGroup>
 						</b:ButtonToolBar>
 					</b:Panel>
@@ -64,7 +63,7 @@
 					<b:Column size="MD_12,XS_12" addStyleNames="{style.wire-components-list}">
 						<b:Panel>
 							<b:PanelHeader>
-								<b:Heading size="H3" text="Wire Components" />
+								<b:Heading size="H3" ui:field="wiresComposerTitle"/>
 							</b:PanelHeader>
 							<b:PanelBody>
 								<g:ScrollPanel>
@@ -78,8 +77,8 @@
 		</b:Row>
 		<b:Row>
 			<b:Panel ui:field="propertiesPanel">
-				<b:PanelHeader ui:field="propertiesPanelHeader"></b:PanelHeader>
-				<b:PanelBody ui:field="propertiesPanelBody"></b:PanelBody>
+				<b:PanelHeader ui:field="propertiesPanelHeader"/>
+				<b:PanelBody ui:field="propertiesPanelBody"/>
 			</b:Panel>
 		</b:Row>
 		<b:Modal closable="true" fade="true" dataBackdrop="STATIC"
@@ -90,29 +89,26 @@
 				<b:Form>
 					<b:FormGroup ui:field="driverInstanceForm"
 						addStyleNames="{style.drivers-list}">
-						<b:FormLabel for="driverPid" addStyleNames="col-md-4">Available
-							Drivers</b:FormLabel>
+						<b:FormLabel for="driverPid" addStyleNames="col-md-4" ui:field="wiresAvailableDrivers"/>
 						<g:FlowPanel addStyleNames="col-md-8">
 							<b:ListBox ui:field="driverPids" b:id="driverPids">
 							</b:ListBox>
 						</g:FlowPanel>
 					</b:FormGroup>
 					<b:FormGroup>
-						<b:FormLabel for="componentName" addStyleNames="col-md-4">Component
-							Name</b:FormLabel>
+						<b:FormLabel for="componentName" addStyleNames="col-md-4" ui:field="wiresComponentName"/>
 						<g:FlowPanel addStyleNames="col-md-8">
-							<b:TextBox ui:field="componentName" b:id="componentName"
-								placeholder="Please enter an user friendly name" allowBlank="false"
-								autoComplete="false"></b:TextBox>
+							<b:TextBox ui:field="componentName" b:id="componentName" allowBlank="false"
+								autoComplete="false"/>
 						</g:FlowPanel>
 					</b:FormGroup>
-					<b:TextBox ui:field="factoryPid" b:id="factoryPid"></b:TextBox>
+					<b:TextBox ui:field="factoryPid" b:id="factoryPid"/>
 				</b:Form>
 			</b:ModalBody>
 			<b:ModalFooter>
+                <b:Button b:id="btn-create-comp-cancel" icon="REMOVE" type="PRIMARY" dataDismiss="MODAL" ui:field="btnCancelComp"/>
 				<b:Button icon="SAVE" type="PRIMARY" b:id="btn-create-comp"
-					ui:field="btnCreateComp">Create</b:Button>
-				<b:Button b:id="btn-create-comp-cancel" icon="REMOVE" type="PRIMARY" dataDismiss="MODAL">Cancel</b:Button>
+					ui:field="btnCreateComp"/>
 			</b:ModalFooter>
 		</b:Modal>
 		<b:Modal closable="true" fade="true" dataBackdrop="STATIC"
@@ -120,15 +116,12 @@
 			<b:ModalHeader addStyleNames="{style.asset-comp-modal-header}">
 			</b:ModalHeader>
 			<b:ModalBody>
-				<b:Alert type="DANGER">
-					<b.html:Strong
-						text="Are you sure you want to delete the selected Wire Component instance?" />
-				</b:Alert>
+				<b:Alert type="DANGER" ui:field="deleteModalAlert"/>
 			</b:ModalBody>
 			<b:ModalFooter>
+                <b:Button icon="THUMBS_DOWN" type="PRIMARY" dataDismiss="MODAL" ui:field="btnDeleteCancel"/>
 				<b:Button icon="THUMBS_UP" type="PRIMARY" b:id="btn-delete-comp"
-					ui:field="btnDeleteYes">Yes</b:Button>
-				<b:Button icon="THUMBS_DOWN" type="PRIMARY" dataDismiss="MODAL">No</b:Button>
+					ui:field="btnDeleteYes"/>
 			</b:ModalFooter>
 		</b:Modal>
 		<b:Modal closable="true" fade="true" dataBackdrop="STATIC"
@@ -141,9 +134,9 @@
 				</b:Alert>
 			</b:ModalBody>
 			<b:ModalFooter>
-				<b:Button icon="THUMBS_UP" type="PRIMARY" b:id="btn-save-graph"
-					ui:field="btnSaveYes">Yes</b:Button>
-				<b:Button icon="THUMBS_DOWN" type="PRIMARY" dataDismiss="MODAL">No</b:Button>
+				<b:Button icon="THUMBS_DOWN" type="PRIMARY" dataDismiss="MODAL" ui:field="btnSaveNo"/>
+                <b:Button icon="THUMBS_UP" type="PRIMARY" b:id="btn-save-graph"
+                    ui:field="btnSaveYes"/>
 			</b:ModalFooter>
 		</b:Modal>
 		<b:Modal closable="true" fade="true" dataBackdrop="STATIC"
@@ -151,15 +144,12 @@
 			<b:ModalHeader addStyleNames="{style.asset-comp-modal-header}">
 			</b:ModalHeader>
 			<b:ModalBody>
-				<b:Alert type="DANGER">
-					<b.html:Strong
-						text="Are you sure you want to delete the complete Wire Graph?" />
-				</b:Alert>
+				<b:Alert type="DANGER" ui:field="deleteGraphAlert"/>
 			</b:ModalBody>
 			<b:ModalFooter>
+                <b:Button icon="THUMBS_DOWN" type="PRIMARY" dataDismiss="MODAL" ui:field="btnDeleteGraphNo"/>
 				<b:Button icon="THUMBS_UP" type="PRIMARY" b:id="btn-delete-graph-confirm"
-					ui:field="btnDeleteGraphYes">Yes</b:Button>
-				<b:Button icon="THUMBS_DOWN" type="PRIMARY" dataDismiss="MODAL">No</b:Button>
+					ui:field="btnDeleteGraphYes"/>
 			</b:ModalFooter>
 		</b:Modal>
 		<b:Modal closable="true" fade="true" dataBackdrop="STATIC"
@@ -172,7 +162,7 @@
 				</b:Alert>
 			</b:ModalBody>
 			<b:ModalFooter>
-				<b:Button icon="REMOVE" type="PRIMARY" dataDismiss="MODAL">Cancel</b:Button>
+				<b:Button icon="REMOVE" type="PRIMARY" dataDismiss="MODAL" ui:field="errorModalClose"/>
 			</b:ModalFooter>
 		</b:Modal>
 	</b:Container>

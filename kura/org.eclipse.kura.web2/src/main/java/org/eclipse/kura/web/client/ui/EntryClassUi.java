@@ -625,6 +625,7 @@ public class EntryClassUi extends Composite {
                                 for (final String servicePid : result) {
                                     factoriesList.addItem(servicePid);
                                 }
+                                newFactoryComponentModal.show();
                             }
                         });
                     }

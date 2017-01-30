@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1773,4 +1774,869 @@ public class ConfigurationServiceTest {
         return cfgs;
     }
 
+    @Test
+    public void testWriteSnapshotFileNotFile() throws Throwable {
+        // force a FileNotFound exception resulting in internal error KuraException
+
+        long sid = 323L;
+
+        XmlComponentConfigurations cfg = prepareSnapshot();
+
+        final String dir = "snapshotDirWSFNF";
+
+        File d1 = new File(dir);
+        d1.mkdirs();
+        d1.deleteOnExit();
+
+        File d2 = new File(d1, "snapshot_" + sid + ".xml");
+        d2.mkdirs();
+        d2.deleteOnExit();
+
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
+
+            @Override
+            String getSnapshotsDirectory() {
+                return dir;
+            }
+        };
+
+        CryptoService cryptoServiceMock = mock(CryptoService.class);
+        cs.setCryptoService(cryptoServiceMock);
+
+        String encCfg = "encrypted";
+        char[] encrypted = encCfg.toCharArray();
+        when(cryptoServiceMock.encryptAes((char[]) Mockito.anyObject())).thenReturn(encrypted);
+
+        try {
+            TestUtil.invokePrivate(cs, "writeSnapshot", sid, cfg);
+            fail("Exception expected due to 'file' being directory.");
+        } catch (KuraException e) {
+            assertEquals("Error code.", KuraErrorCode.INTERNAL_ERROR, e.getCode());
+        }
+
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Mockito.anyObject());
+
+        d1.delete();
+        d2.delete();
+    }
+
+    @Test
+    public void testWriteSnapshot() throws Throwable {
+        // test the normal flow
+
+        long sid = 323L;
+
+        XmlComponentConfigurations cfg = prepareSnapshot();
+
+        final String dir = "snapshotDirWS";
+
+        File d1 = new File(dir);
+        d1.mkdirs();
+        d1.deleteOnExit();
+
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
+
+            @Override
+            String getSnapshotsDirectory() {
+                return dir;
+            }
+        };
+
+        CryptoService cryptoServiceMock = mock(CryptoService.class);
+        cs.setCryptoService(cryptoServiceMock);
+
+        String encCfg = "encrypted";
+        char[] encrypted = encCfg.toCharArray();
+        when(cryptoServiceMock.encryptAes((char[]) Mockito.anyObject())).thenReturn(encrypted);
+
+        TestUtil.invokePrivate(cs, "writeSnapshot", sid, cfg);
+
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Mockito.anyObject());
+
+        File f1 = new File(d1, "snapshot_" + sid + ".xml");
+        f1.deleteOnExit();
+        assertTrue("snapshot file was created", f1.exists());
+
+        FileReader fr = new FileReader(f1);
+        char[] chars = new char[encCfg.length()];
+        int read = fr.read(chars);
+        fr.close();
+
+        assertEquals("proper length", encCfg.length(), read);
+        assertArrayEquals("proper encrypted contents", encrypted, chars);
+
+        f1.delete();
+        d1.delete();
+    }
+
+    /*
+     * FIXME: If 0 snapshots are configured to remain and snapshot_0.xml exists, the method won't finish normally.
+     * NPE when unboxing null to long at pollFirst()
+     * API doesn't state 0 snapshots is illegal return value.
+     */
+    @Test
+    public void testGarbageCollectionOldSnapshotsZero() throws Throwable {
+        // test scenario where 0 snapshots are configured to remain, but snapshot_0.xml prevents deletion of all of them
+        final String dir = "gcosDir0";
+
+        File d1 = new File(dir);
+        d1.mkdirs();
+        d1.deleteOnExit();
+
+        File f0 = new File(dir, "snapshot_0.xml"); // special snapshot file
+        f0.createNewFile();
+        f0.deleteOnExit();
+        File f1 = new File(dir, "snapshot_121.xml");
+        f1.createNewFile();
+        f1.deleteOnExit();
+
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
+
+            @Override
+            String getSnapshotsDirectory() {
+                return dir;
+            }
+        };
+
+        SystemService systemServiceMock = mock(SystemService.class);
+        cs.setSystemService(systemServiceMock);
+
+        when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(0);
+
+        try {
+            TestUtil.invokePrivate(cs, "garbageCollectionOldSnapshots");
+        } catch (Exception e) {
+            // fail("Exception not expected.");
+        }
+
+        verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
+
+        assertTrue("file not deleted", f0.exists());
+        assertFalse("file deleted", f1.exists());
+
+        f0.delete();
+        d1.delete();
+    }
+
+    @Test
+    public void testGarbageCollectionOldSnapshotsZeroNoZero() throws Throwable {
+        // test scenario where 0 snapshots are configured to remain, but snapshot_0.xml is not present
+        final String dir = "gcosDir00";
+
+        File d1 = new File(dir);
+        d1.mkdirs();
+        d1.deleteOnExit();
+
+        File f0 = new File(dir, "snapshot_1.xml");
+        f0.createNewFile();
+        f0.deleteOnExit();
+        File f1 = new File(dir, "snapshot_121.xml");
+        f1.createNewFile();
+        f1.deleteOnExit();
+
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
+
+            @Override
+            String getSnapshotsDirectory() {
+                return dir;
+            }
+        };
+
+        SystemService systemServiceMock = mock(SystemService.class);
+        cs.setSystemService(systemServiceMock);
+
+        when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(0);
+
+        TestUtil.invokePrivate(cs, "garbageCollectionOldSnapshots");
+
+        verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
+
+        assertFalse("file deleted", f0.exists());
+        assertFalse("file deleted", f1.exists());
+
+        d1.delete();
+    }
+
+    @Test
+    public void testGarbageCollectionOldSnapshotsZeroOnly() throws Throwable {
+        // test that 0 is left, even if not newest
+        final String dir = "gcosDir01";
+
+        File d1 = new File(dir);
+        d1.mkdirs();
+        d1.deleteOnExit();
+
+        File f0 = new File(dir, "snapshot_0.xml"); // special snapshot file
+        f0.createNewFile();
+        f0.deleteOnExit();
+        File f1 = new File(dir, "snapshot_121.xml");
+        f1.createNewFile();
+        f1.deleteOnExit();
+        File f2 = new File(dir, "snapshot_122.xml");
+        f2.createNewFile();
+        f2.deleteOnExit();
+        File f3 = new File(dir, "snapshot_123.xml");
+        f3.createNewFile();
+        f3.deleteOnExit();
+
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
+
+            @Override
+            String getSnapshotsDirectory() {
+                return dir;
+            }
+        };
+
+        SystemService systemServiceMock = mock(SystemService.class);
+        cs.setSystemService(systemServiceMock);
+
+        when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(1);
+
+        TestUtil.invokePrivate(cs, "garbageCollectionOldSnapshots");
+
+        verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
+
+        assertTrue("file not deleted", f0.exists());
+        assertFalse("file deleted", f1.exists());
+        assertFalse("file deleted", f2.exists());
+        assertFalse("file deleted", f3.exists());
+
+        f3.delete();
+        d1.delete();
+    }
+
+    @Test
+    public void testGarbageCollectionOldSnapshotsNoZero1() throws Throwable {
+        // no zero => newest is left
+
+        final String dir = "gcosDir";
+
+        File d1 = new File(dir);
+        d1.mkdirs();
+        d1.deleteOnExit();
+
+        File f1 = new File(dir, "snapshot_121.xml");
+        f1.createNewFile();
+        f1.deleteOnExit();
+        File f2 = new File(dir, "snapshot_122.xml");
+        f2.createNewFile();
+        f2.deleteOnExit();
+        File f3 = new File(dir, "snapshot_123.xml");
+        f3.createNewFile();
+        f3.deleteOnExit();
+
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
+
+            @Override
+            String getSnapshotsDirectory() {
+                return dir;
+            }
+        };
+
+        SystemService systemServiceMock = mock(SystemService.class);
+        cs.setSystemService(systemServiceMock);
+
+        when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(1);
+
+        TestUtil.invokePrivate(cs, "garbageCollectionOldSnapshots");
+
+        verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
+
+        assertFalse("file deleted", f1.exists());
+        assertFalse("file deleted", f2.exists());
+        assertTrue("file not deleted", f3.exists());
+
+        f3.delete();
+        d1.delete();
+    }
+
+    @Test
+    public void testGarbageCollectionOldSnapshots2() throws Throwable {
+        // zero and more than one to live => 0 and newest are left
+        final String dir = "gcosDir";
+
+        File d1 = new File(dir);
+        d1.mkdirs();
+        d1.deleteOnExit();
+
+        File f0 = new File(dir, "snapshot_0.xml"); // special snapshot file
+        f0.createNewFile();
+        f0.deleteOnExit();
+        File f1 = new File(dir, "snapshot_121.xml");
+        f1.createNewFile();
+        f1.deleteOnExit();
+        File f2 = new File(dir, "snapshot_122.xml");
+        f2.createNewFile();
+        f2.deleteOnExit();
+        File f3 = new File(dir, "snapshot_123.xml");
+        f3.createNewFile();
+        f3.deleteOnExit();
+
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
+
+            @Override
+            String getSnapshotsDirectory() {
+                return dir;
+            }
+        };
+
+        SystemService systemServiceMock = mock(SystemService.class);
+        cs.setSystemService(systemServiceMock);
+
+        when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(2);
+
+        TestUtil.invokePrivate(cs, "garbageCollectionOldSnapshots");
+
+        verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
+
+        assertTrue("file not deleted", f0.exists());
+        assertFalse("file deleted", f1.exists());
+        assertFalse("file deleted", f2.exists());
+        assertTrue("file not deleted", f3.exists());
+
+        f0.delete();
+        f3.delete();
+        d1.delete();
+    }
+
+    @Test
+    public void testSaveSnapshotNulls() throws Throwable {
+        // test new snapshot creation - no old ones
+
+        final String dir = "dirSSN";
+        File d1 = new File(dir);
+        d1.mkdirs();
+        d1.deleteOnExit();
+
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
+
+            @Override
+            public Set<Long> getSnapshots() throws KuraException {
+                return null;
+            }
+
+            @Override
+            String getSnapshotsDirectory() {
+                return dir;
+            }
+        };
+
+        CryptoService cryptoServiceMock = mock(CryptoService.class);
+        cs.setCryptoService(cryptoServiceMock);
+
+        String encCfg = "encrypted";
+        char[] encrypted = encCfg.toCharArray();
+        when(cryptoServiceMock.encryptAes((char[]) Mockito.anyObject())).thenReturn(encrypted);
+
+        SystemService systemServiceMock = mock(SystemService.class);
+        cs.setSystemService(systemServiceMock);
+
+        when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(1);
+
+        XmlComponentConfigurations snapshot = prepareSnapshot();
+        List<ComponentConfigurationImpl> configs = snapshot.getConfigurations();
+
+        Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
+
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Mockito.anyObject());
+        verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
+
+        assertNotNull(sid);
+
+        File f1 = new File(d1, "snapshot_" + sid + ".xml");
+        assertTrue("snapshot file created", f1.exists());
+
+        FileReader fr = new FileReader(f1);
+        char[] chars = new char[encCfg.length()];
+        fr.read(chars);
+        fr.close();
+
+        assertArrayEquals("snapshot file content matches", encCfg.toCharArray(), chars);
+
+        f1.delete();
+        d1.delete();
+    }
+
+    @Test
+    public void testSaveSnapshotNewerLastPid() throws Throwable {
+        // new snapshot, too recent old PID => predictable SID
+
+        final String dir = "dirSSNLP";
+        File d1 = new File(dir);
+        d1.mkdirs();
+        d1.deleteOnExit();
+
+        final Set<Long> snapshotList = new TreeSet<Long>();
+        snapshotList.add(123L);
+        long lastSid = System.currentTimeMillis() + 1000;
+        snapshotList.add(lastSid);
+
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
+
+            @Override
+            public Set<Long> getSnapshots() throws KuraException {
+                return snapshotList;
+            }
+
+            @Override
+            String getSnapshotsDirectory() {
+                return dir;
+            }
+        };
+
+        CryptoService cryptoServiceMock = mock(CryptoService.class);
+        cs.setCryptoService(cryptoServiceMock);
+
+        String encCfg = "encrypted";
+        char[] encrypted = encCfg.toCharArray();
+        when(cryptoServiceMock.encryptAes((char[]) Mockito.anyObject())).thenReturn(encrypted);
+
+        SystemService systemServiceMock = mock(SystemService.class);
+        cs.setSystemService(systemServiceMock);
+
+        when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(1);
+
+        XmlComponentConfigurations snapshot = prepareSnapshot();
+        List<ComponentConfigurationImpl> configs = snapshot.getConfigurations();
+
+        Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
+
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Mockito.anyObject());
+        verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
+
+        assertNotNull(sid);
+        assertEquals("sid as expected", lastSid + 1, sid.longValue());
+
+        File f1 = new File(d1, "snapshot_" + sid + ".xml");
+        assertTrue("snapshot file created", f1.exists());
+
+        FileReader fr = new FileReader(f1);
+        char[] chars = new char[encCfg.length()];
+        fr.read(chars);
+        fr.close();
+
+        assertArrayEquals("snapshot file content matches", encCfg.toCharArray(), chars);
+
+        f1.delete();
+        d1.delete();
+    }
+
+    @Test
+    public void testSaveSnapshot() throws Throwable {
+        // new snapshot, old last PID => take SID from current time
+
+        final String dir = "dirSS";
+        File d1 = new File(dir);
+        d1.mkdirs();
+        d1.deleteOnExit();
+
+        final Set<Long> snapshotList = new TreeSet<Long>();
+        snapshotList.add(123L);
+        long lastSid = 1234;
+        snapshotList.add(lastSid);
+
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
+
+            @Override
+            public Set<Long> getSnapshots() throws KuraException {
+                return snapshotList;
+            }
+
+            @Override
+            String getSnapshotsDirectory() {
+                return dir;
+            }
+        };
+
+        CryptoService cryptoServiceMock = mock(CryptoService.class);
+        cs.setCryptoService(cryptoServiceMock);
+
+        String encCfg = "encrypted";
+        char[] encrypted = encCfg.toCharArray();
+        when(cryptoServiceMock.encryptAes((char[]) Mockito.anyObject())).thenReturn(encrypted);
+
+        SystemService systemServiceMock = mock(SystemService.class);
+        cs.setSystemService(systemServiceMock);
+
+        when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(1);
+
+        XmlComponentConfigurations snapshot = prepareSnapshot();
+        List<ComponentConfigurationImpl> configs = snapshot.getConfigurations();
+
+        Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
+
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Mockito.anyObject());
+        verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
+
+        assertNotNull(sid);
+        assertTrue("sid as expected", sid.longValue() > lastSid + 1);
+        assertTrue("sid as expected - time >", sid.longValue() > System.currentTimeMillis() - 1000);
+        assertTrue("sid as expected - time <=", sid.longValue() <= System.currentTimeMillis());
+
+        File f1 = new File(d1, "snapshot_" + sid + ".xml");
+        assertTrue("snapshot file created", f1.exists());
+
+        FileReader fr = new FileReader(f1);
+        char[] chars = new char[encCfg.length()];
+        fr.read(chars);
+        fr.close();
+
+        assertArrayEquals("snapshot file content matches", encCfg.toCharArray(), chars);
+
+        f1.delete();
+        d1.delete();
+    }
+
+    @Test
+    public void testSnapshot() {
+        // TODO: Not yet implemented
+    }
+
+    @Test
+    public void testUpdateWithDefaultConfigurationPidsNull() throws Throwable {
+        // test null values
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
+
+        String pid = null;
+        Tocd ocd = null;
+
+        ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
+        cs.setConfigurationAdmin(configAdminMock);
+
+        String caPid = pid;
+        when(configAdminMock.getConfiguration(caPid, "?")).thenReturn(null);
+
+        TestUtil.invokePrivate(cs, "updateWithDefaultConfiguration", pid, ocd);
+
+        verify(configAdminMock, times(1)).getConfiguration(caPid, "?");
+    }
+
+    @Test
+    public void testUpdateWithDefaultConfigurationParamPidOverride() throws Throwable {
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
+
+        String pid = "123";
+        Tocd ocd = null;
+
+        ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
+        cs.setConfigurationAdmin(configAdminMock);
+
+        String caPid = pid;
+        when(configAdminMock.getConfiguration(caPid, "?")).thenReturn(null);
+
+        TestUtil.invokePrivate(cs, "updateWithDefaultConfiguration", pid, ocd);
+
+        verify(configAdminMock, times(1)).getConfiguration(caPid, "?");
+    }
+
+    @Test
+    public void testUpdateWithDefaultConfigurationsServicePidNull() throws Throwable {
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
+
+        String pid = "123";
+        Tocd ocd = null;
+
+        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        pids.put(pid, null);
+
+        ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
+        cs.setConfigurationAdmin(configAdminMock);
+
+        String caPid = pid;
+        when(configAdminMock.getConfiguration(caPid, "?")).thenReturn(null);
+
+        TestUtil.invokePrivate(cs, "updateWithDefaultConfiguration", pid, ocd);
+
+        verify(configAdminMock, times(1)).getConfiguration(caPid, "?");
+    }
+
+    @Test
+    public void testUpdateWithDefaultConfigurationsServicePid() throws Throwable {
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
+
+        String pid = "123";
+        Tocd ocd = null;
+
+        String sPid = "1234";
+        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        pids.put(pid, sPid);
+
+        ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
+        cs.setConfigurationAdmin(configAdminMock);
+
+        String caPid = sPid;
+        when(configAdminMock.getConfiguration(caPid, "?")).thenReturn(null);
+
+        TestUtil.invokePrivate(cs, "updateWithDefaultConfiguration", pid, ocd);
+
+        verify(configAdminMock, times(1)).getConfiguration(caPid, "?");
+    }
+
+    @Test
+    public void testUpdateWithDefaultConfigurationServicePidExists() throws Throwable {
+        final String spid = "1234";
+
+        String pid = "123";
+        Tocd ocd = null;
+
+        final boolean[] calls = { false };
+
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
+
+            @Override
+            boolean mergeWithDefaults(OCD ocd, Map<String, Object> properties) throws KuraException {
+                assertEquals("size", 2, properties.size());
+                assertTrue("new property", properties.containsKey(ConfigurationService.KURA_SERVICE_PID));
+                assertEquals("property value", spid, properties.get(ConfigurationService.KURA_SERVICE_PID));
+
+                calls[0] = true;
+                return true;
+            }
+        };
+
+        ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
+        cs.setConfigurationAdmin(configAdminMock);
+
+        Configuration cfgMock = mock(Configuration.class);
+        String caPid = pid;
+        when(configAdminMock.getConfiguration(caPid, "?")).thenReturn(cfgMock);
+
+        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        props.put(ConfigurationService.KURA_SERVICE_PID, spid);
+        props.put("test", "test");
+        when(cfgMock.getProperties()).thenReturn(props);
+
+        TestUtil.invokePrivate(cs, "updateWithDefaultConfiguration", pid, ocd);
+
+        assertTrue("method called", calls[0]);
+
+        verify(cfgMock, times(1)).update((Dictionary<String, ?>) anyObject());
+    }
+
+    @Test
+    public void testUpdateWithDefaultConfiguration() throws Throwable {
+        final String pid = "123";
+        Tocd ocd = null;
+
+        final boolean[] calls = { false };
+
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
+
+            @Override
+            boolean mergeWithDefaults(OCD ocd, Map<String, Object> properties) throws KuraException {
+                assertEquals("size", 1, properties.size());
+                assertTrue("new property", properties.containsKey(ConfigurationService.KURA_SERVICE_PID));
+                assertEquals("property value", pid, properties.get(ConfigurationService.KURA_SERVICE_PID));
+
+                calls[0] = true;
+                return true;
+            }
+        };
+
+        ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
+        cs.setConfigurationAdmin(configAdminMock);
+
+        Configuration cfgMock = mock(Configuration.class);
+        String caPid = pid;
+        when(configAdminMock.getConfiguration(caPid, "?")).thenReturn(cfgMock);
+
+        when(cfgMock.getProperties()).thenReturn(null);
+
+        Mockito.doAnswer(new Answer<Object>() {
+
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                Dictionary<String, Object> dict = (Dictionary<String, Object>) invocation.getArguments()[0];
+
+                assertNotNull(dict);
+
+                assertEquals("one element in properties list - pid", 1, dict.size());
+
+                assertEquals("expected configuration update PID", pid, dict.elements().nextElement());
+
+                return null;
+            }
+        }).when(cfgMock).update((Dictionary<String, ?>) anyObject());
+
+        TestUtil.invokePrivate(cs, "updateWithDefaultConfiguration", pid, ocd);
+
+        assertTrue("method called", calls[0]);
+
+        verify(cfgMock, times(1)).update((Dictionary<String, ?>) anyObject());
+    }
+
+    @Test
+    public void testRegisterComponentConfigurationAllNulls() {
+        // only null inputs
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
+
+        String pid = null;
+        String servicePid = null;
+        String factoryPid = null;
+
+        cs.registerComponentConfiguration(pid, servicePid, factoryPid);
+
+        // no checks really possible...
+    }
+
+    @Test
+    public void testRegisterComponentConfigurationPreActivated() throws NoSuchFieldException {
+        // pid is already activated, so it's not added to service pids
+
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
+
+        String pid = "pid";
+        String servicePid = "spid";
+        String factoryPid = null;
+
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        allPids.add(pid);
+
+        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        assertEquals("spid size OK", 0, sPids.size());
+
+        cs.registerComponentConfiguration(pid, servicePid, factoryPid);
+
+        assertEquals("size still OK", 0, sPids.size());
+    }
+
+    @Test
+    public void testRegisterComponentConfigurationActivateNoFactory() throws NoSuchFieldException {
+        // not activated, but no factory pid available => add to service and activated pids
+
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
+
+        String pid = "pid";
+        String servicePid = "spid";
+        String factoryPid = null;
+
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        assertEquals("active pids size OK", 0, allPids.size());
+
+        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        assertEquals("spid size OK", 0, sPids.size());
+
+        cs.registerComponentConfiguration(pid, servicePid, factoryPid);
+
+        assertEquals("size still OK", 1, sPids.size());
+        assertEquals("spid in there", servicePid, sPids.get(pid));
+
+        assertEquals("active size increased", 1, allPids.size());
+        assertTrue("spid active", allPids.contains(pid));
+    }
+
+    @Test
+    public void testRegisterComponentConfigurationWithFactoryPid() throws NoSuchFieldException {
+        // add also factory PID, but no OCD mapped
+
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
+
+        String pid = "pid";
+        String servicePid = "spid";
+        String factoryPid = "fpid";
+
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        assertEquals("active pids size OK", 0, allPids.size());
+
+        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        assertEquals("spid size OK", 0, sPids.size());
+
+        Map<String, String> fPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_factoryPidByPid");
+        assertEquals("fpid size OK", 0, fPids.size());
+
+        cs.registerComponentConfiguration(pid, servicePid, factoryPid);
+
+        assertEquals("size still OK", 1, sPids.size());
+        assertEquals("spid in there", servicePid, sPids.get(pid));
+
+        assertEquals("active size increased", 1, allPids.size());
+        assertTrue("spid active", allPids.contains(pid));
+
+        assertEquals("factory size increased", 1, fPids.size());
+        assertEquals("fpid in there", factoryPid, fPids.get(pid));
+    }
+
+    @Test
+    public void testRegisterComponentConfigurationConfigException() throws IOException, NoSuchFieldException {
+        // test exception in cfgadmin
+
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
+
+        String pid = "pid";
+        String servicePid = "spid";
+        String factoryPid = "fpid";
+
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        assertEquals("active pids size OK", 0, allPids.size());
+
+        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        assertEquals("spid size OK", 0, sPids.size());
+
+        Map<String, String> fPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_factoryPidByPid");
+        assertEquals("fpid size OK", 0, fPids.size());
+
+        Map<String, Tocd> ocds = (Map<String, Tocd>) TestUtil.getFieldValue(cs, "m_ocds");
+        Tocd ocd = new Tocd();
+        ocds.put(factoryPid, ocd);
+
+        ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
+        cs.setConfigurationAdmin(configAdminMock);
+
+        when(configAdminMock.getConfiguration(servicePid, "?")).thenThrow(new IOException("test"));
+
+        cs.registerComponentConfiguration(pid, servicePid, factoryPid);
+
+        verify(configAdminMock, times(1)).getConfiguration(servicePid, "?");
+
+        assertEquals("size still OK", 1, sPids.size());
+        assertEquals("spid in there", servicePid, sPids.get(pid));
+
+        assertEquals("active size increased", 1, allPids.size());
+        assertTrue("spid active", allPids.contains(pid));
+
+        assertEquals("factory size increased", 1, fPids.size());
+        assertEquals("fpid in there", factoryPid, fPids.get(pid));
+    }
+
+    @Test
+    public void testRegisterComponentConfiguration() throws IOException, NoSuchFieldException {
+        // check that updateWithDefaultConfiguration is called successfully
+
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
+
+        String pid = "pid";
+        String servicePid = "spid";
+        String factoryPid = "fpid";
+
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        assertEquals("active pids size OK", 0, allPids.size());
+
+        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        assertEquals("spid size OK", 0, sPids.size());
+
+        Map<String, String> fPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_factoryPidByPid");
+        assertEquals("fpid size OK", 0, fPids.size());
+
+        Map<String, Tocd> ocds = (Map<String, Tocd>) TestUtil.getFieldValue(cs, "m_ocds");
+        Tocd ocd = new Tocd();
+        ocds.put(factoryPid, ocd);
+
+        ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
+        cs.setConfigurationAdmin(configAdminMock);
+
+        when(configAdminMock.getConfiguration(servicePid, "?")).thenReturn(null);
+
+        cs.registerComponentConfiguration(pid, servicePid, factoryPid);
+
+        verify(configAdminMock, times(1)).getConfiguration(servicePid, "?");
+
+        assertEquals("size still OK", 1, sPids.size());
+        assertEquals("spid in there", servicePid, sPids.get(pid));
+
+        assertEquals("active size increased", 1, allPids.size());
+        assertTrue("spid active", allPids.contains(pid));
+
+        assertEquals("factory size increased", 1, fPids.size());
+        assertEquals("fpid in there", factoryPid, fPids.get(pid));
+    }
 }

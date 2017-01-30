@@ -15,7 +15,8 @@ such as the [Raspberry Pi installation guide](https://www.raspberrypi.org/docume
       ```
 1. SSH into the RPi. You will need to be plugged into a wired ethernet network at this point,
 but after this step you could configure wifi and repeat the discovery step.
-1. Grow the root file system as described [here](https://fedoraproject.org/wiki/Architectures/ARM/F25/Installation#Resize_the_Root_Filesystem)
+1. Grow the root file system as described [here](https://fedoraproject.org/wiki/Architectures/ARM/F25/Installation#Resize_the_Root_Filesystem),
+also see section "How do I enlarge the root partition?" in the [FAQ](https://fedoraproject.org/wiki/Architectures/ARM/F25/Installation#FAQ)
 1. Install pre-requisites:
       ```
       dnf -y install unzip psmisc tar telnet bind iptables iptables-services dhcp hostapd dos2unix wireless-tools net-tools usbutils java-1.8.0-openjdk-headless

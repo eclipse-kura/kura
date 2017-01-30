@@ -62,4 +62,10 @@ public class ComponentConfigurationImpl implements ComponentConfiguration {
         this.properties = properties;
     }
 
+    @Override
+    public String toString() {
+        return "ComponentConfigurationImpl [pid=" + pid + ", definition=" + definition + ", properties=" + properties
+                + "]";
+    }
+
 }

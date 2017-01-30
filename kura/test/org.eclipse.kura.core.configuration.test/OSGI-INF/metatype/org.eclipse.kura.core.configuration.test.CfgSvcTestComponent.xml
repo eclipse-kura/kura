@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+Copyright (c) 2017 Eurotech and/or its affiliates and others
+
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/legal/epl-v10.html
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.core.configuration.test.CfgSvcTestComponent"
+         name="CfgSvcTestComponent"
+         description="Component for testing Configuration Service.">
+
+        <AD id="field.test"
+            name="field.test"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="1"
+            min="1"
+            max="20"
+            description="Field for test"/>
+
+    </OCD>
+    <Designate pid="org.eclipse.kura.core.configuration.test.CfgSvcTestComponent">
+        <Object ocdref="org.eclipse.kura.core.configuration.test.CfgSvcTestComponent"/>
+    </Designate>
+</MetaData>

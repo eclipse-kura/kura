@@ -276,4 +276,10 @@ public class Tocd implements OCD {
         return this.otherAttributes;
     }
 
+    @Override
+    public String toString() {
+        return "Tocd [ad=" + ad + ", icon=" + icon + ", any=" + any + ", name=" + name + ", description=" + description
+                + ", id=" + id + ", otherAttributes=" + otherAttributes + "]";
+    }
+
 }

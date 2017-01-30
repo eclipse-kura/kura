@@ -37,7 +37,7 @@
 					<testSuite>org.eclipse.kura.asset.provider.test</testSuite>
 					<testClass>org.eclipse.kura.asset.provider.test.AssetTestsSuite</testClass>
 					<useUnlimitedThreads>true</useUnlimitedThreads>
-					 <argLine>${tycho.testArgLine} -DbuildingWithTycho=true -Dosgi.locking=none -Dequinox.ds.print=true -Djava.io.tmpdir=/tmp -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Dorg.eclipse.kura.mode=emulator -Dkura.configuration=file:${project.basedir}/../emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties  -Dlog4j.configuration=file:${project.basedir}/../emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
+					 <argLine>${jacocoArgs} -DbuildingWithTycho=true -Dosgi.locking=none -Dequinox.ds.print=true -Djava.io.tmpdir=/tmp -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Dorg.eclipse.kura.mode=emulator -Dkura.configuration=file:${project.basedir}/../emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties  -Dlog4j.configuration=file:${project.basedir}/../emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
 					<bundleStartLevel>
 						<bundle>
 							<id>org.eclipse.equinox.ds</id>

@@ -237,16 +237,6 @@
 									<version>${org.eclipse.kura.windows.launcher.version}</version>
 
 								</artifactItem>-->
-								<artifactItem>
-									<groupId>org.mockito</groupId>
-									<artifactId>mockito-core</artifactId>
-									<version>${mockito-core.version}</version>
-								</artifactItem>
-                                <artifactItem>
-                                    <groupId>org.objenesis</groupId>
-                                    <artifactId>objenesis</artifactId>
-                                    <version>${objenesis.version}</version>
-                                </artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -295,8 +285,6 @@
 								<move file="target/source/plugins/camel-stream.jar" tofile="target/source/plugins/org.apache.camel.camel-stream_${org.apache.camel.camel-stream.version}.jar"/>
 								<move file="target/source/plugins/camel-core-osgi.jar" tofile="target/source/plugins/org.apache.camel.camel-core-osgi_${org.apache.camel.camel-core-osgi.version}.jar"/>
 								<move file="target/source/plugins/camel-kura.jar" tofile="target/source/plugins/org.apache.camel.camel-kura_${org.apache.camel.camel-kura.version}.jar"/>
-								<move file="target/source/plugins/mockito-core.jar" tofile="target/source/plugins/mockito-core_${mockito-core.version}.jar"/>
-								<move file="target/source/plugins/objenesis.jar" tofile="target/source/plugins/objenesis_${objenesis.version}.jar"/>
 								<move file="target/source/plugins/minimal-json.jar" tofile="target/source/plugins/minimal-json_${com.eclipsesource.minimal-json.version}.jar"/>
 								<!--<move file="target/source/plugins/org.eclipse.kura.windows.system.jar" tofile="target/source/plugins/org.eclipse.kura.windows.system_${org.eclipse.kura.windows.system.version}.jar"/>
 								<move file="target/source/plugins/org.eclipse.kura.windows.launcher.jar" tofile="target/source/plugins/org.eclipse.kura.windows.launcher_${org.eclipse.kura.windows.launcher.version}.jar"/>-->

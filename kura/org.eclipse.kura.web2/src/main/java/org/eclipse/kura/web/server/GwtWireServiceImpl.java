@@ -544,6 +544,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         return this.getWiresConfigurationInternal();
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getDriverPidProp() {
         return AssetConstants.ASSET_DRIVER_PROP.value();

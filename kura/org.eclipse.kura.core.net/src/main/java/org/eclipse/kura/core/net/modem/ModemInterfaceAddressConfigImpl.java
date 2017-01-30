@@ -39,63 +39,36 @@ public class ModemInterfaceAddressConfigImpl extends ModemInterfaceAddressImpl i
     }
 
     @Override
-    public boolean equals(Object obj) {
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((m_configs == null) ? 0 : m_configs.hashCode());
+		return result;
+	}
 
-        if (this == obj) {
-            return true;
-        }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof ModemInterfaceAddressConfigImpl)) {
+			return false;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		ModemInterfaceAddressConfigImpl other = (ModemInterfaceAddressConfigImpl) obj;
+		if (m_configs == null) {
+			if (other.m_configs != null) {
+				return false;
+			}
+		} else if (!m_configs.equals(other.m_configs)) {
+			return false;
+		}
+		return true;
+	}
 
-        if (!super.equals(obj)) {
-            return false;
-        }
-
-        if (!(obj instanceof ModemInterfaceAddressConfig)) {
-            return false;
-        }
-
-        ModemInterfaceAddressConfig other = (ModemInterfaceAddressConfig) obj;
-
-        if (!compare(getSignalStrength(), other.getSignalStrength())) {
-            return false;
-        }
-
-        if (!compare(isRoaming(), other.isRoaming())) {
-            return false;
-        }
-
-        if (!compare(getConnectionStatus(), other.getConnectionStatus())) {
-            return false;
-        }
-
-        if (getBytesTransmitted() != other.getBytesTransmitted()) {
-            return false;
-        }
-
-        if (getBytesReceived() != other.getBytesReceived()) {
-            return false;
-        }
-
-        if (!compare(getConnectionType(), other.getConnectionType())) {
-            return false;
-        }
-
-        List<NetConfig> thisNetConfigs = getConfigs();
-        List<NetConfig> otherNetConfigs = other.getConfigs();
-
-        if (thisNetConfigs.size() != otherNetConfigs.size()) {
-            return false;
-        }
-        if (!thisNetConfigs.containsAll(otherNetConfigs)) {
-            return false;
-        }
-        if (!otherNetConfigs.containsAll(thisNetConfigs)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    @Override
+	@Override
     public String toString() {
         if (this.m_configs != null) {
             StringBuffer sb = new StringBuffer();

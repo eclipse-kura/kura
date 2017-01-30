@@ -94,4 +94,50 @@ public class ModemInterfaceAddressImpl extends NetInterfaceAddressImpl implement
         this.m_connectionType = connectionType;
     }
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (m_bytesReceived ^ (m_bytesReceived >>> 32));
+		result = prime * result + (int) (m_bytesTransmitted ^ (m_bytesTransmitted >>> 32));
+		result = prime * result + ((m_connectionStatus == null) ? 0 : m_connectionStatus.hashCode());
+		result = prime * result + ((m_connectionType == null) ? 0 : m_connectionType.hashCode());
+		result = prime * result + (m_isRoaming ? 1231 : 1237);
+		result = prime * result + m_signalStrength;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof ModemInterfaceAddressImpl)) {
+			return false;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		ModemInterfaceAddressImpl other = (ModemInterfaceAddressImpl) obj;
+		if (m_bytesReceived != other.m_bytesReceived) {
+			return false;
+		}
+		if (m_bytesTransmitted != other.m_bytesTransmitted) {
+			return false;
+		}
+		if (m_connectionStatus != other.m_connectionStatus) {
+			return false;
+		}
+		if (m_connectionType != other.m_connectionType) {
+			return false;
+		}
+		if (m_isRoaming != other.m_isRoaming) {
+			return false;
+		}
+		if (m_signalStrength != other.m_signalStrength) {
+			return false;
+		}
+		return true;
+	}
+
 }

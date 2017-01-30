@@ -171,7 +171,6 @@ public class WiresPanelUi extends Composite {
     private static String wires;
     private static GwtConfigComponent currentSelection = null;
     private static PropertiesUi propertiesUi;
-    private static WiresPanelUi wiresPanelUi;
 
     private static String driverPidProp = "driver.pid";
 
@@ -182,7 +181,6 @@ public class WiresPanelUi extends Composite {
         components = new ArrayList<>();
         drivers = new ArrayList<>();
         propertiesUis = new HashMap<>();
-        wiresPanelUi = this;
 
         initButtons();
         initComposer();

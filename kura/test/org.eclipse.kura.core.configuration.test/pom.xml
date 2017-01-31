@@ -21,7 +21,7 @@ Copyright (c) 2016 Eurotech and/or its affiliates and others
 
     <artifactId>org.eclipse.kura.core.configuration.test</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <packaging>eclipse-plugin</packaging>
+    <packaging>eclipse-test-plugin</packaging>
 
     <properties>
         <kura.basedir>${project.basedir}/../..</kura.basedir>
@@ -36,7 +36,7 @@ Copyright (c) 2016 Eurotech and/or its affiliates and others
                 <configuration>
                     <failIfNoTests>false</failIfNoTests>
                     <providerHint>junit4</providerHint>
-                    <useUnlimitedThreads>true</useUnlimitedThreads>
+                    <useUnlimitedThreads>false</useUnlimitedThreads>
                     <argLine>${jacocoArgs}
                         -DbuildingWithTycho=true -Dosgi.locking=none
                         -Dequinox.ds.print=true -Djava.io.tmpdir=/tmp

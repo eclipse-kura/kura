@@ -110,4 +110,11 @@ public class WireRecord {
         }
     }
 
+    public void addAll(List<WireField> wireFields) {
+        boolean addResult = this.fields.addAll(wireFields);
+        if (!addResult) {
+            throw new IllegalArgumentException();
+        }
+    }
+
 }

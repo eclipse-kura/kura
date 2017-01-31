@@ -10,18 +10,10 @@
 package org.eclipse.kura.internal.wire.filter;
 
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.wire.SeverityLevel.INFO;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -30,17 +22,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.DbService;
-import org.eclipse.kura.internal.wire.common.DbServiceHelper;
-import org.eclipse.kura.internal.wire.store.DbDataTypeMapper;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
-import org.eclipse.kura.type.DataType;
-import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.util.base.ThrowableUtil;
-import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
-import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
@@ -62,8 +48,6 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 
     /** Cache container to store values of SQL view wire records */
     private final WireRecordCache cache;
-
-    private DbServiceHelper dbHelper;
 
     private volatile DbService dbService;
 
@@ -95,9 +79,8 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
             final Map<String, Object> properties) {
         logger.debug(message.activatingFilter());
         this.options = new DbWireRecordFilterOptions(properties);
-        this.dbHelper = DbServiceHelper.getInstance(this.dbService);
         this.wireSupport = this.wireHelperService.newWireSupport(this);
-        this.scheduleRefresh();
+        scheduleRefresh();
         logger.debug(message.activatingFilterDone());
     }
 
@@ -151,14 +134,14 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
      *
      * @return the filtered records
      */
-    synchronized List<WireRecord> filter() {
+    synchronized WireRecord filter() {
         logger.debug(message.filteringStarted());
         try {
-            return this.refreshSQLView();
+            return refreshSQLView();
         } catch (final SQLException e) {
             logger.error(message.errorFiltering() + ThrowableUtil.stackTraceAsString(e));
         }
-        return Collections.emptyList();
+        return null;
     }
 
     /**
@@ -193,87 +176,84 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
     /**
      * Refreshes the SQL view
      */
-    private List<WireRecord> refreshSQLView() throws SQLException {
+    private WireRecord refreshSQLView() throws SQLException {
         final Date now = new Date();
-        final List<WireRecord> dataRecords = CollectionUtil.newArrayList();
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-        final String sqlView = this.options.getSqlView();
-        try {
-            conn = this.dbHelper.getConnection();
-            stmt = conn.createStatement();
-            rset = stmt.executeQuery(sqlView);
-            if (rset != null) {
-                while (rset.next()) {
-                    final List<WireField> dataFields = CollectionUtil.newArrayList();
-                    final ResultSetMetaData rmet = rset.getMetaData();
-                    for (int i = 1; i <= rmet.getColumnCount(); i++) {
-                        String fieldName = rmet.getColumnLabel(i);
-                        if (fieldName == null) {
-                            fieldName = rmet.getColumnName(i);
-                        }
-                        WireField dataField = null;
-                        final int jdbcType = rmet.getColumnType(i);
-                        final DataType dataType = DbDataTypeMapper.getDataType(jdbcType);
-                        switch (dataType) {
-                        case BOOLEAN:
-                            final boolean boolValue = rset.getBoolean(i);
-                            logger.info(message.refreshBoolean(boolValue));
-                            dataField = new WireField(fieldName, TypedValues.newBooleanValue(boolValue), INFO);
-                            break;
-                        case BYTE:
-                            final byte byteValue = rset.getByte(i);
-                            logger.info(message.refreshByte(byteValue));
-                            dataField = new WireField(fieldName, TypedValues.newByteValue(byteValue), INFO);
-                            break;
-                        case DOUBLE:
-                            final double doubleValue = rset.getDouble(i);
-                            logger.info(message.refreshDouble(doubleValue));
-                            dataField = new WireField(fieldName, TypedValues.newDoubleValue(doubleValue), INFO);
-                            break;
-                        case INTEGER:
-                            final int intValue = rset.getInt(i);
-                            logger.info(message.refreshInteger(intValue));
-                            dataField = new WireField(fieldName, TypedValues.newIntegerValue(intValue), INFO);
-                            break;
-                        case LONG:
-                            final long longValue = rset.getLong(i);
-                            logger.info(message.refreshLong(longValue));
-                            dataField = new WireField(fieldName, TypedValues.newLongValue(longValue), INFO);
-                            break;
-                        case BYTE_ARRAY:
-                            final byte[] bytesValue = rset.getBytes(i);
-                            logger.info(message.refreshByteArray(Arrays.toString(bytesValue)));
-                            dataField = new WireField(fieldName, TypedValues.newByteArrayValue(bytesValue), INFO);
-                            break;
-                        case SHORT:
-                            final short shortValue = rset.getShort(i);
-                            logger.info(message.refreshShort(shortValue));
-                            dataField = new WireField(fieldName, TypedValues.newShortValue(shortValue), INFO);
-                            break;
-                        case STRING:
-                            final String stringValue = rset.getString(i);
-                            logger.info(message.refreshString(stringValue));
-                            dataField = new WireField(fieldName, TypedValues.newStringValue(stringValue), INFO);
-                            break;
-                        default:
-                            break;
-                        }
-                        dataFields.add(dataField);
-                    }
-                    dataRecords.add(new WireRecord(new Timestamp(now.getTime()), dataFields));
-                }
-            }
-            logger.info(message.refreshed());
-        } catch (final SQLException e) {
-            throw e;
-        } finally {
-            this.dbHelper.close(rset);
-            this.dbHelper.close(stmt);
-            this.dbHelper.close(conn);
-        }
-        return dataRecords;
+        final WireRecord dataRecord = new WireRecord(new Timestamp(now.getTime()));
+        this.options.getSqlView();
+        // try {
+        // conn = this.dbHelper.getConnection();
+        // stmt = conn.createStatement();
+        // rset = stmt.executeQuery(sqlView);
+        // if (rset != null) {
+        // while (rset.next()) {
+        // final List<WireField> dataFields = CollectionUtil.newArrayList();
+        // final ResultSetMetaData rmet = rset.getMetaData();
+        // for (int i = 1; i <= rmet.getColumnCount(); i++) {
+        // String fieldName = rmet.getColumnLabel(i);
+        // if (fieldName == null) {
+        // fieldName = rmet.getColumnName(i);
+        // }
+        // WireField dataField = null;
+        // final int jdbcType = rmet.getColumnType(i);
+        // final DataType dataType = DbDataTypeMapper.getDataType(jdbcType);
+        // switch (dataType) {
+        // case BOOLEAN:
+        // final boolean boolValue = rset.getBoolean(i);
+        // logger.info(message.refreshBoolean(boolValue));
+        // dataField = new WireField(fieldName, TypedValues.newBooleanValue(boolValue), INFO);
+        // break;
+        // case BYTE:
+        // final byte byteValue = rset.getByte(i);
+        // logger.info(message.refreshByte(byteValue));
+        // dataField = new WireField(fieldName, TypedValues.newByteValue(byteValue), INFO);
+        // break;
+        // case DOUBLE:
+        // final double doubleValue = rset.getDouble(i);
+        // logger.info(message.refreshDouble(doubleValue));
+        // dataField = new WireField(fieldName, TypedValues.newDoubleValue(doubleValue), INFO);
+        // break;
+        // case INTEGER:
+        // final int intValue = rset.getInt(i);
+        // logger.info(message.refreshInteger(intValue));
+        // dataField = new WireField(fieldName, TypedValues.newIntegerValue(intValue), INFO);
+        // break;
+        // case LONG:
+        // final long longValue = rset.getLong(i);
+        // logger.info(message.refreshLong(longValue));
+        // dataField = new WireField(fieldName, TypedValues.newLongValue(longValue), INFO);
+        // break;
+        // case BYTE_ARRAY:
+        // final byte[] bytesValue = rset.getBytes(i);
+        // logger.info(message.refreshByteArray(Arrays.toString(bytesValue)));
+        // dataField = new WireField(fieldName, TypedValues.newByteArrayValue(bytesValue), INFO);
+        // break;
+        // case SHORT:
+        // final short shortValue = rset.getShort(i);
+        // logger.info(message.refreshShort(shortValue));
+        // dataField = new WireField(fieldName, TypedValues.newShortValue(shortValue), INFO);
+        // break;
+        // case STRING:
+        // final String stringValue = rset.getString(i);
+        // logger.info(message.refreshString(stringValue));
+        // dataField = new WireField(fieldName, TypedValues.newStringValue(stringValue), INFO);
+        // break;
+        // default:
+        // break;
+        // }
+        // dataFields.add(dataField);
+        // }
+        // dataRecords.add(new WireRecord(new Timestamp(now.getTime()), dataFields));
+        // }
+        // }
+        // logger.info(message.refreshed());
+        // } catch (final SQLException e) {
+        // throw e;
+        // } finally {
+        // this.dbHelper.close(rset);
+        // this.dbHelper.close(stmt);
+        // this.dbHelper.close(conn);
+        // }
+        return dataRecord;
     }
 
     /**
@@ -333,7 +313,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
     public synchronized void updated(final Map<String, Object> properties) {
         logger.debug(message.updatingFilter() + properties);
         this.options = new DbWireRecordFilterOptions(properties);
-        this.scheduleRefresh();
+        scheduleRefresh();
         logger.debug(message.updatingFilterDone());
     }
 

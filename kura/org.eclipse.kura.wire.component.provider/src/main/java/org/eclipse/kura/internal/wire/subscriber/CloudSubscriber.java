@@ -10,13 +10,14 @@
 package org.eclipse.kura.internal.wire.subscriber;
 
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.wire.SeverityLevel.ERROR;
-import static org.eclipse.kura.wire.SeverityLevel.INFO;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudClient;
@@ -30,8 +31,6 @@ import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.util.base.TypeUtil;
-import org.eclipse.kura.util.collection.CollectionUtil;
-import org.eclipse.kura.wire.SeverityLevel;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireHelperService;
@@ -283,7 +282,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
                 logger.error(ThrowableUtil.stackTraceAsString(e));
             }
             if (record != null) {
-                this.wireSupport.emit(Arrays.asList(record));
+                this.wireSupport.emit(record);
             }
         }
     }
@@ -302,7 +301,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
 
     /**
      * Performs subscription via a cloud client instance.
-     * 
+     *
      * @throws KuraException
      *             if the subscription fails
      */
@@ -368,55 +367,51 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
      */
     private WireRecord buildWireRecord(final KuraPayload payload) throws IOException {
         requireNonNull(payload, wireMessages.payloadNonNull());
-        final List<WireField> wireFields = CollectionUtil.newArrayList();
 
-        final String flag = "asset_flag";
-        SeverityLevel level = INFO;
-        final Object severityLevelMetric = payload.getMetric(flag);
-        if ("ERROR".equalsIgnoreCase(String.valueOf(severityLevelMetric))) {
-            level = ERROR;
+        Map<String, Object> kuraPayloadFlattenedFields = payload.metrics();
+        Map<String, TypedValue<?>> wireFlattenedFields = new HashMap<>();
+
+        for (Entry<String, Object> entry : kuraPayloadFlattenedFields.entrySet()) {
+            String entryKey = entry.getKey();
+            Object entryValue = entry.getValue();
+
+            TypedValue<?> convertedValue = TypedValues.EMPTY_VALUE;
+            if (entryValue instanceof Boolean) {
+                final boolean value = Boolean.parseBoolean(String.valueOf(entryValue));
+                convertedValue = TypedValues.newBooleanValue(value);
+            } else if (entryValue instanceof Byte) {
+                final byte value = Byte.parseByte(String.valueOf(entryValue));
+                convertedValue = TypedValues.newByteValue(value);
+            } else if (entryValue instanceof Long) {
+                final long value = Long.parseLong(String.valueOf(entryValue));
+                convertedValue = TypedValues.newLongValue(value);
+            } else if (entryValue instanceof Double) {
+                final double value = Double.parseDouble(String.valueOf(entryValue));
+                convertedValue = TypedValues.newDoubleValue(value);
+            } else if (entryValue instanceof Integer) {
+                final int value = Integer.parseInt(String.valueOf(entryValue));
+                convertedValue = TypedValues.newIntegerValue(value);
+            } else if (entryValue instanceof Short) {
+                final short value = Short.parseShort(String.valueOf(entryValue));
+                convertedValue = TypedValues.newShortValue(value);
+            } else if (entryValue instanceof String && entryKey.endsWith("_error")) {
+                final String value = String.valueOf(entryValue);
+                convertedValue = TypedValues.newErrorValue(value);
+            } else if (entryValue instanceof String) {
+                final String value = String.valueOf(entryValue);
+                convertedValue = TypedValues.newStringValue(value);
+            } else if (entryValue instanceof byte[]) {
+                final byte[] value = TypeUtil.objectToByteArray(entryValue);
+                convertedValue = TypedValues.newByteArrayValue(value);
+            }
+            wireFlattenedFields.put(entryKey, convertedValue);
         }
 
-        for (final String metric : payload.metricNames()) {
-            final Object metricValue = payload.getMetric(metric);
-            TypedValue<?> val = TypedValues.newStringValue("");
-            // check instance of this metric value properly
-            if (metricValue instanceof Boolean) {
-                final boolean value = Boolean.parseBoolean(String.valueOf(metricValue));
-                val = TypedValues.newBooleanValue(value);
-            }
-            if (metricValue instanceof Byte) {
-                final byte value = Byte.parseByte(String.valueOf(metricValue));
-                val = TypedValues.newByteValue(value);
-            }
-            if (metricValue instanceof Long) {
-                final long value = Long.parseLong(String.valueOf(metricValue));
-                val = TypedValues.newLongValue(value);
-            }
-            if (metricValue instanceof Double) {
-                final double value = Double.parseDouble(String.valueOf(metricValue));
-                val = TypedValues.newDoubleValue(value);
-            }
-            if (metricValue instanceof Integer) {
-                final int value = Integer.parseInt(String.valueOf(metricValue));
-                val = TypedValues.newIntegerValue(value);
-            }
-            if (metricValue instanceof Short) {
-                final short value = Short.parseShort(String.valueOf(metricValue));
-                val = TypedValues.newShortValue(value);
-            }
-            if (metricValue instanceof String) {
-                final String value = String.valueOf(metricValue);
-                val = TypedValues.newStringValue(value);
-            }
-            if (metricValue instanceof byte[]) {
-                final byte[] value = TypeUtil.objectToByteArray(metricValue);
-                val = TypedValues.newByteArrayValue(value);
-            }
-            final WireField wireField = new WireField(metric, val, level);
-            wireFields.add(wireField);
-        }
-        return new WireRecord(wireFields.toArray(new WireField[0]));
+        List<WireField> wireFields = WireField.unflatten(wireFlattenedFields);
+
+        final WireRecord wireRecord = new WireRecord(new Timestamp(new Date().getTime()));
+        wireRecord.addAll(wireFields);
+        return wireRecord;
     }
 
     /**

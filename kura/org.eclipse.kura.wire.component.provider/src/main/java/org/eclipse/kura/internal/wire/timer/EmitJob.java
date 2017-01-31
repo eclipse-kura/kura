@@ -5,14 +5,15 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.timer;
 
-import java.util.Arrays;
+import java.sql.Timestamp;
+import java.util.Date;
 
+import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
-import org.eclipse.kura.wire.SeverityLevel;
 import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
@@ -43,8 +44,14 @@ public final class EmitJob implements Job {
     public void execute(final JobExecutionContext context) throws JobExecutionException {
         final TimerJobDataMap dataMap = (TimerJobDataMap) context.getJobDetail().getJobDataMap();
         final WireSupport wireSupport = dataMap.getWireSupport();
-        wireSupport.emit(Arrays
-                .asList(new WireRecord(new WireField(PROP, TypedValues.newStringValue(PROP), SeverityLevel.CONFIG))));
+
+        final long currentTime = new Date().getTime();
+        final TypedValue<Long> timestamp = TypedValues.newLongValue(currentTime);
+        final WireField timerWireField = new WireField(PROP, timestamp);
+        final WireRecord timerWireRecord = new WireRecord(new Timestamp(currentTime));
+        timerWireRecord.addField(timerWireField);
+
+        wireSupport.emit(timerWireRecord);
     }
 
 }

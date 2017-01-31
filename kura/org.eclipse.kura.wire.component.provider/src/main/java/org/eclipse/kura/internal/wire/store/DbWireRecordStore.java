@@ -245,7 +245,6 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         for (final WireField wireField : wireFields) {
             final Map<String, TypedValue<?>> flattenedField = wireField.flatten();
             allFlattenedFields.putAll(flattenedField);
-
         }
 
         Connection connection = null;
@@ -401,18 +400,22 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         // reconcile columns
         final List<WireField> dataFields = wireRecord.getFields();
         for (final WireField dataField : dataFields) {
-            final String sqlColName = this.dbHelper.sanitizeSqlTableAndColumnName(dataField.getName());
-            final Integer sqlColType = columns.get(sqlColName);
-            final JdbcType jdbcType = DbDataTypeMapper.getJdbcType(dataField.getValue().getType());
-            if (sqlColType == null) {
-                // add column
-                this.dbHelper.execute(
-                        MessageFormat.format(SQL_ADD_COLUMN, sqlTableName, sqlColName, jdbcType.getTypeString()));
-            } else if (sqlColType != jdbcType.getType()) {
-                // drop old column and add new one
-                this.dbHelper.execute(MessageFormat.format(SQL_DROP_COLUMN, sqlTableName, sqlColName));
-                this.dbHelper.execute(
-                        MessageFormat.format(SQL_ADD_COLUMN, sqlTableName, sqlColName, jdbcType.getTypeString()));
+            Map<String, TypedValue<?>> flattenedProperties = dataField.flatten();
+
+            for (Entry<String, TypedValue<?>> entry : flattenedProperties.entrySet()) {
+                final String sqlColName = this.dbHelper.sanitizeSqlTableAndColumnName(entry.getKey());
+                final Integer sqlColType = columns.get(sqlColName);
+                final JdbcType jdbcType = DbDataTypeMapper.getJdbcType(entry.getValue().getType());
+                if (sqlColType == null) {
+                    // add column
+                    this.dbHelper.execute(
+                            MessageFormat.format(SQL_ADD_COLUMN, sqlTableName, sqlColName, jdbcType.getTypeString()));
+                } else if (sqlColType != jdbcType.getType()) {
+                    // drop old column and add new one
+                    this.dbHelper.execute(MessageFormat.format(SQL_DROP_COLUMN, sqlTableName, sqlColName));
+                    this.dbHelper.execute(
+                            MessageFormat.format(SQL_ADD_COLUMN, sqlTableName, sqlColName, jdbcType.getTypeString()));
+                }
             }
         }
     }

@@ -12,7 +12,6 @@ package org.eclipse.kura.internal.wire.filter;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Calendar;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.localization.LocalizationAdapter;
@@ -27,18 +26,14 @@ import org.eclipse.kura.wire.WireRecord;
 final class WireRecordCache {
 
     /** Map that is the cache. */
-    private static final Map<Long, List<WireRecord>> m_map = CollectionUtil.newConcurrentHashMap();
+    private static final Map<Long, WireRecord> cacheMap = CollectionUtil.newConcurrentHashMap();
 
-    /** Localization Resource. */
     private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
 
-    /** Cache Maximum Capacity as configured. */
     private int capacity;
 
-    /** Last refreshed time. */
     private Calendar lastRefreshedTime;
 
-    /** DB Wire Record Filter instance. */
     private final DbWireRecordFilter recordFilter;
 
     /** Refresh duration in seconds. */
@@ -64,11 +59,11 @@ final class WireRecordCache {
      *            - key to get from cache map
      * @return object for the particular key
      */
-    List<WireRecord> get(final long key) {
-        if (this.refreshCache()) {
-            m_map.put(this.lastRefreshedTime.getTimeInMillis(), this.recordFilter.filter());
+    WireRecord get(final long key) {
+        if (refreshCache()) {
+            cacheMap.put(this.lastRefreshedTime.getTimeInMillis(), this.recordFilter.filter());
         }
-        return m_map.get(key);
+        return cacheMap.get(key);
     }
 
     /**
@@ -110,13 +105,13 @@ final class WireRecordCache {
      * @param value
      *            - object for the key
      */
-    void put(final long key, final List<WireRecord> value) {
+    void put(final long key, final WireRecord value) {
         // clears the map if the size of the map is as same as the max size
         // expected
-        if (m_map.size() == this.capacity) {
-            m_map.clear();
+        if (cacheMap.size() == this.capacity) {
+            cacheMap.clear();
         }
-        m_map.put(key, value);
+        cacheMap.put(key, value);
         this.lastRefreshedTime = Calendar.getInstance();
     }
 

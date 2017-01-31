@@ -13,7 +13,9 @@
  *******************************************************************************/
 package org.eclipse.kura.wire;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -27,6 +29,9 @@ import org.eclipse.kura.type.TypedValue;
  */
 public class WireField {
 
+    private static final String PROPERTY_DELIMITER = "_";
+    private static final String ERROR_SUFFIX = "_error";
+    private static final String VALUE_SUFFIX = "_value";
     private final String name;
     private final TypedValue<?> value;
     private final Map<String, TypedValue<?>> properties = new HashMap<>();
@@ -36,8 +41,29 @@ public class WireField {
         this.value = value;
     }
 
-    public WireField(Map<String, TypedValue<?>> properties) {
+    public static List<WireField> unflatten(Map<String, TypedValue<?>> properties) {
+        final List<WireField> wireFieldList = Collections.emptyList();
+        for (final Entry<String, TypedValue<?>> entry : properties.entrySet()) {
+            final String key = entry.getKey();
+            final String name = key.substring(0, key.lastIndexOf(PROPERTY_DELIMITER));
+            final WireField wireField;
+            if (key.endsWith(VALUE_SUFFIX) || key.endsWith(ERROR_SUFFIX)) {
+                wireField = new WireField(name, entry.getValue());
 
+                for (final Entry<String, TypedValue<?>> entryAgain : properties.entrySet()) {
+                    final String tempKey = entryAgain.getKey();
+                    final String tempName = tempKey.substring(0, tempKey.lastIndexOf(PROPERTY_DELIMITER));
+                    final String tempSuffix = tempKey.substring(tempKey.lastIndexOf(PROPERTY_DELIMITER) + 1,
+                            tempKey.length());
+                    if (tempName.equals(name) && !tempKey.endsWith(VALUE_SUFFIX) && !tempKey.endsWith(ERROR_SUFFIX)) {
+                        wireField.addProperty(tempSuffix, entryAgain.getValue());
+                    }
+                }
+                wireFieldList.add(wireField);
+            }
+        }
+
+        return wireFieldList;
     }
 
     public String getName() {
@@ -63,14 +89,14 @@ public class WireField {
         Map<String, TypedValue<?>> result = new HashMap<>();
         String typeSuffix;
         if (this.value instanceof ErrorValue) {
-            typeSuffix = "_error";
+            typeSuffix = ERROR_SUFFIX;
         } else {
-            typeSuffix = "_value";
+            typeSuffix = VALUE_SUFFIX;
         }
         result.put(this.name + typeSuffix, getValue());
 
         for (Entry<String, TypedValue<?>> entry : this.properties.entrySet()) {
-            result.put(this.name + "_" + entry.getKey(), entry.getValue());
+            result.put(this.name + PROPERTY_DELIMITER + entry.getKey(), entry.getValue());
         }
         return result;
     }

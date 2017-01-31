@@ -183,7 +183,8 @@ public final class DbServiceHelper {
     public String sanitizeSqlTableAndColumnName(final String string) {
         requireNonNull(string, s_message.stringNonNull());
         s_logger.debug(s_message.sanitize() + string);
-        return string.replaceAll("(?=[]\\[+&|!(){}^\"~*?:\\\\-])", "_");
+        String sanitizedName = string.replaceAll("(?=[]\\[+&|!(){}^\"~*?:\\\\-])", "_");
+        return "\"" + sanitizedName + "\"";
     }
 
 }

@@ -12,11 +12,14 @@ package org.eclipse.kura.internal.wire.logger;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
+import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireEnvelope;
+import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
@@ -87,9 +90,21 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
     public void onWireReceive(final WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, s_message.wireEnvelopeNonNull());
         s_logger.info(s_message.wireEnvelopeReceived(wireEnvelope.getEmitterPid()));
-        // filtering list of wire records based on the provided severity level
+
+        s_logger.info("Record content: ");
         final WireRecord record = wireEnvelope.getRecord();
-        s_logger.info(record.toString());
+        s_logger.info("  Timestamp: {}", record.getTimestamp().toString());
+        if (record.getPosition() != null) {
+            s_logger.info(" Position: {}", record.getPosition().toString());
+        }
+        for (WireField wireField : record.getFields()) {
+            Map<String, TypedValue<?>> flattenedField = wireField.flatten();
+            for (Entry<String, TypedValue<?>> entry : flattenedField.entrySet()) {
+                s_logger.info("    {} : {}", entry.getKey(), entry.getValue().getValue());
+            }
+            s_logger.info("");
+        }
+
     }
 
     /** {@inheritDoc} */

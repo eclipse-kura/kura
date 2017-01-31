@@ -11,7 +11,6 @@ package org.eclipse.kura.internal.wire.logger;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -89,8 +88,8 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
         requireNonNull(wireEnvelope, s_message.wireEnvelopeNonNull());
         s_logger.info(s_message.wireEnvelopeReceived(wireEnvelope.getEmitterPid()));
         // filtering list of wire records based on the provided severity level
-        final List<WireRecord> records = this.wireSupport.filter(wireEnvelope.getRecords());
-        s_logger.info(s_message.loggerReceive(records.toString()));
+        final WireRecord record = wireEnvelope.getRecord();
+        s_logger.info(record.toString());
     }
 
     /** {@inheritDoc} */

@@ -16,14 +16,12 @@ package org.eclipse.kura.wire;
 import static java.util.Objects.requireNonNull;
 
 import java.sql.Timestamp;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
-import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.Nullable;
-import org.eclipse.kura.annotation.ThreadSafe;
 import org.osgi.util.position.Position;
 
 /**
@@ -32,18 +30,13 @@ import org.osgi.util.position.Position;
  *
  * @noextend This class is not intended to be extended by clients.
  */
-@Immutable
-@ThreadSafe
 public class WireRecord {
 
-    /** The contained wire fields. */
-    private final List<WireField> fields;
+    private final HashSet<WireField> fields = new HashSet<>();
 
-    /** The position. */
     @Nullable
     private final Position position;
 
-    /** The timestamp. */
     private final Timestamp timestamp;
 
     /**
@@ -56,13 +49,11 @@ public class WireRecord {
      * @throws NullPointerException
      *             if any of the argument is null
      */
-    public WireRecord(final Timestamp timestamp, final List<WireField> fields) {
+    public WireRecord(Timestamp timestamp) {
         requireNonNull(timestamp, "Timestamp cannot be null");
-        requireNonNull(fields, "Wire fields cannot be null");
 
         this.timestamp = timestamp;
         this.position = null;
-        this.fields = Collections.unmodifiableList(fields);
     }
 
     /**
@@ -77,28 +68,11 @@ public class WireRecord {
      * @throws NullPointerException
      *             if any of the argument is null (except position)
      */
-    public WireRecord(final Timestamp timestamp, @Nullable final Position position, final List<WireField> fields) {
+    public WireRecord(final Timestamp timestamp, final Position position) {
         requireNonNull(timestamp, "Timestamp cannot be null");
-        requireNonNull(fields, "Wire fields cannot be null");
 
         this.timestamp = timestamp;
         this.position = position;
-        this.fields = Collections.unmodifiableList(fields);
-    }
-
-    /**
-     * Instantiates a new wire record.
-     *
-     * @param fields
-     *            the wire fields
-     * @throws NullPointerException
-     *             if any of the argument is null
-     */
-    public WireRecord(final WireField... fields) {
-        requireNonNull(fields, "Wire fields cannot be null");
-        this.timestamp = new Timestamp(new Date().getTime());
-        this.position = null;
-        this.fields = Collections.unmodifiableList(Arrays.asList(fields));
     }
 
     /**
@@ -107,7 +81,7 @@ public class WireRecord {
      * @return the fields
      */
     public List<WireField> getFields() {
-        return this.fields;
+        return Collections.unmodifiableList(new ArrayList<>(this.fields));
     }
 
     /**
@@ -128,11 +102,12 @@ public class WireRecord {
         return this.timestamp;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public String toString() {
-        return "WireRecord [fields=" + this.fields + ", position=" + this.position + ", timestamp=" + this.timestamp
-                + "]";
+    public void addField(WireField field) {
+
+        boolean addResult = this.fields.add(field);
+        if (!addResult) {
+            throw new IllegalArgumentException();
+        }
     }
 
 }

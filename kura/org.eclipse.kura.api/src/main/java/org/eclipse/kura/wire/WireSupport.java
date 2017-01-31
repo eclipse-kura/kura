@@ -33,17 +33,17 @@ public interface WireSupport extends Producer, Consumer {
     public static final String EMIT_EVENT_TOPIC = "org/eclipse/kura/wires/emit";
 
     /**
-     * Emit the provided wire records
+     * Emit the provided wire record
      *
-     * @param wireRecords
-     *            the Wire Records to emit
+     * @param wireRecord
+     *            the Wire Record to emit
      * @throws NullPointerException
      *             if the argument is null
      */
-    public void emit(List<WireRecord> wireRecords);
+    public void emit(WireRecord wireRecord);
 
     /**
-     * Filters the provided list of wire records based on the configured
+     * Filters the provided wire record based on the configured
      * {@link SeverityLevel} for the provided wire component. It filters out all
      * the Wire Fields that do not belong to the level as required by the Wire
      * Component.
@@ -54,5 +54,5 @@ public interface WireSupport extends Producer, Consumer {
      *             if the argument is null
      * @return the list of filtered Wire Records
      */
-    public List<WireRecord> filter(List<WireRecord> wireRecords);
+    // public List<WireRecord> filter(List<WireRecord> wireRecords);
 }

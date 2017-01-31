@@ -120,4 +120,8 @@ public final class TypedValues {
         return new StringValue(value);
     }
 
+    public static ErrorValue newErrorValue(@Nullable final String value) {
+        return new ErrorValue(value);
+    }
+
 }

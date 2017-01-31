@@ -56,37 +56,28 @@ import org.slf4j.LoggerFactory;
  */
 public final class DbWireRecordFilter implements WireEmitter, WireReceiver, ConfigurableComponent {
 
-    /** The Logger instance. */
-    private static final Logger s_logger = LoggerFactory.getLogger(DbWireRecordFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(DbWireRecordFilter.class);
 
-    /** Localization Resource */
-    private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
+    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
     /** Cache container to store values of SQL view wire records */
     private final WireRecordCache cache;
 
-    /** DB Utility Helper */
     private DbServiceHelper dbHelper;
 
-    /** The DB Service dependency. */
     private volatile DbService dbService;
 
-    /** Scheduled Executor Service */
     private final ScheduledExecutorService executorService;
 
-    /** The DB Filter Options. */
     private DbWireRecordFilterOptions options;
 
     /** The future handle of the thread pool executor service. */
     private ScheduledFuture<?> tickHandle;
 
-    /** The Wire Helper Service. */
     private volatile WireHelperService wireHelperService;
 
-    /** The Wire Supporter component. */
     private WireSupport wireSupport;
 
-    /** Constructor */
     public DbWireRecordFilter() {
         this.executorService = Executors.newSingleThreadScheduledExecutor();
         this.cache = new WireRecordCache(this);
@@ -102,12 +93,12 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
      */
     protected synchronized void activate(final ComponentContext componentContext,
             final Map<String, Object> properties) {
-        s_logger.debug(s_message.activatingFilter());
+        logger.debug(message.activatingFilter());
         this.options = new DbWireRecordFilterOptions(properties);
         this.dbHelper = DbServiceHelper.getInstance(this.dbService);
         this.wireSupport = this.wireHelperService.newWireSupport(this);
         this.scheduleRefresh();
-        s_logger.debug(s_message.activatingFilterDone());
+        logger.debug(message.activatingFilterDone());
     }
 
     /**
@@ -147,12 +138,12 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
      *            the component context
      */
     protected synchronized void deactivate(final ComponentContext componentContext) {
-        s_logger.debug(s_message.deactivatingFilter());
+        logger.debug(message.deactivatingFilter());
         if (this.tickHandle != null) {
             this.tickHandle.cancel(true);
         }
         this.executorService.shutdown();
-        s_logger.debug(s_message.deactivatingFilterDone());
+        logger.debug(message.deactivatingFilterDone());
     }
 
     /**
@@ -161,11 +152,11 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
      * @return the filtered records
      */
     synchronized List<WireRecord> filter() {
-        s_logger.debug(s_message.filteringStarted());
+        logger.debug(message.filteringStarted());
         try {
             return this.refreshSQLView();
         } catch (final SQLException e) {
-            s_logger.error(s_message.errorFiltering() + ThrowableUtil.stackTraceAsString(e));
+            logger.error(message.errorFiltering() + ThrowableUtil.stackTraceAsString(e));
         }
         return Collections.emptyList();
     }
@@ -182,8 +173,8 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
      */
     @Override
     public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {
-        requireNonNull(wireEnvelope, s_message.wireEnvelopeNonNull());
-        s_logger.debug(s_message.wireEnvelopeReceived() + wireEnvelope);
+        requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
+        logger.debug(message.wireEnvelopeReceived() + wireEnvelope);
         this.wireSupport.emit(this.cache.get(this.cache.getLastRefreshedTime().getTimeInMillis()));
     }
 
@@ -228,42 +219,42 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
                         switch (dataType) {
                         case BOOLEAN:
                             final boolean boolValue = rset.getBoolean(i);
-                            s_logger.info(s_message.refreshBoolean(boolValue));
+                            logger.info(message.refreshBoolean(boolValue));
                             dataField = new WireField(fieldName, TypedValues.newBooleanValue(boolValue), INFO);
                             break;
                         case BYTE:
                             final byte byteValue = rset.getByte(i);
-                            s_logger.info(s_message.refreshByte(byteValue));
+                            logger.info(message.refreshByte(byteValue));
                             dataField = new WireField(fieldName, TypedValues.newByteValue(byteValue), INFO);
                             break;
                         case DOUBLE:
                             final double doubleValue = rset.getDouble(i);
-                            s_logger.info(s_message.refreshDouble(doubleValue));
+                            logger.info(message.refreshDouble(doubleValue));
                             dataField = new WireField(fieldName, TypedValues.newDoubleValue(doubleValue), INFO);
                             break;
                         case INTEGER:
                             final int intValue = rset.getInt(i);
-                            s_logger.info(s_message.refreshInteger(intValue));
+                            logger.info(message.refreshInteger(intValue));
                             dataField = new WireField(fieldName, TypedValues.newIntegerValue(intValue), INFO);
                             break;
                         case LONG:
                             final long longValue = rset.getLong(i);
-                            s_logger.info(s_message.refreshLong(longValue));
+                            logger.info(message.refreshLong(longValue));
                             dataField = new WireField(fieldName, TypedValues.newLongValue(longValue), INFO);
                             break;
                         case BYTE_ARRAY:
                             final byte[] bytesValue = rset.getBytes(i);
-                            s_logger.info(s_message.refreshByteArray(Arrays.toString(bytesValue)));
+                            logger.info(message.refreshByteArray(Arrays.toString(bytesValue)));
                             dataField = new WireField(fieldName, TypedValues.newByteArrayValue(bytesValue), INFO);
                             break;
                         case SHORT:
                             final short shortValue = rset.getShort(i);
-                            s_logger.info(s_message.refreshShort(shortValue));
+                            logger.info(message.refreshShort(shortValue));
                             dataField = new WireField(fieldName, TypedValues.newShortValue(shortValue), INFO);
                             break;
                         case STRING:
                             final String stringValue = rset.getString(i);
-                            s_logger.info(s_message.refreshString(stringValue));
+                            logger.info(message.refreshString(stringValue));
                             dataField = new WireField(fieldName, TypedValues.newStringValue(stringValue), INFO);
                             break;
                         default:
@@ -274,7 +265,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
                     dataRecords.add(new WireRecord(new Timestamp(now.getTime()), dataFields));
                 }
             }
-            s_logger.info(s_message.refreshed());
+            logger.info(message.refreshed());
         } catch (final SQLException e) {
             throw e;
         } finally {
@@ -340,10 +331,10 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
      *            the updated properties
      */
     public synchronized void updated(final Map<String, Object> properties) {
-        s_logger.debug(s_message.updatingFilter() + properties);
+        logger.debug(message.updatingFilter() + properties);
         this.options = new DbWireRecordFilterOptions(properties);
         this.scheduleRefresh();
-        s_logger.debug(s_message.updatingFilterDone());
+        logger.debug(message.updatingFilterDone());
     }
 
     /** {@inheritDoc} */

@@ -13,10 +13,11 @@
  *******************************************************************************/
 package org.eclipse.kura.wire;
 
-import static java.util.Objects.requireNonNull;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
-import org.eclipse.kura.annotation.Immutable;
-import org.eclipse.kura.annotation.ThreadSafe;
+import org.eclipse.kura.type.ErrorValue;
 import org.eclipse.kura.type.TypedValue;
 
 /**
@@ -24,57 +25,76 @@ import org.eclipse.kura.type.TypedValue;
  *
  * @noextend This class is not intended to be extended by clients.
  */
-@Immutable
-@ThreadSafe
 public class WireField {
 
-    /** The severity level of the field */
-    private final SeverityLevel level;
-
-    /** The name of the field */
     private final String name;
-
-    /** The value as contained */
     private final TypedValue<?> value;
+    private final Map<String, TypedValue<?>> properties = new HashMap<>();
 
-    /**
-     * Instantiates a new wire field.
-     *
-     * @param name
-     *            the name
-     * @param value
-     *            the value
-     * @param level
-     *            the severity level
-     * @throws NullPointerException
-     *             if any of the arguments is null
-     */
-    public WireField(final String name, final TypedValue<?> value, final SeverityLevel level) {
-        requireNonNull(name, "Wire field name cannot be null");
-        requireNonNull(value, "Wire field value type cannot be null");
-        requireNonNull(level, "Wire field severity level cannot be null");
-
+    public WireField(String name, TypedValue<?> value) {
         this.name = name;
         this.value = value;
-        this.level = level;
     }
 
-    /** {@inheritDoc} */
+    public WireField(Map<String, TypedValue<?>> properties) {
+
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public TypedValue<?> getValue() {
+        return this.value;
+    }
+
+    public Map<String, TypedValue<?>> getProperties() {
+        return this.properties;
+    }
+
+    public void addProperty(String key, TypedValue<?> value) {
+        if ("value".equals(key) || "error".equals(key)) {
+            throw new IllegalArgumentException();
+        }
+        this.properties.put(key, value);
+    }
+
+    public Map<String, TypedValue<?>> flatten() {
+        Map<String, TypedValue<?>> result = new HashMap<>();
+        String typeSuffix;
+        if (this.value instanceof ErrorValue) {
+            typeSuffix = "_error";
+        } else {
+            typeSuffix = "_value";
+        }
+        result.put(this.name + typeSuffix, getValue());
+
+        for (Entry<String, TypedValue<?>> entry : this.properties.entrySet()) {
+            result.put(this.name + "_" + entry.getKey(), entry.getValue());
+        }
+        return result;
+    }
+
     @Override
-    public boolean equals(final Object obj) {
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (this.name == null ? 0 : this.name.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
         if (obj == null) {
             return false;
         }
-        if (this.getClass() != obj.getClass()) {
+        if (!(obj instanceof WireField)) {
             return false;
         }
-        final WireField other = (WireField) obj;
-        if (this.level != other.level) {
-            return false;
-        }
+        WireField other = (WireField) obj;
         if (this.name == null) {
             if (other.name != null) {
                 return false;
@@ -82,58 +102,9 @@ public class WireField {
         } else if (!this.name.equals(other.name)) {
             return false;
         }
-        if (this.value == null) {
-            if (other.value != null) {
-                return false;
-            }
-        } else if (!this.value.equals(other.value)) {
-            return false;
-        }
         return true;
     }
 
-    /**
-     * Gets the name of the field
-     *
-     * @return the name of the field
-     */
-    public String getName() {
-        return this.name;
-    }
-
-    /**
-     * Gets the severity level of the field
-     *
-     * @return the severity level of the field
-     */
-    public SeverityLevel getSeverityLevel() {
-        return this.level;
-    }
-
-    /**
-     * Gets the contained value
-     *
-     * @return the contained value
-     */
-    public TypedValue<?> getValue() {
-        return this.value;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = (prime * result) + ((this.level == null) ? 0 : this.level.hashCode());
-        result = (prime * result) + ((this.name == null) ? 0 : this.name.hashCode());
-        result = (prime * result) + ((this.value == null) ? 0 : this.value.hashCode());
-        return result;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String toString() {
-        return "WireField [level=" + this.level + ", name=" + this.name + ", value=" + this.value + "]";
-    }
+    // TODO: unflatten
 
 }

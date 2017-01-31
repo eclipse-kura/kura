@@ -18,8 +18,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -36,10 +38,12 @@ import org.eclipse.kura.type.ByteArrayValue;
 import org.eclipse.kura.type.ByteValue;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.DoubleValue;
+import org.eclipse.kura.type.ErrorValue;
 import org.eclipse.kura.type.IntegerValue;
 import org.eclipse.kura.type.LongValue;
 import org.eclipse.kura.type.ShortValue;
 import org.eclipse.kura.type.StringValue;
+import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireEmitter;
@@ -236,6 +240,34 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         requireNonNull(tableName, s_message.tableNameNonNull());
         requireNonNull(wireRecord, s_message.wireRecordNonNull());
 
+        final List<WireField> wireFields = wireRecord.getFields();
+        final Map<String, TypedValue<?>> allFlattenedFields = new HashMap<>();
+        for (final WireField wireField : wireFields) {
+            final Map<String, TypedValue<?>> flattenedField = wireField.flatten();
+            allFlattenedFields.putAll(flattenedField);
+
+        }
+
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        try {
+            connection = this.dbHelper.getConnection();
+            stmt = prepareStatement(connection, tableName, allFlattenedFields, wireRecord.getTimestamp().getTime());
+            stmt.execute();
+            connection.commit();
+            s_logger.info(s_message.stored());
+        } catch (final SQLException e) {
+            this.dbHelper.rollback(connection);
+            throw e;
+        } finally {
+            this.dbHelper.close(stmt);
+            this.dbHelper.close(connection);
+        }
+    }
+
+    private PreparedStatement prepareStatement(Connection connection, String tableName,
+            final Map<String, TypedValue<?>> allFlattenedFields, long timestamp) throws SQLException {
+
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
         final StringBuilder sbCols = new StringBuilder();
         final StringBuilder sbVals = new StringBuilder();
@@ -244,9 +276,9 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         sbCols.append("TIMESTAMP");
         sbVals.append("?");
 
-        final List<WireField> dataFields = wireRecord.getFields();
-        for (final WireField dataField : dataFields) {
-            final String sqlColName = this.dbHelper.sanitizeSqlTableAndColumnName(dataField.getName());
+        int i = 2;
+        for (Entry<String, TypedValue<?>> entry : allFlattenedFields.entrySet()) {
+            final String sqlColName = this.dbHelper.sanitizeSqlTableAndColumnName(entry.getKey());
             sbCols.append(", " + sqlColName);
             sbVals.append(", ?");
         }
@@ -254,63 +286,55 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         s_logger.info(s_message.storingRecord(sqlTableName));
         final String sqlInsert = MessageFormat.format(SQL_INSERT_RECORD, sqlTableName, sbCols.toString(),
                 sbVals.toString());
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        try {
-            conn = this.dbHelper.getConnection();
-            stmt = conn.prepareStatement(sqlInsert);
-            stmt.setLong(1, wireRecord.getTimestamp().getTime());
-            for (int i = 0; i < dataFields.size(); i++) {
-                final WireField dataField = dataFields.get(i);
-                final DataType dataType = dataField.getValue().getType();
-                final Object value = dataField.getValue();
-                switch (dataType) {
-                case BOOLEAN:
-                    s_logger.info(s_message.storeBoolean(((BooleanValue) value).getValue()));
-                    stmt.setBoolean(2 + i, ((BooleanValue) value).getValue());
-                    break;
-                case BYTE:
-                    s_logger.info(s_message.storeByte(((ByteValue) value).getValue()));
-                    stmt.setByte(2 + i, ((ByteValue) value).getValue());
-                    break;
-                case DOUBLE:
-                    s_logger.info(s_message.storeDouble(((DoubleValue) value).getValue()));
-                    stmt.setDouble(2 + i, ((DoubleValue) value).getValue());
-                    break;
-                case INTEGER:
-                    s_logger.info(s_message.storeInteger(((IntegerValue) value).getValue()));
-                    stmt.setInt(2 + i, ((IntegerValue) value).getValue());
-                    break;
-                case LONG:
-                    s_logger.info(s_message.storelong(((LongValue) value).getValue()));
-                    stmt.setLong(2 + i, ((LongValue) value).getValue());
-                    break;
-                case BYTE_ARRAY:
-                    s_logger.info(s_message.storeByteArray(Arrays.toString(((ByteArrayValue) value).getValue())));
-                    stmt.setBytes(2 + i, ((ByteArrayValue) value).getValue());
-                    break;
-                case SHORT:
-                    s_logger.info(s_message.storeShort(((ShortValue) value).getValue()));
-                    stmt.setShort(2 + i, ((ShortValue) value).getValue());
-                    break;
-                case STRING:
-                    s_logger.info(s_message.storeString(((StringValue) value).getValue()));
-                    stmt.setString(2 + i, ((StringValue) value).getValue());
-                    break;
-                default:
-                    break;
-                }
+        final PreparedStatement stmt = connection.prepareStatement(sqlInsert);
+        stmt.setLong(1, timestamp); // TODO: Missing position
+
+        for (Entry<String, TypedValue<?>> entry : allFlattenedFields.entrySet()) {
+            final DataType dataType = entry.getValue().getType();
+            final Object value = entry.getValue();
+            switch (dataType) {
+            case BOOLEAN:
+                s_logger.info(s_message.storeBoolean(((BooleanValue) value).getValue()));
+                stmt.setBoolean(i, ((BooleanValue) value).getValue());
+                break;
+            case BYTE:
+                s_logger.info(s_message.storeByte(((ByteValue) value).getValue()));
+                stmt.setByte(i, ((ByteValue) value).getValue());
+                break;
+            case DOUBLE:
+                s_logger.info(s_message.storeDouble(((DoubleValue) value).getValue()));
+                stmt.setDouble(i, ((DoubleValue) value).getValue());
+                break;
+            case INTEGER:
+                s_logger.info(s_message.storeInteger(((IntegerValue) value).getValue()));
+                stmt.setInt(i, ((IntegerValue) value).getValue());
+                break;
+            case LONG:
+                s_logger.info(s_message.storelong(((LongValue) value).getValue()));
+                stmt.setLong(i, ((LongValue) value).getValue());
+                break;
+            case BYTE_ARRAY:
+                s_logger.info(s_message.storeByteArray(Arrays.toString(((ByteArrayValue) value).getValue())));
+                stmt.setBytes(i, ((ByteArrayValue) value).getValue());
+                break;
+            case SHORT:
+                s_logger.info(s_message.storeShort(((ShortValue) value).getValue()));
+                stmt.setShort(i, ((ShortValue) value).getValue());
+                break;
+            case STRING:
+                s_logger.info(s_message.storeString(((StringValue) value).getValue()));
+                stmt.setString(i, ((StringValue) value).getValue());
+                break;
+            case ERROR:
+                s_logger.info(s_message.storeString(((ErrorValue) value).getValue()));
+                stmt.setString(i, ((ErrorValue) value).getValue());
+                break;
+            default:
+                break;
             }
-            stmt.execute();
-            conn.commit();
-            s_logger.info(s_message.stored());
-        } catch (final SQLException e) {
-            this.dbHelper.rollback(conn);
-            throw e;
-        } finally {
-            this.dbHelper.close(stmt);
-            this.dbHelper.close(conn);
+            i++;
         }
+        return stmt;
     }
 
     /** {@inheritDoc} */
@@ -319,12 +343,11 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         requireNonNull(wireEvelope, s_message.wireEnvelopeNonNull());
         s_logger.debug(s_message.wireEnvelopeReceived() + this.wireSupport);
         // filtering list of wire records based on the provided severity level
-        final List<WireRecord> dataRecords = this.wireSupport.filter(wireEvelope.getRecords());
-        for (final WireRecord dataRecord : dataRecords) {
-            this.store(dataRecord);
-        }
+        final WireRecord record = wireEvelope.getRecord();
+        this.store(record);
+
         // emit the list of Wire Records to the downstream components
-        this.wireSupport.emit(dataRecords);
+        this.wireSupport.emit(record);
     }
 
     /** {@inheritDoc} */

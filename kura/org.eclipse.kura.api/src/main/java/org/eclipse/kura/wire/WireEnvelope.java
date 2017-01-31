@@ -13,11 +13,6 @@
  *******************************************************************************/
 package org.eclipse.kura.wire;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.eclipse.kura.annotation.Immutable;
-import org.eclipse.kura.annotation.ThreadSafe;
 import org.osgi.service.wireadmin.BasicEnvelope;
 import org.osgi.service.wireadmin.Envelope;
 
@@ -31,8 +26,6 @@ import org.osgi.service.wireadmin.Envelope;
  *
  * @noextend This class is not intended to be extended by clients.
  */
-@Immutable
-@ThreadSafe
 public class WireEnvelope extends BasicEnvelope {
 
     /**
@@ -49,8 +42,8 @@ public class WireEnvelope extends BasicEnvelope {
      * @param wireRecords
      *            the wire records
      */
-    public WireEnvelope(final String emitterPid, final List<WireRecord> wireRecords) {
-        super(wireRecords, emitterPid, SCOPE);
+    public WireEnvelope(String emitterPid, WireRecord wireRecord) {
+        super(wireRecord, emitterPid, SCOPE);
     }
 
     /**
@@ -59,7 +52,7 @@ public class WireEnvelope extends BasicEnvelope {
      * @return the wire emitter PID
      */
     public String getEmitterPid() {
-        return (String) this.getIdentification();
+        return (String) getIdentification();
     }
 
     /**
@@ -67,9 +60,8 @@ public class WireEnvelope extends BasicEnvelope {
      *
      * @return the wire records
      */
-    @SuppressWarnings("unchecked")
-    public List<WireRecord> getRecords() {
-        return Collections.unmodifiableList((List<WireRecord>) this.getValue());
+    public WireRecord getRecord() {
+        return (WireRecord) getValue();
     }
 
 }

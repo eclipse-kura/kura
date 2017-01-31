@@ -11,8 +11,8 @@ package org.eclipse.kura.internal.wire.publisher;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudClient;
@@ -23,6 +23,7 @@ import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraPosition;
+import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireField;
@@ -234,10 +235,10 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
         requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
         logger.info(message.wireEnvelopeReceived(wireEnvelope.getEmitterPid()));
         // filtering list of wire records based on the provided severity level
-        final List<WireRecord> records = this.wireSupport.filter(wireEnvelope.getRecords());
+        final WireRecord record = wireEnvelope.getRecord();
 
         if (this.cloudService != null && this.cloudClient != null) {
-            publish(records);
+            publish(record);
         }
     }
 
@@ -340,8 +341,9 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
             kuraPayload.setPosition(buildKuraPosition(wireRecord.getPosition()));
         }
         for (final WireField dataField : wireRecord.getFields()) {
-            final Object wrappedValue = dataField.getValue().getValue();
-            kuraPayload.addMetric(dataField.getName(), wrappedValue);
+            for (final Entry<String, TypedValue<?>> entry : dataField.flatten().entrySet()) {
+                kuraPayload.addMetric(entry.getKey(), entry.getValue().getValue());
+            }
         }
         return kuraPayload;
     }
@@ -423,9 +425,9 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
      * @param wireRecords
      *            the provided list of Wire Records
      */
-    private void publish(final List<WireRecord> wireRecords) {
+    private void publish(final WireRecord wireRecord) {
         requireNonNull(this.cloudClient, message.cloudClientNonNull());
-        requireNonNull(wireRecords, message.wireRecordsNonNull());
+        requireNonNull(wireRecord, message.wireRecordsNonNull());
 
         try {
             for (final WireRecord dataRecord : wireRecords) {

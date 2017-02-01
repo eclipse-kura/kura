@@ -40,8 +40,8 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 
     private static final Logger s_logger = LoggerFactory.getLogger(CloudConnectionStatusServiceImpl.class);
 
-    private SystemService m_systemService;
-    private GPIOService m_GPIOService;
+    private SystemService systemService;
+    private GPIOService gpioService;
 
     private KuraGPIOPin notificationLED;
 
@@ -50,10 +50,10 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 
     private final IdleStatusComponent idleComponent;
 
-    private static int currentNotificationType;
-    private static CloudConnectionStatusEnum currentStatus = null;
+    private int currentNotificationType;
+    private CloudConnectionStatusEnum currentStatus = null;
 
-    private static final HashSet<CloudConnectionStatusComponent> componentRegistry = new HashSet<CloudConnectionStatusComponent>();
+    private final HashSet<CloudConnectionStatusComponent> componentRegistry = new HashSet<CloudConnectionStatusComponent>();
 
     // ----------------------------------------------------------------
     //
@@ -67,19 +67,19 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
     }
 
     public void setSystemService(SystemService systemService) {
-        this.m_systemService = systemService;
+        this.systemService = systemService;
     }
 
     public void unsetSystemService(SystemService systemService) {
-        this.m_systemService = null;
+        this.systemService = null;
     }
 
-    public void setGPIOService(GPIOService GpioService) {
-        this.m_GPIOService = GpioService;
+    public void setGPIOService(GPIOService gpioService) {
+        this.gpioService = gpioService;
     }
 
-    public void unsetGPIOService(GPIOService GpioService) {
-        this.m_GPIOService = null;
+    public void unsetGPIOService(GPIOService gpioService) {
+        this.gpioService = null;
     }
 
     // ----------------------------------------------------------------
@@ -91,7 +91,7 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
     protected void activate(ComponentContext componentContext) {
         s_logger.info("Activating CloudConnectionStatus service...");
 
-        String urlFromConfig = this.m_systemService.getProperties().getProperty(STATUS_NOTIFICATION_URL,
+        String urlFromConfig = this.systemService.getProperties().getProperty(STATUS_NOTIFICATION_URL,
                 CloudConnectionStatusURL.S_CCS + CloudConnectionStatusURL.S_NONE);
 
         Properties props = CloudConnectionStatusURL.parseURL(urlFromConfig);
@@ -101,21 +101,21 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 
             switch (notificationType) {
             case CloudConnectionStatusURL.TYPE_LED:
-                currentNotificationType = CloudConnectionStatusURL.TYPE_LED;
+                this.currentNotificationType = CloudConnectionStatusURL.TYPE_LED;
 
-                this.notificationLED = this.m_GPIOService.getPinByTerminal((Integer) props.get("led"),
+                this.notificationLED = this.gpioService.getPinByTerminal((Integer) props.get("led"),
                         KuraGPIODirection.OUTPUT, KuraGPIOMode.OUTPUT_OPEN_DRAIN, KuraGPIOTrigger.NONE);
 
                 this.notificationLED.open();
                 s_logger.info("CloudConnectionStatus active on LED {}.", props.get("led"));
                 break;
             case CloudConnectionStatusURL.TYPE_LOG:
-                currentNotificationType = CloudConnectionStatusURL.TYPE_LOG;
+                this.currentNotificationType = CloudConnectionStatusURL.TYPE_LOG;
 
                 s_logger.info("CloudConnectionStatus active on log.");
                 break;
             case CloudConnectionStatusURL.TYPE_NONE:
-                currentNotificationType = CloudConnectionStatusURL.TYPE_NONE;
+                this.currentNotificationType = CloudConnectionStatusURL.TYPE_NONE;
 
                 s_logger.info("Cloud Connection Status notification disabled");
                 break;
@@ -141,13 +141,13 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 
     @Override
     public void register(CloudConnectionStatusComponent component) {
-        componentRegistry.add(component);
+        this.componentRegistry.add(component);
         internalUpdateStatus();
     }
 
     @Override
     public void unregister(CloudConnectionStatusComponent component) {
-        componentRegistry.remove(component);
+        this.componentRegistry.remove(component);
         internalUpdateStatus();
     }
 
@@ -172,14 +172,14 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 
         CloudConnectionStatusComponent maxPriorityComponent = this.idleComponent;
 
-        for (CloudConnectionStatusComponent c : componentRegistry) {
+        for (CloudConnectionStatusComponent c : this.componentRegistry) {
             if (c.getNotificationPriority() > maxPriorityComponent.getNotificationPriority()) {
                 maxPriorityComponent = c;
             }
         }
 
-        if (currentStatus == null || currentStatus != maxPriorityComponent.getNotificationStatus()) {
-            currentStatus = maxPriorityComponent.getNotificationStatus();
+        if (this.currentStatus == null || this.currentStatus != maxPriorityComponent.getNotificationStatus()) {
+            this.currentStatus = maxPriorityComponent.getNotificationStatus();
 
             if (this.notificationWorker != null) {
                 this.notificationWorker.cancel(true);
@@ -188,14 +188,14 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 
             // Avoid NPE if CloudConnectionStatusComponent doesn't initialize its internal status.
             // Defaults to OFF
-            currentStatus = currentStatus == null ? CloudConnectionStatusEnum.OFF : currentStatus;
+            this.currentStatus = this.currentStatus == null ? CloudConnectionStatusEnum.OFF : this.currentStatus;
 
-            this.notificationWorker = this.notificationExecutor.submit(getWorker(currentStatus));
+            this.notificationWorker = this.notificationExecutor.submit(getWorker(this.currentStatus));
         }
     }
 
     private Runnable getWorker(CloudConnectionStatusEnum status) {
-        if (currentNotificationType == CloudConnectionStatusURL.TYPE_LED) {
+        if (this.currentNotificationType == CloudConnectionStatusURL.TYPE_LED) {
             switch (status) {
             case ON:
                 return new OnOffStatusRunnable(this.notificationLED, true);
@@ -210,9 +210,9 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
             case HEARTBEAT:
                 return new HeartbeatStatusRunnable(this.notificationLED);
             }
-        } else if (currentNotificationType == CloudConnectionStatusURL.TYPE_LOG) {
+        } else if (this.currentNotificationType == CloudConnectionStatusURL.TYPE_LOG) {
             return new LogStatusRunnable(status);
-        } else if (currentNotificationType == CloudConnectionStatusURL.TYPE_NONE) {
+        } else if (this.currentNotificationType == CloudConnectionStatusURL.TYPE_NONE) {
             return new Runnable() {
 
                 @Override

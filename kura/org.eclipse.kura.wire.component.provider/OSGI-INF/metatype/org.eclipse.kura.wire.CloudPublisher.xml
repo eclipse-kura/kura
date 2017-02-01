@@ -89,19 +89,6 @@
             <Option label="Kura Payload" value="1" />
             <Option label="JSON" value="2" />
         </AD>
-        
-        <AD id="severity.level"
-            name="severity.level"
-            type="String"
-            cardinality="0"
-            required="true"
-            default="SEVERE"
-            description="It signifies severity level of Wire Fields to be accepted by this Wire Component">
-            <Option label="SEVERE" value="SEVERE" />
-            <Option label="CONFIG" value="CONFIG" />
-            <Option label="ERROR" value="ERROR" />
-            <Option label="INFO" value="INFO" />
-        </AD>
     </OCD>
     
     <Designate pid="org.eclipse.kura.wire.CloudPublisher" factoryPid="org.eclipse.kura.wire.CloudPublisher">

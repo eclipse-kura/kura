@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.kura.annotation.Immutable;
+import org.eclipse.kura.annotation.ThreadSafe;
 import org.eclipse.kura.type.TypedValue;
 
 /**
@@ -27,6 +29,8 @@ import org.eclipse.kura.type.TypedValue;
  *
  * @noextend This class is not intended to be extended by clients.
  */
+@Immutable
+@ThreadSafe
 public class WireRecord {
 
     private final Map<String, TypedValue<?>> properties;

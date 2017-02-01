@@ -28,11 +28,7 @@ final class DbWireRecordFilterOptions {
 
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
-    private static final String CONF_CACHE_CAPACITY = "cache.max.capacity";
-
-    private static final String CONF_CACHE_INTERVAL = "cache.update.interval";
-
-    private static final String CONF_REFRESH_RATE = "refresh.rate";
+    private static final String CONF_CACHE_EXPIRATION_INTERVAL = "cache.expiration.interval";
 
     private static final String CONF_SQL_VIEW = "sql.view";
 
@@ -50,45 +46,17 @@ final class DbWireRecordFilterOptions {
     }
 
     /**
-     * Returns the cache max capacity as configured.
-     *
-     * @return the configured cache max capacity
-     */
-    int getCacheCapacity() {
-        int cacheSize = 0;
-        final Object cacheCapacity = this.properties.get(CONF_CACHE_CAPACITY);
-        if (cacheCapacity != null && cacheCapacity instanceof String) {
-            cacheSize = (Integer) cacheCapacity;
-        }
-        return cacheSize;
-    }
-
-    /**
      * Returns the cache interval as configured.
      *
      * @return the configured cache interval
      */
-    int getCacheInterval() {
+    int getCacheExpirationInterval() {
         int cacheInterval = 0;
-        final Object cacheInt = this.properties.get(CONF_CACHE_INTERVAL);
+        final Object cacheInt = this.properties.get(CONF_CACHE_EXPIRATION_INTERVAL);
         if (cacheInt != null && cacheInt instanceof Integer) {
             cacheInterval = (Integer) cacheInt;
         }
         return cacheInterval;
-    }
-
-    /**
-     * Returns the rate of refresh for this view.
-     *
-     * @return the refresh rate
-     */
-    int getRefreshRate() {
-        int refreshRate = 0;
-        final Object cacheRefreshRate = this.properties.get(CONF_REFRESH_RATE);
-        if (cacheRefreshRate != null && cacheRefreshRate instanceof Integer) {
-            refreshRate = (Integer) cacheRefreshRate;
-        }
-        return refreshRate;
     }
 
     /**

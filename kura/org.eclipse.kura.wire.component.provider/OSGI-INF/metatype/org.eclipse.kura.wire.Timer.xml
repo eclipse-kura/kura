@@ -39,20 +39,6 @@
             required="true"
             default="0/10 * * * * ?"
             description="Interval in CRON expression (Needs to be set if CRON type is selected) (For more information, please visit http://www.cronmaker.com/ to create your own CRON expression)"/>
-            
-        <AD id="severity.level"
-            name="severity.level"
-            type="String"
-            cardinality="0"
-            required="true"
-            default="SEVERE"
-            description="It signifies severity level of Wire Fields to be accepted by this Wire Component">
-            <Option label="SEVERE" value="SEVERE" />
-            <Option label="CONFIG" value="CONFIG" />
-            <Option label="ERROR" value="ERROR" />
-            <Option label="INFO" value="INFO" />
-        </AD>
-
     </OCD>
     
     <Designate pid="org.eclipse.kura.wire.Timer" factoryPid="org.eclipse.kura.wire.Timer">

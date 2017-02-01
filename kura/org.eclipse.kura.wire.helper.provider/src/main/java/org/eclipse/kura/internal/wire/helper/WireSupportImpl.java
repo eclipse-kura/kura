@@ -99,43 +99,6 @@ final class WireSupportImpl implements WireSupport {
         }
     }
 
-    /** {@inheritDoc} */
-    // @Override
-    // public List<WireRecord> filter(final List<WireRecord> records) {
-    // requireNonNull(records, s_message.wireRecordsNonNull());
-    // final SeverityLevel level = this.getSeverityLevel();
-    // // If the severity level is SEVERE, then all wire fields remain
-    // if ((level == null) || (level == SEVERE)) {
-    // return records;
-    // }
-    // final List<WireRecord> newRecords = CollectionUtil.newArrayList();
-    // final List<WireField> newFields = CollectionUtil.newArrayList();
-    // for (final WireRecord wireRecord : records) {
-    // for (final WireField wireField : wireRecord.getFields()) {
-    // // If the severity level is INFO, then only info wire fields
-    // // will remain
-    // final SeverityLevel wireFieldLevel = wireField.getSeverityLevel();
-    // if ((wireFieldLevel == INFO) && (level == INFO)) {
-    // newFields.add(wireField);
-    // }
-    // // If the severity level is ERROR, then only ERROR wire fields
-    // // will remain
-    // if ((wireFieldLevel == ERROR) && (level == ERROR)) {
-    // newFields.add(wireField);
-    // }
-    // // If the severity level is CONFIG, then info and CONFIG wire
-    // // fields remain
-    // if (((wireFieldLevel == INFO) || (wireFieldLevel == CONFIG)) && (level == CONFIG)) {
-    // newFields.add(wireField);
-    // }
-    // final WireRecord newWireRecord = new WireRecord(wireRecord.getTimestamp(), wireRecord.getPosition(),
-    // newFields);
-    // newRecords.add(newWireRecord);
-    // }
-    // }
-    // return newRecords;
-    // }
-
     /**
      * Gets the incoming wires.
      *
@@ -153,38 +116,6 @@ final class WireSupportImpl implements WireSupport {
     List<Wire> getOutgoingWires() {
         return Collections.unmodifiableList(this.outgoingWires);
     }
-
-    /**
-     * Returns the severity level of the wire component
-     *
-     * @return the severity level
-     */
-    // private SeverityLevel getSeverityLevel() {
-    // final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-    // final ServiceReference<WireComponent>[] refs = ServiceUtil.getServiceReferences(context, WireComponent.class,
-    // null);
-    // String property = null;
-    // for (final ServiceReference<WireComponent> ref : refs) {
-    // final WireComponent component = context.getService(ref);
-    // if (component == this.wireSupporter) {
-    // property = ref.getProperty("severity.level").toString();
-    // break;
-    // }
-    // }
-    // if ("INFO".equalsIgnoreCase(property)) {
-    // return INFO;
-    // }
-    // if ("ERROR".equalsIgnoreCase(property)) {
-    // return ERROR;
-    // }
-    // if ("CONFIG".equalsIgnoreCase(property)) {
-    // return CONFIG;
-    // }
-    // if ("SEVERE".equalsIgnoreCase(property)) {
-    // return SEVERE;
-    // }
-    // return null;
-    // }
 
     /** {@inheritDoc} */
     @Override

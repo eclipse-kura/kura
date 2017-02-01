@@ -41,18 +41,4 @@ public interface WireSupport extends Producer, Consumer {
      *             if the argument is null
      */
     public void emit(List<WireRecord> wireRecords);
-
-    /**
-     * Filters the provided wire record based on the configured
-     * {@link SeverityLevel} for the provided wire component. It filters out all
-     * the Wire Fields that do not belong to the level as required by the Wire
-     * Component.
-     *
-     * @param wireRecords
-     *            the list of Wire Records to filter
-     * @throws NullPointerException
-     *             if the argument is null
-     * @return the list of filtered Wire Records
-     */
-    // public List<WireRecord> filter(List<WireRecord> wireRecords);
 }

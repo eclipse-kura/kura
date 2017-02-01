@@ -21,16 +21,10 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.internal.wire.common.DbServiceHelper;
@@ -61,28 +55,21 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
-    /** Cache container to store values of SQL view wire records */
-    private final WireRecordCache cache;
+    private static List<WireRecord> lastRecords;
 
     private DbServiceHelper dbHelper;
 
     private volatile DbService dbService;
 
-    private final ScheduledExecutorService executorService;
-
     private DbWireRecordFilterOptions options;
-
-    /** The future handle of the thread pool executor service. */
-    private ScheduledFuture<?> tickHandle;
 
     private volatile WireHelperService wireHelperService;
 
     private WireSupport wireSupport;
 
-    public DbWireRecordFilter() {
-        this.executorService = Executors.newSingleThreadScheduledExecutor();
-        this.cache = new WireRecordCache(this);
-    }
+    private Calendar lastRefreshedTime;
+
+    private int cacheExpirationInterval;
 
     /**
      * Binds the DB service.
@@ -146,7 +133,12 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
         this.options = new DbWireRecordFilterOptions(properties);
         this.dbHelper = DbServiceHelper.getInstance(this.dbService);
         this.wireSupport = this.wireHelperService.newWireSupport(this);
-        scheduleRefresh();
+        this.cacheExpirationInterval = this.options.getCacheExpirationInterval();
+
+        // Initialize the lastRefreshTime and remove the cacheExpirationInterval in order to immediately have the cache
+        // expired
+        lastRefreshedTime = Calendar.getInstance();
+        lastRefreshedTime.add(Calendar.SECOND, -this.cacheExpirationInterval);
         logger.debug(message.activatingFilterDone());
     }
 
@@ -159,7 +151,12 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
     public synchronized void updated(final Map<String, Object> properties) {
         logger.debug(message.updatingFilter() + properties);
         this.options = new DbWireRecordFilterOptions(properties);
-        scheduleRefresh();
+        this.cacheExpirationInterval = this.options.getCacheExpirationInterval();
+
+        // Initialize the lastRefreshTime and remove the cacheExpirationInterval in order to immediately have the cache
+        // expired
+        lastRefreshedTime = Calendar.getInstance();
+        lastRefreshedTime.add(Calendar.SECOND, -this.cacheExpirationInterval);
         logger.debug(message.updatingFilterDone());
     }
 
@@ -171,39 +168,8 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
      */
     protected synchronized void deactivate(final ComponentContext componentContext) {
         logger.debug(message.deactivatingFilter());
-        if (this.tickHandle != null) {
-            this.tickHandle.cancel(true);
-        }
-        this.executorService.shutdown();
+
         logger.debug(message.deactivatingFilterDone());
-    }
-
-    /**
-     * Schedule refresh of SQL view operation
-     */
-    private void scheduleRefresh() {
-        final int refreshRate = this.options.getRefreshRate();
-        this.cache.setRefreshDuration(refreshRate);
-        this.cache.setCapacity(this.options.getCacheCapacity());
-        // Cancel the current refresh view handle
-        if (this.tickHandle != null) {
-            this.tickHandle.cancel(true);
-        }
-        // schedule the new refresh view
-        if (refreshRate != 0) {
-            this.tickHandle = this.executorService.schedule(new Runnable() {
-
-                /** {@inheritDoc} */
-                @Override
-                public void run() {
-                    try {
-                        DbWireRecordFilter.this.cache.put(System.currentTimeMillis(), DbWireRecordFilter.this.filter());
-                    } catch (KuraException e) {
-                        logger.error("Error refreshing cache. {}", e);
-                    }
-                }
-            }, refreshRate, TimeUnit.SECONDS);
-        }
     }
 
     /** {@inheritDoc} */
@@ -213,27 +179,9 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
     }
 
     /**
-     * Filters the database records based on the provided query
-     *
-     * @return the filtered records
-     * @throws KuraException
-     */
-    synchronized List<WireRecord> filter() throws KuraException {
-        logger.debug(message.filteringStarted());
-        try {
-            return refreshSQLView();
-        } catch (final SQLException e) {
-            logger.error(message.errorFiltering() + ThrowableUtil.stackTraceAsString(e));
-            throw new KuraException(KuraErrorCode.STORE_ERROR);
-        }
-    }
-
-    /**
      * Refreshes the SQL view
      */
     private List<WireRecord> refreshSQLView() throws SQLException {
-        new Date();
-
         final List<WireRecord> dataRecords = new ArrayList<>();
 
         Connection conn = null;
@@ -322,7 +270,18 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
     public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
         logger.debug(message.wireEnvelopeReceived() + wireEnvelope);
-        this.wireSupport.emit(this.cache.get(this.cache.getLastRefreshedTime().getTimeInMillis()));
+        if (isCacheExpired()) {
+            try {
+                lastRecords = refreshSQLView();
+                this.lastRefreshedTime = Calendar.getInstance(this.lastRefreshedTime.getTimeZone());
+            } catch (SQLException e) {
+                logger.error(message.errorFiltering() + ThrowableUtil.stackTraceAsString(e));
+            }
+        }
+
+        if (lastRecords != null) {
+            this.wireSupport.emit(lastRecords);
+        }
     }
 
     /** {@inheritDoc} */
@@ -341,5 +300,17 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
     @Override
     public void updated(final Wire wire, final Object value) {
         this.wireSupport.updated(wire, value);
+    }
+
+    private boolean isCacheExpired() {
+        final Calendar now = Calendar.getInstance();
+        final Calendar nextRefreshTime = Calendar.getInstance(this.lastRefreshedTime.getTimeZone());
+        nextRefreshTime.setTime(this.lastRefreshedTime.getTime());
+        nextRefreshTime.add(Calendar.SECOND, this.cacheExpirationInterval);
+
+        if (nextRefreshTime.after(now)) {
+            return false;
+        }
+        return true;
     }
 }

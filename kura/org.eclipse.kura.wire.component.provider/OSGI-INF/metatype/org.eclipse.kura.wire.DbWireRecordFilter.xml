@@ -17,7 +17,7 @@
         	type="String"
         	cardinality="0"
         	required="true"
-        	default="SELECT * FROM WR_data;"
+        	default="SELECT * FROM &quot;WR_data&quot;;"
         	description="SQL to be executed to build a view">
         </AD>
         
@@ -37,7 +37,7 @@
         	cardinality="0"
         	required="true"
         	default="60"
-        	min="60"
+        	min="1"
         	description="This denotes the allowed interval (in seconds) for which the cache data will be retrieved if time difference between the current time and the last cache updated time is less than this interval">
         </AD>
         

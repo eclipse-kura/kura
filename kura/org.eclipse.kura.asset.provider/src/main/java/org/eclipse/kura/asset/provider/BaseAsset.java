@@ -23,8 +23,7 @@ import static org.eclipse.kura.asset.AssetConstants.SEVERITY_LEVEL;
 import static org.eclipse.kura.asset.AssetConstants.TYPE;
 import static org.eclipse.kura.asset.AssetConstants.VALUE_TYPE;
 import static org.eclipse.kura.asset.AssetFlag.FAILURE;
-import static org.eclipse.kura.asset.AssetFlag.READ_SUCCESSFUL;
-import static org.eclipse.kura.asset.AssetFlag.WRITE_SUCCESSFUL;
+import static org.eclipse.kura.asset.AssetFlag.SUCCESS;
 import static org.eclipse.kura.asset.ChannelType.READ;
 import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
 import static org.eclipse.kura.asset.ChannelType.WRITE;
@@ -429,11 +428,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         if (assetRecord.getAssetStatus() == null) {
             switch (driverFlag) {
             case READ_SUCCESSFUL:
-                assetStatus = new AssetStatus(READ_SUCCESSFUL);
-                assetRecord.setAssetStatus(assetStatus);
-                break;
             case WRITE_SUCCESSFUL:
-                assetStatus = new AssetStatus(WRITE_SUCCESSFUL);
+                assetStatus = new AssetStatus(SUCCESS);
                 assetRecord.setAssetStatus(assetStatus);
                 break;
             default:

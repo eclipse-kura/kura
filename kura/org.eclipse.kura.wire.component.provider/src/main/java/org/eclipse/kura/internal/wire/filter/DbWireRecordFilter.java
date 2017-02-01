@@ -21,7 +21,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -323,7 +322,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
     public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
         logger.debug(message.wireEnvelopeReceived() + wireEnvelope);
-        this.wireSupport.emit(Collections.emptyList());// this.cache.get(this.cache.getLastRefreshedTime().getTimeInMillis()));
+        this.wireSupport.emit(this.cache.get(this.cache.getLastRefreshedTime().getTimeInMillis()));
     }
 
     /** {@inheritDoc} */

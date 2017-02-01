@@ -9,7 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.store;
 
@@ -22,7 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -42,7 +42,6 @@ import org.eclipse.kura.type.ByteArrayValue;
 import org.eclipse.kura.type.ByteValue;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.DoubleValue;
-import org.eclipse.kura.type.ErrorValue;
 import org.eclipse.kura.type.IntegerValue;
 import org.eclipse.kura.type.LongValue;
 import org.eclipse.kura.type.ShortValue;
@@ -52,7 +51,6 @@ import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
-import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
@@ -174,7 +172,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         this.wireRecordStoreOptions = new DbWireRecordStoreOptions(properties);
         this.dbHelper = DbServiceHelper.getInstance(this.dbService);
         this.wireSupport = this.wireHelperService.newWireSupport(this);
-        this.scheduleTruncation();
+        scheduleTruncation();
         logger.debug(message.activatingStoreDone());
     }
 
@@ -187,7 +185,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
     public synchronized void updated(final Map<String, Object> properties) {
         logger.debug(message.updatingStore() + properties);
         this.wireRecordStoreOptions = new DbWireRecordStoreOptions(properties);
-        this.scheduleTruncation();
+        scheduleTruncation();
         logger.debug(message.updatingStoreDone());
     }
 
@@ -275,12 +273,14 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
     public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
         requireNonNull(wireEvelope, message.wireEnvelopeNonNull());
         logger.debug(message.wireEnvelopeReceived() + this.wireSupport);
-        // filtering list of wire records based on the provided severity level
-        final WireRecord record = wireEvelope.getRecord();
-        this.store(record);
+
+        final List<WireRecord> records = wireEvelope.getRecords();
+        for (WireRecord wireRecord : records) {
+            store(wireRecord);
+        }
 
         // emit the list of Wire Records to the downstream components
-        this.wireSupport.emit(record);
+        this.wireSupport.emit(records);
     }
 
     /**
@@ -298,21 +298,21 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         final String tableName = this.wireRecordStoreOptions.getTableName();
         do {
             try {
-                this.insertDataRecord(tableName, wireRecord);
+                insertDataRecord(tableName, wireRecord);
                 inserted = true;
             } catch (final SQLException e) {
                 logger.error(message.insertionFailed() + ThrowableUtil.stackTraceAsString(e));
                 try {
-                    if ((tableName != null) && (!tableName.isEmpty())) {
+                    if (tableName != null && !tableName.isEmpty()) {
                         retryCount++;
-                        this.reconcileTable(tableName);
-                        this.reconcileColumns(tableName, wireRecord);
+                        reconcileTable(tableName);
+                        reconcileColumns(tableName, wireRecord);
                     }
                 } catch (final SQLException ee) {
                     logger.error(message.errorStoring() + ee);
                 }
             }
-        } while (!inserted && (retryCount < 2));
+        } while (!inserted && retryCount < 2);
     }
 
     /**
@@ -381,24 +381,19 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
             this.dbHelper.close(conn);
         }
         // reconcile columns
-        final List<WireField> dataFields = wireRecord.getFields();
-        for (final WireField dataField : dataFields) {
-            Map<String, TypedValue<?>> flattenedProperties = dataField.flatten();
-
-            for (Entry<String, TypedValue<?>> entry : flattenedProperties.entrySet()) {
-                final String sqlColName = this.dbHelper.sanitizeSqlTableAndColumnName(entry.getKey());
-                final Integer sqlColType = columns.get(sqlColName);
-                final JdbcType jdbcType = DbDataTypeMapper.getJdbcType(entry.getValue().getType());
-                if (sqlColType == null) {
-                    // add column
-                    this.dbHelper.execute(
-                            MessageFormat.format(SQL_ADD_COLUMN, sqlTableName, sqlColName, jdbcType.getTypeString()));
-                } else if (sqlColType != jdbcType.getType()) {
-                    // drop old column and add new one
-                    this.dbHelper.execute(MessageFormat.format(SQL_DROP_COLUMN, sqlTableName, sqlColName));
-                    this.dbHelper.execute(
-                            MessageFormat.format(SQL_ADD_COLUMN, sqlTableName, sqlColName, jdbcType.getTypeString()));
-                }
+        for (Entry<String, TypedValue<?>> entry : wireRecord.getProperties().entrySet()) {
+            final String sqlColName = this.dbHelper.sanitizeSqlTableAndColumnName(entry.getKey());
+            final Integer sqlColType = columns.get(sqlColName);
+            final JdbcType jdbcType = DbDataTypeMapper.getJdbcType(entry.getValue().getType());
+            if (sqlColType == null) {
+                // add column
+                this.dbHelper.execute(
+                        MessageFormat.format(SQL_ADD_COLUMN, sqlTableName, sqlColName, jdbcType.getTypeString()));
+            } else if (sqlColType != jdbcType.getType()) {
+                // drop old column and add new one
+                this.dbHelper.execute(MessageFormat.format(SQL_DROP_COLUMN, sqlTableName, sqlColName));
+                this.dbHelper.execute(
+                        MessageFormat.format(SQL_ADD_COLUMN, sqlTableName, sqlColName, jdbcType.getTypeString()));
             }
         }
     }
@@ -419,18 +414,13 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         requireNonNull(tableName, message.tableNameNonNull());
         requireNonNull(wireRecord, message.wireRecordNonNull());
 
-        final List<WireField> wireFields = wireRecord.getFields();
-        final Map<String, TypedValue<?>> allFlattenedFields = new HashMap<>();
-        for (final WireField wireField : wireFields) {
-            final Map<String, TypedValue<?>> flattenedField = wireField.flatten();
-            allFlattenedFields.putAll(flattenedField);
-        }
+        final Map<String, TypedValue<?>> wireRecordProperties = wireRecord.getProperties();
 
         Connection connection = null;
         PreparedStatement stmt = null;
         try {
             connection = this.dbHelper.getConnection();
-            stmt = prepareStatement(connection, tableName, allFlattenedFields, wireRecord.getTimestamp().getTime());
+            stmt = prepareStatement(connection, tableName, wireRecordProperties, new Date().getTime());
             stmt.execute();
             connection.commit();
             logger.info(message.stored());
@@ -444,7 +434,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
     }
 
     private PreparedStatement prepareStatement(Connection connection, String tableName,
-            final Map<String, TypedValue<?>> allFlattenedFields, long timestamp) throws SQLException {
+            final Map<String, TypedValue<?>> properties, long timestamp) throws SQLException {
 
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
         final StringBuilder sbCols = new StringBuilder();
@@ -455,57 +445,53 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         sbVals.append("?");
 
         int i = 2;
-        for (Entry<String, TypedValue<?>> entry : allFlattenedFields.entrySet()) {
+        for (Entry<String, TypedValue<?>> entry : properties.entrySet()) {
             final String sqlColName = this.dbHelper.sanitizeSqlTableAndColumnName(entry.getKey());
             sbCols.append(", " + sqlColName);
             sbVals.append(", ?");
         }
 
-        logger.info(message.storingRecord(sqlTableName));
+        logger.debug(message.storingRecord(sqlTableName));
         final String sqlInsert = MessageFormat.format(SQL_INSERT_RECORD, sqlTableName, sbCols.toString(),
                 sbVals.toString());
         final PreparedStatement stmt = connection.prepareStatement(sqlInsert);
-        stmt.setLong(1, timestamp); // TODO: Missing position
+        stmt.setLong(1, timestamp);
 
-        for (Entry<String, TypedValue<?>> entry : allFlattenedFields.entrySet()) {
+        for (Entry<String, TypedValue<?>> entry : properties.entrySet()) {
             final DataType dataType = entry.getValue().getType();
             final Object value = entry.getValue();
             switch (dataType) {
             case BOOLEAN:
-                logger.info(message.storeBoolean(((BooleanValue) value).getValue()));
+                logger.debug(message.storeBoolean(((BooleanValue) value).getValue()));
                 stmt.setBoolean(i, ((BooleanValue) value).getValue());
                 break;
             case BYTE:
-                logger.info(message.storeByte(((ByteValue) value).getValue()));
+                logger.debug(message.storeByte(((ByteValue) value).getValue()));
                 stmt.setByte(i, ((ByteValue) value).getValue());
                 break;
             case DOUBLE:
-                logger.info(message.storeDouble(((DoubleValue) value).getValue()));
+                logger.debug(message.storeDouble(((DoubleValue) value).getValue()));
                 stmt.setDouble(i, ((DoubleValue) value).getValue());
                 break;
             case INTEGER:
-                logger.info(message.storeInteger(((IntegerValue) value).getValue()));
+                logger.debug(message.storeInteger(((IntegerValue) value).getValue()));
                 stmt.setInt(i, ((IntegerValue) value).getValue());
                 break;
             case LONG:
-                logger.info(message.storelong(((LongValue) value).getValue()));
+                logger.debug(message.storelong(((LongValue) value).getValue()));
                 stmt.setLong(i, ((LongValue) value).getValue());
                 break;
             case BYTE_ARRAY:
-                logger.info(message.storeByteArray(Arrays.toString(((ByteArrayValue) value).getValue())));
+                logger.debug(message.storeByteArray(Arrays.toString(((ByteArrayValue) value).getValue())));
                 stmt.setBytes(i, ((ByteArrayValue) value).getValue());
                 break;
             case SHORT:
-                logger.info(message.storeShort(((ShortValue) value).getValue()));
+                logger.debug(message.storeShort(((ShortValue) value).getValue()));
                 stmt.setShort(i, ((ShortValue) value).getValue());
                 break;
             case STRING:
-                logger.info(message.storeString(((StringValue) value).getValue()));
+                logger.debug(message.storeString(((StringValue) value).getValue()));
                 stmt.setString(i, ((StringValue) value).getValue());
-                break;
-            case ERROR:
-                logger.info(message.storeString(((ErrorValue) value).getValue()));
-                stmt.setString(i, ((ErrorValue) value).getValue());
                 break;
             default:
                 break;

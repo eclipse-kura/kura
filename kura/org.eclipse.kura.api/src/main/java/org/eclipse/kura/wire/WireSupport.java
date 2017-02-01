@@ -33,14 +33,14 @@ public interface WireSupport extends Producer, Consumer {
     public static final String EMIT_EVENT_TOPIC = "org/eclipse/kura/wires/emit";
 
     /**
-     * Emit the provided wire record
+     * Emit the provided wire records
      *
-     * @param wireRecord
-     *            the Wire Record to emit
+     * @param wireRecords
+     *            a List of Wire Record objects that will be sent to the receiver.
      * @throws NullPointerException
      *             if the argument is null
      */
-    public void emit(WireRecord wireRecord);
+    public void emit(List<WireRecord> wireRecords);
 
     /**
      * Filters the provided wire record based on the configured

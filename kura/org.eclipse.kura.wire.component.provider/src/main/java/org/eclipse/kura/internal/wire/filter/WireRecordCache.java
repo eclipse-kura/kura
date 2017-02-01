@@ -16,12 +16,16 @@ package org.eclipse.kura.internal.wire.filter;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Class WireRecordCache is responsible to contain the Wire Record cached
@@ -29,8 +33,10 @@ import org.eclipse.kura.wire.WireRecord;
  */
 final class WireRecordCache {
 
+    private static final Logger logger = LoggerFactory.getLogger(WireRecordCache.class);
+
     /** Map that is the cache. */
-    private static final Map<Long, WireRecord> cacheMap = CollectionUtil.newConcurrentHashMap();
+    private static final Map<Long, List<WireRecord>> cacheMap = CollectionUtil.newConcurrentHashMap();
 
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
@@ -63,9 +69,13 @@ final class WireRecordCache {
      *            - key to get from cache map
      * @return object for the particular key
      */
-    WireRecord get(final long key) {
-        if (refreshCache()) {
-            cacheMap.put(this.lastRefreshedTime.getTimeInMillis(), this.recordFilter.filter());
+    List<WireRecord> get(final long key) {
+        try {
+            if (refreshCache()) {
+                cacheMap.put(this.lastRefreshedTime.getTimeInMillis(), this.recordFilter.filter());
+            }
+        } catch (KuraException e) {
+            logger.error("Error refreshing cache. {}", e);
         }
         return cacheMap.get(key);
     }
@@ -109,13 +119,13 @@ final class WireRecordCache {
      * @param value
      *            - object for the key
      */
-    void put(final long key, final WireRecord value) {
+    void put(final long key, final List<WireRecord> wireRecords) {
         // clears the map if the size of the map is as same as the max size
         // expected
         if (cacheMap.size() == this.capacity) {
             cacheMap.clear();
         }
-        cacheMap.put(key, value);
+        cacheMap.put(key, wireRecords);
         this.lastRefreshedTime = Calendar.getInstance();
     }
 
@@ -134,7 +144,7 @@ final class WireRecordCache {
             return false;
         } else {
             // Cache expired hence refresh it
-            this.lastRefreshedTime = Calendar.getInstance();
+            this.lastRefreshedTime = Calendar.getInstance(this.lastRefreshedTime.getTimeZone());
             return true;
         }
     }

@@ -39,22 +39,16 @@ import org.osgi.service.wireadmin.Wire;
  */
 final class WireSupportImpl implements WireSupport {
 
-    /** Localization Resource */
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
-    /** Event Admin Service */
     private final EventAdmin eventAdmin;
 
-    /** The incoming wires. */
     private List<Wire> incomingWires;
 
-    /** The outgoing wires. */
     private List<Wire> outgoingWires;
 
-    /** The Wire Helper Service. */
     private final WireHelperService wireHelperService;
 
-    /** The supported Wire Component. */
     private final WireComponent wireSupporter;
 
     /**
@@ -90,12 +84,12 @@ final class WireSupportImpl implements WireSupport {
 
     /** {@inheritDoc} */
     @Override
-    public synchronized void emit(final WireRecord wireRecord) {
-        requireNonNull(wireRecord, message.wireRecordsNonNull());
+    public synchronized void emit(final List<WireRecord> wireRecords) {
+        requireNonNull(wireRecords, message.wireRecordsNonNull());
         if (this.wireSupporter instanceof WireEmitter) {
             final String emitterPid = this.wireHelperService.getServicePid(this.wireSupporter);
             final String pid = this.wireHelperService.getPid(this.wireSupporter);
-            final WireEnvelope wei = new WireEnvelope(emitterPid, wireRecord);
+            final WireEnvelope wei = new WireEnvelope(emitterPid, wireRecords);
             for (final Wire wire : this.outgoingWires) {
                 wire.update(wei);
             }

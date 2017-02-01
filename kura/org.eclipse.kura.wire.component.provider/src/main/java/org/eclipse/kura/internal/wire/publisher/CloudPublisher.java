@@ -9,12 +9,13 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.publisher;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -26,11 +27,9 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.message.KuraPayload;
-import org.eclipse.kura.message.KuraPosition;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.wire.WireEnvelope;
-import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
@@ -42,7 +41,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
-import org.osgi.util.position.Position;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -238,11 +236,10 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
     public void onWireReceive(final WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
         logger.info(message.wireEnvelopeReceived(wireEnvelope.getEmitterPid()));
-        // filtering list of wire records based on the provided severity level
-        final WireRecord record = wireEnvelope.getRecord();
 
         if (this.cloudService != null && this.cloudClient != null) {
-            publish(record);
+            final List<WireRecord> records = wireEnvelope.getRecords();
+            publish(records);
         }
     }
 
@@ -312,15 +309,10 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
     private JsonObject buildJsonObject(final WireRecord wireRecord) {
         requireNonNull(wireRecord, message.wireRecordNonNull());
         final JsonObject jsonObject = Json.object();
-        if (wireRecord.getTimestamp() != null) {
-            jsonObject.add(message.timestamp(), wireRecord.getTimestamp().getTime());
-        }
-        if (wireRecord.getPosition() != null) {
-            jsonObject.add(message.position(), buildKuraPositionForJson(wireRecord.getPosition()));
-        }
-        for (final WireField dataField : wireRecord.getFields()) {
-            final Object wrappedValue = dataField.getValue().getValue();
-            jsonObject.add(dataField.getName(), wrappedValue.toString());
+
+        for (final Entry<String, TypedValue<?>> entry : wireRecord.getProperties().entrySet()) {
+            final Object wrappedValue = entry.getValue().getValue();
+            jsonObject.add(entry.getKey(), wrappedValue.toString());
         }
         return jsonObject;
     }
@@ -338,78 +330,11 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
         requireNonNull(wireRecord, message.wireRecordNonNull());
         final KuraPayload kuraPayload = new KuraPayload();
 
-        if (wireRecord.getTimestamp() != null) {
-            kuraPayload.setTimestamp(wireRecord.getTimestamp());
+        for (final Entry<String, TypedValue<?>> entry : wireRecord.getProperties().entrySet()) {
+            kuraPayload.addMetric(entry.getKey(), entry.getValue().getValue());
         }
-        if (wireRecord.getPosition() != null) {
-            kuraPayload.setPosition(buildKuraPosition(wireRecord.getPosition()));
-        }
-        for (final WireField dataField : wireRecord.getFields()) {
-            for (final Entry<String, TypedValue<?>> entry : dataField.flatten().entrySet()) {
-                kuraPayload.addMetric(entry.getKey(), entry.getValue().getValue());
-            }
-        }
+
         return kuraPayload;
-    }
-
-    /**
-     * Builds the Kura position from the OSGi position instance.
-     *
-     * @param position
-     *            the OSGi position instance
-     * @return the Kura position
-     * @throws NullPointerException
-     *             if the position provided is null
-     */
-    private KuraPosition buildKuraPosition(final Position position) {
-        requireNonNull(position, message.positionNonNull());
-        final KuraPosition kuraPosition = new KuraPosition();
-        if (position.getLatitude() != null) {
-            kuraPosition.setLatitude(position.getLatitude().getValue());
-        }
-        if (position.getLongitude() != null) {
-            kuraPosition.setLongitude(position.getLongitude().getValue());
-        }
-        if (position.getAltitude() != null) {
-            kuraPosition.setAltitude(position.getAltitude().getValue());
-        }
-        if (position.getSpeed() != null) {
-            kuraPosition.setSpeed(position.getSpeed().getValue());
-        }
-        if (position.getTrack() != null) {
-            kuraPosition.setHeading(position.getTrack().getValue());
-        }
-        return kuraPosition;
-    }
-
-    /**
-     * Builds the Kura position from the OSGi position instance.
-     *
-     * @param position
-     *            the OSGi position instance
-     * @return the Kura position
-     * @throws NullPointerException
-     *             if position provided is null
-     */
-    private JsonObject buildKuraPositionForJson(final Position position) {
-        requireNonNull(position, message.positionNonNull());
-        final JsonObject jsonObject = Json.object();
-        if (position.getLatitude() != null) {
-            jsonObject.add(message.latitude(), position.getLatitude().getValue());
-        }
-        if (position.getLongitude() != null) {
-            jsonObject.add(message.longitude(), position.getLongitude().getValue());
-        }
-        if (position.getAltitude() != null) {
-            jsonObject.add(message.altitude(), position.getAltitude().getValue());
-        }
-        if (position.getSpeed() != null) {
-            jsonObject.add(message.speed(), position.getSpeed().getValue());
-        }
-        if (position.getTrack() != null) {
-            jsonObject.add(message.heading(), position.getTrack().getValue());
-        }
-        return jsonObject;
     }
 
     /**
@@ -429,9 +354,9 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
      * @param wireRecords
      *            the provided list of Wire Records
      */
-    private void publish(final WireRecord wireRecord) {
+    private void publish(final List<WireRecord> wireRecords) {
         requireNonNull(this.cloudClient, message.cloudClientNonNull());
-        requireNonNull(wireRecord, message.wireRecordsNonNull());
+        requireNonNull(wireRecords, message.wireRecordsNonNull());
 
         try {
             for (final WireRecord dataRecord : wireRecords) {

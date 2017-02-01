@@ -9,7 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.logger;
 
@@ -23,7 +23,6 @@ import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireEnvelope;
-import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
@@ -115,19 +114,15 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
         requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
         logger.info(message.wireEnvelopeReceived(wireEnvelope.getEmitterPid()));
 
-        logger.info("Record content: ");
-        final WireRecord record = wireEnvelope.getRecord();
-        logger.info("  Timestamp: {}", record.getTimestamp().toString());
-        if (record.getPosition() != null) {
-            logger.info(" Position: {}", record.getPosition().toString());
-        }
-        for (WireField wireField : record.getFields()) {
-            Map<String, TypedValue<?>> flattenedField = wireField.flatten();
-            for (Entry<String, TypedValue<?>> entry : flattenedField.entrySet()) {
+        logger.info("Record List content: ");
+        for (WireRecord record : wireEnvelope.getRecords()) {
+            logger.info("  Record content: ");
+
+            for (Entry<String, TypedValue<?>> entry : record.getProperties().entrySet()) {
                 logger.info("    {} : {}", entry.getKey(), entry.getValue().getValue());
             }
-            logger.info("");
         }
+        logger.info("");
     }
 
     /** {@inheritDoc} */
@@ -142,5 +137,4 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
     public void updated(final Wire wire, final Object value) {
         this.wireSupport.updated(wire, value);
     }
-
 }

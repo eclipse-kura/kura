@@ -9,7 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.asset;
 
@@ -18,10 +18,10 @@ import static org.eclipse.kura.asset.ChannelType.READ;
 import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
 import static org.eclipse.kura.asset.ChannelType.WRITE;
 
-import java.sql.Timestamp;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.Asset;
@@ -32,14 +32,12 @@ import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.provider.BaseAsset;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
-import org.eclipse.kura.type.ErrorValue;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
-import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
@@ -83,6 +81,8 @@ import org.slf4j.LoggerFactory;
  * @see Asset
  */
 public final class WireAsset extends BaseAsset implements WireEmitter, WireReceiver {
+
+    private static final String PROPERTY_SEPARATOR = "_";
 
     /** Configuration PID Property. */
     private static final String CONF_PID = "org.eclipse.kura.wire.WireAsset";
@@ -198,13 +198,14 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
         logger.debug(message.wireEnvelopeReceived() + this.wireSupport);
 
-        // filtering list of wire records based on the provided severity level
-        final WireRecord record = wireEnvelope.getRecord();
         final List<Long> channelIds = determineReadingChannels();
-        final List<AssetRecord> assetRecordsToWriteChannels = determineWritingChannels(record);
 
-        // perform the operations
-        writeChannels(assetRecordsToWriteChannels);
+        final List<WireRecord> records = wireEnvelope.getRecords();
+        for (WireRecord wireRecord : records) {
+            final List<AssetRecord> assetRecordsToWriteChannels = determineWritingChannels(wireRecord);
+            writeChannels(assetRecordsToWriteChannels);
+        }
+
         readChannels(channelIds);
     }
 
@@ -248,25 +249,22 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
         final List<AssetRecord> assetRecordsToWriteChannels = CollectionUtil.newArrayList();
         final Map<Long, Channel> channels = this.assetConfiguration.getAssetChannels();
-        for (final WireField wireField : record.getFields()) {
-            String channelNameWireField = null;
+        for (final Entry<Long, Channel> channelEntry : channels.entrySet()) {
+            final Channel channel = channelEntry.getValue();
+            final String channelName = channel.getName();
 
-            for (final Map.Entry<Long, Channel> channelEntry : channels.entrySet()) {
-                final Channel channel = channelEntry.getValue();
-                if (channel.getType() == WRITE || channel.getType() == READ_WRITE) {
-                    final String wireFieldName = wireField.getName();
-                    final TypedValue<?> value = wireField.getValue();
-                    if (value instanceof ErrorValue) {
-                        logger.info("Received error in input");
-                        break;
-                    }
-                    if (wireFieldName.equalsIgnoreCase(channelNameWireField)
-                            && channel.getValueType() == value.getType()) {
-                        assetRecordsToWriteChannels.add(prepareAssetRecord(channel, wireField.getValue()));
-                    }
-                }
+            if (channel.getType() != WRITE && channel.getType() != READ_WRITE) {
+                continue;
             }
 
+            Map<String, TypedValue<?>> wireRecordProperties = record.getProperties();
+
+            if (wireRecordProperties.containsKey(channelName)) {
+                final TypedValue<?> value = wireRecordProperties.get(channelName);
+                if (channel.getValueType() == value.getType()) {
+                    assetRecordsToWriteChannels.add(prepareAssetRecord(channel, value));
+                }
+            }
         }
         return assetRecordsToWriteChannels;
     }
@@ -331,7 +329,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
             throw new IllegalArgumentException(message.assetRecordsNonEmpty());
         }
 
-        final WireRecord wireRecord = new WireRecord(new Timestamp(new Date().getTime())); // TODO: manage position
+        final WireRecord wireRecord = new WireRecord();
         for (final AssetRecord assetRecord : assetRecords) {
             final AssetStatus assetStatus = assetRecord.getAssetStatus();
             final AssetFlag assetFlag = assetStatus.getAssetFlag();
@@ -340,36 +338,40 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
             final TypedValue<?> typedValue;
             if (assetFlag == AssetFlag.FAILURE) {
-                String errorMessage = "ERROR NOT SPECIFIED";
-                final Exception exception = assetStatus.getException();
-                final String exceptionMsg = assetStatus.getExceptionMessage();
-                if (exception != null && exceptionMsg != null) {
-                    errorMessage = exceptionMsg + " " + ThrowableUtil.stackTraceAsString(exception);
-                } else if (exception == null && exceptionMsg != null) {
-                    errorMessage = exceptionMsg;
-                } else if (exception != null && exceptionMsg == null) {
-                    errorMessage = ThrowableUtil.stackTraceAsString(exception);
-                }
-                typedValue = new ErrorValue(errorMessage);
+                logErrorMessage(assetStatus);
+                continue;
             } else {
                 typedValue = assetRecord.getValue();
             }
 
-            WireField wireField = new WireField(channelName, typedValue);
+            wireRecord.addProperty(channelName, typedValue);
 
             try {
-                wireField.addProperty("assetName", TypedValues.newStringValue(getConfiguration().getPid()));
+                wireRecord.addProperty(channelName + PROPERTY_SEPARATOR + "assetName",
+                        TypedValues.newStringValue(getConfiguration().getPid()));
             } catch (final KuraException e) {
                 logger.error(ThrowableUtil.stackTraceAsString(e));
             }
 
-            wireField.addProperty("channelId", TypedValues.newLongValue(channelId));
-            wireField.addProperty("assetFlag", TypedValues.newStringValue(assetFlag.name()));
-            wireField.addProperty("timestamp", TypedValues.newLongValue(assetRecord.getTimestamp()));
-
-            wireRecord.addField(wireField);
+            wireRecord.addProperty(channelName + PROPERTY_SEPARATOR + "channelId", TypedValues.newLongValue(channelId));
+            wireRecord.addProperty(channelName + PROPERTY_SEPARATOR + "timestamp",
+                    TypedValues.newLongValue(assetRecord.getTimestamp()));
         }
-        this.wireSupport.emit(wireRecord);
+        this.wireSupport.emit(Arrays.asList(wireRecord));
+    }
+
+    private void logErrorMessage(final AssetStatus assetStatus) {
+        String errorMessage = "ERROR NOT SPECIFIED";
+        final Exception exception = assetStatus.getException();
+        final String exceptionMsg = assetStatus.getExceptionMessage();
+        if (exception != null && exceptionMsg != null) {
+            errorMessage = exceptionMsg + " " + ThrowableUtil.stackTraceAsString(exception);
+        } else if (exception == null && exceptionMsg != null) {
+            errorMessage = exceptionMsg;
+        } else if (exception != null) {
+            errorMessage = ThrowableUtil.stackTraceAsString(exception);
+        }
+        logger.error(errorMessage);
     }
 
     /**

@@ -84,7 +84,7 @@ final class DbWireRecordStoreOptions {
     String getTableName() {
         String tableName = null;
         final Object name = this.properties.get(TABLE_NAME);
-        if (name != null && name instanceof Integer) {
+        if (name != null && name instanceof String) {
             tableName = name.toString();
         }
         return TABLE_NAME_PREFIX + tableName;

@@ -9,15 +9,14 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.subscriber;
 
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +35,6 @@ import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.util.base.TypeUtil;
 import org.eclipse.kura.wire.WireEmitter;
-import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
@@ -279,14 +277,11 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
     @Override
     public void onMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
         if (msg != null) {
-            WireRecord record = null;
             try {
-                record = buildWireRecord(msg);
+                List<WireRecord> records = buildWireRecord(msg);
+                this.wireSupport.emit(records);
             } catch (final IOException e) {
                 logger.error(ThrowableUtil.stackTraceAsString(e));
-            }
-            if (record != null) {
-                this.wireSupport.emit(record);
             }
         }
     }
@@ -359,27 +354,27 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
     }
 
     /**
-     * Builds the Wire Record from the provided Kura Payload.
+     * Builds a list of Wire Record from the provided Kura Payload.
      *
      * @param payload
      *            the payload
-     * @return the Wire Record
+     * @return a List of Wire Record
      * @throws IOException
      *             if the byte array conversion fails
      * @throws NullPointerException
      *             if the payload provided is null
      */
-    private WireRecord buildWireRecord(final KuraPayload payload) throws IOException {
+    private List<WireRecord> buildWireRecord(final KuraPayload payload) throws IOException {
         requireNonNull(payload, wireMessages.payloadNonNull());
 
-        Map<String, Object> kuraPayloadFlattenedFields = payload.metrics();
-        Map<String, TypedValue<?>> wireFlattenedFields = new HashMap<>();
+        Map<String, Object> kuraPayloadProperties = payload.metrics();
+        Map<String, TypedValue<?>> wireProperties = new HashMap<>();
 
-        for (Entry<String, Object> entry : kuraPayloadFlattenedFields.entrySet()) {
+        for (Entry<String, Object> entry : kuraPayloadProperties.entrySet()) {
             String entryKey = entry.getKey();
             Object entryValue = entry.getValue();
 
-            TypedValue<?> convertedValue = TypedValues.EMPTY_VALUE;
+            TypedValue<?> convertedValue;
             if (entryValue instanceof Boolean) {
                 final boolean value = Boolean.parseBoolean(String.valueOf(entryValue));
                 convertedValue = TypedValues.newBooleanValue(value);
@@ -398,24 +393,20 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
             } else if (entryValue instanceof Short) {
                 final short value = Short.parseShort(String.valueOf(entryValue));
                 convertedValue = TypedValues.newShortValue(value);
-            } else if (entryValue instanceof String && entryKey.endsWith("_error")) {
-                final String value = String.valueOf(entryValue);
-                convertedValue = TypedValues.newErrorValue(value);
             } else if (entryValue instanceof String) {
                 final String value = String.valueOf(entryValue);
                 convertedValue = TypedValues.newStringValue(value);
             } else if (entryValue instanceof byte[]) {
                 final byte[] value = TypeUtil.objectToByteArray(entryValue);
                 convertedValue = TypedValues.newByteArrayValue(value);
+            } else {
+                throw new IllegalArgumentException("Unknown metric type");
             }
-            wireFlattenedFields.put(entryKey, convertedValue);
+            wireProperties.put(entryKey, convertedValue);
         }
 
-        List<WireField> wireFields = WireField.unflatten(wireFlattenedFields);
-
-        final WireRecord wireRecord = new WireRecord(new Timestamp(new Date().getTime()));
-        wireRecord.addAll(wireFields);
-        return wireRecord;
+        final WireRecord wireRecord = new WireRecord(wireProperties);
+        return Arrays.asList(wireRecord);
     }
 
     /**

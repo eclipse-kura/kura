@@ -9,16 +9,18 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.timer;
 
-import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
-import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.quartz.DisallowConcurrentExecution;
@@ -51,10 +53,13 @@ public final class EmitJob implements Job {
 
         final long currentTime = new Date().getTime();
         final TypedValue<Long> timestamp = TypedValues.newLongValue(currentTime);
-        final WireField timerWireField = new WireField(PROP, timestamp);
-        final WireRecord timerWireRecord = new WireRecord(new Timestamp(currentTime));
-        timerWireRecord.addField(timerWireField);
+        final Map<String, TypedValue<?>> timerProperties = new HashMap<>();
+        timerProperties.put(PROP, timestamp);
 
-        wireSupport.emit(timerWireRecord);
+        final WireRecord timerWireRecord = new WireRecord(timerProperties);
+        final List<WireRecord> timerWireRecords = new ArrayList<>();
+        timerWireRecords.add(timerWireRecord);
+
+        wireSupport.emit(timerWireRecords);
     }
 }

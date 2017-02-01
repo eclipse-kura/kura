@@ -22,10 +22,6 @@ import org.eclipse.kura.annotation.Nullable;
  */
 public final class TypedValues {
 
-    /** Empty Typed Value */
-    public static final TypedValue<String> EMPTY_VALUE = new StringValue("");
-
-    /** Constructor */
     private TypedValues() {
         // Static Factory Methods container. No need to instantiate.
     }
@@ -119,9 +115,4 @@ public final class TypedValues {
     public static StringValue newStringValue(@Nullable final String value) {
         return new StringValue(value);
     }
-
-    public static ErrorValue newErrorValue(@Nullable final String value) {
-        return new ErrorValue(value);
-    }
-
 }

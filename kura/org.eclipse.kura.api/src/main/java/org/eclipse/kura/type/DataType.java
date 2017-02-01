@@ -37,7 +37,5 @@ public enum DataType {
     SHORT,
 
     /** string type */
-    STRING,
-
-    ERROR
+    STRING
 }

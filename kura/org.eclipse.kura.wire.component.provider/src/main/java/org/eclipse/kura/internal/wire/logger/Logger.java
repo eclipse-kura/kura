@@ -1,11 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *  
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.logger;
 
@@ -34,32 +38,13 @@ import org.slf4j.LoggerFactory;
  */
 public final class Logger implements WireReceiver, ConfigurableComponent {
 
-    /** The Logger instance. */
-    private static final org.slf4j.Logger s_logger = LoggerFactory.getLogger(Logger.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Logger.class);
 
-    /** Localization Resource */
-    private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
+    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
-    /** The Wire Helper Service. */
     private volatile WireHelperService wireHelperService;
 
-    /** The wire supporter component. */
     private WireSupport wireSupport;
-
-    /**
-     * OSGi Service Component callback for activation.
-     *
-     * @param componentContext
-     *            the component context
-     * @param properties
-     *            the properties
-     */
-    protected synchronized void activate(final ComponentContext componentContext,
-            final Map<String, Object> properties) {
-        s_logger.debug(s_message.activatingLogger());
-        this.wireSupport = this.wireHelperService.newWireSupport(this);
-        s_logger.debug(s_message.activatingLoggerDone());
-    }
 
     /**
      * Binds the Wire Helper Service.
@@ -71,47 +56,6 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
         if (this.wireHelperService == null) {
             this.wireHelperService = wireHelperService;
         }
-    }
-
-    /**
-     * OSGi Service Component callback for deactivation.
-     *
-     * @param componentContext
-     *            the component context
-     */
-    protected synchronized void deactivate(final ComponentContext componentContext) {
-        s_logger.debug(s_message.deactivatingLogger());
-        // remained for debugging purposes
-        s_logger.debug(s_message.deactivatingLoggerDone());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onWireReceive(final WireEnvelope wireEnvelope) {
-        requireNonNull(wireEnvelope, s_message.wireEnvelopeNonNull());
-        s_logger.info(s_message.wireEnvelopeReceived(wireEnvelope.getEmitterPid()));
-
-        s_logger.info("Record content: ");
-        final WireRecord record = wireEnvelope.getRecord();
-        s_logger.info("  Timestamp: {}", record.getTimestamp().toString());
-        if (record.getPosition() != null) {
-            s_logger.info(" Position: {}", record.getPosition().toString());
-        }
-        for (WireField wireField : record.getFields()) {
-            Map<String, TypedValue<?>> flattenedField = wireField.flatten();
-            for (Entry<String, TypedValue<?>> entry : flattenedField.entrySet()) {
-                s_logger.info("    {} : {}", entry.getKey(), entry.getValue().getValue());
-            }
-            s_logger.info("");
-        }
-
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void producersConnected(final Wire[] wires) {
-        requireNonNull(wires, s_message.wiresNonNull());
-        this.wireSupport.producersConnected(wires);
     }
 
     /**
@@ -127,15 +71,70 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
     }
 
     /**
+     * OSGi Service Component callback for activation.
+     *
+     * @param componentContext
+     *            the component context
+     * @param properties
+     *            the properties
+     */
+    protected synchronized void activate(final ComponentContext componentContext,
+            final Map<String, Object> properties) {
+        logger.debug(message.activatingLogger());
+        this.wireSupport = this.wireHelperService.newWireSupport(this);
+        logger.debug(message.activatingLoggerDone());
+    }
+
+    /**
      * OSGi Service Component callback for updating.
      *
      * @param properties
      *            the updated properties
      */
     public synchronized void updated(final Map<String, Object> properties) {
-        s_logger.debug(s_message.updatingLogger());
+        logger.debug(message.updatingLogger());
         // remained for debugging purposes
-        s_logger.debug(s_message.updatingLoggerDone());
+        logger.debug(message.updatingLoggerDone());
+    }
+
+    /**
+     * OSGi Service Component callback for deactivation.
+     *
+     * @param componentContext
+     *            the component context
+     */
+    protected synchronized void deactivate(final ComponentContext componentContext) {
+        logger.debug(message.deactivatingLogger());
+        // remained for debugging purposes
+        logger.debug(message.deactivatingLoggerDone());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void onWireReceive(final WireEnvelope wireEnvelope) {
+        requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
+        logger.info(message.wireEnvelopeReceived(wireEnvelope.getEmitterPid()));
+
+        logger.info("Record content: ");
+        final WireRecord record = wireEnvelope.getRecord();
+        logger.info("  Timestamp: {}", record.getTimestamp().toString());
+        if (record.getPosition() != null) {
+            logger.info(" Position: {}", record.getPosition().toString());
+        }
+        for (WireField wireField : record.getFields()) {
+            Map<String, TypedValue<?>> flattenedField = wireField.flatten();
+            for (Entry<String, TypedValue<?>> entry : flattenedField.entrySet()) {
+                logger.info("    {} : {}", entry.getKey(), entry.getValue().getValue());
+            }
+            logger.info("");
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void producersConnected(final Wire[] wires) {
+        requireNonNull(wires, message.wiresNonNull());
+        this.wireSupport.producersConnected(wires);
     }
 
     /** {@inheritDoc} */

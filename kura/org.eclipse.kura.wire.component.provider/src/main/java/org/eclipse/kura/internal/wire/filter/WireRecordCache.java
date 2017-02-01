@@ -1,11 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *  
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.filter;
 
@@ -28,7 +32,7 @@ final class WireRecordCache {
     /** Map that is the cache. */
     private static final Map<Long, WireRecord> cacheMap = CollectionUtil.newConcurrentHashMap();
 
-    private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
+    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
     private int capacity;
 
@@ -48,7 +52,7 @@ final class WireRecordCache {
      *             if argument is null
      */
     WireRecordCache(final DbWireRecordFilter filter) {
-        requireNonNull(filter, s_message.dbFilterNonNull());
+        requireNonNull(filter, message.dbFilterNonNull());
         this.recordFilter = filter;
     }
 

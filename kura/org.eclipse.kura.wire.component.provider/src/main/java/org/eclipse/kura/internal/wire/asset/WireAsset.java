@@ -1,11 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *  
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.asset;
 
@@ -92,6 +96,30 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     private WireSupport wireSupport;
 
     /**
+     * Binds the Wire Helper Service.
+     *
+     * @param wireHelperService
+     *            the new Wire Helper Service
+     */
+    public synchronized void bindWireHelperService(final WireHelperService wireHelperService) {
+        if (this.wireHelperService == null) {
+            this.wireHelperService = wireHelperService;
+        }
+    }
+
+    /**
+     * Unbinds the Wire Helper Service.
+     *
+     * @param wireHelperService
+     *            the new Wire Helper Service
+     */
+    public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
+        if (this.wireHelperService == wireHelperService) {
+            this.wireHelperService = null;
+        }
+    }
+
+    /**
      * OSGi service component callback while activation.
      *
      * @param componentContext
@@ -109,21 +137,16 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     }
 
     /**
-     * Binds the Wire Helper Service.
+     * OSGi service component callback while updation.
      *
-     * @param wireHelperService
-     *            the new Wire Helper Service
+     * @param properties
+     *            the service properties
      */
-    public synchronized void bindWireHelperService(final WireHelperService wireHelperService) {
-        if (this.wireHelperService == null) {
-            this.wireHelperService = wireHelperService;
-        }
-    }
-
-    /** {@inheritDoc} */
     @Override
-    public void consumersConnected(final Wire[] wires) {
-        this.wireSupport.consumersConnected(wires);
+    public synchronized void updated(final Map<String, Object> properties) {
+        logger.debug(message.updatingWireAsset());
+        super.updated(properties);
+        logger.debug(message.updatingWireAssetDone());
     }
 
     /**
@@ -137,6 +160,52 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         logger.debug(message.deactivatingWireAsset());
         super.deactivate(context);
         logger.debug(message.deactivatingWireAssetDone());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void consumersConnected(final Wire[] wires) {
+        this.wireSupport.consumersConnected(wires);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected String getFactoryPid() {
+        return CONF_PID;
+    }
+
+    /**
+     * This method is triggered as soon as the wire component receives a Wire
+     * Envelope. After it receives a Wire Envelope, it checks for all associated
+     * channels to read and write and perform the operations accordingly. The
+     * order of executions are performed the following way:
+     *
+     * <ul>
+     * <li>Perform all read operations on associated reading channels</li>
+     * <li>Perform all write operations on associated writing channels</li>
+     * <ul>
+     *
+     * Both of the aforementioned operations are performed as soon as it timer
+     * wire component is also triggered.
+     *
+     * @param wireEnvelope
+     *            the received wire envelope
+     * @throws NullPointerException
+     *             if Wire Envelope is null
+     */
+    @Override
+    public void onWireReceive(final WireEnvelope wireEnvelope) {
+        requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
+        logger.debug(message.wireEnvelopeReceived() + this.wireSupport);
+
+        // filtering list of wire records based on the provided severity level
+        final WireRecord record = wireEnvelope.getRecord();
+        final List<Long> channelIds = determineReadingChannels();
+        final List<AssetRecord> assetRecordsToWriteChannels = determineWritingChannels(record);
+
+        // perform the operations
+        writeChannels(assetRecordsToWriteChannels);
+        readChannels(channelIds);
     }
 
     /**
@@ -203,6 +272,49 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     }
 
     /**
+     * Perform Channel Read and Emit operations
+     *
+     * @param channelsToRead
+     *            the list of {@link Channel} IDs
+     * @throws NullPointerException
+     *             if the provided list is null
+     */
+    private void readChannels(final List<Long> channelsToRead) {
+        requireNonNull(channelsToRead, message.channelIdsNonNull());
+        try {
+            List<AssetRecord> recentlyReadRecords = null;
+            if (!channelsToRead.isEmpty()) {
+                recentlyReadRecords = read(channelsToRead);
+            }
+            if (recentlyReadRecords != null) {
+                emitAssetRecords(recentlyReadRecords);
+            }
+        } catch (final KuraException e) {
+            logger.error(message.errorPerformingRead() + ThrowableUtil.stackTraceAsString(e));
+        }
+    }
+
+    /**
+     * Create an asset record from the provided channel information.
+     *
+     * @param channel
+     *            the channel to get the values from
+     * @param value
+     *            the value
+     * @return the asset record
+     * @throws NullPointerException
+     *             if any of the provided arguments is null
+     */
+    private AssetRecord prepareAssetRecord(final Channel channel, final TypedValue<?> value) {
+        requireNonNull(channel, message.channelNonNull());
+        requireNonNull(value, message.valueNonNull());
+
+        final AssetRecord assetRecord = new AssetRecord(channel.getId());
+        assetRecord.setValue(value);
+        return assetRecord;
+    }
+
+    /**
      * Emit the provided list of asset records to the associated wires.
      *
      * @param assetRecords
@@ -260,132 +372,6 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         this.wireSupport.emit(wireRecord);
     }
 
-    /** {@inheritDoc} */
-    @Override
-    protected String getFactoryPid() {
-        return CONF_PID;
-    }
-
-    /**
-     * This method is triggered as soon as the wire component receives a Wire
-     * Envelope. After it receives a Wire Envelope, it checks for all associated
-     * channels to read and write and perform the operations accordingly. The
-     * order of executions are performed the following way:
-     *
-     * <ul>
-     * <li>Perform all read operations on associated reading channels</li>
-     * <li>Perform all write operations on associated writing channels</li>
-     * <ul>
-     *
-     * Both of the aforementioned operations are performed as soon as it timer
-     * wire component is also triggered.
-     *
-     * @param wireEnvelope
-     *            the received wire envelope
-     * @throws NullPointerException
-     *             if Wire Envelope is null
-     */
-    @Override
-    public void onWireReceive(final WireEnvelope wireEnvelope) {
-        requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
-        logger.debug(message.wireEnvelopeReceived() + this.wireSupport);
-
-        // filtering list of wire records based on the provided severity level
-        final WireRecord record = wireEnvelope.getRecord();
-        final List<Long> channelIds = determineReadingChannels();
-        final List<AssetRecord> assetRecordsToWriteChannels = determineWritingChannels(record);
-
-        // perform the operations
-        writeChannels(assetRecordsToWriteChannels);
-        readChannels(channelIds);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Object polled(final Wire wire) {
-        return this.wireSupport.polled(wire);
-    }
-
-    /**
-     * Create an asset record from the provided channel information.
-     *
-     * @param channel
-     *            the channel to get the values from
-     * @param value
-     *            the value
-     * @return the asset record
-     * @throws NullPointerException
-     *             if any of the provided arguments is null
-     */
-    private AssetRecord prepareAssetRecord(final Channel channel, final TypedValue<?> value) {
-        requireNonNull(channel, message.channelNonNull());
-        requireNonNull(value, message.valueNonNull());
-
-        final AssetRecord assetRecord = new AssetRecord(channel.getId());
-        assetRecord.setValue(value);
-        return assetRecord;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void producersConnected(final Wire[] wires) {
-        this.wireSupport.producersConnected(wires);
-    }
-
-    /**
-     * Perform Channel Read and Emit operations
-     *
-     * @param channelsToRead
-     *            the list of {@link Channel} IDs
-     * @throws NullPointerException
-     *             if the provided list is null
-     */
-    private void readChannels(final List<Long> channelsToRead) {
-        requireNonNull(channelsToRead, message.channelIdsNonNull());
-        try {
-            List<AssetRecord> recentlyReadRecords = null;
-            if (!channelsToRead.isEmpty()) {
-                recentlyReadRecords = read(channelsToRead);
-            }
-            if (recentlyReadRecords != null) {
-                emitAssetRecords(recentlyReadRecords);
-            }
-        } catch (final KuraException e) {
-            logger.error(message.errorPerformingRead() + ThrowableUtil.stackTraceAsString(e));
-        }
-    }
-
-    /**
-     * Unbinds the Wire Helper Service.
-     *
-     * @param wireHelperService
-     *            the new Wire Helper Service
-     */
-    public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
-        if (this.wireHelperService == wireHelperService) {
-            this.wireHelperService = null;
-        }
-    }
-
-    /**
-     * OSGi service component callback while updation.
-     *
-     * @param properties
-     *            the service properties
-     */
-    @Override
-    public synchronized void updated(final Map<String, Object> properties) {
-        logger.debug(message.updatingWireAsset());
-        super.updated(properties);
-        logger.debug(message.updatingWireAssetDone());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void updated(final Wire wire, final Object value) {
-        this.wireSupport.updated(wire, value);
-    }
-
     /**
      * Perform Channel Write operation
      *
@@ -401,5 +387,23 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         } catch (final KuraException e) {
             logger.error(message.errorPerformingWrite() + ThrowableUtil.stackTraceAsString(e));
         }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Object polled(final Wire wire) {
+        return this.wireSupport.polled(wire);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void producersConnected(final Wire[] wires) {
+        this.wireSupport.producersConnected(wires);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void updated(final Wire wire, final Object value) {
+        this.wireSupport.updated(wire, value);
     }
 }

@@ -1,11 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *  
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.store;
 
@@ -67,81 +71,45 @@ import org.slf4j.LoggerFactory;
  */
 public final class DbWireRecordStore implements WireEmitter, WireReceiver, ConfigurableComponent {
 
-    /** The Constant denoting name of the column. */
     private static final String COLUMN_NAME = "COLUMN_NAME";
 
-    /** The constant data type */
     private static final String DATA_TYPE = "DATA_TYPE";
 
-    /** The table name prefix to be used */
-    public static final String PREFIX = "WR_";
+    public static final String TABLE_NAME_PREFIX = "WR_";
 
-    /** The Logger instance. */
-    private static final Logger s_logger = LoggerFactory.getLogger(DbWireRecordStore.class);
+    private static final Logger logger = LoggerFactory.getLogger(DbWireRecordStore.class);
 
-    /** Localization Resource */
-    private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
+    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
-    /** The Constant denoting query to add column. */
     private static final String SQL_ADD_COLUMN = "ALTER TABLE {0} ADD COLUMN {1} {2};";
 
-    /** The Constant denoting query to create table. */
     private static final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS {0} (TIMESTAMP BIGINT NOT NULL PRIMARY KEY);";
 
-    /** The Constant denoting query to delete records in a table. */
     private static final String SQL_DELETE_RANGE_TABLE = "DELETE FROM {0} LIMIT {1};";
 
-    /** The Constant denoting query to drop column. */
     private static final String SQL_DROP_COLUMN = "ALTER TABLE {0} DROP COLUMN {1};";
 
-    /** The Constant denoting query to insert record. */
     private static final String SQL_INSERT_RECORD = "INSERT INTO {0} ({1}) VALUES ({2});";
 
-    /** The Constant denoting query to truncate table. */
     private static final String SQL_TRUNCATE_TABLE = "TRUNCATE TABLE {0};";
 
-    /** DB Utility Helper */
     private DbServiceHelper dbHelper;
 
-    /** The DB Service. */
     private volatile DbService dbService;
 
-    /** Scheduled Executor Service */
     private final ScheduledExecutorService executorService;
 
-    /** The wire record options. */
-    private DbWireRecordStoreOptions options;
+    private DbWireRecordStoreOptions wireRecordStoreOptions;
 
     /** The future handle of the thread pool executor service. */
     private ScheduledFuture<?> tickHandle;
 
-    /** The Wire Helper Service. */
     private volatile WireHelperService wireHelperService;
 
-    /** The Wire Supporter Component. */
     private WireSupport wireSupport;
 
-    /** Constructor */
     public DbWireRecordStore() {
         this.executorService = Executors.newSingleThreadScheduledExecutor();
-    }
-
-    /**
-     * OSGi Service Component callback for activation.
-     *
-     * @param componentContext
-     *            the component context
-     * @param properties
-     *            the properties
-     */
-    protected synchronized void activate(final ComponentContext componentContext,
-            final Map<String, Object> properties) {
-        s_logger.debug(s_message.activatingStore());
-        this.options = new DbWireRecordStoreOptions(properties);
-        this.dbHelper = DbServiceHelper.getInstance(this.dbService);
-        this.wireSupport = this.wireHelperService.newWireSupport(this);
-        this.scheduleTruncation();
-        s_logger.debug(s_message.activatingStoreDone());
     }
 
     /**
@@ -169,13 +137,107 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
     }
 
     /**
+     * Unbinds the DB service.
+     *
+     * @param dbService
+     *            the DB service
+     */
+    public synchronized void unbindDbService(final DbService dbService) {
+        if (this.dbService == dbService) {
+            this.dbService = null;
+        }
+    }
+
+    /**
+     * Unbinds the Wire Helper Service.
+     *
+     * @param wireHelperService
+     *            the new Wire Helper Service
+     */
+    public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
+        if (this.wireHelperService == wireHelperService) {
+            this.wireHelperService = null;
+        }
+    }
+
+    /**
+     * OSGi Service Component callback for activation.
+     *
+     * @param componentContext
+     *            the component context
+     * @param properties
+     *            the properties
+     */
+    protected synchronized void activate(final ComponentContext componentContext,
+            final Map<String, Object> properties) {
+        logger.debug(message.activatingStore());
+        this.wireRecordStoreOptions = new DbWireRecordStoreOptions(properties);
+        this.dbHelper = DbServiceHelper.getInstance(this.dbService);
+        this.wireSupport = this.wireHelperService.newWireSupport(this);
+        this.scheduleTruncation();
+        logger.debug(message.activatingStoreDone());
+    }
+
+    /**
+     * OSGi Service Component callback for updating.
+     *
+     * @param properties
+     *            the updated service component properties
+     */
+    public synchronized void updated(final Map<String, Object> properties) {
+        logger.debug(message.updatingStore() + properties);
+        this.wireRecordStoreOptions = new DbWireRecordStoreOptions(properties);
+        this.scheduleTruncation();
+        logger.debug(message.updatingStoreDone());
+    }
+
+    /**
+     * OSGi Service Component callback for deactivation.
+     *
+     * @param componentContext
+     *            the component context
+     */
+    protected synchronized void deactivate(final ComponentContext componentContext) {
+        logger.debug(message.deactivatingStore());
+        if (this.tickHandle != null) {
+            this.tickHandle.cancel(true);
+        }
+        this.executorService.shutdown();
+        logger.debug(message.deactivatingStoreDone());
+    }
+
+    /**
+     * Schedule truncation of tables containing wire records
+     */
+    private void scheduleTruncation() {
+        final int cleanUpRate = this.wireRecordStoreOptions.getPeriodicCleanupRate();
+        final int noOfRecordsToKeep = this.wireRecordStoreOptions.getNoOfRecordsToKeep();
+        // Cancel the current refresh view handle
+        if (this.tickHandle != null) {
+            this.tickHandle.cancel(true);
+        }
+        // schedule the truncation of collected wire records
+        if (cleanUpRate != 0) {
+            this.tickHandle = this.executorService.schedule(new Runnable() {
+
+                /** {@inheritDoc} */
+                @Override
+                public void run() {
+                    DbWireRecordStore.this.clear(noOfRecordsToKeep);
+                }
+            }, cleanUpRate, TimeUnit.SECONDS);
+        }
+    }
+
+    /**
      * Truncates the records in the table
      *
      * @param noOfRecordsToKeep
      *            the no of records to keep in the table
      */
     private void clear(final int noOfRecordsToKeep) {
-        final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(this.options.getTableName());
+        final String sqlTableName = this.dbHelper
+                .sanitizeSqlTableAndColumnName(this.wireRecordStoreOptions.getTableName());
         Connection conn = null;
         try {
             conn = this.dbHelper.getConnection();
@@ -186,7 +248,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
             if (rsTbls.next()) {
                 // table does exist, truncate it
                 if (noOfRecordsToKeep == 0) {
-                    s_logger.info(s_message.truncatingTable(sqlTableName));
+                    logger.info(message.truncatingTable(sqlTableName));
                     this.dbHelper.execute(MessageFormat.format(SQL_TRUNCATE_TABLE, sqlTableName));
                 } else {
                     this.dbHelper
@@ -194,8 +256,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
                 }
             }
         } catch (final SQLException sqlException) {
-            s_logger.error(
-                    s_message.errorTruncatingTable(sqlTableName) + ThrowableUtil.stackTraceAsString(sqlException));
+            logger.error(message.errorTruncatingTable(sqlTableName) + ThrowableUtil.stackTraceAsString(sqlException));
         } finally {
             if (conn != null) {
                 this.dbHelper.close(conn);
@@ -209,138 +270,11 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         this.wireSupport.consumersConnected(wires);
     }
 
-    /**
-     * OSGi Service Component callback for deactivation.
-     *
-     * @param componentContext
-     *            the component context
-     */
-    protected synchronized void deactivate(final ComponentContext componentContext) {
-        s_logger.debug(s_message.deactivatingStore());
-        if (this.tickHandle != null) {
-            this.tickHandle.cancel(true);
-        }
-        this.executorService.shutdown();
-        s_logger.debug(s_message.deactivatingStoreDone());
-    }
-
-    /**
-     * Insert the provided wire record to the specified table
-     *
-     * @param tableName
-     *            the table name
-     * @param wireRecord
-     *            the wire record
-     * @throws SQLException
-     *             the SQL exception
-     * @throws NullPointerException
-     *             if any of the provided arguments is null
-     */
-    private void insertDataRecord(final String tableName, final WireRecord wireRecord) throws SQLException {
-        requireNonNull(tableName, s_message.tableNameNonNull());
-        requireNonNull(wireRecord, s_message.wireRecordNonNull());
-
-        final List<WireField> wireFields = wireRecord.getFields();
-        final Map<String, TypedValue<?>> allFlattenedFields = new HashMap<>();
-        for (final WireField wireField : wireFields) {
-            final Map<String, TypedValue<?>> flattenedField = wireField.flatten();
-            allFlattenedFields.putAll(flattenedField);
-        }
-
-        Connection connection = null;
-        PreparedStatement stmt = null;
-        try {
-            connection = this.dbHelper.getConnection();
-            stmt = prepareStatement(connection, tableName, allFlattenedFields, wireRecord.getTimestamp().getTime());
-            stmt.execute();
-            connection.commit();
-            s_logger.info(s_message.stored());
-        } catch (final SQLException e) {
-            this.dbHelper.rollback(connection);
-            throw e;
-        } finally {
-            this.dbHelper.close(stmt);
-            this.dbHelper.close(connection);
-        }
-    }
-
-    private PreparedStatement prepareStatement(Connection connection, String tableName,
-            final Map<String, TypedValue<?>> allFlattenedFields, long timestamp) throws SQLException {
-
-        final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
-        final StringBuilder sbCols = new StringBuilder();
-        final StringBuilder sbVals = new StringBuilder();
-
-        // add the timestamp
-        sbCols.append("TIMESTAMP");
-        sbVals.append("?");
-
-        int i = 2;
-        for (Entry<String, TypedValue<?>> entry : allFlattenedFields.entrySet()) {
-            final String sqlColName = this.dbHelper.sanitizeSqlTableAndColumnName(entry.getKey());
-            sbCols.append(", " + sqlColName);
-            sbVals.append(", ?");
-        }
-
-        s_logger.info(s_message.storingRecord(sqlTableName));
-        final String sqlInsert = MessageFormat.format(SQL_INSERT_RECORD, sqlTableName, sbCols.toString(),
-                sbVals.toString());
-        final PreparedStatement stmt = connection.prepareStatement(sqlInsert);
-        stmt.setLong(1, timestamp); // TODO: Missing position
-
-        for (Entry<String, TypedValue<?>> entry : allFlattenedFields.entrySet()) {
-            final DataType dataType = entry.getValue().getType();
-            final Object value = entry.getValue();
-            switch (dataType) {
-            case BOOLEAN:
-                s_logger.info(s_message.storeBoolean(((BooleanValue) value).getValue()));
-                stmt.setBoolean(i, ((BooleanValue) value).getValue());
-                break;
-            case BYTE:
-                s_logger.info(s_message.storeByte(((ByteValue) value).getValue()));
-                stmt.setByte(i, ((ByteValue) value).getValue());
-                break;
-            case DOUBLE:
-                s_logger.info(s_message.storeDouble(((DoubleValue) value).getValue()));
-                stmt.setDouble(i, ((DoubleValue) value).getValue());
-                break;
-            case INTEGER:
-                s_logger.info(s_message.storeInteger(((IntegerValue) value).getValue()));
-                stmt.setInt(i, ((IntegerValue) value).getValue());
-                break;
-            case LONG:
-                s_logger.info(s_message.storelong(((LongValue) value).getValue()));
-                stmt.setLong(i, ((LongValue) value).getValue());
-                break;
-            case BYTE_ARRAY:
-                s_logger.info(s_message.storeByteArray(Arrays.toString(((ByteArrayValue) value).getValue())));
-                stmt.setBytes(i, ((ByteArrayValue) value).getValue());
-                break;
-            case SHORT:
-                s_logger.info(s_message.storeShort(((ShortValue) value).getValue()));
-                stmt.setShort(i, ((ShortValue) value).getValue());
-                break;
-            case STRING:
-                s_logger.info(s_message.storeString(((StringValue) value).getValue()));
-                stmt.setString(i, ((StringValue) value).getValue());
-                break;
-            case ERROR:
-                s_logger.info(s_message.storeString(((ErrorValue) value).getValue()));
-                stmt.setString(i, ((ErrorValue) value).getValue());
-                break;
-            default:
-                break;
-            }
-            i++;
-        }
-        return stmt;
-    }
-
     /** {@inheritDoc} */
     @Override
     public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
-        requireNonNull(wireEvelope, s_message.wireEnvelopeNonNull());
-        s_logger.debug(s_message.wireEnvelopeReceived() + this.wireSupport);
+        requireNonNull(wireEvelope, message.wireEnvelopeNonNull());
+        logger.debug(message.wireEnvelopeReceived() + this.wireSupport);
         // filtering list of wire records based on the provided severity level
         final WireRecord record = wireEvelope.getRecord();
         this.store(record);
@@ -349,16 +283,65 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         this.wireSupport.emit(record);
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public Object polled(final Wire wire) {
-        return this.wireSupport.polled(wire);
+    /**
+     * Stores the provided wire record in the database
+     *
+     * @param wireRecord
+     *            the wire record to be stored
+     * @throws NullPointerException
+     *             if the provided argument is null
+     */
+    private void store(final WireRecord wireRecord) {
+        requireNonNull(wireRecord, message.wireRecordNonNull());
+        boolean inserted = false;
+        int retryCount = 0;
+        final String tableName = this.wireRecordStoreOptions.getTableName();
+        do {
+            try {
+                this.insertDataRecord(tableName, wireRecord);
+                inserted = true;
+            } catch (final SQLException e) {
+                logger.error(message.insertionFailed() + ThrowableUtil.stackTraceAsString(e));
+                try {
+                    if ((tableName != null) && (!tableName.isEmpty())) {
+                        retryCount++;
+                        this.reconcileTable(tableName);
+                        this.reconcileColumns(tableName, wireRecord);
+                    }
+                } catch (final SQLException ee) {
+                    logger.error(message.errorStoring() + ee);
+                }
+            }
+        } while (!inserted && (retryCount < 2));
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void producersConnected(final Wire[] wires) {
-        this.wireSupport.producersConnected(wires);
+    /**
+     * Reconcile table.
+     *
+     * @param tableName
+     *            the table name
+     * @throws SQLException
+     *             the SQL exception
+     * @throws NullPointerException
+     *             if the provided argument is null
+     */
+    private void reconcileTable(final String tableName) throws SQLException {
+        requireNonNull(tableName, message.tableNameNonNull());
+        final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
+        final Connection conn = this.dbHelper.getConnection();
+        try {
+            // check for the table that would collect the data of this emitter
+            final String catalog = conn.getCatalog();
+            final DatabaseMetaData dbMetaData = conn.getMetaData();
+            final ResultSet rsTbls = dbMetaData.getTables(catalog, null, sqlTableName, null);
+            if (!rsTbls.next()) {
+                // table does not exist, create it
+                logger.info(message.creatingTable(sqlTableName));
+                this.dbHelper.execute(MessageFormat.format(SQL_CREATE_TABLE, sqlTableName));
+            }
+        } finally {
+            this.dbHelper.close(conn);
+        }
     }
 
     /**
@@ -374,8 +357,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      *             if any of the provided arguments is null
      */
     private void reconcileColumns(final String tableName, final WireRecord wireRecord) throws SQLException {
-        requireNonNull(tableName, s_message.tableNameNonNull());
-        requireNonNull(wireRecord, s_message.wireRecordNonNull());
+        requireNonNull(tableName, message.tableNameNonNull());
+        requireNonNull(wireRecord, message.wireRecordNonNull());
 
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
         Connection conn = null;
@@ -386,7 +369,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
             conn = this.dbHelper.getConnection();
             final String catalog = conn.getCatalog();
             final DatabaseMetaData dbMetaData = conn.getMetaData();
-            rsColumns = dbMetaData.getColumns(catalog, null, PREFIX + sqlTableName, null);
+            rsColumns = dbMetaData.getColumns(catalog, null, TABLE_NAME_PREFIX + sqlTableName, null);
             // map the columns
             while (rsColumns.next()) {
                 final String colName = rsColumns.getString(COLUMN_NAME);
@@ -421,124 +404,127 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
     }
 
     /**
-     * Reconcile table.
+     * Insert the provided wire record to the specified table
      *
      * @param tableName
      *            the table name
+     * @param wireRecord
+     *            the wire record
      * @throws SQLException
      *             the SQL exception
      * @throws NullPointerException
-     *             if the provided argument is null
+     *             if any of the provided arguments is null
      */
-    private void reconcileTable(final String tableName) throws SQLException {
-        requireNonNull(tableName, s_message.tableNameNonNull());
-        final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
-        final Connection conn = this.dbHelper.getConnection();
+    private void insertDataRecord(final String tableName, final WireRecord wireRecord) throws SQLException {
+        requireNonNull(tableName, message.tableNameNonNull());
+        requireNonNull(wireRecord, message.wireRecordNonNull());
+
+        final List<WireField> wireFields = wireRecord.getFields();
+        final Map<String, TypedValue<?>> allFlattenedFields = new HashMap<>();
+        for (final WireField wireField : wireFields) {
+            final Map<String, TypedValue<?>> flattenedField = wireField.flatten();
+            allFlattenedFields.putAll(flattenedField);
+        }
+
+        Connection connection = null;
+        PreparedStatement stmt = null;
         try {
-            // check for the table that would collect the data of this emitter
-            final String catalog = conn.getCatalog();
-            final DatabaseMetaData dbMetaData = conn.getMetaData();
-            final ResultSet rsTbls = dbMetaData.getTables(catalog, null, sqlTableName, null);
-            if (!rsTbls.next()) {
-                // table does not exist, create it
-                s_logger.info(s_message.creatingTable(sqlTableName));
-                this.dbHelper.execute(MessageFormat.format(SQL_CREATE_TABLE, sqlTableName));
-            }
+            connection = this.dbHelper.getConnection();
+            stmt = prepareStatement(connection, tableName, allFlattenedFields, wireRecord.getTimestamp().getTime());
+            stmt.execute();
+            connection.commit();
+            logger.info(message.stored());
+        } catch (final SQLException e) {
+            this.dbHelper.rollback(connection);
+            throw e;
         } finally {
-            this.dbHelper.close(conn);
+            this.dbHelper.close(stmt);
+            this.dbHelper.close(connection);
         }
     }
 
-    /**
-     * Schedule truncation of tables containing wire records
-     */
-    private void scheduleTruncation() {
-        final int cleanUpRate = this.options.getPeriodicCleanupRate();
-        final int noOfRecordsToKeep = this.options.getNoOfRecordsToKeep();
-        // Cancel the current refresh view handle
-        if (this.tickHandle != null) {
-            this.tickHandle.cancel(true);
-        }
-        // schedule the truncation of collected wire records
-        if (cleanUpRate != 0) {
-            this.tickHandle = this.executorService.schedule(new Runnable() {
+    private PreparedStatement prepareStatement(Connection connection, String tableName,
+            final Map<String, TypedValue<?>> allFlattenedFields, long timestamp) throws SQLException {
 
-                /** {@inheritDoc} */
-                @Override
-                public void run() {
-                    DbWireRecordStore.this.clear(noOfRecordsToKeep);
-                }
-            }, cleanUpRate, TimeUnit.SECONDS);
-        }
-    }
+        final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
+        final StringBuilder sbCols = new StringBuilder();
+        final StringBuilder sbVals = new StringBuilder();
 
-    /**
-     * Stores the provided wire record in the database
-     *
-     * @param wireRecord
-     *            the wire record to be stored
-     * @throws NullPointerException
-     *             if the provided argument is null
-     */
-    private void store(final WireRecord wireRecord) {
-        requireNonNull(wireRecord, s_message.wireRecordNonNull());
-        boolean inserted = false;
-        int retryCount = 0;
-        final String tableName = this.options.getTableName();
-        do {
-            try {
-                this.insertDataRecord(tableName, wireRecord);
-                inserted = true;
-            } catch (final SQLException e) {
-                s_logger.error(s_message.insertionFailed() + ThrowableUtil.stackTraceAsString(e));
-                try {
-                    if ((tableName != null) && (!tableName.isEmpty())) {
-                        retryCount++;
-                        this.reconcileTable(tableName);
-                        this.reconcileColumns(tableName, wireRecord);
-                    }
-                } catch (final SQLException ee) {
-                    s_logger.error(s_message.errorStoring() + ee);
-                }
+        // add the timestamp
+        sbCols.append("TIMESTAMP");
+        sbVals.append("?");
+
+        int i = 2;
+        for (Entry<String, TypedValue<?>> entry : allFlattenedFields.entrySet()) {
+            final String sqlColName = this.dbHelper.sanitizeSqlTableAndColumnName(entry.getKey());
+            sbCols.append(", " + sqlColName);
+            sbVals.append(", ?");
+        }
+
+        logger.info(message.storingRecord(sqlTableName));
+        final String sqlInsert = MessageFormat.format(SQL_INSERT_RECORD, sqlTableName, sbCols.toString(),
+                sbVals.toString());
+        final PreparedStatement stmt = connection.prepareStatement(sqlInsert);
+        stmt.setLong(1, timestamp); // TODO: Missing position
+
+        for (Entry<String, TypedValue<?>> entry : allFlattenedFields.entrySet()) {
+            final DataType dataType = entry.getValue().getType();
+            final Object value = entry.getValue();
+            switch (dataType) {
+            case BOOLEAN:
+                logger.info(message.storeBoolean(((BooleanValue) value).getValue()));
+                stmt.setBoolean(i, ((BooleanValue) value).getValue());
+                break;
+            case BYTE:
+                logger.info(message.storeByte(((ByteValue) value).getValue()));
+                stmt.setByte(i, ((ByteValue) value).getValue());
+                break;
+            case DOUBLE:
+                logger.info(message.storeDouble(((DoubleValue) value).getValue()));
+                stmt.setDouble(i, ((DoubleValue) value).getValue());
+                break;
+            case INTEGER:
+                logger.info(message.storeInteger(((IntegerValue) value).getValue()));
+                stmt.setInt(i, ((IntegerValue) value).getValue());
+                break;
+            case LONG:
+                logger.info(message.storelong(((LongValue) value).getValue()));
+                stmt.setLong(i, ((LongValue) value).getValue());
+                break;
+            case BYTE_ARRAY:
+                logger.info(message.storeByteArray(Arrays.toString(((ByteArrayValue) value).getValue())));
+                stmt.setBytes(i, ((ByteArrayValue) value).getValue());
+                break;
+            case SHORT:
+                logger.info(message.storeShort(((ShortValue) value).getValue()));
+                stmt.setShort(i, ((ShortValue) value).getValue());
+                break;
+            case STRING:
+                logger.info(message.storeString(((StringValue) value).getValue()));
+                stmt.setString(i, ((StringValue) value).getValue());
+                break;
+            case ERROR:
+                logger.info(message.storeString(((ErrorValue) value).getValue()));
+                stmt.setString(i, ((ErrorValue) value).getValue());
+                break;
+            default:
+                break;
             }
-        } while (!inserted && (retryCount < 2));
-    }
-
-    /**
-     * Unbinds the DB service.
-     *
-     * @param dbService
-     *            the DB service
-     */
-    public synchronized void unbindDbService(final DbService dbService) {
-        if (this.dbService == dbService) {
-            this.dbService = null;
+            i++;
         }
+        return stmt;
     }
 
-    /**
-     * Unbinds the Wire Helper Service.
-     *
-     * @param wireHelperService
-     *            the new Wire Helper Service
-     */
-    public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
-        if (this.wireHelperService == wireHelperService) {
-            this.wireHelperService = null;
-        }
+    /** {@inheritDoc} */
+    @Override
+    public Object polled(final Wire wire) {
+        return this.wireSupport.polled(wire);
     }
 
-    /**
-     * OSGi Service Component callback for updating.
-     *
-     * @param properties
-     *            the updated service component properties
-     */
-    public synchronized void updated(final Map<String, Object> properties) {
-        s_logger.debug(s_message.updatingStore() + properties);
-        this.options = new DbWireRecordStoreOptions(properties);
-        this.scheduleTruncation();
-        s_logger.debug(s_message.updatingStoreDone());
+    /** {@inheritDoc} */
+    @Override
+    public void producersConnected(final Wire[] wires) {
+        this.wireSupport.producersConnected(wires);
     }
 
     /** {@inheritDoc} */

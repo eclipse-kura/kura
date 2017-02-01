@@ -1,13 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *  
  *******************************************************************************/
-
 package org.eclipse.kura.internal.wire.store;
 
 import static org.eclipse.kura.type.DataType.BOOLEAN;
@@ -37,7 +40,6 @@ public final class DbDataTypeMapper {
      */
     public static class JdbcType {
 
-        /** The JDBC type represented as integer. */
         private final int type;
 
         /** The JDBC type represented as string. */
@@ -106,9 +108,6 @@ public final class DbDataTypeMapper {
         jdbcTypeMap.put(Types.VARCHAR, DataType.STRING);
     }
 
-    /**
-     * Constructor
-     */
     private DbDataTypeMapper() {
         // Not needed
     }

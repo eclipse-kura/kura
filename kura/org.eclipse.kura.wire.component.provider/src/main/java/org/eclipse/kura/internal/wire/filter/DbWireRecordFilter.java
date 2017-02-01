@@ -1,11 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *  
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.filter;
 
@@ -68,23 +72,6 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
     }
 
     /**
-     * OSGi service component callback for deactivation
-     *
-     * @param componentContext
-     *            the component context
-     * @param properties
-     *            the properties
-     */
-    protected synchronized void activate(final ComponentContext componentContext,
-            final Map<String, Object> properties) {
-        logger.debug(message.activatingFilter());
-        this.options = new DbWireRecordFilterOptions(properties);
-        this.wireSupport = this.wireHelperService.newWireSupport(this);
-        scheduleRefresh();
-        logger.debug(message.activatingFilterDone());
-    }
-
-    /**
      * Binds the DB service.
      *
      * @param dbService
@@ -108,10 +95,82 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
         }
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void consumersConnected(final Wire[] wires) {
-        this.wireSupport.consumersConnected(wires);
+    /**
+     * Unbinds DB service.
+     *
+     * @param dbService
+     *            the DB service
+     */
+    public synchronized void unbindDbService(final DbService dbService) {
+        if (this.dbService == dbService) {
+            this.dbService = null;
+        }
+    }
+
+    /**
+     * Unbinds the Wire Helper Service.
+     *
+     * @param wireHelperService
+     *            the new Wire Helper Service
+     */
+    public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
+        if (this.wireHelperService == wireHelperService) {
+            this.wireHelperService = null;
+        }
+    }
+
+    /**
+     * OSGi service component callback for deactivation
+     *
+     * @param componentContext
+     *            the component context
+     * @param properties
+     *            the properties
+     */
+    protected synchronized void activate(final ComponentContext componentContext,
+            final Map<String, Object> properties) {
+        logger.debug(message.activatingFilter());
+        this.options = new DbWireRecordFilterOptions(properties);
+        this.wireSupport = this.wireHelperService.newWireSupport(this);
+        scheduleRefresh();
+        logger.debug(message.activatingFilterDone());
+    }
+
+    /**
+     * OSGi service component callback for updating
+     *
+     * @param properties
+     *            the updated properties
+     */
+    public synchronized void updated(final Map<String, Object> properties) {
+        logger.debug(message.updatingFilter() + properties);
+        this.options = new DbWireRecordFilterOptions(properties);
+        scheduleRefresh();
+        logger.debug(message.updatingFilterDone());
+    }
+
+    /**
+     * Schedule refresh of SQL view operation
+     */
+    private void scheduleRefresh() {
+        final int refreshRate = this.options.getRefreshRate();
+        this.cache.setRefreshDuration(refreshRate);
+        this.cache.setCapacity(this.options.getCacheCapacity());
+        // Cancel the current refresh view handle
+        if (this.tickHandle != null) {
+            this.tickHandle.cancel(true);
+        }
+        // schedule the new refresh view
+        if (refreshRate != 0) {
+            this.tickHandle = this.executorService.schedule(new Runnable() {
+
+                /** {@inheritDoc} */
+                @Override
+                public void run() {
+                    DbWireRecordFilter.this.cache.put(System.currentTimeMillis(), DbWireRecordFilter.this.filter());
+                }
+            }, refreshRate, TimeUnit.SECONDS);
+        }
     }
 
     /**
@@ -129,6 +188,12 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
         logger.debug(message.deactivatingFilterDone());
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public void consumersConnected(final Wire[] wires) {
+        this.wireSupport.consumersConnected(wires);
+    }
+
     /**
      * Filters the database records based on the provided query
      *
@@ -142,35 +207,6 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
             logger.error(message.errorFiltering() + ThrowableUtil.stackTraceAsString(e));
         }
         return null;
-    }
-
-    /**
-     * Trigger emitting data as soon as new wire envelope is received. This
-     * retrieves the last updated value from the cache if the time difference
-     * between the current time and the last cache updated time is less than the
-     * configured cache interval. If it is more than the aforementioned time
-     * difference, then retrieve the value from the cache using current time as
-     * a key. This will actually result in a cache miss. Every cache miss will
-     * internally be handled by {@link WireRecordCache} in such a way that
-     * whenever a cache miss occurs it will load the value from the DB.
-     */
-    @Override
-    public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {
-        requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
-        logger.debug(message.wireEnvelopeReceived() + wireEnvelope);
-        this.wireSupport.emit(this.cache.get(this.cache.getLastRefreshedTime().getTimeInMillis()));
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Object polled(final Wire wire) {
-        return this.wireSupport.polled(wire);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void producersConnected(final Wire[] wires) {
-        this.wireSupport.producersConnected(wires);
     }
 
     /**
@@ -257,64 +293,32 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
     }
 
     /**
-     * Schedule refresh of SQL view operation
+     * Trigger emitting data as soon as new wire envelope is received. This
+     * retrieves the last updated value from the cache if the time difference
+     * between the current time and the last cache updated time is less than the
+     * configured cache interval. If it is more than the aforementioned time
+     * difference, then retrieve the value from the cache using current time as
+     * a key. This will actually result in a cache miss. Every cache miss will
+     * internally be handled by {@link WireRecordCache} in such a way that
+     * whenever a cache miss occurs it will load the value from the DB.
      */
-    private void scheduleRefresh() {
-        final int refreshRate = this.options.getRefreshRate();
-        this.cache.setRefreshDuration(refreshRate);
-        this.cache.setCapacity(this.options.getCacheCapacity());
-        // Cancel the current refresh view handle
-        if (this.tickHandle != null) {
-            this.tickHandle.cancel(true);
-        }
-        // schedule the new refresh view
-        if (refreshRate != 0) {
-            this.tickHandle = this.executorService.schedule(new Runnable() {
-
-                /** {@inheritDoc} */
-                @Override
-                public void run() {
-                    DbWireRecordFilter.this.cache.put(System.currentTimeMillis(), DbWireRecordFilter.this.filter());
-                }
-            }, refreshRate, TimeUnit.SECONDS);
-        }
+    @Override
+    public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {
+        requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
+        logger.debug(message.wireEnvelopeReceived() + wireEnvelope);
+        this.wireSupport.emit(this.cache.get(this.cache.getLastRefreshedTime().getTimeInMillis()));
     }
 
-    /**
-     * Unbinds DB service.
-     *
-     * @param dbService
-     *            the DB service
-     */
-    public synchronized void unbindDbService(final DbService dbService) {
-        if (this.dbService == dbService) {
-            this.dbService = null;
-        }
+    /** {@inheritDoc} */
+    @Override
+    public Object polled(final Wire wire) {
+        return this.wireSupport.polled(wire);
     }
 
-    /**
-     * Unbinds the Wire Helper Service.
-     *
-     * @param wireHelperService
-     *            the new Wire Helper Service
-     */
-    public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
-        if (this.wireHelperService == wireHelperService) {
-            this.wireHelperService = null;
-        }
-    }
-
-    /**
-     * OSGi service component callback for updating
-     *
-     * @param properties
-     *            the updated properties
-     */
-    public synchronized void updated(final Map<String, Object> properties) {
-        logger.debug(message.updatingFilter() + properties);
-        this.options = new DbWireRecordFilterOptions(properties);
-        scheduleRefresh();
-        logger.debug(message.updatingFilterDone());
+    /** {@inheritDoc} */
+    @Override
+    public void producersConnected(final Wire[] wires) {
+        this.wireSupport.producersConnected(wires);
     }
 
     /** {@inheritDoc} */

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,8 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat - Fixes and cleanups
- *          - Allow the use of text boxed and text areas
+ *     Red Hat 
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
@@ -63,9 +62,9 @@ public abstract class AbstractServicesUi extends Composite {
 
     protected static final Messages MSGS = GWT.create(Messages.class);
 
-    protected GwtConfigComponent m_configurableComponent;
+    protected GwtConfigComponent configurableComponent;
 
-    protected HashMap<String, Boolean> valid = new HashMap<String, Boolean>();
+    protected HashMap<String, Boolean> valid = new HashMap<>();
 
     protected abstract void setDirty(boolean flag);
 
@@ -218,7 +217,6 @@ public abstract class AbstractServicesUi extends Composite {
                 return 0;
             }
         });
-        // textBox.validate();
     }
 
     private TextBoxBase createTextBox(final GwtConfigParameter param) {
@@ -475,7 +473,7 @@ public abstract class AbstractServicesUi extends Composite {
         group.setValidationState(ValidationState.NONE);
         this.valid.put(param.getName(), true);
 
-        List<EditorError> result = new ArrayList<EditorError>();
+        List<EditorError> result = new ArrayList<>();
 
         if (param.isRequired() && (box.getText().trim() == null || "".equals(box.getText().trim()))) {
             this.valid.put(param.getId(), false);
@@ -612,13 +610,13 @@ public abstract class AbstractServicesUi extends Composite {
 
     protected void fillUpdatedConfiguration(FormGroup fg) {
         GwtConfigParameter param = new GwtConfigParameter();
-        List<String> multiFieldValues = new ArrayList<String>();
+        List<String> multiFieldValues = new ArrayList<>();
         int fgwCount = fg.getWidgetCount();
         for (int i = 0; i < fgwCount; i++) {
             logger.fine("Widget: " + fg.getClass());
 
             if (fg.getWidget(i) instanceof FormLabel) {
-                param = this.m_configurableComponent.getParameter(fg.getWidget(i).getTitle());
+                param = this.configurableComponent.getParameter(fg.getWidget(i).getTitle());
                 logger.fine("Param: " + fg.getTitle() + " -> " + param);
 
             } else if (fg.getWidget(i) instanceof ListBox || fg.getWidget(i) instanceof Input
@@ -645,22 +643,22 @@ public abstract class AbstractServicesUi extends Composite {
     }
 
     protected void restoreConfiguration(GwtConfigComponent originalConfig) {
-        this.m_configurableComponent = new GwtConfigComponent();
-        this.m_configurableComponent.setComponentDescription(originalConfig.getComponentDescription());
-        this.m_configurableComponent.setComponentIcon(originalConfig.getComponentIcon());
-        this.m_configurableComponent.setComponentId(originalConfig.getComponentId());
-        this.m_configurableComponent.setComponentName(originalConfig.getComponentName());
+        this.configurableComponent = new GwtConfigComponent();
+        this.configurableComponent.setComponentDescription(originalConfig.getComponentDescription());
+        this.configurableComponent.setComponentIcon(originalConfig.getComponentIcon());
+        this.configurableComponent.setComponentId(originalConfig.getComponentId());
+        this.configurableComponent.setComponentName(originalConfig.getComponentName());
 
-        List<GwtConfigParameter> originalParameters = new ArrayList<GwtConfigParameter>();
+        List<GwtConfigParameter> originalParameters = new ArrayList<>();
         for (GwtConfigParameter parameter : originalConfig.getParameters()) {
             GwtConfigParameter tempParam = new GwtConfigParameter(parameter);
             originalParameters.add(tempParam);
         }
-        this.m_configurableComponent.setParameters(originalParameters);
+        this.configurableComponent.setParameters(originalParameters);
 
-        Map<String, Object> originalProperties = new HashMap<String, Object>();
+        Map<String, Object> originalProperties = new HashMap<>();
         originalProperties.putAll(originalConfig.getProperties());
-        this.m_configurableComponent.setProperties(originalProperties);
+        this.configurableComponent.setProperties(originalProperties);
     }
 
     private String getUpdatedFieldConfiguration(GwtConfigParameter param, Widget wg) {

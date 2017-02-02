@@ -1,11 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *  
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
@@ -63,9 +67,9 @@ public class ServicesAnchorListItem extends AnchorListItem {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (ServicesAnchorListItem.this.ui.selected != null
-                        && ServicesAnchorListItem.this.ui.selected != ServicesAnchorListItem.this.item
-                        && ServicesAnchorListItem.this.ui.servicesUi.isDirty()
+                if (ServicesAnchorListItem.this.ui.getSelected() != null
+                        && ServicesAnchorListItem.this.ui.getSelected() != ServicesAnchorListItem.this.item
+                        && ServicesAnchorListItem.this.ui.isServicesUiDirty()
                         || ServicesAnchorListItem.this.ui.isNetworkDirty()
                         || ServicesAnchorListItem.this.ui.isFirewallDirty()
                         || ServicesAnchorListItem.this.ui.isSettingsDirty()) {
@@ -85,7 +89,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
                         @Override
                         public void onClick(ClickEvent event) {
                             ServicesAnchorListItem.this.ui.setDirty(false);
-                            ServicesAnchorListItem.this.ui.selected = ServicesAnchorListItem.this.item;
+                            ServicesAnchorListItem.this.ui.setSelected(ServicesAnchorListItem.this.item);
                             modal.hide();
                             ServicesAnchorListItem.this.ui.render(ServicesAnchorListItem.this.item);
                         }
@@ -102,7 +106,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
                     modal.show();
 
                 } else {
-                    ServicesAnchorListItem.this.ui.selected = ServicesAnchorListItem.this.item;
+                    ServicesAnchorListItem.this.ui.setSelected(ServicesAnchorListItem.this.item);
                     ServicesAnchorListItem.this.ui.setSelectedAnchorListItem(ServicesAnchorListItem.this);
                     ServicesAnchorListItem.this.ui.render(ServicesAnchorListItem.this.item);
                 }
@@ -151,9 +155,9 @@ public class ServicesAnchorListItem extends AnchorListItem {
         String icon = this.item.getComponentIcon();
         String componentId = this.item.getComponentId();
         if (icon != null && (icon.toLowerCase().startsWith("http://") || icon.toLowerCase().startsWith("https://"))
-                && isImagePath(icon)) { // Util.isImagePath(icon)
+                && isImagePath(icon)) {
             return icon;
-        } else if (icon != null && isImagePath(icon)) { // Util.isImagePath(icon)
+        } else if (icon != null && isImagePath(icon)) {
             return SERVLET_URL + componentId;
         } else {
             return null;

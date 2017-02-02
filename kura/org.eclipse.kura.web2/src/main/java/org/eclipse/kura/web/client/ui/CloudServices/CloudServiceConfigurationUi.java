@@ -132,7 +132,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
     @Override
     protected void renderForm() {
         this.connectionEditFields.clear();
-        for (GwtConfigParameter param : this.m_configurableComponent.getParameters()) {
+        for (GwtConfigParameter param : this.configurableComponent.getParameters()) {
             if (param.getCardinality() == 0 || param.getCardinality() == 1 || param.getCardinality() == -1) {
                 FormGroup formGroup = new FormGroup();
                 renderConfigParameter(param, true, formGroup);
@@ -178,13 +178,26 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                 this.modal.add(header);
 
                 ModalBody body = new ModalBody();
-                body.add(new Span(MSGS.deviceConfigConfirmation(this.m_configurableComponent.getComponentName())));
+                body.add(new Span(MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName())));
                 this.modal.add(body);
 
                 ModalFooter footer = new ModalFooter();
                 ButtonGroup group = new ButtonGroup();
+                Button no = new Button();
+                no.setText(MSGS.noButton());
+                no.addStyleName("fa fa-times");
+                no.addClickHandler(new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        CloudServiceConfigurationUi.this.modal.hide();
+                    }
+                });
+                group.add(no);
+
                 Button yes = new Button();
                 yes.setText(MSGS.yesButton());
+                yes.addStyleName("fa fa-check");
                 yes.addClickHandler(new ClickHandler() {
 
                     @Override
@@ -209,7 +222,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                             @Override
                             public void onSuccess(GwtXSRFToken token) {
                                 CloudServiceConfigurationUi.this.gwtComponentService.updateComponentConfiguration(token,
-                                        CloudServiceConfigurationUi.this.m_configurableComponent,
+                                        CloudServiceConfigurationUi.this.configurableComponent,
                                         new AsyncCallback<Void>() {
 
                                     @Override
@@ -229,7 +242,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                                         CloudServiceConfigurationUi.this.applyConnectionEdit.setEnabled(false);
                                         CloudServiceConfigurationUi.this.resetConnectionEdit.setEnabled(false);
                                         setDirty(false);
-                                        originalConfig = CloudServiceConfigurationUi.this.m_configurableComponent;
+                                        originalConfig = CloudServiceConfigurationUi.this.configurableComponent;
                                         EntryClassUi.hideWaitModal();
                                     }
                                 });
@@ -239,16 +252,6 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                     }
                 });
                 group.add(yes);
-                Button no = new Button();
-                no.setText(MSGS.noButton());
-                no.addClickHandler(new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        CloudServiceConfigurationUi.this.modal.hide();
-                    }
-                });
-                group.add(no);
                 footer.add(group);
                 this.modal.add(footer);
                 this.modal.show();
@@ -268,7 +271,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                 fillUpdatedConfiguration(fg);
             }
         }
-        return this.m_configurableComponent;
+        return this.configurableComponent;
     }
 
     private void showDirtyModal() {
@@ -284,8 +287,22 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
 
         ModalFooter footer = new ModalFooter();
         ButtonGroup group = new ButtonGroup();
+
+        Button no = new Button();
+        no.setText(MSGS.noButton());
+        no.addStyleName("fa fa-times");
+        no.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                CloudServiceConfigurationUi.this.modal.hide();
+            }
+        });
+        group.add(no);
+
         Button yes = new Button();
         yes.setText(MSGS.yesButton());
+        yes.addStyleName("fa fa-check");
         yes.addClickHandler(new ClickHandler() {
 
             @Override
@@ -295,16 +312,6 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
             }
         });
         group.add(yes);
-        Button no = new Button();
-        no.setText(MSGS.noButton());
-        no.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                CloudServiceConfigurationUi.this.modal.hide();
-            }
-        });
-        group.add(no);
         footer.add(group);
         this.modal.add(footer);
         this.modal.show();

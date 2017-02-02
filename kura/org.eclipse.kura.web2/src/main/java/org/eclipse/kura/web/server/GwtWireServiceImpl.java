@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.asset.AssetConstants;
 import org.eclipse.kura.asset.provider.BaseChannelDescriptor;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -543,4 +544,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         return this.getWiresConfigurationInternal();
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public String getDriverPidProp() {
+        return AssetConstants.ASSET_DRIVER_PROP.value();
+    }
 }

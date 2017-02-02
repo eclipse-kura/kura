@@ -1,11 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *
  *******************************************************************************/
 package org.eclipse.kura.web.shared.service;
 
@@ -108,4 +112,10 @@ public interface GwtWireService extends RemoteService {
     public GwtWiresConfiguration updateWireConfiguration(GwtXSRFToken xsrfToken, String newJsonConfiguration,
             Map<String, GwtConfigComponent> configurations) throws GwtKuraException;
 
+    /**
+     * Returns the Driver Pid property as specified in {@link org.eclipse.kura.asset.AssetConstants}
+     * 
+     * @return String representing the {@link org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP}
+     */
+    public String getDriverPidProp();
 }

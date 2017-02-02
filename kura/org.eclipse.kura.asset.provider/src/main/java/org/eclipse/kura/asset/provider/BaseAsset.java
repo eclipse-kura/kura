@@ -650,7 +650,6 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             }
             channelConfiguration.put(CHANNEL_ID.value(), assetRecord.getChannelId());
             driverRecord.setChannelConfig(channelConfiguration);
-            driverRecords.add(driverRecord);
 
             final TypedValue<?> value = assetRecord.getValue();
             if (value != null) {

@@ -269,6 +269,11 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
+                            <id>org.eclipse.kura.wire.helper.provider</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
                             <id>org.eclipse.kura.emulator</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
@@ -496,6 +501,11 @@
                             <requirement>
                                 <type>eclipse-plugin</type>
                                 <id>org.eclipse.kura.core.status</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.wire.helper.provider</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                             <requirement>

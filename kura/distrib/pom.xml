@@ -353,6 +353,11 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.wire.helper.provider</artifactId>
+									<version>${org.eclipse.kura.wire.helper.provider.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.wire.provider</artifactId>
 									<version>${org.eclipse.kura.wire.provider.version}</version>
 								</artifactItem>
@@ -485,6 +490,7 @@
   								<move file="target/plugins/org.eclipse.kura.example.camel.aggregation.jar" tofile="target/plugins/org.eclipse.kura.example.camel.aggregation_${org.eclipse.kura.example.camel.aggregation.version}.jar" failonerror="false"/>
 								<move file="target/plugins/org.eclipse.kura.example.camel.quickstart.jar" tofile="target/plugins/org.eclipse.kura.example.camel.quickstart_${org.eclipse.kura.example.camel.quickstart.version}.jar" failonerror="false"/>
 							    <move file="target/plugins/org.eclipse.kura.wire.component.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.wire.helper.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.helper.provider_${org.eclipse.kura.wire.helper.provider.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.wire.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar"/>
 							</tasks>
 						</configuration>

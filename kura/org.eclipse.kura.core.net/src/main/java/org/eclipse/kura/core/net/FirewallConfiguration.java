@@ -49,16 +49,16 @@ public class FirewallConfiguration {
         String[] astr = null;
         if (properties.containsKey(OPEN_PORTS_PROP_NAME)) {
             str = (String) properties.get(OPEN_PORTS_PROP_NAME);
-            astr = str.split(";");
-            if (astr.length > 0) {
+            if (!str.isEmpty()) {
+                astr = str.split(";");
                 for (String sop : astr) {
                     try {
                         String[] sa = sop.split(",");
-                        if (sa.length >= 7) {
+                        if ((sa.length == 8) && sa[7].equals("#")) {
                             NetProtocol protocol = NetProtocol.valueOf(sa[1]);
                             String permittedNetwork = sa[2];
                             short permittedNetworkMask = 0;
-                            if (permittedNetwork != null && !permittedNetwork.isEmpty()) {
+                            if (!permittedNetwork.isEmpty()) {
                                 permittedNetwork = sa[2].split("/")[0];
                                 permittedNetworkMask = Short.parseShort(sa[2].split("/")[1]);
                             }
@@ -106,14 +106,20 @@ public class FirewallConfiguration {
         }
         if (properties.containsKey(PORT_FORWARDING_PROP_NAME)) {
             str = (String) properties.get(PORT_FORWARDING_PROP_NAME);
-            astr = str.split(";");
-            if (astr.length > 0) {
+            if (!str.isEmpty()) {
+                astr = str.split(";");
                 for (String sop : astr) {
                     try {
                         String[] sa = sop.split(",");
-                        if (sa.length >= 10) {
-                            String inboundIface = sa[0];
-                            String outboundIface = sa[1];
+                        if ((sa.length == 11) && sa[10].equals("#")) {
+                            String inboundIface = null;
+                            if (!sa[0].isEmpty()) {
+                            	inboundIface = sa[0];
+                            }
+                            String outboundIface = null;
+                            if (!sa[1].isEmpty()) {
+                            	outboundIface = sa[1];
+                            }
                             IP4Address address = (IP4Address) IPAddress.parseHostAddress(sa[2]);
                             NetProtocol protocol = NetProtocol.valueOf(sa[3]);
                             int inPort = Integer.parseInt(sa[4]);
@@ -149,14 +155,23 @@ public class FirewallConfiguration {
         }
         if (properties.containsKey(NAT_PROP_NAME)) {
             str = (String) properties.get(NAT_PROP_NAME);
-            astr = str.split(";");
-            if (astr.length > 0) {
+            if (!str.isEmpty()) {
+                astr = str.split(";");
                 for (String sop : astr) {
                     String[] sa = sop.split(",");
-                    if (sa.length >= 7) {
-                        String srcIface = sa[0];
-                        String dstIface = sa[1];
-                        String protocol = sa[2];
+                    if ((sa.length == 7) && sa[6].equals("#")) {
+                        String srcIface = null;
+                        if (!sa[0].isEmpty()) {
+                        	srcIface = sa[0];
+                        }
+                        String dstIface = null;
+                        if (!sa[1].isEmpty()) {
+                        	dstIface = sa[1];
+                        }
+                        String protocol = null;
+                        if (!sa[2].isEmpty()) {
+                        	protocol = sa[2];
+                        }
                         String src = null;
                         if (!sa[3].isEmpty()) {
                             src = sa[3];
@@ -238,7 +253,10 @@ public class FirewallConfiguration {
                 port = Integer.toString(openPortConfig.getPort());
             }
             sb.append(port).append(',');
-            sb.append(openPortConfig.getProtocol()).append(',');
+            if (openPortConfig.getProtocol() != null) {
+                sb.append(openPortConfig.getProtocol());
+            }
+            sb.append(',');
             if (openPortConfig.getPermittedNetwork() != null) {
                 sb.append(openPortConfig.getPermittedNetwork());
             }

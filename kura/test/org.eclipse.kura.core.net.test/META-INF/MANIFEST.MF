@@ -9,6 +9,9 @@ Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
 Import-Package: org.junit;version="4.12.0",
  org.junit.runners;version="4.12.0",
- org.slf4j;version="1.6.4"
+ org.slf4j;version="1.6.4",
+ org.eclipse.kura.core.testutil,
+ org.mockito;version="1.10.19",
+ org.mockito.invocation;version="1.10.19",
+ org.mockito.stubbing;version="1.10.19"
 Fragment-Host: org.eclipse.kura.core.net;bundle-version="1.0.11"
-

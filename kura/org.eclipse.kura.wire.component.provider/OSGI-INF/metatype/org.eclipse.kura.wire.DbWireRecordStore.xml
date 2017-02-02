@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2016 Eurotech and/or its affiliates and others
+    Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -17,7 +17,7 @@
             type="String"
             cardinality="0"
             required="true"
-            default="data"
+            default="WR_data"
             description="The name of the table to be created and all the operations will be performed on it"/>   
         
         <AD id="periodic.cleanup"

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2016 Eurotech and/or its affiliates and others
+    Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -17,7 +17,7 @@
         	type="String"
         	cardinality="0"
         	required="true"
-        	default="SELECT * FROM &quot;WR_data&quot;;"
+        	default="SELECT * FROM &quot;WR_data&quot; LIMIT 10;"
         	description="SQL to be executed to build a view">
         </AD>
         
@@ -27,8 +27,8 @@
         	cardinality="0"
         	required="true"
         	default="60"
-        	min="1"
-        	description="This denotes the allowed interval (in seconds) for which the cache data will be retrieved if time difference between the current time and the last cache updated time is more than this interval">
+        	min="0"
+        	description="This value specifies the cache validity in seconds. When cache expires, it will cause a new read in the database. A database read will be performed for every trigger received if the value is set to 0.">
         </AD>
     </OCD>
     

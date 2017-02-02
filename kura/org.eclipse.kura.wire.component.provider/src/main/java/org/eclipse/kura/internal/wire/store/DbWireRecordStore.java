@@ -73,8 +73,6 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 
     private static final String DATA_TYPE = "DATA_TYPE";
 
-    public static final String TABLE_NAME_PREFIX = "WR_";
-
     private static final Logger logger = LoggerFactory.getLogger(DbWireRecordStore.class);
 
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
@@ -369,7 +367,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
             conn = this.dbHelper.getConnection();
             final String catalog = conn.getCatalog();
             final DatabaseMetaData dbMetaData = conn.getMetaData();
-            rsColumns = dbMetaData.getColumns(catalog, null, TABLE_NAME_PREFIX + sqlTableName, null);
+            rsColumns = dbMetaData.getColumns(catalog, null, sqlTableName, null);
             // map the columns
             while (rsColumns.next()) {
                 final String colName = rsColumns.getString(COLUMN_NAME);

@@ -9,12 +9,11 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.store;
 
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.internal.wire.store.DbWireRecordStore.TABLE_NAME_PREFIX;
 
 import java.util.Map;
 
@@ -87,6 +86,6 @@ final class DbWireRecordStoreOptions {
         if (name != null && name instanceof String) {
             tableName = name.toString();
         }
-        return TABLE_NAME_PREFIX + tableName;
+        return tableName;
     }
 }

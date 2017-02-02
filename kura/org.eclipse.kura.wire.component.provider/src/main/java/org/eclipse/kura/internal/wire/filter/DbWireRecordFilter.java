@@ -47,7 +47,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The Class DbWireRecordFilter is responsible for representing a wire component
- * which is mainly used to filter records as received from the wire record
+ * which is focused on performing an user defined SQL query in a database table and emitting the result as a Wire
+ * Envelope.
  */
 public final class DbWireRecordFilter implements WireEmitter, WireReceiver, ConfigurableComponent {
 
@@ -178,9 +179,6 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
         this.wireSupport.consumersConnected(wires);
     }
 
-    /**
-     * Refreshes the SQL view
-     */
     private List<WireRecord> refreshSQLView() throws SQLException {
         final List<WireRecord> dataRecords = new ArrayList<>();
 
@@ -257,14 +255,11 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
     }
 
     /**
-     * Trigger emitting data as soon as new wire envelope is received. This
-     * retrieves the last updated value from the cache if the time difference
-     * between the current time and the last cache updated time is less than the
-     * configured cache interval. If it is more than the aforementioned time
-     * difference, then retrieve the value from the cache using current time as
-     * a key. This will actually result in a cache miss. Every cache miss will
-     * internally be handled by {@link WireRecordCache} in such a way that
-     * whenever a cache miss occurs it will load the value from the DB.
+     * Trigger emitting data as soon as new wire envelope is received. The component caches the last database read and
+     * provides, as output, this value until the cache validity is not expired. Otherwise, a new database read is
+     * performed, and the value is kept in the {@link #lastRecords} field.
+     * The cache validity is determined by the {@link DbWireRecordFilterOptions#CONF_CACHE_EXPIRATION_INTERVAL} property
+     * provided by the user in the component configuration.
      */
     @Override
     public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {

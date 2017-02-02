@@ -742,14 +742,20 @@ public class EntryClassUi extends Composite {
             this.modal.add(body);
 
             ModalFooter footer = new ModalFooter();
-            footer.add(b);
-            footer.add(new Button(MSGS.noButton(), new ClickHandler() {
+            Button no = new Button();
+            no.setText(MSGS.noButton());
+            no.addStyleName("fa fa-times");
+            no.addClickHandler(new ClickHandler() {
 
                 @Override
                 public void onClick(ClickEvent event) {
                     EntryClassUi.this.modal.hide();
                 }
-            }));
+            });
+            footer.add(no);
+
+            b.addStyleName("fa fa-check");
+            footer.add(b);
             this.modal.add(footer);
             this.modal.show();
 

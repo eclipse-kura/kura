@@ -183,8 +183,21 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
 
                 ModalFooter footer = new ModalFooter();
                 ButtonGroup group = new ButtonGroup();
+                Button no = new Button();
+                no.setText(MSGS.noButton());
+                no.addStyleName("fa fa-times");
+                no.addClickHandler(new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        CloudServiceConfigurationUi.this.modal.hide();
+                    }
+                });
+                group.add(no);
+
                 Button yes = new Button();
                 yes.setText(MSGS.yesButton());
+                yes.addStyleName("fa fa-check");
                 yes.addClickHandler(new ClickHandler() {
 
                     @Override
@@ -239,16 +252,6 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                     }
                 });
                 group.add(yes);
-                Button no = new Button();
-                no.setText(MSGS.noButton());
-                no.addClickHandler(new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        CloudServiceConfigurationUi.this.modal.hide();
-                    }
-                });
-                group.add(no);
                 footer.add(group);
                 this.modal.add(footer);
                 this.modal.show();
@@ -284,8 +287,22 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
 
         ModalFooter footer = new ModalFooter();
         ButtonGroup group = new ButtonGroup();
+
+        Button no = new Button();
+        no.setText(MSGS.noButton());
+        no.addStyleName("fa fa-times");
+        no.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                CloudServiceConfigurationUi.this.modal.hide();
+            }
+        });
+        group.add(no);
+
         Button yes = new Button();
         yes.setText(MSGS.yesButton());
+        yes.addStyleName("fa fa-check");
         yes.addClickHandler(new ClickHandler() {
 
             @Override
@@ -295,16 +312,6 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
             }
         });
         group.add(yes);
-        Button no = new Button();
-        no.setText(MSGS.noButton());
-        no.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                CloudServiceConfigurationUi.this.modal.hide();
-            }
-        });
-        group.add(no);
         footer.add(group);
         this.modal.add(footer);
         this.modal.show();

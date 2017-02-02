@@ -11,6 +11,17 @@
     <OCD id="org.eclipse.kura.wire.Logger" 
          name="Logger" 
          description="A wire component which logs data as received from upstream connected Wire Components">
+         
+         <AD id="log.level"
+            name="log.level"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="INFO"
+            description="Specifies the logging level to be used to log the information contained in the received Wire Envelope">
+            <Option label="DEBUG" value="DEBUG" />
+            <Option label="INFO" value="INFO" />
+        </AD>
     </OCD>
     
     <Designate pid="org.eclipse.kura.wire.Logger" factoryPid="org.eclipse.kura.wire.Logger">

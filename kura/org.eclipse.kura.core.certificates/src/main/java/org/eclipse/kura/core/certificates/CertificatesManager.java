@@ -11,10 +11,15 @@
  *******************************************************************************/
 package org.eclipse.kura.core.certificates;
 
+import java.io.IOException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.util.Enumeration;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.certificate.CertificatesService;
 import org.eclipse.kura.crypto.CryptoService;
@@ -27,7 +32,7 @@ import org.slf4j.LoggerFactory;
 /*
  *
  */
-public final class CertificatesManager implements CertificatesService {
+public class CertificatesManager implements CertificatesService {
 
     private static final Logger s_logger = LoggerFactory.getLogger(CertificatesManager.class);
 
@@ -35,7 +40,7 @@ public final class CertificatesManager implements CertificatesService {
 
     public static final String APP_ID = "org.eclipse.kura.core.certificates.CertificatesManager";
 
-    private CryptoService m_cryptoService;
+    private CryptoService cryptoService;
 
     // ----------------------------------------------------------------
     //
@@ -44,11 +49,11 @@ public final class CertificatesManager implements CertificatesService {
     // ----------------------------------------------------------------
 
     public void setCryptoService(CryptoService cryptoService) {
-        this.m_cryptoService = cryptoService;
+        this.cryptoService = cryptoService;
     }
 
     public void unsetCryptoService(CryptoService cryptoService) {
-        this.m_cryptoService = null;
+        this.cryptoService = null;
     }
 
     // ----------------------------------------------------------------
@@ -67,11 +72,9 @@ public final class CertificatesManager implements CertificatesService {
 
     @Override
     public Certificate returnCertificate(String alias) throws KuraException {
-        KeyStore ks = null;
         try {
-            char[] keystorePassword = this.m_cryptoService.getKeyStorePassword(DEFAULT_KEYSTORE);
-            ks = KeyStoreManagement.loadKeyStore(keystorePassword);
-            return ks.getCertificate(alias);
+            char[] keystorePassword = this.cryptoService.getKeyStorePassword(DEFAULT_KEYSTORE);
+            return getCertificateFromKeyStore(keystorePassword, alias);
         } catch (Exception e) {
             throw KuraException.internalError("Error retrieving the certificate from the keystore");
         }
@@ -79,7 +82,7 @@ public final class CertificatesManager implements CertificatesService {
 
     @Override
     public void storeCertificate(Certificate arg1, String alias) throws KuraException {
-        return;
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
     }
 
     @Override
@@ -103,8 +106,8 @@ public final class CertificatesManager implements CertificatesService {
     }
 
     @Override
-    public void removeCertificate(String alias) {
-        return;
+    public void removeCertificate(String alias) throws KuraException {
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
     }
 
     @Override
@@ -112,12 +115,22 @@ public final class CertificatesManager implements CertificatesService {
         return true;
     }
 
+	protected Certificate getCertificateFromKeyStore(char[] keyStorePassword, String alias)
+			throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
+		KeyStore ks = KeyStoreManagement.loadKeyStore(keyStorePassword);
+		return ks.getCertificate(alias);
+	}
+
+	protected Enumeration<String> getAliasesFromKeyStore(char[] keyStorePassword)
+			throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
+		KeyStore ks = KeyStoreManagement.loadKeyStore(keyStorePassword);
+		return ks.aliases();
+	}
+
     private Enumeration<String> listStoredCertificatesAliases() {
-        KeyStore ks = null;
         try {
-            char[] keystorePassword = this.m_cryptoService.getKeyStorePassword(DEFAULT_KEYSTORE);
-            ks = KeyStoreManagement.loadKeyStore(keystorePassword);
-            return ks.aliases();
+            char[] keystorePassword = this.cryptoService.getKeyStorePassword(DEFAULT_KEYSTORE);
+            return getAliasesFromKeyStore(keystorePassword);
         } catch (Exception e) {
             return null;
         }

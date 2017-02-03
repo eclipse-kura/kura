@@ -6,11 +6,18 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.publisher;
 
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -67,89 +74,65 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
             implements ServiceTrackerCustomizer<CloudService, CloudService> {
 
         @Override
-        public CloudService addingService(ServiceReference<CloudService> reference) {
+        public CloudService addingService(final ServiceReference<CloudService> reference) {
             CloudPublisher.this.cloudService = CloudPublisher.this.bundleContext.getService(reference);
             try {
                 // recreate the Cloud Client
                 setupCloudClient();
-            } catch (KuraException e) {
+            } catch (final KuraException e) {
                 logger.error(message.cloudClientSetupProblem() + ThrowableUtil.stackTraceAsString(e));
             }
             return CloudPublisher.this.cloudService;
         }
 
+        /** {@inheritDoc} */
         @Override
-        public void modifiedService(ServiceReference<CloudService> reference, CloudService service) {
+        public void modifiedService(final ServiceReference<CloudService> reference, final CloudService service) {
             CloudPublisher.this.cloudService = CloudPublisher.this.bundleContext.getService(reference);
             try {
                 // recreate the Cloud Client
                 setupCloudClient();
-            } catch (KuraException e) {
+            } catch (final KuraException e) {
                 logger.error(message.cloudClientSetupProblem() + ThrowableUtil.stackTraceAsString(e));
             }
         }
 
+        /** {@inheritDoc} */
         @Override
-        public void removedService(ServiceReference<CloudService> reference, CloudService service) {
+        public void removedService(final ServiceReference<CloudService> reference, final CloudService service) {
             CloudPublisher.this.cloudService = null;
         }
     }
 
+    /** Logger instance */
     private static final Logger logger = LoggerFactory.getLogger(CloudPublisher.class);
 
+    /** Localization Resource */
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
+    /** OSGi Bundle Context */
     private BundleContext bundleContext;
 
-    private ServiceTrackerCustomizer<CloudService, CloudService> cloudServiceTrackerCustomizer;
-
-    private ServiceTracker<CloudService, CloudService> cloudServiceTracker;
-
-    private volatile CloudService cloudService;
-
+    /** Cloud Client reference */
     private CloudClient cloudClient;
 
+    /** Configurations Provider */
     private CloudPublisherOptions cloudPublisherOptions;
 
+    /** Cloud Service reference */
+    private volatile CloudService cloudService;
+
+    /** Service Tracker to track the injection of Cloud Service to this component */
+    private ServiceTracker<CloudService, CloudService> cloudServiceTracker;
+
+    /** Service Tracker Customizer to customize Cloud Service tracker */
+    private ServiceTrackerCustomizer<CloudService, CloudService> cloudServiceTrackerCustomizer;
+
+    /** Wire Helper Service reference */
     private volatile WireHelperService wireHelperService;
 
+    /** Wire Support instance to filter Wire Envelope */
     private WireSupport wireSupport;
-
-    // ----------------------------------------------------------------
-    //
-    // Dependencies
-    //
-    // ----------------------------------------------------------------
-
-    /**
-     * Binds the Wire Helper Service.
-     *
-     * @param wireHelperService
-     *            the new Wire Helper Service
-     */
-    public synchronized void bindWireHelperService(final WireHelperService wireHelperService) {
-        if (this.wireHelperService == null) {
-            this.wireHelperService = wireHelperService;
-        }
-    }
-
-    /**
-     * Unbinds the Wire Helper Service.
-     *
-     * @param wireHelperService
-     *            the new Wire Helper Service
-     */
-    public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
-        if (this.wireHelperService == wireHelperService) {
-            this.wireHelperService = null;
-        }
-    }
-
-    // ----------------------------------------------------------------
-    //
-    // Activation APIs
-    //
-    // ----------------------------------------------------------------
 
     /**
      * OSGi Service Component callback for activation.
@@ -175,22 +158,124 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
     }
 
     /**
-     * OSGi Service Component callback for updating.
+     * Binds the Wire Helper Service.
      *
-     * @param properties
-     *            the updated properties
+     * @param wireHelperService
+     *            the new Wire Helper Service
      */
-    public synchronized void updated(final Map<String, Object> properties) {
-        logger.debug(message.updatingCloudPublisher());
-        // Update properties
-        this.cloudPublisherOptions = new CloudPublisherOptions(properties);
-
-        if (this.cloudServiceTracker != null) {
-            this.cloudServiceTracker.close();
+    public synchronized void bindWireHelperService(final WireHelperService wireHelperService) {
+        if (this.wireHelperService == null) {
+            this.wireHelperService = wireHelperService;
         }
-        initCloudServiceTracking();
+    }
 
-        logger.debug(message.updatingCloudPublisherDone());
+    /**
+     * Builds the Kura position from the OSGi position instance.
+     *
+     * @param position
+     *            the OSGi position instance
+     * @return the Kura position
+     * @throws NullPointerException
+     *             if the position provided is null
+     */
+    private KuraPosition buildKuraPosition(final Position position) {
+        requireNonNull(position, message.positionNonNull());
+        final KuraPosition kuraPosition = new KuraPosition();
+        if (nonNull(position.getLatitude())) {
+            kuraPosition.setLatitude(position.getLatitude().getValue());
+        }
+        if (nonNull(position.getLongitude())) {
+            kuraPosition.setLongitude(position.getLongitude().getValue());
+        }
+        if (nonNull(position.getAltitude())) {
+            kuraPosition.setAltitude(position.getAltitude().getValue());
+        }
+        if (nonNull(position.getSpeed())) {
+            kuraPosition.setSpeed(position.getSpeed().getValue());
+        }
+        if (nonNull(position.getTrack())) {
+            kuraPosition.setHeading(position.getTrack().getValue());
+        }
+        return kuraPosition;
+    }
+
+    /**
+     * Builds the Kura position from the OSGi position instance.
+     *
+     * @param position
+     *            the OSGi position instance
+     * @return the Kura position
+     * @throws NullPointerException
+     *             if position provided is null
+     */
+    private JsonObject buildKuraPositionForJson(final Position position) {
+        requireNonNull(position, message.positionNonNull());
+        final JsonObject jsonObject = Json.object();
+        if (nonNull(position.getLatitude())) {
+            jsonObject.add(message.latitude(), position.getLatitude().getValue());
+        }
+        if (nonNull(position.getLongitude())) {
+            jsonObject.add(message.longitude(), position.getLongitude().getValue());
+        }
+        if (nonNull(position.getAltitude())) {
+            jsonObject.add(message.altitude(), position.getAltitude().getValue());
+        }
+        if (nonNull(position.getSpeed())) {
+            jsonObject.add(message.speed(), position.getSpeed().getValue());
+        }
+        if (nonNull(position.getTrack())) {
+            jsonObject.add(message.heading(), position.getTrack().getValue());
+        }
+        return jsonObject;
+    }
+
+    /**
+     * Builds the provided payload instance from the provided wire record.
+     *
+     * @param wireRecord
+     *            the wire record
+     * @param payload
+     *            the payload to build
+     * @throws NullPointerException
+     *             if the provided wire record or payload is null
+     */
+    private void buildPayload(final WireRecord wireRecord, final Object payload) {
+        requireNonNull(wireRecord, message.wireRecordNonNull());
+        requireNonNull(payload, message.payloadNonNull());
+
+        if (payload instanceof KuraPayload) {
+            final KuraPayload kuraPayload = (KuraPayload) payload;
+            if (nonNull(wireRecord.getPosition()) && nonNull(kuraPayload.getPosition())) {
+                kuraPayload.setPosition(buildKuraPosition(wireRecord.getPosition()));
+            }
+            for (final WireField dataField : wireRecord.getFields()) {
+                final Object wrappedValue = dataField.getValue().getValue();
+                kuraPayload.addMetric(dataField.getName(), wrappedValue);
+            }
+        }
+
+        if (payload instanceof JsonObject) {
+            final JsonObject jsonObject = (JsonObject) payload;
+            if (nonNull(wireRecord.getPosition()) && nonNull(jsonObject.get(message.position()))) {
+                jsonObject.add(message.position(), buildKuraPositionForJson(wireRecord.getPosition()));
+            }
+            for (final WireField dataField : wireRecord.getFields()) {
+                final Object wrappedValue = dataField.getValue().getValue();
+                jsonObject.add(dataField.getName(), wrappedValue.toString());
+            }
+        }
+
+    }
+
+    /**
+     * Closes the cloud client.
+     */
+    private void closeCloudClient() {
+        if (this.cloudClient != null) {
+            this.cloudClient.removeCloudClientListener(this);
+            this.cloudClient.release();
+            this.cloudClient = null;
+        }
     }
 
     /**
@@ -210,6 +295,23 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
         logger.debug(message.deactivatingCloudPublisherDone());
     }
 
+    /**
+     * Service tracker to manage Cloud Services
+     */
+    private void initCloudServiceTracking() {
+        final String selectedCloudServicePid = this.cloudPublisherOptions.getCloudServicePid();
+        final String filterString = String.format("(&(%s=%s)(kura.service.pid=%s))", Constants.OBJECTCLASS,
+                CloudService.class.getName(), selectedCloudServicePid);
+        Filter filter = null;
+        try {
+            filter = this.bundleContext.createFilter(filterString);
+        } catch (final InvalidSyntaxException e) {
+            logger.error("Filter setup exception " + ThrowableUtil.stackTraceAsString(e));
+        }
+        this.cloudServiceTracker = new ServiceTracker<>(this.bundleContext, filter, this.cloudServiceTrackerCustomizer);
+        this.cloudServiceTracker.open();
+    }
+
     /** {@inheritDoc} */
     @Override
     public void onConnectionEstablished() {
@@ -218,9 +320,35 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
 
     /** {@inheritDoc} */
     @Override
+    public void onConnectionLost() {
+        // Not required
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void onControlMessageArrived(final String deviceId, final String appTopic, final KuraPayload msg,
+            final int qos, final boolean retain) {
+        // Not required
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void onMessageArrived(final String deviceId, final String appTopic, final KuraPayload msg, final int qos,
+            final boolean retain) {
+        // Not required
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public void onMessageConfirmed(final int messageId, final String topic) {
         // Not required
     }
+
+    // ----------------------------------------------------------------
+    //
+    // Private methods
+    //
+    // ----------------------------------------------------------------
 
     /** {@inheritDoc} */
     @Override
@@ -236,7 +364,7 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
         // filtering list of wire records based on the provided severity level
         final List<WireRecord> records = this.wireSupport.filter(wireEnvelope.getRecords());
 
-        if (this.cloudService != null && this.cloudClient != null) {
+        if ((this.cloudService != null) && (this.cloudClient != null)) {
             publish(records);
         }
     }
@@ -246,175 +374,6 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
     public void producersConnected(final Wire[] wires) {
         requireNonNull(wires, message.wiresNonNull());
         this.wireSupport.producersConnected(wires);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void updated(final Wire wire, final Object value) {
-        this.wireSupport.updated(wire, value);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onControlMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
-        // Not required
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
-        // Not required
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onConnectionLost() {
-        // Not required
-    }
-
-    // ----------------------------------------------------------------
-    //
-    // Private methods
-    //
-    // ----------------------------------------------------------------
-
-    /**
-     * Service tracker to manage Cloud Services
-     */
-    private void initCloudServiceTracking() {
-        String selectedCloudServicePid = this.cloudPublisherOptions.getCloudServicePid();
-        String filterString = String.format("(&(%s=%s)(kura.service.pid=%s))", Constants.OBJECTCLASS,
-                CloudService.class.getName(), selectedCloudServicePid);
-        Filter filter = null;
-        try {
-            filter = this.bundleContext.createFilter(filterString);
-        } catch (InvalidSyntaxException e) {
-            logger.error("Filter setup exception " + ThrowableUtil.stackTraceAsString(e));
-        }
-        this.cloudServiceTracker = new ServiceTracker<>(this.bundleContext, filter, this.cloudServiceTrackerCustomizer);
-        this.cloudServiceTracker.open();
-    }
-
-    /**
-     * Builds the JSON instance from the provided wire record.
-     *
-     * @param wireRecord
-     *            the wire record
-     * @return the JSON instance
-     * @throws NullPointerException
-     *             if the wire record provided is null
-     */
-    private JsonObject buildJsonObject(final WireRecord wireRecord) {
-        requireNonNull(wireRecord, message.wireRecordNonNull());
-        final JsonObject jsonObject = Json.object();
-        if (wireRecord.getTimestamp() != null) {
-            jsonObject.add(message.timestamp(), wireRecord.getTimestamp().getTime());
-        }
-        if (wireRecord.getPosition() != null) {
-            jsonObject.add(message.position(), buildKuraPositionForJson(wireRecord.getPosition()));
-        }
-        for (final WireField dataField : wireRecord.getFields()) {
-            final Object wrappedValue = dataField.getValue().getValue();
-            jsonObject.add(dataField.getName(), wrappedValue.toString());
-        }
-        return jsonObject;
-    }
-
-    /**
-     * Builds the Kura payload from the provided wire record.
-     *
-     * @param wireRecord
-     *            the wire record
-     * @return the Kura payload
-     * @throws NullPointerException
-     *             if the wire record provided is null
-     */
-    private KuraPayload buildKuraPayload(final WireRecord wireRecord) {
-        requireNonNull(wireRecord, message.wireRecordNonNull());
-        final KuraPayload kuraPayload = new KuraPayload();
-
-        if (wireRecord.getTimestamp() != null) {
-            kuraPayload.setTimestamp(wireRecord.getTimestamp());
-        }
-        if (wireRecord.getPosition() != null) {
-            kuraPayload.setPosition(buildKuraPosition(wireRecord.getPosition()));
-        }
-        for (final WireField dataField : wireRecord.getFields()) {
-            final Object wrappedValue = dataField.getValue().getValue();
-            kuraPayload.addMetric(dataField.getName(), wrappedValue);
-        }
-        return kuraPayload;
-    }
-
-    /**
-     * Builds the Kura position from the OSGi position instance.
-     *
-     * @param position
-     *            the OSGi position instance
-     * @return the Kura position
-     * @throws NullPointerException
-     *             if the position provided is null
-     */
-    private KuraPosition buildKuraPosition(final Position position) {
-        requireNonNull(position, message.positionNonNull());
-        final KuraPosition kuraPosition = new KuraPosition();
-        if (position.getLatitude() != null) {
-            kuraPosition.setLatitude(position.getLatitude().getValue());
-        }
-        if (position.getLongitude() != null) {
-            kuraPosition.setLongitude(position.getLongitude().getValue());
-        }
-        if (position.getAltitude() != null) {
-            kuraPosition.setAltitude(position.getAltitude().getValue());
-        }
-        if (position.getSpeed() != null) {
-            kuraPosition.setSpeed(position.getSpeed().getValue());
-        }
-        if (position.getTrack() != null) {
-            kuraPosition.setHeading(position.getTrack().getValue());
-        }
-        return kuraPosition;
-    }
-
-    /**
-     * Builds the Kura position from the OSGi position instance.
-     *
-     * @param position
-     *            the OSGi position instance
-     * @return the Kura position
-     * @throws NullPointerException
-     *             if position provided is null
-     */
-    private JsonObject buildKuraPositionForJson(final Position position) {
-        requireNonNull(position, message.positionNonNull());
-        final JsonObject jsonObject = Json.object();
-        if (position.getLatitude() != null) {
-            jsonObject.add(message.latitude(), position.getLatitude().getValue());
-        }
-        if (position.getLongitude() != null) {
-            jsonObject.add(message.longitude(), position.getLongitude().getValue());
-        }
-        if (position.getAltitude() != null) {
-            jsonObject.add(message.altitude(), position.getAltitude().getValue());
-        }
-        if (position.getSpeed() != null) {
-            jsonObject.add(message.speed(), position.getSpeed().getValue());
-        }
-        if (position.getTrack() != null) {
-            jsonObject.add(message.heading(), position.getTrack().getValue());
-        }
-        return jsonObject;
-    }
-
-    /**
-     * Closes the cloud client.
-     */
-    private void closeCloudClient() {
-        if (this.cloudClient != null) {
-            this.cloudClient.removeCloudClientListener(this);
-            this.cloudClient.release();
-            this.cloudClient = null;
-        }
     }
 
     /**
@@ -427,27 +386,37 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
         requireNonNull(this.cloudClient, message.cloudClientNonNull());
         requireNonNull(wireRecords, message.wireRecordsNonNull());
 
+        final String appTopic = this.cloudPublisherOptions.getPublishingTopic();
+        final int messageType = this.cloudPublisherOptions.getMessageType();
+
+        Object payload = null;
+        if (messageType == 1) { // Kura Payload
+            payload = new KuraPayload();
+            ((KuraPayload) payload).setTimestamp(new Timestamp(new Date().getTime()));
+        }
+
+        if (messageType == 2) { // JSON
+            payload = Json.object();
+            ((JsonObject) payload).add(message.timestamp(), new Timestamp(new Date().getTime()).toString());
+        }
+
         try {
-            for (final WireRecord dataRecord : wireRecords) {
-                // prepare the topic
-                final String appTopic = this.cloudPublisherOptions.getPublishingTopic();
-                if (this.cloudPublisherOptions.getMessageType() == 1) { // Kura Payload
-                    // prepare the payload
-                    final KuraPayload kuraPayload = buildKuraPayload(dataRecord);
-                    // publish the payload
+            for (final WireRecord wireRecord : wireRecords) {
+                buildPayload(wireRecord, payload);
+            }
+            if (nonNull(payload)) {
+                if (payload instanceof KuraPayload) {
+                    final KuraPayload kuraPayload = (KuraPayload) payload;
                     this.cloudClient.publish(appTopic, kuraPayload, this.cloudPublisherOptions.getPublishingQos(),
                             this.cloudPublisherOptions.getPublishingRetain(),
                             this.cloudPublisherOptions.getPublishingPriority());
+                    return;
                 }
-                if (this.cloudPublisherOptions.getMessageType() == 2) { // JSON
-                    final JsonObject jsonWire = buildJsonObject(dataRecord);
-                    this.cloudClient.publish(appTopic, jsonWire.toString().getBytes(),
-                            this.cloudPublisherOptions.getPublishingQos(),
-                            this.cloudPublisherOptions.getPublishingRetain(),
-                            this.cloudPublisherOptions.getPublishingPriority());
-                }
+                this.cloudClient.publish(appTopic, payload.toString().getBytes(),
+                        this.cloudPublisherOptions.getPublishingQos(), this.cloudPublisherOptions.getPublishingRetain(),
+                        this.cloudPublisherOptions.getPublishingPriority());
             }
-        } catch (final Exception e) {
+        } catch (final KuraException e) {
             logger.error(message.errorPublishingWireRecords() + ThrowableUtil.stackTraceAsString(e));
         }
     }
@@ -464,5 +433,42 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
         final String appId = this.cloudPublisherOptions.getPublishingApplication();
         this.cloudClient = this.cloudService.newCloudClient(appId);
         this.cloudClient.addCloudClientListener(this);
+    }
+
+    /**
+     * Unbinds the Wire Helper Service.
+     *
+     * @param wireHelperService
+     *            the new Wire Helper Service
+     */
+    public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
+        if (this.wireHelperService == wireHelperService) {
+            this.wireHelperService = null;
+        }
+    }
+
+    /**
+     * OSGi Service Component callback for updating.
+     *
+     * @param properties
+     *            the updated properties
+     */
+    public synchronized void updated(final Map<String, Object> properties) {
+        logger.debug(message.updatingCloudPublisher());
+        // Update properties
+        this.cloudPublisherOptions = new CloudPublisherOptions(properties);
+
+        if (this.cloudServiceTracker != null) {
+            this.cloudServiceTracker.close();
+        }
+        initCloudServiceTracking();
+
+        logger.debug(message.updatingCloudPublisherDone());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void updated(final Wire wire, final Object value) {
+        this.wireSupport.updated(wire, value);
     }
 }

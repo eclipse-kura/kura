@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.localization.resources;
 
@@ -75,27 +75,15 @@ public interface WireMessages {
     @En("altitude")
     public String altitude();
 
-    @En("asset_flag")
-    public String assetFlag();
-
-    @En("asset_name")
-    public String assetName();
-
     @En("Asset Records cannot be empty")
     public String assetRecordsNonEmpty();
 
     @En("List of Asset Records cannot be null")
     public String assetRecordsNonNull();
-    
+
     @En("Bundle context cannot be null")
     public String bundleContextNonNull();
 
-    @En("channel_id")
-    public String channelId();
-
-    @En("channel_name")
-    public String channelName();
-    
     @En("List of Channel IDs cannot be null")
     public String channelIdsNonNull();
 
@@ -353,6 +341,9 @@ public interface WireMessages {
 
     @En("WireService")
     public String name();
+
+    @En("Name cannot be null")
+    public String nameNonNull();
 
     @En("Do not delete any instance")
     public String noDeleteInstance();

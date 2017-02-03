@@ -1,11 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *  
  *******************************************************************************/
 package org.eclipse.kura.internal.asset.cloudlet;
 
@@ -42,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The Class AssetCloudlet is used to provide MQTT read/write operations on the
- * asset. The application id is configured as {@code ASSET-CLOUDLET}.
+ * asset. The application id is configured as {@code ASSET-V1}.
  *
  * The available {@code GET} commands are as follows
  * <ul>
@@ -89,48 +93,23 @@ import org.slf4j.LoggerFactory;
 public final class AssetCloudlet extends Cloudlet {
 
     /** Application Identifier for Cloudlet. */
-    private static final String APP_ID = "ASSET-CLOUDLET";
+    private static final String APP_ID = "ASSET-V1";
 
-    /** The Logger instance. */
-    private static final Logger s_logger = LoggerFactory.getLogger(AssetCloudlet.class);
+    private static final Logger logger = LoggerFactory.getLogger(AssetCloudlet.class);
 
-    /** Localization Resource */
-    private static final AssetCloudletMessages s_message = LocalizationAdapter.adapt(AssetCloudletMessages.class);
+    private static final AssetCloudletMessages message = LocalizationAdapter.adapt(AssetCloudletMessages.class);
 
     /** The map of assets present in the OSGi service registry. */
     private Map<String, Asset> assets;
 
-    /** The Asset Service dependency. */
     private volatile AssetService assetService;
 
-    /** Asset Tracker Customizer */
     private AssetTrackerCustomizer assetTrackerCustomizer;
 
-    /** Asset Tracker. */
-    private ServiceTracker<Asset, Asset> serviceTracker;
+    private ServiceTracker<Asset, Asset> assetServiceTracker;
 
-    /**
-     * Instantiates a new asset cloudlet.
-     */
     public AssetCloudlet() {
         super(APP_ID);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected synchronized void activate(final ComponentContext componentContext) {
-        s_logger.debug(s_message.activating());
-        super.activate(componentContext);
-        try {
-            this.assetTrackerCustomizer = new AssetTrackerCustomizer(componentContext.getBundleContext(),
-                    this.assetService);
-            this.serviceTracker = new ServiceTracker<Asset, Asset>(componentContext.getBundleContext(),
-                    Asset.class.getName(), this.assetTrackerCustomizer);
-            this.serviceTracker.open();
-        } catch (final InvalidSyntaxException e) {
-            s_logger.error(s_message.activationFailed(e));
-        }
-        s_logger.debug(s_message.activatingDone());
     }
 
     /**
@@ -157,20 +136,61 @@ public final class AssetCloudlet extends Cloudlet {
         }
     }
 
+    /**
+     * Asset Service deregistration callback
+     *
+     * @param assetService
+     *            the asset service dependency
+     */
+    protected synchronized void unbindAssetService(final AssetService assetService) {
+        if (this.assetService == assetService) {
+            this.assetService = null;
+        }
+    }
+
+    /**
+     * Cloud Service deregistration callback
+     *
+     * @param cloudService
+     *            the cloud service dependency
+     */
+    protected synchronized void unbindCloudService(final CloudService cloudService) {
+        if (this.getCloudService() == cloudService) {
+            super.unsetCloudService(cloudService);
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected synchronized void activate(final ComponentContext componentContext) {
+        logger.debug(message.activating());
+        super.activate(componentContext);
+        try {
+            this.assetTrackerCustomizer = new AssetTrackerCustomizer(componentContext.getBundleContext(),
+                    this.assetService);
+            this.assetServiceTracker = new ServiceTracker<Asset, Asset>(componentContext.getBundleContext(),
+                    Asset.class.getName(), this.assetTrackerCustomizer);
+            this.assetServiceTracker.open();
+        } catch (final InvalidSyntaxException e) {
+            logger.error(message.activationFailed(e));
+        }
+        logger.debug(message.activatingDone());
+    }
+
     /** {@inheritDoc} */
     @Override
     protected synchronized void deactivate(final ComponentContext componentContext) {
-        s_logger.debug(s_message.deactivating());
+        logger.debug(message.deactivating());
         super.deactivate(componentContext);
-        this.serviceTracker.close();
-        s_logger.debug(s_message.deactivatingDone());
+        this.assetServiceTracker.close();
+        logger.debug(message.deactivatingDone());
     }
 
     /** {@inheritDoc} */
     @Override
     protected void doGet(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
             final KuraResponsePayload respPayload) {
-        s_logger.info(s_message.cloudGETReqReceiving());
+        logger.info(message.cloudGETReqReceiving());
         if ("assets".equals(reqTopic.getResources()[0])) {
             // perform a search operation at the beginning
             this.findAssets();
@@ -190,60 +210,7 @@ public final class AssetCloudlet extends Cloudlet {
                 this.readChannelsByIds(respPayload, assetPid, channelId);
             }
         }
-        s_logger.info(s_message.cloudGETReqReceived());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected void doPut(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
-            final KuraResponsePayload respPayload) {
-        s_logger.info(s_message.cloudPUTReqReceiving());
-        // Checks if the name of the asset and the name of the channel are
-        // provided
-        final String[] resources = reqTopic.getResources();
-        if ("assets".equalsIgnoreCase(resources[0]) && (resources.length > 2)) {
-            // perform a search operation at the beginning
-            this.findAssets();
-            final String assetPid = resources[1];
-            final String channelId = resources[2];
-            final Asset asset = this.assets.get(assetPid);
-            final AssetConfiguration configuration = asset.getAssetConfiguration();
-            final Map<Long, Channel> assetConfiguredChannels = configuration.getAssetChannels();
-            final long id = Long.parseLong(channelId);
-            if ((assetConfiguredChannels != null) && (id != 0)) {
-                final AssetRecord assetRecord = new AssetRecord(id);
-                final String userValue = (String) reqPayload.getMetric("value");
-                final String userType = (String) reqPayload.getMetric("type");
-                boolean flag = true;
-                try {
-                    this.wrapValue(assetRecord, userValue, userType);
-                } catch (final NumberFormatException nfe) {
-                    flag = false;
-                    assetRecord.setAssetStatus(
-                            new AssetStatus(AssetFlag.FAILURE, s_message.valueTypeConversionError(), nfe));
-                    assetRecord.setTimestamp(System.currentTimeMillis());
-                }
-
-                List<AssetRecord> assetRecords = Arrays.asList(assetRecord);
-                try {
-                    if (flag) {
-                        assetRecords = asset.write(assetRecords);
-                    }
-                } catch (final KuraException e) {
-                    // if connection exception occurs
-                    respPayload.addMetric(s_message.errorMessage(), s_message.connectionException());
-                }
-                this.prepareResponse(respPayload, assetRecords);
-            }
-        }
-        s_logger.info(s_message.cloudPUTReqReceived());
-    }
-
-    /**
-     * Searches for all the currently available assets in the service registry
-     */
-    private void findAssets() {
-        this.assets = this.assetTrackerCustomizer.getRegisteredAssets();
+        logger.info(message.cloudGETReqReceived());
     }
 
     /**
@@ -255,7 +222,7 @@ public final class AssetCloudlet extends Cloudlet {
      *             if the argument is null
      */
     private void getAllAssets(final KuraResponsePayload respPayload) {
-        requireNonNull(respPayload, s_message.respPayloadNonNull());
+        requireNonNull(respPayload, message.respPayloadNonNull());
         int i = 0;
         for (final Map.Entry<String, Asset> assetEntry : this.assets.entrySet()) {
             respPayload.addMetric(String.valueOf(++i), assetEntry.getKey());
@@ -273,8 +240,8 @@ public final class AssetCloudlet extends Cloudlet {
      *             if any of the argument is null
      */
     private void getAllChannelsByAssetPid(final KuraResponsePayload respPayload, final String assetPid) {
-        requireNonNull(respPayload, s_message.respPayloadNonNull());
-        requireNonNull(assetPid, s_message.assetPidNonNull());
+        requireNonNull(respPayload, message.respPayloadNonNull());
+        requireNonNull(assetPid, message.assetPidNonNull());
 
         final Asset asset = this.assets.get(assetPid);
         final AssetConfiguration configuration = asset.getAssetConfiguration();
@@ -285,39 +252,70 @@ public final class AssetCloudlet extends Cloudlet {
         }
     }
 
-    /**
-     * Prepares the response payload based on the asset records as provided
-     *
-     * @param respPayload
-     *            the response payload to prepare
-     * @param assetRecords
-     *            the list of asset records
-     * @throws NullPointerException
-     *             if any of the arguments is null
-     */
-    private void prepareResponse(final KuraResponsePayload respPayload, final List<AssetRecord> assetRecords) {
-        requireNonNull(respPayload, s_message.respPayloadNonNull());
-        requireNonNull(assetRecords, s_message.assetRecordsNonNull());
-
-        for (final AssetRecord assetRecord : assetRecords) {
-            final TypedValue<?> assetValue = assetRecord.getValue();
-            final String value = (assetValue != null) ? String.valueOf(assetValue.getValue()) : "ERROR";
-            String errorText;
-            final AssetStatus assetStatus = assetRecord.getAssetStatus();
-            final AssetFlag assetFlag = assetStatus.getAssetFlag();
-
-            final String prefix = assetRecord.getChannelId() + ".";
-            respPayload.addMetric(prefix + s_message.flag(), assetFlag.toString());
-            respPayload.addMetric(prefix + s_message.channel(), assetRecord.getChannelId());
-            respPayload.addMetric(prefix + s_message.timestamp(), assetRecord.getTimestamp());
-            respPayload.addMetric(prefix + s_message.value(), value);
-
-            if (assetFlag == AssetFlag.FAILURE) {
-                final String exceptionMessage = assetStatus.getExceptionMessage();
-                errorText = (exceptionMessage != null) ? exceptionMessage : "";
-                respPayload.addMetric(prefix + s_message.errorMessage(), errorText);
-            }
+    /** {@inheritDoc} */
+    @Override
+    protected void doPut(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
+            final KuraResponsePayload respPayload) {
+        logger.info(message.cloudPUTReqReceiving());
+        // Checks if the name of the asset and the name of the channel are
+        // provided
+        final String[] resources = reqTopic.getResources();
+        if ("assets".equalsIgnoreCase(resources[0]) && (resources.length > 2)) {
+            doPutAssets(reqPayload, respPayload, resources);
         }
+        logger.info(message.cloudPUTReqReceived());
+    }
+
+    /**
+     * Put operation specific for assets
+     * 
+     * @param reqPayload
+     *            a KuraRequestPayload
+     * @param respPayload
+     *            a KuraResponsePayload
+     * @param resources
+     *            String array representing the topic chunks
+     */
+    private void doPutAssets(final KuraRequestPayload reqPayload, final KuraResponsePayload respPayload,
+            final String[] resources) {
+        this.findAssets();
+        final String assetPid = resources[1];
+        final String channelId = resources[2];
+        final Asset asset = this.assets.get(assetPid);
+        final AssetConfiguration configuration = asset.getAssetConfiguration();
+        final Map<Long, Channel> assetConfiguredChannels = configuration.getAssetChannels();
+        final long id = Long.parseLong(channelId);
+        if ((assetConfiguredChannels != null) && (id != 0)) {
+            final AssetRecord assetRecord = new AssetRecord(id);
+            final String userValue = (String) reqPayload.getMetric("value");
+            final String userType = (String) reqPayload.getMetric("type");
+            boolean flag = true;
+            try {
+                this.wrapValue(assetRecord, userValue, userType);
+            } catch (final NumberFormatException nfe) {
+                flag = false;
+                assetRecord.setAssetStatus(new AssetStatus(AssetFlag.FAILURE, message.valueTypeConversionError(), nfe));
+                assetRecord.setTimestamp(System.currentTimeMillis());
+            }
+
+            List<AssetRecord> assetRecords = Arrays.asList(assetRecord);
+            try {
+                if (flag) {
+                    assetRecords = asset.write(assetRecords);
+                }
+            } catch (final KuraException e) {
+                // if connection exception occurs
+                respPayload.addMetric(message.errorMessage(), message.connectionException());
+            }
+            this.prepareResponse(respPayload, assetRecords);
+        }
+    }
+
+    /**
+     * Searches for all the currently available assets in the service registry
+     */
+    private void findAssets() {
+        this.assets = this.assetTrackerCustomizer.getRegisteredAssets();
     }
 
     /**
@@ -334,9 +332,9 @@ public final class AssetCloudlet extends Cloudlet {
      */
     private void readChannelsByIds(final KuraResponsePayload respPayload, final String assetPid,
             final String channelId) {
-        requireNonNull(respPayload, s_message.respPayloadNonNull());
-        requireNonNull(assetPid, s_message.assetPidNonNull());
-        requireNonNull(channelId, s_message.channelIdNonNull());
+        requireNonNull(respPayload, message.respPayloadNonNull());
+        requireNonNull(assetPid, message.assetPidNonNull());
+        requireNonNull(channelId, message.channelIdNonNull());
 
         final String channelDelim = ",";
         Set<String> channelIds = null;
@@ -365,8 +363,8 @@ public final class AssetCloudlet extends Cloudlet {
                 assetRecords = asset.read(channelIdsToRead);
             } catch (final KuraException e) {
                 // if connection exception occurs
-                s_logger.warn(s_message.connectionException() + e);
-                respPayload.addMetric(s_message.errorMessage(), s_message.connectionException());
+                logger.warn(message.connectionException() + e);
+                respPayload.addMetric(message.errorMessage(), message.connectionException());
             }
             if (assetRecords != null) {
                 this.prepareResponse(respPayload, assetRecords);
@@ -375,26 +373,37 @@ public final class AssetCloudlet extends Cloudlet {
     }
 
     /**
-     * Asset Service deregistration callback
+     * Prepares the response payload based on the asset records as provided
      *
-     * @param assetService
-     *            the asset service dependency
+     * @param respPayload
+     *            the response payload to prepare
+     * @param assetRecords
+     *            the list of asset records
+     * @throws NullPointerException
+     *             if any of the arguments is null
      */
-    protected synchronized void unbindAssetService(final AssetService assetService) {
-        if (this.assetService == assetService) {
-            this.assetService = null;
-        }
-    }
+    private void prepareResponse(final KuraResponsePayload respPayload, final List<AssetRecord> assetRecords) {
+        requireNonNull(respPayload, message.respPayloadNonNull());
+        requireNonNull(assetRecords, message.assetRecordsNonNull());
 
-    /**
-     * Cloud Service deregistration callback
-     *
-     * @param cloudService
-     *            the cloud service dependency
-     */
-    protected synchronized void unbindCloudService(final CloudService cloudService) {
-        if (this.getCloudService() == cloudService) {
-            super.unsetCloudService(cloudService);
+        for (final AssetRecord assetRecord : assetRecords) {
+            final TypedValue<?> assetValue = assetRecord.getValue();
+            final String value = (assetValue != null) ? String.valueOf(assetValue.getValue()) : "ERROR";
+            String errorText;
+            final AssetStatus assetStatus = assetRecord.getAssetStatus();
+            final AssetFlag assetFlag = assetStatus.getAssetFlag();
+
+            final String prefix = assetRecord.getChannelId() + ".";
+            respPayload.addMetric(prefix + message.flag(), assetFlag.toString());
+            respPayload.addMetric(prefix + message.channel(), assetRecord.getChannelId());
+            respPayload.addMetric(prefix + message.timestamp(), assetRecord.getTimestamp());
+            respPayload.addMetric(prefix + message.value(), value);
+
+            if (assetFlag == AssetFlag.FAILURE) {
+                final String exceptionMessage = assetStatus.getExceptionMessage();
+                errorText = (exceptionMessage != null) ? exceptionMessage : "";
+                respPayload.addMetric(prefix + message.errorMessage(), errorText);
+            }
         }
     }
 
@@ -414,9 +423,9 @@ public final class AssetCloudlet extends Cloudlet {
      *             if the provided value cannot be parsed
      */
     private void wrapValue(final AssetRecord assetRecord, final String userValue, final String userType) {
-        requireNonNull(assetRecord, s_message.assetRecordNonNull());
-        requireNonNull(userValue, s_message.valueNonNull());
-        requireNonNull(userType, s_message.typeNonNull());
+        requireNonNull(assetRecord, message.assetRecordNonNull());
+        requireNonNull(userValue, message.valueNonNull());
+        requireNonNull(userType, message.typeNonNull());
 
         TypedValue<?> value = null;
         try {
@@ -444,9 +453,7 @@ public final class AssetCloudlet extends Cloudlet {
         } catch (final NumberFormatException nfe) {
             throw nfe;
         }
-        if (userValue != null) {
-            assetRecord.setValue(value);
-        }
-    }
 
+        assetRecord.setValue(value);
+    }
 }

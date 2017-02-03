@@ -29,13 +29,14 @@ final class CloudPublisherOptions {
     /** The Constant denoting the publisher application. */
     private static final String CONF_APPLICATION = "publish.application";
 
-    /** The Constant denoting message type. */
-    private static final String CONF_MESSAGE_TYPE = "publish.message.type";
+    /** The Constant denoting payload type. */
+    private static final String CONF_PAYLOAD_TYPE = "publish.payload.type";
 
-    /** The Constant denoting priority. */
+    /** The Constant denoting if publishing has to be performed on control topics. */
+    private static final String CONF_PUBLISH_CONTROL_MESSAGE = "publish.control.messages";
+
     private static final String CONF_PRIORITY = "publish.priority";
 
-    /** The Constant denoting QoS. */
     private static final String CONF_QOS = "publish.qos";
 
     /** The Constant denoting MQTT retain */
@@ -49,8 +50,9 @@ final class CloudPublisherOptions {
     /** The Constant application to perform (either publish or subscribe). */
     private static final String DEFAULT_APPLICATION = "PUB";
 
-    /** The Constant denoting default message type : Kura Payload. */
-    private static final int DEFAULT_MESSAGE_TYPE = 1;
+    private static final boolean DEFAULT_CONTROL_MESSAGE = false;
+
+    private static final PayloadType DEFAULT_PAYLOAD_TYPE = PayloadType.KURA_PAYLOAD;
 
     /** The Constant denoting default priority. */
     private static final int DEFAULT_PRIORITY = 7;
@@ -78,17 +80,18 @@ final class CloudPublisherOptions {
     }
 
     /**
-     * Returns the message type to be used for wrapping wire records.
+     * Returns the payload type to be used for wrapping wire records.
      *
      * @return the type of the encoding message type
      */
-    int getMessageType() {
-        int messageType = DEFAULT_MESSAGE_TYPE;
-        final Object type = this.properties.get(CONF_MESSAGE_TYPE);
+    PayloadType getPayloadType() {
+        int configurationPayloadType = DEFAULT_PAYLOAD_TYPE.getValue();
+        final Object type = this.properties.get(CONF_PAYLOAD_TYPE);
         if (type != null && type instanceof Integer) {
-            messageType = (Integer) type;
+            configurationPayloadType = (Integer) type;
         }
-        return messageType;
+
+        return PayloadType.getPayloadType(configurationPayloadType);
     }
 
     /**
@@ -141,7 +144,7 @@ final class CloudPublisherOptions {
     boolean getPublishingRetain() {
         boolean publishingRetain = DEFAULT_RETAIN;
         final Object retain = this.properties.get(CONF_RETAIN);
-        if (retain != null && retain instanceof Integer) {
+        if (retain != null && retain instanceof Boolean) {
             publishingRetain = (Boolean) retain;
         }
         return publishingRetain;
@@ -173,5 +176,19 @@ final class CloudPublisherOptions {
             cloudServicePid = (String) configCloudServicePid;
         }
         return cloudServicePid;
+    }
+
+    /**
+     * Returns if the messages have to be published as control messages or simple data messages.
+     *
+     * @return true if messages have to be published as control messages
+     */
+    boolean isControlMessage() {
+        boolean isControlMessage = DEFAULT_CONTROL_MESSAGE;
+        final Object configurationIsControlMessage = this.properties.get(CONF_PUBLISH_CONTROL_MESSAGE);
+        if (configurationIsControlMessage != null && configurationIsControlMessage instanceof Boolean) {
+            isControlMessage = (Boolean) configurationIsControlMessage;
+        }
+        return isControlMessage;
     }
 }

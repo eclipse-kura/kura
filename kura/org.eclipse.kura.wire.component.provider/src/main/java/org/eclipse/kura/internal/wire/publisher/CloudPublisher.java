@@ -431,24 +431,36 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
             for (final WireRecord dataRecord : wireRecords) {
                 // prepare the topic
                 final String appTopic = this.cloudPublisherOptions.getPublishingTopic();
-                if (this.cloudPublisherOptions.getMessageType() == 1) { // Kura Payload
-                    // prepare the payload
-                    final KuraPayload kuraPayload = buildKuraPayload(dataRecord);
-                    // publish the payload
-                    this.cloudClient.publish(appTopic, kuraPayload, this.cloudPublisherOptions.getPublishingQos(),
-                            this.cloudPublisherOptions.getPublishingRetain(),
-                            this.cloudPublisherOptions.getPublishingPriority());
+                if (this.cloudPublisherOptions.getPayloadType() == PayloadType.KURA_PAYLOAD) {
+                    publishKuraPayload(dataRecord, appTopic);
                 }
-                if (this.cloudPublisherOptions.getMessageType() == 2) { // JSON
-                    final JsonObject jsonWire = buildJsonObject(dataRecord);
-                    this.cloudClient.publish(appTopic, jsonWire.toString().getBytes(),
-                            this.cloudPublisherOptions.getPublishingQos(),
-                            this.cloudPublisherOptions.getPublishingRetain(),
-                            this.cloudPublisherOptions.getPublishingPriority());
+                if (this.cloudPublisherOptions.getPayloadType() == PayloadType.JSON) {
+                    publishJson(dataRecord, appTopic);
                 }
             }
         } catch (final Exception e) {
             logger.error(message.errorPublishingWireRecords() + ThrowableUtil.stackTraceAsString(e));
+        }
+    }
+
+    private void publishJson(final WireRecord dataRecord, final String appTopic) throws KuraException {
+        final JsonObject jsonWire = buildJsonObject(dataRecord);
+        this.cloudClient.publish(appTopic, jsonWire.toString().getBytes(),
+                this.cloudPublisherOptions.getPublishingQos(), this.cloudPublisherOptions.getPublishingRetain(),
+                this.cloudPublisherOptions.getPublishingPriority());
+    }
+
+    private void publishKuraPayload(final WireRecord dataRecord, final String appTopic) throws KuraException {
+        final KuraPayload kuraPayload = buildKuraPayload(dataRecord);
+
+        if (this.cloudPublisherOptions.isControlMessage()) {
+            this.cloudClient.controlPublish(appTopic, kuraPayload, this.cloudPublisherOptions.getPublishingQos(),
+                    this.cloudPublisherOptions.getPublishingRetain(),
+                    this.cloudPublisherOptions.getPublishingPriority());
+        } else {
+            this.cloudClient.publish(appTopic, kuraPayload, this.cloudPublisherOptions.getPublishingQos(),
+                    this.cloudPublisherOptions.getPublishingRetain(),
+                    this.cloudPublisherOptions.getPublishingPriority());
         }
     }
 

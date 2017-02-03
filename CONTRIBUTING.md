@@ -36,7 +36,7 @@ A proper header must be in place for any file contributed to Eclipse Kura. For a
 
 ```
 /*******************************************************************************
- * Copyright (c) 2016 <legal entity> and others
+ * Copyright (c) <year> <legal entity> and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -45,13 +45,14 @@ A proper header must be in place for any file contributed to Eclipse Kura. For a
  *
  *******************************************************************************/
  ```
- 
+
+ Please ensure \<year\> is replaced with the current year or range (e.g. 2017 or 2015, 2017).
  Please ensure \<legal entity\> is replaced with the relevant information. If you are editing an existing contribution, feel free
  to create or add your legal entity to the contributors section as such:
- 
+
  ```
  /*******************************************************************************
- * Copyright (c) 2016 <legal entity> and others
+ * Copyright (c) <year> <legal entity> and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -62,7 +63,7 @@ A proper header must be in place for any file contributed to Eclipse Kura. For a
  *     <legal entity>
  *******************************************************************************/
  ```
- 
+
 ### How to Contribute
 The easiest way to contribute code/patches/whatever is by creating a GitHub pull request (PR). When you do make sure that you *Sign-off* your commit records using the same email address used for your Eclipse account.
 
@@ -83,12 +84,15 @@ You can find all the details in the [Contributing via Git](http://wiki.eclipse.o
 * Make your changes
 * Make sure you include test cases for non-trivial features
 * Make sure the test suite passes after your changes
+* Make sure copyright headers are included in (all) files including updated year(s)
+* Make sure build plugins and dependencies and their versions have (approved) CQs
 * Make sure proper headers are in place for each file (see above Legal Requirements)
 * Commit your changes into that branch
 * Use descriptive and meaningful commit messages
 * If you have a lot of commits squash them into a single commit
 * Make sure you use the `-s` flag when committing as explained above
 * Push your changes to your branch in your forked repository
+* Make a full clean build (locally and/or using [Travis CI](http://travis-ci.org)) before you submit a pull request
 
 ## Submitting the Changes
 

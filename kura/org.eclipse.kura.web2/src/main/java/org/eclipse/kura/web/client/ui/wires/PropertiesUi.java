@@ -714,7 +714,7 @@ public class PropertiesUi extends AbstractServicesUi {
     private boolean validateType(final GwtConfigParameterType param, final String value) {
         switch (param) {
         case STRING:
-            return validateIfString();
+            return true;
         case LONG:
             return validateIfLong(value);
         case DOUBLE:
@@ -731,22 +731,17 @@ public class PropertiesUi extends AbstractServicesUi {
             return validateIfBoolean(value);
         case SHORT:
             return validateIfShort(value);
-        case PASSWORD:
-            // no need
+        default:
             break;
         }
         return false;
-    }
-
-    private boolean validateIfString() {
-        return true;
     }
 
     private boolean validateIfShort(final String value) {
         try {
             Short.parseShort(value);
             return true;
-        } catch (final NumberFormatException e) {
+        } catch (final NumberFormatException | NullPointerException e) {
             return false;
         }
     }
@@ -755,7 +750,7 @@ public class PropertiesUi extends AbstractServicesUi {
         try {
             Boolean.parseBoolean(value);
             return true;
-        } catch (final NumberFormatException e) {
+        } catch (final NumberFormatException | NullPointerException e) {
             return false;
         }
     }
@@ -764,7 +759,7 @@ public class PropertiesUi extends AbstractServicesUi {
         try {
             Byte.parseByte(value);
             return true;
-        } catch (final NumberFormatException e) {
+        } catch (final NumberFormatException | NullPointerException e) {
             return false;
         }
     }
@@ -773,7 +768,7 @@ public class PropertiesUi extends AbstractServicesUi {
         try {
             Integer.parseInt(value);
             return true;
-        } catch (final NumberFormatException e) {
+        } catch (final NumberFormatException | NullPointerException e) {
             return false;
         }
     }
@@ -782,7 +777,7 @@ public class PropertiesUi extends AbstractServicesUi {
         try {
             Float.parseFloat(value);
             return true;
-        } catch (final NumberFormatException e) {
+        } catch (final NumberFormatException | NullPointerException e) {
             return false;
         }
     }
@@ -791,7 +786,7 @@ public class PropertiesUi extends AbstractServicesUi {
         try {
             Double.parseDouble(value);
             return true;
-        } catch (final NumberFormatException e) {
+        } catch (final NumberFormatException | NullPointerException e) {
             return false;
         }
     }
@@ -800,7 +795,7 @@ public class PropertiesUi extends AbstractServicesUi {
         try {
             Long.parseLong(value);
             return true;
-        } catch (final NumberFormatException e) {
+        } catch (final NumberFormatException | NullPointerException e) {
             return false;
         }
     }

@@ -26,4 +26,10 @@
     		  name="ModbusProtocolDeviceService" 
     		  policy="static" 
     		  unbind="unsetModbusProtocolDeviceService"/>
+   <reference name="CloudService"
+              policy="static"
+              bind="setCloudService"       
+              unbind="unsetCloudService"       
+              cardinality="1..1" 
+              interface="org.eclipse.kura.cloud.CloudService"/>
 </scr:component>

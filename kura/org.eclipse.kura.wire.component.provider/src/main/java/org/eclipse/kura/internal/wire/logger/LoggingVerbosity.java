@@ -13,10 +13,10 @@
 package org.eclipse.kura.internal.wire.logger;
 
 /**
- * This enum represents the allowed logging levels as supported by the Wires Logger component.
+ * This enum represents the allowed logging verbosity as supported by the Wires Logger component.
  *
  */
-enum LoggingLevel {
-    INFO,
-    DEBUG
+enum LoggingVerbosity {
+    QUIET,
+    VERBOSE
 }

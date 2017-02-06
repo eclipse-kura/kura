@@ -14,7 +14,8 @@
 package org.eclipse.kura.internal.wire.logger;
 
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.internal.wire.logger.LoggingLevel.DEBUG;
+import static org.eclipse.kura.internal.wire.logger.LoggingVerbosity.VERBOSE;
+import static org.eclipse.kura.internal.wire.logger.LoggingVerbosity.QUIET;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -42,9 +43,9 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
 
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
-    private static final String DEFAULT_LOG_LEVEL = "INFO";
+    private static final String DEFAULT_LOG_LEVEL = QUIET.name();
 
-    private static final String PROP_LOG_LEVEL = "log.level";
+    private static final String PROP_LOG_LEVEL = "log.verbosity";
 
     private volatile WireHelperService wireHelperService;
 
@@ -122,7 +123,7 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
         requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
         logger.info(message.wireEnvelopeReceived(wireEnvelope.getEmitterPid()));
 
-        if (DEBUG.name().equals(getLoggingLevel())) {
+        if (VERBOSE.name().equals(getLoggingLevel())) {
             logger.info("Record List content: ");
             for (WireRecord record : wireEnvelope.getRecords()) {
                 logger.info("  Record content: ");

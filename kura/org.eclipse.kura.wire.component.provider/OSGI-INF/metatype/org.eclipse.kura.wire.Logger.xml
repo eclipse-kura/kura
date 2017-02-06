@@ -12,15 +12,15 @@
          name="Logger" 
          description="A wire component which logs data as received from upstream connected Wire Components">
          
-         <AD id="log.level"
-            name="log.level"
+         <AD id="log.verbosity"
+            name="log.verbosity"
             type="String"
             cardinality="0"
             required="true"
-            default="INFO"
-            description="Specifies the logging level to be used to log the information contained in the received Wire Envelope">
-            <Option label="DEBUG" value="DEBUG" />
-            <Option label="INFO" value="INFO" />
+            default="QUIET"
+            description="Specifies the logging verbosity to be used to log the information contained in the received Wire Envelope">
+            <Option label="VERBOSE" value="VERBOSE" />
+            <Option label="QUIET" value="QUIET" />
         </AD>
     </OCD>
     

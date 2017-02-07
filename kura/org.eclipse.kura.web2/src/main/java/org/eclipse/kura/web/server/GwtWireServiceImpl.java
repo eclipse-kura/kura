@@ -71,22 +71,21 @@ import com.eclipsesource.json.JsonObject;
  */
 public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implements GwtWireService {
 
+    private static final int SERVICE_WAIT_TIMEOUT = 60000;
     private static final String CONSUMER = "consumer";
     private static final String GRAPH = "wiregraph";
     private static final String PRODUCER = "producer";
-    /** The Logger instance. */
+
     private static final Logger s_logger = LoggerFactory.getLogger(GwtWireServiceImpl.class);
 
-    /** Serial Version */
     private static final long serialVersionUID = -6577843865830245755L;
 
-    /** Wire Service PID Property */
     private static final String WIRE_SERVICE_PID = "org.eclipse.kura.wire.WireService";
 
     private static Map<String, Object> fillPropertiesFromConfiguration(final GwtConfigComponent config,
             final ComponentConfiguration currentCC) {
         // Build the new properties
-        final Map<String, Object> properties = new HashMap<String, Object>();
+        final Map<String, Object> properties = new HashMap<>();
         final ComponentConfiguration backupCC = currentCC;
         if (backupCC == null) {
             return null;
@@ -190,7 +189,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         this.checkXSRFToken(xsrfToken);
         final Collection<ServiceReference<Driver>> refs = ServiceLocator.getInstance()
                 .getServiceReferences(Driver.class, null);
-        final List<String> drivers = new ArrayList<String>();
+        final List<String> drivers = new ArrayList<>();
         for (final ServiceReference<Driver> ref : refs) {
             drivers.add(String.valueOf(ref.getProperty("kura.service.pid")));
         }
@@ -207,7 +206,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             final GwtConfigComponent gwtConfig = new GwtConfigComponent();
             gwtConfig.setComponentId("BaseChannelDescriptor");
 
-            final List<GwtConfigParameter> gwtParams = new ArrayList<GwtConfigParameter>();
+            final List<GwtConfigParameter> gwtParams = new ArrayList<>();
             gwtConfig.setParameters(gwtParams);
             for (final AD ad : params) {
                 final GwtConfigParameter gwtParam = new GwtConfigParameter();
@@ -218,7 +217,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                 gwtParam.setRequired(ad.isRequired());
                 gwtParam.setCardinality(ad.getCardinality());
                 if ((ad.getOption() != null) && !ad.getOption().isEmpty()) {
-                    final Map<String, String> options = new HashMap<String, String>();
+                    final Map<String, String> options = new HashMap<>();
                     for (final Option option : ad.getOption()) {
                         options.put(option.getLabel(), option.getValue());
                     }
@@ -250,7 +249,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             final GwtConfigComponent gwtConfig = new GwtConfigComponent();
             gwtConfig.setComponentId(driverPid);
 
-            final List<GwtConfigParameter> gwtParams = new ArrayList<GwtConfigParameter>();
+            final List<GwtConfigParameter> gwtParams = new ArrayList<>();
             gwtConfig.setParameters(gwtParams);
             for (final AD ad : params) {
                 final GwtConfigParameter gwtParam = new GwtConfigParameter();
@@ -261,7 +260,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                 gwtParam.setRequired(ad.isRequired());
                 gwtParam.setCardinality(ad.getCardinality());
                 if ((ad.getOption() != null) && !ad.getOption().isEmpty()) {
-                    final Map<String, String> options = new HashMap<String, String>();
+                    final Map<String, String> options = new HashMap<>();
                     for (final Option option : ad.getOption()) {
                         options.put(option.getLabel(), option.getValue());
                     }
@@ -284,9 +283,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
     public List<GwtChannelInfo> getGwtChannels(final GwtXSRFToken xsrfToken, final GwtConfigComponent descriptor,
             final GwtConfigComponent asset) throws GwtKuraException {
 
-        final List<GwtChannelInfo> result = new ArrayList<GwtChannelInfo>();
+        final List<GwtChannelInfo> result = new ArrayList<>();
 
-        final Set<Integer> channelIndexes = new HashSet<Integer>();
+        final Set<Integer> channelIndexes = new HashSet<>();
         for (final GwtConfigParameter param : asset.getParameters()) {
             if (param != null && param.getName() != null && param.getName().endsWith("CH.name")) {
                 final String[] tokens = param.getName().split("\\.");
@@ -314,9 +313,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         final WireService wireService = ServiceLocator.getInstance().getService(WireService.class);
 
         final Set<WireConfiguration> wireConfigurations = wireService.getWireConfigurations();
-        final List<String> wireEmitterFactoryPids = new ArrayList<String>();
-        final List<String> wireReceiverFactoryPids = new ArrayList<String>();
-        final List<String> wireComponents = new ArrayList<String>();
+        final List<String> wireEmitterFactoryPids = new ArrayList<>();
+        final List<String> wireReceiverFactoryPids = new ArrayList<>();
+        final List<String> wireComponents = new ArrayList<>();
 
         GwtServerUtil.fillFactoriesLists(wireEmitterFactoryPids, wireReceiverFactoryPids);
 
@@ -343,7 +342,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             wireConf.add("p", emitterPid).add("c", receiverPid);
             wireConfig.add(String.valueOf(++i), wireConf);
         }
-        final List<GwtWireComponentConfiguration> configs = new ArrayList<GwtWireComponentConfiguration>();
+        final List<GwtWireComponentConfiguration> configs = new ArrayList<>();
         for (final String wc : GwtWireServiceUtil.getWireComponents()) {
             // create instance of GWT Wire Component Configuration to hold all
             // the information for a Wire Component
@@ -355,7 +354,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             configs.add(config);
         }
 
-        final List<GwtWireConfiguration> wires = new ArrayList<GwtWireConfiguration>();
+        final List<GwtWireConfiguration> wires = new ArrayList<>();
         for (final WireConfiguration wc : GwtWireServiceUtil.getWireConfigurations()) {
             final GwtWireConfiguration config = new GwtWireConfiguration();
             config.setEmitterPid(wc.getEmitterPid());
@@ -383,6 +382,8 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                     throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
 
+        // TODO: refactor this method: split and simplify code
+
         JsonObject jWireGraph = null;
         final WireService wireService = ServiceLocator.getInstance().getService(WireService.class);
         final WireHelperService wireHelperService = ServiceLocator.getInstance().getService(WireHelperService.class);
@@ -393,8 +394,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             // don't consider the "wires" JSON
             final int length = jWireGraph.size() - 1;
             // Delete wires
-            final Set<WireConfiguration> set = new CopyOnWriteArraySet<WireConfiguration>(
-                    wireService.getWireConfigurations());
+            final Set<WireConfiguration> set = new CopyOnWriteArraySet<>(wireService.getWireConfigurations());
             Iterator<WireConfiguration> iterator = set.iterator();
             while (iterator.hasNext()) {
                 final WireConfiguration wireConfiguration = iterator.next();
@@ -407,8 +407,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                 }
             }
 
-            final Set<WireConfiguration> configs = new CopyOnWriteArraySet<WireConfiguration>(
-                    wireService.getWireConfigurations());
+            final Set<WireConfiguration> configs = new CopyOnWriteArraySet<>(wireService.getWireConfigurations());
             iterator = configs.iterator();
             while (iterator.hasNext()) {
                 final WireConfiguration wireConfiguration = iterator.next();
@@ -465,7 +464,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                 if ((pid != null) && !wireComponents.contains(pid)) {
                     s_logger.info("Creating new Wire Component: Factory PID -> " + fpid + " | PID -> " + pid);
                     if (driver != null) {
-                        properties = new HashMap<String, Object>();
+                        properties = new HashMap<>();
                         properties.put("asset.desc", "Sample Asset");
                         properties.put("driver.pid", driver);
                     }
@@ -495,8 +494,6 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                     Filter filter = bundleContext.createFilter(filterString);
                     final ServiceTracker producerTracker = new ServiceTracker(bundleContext, filter, null);
                     producerTracker.open();
-                    producerTracker.waitForService(5000);
-                    producerTracker.close();
 
                     // track and wait for the receiver
                     final String cPid = wireHelperService.getServicePid(receiverPid);
@@ -504,10 +501,14 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                     filter = bundleContext.createFilter(filterString);
                     final ServiceTracker consumerTracker = new ServiceTracker(bundleContext, filter, null);
                     consumerTracker.open();
-                    consumerTracker.waitForService(5000);
-                    consumerTracker.close();
+
+                    producerTracker.waitForService(SERVICE_WAIT_TIMEOUT);
+                    consumerTracker.waitForService(SERVICE_WAIT_TIMEOUT);
 
                     wireService.createWireConfiguration(emitterPid, receiverPid);
+
+                    producerTracker.close();
+                    consumerTracker.close();
                 }
             }
 

@@ -1,11 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *  
  *******************************************************************************/
 package org.eclipse.kura.localization.resources;
 
@@ -102,9 +106,6 @@ public interface AssetMessages {
 
     @En("Channel Value Type cannot be null")
     public String channelValueTypeNonNull();
-
-    @En("CONFIG")
-    public String config();
 
     @En("Asset Configuration")
     public String configuration();
@@ -234,12 +235,6 @@ public interface AssetMessages {
 
     @En("Retrieving configurations from the properties...Done")
     public String retrievingConfDone();
-
-    @En("SEVERE")
-    public String severe();
-
-    @En("It signifies severity level of Wire Fields to be accepted by this Wire Component")
-    public String severityLevelDesc();
 
     @En("SHORT")
     public String shortStr();

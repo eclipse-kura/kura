@@ -108,10 +108,7 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     @Override
     public int publish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain)
             throws KuraException {
-        boolean isControl = false;
-        String fullTopic = encodeTopic(deviceId, appTopic, isControl);
-        byte[] appPayload = this.cloudServiceImpl.encodePayload(payload);
-        return this.dataService.publish(fullTopic, appPayload, qos, retain, 5);
+        return publish(deviceId, appTopic, payload, qos, retain, 5);
     }
 
     @Override
@@ -124,16 +121,14 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     @Override
     public int publish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain, int priority)
             throws KuraException {
-        boolean isControl = false;
-        String fullTopic = encodeTopic(deviceId, appTopic, isControl);
         byte[] appPayload = this.cloudServiceImpl.encodePayload(payload);
-        return this.dataService.publish(fullTopic, appPayload, qos, retain, priority);
+        return publish(deviceId, appTopic, appPayload, qos, retain, priority);
     }
 
     @Override
-    public int publish(String topic, byte[] payload, int qos, boolean retain, int priority) throws KuraException {
+    public int publish(String appTopic, byte[] payload, int qos, boolean retain, int priority) throws KuraException {
         CloudServiceOptions options = this.cloudServiceImpl.getCloudServiceOptions();
-        return publish(options.getTopicClientIdToken(), payload, qos, retain, priority);
+        return publish(options.getTopicClientIdToken(), appTopic, payload, qos, retain, priority);
     }
 
     @Override
@@ -145,27 +140,25 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     }
 
     @Override
-    public int controlPublish(String topic, KuraPayload payload, int qos, boolean retain, int priority)
+    public int controlPublish(String appTopic, KuraPayload payload, int qos, boolean retain, int priority)
             throws KuraException {
         CloudServiceOptions options = this.cloudServiceImpl.getCloudServiceOptions();
-        return controlPublish(options.getTopicClientIdToken(), topic, payload, qos, retain, priority);
+        return controlPublish(options.getTopicClientIdToken(), appTopic, payload, qos, retain, priority);
     }
 
     @Override
-    public int controlPublish(String deviceId, String topic, KuraPayload payload, int qos, boolean retain, int priority)
+    public int controlPublish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain, int priority)
             throws KuraException {
-        boolean isControl = true;
-        String fullTopic = encodeTopic(deviceId, topic, isControl);
         byte[] appPayload = this.cloudServiceImpl.encodePayload(payload);
-        return this.dataService.publish(fullTopic, appPayload, qos, retain, priority);
+        return controlPublish(deviceId, appTopic, appPayload, qos, retain, priority);
     }
 
     @Override
-    public int controlPublish(String deviceId, String topic, byte[] payload, int qos, boolean retain, int priority)
+    public int controlPublish(String deviceId, String appTopic, byte[] payload, int qos, boolean retain, int priority)
             throws KuraException {
         boolean isControl = true;
-        String appTopic = encodeTopic(deviceId, topic, isControl);
-        return this.dataService.publish(appTopic, payload, qos, retain, priority);
+        String fullTopic = encodeTopic(deviceId, appTopic, isControl);
+        return this.dataService.publish(fullTopic, payload, qos, retain, priority);
     }
 
     @Override
@@ -293,7 +286,7 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
     //
     // ----------------------------------------------------------------
 
-    private String encodeTopic(String deviceId, String topic, boolean isControl) {
+    private String encodeTopic(String deviceId, String appTopic, boolean isControl) {
         CloudServiceOptions options = this.cloudServiceImpl.getCloudServiceOptions();
         StringBuilder sb = new StringBuilder();
         if (isControl) {
@@ -303,8 +296,8 @@ public class CloudClientImpl implements CloudClient, CloudClientListener {
         sb.append(options.getTopicAccountToken()).append(options.getTopicSeparator()).append(deviceId)
                 .append(options.getTopicSeparator()).append(this.applicationId);
 
-        if (topic != null && !topic.isEmpty()) {
-            sb.append(options.getTopicSeparator()).append(topic);
+        if (appTopic != null && !appTopic.isEmpty()) {
+            sb.append(options.getTopicSeparator()).append(appTopic);
         }
 
         return sb.toString();

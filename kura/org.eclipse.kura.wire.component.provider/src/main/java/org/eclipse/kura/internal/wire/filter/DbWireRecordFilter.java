@@ -33,7 +33,6 @@ import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValues;
-import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
@@ -56,7 +55,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
-    private static List<WireRecord> lastRecords;
+    private List<WireRecord> lastRecords;
 
     private DbServiceHelper dbHelper;
 
@@ -128,8 +127,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
      * @param properties
      *            the properties
      */
-    protected synchronized void activate(final ComponentContext componentContext,
-            final Map<String, Object> properties) {
+    protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug(message.activatingFilter());
         this.options = new DbWireRecordFilterOptions(properties);
         this.dbHelper = DbServiceHelper.getInstance(this.dbService);
@@ -138,8 +136,8 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 
         // Initialize the lastRefreshTime and remove the cacheExpirationInterval in order to immediately have the cache
         // expired
-        lastRefreshedTime = Calendar.getInstance();
-        lastRefreshedTime.add(Calendar.SECOND, -this.cacheExpirationInterval);
+        this.lastRefreshedTime = Calendar.getInstance();
+        this.lastRefreshedTime.add(Calendar.SECOND, -this.cacheExpirationInterval);
         logger.debug(message.activatingFilterDone());
     }
 
@@ -149,15 +147,15 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
      * @param properties
      *            the updated properties
      */
-    public synchronized void updated(final Map<String, Object> properties) {
+    public void updated(final Map<String, Object> properties) {
         logger.debug(message.updatingFilter() + properties);
         this.options = new DbWireRecordFilterOptions(properties);
         this.cacheExpirationInterval = this.options.getCacheExpirationInterval();
 
         // Initialize the lastRefreshTime and remove the cacheExpirationInterval in order to immediately have the cache
         // expired
-        lastRefreshedTime = Calendar.getInstance();
-        lastRefreshedTime.add(Calendar.SECOND, -this.cacheExpirationInterval);
+        this.lastRefreshedTime = Calendar.getInstance();
+        this.lastRefreshedTime.add(Calendar.SECOND, -this.cacheExpirationInterval);
         logger.debug(message.updatingFilterDone());
     }
 
@@ -167,7 +165,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
      * @param componentContext
      *            the component context
      */
-    protected synchronized void deactivate(final ComponentContext componentContext) {
+    protected void deactivate(final ComponentContext componentContext) {
         logger.debug(message.deactivatingFilter());
 
         logger.debug(message.deactivatingFilterDone());
@@ -255,27 +253,28 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
     }
 
     /**
-     * Trigger emitting data as soon as new wire envelope is received. The component caches the last database read and
+     * Trigger data emit as soon as new {@link WireEnvelope} is received. The component caches the last database
+     * read and
      * provides, as output, this value until the cache validity is not expired. Otherwise, a new database read is
      * performed, and the value is kept in the {@link #lastRecords} field.
      * The cache validity is determined by the {@link DbWireRecordFilterOptions#CONF_CACHE_EXPIRATION_INTERVAL} property
      * provided by the user in the component configuration.
      */
     @Override
-    public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {
+    public void onWireReceive(final WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
-        logger.debug(message.wireEnvelopeReceived() + wireEnvelope);
+        logger.debug(message.wireEnvelopeReceived(), wireEnvelope);
         if (isCacheExpired()) {
             try {
-                lastRecords = refreshSQLView();
+                this.lastRecords = refreshSQLView();
                 this.lastRefreshedTime = Calendar.getInstance(this.lastRefreshedTime.getTimeZone());
             } catch (SQLException e) {
-                logger.error(message.errorFiltering() + ThrowableUtil.stackTraceAsString(e));
+                logger.error(message.errorFiltering(), e);
             }
         }
 
-        if (lastRecords != null) {
-            this.wireSupport.emit(lastRecords);
+        if (this.lastRecords != null) {
+            this.wireSupport.emit(this.lastRecords);
         }
     }
 

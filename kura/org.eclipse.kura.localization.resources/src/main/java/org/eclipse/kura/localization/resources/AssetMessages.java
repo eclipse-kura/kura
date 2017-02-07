@@ -157,6 +157,9 @@ public interface AssetMessages {
     @En("ERROR")
     public String error();
 
+    @En("Error while trying to track driver instances.")
+    public String errorDriverTracking();
+
     @En("Error in disconnecting driver...")
     public String errorDriverDisconnection();
 

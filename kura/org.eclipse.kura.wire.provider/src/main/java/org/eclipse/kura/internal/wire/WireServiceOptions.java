@@ -1,11 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *  
  *******************************************************************************/
 package org.eclipse.kura.internal.wire;
 
@@ -29,8 +33,7 @@ final class WireServiceOptions {
     /** Regular Expression pattern used for checking wire configurations */
     private static final String PATTERN = "%s.";
 
-    /** Localization Resource */
-    private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
+    private static final WireMessages wireMessages = LocalizationAdapter.adapt(WireMessages.class);
 
     /**
      * The separator to be used for storing Wire Configuration properties in a
@@ -38,7 +41,6 @@ final class WireServiceOptions {
      */
     public static final String SEPARATOR = ".";
 
-    /** The list of wire configurations. */
     private final List<WireConfiguration> wireConfigurations;
 
     /**
@@ -50,7 +52,7 @@ final class WireServiceOptions {
      *             if provided configurations is null
      */
     private WireServiceOptions(final List<WireConfiguration> configurations) {
-        requireNonNull(configurations, s_message.configurationNonNull());
+        requireNonNull(configurations, wireMessages.configurationNonNull());
         this.wireConfigurations = configurations;
     }
 
@@ -65,8 +67,9 @@ final class WireServiceOptions {
      * @throws NullPointerException
      *             if provided properties is null
      */
-    static WireServiceOptions getInstance(final Map<String, Object> properties) {
-        requireNonNull(properties, s_message.wireServicePropNonNull());
+    static WireServiceOptions getInstance(final Map<String, Object> properties) {  // TODO: this needs to be refactored
+                                                                                   // and/or simplified
+        requireNonNull(properties, wireMessages.wireServicePropNonNull());
         final List<WireConfiguration> wireConfs = CollectionUtil.newCopyOnWriteArrayList();
         final Set<Long> wireIds = CollectionUtil.newHashSet();
         for (final Map.Entry<String, Object> entry : properties.entrySet()) {
@@ -90,13 +93,13 @@ final class WireServiceOptions {
                     continue;
                 }
                 if ((key.startsWith(String.format(PATTERN, wireConfId)))) {
-                    if (key.contains(s_message.emitter())) {
+                    if (key.contains(wireMessages.emitter())) {
                         emitterPid = value;
                     }
-                    if (key.contains(s_message.receiver())) {
+                    if (key.contains(wireMessages.receiver())) {
                         receiverPid = value;
                     }
-                    if (key.contains(s_message.filter())) {
+                    if (key.contains(wireMessages.filter())) {
                         filter = value;
                     }
                 }
@@ -121,5 +124,4 @@ final class WireServiceOptions {
     public String toString() {
         return "WireServiceOptions [m_wireConfigurations=" + this.wireConfigurations + "]";
     }
-
 }

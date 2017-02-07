@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Eurotech
  *     Red Hat Inc
@@ -44,7 +44,6 @@ import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.AssetMessages;
 import org.eclipse.kura.type.DataType;
-import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +81,7 @@ public final class AssetOptions {
      */
     public AssetOptions(final Map<String, Object> properties) {
         requireNonNull(properties, message.propertiesNonNull());
-        this.extractProperties(properties);
+        extractProperties(properties);
     }
 
     /**
@@ -109,10 +108,10 @@ public final class AssetOptions {
      */
     private void checkChannelAvailability(final Map<String, Object> properties) {
         requireNonNull(properties, message.propertiesNonNull());
-        final Set<Long> channelIds = this.retrieveChannelIds(properties);
+        final Set<Long> channelIds = retrieveChannelIds(properties);
         for (final long channelId : channelIds) {
-            final Channel channel = this.retrieveChannel(channelId, properties);
-            this.addChannel(channel);
+            final Channel channel = retrieveChannel(channelId, properties);
+            addChannel(channel);
         }
     }
 
@@ -133,9 +132,9 @@ public final class AssetOptions {
             if (properties.containsKey(ASSET_DESC_PROP.value())) {
                 this.assetDescription = (String) properties.get(ASSET_DESC_PROP.value());
             }
-            this.checkChannelAvailability(properties);
+            checkChannelAvailability(properties);
         } catch (final Exception ex) {
-            logger.error(message.errorRetrievingChannels() + ThrowableUtil.stackTraceAsString(ex));
+            logger.error(message.errorRetrievingChannels(), ex);
         }
     }
 
@@ -264,14 +263,14 @@ public final class AssetOptions {
                 channelName = (String) properties.get(channelNamePropertyKey);
             }
             final String channelTypePropertyKey = channelKeyFormat + TYPE.value();
-            channelType = this.getChannelType(properties, channelTypePropertyKey);
+            channelType = getChannelType(properties, channelTypePropertyKey);
             final String channelValueTypePropertyKey = channelKeyFormat + VALUE_TYPE.value();
-            dataType = this.getDataType(properties, channelValueTypePropertyKey);
+            dataType = getDataType(properties, channelValueTypePropertyKey);
             for (final Map.Entry<String, Object> entry : properties.entrySet()) {
                 final String key = entry.getKey();
                 final String value = entry.getValue().toString();
                 final List<String> strings = Arrays.asList(key.split("\\" + CHANNEL_PROPERTY_POSTFIX.value()));
-                if ((strings.size() > 2) && key.startsWith(String.valueOf(channelId) + CHANNEL_PROPERTY_POSTFIX.value())
+                if (strings.size() > 2 && key.startsWith(String.valueOf(channelId) + CHANNEL_PROPERTY_POSTFIX.value())
                         && DRIVER_PROPERTY_POSTFIX.value().equals(strings.get(2))) {
                     final String driverSpecificPropertyKey = DRIVER_PROPERTY_POSTFIX.value()
                             + CHANNEL_PROPERTY_POSTFIX.value();
@@ -281,7 +280,7 @@ public final class AssetOptions {
                 }
             }
         }
-        if ((channelType != null) && (dataType != null)) {
+        if (channelType != null && dataType != null) {
             channel = new Channel(channelId, channelName, channelType, dataType, channelConfig);
         }
         logger.debug(message.retrievingChannelDone());
@@ -329,7 +328,7 @@ public final class AssetOptions {
      */
     public void update(final Map<String, Object> properties) {
         requireNonNull(properties, message.propertiesNonNull());
-        this.extractProperties(properties);
+        extractProperties(properties);
     }
 
 }

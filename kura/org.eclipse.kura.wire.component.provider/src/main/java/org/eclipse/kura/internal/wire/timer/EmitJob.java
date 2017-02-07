@@ -29,7 +29,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 /**
- * The Class EmitJob is responsible for emitting Wire Record every specified
+ * The Class EmitJob is responsible for emitting {@link WireRecord} every specified
  * interval (or specified CRON job interval)
  */
 @DisallowConcurrentExecution
@@ -39,7 +39,7 @@ public final class EmitJob implements Job {
     private static final String PROP = "TIMER";
 
     /**
-     * Emits a Wire Record every specified interval.
+     * Emits a {@link WireRecord} every specified interval.
      *
      * @param context
      *            the Job Execution context

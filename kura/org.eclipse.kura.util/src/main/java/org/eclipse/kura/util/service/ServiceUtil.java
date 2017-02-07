@@ -11,13 +11,14 @@ package org.eclipse.kura.util.service;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collection;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.UtilMessages;
-import org.eclipse.kura.util.base.ThrowableUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -61,7 +62,10 @@ public final class ServiceUtil {
             final Collection<ServiceReference<T>> refs = bundleContext.getServiceReferences(clazz, filter);
             return refs.toArray(new ServiceReference[0]);
         } catch (final InvalidSyntaxException ise) {
-            throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, ThrowableUtil.stackTraceAsString(ise));
+            final StringWriter sw = new StringWriter();
+            final PrintWriter pw = new PrintWriter(sw);
+            ise.printStackTrace(pw);
+            throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, sw.toString());
         }
     }
 
@@ -82,7 +86,5 @@ public final class ServiceUtil {
         for (final ServiceReference<?> ref : refs) {
             bundleContext.ungetService(ref);
         }
-
     }
-
 }

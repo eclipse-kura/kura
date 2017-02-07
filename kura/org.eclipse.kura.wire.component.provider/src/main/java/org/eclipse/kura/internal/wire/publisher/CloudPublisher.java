@@ -28,7 +28,6 @@ import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.type.TypedValue;
-import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
@@ -51,13 +50,13 @@ import com.eclipsesource.json.JsonObject;
 
 /**
  * The Class CloudPublisher is the specific Wire Component to publish a list of
- * wire records as received in Wire Envelope to the configured cloud
+ * {@link WireRecord}s as received in {@link WireEnvelope} to the configured cloud
  * platform.<br/>
  * <br/>
  *
- * For every Wire Record as found in Wire Envelope will be wrapped inside a Kura
+ * For every {@link WireRecord} as found in {@link WireEnvelope} will be wrapped inside a Kura
  * Payload and will be sent to the Cloud Platform. In addition, the user can
- * avail to wrap every Wire Record as a JSON object as well.
+ * avail to wrap every {@link WireRecord} as a JSON object as well.
  */
 public final class CloudPublisher implements WireReceiver, CloudClientListener, ConfigurableComponent {
 
@@ -76,7 +75,7 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
                 // recreate the Cloud Client
                 setupCloudClient();
             } catch (KuraException e) {
-                logger.error(message.cloudClientSetupProblem() + ThrowableUtil.stackTraceAsString(e));
+                logger.error(message.cloudClientSetupProblem(), e);
             }
             return CloudPublisher.this.cloudService;
         }
@@ -88,7 +87,7 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
                 // recreate the Cloud Client
                 setupCloudClient();
             } catch (KuraException e) {
-                logger.error(message.cloudClientSetupProblem() + ThrowableUtil.stackTraceAsString(e));
+                logger.error(message.cloudClientSetupProblem(), e);
             }
         }
 
@@ -291,20 +290,20 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
         try {
             filter = this.bundleContext.createFilter(filterString);
         } catch (InvalidSyntaxException e) {
-            logger.error("Filter setup exception " + ThrowableUtil.stackTraceAsString(e));
+            logger.error("Filter setup exception ", e);
         }
         this.cloudServiceTracker = new ServiceTracker<>(this.bundleContext, filter, this.cloudServiceTrackerCustomizer);
         this.cloudServiceTracker.open();
     }
 
     /**
-     * Builds the JSON instance from the provided wire record.
+     * Builds the JSON instance from the provided {@link WireRecord}.
      *
      * @param wireRecord
-     *            the wire record
+     *            the {@link WireRecord}
      * @return the JSON instance
      * @throws NullPointerException
-     *             if the wire record provided is null
+     *             if the {@link WireRecord} provided is null
      */
     private JsonObject buildJsonObject(final WireRecord wireRecord) {
         requireNonNull(wireRecord, message.wireRecordNonNull());
@@ -318,13 +317,13 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
     }
 
     /**
-     * Builds the Kura payload from the provided wire record.
+     * Builds the Kura payload from the provided {@link WireRecord}.
      *
      * @param wireRecord
-     *            the wire record
+     *            the {@link WireRecord}
      * @return the Kura payload
      * @throws NullPointerException
-     *             if the wire record provided is null
+     *             if the {@link WireRecord} provided is null
      */
     private KuraPayload buildKuraPayload(final WireRecord wireRecord) {
         requireNonNull(wireRecord, message.wireRecordNonNull());
@@ -349,10 +348,10 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
     }
 
     /**
-     * Publishes the list of provided Wire Records
+     * Publishes the list of provided {@link WireRecord}s
      *
      * @param wireRecords
-     *            the provided list of Wire Records
+     *            the provided list of {@link WireRecord}s
      */
     private void publish(final List<WireRecord> wireRecords) {
         requireNonNull(this.cloudClient, message.cloudClientNonNull());
@@ -370,7 +369,7 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
                 }
             }
         } catch (final Exception e) {
-            logger.error(message.errorPublishingWireRecords() + ThrowableUtil.stackTraceAsString(e));
+            logger.error(message.errorPublishingWireRecords(), e);
         }
     }
 

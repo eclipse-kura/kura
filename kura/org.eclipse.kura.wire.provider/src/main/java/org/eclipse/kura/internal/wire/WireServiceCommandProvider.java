@@ -10,6 +10,7 @@
  *     Eurotech
  *     Red Hat Inc
  *     Amit Kumar Mondal
+ *     
  *******************************************************************************/
 package org.eclipse.kura.internal.wire;
 
@@ -26,7 +27,6 @@ import org.eclipse.kura.wire.WireService;
  */
 public final class WireServiceCommandProvider {
 
-    /** The Wire Service. */
     private volatile WireService wireService;
 
     /**
@@ -38,6 +38,18 @@ public final class WireServiceCommandProvider {
     public synchronized void bindWireService(final WireService wireHelperService) {
         if (this.wireService == null) {
             this.wireService = wireHelperService;
+        }
+    }
+
+    /**
+     * Unbinds the Wire Service.
+     *
+     * @param wireHelperService
+     *            the new Wire Helper Service
+     */
+    public synchronized void unbindWireService(final WireService wireHelperService) {
+        if (this.wireService == wireHelperService) {
+            this.wireService = null;
         }
     }
 
@@ -91,17 +103,5 @@ public final class WireServiceCommandProvider {
             i++;
         }
         System.out.println("===========================================================");
-    }
-
-    /**
-     * Unbinds the Wire Service.
-     *
-     * @param wireHelperService
-     *            the new Wire Helper Service
-     */
-    public synchronized void unbindWireService(final WireService wireHelperService) {
-        if (this.wireService == wireHelperService) {
-            this.wireService = null;
-        }
     }
 }

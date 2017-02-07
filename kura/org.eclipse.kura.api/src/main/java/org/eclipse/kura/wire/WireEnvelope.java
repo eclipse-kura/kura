@@ -47,7 +47,7 @@ public class WireEnvelope extends BasicEnvelope {
      * @param emitterPid
      *            the wire emitter PID
      * @param wireRecords
-     *            the wire records
+     *            the {@link WireRecord}s
      */
     public WireEnvelope(String emitterPid, List<WireRecord> wireRecords) {
         super(wireRecords, emitterPid, SCOPE);
@@ -63,9 +63,9 @@ public class WireEnvelope extends BasicEnvelope {
     }
 
     /**
-     * Gets the wire records.
+     * Gets the {@link WireRecord}s.
      *
-     * @return the wire records
+     * @return the {@link WireRecord}s
      */
     @SuppressWarnings("unchecked")
     public List<WireRecord> getRecords() {

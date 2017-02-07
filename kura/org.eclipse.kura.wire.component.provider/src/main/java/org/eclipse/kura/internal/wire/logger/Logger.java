@@ -34,8 +34,8 @@ import org.osgi.service.wireadmin.Wire;
 import org.slf4j.LoggerFactory;
 
 /**
- * The Class Logger is the specific Wire Component to log a list of wire records
- * as received in Wire Envelope
+ * The Class Logger is the specific Wire Component to log a list of {@link WireRecord}s
+ * as received in {@link WireEnvelope}
  */
 public final class Logger implements WireReceiver, ConfigurableComponent {
 

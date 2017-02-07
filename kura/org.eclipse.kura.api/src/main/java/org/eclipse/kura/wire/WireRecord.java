@@ -36,7 +36,7 @@ public class WireRecord {
     private final Map<String, TypedValue<?>> properties;
 
     /**
-     * Instantiates a new wire record.
+     * Instantiates a new {@link WireRecord}.
      *
      */
     public WireRecord() {
@@ -44,7 +44,7 @@ public class WireRecord {
     }
 
     /**
-     * Instantiates a new wire record.
+     * Instantiates a new {@link WireRecord}.
      *
      * @param properties
      *            Map that represents the key-value pairs
@@ -58,7 +58,7 @@ public class WireRecord {
     }
 
     /**
-     * Returns the properties stored in this Wire Record
+     * Returns the properties stored in this {@link WireRecord}
      *
      * @return the fields
      */
@@ -67,7 +67,7 @@ public class WireRecord {
     }
 
     /**
-     * Adds a key-value pair to the existing Wire Record properties.
+     * Adds a key-value pair to the existing {@link WireRecord} properties.
      *
      * @param key
      *            String representing the key of the entry in the map.
@@ -84,10 +84,10 @@ public class WireRecord {
     }
 
     /**
-     * Adds the provided map to the existing Wire Record
+     * Adds the provided map to the existing {@link WireRecord}
      *
      * @param properties
-     *            a Map that will be added to the existing Wire Record properties
+     *            a Map that will be added to the existing {@link WireRecord} properties
      * @throws NullPointerException
      *             if any of the argument is null
      */

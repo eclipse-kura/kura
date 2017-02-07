@@ -86,7 +86,7 @@ public interface WireMessages {
 
     @En("List of Asset Records cannot be null")
     public String assetRecordsNonNull();
-    
+
     @En("Bundle context cannot be null")
     public String bundleContextNonNull();
 
@@ -95,7 +95,7 @@ public interface WireMessages {
 
     @En("channel_name")
     public String channelName();
-    
+
     @En("List of Channel IDs cannot be null")
     public String channelIdsNonNull();
 
@@ -252,6 +252,12 @@ public interface WireMessages {
     @En("ERROR")
     public String error();
 
+    @En("Error while building Wire Records.")
+    public String errorBuildingWireRecords();
+
+    @En("Error while building a Bundle Context filter.")
+    public String errorBuildingBundleContextFilter();
+
     @En("Error in creating cloud client")
     public String errorCreatingCloudClinet();
 
@@ -285,8 +291,14 @@ public interface WireMessages {
     @En("Error while storing Wire Records...")
     public String errorStoring();
 
+    @En("Error subscribing...")
+    public String errorSubscribing();
+
     @En("Error in truncating the table {0}....")
     public String errorTruncatingTable(String tableName);
+
+    @En("Error unsubscribing...")
+    public String errorUnsubscribing();
 
     @En("Error during Wire Service Component update! Something went wrong...")
     public String errorUpdatingWireService();
@@ -447,6 +459,9 @@ public interface WireMessages {
     @En("Sanitizing the provided string...")
     public String sanitize();
 
+    @En("Scheduler exception.")
+    public String schedulerException();
+
     @En("Scheduler stopping in Cloud Publisher Disconnect Manager...Done")
     public String schedulerStopped();
 
@@ -513,7 +528,7 @@ public interface WireMessages {
     @En("Starting to track Wire Components....Done")
     public String trackWireComponentsDone();
 
-    @En("Truncating table DR_{0}...")
+    @En("Truncating table {0}...")
     public String truncatingTable(String tableName);
 
     @En("typed_value")

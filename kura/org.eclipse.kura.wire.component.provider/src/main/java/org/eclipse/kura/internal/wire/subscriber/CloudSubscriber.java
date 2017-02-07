@@ -32,9 +32,9 @@ import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
-import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.util.base.TypeUtil;
 import org.eclipse.kura.wire.WireEmitter;
+import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
@@ -52,13 +52,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The Class CloudSubscriber is the specific Wire Component to subscribe a list
- * of wire records as received in Wire Envelope from the configured cloud
+ * of {@link WireRecord}s as received in {@link WireEnvelope} from the configured cloud
  * platform.<br/>
  * <br/>
  *
- * For every Wire Record as found in Wire Envelope will be wrapped inside a Kura
+ * For every {@link WireRecord} as found in {@link WireEnvelope} will be wrapped inside a Kura
  * Payload and will be sent to the Cloud Platform. Unlike Cloud Publisher Wire
- * Component, the user can only avail to wrap every Wire Record in the default
+ * Component, the user can only avail to wrap every {@link WireRecord} in the default
  * Google Protobuf Payload.
  */
 public final class CloudSubscriber implements WireEmitter, ConfigurableComponent, CloudClientListener {
@@ -79,7 +79,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
                 setupCloudClient();
                 subscribeTopic();
             } catch (KuraException e) {
-                logger.error(wireMessages.cloudClientSetupProblem() + ThrowableUtil.stackTraceAsString(e));
+                logger.error(wireMessages.cloudClientSetupProblem(), e);
             }
             return CloudSubscriber.this.cloudService;
         }
@@ -92,7 +92,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
                 setupCloudClient();
                 subscribeTopic();
             } catch (KuraException e) {
-                logger.error(wireMessages.cloudClientSetupProblem() + ThrowableUtil.stackTraceAsString(e));
+                logger.error(wireMessages.cloudClientSetupProblem(), e);
             }
         }
 
@@ -196,7 +196,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
         try {
             unsubsribe();
         } catch (final KuraException e) {
-            logger.error(ThrowableUtil.stackTraceAsString(e));
+            logger.error(wireMessages.errorUnsubscribing(), e);
         }
         // Update properties
         this.cloudSubscriberOptions = new CloudSubscriberOptions(properties);
@@ -221,7 +221,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
         try {
             unsubsribe();
         } catch (final KuraException e) {
-            logger.error(ThrowableUtil.stackTraceAsString(e));
+            logger.error(wireMessages.errorUnsubscribing(), e);
         }
         closeCloudClient();
 
@@ -281,7 +281,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
                 List<WireRecord> records = buildWireRecord(msg);
                 this.wireSupport.emit(records);
             } catch (final IOException e) {
-                logger.error(ThrowableUtil.stackTraceAsString(e));
+                logger.error(wireMessages.errorBuildingWireRecords(), e);
             }
         }
     }
@@ -322,7 +322,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
         try {
             filter = this.bundleContext.createFilter(filterString);
         } catch (InvalidSyntaxException e) {
-            logger.error("Filter setup exception " + ThrowableUtil.stackTraceAsString(e));
+            logger.error(wireMessages.errorBuildingBundleContextFilter(), e);
         }
         this.cloudServiceTracker = new ServiceTracker<>(this.bundleContext, filter, this.cloudServiceTrackerCustomizer);
         this.cloudServiceTracker.open();
@@ -354,11 +354,11 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
     }
 
     /**
-     * Builds a list of Wire Record from the provided Kura Payload.
+     * Builds a list of {@link WireRecord}s from the provided Kura Payload.
      *
      * @param payload
      *            the payload
-     * @return a List of Wire Record
+     * @return a List of {@link WireRecord}s
      * @throws IOException
      *             if the byte array conversion fails
      * @throws NullPointerException

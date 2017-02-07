@@ -29,12 +29,12 @@ import org.eclipse.kura.asset.AssetFlag;
 import org.eclipse.kura.asset.AssetRecord;
 import org.eclipse.kura.asset.AssetStatus;
 import org.eclipse.kura.asset.Channel;
+import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.asset.provider.BaseAsset;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
-import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
@@ -57,30 +57,49 @@ import org.slf4j.LoggerFactory;
  * The WireRecord to be emitted by every wire asset comprises the following keys
  *
  * <ul>
- * <li>channel_name</li>
- * <li>asset_flag</li>
- * <li>timestamp</li>
- * <li>typed_value</li>
- * <li>exception</li> (This Wire Field is present if and only if asset_flag is
- * set to FAILURE)
+ * <li>{@code <channelName>}</li>
+ * <li>{@code <channelName>_assetName}</li>
+ * <li>{@code <channelName>_channelId}</li>
+ * <li>{@code <channelName>_timestamp}</li>
  * </ul>
+ *
+ * For example, if the processing of data of a channel with a name of {@code LED} becomes
+ * <b>successful</b>, the data will be as follows:
+ *
+ * <pre>
+ * 1. LED = true
+ * 2. LED_assetName = MODICON_PLC
+ * 3. LED_channelId = 5
+ * 4. LED_timestamp = 201648274712
+ * </pre>
  *
  * <br/>
  * Also note that, if the channel name is equal to the received value of the
  * channel wire field name, then it would be considered as a WRITE wire field
  * value to the specific channel. <br/>
  * <br/>
- * For instance, {@code A} asset sends a Wire Record to {@code B} asset and the
- * received Wire Record contains list of Wire Fields. If there exists a Wire
+ * For instance, {@code A} asset sends a {@link WireRecord} to {@code B} asset and the
+ * received {@link WireRecord} contains list of Wire Fields. If there exists a Wire
  * Field which signifies the channel name and if this channel name also exists
  * in {@code B}'s list of configured channels, then the Wire Field which
- * contains the typed value of this channel in the received Wire Record will be
+ * contains the typed value of this channel in the received {@link WireRecord} will be
  * considered as a WRITE Value in that specific channel in B and this value will
  * be written to {@code B}'s channel
  *
+ * @see Channel
+ * @see AssetRecord
+ * @see WireRecord
  * @see Asset
  */
 public final class WireAsset extends BaseAsset implements WireEmitter, WireReceiver {
+
+    private static final String ERROR_NOT_SPECIFIED_MESSAGE = "ERROR NOT SPECIFIED";
+
+    private static final String ASSET_NAME = "assetName";
+
+    private static final String CHANNEL_ID = "channelId";
+
+    private static final String TIMESTAMP = "timestamp";
 
     private static final String PROPERTY_SEPARATOR = "_";
 
@@ -176,7 +195,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
     /**
      * This method is triggered as soon as the wire component receives a Wire
-     * Envelope. After it receives a Wire Envelope, it checks for all associated
+     * Envelope. After it receives a {@link WireEnvelope}, it checks for all associated
      * channels to read and write and perform the operations accordingly. The
      * order of executions are performed the following way:
      *
@@ -189,14 +208,14 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * wire component is also triggered.
      *
      * @param wireEnvelope
-     *            the received wire envelope
+     *            the received {@link WireEnvelope}
      * @throws NullPointerException
-     *             if Wire Envelope is null
+     *             if {@link WireEnvelope} is null
      */
     @Override
     public void onWireReceive(final WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
-        logger.debug(message.wireEnvelopeReceived() + this.wireSupport);
+        logger.debug(message.wireEnvelopeReceived(), this.wireSupport);
 
         final List<Long> channelIds = determineReadingChannels();
 
@@ -210,15 +229,9 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     }
 
     /**
-     * Determines the channels to read from the list of provided Wire Records
+     * Determines the channels to read.
      *
-     * @param records
-     *            the list of Wire Records
      * @return the list of channel IDs
-     * @throws NullPointerException
-     *             if argument is null
-     * @throws IllegalArgumentException
-     *             if argument is empty
      */
     private List<Long> determineReadingChannels() {
 
@@ -226,7 +239,9 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         final Map<Long, Channel> channels = this.assetConfiguration.getAssetChannels();
         for (final Map.Entry<Long, Channel> channelEntry : channels.entrySet()) {
             final Channel channel = channelEntry.getValue();
-            if (channel.getType() == READ || channel.getType() == READ_WRITE) {
+            final ChannelType channelType = channel.getType();
+
+            if (channelType == READ || channelType == READ_WRITE) {
                 channelsToRead.add(channel.getId());
             }
         }
@@ -237,7 +252,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * Determine the channels to write
      *
      * @param records
-     *            the list of Wire Records to parse
+     *            the list of {@link WireRecord}s to parse
      * @return list of Asset Records containing the values to be written
      * @throws NullPointerException
      *             if argument is null
@@ -252,8 +267,9 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         for (final Entry<Long, Channel> channelEntry : channels.entrySet()) {
             final Channel channel = channelEntry.getValue();
             final String channelName = channel.getName();
+            final ChannelType channelType = channel.getType();
 
-            if (channel.getType() != WRITE && channel.getType() != READ_WRITE) {
+            if (channelType != WRITE && channelType != READ_WRITE) {
                 continue;
             }
 
@@ -288,7 +304,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
                 emitAssetRecords(recentlyReadRecords);
             }
         } catch (final KuraException e) {
-            logger.error(message.errorPerformingRead() + ThrowableUtil.stackTraceAsString(e));
+            logger.error(message.errorPerformingRead(), e);
         }
     }
 
@@ -347,29 +363,29 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
             wireRecord.addProperty(channelName, typedValue);
 
             try {
-                wireRecord.addProperty(channelName + PROPERTY_SEPARATOR + "assetName",
+                wireRecord.addProperty(channelName + PROPERTY_SEPARATOR + ASSET_NAME,
                         TypedValues.newStringValue(getConfiguration().getPid()));
             } catch (final KuraException e) {
-                logger.error(ThrowableUtil.stackTraceAsString(e));
+                logger.error(message.configurationNonNull(), e);
             }
 
-            wireRecord.addProperty(channelName + PROPERTY_SEPARATOR + "channelId", TypedValues.newLongValue(channelId));
-            wireRecord.addProperty(channelName + PROPERTY_SEPARATOR + "timestamp",
+            wireRecord.addProperty(channelName + PROPERTY_SEPARATOR + CHANNEL_ID, TypedValues.newLongValue(channelId));
+            wireRecord.addProperty(channelName + PROPERTY_SEPARATOR + TIMESTAMP,
                     TypedValues.newLongValue(assetRecord.getTimestamp()));
         }
         this.wireSupport.emit(Arrays.asList(wireRecord));
     }
 
     private void logErrorMessage(final AssetStatus assetStatus) {
-        String errorMessage = "ERROR NOT SPECIFIED";
+        String errorMessage = ERROR_NOT_SPECIFIED_MESSAGE;
         final Exception exception = assetStatus.getException();
         final String exceptionMsg = assetStatus.getExceptionMessage();
         if (exception != null && exceptionMsg != null) {
-            errorMessage = exceptionMsg + " " + ThrowableUtil.stackTraceAsString(exception);
+            errorMessage = exceptionMsg + " " + exception.toString();
         } else if (exception == null && exceptionMsg != null) {
             errorMessage = exceptionMsg;
         } else if (exception != null) {
-            errorMessage = ThrowableUtil.stackTraceAsString(exception);
+            errorMessage = exception.toString();
         }
         logger.error(errorMessage);
     }
@@ -387,7 +403,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         try {
             write(assetRecordsToWriteChannels);
         } catch (final KuraException e) {
-            logger.error(message.errorPerformingWrite() + ThrowableUtil.stackTraceAsString(e));
+            logger.error(message.errorPerformingWrite(), e);
         }
     }
 

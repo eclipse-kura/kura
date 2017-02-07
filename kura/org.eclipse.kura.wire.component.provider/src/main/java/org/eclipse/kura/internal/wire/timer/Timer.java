@@ -9,7 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.timer;
 
@@ -20,9 +20,9 @@ import java.util.Map;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
-import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireHelperService;
+import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
@@ -104,9 +104,9 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
         this.timerOptions = new TimerOptions(properties);
         try {
             this.scheduler = new StdSchedulerFactory().getScheduler();
-            this.doUpdate();
+            doUpdate();
         } catch (final SchedulerException e) {
-            logger.error(ThrowableUtil.stackTraceAsString(e));
+            logger.error(message.schedulerException(), e);
         }
         logger.debug(message.activatingTimerDone());
     }
@@ -122,9 +122,9 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
         this.timerOptions = new TimerOptions(properties);
         try {
             this.scheduler = new StdSchedulerFactory().getScheduler();
-            this.doUpdate();
+            doUpdate();
         } catch (final SchedulerException e) {
-            logger.error(ThrowableUtil.stackTraceAsString(e));
+            logger.error(message.schedulerException(), e);
         }
         logger.debug(message.updatingTimerDone());
     }
@@ -141,14 +141,14 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
             try {
                 this.scheduler.deleteJob(this.jobKey);
             } catch (final SchedulerException e) {
-                logger.error(ThrowableUtil.stackTraceAsString(e));
+                logger.error(message.schedulerException(), e);
             }
         }
         logger.debug(message.deactivatingTimerDone());
     }
 
     /**
-     * Perform update operation which internally emits a Wire Record every
+     * Perform update operation which internally emits a {@link WireRecord} every
      * interval
      *
      * @throws SchedulerException
@@ -158,11 +158,11 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
         int interval;
         if ("SIMPLE".equalsIgnoreCase(this.timerOptions.getType())) {
             interval = this.timerOptions.getSimpleInterval();
-            this.scheduleSimpleInterval(interval);
+            scheduleSimpleInterval(interval);
             return;
         }
         final String cronExpression = this.timerOptions.getCronExpression();
-        this.scheduleCronInterval(cronExpression);
+        scheduleCronInterval(cronExpression);
     }
 
     /**

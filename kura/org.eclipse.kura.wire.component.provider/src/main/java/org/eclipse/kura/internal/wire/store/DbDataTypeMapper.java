@@ -93,7 +93,7 @@ public final class DbDataTypeMapper {
         dataTypeMap.put(LONG, new JdbcType(Types.BIGINT, "BIGINT"));
         dataTypeMap.put(DOUBLE, new JdbcType(Types.DOUBLE, "DOUBLE"));
         dataTypeMap.put(BOOLEAN, new JdbcType(Types.BOOLEAN, "BOOLEAN"));
-        dataTypeMap.put(BYTE_ARRAY, new JdbcType(Types.BINARY, "BINARY"));
+        dataTypeMap.put(BYTE_ARRAY, new JdbcType(Types.BLOB, "BLOB"));
         dataTypeMap.put(STRING, new JdbcType(Types.VARCHAR, "VARCHAR(102400)"));
     }
 
@@ -104,7 +104,7 @@ public final class DbDataTypeMapper {
         jdbcTypeMap.put(Types.BIGINT, DataType.LONG);
         jdbcTypeMap.put(Types.DOUBLE, DataType.DOUBLE);
         jdbcTypeMap.put(Types.BOOLEAN, DataType.BOOLEAN);
-        jdbcTypeMap.put(Types.BINARY, DataType.BYTE_ARRAY);
+        jdbcTypeMap.put(Types.BLOB, DataType.BYTE_ARRAY);
         jdbcTypeMap.put(Types.VARCHAR, DataType.STRING);
     }
 

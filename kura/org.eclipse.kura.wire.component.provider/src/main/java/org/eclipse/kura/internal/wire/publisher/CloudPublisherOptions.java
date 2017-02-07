@@ -84,7 +84,7 @@ final class CloudPublisherOptions {
     }
 
     /**
-     * Returns the payload type to be used for wrapping wire records.
+     * Returns the payload type to be used for wrapping {@link WireRecord}s.
      *
      * @return the type of the encoding message type
      */

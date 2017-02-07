@@ -67,7 +67,6 @@ import org.eclipse.kura.internal.asset.provider.DriverTrackerCustomizer;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.AssetMessages;
 import org.eclipse.kura.type.TypedValue;
-import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
@@ -158,11 +157,11 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         try {
             final DriverTrackerCustomizer driverTrackerCustomizer = new DriverTrackerCustomizer(
                     this.context.getBundleContext(), this, driverId);
-            this.serviceTracker = new ServiceTracker<Driver, Driver>(this.context.getBundleContext(),
-                    Driver.class.getName(), driverTrackerCustomizer);
+            this.serviceTracker = new ServiceTracker<>(this.context.getBundleContext(), Driver.class.getName(),
+                    driverTrackerCustomizer);
             this.serviceTracker.open();
         } catch (final InvalidSyntaxException e) {
-            logger.error(ThrowableUtil.stackTraceAsString(e));
+            logger.error(message.errorDriverTracking(), e);
         }
         logger.debug(message.driverAttachDone());
     }
@@ -225,7 +224,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 this.driver.disconnect();
             }
         } catch (final ConnectionException e) {
-            logger.error(message.errorDriverDisconnection() + ThrowableUtil.stackTraceAsString(e));
+            logger.error(message.errorDriverDisconnection(), e);
         } finally {
             this.monitor.unlock();
         }
@@ -515,7 +514,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 try {
                     prepareAssetRecord(driverRecord, assetRecord);
                 } catch (final KuraException e) {
-                    logger.error(message.errorPreparingAssetRecord() + ThrowableUtil.stackTraceAsString(e));
+                    logger.error(message.errorPreparingAssetRecord(), e);
                 }
                 final AssetEvent assetEvent = new AssetEvent(assetRecord);
                 this.assetListener.onAssetEvent(assetEvent);

@@ -22,7 +22,6 @@ import org.quartz.JobDataMap;
  */
 public final class TimerJobDataMap extends JobDataMap {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -2191522128203525408L;
 
     /** The Constant to be used in the map. */

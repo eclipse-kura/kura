@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.publisher;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
@@ -69,30 +71,30 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
             implements ServiceTrackerCustomizer<CloudService, CloudService> {
 
         @Override
-        public CloudService addingService(ServiceReference<CloudService> reference) {
+        public CloudService addingService(final ServiceReference<CloudService> reference) {
             CloudPublisher.this.cloudService = CloudPublisher.this.bundleContext.getService(reference);
             try {
                 // recreate the Cloud Client
                 setupCloudClient();
-            } catch (KuraException e) {
+            } catch (final KuraException e) {
                 logger.error(message.cloudClientSetupProblem(), e);
             }
             return CloudPublisher.this.cloudService;
         }
 
         @Override
-        public void modifiedService(ServiceReference<CloudService> reference, CloudService service) {
+        public void modifiedService(final ServiceReference<CloudService> reference, final CloudService service) {
             CloudPublisher.this.cloudService = CloudPublisher.this.bundleContext.getService(reference);
             try {
                 // recreate the Cloud Client
                 setupCloudClient();
-            } catch (KuraException e) {
+            } catch (final KuraException e) {
                 logger.error(message.cloudClientSetupProblem(), e);
             }
         }
 
         @Override
-        public void removedService(ServiceReference<CloudService> reference, CloudService service) {
+        public void removedService(final ServiceReference<CloudService> reference, final CloudService service) {
             CloudPublisher.this.cloudService = null;
         }
     }
@@ -129,8 +131,8 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
      * @param wireHelperService
      *            the new Wire Helper Service
      */
-    public synchronized void bindWireHelperService(final WireHelperService wireHelperService) {
-        if (this.wireHelperService == null) {
+    public void bindWireHelperService(final WireHelperService wireHelperService) {
+        if (isNull(this.wireHelperService)) {
             this.wireHelperService = wireHelperService;
         }
     }
@@ -141,7 +143,7 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
      * @param wireHelperService
      *            the new Wire Helper Service
      */
-    public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
+    public void unbindWireHelperService(final WireHelperService wireHelperService) {
         if (this.wireHelperService == wireHelperService) {
             this.wireHelperService = null;
         }
@@ -161,8 +163,7 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
      * @param properties
      *            the properties
      */
-    protected synchronized void activate(final ComponentContext componentContext,
-            final Map<String, Object> properties) {
+    protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug(message.activatingCloudPublisher());
         this.wireSupport = this.wireHelperService.newWireSupport(this);
         this.bundleContext = componentContext.getBundleContext();
@@ -182,12 +183,12 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
      * @param properties
      *            the updated properties
      */
-    public synchronized void updated(final Map<String, Object> properties) {
+    public void updated(final Map<String, Object> properties) {
         logger.debug(message.updatingCloudPublisher());
         // Update properties
         this.cloudPublisherOptions = new CloudPublisherOptions(properties);
 
-        if (this.cloudServiceTracker != null) {
+        if (nonNull(this.cloudServiceTracker)) {
             this.cloudServiceTracker.close();
         }
         initCloudServiceTracking();
@@ -201,12 +202,12 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
      * @param componentContext
      *            the component context
      */
-    protected synchronized void deactivate(final ComponentContext componentContext) {
+    protected void deactivate(final ComponentContext componentContext) {
         logger.debug(message.deactivatingCloudPublisher());
         // close the client
         closeCloudClient();
 
-        if (this.cloudServiceTracker != null) {
+        if (nonNull(this.cloudServiceTracker)) {
             this.cloudServiceTracker.close();
         }
         logger.debug(message.deactivatingCloudPublisherDone());
@@ -236,7 +237,7 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
         requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
         logger.info(message.wireEnvelopeReceived(wireEnvelope.getEmitterPid()));
 
-        if (this.cloudService != null && this.cloudClient != null) {
+        if (nonNull(this.cloudService) && nonNull(this.cloudClient)) {
             final List<WireRecord> records = wireEnvelope.getRecords();
             publish(records);
         }
@@ -340,7 +341,7 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
      * Closes the cloud client.
      */
     private void closeCloudClient() {
-        if (this.cloudClient != null) {
+        if (nonNull(this.cloudClient)) {
             this.cloudClient.removeCloudClientListener(this);
             this.cloudClient.release();
             this.cloudClient = null;

@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.timer;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
@@ -72,8 +74,8 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
      * @param wireHelperService
      *            the new Wire Helper Service
      */
-    public synchronized void bindWireHelperService(final WireHelperService wireHelperService) {
-        if (this.wireHelperService == null) {
+    public void bindWireHelperService(final WireHelperService wireHelperService) {
+        if (isNull(this.wireHelperService)) {
             this.wireHelperService = wireHelperService;
         }
     }
@@ -84,7 +86,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
      * @param wireHelperService
      *            the new Wire Helper Service
      */
-    public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
+    public void unbindWireHelperService(final WireHelperService wireHelperService) {
         if (this.wireHelperService == wireHelperService) {
             this.wireHelperService = null;
         }
@@ -98,7 +100,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
      * @param properties
      *            the configured properties
      */
-    protected synchronized void activate(final ComponentContext ctx, final Map<String, Object> properties) {
+    protected void activate(final ComponentContext ctx, final Map<String, Object> properties) {
         logger.debug(message.activatingTimer());
         this.wireSupport = this.wireHelperService.newWireSupport(this);
         this.timerOptions = new TimerOptions(properties);
@@ -117,7 +119,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
      * @param properties
      *            the updated properties
      */
-    protected synchronized void updated(final Map<String, Object> properties) {
+    protected void updated(final Map<String, Object> properties) {
         logger.debug(message.updatingTimer());
         this.timerOptions = new TimerOptions(properties);
         try {
@@ -135,9 +137,9 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
      * @param ctx
      *            the component context
      */
-    protected synchronized void deactivate(final ComponentContext ctx) {
+    protected void deactivate(final ComponentContext ctx) {
         logger.debug(message.deactivatingTimer());
-        if (this.jobKey != null) {
+        if (nonNull(this.jobKey)) {
             try {
                 this.scheduler.deleteJob(this.jobKey);
             } catch (final SchedulerException e) {
@@ -180,7 +182,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
             throw new IllegalArgumentException(message.intervalNonLessThanEqualToZero());
         }
         ++id;
-        if (this.jobKey != null) {
+        if (nonNull(this.jobKey)) {
             this.scheduler.deleteJob(this.jobKey);
         }
         this.jobKey = new JobKey("emitJob" + id, GROUP_ID);
@@ -209,7 +211,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
     private void scheduleCronInterval(final String expression) throws SchedulerException {
         requireNonNull(expression, message.cronExpressionNonNull());
         ++id;
-        if (this.jobKey != null) {
+        if (nonNull(this.jobKey)) {
             this.scheduler.deleteJob(this.jobKey);
         }
         this.jobKey = new JobKey("emitJob" + id, GROUP_ID);
@@ -244,7 +246,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
      */
     @Override
     protected void finalize() throws Throwable {
-        if (this.scheduler != null) {
+        if (nonNull(this.scheduler)) {
             this.scheduler.shutdown();
             this.scheduler = null;
         }

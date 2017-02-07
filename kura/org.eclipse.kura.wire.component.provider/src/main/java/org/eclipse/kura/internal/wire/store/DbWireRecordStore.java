@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.store;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import java.io.ByteArrayInputStream;
@@ -117,8 +119,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      * @param dbService
      *            the new DB service
      */
-    public synchronized void bindDbService(final DbService dbService) {
-        if (this.dbService == null) {
+    public void bindDbService(final DbService dbService) {
+        if (isNull(this.dbService)) {
             this.dbService = dbService;
         }
     }
@@ -129,8 +131,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      * @param wireHelperService
      *            the new Wire Helper Service
      */
-    public synchronized void bindWireHelperService(final WireHelperService wireHelperService) {
-        if (this.wireHelperService == null) {
+    public void bindWireHelperService(final WireHelperService wireHelperService) {
+        if (isNull(this.wireHelperService)) {
             this.wireHelperService = wireHelperService;
         }
     }
@@ -141,7 +143,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      * @param dbService
      *            the DB service
      */
-    public synchronized void unbindDbService(final DbService dbService) {
+    public void unbindDbService(final DbService dbService) {
         if (this.dbService == dbService) {
             this.dbService = null;
         }
@@ -153,7 +155,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      * @param wireHelperService
      *            the new Wire Helper Service
      */
-    public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
+    public void unbindWireHelperService(final WireHelperService wireHelperService) {
         if (this.wireHelperService == wireHelperService) {
             this.wireHelperService = null;
         }
@@ -167,8 +169,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      * @param properties
      *            the properties
      */
-    protected synchronized void activate(final ComponentContext componentContext,
-            final Map<String, Object> properties) {
+    protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug(message.activatingStore());
         this.wireRecordStoreOptions = new DbWireRecordStoreOptions(properties);
         this.dbHelper = DbServiceHelper.getInstance(this.dbService);
@@ -183,7 +184,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      * @param properties
      *            the updated service component properties
      */
-    public synchronized void updated(final Map<String, Object> properties) {
+    public void updated(final Map<String, Object> properties) {
         logger.debug(message.updatingStore() + properties);
         this.wireRecordStoreOptions = new DbWireRecordStoreOptions(properties);
         scheduleTruncation();
@@ -196,9 +197,9 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      * @param componentContext
      *            the component context
      */
-    protected synchronized void deactivate(final ComponentContext componentContext) {
+    protected void deactivate(final ComponentContext componentContext) {
         logger.debug(message.deactivatingStore());
-        if (this.tickHandle != null) {
+        if (nonNull(this.tickHandle)) {
             this.tickHandle.cancel(true);
         }
         this.executorService.shutdown();
@@ -212,7 +213,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         final int cleanUpRate = this.wireRecordStoreOptions.getPeriodicCleanupRate();
         final int noOfRecordsToKeep = this.wireRecordStoreOptions.getNoOfRecordsToKeep();
         // Cancel the current refresh view handle
-        if (this.tickHandle != null) {
+        if (nonNull(this.tickHandle)) {
             this.tickHandle.cancel(true);
         }
         // schedule the truncation of collected wire records
@@ -258,7 +259,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         } catch (final SQLException sqlException) {
             logger.error(message.errorTruncatingTable(sqlTableName), sqlException);
         } finally {
-            if (conn != null) {
+            if (nonNull(conn)) {
                 this.dbHelper.close(conn);
             }
         }
@@ -319,7 +320,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      */
     private void reconcileDB(final WireRecord wireRecord, final String tableName) {
         try {
-            if (tableName != null && !tableName.isEmpty()) {
+            if (nonNull(tableName) && !tableName.isEmpty()) {
                 reconcileTable(tableName);
                 reconcileColumns(tableName, wireRecord);
             }
@@ -399,7 +400,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
             final String sqlColName = this.dbHelper.sanitizeSqlTableAndColumnName(entry.getKey());
             final Integer sqlColType = columns.get(sqlColName);
             final JdbcType jdbcType = DbDataTypeMapper.getJdbcType(entry.getValue().getType());
-            if (sqlColType == null) {
+            if (isNull(sqlColType)) {
                 // add column
                 this.dbHelper.execute(
                         MessageFormat.format(SQL_ADD_COLUMN, sqlTableName, sqlColName, jdbcType.getTypeString()));

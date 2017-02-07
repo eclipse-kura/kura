@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.subscriber;
 
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
@@ -47,7 +48,6 @@ final class CloudSubscriberOptions {
 
     private static final String DEFAULT_CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
 
-    /** The Constant denoting default QoS. */
     private static final int DEFAULT_QOS = 0;
 
     /** The Constant denoting default MQTT deviceId. */
@@ -77,7 +77,7 @@ final class CloudSubscriberOptions {
     int getSubscribingQos() {
         int subscribingQos = DEFAULT_QOS;
         final Object qos = this.properties.get(CONF_QOS);
-        if (qos != null && qos instanceof Integer) {
+        if (nonNull(qos) && qos instanceof Integer) {
             subscribingQos = (Integer) qos;
         }
         return subscribingQos;
@@ -91,7 +91,7 @@ final class CloudSubscriberOptions {
     String getSubscribingAppTopic() {
         String subscribingAppTopic = DEFAULT_APP_TOPIC;
         final Object appTopic = this.properties.get(CONF_APP_TOPIC);
-        if (appTopic != null && appTopic instanceof String) {
+        if (nonNull(appTopic) && appTopic instanceof String) {
             subscribingAppTopic = String.valueOf(appTopic);
         }
         return subscribingAppTopic;
@@ -105,7 +105,7 @@ final class CloudSubscriberOptions {
     String getSubscribingDeviceId() {
         String subscribingDeviceId = DEFAULT_DEVICE_ID_TOPIC;
         final Object deviceId = this.properties.get(CONF_DEVICE_ID_TOPIC);
-        if (deviceId != null && deviceId instanceof String) {
+        if (nonNull(deviceId) && deviceId instanceof String) {
             subscribingDeviceId = String.valueOf(deviceId);
         }
         return subscribingDeviceId;
@@ -119,7 +119,7 @@ final class CloudSubscriberOptions {
     String getSubscribingApplication() {
         String subscribingApp = DEFAULT_APPLICATION;
         final Object app = this.properties.get(CONF_SUB_APPLICATION);
-        if (app != null && app instanceof String) {
+        if (nonNull(app) && app instanceof String) {
             subscribingApp = String.valueOf(app);
         }
         return subscribingApp;
@@ -133,7 +133,7 @@ final class CloudSubscriberOptions {
     String getCloudServicePid() {
         String cloudServicePid = DEFAULT_CLOUD_SERVICE_PID;
         Object configCloudServicePid = this.properties.get(CLOUD_SERVICE_PID);
-        if (configCloudServicePid != null && configCloudServicePid instanceof String) {
+        if (nonNull(configCloudServicePid) && configCloudServicePid instanceof String) {
             cloudServicePid = (String) configCloudServicePid;
         }
         return cloudServicePid;

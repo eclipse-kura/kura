@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.store;
 
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
@@ -55,7 +56,7 @@ final class DbWireRecordStoreOptions {
     int getNoOfRecordsToKeep() {
         int noOfRecords = 0;
         final Object cleanUp = this.properties.get(PERIODIC_CLEANUP_RECORDS_ID);
-        if (cleanUp != null && cleanUp instanceof Integer) {
+        if (nonNull(cleanUp) && cleanUp instanceof Integer) {
             noOfRecords = (Integer) cleanUp;
         }
         return noOfRecords;
@@ -69,7 +70,7 @@ final class DbWireRecordStoreOptions {
     int getPeriodicCleanupRate() {
         int period = 0;
         final Object rate = this.properties.get(PERIODIC_CLEANUP_ID);
-        if (rate != null && rate instanceof Integer) {
+        if (nonNull(rate) && rate instanceof Integer) {
             period = (Integer) rate;
         }
         return period;
@@ -83,7 +84,7 @@ final class DbWireRecordStoreOptions {
     String getTableName() {
         String tableName = null;
         final Object name = this.properties.get(TABLE_NAME);
-        if (name != null && name instanceof String) {
+        if (nonNull(name) && name instanceof String) {
             tableName = name.toString();
         }
         return tableName;

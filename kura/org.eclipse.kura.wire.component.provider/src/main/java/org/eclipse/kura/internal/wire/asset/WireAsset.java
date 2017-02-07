@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.asset;
 
+import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.asset.ChannelType.READ;
 import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
@@ -120,8 +122,8 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * @param wireHelperService
      *            the new Wire Helper Service
      */
-    public synchronized void bindWireHelperService(final WireHelperService wireHelperService) {
-        if (this.wireHelperService == null) {
+    public void bindWireHelperService(final WireHelperService wireHelperService) {
+        if (isNull(this.wireHelperService)) {
             this.wireHelperService = wireHelperService;
         }
     }
@@ -132,7 +134,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * @param wireHelperService
      *            the new Wire Helper Service
      */
-    public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
+    public void unbindWireHelperService(final WireHelperService wireHelperService) {
         if (this.wireHelperService == wireHelperService) {
             this.wireHelperService = null;
         }
@@ -147,8 +149,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      *            the service properties
      */
     @Override
-    protected synchronized void activate(final ComponentContext componentContext,
-            final Map<String, Object> properties) {
+    protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug(message.activatingWireAsset());
         super.activate(componentContext, properties);
         this.wireSupport = this.wireHelperService.newWireSupport(this);
@@ -162,7 +163,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      *            the service properties
      */
     @Override
-    public synchronized void updated(final Map<String, Object> properties) {
+    public void updated(final Map<String, Object> properties) {
         logger.debug(message.updatingWireAsset());
         super.updated(properties);
         logger.debug(message.updatingWireAssetDone());
@@ -175,7 +176,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      *            the context
      */
     @Override
-    protected synchronized void deactivate(final ComponentContext context) {
+    protected void deactivate(final ComponentContext context) {
         logger.debug(message.deactivatingWireAsset());
         super.deactivate(context);
         logger.debug(message.deactivatingWireAssetDone());
@@ -300,7 +301,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
             if (!channelsToRead.isEmpty()) {
                 recentlyReadRecords = read(channelsToRead);
             }
-            if (recentlyReadRecords != null) {
+            if (nonNull(recentlyReadRecords)) {
                 emitAssetRecords(recentlyReadRecords);
             }
         } catch (final KuraException e) {
@@ -380,11 +381,11 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         String errorMessage = ERROR_NOT_SPECIFIED_MESSAGE;
         final Exception exception = assetStatus.getException();
         final String exceptionMsg = assetStatus.getExceptionMessage();
-        if (exception != null && exceptionMsg != null) {
+        if (nonNull(exception) && nonNull(exceptionMsg)) {
             errorMessage = exceptionMsg + " " + exception.toString();
-        } else if (exception == null && exceptionMsg != null) {
+        } else if (isNull(exception) && nonNull(exceptionMsg)) {
             errorMessage = exceptionMsg;
-        } else if (exception != null) {
+        } else if (nonNull(exception)) {
             errorMessage = exception.toString();
         }
         logger.error(errorMessage);

@@ -133,5 +133,4 @@ public final class DbDataTypeMapper {
     public static JdbcType getJdbcType(final DataType dataType) {
         return dataTypeMap.get(dataType);
     }
-
 }

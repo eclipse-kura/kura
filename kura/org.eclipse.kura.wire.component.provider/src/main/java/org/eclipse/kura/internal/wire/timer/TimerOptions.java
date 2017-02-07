@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.timer;
 
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
@@ -57,7 +58,7 @@ final class TimerOptions {
     String getCronExpression() {
         String expression = null;
         final Object interval = this.properties.get(PROP_CRON_INTERVAL);
-        if (interval != null && interval instanceof String) {
+        if (nonNull(interval) && interval instanceof String) {
             expression = (String) interval;
         }
         return expression;
@@ -71,7 +72,7 @@ final class TimerOptions {
     int getSimpleInterval() {
         int interval = 0;
         final Object simpleInterval = this.properties.get(PROP_SIMPLE_INTERVAL);
-        if (simpleInterval != null && simpleInterval instanceof Integer) {
+        if (nonNull(simpleInterval) && simpleInterval instanceof Integer) {
             interval = (Integer) simpleInterval;
         }
         return interval;
@@ -85,7 +86,7 @@ final class TimerOptions {
     String getType() {
         String type = null;
         final Object timerType = this.properties.get(PROP_INTERVAL_TYPE);
-        if (timerType != null && timerType instanceof String) {
+        if (nonNull(timerType) && timerType instanceof String) {
             type = (String) timerType;
         }
         return type;

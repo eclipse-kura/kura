@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.logger;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.internal.wire.logger.LoggingVerbosity.VERBOSE;
 import static org.eclipse.kura.internal.wire.logger.LoggingVerbosity.QUIET;
@@ -59,8 +61,8 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
      * @param wireHelperService
      *            the new Wire Helper Service
      */
-    public synchronized void bindWireHelperService(final WireHelperService wireHelperService) {
-        if (this.wireHelperService == null) {
+    public void bindWireHelperService(final WireHelperService wireHelperService) {
+        if (isNull(this.wireHelperService)) {
             this.wireHelperService = wireHelperService;
         }
     }
@@ -71,7 +73,7 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
      * @param wireHelperService
      *            the new Wire Helper Service
      */
-    public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
+    public void unbindWireHelperService(final WireHelperService wireHelperService) {
         if (this.wireHelperService == wireHelperService) {
             this.wireHelperService = null;
         }
@@ -85,8 +87,7 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
      * @param properties
      *            the properties
      */
-    protected synchronized void activate(final ComponentContext componentContext,
-            final Map<String, Object> properties) {
+    protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug(message.activatingLogger());
         this.properties = properties;
         this.wireSupport = this.wireHelperService.newWireSupport(this);
@@ -99,7 +100,7 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
      * @param properties
      *            the updated properties
      */
-    public synchronized void updated(final Map<String, Object> properties) {
+    public void updated(final Map<String, Object> properties) {
         logger.debug(message.updatingLogger());
         this.properties = properties;
         logger.debug(message.updatingLoggerDone());
@@ -111,7 +112,7 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
      * @param componentContext
      *            the component context
      */
-    protected synchronized void deactivate(final ComponentContext componentContext) {
+    protected void deactivate(final ComponentContext componentContext) {
         logger.debug(message.deactivatingLogger());
         // remained for debugging purposes
         logger.debug(message.deactivatingLoggerDone());
@@ -139,7 +140,7 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
     private String getLoggingLevel() {
         String logLevel = DEFAULT_LOG_LEVEL;
         final Object configuredLogLevel = this.properties.get(PROP_LOG_LEVEL);
-        if (configuredLogLevel != null && configuredLogLevel instanceof String) {
+        if (nonNull(configuredLogLevel) && configuredLogLevel instanceof String) {
             logLevel = String.valueOf(configuredLogLevel);
         }
         return logLevel;

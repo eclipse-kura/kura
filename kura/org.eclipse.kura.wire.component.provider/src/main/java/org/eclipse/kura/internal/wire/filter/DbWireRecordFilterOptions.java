@@ -14,6 +14,7 @@
 package org.eclipse.kura.internal.wire.filter;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Objects.nonNull;
 
 import java.util.Map;
 
@@ -53,7 +54,7 @@ final class DbWireRecordFilterOptions {
     int getCacheExpirationInterval() {
         int cacheInterval = 0;
         final Object cacheInt = this.properties.get(CONF_CACHE_EXPIRATION_INTERVAL);
-        if (cacheInt != null && cacheInt instanceof Integer) {
+        if (nonNull(cacheInt) && cacheInt instanceof Integer) {
             cacheInterval = (Integer) cacheInt;
         }
         return cacheInterval;
@@ -67,7 +68,7 @@ final class DbWireRecordFilterOptions {
     String getSqlView() {
         String sqlView = null;
         final Object view = this.properties.get(CONF_SQL_VIEW);
-        if (view != null && view instanceof String) {
+        if (nonNull(view) && view instanceof String) {
             sqlView = String.valueOf(view);
         }
         return sqlView;

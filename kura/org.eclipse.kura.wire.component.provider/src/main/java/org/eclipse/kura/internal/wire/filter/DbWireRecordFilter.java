@@ -14,6 +14,8 @@
 package org.eclipse.kura.internal.wire.filter;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -77,8 +79,8 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
      * @param dbService
      *            the new DB service
      */
-    public synchronized void bindDbService(final DbService dbService) {
-        if (this.dbService == null) {
+    public void bindDbService(final DbService dbService) {
+        if (isNull(this.dbService)) {
             this.dbService = dbService;
         }
     }
@@ -89,8 +91,8 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
      * @param wireHelperService
      *            the new Wire Helper Service
      */
-    public synchronized void bindWireHelperService(final WireHelperService wireHelperService) {
-        if (this.wireHelperService == null) {
+    public void bindWireHelperService(final WireHelperService wireHelperService) {
+        if (isNull(this.wireHelperService)) {
             this.wireHelperService = wireHelperService;
         }
     }
@@ -101,7 +103,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
      * @param dbService
      *            the DB service
      */
-    public synchronized void unbindDbService(final DbService dbService) {
+    public void unbindDbService(final DbService dbService) {
         if (this.dbService == dbService) {
             this.dbService = null;
         }
@@ -113,7 +115,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
      * @param wireHelperService
      *            the new Wire Helper Service
      */
-    public synchronized void unbindWireHelperService(final WireHelperService wireHelperService) {
+    public void unbindWireHelperService(final WireHelperService wireHelperService) {
         if (this.wireHelperService == wireHelperService) {
             this.wireHelperService = null;
         }
@@ -188,14 +190,14 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
             conn = this.dbHelper.getConnection();
             stmt = conn.createStatement();
             rset = stmt.executeQuery(sqlView);
-            if (rset != null) {
+            if (nonNull(rset)) {
                 while (rset.next()) {
                     final WireRecord wireRecord = new WireRecord();
 
                     final ResultSetMetaData rmet = rset.getMetaData();
                     for (int i = 1; i <= rmet.getColumnCount(); i++) {
                         String fieldName = rmet.getColumnLabel(i);
-                        if (fieldName == null) {
+                        if (isNull(fieldName)) {
                             fieldName = rmet.getColumnName(i);
                         }
 
@@ -273,7 +275,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
             }
         }
 
-        if (this.lastRecords != null) {
+        if (nonNull(this.lastRecords)) {
             this.wireSupport.emit(this.lastRecords);
         }
     }

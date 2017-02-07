@@ -176,8 +176,9 @@ public class NetworkConfiguration {
                 break;
             case MODEM:
                 netInterfaceConfig = new ModemInterfaceConfigImpl(interfaceName);
-            default:
                 break;
+            default:
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER);
             }
         }
 
@@ -186,10 +187,8 @@ public class NetworkConfiguration {
 
         s_logger.trace("Adding a netConfig: {}", netConfig);
         for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-            NetInterfaceAddressConfigImpl netInterfaceAddressConfigImpl = (NetInterfaceAddressConfigImpl) netInterfaceAddressConfig;
             List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
             netConfigs.add(netConfig);
-            netInterfaceAddressConfigImpl.setNetConfigs(netConfigs);
         }
 
         this.m_recomputeProperties = true;
@@ -214,7 +213,7 @@ public class NetworkConfiguration {
             sb.append(" :: Firmware Version: " + netInterfaceConfig.getFirmwareVersion());
             sb.append(" :: MTU: " + netInterfaceConfig.getMTU());
             if (netInterfaceConfig.getHardwareAddress() != null) {
-                sb.append(" :: Hardware Address: " + new String(netInterfaceConfig.getHardwareAddress()));
+                sb.append(" :: Hardware Address: " + NetworkUtil.macToString(netInterfaceConfig.getHardwareAddress()));
             }
             sb.append(" :: State: " + netInterfaceConfig.getState());
             sb.append(" :: Type: " + netInterfaceConfig.getType());
@@ -319,6 +318,7 @@ public class NetworkConfiguration {
                                 sb.append(" :: Broadcast: " + ((WifiConfig) netConfig).getBroadcast());
                                 int[] channels = ((WifiConfig) netConfig).getChannels();
                                 if (channels != null && channels.length > 0) {
+                                    sb.append(" :: Channels: ");
                                     for (int i = 0; i < channels.length; i++) {
                                         sb.append(channels[i]);
                                         if (i + 1 < channels.length) {

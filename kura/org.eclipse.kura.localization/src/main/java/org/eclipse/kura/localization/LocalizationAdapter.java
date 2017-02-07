@@ -1,16 +1,24 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *
  *******************************************************************************/
 package org.eclipse.kura.localization;
 
 import static java.util.Objects.requireNonNull;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.HashMap;
 import java.util.Locale;
 
 import com.github.rodionmoiseev.c10n.C10N;
@@ -38,16 +46,43 @@ import com.github.rodionmoiseev.c10n.annotations.DefaultC10NAnnotations;
  */
 public final class LocalizationAdapter {
 
-    /** System property for localization */
-    private static final String LOCALE_PROPERTY = "nl";
+    private static final Locale CURRENT_LOCALE;
 
     static {
         C10N.configure(new DefaultC10NAnnotations());
+        CURRENT_LOCALE = Locale.getDefault();
     }
 
     /** Constructor */
     private LocalizationAdapter() {
         // Static Factory Methods container. No need to instantiate.
+    }
+
+    private static class C10NWrapper<T> implements InvocationHandler {
+
+        private T wrapped;
+        private HashMap<Method, String> cache = new HashMap<>();
+
+        public C10NWrapper(T wrapped) {
+            this.wrapped = wrapped;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if (args != null && args.length > 0) {
+                return method.invoke(wrapped, args);
+            }
+
+            String cached = cache.get(method);
+            if (cached != null) {
+                return cached;
+            }
+
+            cached = (String) method.invoke(wrapped, args);
+
+            cache.put(method, cached);
+            return cached;
+        }
     }
 
     /**
@@ -61,43 +96,10 @@ public final class LocalizationAdapter {
      *             if the argument is null
      * @return the instance of the C10N resource
      */
+    @SuppressWarnings("unchecked")
     public static <T> T adapt(final Class<T> clazz) {
         requireNonNull(clazz, "Class instance of localization resource cannot be null");
-        return C10N.get(clazz, getSystemLocale());
+        return (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class<?>[] { clazz },
+                new C10NWrapper<T>(C10N.get(clazz, CURRENT_LOCALE)));
     }
-
-    /**
-     * Returns the locale as set in the system property
-     */
-    private static Locale getSystemLocale() {
-        final String locale = System.getProperty(LOCALE_PROPERTY);
-        if (locale != null) {
-            if ("EN".equalsIgnoreCase(locale)) {
-                return Locale.ENGLISH;
-            }
-            if ("IT".equalsIgnoreCase(locale)) {
-                return Locale.ITALIAN;
-            }
-            if ("DE".equalsIgnoreCase(locale)) {
-                return Locale.GERMAN;
-            }
-            if ("FR".equalsIgnoreCase(locale)) {
-                return Locale.FRENCH;
-            }
-            if ("JA".equalsIgnoreCase(locale)) {
-                return Locale.JAPANESE;
-            }
-            if ("KO".equalsIgnoreCase(locale)) {
-                return Locale.KOREAN;
-            }
-            if ("RU".equalsIgnoreCase(locale)) {
-                return new Locale.Builder().setLanguage("ru").setRegion("RU").build();
-            }
-            if ("ZH".equalsIgnoreCase(locale)) {
-                return Locale.CHINESE;
-            }
-        }
-        return Locale.ENGLISH;
-    }
-
 }

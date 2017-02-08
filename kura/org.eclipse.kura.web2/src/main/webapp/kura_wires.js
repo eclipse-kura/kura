@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ * 	Eurotech
+ * 	Amit Kumar Mondal
  * 
  *******************************************************************************/
 var kuraWires = (function() {
@@ -22,6 +26,7 @@ var kuraWires = (function() {
 	var selectedElement, oldSelectedPid;
 	var oldCellView;
 	var elementsContainerTemp = [];
+	var eventSourceSessionId; // Server Sent Events Session ID
 	// used to disallow adding new instance to the Wire
 	// Graph if any instance is recently deleted.
 	var isComponentDeleted;
@@ -32,10 +37,23 @@ var kuraWires = (function() {
 	client.render = function(obj) {
 		elementsContainerTemp = [];
 		clientConfig = JSON.parse(obj);
+		eventSourceSessionId = generateId();
 		sse();
 		setup();
 		regiterFormInputFieldValidation();
 	};
+
+	function generateId() {
+		return new Date().getTime()
+	}
+
+	$(document).ready(function() {
+		$(window).bind("beforeunload", function() {
+			var eventSource = new EventSource("/sse?session="
+					+ eventSourceSessionId + "&logout=" + eventSourceSessionId);
+			return confirm("Do you really want to close?");
+		});
+	});
 	
 	client.resetDeleteComponentState = function() {
 		isComponentDeleted = false;
@@ -65,7 +83,8 @@ var kuraWires = (function() {
 	 * Interaction with OSGi Event Admin through Server Sent Events
 	 */
 	function sse() {
-		var eventSource = new EventSource("/sse");
+		var eventSource = new EventSource("/sse?session="
+				+ eventSourceSessionId);
 		eventSource.onmessage = function(event) {
 			_.each(graph.getElements(), function(c) {
 				if (c.attributes.pid === event.data) {
@@ -322,7 +341,7 @@ var kuraWires = (function() {
 			paper.scale(currentZoomLevel);
 		}
 	}
-	
+
 	function fireTransition(t) {
 		var inbound = graph.getConnectedLinks(t, {
 			inbound : false
@@ -648,16 +667,19 @@ var kuraWires = (function() {
 	}
 
 	function regiterFormInputFieldValidation() {
-		$("#componentName").bind('keypress', function (event) {
-		    var regex = new RegExp("^[0-9a-zA-Z \b]+$"); //allow 0-9, aA-zZ, space 
-		    var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
-		    if (!regex.test(key)) {
-		       event.preventDefault();
-		       return false;
-		    }
-		});
+		$("#componentName").bind(
+				'keypress',
+				function(event) {
+					var regex = new RegExp("^[0-9a-zA-Z \b]+$");
+					var key = String.fromCharCode(!event.charCode ? event.which
+							: event.charCode);
+					if (!regex.test(key)) {
+						event.preventDefault();
+						return false;
+					}
+				});
 	}
-	
+
 	function cancelCreateNewComponent() {
 		top.jsniDeactivateNavPils();
 	}

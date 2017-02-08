@@ -416,7 +416,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                 for (final GwtWireConfiguration configuration : GwtWireServiceUtil
                         .getWireConfigurationsFromJson(jWireGraph.get("wires").asObject())) {
                     final WireConfiguration temp = new WireConfiguration(configuration.getEmitterPid(),
-                            configuration.getReceiverPid(), null);
+                            configuration.getReceiverPid());
                     if (temp.equals(wireConfiguration)) {
                         isFound = true;
                     }
@@ -479,7 +479,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                     .getWireConfigurationsFromJson(jWireGraph.get("wires").asObject())) {
                 final String emitterPid = conf.getEmitterPid();
                 final String receiverPid = conf.getReceiverPid();
-                final WireConfiguration temp = new WireConfiguration(emitterPid, receiverPid, null);
+                final WireConfiguration temp = new WireConfiguration(emitterPid, receiverPid);
                 if (!wireConfs.contains(temp)) {
                     logger.info(
                             "Creating new wire: Emitter PID -> " + emitterPid + " | Consumer PID -> " + receiverPid);

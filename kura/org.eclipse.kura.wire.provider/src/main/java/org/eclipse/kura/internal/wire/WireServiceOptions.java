@@ -9,7 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire;
 
@@ -30,10 +30,10 @@ import org.eclipse.kura.wire.WireConfiguration;
  */
 final class WireServiceOptions {
 
+    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
+
     /** Regular Expression pattern used for checking wire configurations */
     private static final String PATTERN = "%s.";
-
-    private static final WireMessages wireMessages = LocalizationAdapter.adapt(WireMessages.class);
 
     /**
      * The separator to be used for storing Wire Configuration properties in a
@@ -52,7 +52,7 @@ final class WireServiceOptions {
      *             if provided configurations is null
      */
     private WireServiceOptions(final List<WireConfiguration> configurations) {
-        requireNonNull(configurations, wireMessages.configurationNonNull());
+        requireNonNull(configurations, message.configurationNonNull());
         this.wireConfigurations = configurations;
     }
 
@@ -67,9 +67,8 @@ final class WireServiceOptions {
      * @throws NullPointerException
      *             if provided properties is null
      */
-    static WireServiceOptions getInstance(final Map<String, Object> properties) {  // TODO: this needs to be refactored
-                                                                                   // and/or simplified
-        requireNonNull(properties, wireMessages.wireServicePropNonNull());
+    static WireServiceOptions getInstance(final Map<String, Object> properties) {
+        requireNonNull(properties, message.wireServicePropNonNull());
         final List<WireConfiguration> wireConfs = CollectionUtil.newCopyOnWriteArrayList();
         final Set<Long> wireIds = CollectionUtil.newHashSet();
         for (final Map.Entry<String, Object> entry : properties.entrySet()) {
@@ -93,27 +92,28 @@ final class WireServiceOptions {
                     continue;
                 }
                 if ((key.startsWith(String.format(PATTERN, wireConfId)))) {
-                    if (key.contains(wireMessages.emitter())) {
+                    if (key.contains(message.emitter())) {
                         emitterPid = value;
                     }
-                    if (key.contains(wireMessages.receiver())) {
+                    if (key.contains(message.receiver())) {
                         receiverPid = value;
                     }
-                    if (key.contains(wireMessages.filter())) {
+                    if (key.contains(message.filter())) {
                         filter = value;
                     }
                 }
             }
-            final WireConfiguration configuration = new WireConfiguration(emitterPid, receiverPid, filter);
+            final WireConfiguration configuration = new WireConfiguration(emitterPid, receiverPid);
+            configuration.setFilter(filter);
             wireConfs.add(configuration);
         }
         return new WireServiceOptions(wireConfs);
     }
 
     /**
-     * Gets the wire configurations.
+     * Gets the {@link WireConfiguration}s.
      *
-     * @return the wire configurations
+     * @return the {@link WireConfiguration}s
      */
     List<WireConfiguration> getWireConfigurations() {
         return this.wireConfigurations;
@@ -122,6 +122,6 @@ final class WireServiceOptions {
     /** {@inheritDoc} */
     @Override
     public String toString() {
-        return "WireServiceOptions [m_wireConfigurations=" + this.wireConfigurations + "]";
+        return "WireServiceOptions [wireConfigurations=" + this.wireConfigurations + "]";
     }
 }

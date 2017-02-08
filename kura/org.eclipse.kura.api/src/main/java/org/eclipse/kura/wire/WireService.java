@@ -45,7 +45,7 @@ public interface WireService {
      *             Receiver
      * @throws NullPointerException
      *             if any of the arguments is null
-     * @return the wire instance recently created
+     * @return the recently created wire instance
      */
     public WireConfiguration createWireConfiguration(String emitterPid, String receiverPid) throws KuraException;
 
@@ -57,6 +57,8 @@ public interface WireService {
      *            the wire configuration to be deleted
      * @throws NullPointerException
      *             if the argument is null
+     * @throws IllegalArgumentException
+     *             if the filter in the provided wire configuration is erroneous
      */
     public void deleteWireConfiguration(WireConfiguration wireConfiguration);
 

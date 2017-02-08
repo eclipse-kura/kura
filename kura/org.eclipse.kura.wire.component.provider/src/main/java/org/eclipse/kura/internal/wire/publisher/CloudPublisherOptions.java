@@ -5,10 +5,15 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
  *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.publisher;
 
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
@@ -22,8 +27,6 @@ import org.eclipse.kura.localization.resources.WireMessages;
  */
 final class CloudPublisherOptions {
 
-    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
-
     private static final String CLOUD_SERVICE_PID = "cloud.service.pid";
 
     /** The Constant denoting the publisher application. */
@@ -32,10 +35,10 @@ final class CloudPublisherOptions {
     /** The Constant denoting payload type. */
     private static final String CONF_PAYLOAD_TYPE = "publish.payload.type";
 
+    private static final String CONF_PRIORITY = "publish.priority";
+
     /** The Constant denoting if publishing has to be performed on control topics. */
     private static final String CONF_PUBLISH_CONTROL_MESSAGE = "publish.control.messages";
-
-    private static final String CONF_PRIORITY = "publish.priority";
 
     private static final String CONF_QOS = "publish.qos";
 
@@ -45,10 +48,10 @@ final class CloudPublisherOptions {
     /** The Constant denoting MQTT topic. */
     private static final String CONF_TOPIC = "publish.topic";
 
-    private static final String DEFAULT_CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
-
     /** The Constant application to perform (either publish or subscribe). */
     private static final String DEFAULT_APPLICATION = "PUB";
+
+    private static final String DEFAULT_CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
 
     private static final boolean DEFAULT_CONTROL_MESSAGE = false;
 
@@ -66,6 +69,9 @@ final class CloudPublisherOptions {
     /** The Constant denoting default MQTT topic. */
     private static final String DEFAULT_TOPIC = "EVENT";
 
+    /** Localization Resource */
+    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
+
     private final Map<String, Object> properties;
 
     /**
@@ -73,10 +79,26 @@ final class CloudPublisherOptions {
      *
      * @param properties
      *            the properties
+     * @throws NullPointerException
+     *             if the argument is null
      */
     CloudPublisherOptions(final Map<String, Object> properties) {
         requireNonNull(properties, message.propertiesNonNull());
         this.properties = properties;
+    }
+
+    /**
+     * Returns the kura.service.pid of the cloud service to be used to publish the generated messages
+     *
+     * @return the kura.service.pid of the cloud service to be used.
+     */
+    String getCloudServicePid() {
+        String cloudServicePid = DEFAULT_CLOUD_SERVICE_PID;
+        final Object configCloudServicePid = this.properties.get(CLOUD_SERVICE_PID);
+        if (nonNull(configCloudServicePid) && (configCloudServicePid instanceof String)) {
+            cloudServicePid = (String) configCloudServicePid;
+        }
+        return cloudServicePid;
     }
 
     /**
@@ -87,7 +109,7 @@ final class CloudPublisherOptions {
     PayloadType getPayloadType() {
         int configurationPayloadType = DEFAULT_PAYLOAD_TYPE.getValue();
         final Object type = this.properties.get(CONF_PAYLOAD_TYPE);
-        if (type != null && type instanceof Integer) {
+        if (nonNull(type) && (type instanceof Integer)) {
             configurationPayloadType = (Integer) type;
         }
 
@@ -102,7 +124,7 @@ final class CloudPublisherOptions {
     String getPublishingApplication() {
         String publishingApp = DEFAULT_APPLICATION;
         final Object app = this.properties.get(CONF_APPLICATION);
-        if (app != null && app instanceof String) {
+        if (nonNull(app) && (app instanceof String)) {
             publishingApp = String.valueOf(app);
         }
         return publishingApp;
@@ -116,7 +138,7 @@ final class CloudPublisherOptions {
     int getPublishingPriority() {
         int publishingPriority = DEFAULT_PRIORITY;
         final Object priority = this.properties.get(CONF_PRIORITY);
-        if (priority != null && priority instanceof Integer) {
+        if (nonNull(priority) && (priority instanceof Integer)) {
             publishingPriority = (Integer) priority;
         }
         return publishingPriority;
@@ -130,7 +152,7 @@ final class CloudPublisherOptions {
     int getPublishingQos() {
         int publishingQos = DEFAULT_QOS;
         final Object qos = this.properties.get(CONF_QOS);
-        if (qos != null && qos instanceof Integer) {
+        if (nonNull(qos) && (qos instanceof Integer)) {
             publishingQos = (Integer) qos;
         }
         return publishingQos;
@@ -144,7 +166,7 @@ final class CloudPublisherOptions {
     boolean getPublishingRetain() {
         boolean publishingRetain = DEFAULT_RETAIN;
         final Object retain = this.properties.get(CONF_RETAIN);
-        if (retain != null && retain instanceof Boolean) {
+        if (nonNull(retain) && (retain instanceof Boolean)) {
             publishingRetain = (Boolean) retain;
         }
         return publishingRetain;
@@ -158,24 +180,10 @@ final class CloudPublisherOptions {
     String getPublishingTopic() {
         String publishingTopic = DEFAULT_TOPIC;
         final Object topic = this.properties.get(CONF_TOPIC);
-        if (topic != null && topic instanceof String) {
+        if (nonNull(topic) && (topic instanceof String)) {
             publishingTopic = String.valueOf(topic);
         }
         return publishingTopic;
-    }
-
-    /**
-     * Returns the kura.service.pid of the cloud service to be used to publish the generated messages
-     *
-     * @return the kura.service.pid of the cloud service to be used.
-     */
-    String getCloudServicePid() {
-        String cloudServicePid = DEFAULT_CLOUD_SERVICE_PID;
-        Object configCloudServicePid = this.properties.get(CLOUD_SERVICE_PID);
-        if (configCloudServicePid != null && configCloudServicePid instanceof String) {
-            cloudServicePid = (String) configCloudServicePid;
-        }
-        return cloudServicePid;
     }
 
     /**
@@ -186,7 +194,7 @@ final class CloudPublisherOptions {
     boolean isControlMessage() {
         boolean isControlMessage = DEFAULT_CONTROL_MESSAGE;
         final Object configurationIsControlMessage = this.properties.get(CONF_PUBLISH_CONTROL_MESSAGE);
-        if (configurationIsControlMessage != null && configurationIsControlMessage instanceof Boolean) {
+        if (nonNull(configurationIsControlMessage) && (configurationIsControlMessage instanceof Boolean)) {
             isControlMessage = (Boolean) configurationIsControlMessage;
         }
         return isControlMessage;

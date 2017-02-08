@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
  *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire;
@@ -23,7 +27,6 @@ import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
@@ -53,10 +56,10 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
     private static final String CONF_PID = "org.eclipse.kura.wire.WireService";
 
     /** The Logger instance. */
-    private static final Logger s_logger = LoggerFactory.getLogger(WireServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(WireServiceImpl.class);
 
     /** Localization Resource */
-    private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
+    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
     /** The Wire Service options. */
     private WireServiceOptions options;
@@ -95,18 +98,18 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
      */
     protected synchronized void activate(final ComponentContext componentContext,
             final Map<String, Object> properties) {
-        s_logger.debug(s_message.activatingWireService());
+        logger.debug(message.activatingWireService());
         try {
             this.extractProperties(properties);
             this.trackerCustomizer = new WireComponentTrackerCustomizer(componentContext.getBundleContext(), this);
-            this.serviceTracker = new ServiceTracker<WireComponent, WireComponent>(componentContext.getBundleContext(),
-                    WireComponent.class, this.trackerCustomizer);
+            this.serviceTracker = new ServiceTracker<>(componentContext.getBundleContext(), WireComponent.class,
+                    this.trackerCustomizer);
             this.serviceTracker.open();
             this.createWires();
-        } catch (final Exception exception) {
-            s_logger.error(ThrowableUtil.stackTraceAsString(exception));
+        } catch (final Exception e) {
+            logger.error(e.getMessage(), e);
         }
-        s_logger.debug(s_message.activatingWireServiceDone());
+        logger.debug(message.activatingWireServiceDone());
     }
 
     /**
@@ -137,19 +140,19 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
     @Override
     public WireConfiguration createWireConfiguration(final String emitterPid, final String receiverPid)
             throws KuraException {
-        requireNonNull(emitterPid, s_message.emitterPidNonNull());
-        requireNonNull(receiverPid, s_message.receiverPidNonNull());
+        requireNonNull(emitterPid, message.emitterPidNonNull());
+        requireNonNull(receiverPid, message.receiverPidNonNull());
 
-        s_logger.info(s_message.creatingWire(emitterPid, receiverPid));
+        logger.info(message.creatingWire(emitterPid, receiverPid));
         WireConfiguration conf = null;
         if (!emitterPid.equals(receiverPid)) {
             final String emitterServicePid = this.wireHelperService.getServicePid(emitterPid);
             final String receiverServicePid = this.wireHelperService.getServicePid(receiverPid);
             if ((emitterServicePid == null) || (receiverServicePid == null)) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, s_message.componentPidsNull());
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, message.componentPidsNull());
             }
             if (!(this.wireHelperService.isEmitter(emitterPid) || this.wireHelperService.isReceiver(receiverPid))) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, s_message.componentsNotApplicable());
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, message.componentsNotApplicable());
             }
             conf = new WireConfiguration(emitterPid, receiverPid, null);
             final Wire wire = this.wireAdmin.createWire(emitterServicePid, receiverServicePid, null);
@@ -157,7 +160,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
                 conf.setWire(wire);
                 this.wireConfigs.add(conf);
             }
-            s_logger.info(s_message.creatingWireDone(emitterPid, receiverPid));
+            logger.info(message.creatingWireDone(emitterPid, receiverPid));
         }
         return conf;
     }
@@ -171,7 +174,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
      *             PID
      */
     synchronized void createWires() throws KuraException {
-        s_logger.debug(s_message.creatingWires());
+        logger.debug(message.creatingWires());
         final List<WireConfiguration> cloned = CollectionUtil.newArrayList();
         for (final WireConfiguration wc : this.wireConfigs) {
             cloned.add(new WireConfiguration(wc.getEmitterPid(), wc.getReceiverPid(), wc.getFilter()));
@@ -183,13 +186,13 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
             final boolean emitterFound = this.trackerCustomizer.getWireEmitters().contains(emitterPid);
             final boolean receiverFound = this.trackerCustomizer.getWireReceivers().contains(receiverPid);
             if (emitterFound && receiverFound) {
-                s_logger.info(s_message.creatingWire(emitterPid, receiverPid));
+                logger.info(message.creatingWire(emitterPid, receiverPid));
                 final String emitterServicePid = this.wireHelperService.getServicePid(emitterPid);
                 final String receiverServicePid = this.wireHelperService.getServicePid(receiverPid);
                 if ((emitterServicePid != null) && (receiverServicePid != null)) {
                     if (conf.getWire() == null) {
                         try {
-                            final Wire[] wires = this.wireAdmin.getWires(null);
+                            final Wire[] wires = this.wireAdmin.getWires(conf.getFilter());
                             boolean found = false;
                             if (wires != null) {
                                 for (final Wire w : wires) {
@@ -206,13 +209,13 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
                                 conf.setWire(wire);
                             }
                         } catch (final InvalidSyntaxException e) {
-                            s_logger.error(ThrowableUtil.stackTraceAsString(e));
+                            logger.error(e.getMessage(), e);
                         }
                     }
                 }
             }
         }
-        s_logger.debug(s_message.creatingWiresDone());
+        logger.debug(message.creatingWiresDone());
     }
 
     /**
@@ -222,21 +225,21 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
      *            the component context
      */
     protected synchronized void deactivate(final ComponentContext componentContext) {
-        s_logger.debug(s_message.deactivatingWireService());
+        logger.debug(message.deactivatingWireService());
         this.serviceTracker.close();
         for (final WireConfiguration wireConfiguration : this.wireConfigs) {
             this.deleteWireConfiguration(wireConfiguration);
         }
-        s_logger.debug(s_message.deactivatingWireServiceDone());
+        logger.debug(message.deactivatingWireServiceDone());
     }
 
     /** {@inheritDoc} */
     @Override
     public void deleteWireConfiguration(final WireConfiguration wireConfiguration) {
-        requireNonNull(wireConfiguration, s_message.wireConfigurationNonNull());
-        s_logger.info(s_message.removingWires());
+        requireNonNull(wireConfiguration, message.wireConfigurationNonNull());
+        logger.info(message.removingWires());
         try {
-            final Wire[] wiresList = this.wireAdmin.getWires(null);
+            final Wire[] wiresList = this.wireAdmin.getWires(wireConfiguration.getFilter());
             if (wiresList != null) {
                 for (final Wire wire : wiresList) {
                     final Dictionary<?, ?> props = wire.getProperties();
@@ -264,10 +267,10 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
                     }
                 }
             }
-        } catch (final InvalidSyntaxException e) {
-            throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, ThrowableUtil.stackTraceAsString(e));
+        } catch (final InvalidSyntaxException ise) {
+            throw new IllegalArgumentException(ise);
         }
-        s_logger.info(s_message.removingWiresDone());
+        logger.info(message.removingWiresDone());
     }
 
     /**
@@ -279,8 +282,8 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
      *             if argument is null
      */
     private void extractProperties(final Map<String, Object> properties) {
-        requireNonNull(properties, s_message.propertiesNonNull());
-        s_logger.debug(s_message.exectractingProp());
+        requireNonNull(properties, message.propertiesNonNull());
+        logger.debug(message.exectractingProp());
         // clear the configurations first
         if (this.options != null) {
             final List<WireConfiguration> list = this.options.getWireConfigurations();
@@ -291,7 +294,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
         for (final WireConfiguration conf : this.options.getWireConfigurations()) {
             this.wireConfigs.add(conf);
         }
-        s_logger.debug(s_message.exectractingPropDone());
+        logger.debug(message.exectractingPropDone());
     }
 
     /** {@inheritDoc} */
@@ -299,23 +302,23 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
     public ComponentConfiguration getConfiguration() throws KuraException {
         final Tocd wiresOCD = new Tocd();
         wiresOCD.setId(CONF_PID);
-        wiresOCD.setName(s_message.name());
-        wiresOCD.setDescription(s_message.description());
+        wiresOCD.setName(message.name());
+        wiresOCD.setDescription(message.description());
 
         final Map<String, Object> props = CollectionUtil.newHashMap();
         for (final Map.Entry<String, Object> entry : this.properties.entrySet()) {
             final String key = entry.getKey();
-            final boolean isNotWireConfigurationProperty = !(key.endsWith(s_message.emitter())
-                    || key.endsWith(s_message.receiver()) || key.endsWith(s_message.filter()));
+            final boolean isNotWireConfigurationProperty = !(key.endsWith(message.emitter())
+                    || key.endsWith(message.receiver()) || key.endsWith(message.filter()));
             if (isNotWireConfigurationProperty) {
                 props.put(key, entry.getValue());
             }
         }
         int i = 0;
         for (final WireConfiguration wireConfiguration : this.wireConfigs) {
-            final String emitterKey = String.valueOf(++i) + SEPARATOR + s_message.emitter();
-            final String receiverKey = String.valueOf(i) + SEPARATOR + s_message.receiver();
-            final String filterKey = String.valueOf(i) + SEPARATOR + s_message.filter();
+            final String emitterKey = String.valueOf(++i) + SEPARATOR + message.emitter();
+            final String receiverKey = String.valueOf(i) + SEPARATOR + message.receiver();
+            final String filterKey = String.valueOf(i) + SEPARATOR + message.filter();
             props.put(emitterKey, wireConfiguration.getEmitterPid());
             props.put(receiverKey, wireConfiguration.getReceiverPid());
             props.put(filterKey, wireConfiguration.getFilter());
@@ -360,14 +363,14 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
      *            the properties
      */
     public synchronized void updated(final Map<String, Object> properties) {
-        s_logger.debug(s_message.updatingWireService() + properties);
+        logger.debug(message.updatingWireService() + properties);
         this.extractProperties(properties);
         try {
             this.createWires();
         } catch (final KuraException e) {
-            s_logger.error(ThrowableUtil.stackTraceAsString(e));
+            logger.error(e.getMessage(), e);
         }
-        s_logger.debug(s_message.updatingWireServiceDone());
+        logger.debug(message.updatingWireServiceDone());
     }
 
 }

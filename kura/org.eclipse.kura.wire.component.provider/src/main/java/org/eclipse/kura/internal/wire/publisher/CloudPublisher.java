@@ -6,6 +6,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.publisher;
 
@@ -422,6 +426,8 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
      *
      * @param wireRecords
      *            the provided list of Wire Records
+     * @throws NullPointerException
+     *             if the provided list or the cloud client is null
      */
     private void publish(final List<WireRecord> wireRecords) {
         requireNonNull(this.cloudClient, message.cloudClientNonNull());

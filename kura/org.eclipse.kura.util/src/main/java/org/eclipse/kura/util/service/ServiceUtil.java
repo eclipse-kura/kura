@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
  *
  *******************************************************************************/
 package org.eclipse.kura.util.service;
@@ -13,11 +17,9 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Collection;
 
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.UtilMessages;
-import org.eclipse.kura.util.base.ThrowableUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -43,17 +45,18 @@ public final class ServiceUtil {
      * @param bundleContext
      *            OSGi bundle context
      * @param clazz
-     *            fully qualified class name (can be <code>null</code>)
+     *            qualified class type
      * @param filter
-     *            valid OSGi filter (can be <code>null</code>)
+     *            valid OSGi filter (can be {@code null})
      * @return non-<code>null</code> array of references to matching services
      * @throws NullPointerException
-     *             if the filter syntax is wrong (even though filter is
-     *             nullable) or bundle syntax or class instance name is null
+     *             if bundle syntax or class type is null
+     * @throws IllegalArgumentException
+     *             if the filter syntax is erroneous
      */
     @SuppressWarnings("unchecked")
     public static <T> ServiceReference<T>[] getServiceReferences(final BundleContext bundleContext,
-            final Class<T> clazz, final String filter) {
+            final Class<T> clazz, @Nullable final String filter) {
         requireNonNull(bundleContext, s_message.bundleContextNonNull());
         requireNonNull(clazz, s_message.clazzNonNull());
 
@@ -61,7 +64,7 @@ public final class ServiceUtil {
             final Collection<ServiceReference<T>> refs = bundleContext.getServiceReferences(clazz, filter);
             return refs.toArray(new ServiceReference[0]);
         } catch (final InvalidSyntaxException ise) {
-            throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, ThrowableUtil.stackTraceAsString(ise));
+            throw new IllegalArgumentException(ise);
         }
     }
 

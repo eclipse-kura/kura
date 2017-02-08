@@ -165,11 +165,4 @@ public class Toption implements Option {
     public Map<QName, String> getOtherAttributes() {
         return this.otherAttributes;
     }
-
-    @Override
-    public String toString() {
-        return "Toption [any=" + any + ", label=" + label + ", value=" + value + ", otherAttributes=" + otherAttributes
-                + "]";
-    }
-
 }

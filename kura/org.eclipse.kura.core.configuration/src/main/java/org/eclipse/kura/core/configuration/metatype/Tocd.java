@@ -275,11 +275,4 @@ public class Tocd implements OCD {
     public Map<QName, String> getOtherAttributes() {
         return this.otherAttributes;
     }
-
-    @Override
-    public String toString() {
-        return "Tocd [ad=" + ad + ", icon=" + icon + ", any=" + any + ", name=" + name + ", description=" + description
-                + ", id=" + id + ", otherAttributes=" + otherAttributes + "]";
-    }
-
 }

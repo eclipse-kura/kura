@@ -606,7 +606,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // metatypePid is either the 'pid' or 'factoryPid' attribute of the MetaType Designate element
         // 'pid' matches a service.pid, not a kura.service.pid
         s_logger.info("Registering metatype pid: {} ...", metatypePid);
-        s_logger.debug("pid: {} is registered with ocd: {}", metatypePid, ocd);
+
         this.m_ocds.put(metatypePid, ocd);
 
         if (isFactory) {
@@ -912,7 +912,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 StringBuilder entireFile = new StringBuilder();
                 while ((line = br.readLine()) != null) {
                     entireFile.append(line);
-                }         // end while
+                }          // end while
                 xmlConfigs = XmlUtil.unmarshal(entireFile.toString(), XmlComponentConfigurations.class);
             } finally {
                 if (br != null) {

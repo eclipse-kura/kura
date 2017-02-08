@@ -179,7 +179,7 @@
             </activation>
             <modules>
                 <module>org.eclipse.kura.protocol.can</module>
-                <module>org.eclipse.kura.protocol.can.test</module>
+                <!-- <module>org.eclipse.kura.protocol.can.test</module> -->
             </modules>
         </profile>
 		<profile>

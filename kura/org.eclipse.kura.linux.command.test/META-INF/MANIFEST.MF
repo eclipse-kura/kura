@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Unit tests for 'org.eclipse.kura.linux.command'
+Bundle-SymbolicName: org.eclipse.kura.linux.command.test
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Fragment-Host: org.eclipse.kura.linux.command
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: org.junit;version="4.12.0"

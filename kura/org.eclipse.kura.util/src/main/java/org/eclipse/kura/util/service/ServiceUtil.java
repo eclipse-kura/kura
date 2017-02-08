@@ -11,12 +11,9 @@ package org.eclipse.kura.util.service;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Collection;
 
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.UtilMessages;
 import org.osgi.framework.BundleContext;
@@ -29,10 +26,8 @@ import org.osgi.framework.ServiceReference;
  */
 public final class ServiceUtil {
 
-    /** Localization Resource. */
-    private static final UtilMessages s_message = LocalizationAdapter.adapt(UtilMessages.class);
+    private static final UtilMessages message = LocalizationAdapter.adapt(UtilMessages.class);
 
-    /** Constructor */
     private ServiceUtil() {
         // Static Factory Methods container. No need to instantiate.
     }
@@ -44,28 +39,26 @@ public final class ServiceUtil {
      * @param bundleContext
      *            OSGi bundle context
      * @param clazz
-     *            fully qualified class name (can be <code>null</code>)
+     *            qualified class type
      * @param filter
      *            valid OSGi filter (can be <code>null</code>)
      * @return non-<code>null</code> array of references to matching services
      * @throws NullPointerException
-     *             if the filter syntax is wrong (even though filter is
-     *             nullable) or bundle syntax or class instance name is null
+     *             if {@code bundleContext} or {@code clazz} is null
+     * @throws IllegalArgumentException
+     *             if the specified {@code filter} contains an invalid filter expression that cannot be parsed.
      */
     @SuppressWarnings("unchecked")
     public static <T> ServiceReference<T>[] getServiceReferences(final BundleContext bundleContext,
-            final Class<T> clazz, final String filter) {
-        requireNonNull(bundleContext, s_message.bundleContextNonNull());
-        requireNonNull(clazz, s_message.clazzNonNull());
+            final Class<T> clazz, @Nullable final String filter) {
+        requireNonNull(bundleContext, message.bundleContextNonNull());
+        requireNonNull(clazz, message.clazzNonNull());
 
         try {
             final Collection<ServiceReference<T>> refs = bundleContext.getServiceReferences(clazz, filter);
             return refs.toArray(new ServiceReference[0]);
         } catch (final InvalidSyntaxException ise) {
-            final StringWriter sw = new StringWriter();
-            final PrintWriter pw = new PrintWriter(sw);
-            ise.printStackTrace(pw);
-            throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, sw.toString());
+            throw new IllegalArgumentException(ise);
         }
     }
 
@@ -80,8 +73,8 @@ public final class ServiceUtil {
      *             if any of the arguments is null
      */
     public static void ungetServiceReferences(final BundleContext bundleContext, final ServiceReference<?>[] refs) {
-        requireNonNull(bundleContext, s_message.bundleContextNonNull());
-        requireNonNull(refs, s_message.referencesNonNull());
+        requireNonNull(bundleContext, message.bundleContextNonNull());
+        requireNonNull(refs, message.referencesNonNull());
 
         for (final ServiceReference<?> ref : refs) {
             bundleContext.ungetService(ref);

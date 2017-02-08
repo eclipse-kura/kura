@@ -9,7 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire;
 
@@ -18,8 +18,6 @@ import static org.eclipse.kura.internal.wire.WireServiceOptions.SEPARATOR;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_CONSUMER_PID;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_PRODUCER_PID;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Iterator;
@@ -29,7 +27,6 @@ import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
@@ -72,7 +69,6 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
     private volatile WireAdmin wireAdmin;
 
-    /** The set of wire configurations */
     private final Set<WireConfiguration> wireConfigs;
 
     private volatile WireHelperService wireHelperService;
@@ -235,7 +231,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
                 if (emitterServicePid != null && receiverServicePid != null) {
                     if (conf.getWire() == null) {
                         try {
-                            final Wire[] wires = this.wireAdmin.getWires(null);
+                            final Wire[] wires = this.wireAdmin.getWires(conf.getFilter());
                             boolean found = false;
                             if (wires != null) {
                                 for (final Wire w : wires) {
@@ -263,12 +259,12 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
 
     /** {@inheritDoc} */
     @Override
-    public void deleteWireConfiguration(final WireConfiguration wireConfiguration) { // TODO: this needs to be
-                                                                                     // refactored
+    public void deleteWireConfiguration(final WireConfiguration wireConfiguration) {
+        // TODO: this needs to be refactored
         requireNonNull(wireConfiguration, message.wireConfigurationNonNull());
         logger.info(message.removingWires());
         try {
-            final Wire[] wiresList = this.wireAdmin.getWires(null);
+            final Wire[] wiresList = this.wireAdmin.getWires(wireConfiguration.getFilter());
             if (wiresList != null) {
                 for (final Wire wire : wiresList) {
                     final Dictionary<?, ?> props = wire.getProperties();
@@ -297,10 +293,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
                 }
             }
         } catch (final InvalidSyntaxException e) {
-            final StringWriter sw = new StringWriter();
-            final PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, sw.toString());
+            throw new IllegalArgumentException(e);
         }
         logger.info(message.removingWiresDone());
     }

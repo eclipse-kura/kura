@@ -34,7 +34,6 @@ import org.osgi.framework.ServiceReference;
  */
 public final class AssetServiceImpl implements AssetService {
 
-    /** Localization Resource */
     private static final AssetMessages message = LocalizationAdapter.adapt(AssetMessages.class);
 
     /** {@inheritDoc} */
@@ -90,5 +89,4 @@ public final class AssetServiceImpl implements AssetService {
         }
         return assets;
     }
-
 }

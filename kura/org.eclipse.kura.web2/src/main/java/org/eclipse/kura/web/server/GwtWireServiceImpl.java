@@ -72,11 +72,12 @@ import com.eclipsesource.json.JsonObject;
 public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implements GwtWireService {
 
     private static final int SERVICE_WAIT_TIMEOUT = 60000;
+
     private static final String CONSUMER = "consumer";
     private static final String GRAPH = "wiregraph";
     private static final String PRODUCER = "producer";
 
-    private static final Logger s_logger = LoggerFactory.getLogger(GwtWireServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(GwtWireServiceImpl.class);
 
     private static final long serialVersionUID = -6577843865830245755L;
 
@@ -163,7 +164,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                 return result.toString();
             }
         }
-        s_logger.error("Could not find WireComponent for pid {}", pid);
+        logger.error("Could not find WireComponent for pid {}", pid);
         throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
     }
 
@@ -401,7 +402,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                 // check if jObj is an empty JSON. It means all the existing
                 // wire configurations need to be deleted
                 if (length == 0) {
-                    s_logger.info("Deleting Wire: Emitter PID -> " + wireConfiguration.getEmitterPid()
+                    logger.info("Deleting Wire: Emitter PID -> " + wireConfiguration.getEmitterPid()
                             + " | Receiver PID -> " + wireConfiguration.getReceiverPid());
                     wireService.deleteWireConfiguration(wireConfiguration);
                 }
@@ -421,7 +422,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                     }
                 }
                 if (!isFound) {
-                    s_logger.info("Deleting Wire: Emitter PID -> " + wireConfiguration.getEmitterPid()
+                    logger.info("Deleting Wire: Emitter PID -> " + wireConfiguration.getEmitterPid()
                             + " | Receiver PID -> " + wireConfiguration.getReceiverPid());
                     wireService.deleteWireConfiguration(wireConfiguration);
                 }
@@ -433,7 +434,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                 // check if jObj is an empty JSON. It means all the existing
                 // wire components need to be deleted
                 if (length == 0) {
-                    s_logger.info("Deleting Wire Component: PID -> " + componentPid);
+                    logger.info("Deleting Wire Component: PID -> " + componentPid);
                     configService.deleteFactoryConfiguration(componentPid, false);
                     continue;
                 }
@@ -447,7 +448,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                     }
                 }
                 if (!isFound) {
-                    s_logger.info("Deleting Wire Component: PID -> " + componentPid);
+                    logger.info("Deleting Wire Component: PID -> " + componentPid);
                     configService.deleteFactoryConfiguration(componentPid, false);
                 }
             }
@@ -462,7 +463,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                 driver = jsonObject.getString("driver", null);
                 Map<String, Object> properties = null;
                 if ((pid != null) && !wireComponents.contains(pid)) {
-                    s_logger.info("Creating new Wire Component: Factory PID -> " + fpid + " | PID -> " + pid);
+                    logger.info("Creating new Wire Component: Factory PID -> " + fpid + " | PID -> " + pid);
                     if (driver != null) {
                         properties = new HashMap<>();
                         properties.put("asset.desc", "Sample Asset");
@@ -480,11 +481,11 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                 final String receiverPid = conf.getReceiverPid();
                 final WireConfiguration temp = new WireConfiguration(emitterPid, receiverPid, null);
                 if (!wireConfs.contains(temp)) {
-                    s_logger.info(
+                    logger.info(
                             "Creating new wire: Emitter PID -> " + emitterPid + " | Consumer PID -> " + receiverPid);
-                    s_logger.info("Service PID for Emitter before tracker: {}",
+                    logger.info("Service PID for Emitter before tracker: {}",
                             wireHelperService.getServicePid(emitterPid));
-                    s_logger.info("Service PID for Receiver before tracker: {}",
+                    logger.info("Service PID for Receiver before tracker: {}",
                             wireHelperService.getServicePid(receiverPid));
 
                     // track and wait for the emitter

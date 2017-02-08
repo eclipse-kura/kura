@@ -25,7 +25,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -236,16 +235,15 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      *            the no of records to keep in the table
      */
     private void clear(final int noOfRecordsToKeep) {
-        final String sqlTableName = this.dbHelper
-                .sanitizeSqlTableAndColumnName(this.wireRecordStoreOptions.getTableName());
+        final String tableName = this.wireRecordStoreOptions.getTableName();
+        final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
         Connection conn = null;
         try {
             conn = this.dbHelper.getConnection();
 
             final String catalog = conn.getCatalog();
             final DatabaseMetaData dbMetaData = conn.getMetaData();
-            final ResultSet rsTbls = dbMetaData.getTables(catalog, null, this.wireRecordStoreOptions.getTableName(),
-                    TABLE_TYPE);
+            final ResultSet rsTbls = dbMetaData.getTables(catalog, null, tableName, TABLE_TYPE);
             if (rsTbls.next()) {
                 // table does exist, truncate it
                 if (noOfRecordsToKeep == 0) {
@@ -477,37 +475,29 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
             final Object value = entry.getValue();
             switch (dataType) {
             case BOOLEAN:
-                logger.debug(message.storeBoolean(((BooleanValue) value).getValue()));
                 stmt.setBoolean(i, ((BooleanValue) value).getValue());
                 break;
             case BYTE:
-                logger.debug(message.storeByte(((ByteValue) value).getValue()));
                 stmt.setByte(i, ((ByteValue) value).getValue());
                 break;
             case DOUBLE:
-                logger.debug(message.storeDouble(((DoubleValue) value).getValue()));
                 stmt.setDouble(i, ((DoubleValue) value).getValue());
                 break;
             case INTEGER:
-                logger.debug(message.storeInteger(((IntegerValue) value).getValue()));
                 stmt.setInt(i, ((IntegerValue) value).getValue());
                 break;
             case LONG:
-                logger.debug(message.storelong(((LongValue) value).getValue()));
                 stmt.setLong(i, ((LongValue) value).getValue());
                 break;
             case BYTE_ARRAY:
-                logger.debug(message.storeByteArray(Arrays.toString(((ByteArrayValue) value).getValue())));
                 byte[] byteArrayValue = ((ByteArrayValue) value).getValue();
                 InputStream is = new ByteArrayInputStream(byteArrayValue);
                 stmt.setBlob(i, is);
                 break;
             case SHORT:
-                logger.debug(message.storeShort(((ShortValue) value).getValue()));
                 stmt.setShort(i, ((ShortValue) value).getValue());
                 break;
             case STRING:
-                logger.debug(message.storeString(((StringValue) value).getValue()));
                 stmt.setString(i, ((StringValue) value).getValue());
                 break;
             default:

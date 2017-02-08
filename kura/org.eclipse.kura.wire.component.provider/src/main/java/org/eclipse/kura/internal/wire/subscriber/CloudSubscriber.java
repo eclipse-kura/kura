@@ -401,7 +401,7 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
                 final byte[] value = TypeUtil.objectToByteArray(entryValue);
                 convertedValue = TypedValues.newByteArrayValue(value);
             } else {
-                throw new IllegalArgumentException("Unknown metric type");
+                throw new IllegalArgumentException(wireMessages.unknownMetricType());
             }
             wireProperties.put(entryKey, convertedValue);
         }

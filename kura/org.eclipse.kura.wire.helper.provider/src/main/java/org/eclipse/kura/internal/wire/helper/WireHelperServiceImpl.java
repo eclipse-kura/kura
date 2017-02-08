@@ -128,8 +128,8 @@ public final class WireHelperServiceImpl implements WireHelperService {
         final ServiceReference<?>[] refs = ServiceUtil.getServiceReferences(context, WireComponent.class, null);
         try {
             for (final ServiceReference<?> ref : refs) {
-                final WireComponent wc = (WireComponent) context.getService(ref);
-                if (ref.getProperty(KURA_SERVICE_PID).equals(wireComponentPid) && wc instanceof WireEmitter) {
+                if (ref.getProperty(KURA_SERVICE_PID).equals(wireComponentPid)
+                        && context.getService(ref) instanceof WireEmitter) {
                     return true;
                 }
             }
@@ -147,8 +147,8 @@ public final class WireHelperServiceImpl implements WireHelperService {
         final ServiceReference<?>[] refs = ServiceUtil.getServiceReferences(context, WireComponent.class, null);
         try {
             for (final ServiceReference<?> ref : refs) {
-                final WireComponent wc = (WireComponent) context.getService(ref);
-                if (ref.getProperty(KURA_SERVICE_PID).equals(wireComponentPid) && wc instanceof WireReceiver) {
+                if (ref.getProperty(KURA_SERVICE_PID).equals(wireComponentPid)
+                        && context.getService(ref) instanceof WireReceiver) {
                     return true;
                 }
             }

@@ -16,6 +16,8 @@ package org.eclipse.kura.internal.wire.publisher;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
+import static org.eclipse.kura.internal.wire.publisher.PayloadType.JSON;
+import static org.eclipse.kura.internal.wire.publisher.PayloadType.KURA_PAYLOAD;
 
 import java.util.List;
 import java.util.Map;
@@ -353,6 +355,8 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
      *
      * @param wireRecords
      *            the provided list of {@link WireRecord}s
+     * @throws NullPointerException
+     *             if one of the arguments is null
      */
     private void publish(final List<WireRecord> wireRecords) {
         requireNonNull(this.cloudClient, message.cloudClientNonNull());
@@ -362,10 +366,11 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
             for (final WireRecord dataRecord : wireRecords) {
                 // prepare the topic
                 final String appTopic = this.cloudPublisherOptions.getPublishingTopic();
-                if (this.cloudPublisherOptions.getPayloadType() == PayloadType.KURA_PAYLOAD) {
+                final PayloadType payloadType = this.cloudPublisherOptions.getPayloadType();
+                if (payloadType == KURA_PAYLOAD) {
                     publishKuraPayload(dataRecord, appTopic);
                 }
-                if (this.cloudPublisherOptions.getPayloadType() == PayloadType.JSON) {
+                if (payloadType == JSON) {
                     publishJson(dataRecord, appTopic);
                 }
             }
@@ -399,7 +404,7 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
      * Setup cloud client.
      *
      * @throws KuraException
-     *             the kura exception
+     *             if cloud client setup fails.
      */
     private void setupCloudClient() throws KuraException {
         closeCloudClient();

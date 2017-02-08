@@ -60,8 +60,8 @@ public final class LocalizationAdapter {
 
     private static class C10NWrapper<T> implements InvocationHandler {
 
-        private T wrapped;
-        private HashMap<Method, String> cache = new HashMap<>();
+        private final T wrapped;
+        private final HashMap<Method, String> cache = new HashMap<>();
 
         public C10NWrapper(T wrapped) {
             this.wrapped = wrapped;

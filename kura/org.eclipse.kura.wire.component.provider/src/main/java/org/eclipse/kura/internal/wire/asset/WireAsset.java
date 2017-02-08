@@ -13,14 +13,15 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.asset;
 
-import static java.util.Objects.nonNull;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.asset.ChannelType.READ;
 import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
 import static org.eclipse.kura.asset.ChannelType.WRITE;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,6 +34,7 @@ import org.eclipse.kura.asset.AssetStatus;
 import org.eclipse.kura.asset.Channel;
 import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.asset.provider.BaseAsset;
+import org.eclipse.kura.driver.DriverRecord;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.TypedValue;
@@ -90,6 +92,7 @@ import org.slf4j.LoggerFactory;
  *
  * @see Channel
  * @see AssetRecord
+ * @see DriverRecord
  * @see WireRecord
  * @see Asset
  */
@@ -257,11 +260,9 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * @return list of Asset Records containing the values to be written
      * @throws NullPointerException
      *             if argument is null
-     * @throws IllegalArgumentException
-     *             if argument is empty
      */
     private List<AssetRecord> determineWritingChannels(final WireRecord record) {
-        requireNonNull(record, message.wireRecordsNonNull());
+        requireNonNull(record, message.wireRecordNonNull());
 
         final List<AssetRecord> assetRecordsToWriteChannels = CollectionUtil.newArrayList();
         final Map<Long, Channel> channels = this.assetConfiguration.getAssetChannels();
@@ -346,7 +347,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
             throw new IllegalArgumentException(message.assetRecordsNonEmpty());
         }
 
-        final WireRecord wireRecord = new WireRecord();
+        final Map<String, TypedValue<?>> wireRecordProperties = new HashMap<>();
         for (final AssetRecord assetRecord : assetRecords) {
             final AssetStatus assetStatus = assetRecord.getAssetStatus();
             final AssetFlag assetFlag = assetStatus.getAssetFlag();
@@ -361,19 +362,21 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
                 typedValue = assetRecord.getValue();
             }
 
-            wireRecord.addProperty(channelName, typedValue);
+            wireRecordProperties.put(channelName, typedValue);
 
             try {
-                wireRecord.addProperty(channelName + PROPERTY_SEPARATOR + ASSET_NAME,
+                wireRecordProperties.put(channelName + PROPERTY_SEPARATOR + ASSET_NAME,
                         TypedValues.newStringValue(getConfiguration().getPid()));
             } catch (final KuraException e) {
                 logger.error(message.configurationNonNull(), e);
             }
 
-            wireRecord.addProperty(channelName + PROPERTY_SEPARATOR + CHANNEL_ID, TypedValues.newLongValue(channelId));
-            wireRecord.addProperty(channelName + PROPERTY_SEPARATOR + TIMESTAMP,
+            wireRecordProperties.put(channelName + PROPERTY_SEPARATOR + CHANNEL_ID,
+                    TypedValues.newLongValue(channelId));
+            wireRecordProperties.put(channelName + PROPERTY_SEPARATOR + TIMESTAMP,
                     TypedValues.newLongValue(assetRecord.getTimestamp()));
         }
+        final WireRecord wireRecord = new WireRecord(wireRecordProperties);
         this.wireSupport.emit(Arrays.asList(wireRecord));
     }
 

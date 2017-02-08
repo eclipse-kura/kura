@@ -38,14 +38,6 @@ public class WireRecord {
     /**
      * Instantiates a new {@link WireRecord}.
      *
-     */
-    public WireRecord() {
-        this.properties = new HashMap<>();
-    }
-
-    /**
-     * Instantiates a new {@link WireRecord}.
-     *
      * @param properties
      *            Map that represents the key-value pairs
      * @throws NullPointerException
@@ -54,7 +46,7 @@ public class WireRecord {
     public WireRecord(Map<String, TypedValue<?>> properties) {
         requireNonNull(properties, "Properties cannot be null");
 
-        this.properties = properties;
+        this.properties = new HashMap<>(properties);
     }
 
     /**
@@ -65,35 +57,4 @@ public class WireRecord {
     public Map<String, TypedValue<?>> getProperties() {
         return Collections.unmodifiableMap(this.properties);
     }
-
-    /**
-     * Adds a key-value pair to the existing {@link WireRecord} properties.
-     *
-     * @param key
-     *            String representing the key of the entry in the map.
-     * @param value
-     *            a TypedValue that represents the value that needs to be added to the map.
-     * @throws NullPointerException
-     *             if any of the argument is null
-     */
-    public void addProperty(String key, TypedValue<?> value) {
-        requireNonNull(key, "The provided key cannot be null");
-        requireNonNull(value, "The provided key cannot be null");
-
-        this.properties.put(key, value);
-    }
-
-    /**
-     * Adds the provided map to the existing {@link WireRecord}
-     *
-     * @param properties
-     *            a Map that will be added to the existing {@link WireRecord} properties
-     * @throws NullPointerException
-     *             if any of the argument is null
-     */
-    public void addAll(Map<String, TypedValue<?>> properties) {
-        requireNonNull(properties, "The provided map cannot be null");
-        this.properties.putAll(properties);
-    }
-
 }

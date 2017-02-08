@@ -535,6 +535,9 @@ public interface WireMessages {
     @En("typed_value")
     public String typedValue();
 
+    @En("Unknown metric type.")
+    public String unknownMetricType();
+
     @En("Updating Cloud Publisher Wire Component...")
     public String updatingCloudPublisher();
 

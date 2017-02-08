@@ -13,9 +13,9 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.filter;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.Objects.nonNull;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +35,7 @@ import org.eclipse.kura.internal.wire.store.DbDataTypeMapper;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.DataType;
+import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
@@ -192,7 +194,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
             rset = stmt.executeQuery(sqlView);
             if (nonNull(rset)) {
                 while (rset.next()) {
-                    final WireRecord wireRecord = new WireRecord();
+                    final Map<String, TypedValue<?>> wireRecordProperties = new HashMap<>();
 
                     final ResultSetMetaData rmet = rset.getMetaData();
                     for (int i = 1; i <= rmet.getColumnCount(); i++) {
@@ -206,40 +208,41 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
                         switch (dataType) {
                         case BOOLEAN:
                             final boolean boolValue = rset.getBoolean(i);
-                            wireRecord.addProperty(fieldName, TypedValues.newBooleanValue(boolValue));
+                            wireRecordProperties.put(fieldName, TypedValues.newBooleanValue(boolValue));
                             break;
                         case BYTE:
                             final byte byteValue = rset.getByte(i);
-                            wireRecord.addProperty(fieldName, TypedValues.newByteValue(byteValue));
+                            wireRecordProperties.put(fieldName, TypedValues.newByteValue(byteValue));
                             break;
                         case DOUBLE:
                             final double doubleValue = rset.getDouble(i);
-                            wireRecord.addProperty(fieldName, TypedValues.newDoubleValue(doubleValue));
+                            wireRecordProperties.put(fieldName, TypedValues.newDoubleValue(doubleValue));
                             break;
                         case INTEGER:
                             final int intValue = rset.getInt(i);
-                            wireRecord.addProperty(fieldName, TypedValues.newIntegerValue(intValue));
+                            wireRecordProperties.put(fieldName, TypedValues.newIntegerValue(intValue));
                             break;
                         case LONG:
                             final long longValue = rset.getLong(i);
-                            wireRecord.addProperty(fieldName, TypedValues.newLongValue(longValue));
+                            wireRecordProperties.put(fieldName, TypedValues.newLongValue(longValue));
                             break;
                         case BYTE_ARRAY:
                             final byte[] bytesValue = rset.getBytes(i);
-                            wireRecord.addProperty(fieldName, TypedValues.newByteArrayValue(bytesValue));
+                            wireRecordProperties.put(fieldName, TypedValues.newByteArrayValue(bytesValue));
                             break;
                         case SHORT:
                             final short shortValue = rset.getShort(i);
-                            wireRecord.addProperty(fieldName, TypedValues.newShortValue(shortValue));
+                            wireRecordProperties.put(fieldName, TypedValues.newShortValue(shortValue));
                             break;
                         case STRING:
                             final String stringValue = rset.getString(i);
-                            wireRecord.addProperty(fieldName, TypedValues.newStringValue(stringValue));
+                            wireRecordProperties.put(fieldName, TypedValues.newStringValue(stringValue));
                             break;
                         default:
                             break;
                         }
                     }
+                    final WireRecord wireRecord = new WireRecord(wireRecordProperties);
                     dataRecords.add(wireRecord);
                 }
             }
@@ -256,9 +259,8 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
 
     /**
      * Trigger data emit as soon as new {@link WireEnvelope} is received. The component caches the last database
-     * read and
-     * provides, as output, this value until the cache validity is not expired. Otherwise, a new database read is
-     * performed, and the value is kept in the {@link #lastRecords} field.
+     * read and provides, as output, this value until the cache validity is not expired. Otherwise, a new database read
+     * is performed, and the value is kept in the {@link #lastRecords} field.
      * The cache validity is determined by the {@link DbWireRecordFilterOptions#CONF_CACHE_EXPIRATION_INTERVAL} property
      * provided by the user in the component configuration.
      */

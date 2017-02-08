@@ -34,7 +34,6 @@ import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
-import org.eclipse.kura.util.base.TypeUtil;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
@@ -368,41 +367,14 @@ public final class CloudSubscriber implements WireEmitter, ConfigurableComponent
     private List<WireRecord> buildWireRecord(final KuraPayload payload) throws IOException {
         requireNonNull(payload, wireMessages.payloadNonNull());
 
-        Map<String, Object> kuraPayloadProperties = payload.metrics();
-        Map<String, TypedValue<?>> wireProperties = new HashMap<>();
+        final Map<String, Object> kuraPayloadProperties = payload.metrics();
+        final Map<String, TypedValue<?>> wireProperties = new HashMap<>();
 
         for (Entry<String, Object> entry : kuraPayloadProperties.entrySet()) {
-            String entryKey = entry.getKey();
-            Object entryValue = entry.getValue();
+            final String entryKey = entry.getKey();
+            final Object entryValue = entry.getValue();
 
-            TypedValue<?> convertedValue;
-            if (entryValue instanceof Boolean) {
-                final boolean value = Boolean.parseBoolean(String.valueOf(entryValue));
-                convertedValue = TypedValues.newBooleanValue(value);
-            } else if (entryValue instanceof Byte) {
-                final byte value = Byte.parseByte(String.valueOf(entryValue));
-                convertedValue = TypedValues.newByteValue(value);
-            } else if (entryValue instanceof Long) {
-                final long value = Long.parseLong(String.valueOf(entryValue));
-                convertedValue = TypedValues.newLongValue(value);
-            } else if (entryValue instanceof Double) {
-                final double value = Double.parseDouble(String.valueOf(entryValue));
-                convertedValue = TypedValues.newDoubleValue(value);
-            } else if (entryValue instanceof Integer) {
-                final int value = Integer.parseInt(String.valueOf(entryValue));
-                convertedValue = TypedValues.newIntegerValue(value);
-            } else if (entryValue instanceof Short) {
-                final short value = Short.parseShort(String.valueOf(entryValue));
-                convertedValue = TypedValues.newShortValue(value);
-            } else if (entryValue instanceof String) {
-                final String value = String.valueOf(entryValue);
-                convertedValue = TypedValues.newStringValue(value);
-            } else if (entryValue instanceof byte[]) {
-                final byte[] value = TypeUtil.objectToByteArray(entryValue);
-                convertedValue = TypedValues.newByteArrayValue(value);
-            } else {
-                throw new IllegalArgumentException(wireMessages.unknownMetricType());
-            }
+            final TypedValue<?> convertedValue = TypedValues.newTypedValue(entryValue);
             wireProperties.put(entryKey, convertedValue);
         }
 

@@ -31,10 +31,8 @@ import java.util.Map;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.internal.wire.common.DbServiceHelper;
-import org.eclipse.kura.internal.wire.store.DbDataTypeMapper;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
-import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireEmitter;
@@ -203,44 +201,9 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
                             fieldName = rmet.getColumnName(i);
                         }
 
-                        final int jdbcType = rmet.getColumnType(i);
-                        final DataType dataType = DbDataTypeMapper.getDataType(jdbcType);
-                        switch (dataType) {
-                        case BOOLEAN:
-                            final boolean boolValue = rset.getBoolean(i);
-                            wireRecordProperties.put(fieldName, TypedValues.newBooleanValue(boolValue));
-                            break;
-                        case BYTE:
-                            final byte byteValue = rset.getByte(i);
-                            wireRecordProperties.put(fieldName, TypedValues.newByteValue(byteValue));
-                            break;
-                        case DOUBLE:
-                            final double doubleValue = rset.getDouble(i);
-                            wireRecordProperties.put(fieldName, TypedValues.newDoubleValue(doubleValue));
-                            break;
-                        case INTEGER:
-                            final int intValue = rset.getInt(i);
-                            wireRecordProperties.put(fieldName, TypedValues.newIntegerValue(intValue));
-                            break;
-                        case LONG:
-                            final long longValue = rset.getLong(i);
-                            wireRecordProperties.put(fieldName, TypedValues.newLongValue(longValue));
-                            break;
-                        case BYTE_ARRAY:
-                            final byte[] bytesValue = rset.getBytes(i);
-                            wireRecordProperties.put(fieldName, TypedValues.newByteArrayValue(bytesValue));
-                            break;
-                        case SHORT:
-                            final short shortValue = rset.getShort(i);
-                            wireRecordProperties.put(fieldName, TypedValues.newShortValue(shortValue));
-                            break;
-                        case STRING:
-                            final String stringValue = rset.getString(i);
-                            wireRecordProperties.put(fieldName, TypedValues.newStringValue(stringValue));
-                            break;
-                        default:
-                            break;
-                        }
+                        final Object dbExtractedData = rset.getObject(i);
+                        final TypedValue<?> value = TypedValues.newTypedValue(dbExtractedData);
+                        wireRecordProperties.put(fieldName, value);
                     }
                     final WireRecord wireRecord = new WireRecord(wireRecordProperties);
                     dataRecords.add(wireRecord);

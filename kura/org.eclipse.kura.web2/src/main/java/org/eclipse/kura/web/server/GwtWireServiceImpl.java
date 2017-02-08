@@ -506,10 +506,10 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                     producerTracker.waitForService(SERVICE_WAIT_TIMEOUT);
                     consumerTracker.waitForService(SERVICE_WAIT_TIMEOUT);
 
-                    wireService.createWireConfiguration(emitterPid, receiverPid);
-
                     producerTracker.close();
                     consumerTracker.close();
+
+                    wireService.createWireConfiguration(emitterPid, receiverPid);
                 }
             }
 

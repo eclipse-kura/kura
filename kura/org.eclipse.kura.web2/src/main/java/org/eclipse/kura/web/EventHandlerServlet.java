@@ -17,7 +17,6 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.util.base.StringUtil.isNullOrEmpty;
-import static org.eclipse.kura.util.base.ThrowableUtil.stackTraceAsString;
 import static org.eclipse.kura.wire.WireSupport.EMIT_EVENT_TOPIC;
 import static org.osgi.service.event.EventConstants.EVENT_TOPIC;
 
@@ -157,7 +156,7 @@ public final class EventHandlerServlet extends HttpServlet {
                     printStream.flush();
                 }
             } catch (final InterruptedException ex) {
-                logger.warn("Element removal timeout..." + stackTraceAsString(ex));
+                logger.warn("Element removal timeout...", ex);
                 response.setStatus(HttpServletResponse.SC_OK);
             }
         });
@@ -170,7 +169,7 @@ public final class EventHandlerServlet extends HttpServlet {
             try {
                 outputStream.close();
             } catch (final IOException ex) {
-                logger.warn("Outport Stream closing issue..." + stackTraceAsString(ex));
+                logger.warn("Outport Stream closing issue...", ex);
             }
             return null;
         });

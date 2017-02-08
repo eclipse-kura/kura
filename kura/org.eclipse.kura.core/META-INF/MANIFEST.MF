@@ -33,4 +33,4 @@ Import-Package: javax.crypto,
  org.osgi.util.tracker;version="1.5.0",
  org.slf4j;version="1.6.4"
 Bundle-ClassPath: .,
- lib/org.eclipse.paho.client.mqttv3-1.0.1.2.jar
+ lib/org.eclipse.paho.client.mqttv3-1.1.0.jar

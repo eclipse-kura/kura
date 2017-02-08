@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 public class DataServiceImpl
         implements DataService, DataTransportListener, ConfigurableComponent, CloudConnectionStatusComponent {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(DataServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataServiceImpl.class);
 
     private static final int TRANSPORT_TASK_TIMEOUT = 1; // In seconds
 
@@ -66,27 +66,27 @@ public class DataServiceImpl
     private static final String MAX_IN_FLIGHT_MSGS_PROP_NAME = "in-flight-messages.max-number";
     private static final String IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_PROP_NAME = "in-flight-messages.congestion-timeout";
 
-    private final Map<String, Object> m_properties = new HashMap<String, Object>();
+    private final Map<String, Object> properties = new HashMap<String, Object>();
 
-    private DataTransportService m_dataTransportService;
-    private DbService m_dbService;
-    private DataServiceListenerS m_dataServiceListeners;
+    private DataTransportService dataTransportService;
+    private DbService dbService;
+    private DataServiceListenerS dataServiceListeners;
 
-    protected ScheduledExecutorService m_reconnectExecutor;
-    private ScheduledFuture<?> m_reconnectFuture;
+    protected ScheduledExecutorService reconnectExecutor;
+    private ScheduledFuture<?> reconnectFuture;
 
     // A dedicated executor for the publishing task
-    private ScheduledExecutorService m_publisherExecutor;
+    private ScheduledExecutorService publisherExecutor;
 
-    private DataStore m_store;
+    private DataStore store;
 
-    private Map<DataTransportToken, Integer> m_inFlightMsgIds;
+    private Map<DataTransportToken, Integer> inFlightMsgIds;
 
-    private ScheduledExecutorService m_congestionExecutor;
-    private ScheduledFuture<?> m_congestionFuture;
+    private ScheduledExecutorService congestionExecutor;
+    private ScheduledFuture<?> congestionFuture;
 
-    private CloudConnectionStatusService m_cloudConnectionStatusService;
-    private CloudConnectionStatusEnum m_notificationStatus = CloudConnectionStatusEnum.OFF;
+    private CloudConnectionStatusService cloudConnectionStatusService;
+    private CloudConnectionStatusEnum notificationStatus = CloudConnectionStatusEnum.OFF;
 
     // ----------------------------------------------------------------
     //
@@ -96,96 +96,96 @@ public class DataServiceImpl
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         String pid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
-        s_logger.info("Activating {}...", pid);
+        logger.info("Activating {}...", pid);
 
-        this.m_reconnectExecutor = Executors.newSingleThreadScheduledExecutor();
-        this.m_publisherExecutor = Executors.newSingleThreadScheduledExecutor();
-        this.m_congestionExecutor = Executors.newSingleThreadScheduledExecutor();
+        this.reconnectExecutor = Executors.newSingleThreadScheduledExecutor();
+        this.publisherExecutor = Executors.newSingleThreadScheduledExecutor();
+        this.congestionExecutor = Executors.newSingleThreadScheduledExecutor();
 
-        this.m_properties.putAll(properties);
+        this.properties.putAll(properties);
 
         String[] parts = pid.split("-");
         String table = "ds_messages";
         if (parts.length > 1) {
             table += "_" + parts[1];
         }
-        this.m_store = new DbDataStore(table);
+        this.store = new DbDataStore(table);
 
         try {
-            this.m_store.start(this.m_dbService, (Integer) this.m_properties.get(STORE_HOUSEKEEPER_INTERVAL_PROP_NAME),
-                    (Integer) this.m_properties.get(STORE_PURGE_AGE_PROP_NAME),
-                    (Integer) this.m_properties.get(STORE_CAPACITY_PROP_NAME));
+            this.store.start(this.dbService, (Integer) this.properties.get(STORE_HOUSEKEEPER_INTERVAL_PROP_NAME),
+                    (Integer) this.properties.get(STORE_PURGE_AGE_PROP_NAME),
+                    (Integer) this.properties.get(STORE_CAPACITY_PROP_NAME));
 
             // The initial list of in-flight messages
-            List<DataMessage> inFlightMsgs = this.m_store.allInFlightMessagesNoPayload();
+            List<DataMessage> inFlightMsgs = this.store.allInFlightMessagesNoPayload();
 
             // The map associating a DataTransportToken with a message ID
-            this.m_inFlightMsgIds = new ConcurrentHashMap<DataTransportToken, Integer>();
+            this.inFlightMsgIds = new ConcurrentHashMap<DataTransportToken, Integer>();
 
             if (inFlightMsgs != null) {
                 for (DataMessage message : inFlightMsgs) {
 
                     DataTransportToken token = new DataTransportToken(message.getPublishedMessageId(),
                             message.getSessionId());
-                    this.m_inFlightMsgIds.put(token, message.getId());
+                    this.inFlightMsgIds.put(token, message.getId());
 
-                    s_logger.debug("Restored in-fligh messages from store. Topic: {}, ID: {}, MQTT message ID: {}",
+                    logger.debug("Restored in-fligh messages from store. Topic: {}, ID: {}, MQTT message ID: {}",
                             new Object[] { message.getTopic(), message.getId(), message.getPublishedMessageId() });
                 }
             }
         } catch (KuraStoreException e) {
-            s_logger.error("Failed to start store", e);
+            logger.error("Failed to start store", e);
             throw new ComponentException("Failed to start store", e);
         }
 
-        this.m_dataServiceListeners = new DataServiceListenerS(componentContext);
+        this.dataServiceListeners = new DataServiceListenerS(componentContext);
 
         // Register the component in the CloudConnectionStatus Service
-        this.m_cloudConnectionStatusService.register(this);
+        this.cloudConnectionStatusService.register(this);
 
-        this.m_dataTransportService.addDataTransportListener(this);
+        this.dataTransportService.addDataTransportListener(this);
 
         startReconnectTask();
     }
 
     public void updated(Map<String, Object> properties) {
-        s_logger.info("Updating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
+        logger.info("Updating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
         stopReconnectTask();
 
-        this.m_properties.clear();
-        this.m_properties.putAll(properties);
+        this.properties.clear();
+        this.properties.putAll(properties);
 
-        this.m_store.update((Integer) this.m_properties.get(STORE_HOUSEKEEPER_INTERVAL_PROP_NAME),
-                (Integer) this.m_properties.get(STORE_PURGE_AGE_PROP_NAME),
-                (Integer) this.m_properties.get(STORE_CAPACITY_PROP_NAME));
+        this.store.update((Integer) this.properties.get(STORE_HOUSEKEEPER_INTERVAL_PROP_NAME),
+                (Integer) this.properties.get(STORE_PURGE_AGE_PROP_NAME),
+                (Integer) this.properties.get(STORE_CAPACITY_PROP_NAME));
 
-        if (!this.m_dataTransportService.isConnected()) {
+        if (!this.dataTransportService.isConnected()) {
             startReconnectTask();
         }
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        s_logger.info("Deactivating {}...", this.m_properties.get(ConfigurationService.KURA_SERVICE_PID));
+        logger.info("Deactivating {}...", this.properties.get(ConfigurationService.KURA_SERVICE_PID));
 
         stopReconnectTask();
-        this.m_reconnectExecutor.shutdownNow();
+        this.reconnectExecutor.shutdownNow();
 
-        this.m_congestionExecutor.shutdownNow();
+        this.congestionExecutor.shutdownNow();
 
         disconnect();
 
         // Await termination of the publisher executor tasks
         try {
-            this.m_publisherExecutor.awaitTermination(TRANSPORT_TASK_TIMEOUT, TimeUnit.SECONDS);
+            this.publisherExecutor.awaitTermination(TRANSPORT_TASK_TIMEOUT, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            s_logger.info("Interrupted", e);
+            logger.info("Interrupted", e);
         }
-        this.m_publisherExecutor.shutdownNow();
+        this.publisherExecutor.shutdownNow();
 
-        this.m_dataTransportService.removeDataTransportListener(this);
+        this.dataTransportService.removeDataTransportListener(this);
 
-        this.m_store.stop();
+        this.store.stop();
     }
 
     // ----------------------------------------------------------------
@@ -195,44 +195,44 @@ public class DataServiceImpl
     // ----------------------------------------------------------------
 
     public void setDataTransportService(DataTransportService dataTransportService) {
-        this.m_dataTransportService = dataTransportService;
+        this.dataTransportService = dataTransportService;
     }
 
     public void unsetDataTransportService(DataTransportService dataTransportService) {
-        this.m_dataTransportService = null;
+        this.dataTransportService = null;
     }
 
     public void setDbService(DbService dbService) {
-        this.m_dbService = dbService;
+        this.dbService = dbService;
     }
 
     public void unsetDbService(DbService dbService) {
-        this.m_dbService = null;
+        this.dbService = null;
     }
 
     public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
-        this.m_cloudConnectionStatusService = cloudConnectionStatusService;
+        this.cloudConnectionStatusService = cloudConnectionStatusService;
     }
 
     public void unsetCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
-        this.m_cloudConnectionStatusService = null;
+        this.cloudConnectionStatusService = null;
     }
 
     @Override
     public void addDataServiceListener(DataServiceListener listener) {
-        this.m_dataServiceListeners.add(listener);
+        this.dataServiceListeners.add(listener);
     }
 
     @Override
     public void removeDataServiceListener(DataServiceListener listener) {
-        this.m_dataServiceListeners.remove(listener);
+        this.dataServiceListeners.remove(listener);
     }
 
     @Override
     public void onConnectionEstablished(boolean newSession) {
 
-        s_logger.info("Notified connected");
-        this.m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.ON);
+        logger.info("Notified connected");
+        this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.ON);
 
         // On a new session all messages the were in-flight in the previous session
         // would be lost and never confirmed by the DataPublisherService.
@@ -257,30 +257,30 @@ public class DataServiceImpl
         // in the DataPublisherService persistence.
 
         if (newSession) {
-            Boolean unpublishInFlightMsgs = (Boolean) this.m_properties.get(REPUBLISH_IN_FLIGHT_MSGS_PROP_NAME);
+            Boolean unpublishInFlightMsgs = (Boolean) this.properties.get(REPUBLISH_IN_FLIGHT_MSGS_PROP_NAME);
 
             if (unpublishInFlightMsgs) {
-                s_logger.info(
+                logger.info(
                         "New session established. Unpublishing all in-flight messages. Disregarding the QoS level, this may cause duplicate messages.");
                 try {
-                    this.m_store.unpublishAllInFlighMessages();
-                    this.m_inFlightMsgIds.clear();
+                    this.store.unpublishAllInFlighMessages();
+                    this.inFlightMsgIds.clear();
                 } catch (KuraStoreException e) {
-                    s_logger.error("Failed to unpublish in-flight messages", e);
+                    logger.error("Failed to unpublish in-flight messages", e);
                 }
             } else {
-                s_logger.info("New session established. Dropping all in-flight messages.");
+                logger.info("New session established. Dropping all in-flight messages.");
                 try {
-                    this.m_store.dropAllInFlightMessages();
-                    this.m_inFlightMsgIds.clear();
+                    this.store.dropAllInFlightMessages();
+                    this.inFlightMsgIds.clear();
                 } catch (KuraStoreException e) {
-                    s_logger.error("Failed to drop in-flight messages", e);
+                    logger.error("Failed to drop in-flight messages", e);
                 }
             }
         }
 
         // Notify the listeners
-        this.m_dataServiceListeners.onConnectionEstablished();
+        this.dataServiceListeners.onConnectionEstablished();
 
         // Schedule execution of a publisher task
         submitPublishingWork();
@@ -288,71 +288,71 @@ public class DataServiceImpl
 
     @Override
     public void onDisconnecting() {
-        s_logger.info("Notified disconnecting");
+        logger.info("Notified disconnecting");
 
         // Notify the listeners
-        this.m_dataServiceListeners.onDisconnecting();
+        this.dataServiceListeners.onDisconnecting();
 
         // Schedule execution of a publisher task waiting until done or timeout.
         Future<?> future = submitPublishingWork();
         try {
             future.get(TRANSPORT_TASK_TIMEOUT, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            s_logger.info("Interrupted while waiting for the publishing work to complete");
+            logger.info("Interrupted while waiting for the publishing work to complete");
         } catch (ExecutionException e) {
-            s_logger.warn("ExecutionException while waiting for the publishing work to complete", e);
+            logger.warn("ExecutionException while waiting for the publishing work to complete", e);
         } catch (TimeoutException e) {
-            s_logger.warn("Timeout while waiting for the publishing work to complete");
+            logger.warn("Timeout while waiting for the publishing work to complete");
         }
     }
 
     @Override
     public void onDisconnected() {
-        s_logger.info("Notified disconnected");
-        this.m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
+        logger.info("Notified disconnected");
+        this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
 
         // Notify the listeners
-        this.m_dataServiceListeners.onDisconnected();
+        this.dataServiceListeners.onDisconnected();
     }
 
     @Override
     public void onConfigurationUpdating(boolean wasConnected) {
-        s_logger.info("Notified DataTransportService configuration updating...");
+        logger.info("Notified DataTransportService configuration updating...");
         stopReconnectTask();
         disconnect(0);
     }
 
     @Override
     public void onConfigurationUpdated(boolean wasConnected) {
-        s_logger.info("Notified DataTransportService configuration updated.");
+        logger.info("Notified DataTransportService configuration updated.");
         boolean autoConnect = startReconnectTask();
         if (!autoConnect && wasConnected) {
             try {
                 connect();
             } catch (KuraConnectException e) {
-                s_logger.error("Error during re-connect after configuration update.", e);
+                logger.error("Error during re-connect after configuration update.", e);
             }
         }
     }
 
     @Override
     public void onConnectionLost(Throwable cause) {
-        s_logger.info("connectionLost");
+        logger.info("connectionLost");
 
         stopReconnectTask(); // Just in case...
         startReconnectTask();
 
         // Notify the listeners
-        this.m_dataServiceListeners.onConnectionLost(cause);
+        this.dataServiceListeners.onConnectionLost(cause);
     }
 
     @Override
     public void onMessageArrived(String topic, byte[] payload, int qos, boolean retained) {
 
-        s_logger.debug("Message arrived on topic: {}", topic);
+        logger.debug("Message arrived on topic: {}", topic);
 
         // Notify the listeners
-        this.m_dataServiceListeners.onMessageArrived(topic, payload, qos, retained);
+        this.dataServiceListeners.onMessageArrived(topic, payload, qos, retained);
 
         submitPublishingWork();
     }
@@ -361,35 +361,35 @@ public class DataServiceImpl
     // It's very important that the publishInternal and messageConfirmed methods are synchronized
     public synchronized void onMessageConfirmed(DataTransportToken token) {
 
-        s_logger.debug("Confirmed message with MQTT message ID: {} on session ID: {}", token.getMessageId(),
+        logger.debug("Confirmed message with MQTT message ID: {} on session ID: {}", token.getMessageId(),
                 token.getSessionId());
 
-        Integer messageId = this.m_inFlightMsgIds.remove(token);
+        Integer messageId = this.inFlightMsgIds.remove(token);
         if (messageId == null) {
-            s_logger.info(
+            logger.info(
                     "Confirmed message published with MQTT message ID: {} not tracked in the map of in-flight messages",
                     token.getMessageId());
         } else {
 
             DataMessage confirmedMessage = null;
             try {
-                s_logger.info("Confirmed message ID: {} to store", messageId);
-                this.m_store.confirmed(messageId);
-                confirmedMessage = this.m_store.get(messageId);
+                logger.info("Confirmed message ID: {} to store", messageId);
+                this.store.confirmed(messageId);
+                confirmedMessage = this.store.get(messageId);
             } catch (KuraStoreException e) {
-                s_logger.error("Cannot confirm message to store", e);
+                logger.error("Cannot confirm message to store", e);
             }
 
             // Notify the listeners
             if (confirmedMessage != null) {
                 String topic = confirmedMessage.getTopic();
-                this.m_dataServiceListeners.onMessageConfirmed(messageId, topic);
+                this.dataServiceListeners.onMessageConfirmed(messageId, topic);
             } else {
-                s_logger.error("Confirmed Message with ID {} could not be loaded from the DataStore.", messageId);
+                logger.error("Confirmed Message with ID {} could not be loaded from the DataStore.", messageId);
             }
         }
 
-        if (this.m_inFlightMsgIds.size() < (Integer) this.m_properties.get(MAX_IN_FLIGHT_MSGS_PROP_NAME)) {
+        if (this.inFlightMsgIds.size() < (Integer) this.properties.get(MAX_IN_FLIGHT_MSGS_PROP_NAME)) {
             handleInFlightDecongestion();
         }
 
@@ -399,49 +399,49 @@ public class DataServiceImpl
     @Override
     public void connect() throws KuraConnectException {
         stopReconnectTask();
-        if (!this.m_dataTransportService.isConnected()) {
-            this.m_dataTransportService.connect();
+        if (!this.dataTransportService.isConnected()) {
+            this.dataTransportService.connect();
         }
     }
 
     @Override
     public boolean isConnected() {
-        return this.m_dataTransportService.isConnected();
+        return this.dataTransportService.isConnected();
     }
 
     @Override
     public boolean isAutoConnectEnabled() {
-        return (Boolean) this.m_properties.get(AUTOCONNECT_PROP_NAME);
+        return (Boolean) this.properties.get(AUTOCONNECT_PROP_NAME);
     }
 
     @Override
     public int getRetryInterval() {
-        return (Integer) this.m_properties.get(CONNECT_DELAY_PROP_NAME);
+        return (Integer) this.properties.get(CONNECT_DELAY_PROP_NAME);
     }
 
     @Override
     public void disconnect(long quiesceTimeout) {
         stopReconnectTask();
-        this.m_dataTransportService.disconnect(quiesceTimeout);
+        this.dataTransportService.disconnect(quiesceTimeout);
     }
 
     @Override
     public void subscribe(String topic, int qos) throws KuraTimeoutException, KuraException, KuraNotConnectedException {
-        this.m_dataTransportService.subscribe(topic, qos);
+        this.dataTransportService.subscribe(topic, qos);
     }
 
     @Override
     public void unsubscribe(String topic) throws KuraTimeoutException, KuraException, KuraNotConnectedException {
-        this.m_dataTransportService.unsubscribe(topic);
+        this.dataTransportService.unsubscribe(topic);
     }
 
     @Override
     public int publish(String topic, byte[] payload, int qos, boolean retain, int priority) throws KuraStoreException {
 
-        s_logger.info("Storing message on topic :{}, priority: {}", topic, priority);
+        logger.info("Storing message on topic :{}, priority: {}", topic, priority);
 
-        DataMessage dataMsg = this.m_store.store(topic, payload, qos, retain, priority);
-        s_logger.info("Stored message on topic :{}, priority: {}", topic, priority);
+        DataMessage dataMsg = this.store.store(topic, payload, qos, retain, priority);
+        logger.info("Stored message on topic :{}, priority: {}", topic, priority);
 
         submitPublishingWork();
 
@@ -450,43 +450,43 @@ public class DataServiceImpl
 
     @Override
     public List<Integer> getUnpublishedMessageIds(String topicRegex) throws KuraStoreException {
-        List<DataMessage> messages = this.m_store.allUnpublishedMessagesNoPayload();
+        List<DataMessage> messages = this.store.allUnpublishedMessagesNoPayload();
         return buildMessageIds(messages, topicRegex);
     }
 
     @Override
     public List<Integer> getInFlightMessageIds(String topicRegex) throws KuraStoreException {
-        List<DataMessage> messages = this.m_store.allInFlightMessagesNoPayload();
+        List<DataMessage> messages = this.store.allInFlightMessagesNoPayload();
         return buildMessageIds(messages, topicRegex);
     }
 
     @Override
     public List<Integer> getDroppedInFlightMessageIds(String topicRegex) throws KuraStoreException {
-        List<DataMessage> messages = this.m_store.allDroppedInFlightMessagesNoPayload();
+        List<DataMessage> messages = this.store.allDroppedInFlightMessagesNoPayload();
         return buildMessageIds(messages, topicRegex);
     }
 
     private boolean startReconnectTask() {
-        if (this.m_reconnectFuture != null && !this.m_reconnectFuture.isDone()) {
-            s_logger.error("Reconnect task already running");
+        if (this.reconnectFuture != null && !this.reconnectFuture.isDone()) {
+            logger.error("Reconnect task already running");
             throw new IllegalStateException("Reconnect task already running");
         }
 
         //
         // Establish a reconnect Thread based on the reconnect interval
-        boolean autoConnect = (Boolean) this.m_properties.get(AUTOCONNECT_PROP_NAME);
-        int reconnectInterval = (Integer) this.m_properties.get(CONNECT_DELAY_PROP_NAME);
+        boolean autoConnect = (Boolean) this.properties.get(AUTOCONNECT_PROP_NAME);
+        int reconnectInterval = (Integer) this.properties.get(CONNECT_DELAY_PROP_NAME);
         if (autoConnect) {
 
             // Change notification status to slow blinking when connection is expected to happen in the future
-            this.m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.SLOW_BLINKING);
+            this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.SLOW_BLINKING);
             // add a delay on the reconnect
             int maxDelay = reconnectInterval / 5;
             maxDelay = maxDelay > 0 ? maxDelay : 1;
             int initialDelay = new Random().nextInt(maxDelay);
 
-            s_logger.info("Starting reconnect task with initial delay {}", initialDelay);
-            this.m_reconnectFuture = this.m_reconnectExecutor.scheduleAtFixedRate(new Runnable() {
+            logger.info("Starting reconnect task with initial delay {}", initialDelay);
+            this.reconnectFuture = this.reconnectExecutor.scheduleAtFixedRate(new Runnable() {
 
                 @Override
                 public void run() {
@@ -494,19 +494,19 @@ public class DataServiceImpl
                     Thread.currentThread().setName("DataServiceImpl:ReconnectTask");
                     boolean connected = false;
                     try {
-                        s_logger.info("Connecting...");
-                        if (DataServiceImpl.this.m_dataTransportService.isConnected()) {
-                            s_logger.info("Already connected. Reconnect task will be terminated.");
+                        logger.info("Connecting...");
+                        if (DataServiceImpl.this.dataTransportService.isConnected()) {
+                            logger.info("Already connected. Reconnect task will be terminated.");
                         } else {
-                            DataServiceImpl.this.m_dataTransportService.connect();
-                            s_logger.info("Connected. Reconnect task will be terminated.");
+                            DataServiceImpl.this.dataTransportService.connect();
+                            logger.info("Connected. Reconnect task will be terminated.");
                         }
                         connected = true;
                     } catch (Exception e) {
-                        s_logger.warn("Connect failed", e.getCause().getMessage());
+                        logger.warn("Connect failed", e);
                     } catch (Error e) {
                         // There's nothing we can do here but log an exception.
-                        s_logger.error("Unexpected Error. Task will be terminated", e);
+                        logger.error("Unexpected Error. Task will be terminated", e);
                         throw e;
                     } finally {
                         Thread.currentThread().setName(originalName);
@@ -516,40 +516,40 @@ public class DataServiceImpl
                         }
                     }
                 }
-            }, initialDelay,   		// initial delay
-                    reconnectInterval,   // repeat every reconnect interval until we stopped.
+            }, initialDelay,       		// initial delay
+                    reconnectInterval,       // repeat every reconnect interval until we stopped.
                     TimeUnit.SECONDS);
         } else {
             // Change notification status to off. Connection is not expected to happen in the future
-            this.m_cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
+            this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
         }
         return autoConnect;
     }
 
     private void stopReconnectTask() {
-        if (this.m_reconnectFuture != null && !this.m_reconnectFuture.isDone()) {
+        if (this.reconnectFuture != null && !this.reconnectFuture.isDone()) {
 
-            s_logger.info("Reconnect task running. Stopping it");
+            logger.info("Reconnect task running. Stopping it");
 
-            this.m_reconnectFuture.cancel(true);
+            this.reconnectFuture.cancel(true);
         }
     }
 
     private void disconnect() {
-        long millis = (Integer) this.m_properties.get(DISCONNECT_DELAY_PROP_NAME) * 1000L;
-        this.m_dataTransportService.disconnect(millis);
+        long millis = (Integer) this.properties.get(DISCONNECT_DELAY_PROP_NAME) * 1000L;
+        this.dataTransportService.disconnect(millis);
     }
 
     // Submit a new publishing work if any
     // TODO: only one instance of the Runnable is needed
     private Future<?> submitPublishingWork() {
-        return this.m_publisherExecutor.submit(new Runnable() {
+        return this.publisherExecutor.submit(new Runnable() {
 
             @Override
             public void run() {
                 Thread.currentThread().setName("DataServiceImpl:Submit");
-                if (!DataServiceImpl.this.m_dataTransportService.isConnected()) {
-                    s_logger.info("DataPublisherService not connected");
+                if (!DataServiceImpl.this.dataTransportService.isConnected()) {
+                    logger.info("DataPublisherService not connected");
                     return;
                 }
                 try {
@@ -560,14 +560,13 @@ public class DataServiceImpl
                     // TODO: add a getUnpublishedMessages with a limit argument?
                     // getNextMessage is a special case with limit = 1.
                     DataMessage message = null;
-                    while ((message = DataServiceImpl.this.m_store.getNextMessage()) != null) {
+                    while ((message = DataServiceImpl.this.store.getNextMessage()) != null) {
 
                         // Further limit the maximum number of in-flight messages
                         if (message.getQos() > 0) {
-                            if (DataServiceImpl.this.m_inFlightMsgIds
-                                    .size() >= (Integer) DataServiceImpl.this.m_properties
-                                            .get(MAX_IN_FLIGHT_MSGS_PROP_NAME)) {
-                                s_logger.warn("The configured maximum number of in-flight messages has been reached");
+                            if (DataServiceImpl.this.inFlightMsgIds.size() >= (Integer) DataServiceImpl.this.properties
+                                    .get(MAX_IN_FLIGHT_MSGS_PROP_NAME)) {
+                                logger.warn("The configured maximum number of in-flight messages has been reached");
                                 handleInFlightCongestion();
                                 break;
                             }
@@ -579,16 +578,16 @@ public class DataServiceImpl
                         // slow down publish rate?
 
                         // Notify the listeners
-                        DataServiceImpl.this.m_dataServiceListeners.onMessagePublished(message.getId(),
+                        DataServiceImpl.this.dataServiceListeners.onMessagePublished(message.getId(),
                                 message.getTopic());
                     }
                 } catch (KuraConnectException e) {
-                    s_logger.info("DataPublisherService is not connected", e);
+                    logger.info("DataPublisherService is not connected", e);
                 } catch (KuraTooManyInflightMessagesException e) {
-                    s_logger.info("Too many in-flight messages", e);
+                    logger.info("Too many in-flight messages", e);
                     handleInFlightCongestion();
                 } catch (Exception e) {
-                    s_logger.error("Probably an unrecoverable exception", e);
+                    logger.error("Probably an unrecoverable exception", e);
                 }
             }
         });
@@ -604,25 +603,25 @@ public class DataServiceImpl
         boolean retain = message.isRetain();
         int msgId = message.getId();
 
-        s_logger.debug("Publishing message with ID: {} on topic: {}, priority: {}",
+        logger.debug("Publishing message with ID: {} on topic: {}, priority: {}",
                 new Object[] { msgId, topic, message.getPriority() });
 
-        DataTransportToken token = this.m_dataTransportService.publish(topic, payload, qos, retain);
+        DataTransportToken token = this.dataTransportService.publish(topic, payload, qos, retain);
 
         if (token == null) {
-            this.m_store.published(msgId);
-            s_logger.debug("Published message with ID: {}", msgId);
+            this.store.published(msgId);
+            logger.debug("Published message with ID: {}", msgId);
         } else {
 
             // Check if the token is already tracked in the map (in which case we are in trouble)
-            Integer trackedMsgId = this.m_inFlightMsgIds.get(token);
+            Integer trackedMsgId = this.inFlightMsgIds.get(token);
             if (trackedMsgId != null) {
-                s_logger.error("Token already tracked: " + token.getSessionId() + "-" + token.getMessageId());
+                logger.error("Token already tracked: " + token.getSessionId() + "-" + token.getMessageId());
             }
 
-            this.m_inFlightMsgIds.put(token, msgId);
-            this.m_store.published(msgId, token.getMessageId(), token.getSessionId());
-            s_logger.debug("Published message with ID: {} and MQTT message ID: {}", msgId, token.getMessageId());
+            this.inFlightMsgIds.put(token, msgId);
+            this.store.published(msgId, token.getMessageId(), token.getSessionId());
+            logger.debug("Published message with ID: {} and MQTT message ID: {}", msgId, token.getMessageId());
         }
     }
 
@@ -643,17 +642,17 @@ public class DataServiceImpl
     }
 
     private void handleInFlightCongestion() {
-        int timeout = (Integer) this.m_properties.get(IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_PROP_NAME);
+        int timeout = (Integer) this.properties.get(IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_PROP_NAME);
 
         // Do not schedule more that one task at a time
-        if (timeout != 0 && (this.m_congestionFuture == null || this.m_congestionFuture.isDone())) {
-            s_logger.warn("In-flight message congestion timeout started");
-            this.m_congestionFuture = this.m_congestionExecutor.schedule(new Runnable() {
+        if (timeout != 0 && (this.congestionFuture == null || this.congestionFuture.isDone())) {
+            logger.warn("In-flight message congestion timeout started");
+            this.congestionFuture = this.congestionExecutor.schedule(new Runnable() {
 
                 @Override
                 public void run() {
                     Thread.currentThread().setName("DataServiceImpl:InFlightCongestion");
-                    s_logger.warn("In-flight message congestion timeout elapsed. Disconnecting and reconnecting again");
+                    logger.warn("In-flight message congestion timeout elapsed. Disconnecting and reconnecting again");
                     disconnect();
                     startReconnectTask();
                 }
@@ -662,8 +661,8 @@ public class DataServiceImpl
     }
 
     private void handleInFlightDecongestion() {
-        if (this.m_congestionFuture != null && !this.m_congestionFuture.isDone()) {
-            this.m_congestionFuture.cancel(true);
+        if (this.congestionFuture != null && !this.congestionFuture.isDone()) {
+            this.congestionFuture.cancel(true);
         }
     }
 
@@ -674,11 +673,11 @@ public class DataServiceImpl
 
     @Override
     public CloudConnectionStatusEnum getNotificationStatus() {
-        return this.m_notificationStatus;
+        return this.notificationStatus;
     }
 
     @Override
     public void setNotificationStatus(CloudConnectionStatusEnum status) {
-        this.m_notificationStatus = status;
+        this.notificationStatus = status;
     }
 }

@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Eurotech
  *     Red Hat Inc
@@ -19,12 +19,10 @@ import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_POSTFIX;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_PREFIX;
 import static org.eclipse.kura.asset.AssetConstants.DRIVER_PROPERTY_POSTFIX;
 import static org.eclipse.kura.asset.AssetConstants.NAME;
-import static org.eclipse.kura.asset.AssetConstants.SEVERITY_LEVEL;
 import static org.eclipse.kura.asset.AssetConstants.TYPE;
 import static org.eclipse.kura.asset.AssetConstants.VALUE_TYPE;
 import static org.eclipse.kura.asset.AssetFlag.FAILURE;
-import static org.eclipse.kura.asset.AssetFlag.READ_SUCCESSFUL;
-import static org.eclipse.kura.asset.AssetFlag.WRITE_SUCCESSFUL;
+import static org.eclipse.kura.asset.AssetFlag.SUCCESS;
 import static org.eclipse.kura.asset.ChannelType.READ;
 import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
 import static org.eclipse.kura.asset.ChannelType.WRITE;
@@ -69,7 +67,6 @@ import org.eclipse.kura.internal.asset.provider.DriverTrackerCustomizer;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.AssetMessages;
 import org.eclipse.kura.type.TypedValue;
-import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
@@ -140,8 +137,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         logger.debug(message.activating());
         this.context = componentContext;
         this.properties = properties;
-        this.retrieveConfigurationsFromProperties(properties);
-        this.attachDriver(this.assetConfiguration.getDriverPid());
+        retrieveConfigurationsFromProperties(properties);
+        attachDriver(this.assetConfiguration.getDriverPid());
         logger.debug(message.activatingDone());
     }
 
@@ -160,11 +157,11 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         try {
             final DriverTrackerCustomizer driverTrackerCustomizer = new DriverTrackerCustomizer(
                     this.context.getBundleContext(), this, driverId);
-            this.serviceTracker = new ServiceTracker<Driver, Driver>(this.context.getBundleContext(),
-                    Driver.class.getName(), driverTrackerCustomizer);
+            this.serviceTracker = new ServiceTracker<>(this.context.getBundleContext(), Driver.class.getName(),
+                    driverTrackerCustomizer);
             this.serviceTracker.open();
         } catch (final InvalidSyntaxException e) {
-            logger.error(ThrowableUtil.stackTraceAsString(e));
+            logger.error(message.errorDriverTracking(), e);
         }
         logger.debug(message.driverAttachDone());
     }
@@ -191,7 +188,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
         String pref = prefix;
         final String oldAdId = oldAd.getId();
-        if (this.isDriverAttrbuteDefinition(oldAdId)) {
+        if (isDriverAttrbuteDefinition(oldAdId)) {
             pref = prefix + DRIVER_PROPERTY_POSTFIX.value() + CHANNEL_PROPERTY_POSTFIX.value();
         }
         final Tad result = new Tad();
@@ -227,7 +224,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 this.driver.disconnect();
             }
         } catch (final ConnectionException e) {
-            logger.error(message.errorDriverDisconnection() + ThrowableUtil.stackTraceAsString(e));
+            logger.error(message.errorDriverDisconnection(), e);
         } finally {
             this.monitor.unlock();
         }
@@ -286,7 +283,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         final String componentName = this.context.getProperties().get(ConfigurationService.KURA_SERVICE_PID).toString();
 
         final Tocd mainOcd = new Tocd();
-        mainOcd.setId(this.getFactoryPid());
+        mainOcd.setId(getFactoryPid());
         mainOcd.setName(message.ocdName());
         mainOcd.setDescription(message.ocdDescription());
 
@@ -306,39 +303,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         driverNameAd.setDescription(message.driverName());
         driverNameAd.setRequired(true);
 
-        final Tad severityLevelAd = new Tad();
-        severityLevelAd.setId(SEVERITY_LEVEL.value());
-        severityLevelAd.setName(SEVERITY_LEVEL.value());
-        // default severity level is SEVERE
-        severityLevelAd.setDefault(message.severe());
-        severityLevelAd.setCardinality(0);
-        severityLevelAd.setType(Tscalar.STRING);
-        severityLevelAd.setDescription(message.severityLevelDesc());
-        severityLevelAd.setRequired(true);
-
-        final Toption severeLevel = new Toption();
-        severeLevel.setValue(message.severe());
-        severeLevel.setLabel(message.severe());
-        severityLevelAd.getOption().add(severeLevel);
-
-        final Toption configLevel = new Toption();
-        configLevel.setValue(message.error());
-        configLevel.setLabel(message.error());
-        severityLevelAd.getOption().add(configLevel);
-
-        final Toption infoLevel = new Toption();
-        infoLevel.setValue(message.info());
-        infoLevel.setLabel(message.info());
-        severityLevelAd.getOption().add(infoLevel);
-
-        final Toption errorLevel = new Toption();
-        errorLevel.setValue(message.config());
-        errorLevel.setLabel(message.config());
-        severityLevelAd.getOption().add(errorLevel);
-
         mainOcd.addAD(assetDescriptionAd);
         mainOcd.addAD(driverNameAd);
-        mainOcd.addAD(severityLevelAd);
 
         final Map<String, Object> props = CollectionUtil.newHashMap();
         for (final Map.Entry<String, Object> entry : this.properties.entrySet()) {
@@ -365,10 +331,10 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                     channelConfiguration.addAll(driverSpecificChannelConfiguration);
                 }
                 for (final Tad attribute : channelConfiguration) {
-                    final Set<String> channelPrefixes = this
-                            .retrieveChannelPrefixes(this.assetConfiguration.getAssetChannels());
+                    final Set<String> channelPrefixes = retrieveChannelPrefixes(
+                            this.assetConfiguration.getAssetChannels());
                     for (final String prefix : channelPrefixes) {
-                        final Tad newAttribute = this.cloneAd(attribute, prefix);
+                        final Tad newAttribute = cloneAd(attribute, prefix);
                         mainOcd.addAD(newAttribute);
                     }
                 }
@@ -399,9 +365,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      */
     private boolean isDriverAttrbuteDefinition(final String oldAdId) {
         requireNonNull(oldAdId, message.oldAdNonNull());
-        return (oldAdId != ASSET_DESC_PROP.value()) && (oldAdId != ASSET_DRIVER_PROP.value())
-                && (oldAdId != NAME.value()) && (oldAdId != TYPE.value()) && (oldAdId != VALUE_TYPE.value())
-                && (oldAdId != SEVERITY_LEVEL.value());
+        return oldAdId != ASSET_DESC_PROP.value() && oldAdId != ASSET_DRIVER_PROP.value() && oldAdId != NAME.value()
+                && oldAdId != TYPE.value() && oldAdId != VALUE_TYPE.value();
     }
 
     /**
@@ -429,11 +394,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         if (assetRecord.getAssetStatus() == null) {
             switch (driverFlag) {
             case READ_SUCCESSFUL:
-                assetStatus = new AssetStatus(READ_SUCCESSFUL);
-                assetRecord.setAssetStatus(assetStatus);
-                break;
             case WRITE_SUCCESSFUL:
-                assetStatus = new AssetStatus(WRITE_SUCCESSFUL);
+                assetStatus = new AssetStatus(SUCCESS);
                 assetRecord.setAssetStatus(assetStatus);
                 break;
             default:
@@ -469,7 +431,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             final Channel channel = channels.get(id);
             if (channel == null) {
                 assetRecord.setAssetStatus(new AssetStatus(FAILURE, message.channelUnavailable(), null));
-            } else if (!((channel.getType() == READ) || (channel.getType() == READ_WRITE))) {
+            } else if (!(channel.getType() == READ || channel.getType() == READ_WRITE)) {
                 assetRecord.setAssetStatus(new AssetStatus(FAILURE, message.channelTypeNotReadable(), null));
             }
 
@@ -493,7 +455,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         }
 
         for (final DriverRecord driverRecord : driverRecords) {
-            this.prepareAssetRecord(driverRecord, this.getAssetRecordByDriverRecord(assetRecords, driverRecord));
+            prepareAssetRecord(driverRecord, getAssetRecordByDriverRecord(assetRecords, driverRecord));
         }
         logger.debug(message.readingChannelsDone());
         return assetRecords;
@@ -550,9 +512,9 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 }
                 final AssetRecord assetRecord = new AssetRecord(channelId);
                 try {
-                    BaseAsset.this.prepareAssetRecord(driverRecord, assetRecord);
+                    prepareAssetRecord(driverRecord, assetRecord);
                 } catch (final KuraException e) {
-                    logger.error(message.errorPreparingAssetRecord() + ThrowableUtil.stackTraceAsString(e));
+                    logger.error(message.errorPreparingAssetRecord(), e);
                 }
                 final AssetEvent assetEvent = new AssetEvent(assetRecord);
                 this.assetListener.onAssetEvent(assetEvent);
@@ -613,7 +575,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         } else {
             this.assetOptions.update(properties);
         }
-        if ((this.assetConfiguration == null) && (this.assetOptions != null)) {
+        if (this.assetConfiguration == null && this.assetOptions != null) {
             this.assetConfiguration = this.assetOptions.getAssetConfiguration();
         }
         logger.debug(message.retrievingConfDone());
@@ -656,8 +618,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      */
     public synchronized void updated(final Map<String, Object> properties) {
         logger.debug(message.updating());
-        this.retrieveConfigurationsFromProperties(properties);
-        this.attachDriver(this.assetConfiguration.getDriverPid());
+        retrieveConfigurationsFromProperties(properties);
+        attachDriver(this.assetConfiguration.getDriverPid());
         logger.debug(message.updatingDone());
 
     }
@@ -676,7 +638,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             final Channel channel = channels.get(id);
             if (channel == null) {
                 assetRecord.setAssetStatus(new AssetStatus(FAILURE, message.channelUnavailable(), null));
-            } else if (!((channel.getType() == WRITE) || (channel.getType() == READ_WRITE))) {
+            } else if (!(channel.getType() == WRITE || channel.getType() == READ_WRITE)) {
                 assetRecord.setAssetStatus(new AssetStatus(FAILURE, message.channelTypeNotReadable(), null));
             }
 
@@ -687,7 +649,6 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             }
             channelConfiguration.put(CHANNEL_ID.value(), assetRecord.getChannelId());
             driverRecord.setChannelConfig(channelConfiguration);
-            driverRecords.add(driverRecord);
 
             final TypedValue<?> value = assetRecord.getValue();
             if (value != null) {
@@ -706,9 +667,9 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         }
 
         for (final DriverRecord driverRecord : driverRecords) {
-            final AssetRecord assetRecord = this.getAssetRecordByDriverRecord(assetRecords, driverRecord);
+            final AssetRecord assetRecord = getAssetRecordByDriverRecord(assetRecords, driverRecord);
             requireNonNull(assetRecord, message.assetRecordNonNull());
-            this.prepareAssetRecord(driverRecord, assetRecord);
+            prepareAssetRecord(driverRecord, assetRecord);
         }
         logger.debug(message.writingDone());
         return assetRecords;

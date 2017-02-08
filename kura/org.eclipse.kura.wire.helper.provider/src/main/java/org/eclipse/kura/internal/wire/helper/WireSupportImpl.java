@@ -14,10 +14,6 @@
 package org.eclipse.kura.internal.wire.helper;
 
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.wire.SeverityLevel.CONFIG;
-import static org.eclipse.kura.wire.SeverityLevel.ERROR;
-import static org.eclipse.kura.wire.SeverityLevel.INFO;
-import static org.eclipse.kura.wire.SeverityLevel.SEVERE;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,19 +23,13 @@ import java.util.Map;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;
-import org.eclipse.kura.util.service.ServiceUtil;
-import org.eclipse.kura.wire.SeverityLevel;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
-import org.eclipse.kura.wire.WireField;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.wireadmin.Wire;
@@ -49,22 +39,16 @@ import org.osgi.service.wireadmin.Wire;
  */
 final class WireSupportImpl implements WireSupport {
 
-    /** Localization Resource */
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
-    /** Event Admin Service */
     private final EventAdmin eventAdmin;
 
-    /** The incoming wires. */
     private List<Wire> incomingWires;
 
-    /** The outgoing wires. */
     private List<Wire> outgoingWires;
 
-    /** The Wire Helper Service. */
     private final WireHelperService wireHelperService;
 
-    /** The supported Wire Component. */
     private final WireComponent wireSupporter;
 
     /**
@@ -115,43 +99,6 @@ final class WireSupportImpl implements WireSupport {
         }
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public List<WireRecord> filter(final List<WireRecord> records) {
-        requireNonNull(records, message.wireRecordsNonNull());
-        final SeverityLevel level = this.getSeverityLevel();
-        // If the severity level is SEVERE, then all wire fields remain
-        if ((level == null) || (level == SEVERE)) {
-            return records;
-        }
-        final List<WireRecord> newRecords = CollectionUtil.newArrayList();
-        final List<WireField> newFields = CollectionUtil.newArrayList();
-        for (final WireRecord wireRecord : records) {
-            for (final WireField wireField : wireRecord.getFields()) {
-                // If the severity level is INFO, then only info wire fields
-                // will remain
-                final SeverityLevel wireFieldLevel = wireField.getSeverityLevel();
-                if ((wireFieldLevel == INFO) && (level == INFO)) {
-                    newFields.add(wireField);
-                }
-                // If the severity level is ERROR, then only ERROR wire fields
-                // will remain
-                if ((wireFieldLevel == ERROR) && (level == ERROR)) {
-                    newFields.add(wireField);
-                }
-                // If the severity level is CONFIG, then info and CONFIG wire
-                // fields remain
-                if (((wireFieldLevel == INFO) || (wireFieldLevel == CONFIG)) && (level == CONFIG)) {
-                    newFields.add(wireField);
-                }
-                final WireRecord newWireRecord = new WireRecord(wireRecord.getTimestamp(), wireRecord.getPosition(),
-                        newFields);
-                newRecords.add(newWireRecord);
-            }
-        }
-        return newRecords;
-    }
-
     /**
      * Gets the incoming wires.
      *
@@ -170,38 +117,6 @@ final class WireSupportImpl implements WireSupport {
         return Collections.unmodifiableList(this.outgoingWires);
     }
 
-    /**
-     * Returns the severity level of the wire component
-     *
-     * @return the severity level
-     */
-    private SeverityLevel getSeverityLevel() {
-        final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-        final ServiceReference<WireComponent>[] refs = ServiceUtil.getServiceReferences(context, WireComponent.class,
-                null);
-        String property = null;
-        for (final ServiceReference<WireComponent> ref : refs) {
-            final WireComponent component = context.getService(ref);
-            if (component == this.wireSupporter) {
-                property = ref.getProperty("severity.level").toString();
-                break;
-            }
-        }
-        if ("INFO".equalsIgnoreCase(property)) {
-            return INFO;
-        }
-        if ("ERROR".equalsIgnoreCase(property)) {
-            return ERROR;
-        }
-        if ("CONFIG".equalsIgnoreCase(property)) {
-            return CONFIG;
-        }
-        if ("SEVERE".equalsIgnoreCase(property)) {
-            return SEVERE;
-        }
-        return null;
-    }
-
     /** {@inheritDoc} */
     @Override
     public synchronized Object polled(final Wire wire) {
@@ -218,7 +133,7 @@ final class WireSupportImpl implements WireSupport {
     @Override
     public void updated(final Wire wire, final Object value) {
         requireNonNull(wire, message.wireNonNull());
-        if ((value instanceof WireEnvelope) && (this.wireSupporter instanceof WireReceiver)) {
+        if (value instanceof WireEnvelope && this.wireSupporter instanceof WireReceiver) {
             ((WireReceiver) this.wireSupporter).onWireReceive((WireEnvelope) value);
         }
     }

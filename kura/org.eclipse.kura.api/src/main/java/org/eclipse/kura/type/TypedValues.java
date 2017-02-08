@@ -19,13 +19,11 @@ import org.eclipse.kura.annotation.Nullable;
 /**
  * The Class TypedValues is an utility class to quickly create different
  * {@link TypedValue}
+ * 
+ * @noextend This class is not intended to be extended by clients.
  */
 public final class TypedValues {
 
-    /** Empty Typed Value */
-    public static final TypedValue<String> EMPTY_VALUE = new StringValue("");
-
-    /** Constructor */
     private TypedValues() {
         // Static Factory Methods container. No need to instantiate.
     }
@@ -120,4 +118,34 @@ public final class TypedValues {
         return new StringValue(value);
     }
 
+    /**
+     * Creates new TypedValue inferring the type from the argument.
+     * 
+     * @param value
+     *            an object that needs to be represented as {@link TypedValue}
+     * @return a {@link TypedValue} that represents the conversion of {@code value}
+     * @throws IllegalArgumentException
+     *             if {@code value} cannot be represented as {@link TypedValue}
+     */
+    public static TypedValue<?> newTypedValue(final Object value) {
+        if (value instanceof Boolean) {
+            return newBooleanValue((Boolean) value);
+        } else if (value instanceof byte[]) {
+            return newByteArrayValue((byte[]) value);
+        } else if (value instanceof Byte) {
+            return newByteValue((Byte) value);
+        } else if (value instanceof Double) {
+            return newDoubleValue((Double) value);
+        } else if (value instanceof Integer) {
+            return newIntegerValue((Integer) value);
+        } else if (value instanceof Long) {
+            return newLongValue((Long) value);
+        } else if (value instanceof Short) {
+            return newShortValue((Short) value);
+        } else if (value instanceof String) {
+            return newStringValue((String) value);
+        }
+
+        throw new IllegalArgumentException("Cannot convert to TypedValue");
+    }
 }

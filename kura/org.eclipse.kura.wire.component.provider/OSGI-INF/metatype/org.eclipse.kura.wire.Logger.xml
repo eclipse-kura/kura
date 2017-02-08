@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2016 Eurotech and/or its affiliates and others
+    Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -11,18 +11,16 @@
     <OCD id="org.eclipse.kura.wire.Logger" 
          name="Logger" 
          description="A wire component which logs data as received from upstream connected Wire Components">
-
-        <AD id="severity.level"
-            name="severity.level"
+         
+         <AD id="log.verbosity"
+            name="log.verbosity"
             type="String"
             cardinality="0"
             required="true"
-            default="SEVERE"
-            description="It signifies severity level of Wire Fields to be accepted by this Wire Component">
-            <Option label="SEVERE" value="SEVERE" />
-            <Option label="CONFIG" value="CONFIG" />
-            <Option label="ERROR" value="ERROR" />
-            <Option label="INFO" value="INFO" />
+            default="QUIET"
+            description="Specifies the logging verbosity to be used to log the information contained in the received Wire Envelope">
+            <Option label="VERBOSE" value="VERBOSE" />
+            <Option label="QUIET" value="QUIET" />
         </AD>
     </OCD>
     

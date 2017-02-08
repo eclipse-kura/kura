@@ -1,11 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *  
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.common;
 
@@ -31,13 +35,10 @@ import org.slf4j.LoggerFactory;
  */
 public final class DbServiceHelper {
 
-    /** The Logger instance. */
-    private static final Logger s_logger = LoggerFactory.getLogger(DbServiceHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(DbServiceHelper.class);
 
-    /** Localization Resource */
-    private static final WireMessages s_message = LocalizationAdapter.adapt(WireMessages.class);
+    private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
-    /** The dependent DB service instance. */
     private final DbService dbService;
 
     /**
@@ -49,7 +50,7 @@ public final class DbServiceHelper {
      *             if argument is null
      */
     private DbServiceHelper(final DbService dbService) {
-        requireNonNull(dbService, s_message.dbServiceNonNull());
+        requireNonNull(dbService, message.dbServiceNonNull());
         this.dbService = dbService;
     }
 
@@ -75,10 +76,10 @@ public final class DbServiceHelper {
      *             if argument is null
      */
     public void close(final Connection conn) {
-        requireNonNull(conn, s_message.connectionNonNull());
-        s_logger.debug(s_message.closingConnection() + conn);
+        requireNonNull(conn, message.connectionNonNull());
+        logger.debug(message.closingConnection() + conn);
         this.dbService.close(conn);
-        s_logger.debug(s_message.closingConnectionDone());
+        logger.debug(message.closingConnectionDone());
     }
 
     /**
@@ -88,9 +89,9 @@ public final class DbServiceHelper {
      *            the result sets
      */
     public void close(final ResultSet... rss) {
-        s_logger.debug(s_message.closingResultSet() + Arrays.toString(rss));
+        logger.debug(message.closingResultSet() + Arrays.toString(rss));
         this.dbService.close(rss);
-        s_logger.debug(s_message.closingResultSetDone());
+        logger.debug(message.closingResultSetDone());
     }
 
     /**
@@ -100,9 +101,9 @@ public final class DbServiceHelper {
      *            the SQL statements
      */
     public void close(final Statement... stmts) {
-        s_logger.debug(s_message.closingStatement() + Arrays.toString(stmts));
+        logger.debug(message.closingStatement() + Arrays.toString(stmts));
         this.dbService.close(stmts);
-        s_logger.debug(s_message.closingStatementDone());
+        logger.debug(message.closingStatementDone());
     }
 
     /**
@@ -118,8 +119,8 @@ public final class DbServiceHelper {
      *             if SQL query argument is null
      */
     public synchronized void execute(final String sql, final Integer... params) throws SQLException {
-        requireNonNull(sql, s_message.sqlQueryNonNull());
-        s_logger.debug(s_message.execSql() + sql);
+        requireNonNull(sql, message.sqlQueryNonNull());
+        logger.debug(message.execSql() + sql);
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
@@ -137,7 +138,7 @@ public final class DbServiceHelper {
             this.close(stmt);
             this.close(conn);
         }
-        s_logger.debug(s_message.execSqlDone());
+        logger.debug(message.execSqlDone());
     }
 
     /**
@@ -160,10 +161,10 @@ public final class DbServiceHelper {
      *             if argument is null
      */
     public void rollback(final Connection conn) {
-        requireNonNull(conn, s_message.connectionNonNull());
-        s_logger.debug(s_message.rollback() + conn);
+        requireNonNull(conn, message.connectionNonNull());
+        logger.debug(message.rollback() + conn);
         this.dbService.rollback(conn);
-        s_logger.debug(s_message.rollbackDone());
+        logger.debug(message.rollbackDone());
     }
 
     /**
@@ -181,9 +182,9 @@ public final class DbServiceHelper {
      *             if argument is null
      */
     public String sanitizeSqlTableAndColumnName(final String string) {
-        requireNonNull(string, s_message.stringNonNull());
-        s_logger.debug(s_message.sanitize() + string);
-        return string.replaceAll("(?=[]\\[+&|!(){}^\"~*?:\\\\-])", "_");
+        requireNonNull(string, message.stringNonNull());
+        logger.debug(message.sanitize() + string);
+        String sanitizedName = string.replaceAll("(?=[]\\[+&|!(){}^\"~*?:\\\\-])", "_");
+        return "\"" + sanitizedName + "\"";
     }
-
 }

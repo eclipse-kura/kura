@@ -1,11 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *  
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.timer;
 
@@ -18,7 +22,6 @@ import org.quartz.JobDataMap;
  */
 public final class TimerJobDataMap extends JobDataMap {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -2191522128203525408L;
 
     /** The Constant to be used in the map. */
@@ -42,5 +45,4 @@ public final class TimerJobDataMap extends JobDataMap {
     public void putWireSupport(final WireSupport wireSupport) {
         super.put(WIRE_SUPPORT, wireSupport);
     }
-
 }

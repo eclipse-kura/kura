@@ -18,10 +18,8 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 
 import java.util.List;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
-import org.eclipse.kura.util.base.ThrowableUtil;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.wire.WireComponent;
@@ -41,22 +39,16 @@ import org.slf4j.LoggerFactory;
  */
 final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<WireComponent, WireComponent> {
 
-    /** The Logger instance. */
     private static final Logger logger = LoggerFactory.getLogger(WireComponentTrackerCustomizer.class);
 
-    /** Localization Resource */
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
-    /** Bundle Context */
     private final BundleContext context;
 
-    /** The wire emitter PIDs. */
-    private final List<String> wireEmitters;
+    private final List<String> wireEmitterPids;
 
-    /** The wire receiver PIDs. */
-    private final List<String> wireReceivers;
+    private final List<String> wireReceiverPids;
 
-    /** The wire service. */
     private final WireServiceImpl wireService;
 
     /**
@@ -76,11 +68,11 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
         requireNonNull(context, message.bundleContextNonNull());
         requireNonNull(wireService, message.wireServiceNonNull());
 
-        this.wireEmitters = CollectionUtil.newArrayList();
-        this.wireReceivers = CollectionUtil.newArrayList();
+        this.wireEmitterPids = CollectionUtil.newArrayList();
+        this.wireReceiverPids = CollectionUtil.newArrayList();
         this.wireService = wireService;
         this.context = context;
-        this.searchPreExistingWireComponents();
+        searchPreExistingWireComponents();
     }
 
     /** {@inheritDoc} */
@@ -90,18 +82,16 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
         logger.debug(message.addingWireComponent());
         final String property = String.valueOf(reference.getProperty(KURA_SERVICE_PID));
         if (service instanceof WireEmitter) {
-            this.wireEmitters.add(property);
+            this.wireEmitterPids.add(property);
             logger.debug(message.registeringEmitter(property));
         }
         if (service instanceof WireReceiver) {
-            this.wireReceivers.add(property);
+            this.wireReceiverPids.add(property);
             logger.debug(message.registeringReceiver(property));
         }
-        try {
-            this.wireService.createWires();
-        } catch (final KuraException e) {
-            logger.error(message.errorCreatingWires() + ThrowableUtil.stackTraceAsString(e));
-        }
+
+        this.wireService.createWires();
+
         logger.debug(message.addingWireComponentDone());
         return service;
     }
@@ -112,7 +102,7 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
      * @return the wire emitter PIDs
      */
     List<String> getWireEmitters() {
-        return this.wireEmitters;
+        return this.wireEmitterPids;
     }
 
     /**
@@ -121,7 +111,7 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
      * @return the wire receiver PIDs
      */
     List<String> getWireReceivers() {
-        return this.wireReceivers;
+        return this.wireReceiverPids;
     }
 
     /** {@inheritDoc} */
@@ -136,13 +126,13 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
         logger.debug(message.removingWireComponent());
         final String property = String.valueOf(reference.getProperty(KURA_SERVICE_PID));
         if (property != null) {
-            this.removeWireComponent(property);
+            removeWireComponent(property);
             if (service instanceof WireEmitter) {
-                this.wireEmitters.remove(property);
+                this.wireEmitterPids.remove(property);
                 logger.debug(message.deregisteringEmitter(property));
             }
             if (service instanceof WireReceiver) {
-                this.wireReceivers.remove(property);
+                this.wireReceiverPids.remove(property);
                 logger.debug(message.deregisteringReceiver(property));
             }
         }
@@ -162,8 +152,8 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
     private void removeWireComponent(final String pid) {
         requireNonNull(pid, message.pidNonNull());
         for (final WireConfiguration wireConfiguration : this.wireService.getWireConfigurations()) {
-            if ((wireConfiguration.getWire() != null) && (pid.equals(wireConfiguration.getEmitterPid())
-                    || (pid.equals(wireConfiguration.getReceiverPid())))) {
+            if (wireConfiguration.getWire() != null && (pid.equals(wireConfiguration.getEmitterPid())
+                    || pid.equals(wireConfiguration.getReceiverPid()))) {
                 this.wireService.deleteWireConfiguration(wireConfiguration);
             }
         }
@@ -179,13 +169,12 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
             final WireComponent wc = (WireComponent) this.context.getService(ref);
             final Object pidProperty = ref.getProperty(KURA_SERVICE_PID);
             if (wc instanceof WireEmitter) {
-                this.wireEmitters.add(String.valueOf(pidProperty));
+                this.wireEmitterPids.add(String.valueOf(pidProperty));
             }
             if (wc instanceof WireReceiver) {
-                this.wireReceivers.add(String.valueOf(pidProperty));
+                this.wireReceiverPids.add(String.valueOf(pidProperty));
             }
         }
         ServiceUtil.ungetServiceReferences(this.context, refs);
     }
-
 }

@@ -147,7 +147,7 @@ public final class AssetTest {
         assetRecord.setValue(TypedValues.newBooleanValue(true));
         final List<AssetRecord> records = asset.write(Arrays.asList(assetRecord));
         assertEquals(1, records.size());
-        assertEquals(AssetFlag.WRITE_SUCCESSFUL, records.get(0).getAssetStatus().getAssetFlag());
+        assertEquals(AssetFlag.SUCCESS, records.get(0).getAssetStatus().getAssetFlag());
     }
 
     /**

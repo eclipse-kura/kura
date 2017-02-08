@@ -27,43 +27,45 @@ public interface WireService {
 
     /**
      * Creates the wire configuration for the provided wire emitter and the wire
-     * receiver
+     * receiver.
      *
      * @param emitterPid
      *            the PID of the wire emitter (this PID will internally be used
      *            to retrieve kura.service.pid property of any matching DS
-     *            component)
+     *            component).
      * @param receiverPid
      *            the PID of the wire receiver (this PID will internally be used
      *            to retrieve kura.service.pid property of any matching DS
-     *            component)
+     *            component).
+     * @return the recently created wire instance.
      * @throws KuraException
-     *             if there doesn't exist any Wire Component having provided
-     *             emitter PID or any Wire Component having provided receiver
-     *             PID or the provided emitter PID does not belong to a Wire
-     *             Emitter or the receiver PID does not belong to a Wire
-     *             Receiver
+     *             if there are no services associated to the provided {@code emitterPid} or {@code receiverPid}.
+     * @throws KuraException
+     *             if the provided {@code emitterPid} does not belong to a Wire
+     *             Emitter or if the {@code receiverPid} does not belong to a Wire
+     *             Receiver.
      * @throws NullPointerException
-     *             if any of the arguments is null
-     * @return the wire instance recently created
+     *             if any of the arguments is null.
      */
     public WireConfiguration createWireConfiguration(String emitterPid, String receiverPid) throws KuraException;
 
     /**
      * Removes the provided wire configuration for the provided wire emitter and
-     * the wire receiver
+     * the wire receiver.
      *
      * @param wireConfiguration
-     *            the wire configuration to be deleted
+     *            the wire configuration to be deleted.
      * @throws NullPointerException
-     *             if the argument is null
+     *             if the argument is null.
+     * @throws IllegalArgumentException
+     *             if the provided argument is illegal or inappropriate.
      */
     public void deleteWireConfiguration(WireConfiguration wireConfiguration);
 
     /**
-     * Retrieves the set of already created Wire Configurations
+     * Retrieves the set of already created Wire Configurations.
      *
-     * @return the set of wire configurations
+     * @return the set of wire configurations.
      */
     public Set<WireConfiguration> getWireConfigurations();
 

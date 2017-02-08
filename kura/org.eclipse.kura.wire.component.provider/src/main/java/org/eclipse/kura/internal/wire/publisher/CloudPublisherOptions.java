@@ -6,9 +6,14 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *  
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.publisher;
 
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
@@ -54,10 +59,8 @@ final class CloudPublisherOptions {
 
     private static final PayloadType DEFAULT_PAYLOAD_TYPE = PayloadType.KURA_PAYLOAD;
 
-    /** The Constant denoting default priority. */
     private static final int DEFAULT_PRIORITY = 7;
 
-    /** The Constant denoting default QoS. */
     private static final int DEFAULT_QOS = 0;
 
     /** The Constant denoting default MQTT retain. */
@@ -80,14 +83,14 @@ final class CloudPublisherOptions {
     }
 
     /**
-     * Returns the payload type to be used for wrapping wire records.
+     * Returns the payload type to be used for wrapping {@link WireRecord}s.
      *
      * @return the type of the encoding message type
      */
     PayloadType getPayloadType() {
         int configurationPayloadType = DEFAULT_PAYLOAD_TYPE.getValue();
         final Object type = this.properties.get(CONF_PAYLOAD_TYPE);
-        if (type != null && type instanceof Integer) {
+        if (nonNull(type) && type instanceof Integer) {
             configurationPayloadType = (Integer) type;
         }
 
@@ -102,7 +105,7 @@ final class CloudPublisherOptions {
     String getPublishingApplication() {
         String publishingApp = DEFAULT_APPLICATION;
         final Object app = this.properties.get(CONF_APPLICATION);
-        if (app != null && app instanceof String) {
+        if (nonNull(app) && app instanceof String) {
             publishingApp = String.valueOf(app);
         }
         return publishingApp;
@@ -116,7 +119,7 @@ final class CloudPublisherOptions {
     int getPublishingPriority() {
         int publishingPriority = DEFAULT_PRIORITY;
         final Object priority = this.properties.get(CONF_PRIORITY);
-        if (priority != null && priority instanceof Integer) {
+        if (nonNull(priority) && priority instanceof Integer) {
             publishingPriority = (Integer) priority;
         }
         return publishingPriority;
@@ -130,7 +133,7 @@ final class CloudPublisherOptions {
     int getPublishingQos() {
         int publishingQos = DEFAULT_QOS;
         final Object qos = this.properties.get(CONF_QOS);
-        if (qos != null && qos instanceof Integer) {
+        if (nonNull(qos) && qos instanceof Integer) {
             publishingQos = (Integer) qos;
         }
         return publishingQos;
@@ -144,7 +147,7 @@ final class CloudPublisherOptions {
     boolean getPublishingRetain() {
         boolean publishingRetain = DEFAULT_RETAIN;
         final Object retain = this.properties.get(CONF_RETAIN);
-        if (retain != null && retain instanceof Boolean) {
+        if (nonNull(retain) && retain instanceof Boolean) {
             publishingRetain = (Boolean) retain;
         }
         return publishingRetain;
@@ -158,7 +161,7 @@ final class CloudPublisherOptions {
     String getPublishingTopic() {
         String publishingTopic = DEFAULT_TOPIC;
         final Object topic = this.properties.get(CONF_TOPIC);
-        if (topic != null && topic instanceof String) {
+        if (nonNull(topic) && topic instanceof String) {
             publishingTopic = String.valueOf(topic);
         }
         return publishingTopic;
@@ -172,7 +175,7 @@ final class CloudPublisherOptions {
     String getCloudServicePid() {
         String cloudServicePid = DEFAULT_CLOUD_SERVICE_PID;
         Object configCloudServicePid = this.properties.get(CLOUD_SERVICE_PID);
-        if (configCloudServicePid != null && configCloudServicePid instanceof String) {
+        if (nonNull(configCloudServicePid) && configCloudServicePid instanceof String) {
             cloudServicePid = (String) configCloudServicePid;
         }
         return cloudServicePid;

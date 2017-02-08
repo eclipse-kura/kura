@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2016 Eurotech and/or its affiliates and others
+    Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -17,53 +17,19 @@
         	type="String"
         	cardinality="0"
         	required="true"
-        	default="SELECT * FROM WR_data;"
+        	default="SELECT * FROM &quot;WR_data&quot; LIMIT 10;"
         	description="SQL to be executed to build a view">
         </AD>
         
-        <AD id="refresh.rate"
-        	name="refresh.rate"
-        	type="Integer"
-        	cardinality="0"
-        	required="true"
-        	default="0"
-        	min="5"
-        	description="Refresh rate, in seconds (0 denotes disabled)">
-        </AD>
-        
-        <AD id="cache.update.interval"
-        	name="cache.update.interval"
+        <AD id="cache.expiration.interval"
+        	name="cache.expiration.interval"
         	type="Integer"
         	cardinality="0"
         	required="true"
         	default="60"
-        	min="60"
-        	description="This denotes the allowed interval (in seconds) for which the cache data will be retrieved if time difference between the current time and the last cache updated time is less than this interval">
+        	min="0"
+        	description="This value specifies the cache validity in seconds. When cache expires, it will cause a new read in the database. A database read will be performed for every trigger received if the value is set to 0.">
         </AD>
-        
-        <AD id="cache.max.capacity"
-        	name="cache.max.capacity"
-        	type="Integer"
-        	cardinality="0"
-        	required="true"
-        	default="100"
-        	min="100"
-        	description="This denotes the allowed maximum capacity for the cache">
-        </AD>
-        
-        <AD id="severity.level"
-            name="severity.level"
-            type="String"
-            cardinality="0"
-            required="true"
-            default="SEVERE"
-            description="It signifies severity level of Wire Fields to be accepted by this Wire Component">
-            <Option label="SEVERE" value="SEVERE" />
-            <Option label="CONFIG" value="CONFIG" />
-            <Option label="ERROR" value="ERROR" />
-            <Option label="INFO" value="INFO" />
-        </AD>
-        
     </OCD>
     
     <Designate pid="org.eclipse.kura.wire.DbWireRecordFilter" factoryPid="org.eclipse.kura.wire.DbWireRecordFilter">

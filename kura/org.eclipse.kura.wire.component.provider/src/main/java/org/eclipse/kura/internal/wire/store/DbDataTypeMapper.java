@@ -1,13 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
+ *  
  *******************************************************************************/
-
 package org.eclipse.kura.internal.wire.store;
 
 import static org.eclipse.kura.type.DataType.BOOLEAN;
@@ -37,7 +40,6 @@ public final class DbDataTypeMapper {
      */
     public static class JdbcType {
 
-        /** The JDBC type represented as integer. */
         private final int type;
 
         /** The JDBC type represented as string. */
@@ -91,7 +93,7 @@ public final class DbDataTypeMapper {
         dataTypeMap.put(LONG, new JdbcType(Types.BIGINT, "BIGINT"));
         dataTypeMap.put(DOUBLE, new JdbcType(Types.DOUBLE, "DOUBLE"));
         dataTypeMap.put(BOOLEAN, new JdbcType(Types.BOOLEAN, "BOOLEAN"));
-        dataTypeMap.put(BYTE_ARRAY, new JdbcType(Types.BINARY, "BINARY"));
+        dataTypeMap.put(BYTE_ARRAY, new JdbcType(Types.BLOB, "BLOB"));
         dataTypeMap.put(STRING, new JdbcType(Types.VARCHAR, "VARCHAR(102400)"));
     }
 
@@ -102,13 +104,10 @@ public final class DbDataTypeMapper {
         jdbcTypeMap.put(Types.BIGINT, DataType.LONG);
         jdbcTypeMap.put(Types.DOUBLE, DataType.DOUBLE);
         jdbcTypeMap.put(Types.BOOLEAN, DataType.BOOLEAN);
-        jdbcTypeMap.put(Types.BINARY, DataType.BYTE_ARRAY);
+        jdbcTypeMap.put(Types.BLOB, DataType.BYTE_ARRAY);
         jdbcTypeMap.put(Types.VARCHAR, DataType.STRING);
     }
 
-    /**
-     * Constructor
-     */
     private DbDataTypeMapper() {
         // Not needed
     }
@@ -134,5 +133,4 @@ public final class DbDataTypeMapper {
     public static JdbcType getJdbcType(final DataType dataType) {
         return dataTypeMap.get(dataType);
     }
-
 }

@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
  *
  *******************************************************************************/
 package org.eclipse.kura.driver;
@@ -135,6 +139,10 @@ public interface Driver {
      *             if argument is null
      * @throws IllegalArgumentException
      *             if argument is empty
+     * @throws KuraRuntimeException
+     *             if the method is not implemented by the driver then specific
+     *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
+     *             needs to be set in the thrown {@link KuraRuntimeException}
      */
     public List<DriverRecord> read(List<DriverRecord> records) throws ConnectionException;
 

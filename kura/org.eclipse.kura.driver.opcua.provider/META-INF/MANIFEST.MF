@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OPC-UA Driver
+Bundle-SymbolicName: org.eclipse.kura.driver.opcua.provider;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: EUROTECH
+Bundle-License: Eclipse Public License v1.0
+Bundle-Category: Asset-Driver Management
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.kura;version="[1.2,2.0)",
+ org.eclipse.kura.configuration;version="[1.1,1.2)",
+ org.eclipse.kura.configuration.metatype;version="[1.0,2.0)",
+ org.eclipse.kura.core.configuration.metatype;version="[1.0,2.0)",
+ org.eclipse.kura.crypto;version="[1.0,2.0)",
+ org.eclipse.kura.driver;version="[1.0,1.1)",
+ org.eclipse.kura.driver.listener;version="[1.0,1.1)",
+ org.eclipse.kura.localization;version="[1.0,2.0)",
+ org.eclipse.kura.driver.opcua.localization;version="[1.0,2.0)",
+ org.eclipse.kura.type;version="[1.0,2.0)",
+ org.eclipse.kura.util.base;version="[1.0,2.0)",
+ org.eclipse.kura.util.collection;version="[1.0,2.0)",
+ org.osgi.framework;version="1.7.0",
+ org.osgi.service.component;version="1.2.0",
+ org.slf4j;version="1.6.4"
+Service-Component: OSGI-INF/*.xml
+Bundle-ClassPath: lib/netty-all-4.0.40.Final.jar,
+ lib/guava-19.0.jar,
+ lib/jool-0.9.11.jar,
+ lib/sdk-client-0.1.0-SNAPSHOT.jar,
+ lib/sdk-core-0.1.0-SNAPSHOT.jar,
+ lib/stack-client-0.1.0-SNAPSHOT.jar,
+ lib/stack-core-0.1.0-SNAPSHOT.jar,
+ .

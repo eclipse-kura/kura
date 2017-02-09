@@ -14,6 +14,10 @@ package org.eclipse.kura.internal.driver.opcua;
 
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
+import static org.eclipse.milo.opcua.stack.core.security.SecurityPolicy.Basic128Rsa15;
+import static org.eclipse.milo.opcua.stack.core.security.SecurityPolicy.Basic256;
+import static org.eclipse.milo.opcua.stack.core.security.SecurityPolicy.Basic256Sha256;
+import static org.eclipse.milo.opcua.stack.core.security.SecurityPolicy.None;
 
 import java.util.Map;
 
@@ -269,8 +273,7 @@ final class OpcUaOptions {
     String getKeystoreServerAlias() {
         String serverAlias = null;
         final Object keystoreServerAlias = this.properties.get(KEYSTORE_SERVER_ALIAS);
-        if (nonNull(this.properties) && this.properties.containsKey(KEYSTORE_SERVER_ALIAS)
-                && (keystoreServerAlias != null)) {
+        if (nonNull(keystoreServerAlias) && (keystoreServerAlias instanceof String)) {
             serverAlias = keystoreServerAlias.toString();
         }
         return serverAlias;
@@ -351,13 +354,13 @@ final class OpcUaOptions {
         }
         switch (securityPolicy) {
         case 1:
-            return SecurityPolicy.Basic128Rsa15;
+            return Basic128Rsa15;
         case 2:
-            return SecurityPolicy.Basic256;
+            return Basic256;
         case 3:
-            return SecurityPolicy.Basic256Sha256;
+            return Basic256Sha256;
         default:
-            return SecurityPolicy.None;
+            return None;
         }
     }
 
@@ -397,7 +400,7 @@ final class OpcUaOptions {
     String getUsername() {
         String username = null;
         final Object name = this.properties.get(USERNAME);
-        if ((this.properties != null) && this.properties.containsKey(USERNAME) && (name != null)) {
+        if (nonNull(name) && (name instanceof String)) {
             username = name.toString();
         }
         return username;

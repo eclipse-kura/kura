@@ -8,7 +8,7 @@
      http://www.eclipse.org/legal/epl-v10.html
 
     Contributors:
-   	  Eurotech
+      Eurotech
       Amit Kumar Mondal
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
@@ -39,7 +39,7 @@
             name="server.name"
             type="String"
             cardinality="0"
-            required="true"
+            required="false"
             default="OPC-UA-Server"
             description="OPC-UA Server Name">
         </AD>

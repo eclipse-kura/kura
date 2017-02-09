@@ -22,7 +22,7 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
 /**
- * The Class KeyStoreLoader loads the provided keystore
+ * The Class {@link KeyStoreLoader} loads the provided keystore
  */
 public final class KeyStoreLoader {
 

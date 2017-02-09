@@ -34,7 +34,7 @@ import org.eclipse.kura.util.collection.CollectionUtil;
 public final class OpcUaChannelDescriptor implements ChannelDescriptor {
 
     /** Localization Resource. */
-    private static final OpcUaMessages s_message = LocalizationAdapter.adapt(OpcUaMessages.class);
+    private static final OpcUaMessages message = LocalizationAdapter.adapt(OpcUaMessages.class);
 
     /** {@inheritDoc} */
     @Override
@@ -42,18 +42,18 @@ public final class OpcUaChannelDescriptor implements ChannelDescriptor {
         final List<Tad> elements = CollectionUtil.newArrayList();
 
         final Tad nodeId = new Tad();
-        nodeId.setName(s_message.nodeId());
-        nodeId.setId(s_message.nodeId());
-        nodeId.setDescription(s_message.nodeId());
+        nodeId.setName(message.nodeId());
+        nodeId.setId(message.nodeId());
+        nodeId.setDescription(message.nodeId());
         nodeId.setType(Tscalar.STRING);
         nodeId.setRequired(true);
         nodeId.setDefault("MyNode");
         elements.add(nodeId);
 
         final Tad namespaceIndex = new Tad();
-        namespaceIndex.setName(s_message.nodeNamespaceIndex());
-        namespaceIndex.setId(s_message.nodeNamespaceIndex());
-        namespaceIndex.setDescription(s_message.nodeNamespaceIndex());
+        namespaceIndex.setName(message.nodeNamespaceIndex());
+        namespaceIndex.setId(message.nodeNamespaceIndex());
+        namespaceIndex.setDescription(message.nodeNamespaceIndex());
         namespaceIndex.setType(Tscalar.INTEGER);
         namespaceIndex.setRequired(true);
         namespaceIndex.setDefault("2");

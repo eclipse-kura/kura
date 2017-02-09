@@ -8,10 +8,13 @@
  *
  * Contributors:
  *     Eurotech
+ *     Amit Kumar Mondal
  *     Red Hat Inc
+ *     
  *******************************************************************************/
 package org.eclipse.kura.asset.provider;
 
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DESC_PROP;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
@@ -86,14 +89,12 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     /** Configuration PID Property. */
     private static final String CONF_PID = "org.eclipse.kura.asset";
 
-    /** The Logger instance. */
     private static final Logger logger = LoggerFactory.getLogger(BaseAsset.class);
 
-    /** Localization Resource. */
     private static final AssetMessages message = LocalizationAdapter.adapt(AssetMessages.class);
 
     /** The provided asset configuration wrapper instance. */
-    protected AssetConfiguration assetConfiguration;
+    private AssetConfiguration assetConfiguration;
 
     /** Container of mapped asset listeners and drivers listener. */
     private final Map<AssetListener, DriverListener> assetListeners;
@@ -101,20 +102,17 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     /** The provided asset options instance. */
     private AssetOptions assetOptions;
 
-    /** The service component context. */
     private ComponentContext context;
 
-    /** The Driver instance. */
-    public volatile Driver driver;
+    private volatile Driver driver;
 
     /** Synchronization Monitor for driver specific operations. */
     private final Lock monitor;
 
-    /** The configurable properties of this asset. */
+    /** The configurable properties of this service. */
     private Map<String, Object> properties;
 
-    /** Asset Driver Tracker. */
-    private ServiceTracker<Driver, Driver> serviceTracker;
+    private ServiceTracker<Driver, Driver> driverServiceTracker;
 
     /**
      * Instantiates a new asset instance.
@@ -132,14 +130,52 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      * @param properties
      *            the service properties
      */
-    protected synchronized void activate(final ComponentContext componentContext,
-            final Map<String, Object> properties) {
+    protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug(message.activating());
         this.context = componentContext;
         this.properties = properties;
         retrieveConfigurationsFromProperties(properties);
         attachDriver(this.assetConfiguration.getDriverPid());
         logger.debug(message.activatingDone());
+    }
+
+    /**
+     * OSGi service component callback while updation.
+     *
+     * @param properties
+     *            the service properties
+     */
+    public void updated(final Map<String, Object> properties) {
+        logger.debug(message.updating());
+        retrieveConfigurationsFromProperties(properties);
+        attachDriver(this.assetConfiguration.getDriverPid());
+        logger.debug(message.updatingDone());
+
+    }
+
+    /**
+     * OSGi service component callback while deactivation.
+     *
+     * @param context
+     *            the component context
+     */
+    protected void deactivate(final ComponentContext context) {
+        logger.debug(message.deactivating());
+        this.monitor.lock();
+        try {
+            if (this.driver != null) {
+                this.driver.disconnect();
+            }
+        } catch (final ConnectionException e) {
+            logger.error(message.errorDriverDisconnection(), e);
+        } finally {
+            this.monitor.unlock();
+        }
+        this.driver = null;
+        if (this.driverServiceTracker != null) {
+            this.driverServiceTracker.close();
+        }
+        logger.debug(message.deactivatingDone());
     }
 
     /**
@@ -157,9 +193,9 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         try {
             final DriverTrackerCustomizer driverTrackerCustomizer = new DriverTrackerCustomizer(
                     this.context.getBundleContext(), this, driverId);
-            this.serviceTracker = new ServiceTracker<>(this.context.getBundleContext(), Driver.class.getName(),
+            this.driverServiceTracker = new ServiceTracker<>(this.context.getBundleContext(), Driver.class.getName(),
                     driverTrackerCustomizer);
-            this.serviceTracker.open();
+            this.driverServiceTracker.open();
         } catch (final InvalidSyntaxException e) {
             logger.error(message.errorDriverTracking(), e);
         }
@@ -188,7 +224,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
         String pref = prefix;
         final String oldAdId = oldAd.getId();
-        if (isDriverAttrbuteDefinition(oldAdId)) {
+        if (isDriverAttributeDefinition(oldAdId)) {
             pref = prefix + DRIVER_PROPERTY_POSTFIX.value() + CHANNEL_PROPERTY_POSTFIX.value();
         }
         final Tad result = new Tad();
@@ -210,35 +246,18 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         return result;
     }
 
-    /**
-     * OSGi service component callback while deactivation.
-     *
-     * @param context
-     *            the component context
-     */
-    protected synchronized void deactivate(final ComponentContext context) {
-        logger.debug(message.deactivating());
-        this.monitor.lock();
-        try {
-            if (this.driver != null) {
-                this.driver.disconnect();
-            }
-        } catch (final ConnectionException e) {
-            logger.error(message.errorDriverDisconnection(), e);
-        } finally {
-            this.monitor.unlock();
-        }
-        this.driver = null;
-        if (this.serviceTracker != null) {
-            this.serviceTracker.close();
-        }
-        logger.debug(message.deactivatingDone());
-    }
-
     /** {@inheritDoc} */
     @Override
     public AssetConfiguration getAssetConfiguration() {
         return this.assetConfiguration;
+    }
+
+    public void setDriver(Driver driver) {
+        this.driver = driver;
+    }
+
+    public Driver getDriver() {
+        return this.driver;
     }
 
     /**
@@ -280,7 +299,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     @SuppressWarnings("unchecked")
     @Override
     public ComponentConfiguration getConfiguration() throws KuraException {
-        final String componentName = this.context.getProperties().get(ConfigurationService.KURA_SERVICE_PID).toString();
+        requireNonNull(this.properties, message.propertiesNonNull());
+        final String componentName = this.properties.get(ConfigurationService.KURA_SERVICE_PID).toString();
 
         final Tocd mainOcd = new Tocd();
         mainOcd.setId(getFactoryPid());
@@ -321,26 +341,29 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 driverSpecificChannelConfiguration = (List<Tad>) descriptor;
             }
             if (driverSpecificChannelConfiguration != null) {
-                final ChannelDescriptor basicChanneldescriptor = new BaseChannelDescriptor();
-                List<Tad> channelConfiguration = null;
-                final Object baseChannelDescriptor = basicChanneldescriptor.getDescriptor();
-                if (baseChannelDescriptor instanceof List<?>) {
-                    channelConfiguration = (List<Tad>) baseChannelDescriptor;
-                }
-                if (channelConfiguration != null) {
-                    channelConfiguration.addAll(driverSpecificChannelConfiguration);
-                }
-                for (final Tad attribute : channelConfiguration) {
-                    final Set<String> channelPrefixes = retrieveChannelPrefixes(
-                            this.assetConfiguration.getAssetChannels());
-                    for (final String prefix : channelPrefixes) {
-                        final Tad newAttribute = cloneAd(attribute, prefix);
-                        mainOcd.addAD(newAttribute);
-                    }
-                }
+                fillDriverSpecificChannelConfiguration(mainOcd, driverSpecificChannelConfiguration);
             }
         }
         return new ComponentConfigurationImpl(componentName, mainOcd, props);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void fillDriverSpecificChannelConfiguration(final Tocd mainOcd,
+            final List<Tad> driverSpecificChannelConfiguration) {
+
+        final ChannelDescriptor basicChanneldescriptor = new BaseChannelDescriptor();
+        final Object baseChannelDescriptor = basicChanneldescriptor.getDescriptor();
+        if (nonNull(baseChannelDescriptor) && baseChannelDescriptor instanceof List<?>) {
+            List<Tad> channelConfiguration = (List<Tad>) baseChannelDescriptor;
+            channelConfiguration.addAll(driverSpecificChannelConfiguration);
+            for (final Tad attribute : channelConfiguration) {
+                final Set<String> channelPrefixes = retrieveChannelPrefixes(this.assetConfiguration.getAssetChannels());
+                for (final String prefix : channelPrefixes) {
+                    final Tad newAttribute = cloneAd(attribute, prefix);
+                    mainOcd.addAD(newAttribute);
+                }
+            }
+        }
     }
 
     /**
@@ -363,10 +386,12 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      * @throws NullPointerException
      *             if the argument is null
      */
-    private boolean isDriverAttrbuteDefinition(final String oldAdId) {
+    private boolean isDriverAttributeDefinition(final String oldAdId) {
         requireNonNull(oldAdId, message.oldAdNonNull());
-        return oldAdId != ASSET_DESC_PROP.value() && oldAdId != ASSET_DRIVER_PROP.value() && oldAdId != NAME.value()
-                && oldAdId != TYPE.value() && oldAdId != VALUE_TYPE.value();
+        boolean result = !oldAdId.equals(ASSET_DESC_PROP.value()) && !oldAdId.equals(ASSET_DRIVER_PROP.value());
+        result = result && !oldAdId.equals(NAME.value()) && !oldAdId.equals(TYPE.value());
+        result = result && !oldAdId.equals(VALUE_TYPE.value());
+        return result;
     }
 
     /**
@@ -555,9 +580,14 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         final Set<String> channelPrefixes = CollectionUtil.newHashSet();
         for (final Map.Entry<Long, Channel> entry : channels.entrySet()) {
             final Long key = entry.getKey();
-            final String prefix = key + CHANNEL_PROPERTY_POSTFIX.value() + CHANNEL_PROPERTY_PREFIX.value()
-                    + CHANNEL_PROPERTY_POSTFIX.value();
-            channelPrefixes.add(prefix);
+
+            final StringBuilder channelPrefix = new StringBuilder();
+            channelPrefix.append(key);
+            channelPrefix.append(CHANNEL_PROPERTY_POSTFIX.value());
+            channelPrefix.append(CHANNEL_PROPERTY_PREFIX.value());
+            channelPrefix.append(CHANNEL_PROPERTY_POSTFIX.value());
+
+            channelPrefixes.add(channelPrefix.toString());
         }
         return channelPrefixes;
     }
@@ -608,20 +638,6 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         }
         this.assetListeners.remove(assetListener);
         logger.debug(message.unregisteringListenerDone());
-    }
-
-    /**
-     * OSGi service component callback while updation.
-     *
-     * @param properties
-     *            the service properties
-     */
-    public synchronized void updated(final Map<String, Object> properties) {
-        logger.debug(message.updating());
-        retrieveConfigurationsFromProperties(properties);
-        attachDriver(this.assetConfiguration.getDriverPid());
-        logger.debug(message.updatingDone());
-
     }
 
     /** {@inheritDoc} */

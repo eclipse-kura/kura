@@ -1,11 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * Contributors:
+ *     Eurotech
+ *     Amit Kumar Mondal
+ *     
  *******************************************************************************/
 package org.eclipse.kura.asset.provider;
 
@@ -59,10 +63,8 @@ import org.eclipse.kura.util.collection.CollectionUtil;
  */
 public final class BaseChannelDescriptor implements ChannelDescriptor {
 
-    /** Localization Resource */
     private static final AssetMessages s_message = LocalizationAdapter.adapt(AssetMessages.class);
 
-    /** The default elements. */
     private final List<Tad> defaultElements;
 
     /**
@@ -163,5 +165,4 @@ public final class BaseChannelDescriptor implements ChannelDescriptor {
     public Object getDescriptor() {
         return this.defaultElements;
     }
-
 }

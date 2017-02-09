@@ -628,10 +628,8 @@ public class PropertiesUi extends AbstractServicesUi {
 
             @Override
             public String getValue(final GwtChannelInfo object) {
-                final String value = object.get(id).toString();
-                return value == null ? "" : value;
+                return object.get(id).toString();
             }
-
         };
 
         result.setFieldUpdater(new FieldUpdater<GwtChannelInfo, String>() {

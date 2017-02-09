@@ -103,11 +103,8 @@ public final class AssetOptions {
      *
      * @param properties
      *            the properties to retrieve the channels from
-     * @throws NullPointerException
-     *             if the argument is null
      */
     private void checkChannelAvailability(final Map<String, Object> properties) {
-        requireNonNull(properties, message.propertiesNonNull());
         final Set<Long> channelIds = retrieveChannelIds(properties);
         for (final long channelId : channelIds) {
             final Channel channel = retrieveChannel(channelId, properties);
@@ -120,11 +117,8 @@ public final class AssetOptions {
      *
      * @param properties
      *            the provided properties
-     * @throws NullPointerException
-     *             if the argument is null
      */
     private void extractProperties(final Map<String, Object> properties) {
-        requireNonNull(properties, message.propertiesNonNull());
         try {
             if (properties.containsKey(ASSET_DRIVER_PROP.value())) {
                 this.driverPid = (String) properties.get(ASSET_DRIVER_PROP.value());
@@ -158,9 +152,10 @@ public final class AssetOptions {
      * @throws NullPointerException
      *             if any of the arguments is null
      */
-    private ChannelType getChannelType(final Map<String, Object> properties, final String channelTypePropertyKey) {
-        requireNonNull(properties, message.propertiesNonNull());
-        requireNonNull(channelTypePropertyKey, message.channelKeyNonNull());
+    private ChannelType getChannelType(final Map<String, Object> properties, final String channelKeyFormat) {
+        requireNonNull(channelKeyFormat, message.channelKeyNonNull());
+
+        final String channelTypePropertyKey = channelKeyFormat + TYPE.value();
 
         if (properties.containsKey(channelTypePropertyKey)) {
             final String channelTypeProp = (String) properties.get(channelTypePropertyKey);
@@ -188,10 +183,11 @@ public final class AssetOptions {
      * @throws NullPointerException
      *             if any of the arguments is null
      */
-    private DataType getDataType(final Map<String, Object> properties, final String channelValueTypePropertyKey) {
+    private DataType getDataType(final Map<String, Object> properties, final String channelKeyFormat) {
         requireNonNull(properties, message.propertiesNonNull());
-        requireNonNull(channelValueTypePropertyKey, message.channelValueTypeNonNull());
+        requireNonNull(channelKeyFormat, message.channelValueTypeNonNull());
 
+        final String channelValueTypePropertyKey = channelKeyFormat + VALUE_TYPE.value();
         if (properties.containsKey(channelValueTypePropertyKey)) {
             final String dataTypeProp = (String) properties.get(channelValueTypePropertyKey);
             if ("INTEGER".equalsIgnoreCase(dataTypeProp)) {
@@ -233,8 +229,6 @@ public final class AssetOptions {
      * @param properties
      *            the properties to retrieve channel from
      * @return the specific channel
-     * @throws NullPointerException
-     *             if the properties is null
      * @throws IllegalArgumentException
      *             the channel identifier is less
      *             than or equal to zero
@@ -243,48 +237,54 @@ public final class AssetOptions {
         if (channelId <= 0) {
             throw new IllegalArgumentException(message.channelIdNotLessThanZero());
         }
-        requireNonNull(properties, message.propertiesNonNull());
 
         logger.debug(message.retrievingChannel());
-        String channelName = null;
-        ChannelType channelType = null;
-        DataType dataType = null;
         Channel channel = null;
-        final Map<String, Object> channelConfig = CollectionUtil.newConcurrentHashMap();
 
         // All key names present is the properties
-        final String channelKeyContainment = CHANNEL_PROPERTY_POSTFIX.value() + CHANNEL_PROPERTY_PREFIX.value()
-                + CHANNEL_PROPERTY_POSTFIX.value();
-        final String channelKeyFormat = channelId + channelKeyContainment;
+        final StringBuilder channelPropertyKeyBuilder = new StringBuilder();
+        channelPropertyKeyBuilder.append(channelId);
+        channelPropertyKeyBuilder.append(CHANNEL_PROPERTY_POSTFIX.value());
+        channelPropertyKeyBuilder.append(CHANNEL_PROPERTY_PREFIX.value());
+        channelPropertyKeyBuilder.append(CHANNEL_PROPERTY_POSTFIX.value());
+        final String channelKeyFormat = channelPropertyKeyBuilder.toString();
 
-        if (properties != null) {
-            final String channelNamePropertyKey = channelKeyFormat + NAME.value();
-            if (properties.containsKey(channelNamePropertyKey)) {
-                channelName = (String) properties.get(channelNamePropertyKey);
-            }
-            final String channelTypePropertyKey = channelKeyFormat + TYPE.value();
-            channelType = getChannelType(properties, channelTypePropertyKey);
-            final String channelValueTypePropertyKey = channelKeyFormat + VALUE_TYPE.value();
-            dataType = getDataType(properties, channelValueTypePropertyKey);
-            for (final Map.Entry<String, Object> entry : properties.entrySet()) {
-                final String key = entry.getKey();
-                final String value = entry.getValue().toString();
-                final List<String> strings = Arrays.asList(key.split("\\" + CHANNEL_PROPERTY_POSTFIX.value()));
-                if (strings.size() > 2 && key.startsWith(String.valueOf(channelId) + CHANNEL_PROPERTY_POSTFIX.value())
-                        && DRIVER_PROPERTY_POSTFIX.value().equals(strings.get(2))) {
-                    final String driverSpecificPropertyKey = DRIVER_PROPERTY_POSTFIX.value()
-                            + CHANNEL_PROPERTY_POSTFIX.value();
-                    final String cKey = key
-                            .substring(key.indexOf(driverSpecificPropertyKey) + driverSpecificPropertyKey.length());
-                    channelConfig.put(cKey, value);
-                }
-            }
-        }
+        final String channelName = retrieveChannelName(properties, channelKeyFormat);
+        final ChannelType channelType = getChannelType(properties, channelKeyFormat);
+        final DataType dataType = getDataType(properties, channelKeyFormat);
+        final Map<String, Object> channelConfig = retrieveChannelConfig(channelId, properties);
+
         if (channelType != null && dataType != null) {
             channel = new Channel(channelId, channelName, channelType, dataType, channelConfig);
         }
         logger.debug(message.retrievingChannelDone());
         return channel;
+    }
+
+    private Map<String, Object> retrieveChannelConfig(final long channelId, final Map<String, Object> properties) {
+        final Map<String, Object> channelConfig = CollectionUtil.newConcurrentHashMap();
+        for (final Map.Entry<String, Object> entry : properties.entrySet()) {
+            final String key = entry.getKey();
+            final String value = entry.getValue().toString();
+            final List<String> strings = Arrays.asList(key.split("\\" + CHANNEL_PROPERTY_POSTFIX.value()));
+            if (strings.size() > 2 && key.startsWith(String.valueOf(channelId) + CHANNEL_PROPERTY_POSTFIX.value())
+                    && DRIVER_PROPERTY_POSTFIX.value().equals(strings.get(2))) {
+                final String driverSpecificPropertyKey = DRIVER_PROPERTY_POSTFIX.value()
+                        + CHANNEL_PROPERTY_POSTFIX.value();
+                final String cKey = key
+                        .substring(key.indexOf(driverSpecificPropertyKey) + driverSpecificPropertyKey.length());
+                channelConfig.put(cKey, value);
+            }
+        }
+        return channelConfig;
+    }
+
+    private String retrieveChannelName(final Map<String, Object> properties, final String channelKeyFormat) {
+        final String channelNamePropertyKey = channelKeyFormat + NAME.value();
+        if (properties.containsKey(channelNamePropertyKey)) {
+            return (String) properties.get(channelNamePropertyKey);
+        }
+        return null;
     }
 
     /**

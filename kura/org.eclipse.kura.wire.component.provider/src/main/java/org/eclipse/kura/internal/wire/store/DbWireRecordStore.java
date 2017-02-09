@@ -373,7 +373,6 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         requireNonNull(tableName, message.tableNameNonNull());
         requireNonNull(wireRecord, message.wireRecordNonNull());
 
-        final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
         Connection conn = null;
         ResultSet rsColumns = null;
         final Map<String, Integer> columns = CollectionUtil.newHashMap();
@@ -382,12 +381,13 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
             conn = this.dbHelper.getConnection();
             final String catalog = conn.getCatalog();
             final DatabaseMetaData dbMetaData = conn.getMetaData();
-            rsColumns = dbMetaData.getColumns(catalog, null, sqlTableName, null);
+            rsColumns = dbMetaData.getColumns(catalog, null, tableName, null);
             // map the columns
             while (rsColumns.next()) {
                 final String colName = rsColumns.getString(COLUMN_NAME);
+                final String sqlColName = this.dbHelper.sanitizeSqlTableAndColumnName(colName);
                 final int colType = rsColumns.getInt(DATA_TYPE);
-                columns.put(colName, colType);
+                columns.put(sqlColName, colType);
             }
         } finally {
             this.dbHelper.close(rsColumns);
@@ -398,6 +398,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
             final String sqlColName = this.dbHelper.sanitizeSqlTableAndColumnName(entry.getKey());
             final Integer sqlColType = columns.get(sqlColName);
             final JdbcType jdbcType = DbDataTypeMapper.getJdbcType(entry.getValue().getType());
+            final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
             if (isNull(sqlColType)) {
                 // add column
                 this.dbHelper.execute(

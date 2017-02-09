@@ -17,6 +17,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -179,7 +180,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
         this.wireSupport.consumersConnected(wires);
     }
 
-    private List<WireRecord> refreshSQLView() throws SQLException {
+    private List<WireRecord> performSQLQuery() throws SQLException {
         final List<WireRecord> dataRecords = new ArrayList<>();
 
         Connection conn = null;
@@ -190,25 +191,12 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
             conn = this.dbHelper.getConnection();
             stmt = conn.createStatement();
             rset = stmt.executeQuery(sqlView);
-            if (nonNull(rset)) {
-                while (rset.next()) {
-                    final Map<String, TypedValue<?>> wireRecordProperties = new HashMap<>();
 
-                    final ResultSetMetaData rmet = rset.getMetaData();
-                    for (int i = 1; i <= rmet.getColumnCount(); i++) {
-                        String fieldName = rmet.getColumnLabel(i);
-                        if (isNull(fieldName)) {
-                            fieldName = rmet.getColumnName(i);
-                        }
-
-                        final Object dbExtractedData = rset.getObject(i);
-                        final TypedValue<?> value = TypedValues.newTypedValue(dbExtractedData);
-                        wireRecordProperties.put(fieldName, value);
-                    }
-                    final WireRecord wireRecord = new WireRecord(wireRecordProperties);
-                    dataRecords.add(wireRecord);
-                }
+            while (rset.next()) {
+                final WireRecord wireRecord = new WireRecord(convertSQLRowToWireRecord(rset));
+                dataRecords.add(wireRecord);
             }
+
             logger.info(message.refreshed());
         } catch (final SQLException e) {
             throw e;
@@ -218,6 +206,34 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
             this.dbHelper.close(conn);
         }
         return dataRecords;
+    }
+
+    private Map<String, TypedValue<?>> convertSQLRowToWireRecord(ResultSet rset) throws SQLException {
+        final Map<String, TypedValue<?>> wireRecordProperties = new HashMap<>();
+        final ResultSetMetaData rmet = rset.getMetaData();
+        for (int i = 1; i <= rmet.getColumnCount(); i++) {
+            String fieldName = rmet.getColumnLabel(i);
+            Object dbExtractedData = rset.getObject(i);
+
+            if (isNull(fieldName)) {
+                fieldName = rmet.getColumnName(i);
+            }
+
+            if (isNull(dbExtractedData)) {
+                continue;
+            }
+
+            // TODO: Consider if moving to TypeValues
+            if (dbExtractedData instanceof Blob) {
+                final Blob dbExtractedBlob = (Blob) dbExtractedData;
+                final int dbExtractedBlobLength = (int) dbExtractedBlob.length();
+                dbExtractedData = dbExtractedBlob.getBytes(1, dbExtractedBlobLength);
+            }
+
+            final TypedValue<?> value = TypedValues.newTypedValue(dbExtractedData);
+            wireRecordProperties.put(fieldName, value);
+        }
+        return wireRecordProperties;
     }
 
     /**
@@ -233,7 +249,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
         logger.debug(message.wireEnvelopeReceived(), wireEnvelope);
         if (isCacheExpired()) {
             try {
-                this.lastRecords = refreshSQLView();
+                this.lastRecords = performSQLQuery();
                 this.lastRefreshedTime = Calendar.getInstance(this.lastRefreshedTime.getTimeZone());
             } catch (SQLException e) {
                 logger.error(message.errorFiltering(), e);

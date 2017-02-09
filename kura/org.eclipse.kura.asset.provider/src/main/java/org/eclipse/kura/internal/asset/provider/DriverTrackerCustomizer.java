@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Eurotech
  *     Red Hat Inc
@@ -15,7 +15,6 @@ package org.eclipse.kura.internal.asset.provider;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
-import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.provider.BaseAsset;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.localization.LocalizationAdapter;
@@ -34,19 +33,14 @@ import org.slf4j.LoggerFactory;
  */
 public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<Driver, Driver> {
 
-    /** The Logger instance. */
     private static final Logger logger = LoggerFactory.getLogger(DriverTrackerCustomizer.class);
 
-    /** Localization Resource */
     private static final AssetMessages message = LocalizationAdapter.adapt(AssetMessages.class);
 
-    /** The Asset Instance */
-    private final Asset asset;
+    private final BaseAsset baseAsset;
 
-    /** Bundle Context */
     private final BundleContext context;
 
-    /** The Driver Identifier */
     private final String driverId;
 
     /**
@@ -54,7 +48,7 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
      *
      * @param context
      *            the bundle context
-     * @param asset
+     * @param baseAsset
      *            the asset
      * @param driverId
      *            the driver id
@@ -63,14 +57,14 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
      * @throws NullPointerException
      *             if any of the arguments is null
      */
-    public DriverTrackerCustomizer(final BundleContext context, final Asset asset, final String driverId)
+    public DriverTrackerCustomizer(final BundleContext context, final BaseAsset baseAsset, final String driverId)
             throws InvalidSyntaxException {
         requireNonNull(context, message.bundleContextNonNull());
-        requireNonNull(asset, message.assetNonNull());
+        requireNonNull(baseAsset, message.assetNonNull());
         requireNonNull(driverId, message.driverPidNonNull());
 
         this.driverId = driverId;
-        this.asset = asset;
+        this.baseAsset = baseAsset;
         this.context = context;
     }
 
@@ -80,7 +74,7 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
         final Driver driver = this.context.getService(reference);
         if (reference.getProperty(KURA_SERVICE_PID).equals(this.driverId)) {
             logger.info(message.driverFoundAdding());
-            ((BaseAsset) this.asset).driver = driver;
+            this.baseAsset.setDriver(driver);
         }
         return driver;
     }
@@ -88,8 +82,8 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
     /** {@inheritDoc} */
     @Override
     public void modifiedService(final ServiceReference<Driver> reference, final Driver service) {
-        this.removedService(reference, service);
-        this.addingService(reference);
+        removedService(reference, service);
+        addingService(reference);
     }
 
     /** {@inheritDoc} */
@@ -98,8 +92,7 @@ public final class DriverTrackerCustomizer implements ServiceTrackerCustomizer<D
         this.context.ungetService(reference);
         if (reference.getProperty(KURA_SERVICE_PID).equals(this.driverId)) {
             logger.info(message.driverRemoved() + service);
-            ((BaseAsset) this.asset).driver = null;
+            this.baseAsset.setDriver(null);
         }
     }
-
 }

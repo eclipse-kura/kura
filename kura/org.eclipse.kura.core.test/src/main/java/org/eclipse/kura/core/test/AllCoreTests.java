@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
@@ -19,7 +19,6 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.system.SystemService;
-import io.moquette.server.Server;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -28,10 +27,12 @@ import org.junit.runners.Suite.SuiteClasses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.moquette.server.Server;
+
 @RunWith(Suite.class)
 @SuiteClasses({ DataServiceTest.class, CloudDeploymentHandlerTest.class, CloudServiceTest.class, CommURITest.class,
         ComponentConfigurationImplTest.class, ConfigurationServiceTest.class, NetUtilTest.class,
-        NetworkServiceTest.class, SystemAdminServiceTest.class, SystemServiceTest.class, XmlUtilTest.class })
+        NetworkServiceTest.class, SystemAdminServiceTest.class, XmlUtilTest.class })
 public class AllCoreTests {
 
     private static final Logger s_logger = LoggerFactory.getLogger(AllCoreTests.class);

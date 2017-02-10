@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2017 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -136,7 +136,7 @@ public class SystemServiceImpl implements SystemService {
             // if not found, look for such file in the kura.home directory
             String kuraHome = System.getProperty(KEY_KURA_HOME_DIR);
             String kuraConfig = System.getProperty(KURA_CONFIG);
-            String kuraProperties = IOUtil.readResource(KURA_PROPS_FILE);
+            String kuraProperties = readResource(KURA_PROPS_FILE);
 
             if (kuraProperties != null) {
                 kuraDefaults.load(new StringReader(kuraProperties));
@@ -179,7 +179,7 @@ public class SystemServiceImpl implements SystemService {
             // if not found, look for such file in the kura.home directory
             Properties kuraCustomProps = new Properties();
             String kuraCustomConfig = System.getProperty(KURA_CUSTOM_CONFIG);
-            String kuraCustomProperties = IOUtil.readResource(KURA_CUSTOM_PROPS_FILE);
+            String kuraCustomProperties = readResource(KURA_CUSTOM_PROPS_FILE);
 
             if (kuraCustomProperties != null) {
                 kuraCustomProps.load(new StringReader(kuraCustomProperties));
@@ -255,17 +255,17 @@ public class SystemServiceImpl implements SystemService {
                  * s_logger.info("kura.home = " + kuraDefaults.getProperty(KEY_KURA_HOME_DIR));
                  * s_logger.info("kura.plugins = " + kuraDefaults.getProperty(KEY_KURA_PLUGINS_DIR));
                  * s_logger.info("kura.packages = " + kuraDefaults.getProperty("kura.packages"));
-                 * 
+                 *
                  * //write out Kura defaults back to kuraPropsFile
                  * FileOutputStream fos = new FileOutputStream(kuraHome+File.separator+KURA_PROPS_FILE);
                  * kuraDefaults.store(fos, null);
                  * fos.flush();
                  * fos.getFD().sync();
                  * fos.close();
-                 * 
+                 *
                  * s_logger.warn("Restarting DeploymentAgent to reload kura.properties");
                  * String bundleName = "org.eclipse.kura.deployment.agent";
-                 * 
+                 *
                  * Bundle[] bundles = m_ctx.getBundleContext().getBundles();
                  * Long id = null;
                  * try {
@@ -281,7 +281,7 @@ public class SystemServiceImpl implements SystemService {
                  * throw new ComponentException(
                  * "Error restarting org.eclipse.kura.deployment.agent.DeploymentAgentService to update Kura", e);
                  * }
-                 * 
+                 *
                  * if (id != null) {
                  * Bundle bundle = m_ctx.getBundleContext().getBundle(id);
                  * if (bundle == null) {
@@ -502,6 +502,10 @@ public class SystemServiceImpl implements SystemService {
         }
     }
 
+    protected String readResource(String resource) throws IOException {
+        return IOUtil.readResource(resource);
+    }
+
     protected void deactivate(ComponentContext componentContext) {
         this.m_ctx = null;
         this.m_kuraProperties = null;
@@ -584,13 +588,13 @@ public class SystemServiceImpl implements SystemService {
             try {
                 s_logger.info("executing: InetAddress.getLocalHost " + primaryNetworkInterfaceName);
                 ip = InetAddress.getLocalHost();
-                Enumeration<NetworkInterface> networks = NetworkInterface.getNetworkInterfaces();
-                while (networks.hasMoreElements()) {
-                    NetworkInterface network = networks.nextElement();
-                    if ("eth0".equals(network.getName())) {
-                        ip = network.getInetAddresses().nextElement();
-                        break;
-                    }
+                // Windows options are either ethX or wlanX, and eth0 may really not be the correct one
+                InetAddress ip2 = getPrimaryIPWindows("eth");
+                if (ip2 == null) {
+                    ip2 = getPrimaryIPWindows("wlan");
+                }
+                if (ip2 != null) {
+                    ip = ip2;
                 }
                 NetworkInterface network = NetworkInterface.getByInetAddress(ip);
                 byte[] mac = network.getHardwareAddress();
@@ -619,6 +623,32 @@ public class SystemServiceImpl implements SystemService {
         }
 
         return macAddress;
+    }
+
+    /**
+     * Returns ip of the first interface name of which begins with <code>prefix</code>.
+     *
+     * @param prefix
+     *            network interface name prefix e.g. eth, wlan
+     * @return ip of the first interface name of which begins with prefix; null if none found with ip
+     * @throws SocketException
+     */
+    private InetAddress getPrimaryIPWindows(String prefix) throws SocketException {
+        InetAddress ip = null;
+
+        Enumeration<NetworkInterface> networks = NetworkInterface.getNetworkInterfaces();
+        while (networks.hasMoreElements()) {
+            NetworkInterface network = networks.nextElement();
+            if (network.getName().startsWith(prefix)) {
+                Enumeration<InetAddress> ips = network.getInetAddresses();
+                if (ips.hasMoreElements()) {
+                    ip = ips.nextElement();
+                    break;
+                }
+            }
+        }
+
+        return ip;
     }
 
     @Override
@@ -942,6 +972,13 @@ public class SystemServiceImpl implements SystemService {
             String biosTmp = runSystemInfoCommand(cmds);
             if (biosTmp.contains(": ")) {
                 biosVersion = biosTmp.split(":\\s+")[1];
+            }
+        } else if (getOsName().contains("Windows")) {
+            String[] cmds = { "wmic", "bios", "get", "smbiosbiosversion" };
+            String biosTmp = runSystemInfoCommand(cmds);
+            if (biosTmp.contains("SMBIOSBIOSVersion")) {
+                biosVersion = biosTmp.split("SMBIOSBIOSVersion\\s+")[1];
+                biosVersion = biosVersion.trim();
             }
         }
 

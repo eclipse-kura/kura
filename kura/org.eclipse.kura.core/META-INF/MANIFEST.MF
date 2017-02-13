@@ -5,17 +5,17 @@ Bundle-SymbolicName: org.eclipse.kura.core;singleton:=true
 Bundle-Version: 1.0.11.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: org.eclipse.kura.core.linux.util; version="1.1.0", org.eclipse.kura.core.util; version="1.1.0"
+Export-Package: org.eclipse.kura.core.linux.util; version="1.1.0"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.crypto,
  javax.net,
  javax.net.ssl,
  javax.sql,
- org.apache.commons.io;version="[2.4,3.0)",
  org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.certificate;version="[1.0,2.0)",
  org.eclipse.kura.configuration;version="[1.0,2.0)",
+ org.eclipse.kura.core.util; version="1.1.0",
  org.eclipse.kura.crypto;version="[1.0,2.0)",
  org.eclipse.kura.data;version="[1.1,2.0)",
  org.eclipse.kura.data.listener;version="[1.0,2.0)",

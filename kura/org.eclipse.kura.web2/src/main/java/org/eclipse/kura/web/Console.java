@@ -242,7 +242,6 @@ public class Console implements ConfigurableComponent {
         this.m_httpService.unregister(servletRoot + "/device_snapshots");
         this.m_httpService.unregister(servletRoot + "/skin");
         this.m_httpService.unregister(servletRoot + "/wires");
-        this.m_httpService.unregister("/sse");
         this.eventService.stop();
         this.m_httpService.unregister(servletRoot + "/event");
     }
@@ -286,7 +285,6 @@ public class Console implements ConfigurableComponent {
         this.m_httpService.registerServlet(servletRoot + "/ssl", new GwtSslServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/cloudservices", new GwtCloudServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/wires", new GwtWireServiceImpl(), null, httpCtx);
-        this.m_httpService.registerServlet("/sse", new EventHandlerServlet(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/event", this.eventService, null, httpCtx);
         this.eventService.start();
     }

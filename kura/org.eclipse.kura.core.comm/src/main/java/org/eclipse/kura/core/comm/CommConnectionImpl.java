@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.StringJoiner;
 
 import javax.comm.CommPort;
 import javax.comm.CommPortIdentifier;
@@ -317,11 +318,12 @@ public class CommConnectionImpl implements CommConnection, Closeable {
             return null;
         }
 
-        StringBuilder sb = new StringBuilder(bytes.length * 3);
+        StringJoiner sj = new StringJoiner(" ");
+        
         for (byte b : bytes) {
-            sb.append(String.format("%02X ", b));
+        	sj.add(String.format("%02X", b));
         }
 
-        return sb.toString();
+        return sj.toString();
     }
 }

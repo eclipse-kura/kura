@@ -345,7 +345,7 @@
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.util</artifactId>
 									<version>${org.eclipse.kura.util.version}</version>
-									</artifactItem>
+								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.wire.component.provider</artifactId>

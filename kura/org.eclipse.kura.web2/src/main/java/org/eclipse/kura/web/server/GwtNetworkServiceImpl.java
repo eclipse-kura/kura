@@ -252,7 +252,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                         } else {
                                             gwtNetConfig.setIpAddress("");
                                         }
-                                        if (addressConfig.getNetworkPrefixLength() >= 0
+                                        if (addressConfig.getNetworkPrefixLength() > 0
                                                 && addressConfig.getNetworkPrefixLength() <= 32) {
                                             gwtNetConfig.setSubnetMask(NetworkUtil
                                                     .getNetmaskStringForm(addressConfig.getNetworkPrefixLength()));
@@ -723,7 +723,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public void updateNetInterfaceConfigurations(GwtXSRFToken xsrfToken, GwtNetInterfaceConfig config)
             throws GwtKuraException {
-    	
+
         checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
 
@@ -1564,9 +1564,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
             // ignore SSID?
             wifiConfig.setIgnoreSSID(gwtWifiConfig.ignoreSSID());
-            
+
             // broadcast SSID
-         	wifiConfig.setBroadcast(!gwtWifiConfig.ignoreSSID());
+            wifiConfig.setBroadcast(!gwtWifiConfig.ignoreSSID());
         }
 
         return wifiConfig;

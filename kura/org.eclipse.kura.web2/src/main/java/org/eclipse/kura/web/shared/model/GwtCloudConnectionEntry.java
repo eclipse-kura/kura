@@ -23,11 +23,11 @@ public class GwtCloudConnectionEntry extends KuraBaseModel implements Serializab
     public GwtCloudConnectionEntry() {
     }
 
-    public GwtCloudConnectionState getState() {
+    public int getState() {
         return get("state");
     }
 
-    public void setState(GwtCloudConnectionState state) {
+    public void setState(int state) {
         set("state", state);
     }
 

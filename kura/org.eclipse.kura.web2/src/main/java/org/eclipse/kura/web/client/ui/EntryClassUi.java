@@ -205,19 +205,8 @@ public class EntryClassUi extends Composite {
     private ValueChangeHandler<String> changeHandler = new ValueChangeHandler<String>() {
 
         @Override
-        public void onValueChange(ValueChangeEvent<String> event) {
-            gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                @Override
-                public void onFailure(Throwable ex) {
-                    FailureHandler.handle(ex, EntryClassUi.class.getName());
-                }
-
-                @Override
-                public void onSuccess(GwtXSRFToken token) {
-                    fetchAvailableServices();
-                }
-            });
+        public void onValueChange(final ValueChangeEvent<String> event) {
+            filterAvailableServices(textSearch.getValue());
         }
     };
 
@@ -554,6 +543,19 @@ public class EntryClassUi extends Composite {
 
     }
 
+    public void filterAvailableServices(String serviceName) {
+        serviceName = serviceName.toLowerCase();
+
+        for (int i = 0; i < servicesMenu.getWidgetCount(); i++) {
+            ServicesAnchorListItem sl = (ServicesAnchorListItem) servicesMenu.getWidget(i);
+            if (serviceName == null || sl.getServiceName().toLowerCase().indexOf(serviceName) != -1) {
+                sl.setVisible(true);
+            } else {
+                sl.setVisible(false);
+            }
+        }
+    }
+
     public void fetchAvailableServices() {
         // (Re)Fetch Available Services
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
@@ -568,23 +570,24 @@ public class EntryClassUi extends Composite {
                 EntryClassUi.this.gwtComponentService.findServicesConfigurations(token,
                         new AsyncCallback<List<GwtConfigComponent>>() {
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        logger.log(Level.SEVERE, ex.getMessage(), ex);
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(List<GwtConfigComponent> result) {
-                        EntryClassUi.this.servicesMenu.clear();
-                        for (GwtConfigComponent pair : result) {
-                            if (!pair.isWireComponent()) {
-                                EntryClassUi.this.servicesMenu
-                                        .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                FailureHandler.handle(ex, EntryClassUi.class.getName());
                             }
-                        }
-                    }
-                });
+
+                            @Override
+                            public void onSuccess(List<GwtConfigComponent> result) {
+                                EntryClassUi.this.servicesMenu.clear();
+                                for (GwtConfigComponent pair : result) {
+                                    if (!pair.isWireComponent()) {
+                                        EntryClassUi.this.servicesMenu
+                                                .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
+                                    }
+                                }
+                                filterAvailableServices(textSearch.getValue());
+                            }
+                        });
             }
         });
     }
@@ -674,8 +677,7 @@ public class EntryClassUi extends Composite {
 
                             @Override
                             public void onSuccess(Void result) {
-                                ValueChangeEvent<String> event = new SelectValueChangeEvent(textSearch.getValue());
-                                changeHandler.onValueChange(event);
+                                fetchAvailableServices();
                             }
                         });
                     }

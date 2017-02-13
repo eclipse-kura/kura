@@ -125,7 +125,6 @@
 
                                         <b:AnchorListItem icon="GEAR" iconFixedWidth="true" text="Settings"
                                             ui:field="settings" />
-
                                         <b:AnchorListItem icon="RETWEET" iconFixedWidth="true" text="Wires"
                                             ui:field="wires" />
                                     </b:NavPills>
@@ -138,7 +137,6 @@
                                     <b:Heading size="H3" text="Services" />
                                 </b:PanelHeader>
                                 <b:PanelBody>
-                                    <b:Form type="INLINE">
                                         <b:FieldSet>
                                             <b:FormGroup addStyleNames="services-form-group">
                                                 <b:InputGroup addStyleNames="services-input-group">
@@ -154,7 +152,6 @@
                                                 </b:InputGroup>
                                             </b:FormGroup>
                                         </b:FieldSet>
-                                    </b:Form>
                                     <g:ScrollPanel ui:field="servicesPanel">
                                         <b:NavPills stacked="true" ui:field="servicesMenu" />
                                     </g:ScrollPanel>

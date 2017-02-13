@@ -115,6 +115,10 @@ public class ServicesAnchorListItem extends AnchorListItem {
 
     }
 
+    public String getServiceName() {
+        return this.item.getComponentName();
+    }
+
     private IconType getIcon(String name) {
         if (name.startsWith("BluetoothService")) {
             return IconType.BTC;

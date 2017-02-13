@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
  * 
  *******************************************************************************/
 package org.eclipse.kura.web;
@@ -18,6 +22,7 @@ import javax.servlet.ServletException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.KuraConfigReadyEvent;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.easse.SseEventSourceServlet;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.GwtCertificatesServiceImpl;
 import org.eclipse.kura.web.server.GwtCloudServiceImpl;
@@ -34,7 +39,6 @@ import org.eclipse.kura.web.server.GwtSslServiceImpl;
 import org.eclipse.kura.web.server.GwtStatusServiceImpl;
 import org.eclipse.kura.web.server.GwtWireServiceImpl;
 import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
-import org.eclipse.kura.web.server.servlet.EventHandlerServlet;
 import org.eclipse.kura.web.server.servlet.FileServlet;
 import org.eclipse.kura.web.server.servlet.SkinServlet;
 import org.osgi.framework.BundleContext;
@@ -63,7 +67,7 @@ public class Console implements ConfigurableComponent {
     private static ComponentContext s_context;
 
     private HttpService m_httpService;
-
+    
     private SystemService m_systemService;
     private CryptoService m_cryptoService;
 
@@ -110,7 +114,7 @@ public class Console implements ConfigurableComponent {
     public void unsetEventAdminService(EventAdmin eventAdmin) {
         this.m_eventAdmin = null;
     }
-
+    
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -244,6 +248,7 @@ public class Console implements ConfigurableComponent {
         this.m_httpService.unregister(servletRoot + "/wires");
         this.eventService.stop();
         this.m_httpService.unregister(servletRoot + "/event");
+        this.m_httpService.unregister("/sse");
     }
 
     public static BundleContext getBundleContext() {
@@ -286,6 +291,7 @@ public class Console implements ConfigurableComponent {
         this.m_httpService.registerServlet(servletRoot + "/cloudservices", new GwtCloudServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/wires", new GwtWireServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/event", this.eventService, null, httpCtx);
+        this.m_httpService.registerServlet("/sse", new SseEventSourceServlet(), null, httpCtx);
         this.eventService.start();
     }
 

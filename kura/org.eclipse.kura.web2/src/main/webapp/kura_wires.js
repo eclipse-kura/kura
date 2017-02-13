@@ -26,11 +26,9 @@ var kuraWires = (function() {
 	var selectedElement, oldSelectedPid;
 	var oldCellView;
 	var elementsContainerTemp = [];
-	var eventSourceSessionId; // Server Sent Events Session ID
 	// used to disallow adding new instance to the Wire
 	// Graph if any instance is recently deleted.
 	var isComponentDeleted;
-	var eventSource;
 
 	/*
 	 * / Public functions
@@ -42,30 +40,6 @@ var kuraWires = (function() {
 		setup();
 		regiterFormInputFieldValidation();
 	};
-	
-	client.unload = function() {
-		eventSource.close();
-		eventSource = null;
-		var xmlHttp = new XMLHttpRequest();
-	    xmlHttp.open("GET", "/sse?session="
-				+ eventSourceSessionId + "&logout=" + eventSourceSessionId, true);
-	    xmlHttp.send(null);
-	};
-
-	function generateId() {
-		return new Date().getTime()
-	}
-
-	$(document).ready(function() {
-		$(window).bind("beforeunload", function() {
-			eventSource.close();
-			eventSource = null;
-			var xmlHttp = new XMLHttpRequest();
-		    xmlHttp.open("GET", "/sse?session="
-					+ eventSourceSessionId + "&logout=" + eventSourceSessionId, true);
-		    xmlHttp.send(null);
-		});
-	});
 	
 	client.resetDeleteComponentState = function() {
 		isComponentDeleted = false;
@@ -95,17 +69,15 @@ var kuraWires = (function() {
 	 * Interaction with OSGi Event Admin through Server Sent Events
 	 */
 	function sse() {
-		if(eventSource == null) {
-			eventSourceSessionId = generateId();
-			eventSource = new EventSource("/sse?session=" + eventSourceSessionId);
-			eventSource.onmessage = function(event) {
-				_.each(graph.getElements(), function(c) {
-					if (c.attributes.label === event.data) {
-						fireTransition(c);
-					}
-				});
-			};
-		}
+		var eventSource = new EventSource("/sse?topic=org/eclipse/kura/wires/emit");
+		eventSource.onmessage = function(event) {
+			var parsedData = JSON.parse(event.data);
+			_.each(graph.getElements(), function(c) {
+				if (c.attributes.pid === parsedData.emitter) {
+					fireTransition(c);
+				}
+			});
+		};
 	}
 
 	function toggleDeleteGraphButton(flag) {

@@ -107,6 +107,11 @@
 								    <version>${com.eclipsesource.minimal-json.version}</version>
 								</artifactItem>
 								<artifactItem>
+								    <groupId>org.eclipse.jetty</groupId>
+								    <artifactId>jetty-servlets</artifactId>
+								    <version>${org.eclipse.jetty.jetty-servlets.version}</version>
+								</artifactItem>
+								<artifactItem>
 									<groupId>org.tigris</groupId>
 									<artifactId>org.tigris.mtoolkit.iagent.rpc</artifactId>
 									<version>${org.tigris.mtoolkit.iagent.rpc.version}</version>
@@ -338,6 +343,7 @@
 								<move file="target/source/plugins/camel-core-osgi.jar" tofile="target/source/plugins/org.apache.camel.camel-core-osgi_${org.apache.camel.camel-core-osgi.version}.jar"/>
 								<move file="target/source/plugins/camel-kura.jar" tofile="target/source/plugins/org.apache.camel.camel-kura_${org.apache.camel.camel-kura.version}.jar"/>
 								<move file="target/source/plugins/minimal-json.jar" tofile="target/source/plugins/minimal-json_${com.eclipsesource.minimal-json.version}.jar"/>
+								<move file="target/source/plugins/jetty-servlets.jar" tofile="target/source/plugins/jetty-servlets_${org.eclipse.jetty.jetty-servlets.version}.jar"/>
 								<!--<move file="target/source/plugins/org.eclipse.kura.windows.system.jar" tofile="target/source/plugins/org.eclipse.kura.windows.system_${org.eclipse.kura.windows.system.version}.jar"/>
 								<move file="target/source/plugins/org.eclipse.kura.windows.launcher.jar" tofile="target/source/plugins/org.eclipse.kura.windows.launcher_${org.eclipse.kura.windows.launcher.version}.jar"/>-->
 							</tasks>

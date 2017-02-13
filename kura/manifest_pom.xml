@@ -56,6 +56,8 @@
 
         <module>org.eclipse.kura.driver.helper.provider</module>
 
+        <module>org.eclipse.kura.easse</module>
+
         <module>org.eclipse.kura.linux.bluetooth</module>
         <module>org.eclipse.kura.linux.clock</module>
         <module>org.eclipse.kura.linux.command</module>

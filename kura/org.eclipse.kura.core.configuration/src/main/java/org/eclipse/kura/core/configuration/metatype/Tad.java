@@ -398,12 +398,4 @@ public class Tad implements AD {
     public Map<QName, String> getOtherAttributes() {
         return this.otherAttributes;
     }
-
-    @Override
-    public String toString() {
-        return "Tad [option=" + option + ", any=" + any + ", name=" + name + ", description=" + description + ", id="
-                + id + ", type=" + type + ", cardinality=" + cardinality + ", min=" + min + ", max=" + max
-                + ", _default=" + _default + ", required=" + required + ", otherAttributes=" + otherAttributes + "]";
-    }
-
 }

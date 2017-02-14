@@ -605,7 +605,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     synchronized void registerComponentOCD(String metatypePid, Tocd ocd, boolean isFactory) throws KuraException {
         // metatypePid is either the 'pid' or 'factoryPid' attribute of the MetaType Designate element
         // 'pid' matches a service.pid, not a kura.service.pid
-        s_logger.info("Registering metatype pid: {} with ocd: {} ...", metatypePid, ocd);
+        s_logger.info("Registering metatype pid: {} ...", metatypePid);
+
         this.m_ocds.put(metatypePid, ocd);
 
         if (isFactory) {
@@ -911,7 +912,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 StringBuilder entireFile = new StringBuilder();
                 while ((line = br.readLine()) != null) {
                     entireFile.append(line);
-                }        // end while
+                }          // end while
                 xmlConfigs = XmlUtil.unmarshal(entireFile.toString(), XmlComponentConfigurations.class);
             } finally {
                 if (br != null) {
@@ -1481,8 +1482,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 if (stringValue != null) {
                     String result = attrDef.validate(stringValue);
                     if (result != null && !result.isEmpty()) {
-                        throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID,
-                                attrDef.getID(), stringValue, result);
+                        throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, attrDef.getID(),
+                                stringValue, result);
                     }
                 }
             }

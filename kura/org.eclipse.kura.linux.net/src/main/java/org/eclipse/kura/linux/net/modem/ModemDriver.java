@@ -281,16 +281,22 @@ public class ModemDriver {
                 echoSysfsResource(RELIAGATE_10_05_GSM_USB_PATH, true);
 
                 // wait until the modem is on again
-                // isOn uses lsusb that is not supported on the Reliagate 10-05
-                // int cnt = 10;
-                // while (!isOn() && cnt > 0) {
-                // sleep(1000);
-                // cnt--;
-                // }
-                // if (!isOn()) {
-                // retVal = false;
-                // }
-            } catch (Exception e) {
+                int cnt = 10;
+                while (!isOn() && cnt > 0) {
+                    sleep(1000);
+                    cnt--;
+                }
+                if (!isOn()) {
+                    retVal = false;
+                }
+            } catch (IOException e) {
+                s_logger.error("Failed to write to gpio", e);
+                retVal = false;
+            } catch (KuraException e) {
+                s_logger.error("Failed to detect modem", e);
+                retVal = false;
+            } catch (InterruptedException e) {
+                s_logger.error("Interrupted Exception during sleep", e);
                 retVal = false;
             }
         } else {
@@ -463,13 +469,17 @@ public class ModemDriver {
         }
     }
 
-    private boolean isOn() throws Exception {
+    private boolean isOn() throws KuraException {
 
         boolean isModemOn;
         if (this instanceof UsbModemDriver) {
-            isModemOn = SupportedUsbModems.isAttached(((UsbModemDriver) this).getVendor(),
-                    ((UsbModemDriver) this).getProduct());
-            s_logger.info("isOn() :: USB modem attached? {}", isModemOn);
+            try {
+                isModemOn = SupportedUsbModems.isAttached(((UsbModemDriver) this).getVendor(),
+                        ((UsbModemDriver) this).getProduct());
+                s_logger.info("isOn() :: USB modem attached? {}", isModemOn);
+            } catch (IOException e) {
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Error executing lsusb command");
+            }
         } else if (this instanceof SerialModemDriver) {
             isModemOn = ((SerialModemDriver) this).isReachable();
             s_logger.info("isOn() :: Serial modem reachable? {}", isModemOn);

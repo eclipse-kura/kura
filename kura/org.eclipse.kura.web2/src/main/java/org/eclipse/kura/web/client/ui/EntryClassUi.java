@@ -9,7 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
@@ -66,8 +66,8 @@ import org.gwtbootstrap3.client.ui.html.Strong;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -185,30 +185,28 @@ public class EntryClassUi extends Composite {
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
+    private final KeyUpHandler searchBoxChangeHandler = new KeyUpHandler() {
+
+        @Override
+        public void onKeyUp(KeyUpEvent event) {
+            TextBox searchBox = (TextBox) event.getSource();
+            String searchedValue = searchBox.getValue();
+            if (searchedValue != null) {
+                filterAvailableServices(searchedValue);
+            }
+        }
+    };
+
+    private final EntryClassUi ui;
+
     private GwtSession currentSession;
     private AnchorListItem service;
     private GwtConfigComponent addedItem;
     private GwtConfigComponent selected = null;
 
-    private EntryClassUi ui;
     private Modal modal;
     private ServicesUi servicesUi;
     private AnchorListItem selectedAnchorListItem;
-
-    private class SelectValueChangeEvent extends ValueChangeEvent<String> {
-
-        protected SelectValueChangeEvent(String value) {
-            super(value);
-        }
-    }
-
-    private ValueChangeHandler<String> changeHandler = new ValueChangeHandler<String>() {
-
-        @Override
-        public void onValueChange(final ValueChangeEvent<String> event) {
-            filterAvailableServices(textSearch.getValue());
-        }
-    };
 
     public EntryClassUi() {
         logger.log(Level.FINER, "Initiating UiBinder");
@@ -225,11 +223,11 @@ public class EntryClassUi extends Composite {
         this.contentPanel.setVisible(false);
 
         // Add handler for sidenav show/hide button
-        sidenavButton.addClickHandler(new ClickHandler() {
+        this.sidenavButton.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (sidenav.getStyleName().contains(SIDENAV_HIDDEN_STYLE_NAME)) {
+                if (EntryClassUi.this.sidenav.getStyleName().contains(SIDENAV_HIDDEN_STYLE_NAME)) {
                     showSidenav();
                 } else {
                     hideSidenav();
@@ -273,24 +271,24 @@ public class EntryClassUi extends Composite {
     }
 
     public void setSelectedAnchorListItem(AnchorListItem selected) {
-        if (selectedAnchorListItem != null) {
-            selectedAnchorListItem.removeStyleName(SELECTED_ANCHOR_LIST_ITEM_STYLE_NAME);
+        if (this.selectedAnchorListItem != null) {
+            this.selectedAnchorListItem.removeStyleName(SELECTED_ANCHOR_LIST_ITEM_STYLE_NAME);
         }
-        selectedAnchorListItem = selected;
-        selectedAnchorListItem.addStyleName(SELECTED_ANCHOR_LIST_ITEM_STYLE_NAME);
+        this.selectedAnchorListItem = selected;
+        this.selectedAnchorListItem.addStyleName(SELECTED_ANCHOR_LIST_ITEM_STYLE_NAME);
         hideSidenav();
     }
 
     private void showSidenav() {
-        sidenav.removeStyleName(SIDENAV_HIDDEN_STYLE_NAME);
-        sidenavOverlay.removeStyleName(SIDENAV_HIDDEN_STYLE_NAME);
+        this.sidenav.removeStyleName(SIDENAV_HIDDEN_STYLE_NAME);
+        this.sidenavOverlay.removeStyleName(SIDENAV_HIDDEN_STYLE_NAME);
         // prevent body scrolling if sidenav is shown
         RootPanel.get().addStyleName(NOT_SCROLLABLE_STYLE_NAME);
     }
 
     private void hideSidenav() {
-        sidenav.addStyleName(SIDENAV_HIDDEN_STYLE_NAME);
-        sidenavOverlay.addStyleName(SIDENAV_HIDDEN_STYLE_NAME);
+        this.sidenav.addStyleName(SIDENAV_HIDDEN_STYLE_NAME);
+        this.sidenavOverlay.addStyleName(SIDENAV_HIDDEN_STYLE_NAME);
         RootPanel.get().removeStyleName(NOT_SCROLLABLE_STYLE_NAME);
     }
 
@@ -543,12 +541,31 @@ public class EntryClassUi extends Composite {
 
     }
 
-    public void filterAvailableServices(String serviceName) {
-        serviceName = serviceName.toLowerCase();
+    private void filterAvailableServices(String serviceName) {
+        if (serviceName == null) {
+            showAllServices();
+            return;
+        }
 
-        for (int i = 0; i < servicesMenu.getWidgetCount(); i++) {
-            ServicesAnchorListItem sl = (ServicesAnchorListItem) servicesMenu.getWidget(i);
-            if (serviceName == null || sl.getServiceName().toLowerCase().indexOf(serviceName) != -1) {
+        String tmpServiceName = serviceName.toLowerCase();
+        if (tmpServiceName.isEmpty() || "".equals(tmpServiceName)) {
+            showAllServices();
+        } else {
+            filterByServiceName(tmpServiceName);
+        }
+    }
+
+    private void showAllServices() {
+        for (int i = 0; i < this.servicesMenu.getWidgetCount(); i++) {
+            ServicesAnchorListItem sl = (ServicesAnchorListItem) this.servicesMenu.getWidget(i);
+            sl.setVisible(true);
+        }
+    }
+
+    private void filterByServiceName(String tmpServiceName) {
+        for (int i = 0; i < this.servicesMenu.getWidgetCount(); i++) {
+            ServicesAnchorListItem sl = (ServicesAnchorListItem) this.servicesMenu.getWidget(i);
+            if (tmpServiceName == null || sl.getServiceName().toLowerCase().indexOf(tmpServiceName) != -1) {
                 sl.setVisible(true);
             } else {
                 sl.setVisible(false);
@@ -570,41 +587,41 @@ public class EntryClassUi extends Composite {
                 EntryClassUi.this.gwtComponentService.findServicesConfigurations(token,
                         new AsyncCallback<List<GwtConfigComponent>>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                    }
 
-                            @Override
-                            public void onSuccess(List<GwtConfigComponent> result) {
-                                EntryClassUi.this.servicesMenu.clear();
-                                for (GwtConfigComponent pair : result) {
-                                    if (!pair.isWireComponent()) {
-                                        EntryClassUi.this.servicesMenu
-                                                .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
-                                    }
-                                }
-                                filterAvailableServices(textSearch.getValue());
+                    @Override
+                    public void onSuccess(List<GwtConfigComponent> result) {
+                        EntryClassUi.this.servicesMenu.clear();
+                        for (GwtConfigComponent pair : result) {
+                            if (!pair.isWireComponent()) {
+                                EntryClassUi.this.servicesMenu
+                                        .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
                             }
-                        });
+                        }
+                        filterAvailableServices(EntryClassUi.this.textSearch.getValue());
+                    }
+                });
             }
         });
     }
 
     private void initServicesTree() {
         // Keypress handler
-        textSearch.addValueChangeHandler(changeHandler);
+        this.textSearch.addKeyUpHandler(this.searchBoxChangeHandler);
 
         initNewFactoryComponentModal();
 
-        factoriesButton.addClickHandler(new ClickHandler() {
+        this.factoriesButton.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
                 // always empty the PID input field
-                componentName.setValue("");
-                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+                EntryClassUi.this.componentName.setValue("");
+                EntryClassUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -613,7 +630,8 @@ public class EntryClassUi extends Composite {
 
                     @Override
                     public void onSuccess(GwtXSRFToken token) {
-                        gwtComponentService.findFactoryComponents(token, new AsyncCallback<List<String>>() {
+                        EntryClassUi.this.gwtComponentService.findFactoryComponents(token,
+                                new AsyncCallback<List<String>>() {
 
                             @Override
                             public void onFailure(Throwable ex) {
@@ -623,12 +641,12 @@ public class EntryClassUi extends Composite {
 
                             @Override
                             public void onSuccess(final List<String> result) {
-                                factoriesList.clear();
-                                factoriesList.addItem(SELECT_COMPONENT);
+                                EntryClassUi.this.factoriesList.clear();
+                                EntryClassUi.this.factoriesList.addItem(SELECT_COMPONENT);
                                 for (final String servicePid : result) {
-                                    factoriesList.addItem(servicePid);
+                                    EntryClassUi.this.factoriesList.addItem(servicePid);
                                 }
-                                newFactoryComponentModal.show();
+                                EntryClassUi.this.newFactoryComponentModal.show();
                             }
                         });
                     }
@@ -638,20 +656,20 @@ public class EntryClassUi extends Composite {
     }
 
     private void initNewFactoryComponentModal() {
-        newFactoryComponentModal.setTitle(MSGS.servicesComponentFactoryNew());
-        newFactoryComponentFormLabel.setText(MSGS.servicesComponentFactoryFactory());
-        componentInstanceNameLabel.setText(MSGS.servicesComponentFactoryName());
-        componentName.setPlaceholder(MSGS.servicesComponentFactoryNamePlaceholder());
-        buttonNewComponent.setText(MSGS.apply());
-        buttonNewComponentCancel.setText(MSGS.cancelButton());
+        this.newFactoryComponentModal.setTitle(MSGS.servicesComponentFactoryNew());
+        this.newFactoryComponentFormLabel.setText(MSGS.servicesComponentFactoryFactory());
+        this.componentInstanceNameLabel.setText(MSGS.servicesComponentFactoryName());
+        this.componentName.setPlaceholder(MSGS.servicesComponentFactoryNamePlaceholder());
+        this.buttonNewComponent.setText(MSGS.apply());
+        this.buttonNewComponentCancel.setText(MSGS.cancelButton());
 
         // New factory configuration handler
-        buttonNewComponent.addClickHandler(new ClickHandler() {
+        this.buttonNewComponent.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
 
-                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+                EntryClassUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -660,14 +678,15 @@ public class EntryClassUi extends Composite {
 
                     @Override
                     public void onSuccess(GwtXSRFToken token) {
-                        String factoryPid = factoriesList.getSelectedValue();
-                        String pid = componentName.getValue();
+                        String factoryPid = EntryClassUi.this.factoriesList.getSelectedValue();
+                        String pid = EntryClassUi.this.componentName.getValue();
                         if (SELECT_COMPONENT.equalsIgnoreCase(factoryPid) || "".equals(pid)) {
-                            errorAlertText.setText(MSGS.servicesComponentFactoryAlertNotSelected());
+                            EntryClassUi.this.errorAlertText.setText(MSGS.servicesComponentFactoryAlertNotSelected());
                             errorModal.show();
                             return;
                         }
-                        gwtComponentService.createFactoryComponent(token, factoryPid, pid, new AsyncCallback<Void>() {
+                        EntryClassUi.this.gwtComponentService.createFactoryComponent(token, factoryPid, pid,
+                                new AsyncCallback<Void>() {
 
                             @Override
                             public void onFailure(Throwable ex) {
@@ -768,8 +787,8 @@ public class EntryClassUi extends Composite {
     }
 
     public boolean isServicesUiDirty() {
-        if (servicesUi != null) {
-            return servicesUi.isDirty();
+        if (this.servicesUi != null) {
+            return this.servicesUi.isDirty();
         } else {
             return false;
         }
@@ -808,7 +827,7 @@ public class EntryClassUi extends Composite {
     }
 
     public boolean isWiresDirty() {
-        if (wires.isVisible()) {
+        if (this.wires.isVisible()) {
             return WiresPanelUi.isDirty();
         } else {
             return false;
@@ -843,7 +862,7 @@ public class EntryClassUi extends Composite {
     }
 
     private void initNewComponentErrorModal() {
-        errorModalDismiss.setText(MSGS.closeButton());
+        this.errorModalDismiss.setText(MSGS.closeButton());
     }
 
     public static void showWaitModal() {
@@ -962,7 +981,7 @@ public class EntryClassUi extends Composite {
     }
 
     GwtConfigComponent getSelected() {
-        return selected;
+        return this.selected;
     }
 
     void setSelected(GwtConfigComponent selected) {

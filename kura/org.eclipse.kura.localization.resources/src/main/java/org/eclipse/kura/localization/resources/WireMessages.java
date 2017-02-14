@@ -5,11 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.localization.resources;
 
@@ -97,11 +97,11 @@ public interface WireMessages {
     @En("channel_id")
     public String channelId();
 
-    @En("channel_name")
-    public String channelName();
-
     @En("List of Channel IDs cannot be null")
     public String channelIdsNonNull();
+
+    @En("channel_name")
+    public String channelName();
 
     @En("Channel cannot be null")
     public String channelNonNull();
@@ -169,7 +169,7 @@ public interface WireMessages {
     @En("Creating wires.....")
     public String creatingWires();
 
-    @En("Creating wires.....Done")
+    @En("Creating wire.....Done")
     public String creatingWiresDone();
 
     @En("Cron Expression cannot be null")
@@ -253,14 +253,17 @@ public interface WireMessages {
     @En("Emitter PID cannot be null")
     public String emitterPidNonNull();
 
+    @En("Emitter Service PID cannot be null")
+    public String emitterServicePidNonNull();
+
     @En("ERROR")
     public String error();
 
-    @En("Error while building Wire Records.")
-    public String errorBuildingWireRecords();
-
     @En("Error while building a Bundle Context filter.")
     public String errorBuildingBundleContextFilter();
+
+    @En("Error while building Wire Records.")
+    public String errorBuildingWireRecords();
 
     @En("Error in creating cloud client")
     public String errorCreatingCloudClinet();
@@ -408,6 +411,9 @@ public interface WireMessages {
 
     @En("Receiver PID cannot be null")
     public String receiverPidNonNull();
+
+    @En("Receiver Service PID cannot be null")
+    public String receiverServicePidNonNull();
 
     @En("Refreshing boolean value {0}")
     public String refreshBoolean(boolean value);

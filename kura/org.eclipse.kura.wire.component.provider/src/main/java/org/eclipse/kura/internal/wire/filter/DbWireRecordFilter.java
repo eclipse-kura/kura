@@ -205,6 +205,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
             this.dbHelper.close(stmt);
             this.dbHelper.close(conn);
         }
+
         return dataRecords;
     }
 
@@ -248,16 +249,23 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
         requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
         logger.debug(message.wireEnvelopeReceived(), wireEnvelope);
         if (isCacheExpired()) {
-            try {
-                this.lastRecords = performSQLQuery();
-                this.lastRefreshedTime = Calendar.getInstance(this.lastRefreshedTime.getTimeZone());
-            } catch (SQLException e) {
-                logger.error(message.errorFiltering(), e);
-            }
+            refreshCachedRecords();
         }
 
         if (nonNull(this.lastRecords)) {
             this.wireSupport.emit(this.lastRecords);
+        }
+    }
+
+    private void refreshCachedRecords() {
+        try {
+            final List<WireRecord> tmpWireRecords = performSQLQuery();
+            if (!tmpWireRecords.isEmpty()) {
+                this.lastRecords = tmpWireRecords;
+                this.lastRefreshedTime = Calendar.getInstance(this.lastRefreshedTime.getTimeZone());
+            }
+        } catch (SQLException e) {
+            logger.error(message.errorFiltering(), e);
         }
     }
 

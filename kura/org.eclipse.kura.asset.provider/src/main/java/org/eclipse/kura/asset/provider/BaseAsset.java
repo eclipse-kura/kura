@@ -99,7 +99,6 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     /** Container of mapped asset listeners and drivers listener. */
     private final Map<AssetListener, DriverListener> assetListeners;
 
-    /** The provided asset options instance. */
     private AssetOptions assetOptions;
 
     private ComponentContext context;
@@ -340,16 +339,27 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             if (descriptor instanceof List<?>) {
                 driverSpecificChannelConfiguration = (List<Tad>) descriptor;
             }
-            if (driverSpecificChannelConfiguration != null) {
-                fillDriverSpecificChannelConfiguration(mainOcd, driverSpecificChannelConfiguration);
-            }
+
+            fillDriverSpecificChannelConfiguration(mainOcd, driverSpecificChannelConfiguration);
         }
         return new ComponentConfigurationImpl(componentName, mainOcd, props);
     }
 
+    /**
+     * Fills the {@code mainOcd} with the driver specific configuration provided by
+     * {@code driverSpecificChannelConfiguration}
+     * 
+     * @param mainOcd
+     *            a {@link Tocd} object.
+     * @param driverSpecificChannelConfiguration
+     *            the driver specific configuration.
+     */
     @SuppressWarnings("unchecked")
     private void fillDriverSpecificChannelConfiguration(final Tocd mainOcd,
             final List<Tad> driverSpecificChannelConfiguration) {
+        if (mainOcd == null || driverSpecificChannelConfiguration == null) {
+            return;
+        }
 
         final ChannelDescriptor basicChanneldescriptor = new BaseChannelDescriptor();
         final Object baseChannelDescriptor = basicChanneldescriptor.getDescriptor();

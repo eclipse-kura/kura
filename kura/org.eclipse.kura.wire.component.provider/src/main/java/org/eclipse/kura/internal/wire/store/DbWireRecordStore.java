@@ -238,12 +238,13 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         final String tableName = this.wireRecordStoreOptions.getTableName();
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
         Connection conn = null;
+        ResultSet rsTbls = null;
         try {
             conn = this.dbHelper.getConnection();
 
             final String catalog = conn.getCatalog();
             final DatabaseMetaData dbMetaData = conn.getMetaData();
-            final ResultSet rsTbls = dbMetaData.getTables(catalog, null, tableName, TABLE_TYPE);
+            rsTbls = dbMetaData.getTables(catalog, null, tableName, TABLE_TYPE);
             if (rsTbls.next()) {
                 // table does exist, truncate it
                 if (noOfRecordsToKeep == 0) {
@@ -257,9 +258,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         } catch (final SQLException sqlException) {
             logger.error(message.errorTruncatingTable(sqlTableName), sqlException);
         } finally {
-            if (nonNull(conn)) {
-                this.dbHelper.close(conn);
-            }
+            this.dbHelper.close(rsTbls);
+            this.dbHelper.close(conn);
         }
     }
 
@@ -341,18 +341,19 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         requireNonNull(tableName, message.tableNameNonNull());
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
         final Connection conn = this.dbHelper.getConnection();
+        ResultSet rsTbls = null;
         try {
             // check for the table that would collect the data of this emitter
             final String catalog = conn.getCatalog();
             final DatabaseMetaData dbMetaData = conn.getMetaData();
-            final ResultSet rsTbls = dbMetaData.getTables(catalog, null, this.wireRecordStoreOptions.getTableName(),
-                    TABLE_TYPE);
+            rsTbls = dbMetaData.getTables(catalog, null, this.wireRecordStoreOptions.getTableName(), TABLE_TYPE);
             if (!rsTbls.next()) {
                 // table does not exist, create it
                 logger.info(message.creatingTable(sqlTableName));
                 this.dbHelper.execute(MessageFormat.format(SQL_CREATE_TABLE, sqlTableName));
             }
         } finally {
+            this.dbHelper.close(rsTbls);
             this.dbHelper.close(conn);
         }
     }

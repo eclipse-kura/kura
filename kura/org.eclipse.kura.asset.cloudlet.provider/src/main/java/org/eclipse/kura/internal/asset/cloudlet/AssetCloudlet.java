@@ -14,6 +14,8 @@
 package org.eclipse.kura.internal.asset.cloudlet;
 
 import static java.util.Objects.requireNonNull;
+import static org.eclipse.kura.type.DataType.*;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -35,6 +37,7 @@ import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.AssetCloudletMessages;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
+import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.util.collection.CollectionUtil;
@@ -292,9 +295,9 @@ public final class AssetCloudlet extends Cloudlet {
             boolean flag = true;
             try {
                 this.wrapValue(assetRecord, userValue, userType);
-            } catch (final NumberFormatException nfe) {
+            } catch (final IllegalArgumentException e) {
                 flag = false;
-                assetRecord.setAssetStatus(new AssetStatus(AssetFlag.FAILURE, message.valueTypeConversionError(), nfe));
+                assetRecord.setAssetStatus(new AssetStatus(AssetFlag.FAILURE, message.valueTypeConversionError(), e));
                 assetRecord.setTimestamp(System.currentTimeMillis());
             }
 
@@ -421,33 +424,37 @@ public final class AssetCloudlet extends Cloudlet {
      *             if any of the provided arguments is null
      * @throws NumberFormatException
      *             if the provided value cannot be parsed
+     * @throws IllegalArgumentException
+     *             if the {@code userType} cannot be converted to a {@link DataType}.
      */
     private void wrapValue(final AssetRecord assetRecord, final String userValue, final String userType) {
         requireNonNull(assetRecord, message.assetRecordNonNull());
         requireNonNull(userValue, message.valueNonNull());
         requireNonNull(userType, message.typeNonNull());
 
+        final DataType dataType = DataType.getDataType(userType);
+
         TypedValue<?> value = null;
         try {
-            if ("INTEGER".equalsIgnoreCase(userType)) {
+            if (INTEGER == dataType) {
                 value = TypedValues.newIntegerValue(Integer.parseInt(userValue));
             }
-            if ("BOOLEAN".equalsIgnoreCase(userType)) {
+            if (BOOLEAN == dataType) {
                 value = TypedValues.newBooleanValue(Boolean.parseBoolean(userValue));
             }
-            if ("BYTE".equalsIgnoreCase(userType)) {
+            if (BYTE == dataType) {
                 value = TypedValues.newByteValue(Byte.parseByte(userValue));
             }
-            if ("DOUBLE".equalsIgnoreCase(userType)) {
+            if (DOUBLE == dataType) {
                 value = TypedValues.newDoubleValue(Double.parseDouble(userValue));
             }
-            if ("LONG".equalsIgnoreCase(userType)) {
+            if (LONG == dataType) {
                 value = TypedValues.newLongValue(Long.parseLong(userValue));
             }
-            if ("SHORT".equalsIgnoreCase(userType)) {
+            if (SHORT == dataType) {
                 value = TypedValues.newShortValue(Short.parseShort(userValue));
             }
-            if ("STRING".equalsIgnoreCase(userType)) {
+            if (STRING == dataType) {
                 value = TypedValues.newStringValue(userValue);
             }
         } catch (final NumberFormatException nfe) {

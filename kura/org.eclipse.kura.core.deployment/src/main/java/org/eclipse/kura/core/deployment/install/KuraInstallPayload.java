@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -62,8 +62,8 @@ public class KuraInstallPayload extends KuraPayload {
         addMetric(METRIC_INSTALL_STATUS, installStatus);
     }
 
-    public int getInstallStatus() {
-        return (Integer) getMetric(METRIC_INSTALL_STATUS);
+    public String getInstallStatus() {
+        return (String) getMetric(METRIC_INSTALL_STATUS);
     }
 
     public void setDpName(String dpName) {

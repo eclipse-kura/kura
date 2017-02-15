@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -171,14 +171,14 @@ public class InstallImpl {
 
     public void installInProgressSyncMessage(KuraResponsePayload respPayload) {
         respPayload.setTimestamp(new Date());
-        respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, INSTALL_STATUS.IN_PROGRESS);
+        respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, INSTALL_STATUS.IN_PROGRESS.getStatusString());
         respPayload.addMetric(KuraInstallPayload.METRIC_DP_NAME, this.options.getDpName());
         respPayload.addMetric(KuraInstallPayload.METRIC_DP_VERSION, this.options.getDpVersion());
     }
 
     public void installIdleSyncMessage(KuraResponsePayload respPayload) {
         respPayload.setTimestamp(new Date());
-        respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, INSTALL_STATUS.IDLE);
+        respPayload.addMetric(KuraInstallPayload.METRIC_INSTALL_STATUS, INSTALL_STATUS.IDLE.getStatusString());
     }
 
     public void installCompleteAsync(DeploymentPackageOptions options, String dpName) throws KuraException {

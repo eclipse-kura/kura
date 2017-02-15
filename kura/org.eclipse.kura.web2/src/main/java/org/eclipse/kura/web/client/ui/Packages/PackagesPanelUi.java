@@ -17,6 +17,8 @@ import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.util.DropSupport;
+import org.eclipse.kura.web.client.util.DropSupport.DropEvent;
 import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
@@ -35,6 +37,7 @@ import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TextBox;
+import org.gwtbootstrap3.client.ui.Well;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Text;
@@ -42,10 +45,18 @@ import org.gwtbootstrap3.client.ui.html.Text;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -59,6 +70,9 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class PackagesPanelUi extends Composite {
 
+    private static RegExp MARKETPLACE_URL_REGEXP = RegExp
+            .compile("http[s]?:\\/\\/marketplace.eclipse.org/marketplace-client-intro\\?mpc_install=.*");
+
     private static PackagesPanelUiUiBinder uiBinder = GWT.create(PackagesPanelUiUiBinder.class);
     private static final Logger logger = Logger.getLogger(PackagesPanelUi.class.getSimpleName());
 
@@ -71,8 +85,8 @@ public class PackagesPanelUi extends Composite {
     private boolean isRefreshPending;
     private EntryClassUi entryClassUi;
 
-    private final ListDataProvider<GwtDeploymentPackage> packagesDataProvider = new ListDataProvider<GwtDeploymentPackage>();
-    private final SingleSelectionModel<GwtDeploymentPackage> selectionModel = new SingleSelectionModel<GwtDeploymentPackage>();
+    private final ListDataProvider<GwtDeploymentPackage> packagesDataProvider = new ListDataProvider<>();
+    private final SingleSelectionModel<GwtDeploymentPackage> selectionModel = new SingleSelectionModel<>();
 
     private GwtSession gwtSession;
     private GwtDeploymentPackage selected;
@@ -98,13 +112,15 @@ public class PackagesPanelUi extends Composite {
     @UiField
     Button packagesRefresh, packagesInstall, packagesUninstall;
     @UiField
-    CellTable<GwtDeploymentPackage> packagesGrid = new CellTable<GwtDeploymentPackage>(10);
+    CellTable<GwtDeploymentPackage> packagesGrid = new CellTable<>(10);
     @UiField
     FileUpload filePath;
     @UiField
     TextBox formUrl;
     @UiField
     Hidden xsrfTokenFieldFile, xsrfTokenFieldUrl;
+    @UiField
+    Well marketplaceInstallWell;
 
     public PackagesPanelUi() {
 
@@ -118,6 +134,8 @@ public class PackagesPanelUi extends Composite {
         initModalHandlers();
 
         initModal();
+
+        initDragDrop();
 
         EventService.Handler onPackagesUpdatedHandler = new EventService.Handler() {
 
@@ -472,5 +490,114 @@ public class PackagesPanelUi extends Composite {
     private void initModal() {
         this.uploadErrorModal.setTitle(MSGS.warning());
         this.uploadErrorText.setText(MSGS.missingFileUpload());
+    }
+
+    private void eclipseMarketplaceInstall(String url) {
+
+        // Construct the REST URL for Eclipse Marketplace
+        String appId = url.split("=")[1];
+        final String empApi = "http://marketplace.eclipse.org/node/" + appId + "/api/p";
+
+        // Generate security token
+        EntryClassUi.showWaitModal();
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex, EntryClassUi.class.getName());
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                // Retrieve the URL of the DP via the Eclipse Marketplace API
+                gwtPackageService.getMarketplaceUri(token, empApi, new AsyncCallback<String>() {
+
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        EntryClassUi.hideWaitModal();
+                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                    }
+
+                    @Override
+                    public void onSuccess(String result) {
+                        installMarketplaceDp(result);
+                    }
+                });
+
+            }
+        });
+    }
+
+    private void installMarketplaceDp(final String uri) {
+        String url = "/" + GWT.getModuleName() + "/file/deploy/url";
+        final RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, URL.encode(url));
+
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex, EntryClassUi.class.getName());
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("xsrfToken=" + token.getToken());
+                sb.append("&packageUrl=" + uri);
+
+                builder.setHeader("Content-type", "application/x-www-form-urlencoded");
+                try {
+                    builder.sendRequest(sb.toString(), new RequestCallback() {
+
+                        @Override
+                        public void onResponseReceived(Request request, Response response) {
+                            logger.info(response.getText());
+                        }
+
+                        @Override
+                        public void onError(Request request, Throwable ex) {
+                            logger.log(Level.SEVERE, ex.getMessage(), ex);
+                            FailureHandler.handle(ex, EntryClassUi.class.getName());
+                        }
+
+                    });
+                } catch (RequestException e) {
+                    logger.log(Level.SEVERE, e.getMessage(), e);
+                    FailureHandler.handle(e, EntryClassUi.class.getName());
+                }
+            }
+        });
+    }
+
+    private boolean isEclipseMarketplaceUrl(String url) {
+        return url != null && !url.isEmpty() && MARKETPLACE_URL_REGEXP.test(url);
+    }
+
+    private void initDragDrop() {
+        DropSupport drop = DropSupport.addIfSupported(marketplaceInstallWell);
+        if (drop != null) {
+            drop.setListener(new DropSupport.Listener() {
+
+                @Override
+                public boolean onDrop(DropEvent event) {
+                    String url = event.getAsText();
+                    if (isEclipseMarketplaceUrl(url)
+                            && Window.confirm("Install deployment package from Eclipse Marketplace?")) {
+                        eclipseMarketplaceInstall(url);
+                    }
+                    return true;
+                }
+
+                @Override
+                public boolean onDragOver(DropEvent event) {
+                    return true;
+                }
+            });
+        } else {
+            marketplaceInstallWell.setVisible(false);
+        }
     }
 }

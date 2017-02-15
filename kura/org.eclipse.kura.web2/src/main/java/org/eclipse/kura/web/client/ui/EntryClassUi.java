@@ -68,16 +68,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.logging.client.HasWidgetsLogHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
@@ -244,9 +237,6 @@ public class EntryClassUi extends Composite {
                 EntryClassUi.this.errorLogArea.clear();
             }
         });
-
-        //
-        dragDropInit(this);
 
         EventService.subscribe(ForwardedEventTopic.CLOUD_CONNECTION_STATUS_ESTABLISHED, new EventService.Handler() {
 
@@ -587,24 +577,24 @@ public class EntryClassUi extends Composite {
                 EntryClassUi.this.gwtComponentService.findServicesConfigurations(token,
                         new AsyncCallback<List<GwtConfigComponent>>() {
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        logger.log(Level.SEVERE, ex.getMessage(), ex);
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(List<GwtConfigComponent> result) {
-                        EntryClassUi.this.servicesMenu.clear();
-                        for (GwtConfigComponent pair : result) {
-                            if (!pair.isWireComponent()) {
-                                EntryClassUi.this.servicesMenu
-                                        .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                FailureHandler.handle(ex, EntryClassUi.class.getName());
                             }
-                        }
-                        filterAvailableServices(EntryClassUi.this.textSearch.getValue());
-                    }
-                });
+
+                            @Override
+                            public void onSuccess(List<GwtConfigComponent> result) {
+                                EntryClassUi.this.servicesMenu.clear();
+                                for (GwtConfigComponent pair : result) {
+                                    if (!pair.isWireComponent()) {
+                                        EntryClassUi.this.servicesMenu
+                                                .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
+                                    }
+                                }
+                                filterAvailableServices(EntryClassUi.this.textSearch.getValue());
+                            }
+                        });
             }
         });
     }
@@ -633,22 +623,22 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.gwtComponentService.findFactoryComponents(token,
                                 new AsyncCallback<List<String>>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
+                                    @Override
+                                    public void onFailure(Throwable ex) {
+                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                    }
 
-                            @Override
-                            public void onSuccess(final List<String> result) {
-                                EntryClassUi.this.factoriesList.clear();
-                                EntryClassUi.this.factoriesList.addItem(SELECT_COMPONENT);
-                                for (final String servicePid : result) {
-                                    EntryClassUi.this.factoriesList.addItem(servicePid);
-                                }
-                                EntryClassUi.this.newFactoryComponentModal.show();
-                            }
-                        });
+                                    @Override
+                                    public void onSuccess(final List<String> result) {
+                                        EntryClassUi.this.factoriesList.clear();
+                                        EntryClassUi.this.factoriesList.addItem(SELECT_COMPONENT);
+                                        for (final String servicePid : result) {
+                                            EntryClassUi.this.factoriesList.addItem(servicePid);
+                                        }
+                                        EntryClassUi.this.newFactoryComponentModal.show();
+                                    }
+                                });
                     }
                 });
             }
@@ -688,17 +678,17 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.gwtComponentService.createFactoryComponent(token, factoryPid, pid,
                                 new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
+                                    @Override
+                                    public void onFailure(Throwable ex) {
+                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                fetchAvailableServices();
-                            }
-                        });
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        fetchAvailableServices();
+                                    }
+                                });
                     }
                 });
             }
@@ -891,95 +881,6 @@ public class EntryClassUi extends Composite {
         }
     }
 
-    private void eclipseMarketplaceInstall(String url) {
-
-        // Construct the REST URL for Eclipse Marketplace
-        String appId = url.split("=")[1];
-        final String empApi = "http://marketplace.eclipse.org/node/" + appId + "/api/p";
-
-        // Generate security token
-        EntryClassUi.showWaitModal();
-        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(Throwable ex) {
-                EntryClassUi.hideWaitModal();
-                FailureHandler.handle(ex, EntryClassUi.class.getName());
-            }
-
-            @Override
-            public void onSuccess(GwtXSRFToken token) {
-                // Retrieve the URL of the DP via the Eclipse Marketplace API
-                EntryClassUi.this.gwtPackageService.getMarketplaceUri(token, empApi, new AsyncCallback<String>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        EntryClassUi.hideWaitModal();
-                        logger.log(Level.SEVERE, ex.getMessage(), ex);
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(String result) {
-                        installMarketplaceDp(result);
-                        Timer timer = new Timer() {
-
-                            @Override
-                            public void run() {
-                                initServicesTree();
-                                EntryClassUi.hideWaitModal();
-                            }
-                        };
-                        timer.schedule(2000);
-                    }
-                });
-
-            }
-        });
-    }
-
-    private void installMarketplaceDp(final String uri) {
-        String url = "/" + GWT.getModuleName() + "/file/deploy/url";
-        final RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, URL.encode(url));
-
-        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(Throwable ex) {
-                EntryClassUi.hideWaitModal();
-                FailureHandler.handle(ex, EntryClassUi.class.getName());
-            }
-
-            @Override
-            public void onSuccess(GwtXSRFToken token) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("xsrfToken=" + token.getToken());
-                sb.append("&packageUrl=" + uri);
-
-                builder.setHeader("Content-type", "application/x-www-form-urlencoded");
-                try {
-                    builder.sendRequest(sb.toString(), new RequestCallback() {
-
-                        @Override
-                        public void onResponseReceived(Request request, Response response) {
-                            logger.info(response.getText());
-                        }
-
-                        @Override
-                        public void onError(Request request, Throwable ex) {
-                            logger.log(Level.SEVERE, ex.getMessage(), ex);
-                            FailureHandler.handle(ex, EntryClassUi.class.getName());
-                        }
-
-                    });
-                } catch (RequestException e) {
-                    logger.log(Level.SEVERE, e.getMessage(), e);
-                    FailureHandler.handle(e, EntryClassUi.class.getName());
-                }
-            }
-        });
-    }
-
     GwtConfigComponent getSelected() {
         return this.selected;
     }
@@ -987,25 +888,4 @@ public class EntryClassUi extends Composite {
     void setSelected(GwtConfigComponent selected) {
         this.selected = selected;
     }
-
-    public static native void dragDropInit(EntryClassUi ecu) /*-{
-                                                             $wnd.$("html").on("dragover", function(event) {
-                                                             event.preventDefault();
-                                                             event.stopPropagation();
-                                                             });
-                                                             
-                                                             $wnd.$("html").on("dragleave", function(event) {
-                                                             event.preventDefault();
-                                                             event.stopPropagation();
-                                                             });
-                                                             
-                                                             $wnd.$("html").on("drop", function(event) {
-                                                             event.preventDefault();
-                                                             event.stopPropagation();
-                                                             console.log(event.originalEvent.dataTransfer.getData("text"));
-                                                             if (confirm("Install file?") == true) {
-                                                             ecu.@org.eclipse.kura.web.client.ui.EntryClassUi::eclipseMarketplaceInstall(Ljava/lang/String;)(event.originalEvent.dataTransfer.getData("text"));
-                                                             }
-                                                             });
-                                                             }-*/;
 }

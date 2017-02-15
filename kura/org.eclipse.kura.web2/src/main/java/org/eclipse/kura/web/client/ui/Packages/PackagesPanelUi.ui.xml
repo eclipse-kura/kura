@@ -46,6 +46,13 @@
             </b:Panel>
         </b:Row>
 
+		<b:Row>
+            <b:Well size="SMALL" ui:field="marketplaceInstallWell">
+            	<b:Heading size="H5" text="Install from Eclipse Marketplace&trade;"/>
+            	<b:HelpBlock text="In order to install a deployment package from Eclipse Marketplace drag and drop here the Install button present on the software description page."/>
+            </b:Well>
+        </b:Row>
+
         <b:Row>
             <b:Well size="SMALL">
                 <gwt:CellTable bordered="true" condensed="true"

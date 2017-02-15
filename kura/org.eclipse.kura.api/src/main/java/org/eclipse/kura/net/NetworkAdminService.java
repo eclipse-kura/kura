@@ -199,7 +199,18 @@ public interface NetworkAdminService {
      * @return map of SSIDs with respective hotspot information.
      * @throws KuraException
      */
+    @Deprecated
     public Map<String, WifiHotspotInfo> getWifiHotspots(String ifaceName) throws KuraException;
+
+    /**
+     * Obtains information for WiFi hotspots in range.
+     *
+     * @param ifaceName
+     *            - name of WiFi interface
+     * @return list of hotspot information.
+     * @throws KuraException
+     */
+    public List<WifiHotspotInfo> getWifiHotspotList(String ifaceName) throws KuraException;
 
     /**
      * Verifies WiFi credentials by trying to establish connection with access point.

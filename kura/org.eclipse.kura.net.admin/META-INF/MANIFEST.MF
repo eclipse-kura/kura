@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.net.admin
 Bundle-SymbolicName: org.eclipse.kura.net.admin;singleton:=true
 Bundle-Version: 1.0.13.qualifier
 Bundle-Vendor: Eclipse Kura
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: javax.microedition.io,
  org.apache.commons.io;version="2.4.0",
  org.eclipse.kura;version="[1.0,2.0)",

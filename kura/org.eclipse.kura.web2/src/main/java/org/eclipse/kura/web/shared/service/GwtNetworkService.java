@@ -51,7 +51,7 @@ public interface GwtNetworkService extends RemoteService {
 
     public void renewDhcpLease(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException;
 
-    public List<GwtWifiHotspotEntry> findWifiHotspots(GwtXSRFToken xsrfToken, String interfaceName)
+    public List<GwtWifiHotspotEntry> findWifiHotspots(GwtXSRFToken xsrfToken, String interfaceName, String wirelessSsid)
             throws GwtKuraException;
 
     public boolean verifyWifiCredentials(GwtXSRFToken xsrfToken, String interfaceName, GwtWifiConfig gwtWifiConfig)

@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.wires;
 
+import org.eclipse.kura.web.client.util.DragSupport;
+import org.eclipse.kura.web.client.util.DragSupport.DragEvent;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.constants.IconType;
 
@@ -31,17 +33,23 @@ public class WireComponentsAnchorListItem extends AnchorListItem {
         super.setIcon(this.getFactoryIcon());
         super.setText(WiresPanelUi.getFormattedPid(factoryPid));
 
+        DragSupport drag = DragSupport.addIfSupported(this);
+
+        if (drag != null) {
+            drag.setListener(new DragSupport.Listener() {
+
+                @Override
+                public void onDragStart(DragEvent event) {
+                    event.setData("text/plain", WiresPanelUi.FACTORY_PID_DROP_PREFIX + factoryPid);
+                }
+            });
+        }
+
         super.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(final ClickEvent event) {
-                if (factoryPid.contains(WiresPanelUi.WIRE_ASSET)) {
-                    WiresPanelUi.driverInstanceForm.setVisible(true);
-                } else {
-                    WiresPanelUi.driverInstanceForm.setVisible(false);
-                }
-                WiresPanelUi.factoryPid.setValue(factoryPid);
-                WiresPanelUi.assetModal.show();
+                WiresPanelUi.showComponentCreationDialog(factoryPid);
                 WireComponentsAnchorListItem.this.setActive(true);
             }
         });

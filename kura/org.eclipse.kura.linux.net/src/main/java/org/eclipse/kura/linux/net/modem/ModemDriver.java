@@ -267,7 +267,7 @@ public class ModemDriver {
     }
 
     public boolean resetModem() {
-        boolean retVal = true;
+        boolean retVal = false;
         if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(TARGET_NAME)) {
             // just pulse the modem reset pin
             try {
@@ -286,18 +286,15 @@ public class ModemDriver {
                     sleep(1000);
                     cnt--;
                 }
-                if (!isOn()) {
-                    retVal = false;
+                if (isOn()) {
+                    retVal = true;
                 }
             } catch (IOException e) {
                 s_logger.error("Failed to write to gpio", e);
-                retVal = false;
             } catch (KuraException e) {
                 s_logger.error("Failed to detect modem", e);
-                retVal = false;
             } catch (InterruptedException e) {
                 s_logger.error("Interrupted Exception during sleep", e);
-                retVal = false;
             }
         } else {
             s_logger.warn("resetModem() :: modem reset operation is not supported for the {} platform", TARGET_NAME);

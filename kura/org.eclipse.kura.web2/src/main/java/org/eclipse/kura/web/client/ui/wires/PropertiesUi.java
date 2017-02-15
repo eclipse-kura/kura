@@ -628,10 +628,12 @@ public class PropertiesUi extends AbstractServicesUi {
 
             @Override
             public String getValue(final GwtChannelInfo object) {
-                final String value = object.get(id).toString();
-                return value == null ? "" : value;
+                Object result = object.get(id);
+                if (result != null) {
+                    return result.toString();
+                }
+                return null;
             }
-
         };
 
         result.setFieldUpdater(new FieldUpdater<GwtChannelInfo, String>() {
@@ -670,9 +672,12 @@ public class PropertiesUi extends AbstractServicesUi {
 
             @Override
             public String getValue(final GwtChannelInfo object) {
-                return object.get(id).toString();
+                Object result = object.get(id);
+                if (result != null) {
+                    return result.toString();
+                }
+                return null;
             }
-
         };
 
         result.setFieldUpdater(new FieldUpdater<GwtChannelInfo, String>() {

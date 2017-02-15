@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.Asset;
+import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.AssetFlag;
 import org.eclipse.kura.asset.AssetRecord;
 import org.eclipse.kura.asset.AssetStatus;
@@ -240,7 +241,8 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     private List<Long> determineReadingChannels() {
 
         final List<Long> channelsToRead = CollectionUtil.newArrayList();
-        final Map<Long, Channel> channels = this.assetConfiguration.getAssetChannels();
+        final AssetConfiguration assetConfiguration = getAssetConfiguration();
+        final Map<Long, Channel> channels = assetConfiguration.getAssetChannels();
         for (final Map.Entry<Long, Channel> channelEntry : channels.entrySet()) {
             final Channel channel = channelEntry.getValue();
             final ChannelType channelType = channel.getType();
@@ -265,7 +267,8 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         requireNonNull(record, message.wireRecordNonNull());
 
         final List<AssetRecord> assetRecordsToWriteChannels = CollectionUtil.newArrayList();
-        final Map<Long, Channel> channels = this.assetConfiguration.getAssetChannels();
+        final AssetConfiguration assetConfiguration = getAssetConfiguration();
+        final Map<Long, Channel> channels = assetConfiguration.getAssetChannels();
         for (final Entry<Long, Channel> channelEntry : channels.entrySet()) {
             final Channel channel = channelEntry.getValue();
             final String channelName = channel.getName();
@@ -352,7 +355,8 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
             final AssetStatus assetStatus = assetRecord.getAssetStatus();
             final AssetFlag assetFlag = assetStatus.getAssetFlag();
             final long channelId = assetRecord.getChannelId();
-            final String channelName = this.assetConfiguration.getAssetChannels().get(channelId).getName();
+            final AssetConfiguration assetConfiguration = getAssetConfiguration();
+            final String channelName = assetConfiguration.getAssetChannels().get(channelId).getName();
 
             final TypedValue<?> typedValue;
             if (assetFlag == AssetFlag.FAILURE) {

@@ -13,6 +13,7 @@
 package org.eclipse.kura.internal.asset.provider;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Objects.isNull;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DESC_PROP;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
 import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_POSTFIX;
@@ -21,17 +22,6 @@ import static org.eclipse.kura.asset.AssetConstants.DRIVER_PROPERTY_POSTFIX;
 import static org.eclipse.kura.asset.AssetConstants.NAME;
 import static org.eclipse.kura.asset.AssetConstants.TYPE;
 import static org.eclipse.kura.asset.AssetConstants.VALUE_TYPE;
-import static org.eclipse.kura.asset.ChannelType.READ;
-import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
-import static org.eclipse.kura.asset.ChannelType.WRITE;
-import static org.eclipse.kura.type.DataType.BOOLEAN;
-import static org.eclipse.kura.type.DataType.BYTE;
-import static org.eclipse.kura.type.DataType.BYTE_ARRAY;
-import static org.eclipse.kura.type.DataType.DOUBLE;
-import static org.eclipse.kura.type.DataType.INTEGER;
-import static org.eclipse.kura.type.DataType.LONG;
-import static org.eclipse.kura.type.DataType.SHORT;
-import static org.eclipse.kura.type.DataType.STRING;
 
 import java.util.Arrays;
 import java.util.List;
@@ -56,13 +46,15 @@ import org.slf4j.LoggerFactory;
  */
 public final class AssetOptions {
 
-    /** The Logger instance. */
+    private static final String DRIVER_SPECIFIC_PROPERTY_KEY = DRIVER_PROPERTY_POSTFIX.value()
+            + CHANNEL_PROPERTY_POSTFIX.value();
+
+    private static final String CHANNEL_PROPERTY_SPLIT_REGEX = "\\" + CHANNEL_PROPERTY_POSTFIX.value();
+
     private static final Logger logger = LoggerFactory.getLogger(AssetOptions.class);
 
-    /** Localization Resource */
     private static final AssetMessages message = LocalizationAdapter.adapt(AssetMessages.class);
 
-    /** The asset description. */
     private String assetDescription;
 
     /** The list of channels associated with this asset. */
@@ -103,11 +95,8 @@ public final class AssetOptions {
      *
      * @param properties
      *            the properties to retrieve the channels from
-     * @throws NullPointerException
-     *             if the argument is null
      */
     private void checkChannelAvailability(final Map<String, Object> properties) {
-        requireNonNull(properties, message.propertiesNonNull());
         final Set<Long> channelIds = retrieveChannelIds(properties);
         for (final long channelId : channelIds) {
             final Channel channel = retrieveChannel(channelId, properties);
@@ -120,11 +109,8 @@ public final class AssetOptions {
      *
      * @param properties
      *            the provided properties
-     * @throws NullPointerException
-     *             if the argument is null
      */
     private void extractProperties(final Map<String, Object> properties) {
-        requireNonNull(properties, message.propertiesNonNull());
         try {
             if (properties.containsKey(ASSET_DRIVER_PROP.value())) {
                 this.driverPid = (String) properties.get(ASSET_DRIVER_PROP.value());
@@ -157,24 +143,20 @@ public final class AssetOptions {
      * @return the Channel Type
      * @throws NullPointerException
      *             if any of the arguments is null
+     * @throws IllegalArgumentException
+     *             if it is not possible to get a ChannelType from the provided properties.
      */
-    private ChannelType getChannelType(final Map<String, Object> properties, final String channelTypePropertyKey) {
-        requireNonNull(properties, message.propertiesNonNull());
-        requireNonNull(channelTypePropertyKey, message.channelKeyNonNull());
+    private ChannelType getChannelType(final Map<String, Object> properties, final String channelKeyFormat) {
+        requireNonNull(channelKeyFormat, message.channelKeyNonNull());
 
+        final String channelTypePropertyKey = channelKeyFormat + TYPE.value();
+
+        ChannelType result = null;
         if (properties.containsKey(channelTypePropertyKey)) {
             final String channelTypeProp = (String) properties.get(channelTypePropertyKey);
-            if ("READ".equalsIgnoreCase(channelTypeProp)) {
-                return READ;
-            }
-            if ("WRITE".equalsIgnoreCase(channelTypeProp)) {
-                return WRITE;
-            }
-            if ("READ_WRITE".equalsIgnoreCase(channelTypeProp)) {
-                return READ_WRITE;
-            }
+            result = ChannelType.getChannelType(channelTypeProp);
         }
-        return null;
+        return result;
     }
 
     /**
@@ -187,40 +169,20 @@ public final class AssetOptions {
      * @return the Channel Type
      * @throws NullPointerException
      *             if any of the arguments is null
+     * @throws IllegalArgumentException
+     *             if the {@link DataType} is not found
      */
-    private DataType getDataType(final Map<String, Object> properties, final String channelValueTypePropertyKey) {
+    private DataType getDataType(final Map<String, Object> properties, final String channelKeyFormat) {
         requireNonNull(properties, message.propertiesNonNull());
-        requireNonNull(channelValueTypePropertyKey, message.channelValueTypeNonNull());
+        requireNonNull(channelKeyFormat, message.channelValueTypeNonNull());
 
+        DataType result = null;
+        final String channelValueTypePropertyKey = channelKeyFormat + VALUE_TYPE.value();
         if (properties.containsKey(channelValueTypePropertyKey)) {
             final String dataTypeProp = (String) properties.get(channelValueTypePropertyKey);
-            if ("INTEGER".equalsIgnoreCase(dataTypeProp)) {
-                return INTEGER;
-            }
-            if ("DOUBLE".equalsIgnoreCase(dataTypeProp)) {
-                return DOUBLE;
-            }
-            if ("SHORT".equalsIgnoreCase(dataTypeProp)) {
-                return SHORT;
-            }
-            if ("LONG".equalsIgnoreCase(dataTypeProp)) {
-                return LONG;
-            }
-            if ("BYTE".equalsIgnoreCase(dataTypeProp)) {
-                return BYTE;
-            }
-            if ("BYTE_ARRAY".equalsIgnoreCase(dataTypeProp)) {
-                return BYTE_ARRAY;
-            }
-            if ("BOOLEAN".equalsIgnoreCase(dataTypeProp)) {
-                return BOOLEAN;
-            }
-            if ("STRING".equalsIgnoreCase(dataTypeProp)) {
-                return STRING;
-            }
-
+            result = DataType.getDataType(dataTypeProp);
         }
-        return null;
+        return result;
     }
 
     /**
@@ -233,8 +195,6 @@ public final class AssetOptions {
      * @param properties
      *            the properties to retrieve channel from
      * @return the specific channel
-     * @throws NullPointerException
-     *             if the properties is null
      * @throws IllegalArgumentException
      *             the channel identifier is less
      *             than or equal to zero
@@ -243,48 +203,59 @@ public final class AssetOptions {
         if (channelId <= 0) {
             throw new IllegalArgumentException(message.channelIdNotLessThanZero());
         }
-        requireNonNull(properties, message.propertiesNonNull());
 
         logger.debug(message.retrievingChannel());
-        String channelName = null;
-        ChannelType channelType = null;
-        DataType dataType = null;
         Channel channel = null;
-        final Map<String, Object> channelConfig = CollectionUtil.newConcurrentHashMap();
 
         // All key names present is the properties
-        final String channelKeyContainment = CHANNEL_PROPERTY_POSTFIX.value() + CHANNEL_PROPERTY_PREFIX.value()
-                + CHANNEL_PROPERTY_POSTFIX.value();
-        final String channelKeyFormat = channelId + channelKeyContainment;
+        final StringBuilder channelPropertyKeyBuilder = new StringBuilder();
+        channelPropertyKeyBuilder.append(channelId);
+        channelPropertyKeyBuilder.append(CHANNEL_PROPERTY_POSTFIX.value());
+        channelPropertyKeyBuilder.append(CHANNEL_PROPERTY_PREFIX.value());
+        channelPropertyKeyBuilder.append(CHANNEL_PROPERTY_POSTFIX.value());
+        final String channelKeyFormat = channelPropertyKeyBuilder.toString();
 
-        if (properties != null) {
-            final String channelNamePropertyKey = channelKeyFormat + NAME.value();
-            if (properties.containsKey(channelNamePropertyKey)) {
-                channelName = (String) properties.get(channelNamePropertyKey);
-            }
-            final String channelTypePropertyKey = channelKeyFormat + TYPE.value();
-            channelType = getChannelType(properties, channelTypePropertyKey);
-            final String channelValueTypePropertyKey = channelKeyFormat + VALUE_TYPE.value();
-            dataType = getDataType(properties, channelValueTypePropertyKey);
-            for (final Map.Entry<String, Object> entry : properties.entrySet()) {
-                final String key = entry.getKey();
-                final String value = entry.getValue().toString();
-                final List<String> strings = Arrays.asList(key.split("\\" + CHANNEL_PROPERTY_POSTFIX.value()));
-                if (strings.size() > 2 && key.startsWith(String.valueOf(channelId) + CHANNEL_PROPERTY_POSTFIX.value())
-                        && DRIVER_PROPERTY_POSTFIX.value().equals(strings.get(2))) {
-                    final String driverSpecificPropertyKey = DRIVER_PROPERTY_POSTFIX.value()
-                            + CHANNEL_PROPERTY_POSTFIX.value();
-                    final String cKey = key
-                            .substring(key.indexOf(driverSpecificPropertyKey) + driverSpecificPropertyKey.length());
-                    channelConfig.put(cKey, value);
-                }
-            }
-        }
+        final String channelName = retrieveChannelName(properties, channelKeyFormat);
+        final ChannelType channelType = getChannelType(properties, channelKeyFormat);
+        final DataType dataType = getDataType(properties, channelKeyFormat);
+        final Map<String, Object> channelConfig = retrieveChannelConfig(channelId, properties);
+
         if (channelType != null && dataType != null) {
             channel = new Channel(channelId, channelName, channelType, dataType, channelConfig);
         }
         logger.debug(message.retrievingChannelDone());
         return channel;
+    }
+
+    private Map<String, Object> retrieveChannelConfig(final long channelId, final Map<String, Object> properties) {
+        final Map<String, Object> channelConfig = CollectionUtil.newConcurrentHashMap();
+        final String channelIdPropertyPrefix = String.valueOf(channelId) + CHANNEL_PROPERTY_POSTFIX.value();
+
+        for (final Map.Entry<String, Object> entry : properties.entrySet()) {
+            final String key = entry.getKey();
+            final String value = entry.getValue().toString();
+            final List<String> strings = Arrays.asList(key.split(CHANNEL_PROPERTY_SPLIT_REGEX));
+            if (strings.size() > 2 && key.startsWith(channelIdPropertyPrefix)
+                    && DRIVER_PROPERTY_POSTFIX.value().equals(strings.get(2))) {
+                final String cKey = key
+                        .substring(key.indexOf(DRIVER_SPECIFIC_PROPERTY_KEY) + DRIVER_SPECIFIC_PROPERTY_KEY.length());
+                channelConfig.put(cKey, value);
+            }
+        }
+        return channelConfig;
+    }
+
+    private String retrieveChannelName(final Map<String, Object> properties, final String channelKeyFormat) {
+        String result = null;
+        if (isNull(channelKeyFormat)) {
+            return result;
+        }
+
+        final String channelNamePropertyKey = channelKeyFormat + NAME.value();
+        if (properties.containsKey(channelNamePropertyKey)) {
+            result = (String) properties.get(channelNamePropertyKey);
+        }
+        return result;
     }
 
     /**
@@ -301,7 +272,7 @@ public final class AssetOptions {
         final Set<Long> channelIds = CollectionUtil.newHashSet();
         for (final Map.Entry<String, Object> entry : properties.entrySet()) {
             final String key = entry.getKey();
-            final List<String> strings = Arrays.asList(key.split("\\" + CHANNEL_PROPERTY_POSTFIX.value()));
+            final List<String> strings = Arrays.asList(key.split(CHANNEL_PROPERTY_SPLIT_REGEX));
             for (final String string : strings) {
                 if (string.matches("\\d+")) {
                     channelIds.add(Long.parseLong(string));
@@ -330,5 +301,4 @@ public final class AssetOptions {
         requireNonNull(properties, message.propertiesNonNull());
         extractProperties(properties);
     }
-
 }

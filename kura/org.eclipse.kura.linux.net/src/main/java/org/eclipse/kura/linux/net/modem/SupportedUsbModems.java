@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
@@ -105,21 +104,17 @@ public class SupportedUsbModems {
         return SupportedUsbModems.getModem(vendorId, productId, productName) != null;
     }
 
-    public static boolean isAttached(String vendor, String product) throws Exception {
+    public static boolean isAttached(String vendor, String product) throws IOException {
         final String lsusbCmd = formLsusbCommand(vendor, product); // e.g. lsusb -d 1bc7:1010
-        try {
-            final List<String> lines = execute(lsusbCmd);
+        final List<String> lines = execute(lsusbCmd);
 
-            for (final String line : lines) {
-                final LsusbEntry lsusbEntry = getLsusbEntry(line);
-                if (lsusbEntry != null && vendor != null && product != null && vendor.equals(lsusbEntry.m_vendor)
-                        && product.equals(lsusbEntry.m_product)) {
-                    s_logger.info("The '{}' command detected {}", lsusbCmd, lsusbEntry);
-                    return true;
-                }
+        for (final String line : lines) {
+            final LsusbEntry lsusbEntry = getLsusbEntry(line);
+            if (lsusbEntry != null && vendor != null && product != null && vendor.equals(lsusbEntry.m_vendor)
+                    && product.equals(lsusbEntry.m_product)) {
+                s_logger.info("The '{}' command detected {}", lsusbCmd, lsusbEntry);
+                return true;
             }
-        } catch (ExecuteException e) {
-            s_logger.debug("Lsusb command returned with ExecuteException: ", e);
         }
         return false;
     }
@@ -150,7 +145,7 @@ public class SupportedUsbModems {
      * @throws IOException
      *             if executing the commands fails
      */
-    private static List<String> execute(final String command) throws ExecuteException, IOException {
+    private static List<String> execute(final String command) throws IOException {
         final DefaultExecutor executor = new DefaultExecutor();
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream();

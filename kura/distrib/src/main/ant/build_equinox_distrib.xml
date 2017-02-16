@@ -466,6 +466,7 @@ fi]]>
 				<exclude name="org.eclipse.paho.*"/>
 				<exclude name="com.gwt.user_*"/>
 				<exclude name="org.eclipse.kura.windows.*"/>
+				<exclude name="org.junit*"/>
 				
 				<!-- exclude source bundles -->
 				<exclude name="*.source_*.jar"/>

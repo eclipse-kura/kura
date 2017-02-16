@@ -254,7 +254,7 @@ public class SslTabUi extends Composite implements Tab {
     private void initFormLabels() {
         this.description.add(new Span("<p>" + MSGS.settingsSSLConfigurationDescription() + "</p>"));
         this.defaultProtocolFormLabel.setText(MSGS.settingsSSLConfigurationProtocol());  // TODO: From here: must be
-                                                                                         // changed.
+  // changed.
         // Fetch in some way the metatype
         // values!
         this.hostnameVerificationFormLabel.setText(MSGS.settingsSSLConfigurationHostnameVerification());
@@ -353,6 +353,7 @@ public class SslTabUi extends Composite implements Tab {
             footer.add(group);
             this.modal.add(footer);
             this.modal.show();
+            no.setFocus(true);
         }
     }
 

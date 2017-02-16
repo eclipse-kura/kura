@@ -255,6 +255,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                 footer.add(group);
                 this.modal.add(footer);
                 this.modal.show();
+                no.setFocus(true);
             }
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");
@@ -315,6 +316,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
         footer.add(group);
         this.modal.add(footer);
         this.modal.show();
+        no.setFocus(true);
     }
 
     protected void resetVisualization() {

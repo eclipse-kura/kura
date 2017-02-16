@@ -93,7 +93,7 @@ public class NetworkInterfacesTableUi extends Composite {
 
                     confirm.setTitle(MSGS.confirm());
                     confirmBody.add(new Span(MSGS.deviceConfigDirty()));
-                    confirmFooter.add(new Button(MSGS.yesButton(), new ClickHandler() {
+                    Button yes = new Button(MSGS.yesButton(), new ClickHandler() {
 
                         @Override
                         public void onClick(ClickEvent event) {
@@ -108,9 +108,9 @@ public class NetworkInterfacesTableUi extends Composite {
                                 NetworkInterfacesTableUi.this.tabs.setDirty(false);
                             }
                         }
-                    }));
+                    });
 
-                    confirmFooter.add(new Button(MSGS.noButton(), new ClickHandler() {
+                    Button no = new Button(MSGS.noButton(), new ClickHandler() {
 
                         @Override
                         public void onClick(ClickEvent event) {
@@ -118,11 +118,13 @@ public class NetworkInterfacesTableUi extends Composite {
                             NetworkInterfacesTableUi.this.selectionModel
                                     .setSelected(NetworkInterfacesTableUi.this.selection, true);
                         }
-                    }));
+                    });
+                    confirmFooter.add(no);
+                    confirmFooter.add(yes);
                     confirm.add(confirmBody);
                     confirm.add(confirmFooter);
                     confirm.show();
-
+                    no.setFocus(true);
                 } else {
                     // no unsaved changes
                     NetworkInterfacesTableUi.this.selection = NetworkInterfacesTableUi.this.selectionModel
@@ -214,19 +216,19 @@ public class NetworkInterfacesTableUi extends Composite {
                 columnSortHandler.setComparator(NetworkInterfacesTableUi.this.col1,
                         new Comparator<GwtNetInterfaceConfig>() {
 
-                            @Override
-                            public int compare(GwtNetInterfaceConfig o1, GwtNetInterfaceConfig o2) {
-                                if (o1 == o2) {
-                                    return 0;
-                                }
+                    @Override
+                    public int compare(GwtNetInterfaceConfig o1, GwtNetInterfaceConfig o2) {
+                        if (o1 == o2) {
+                            return 0;
+                        }
 
-                                // Compare the name columns.
-                                if (o1 != null) {
-                                    return o2 != null ? compareFromName(o1.getName(), o2.getName()) : 1;
-                                }
-                                return -1;
-                            }
-                        });
+                        // Compare the name columns.
+                        if (o1 != null) {
+                            return o2 != null ? compareFromName(o1.getName(), o2.getName()) : 1;
+                        }
+                        return -1;
+                    }
+                });
                 NetworkInterfacesTableUi.this.interfacesGrid.addColumnSortHandler(columnSortHandler);
 
                 NetworkInterfacesTableUi.this.interfacesProvider.getList().addAll(result);

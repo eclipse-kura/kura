@@ -183,7 +183,6 @@ public class CloudServicesUi extends Composite {
                 setDirty(false);
             }
         });
-        group.add(yes);
         Button no = new Button();
         no.setText(MSG.noButton());
         no.addClickHandler(new ClickHandler() {
@@ -196,9 +195,11 @@ public class CloudServicesUi extends Composite {
             }
         });
         group.add(no);
+        group.add(yes);
         footer.add(group);
         modal.add(footer);
         modal.show();
+        no.setFocus(true);
     }
 
     protected void refresh(int delay) {

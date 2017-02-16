@@ -11,7 +11,7 @@
  *  Amit Kumar Mondal
  *
  *******************************************************************************/
-package org.eclipse.kura.web;
+package org.eclipse.kura.web.server.servlet;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -74,8 +74,8 @@ public final class EventHandlerServlet extends HttpServlet {
     private BundleContext bundleContext;
 
     /** Used to track the new sessions */
-    private Map<String, HttpServletRequest> requests;
-    
+    private Map<String, HttpSession> requests;
+
     /** {@inheritDoc} */
     @Override
     public void init() throws ServletException {
@@ -108,9 +108,6 @@ public final class EventHandlerServlet extends HttpServlet {
             throws ServletException, IOException {
         // track the new session
         final String sessionId = request.getParameter("session");
-        if (!isNullOrEmpty(sessionId)) {
-            this.requests.put(sessionId, request);
-        }
 
         // set the response headers for SSE
         response.setContentType("text/event-stream");
@@ -126,12 +123,17 @@ public final class EventHandlerServlet extends HttpServlet {
         // event is not fired, the timeout of a session will notice the disconnection.
         session.setMaxInactiveInterval(MAX_INACTIVE_INTERVAL);
 
+        if (!isNullOrEmpty(sessionId)) {
+            this.requests.put(sessionId, session);
+        }
+
         // destroy the session if exists. It actually destroys the current session which initiated
         // the destruction request
         final String sessionToDestroy = request.getParameter("logout");
-        if ((!isNullOrEmpty(sessionToDestroy)) && this.requests.containsKey(sessionId)) {
+        if (!isNullOrEmpty(sessionToDestroy) && this.requests.containsKey(sessionId)) {
+            final HttpSession storedSession = this.requests.get(sessionId);
+            storedSession.invalidate();
             this.requests.remove(sessionId);
-            session.invalidate();
             return;
         }
 
@@ -143,8 +145,7 @@ public final class EventHandlerServlet extends HttpServlet {
         // the asynchronous task to retrieve and remove head element from the queue
         final CompletableFuture<Void> elementRemovalFuture = CompletableFuture.runAsync(() -> {
             try {
-                final boolean sessionExistsAndValid = this.requests.containsKey(sessionId)
-                        && this.requests.get(sessionId).isRequestedSessionIdValid();
+                boolean sessionExistsAndValid = checkSessionValidity(sessionId);
                 // if session exists and valid, remove head element from the queue
                 while (sessionExistsAndValid) {
                     final String data = eventQueue.poll(2, TimeUnit.SECONDS);
@@ -154,6 +155,7 @@ public final class EventHandlerServlet extends HttpServlet {
                         printStream.printf("data: %s%n%n", data);
                     }
                     printStream.flush();
+                    sessionExistsAndValid = checkSessionValidity(sessionId);
                 }
             } catch (final InterruptedException ex) {
                 logger.warn("Element removal timeout...", ex);
@@ -174,11 +176,26 @@ public final class EventHandlerServlet extends HttpServlet {
             return null;
         });
 
-        //returns the result if available or throw exception
+        // returns the result if available or throw exception
         try {
             cleanupFuture.join();
         } catch (RuntimeException re) {
-            //expecting if the queue is not processed
+            // expecting if the queue is not processed
+        }
+    }
+
+    private boolean checkSessionValidity(final String sessionId) {
+        boolean sessionAvailable = this.requests.containsKey(sessionId);
+        if (sessionAvailable) {
+            HttpSession storedSession = this.requests.get(sessionId);
+            try {
+                storedSession.getCreationTime();
+                return true;
+            } catch (IllegalStateException ise) {
+                return false;
+            }
+        } else {
+            return false;
         }
     }
 
@@ -218,19 +235,16 @@ public final class EventHandlerServlet extends HttpServlet {
                 // the event data can only be added to the queue if and only if it satisfies the following:
                 // 1. The initiated session request is valid (the session is not expired)
                 // 2. the queue has space to enqueue the event data
-                final HttpServletRequest servletRequest = this.requests.get(sessionId);
-                if (this.requests.containsKey(sessionId) && nonNull(servletRequest) && eventQueue.offer(eventData)) {
+                final HttpSession storedSession = this.requests.get(sessionId);
+                if (this.requests.containsKey(sessionId) && nonNull(storedSession) && eventQueue.offer(eventData)) {
                     return;
                 }
 
                 // session must be invalidated or it is already invalidated
-                this.requests.remove(sessionId);
-                if (nonNull(servletRequest)) {
-                    final HttpSession session = servletRequest.getSession();
-                    if (nonNull(session)) {
-                        session.invalidate();
-                    }
+                if (storedSession != null) {
+                    storedSession.invalidate();
                 }
+                this.requests.remove(sessionId);
 
                 // It signifies that there exists no consumer thread (browser or tab closed).
                 // We must cancel the future instance that the current SSE worker thread
@@ -247,7 +261,7 @@ public final class EventHandlerServlet extends HttpServlet {
                     logger.warn("Output Stream closing issue..." + ex);
                 }
             }
-        }, props);
+        } , props);
     }
 
 }

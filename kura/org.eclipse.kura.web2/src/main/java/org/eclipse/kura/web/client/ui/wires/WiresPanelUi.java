@@ -22,7 +22,9 @@ import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.util.DropSupport;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.util.DropSupport.DropEvent;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtWiresConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -138,6 +140,9 @@ public class WiresPanelUi extends Composite {
     @UiField
     static NavPills wireComponentsMenu;
 
+    @UiField
+    Widget composer;
+
     static final String WIRE_ASSET = "WireAsset";
 
     interface WiresPanelUiUiBinder extends UiBinder<Widget, WiresPanelUi> {
@@ -152,6 +157,8 @@ public class WiresPanelUi extends Composite {
     private static final Logger logger = Logger.getLogger(WiresPanelUi.class.getSimpleName());
 
     private static final Messages MSGS = GWT.create(Messages.class);
+
+    static final String FACTORY_PID_DROP_PREFIX = "factory://";
 
     private static final String TEMPORARY_ASSET_REG_EXP = "^[0-9]{14}$";
     private static final String ASSET_DESCRIPTION_PROP = "asset.desc";
@@ -189,6 +196,40 @@ public class WiresPanelUi extends Composite {
         initSaveModal();
         initGraphDeleteModal();
         initErrorModal();
+        initDragDrop();
+    }
+
+    private String getFactoryPidFromDropUrl(String dropUrl) {
+        if (dropUrl == null || dropUrl.isEmpty()) {
+            return null;
+        }
+        if (!dropUrl.startsWith(FACTORY_PID_DROP_PREFIX)) {
+            return null;
+        }
+        return dropUrl.substring(FACTORY_PID_DROP_PREFIX.length());
+    }
+
+    private void initDragDrop() {
+        DropSupport drop = DropSupport.addIfSupported(composer);
+
+        if (drop != null) {
+            drop.setListener(new DropSupport.Listener() {
+
+                @Override
+                public boolean onDrop(DropEvent event) {
+                    String factoryPid = getFactoryPidFromDropUrl(event.getAsText());
+                    if (factoryPid != null) {
+                        WiresPanelUi.showComponentCreationDialog(factoryPid);
+                    }
+                    return true;
+                }
+
+                @Override
+                public boolean onDragOver(DropEvent event) {
+                    return true;
+                }
+            });
+        }
     }
 
     private void initButtons() {
@@ -647,27 +688,37 @@ public class WiresPanelUi extends Composite {
                     gwtComponentService.findWireComponentConfigurationFromPid(token, pid, factoryPid, temporaryMap,
                             new AsyncCallback<GwtConfigComponent>() {
 
-                        @Override
-                        public void onFailure(final Throwable caught) {
-                            EntryClassUi.hideWaitModal();
-                            FailureHandler.handle(caught);
-                        }
+                                @Override
+                                public void onFailure(final Throwable caught) {
+                                    EntryClassUi.hideWaitModal();
+                                    FailureHandler.handle(caught);
+                                }
 
-                        @Override
-                        public void onSuccess(final GwtConfigComponent result) {
-                            // Component configuration retrieved
-                            // from the Configuration Service
-                            fillProperties(result, pid);
-                            configs.put(pid, result);
-                            if (propertiesUis.containsKey(pid)) {
-                                propertiesUis.remove(pid);
-                            }
-                            EntryClassUi.hideWaitModal();
-                        }
-                    });
+                                @Override
+                                public void onSuccess(final GwtConfigComponent result) {
+                                    // Component configuration retrieved
+                                    // from the Configuration Service
+                                    fillProperties(result, pid);
+                                    configs.put(pid, result);
+                                    if (propertiesUis.containsKey(pid)) {
+                                        propertiesUis.remove(pid);
+                                    }
+                                    EntryClassUi.hideWaitModal();
+                                }
+                            });
                 }
             });
         }
+    }
+
+    public static void showComponentCreationDialog(String factoryPid) {
+        if (factoryPid.contains(WiresPanelUi.WIRE_ASSET)) {
+            WiresPanelUi.driverInstanceForm.setVisible(true);
+        } else {
+            WiresPanelUi.driverInstanceForm.setVisible(false);
+        }
+        WiresPanelUi.factoryPid.setValue(factoryPid);
+        WiresPanelUi.assetModal.show();
     }
 
     public static int jsniUpdateWireConfig(final String obj) {

@@ -55,7 +55,7 @@
 					</b:Panel>
 				</b:Row>
 				<b:Row>
-					<b:Column size="MD_12,XS_12" b:id="wires-graph" addStyleNames="composer"></b:Column>
+					<b:Column size="MD_12,XS_12" b:id="wires-graph" addStyleNames="composer" ui:field="composer"></b:Column>
 				</b:Row>
 			</b:Column>
 			<b:Column size="MD_2">

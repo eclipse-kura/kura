@@ -309,21 +309,20 @@ public class CloudInstancesUi extends Composite {
                 CloudInstancesUi.this.gwtCloudService.createCloudServiceFromFactory(token, factoryPid,
                         newCloudServicePid, new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught,
-                                        CloudInstancesUi.this.gwtCloudService.getClass().getSimpleName());
-                                CloudInstancesUi.this.newConnectionModal.hide();
-                            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught, CloudInstancesUi.this.gwtCloudService.getClass().getSimpleName());
+                        CloudInstancesUi.this.newConnectionModal.hide();
+                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                CloudInstancesUi.this.newConnectionModal.hide();
-                                EntryClassUi.hideWaitModal();
-                                CloudInstancesUi.this.cloudServicesUi.refresh(2000);
-                            }
-                        });
+                    @Override
+                    public void onSuccess(Void result) {
+                        CloudInstancesUi.this.newConnectionModal.hide();
+                        EntryClassUi.hideWaitModal();
+                        CloudInstancesUi.this.cloudServicesUi.refresh(2000);
+                    }
+                });
             }
 
         });
@@ -385,17 +384,17 @@ public class CloudInstancesUi extends Composite {
                 CloudInstancesUi.this.gwtStatusService.connectDataService(token, connectionId,
                         new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                EntryClassUi.hideWaitModal();
-                            }
+                    @Override
+                    public void onSuccess(Void result) {
+                        EntryClassUi.hideWaitModal();
+                    }
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
-                        });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
+                });
             }
         });
     }
@@ -415,17 +414,17 @@ public class CloudInstancesUi extends Composite {
                 CloudInstancesUi.this.gwtStatusService.disconnectDataService(token, connectionId,
                         new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                EntryClassUi.hideWaitModal();
-                            }
+                    @Override
+                    public void onSuccess(Void result) {
+                        EntryClassUi.hideWaitModal();
+                    }
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
-                        });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
+                });
             }
         });
     }
@@ -445,18 +444,18 @@ public class CloudInstancesUi extends Composite {
                 CloudInstancesUi.this.gwtCloudService.deleteCloudServiceFromFactory(token, factoryPid, cloudServicePid,
                         new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                EntryClassUi.hideWaitModal();
-                                CloudInstancesUi.this.cloudServicesUi.refresh(2000);
-                            }
+                    @Override
+                    public void onSuccess(Void result) {
+                        EntryClassUi.hideWaitModal();
+                        CloudInstancesUi.this.cloudServicesUi.refresh(2000);
+                    }
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
-                        });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
+                });
             }
         });
     }
@@ -473,7 +472,7 @@ public class CloudInstancesUi extends Composite {
         modal.add(body);
 
         ModalFooter footer = new ModalFooter();
-        footer.add(new Button(MSG.yesButton(), new ClickHandler() {
+        Button yes = new Button(MSG.yesButton(), new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -483,16 +482,19 @@ public class CloudInstancesUi extends Composite {
                 deleteConnection(selectedFactoryPid, selectedCloudServicePid);
                 modal.hide();
             }
-        }));
-        footer.add(new Button(MSG.noButton(), new ClickHandler() {
+        });
+        Button no = new Button(MSG.noButton(), new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
                 modal.hide();
             }
-        }));
+        });
+        footer.add(no);
+        footer.add(yes);
         modal.add(footer);
         modal.show();
+        no.setFocus(true);
     }
 
     private void getSuggestedCloudServicePid(final String factoryPid) {

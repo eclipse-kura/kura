@@ -297,7 +297,7 @@ public class NatTabUi extends Composite implements Tab {
 
                     confirm.setTitle(MSGS.confirm());
                     confirmBody.add(new Span(MSGS.firewallNatDeleteConfirmation(selection.getInInterface())));
-                    confirmFooter.add(new Button(MSGS.yesButton(), new ClickHandler() {
+                    Button yes = new Button(MSGS.yesButton(), new ClickHandler() {
 
                         @Override
                         public void onClick(ClickEvent event) {
@@ -307,19 +307,22 @@ public class NatTabUi extends Composite implements Tab {
                             confirm.hide();
                             setDirty(true);
                         }
-                    }));
+                    });
 
-                    confirmFooter.add(new Button(MSGS.noButton(), new ClickHandler() {
+                    Button no = new Button(MSGS.noButton(), new ClickHandler() {
 
                         @Override
                         public void onClick(ClickEvent event) {
                             confirm.hide();
                         }
-                    }));
+                    });
+                    confirmFooter.add(no);
+                    confirmFooter.add(yes);
 
                     confirm.add(confirmBody);
                     confirm.add(confirmFooter);
                     confirm.show();
+                    no.setFocus(true);
                 }
             }
         });

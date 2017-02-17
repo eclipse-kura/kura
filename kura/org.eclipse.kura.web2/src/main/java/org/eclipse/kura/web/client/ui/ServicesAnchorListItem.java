@@ -84,7 +84,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
                     modal.add(body);
 
                     ModalFooter footer = new ModalFooter();
-                    footer.add(new Button(MSGS.yesButton(), new ClickHandler() {
+                    Button yes = new Button(MSGS.yesButton(), new ClickHandler() {
 
                         @Override
                         public void onClick(ClickEvent event) {
@@ -93,17 +93,21 @@ public class ServicesAnchorListItem extends AnchorListItem {
                             modal.hide();
                             ServicesAnchorListItem.this.ui.render(ServicesAnchorListItem.this.item);
                         }
-                    }));
-                    footer.add(new Button(MSGS.noButton(), new ClickHandler() {
+                    });
+
+                    Button no = new Button(MSGS.noButton(), new ClickHandler() {
 
                         @Override
                         public void onClick(ClickEvent event) {
                             modal.hide();
                         }
-                    }));
+                    });
+                    footer.add(no);
+                    footer.add(yes);
                     modal.add(footer);
 
                     modal.show();
+                    no.setFocus(true);
 
                 } else {
                     ServicesAnchorListItem.this.ui.setSelected(ServicesAnchorListItem.this.item);

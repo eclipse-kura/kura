@@ -209,6 +209,13 @@ public class PackagesPanelUi extends Composite {
                     modal.setClosable(true);
                     modal.setTitle(MSGS.confirm());
                     modalBody.add(new Span(MSGS.deviceUninstallPackage(PackagesPanelUi.this.selected.getName())));
+                    modalFooter.add(new Button("No", new ClickHandler() {
+
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            modal.hide();
+                        }
+                    }));
                     modalFooter.add(new Button("Yes", new ClickHandler() {
 
                         @Override
@@ -217,18 +224,11 @@ public class PackagesPanelUi extends Composite {
                             uninstall(PackagesPanelUi.this.selected);
                         }
                     }));
-                    modalFooter.add(new Button("No", new ClickHandler() {
-
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            modal.hide();
-                        }
-                    }));
 
                     modal.add(modalBody);
                     modal.add(modalFooter);
                     modal.show();
-                }   // end if null
+                }    // end if null
             }// end on click
         });
     }
@@ -386,17 +386,17 @@ public class PackagesPanelUi extends Composite {
                 PackagesPanelUi.this.gwtPackageService.uninstallDeploymentPackage(token, selected.getName(),
                         new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
+                    @Override
+                    public void onSuccess(Void result) {
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
             }
 
         });
@@ -448,41 +448,41 @@ public class PackagesPanelUi extends Composite {
                 PackagesPanelUi.this.gwtPackageService.findDeviceDeploymentPackages(token,
                         new AsyncCallback<List<GwtDeploymentPackage>>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                isRefreshPending = false;
-                                EntryClassUi.hideWaitModal();
-                                GwtDeploymentPackage pkg = new GwtDeploymentPackage();
-                                pkg.setName("Unavailable! Please click refresh");
-                                pkg.setVersion(caught.getLocalizedMessage());
-                                PackagesPanelUi.this.packagesDataProvider.getList().add(pkg);
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        isRefreshPending = false;
+                        EntryClassUi.hideWaitModal();
+                        GwtDeploymentPackage pkg = new GwtDeploymentPackage();
+                        pkg.setName("Unavailable! Please click refresh");
+                        pkg.setVersion(caught.getLocalizedMessage());
+                        PackagesPanelUi.this.packagesDataProvider.getList().add(pkg);
 
-                            }
+                    }
 
-                            @Override
-                            public void onSuccess(List<GwtDeploymentPackage> result) {
-                                isRefreshPending = false;
-                                EntryClassUi.hideWaitModal();
-                                for (GwtDeploymentPackage pair : result) {
-                                    PackagesPanelUi.this.packagesDataProvider.getList().add(pair);
-                                }
-                                int size = PackagesPanelUi.this.packagesDataProvider.getList().size();
-                                PackagesPanelUi.this.packagesGrid.setVisibleRange(0, size);
-                                PackagesPanelUi.this.packagesDataProvider.flush();
+                    @Override
+                    public void onSuccess(List<GwtDeploymentPackage> result) {
+                        isRefreshPending = false;
+                        EntryClassUi.hideWaitModal();
+                        for (GwtDeploymentPackage pair : result) {
+                            PackagesPanelUi.this.packagesDataProvider.getList().add(pair);
+                        }
+                        int size = PackagesPanelUi.this.packagesDataProvider.getList().size();
+                        PackagesPanelUi.this.packagesGrid.setVisibleRange(0, size);
+                        PackagesPanelUi.this.packagesDataProvider.flush();
 
-                                if (PackagesPanelUi.this.packagesDataProvider.getList().isEmpty()) {
-                                    PackagesPanelUi.this.packagesGrid.setVisible(false);
-                                    PackagesPanelUi.this.notification.setVisible(true);
-                                    PackagesPanelUi.this.notification.setText(MSGS.devicePackagesNone());
-                                } else {
-                                    PackagesPanelUi.this.packagesGrid.setVisible(true);
-                                    PackagesPanelUi.this.notification.setVisible(false);
-                                }
-                                if (PackagesPanelUi.this.entryClassUi != null) {
-                                    PackagesPanelUi.this.entryClassUi.fetchAvailableServices();
-                                }
-                            }
-                        });
+                        if (PackagesPanelUi.this.packagesDataProvider.getList().isEmpty()) {
+                            PackagesPanelUi.this.packagesGrid.setVisible(false);
+                            PackagesPanelUi.this.notification.setVisible(true);
+                            PackagesPanelUi.this.notification.setText(MSGS.devicePackagesNone());
+                        } else {
+                            PackagesPanelUi.this.packagesGrid.setVisible(true);
+                            PackagesPanelUi.this.notification.setVisible(false);
+                        }
+                        if (PackagesPanelUi.this.entryClassUi != null) {
+                            PackagesPanelUi.this.entryClassUi.fetchAvailableServices();
+                        }
+                    }
+                });
             }
         });
     }

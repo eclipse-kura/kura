@@ -212,6 +212,7 @@ public class ServicesUi extends AbstractServicesUi {
             footer.add(group);
             this.modal.add(footer);
             this.modal.show();
+            no.setFocus(true);
         }
     }
 
@@ -385,6 +386,7 @@ public class ServicesUi extends AbstractServicesUi {
                 footer.add(group);
                 this.modal.add(footer);
                 this.modal.show();
+                no.setFocus(true);
             }
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");

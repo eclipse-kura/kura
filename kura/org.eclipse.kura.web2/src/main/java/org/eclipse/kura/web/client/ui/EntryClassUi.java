@@ -290,13 +290,6 @@ public class EntryClassUi extends Composite {
         }
     }
 
-    public void discardWiresPanelChanges() {
-        if (WiresPanelUi.isDirty()) {
-            WiresPanelUi.clearUnsavedPanelChanges();
-            WiresPanelUi.loadGraph();
-        }
-    }
-
     public void initSystemPanel(GwtSession GwtSession, boolean connectionStatus) {
         final EntryClassUi instanceReference = this;
         if (!GwtSession.isNetAdminAvailable()) {
@@ -314,6 +307,7 @@ public class EntryClassUi extends Composite {
 
                     @Override
                     public void onClick(ClickEvent event) {
+                        forceTabsCleaning();
                         if (EntryClassUi.this.modal != null) {
                             EntryClassUi.this.modal.hide();
                         }
@@ -325,7 +319,6 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.statusBinder.setSession(EntryClassUi.this.currentSession);
                         EntryClassUi.this.statusBinder.setParent(instanceReference);
                         EntryClassUi.this.statusBinder.loadStatusData();
-                        EntryClassUi.this.discardWiresPanelChanges();
                     }
                 });
 
@@ -353,7 +346,6 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.deviceBinder);
                         EntryClassUi.this.deviceBinder.setSession(EntryClassUi.this.currentSession);
                         EntryClassUi.this.deviceBinder.initDevicePanel();
-                        EntryClassUi.this.discardWiresPanelChanges();
                     }
                 });
                 renderDirtyConfigModal(b);
@@ -381,7 +373,6 @@ public class EntryClassUi extends Composite {
                             EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.networkBinder);
                             EntryClassUi.this.networkBinder.setSession(EntryClassUi.this.currentSession);
                             EntryClassUi.this.networkBinder.initNetworkPanel();
-                            EntryClassUi.this.discardWiresPanelChanges();
                         }
                     });
                     renderDirtyConfigModal(b);
@@ -409,7 +400,6 @@ public class EntryClassUi extends Composite {
                             EntryClassUi.this.contentPanelBody.clear();
                             EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.firewallBinder);
                             EntryClassUi.this.firewallBinder.initFirewallPanel();
-                            EntryClassUi.this.discardWiresPanelChanges();
                         }
                     });
                     renderDirtyConfigModal(b);
@@ -438,7 +428,6 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.packagesBinder.setSession(EntryClassUi.this.currentSession);
                         EntryClassUi.this.packagesBinder.setMainUi(EntryClassUi.this.ui);
                         EntryClassUi.this.packagesBinder.refresh();
-                        EntryClassUi.this.discardWiresPanelChanges();
                     }
                 });
                 renderDirtyConfigModal(b);
@@ -465,7 +454,6 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.settingsBinder);
                         EntryClassUi.this.settingsBinder.setSession(EntryClassUi.this.currentSession);
                         EntryClassUi.this.settingsBinder.load();
-                        EntryClassUi.this.discardWiresPanelChanges();
                     }
                 });
                 renderDirtyConfigModal(b);
@@ -491,7 +479,7 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.contentPanelBody.clear();
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.cloudServicesBinder);
                         EntryClassUi.this.cloudServicesBinder.refresh();
-                        EntryClassUi.this.discardWiresPanelChanges();
+
                     }
                 });
                 renderDirtyConfigModal(b);
@@ -517,7 +505,7 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.contentPanelBody.clear();
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.wiresBinder);
                         WiresPanelUi.load();
-                        EntryClassUi.this.discardWiresPanelChanges();
+                        // EntryClassUi.this.discardWiresPanelChanges();
                     }
                 });
                 renderDirtyConfigModal(b);
@@ -873,6 +861,10 @@ public class EntryClassUi extends Composite {
         }
         if (this.cloudServices.isVisible()) {
             this.cloudServicesBinder.setDirty(false);
+        }
+        if (this.wires.isVisible()) {
+            WiresPanelUi.setDirty(false);
+            WiresPanelUi.unload();
         }
     }
 

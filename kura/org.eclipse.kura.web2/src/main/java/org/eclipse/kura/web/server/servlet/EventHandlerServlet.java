@@ -14,13 +14,11 @@
 package org.eclipse.kura.web.server.servlet;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.util.base.StringUtil.isNullOrEmpty;
 import static org.eclipse.kura.wire.WireSupport.EMIT_EVENT_TOPIC;
 import static org.osgi.service.event.EventConstants.EVENT_TOPIC;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Dictionary;
@@ -31,7 +29,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -107,7 +104,7 @@ public final class EventHandlerServlet extends HttpServlet {
     public void doGet(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException {
         // track the new session
-        final String sessionId = request.getParameter("session");
+        final String requestId = request.getParameter("session");
 
         // set the response headers for SSE
         response.setContentType("text/event-stream");
@@ -116,6 +113,14 @@ public final class EventHandlerServlet extends HttpServlet {
         response.setHeader("Connection", "keep-alive");
         response.setHeader("Access-Control-Allow-Origin", "*"); // required for IE9
 
+        // destroy the session if exists. It actually destroys the current session which initiated
+        // the destruction request
+        final String sessionToDestroy = request.getParameter("logout");
+        if (!isNullOrEmpty(sessionToDestroy)) {
+            cleanRequest(requestId);
+            return;
+        }
+
         final HttpSession session = request.getSession(false);
         // timeout is required if the browser beforeunload event is not fired in exceptional circumstances.
         // If there exists a session in which a browser is opened, the beforeunload event is expected to
@@ -123,39 +128,32 @@ public final class EventHandlerServlet extends HttpServlet {
         // event is not fired, the timeout of a session will notice the disconnection.
         session.setMaxInactiveInterval(MAX_INACTIVE_INTERVAL);
 
-        if (!isNullOrEmpty(sessionId)) {
-            this.requests.put(sessionId, session);
+        if (!isNullOrEmpty(requestId) && this.requests.containsKey(requestId)) {
+            cleanRequest(requestId);
         }
 
-        // destroy the session if exists. It actually destroys the current session which initiated
-        // the destruction request
-        final String sessionToDestroy = request.getParameter("logout");
-        if (!isNullOrEmpty(sessionToDestroy) && this.requests.containsKey(sessionId)) {
-            final HttpSession storedSession = this.requests.get(sessionId);
-            storedSession.invalidate();
-            this.requests.remove(sessionId);
-            return;
+        if (!isNullOrEmpty(requestId)) {
+            this.requests.put(requestId, session);
         }
 
         final BlockingQueue<String> eventQueue = new LinkedBlockingQueue<>(MAX_SIZE_OF_QUEUE);
         final ServletOutputStream outputStream = response.getOutputStream();
         final PrintStream printStream = new PrintStream(outputStream);
-        final AtomicReference<Closeable> closeableReference = new AtomicReference<>(outputStream);
 
         // the asynchronous task to retrieve and remove head element from the queue
         final CompletableFuture<Void> elementRemovalFuture = CompletableFuture.runAsync(() -> {
             try {
-                boolean sessionExistsAndValid = checkSessionValidity(sessionId);
+                boolean requestExistsAndValid = checkRequestValidity(requestId);
                 // if session exists and valid, remove head element from the queue
-                while (sessionExistsAndValid) {
+                while (requestExistsAndValid && !printStream.checkError()) {
                     final String data = eventQueue.poll(2, TimeUnit.SECONDS);
                     if (isNull(data)) {
                         printStream.print(":\n\n");
                     } else {
+                        logger.debug("Sending data for request: {}", requestId);
                         printStream.printf("data: %s%n%n", data);
                     }
-                    printStream.flush();
-                    sessionExistsAndValid = checkSessionValidity(sessionId);
+                    requestExistsAndValid = checkRequestValidity(requestId);
                 }
             } catch (final InterruptedException ex) {
                 logger.warn("Element removal timeout...", ex);
@@ -163,12 +161,15 @@ public final class EventHandlerServlet extends HttpServlet {
             }
         });
 
-        final ServiceRegistration<?> registration = registerEventHandler(EMIT_EVENT_TOPIC, eventQueue, sessionId,
-                closeableReference, elementRemovalFuture);
+        final ServiceRegistration<?> registration = registerEventHandler(EMIT_EVENT_TOPIC, eventQueue, requestId,
+                elementRemovalFuture);
         // unregisters event handler service and close the servlet output stream
         final CompletableFuture<Void> cleanupFuture = elementRemovalFuture.handle((ok, exeption) -> {
+            logger.info("Cleaning resources for request: {}", requestId);
+            cleanRequest(requestId);
             registration.unregister();
             try {
+                printStream.close();
                 outputStream.close();
             } catch (final IOException ex) {
                 logger.warn("Outport Stream closing issue...", ex);
@@ -184,19 +185,17 @@ public final class EventHandlerServlet extends HttpServlet {
         }
     }
 
-    private boolean checkSessionValidity(final String sessionId) {
-        boolean sessionAvailable = this.requests.containsKey(sessionId);
-        if (sessionAvailable) {
-            HttpSession storedSession = this.requests.get(sessionId);
+    private boolean checkRequestValidity(final String requestId) {
+        boolean requestAvailable = this.requests.containsKey(requestId);
+        if (requestAvailable) {
+            HttpSession storedSession = this.requests.get(requestId);
             try {
                 storedSession.getCreationTime();
                 return true;
             } catch (IllegalStateException ise) {
-                return false;
             }
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -206,8 +205,8 @@ public final class EventHandlerServlet extends HttpServlet {
      *            the topic to track changes
      * @param eventQueue
      *            the shared queue
-     * @param sessionId
-     *            the session ID to track
+     * @param requestId
+     *            the request ID to track
      * @param output
      *            the output stream
      * @param future
@@ -217,11 +216,10 @@ public final class EventHandlerServlet extends HttpServlet {
      *             if any of the provided arguments is null
      */
     private ServiceRegistration<?> registerEventHandler(final String topic, final BlockingQueue<String> eventQueue,
-            final String sessionId, final AtomicReference<Closeable> output, final CompletableFuture<?> future) {
+            final String requestId, final CompletableFuture<?> future) {
         requireNonNull(topic, "Topic must not be null");
         requireNonNull(eventQueue, "Provided Queue must not be null");
-        requireNonNull(sessionId, "Provided Session ID must not be null");
-        requireNonNull(output, "Output Stream must not be null");
+        requireNonNull(requestId, "Provided Session ID must not be null");
         requireNonNull(future, "Future reference must not be null");
 
         // event handler properties
@@ -232,36 +230,23 @@ public final class EventHandlerServlet extends HttpServlet {
             synchronized (EventHandlerServlet.class) {
                 final String eventData = String.valueOf(event.getProperty("emitter"));
 
-                // the event data can only be added to the queue if and only if it satisfies the following:
-                // 1. The initiated session request is valid (the session is not expired)
-                // 2. the queue has space to enqueue the event data
-                final HttpSession storedSession = this.requests.get(sessionId);
-                if (this.requests.containsKey(sessionId) && nonNull(storedSession) && eventQueue.offer(eventData)) {
+                final boolean validRequest = checkRequestValidity(requestId);
+                final boolean consumerAlive = eventQueue.offer(eventData);
+                if (validRequest && consumerAlive) {
                     return;
-                }
+                } else {
+                    logger.debug("Valid request: {}, consumer alive: {}. Ready to close...", validRequest,
+                            consumerAlive);
+                    cleanRequest(requestId);
 
-                // session must be invalidated or it is already invalidated
-                if (storedSession != null) {
-                    storedSession.invalidate();
-                }
-                this.requests.remove(sessionId);
-
-                // It signifies that there exists no consumer thread (browser or tab closed).
-                // We must cancel the future instance that the current SSE worker thread
-                // working on.
-                final Closeable closeable = output.getAndSet(null);
-                if (isNull(closeable)) {
-                    // SSE worker thread already been killed
-                    return;
-                }
-                try {
                     future.cancel(true);
-                    closeable.close();
-                } catch (final IOException ex) {
-                    logger.warn("Output Stream closing issue..." + ex);
                 }
             }
         } , props);
     }
 
+    private void cleanRequest(final String requestId) {
+        logger.debug("Cleaning request: {}", requestId);
+        this.requests.remove(requestId);
+    }
 }

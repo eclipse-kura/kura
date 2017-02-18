@@ -30,6 +30,7 @@ var kuraWires = (function() {
 	// used to disallow adding new instance to the Wire
 	// Graph if any instance is recently deleted.
 	var isComponentDeleted;
+	var eventSource;
 
 	/*
 	 * / Public functions
@@ -37,10 +38,18 @@ var kuraWires = (function() {
 	client.render = function(obj) {
 		elementsContainerTemp = [];
 		clientConfig = JSON.parse(obj);
-		eventSourceSessionId = generateId();
 		sse();
 		setup();
 		regiterFormInputFieldValidation();
+	};
+	
+	client.unload = function() {
+		eventSource.close();
+		eventSource = null;
+		var xmlHttp = new XMLHttpRequest();
+	    xmlHttp.open("GET", "/sse?session="
+				+ eventSourceSessionId + "&logout=" + eventSourceSessionId, true);
+	    xmlHttp.send(null);
 	};
 
 	function generateId() {
@@ -49,9 +58,12 @@ var kuraWires = (function() {
 
 	$(document).ready(function() {
 		$(window).bind("beforeunload", function() {
-			var eventSource = new EventSource("/sse?session="
-					+ eventSourceSessionId + "&logout=" + eventSourceSessionId);
-			return confirm("Do you really want to close?");
+			eventSource.close();
+			eventSource = null;
+			var xmlHttp = new XMLHttpRequest();
+		    xmlHttp.open("GET", "/sse?session="
+					+ eventSourceSessionId + "&logout=" + eventSourceSessionId, true);
+		    xmlHttp.send(null);
 		});
 	});
 	
@@ -83,15 +95,17 @@ var kuraWires = (function() {
 	 * Interaction with OSGi Event Admin through Server Sent Events
 	 */
 	function sse() {
-		var eventSource = new EventSource("/sse?session="
-				+ eventSourceSessionId);
-		eventSource.onmessage = function(event) {
-			_.each(graph.getElements(), function(c) {
-				if (c.attributes.pid === event.data) {
-					fireTransition(c);
-				}
-			});
-		};
+		if(eventSource == null) {
+			eventSourceSessionId = generateId();
+			eventSource = new EventSource("/sse?session=" + eventSourceSessionId);
+			eventSource.onmessage = function(event) {
+				_.each(graph.getElements(), function(c) {
+					if (c.attributes.pid === event.data) {
+						fireTransition(c);
+					}
+				});
+			};
+		}
 	}
 
 	function toggleDeleteGraphButton(flag) {

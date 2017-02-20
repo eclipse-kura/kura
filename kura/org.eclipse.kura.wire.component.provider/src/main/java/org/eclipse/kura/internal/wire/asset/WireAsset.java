@@ -408,6 +408,10 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      */
     private void writeChannels(final List<AssetRecord> assetRecordsToWriteChannels) {
         requireNonNull(assetRecordsToWriteChannels, message.assetRecordsNonNull());
+        if (assetRecordsToWriteChannels.isEmpty()) {
+            return;
+        }
+
         try {
             write(assetRecordsToWriteChannels);
         } catch (final KuraException e) {

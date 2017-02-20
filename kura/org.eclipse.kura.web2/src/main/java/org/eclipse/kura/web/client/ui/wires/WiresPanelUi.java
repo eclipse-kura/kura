@@ -23,8 +23,8 @@ import java.util.logging.Logger;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.DropSupport;
-import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.DropSupport.DropEvent;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtWiresConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -181,6 +181,8 @@ public class WiresPanelUi extends Composite {
 
     private static String driverPidProp = "driver.pid";
 
+    private static boolean panelLoaded = false;
+
     public WiresPanelUi() {
         initWidget(uiBinder.createAndBindUi(this));
         emitters = new ArrayList<>();
@@ -197,6 +199,14 @@ public class WiresPanelUi extends Composite {
         initGraphDeleteModal();
         initErrorModal();
         initDragDrop();
+
+        exportJSNIUpdateWireConfig();
+        exportJSNIUpdateSelection();
+        exportJSNIShowDuplicatePidModal();
+        exportJSNIShowAddNotAllowedModal();
+        exportJSNIshowCycleExistenceError();
+        exportJSNImakeUiDirty();
+        exportJSNIDeactivateNavPils();
     }
 
     private String getFactoryPidFromDropUrl(String dropUrl) {
@@ -210,7 +220,7 @@ public class WiresPanelUi extends Composite {
     }
 
     private void initDragDrop() {
-        DropSupport drop = DropSupport.addIfSupported(composer);
+        DropSupport drop = DropSupport.addIfSupported(this.composer);
 
         if (drop != null) {
             drop.setListener(new DropSupport.Listener() {
@@ -378,6 +388,7 @@ public class WiresPanelUi extends Composite {
                         requestDriverInstances(result);
                         wireComponentsConfigJson = result.getWireComponentsJson();
                         wireConfigsJson = result.getWireConfigurationsJson();
+                        panelLoaded = true;
                     }
                 });
             }
@@ -476,13 +487,14 @@ public class WiresPanelUi extends Composite {
     }
 
     public static void setDirty(final boolean flag) {
-        // if WiresPanelUI is already dirty, there is no need to make it dirty
-        // again and again
-        if (!isDirty) {
+        if (flag) {
             btnSave.setEnabled(true);
             btnSave.setText(MSGS.apply() + " *");
-            isDirty = flag;
+        } else {
+            btnSave.setEnabled(false);
+            btnSave.setText(MSGS.apply());
         }
+        isDirty = flag;
     }
 
     private static void fillProperties(final GwtConfigComponent config, final String pid) {
@@ -551,13 +563,6 @@ public class WiresPanelUi extends Composite {
         populateDrivers();
         populateComponentsPanel();
         loadGraph();
-        exportJSNIUpdateWireConfig();
-        exportJSNIUpdateSelection();
-        exportJSNIShowDuplicatePidModal();
-        exportJSNIShowAddNotAllowedModal();
-        exportJSNIshowCycleExistenceError();
-        exportJSNImakeUiDirty();
-        exportJSNIDeactivateNavPils();
     }
 
     // ----------------------------------------------------------------
@@ -688,24 +693,24 @@ public class WiresPanelUi extends Composite {
                     gwtComponentService.findWireComponentConfigurationFromPid(token, pid, factoryPid, temporaryMap,
                             new AsyncCallback<GwtConfigComponent>() {
 
-                                @Override
-                                public void onFailure(final Throwable caught) {
-                                    EntryClassUi.hideWaitModal();
-                                    FailureHandler.handle(caught);
-                                }
+                        @Override
+                        public void onFailure(final Throwable caught) {
+                            EntryClassUi.hideWaitModal();
+                            FailureHandler.handle(caught);
+                        }
 
-                                @Override
-                                public void onSuccess(final GwtConfigComponent result) {
-                                    // Component configuration retrieved
-                                    // from the Configuration Service
-                                    fillProperties(result, pid);
-                                    configs.put(pid, result);
-                                    if (propertiesUis.containsKey(pid)) {
-                                        propertiesUis.remove(pid);
-                                    }
-                                    EntryClassUi.hideWaitModal();
-                                }
-                            });
+                        @Override
+                        public void onSuccess(final GwtConfigComponent result) {
+                            // Component configuration retrieved
+                            // from the Configuration Service
+                            fillProperties(result, pid);
+                            configs.put(pid, result);
+                            if (propertiesUis.containsKey(pid)) {
+                                propertiesUis.remove(pid);
+                            }
+                            EntryClassUi.hideWaitModal();
+                        }
+                    });
                 }
             });
         }
@@ -753,9 +758,7 @@ public class WiresPanelUi extends Composite {
                     public void onSuccess(final GwtWiresConfiguration result) {
                         internalLoad(result);
                         EntryClassUi.hideWaitModal();
-                        btnSave.setEnabled(false);
-                        btnSave.setText(MSGS.apply());
-                        isDirty = false;
+                        setDirty(false);
                         if (configs != null && !configs.isEmpty()) {
                             configs.clear();
                         }
@@ -778,6 +781,18 @@ public class WiresPanelUi extends Composite {
     public static native void wiresOpen(String obj)
     /*-{
         $wnd.kuraWires.render(obj);
+    }-*/;
+
+    public static void unload() {
+        if (panelLoaded) {
+            wiresClose();
+        }
+        panelLoaded = false;
+    }
+
+    private static native void wiresClose()
+    /*-{
+        $wnd.kuraWires.unload();
     }-*/;
 
     private static JSONArray createComponentsJson() {

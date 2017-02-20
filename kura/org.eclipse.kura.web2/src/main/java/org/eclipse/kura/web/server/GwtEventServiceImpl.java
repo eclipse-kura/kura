@@ -29,6 +29,8 @@ import org.osgi.service.event.EventHandler;
 
 public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements GwtEventService, EventHandler {
 
+    private static final long serialVersionUID = 4948177265652519828L;
+
     private static final int MAX_EVENT_COUNT = 50;
 
     private LinkedList<String> topics = new LinkedList<String>();

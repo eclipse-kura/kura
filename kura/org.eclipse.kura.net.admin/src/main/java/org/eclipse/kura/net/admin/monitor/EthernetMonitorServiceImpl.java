@@ -563,9 +563,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
     }
 
     private void disableInterface(String interfaceName) throws Exception {
-        // WTF: should this be m_netAdminService.disableInterface(interfaceName); instead?
-        LinuxNetworkUtil.disableInterface(interfaceName);
-        // LinuxNetworkUtil.powerOnEthernetController(interfaceName); // already called by NetworkUtil.disableInterface
+    	m_netAdminService.disableInterface(interfaceName);
         this.m_netAdminService.manageDhcpServer(interfaceName, false);
     }
 

@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.wires;
 
+import static org.eclipse.kura.web.shared.service.GwtWireService.DELETED_WIRE_COMPONENT;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -203,7 +205,6 @@ public class WiresPanelUi extends Composite {
         exportJSNIUpdateWireConfig();
         exportJSNIUpdateSelection();
         exportJSNIShowDuplicatePidModal();
-        exportJSNIShowAddNotAllowedModal();
         exportJSNIshowCycleExistenceError();
         exportJSNImakeUiDirty();
         exportJSNIDeactivateNavPils();
@@ -581,13 +582,6 @@ public class WiresPanelUi extends Composite {
     );
     }-*/;
 
-    private static native void exportJSNIShowAddNotAllowedModal()
-    /*-{
-    parent.window.jsniShowAddNotAllowedModal = $entry(
-    @org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniShowAddNotAllowedModal()
-    );
-    }-*/;
-
     private static native void exportJSNIshowCycleExistenceError()
     /*-{
     parent.window.jsniShowCycleExistenceError = $entry(
@@ -635,12 +629,6 @@ public class WiresPanelUi extends Composite {
         WiresPanelUi.setDirty(true);
     }
 
-    public static void jsniShowAddNotAllowedModal() {
-        WiresPanelUi.errorAlertText.setText(MSGS.wiresDeletePerformedSaveRequired());
-        WiresPanelUi.errorModal.show();
-        assetModal.hide();
-    }
-
     public static void jsniShowCycleExistenceError() {
         WiresPanelUi.errorAlertText.setText(MSGS.wiresCycleDetected());
         WiresPanelUi.errorModal.show();
@@ -653,64 +641,124 @@ public class WiresPanelUi extends Composite {
     }
 
     public static void jsniUpdateSelection(final String pid, final String factoryPid) {
-        if ("".equals(pid)) {
+        if ("".equals(factoryPid)) {
             WiresPanelUi.btnDelete.setEnabled(false);
             WiresPanelUi.propertiesPanel.setVisible(false);
+            if (!"".equals(pid)) {
+                updateDeletedWireComponent(pid);
+            }
             return;
         }
         // enable delete instance button
         WiresPanelUi.btnDelete.setEnabled(true);
-        // Retrieve GwtComponentConfiguration to use for manipulating the
-        // properties.
-        // If it is already present in the map, it means the component has
-        // already been
-        // accessed by the graph, and its configuration has already been
-        // gathered from the ConfigurationService.
+        // Retrieve GwtComponentConfiguration to use for manipulating the properties.
+        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(final Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(final GwtXSRFToken token) {
+                Map<String, Object> temporaryMap = null;
+                if (WIRE_ASSET_PID.equalsIgnoreCase(factoryPid)) {
+                    temporaryMap = new HashMap<>();
+                    temporaryMap.put(ASSET_DESCRIPTION_PROP, MSGS.wiresSampleAssetName());
+                    temporaryMap.put(driverPidProp, getDriver(pid));
+                }
+                gwtComponentService.findWireComponentConfigurationFromPid(token, pid, factoryPid, temporaryMap,
+                        new AsyncCallback<GwtConfigComponent>() {
+
+                            @Override
+                            public void onFailure(final Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
+                            }
+
+                            @Override
+                            public void onSuccess(final GwtConfigComponent result) {
+                                // Component configuration retrieved
+                                // from the Configuration Service
+                                fillProperties(result, pid);
+                                configs.put(pid, result);
+                                if (propertiesUis.containsKey(pid)) {
+                                    propertiesUis.remove(pid);
+                                }
+                                EntryClassUi.hideWaitModal();
+                            }
+                        });
+            }
+        });
+    }
+
+    private static void updateDeletedWireComponent(final String pid) {
         if (configs.containsKey(pid)) {
-            fillProperties(configs.get(pid), pid);
-        } else {
-            // else we get the GwtComponentConfiguration from the
-            // ConfigurationService
-            gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                @Override
-                public void onFailure(final Throwable ex) {
-                    EntryClassUi.hideWaitModal();
-                    FailureHandler.handle(ex);
-                }
-
-                @Override
-                public void onSuccess(final GwtXSRFToken token) {
-                    Map<String, Object> temporaryMap = null;
-                    if (WIRE_ASSET_PID.equalsIgnoreCase(factoryPid)) {
-                        temporaryMap = new HashMap<>();
-                        temporaryMap.put(ASSET_DESCRIPTION_PROP, MSGS.wiresSampleAssetName());
-                        temporaryMap.put(driverPidProp, getDriver(pid));
-                    }
-                    gwtComponentService.findWireComponentConfigurationFromPid(token, pid, factoryPid, temporaryMap,
-                            new AsyncCallback<GwtConfigComponent>() {
-
-                                @Override
-                                public void onFailure(final Throwable caught) {
-                                    EntryClassUi.hideWaitModal();
-                                    FailureHandler.handle(caught);
-                                }
-
-                                @Override
-                                public void onSuccess(final GwtConfigComponent result) {
-                                    // Component configuration retrieved
-                                    // from the Configuration Service
-                                    fillProperties(result, pid);
-                                    configs.put(pid, result);
-                                    if (propertiesUis.containsKey(pid)) {
-                                        propertiesUis.remove(pid);
-                                    }
-                                    EntryClassUi.hideWaitModal();
-                                }
-                            });
-                }
-            });
+            configs.remove(pid);
         }
+        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(final Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(final GwtXSRFToken token) {
+                gwtComponentService.findComponentConfiguration(token, pid,
+                        new AsyncCallback<List<GwtConfigComponent>>() {
+
+                            @Override
+                            public void onFailure(final Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
+                            }
+
+                            @Override
+                            public void onSuccess(final List<GwtConfigComponent> components) {
+                                if (!components.isEmpty()) {
+                                    final GwtConfigComponent component = components.get(0);
+                                    Map<String, Object> props = new HashMap<>();
+                                    props.put(DELETED_WIRE_COMPONENT, true);
+                                    updateConfiguration(component.getComponentId(), props);
+                                }
+                                EntryClassUi.hideWaitModal();
+                            }
+                        });
+            }
+
+        });
+    }
+
+    private static void updateConfiguration(final String pid, final Map<String, Object> properties) {
+        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(final Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(final GwtXSRFToken token) {
+                gwtComponentService.updateProperties(token, pid, properties, new AsyncCallback<Boolean>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
+            }
+
+        });
     }
 
     public static void showComponentCreationDialog(String factoryPid) {

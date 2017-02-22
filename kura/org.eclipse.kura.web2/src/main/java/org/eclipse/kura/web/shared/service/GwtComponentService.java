@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
  *
  *******************************************************************************/
 package org.eclipse.kura.web.shared.service;
@@ -146,6 +150,8 @@ public interface GwtComponentService extends RemoteService {
             throws GwtKuraException;
     
     public List<String> findFactoryComponents(GwtXSRFToken xsrfToken) throws GwtKuraException;
+    
+    public boolean updateProperties(GwtXSRFToken xsrfToken, String pid, Map<String, Object> properties) throws GwtKuraException;
 
     public GwtConfigComponent findWireComponentConfigurationFromPid(GwtXSRFToken xsrfToken, String pid,
             String factoryPid, Map<String, Object> extraProps) throws GwtKuraException;

@@ -9,14 +9,20 @@
  * Contributors:
  *     Eurotech
  *     Red Hat Inc
+ *     Amit Kumar Mondal
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import static org.eclipse.kura.web.shared.service.GwtWireService.DELETED_WIRE_COMPONENT;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +49,7 @@ import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.wire.WireHelperService;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements GwtComponentService {
@@ -220,7 +227,11 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         GwtConfigComponent comp = null;
         try {
             ComponentConfiguration conf = cs.getComponentConfiguration(pid);
-            if (conf == null) {
+            boolean checkIfWireComponentIsDeleted = false;
+            if (conf != null) {
+                checkIfWireComponentIsDeleted = conf.getConfigurationProperties().containsKey(DELETED_WIRE_COMPONENT);
+            }
+            if (conf == null || checkIfWireComponentIsDeleted) {
                 conf = cs.getDefaultComponentConfiguration(factoryPid);
                 if (conf != null) {
                     conf.getConfigurationProperties().put(ConfigurationAdmin.SERVICE_FACTORYPID, factoryPid);
@@ -484,10 +495,17 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         List<GwtConfigComponent> gwtConfigs = new ArrayList<>();
         try {
             ComponentConfiguration config = cs.getComponentConfiguration(componentPid);
-
-            GwtConfigComponent gwtConfigComponent = createMetatypeOnlyGwtComponentConfiguration(config);
-            GwtConfigComponent fullGwtConfigComponent = addNonMetatypeProperties(gwtConfigComponent, config);
-            gwtConfigs.add(fullGwtConfigComponent);
+            GwtConfigComponent gwtConfigComponent = null;
+            if (config != null) {
+                gwtConfigComponent = createMetatypeOnlyGwtComponentConfiguration(config);
+            }
+            GwtConfigComponent fullGwtConfigComponent = null;
+            if (gwtConfigComponent != null) {
+                fullGwtConfigComponent = addNonMetatypeProperties(gwtConfigComponent, config);
+            }
+            if (fullGwtConfigComponent != null) {
+                gwtConfigs.add(fullGwtConfigComponent);
+            }
         } catch (Throwable t) {
             KuraExceptionHandler.handle(t);
         }
@@ -679,5 +697,39 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             gwtParams.add(gwtParam);
         }
         return gwtParams;
+    }
+
+    @Override
+    public boolean updateProperties(GwtXSRFToken xsrfToken, String pid, Map<String, Object> properties)
+            throws GwtKuraException {
+        this.checkXSRFToken(xsrfToken);
+        final ConfigurationAdmin configAdmin = ServiceLocator.getInstance().getService(ConfigurationAdmin.class);
+        final WireHelperService wireHelperService = ServiceLocator.getInstance().getService(WireHelperService.class);
+        try {
+            final String servicePid = wireHelperService.getServicePid(pid);
+            Configuration conf = null;
+            if (servicePid != null) {
+                conf = configAdmin.getConfiguration(servicePid);
+            }
+            Dictionary<String, Object> props = null;
+            if (conf != null) {
+                props = conf.getProperties();
+            }
+            if (props == null) {
+                props = new Hashtable<String, Object>();
+            }
+            for (Map.Entry<String, Object> entry : properties.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                props.put(key, value != null ? value : "");
+            }
+            if (conf != null) {
+                conf.update(props);
+            }
+        } catch (IOException e) {
+            return false;
+        }
+
+        return true;
     }
 }

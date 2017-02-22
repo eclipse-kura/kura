@@ -99,4 +99,15 @@ public interface OpcUaMessages {
     @En("OPC-UA Write Operation Failed")
     public String writeFailed();
 
+    @En("Driver is busy")
+    public String errorDriverBusy();
+
+    @En("Searching for endpoints")
+    public String searchingEndpoints();
+
+    @En("Got bad status: ")
+    public String errorBadResultStatus();
+
+    @En("Operation result is null")
+    public String errorNullResult();
 }

@@ -4,7 +4,7 @@ Bundle-Name: Camel Cloud Factory
 Bundle-SymbolicName: org.eclipse.kura.camel.cloud.factory;singleton:=true
 Bundle-Version: 1.0.1.qualifier
 Bundle-Vendor: Eclipse Kura
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.script,
  org.apache.camel;version="[2.17.0,3.0.0)",

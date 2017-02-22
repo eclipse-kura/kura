@@ -19,6 +19,7 @@ public class ServiceConfiguration {
 
     private String xml;
     private String initCode;
+    private boolean enableJmx;
 
     /**
      * Set the router XML
@@ -42,6 +43,14 @@ public class ServiceConfiguration {
         return this.initCode;
     }
 
+    public void setEnableJmx(boolean enableJmx) {
+        this.enableJmx = enableJmx;
+    }
+
+    public boolean isEnableJmx() {
+        return enableJmx;
+    }
+
     public boolean isValid() {
         if (this.xml == null || this.xml.trim().isEmpty()) {
             return false;
@@ -53,6 +62,7 @@ public class ServiceConfiguration {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + (this.enableJmx ? 1231 : 1237);
         result = prime * result + (this.initCode == null ? 0 : this.initCode.hashCode());
         result = prime * result + (this.xml == null ? 0 : this.xml.hashCode());
         return result;
@@ -70,6 +80,9 @@ public class ServiceConfiguration {
             return false;
         }
         ServiceConfiguration other = (ServiceConfiguration) obj;
+        if (this.enableJmx != other.enableJmx) {
+            return false;
+        }
         if (this.initCode == null) {
             if (other.initCode != null) {
                 return false;

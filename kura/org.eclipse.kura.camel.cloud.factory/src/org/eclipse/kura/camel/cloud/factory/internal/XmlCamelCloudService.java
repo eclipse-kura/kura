@@ -84,6 +84,9 @@ public class XmlCamelCloudService {
         // new router
 
         this.router = new OsgiDefaultCamelContext(this.context, registry);
+        if (!configuration.isEnableJmx()) {
+            this.router.disableJMX();
+        }
 
         // call init code
 

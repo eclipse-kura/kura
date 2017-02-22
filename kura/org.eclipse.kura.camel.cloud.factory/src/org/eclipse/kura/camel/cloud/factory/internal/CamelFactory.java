@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.kura.camel.cloud.factory.internal;
 
+import static org.eclipse.kura.camel.component.Configuration.asBoolean;
 import static org.eclipse.kura.camel.component.Configuration.asString;
 
 import java.util.Map;
@@ -52,6 +53,7 @@ public class CamelFactory implements ConfigurableComponent {
         final ServiceConfiguration configuration = new ServiceConfiguration();
         configuration.setXml(asString(properties, "xml"));
         configuration.setInitCode(asString(properties, "initCode"));
+        configuration.setEnableJmx(asBoolean(properties, "enableJmx", true));
 
         createService(pid, configuration);
     }

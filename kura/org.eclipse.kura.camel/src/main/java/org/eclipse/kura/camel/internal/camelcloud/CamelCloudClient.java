@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Red Hat Inc and others.
+ * Copyright (c) 2011, 2017 Red Hat Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,9 +11,9 @@
 package org.eclipse.kura.camel.internal.camelcloud;
 
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 import static org.apache.camel.ServiceStatus.Started;
 import static org.eclipse.kura.KuraErrorCode.CONFIGURATION_ERROR;
-import static org.eclipse.kura.KuraErrorCode.OPERATION_NOT_SUPPORTED;
 import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_KURA_CLOUD_CONTROL;
 import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_KURA_CLOUD_DEVICEID;
 import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_KURA_CLOUD_MESSAGEID;
@@ -21,6 +21,7 @@ import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_K
 import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_KURA_CLOUD_QOS;
 import static org.eclipse.kura.camel.camelcloud.KuraCloudClientConstants.CAMEL_KURA_CLOUD_RETAIN;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.function.IntSupplier;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
@@ -46,6 +48,9 @@ import org.eclipse.kura.message.KuraPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A Kura {@link CloudClient} based in Apache Camel
+ */
 public class CamelCloudClient implements CloudClient {
 
     private static final Logger logger = LoggerFactory.getLogger(CamelCloudClient.class);
@@ -63,6 +68,10 @@ public class CamelCloudClient implements CloudClient {
     private final String baseEndpoint;
 
     private final ExecutorService executorService;
+
+    private final Random messageIdRandom = new Random();
+
+    private final IntSupplier messageIdGenerator = () -> Math.abs(this.messageIdRandom.nextInt());
 
     public CamelCloudClient(CamelCloudService cloudService, CamelContext camelContext, String applicationId,
             String baseEndpoint) {
@@ -157,29 +166,73 @@ public class CamelCloudClient implements CloudClient {
 
     @Override
     public void subscribe(String topic, int qos) throws KuraException {
-        forkSubscribe(false, topic, qos);
+        forkSubscribe(false, null, topic, qos);
     }
 
     @Override
     public void subscribe(String deviceId, String appTopic, int qos) throws KuraException {
-        // TODO Check if this needs to be implemented
-        throw new KuraException(OPERATION_NOT_SUPPORTED);
+        forkSubscribe(false, deviceId, appTopic, qos);
     }
 
     @Override
     public void controlSubscribe(String topic, int qos) throws KuraException {
-        forkSubscribe(true, topic, qos);
+        forkSubscribe(true, null, topic, qos);
     }
 
     @Override
     public void controlSubscribe(String deviceId, String appTopic, int qos) throws KuraException {
-        // TODO Check if this needs to be implemented
-        throw new KuraException(OPERATION_NOT_SUPPORTED);
+        forkSubscribe(true, deviceId, appTopic, qos);
     }
 
     @Override
     public void unsubscribe(String topic) throws KuraException {
-        final String internalQueue = this.applicationId + ":" + topic;
+        doUnsubscribe(null, topic);
+    }
+
+    @Override
+    public void unsubscribe(String deviceId, String appTopic) throws KuraException {
+        doUnsubscribe(deviceId, appTopic);
+    }
+
+    @Override
+    public void controlUnsubscribe(String topic) throws KuraException {
+        doUnsubscribe(null, topic);
+    }
+
+    @Override
+    public void controlUnsubscribe(String deviceId, String appTopic) throws KuraException {
+        doUnsubscribe(deviceId, appTopic);
+    }
+
+    @Override
+    public void addCloudClientListener(CloudClientListener cloudClientListener) {
+        this.cloudClientListeners.add(cloudClientListener);
+    }
+
+    @Override
+    public void removeCloudClientListener(CloudClientListener cloudClientListener) {
+        this.cloudClientListeners.remove(cloudClientListener);
+    }
+
+    @Override
+    public List<Integer> getUnpublishedMessageIds() throws KuraException {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<Integer> getInFlightMessageIds() throws KuraException {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<Integer> getDroppedInFlightMessageIds() throws KuraException {
+        return Collections.emptyList();
+    }
+
+    // Helpers
+
+    private void doUnsubscribe(String deviceId, String topic) throws KuraException {
+        final String internalQueue = buildTopicName(deviceId, topic);
 
         try {
             ShutdownStrategy strategy = this.camelContext.getShutdownStrategy();
@@ -196,60 +249,26 @@ public class CamelCloudClient implements CloudClient {
             this.camelContext.stopRoute(internalQueue);
             this.camelContext.removeRoute(internalQueue);
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.SUBSCRIPTION_ERROR, e, internalQueue);
         }
     }
 
-    @Override
-    public void unsubscribe(String deviceId, String appTopic) throws KuraException {
-        // TODO Check if this needs to be implemented
-        throw new KuraException(OPERATION_NOT_SUPPORTED);
-    }
+    private String buildTopicName(final String deviceId, final String topic) {
+        requireNonNull(topic, "'topic' must not be null");
 
-    @Override
-    public void controlUnsubscribe(String topic) throws KuraException {
-        unsubscribe(topic);
+        if (deviceId == null) {
+            return String.format("%s:%s", this.applicationId, topic);
+        } else {
+            return String.format("%s:%s:%s", deviceId, this.applicationId, topic);
+        }
     }
-
-    @Override
-    public void controlUnsubscribe(String deviceId, String appTopic) throws KuraException {
-        // TODO Check if this needs to be implemented
-        throw new KuraException(OPERATION_NOT_SUPPORTED);
-    }
-
-    @Override
-    public void addCloudClientListener(CloudClientListener cloudClientListener) {
-        this.cloudClientListeners.add(cloudClientListener);
-    }
-
-    @Override
-    public void removeCloudClientListener(CloudClientListener cloudClientListener) {
-        this.cloudClientListeners.remove(cloudClientListener);
-    }
-
-    @Override
-    public List<Integer> getUnpublishedMessageIds() throws KuraException {
-        throw new KuraException(OPERATION_NOT_SUPPORTED);
-    }
-
-    @Override
-    public List<Integer> getInFlightMessageIds() throws KuraException {
-        throw new KuraException(OPERATION_NOT_SUPPORTED);
-    }
-
-    @Override
-    public List<Integer> getDroppedInFlightMessageIds() throws KuraException {
-        throw new KuraException(OPERATION_NOT_SUPPORTED);
-    }
-
-    // Helpers
 
     private int doPublish(boolean isControl, String deviceId, String topic, KuraPayload kuraPayload, int qos,
             boolean retain, int priority) throws KuraException {
-        final String target = target(this.applicationId + ":" + topic);
-        final int kuraMessageId = Math.abs(new Random().nextInt());
+        final String target = target(buildTopicName(deviceId, topic));
+        final int kuraMessageId = this.messageIdGenerator.getAsInt();
 
-        Map<String, Object> headers = new HashMap<>();
+        final Map<String, Object> headers = new HashMap<>();
         headers.put(CAMEL_KURA_CLOUD_CONTROL, isControl);
         headers.put(CAMEL_KURA_CLOUD_MESSAGEID, kuraMessageId);
         headers.put(CAMEL_KURA_CLOUD_DEVICEID, deviceId);
@@ -257,13 +276,15 @@ public class CamelCloudClient implements CloudClient {
         headers.put(CAMEL_KURA_CLOUD_RETAIN, retain);
         headers.put(CAMEL_KURA_CLOUD_PRIORITY, priority);
 
-        logger.trace("Publishing: {} -> {} / {}", new Object[] { target, kuraPayload, this.camelContext });
+        logger.trace("Publishing: {} -> {} / {}", target, kuraPayload, this.camelContext);
 
         this.producerTemplate.sendBodyAndHeaders(target, kuraPayload, headers);
+
         return kuraMessageId;
     }
 
-    private void forkSubscribe(final boolean isControl, final String topic, final int qos) throws KuraException {
+    private void forkSubscribe(final boolean isControl, final String deviceId, final String topic, final int qos)
+            throws KuraException {
         /*
          * This construct is needed due to CAMEL-10206
          *
@@ -287,20 +308,21 @@ public class CamelCloudClient implements CloudClient {
 
                         @Override
                         public Void call() throws Exception {
-                            doSubscribe(isControl, topic, qos);
+                            doSubscribe(isControl, deviceId, topic, qos);
                             return null;
                         }
                     });
                 }
             });
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.SUBSCRIPTION_ERROR, e, buildTopicName(deviceId, topic));
         }
     }
 
-    private void doSubscribe(final boolean isControl, final String topic, final int qos) throws KuraException {
-        logger.debug("About to subscribe to topic {} with QOS {}.", topic, qos);
-        final String internalQueue = this.applicationId + ":" + topic;
+    private void doSubscribe(final boolean isControl, String deviceId, final String topic, final int qos)
+            throws KuraException {
+        logger.debug("About to subscribe to topic {}:{} with QOS {}.", deviceId, topic, qos);
+        final String internalQueue = buildTopicName(deviceId, topic);
         logger.debug("\tInternal target: {} / {}", target(internalQueue), this.camelContext);
         try {
             this.camelContext.addRoutes(new RouteBuilder() {

@@ -39,7 +39,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private static final String PROPERTY_ENABLED = "enabled";
     private static final String PROPERTY_PING_INTERVAL = "pingInterval";
     private static final String PROPERTY_WD_DEVICE = "watchdogDevice";
-    private static final String WD_FILE = "/tmp/.kura/watchdog";
+    private static final String WD_FILE = "/tmp/watchdog";
 
     private volatile boolean isEnabled;
     private volatile boolean watchdogToStop;

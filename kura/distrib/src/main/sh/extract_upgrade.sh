@@ -18,6 +18,8 @@ INSTALL_DIR=
 REMOVE_LIST=
 
 TMP=/tmp/kura_upgrade
+WD_TMP_FILE=/tmp/watchdog
+REFRESH_TIME=5
 TIMESTAMP=`date +%Y%m%d%H%M%S`
 LOG=/tmp/kura_upgrade_${TIMESTAMP}.log
 ABSOLUTE_PATH=`readlink -m $0`
@@ -36,33 +38,73 @@ cleanup() {
 	sleep 3
 	KURA_DP=`grep -e "^kura-upgrade=" ${BASE_DIR}/kura/kura/dpa.properties |cut -d'=' -f2`
 	KURA_DP=${KURA_DP#file\\:}
-	echo "Found kura upgrade deployment package file: $KURA_DP" >> $LOG 2>&1
-	if [ -n "$KURA_DP" ]; then
-		echo "Removing kura upgrade deployment package" >> $LOG 2>&1
-   	 	sed "/^kura-upgrade=.*/d" ${BASE_DIR}/kura/kura/dpa.properties > /tmp/dpa.properties
-    	mv -f /tmp/dpa.properties ${BASE_DIR}/kura/kura/dpa.properties >> $LOG 2>&1
-    	rm -f $KURA_DP >> $LOG 2>&1
+	if [ -n "${KURA_DP}" ]; then
+	   echo "Found kura upgrade deployment package file: $KURA_DP" >> $LOG 2>&1
+	   if [ -n "$KURA_DP" ]; then
+		  echo "Removing kura upgrade deployment package" >> $LOG 2>&1
+   	 	  sed "/^kura-upgrade=.*/d" ${BASE_DIR}/kura/kura/dpa.properties > /tmp/dpa.properties
+    	   mv -f /tmp/dpa.properties ${BASE_DIR}/kura/kura/dpa.properties >> $LOG 2>&1
+    	   rm -f $KURA_DP >> $LOG 2>&1
+        fi
 	fi
-
+    
     # Remove the upgrade installation directory on fail
     if [ $SUCCESS -ne 0 ]; then
         echo "Could not upgrade - Remove the upgrade installation directory" >> $LOG 2>&1
         rm -rf "${BASE_DIR}/${INSTALL_DIR}" >> $LOG 2>&1
     fi
-
+    
     # Remove temporary stuff
     rm -rf "$TMP" >> $LOG 2>&1
     rm -rf "${BASE_DIR}/${INSTALL_DIR}/install" >> $LOG 2>&1
     rm -f kura-*.zip >> $LOG 2>&1
-
+    
     # Save the log file in a persistent directory
     mkdir -p ${BASE_DIR}/kura/log
     cp -f $LOG ${BASE_DIR}/kura/log
     
-    # Always sync and reboot
+    # Always stop watchdog, sync and reboot
+    stopWatchdog
     sync
     reboot
 }
+
+##############################################
+# UTILITY FUNCTIONS
+##############################################
+
+# Start refresh watchdog device if present
+function startRefreshWatchdog {
+	if [ -f "${WD_TMP_FILE}" ]; then
+        WATCHDOG_DEVICE=`cat ${WD_TMP_FILE}`
+        echo "Got watchdog ${WATCHDOG_DEVICE}" >> $LOG 2>&1
+        refreshWatchdog &
+        PID=$!
+    fi
+}
+
+# Refresh watchdog device
+function refreshWatchdog {
+    for (( ; ; ))
+    do
+        echo w > ${WATCHDOG_DEVICE}
+        sleep $REFRESH_TIME
+    done
+}
+
+# Deactivate watchdog device if possible
+function stopWatchdog {
+	if [ -n "${PID}" ]; then
+		kill -9 $PID >> /dev/null 2>&1
+	fi
+    if [ -n "${WATCHDOG_DEVICE}" ]; then
+        echo V > ${WATCHDOG_DEVICE}
+    fi
+}
+
+##############################################
+# END UTILITY FUNCTIONS
+##############################################
 
 ##############################################
 # PRE-INSTALL SCRIPT
@@ -70,6 +112,9 @@ cleanup() {
 mkdir -p $TMP
 echo "Upgrading Kura..." > $LOG
 
+#Get watchdog device and start refreshing
+startRefreshWatchdog
+ 
 # Check currently installed version
 CURRENT_VERSION=`grep -e "^kura.version=" ${BASE_DIR}/kura/kura/kura.properties |cut -d'=' -f2`
 if [ "$CURRENT_VERSION" != "$OLD_VERSION" ]; then
@@ -98,7 +143,6 @@ if [ -d "/tmp/.kura/configuration" ]; then
 	echo "Removing OSGi storage directory..." >> $LOG 2>&1
 	rm -rf /tmp/.kura/configuration >> $LOG 2>&1
 fi
-
 
 # Make a copy of the previous installation using hard links
 echo "Creating hard link copy of previous version into ${INSTALL_DIR}" >> $LOG 2>&1
@@ -194,7 +238,6 @@ rm -rf ${OLD_INSTALL_PATH} >> $LOG 2>&1
 
 echo "" >> $LOG 2>&1
 echo "Finished.  Kura has been upgraded in ${BASE_DIR}/kura and system will now reboot" >> $LOG 2>&1
-
 exit 0
 
 #############################################

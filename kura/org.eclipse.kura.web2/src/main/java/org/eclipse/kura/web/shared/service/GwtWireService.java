@@ -105,11 +105,10 @@ public interface GwtWireService extends RemoteService {
      *            the new configuration to update
      * @param configurations
      *            the configurations
-     * @return the updated {@link GwtWiresConfiguration} instance
      * @throws GwtKuraException
      *             if the associated instance is not updated
      */
-    public GwtWiresConfiguration updateWireConfiguration(GwtXSRFToken xsrfToken, String newJsonConfiguration,
+    public void updateWireConfiguration(GwtXSRFToken xsrfToken, String newJsonConfiguration,
             Map<String, GwtConfigComponent> configurations) throws GwtKuraException;
 
     /**

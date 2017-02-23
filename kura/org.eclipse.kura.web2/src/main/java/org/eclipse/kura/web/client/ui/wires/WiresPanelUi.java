@@ -456,10 +456,7 @@ public class WiresPanelUi extends Composite {
             currentSelection = item;
             WiresPanelUi.propertiesPanelBody.add(WiresPanelUi.propertiesUi);
         } else {
-            WiresPanelUi.propertiesPanelBody.clear();
-            propertiesPanelHeader.setText(MSGS.wiresNoComponentSelected());
-            WiresPanelUi.propertiesPanel.setVisible(false);
-            currentSelection = null;
+            deselectComponent();
         }
     }
 
@@ -746,7 +743,7 @@ public class WiresPanelUi extends Composite {
                 if (currentSelection != null && WiresPanelUi.propertiesUi != null) {
                     WiresPanelUi.propertiesUi.getUpdatedConfiguration();
                 }
-                gwtWireService.updateWireConfiguration(token, obj, configs, new AsyncCallback<GwtWiresConfiguration>() {
+                gwtWireService.updateWireConfiguration(token, obj, configs, new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(final Throwable caught) {
@@ -755,8 +752,7 @@ public class WiresPanelUi extends Composite {
                     }
 
                     @Override
-                    public void onSuccess(final GwtWiresConfiguration result) {
-                        internalLoad(result);
+                    public void onSuccess(final Void result) {
                         EntryClassUi.hideWaitModal();
                         setDirty(false);
                         if (configs != null && !configs.isEmpty()) {
@@ -765,12 +761,20 @@ public class WiresPanelUi extends Composite {
                         if (propertiesUis != null && !propertiesUis.isEmpty()) {
                             propertiesUis.clear();
                         }
+                        deselectComponent();
                     }
                 });
             }
         });
 
         return 0;
+    }
+
+    private static void deselectComponent() {
+        WiresPanelUi.propertiesPanelBody.clear();
+        propertiesPanelHeader.setText(MSGS.wiresNoComponentSelected());
+        WiresPanelUi.propertiesPanel.setVisible(false);
+        currentSelection = null;
     }
 
     public static native void resetDeleteComponentState()

@@ -16,6 +16,7 @@ package org.eclipse.kura.internal.wire;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.kura.localization.LocalizationAdapter;
@@ -151,7 +152,9 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
      */
     private void removeWireComponent(final String pid) {
         requireNonNull(pid, message.pidNonNull());
-        for (final WireConfiguration wireConfiguration : this.wireService.getWireConfigurations()) {
+        Iterator<WireConfiguration> wireConfigsIterator = this.wireService.getWireConfigurations().iterator();
+        while (wireConfigsIterator.hasNext()) {
+            final WireConfiguration wireConfiguration = wireConfigsIterator.next();
             if (wireConfiguration.getWire() != null && (pid.equals(wireConfiguration.getEmitterPid())
                     || pid.equals(wireConfiguration.getReceiverPid()))) {
                 this.wireService.deleteWireConfiguration(wireConfiguration);

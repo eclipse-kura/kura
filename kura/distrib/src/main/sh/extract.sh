@@ -13,11 +13,13 @@
 
 set -e
 #Install failure trap
-trap 'do_restore; exit 1' SIGINT SIGTERM ERR
+trap 'do_restore; stopWatchdog; exit 1' SIGINT SIGTERM ERR
 
 INSTALL_DIR=/opt/eclipse
 TIMESTAMP=`date +%Y%m%d%H%M%S`
 LOG=/tmp/kura_install_${TIMESTAMP}.log
+WD_TMP_FILE=/tmp/watchdog
+REFRESH_TIME=5
 
 ##############################################
 # UTILITY FUNCTIONS
@@ -36,6 +38,35 @@ function require {
     echo "$1 not found, please install it"
     exit 1
   fi
+}
+
+# Start refresh watchdog device if present
+function startRefreshWatchdog {
+	if [ -f "${WD_TMP_FILE}" ]; then
+        WATCHDOG_DEVICE=`cat ${WD_TMP_FILE}`
+        echo "Got watchdog ${WATCHDOG_DEVICE}" >> $LOG 2>&1
+        refreshWatchdog &
+        PID=$!
+    fi
+}
+
+# Refresh watchdog device
+function refreshWatchdog {
+    for (( ; ; ))
+    do
+        echo w > ${WATCHDOG_DEVICE}
+        sleep $REFRESH_TIME
+    done
+}
+
+# Deactivate watchdog device if possible
+function stopWatchdog {
+	if [ -n "${PID}" ]; then
+		kill -9 $PID >> /dev/null 2>&1
+	fi
+    if [ -n "${WATCHDOG_DEVICE}" ]; then
+        echo V > ${WATCHDOG_DEVICE}
+    fi
 }
 
 ##############################################
@@ -147,6 +178,9 @@ echo ""
 echo "Installing Kura..."
 echo "Installing Kura..." > $LOG 2>&1
 
+#Get watchdog device and start refreshing
+startRefreshWatchdog
+ 
 #Kill JVM and monit for installation
 { killall monit java || true; } >> $LOG 2>&1
 
@@ -206,7 +240,6 @@ SKIP=`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' $0`
 # take the tarfile and pipe it into tar and redirect the output
 tail -n +$SKIP $0 | tar -xz >> $LOG 2>&1
 
-
 ##############################################
 # POST INSTALL SCRIPT
 ##############################################
@@ -229,9 +262,9 @@ mv $LOG ${INSTALL_DIR}/kura/log/
 sync
 
 echo ""
-do_delete_backup
 echo ""
 echo "Finished.  Kura has been installed to ${INSTALL_DIR}/kura and will start automatically after a reboot"
+stopWatchdog
 exit 0
 #############################################
 # END POST INSTALL SCRIPT

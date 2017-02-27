@@ -15,14 +15,14 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.eclipse.kura</groupId>
-    <artifactId>org.eclipse.soda.dk.comm-parent</artifactId>
-    <version>1.2.4-SNAPSHOT</version>
-  </parent>
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>org.eclipse.soda.dk.comm-parent</artifactId>
+        <version>1.2.4-SNAPSHOT</version>
+    </parent>
 
     <artifactId>org.eclipse.soda.dk.comm.x86</artifactId>
     <version>1.2.4-SNAPSHOT</version>
@@ -53,7 +53,7 @@
                 <version>2.3.5</version>
                 <extensions>true</extensions>
                 <configuration>
-		    <manifestLocation>META-INF</manifestLocation>
+                    <manifestLocation>META-INF</manifestLocation>
                     <instructions>
                         <Bundle-Activator>org.eclipse.soda.dk.comm.bundle.Activator</Bundle-Activator>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
@@ -67,63 +67,63 @@
                             about_files=${project.basedir}/about_files/
                         </Include-Resource>
                         <Bundle-NativeCode>
-                        	lib/libdkcomm.so; osname=Linux; processor=x86
+                            lib/libdkcomm.so; osname=Linux; processor=x86
                         </Bundle-NativeCode>
-                        <Fragment-Host>com.codeminders.hidapi;bundle-version="[1.2.4,2.0.0)"</Fragment-Host>
+                        <Fragment-Host>org.eclipse.soda.dk.comm;bundle-version="[1.2.4,2.0.0)"</Fragment-Host>
                     </instructions>
                 </configuration>
             </plugin>
-            
-	    <plugin>
-        	<artifactId>maven-dependency-plugin</artifactId>
-        	<executions>
-        	  <execution>
-        	    <id>copy-dependencies</id>
-        	    <phase>package</phase>
-        	    <goals>
-        	      <goal>copy-dependencies</goal>
-        	    </goals>
-        	  </execution>
-        	</executions>
-	   </plugin>
-	   
+
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
         <pluginManagement>
-        	<plugins>
+            <plugins>
         		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-        		<plugin>
-        			<groupId>org.eclipse.m2e</groupId>
-        			<artifactId>lifecycle-mapping</artifactId>
-        			<version>1.0.0</version>
-        			<configuration>
-        				<lifecycleMappingMetadata>
-        					<pluginExecutions>
-        						<pluginExecution>
-        							<pluginExecutionFilter>
-        								<groupId>
-        									org.apache.maven.plugins
-        								</groupId>
-        								<artifactId>
-        									maven-dependency-plugin
-        								</artifactId>
-        								<versionRange>
-        									[2.1,)
-        								</versionRange>
-        								<goals>
-        									<goal>
-        										copy-dependencies
-        									</goal>
-        								</goals>
-        							</pluginExecutionFilter>
-        							<action>
-        								<ignore></ignore>
-        							</action>
-        						</pluginExecution>
-        					</pluginExecutions>
-        				</lifecycleMappingMetadata>
-        			</configuration>
-        		</plugin>
-        	</plugins>
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.apache.maven.plugins
+                                        </groupId>
+                                        <artifactId>
+                                            maven-dependency-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [2.1,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>
+                                                copy-dependencies
+                                            </goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore></ignore>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
         </pluginManagement>
     </build>
 </project>

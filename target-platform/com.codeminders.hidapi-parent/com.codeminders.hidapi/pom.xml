@@ -14,8 +14,8 @@
  
 -->
 
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -40,9 +40,9 @@
         </license>
     </licenses>
     <scm>
-         <connection>scm:hg:http://code.google.com/p/javahidapi</connection>
-         <developerConnection>scm:hg:https://code.google.com/p/javahidapi</developerConnection>
-         <url>http://code.google.com/p/javahidapi</url>
+        <connection>scm:hg:http://code.google.com/p/javahidapi</connection>
+        <developerConnection>scm:hg:https://code.google.com/p/javahidapi</developerConnection>
+        <url>http://code.google.com/p/javahidapi</url>
     </scm>
     <developers>
         <developer>
@@ -68,61 +68,61 @@
     </properties>
 
     <dependencies>
-		<dependency>
-			<groupId>org.eclipse.tycho</groupId>
-			<artifactId>org.eclipse.osgi</artifactId>
-			<version>3.8.1.v20120830-144521</version>
-		</dependency>
+        <dependency>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>org.eclipse.osgi</artifactId>
+            <version>3.8.1.v20120830-144521</version>
+        </dependency>
     </dependencies>
 
     <build>
-    <resources>
-        <resource>
-            <directory>src/main/resources</directory>
-        </resource>
-        <resource>
-            <directory>.</directory>
-            <includes>
-                <include>plugin.xml</include>
-            </includes>
-        </resource>
-    </resources>
-    <plugins>
-		<plugin>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>maven-bundle-plugin</artifactId>
-			<version>2.3.5</version>
-			<extensions>true</extensions>
-			<configuration>
-				<manifestLocation>META-INF</manifestLocation>
-				<instructions>
-					<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-					<Bundle-Version>${project.version}</Bundle-Version>
-					<Include-Resource>
-						${project.basedir}/about.html,
-						about_files=${project.basedir}/about_files/
-					</Include-Resource>
-					<Export-Package>
-						com.codeminders.hidapi
-					</Export-Package>
-				</instructions>
-			</configuration>
-		</plugin>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>.</directory>
+                <includes>
+                    <include>plugin.xml</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.3.5</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <manifestLocation>META-INF</manifestLocation>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Include-Resource>
+                            ${project.basedir}/about.html,
+                            about_files=${project.basedir}/about_files/
+                        </Include-Resource>
+                        <Export-Package>
+                            com.codeminders.hidapi
+                        </Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
 
-	    <plugin>
-        	<artifactId>maven-dependency-plugin</artifactId>
-        	<executions>
-        	  <execution>
-        	    <id>copy-dependencies</id>
-        	    <phase>package</phase>
-        	    <goals>
-        	      <goal>copy-dependencies</goal>
-        	    </goals>
-        	  </execution>
-        	</executions>
-	   </plugin>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
-    </plugins>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->

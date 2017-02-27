@@ -57,6 +57,26 @@
 									<version>${com.codeminders.hidapi.version}</version>
 								</artifactItem>
 								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>com.codeminders.hidapi.armv5sf</artifactId>
+									<version>${com.codeminders.hidapi.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>com.codeminders.hidapi.armv6hf</artifactId>
+									<version>${com.codeminders.hidapi.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>com.codeminders.hidapi.x86_64</artifactId>
+									<version>${com.codeminders.hidapi.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>com.codeminders.hidapi.x86</artifactId>
+									<version>${com.codeminders.hidapi.version}</version>
+								</artifactItem>
+								<artifactItem>
 									<groupId>org.apache</groupId>
 									<artifactId>org.apache.commons.net</artifactId>
 									<version>${org.apache.commons.net.version}</version>
@@ -207,6 +227,26 @@
 									<version>${org.eclipse.soda.dk.comm.version}</version>
 								</artifactItem>
 								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.soda.dk.comm.armv5sf</artifactId>
+									<version>${org.eclipse.soda.dk.comm.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.soda.dk.comm.armv6hf</artifactId>
+									<version>${org.eclipse.soda.dk.comm.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.soda.dk.comm.x86</artifactId>
+									<version>${org.eclipse.soda.dk.comm.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.soda.dk.comm.x86_64</artifactId>
+									<version>${org.eclipse.soda.dk.comm.version}</version>
+								</artifactItem>
+								<artifactItem>
 									<groupId>org.apache.camel</groupId>
 									<artifactId>camel-core</artifactId>
 									<version>${org.apache.camel.camel-core.version}</version>
@@ -257,6 +297,10 @@
 						<configuration>
 							<tasks>
 							    <move file="target/source/plugins/com.codeminders.hidapi.jar" tofile="target/source/plugins/com.codeminders.hidapi_${com.codeminders.hidapi.version}.jar"/>
+							    <move file="target/source/plugins/com.codeminders.hidapi.armv5sf.jar" tofile="target/source/plugins/com.codeminders.hidapi.armv5sf_${com.codeminders.hidapi.version}.jar"/>
+							    <move file="target/source/plugins/com.codeminders.hidapi.armv6hf.jar" tofile="target/source/plugins/com.codeminders.hidapi.armv6hf_${com.codeminders.hidapi.version}.jar"/>
+							    <move file="target/source/plugins/com.codeminders.hidapi.x86_64.jar" tofile="target/source/plugins/com.codeminders.hidapi.x86_64_${com.codeminders.hidapi.version}.jar"/>
+							    <move file="target/source/plugins/com.codeminders.hidapi.x86.jar" tofile="target/source/plugins/com.codeminders.hidapi.x86_${com.codeminders.hidapi.version}.jar"/>
 								<move file="target/source/plugins/org.apache.commons.net.jar" tofile="target/source/plugins/org.apache.commons.net_${org.apache.commons.net.version}.jar"/>
 								<move file="target/source/plugins/commons-exec.jar" tofile="target/source/plugins/org.apache.commons.exec_${org.apache.commons.exec.version}.jar"/>
 								<move file="target/source/plugins/com.google.protobuf.jar" tofile="target/source/plugins/com.google.protobuf_${com.google.protobuf.version}.jar"/>
@@ -269,6 +313,10 @@
 								<move file="target/source/plugins/org.usb4java.jar" tofile="target/source/plugins/org.usb4java_${org.usb4java.version}.jar"/>
 								<move file="target/source/plugins/org.hsqldb.hsqldb.jar" tofile="target/source/plugins/org.hsqldb.hsqldb_${org.hsqldb.hsqldb.version}.jar"/>
 								<move file="target/source/plugins/jdk.dio.jar" tofile="target/source/plugins/jdk.dio_${jdk.dio.version}.jar"/>
+								<move file="target/source/plugins/jdk.dio.armv5sf.jar" tofile="target/source/plugins/jdk.dio.armv5sf_${jdk.dio.version}.jar"/>
+								<move file="target/source/plugins/jdk.dio.armv6hf.jar" tofile="target/source/plugins/jdk.dio.armv6hf_${jdk.dio.version}.jar"/>
+								<move file="target/source/plugins/jdk.dio.x86_64.jar" tofile="target/source/plugins/jdk.dio.x86_64_${jdk.dio.version}.jar"/>
+								<move file="target/source/plugins/jdk.dio.x86.jar" tofile="target/source/plugins/jdk.dio.x86_${jdk.dio.version}.jar"/>
 								<move file="target/source/plugins/slf4j-api.jar" tofile="target/source/plugins/slf4j.api_${slf4j.api.version}.jar"/>
 								<move file="target/source/plugins/log4j.jar" tofile="target/source/plugins/log4j_${log4j.version}.jar"/>
 								<move file="target/source/plugins/org.junit.jar" tofile="target/source/plugins/org.junit_${org.junit.version}.jar"/>
@@ -281,6 +329,10 @@
 								<move file="target/source/plugins/org.apache.commons.io.jar" tofile="target/source/plugins/org.apache.commons.io_${org.apache.commons.io.version}.jar"/>
 								<move file="target/source/plugins/org.apache.commons.lang3.jar" tofile="target/source/plugins/org.apache.commons.lang3_${org.apache.commons.lang3.version}.jar"/>
 								<move file="target/source/plugins/org.eclipse.soda.dk.comm.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm_${org.eclipse.soda.dk.comm.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.soda.dk.comm.armv5sf.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm.armv5sf_${org.eclipse.soda.dk.comm.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.soda.dk.comm.armv6hf.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm.armv6hf_${org.eclipse.soda.dk.comm.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.soda.dk.comm.x86.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm.x86_${org.eclipse.soda.dk.comm.version}.jar"/>
+								<move file="target/source/plugins/org.eclipse.soda.dk.comm.x86_64.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm.x86_64_${org.eclipse.soda.dk.comm.version}.jar"/>
 								<move file="target/source/plugins/camel-core.jar" tofile="target/source/plugins/org.apache.camel.camel-core_${org.apache.camel.camel-core.version}.jar"/>
 								<move file="target/source/plugins/camel-stream.jar" tofile="target/source/plugins/org.apache.camel.camel-stream_${org.apache.camel.camel-stream.version}.jar"/>
 								<move file="target/source/plugins/camel-core-osgi.jar" tofile="target/source/plugins/org.apache.camel.camel-core-osgi_${org.apache.camel.camel-core-osgi.version}.jar"/>

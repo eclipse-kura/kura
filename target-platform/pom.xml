@@ -12,10 +12,10 @@
 	<modules>
 		<module>org.eclipse.kura.camel.sun.misc</module>
 		<module>org.eclipse.kura.sun.misc</module>
-		<module>com.codeminders.hidapi</module>
+		<module>com.codeminders.hidapi-parent</module>
 		<module>org.usb4java</module>
 		<module>usb4java-javax</module>
-		<module>org.eclipse.soda.dk.comm</module>
+		<module>org.eclipse.soda.dk.comm-parent</module>
 		<!--<module>org.eclipse.kura.windows.system</module>
 		<module>org.eclipse.kura.windows.service</module>
 		<module>org.eclipse.kura.windows.launcher</module>-->

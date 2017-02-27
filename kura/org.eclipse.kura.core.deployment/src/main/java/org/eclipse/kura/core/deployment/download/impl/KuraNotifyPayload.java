@@ -68,8 +68,8 @@ public class KuraNotifyPayload extends KuraPayload {
         addMetric(METRIC_TRANSFER_STATUS, transferStatus);
     }
 
-    public int getTransferStatus() {
-        return (Integer) getMetric(METRIC_TRANSFER_STATUS);
+    public String getTransferStatus() {
+        return (String) getMetric(METRIC_TRANSFER_STATUS);
     }
 
     public static KuraNotifyPayload buildFromKuraPayload(KuraPayload payload) throws ParseException {

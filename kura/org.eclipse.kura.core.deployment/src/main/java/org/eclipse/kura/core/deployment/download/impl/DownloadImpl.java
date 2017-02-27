@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -151,6 +151,10 @@ public class DownloadImpl implements ProgressListener {
         }
     }
 
+    protected DownloadCountingOutputStream getDownloadInstance(String protocol, DownloadOptions downloadOptions) {
+        return DownloadFactory.getDownloadInstance(protocol, downloadOptions);
+    }
+
     // ----------------------------------------------------------------
     //
     // Private methods
@@ -170,8 +174,7 @@ public class DownloadImpl implements ProgressListener {
             downloadOptions.setDownloadURL(url);
             downloadOptions.setAlreadyDownloaded(downloadIndex);
 
-            this.downloadHelper = DownloadFactory.getDownloadInstance(this.options.getDownloadProtocol(),
-                    downloadOptions);
+            this.downloadHelper = getDownloadInstance(this.options.getDownloadProtocol(), downloadOptions);
             this.downloadHelper.startWork();
             this.downloadHelper.close();
         } finally {
@@ -195,9 +198,15 @@ public class DownloadImpl implements ProgressListener {
             }
             s_logger.info("--> Going to verify hash signature!");
             try {
+                // these things should be checked beforehand, so that hash() has a chance to succeed
+                if (hashAlgorithm == null || "".equals(hashAlgorithm) || hashValue == null || "".equals(hashValue)) {
+                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, null,
+                            "Failed to verify checksum with empty algorithm: " + hashAlgorithm);
+                }
+
                 String checksum = HashUtil.hash(hashAlgorithm, dpFile);
-                if (hashAlgorithm == null || "".equals(hashAlgorithm) || hashValue == null || "".equals(hashValue)
-                        || checksum == null || !checksum.equals(hashValue)) {
+
+                if (checksum == null || !checksum.equals(hashValue)) {
                     throw new KuraException(KuraErrorCode.INTERNAL_ERROR, null,
                             "Failed to verify checksum with algorithm: " + hashAlgorithm);
                 }
@@ -224,7 +233,7 @@ public class DownloadImpl implements ProgressListener {
         respPayload.setTimestamp(new Date());
         respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE, 0);
         respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS, 100);
-        respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS, DOWNLOAD_STATUS.ALREADY_DONE);
+        respPayload.addMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS, DOWNLOAD_STATUS.ALREADY_DONE.getStatusString());
     }
 
     private void alreadyDownloadedAsync() {

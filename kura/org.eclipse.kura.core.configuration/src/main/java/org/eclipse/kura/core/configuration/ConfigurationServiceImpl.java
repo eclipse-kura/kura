@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2017 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,8 +8,7 @@
  *
  * Contributors:
  *     Eurotech
- *     Red Hat Inc - Fix issue #462, Fix build warnings, Fix issue #596
- *        - Fix service registration
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
@@ -82,9 +81,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     private static final Logger s_logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
 
-    private static final boolean TRACK_ONLY_RELEVANT_SERVICES = Boolean
-            .getBoolean("org.eclipse.kura.core.configuration.trackOnlyRelevantServices");
-
     private interface ServiceHandler {
 
         void add(String servicePid, String kuraPid, String factoryPid);
@@ -122,7 +118,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     private ServiceTracker<ConfigurableComponent, ConfigurableComponent> serviceTracker1;
     private ServiceTracker<SelfConfiguringComponent, SelfConfiguringComponent> serviceTracker2;
-    private ConfigurableComponentTracker anyTracker;
 
     private BundleTracker<Bundle> m_bundleTracker;
 
@@ -224,18 +219,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // start the trackers
         s_logger.info("Trackers being opened...");
 
-        if (TRACK_ONLY_RELEVANT_SERVICES) {
-            s_logger.info("Only tracking relevant services");
-            this.serviceTracker1 = createTracker(ConfigurableComponent.class, this.trackerHandler1);
-            this.serviceTracker2 = createTracker(SelfConfiguringComponent.class, this.trackerHandler2);
+        this.serviceTracker1 = createTracker(ConfigurableComponent.class, this.trackerHandler1);
+        this.serviceTracker2 = createTracker(SelfConfiguringComponent.class, this.trackerHandler2);
 
-            this.serviceTracker1.open();
-            this.serviceTracker2.open();
-        } else {
-            s_logger.info("Tracking all services");
-            this.anyTracker = new ConfigurableComponentTracker(this.m_ctx.getBundleContext(), this);
-            this.anyTracker.open(true);
-        }
+        this.serviceTracker1.open();
+        this.serviceTracker2.open();
 
         this.m_bundleTracker = new ComponentMetaTypeBundleTracker(this.m_ctx.getBundleContext(), this);
         this.m_bundleTracker.open();
@@ -295,10 +283,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // stop the trackers
         //
 
-        if (this.anyTracker != null) {
-            this.anyTracker.close();
-            this.anyTracker = null;
-        }
         if (this.serviceTracker2 != null) {
             this.serviceTracker2.close();
             this.serviceTracker2 = null;

@@ -15,11 +15,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.kura.camel.component.Configuration.asInt;
 
 import java.util.Map;
-import java.util.Random;
 
-import org.apache.camel.Exchange;
-import org.apache.camel.processor.aggregate.AggregationStrategy;
-import org.apache.camel.support.ExpressionAdapter;
 import org.eclipse.kura.camel.component.AbstractJavaCamelComponent;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.osgi.service.component.ComponentContext;
@@ -36,33 +32,15 @@ public class GatewayRouter extends AbstractJavaCamelComponent implements Configu
     private static final int DEFAULT_MINIMUM = 0;
     private static final int DEFAULT_MAXIMUM = 40;
 
-    private final Random random = new Random();
-
-    private int minimum = DEFAULT_MINIMUM;
-    private int maximum = DEFAULT_MAXIMUM;
+    RandomTemperatureGenerator randomTemperatureGenerator = new RandomTemperatureGenerator(DEFAULT_MINIMUM, DEFAULT_MAXIMUM);
 
     @Override
     public void configure() throws Exception {
-        from("timer://temperature").setBody(new ExpressionAdapter() {
-
-            @Override
-            public Object evaluate(Exchange exchange) {
-                return random();
-            }
-        }).aggregate(simple("temperature"), new AggregationStrategy() {
-
-            @Override
-            public Exchange aggregate(Exchange oldExchange, Exchange newExchange) {
-                if (oldExchange == null) {
-                    return newExchange;
-                } else {
-                    double incomingValue = newExchange.getIn().getBody(double.class);
-                    double existingValue = oldExchange.getIn().getBody(double.class);
-                    newExchange.getIn().setBody((incomingValue + existingValue) / 2d);
-                    return newExchange;
-                }
-            }
-        }).completionInterval(SECONDS.toMillis(10)).to("log:averageTemperatureFromLast10Seconds");
+        from("timer://temperature")
+        .setBody(randomTemperatureGenerator)
+        .aggregate(simple("temperature"), new AverageAggregationStrategy())
+        .completionInterval(SECONDS.toMillis(10))
+        .to("log:averageTemperatureFromLast10Seconds");
     }
 
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties)
@@ -83,10 +61,6 @@ public class GatewayRouter extends AbstractJavaCamelComponent implements Configu
         stop();
     }
 
-    private int random() {
-        return this.random.nextInt(this.maximum - this.minimum) + this.minimum;
-    }
-
     private void setProperties(final Map<String, Object> properties) {
         int minimum = asInt(properties, "minimum", DEFAULT_MINIMUM);
         int maximum = asInt(properties, "maximum", DEFAULT_MAXIMUM);
@@ -95,7 +69,7 @@ public class GatewayRouter extends AbstractJavaCamelComponent implements Configu
             throw new IllegalArgumentException("Maximum must be at least one higher than minimum");
         }
 
-        this.minimum = minimum;
-        this.maximum = maximum;
+        randomTemperatureGenerator.setMinimum(minimum);
+        randomTemperatureGenerator.setMaximum(maximum);
     }
 }

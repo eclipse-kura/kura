@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -80,8 +82,10 @@ public class AllCoreTests {
 
         // Wait for OSGi dependencies
         s_logger.info("Setting Up The Testcase....");
+
         try {
-            dependencyLatch.await(10, TimeUnit.SECONDS);
+            boolean result = dependencyLatch.await(10, TimeUnit.SECONDS);
+            assertTrue(result);
         } catch (InterruptedException e) {
             throw new Exception("OSGi dependencies unfulfilled", e);
         }

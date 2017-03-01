@@ -2259,19 +2259,18 @@ public class ConfigurationServiceTest {
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
 
         assertNotNull(sid);
-        assertTrue("sid as expected", sid.longValue() > lastSid + 1);
-        assertTrue("sid as expected - time >", sid.longValue() > System.currentTimeMillis() - 1000);
-        assertTrue("sid as expected - time <=", sid.longValue() <= System.currentTimeMillis());
+        assertTrue("Expected higher sid", sid.longValue() > lastSid + 1);
+        assertTrue("Expected sid <= current time", sid.longValue() <= System.currentTimeMillis());
 
         File f1 = new File(d1, "snapshot_" + sid + ".xml");
-        assertTrue("snapshot file created", f1.exists());
+        assertTrue("Expected snapshot file to be created", f1.exists());
 
         FileReader fr = new FileReader(f1);
         char[] chars = new char[encCfg.length()];
         fr.read(chars);
         fr.close();
 
-        assertArrayEquals("snapshot file content matches", encCfg.toCharArray(), chars);
+        assertArrayEquals("Expected snapshot file content to match", encCfg.toCharArray(), chars);
 
         f1.delete();
         d1.delete();

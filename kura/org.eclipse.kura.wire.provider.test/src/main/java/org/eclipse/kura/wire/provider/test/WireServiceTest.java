@@ -12,6 +12,7 @@ package org.eclipse.kura.wire.provider.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Set;
@@ -161,7 +162,9 @@ public final class WireServiceTest {
         // Wait for OSGi dependencies
         s_logger.info("Setting Up The Testcase....");
         try {
-            dependencyLatch.await(10, TimeUnit.SECONDS);
+            boolean ok = dependencyLatch.await(10, TimeUnit.SECONDS);
+
+            assertTrue("Dependencies OK", ok);
         } catch (final InterruptedException e) {
             fail("OSGi dependencies unfulfilled");
         }

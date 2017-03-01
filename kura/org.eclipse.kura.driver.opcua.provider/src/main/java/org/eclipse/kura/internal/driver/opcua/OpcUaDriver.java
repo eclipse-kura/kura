@@ -13,7 +13,6 @@
 package org.eclipse.kura.internal.driver.opcua;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.KuraErrorCode.OPERATION_NOT_SUPPORTED;
 import static org.eclipse.kura.driver.DriverConstants.CHANNEL_VALUE_TYPE;
@@ -25,18 +24,21 @@ import static org.eclipse.kura.driver.DriverFlag.WRITE_FAILURE;
 import static org.eclipse.kura.driver.DriverFlag.WRITE_SUCCESSFUL;
 
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
-import org.eclipse.kura.driver.DriverFlag;
 import org.eclipse.kura.driver.DriverRecord;
 import org.eclipse.kura.driver.DriverStatus;
 import org.eclipse.kura.driver.listener.DriverListener;
@@ -45,31 +47,23 @@ import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
-import org.eclipse.kura.util.base.StringUtil;
 import org.eclipse.kura.util.base.TypeUtil;
-import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfig;
+import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfigBuilder;
 import org.eclipse.milo.opcua.sdk.client.api.nodes.VariableNode;
 import org.eclipse.milo.opcua.stack.client.UaTcpStackClient;
-import org.eclipse.milo.opcua.stack.core.Stack;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription;
-import org.eclipse.osgi.service.urlconversion.URLConverter;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Filter;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
+import io.netty.util.internal.StringUtil;
 
 /**
  * The Class {@link OpcUaDriver} is an OPC-UA Driver implementation for Kura Asset-Driver
@@ -106,91 +100,33 @@ public final class OpcUaDriver implements Driver {
     /** Node Namespace Index Property */
     private static final String NODE_NAMESPACE_INDEX = "node.namespace.index";
 
-    /** URL Converter Service Trackers */
-    private static Map<String, ServiceTracker<Object, URLConverter>> urlConverterTrackers = CollectionUtil
-            .newConcurrentHashMap();
-
-    // initialize Milo Stack class loader
-    static {
-        try {
-            final URL url = new URL("platform:/plugin/org.eclipse.kura.driver.opcua.provider/lib/stack-core-0.1.0.jar");
-            final Optional<URLConverter> converter = getURLConverter(url);
-            Optional<URL> fileUrl = Optional.empty();
-            if (converter.isPresent()) {
-                fileUrl = Optional.of(converter.get().toFileURL(url));
-            }
-            Optional<ClassLoader> classLoader = Optional.empty();
-            if (fileUrl.isPresent()) {
-                classLoader = Optional
-                        .of(new URLClassLoader(new URL[] { fileUrl.get() }, OpcUaDriver.class.getClassLoader()));
-            }
-            if (classLoader.isPresent()) {
-                Stack.setCustomClassLoader(classLoader.get());
-            }
-        } catch (final IOException e) {
-            logger.error(e.getMessage(), e);
-        }
-    }
-
     /** OPC-UA Client Connector */
     private OpcUaClient client;
 
     /** Dependency for password decryption. */
     private volatile CryptoService cryptoService;
 
-    /** flag to check if the driver is connected. */
-    private volatile boolean isConnected;
-
     /** OPC-UA Configuration Options. */
     private OpcUaOptions options;
 
-    /**
-     * Remove the already tracked {@link URLConverter} service trackers
-     */
-    private static void closeURLConverterTrackers() {
-        if (!urlConverterTrackers.isEmpty()) {
-            for (final ServiceTracker<Object, URLConverter> tracker : urlConverterTrackers.values()) {
-                tracker.close();
-            }
-            urlConverterTrackers = CollectionUtil.newConcurrentHashMap();
-        }
-    }
+    private AtomicBoolean isBusy = new AtomicBoolean();
 
-    /**
-     * Returns the {@link URLConverter} service for the given URL.
-     */
-    public static Optional<URLConverter> getURLConverter(final URL url) {
-        final BundleContext ctx = FrameworkUtil.getBundle(OpcUaDriver.class).getBundleContext();
-        if ((url == null) || (ctx == null)) {
-            return Optional.empty();
+    private <U> U runSafe(Future<U> future) throws ExecutionException, InterruptedException, TimeoutException {
+        try {
+            return future.get(this.options.getRequestTimeout(), TimeUnit.MILLISECONDS);
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
+            future.cancel(true);
+            throw e;
         }
-        final String protocol = url.getProtocol();
-        ServiceTracker<Object, URLConverter> tracker = urlConverterTrackers.get(protocol);
-        if (isNull(tracker)) {
-            final String urlFilter = "(&(objectClass=" + URLConverter.class.getName() + ")(protocol=" + protocol + "))";
-            Filter filter = null;
-            try {
-                filter = ctx.createFilter(urlFilter);
-            } catch (final InvalidSyntaxException e) {
-                return Optional.empty();
-            }
-            tracker = new ServiceTracker<>(ctx, filter, null);
-            tracker.open();
-            urlConverterTrackers.put(protocol, tracker);
-        }
-        return Optional.of(tracker.getService());
     }
 
     /**
      * OSGi service component callback while activation.
      *
-     * @param componentContext
-     *            the component context
      * @param properties
      *            the service properties
      */
-    protected synchronized void activate(final ComponentContext componentContext,
-            final Map<String, Object> properties) {
+    protected synchronized void activate(final Map<String, Object> properties) {
         logger.debug(message.activating());
         this.extractProperties(properties);
         logger.debug(message.activatingDone());
@@ -210,9 +146,14 @@ public final class OpcUaDriver implements Driver {
 
     /** {@inheritDoc} */
     @Override
-    public synchronized void connect() throws ConnectionException {
+    public void connect() throws ConnectionException {
+        if (!isBusy.compareAndSet(false, true)) {
+            throw new ConnectionException(message.errorDriverBusy());
+        }
+
+        OpcUaClient newClient = null;
         try {
-            logger.debug(message.connecting());
+            logger.info(message.connecting());
 
             // opc.tcp://<IP>:<PORT>/<SERVER_NAME>
             final String serverName = this.options.getServerName();
@@ -225,7 +166,13 @@ public final class OpcUaDriver implements Driver {
                 endPointBuilder.append("/").append(serverName);
             }
 
-            final EndpointDescription[] endpoints = UaTcpStackClient.getEndpoints(endPointBuilder.toString()).get();
+            String endpointString = endPointBuilder.toString();
+
+            logger.debug("Connecting to endpoint: {}", endpointString);
+
+            logger.debug("Fetching endpoint descriptions");
+            final EndpointDescription[] endpoints = runSafe(UaTcpStackClient.getEndpoints(endpointString));
+
             final EndpointDescription endpoint = Arrays.stream(endpoints).filter(
                     e -> e.getSecurityPolicyUri().equals(this.options.getSecurityPolicy().getSecurityPolicyUri()))
                     .findFirst().orElseThrow(() -> new ConnectionException(message.connectionProblem()));
@@ -234,7 +181,9 @@ public final class OpcUaDriver implements Driver {
                     this.options.getKeystoreClientAlias(), this.options.getKeystoreServerAlias(),
                     this.options.getKeystorePassword(), this.options.getApplicationCertificate());
 
-            final OpcUaClientConfig clientConfig = OpcUaClientConfig.builder().setEndpoint(endpoint)
+            final OpcUaClientConfigBuilder clientConfigBuilder = OpcUaClientConfig.builder();
+
+            clientConfigBuilder.setEndpoint(endpoint)
                     .setApplicationName(LocalizedText.english(this.options.getApplicationName()))
                     .setApplicationUri(this.options.getApplicationUri())
                     .setRequestTimeout(UInteger.valueOf(this.options.getRequestTimeout()))
@@ -242,24 +191,26 @@ public final class OpcUaDriver implements Driver {
                     .setIdentityProvider(this.options.getIdentityProvider()).setKeyPair(loader.getClientKeyPair())
                     .setCertificate(loader.getClientCertificate()).build();
 
-            this.client = new OpcUaClient(clientConfig);
-            this.isConnected = true;
+            logger.debug("Connecting");
+            newClient = new OpcUaClient(clientConfigBuilder.build());
+            this.client = (OpcUaClient) runSafe(newClient.connect());
 
-            logger.debug(message.connectingDone());
+            logger.info(message.connectingDone());
         } catch (final Exception e) {
-            logger.error(message.disconnectionProblem(), e);
+            logger.error(message.connectionProblem(), e);
+            this.client = null;
+            shutdownClient(newClient);
             throw new ConnectionException(e);
+        } finally {
+            isBusy.set(false);
         }
-
     }
 
     /**
      * OSGi service component callback while deactivation.
      *
-     * @param componentContext
-     *            the component context
      */
-    protected synchronized void deactivate(final ComponentContext componentContext) {
+    protected synchronized void deactivate() {
         logger.debug(message.deactivating());
         try {
             this.disconnect();
@@ -267,18 +218,35 @@ public final class OpcUaDriver implements Driver {
             logger.error(message.errorDisconnecting(), e);
         }
         this.client = null;
-        closeURLConverterTrackers();
         logger.debug(message.deactivatingDone());
     }
 
     /** {@inheritDoc} */
     @Override
-    public synchronized void disconnect() throws ConnectionException {
-        if (this.isConnected) {
-            logger.debug(message.disconnecting());
-            this.client.disconnect();
-            this.isConnected = false;
-            logger.debug(message.disconnectingDone());
+    public void disconnect() throws ConnectionException {
+        if (!isBusy.compareAndSet(false, true)) {
+            throw new ConnectionException(message.errorDriverBusy());
+        }
+
+        try {
+            logger.info(message.disconnecting());
+            shutdownClient(client);
+            this.client = null;
+            logger.info(message.disconnectingDone());
+        } finally {
+            isBusy.set(false);
+        }
+    }
+
+    private void shutdownClient(OpcUaClient client) throws ConnectionException {
+        if (this.client == null) {
+            return;
+        }
+
+        try {
+            runSafe(client.disconnect());
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            throw new ConnectionException(message.disconnectionProblem(), e);
         }
     }
 
@@ -301,23 +269,8 @@ public final class OpcUaDriver implements Driver {
         return new OpcUaChannelDescriptor();
     }
 
-    /**
-     * Returns the wrapped Typed Value instance based on the provided value
-     *
-     * @param value
-     *            the provided {@link Variant} to wrap
-     * @param record
-     *            the driver record to check the expected value type
-     * @return the TypedValue {@link Optional} instance
-     * @throws NullPointerException
-     *             if any of the arguments is null
-     */
-    private Optional<TypedValue<?>> getTypedValue(final Variant value, final DriverRecord record) {
-        requireNonNull(value, message.valueNonNull());
-        requireNonNull(record, message.recordNonNull());
-
-        final Object containedValue = value.getValue();
-        final DataType expectedValueType = (DataType) record.getChannelConfig().get(CHANNEL_VALUE_TYPE.value());
+    private Optional<TypedValue<?>> getTypedValue(final DataType expectedValueType, final Object containedValue,
+            final DriverRecord record) {
 
         try {
             switch (expectedValueType) {
@@ -350,72 +303,67 @@ public final class OpcUaDriver implements Driver {
         }
     }
 
+    private Object extractValue(DataValue value) throws IllegalArgumentException {
+        Variant variant = value.getValue();
+        if (variant == null) {
+            throw new NullPointerException(message.errorNullResult());
+        }
+        Object result = variant.getValue();
+        if (result == null) {
+            throw new NullPointerException(message.errorNullResult());
+        }
+        return result;
+    }
+
+    private void checkStatus(StatusCode status) throws IOException {
+        logger.debug("result status code: {}", status);
+        if (status == null) {
+            throw new NullPointerException(message.errorNullResult());
+        }
+        if (!status.isGood()) {
+            throw new IOException(message.errorBadResultStatus() + status);
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public synchronized List<DriverRecord> read(final List<DriverRecord> records) throws ConnectionException {
-        if (!this.isConnected) {
+        if (isBusy.get()) {
+            throw new ConnectionException(message.errorDriverBusy());
+        }
+        if (this.client == null) {
             this.connect();
         }
         for (final DriverRecord record : records) {
-            // check if the channel type configuration is provided
-            final Map<String, Object> channelConfig = record.getChannelConfig();
-            if (!channelConfig.containsKey(CHANNEL_VALUE_TYPE.value())) {
-                record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION,
-                        message.errorRetrievingValueType(), null));
-                record.setTimestamp(System.currentTimeMillis());
-                continue;
-            }
-            // check if the node ID configuration is provided
-            if (!channelConfig.containsKey(NODE_ID)) {
-                record.setDriverStatus(
-                        new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE, message.errorRetrievingNodeId(), null));
-                record.setTimestamp(System.currentTimeMillis());
-                continue;
-            }
-            // check if the node namespace index configuration is provided
-            if (!channelConfig.containsKey(NODE_NAMESPACE_INDEX)) {
-                record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
-                        message.errorRetrievingNodeNamespace(), null));
-                record.setTimestamp(System.currentTimeMillis());
-                continue;
-            }
-            int nodeNamespaceIndex;
-            try {
-                nodeNamespaceIndex = Integer.parseInt(channelConfig.get(NODE_NAMESPACE_INDEX).toString());
-            } catch (final NumberFormatException nfe) {
-                record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
-                        message.errorRetrievingNodeNamespace(), null));
-                record.setTimestamp(System.currentTimeMillis());
-                continue;
-            }
-            final NodeId nodeId = new NodeId(nodeNamespaceIndex, channelConfig.get(NODE_ID).toString());
-            final VariableNode node = this.client.getAddressSpace().createVariableNode(nodeId);
-            DataValue value = null;
-            try {
-                value = node.readValue().get();
-            } catch (final Exception e) {
-                record.setDriverStatus(new DriverStatus(READ_FAILURE, message.readFailed(), e));
-                record.setTimestamp(System.currentTimeMillis());
-                continue;
-            }
-            if (nonNull(value)) {
-                final Variant variant = value.getValue();
-                final Optional<TypedValue<?>> typedValue = this.getTypedValue(variant, record);
+
+            OpcUaRequestInfo.extract(record).ifPresent((requestInfo) -> {
+                final NodeId nodeId = new NodeId(requestInfo.nodeNamespaceIndex, requestInfo.nodeId);
+                final VariableNode node = this.client.getAddressSpace().createVariableNode(nodeId);
+                Object readResult = null;
+                try {
+                    logger.debug("reading: ns={};s={}..", requestInfo.nodeNamespaceIndex, requestInfo.nodeId);
+                    readResult = extractValue(runSafe(node.readValue()));
+                    logger.debug("read successful");
+                } catch (final Exception e) {
+                    record.setDriverStatus(new DriverStatus(READ_FAILURE, message.readFailed(), e));
+                    record.setTimestamp(System.currentTimeMillis());
+                    logger.warn(message.readFailed(), e);
+                    return;
+                }
+
+                final Optional<TypedValue<?>> typedValue = this.getTypedValue(requestInfo.dataType, readResult, record);
                 if (!typedValue.isPresent()) {
                     record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION,
                             message.errorValueTypeConversion(), null));
                     record.setTimestamp(System.currentTimeMillis());
-                    continue;
+                    return;
                 }
                 record.setValue(typedValue.get());
                 record.setDriverStatus(new DriverStatus(READ_SUCCESSFUL));
                 record.setTimestamp(System.currentTimeMillis());
-            } else {
-                record.setDriverStatus(new DriverStatus(DriverFlag.CUSTOM_ERROR_0, message.valueNull(), null));
-                record.setTimestamp(System.currentTimeMillis());
-            }
+            });
         }
-        return ImmutableList.copyOf(records);
+        return Collections.unmodifiableList(records);
     }
 
     /** {@inheritDoc} */
@@ -451,61 +399,93 @@ public final class OpcUaDriver implements Driver {
      */
     public synchronized void updated(final Map<String, Object> properties) {
         logger.debug(message.updating());
+        if (this.client != null) {
+            try {
+                disconnect();
+            } catch (ConnectionException e) {
+                logger.error(message.disconnectionProblem(), e);
+            }
+        }
         this.extractProperties(properties);
         logger.debug(message.updatingDone());
     }
 
     /** {@inheritDoc} */
     @Override
-    public synchronized List<DriverRecord> write(final List<DriverRecord> records) throws ConnectionException {
-        if (!this.isConnected) {
+    public List<DriverRecord> write(final List<DriverRecord> records) throws ConnectionException {
+        if (isBusy.get()) {
+            throw new ConnectionException(message.errorDriverBusy());
+        }
+        if (this.client == null) {
             this.connect();
         }
         for (final DriverRecord record : records) {
-            // check if the channel type configuration is provided
-            final Map<String, Object> channelConfig = record.getChannelConfig();
-            if (!channelConfig.containsKey(CHANNEL_VALUE_TYPE.value())) {
-                record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION,
-                        message.errorRetrievingValueType(), null));
+
+            OpcUaRequestInfo.extract(record).ifPresent((requestInfo) -> {
+                final TypedValue<?> value = record.getValue();
+                final NodeId nodeId = new NodeId(requestInfo.nodeNamespaceIndex, requestInfo.nodeId);
+                final VariableNode node = this.client.getAddressSpace().createVariableNode(nodeId);
+                final DataValue newValue = new DataValue(new Variant(value.getValue()));
+                try {
+                    logger.debug("writing: {} to ns={};s={}..", value, requestInfo.nodeNamespaceIndex,
+                            requestInfo.nodeId);
+                    checkStatus(runSafe(node.writeValue(newValue)));
+                    record.setDriverStatus(new DriverStatus(WRITE_SUCCESSFUL));
+                    logger.debug("write successful");
+                } catch (final Exception e) {
+                    record.setDriverStatus(new DriverStatus(WRITE_FAILURE, message.writeFailed(), e));
+                    logger.warn(message.writeFailed(), e);
+                }
                 record.setTimestamp(System.currentTimeMillis());
-                continue;
-            }
-            // check if the unit ID configuration is provided
-            if (!channelConfig.containsKey(NODE_ID)) {
-                record.setDriverStatus(
-                        new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE, message.errorRetrievingNodeId(), null));
-                record.setTimestamp(System.currentTimeMillis());
-                continue;
-            }
-            // check if the node namespace index configuration is provided
-            if (!channelConfig.containsKey(NODE_NAMESPACE_INDEX)) {
-                record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
-                        message.errorRetrievingNodeNamespace(), null));
-                record.setTimestamp(System.currentTimeMillis());
-                continue;
-            }
-            int nodeNamespaceIndex;
-            try {
-                nodeNamespaceIndex = Integer.parseInt(channelConfig.get(NODE_NAMESPACE_INDEX).toString());
-            } catch (final NumberFormatException nfe) {
-                record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE,
-                        message.errorRetrievingNodeNamespace(), null));
-                record.setTimestamp(System.currentTimeMillis());
-                continue;
-            }
-            final TypedValue<?> value = record.getValue();
-            final NodeId nodeId = new NodeId(nodeNamespaceIndex, channelConfig.get(NODE_ID).toString());
-            final VariableNode node = this.client.getAddressSpace().createVariableNode(nodeId);
-            final DataValue newValue = new DataValue(new Variant(value.getValue()));
-            try {
-                node.writeValue(newValue).get();
-                record.setDriverStatus(new DriverStatus(WRITE_SUCCESSFUL));
-            } catch (final Exception e) {
-                record.setDriverStatus(new DriverStatus(WRITE_FAILURE, message.writeFailed(), e));
-            }
-            record.setTimestamp(System.currentTimeMillis());
+            });
         }
-        return ImmutableList.copyOf(records);
+        return Collections.unmodifiableList(records);
     }
 
+    private static class OpcUaRequestInfo {
+
+        private final DataType dataType;
+        private final int nodeNamespaceIndex;
+        private final String nodeId;
+
+        public OpcUaRequestInfo(DataType dataType, int nodeNamespaceIndex, String nodeId) {
+            this.dataType = dataType;
+            this.nodeNamespaceIndex = nodeNamespaceIndex;
+            this.nodeId = nodeId;
+        }
+
+        private static void fail(DriverRecord record, String message) {
+            record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE, message, null));
+            record.setTimestamp(System.currentTimeMillis());
+        }
+
+        public static Optional<OpcUaRequestInfo> extract(DriverRecord record) {
+            final Map<String, Object> channelConfig = record.getChannelConfig();
+            int nodeNamespaceIndex;
+            String nodeId;
+
+            try {
+                nodeId = channelConfig.get(NODE_ID).toString();
+            } catch (final Exception e) {
+                fail(record, message.errorRetrievingNodeId());
+                return Optional.empty();
+            }
+
+            try {
+                nodeNamespaceIndex = Integer.parseInt(channelConfig.get(NODE_NAMESPACE_INDEX).toString());
+            } catch (final Exception e) {
+                fail(record, message.errorRetrievingNodeNamespace());
+                return Optional.empty();
+            }
+
+            final DataType dataType = (DataType) channelConfig.get(CHANNEL_VALUE_TYPE.value());
+
+            if (dataType == null) {
+                fail(record, message.errorRetrievingValueType());
+                return Optional.empty();
+            }
+
+            return Optional.of(new OpcUaRequestInfo(dataType, nodeNamespaceIndex, nodeId));
+        }
+    }
 }

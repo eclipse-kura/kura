@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,7 +9,12 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.core.test;
+package org.eclipse.kura.core.system.test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,17 +31,15 @@ import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import junit.framework.TestCase;
 
-public class SystemServiceTest extends TestCase {
+public class SystemServiceTest {
 
     private static SystemService systemService = null;
     private static CountDownLatch dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
     private static boolean onCloudbees = false;
 
-    @Override
     @BeforeClass
-    public void setUp() {
+    public static void setUp() {
         // Wait for OSGi dependencies
         try {
             dependencyLatch.await(10, TimeUnit.SECONDS);

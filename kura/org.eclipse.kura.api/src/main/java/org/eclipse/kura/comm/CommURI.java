@@ -48,7 +48,8 @@ public class CommURI {
     private final int m_stopBits;
     private final int m_parity;
     private final int m_flowControl;
-    private final int m_timeout;
+    private final int m_openTimeout;
+    private final int m_receiveTimeout;
 
     /**
      * Constructor to build the CommURI
@@ -63,7 +64,8 @@ public class CommURI {
         this.m_stopBits = builder.m_stopBits;
         this.m_parity = builder.m_parity;
         this.m_flowControl = builder.m_flowControl;
-        this.m_timeout = builder.m_timeout;
+        this.m_openTimeout = builder.m_openTimeout;
+        this.m_receiveTimeout = builder.m_receiveTimeout;
     }
 
     /**
@@ -121,12 +123,35 @@ public class CommURI {
     }
 
     /**
-     * The timeout associated with the port
+     * The open timeout associated with the port, this method is identical to {@link #getOpenTimeout()}
      *
-     * @return an int representing the timeout in milliseconds
+     * @deprecated Use {@link #getOpenTimeout()} and {@link #getReceiveTimeout()} instead
+     * @since 1.1.0
+     * @return an int representing the open timeout in milliseconds
      */
+    @Deprecated
     public int getTimeout() {
-        return this.m_timeout;
+        return this.m_openTimeout;
+    }
+
+    /**
+     * The open timeout associated with the port
+     * 
+     * @since 1.1.0
+     * @return an int representing the open timeout in milliseconds
+     */
+    public int getOpenTimeout() {
+        return this.m_openTimeout;
+    }
+
+    /**
+     * The receive timeout associated with the port
+     * 
+     * @since 1.1.0
+     * @return an int representing the receive timeout in milliseconds
+     */
+    public int getReceiveTimeout() {
+        return this.m_receiveTimeout;
     }
 
     /**
@@ -138,7 +163,7 @@ public class CommURI {
         sb.append("comm:").append(this.m_port).append(";baudrate=").append(this.m_baudRate).append(";databits=")
                 .append(this.m_dataBits).append(";stopbits=").append(this.m_stopBits).append(";parity=")
                 .append(this.m_parity).append(";flowcontrol=").append(this.m_flowControl).append(";timeout=")
-                .append(this.m_timeout);
+                .append(this.m_openTimeout).append(";receivetimeout=").append(this.m_receiveTimeout);
         return sb.toString();
     }
 
@@ -181,7 +206,9 @@ public class CommURI {
                     } else if ("flowcontrol".equals(name)) {
                         builder = builder.withFlowControl(Integer.parseInt(value));
                     } else if ("timeout".equals(name)) {
-                        builder = builder.withTimeout(Integer.parseInt(value));
+                        builder = builder.withOpenTimeout(Integer.parseInt(value));
+                    } else if ("receivetimeout".equals(name)) {
+                        builder = builder.withReceiveTimeout(Integer.parseInt(value));
                     }
                 }
             }
@@ -203,7 +230,8 @@ public class CommURI {
         private int m_stopBits = 1;
         private int m_parity = 0;
         private int m_flowControl = 0;
-        private int m_timeout = 2000;
+        private int m_openTimeout = 2000;
+        private int m_receiveTimeout = 0;
 
         public Builder(String port) {
             this.m_port = port;
@@ -234,8 +262,44 @@ public class CommURI {
             return this;
         }
 
+        /**
+         * Sets the open timeout associated with the port, this method is identical to {@link #withOpenTimeout(int)}
+         * 
+         * @deprecated use {@link #withOpenTimeout(int)} and {@link #withReceiveTimeout(int)} instead
+         * @since 1.1.0
+         * @param timeout
+         *            The open timeout in milliseconds.
+         * @return
+         */
+        @Deprecated
         public Builder withTimeout(int timeout) {
-            this.m_timeout = timeout;
+            return withOpenTimeout(timeout);
+        }
+
+        /**
+         * Sets the open timeout associated with the port
+         * 
+         * @param timeout
+         *            The open timeout in milliseconds.
+         * @since 1.1.0
+         * @return
+         */
+        public Builder withOpenTimeout(int timeout) {
+            this.m_openTimeout = timeout;
+            return this;
+        }
+
+        /**
+         * Sets the receive timeout associated with the port. Pass 0 to disable the receive timeout. The receive timeout
+         * is disabled by default.
+         * 
+         * @param timeout
+         *            The receive timeout in milliseconds.
+         * @since 1.1.0
+         * @return
+         */
+        public Builder withReceiveTimeout(int timeout) {
+            this.m_receiveTimeout = timeout;
             return this;
         }
 

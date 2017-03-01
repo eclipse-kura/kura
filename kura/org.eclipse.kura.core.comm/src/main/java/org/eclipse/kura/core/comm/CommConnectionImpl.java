@@ -80,20 +80,27 @@ public class CommConnectionImpl implements CommConnection, Closeable {
         final int stopBits = this.commUri.getStopBits();
         final int parity = this.commUri.getParity();
         final int flowControl = this.commUri.getFlowControl();
-        final int timeout = this.commUri.getTimeout();
+        final int openTimeout = this.commUri.getOpenTimeout();
+        final int receiveTimeout = this.commUri.getReceiveTimeout();
 
         final CommPortIdentifier commPortIdentifier = CommPortIdentifier.getPortIdentifier(port);
 
-        final CommPort commPort = commPortIdentifier.open(this.getClass().getName(), timeout);
+        final CommPort commPort = commPortIdentifier.open(this.getClass().getName(), openTimeout);
 
         if (commPort instanceof SerialPort) {
             this.serialPort = (SerialPort) commPort;
             try {
                 this.serialPort.setSerialPortParams(baudRate, dataBits, stopBits, parity);
                 this.serialPort.setFlowControlMode(flowControl);
+                if (receiveTimeout > 0) {
+                    this.serialPort.enableReceiveTimeout(receiveTimeout);
+                    if (!this.serialPort.isReceiveTimeoutEnabled()) {
+                        throw new IOException("Serial receive timeout not supported by driver");
+                    }
+                }
             } catch (UnsupportedCommOperationException e) {
                 logger.error("Failed to configure COM port", e);
-                // TODO shouldn't we throw an IOException here
+                throw new IOException(e);
             }
         } else {
             throw new IOException("Unsupported Port Type");

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat Inc and others.
+ * Copyright (c) 2016, 2017 Red Hat Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -117,8 +117,8 @@ public class ExamplePublisher extends AbstractSimplePeriodicPublisher<ExamplePub
 
         result.put("intValue",
                 round(makeSine(configuration.getAmpInt(), configuration.getOffsetInt(), configuration.getPeriodInt())));
-        result.put("doubleValue",
-                makeSine(configuration.getAmpDouble(), configuration.getOffsetDouble(), configuration.getPeriodDouble()));
+        result.put("doubleValue", makeSine(configuration.getAmpDouble(), configuration.getOffsetDouble(),
+                configuration.getPeriodDouble()));
 
         // return result
 
@@ -126,7 +126,7 @@ public class ExamplePublisher extends AbstractSimplePeriodicPublisher<ExamplePub
     }
 
     private static double makeSine(final double amp, final double offset, final double period) {
-        final double freq = 1.0 / period * Math.PI;
+        final double freq = 1.0 / period * Math.PI * 2.0;
         final double v = System.currentTimeMillis() / 1000.0;
 
         return Math.sin(freq * v) * amp + offset;

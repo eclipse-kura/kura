@@ -50,7 +50,7 @@
             default="60"
             />
 
-        <AD id="double.amplitude"
+        <AD id="double.amp"
             name="Floating point amplitude"
             description="The amplitude of the floating point value"
             type="Double"

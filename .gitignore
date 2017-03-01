@@ -24,6 +24,7 @@ kura/target-definition/*/repository/content.xml
 kura/target-definition/*/repository/plugins/*
 kura/tools/archetype/example/src/main/resources/archetype-resources/target-definition
 target-platform/*/META-INF/MANIFEST.MF
+target-platform/*/*/META-INF/MANIFEST.MF
 gwt-unitCache
 .launch
 www-test

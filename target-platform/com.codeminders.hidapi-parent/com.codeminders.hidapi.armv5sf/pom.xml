@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+    Copyright (c) 2017 Eurotech and/or its affiliates and others
+ 
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+  
+    Contributors:
+     Eurotech
+ 
+-->
+
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>com.codeminders.hidapi-parent</artifactId>
+        <version>1.1.3-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>com.codeminders.hidapi.armv5sf</artifactId>
+    <version>1.1.3-SNAPSHOT</version>
+    <packaging>bundle</packaging>
+
+    <name>Native libraries for 'com.codeminders.hidapi' on ARM 5 SF</name>
+
+    <licenses>
+        <license>
+            <name>New BSD License</name>
+            <url>http://opensource.org/licenses/BSD-3-Clause</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:hg:http://code.google.com/p/javahidapi</connection>
+        <developerConnection>scm:hg:https://code.google.com/p/javahidapi</developerConnection>
+        <url>http://code.google.com/p/javahidapi</url>
+    </scm>
+    <developers>
+        <developer>
+            <id>lord</id>
+            <name>Vadim Zaliva</name>
+            <email>lord@codeminders.com</email>
+        </developer>
+        <developer>
+            <id>Alexander Sova</id>
+            <name>Vadim Zaliva</name>
+            <email>bird@codeminders.com</email>
+        </developer>
+        <developer>
+            <id>dshmyga</id>
+            <name>Denis Shmyga</name>
+            <email>dshmyga@codeminders.com</email>
+        </developer>
+    </developers>
+
+    <properties>
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.7.2</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <java.library.path>${project.basedir}/src/main/lib/linux</java.library.path>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.3.5</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <manifestLocation>META-INF</manifestLocation>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Include-Resource>
+                            lib=${project.basedir}/src/main/lib/linux,
+                            ${project.basedir}/about.html,
+                            about_files=${project.basedir}/about_files/
+                        </Include-Resource>
+                        <Bundle-NativeCode>
+                            lib/libhidapi.so; osname=Linux; processor=ARM
+                        </Bundle-NativeCode>
+                        <Fragment-Host>com.codeminders.hidapi;bundle-version="[1.1.3,2.0.0)"</Fragment-Host>
+                    </instructions>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+        <pluginManagement>
+            <plugins>
+                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.apache.maven.plugins
+                                        </groupId>
+                                        <artifactId>
+                                            maven-dependency-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [2.1,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>
+                                                copy-dependencies
+                                            </goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore></ignore>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

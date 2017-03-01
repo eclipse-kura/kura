@@ -1041,7 +1041,11 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.hsqldb.hsqldb_${org.hsqldb.hsqldb.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/kura/plugins/com.codeminders.hidapi.${native.tag}_${com.codeminders.hidapi.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/com.codeminders.hidapi_${com.codeminders.hidapi.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.soda.dk.comm.${native.tag}_${org.eclipse.soda.dk.comm.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.eclipse.soda.dk.comm_${org.eclipse.soda.dk.comm.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"

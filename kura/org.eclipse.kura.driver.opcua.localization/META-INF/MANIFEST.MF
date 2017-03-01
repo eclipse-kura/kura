@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OPC-UA Driver Localization Resource
+Bundle-SymbolicName: org.eclipse.kura.driver.opcua.localization;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Bundle-License: Eclipse Public License v1.0
+Bundle-Category: Localization
+Fragment-Host: org.eclipse.kura.localization;bundle-version="1.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: org.eclipse.kura.driver.opcua.localization;version="1.0.0"

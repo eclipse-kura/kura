@@ -377,9 +377,8 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
     /** {@inheritDoc} */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public GwtWiresConfiguration updateWireConfiguration(final GwtXSRFToken xsrfToken,
-            final String newJsonConfiguration, final Map<String, GwtConfigComponent> configurations)
-                    throws GwtKuraException {
+    public void updateWireConfiguration(final GwtXSRFToken xsrfToken, final String newJsonConfiguration,
+            final Map<String, GwtConfigComponent> configurations) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
 
         // TODO: refactor this method: split and simplify code
@@ -518,7 +517,6 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         } catch (final InvalidSyntaxException exception) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
         }
-        return getWiresConfigurationInternal();
     }
 
     private List<String> deleteWireComponents(JsonObject jWireGraph, final ConfigurationService configService,

@@ -100,7 +100,7 @@ var kuraWires = (function() {
 			eventSource = new EventSource("/sse?session=" + eventSourceSessionId);
 			eventSource.onmessage = function(event) {
 				_.each(graph.getElements(), function(c) {
-					if (c.attributes.pid === event.data) {
+					if (c.attributes.label === event.data) {
 						fireTransition(c);
 					}
 				});

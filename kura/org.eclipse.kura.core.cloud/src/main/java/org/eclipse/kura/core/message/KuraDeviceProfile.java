@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.message;
 
@@ -38,10 +39,14 @@ public class KuraDeviceProfile {
     private static final String JVM_VERSION = "jvm_version";
     private static final String JVM_PROFILE = "jvm_profile";
     private static final String KURA_VERSION = "kura_version";
+    private static final String APPLICATION_FRAMEWORK = "application_framework";
+    private static final String APPLICATION_FRAMEWORK_VERSION = "application_framework_version";
     private static final String OSGI_FRAMEWORK = "osgi_framework";
     private static final String OSGI_FRAMEWORK_VERSION = "osgi_framework_version";
     private static final String CONNECTION_INTERFACE = "connection_interface";
     private static final String CONNECTION_IP = "connection_ip";
+
+    private static final String DEFAULT_APPLICATION_FRAMEWORK = "Kura";
 
     private String uptime;
     private String displayName;
@@ -59,7 +64,8 @@ public class KuraDeviceProfile {
     private String jvmName;
     private String jvmVersion;
     private String jvmProfile;
-    private String kuraVersion;
+    private String applicationFramework;
+    private String applicationFrameworkVersion;
     private String osgiFramework;
     private String osgiFrameworkVersion;
     private String connectionInterface;
@@ -86,10 +92,19 @@ public class KuraDeviceProfile {
                 props.getProperty(MODEL_ID), props.getProperty(PART_NUMBER), props.getProperty(SERIAL_NUMBER),
                 props.getProperty(FIRMWARE_VERSION), props.getProperty(BIOS_VERSION), props.getProperty(OS),
                 props.getProperty(OS_VERSION), props.getProperty(JVM_NAME), props.getProperty(JVM_VERSION),
-                props.getProperty(JVM_PROFILE), props.getProperty(KURA_VERSION),
-                props.getProperty(CONNECTION_INTERFACE), props.getProperty(CONNECTION_IP),
-                props.getProperty(AVAILABLE_PROCESSORS), props.getProperty(TOTAL_MEMORY), props.getProperty(OS_ARCH),
-                props.getProperty(OSGI_FRAMEWORK), props.getProperty(OSGI_FRAMEWORK_VERSION));
+                props.getProperty(JVM_PROFILE), extractApplicationFramework(props),
+                extractApplicationFrameworkVersion(props), props.getProperty(CONNECTION_INTERFACE),
+                props.getProperty(CONNECTION_IP), props.getProperty(AVAILABLE_PROCESSORS),
+                props.getProperty(TOTAL_MEMORY), props.getProperty(OS_ARCH), props.getProperty(OSGI_FRAMEWORK),
+                props.getProperty(OSGI_FRAMEWORK_VERSION));
+    }
+
+    private static String extractApplicationFramework(Properties props) {
+        return props.getProperty(APPLICATION_FRAMEWORK, DEFAULT_APPLICATION_FRAMEWORK);
+    }
+
+    private static String extractApplicationFrameworkVersion(Properties props) {
+        return props.getProperty(APPLICATION_FRAMEWORK_VERSION, props.getProperty(KURA_VERSION));
     }
 
     /**
@@ -186,7 +201,53 @@ public class KuraDeviceProfile {
             String serialNumber, String firmwareVersion, String biosVersion, String os, String osVersion,
             String jvmName, String jvmVersion, String jvmProfile, String kuraVersion, String connectionInterface,
             String connectionIp) {
-        super();
+        this(uptime, displayName, modelName, modelId, partNumber, serialNumber, firmwareVersion, biosVersion, os,
+                osVersion, jvmName, jvmVersion, jvmProfile, DEFAULT_APPLICATION_FRAMEWORK, kuraVersion,
+                connectionInterface, connectionIp);
+    }
+
+    /**
+     * Creates an KuraDeviceProfile using the values of the supplied parameters.
+     *
+     * @param uptime
+     *            The length of time the unit has been powered on.
+     * @param displayName
+     *            A readable display name for the device.
+     * @param modelName
+     *            The device model name.
+     * @param modelId
+     *            The device model ID.
+     * @param partNumber
+     *            The part number of the device.
+     * @param serialNumber
+     *            The serial number of the device.
+     * @param firmwareVersion
+     *            The version of firmware running on the device.
+     * @param biosVersion
+     *            The version of the BIOS on the device.
+     * @param os
+     *            The name of the operating system
+     * @param osVersion
+     *            The version of the operating system
+     * @param jvmName
+     *            The name of the JVM
+     * @param jvmVersion
+     *            The version of the JVM
+     * @param jvmProfile
+     *            The profile of the JVM
+     * @param applicationFramework
+     *            The application framework
+     * @param applicationFrameworkVersion
+     *            The application framework version
+     * @param connectionInterface
+     *            The name of the interface used to connect to the cloud
+     * @param connectionIp
+     *            The IP address of the interface used to connect to the cloud
+     */
+    public KuraDeviceProfile(String uptime, String displayName, String modelName, String modelId, String partNumber,
+            String serialNumber, String firmwareVersion, String biosVersion, String os, String osVersion,
+            String jvmName, String jvmVersion, String jvmProfile, String applicationFramework,
+            String applicationFrameworkVersion, String connectionInterface, String connectionIp) {
         this.uptime = uptime;
         this.displayName = displayName;
         this.modelName = modelName;
@@ -200,7 +261,8 @@ public class KuraDeviceProfile {
         this.jvmName = jvmName;
         this.jvmVersion = jvmVersion;
         this.jvmProfile = jvmProfile;
-        this.kuraVersion = kuraVersion;
+        this.applicationFramework = applicationFramework;
+        this.applicationFrameworkVersion = applicationFrameworkVersion;
         this.connectionInterface = connectionInterface;
         this.connectionIp = connectionIp;
     }
@@ -256,7 +318,66 @@ public class KuraDeviceProfile {
             String jvmName, String jvmVersion, String jvmProfile, String kuraVersion, String connectionInterface,
             String connectionIp, String availableProcessors, String totalMemory, String osArch, String osgiFramework,
             String osgiFrameworkVersion) {
-        super();
+        this(uptime, displayName, modelName, modelId, partNumber, serialNumber, firmwareVersion, biosVersion, os,
+                osVersion, jvmName, jvmVersion, jvmProfile, DEFAULT_APPLICATION_FRAMEWORK, kuraVersion,
+                connectionInterface, connectionIp, availableProcessors, totalMemory, osArch, osgiFramework,
+                osgiFrameworkVersion);
+    }
+
+    /**
+     * Creates an KuraDeviceProfile using the values of the supplied parameters.
+     *
+     * @param uptime
+     *            The length of time the unit has been powered on.
+     * @param displayName
+     *            A readable display name for the device.
+     * @param modelName
+     *            The device model name.
+     * @param modelId
+     *            The device model ID.
+     * @param partNumber
+     *            The part number of the device.
+     * @param serialNumber
+     *            The serial number of the device.
+     * @param firmwareVersion
+     *            The version of firmware running on the device.
+     * @param biosVersion
+     *            The version of the BIOS on the device.
+     * @param os
+     *            The name of the operating system
+     * @param osVersion
+     *            The version of the operating system
+     * @param jvmName
+     *            The name of the JVM
+     * @param jvmVersion
+     *            The version of the JVM
+     * @param jvmProfile
+     *            The profile of the JVM
+     * @param applicationFramework
+     *            The application framework
+     * @param applicationFrameworkVersion
+     *            The application framework version
+     * @param connectionInterface
+     *            The name of the interface used to connect to the cloud
+     * @param connectionIp
+     *            The IP address of the interface used to connect to the cloud
+     * @param availableProcessors
+     *            The number of available processors for the JVM
+     * @param totalMemory
+     *            The total memory available for the JVM
+     * @param osArch
+     *            The architecture of the JVM (32 or 64)
+     * @param osgiFramework
+     *            The OSGI Framework in use
+     * @param osgiFrameworkVersion
+     *            The version of the OSGI Framework in use
+     */
+    public KuraDeviceProfile(String uptime, String displayName, String modelName, String modelId, String partNumber,
+            String serialNumber, String firmwareVersion, String biosVersion, String os, String osVersion,
+            String jvmName, String jvmVersion, String jvmProfile, String applicationFramework,
+            String applicationFrameworkVersion, String connectionInterface, String connectionIp,
+            String availableProcessors, String totalMemory, String osArch, String osgiFramework,
+            String osgiFrameworkVersion) {
         this.uptime = uptime;
         this.displayName = displayName;
         this.modelName = modelName;
@@ -270,7 +391,8 @@ public class KuraDeviceProfile {
         this.jvmName = jvmName;
         this.jvmVersion = jvmVersion;
         this.jvmProfile = jvmProfile;
-        this.kuraVersion = kuraVersion;
+        this.applicationFramework = applicationFramework;
+        this.applicationFrameworkVersion = applicationFrameworkVersion;
         this.connectionInterface = connectionInterface;
         this.connectionIp = connectionIp;
         setAvailableProcessors(availableProcessors);
@@ -458,8 +580,27 @@ public class KuraDeviceProfile {
      *
      * @return A String representing the Kura version
      */
+    @Deprecated
     public String getKuraVersion() {
-        return this.kuraVersion;
+        return this.applicationFrameworkVersion;
+    }
+
+    /**
+     * Returns the Application Framework.
+     * 
+     * @return A String representing the Application Framework
+     */
+    public String getApplicationFramework() {
+        return this.applicationFramework;
+    }
+
+    /**
+     * Returns the Application Framework version.
+     * 
+     * @return A String representing the Application Framework version
+     */
+    public String getApplicationFrameworkVersion() {
+        return this.applicationFrameworkVersion;
     }
 
     /**

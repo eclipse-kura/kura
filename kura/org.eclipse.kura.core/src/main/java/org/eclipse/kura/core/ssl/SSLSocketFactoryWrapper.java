@@ -36,8 +36,6 @@ public class SSLSocketFactoryWrapper extends SSLSocketFactory {
 
     private static final Logger s_logger = LoggerFactory.getLogger(SSLSocketFactoryWrapper.class);
 
-    private static final String CANNOT_ENABLE_SSL_ENDPOINT_IDENTIFICATION_JAVA7 = "Cannot enable SSL Endpoint Identification as it requires Java7";
-
     private final String ciphers;
     private final Boolean hostnameVerification;
     private final SSLSocketFactory sslsf;
@@ -113,26 +111,11 @@ public class SSLSocketFactoryWrapper extends SSLSocketFactory {
             sslParams.setProtocols(protocols.toArray(new String[protocols.size()]));
 
             // enable server verification
-            // to keep the code compatible with Java6,
-            // test if the SSLParameters class has the
-            // setEndpointIdentificationAlgorithm method
-            Class<SSLParameters> clSSLParameters = SSLParameters.class;
-            try {
-                Method m = clSSLParameters.getMethod("setEndpointIdentificationAlgorithm", String.class);
-                if (m != null && this.hostnameVerification) {
-                    m.invoke(sslParams, "HTTPS");
-                    s_logger.info("SSL Endpoint Identification enabled.");
-                }
-            } catch (NoSuchMethodException e) {
-                s_logger.warn(CANNOT_ENABLE_SSL_ENDPOINT_IDENTIFICATION_JAVA7, e);
-            } catch (IllegalArgumentException e) {
-                s_logger.warn(CANNOT_ENABLE_SSL_ENDPOINT_IDENTIFICATION_JAVA7, e);
-            } catch (IllegalAccessException e) {
-                s_logger.warn(CANNOT_ENABLE_SSL_ENDPOINT_IDENTIFICATION_JAVA7, e);
-            } catch (InvocationTargetException e) {
-                s_logger.warn(CANNOT_ENABLE_SSL_ENDPOINT_IDENTIFICATION_JAVA7, e);
+            if (this.hostnameVerification) {
+                sslParams.setEndpointIdentificationAlgorithm("HTTPS");
+                s_logger.info("SSL Endpoint Identification enabled.");
             }
-
+            
             // Adjust the supported ciphers.
             if (this.ciphers != null && !this.ciphers.isEmpty()) {
                 String[] arrCiphers = this.ciphers.split(",");

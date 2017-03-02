@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.message;
 
@@ -33,6 +34,8 @@ public class KuraBirthPayload extends KuraPayload {
     private static final String JVM_VERSION = "jvm_version";
     private static final String JVM_PROFILE = "jvm_profile";
     private static final String KURA_VERSION = "kura_version";
+    private static final String APPLICATION_FRAMEWORK = "application_framework";
+    private static final String APPLICATION_FRAMEWORK_VERSION = "application_framework_version";
     private static final String OSGI_FRAMEWORK = "osgi_framework";
     private static final String OSGI_FRAMEWORK_VERSION = "osgi_framework_version";
     private static final String CONNECTION_INTERFACE = "connection_interface";
@@ -43,6 +46,8 @@ public class KuraBirthPayload extends KuraPayload {
     private static final String MODEM_IMSI = "modem_imsi";
     private static final String MODEM_ICCID = "modem_iccid";
     private static final String MODEM_RSSI = "modem_rssi";
+
+    private static final String DEFAULT_APPLICATION_FRAMEWORK = "Kura";
 
     public String getUptime() {
         return (String) getMetric(UPTIME);
@@ -96,8 +101,28 @@ public class KuraBirthPayload extends KuraPayload {
         return (String) getMetric(JVM_PROFILE);
     }
 
+    /**
+     * @deprecated Use {@link #getApplicationFrameworkVersion()}
+     */
+    @Deprecated
     public String getKuraVersion() {
         return (String) getMetric(KURA_VERSION);
+    }
+
+    public String getApplicationFramework() {
+        final String value = (String) getMetric(APPLICATION_FRAMEWORK);
+        if (value != null) {
+            return value;
+        }
+        return DEFAULT_APPLICATION_FRAMEWORK;
+    }
+
+    public String getApplicationFrameworkVersion() {
+        final String value = (String) getMetric(APPLICATION_FRAMEWORK_VERSION);
+        if (value != null) {
+            return value;
+        }
+        return getKuraVersion();
     }
 
     public String getConnectionInterface() {
@@ -154,17 +179,37 @@ public class KuraBirthPayload extends KuraPayload {
 
     @Override
     public String toString() {
-        return "EdcBirthMessage [getUptime()=" + getUptime() + ", getDisplayName()=" + getDisplayName()
-                + ", getModelName()=" + getModelName() + ", getModelId()=" + getModelId() + ", getPartNumber()="
-                + getPartNumber() + ", getSerialNumber()=" + getSerialNumber() + ", getFirmwareVersion()="
-                + getFirmwareVersion() + ", getAvailableProcessors()=" + getAvailableProcessors()
-                + ", getTotalMemory()=" + getTotalMemory() + ", getBiosVersion()=" + getBiosVersion() + ", getOs()="
-                + getOs() + ", getOsVersion()=" + getOsVersion() + ", getOsArch()=" + getOsArch() + ", getJvmName()="
-                + getJvmName() + ", getJvmVersion()=" + getJvmVersion() + ", getJvmProfile()=" + getJvmProfile()
-                + ", getKuraVersion()=" + getKuraVersion() + ", getOsgiFramework()=" + getOsgiFramework()
-                + ", getOsgiFrameworkVersion()=" + getOsgiFrameworkVersion() + ", getConnectionInterface()="
-                + getConnectionInterface() + ", getConnectionIp()=" + getConnectionIp() + ", getAcceptEncoding()="
-                + getAcceptEncoding() + ", getApplicationIdentifiers()=" + getApplicationIdentifiers() + "]";
+        final StringBuilder sb = new StringBuilder("KuraBirthPayload [");
+
+        sb.append("getUptime()=").append(getUptime()).append(", ");
+        sb.append("getDisplayName()=").append(getDisplayName()).append(", ");
+        sb.append("getModelName()=").append(getModelName()).append(", ");
+        sb.append("getModelId()=").append(getModelId()).append(", ");
+        sb.append("getPartNumber()=").append(getPartNumber()).append(", ");
+        sb.append("getSerialNumber()=").append(getSerialNumber()).append(", ");
+        sb.append("getFirmwareVersion()=").append(getFirmwareVersion()).append(", ");
+        sb.append("getAvailableProcessors()=").append(getAvailableProcessors()).append(", ");
+        sb.append("getTotalMemory()=").append(getTotalMemory()).append(", ");
+        sb.append("getBiosVersion()=").append(getBiosVersion()).append(", ");
+        sb.append("getOs()=").append(getOs()).append(", ");
+        sb.append("getOsVersion()=").append(getOsVersion()).append(", ");
+        sb.append("getOsArch()=").append(getOsArch()).append(", ");
+        sb.append("getJvmName()=").append(getJvmName()).append(", ");
+        sb.append("getJvmVersion()=").append(getJvmVersion()).append(", ");
+        sb.append("getJvmProfile()=").append(getJvmProfile()).append(", ");
+        sb.append("getKuraVersion()=").append(getKuraVersion()).append(", ");
+        sb.append("getApplicationFramework()=").append(getApplicationFramework()).append(", ");
+        sb.append("getApplicationFrameworkVersion()=").append(getApplicationFrameworkVersion()).append(", ");
+        sb.append("getOsgiFramework()=").append(getOsgiFramework()).append(", ");
+        sb.append("getOsgiFrameworkVersion()=").append(getOsgiFrameworkVersion()).append(", ");
+        sb.append("getConnectionInterface()=").append(getConnectionInterface()).append(", ");
+        sb.append("getConnectionIp()=").append(getConnectionIp()).append(", ");
+        sb.append("getAcceptEncoding()=").append(getAcceptEncoding()).append(", ");
+        sb.append("getApplicationIdentifiers()=").append(getApplicationIdentifiers());
+
+        sb.append("]");
+
+        return sb.toString();
     }
 
     public static class KuraBirthPayloadBuilder {
@@ -186,6 +231,8 @@ public class KuraBirthPayload extends KuraPayload {
         private String jvmVersion;
         private String jvmProfile;
         private String kuraVersion;
+        private String applicationFramework;
+        private String applicationFrameworkVersion;
         private String connectionInterface;
         private String connectionIp;
         private String acceptEncoding;
@@ -290,7 +337,18 @@ public class KuraBirthPayload extends KuraPayload {
         }
 
         public KuraBirthPayloadBuilder withKuraVersion(String kuraVersion) {
-            this.kuraVersion = kuraVersion;
+            withApplicationFramework(DEFAULT_APPLICATION_FRAMEWORK);
+            withApplicationFrameworkVersion(kuraVersion);
+            return this;
+        }
+
+        public KuraBirthPayloadBuilder withApplicationFramework(String applicationFramework) {
+            this.applicationFramework = applicationFramework;
+            return this;
+        }
+
+        public KuraBirthPayloadBuilder withApplicationFrameworkVersion(String applicationFrameworkVersion) {
+            this.applicationFrameworkVersion = applicationFrameworkVersion;
             return this;
         }
 
@@ -383,6 +441,15 @@ public class KuraBirthPayload extends KuraPayload {
             }
             if (this.kuraVersion != null) {
                 birthPayload.addMetric(KURA_VERSION, this.kuraVersion);
+            }
+            if (this.applicationFramework != null) {
+                birthPayload.addMetric(APPLICATION_FRAMEWORK, this.applicationFramework);
+            } else {
+                birthPayload.addMetric(APPLICATION_FRAMEWORK, DEFAULT_APPLICATION_FRAMEWORK);
+            }
+            if (this.applicationFrameworkVersion != null) {
+                birthPayload.addMetric(KURA_VERSION, this.applicationFrameworkVersion);
+                birthPayload.addMetric(APPLICATION_FRAMEWORK_VERSION, this.applicationFrameworkVersion);
             }
             if (this.connectionInterface != null) {
                 birthPayload.addMetric(CONNECTION_INTERFACE, this.connectionInterface);

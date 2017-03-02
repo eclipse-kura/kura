@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2016 Eurotech and/or its affiliates and others All rights
-    reserved. This program and the accompanying materials are made available
-    under the terms of the Eclipse Public License v1.0 which accompanies this
-    distribution, and is available at http://www.eclipse.org/legal/epl-v10.html -->
+<!--
+
+    Copyright (c) 2016, 2017 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+      Amit Kumar Mondal
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -21,6 +31,7 @@
     <properties>
         <kura.basedir>${project.basedir}/..</kura.basedir>
     </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -35,13 +46,22 @@
                     <useUnlimitedThreads>true</useUnlimitedThreads>
                     <argLine>${jacocoArgs}
                         -DbuildingWithTycho=true -Dosgi.locking=none
-                        -Dequinox.ds.print=true -Djava.io.tmpdir=/tmp
+                        -Dequinox.ds.print=true
+                        -Djava.io.tmpdir=/tmp
                         -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
                         -Dosgi.clean=true
+                        -Dkura.home=${project.basedir}/target/kura
+                        -Dkura.plugins=${project.basedir}/target/kura/plugins
+                        -Dkura.packages=${project.basedir}/target/kura/packages
+                        -Dkura.data=${project.basedir}/target/kura/data
+                        -Dkura.tmp=${project.basedir}/target/kura/tmp
+                        -Dkura.snapshots=${project.basedir}/target/kura/snapshots
                         -Dorg.eclipse.kura.mode=emulator
                         -Dkura.configuration=file:${project.basedir}/../emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
                         -Ddpa.configuration=/tmp/kura/dpa.properties
-                        -Dlog4j.configuration=file:${project.basedir}/../emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
+                        -Dlog4j.configuration=file:${project.basedir}/../emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties
+                    </argLine>
+                    <!--<appArgLine>-consoleLog -console 5002 -noExit</appArgLine>-->
                     <bundleStartLevel>
                         <bundle>
                             <id>org.eclipse.equinox.ds</id>
@@ -270,6 +290,11 @@
                         </bundle>
                         <bundle>
                             <id>org.eclipse.kura.wire.helper.provider</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.wire.provider</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -506,6 +531,11 @@
                             <requirement>
                                 <type>eclipse-plugin</type>
                                 <id>org.eclipse.kura.wire.helper.provider</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.wire.provider</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                             <requirement>

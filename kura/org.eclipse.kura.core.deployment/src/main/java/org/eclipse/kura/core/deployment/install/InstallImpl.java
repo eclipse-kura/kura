@@ -212,7 +212,8 @@ public class InstallImpl {
         File verificationDir = new File(this.m_installVerifDir);
         if (verificationDir.listFiles() != null) {
             for (File fileEntry : verificationDir.listFiles()) {
-                if (fileEntry.isFile() && fileEntry.getName().endsWith(".sh")) {
+                if (fileEntry.isFile()
+                        && (fileEntry.getName().endsWith(".sh") || fileEntry.getName().endsWith(".bat"))) {
                     SafeProcess proc = null;
                     try {
                         proc = ProcessUtil.exec("chmod 700 " + fileEntry.getCanonicalPath());

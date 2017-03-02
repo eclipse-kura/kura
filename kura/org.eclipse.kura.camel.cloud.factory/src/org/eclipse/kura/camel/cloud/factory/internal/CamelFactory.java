@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat Inc and others.
+ * Copyright (c) 2016, 2017 Red Hat Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,15 +10,25 @@
  *******************************************************************************/
 package org.eclipse.kura.camel.cloud.factory.internal;
 
+import static org.eclipse.kura.camel.component.Configuration.asBoolean;
 import static org.eclipse.kura.camel.component.Configuration.asString;
 
 import java.util.Map;
 
+import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A Kura component which takes care of creating a {@link CloudService} based in Apache Camel
+ * <p>
+ * This component does not directly register as {@link CloudService}, but can be managed
+ * through the Kura configuration system and will forward this configuration to the
+ * {@link XmlCamelCloudService} which will take care of the lifecycle of the Camel context.
+ * </p>
+ */
 public class CamelFactory implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(CamelFactory.class);
@@ -43,6 +53,7 @@ public class CamelFactory implements ConfigurableComponent {
         final ServiceConfiguration configuration = new ServiceConfiguration();
         configuration.setXml(asString(properties, "xml"));
         configuration.setInitCode(asString(properties, "initCode"));
+        configuration.setEnableJmx(asBoolean(properties, "enableJmx", true));
 
         createService(pid, configuration);
     }

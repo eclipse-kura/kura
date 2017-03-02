@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Red Hat Inc and others.
+ * Copyright (c) 2011, 2017 Red Hat Inc and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -43,7 +43,7 @@ public class DefaultCamelCloudService implements CamelCloudService {
         if (baseEndpoint == null) {
             baseEndpoint = "vm:%s";
         }
-        CloudClient cloudClient = new CamelCloudClient(this, this.camelContext, applicationId, baseEndpoint);
+        final CloudClient cloudClient = new CamelCloudClient(this, this.camelContext, applicationId, baseEndpoint);
         this.clients.put(applicationId, cloudClient);
         return cloudClient;
     }
@@ -84,9 +84,7 @@ public class DefaultCamelCloudService implements CamelCloudService {
 
         if (!errors.isEmpty()) {
             final Exception first = errors.pollFirst();
-            for (Exception others : errors) {
-                first.addSuppressed(others);
-            }
+            errors.forEach(first::addSuppressed);
             throw new RuntimeException(first);
         }
     }

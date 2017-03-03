@@ -34,7 +34,6 @@ import org.eclipse.kura.web.server.GwtSslServiceImpl;
 import org.eclipse.kura.web.server.GwtStatusServiceImpl;
 import org.eclipse.kura.web.server.GwtWireServiceImpl;
 import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
-import org.eclipse.kura.web.server.servlet.EventHandlerServlet;
 import org.eclipse.kura.web.server.servlet.FileServlet;
 import org.eclipse.kura.web.server.servlet.SkinServlet;
 import org.eclipse.kura.web.server.servlet.easse.SseEventSourceServlet;

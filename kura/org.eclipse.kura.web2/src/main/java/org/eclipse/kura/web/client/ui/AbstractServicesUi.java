@@ -13,6 +13,8 @@
 package org.eclipse.kura.web.client.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +63,7 @@ public abstract class AbstractServicesUi extends Composite {
     protected static final Logger errorLogger = Logger.getLogger("ErrorLogger");
 
     protected static final Messages MSGS = GWT.create(Messages.class);
+    private static final DropdownLabelComparator DROPDOWN_LABEL_COMPARATOR = new DropdownLabelComparator();
 
     protected GwtConfigComponent configurableComponent;
 
@@ -440,7 +443,11 @@ public abstract class AbstractServicesUi extends Composite {
 
         int i = 0;
         Map<String, String> oMap = param.getOptions();
-        for (Entry<String, String> current : oMap.entrySet()) {
+
+        ArrayList<Entry<String, String>> sortedOptions = new ArrayList<Entry<String, String>>(oMap.entrySet());
+        Collections.sort(sortedOptions, DROPDOWN_LABEL_COMPARATOR);
+
+        for (Entry<String, String> current : sortedOptions) {
             String label = current.getKey();
             String value = current.getValue();
             listBox.addItem(label, value);
@@ -700,5 +707,81 @@ public abstract class AbstractServicesUi extends Composite {
             }
         }
         return null;
+    }
+
+    private enum ComparatorState {
+        COMPARE_STRING,
+        COMPARE_NUMBER,
+    }
+
+    private static class DropdownLabelComparator implements Comparator<Entry<String, String>> {
+
+        private int getNumberEnd(String s, int index) {
+
+            while (index < s.length()) {
+                if (!Character.isDigit(s.charAt(index))) {
+                    return index;
+                }
+                index++;
+            }
+
+            return index;
+        }
+
+        @Override
+        public int compare(Entry<String, String> e1, Entry<String, String> e2) {
+            String o1 = e1.getKey();
+            String o2 = e2.getKey();
+
+            ComparatorState state = ComparatorState.COMPARE_STRING;
+            int i1 = 0;
+            int i2 = 0;
+
+            while (i1 < o1.length() && i2 < o2.length()) {
+                final char c1 = o1.charAt(i1);
+                final char c2 = o2.charAt(i2);
+
+                if (state == ComparatorState.COMPARE_STRING) {
+
+                    if (Character.isDigit(c1) && Character.isDigit(c2)) {
+                        state = ComparatorState.COMPARE_NUMBER;
+                        continue;
+                    }
+
+                    if (c1 < c2) {
+                        return -1;
+                    }
+                    if (c1 > c2) {
+                        return 1;
+                    }
+
+                    i1++;
+                    i2++;
+
+                } else {
+
+                    final int s1 = i1;
+                    final int s2 = i2;
+
+                    i1 = getNumberEnd(o1, s1);
+                    i2 = getNumberEnd(o2, s2);
+
+                    int n1 = Integer.parseInt(o1.substring(s1, i1));
+                    int n2 = Integer.parseInt(o2.substring(s2, i2));
+
+                    if (n1 < n2) {
+                        return -1;
+                    }
+                    if (n1 > n2) {
+                        return 1;
+                    }
+
+                    state = ComparatorState.COMPARE_STRING;
+                }
+            }
+
+            return 0;
+        }
+
     }
 }

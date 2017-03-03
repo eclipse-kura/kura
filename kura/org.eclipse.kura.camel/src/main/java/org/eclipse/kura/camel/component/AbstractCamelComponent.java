@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractCamelComponent {
 
+    static final String PROP_DISABLE_JMX = "org.eclipse.kura.camel.component.disableJmx";
+
     private static final Logger logger = LoggerFactory.getLogger(AbstractCamelComponent.class);
 
     protected CamelRunner runner;
@@ -41,6 +43,7 @@ public abstract class AbstractCamelComponent {
 
         final Builder builder = new CamelRunner.Builder();
         builder.contextFactory(getContextFactory());
+        builder.disableJmx(Boolean.getBoolean(PROP_DISABLE_JMX));
         builder.addBeforeStart(this::beforeStart);
 
         customizeBuilder(builder, properties);

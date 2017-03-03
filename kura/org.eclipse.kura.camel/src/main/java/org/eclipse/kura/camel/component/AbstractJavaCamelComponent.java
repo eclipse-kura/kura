@@ -12,6 +12,8 @@
 
 package org.eclipse.kura.camel.component;
 
+import static java.lang.Boolean.getBoolean;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.eclipse.kura.camel.runner.CamelRunner;
@@ -45,6 +47,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractJavaCamelComponent extends RouteBuilder implements ConfigurableComponent {
 
+    private static final String PROP_DISABLE_JMX = AbstractCamelComponent.PROP_DISABLE_JMX;
+
     private final static Logger logger = LoggerFactory.getLogger(AbstractJavaCamelComponent.class);
 
     protected CamelRunner runner;
@@ -57,6 +61,7 @@ public abstract class AbstractJavaCamelComponent extends RouteBuilder implements
 
         final Builder builder = new CamelRunner.Builder();
         builder.contextFactory(getContextFactory());
+        builder.disableJmx(getBoolean(PROP_DISABLE_JMX));
         builder.addBeforeStart(camelContext -> {
             beforeStart(camelContext);
             camelContext.addRoutes(AbstractJavaCamelComponent.this);

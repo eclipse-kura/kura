@@ -121,9 +121,12 @@ public class ConfigurationServiceTest {
 
         // remove all other snapshots
         File dir = new File(kuraSnapshotsDir);
+        dir.mkdirs();
         File[] snapshots = dir.listFiles();
-        for (File f : snapshots) {
-            f.delete();
+        if (snapshots != null) {
+            for (File f : snapshots) {
+                f.delete();
+            }
         }
     }
 

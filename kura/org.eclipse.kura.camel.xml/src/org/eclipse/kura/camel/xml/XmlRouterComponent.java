@@ -24,11 +24,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.camel.CamelContext;
 import org.eclipse.kura.camel.bean.PayloadFactory;
 import org.eclipse.kura.camel.component.AbstractXmlCamelComponent;
 import org.eclipse.kura.camel.component.Configuration;
-import org.eclipse.kura.camel.runner.BeforeStart;
 import org.eclipse.kura.camel.runner.CamelRunner.Builder;
 import org.eclipse.kura.cloud.CloudService;
 import org.osgi.framework.BundleContext;
@@ -106,12 +104,8 @@ public class XmlRouterComponent extends AbstractXmlCamelComponent {
 
             // call init code before context start
 
-            builder.addBeforeStart(new BeforeStart() {
-
-                @Override
-                public void beforeStart(final CamelContext camelContext) throws Exception {
-                    scriptInitCamelContext(camelContext, initCode, XmlRouterComponent.class.getClassLoader());
-                }
+            builder.addBeforeStart(camelContext -> {
+                scriptInitCamelContext(camelContext, initCode, XmlRouterComponent.class.getClassLoader());
             });
         }
 

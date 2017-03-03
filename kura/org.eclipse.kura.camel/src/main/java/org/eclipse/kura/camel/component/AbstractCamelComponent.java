@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat Inc and others
+ * Copyright (c) 2016, 2017 Red Hat Inc and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,7 +14,6 @@ package org.eclipse.kura.camel.component;
 import java.util.Map;
 
 import org.apache.camel.CamelContext;
-import org.eclipse.kura.camel.runner.BeforeStart;
 import org.eclipse.kura.camel.runner.CamelRunner;
 import org.eclipse.kura.camel.runner.CamelRunner.Builder;
 import org.eclipse.kura.camel.runner.ContextFactory;
@@ -42,13 +41,7 @@ public abstract class AbstractCamelComponent {
 
         final Builder builder = new CamelRunner.Builder();
         builder.contextFactory(getContextFactory());
-        builder.addBeforeStart(new BeforeStart() {
-
-            @Override
-            public void beforeStart(final CamelContext camelContext) {
-                AbstractCamelComponent.this.beforeStart(camelContext);
-            }
-        });
+        builder.addBeforeStart(this::beforeStart);
 
         customizeBuilder(builder, properties);
 

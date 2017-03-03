@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat Inc and others
+ * Copyright (c) 2016, 2017 Red Hat Inc and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,7 +14,6 @@ package org.eclipse.kura.camel.component;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
-import org.eclipse.kura.camel.runner.BeforeStart;
 import org.eclipse.kura.camel.runner.CamelRunner;
 import org.eclipse.kura.camel.runner.CamelRunner.Builder;
 import org.eclipse.kura.camel.runner.ContextFactory;
@@ -58,13 +57,9 @@ public abstract class AbstractJavaCamelComponent extends RouteBuilder implements
 
         final Builder builder = new CamelRunner.Builder();
         builder.contextFactory(getContextFactory());
-        builder.addBeforeStart(new BeforeStart() {
-
-            @Override
-            public void beforeStart(final CamelContext camelContext) throws Exception {
-                AbstractJavaCamelComponent.this.beforeStart(camelContext);
-                camelContext.addRoutes(AbstractJavaCamelComponent.this);
-            }
+        builder.addBeforeStart(camelContext -> {
+            beforeStart(camelContext);
+            camelContext.addRoutes(AbstractJavaCamelComponent.this);
         });
 
         this.runner = builder.build();

@@ -37,6 +37,7 @@ import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.server.servlet.EventHandlerServlet;
 import org.eclipse.kura.web.server.servlet.FileServlet;
 import org.eclipse.kura.web.server.servlet.SkinServlet;
+import org.eclipse.kura.web.server.servlet.easse.SseEventSourceServlet;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -286,7 +287,7 @@ public class Console implements ConfigurableComponent {
         this.m_httpService.registerServlet(servletRoot + "/ssl", new GwtSslServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/cloudservices", new GwtCloudServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/wires", new GwtWireServiceImpl(), null, httpCtx);
-        this.m_httpService.registerServlet("/sse", new EventHandlerServlet(), null, httpCtx);
+        this.m_httpService.registerServlet("/sse", new SseEventSourceServlet(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/event", this.eventService, null, httpCtx);
         this.eventService.start();
     }

@@ -82,7 +82,7 @@ var kuraWires = (function() {
 	};
 
 	var removeCellFunc = function(cell) {
-		top.jsniMakeUiDirty();
+		jsniMakeUiDirty();
 		var _elements = graph.getElements();
 		if (_elements.length == 0) {
 			toggleDeleteGraphButton(true);
@@ -125,7 +125,7 @@ var kuraWires = (function() {
 			}
 		}
 		if (isCycleExists) {
-			top.jsniShowCycleExistenceError();
+			jsniShowCycleExistenceError();
 		}
 		return isCycleExists;
 	}
@@ -214,7 +214,7 @@ var kuraWires = (function() {
 		for (var i = 0; i < _elements.length; i++) {
 			var elem = _elements[i];
 			elem.on('change:position', function() {
-				top.jsniMakeUiDirty();
+				jsniMakeUiDirty();
 			})
 		}
 
@@ -228,7 +228,7 @@ var kuraWires = (function() {
 
 		graph.on('change:source change:target', function(link) {
 			createWire(link);
-			top.jsniMakeUiDirty();
+			jsniMakeUiDirty();
 		});
 
 		graph.on('remove', removeCellFunc);
@@ -244,7 +244,7 @@ var kuraWires = (function() {
 			if (typeof cellView !== 'undefined'
 					&& typeof cellView.sourceBBox === 'undefined') {
 				if (oldSelectedPid !== pid) {
-					top.jsniUpdateSelection(pid, factoryPid);
+					jsniUpdateSelection(pid, factoryPid);
 					oldSelectedPid = pid;
 					isUpdateSelectionTriggered = true;
 				}
@@ -254,7 +254,7 @@ var kuraWires = (function() {
 		});
 
 		paper.on('blank:pointerdown', function(cellView, evt, x, y) {
-			top.jsniUpdateSelection("", "");
+			jsniUpdateSelection("", "");
 			selectedElement = "";
 			oldSelectedPid = null;
 			if (oldCellView != null) {
@@ -458,7 +458,7 @@ var kuraWires = (function() {
 		});
 
 		if (isFoundExistingElementWithSamePid) {
-			top.jsniShowDuplicatePidModal(name);
+			jsniShowDuplicatePidModal(name);
 			return;
 		}
 
@@ -510,7 +510,7 @@ var kuraWires = (function() {
 		});
 
 		rect.on('change:position', function() {
-			top.jsniMakeUiDirty();
+			jsniMakeUiDirty();
 		})
 
 		/* custom highlighting for ports */
@@ -572,7 +572,7 @@ var kuraWires = (function() {
 		elementsContainerTemp = [];
 		isComponentDeleted = false;
 		if (!checkForCycleExistence()) {
-			top.jsniUpdateWireConfig(JSON.stringify(newConfig));
+			jsniUpdateWireConfig(JSON.stringify(newConfig));
 		}
 	}
 
@@ -666,7 +666,7 @@ var kuraWires = (function() {
 			if (i != -1) {
 				elementsContainerTemp.splice(i, 1);
 			}
-			top.jsniUpdateSelection("", "");
+			jsniUpdateSelection("", "");
 			if (clientConfig.wireComponentsJson.length !== "0") {
 				isComponentDeleted = true;
 			}
@@ -695,12 +695,12 @@ var kuraWires = (function() {
 	}
 
 	function cancelCreateNewComponent() {
-		top.jsniDeactivateNavPils();
+		jsniDeactivateNavPils();
 	}
 
 	function createNewComponent() {
 		if (isComponentDeleted) {
-			top.jsniShowAddNotAllowedModal();
+			jsniShowAddNotAllowedModal();
 			return;
 		}
 		var newComp;
@@ -720,7 +720,7 @@ var kuraWires = (function() {
 		});
 
 		if (isFoundExistingElementWithSamePid) {
-			top.jsniShowDuplicatePidModal(name);
+			jsniShowDuplicatePidModal(name);
 			return;
 		}
 
@@ -756,8 +756,8 @@ var kuraWires = (function() {
 					y : yPos
 				}
 			}
-			top.jsniMakeUiDirty();
-			top.jsniDeactivateNavPils();
+			jsniMakeUiDirty();
+			jsniDeactivateNavPils();
 			toggleDeleteGraphButton(false);
 			// Create the new component and store information in array
 			createComponent(newComp);

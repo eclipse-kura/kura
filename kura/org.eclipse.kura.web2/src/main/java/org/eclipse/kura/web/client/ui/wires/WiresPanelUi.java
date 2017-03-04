@@ -569,56 +569,56 @@ public class WiresPanelUi extends Composite {
     // ----------------------------------------------------------------
     private static native void exportJSNIDeactivateNavPils()
     /*-{
-    $wnd.jsniDeactivateNavPils = $entry(
+    parent.window.jsniDeactivateNavPils = $entry(
     @org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniDeactivateNavPils()
     );
     }-*/;
 
     private static native void exportJSNImakeUiDirty()
     /*-{
-    $wnd.jsniMakeUiDirty = $entry(
+    parent.window.jsniMakeUiDirty = $entry(
     @org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniMakeUiDirty()
     );
     }-*/;
 
     private static native void exportJSNIShowAddNotAllowedModal()
     /*-{
-    $wnd.jsniShowAddNotAllowedModal = $entry(
+    parent.window.jsniShowAddNotAllowedModal = $entry(
     @org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniShowAddNotAllowedModal()
     );
     }-*/;
 
     private static native void exportJSNIshowCycleExistenceError()
     /*-{
-    $wnd.jsniShowCycleExistenceError = $entry(
+    parent.window.jsniShowCycleExistenceError = $entry(
     @org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniShowCycleExistenceError()
     );
     }-*/;
 
     private static native void exportJSNIShowDuplicatePidModal()
     /*-{
-    $wnd.jsniShowDuplicatePidModal = $entry(
+    parent.window.jsniShowDuplicatePidModal = $entry(
     @org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniShowDuplicatePidModal(Ljava/lang/String;)
     );
     }-*/;
 
     private static native void exportJSNIUpdateSelection()
     /*-{
-    $wnd.jsniUpdateSelection = $entry(
+    parent.window.jsniUpdateSelection = $entry(
     @org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniUpdateSelection(Ljava/lang/String;Ljava/lang/String;)
     );
     }-*/;
 
     private static native void exportJSNIUpdateWireConfig()
     /*-{
-    $wnd.jsniUpdateWireConfig = $entry(
+    parent.window.jsniUpdateWireConfig = $entry(
     @org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniUpdateWireConfig(Ljava/lang/String;)
     );
     }-*/;
 
     public static native String getDriver(String assetPid)
     /*-{
-        return $wnd.kuraWires.getDriver(assetPid);
+        return parent.window.kuraWires.getDriver(assetPid);
     }-*/;
 
     public static void jsniDeactivateNavPils() {
@@ -690,24 +690,24 @@ public class WiresPanelUi extends Composite {
                     gwtComponentService.findWireComponentConfigurationFromPid(token, pid, factoryPid, temporaryMap,
                             new AsyncCallback<GwtConfigComponent>() {
 
-                        @Override
-                        public void onFailure(final Throwable caught) {
-                            EntryClassUi.hideWaitModal();
-                            FailureHandler.handle(caught);
-                        }
+                                @Override
+                                public void onFailure(final Throwable caught) {
+                                    EntryClassUi.hideWaitModal();
+                                    FailureHandler.handle(caught);
+                                }
 
-                        @Override
-                        public void onSuccess(final GwtConfigComponent result) {
-                            // Component configuration retrieved
-                            // from the Configuration Service
-                            fillProperties(result, pid);
-                            configs.put(pid, result);
-                            if (propertiesUis.containsKey(pid)) {
-                                propertiesUis.remove(pid);
-                            }
-                            EntryClassUi.hideWaitModal();
-                        }
-                    });
+                                @Override
+                                public void onSuccess(final GwtConfigComponent result) {
+                                    // Component configuration retrieved
+                                    // from the Configuration Service
+                                    fillProperties(result, pid);
+                                    configs.put(pid, result);
+                                    if (propertiesUis.containsKey(pid)) {
+                                        propertiesUis.remove(pid);
+                                    }
+                                    EntryClassUi.hideWaitModal();
+                                }
+                            });
                 }
             });
         }
@@ -779,12 +779,12 @@ public class WiresPanelUi extends Composite {
 
     public static native void resetDeleteComponentState()
     /*-{
-        $wnd.kuraWires.resetDeleteComponentState();
+        parent.window.kuraWires.resetDeleteComponentState();
     }-*/;
 
     public static native void wiresOpen(String obj)
     /*-{
-        $wnd.kuraWires.render(obj);
+        parent.window.kuraWires.render(obj);
     }-*/;
 
     public static void unload() {
@@ -796,7 +796,7 @@ public class WiresPanelUi extends Composite {
 
     private static native void wiresClose()
     /*-{
-        $wnd.kuraWires.unload();
+        parent.window.kuraWires.unload();
     }-*/;
 
     private static JSONArray createComponentsJson() {

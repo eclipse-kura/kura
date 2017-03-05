@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,6 +14,7 @@ package org.eclipse.kura.core.util;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
+import java.util.StringJoiner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,27 +27,45 @@ public class NetUtil {
         if (macAddress == null) {
             return "N/A";
         }
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < macAddress.length; i++) {
-            sb.append(String.format("%02X%s", macAddress[i], i < macAddress.length - 1 ? ":" : ""));
+
+        if (macAddress.length != 6) {
+            throw new IllegalArgumentException("macAddress is invalid");
         }
-        return sb.toString();
+
+        StringJoiner sj = new StringJoiner(":");
+        for (byte item : macAddress) {
+        	sj.add(String.format("%02X", item));
+        }
+        
+        return sj.toString();
     }
 
     public static byte[] hardwareAddressToBytes(String macAddress) {
         if (macAddress == null || macAddress.isEmpty()) {
             return new byte[] { 0, 0, 0, 0, 0, 0 };
         }
+        
+        String[] items = macAddress.split("\\:");
 
-        macAddress = macAddress.replaceAll(":", "");
-
-        byte[] mac = new byte[6];
-        for (int i = 0; i < 6; i++) {
-            mac[i] = (byte) ((Character.digit(macAddress.charAt(i * 2), 16) << 4)
-                    + Character.digit(macAddress.charAt(i * 2 + 1), 16));
+        if (items.length != 6) {
+            throw new IllegalArgumentException("mac is invalid: " + macAddress);
         }
 
-        return mac;
+        byte[] bytes = new byte[6];
+        for (int i = 0; i < 6; i++) {
+            String item = items[i];
+            if (item.isEmpty() || (item.length() > 2)) {
+                throw new IllegalArgumentException("mac is invalid: " + macAddress);
+            }
+
+            try {
+                bytes[i] = (byte) Integer.parseInt(items[i], 16);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("mac is invalid: " + macAddress, e);
+            }
+        }
+
+        return bytes;
     }
 
     public static String getPrimaryMacAddress() {

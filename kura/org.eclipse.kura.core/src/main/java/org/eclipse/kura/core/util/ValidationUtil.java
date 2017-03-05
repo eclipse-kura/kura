@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,11 +23,11 @@ public class ValidationUtil {
     }
 
     /**
-     * Throws an EdcIllegalNullArgumentException if the string value for the specified argument is empty or null.
+     * Throws an KuraException if the string value for the specified argument is empty, null, or whitespace.
      * 
      * @param obj
      * @param argumentName
-     * @throws EdcIllegalNullArgumentException
+     * @throws KuraException
      */
     public static void notEmptyOrNull(String value, String argumentName) throws KuraException {
         if (value == null || value.trim().length() == 0) {
@@ -36,11 +36,11 @@ public class ValidationUtil {
     }
 
     /**
-     * Throws an EdcIllegalNullArgumentException if the value for the specified argument is null.
+     * Throws an KuraException if the value for the specified argument is null.
      * 
      * @param obj
      * @param argumentName
-     * @throws EdcIllegalNullArgumentException
+     * @throws KuraException
      */
     public static void notNegative(int value, String argumentName) throws KuraException {
         if (value < 0) {
@@ -49,11 +49,11 @@ public class ValidationUtil {
     }
 
     /**
-     * Throws an EdcIllegalNullArgumentException if the value for the specified argument is null.
+     * Throws an KuraException if the value for the specified argument is null.
      * 
      * @param obj
      * @param argumentName
-     * @throws EdcIllegalNullArgumentException
+     * @throws KuraException
      */
     public static void notNegative(short value, String argumentName) throws KuraException {
         if (value < 0) {
@@ -62,11 +62,11 @@ public class ValidationUtil {
     }
 
     /**
-     * Throws an EdcIllegalNullArgumentException if the value for the specified argument is null.
+     * Throws an KuraException if the value for the specified argument is null.
      * 
      * @param obj
      * @param argumentName
-     * @throws EdcIllegalNullArgumentException
+     * @throws KuraException
      */
     public static void notNegative(long value, String argumentName) throws KuraException {
         if (value < 0) {

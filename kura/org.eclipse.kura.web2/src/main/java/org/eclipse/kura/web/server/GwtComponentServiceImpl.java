@@ -55,6 +55,14 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     private static final long serialVersionUID = -4176701819112753800L;
 
     @Override
+    public List<String> findTrackedPids(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
+
+        return new ArrayList<>(cs.getConfigurableComponentPids());
+    }
+
+    @Override
     public List<GwtConfigComponent> findServicesConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         List<String> hidePidsList = new ArrayList<>();

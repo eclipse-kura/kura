@@ -342,10 +342,10 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
         } else if (resources[0].equals(RESOURCE_UNINSTALL)) {
             doExecUninstall(reqPayload, respPayload);
         } else if (resources[0].equals(RESOURCE_START)) {
-            String bundleId = resources[1];
+            String bundleId = resources.length >= 2 ? resources[1] : null; // no checking is done before
             doExecStartStopBundle(respPayload, true, bundleId);
         } else if (resources[0].equals(RESOURCE_STOP)) {
-            String bundleId = resources[1];
+            String bundleId = resources.length >= 2 ? resources[1] : null; // no checking is done before
             doExecStartStopBundle(respPayload, false, bundleId);
         } else {
             s_logger.error("Bad request topic: {}", reqTopic.toString());
@@ -376,6 +376,21 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
             return;
         }
+    }
+
+    protected DownloadImpl createDownloadImpl(final DeploymentPackageDownloadOptions options) {
+        DownloadImpl downloadImplementation = new DownloadImpl(options, this);
+        return downloadImplementation;
+    }
+
+    protected UninstallImpl createUninstallImpl() {
+        UninstallImpl uninstallImplementation = new UninstallImpl(this, this.m_deploymentAdmin);
+
+        return uninstallImplementation;
+    }
+
+    protected File getDpDownloadFile(final DeploymentPackageInstallOptions options) throws IOException {
+        return DownloadFileUtilities.getDpDownloadFile(options);
     }
 
     // ----------------------------------------------------------------
@@ -412,7 +427,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
         try {
             options = new DeploymentPackageDownloadOptions(request);
             options.setClientId(this.m_dataTransportService.getClientId());
-            s_downloadImplementation = new DownloadImpl(options, this);
+            s_downloadImplementation = createDownloadImpl(options);
         } catch (Exception ex) {
             s_logger.info("Malformed download request!");
             response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
@@ -476,7 +491,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
                         s_downloadImplementation.downloadDeploymentPackageInternal();
                     } catch (KuraException e) {
                         try {
-                            File dpFile = DownloadFileUtilities.getDpDownloadFile(options);
+                            File dpFile = getDpDownloadFile(options);
                             if (dpFile != null) {
                                 dpFile.delete();
                             }
@@ -544,7 +559,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 
             try {
                 this.m_isInstalling = true;
-                final File dpFile = DownloadFileUtilities.getDpDownloadFile(options);
+                final File dpFile = getDpDownloadFile(options);
 
                 s_installImplementation.setOptions(options);
 
@@ -615,7 +630,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
             s_logger.info("Another request seems still pending: {}. Checking if stale...",
                     this.m_pendingUninstPackageName);
 
-            response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
+            response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
             response.setTimestamp(new Date());
             try {
                 response.setBody("Only one request at a time is allowed".getBytes("UTF-8"));
@@ -628,7 +643,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
             try {
                 this.m_isInstalling = true;
                 this.m_pendingUninstPackageName = packageName;
-                s_uninstallImplementation = new UninstallImpl(this, this.m_deploymentAdmin);
+                s_uninstallImplementation = createUninstallImpl();
 
                 s_logger.info("Uninstalling package...");
                 this.installerFuture = executor.submit(new Runnable() {
@@ -652,7 +667,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
             } catch (Exception e) {
                 s_logger.error("Failed to uninstall package {}: {}", packageName, e);
 
-                response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_ERROR);
+                response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
                 response.setTimestamp(new Date());
                 try {
                     response.setBody(e.getMessage().getBytes("UTF-8"));

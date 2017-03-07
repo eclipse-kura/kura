@@ -24,12 +24,21 @@ public class ProgressEvent extends EventObject {
     private static final long serialVersionUID = -4316652505853478843L;
 
     String clientId;
+    /**
+     * Size in B.
+     */
     int transferSize;
+    /**
+     * Progress in %.
+     */
     int transferProgress;
     String transferStatus;
     String requesterClientId;
     long jobId;
     String exceptionMessage = null;
+    /**
+     * Already downloaded/missing downloads.
+     */
     int downloadIndex;
 
     public ProgressEvent(Object source, DeploymentPackageDownloadOptions options, int transferSize,

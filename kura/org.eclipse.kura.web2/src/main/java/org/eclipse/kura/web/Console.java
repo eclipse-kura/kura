@@ -273,7 +273,8 @@ public class Console implements ConfigurableComponent {
         this.m_httpService.registerServlet(servletRoot + "/device", new GwtDeviceServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/network", new GwtNetworkServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/component", new GwtComponentServiceImpl(), null, httpCtx);
-        this.m_httpService.registerServlet(servletRoot + "/package", new GwtPackageServiceImpl(), null, httpCtx);
+        this.m_httpService.registerServlet(servletRoot + "/package", new GwtPackageServiceImpl(m_systemService), null,
+                httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/snapshot", new GwtSnapshotServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/setting", new GwtSettingServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/certificate", new GwtCertificatesServiceImpl(), null,

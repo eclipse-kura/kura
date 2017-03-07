@@ -130,6 +130,24 @@
                 </b:Panel>
             </b:ModalBody>
         </b:Modal>
+        <b:Modal closable="true" dataKeyboard="true" ui:field="versionCheckModal">
+            <b:ModalBody>
+                <b:Panel>
+                    <b:PanelBody>
+                        <b:Well size="SMALL">
+            				<b.html:Paragraph ui:field="versionMismatchErrorText" />
+                            <b.html:Paragraph ui:field="maxKuraVersionLabel" />
+                            <b.html:Paragraph ui:field="minKuraVersionLabel" />
+                            <b.html:Paragraph ui:field="currentKuraVersionLabel" />
+            			</b:Well>
+                    </b:PanelBody>
+                </b:Panel>
+            </b:ModalBody>
+            <b:ModalFooter>
+				<b:Button type="PRIMARY" dataDismiss="MODAL" ui:field="btnCancelMarketplaceInstall"/>
+                <b:Button icon="THUMBS_UP" dataDismiss="MODAL" type="PRIMARY" ui:field="btnConfirmMarketplaceInstall"/>
+			</b:ModalFooter>
+        </b:Modal>
 		<!-- </b:Column> -->
     </b:Container>
 </ui:UiBinder> 

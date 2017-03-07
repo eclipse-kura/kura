@@ -26,6 +26,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.client.util.GwtSafeHtmlUtils;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
@@ -37,6 +38,7 @@ import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtPackageService;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.Version;
 import org.osgi.service.deploymentadmin.BundleInfo;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
@@ -55,6 +57,19 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
     private static final long serialVersionUID = -3422518194598042896L;
     private static final Logger logger = LoggerFactory.getLogger(GwtPackageServiceImpl.class);
     private static final int MARKETPLACE_FEEDBACK_REQUEST_TIMEOUT = 20 * 1000;
+
+    private String marketplaceCompatibilityVersionString;
+    private Version marketplaceCompatibilityVersion;
+
+    public GwtPackageServiceImpl(SystemService systemService) {
+        marketplaceCompatibilityVersionString = systemService.getKuraMarketplaceCompatibilityVersion();
+        try {
+            marketplaceCompatibilityVersion = new Version(marketplaceCompatibilityVersionString);
+            marketplaceCompatibilityVersionString = marketplaceCompatibilityVersion.toString();
+        } catch (Exception e) {
+            marketplaceCompatibilityVersion = null;
+        }
+    }
 
     @Override
     public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken) throws GwtKuraException {
@@ -123,6 +138,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
     public GwtMarketplacePackageDescriptor getMarketplacePackageDescriptor(GwtXSRFToken xsrfToken, String nodeId)
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
+
         GwtMarketplacePackageDescriptor descriptor = null;
         URL mpUrl = null;
         HttpURLConnection connection = null;
@@ -171,6 +187,9 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
                 }
             }
 
+            descriptor.setCurrentKuraVersion(marketplaceCompatibilityVersionString);
+            checkCompatibility(descriptor, marketplaceCompatibilityVersion);
+
         } catch (Exception e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         } finally {
@@ -180,6 +199,28 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
         }
 
         return descriptor;
+    }
+
+    private void checkCompatibility(GwtMarketplacePackageDescriptor descriptor, Version currentProductVersion) {
+        final String minKuraVersionString = descriptor.getMinKuraVersion();
+        final String maxKuraVersionString = descriptor.getMaxKuraVersion();
+
+        try {
+            boolean haveMinKuraVersion = minKuraVersionString != null && !minKuraVersionString.isEmpty();
+            boolean haveMaxKuraVersion = maxKuraVersionString != null && !maxKuraVersionString.isEmpty();
+
+            if (haveMinKuraVersion && currentProductVersion.compareTo(new Version(minKuraVersionString)) < 0) {
+                throw new Exception();
+            }
+            if (haveMaxKuraVersion && currentProductVersion.compareTo(new Version(maxKuraVersionString)) > 0) {
+                throw new Exception();
+            }
+
+            descriptor.setCompatible(haveMinKuraVersion || haveMaxKuraVersion);
+
+        } catch (Exception e) {
+            descriptor.setCompatible(false);
+        }
     }
 
     @Override
@@ -270,6 +311,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
                     registration.unregister();
                 }
             }
+
         }
     }
 

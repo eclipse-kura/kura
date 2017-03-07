@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.messages.ValidationMessages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.DropSupport;
 import org.eclipse.kura.web.client.util.DropSupport.DropEvent;
@@ -40,6 +41,7 @@ import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.Well;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
+import org.gwtbootstrap3.client.ui.html.Paragraph;
 import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Text;
 
@@ -75,7 +77,9 @@ public class PackagesPanelUi extends Composite {
     private final GwtPackageServiceAsync gwtPackageService = GWT.create(GwtPackageService.class);
 
     private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/deploy";
+
     private static final Messages MSGS = GWT.create(Messages.class);
+    private static final ValidationMessages VMSGS = GWT.create(ValidationMessages.class);
 
     private boolean isRefreshPending;
     private EntryClassUi entryClassUi;
@@ -117,6 +121,24 @@ public class PackagesPanelUi extends Composite {
     @UiField
     Well marketplaceInstallWell;
 
+    @UiField
+    Modal versionCheckModal;
+    @UiField
+    Paragraph versionMismatchErrorText;
+    @UiField
+    Paragraph maxKuraVersionLabel;
+    @UiField
+    Paragraph minKuraVersionLabel;
+    @UiField
+    Paragraph currentKuraVersionLabel;
+
+    @UiField
+    Button btnCancelMarketplaceInstall;
+    @UiField
+    Button btnConfirmMarketplaceInstall;
+
+    private GwtMarketplacePackageDescriptor marketplaceDescriptor;
+
     public PackagesPanelUi() {
 
         // TODO - ServiceTree
@@ -128,7 +150,8 @@ public class PackagesPanelUi extends Composite {
 
         initModalHandlers();
 
-        initModal();
+        initUploadErrorModal();
+        initMarketplaceVersionCheckModal();
 
         initDragDrop();
 
@@ -293,6 +316,17 @@ public class PackagesPanelUi extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 PackagesPanelUi.this.uploadModal.hide();
+            }
+        });
+
+        this.btnConfirmMarketplaceInstall.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (marketplaceDescriptor != null) {
+                    installMarketplaceDp(marketplaceDescriptor);
+                    marketplaceDescriptor = null;
+                }
             }
         });
     }
@@ -482,9 +516,20 @@ public class PackagesPanelUi extends Composite {
         });
     }
 
-    private void initModal() {
+    private void initUploadErrorModal() {
         this.uploadErrorModal.setTitle(MSGS.warning());
         this.uploadErrorText.setText(MSGS.missingFileUpload());
+    }
+
+    private void initMarketplaceVersionCheckModal() {
+        this.versionCheckModal.setTitle(VMSGS.marketplaceInstallDpVersionMismatch());
+        this.versionMismatchErrorText.setText(VMSGS.marketplaceInstallDpVersionDoesNotMatch());
+        this.currentKuraVersionLabel.setText(VMSGS.marketplaceInstallCurrentKuraVersion());
+        this.minKuraVersionLabel.setText(VMSGS.marketplaceInstallMinKuraVersion());
+        this.maxKuraVersionLabel.setText(VMSGS.marketplaceInstallMaxKuraVersion());
+
+        this.btnCancelMarketplaceInstall.setText(VMSGS.marketplaceInstallDpVersionMismatchCancel());
+        this.btnConfirmMarketplaceInstall.setText(VMSGS.marketplaceInstallDpVersionMismatchInstall());
     }
 
     private void eclipseMarketplaceInstall(String url) {
@@ -516,9 +561,13 @@ public class PackagesPanelUi extends Composite {
                             }
 
                             @Override
-                            public void onSuccess(GwtMarketplacePackageDescriptor result) {
-                                // TODO perform version check here
-                                installMarketplaceDp(result);
+                            public void onSuccess(GwtMarketplacePackageDescriptor descriptor) {
+                                if (!descriptor.isCompatible()) {
+                                    EntryClassUi.hideWaitModal();
+                                    showVersionMismatchDialog(descriptor);
+                                } else {
+                                    installMarketplaceDp(descriptor);
+                                }
                             }
                         });
 
@@ -583,4 +632,27 @@ public class PackagesPanelUi extends Composite {
             marketplaceInstallWell.setVisible(false);
         }
     }
+
+    private void showVersionMismatchDialog(GwtMarketplacePackageDescriptor descriptor) {
+
+        this.marketplaceDescriptor = descriptor;
+
+        String minKuraVersion = descriptor.getMinKuraVersion();
+        String maxKuraVersion = descriptor.getMaxKuraVersion();
+
+        if (minKuraVersion == null || minKuraVersion.isEmpty()) {
+            minKuraVersion = "unspecified";
+        }
+        if (maxKuraVersion == null || maxKuraVersion.isEmpty()) {
+            maxKuraVersion = "unspecified";
+        }
+
+        this.currentKuraVersionLabel
+                .setText(VMSGS.marketplaceInstallCurrentKuraVersion() + " " + descriptor.getCurrentKuraVersion());
+        this.minKuraVersionLabel.setText(VMSGS.marketplaceInstallMinKuraVersion() + " " + minKuraVersion);
+        this.maxKuraVersionLabel.setText(VMSGS.marketplaceInstallMaxKuraVersion() + " " + maxKuraVersion);
+        this.versionCheckModal.show();
+
+    }
+
 }

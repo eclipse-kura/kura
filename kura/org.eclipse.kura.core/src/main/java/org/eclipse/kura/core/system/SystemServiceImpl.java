@@ -816,6 +816,15 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     }
 
     @Override
+    public String getKuraMarketplaceCompatibilityVersion() {
+        String marketetplaceCompatibilityVersion = this.kuraProperties.getProperty(KEY_KURA_MARKETPLACE_COMPAT_VERSION);
+        if (marketetplaceCompatibilityVersion == null) {
+            marketetplaceCompatibilityVersion = getKuraVersion();
+        }
+        return marketetplaceCompatibilityVersion.replaceAll("KURA[-_ ]", "").replaceAll("[-_]", ".");
+    }
+
+    @Override
     public String getKuraHome() {
         return this.kuraProperties.getProperty(KEY_KURA_HOME_DIR);
     }

@@ -209,8 +209,8 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * <li>Perform all write operations on associated writing channels</li>
      * <ul>
      *
-     * Both of the aforementioned operations are performed as soon as it timer
-     * wire component is also triggered.
+     * Both the aforementioned operations are performed as soon as this Wire Component 
+     * receives {@code Non Null} {@link WireEnvelop} from its upstream Wire Component(s).
      *
      * @param wireEnvelope
      *            the received {@link WireEnvelope}
@@ -223,14 +223,13 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         logger.debug(message.wireEnvelopeReceived(), this.wireSupport);
 
         final List<Long> channelIds = determineReadingChannels();
+        readChannels(channelIds);
 
         final List<WireRecord> records = wireEnvelope.getRecords();
         for (WireRecord wireRecord : records) {
             final List<AssetRecord> assetRecordsToWriteChannels = determineWritingChannels(wireRecord);
             writeChannels(assetRecordsToWriteChannels);
         }
-
-        readChannels(channelIds);
     }
 
     /**

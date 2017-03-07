@@ -74,17 +74,16 @@ var kuraWires = (function() {
 	 * Interaction with OSGi Event Admin Events through Server Sent Events (SSE)
 	 */
 	function receiveOSGiEvents() {
-		if (typeof(EventSource) !== "undefined") {
-			var eventSource = new EventSource("/sse?topic=org/eclipse/kura/wires/emit");
-			eventSource.onmessage = function(event) {
-				var parsedData = JSON.parse(event.data);
-				_.each(graph.getElements(), function(c) {
-					if (c.attributes.pid === parsedData.emitter) {
-						fireTransition(c);
-					}
-				});
-			};
-		}
+		var emitEventTopic = "org/eclipse/kura/wires/emit";
+		var eventSource = new EventSource("/sse?topic=" + emitEventTopic);
+		eventSource.onmessage = function(event) {
+			var parsedData = JSON.parse(event.data);
+			_.each(graph.getElements(), function(c) {
+				if (c.attributes.pid === parsedData.emitter) {
+					fireTransition(c);
+				}
+			});
+		};
 	}
 
 	function toggleDeleteGraphButton(flag) {

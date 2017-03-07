@@ -4,9 +4,9 @@ title:  "Hello World Example"
 categories: [doc]
 ---
 
-[Overview](#_Overview)
+[Overview](#overview)
 
-* [Prerequisites](#prerequisites)
+[Prerequisites](#prerequisites)
 
 [Hello World Using the Kura Logger](#hello-world-using-the-kura-logger)
 
@@ -24,7 +24,7 @@ categories: [doc]
 
 * [Export the OSGi Bundle](#export-the-osgi-bundle)
 
-* [Create a Deployment Package](#_Create_a_Deployment)
+* [Create a Deployment Package](#create-a-deployment-package)
 
 
 ## Overview
@@ -45,7 +45,7 @@ to perform the following functions:
 
 ## Prerequisites
 
-Setting up the Kura Development Environment
+[Setting up the Kura Development Environment](kura-setup.html)
 
 ## Hello World Using the Kura Logger
 
@@ -146,23 +146,23 @@ package org.eclipse.kura.example.hello_osgi;
 
 public class HelloOsgi {
 
-	private static final Logger s_logger = LoggerFactory.getLogger(HelloOsgi.class);
+    private static final Logger s_logger = LoggerFactory.getLogger(HelloOsgi.class);
 
-	private static final String APP_ID = "org.eclipse.kura.example.hello_osgi";
+    private static final String APP_ID = "org.eclipse.kura.example.hello_osgi";
 
-	protected void activate(ComponentContext componentContext) {
+    protected void activate(ComponentContext componentContext) {
 
-		s_logger.info("Bundle " + APP_ID + " has started!");
+        s_logger.info("Bundle " + APP_ID + " has started!");
 
-		s_logger.debug(APP_ID + ": This is a debug message.");
+        s_logger.debug(APP_ID + ": This is a debug message.");
 
-	}
+    }
 
-	protected void deactivate(ComponentContext componentContext) {
+    protected void deactivate(ComponentContext componentContext) {
 
-		s_logger.info("Bundle " + APP_ID + " has stopped!");
+        s_logger.info("Bundle " + APP_ID + " has stopped!");
 
-	}
+    }
 
 }
 ```
@@ -232,23 +232,23 @@ import org.slf4j.LoggerFactory;
 
 public class HelloOsgi {
 
-	private static final Logger s_logger = LoggerFactory.getLogger(HelloOsgi.class);
+    private static final Logger s_logger = LoggerFactory.getLogger(HelloOsgi.class);
 
-	private static final String APP_ID = "org.eclipse.kura.example.hello_osgi";
+    private static final String APP_ID = "org.eclipse.kura.example.hello_osgi";
 
-	protected void activate(ComponentContext componentContext) {
+    protected void activate(ComponentContext componentContext) {
 
-		s_logger.info("Bundle " + APP_ID + " has started!");
+        s_logger.info("Bundle " + APP_ID + " has started!");
 
-		s_logger.debug(APP_ID + ": This is a debug message.");
+        s_logger.debug(APP_ID + ": This is a debug message.");
 
-	}
+    }
 
-	protected void deactivate(ComponentContext componentContext) {
+    protected void deactivate(ComponentContext componentContext) {
 
-		s_logger.info("Bundle " + APP_ID + " has stopped!");
+        s_logger.info("Bundle " + APP_ID + " has stopped!");
 
-	}
+    }
 
 }
 ```
@@ -340,7 +340,7 @@ Click **Finish**.
 This will create a JAR file in the selected directory (e.g.,
 /home/joe/myPlugins/plugins/org.eclipse.kura.example.hello_osgi_1.0.0.jar).
 
-## Create a Deployment Package
+### Create a Deployment Package
 
 Rather than creating a stand-alone plug-in, you can also create a
 Deployment Package that contains multiple bundles, configuration
@@ -383,8 +383,7 @@ Package, such as its output directory, ant build file, etc.
 ![]({{ site.baseurl }}/assets/images/hello_example/media/image23.png)
 
 Select the **Bundles** tab and then click **New**. In the Bundle Path
-column, select the browse icon. Browse to either the bundle’s project
-file (*[filesystem_path]*/.project file in the Workspace) or to the
+column, select the browse icon. Browse to the
 bundle’s JAR file [created earlier](#export-the-osgi-bundle). Select the
 file and click **Open**. Doing so should populate the remaining columns
 as needed.

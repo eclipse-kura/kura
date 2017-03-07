@@ -8,7 +8,7 @@ categories: [doc]
 
 This document describes how to set up the development environment for Eclipse Kura, which consists of the following components:
 
-* JVM (Java JDK SE 7)
+* JVM (Java JDK SE 8 or Open JDK 8)
 * Eclipse IDE
 * Kura Workspace setup
 
@@ -20,12 +20,14 @@ The Kura development environment may be installed on a Windows, Linux, or Mac OS
 
 Download and install Java SE from [Java SE Downloads](http://www.oracle.com/technetwork/java/javase/downloads/index.html). Use the latest version of Java SE Development Kit and download the version appropriate for your system.
 
-For additional information regarding the installation of Java 7 on all supported operating systems, see [JDK 7 and JRE 7 Installation Guide](http://docs.oracle.com/javase/7/docs/webnotes/install/).
+For additional information regarding the installation of Java 8 on all supported operating systems, see [JDK 8 and JRE 8 Installation Guide](http://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html).
 
 
 ## Eclipse IDE
 
 The Eclipse IDE is an open source development tool that consists of an integrated development environment (IDE) and a plug-in system for managing extensions.
+
+For automated installation see [Oomph installer](#oomph-installer) below.
 
 ### Installing Eclipse
 
@@ -53,12 +55,14 @@ An additional plugin, mToolkit, is needed to allow remote connectivity to an OSG
 
 * Open the **Help \| Install New Software...** menu.
 * Add the following URL as an update site based on your version of Eclipse
-	* Eclipse Mars and older: **http://mtoolkit-mars.s3-website-us-east-1.amazonaws.com**
-	* Eclipse Neon: **http://mtoolkit-neon.s3-website-us-east-1.amazonaws.com**
+    * Eclipse Mars and older: **http://mtoolkit-mars.s3-website-us-east-1.amazonaws.com**
+    * Eclipse Neon: **http://mtoolkit-neon.s3-website-us-east-1.amazonaws.com**
 * Install the "mToolkit" feature (you need to uncheck the **Group items by category** checkbox in order to see the feature)
 * Restart Eclipse. In the menu **Window \| Show View \| Other**, there should be an **mToolkit \| Frameworks** option. If so, the plugin has been installed correctly.
 
 ## Workspaces
+
+For automated installation see [Oomph installer](#oomph-installer) below.
 
 ### Creating an Eclipse Workspace
 
@@ -100,8 +104,26 @@ Eclipse will also report some errors at this point. See the next section to reso
 
 ### Workspace Setup
 
-Click the arrow next to the *target-definition* project in the workspace and double-click **kura-equinox_3.8.1.target** to open it.
+Click the arrow next to the *target-definition* project in the workspace and double-click **kura-equinox_3.11.1.target** to open it.
 
 ![Image 7]({{ site.baseurl }}/assets/images/kura_setup/image007.png)
 
 In the Target Definition window, click the link **Set as Target Platform**. Doing so will reset the target platform, rebuild the Kura projects, and clear the errors that were reported. At this point, you are ready to begin developing Kura-based applications for your target platform.
+
+## Oomph installer
+
+Download the latest Eclipse Installer appropriate for your platform from [Eclipse Downloads](https://www.eclipse.org/downloads/eclipse-packages/)
+
+* Start the Eclipse Installer
+* Switch to advanced mode (in simple mode you cannot add the custom installer)
+* Select "Eclipse for Committers" and select a JRE 1.8+ -> Next
+* Add a new installer by URL: https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup -> Check and next
+* Update Eclipse Kura Git repository's username (HTTPS, link to your fork) and customize further settings if you like (e.g. Root install folder, Installation folder name) -> Next
+* Leave all Bootstrap Tasks selected -> Finish
+* Accept the licenses and unsigned content
+* Wait for the installation to finish, a few additional plugins will be installed
+* At first startup Eclipse IDE will checkout the code and perform a full build
+
+The result will be installed Eclipse IDE with all the recommended plug-ins already available, code will be checked out and built, workspace will be set up, a few Working Sets will be prepared with most projects building without errors
+
+The next step is to get the rest of the projects to build, for which you might need to build them in the console with specific profiles available e.g. can.

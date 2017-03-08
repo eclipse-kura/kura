@@ -25,7 +25,7 @@ final class RandomTemperatureGenerator extends ExpressionAdapter {
 
     public RandomTemperatureGenerator(int minimum, int maximum) {
         this.minimum = minimum;
-        this.setMaximum(maximum);
+        setMaximum(maximum);
     }
 
     @Override

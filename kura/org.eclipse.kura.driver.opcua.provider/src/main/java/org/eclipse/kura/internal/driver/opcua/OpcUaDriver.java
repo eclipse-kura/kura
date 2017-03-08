@@ -13,6 +13,7 @@
 package org.eclipse.kura.internal.driver.opcua;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.KuraErrorCode.OPERATION_NOT_SUPPORTED;
 import static org.eclipse.kura.driver.DriverConstants.CHANNEL_VALUE_TYPE;
@@ -109,9 +110,9 @@ public final class OpcUaDriver implements Driver {
     /** OPC-UA Configuration Options. */
     private OpcUaOptions options;
 
-    private AtomicBoolean isBusy = new AtomicBoolean();
+    private final AtomicBoolean isBusy = new AtomicBoolean();
 
-    private <U> U runSafe(Future<U> future) throws ExecutionException, InterruptedException, TimeoutException {
+    private <U> U runSafe(final Future<U> future) throws ExecutionException, InterruptedException, TimeoutException {
         try {
             return future.get(this.options.getRequestTimeout(), TimeUnit.MILLISECONDS);
         } catch (ExecutionException | InterruptedException | TimeoutException e) {
@@ -147,7 +148,7 @@ public final class OpcUaDriver implements Driver {
     /** {@inheritDoc} */
     @Override
     public void connect() throws ConnectionException {
-        if (!isBusy.compareAndSet(false, true)) {
+        if (!this.isBusy.compareAndSet(false, true)) {
             throw new ConnectionException(message.errorDriverBusy());
         }
 
@@ -166,8 +167,7 @@ public final class OpcUaDriver implements Driver {
                 endPointBuilder.append("/").append(serverName);
             }
 
-            String endpointString = endPointBuilder.toString();
-
+            final String endpointString = endPointBuilder.toString();
             logger.debug("Connecting to endpoint: {}", endpointString);
 
             logger.debug("Fetching endpoint descriptions");
@@ -191,7 +191,7 @@ public final class OpcUaDriver implements Driver {
                     .setIdentityProvider(this.options.getIdentityProvider()).setKeyPair(loader.getClientKeyPair())
                     .setCertificate(loader.getClientCertificate()).build();
 
-            logger.debug("Connecting");
+            logger.debug("Connecting...");
             newClient = new OpcUaClient(clientConfigBuilder.build());
             this.client = (OpcUaClient) runSafe(newClient.connect());
 
@@ -202,7 +202,7 @@ public final class OpcUaDriver implements Driver {
             shutdownClient(newClient);
             throw new ConnectionException(e);
         } finally {
-            isBusy.set(false);
+            this.isBusy.set(false);
         }
     }
 
@@ -224,25 +224,23 @@ public final class OpcUaDriver implements Driver {
     /** {@inheritDoc} */
     @Override
     public void disconnect() throws ConnectionException {
-        if (!isBusy.compareAndSet(false, true)) {
+        if (!this.isBusy.compareAndSet(false, true)) {
             throw new ConnectionException(message.errorDriverBusy());
         }
-
         try {
             logger.info(message.disconnecting());
-            shutdownClient(client);
+            shutdownClient(this.client);
             this.client = null;
             logger.info(message.disconnectingDone());
         } finally {
-            isBusy.set(false);
+            this.isBusy.set(false);
         }
     }
 
-    private void shutdownClient(OpcUaClient client) throws ConnectionException {
-        if (this.client == null) {
+    private void shutdownClient(final OpcUaClient client) throws ConnectionException {
+        if (isNull(this.client)) {
             return;
         }
-
         try {
             runSafe(client.disconnect());
         } catch (TimeoutException | InterruptedException | ExecutionException e) {
@@ -269,9 +267,7 @@ public final class OpcUaDriver implements Driver {
         return new OpcUaChannelDescriptor();
     }
 
-    private Optional<TypedValue<?>> getTypedValue(final DataType expectedValueType, final Object containedValue,
-            final DriverRecord record) {
-
+    private Optional<TypedValue<?>> getTypedValue(final DataType expectedValueType, final Object containedValue) {
         try {
             switch (expectedValueType) {
             case LONG:
@@ -289,61 +285,49 @@ public final class OpcUaDriver implements Driver {
             case STRING:
                 return Optional.of(TypedValues.newStringValue(containedValue.toString()));
             case BYTE_ARRAY:
-                try {
-                    return Optional.of(TypedValues.newByteArrayValue(TypeUtil.objectToByteArray(containedValue)));
-                } catch (final IOException e) {
-                    logger.error(e.getMessage(), e);
-                    return Optional.empty();
-                }
+                return Optional.of(TypedValues.newByteArrayValue(TypeUtil.objectToByteArray(containedValue)));
             default:
                 return Optional.empty();
             }
-        } catch (final NumberFormatException nfe) {
+        } catch (final Exception ex) {
             return Optional.empty();
         }
     }
 
-    private Object extractValue(DataValue value) throws IllegalArgumentException {
-        Variant variant = value.getValue();
-        if (variant == null) {
-            throw new NullPointerException(message.errorNullResult());
-        }
-        Object result = variant.getValue();
-        if (result == null) {
-            throw new NullPointerException(message.errorNullResult());
-        }
+    private Object extractValue(final DataValue value) {
+        final Variant variant = value.getValue();
+        requireNonNull(variant, message.errorNullVariant());
+
+        final Object result = variant.getValue();
+        requireNonNull(result, message.errorNullResult());
         return result;
     }
 
-    private void checkStatus(StatusCode status) throws IOException {
-        logger.debug("result status code: {}", status);
-        if (status == null) {
-            throw new NullPointerException(message.errorNullResult());
-        }
+    private void checkStatus(final StatusCode status) throws IOException {
+        requireNonNull(status, message.errorNullStatus());
         if (!status.isGood()) {
-            throw new IOException(message.errorBadResultStatus() + status);
+            throw new IOException(message.errorBadResultStatus(status.getValue()));
         }
     }
 
     /** {@inheritDoc} */
     @Override
-    public synchronized List<DriverRecord> read(final List<DriverRecord> records) throws ConnectionException {
-        if (isBusy.get()) {
+    public List<DriverRecord> read(final List<DriverRecord> records) throws ConnectionException {
+        if (this.isBusy.get()) {
             throw new ConnectionException(message.errorDriverBusy());
         }
-        if (this.client == null) {
+        if (isNull(this.client)) {
             this.connect();
         }
         for (final DriverRecord record : records) {
-
-            OpcUaRequestInfo.extract(record).ifPresent((requestInfo) -> {
+            OpcUaRequestInfo.extract(record).ifPresent(requestInfo -> {
                 final NodeId nodeId = new NodeId(requestInfo.nodeNamespaceIndex, requestInfo.nodeId);
                 final VariableNode node = this.client.getAddressSpace().createVariableNode(nodeId);
                 Object readResult = null;
                 try {
                     logger.debug("reading: ns={};s={}..", requestInfo.nodeNamespaceIndex, requestInfo.nodeId);
                     readResult = extractValue(runSafe(node.readValue()));
-                    logger.debug("read successful");
+                    logger.debug("Read Successful");
                 } catch (final Exception e) {
                     record.setDriverStatus(new DriverStatus(READ_FAILURE, message.readFailed(), e));
                     record.setTimestamp(System.currentTimeMillis());
@@ -351,7 +335,7 @@ public final class OpcUaDriver implements Driver {
                     return;
                 }
 
-                final Optional<TypedValue<?>> typedValue = this.getTypedValue(requestInfo.dataType, readResult, record);
+                final Optional<TypedValue<?>> typedValue = this.getTypedValue(requestInfo.dataType, readResult);
                 if (!typedValue.isPresent()) {
                     record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION,
                             message.errorValueTypeConversion(), null));
@@ -399,10 +383,10 @@ public final class OpcUaDriver implements Driver {
      */
     public synchronized void updated(final Map<String, Object> properties) {
         logger.debug(message.updating());
-        if (this.client != null) {
+        if (nonNull(this.client)) {
             try {
                 disconnect();
-            } catch (ConnectionException e) {
+            } catch (final ConnectionException e) {
                 logger.error(message.disconnectionProblem(), e);
             }
         }
@@ -413,14 +397,13 @@ public final class OpcUaDriver implements Driver {
     /** {@inheritDoc} */
     @Override
     public List<DriverRecord> write(final List<DriverRecord> records) throws ConnectionException {
-        if (isBusy.get()) {
+        if (this.isBusy.get()) {
             throw new ConnectionException(message.errorDriverBusy());
         }
         if (this.client == null) {
             this.connect();
         }
         for (final DriverRecord record : records) {
-
             OpcUaRequestInfo.extract(record).ifPresent((requestInfo) -> {
                 final TypedValue<?> value = record.getValue();
                 final NodeId nodeId = new NodeId(requestInfo.nodeNamespaceIndex, requestInfo.nodeId);
@@ -431,7 +414,7 @@ public final class OpcUaDriver implements Driver {
                             requestInfo.nodeId);
                     checkStatus(runSafe(node.writeValue(newValue)));
                     record.setDriverStatus(new DriverStatus(WRITE_SUCCESSFUL));
-                    logger.debug("write successful");
+                    logger.debug("Write Successful");
                 } catch (final Exception e) {
                     record.setDriverStatus(new DriverStatus(WRITE_FAILURE, message.writeFailed(), e));
                     logger.warn(message.writeFailed(), e);
@@ -448,18 +431,18 @@ public final class OpcUaDriver implements Driver {
         private final int nodeNamespaceIndex;
         private final String nodeId;
 
-        public OpcUaRequestInfo(DataType dataType, int nodeNamespaceIndex, String nodeId) {
+        public OpcUaRequestInfo(final DataType dataType, final int nodeNamespaceIndex, final String nodeId) {
             this.dataType = dataType;
             this.nodeNamespaceIndex = nodeNamespaceIndex;
             this.nodeId = nodeId;
         }
 
-        private static void fail(DriverRecord record, String message) {
+        private static void fail(final DriverRecord record, final String message) {
             record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE, message, null));
             record.setTimestamp(System.currentTimeMillis());
         }
 
-        public static Optional<OpcUaRequestInfo> extract(DriverRecord record) {
+        public static Optional<OpcUaRequestInfo> extract(final DriverRecord record) {
             final Map<String, Object> channelConfig = record.getChannelConfig();
             int nodeNamespaceIndex;
             String nodeId;
@@ -480,7 +463,7 @@ public final class OpcUaDriver implements Driver {
 
             final DataType dataType = (DataType) channelConfig.get(CHANNEL_VALUE_TYPE.value());
 
-            if (dataType == null) {
+            if (isNull(dataType)) {
                 fail(record, message.errorRetrievingValueType());
                 return Optional.empty();
             }

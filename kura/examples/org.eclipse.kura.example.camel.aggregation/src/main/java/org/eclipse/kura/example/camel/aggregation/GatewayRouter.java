@@ -32,15 +32,16 @@ public class GatewayRouter extends AbstractJavaCamelComponent implements Configu
     private static final int DEFAULT_MINIMUM = 0;
     private static final int DEFAULT_MAXIMUM = 40;
 
-    RandomTemperatureGenerator randomTemperatureGenerator = new RandomTemperatureGenerator(DEFAULT_MINIMUM, DEFAULT_MAXIMUM);
+    RandomTemperatureGenerator randomTemperatureGenerator = new RandomTemperatureGenerator(DEFAULT_MINIMUM,
+            DEFAULT_MAXIMUM);
 
     @Override
     public void configure() throws Exception {
-        from("timer://temperature")
-        .setBody(randomTemperatureGenerator)
-        .aggregate(simple("temperature"), new AverageAggregationStrategy())
-        .completionInterval(SECONDS.toMillis(10))
-        .to("log:averageTemperatureFromLast10Seconds");
+        from("timer://temperature") //
+                .setBody(this.randomTemperatureGenerator) //
+                .aggregate(simple("temperature"), new AverageAggregationStrategy()) //
+                .completionInterval(SECONDS.toMillis(10)) //
+                .to("log:averageTemperatureFromLast10Seconds");
     }
 
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties)
@@ -69,7 +70,7 @@ public class GatewayRouter extends AbstractJavaCamelComponent implements Configu
             throw new IllegalArgumentException("Maximum must be at least one higher than minimum");
         }
 
-        randomTemperatureGenerator.setMinimum(minimum);
-        randomTemperatureGenerator.setMaximum(maximum);
+        this.randomTemperatureGenerator.setMinimum(minimum);
+        this.randomTemperatureGenerator.setMaximum(maximum);
     }
 }

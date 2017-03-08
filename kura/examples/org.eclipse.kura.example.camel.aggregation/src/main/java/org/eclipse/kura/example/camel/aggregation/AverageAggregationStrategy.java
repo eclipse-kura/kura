@@ -15,6 +15,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.processor.aggregate.AggregationStrategy;
 
 final class AverageAggregationStrategy implements AggregationStrategy {
+
     @Override
     public Exchange aggregate(Exchange oldExchange, Exchange newExchange) {
         if (oldExchange == null) {

@@ -291,7 +291,7 @@ var kuraWires = (function() {
 					x : x,
 					y : y,
 				};
-				createComponent(compConfig);
+				createComponent(compConfig, false);
 			}
 			createExisitingWires();
 		}
@@ -438,10 +438,10 @@ var kuraWires = (function() {
 		}
 	}
 
-	/*
-	 * / Create a new component
+	/**
+	 * Create a new component
 	 */
-	function createComponent(comp) {
+	function createComponent(comp, flag) {
 
 		if (comp.name === "") {
 			comp.name = comp.pid;
@@ -557,12 +557,16 @@ var kuraWires = (function() {
 			xPos = 300;
 			yPos = 300;
 		}
-
+		
+		if (flag) {
+			selectedElement = rect;
+			jsniUpdateSelection(comp.name, comp.fPid);
+		}
 		return rect.attributes.id;
 	}
 
-	/*
-	 * / Event Functions
+	/**
+	 * Event Functions
 	 */
 	function saveConfig() {
 		graphToSave = prepareJsonFromGraph();
@@ -666,7 +670,7 @@ var kuraWires = (function() {
 			if (i != -1) {
 				elementsContainerTemp.splice(i, 1);
 			}
-			jsniUpdateSelection("", "");
+			jsniUpdateSelection(pid, "");
 			if (clientConfig.wireComponentsJson.length !== "0") {
 				isComponentDeleted = true;
 			}
@@ -699,10 +703,6 @@ var kuraWires = (function() {
 	}
 
 	function createNewComponent() {
-		if (isComponentDeleted) {
-			jsniShowAddNotAllowedModal();
-			return;
-		}
 		var newComp;
 		// Determine whether component can be producer, consumer, or both
 		fPid = $("#factoryPid").val();
@@ -760,7 +760,7 @@ var kuraWires = (function() {
 			jsniDeactivateNavPils();
 			toggleDeleteGraphButton(false);
 			// Create the new component and store information in array
-			createComponent(newComp);
+			createComponent(newComp, true);
 			$("#componentName").val('');
 			$("#driverPids").val('--- Select Driver ---');
 			$("#factoryPid").val('');

@@ -1,18 +1,24 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
  *
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -57,6 +63,7 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -191,7 +198,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                 .getServiceReferences(Driver.class, null);
         final List<String> drivers = new ArrayList<>();
         for (final ServiceReference<Driver> ref : refs) {
-            drivers.add(String.valueOf(ref.getProperty("kura.service.pid")));
+            drivers.add(String.valueOf(ref.getProperty(ConfigurationService.KURA_SERVICE_PID)));
         }
         return drivers;
     }
@@ -381,8 +388,6 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             final Map<String, GwtConfigComponent> configurations) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
 
-        // TODO: refactor this method: split and simplify code
-
         JsonObject jWireGraph = null;
         final WireService wireService = ServiceLocator.getInstance().getService(WireService.class);
         final WireHelperService wireHelperService = ServiceLocator.getInstance().getService(WireHelperService.class);
@@ -492,14 +497,31 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                 final GwtConfigComponent config = configurations.get(pid);
                 if (config != null) {
                     final ComponentConfiguration currentConf = configService.getComponentConfiguration(pid);
+                    Map<String, Object> prop = null;
+                    if (currentConf != null) {
+                        prop = currentConf.getConfigurationProperties();
+                    }
+                    Object val = null;
+                    if (prop != null) {
+                        val = prop.get(ConfigurationAdmin.SERVICE_FACTORYPID);
+                    }
+                    String runtimeWireComponentFactoryPid = val != null ? val.toString() : null;
                     final Map<String, Object> props = fillPropertiesFromConfiguration(config, currentConf);
                     if (props != null) {
                         final String factoryPid = config.getFactoryId();
-                        if ("org.eclipse.kura.wire.WireAsset".equalsIgnoreCase(factoryPid)) {
+                        // if the Wire Component to be created with the same name is of the same type
+                        // as the recently removed Wire Component
+                        boolean isSame = false;
+                        if (runtimeWireComponentFactoryPid != null) {
+                            isSame = runtimeWireComponentFactoryPid.equalsIgnoreCase(factoryPid);
+                        }
+                        if ("org.eclipse.kura.wire.WireAsset".equalsIgnoreCase(factoryPid) || !isSame) {
                             configService.deleteFactoryConfiguration(pid, false);
                             configService.createFactoryConfiguration(factoryPid, pid, props, false);
+                            continue;
                         }
                         configService.updateConfiguration(pid, props, false);
+                        removeDeletedFromWireGraphProperty(pid);
                     }
                 }
             }
@@ -510,12 +532,32 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             props.put(GRAPH, jWireGraph.toString());
             configService.updateConfiguration(WIRE_SERVICE_PID, props, true);
             configurations.clear();
-        } catch (final KuraException exception) {
+        } catch (final KuraException | InterruptedException | InvalidSyntaxException exception) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
-        } catch (final InterruptedException exception) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
-        } catch (final InvalidSyntaxException exception) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
+        }
+    }
+
+    private void removeDeletedFromWireGraphProperty(String pid) throws GwtKuraException {
+        final ConfigurationAdmin configAdmin = ServiceLocator.getInstance().getService(ConfigurationAdmin.class);
+        final WireHelperService wireHelperService = ServiceLocator.getInstance().getService(WireHelperService.class);
+        try {
+            final String servicePid = wireHelperService.getServicePid(pid);
+            Configuration conf = null;
+            if (servicePid != null) {
+                conf = configAdmin.getConfiguration(servicePid);
+            }
+            Dictionary<String, Object> props = null;
+            if (conf != null) {
+                props = conf.getProperties();
+            }
+            if (props != null) {
+                props.remove(DELETED_WIRE_COMPONENT);
+            }
+            if (conf != null) {
+                conf.update(props);
+            }
+        } catch (IOException e) {
+            // no need
         }
     }
 

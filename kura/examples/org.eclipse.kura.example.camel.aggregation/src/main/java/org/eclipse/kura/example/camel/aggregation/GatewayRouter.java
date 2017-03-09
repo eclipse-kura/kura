@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat Inc and others
+ * Copyright (c) 2016, 2017 Red Hat Inc and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,7 +32,7 @@ public class GatewayRouter extends AbstractJavaCamelComponent implements Configu
     private static final int DEFAULT_MINIMUM = 0;
     private static final int DEFAULT_MAXIMUM = 40;
 
-    RandomTemperatureGenerator randomTemperatureGenerator = new RandomTemperatureGenerator(DEFAULT_MINIMUM,
+    private RandomTemperatureGenerator randomTemperatureGenerator = new RandomTemperatureGenerator(DEFAULT_MINIMUM,
             DEFAULT_MAXIMUM);
 
     @Override

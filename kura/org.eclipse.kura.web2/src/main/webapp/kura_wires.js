@@ -155,7 +155,6 @@ var kuraWires = (function() {
 		// GWT entry point to be called
 		// Instantiate JointJS graph and paper
 		if (!initialized) {
-			$("#btn-create-comp").on("click", createNewComponent);
 			$("#btn-create-comp-cancel").on("click", cancelCreateNewComponent);
 			$("#btn-save-graph").on("click", saveConfig);
 			$("#btn-delete-comp").on("click", deleteComponent);
@@ -767,6 +766,8 @@ var kuraWires = (function() {
 			$("#asset-comp-modal").modal('hide');
 		}
 	}
+	
+	client.createNewComponent = createNewComponent;
 
 	/*
 	 * / Setup Custom Elements

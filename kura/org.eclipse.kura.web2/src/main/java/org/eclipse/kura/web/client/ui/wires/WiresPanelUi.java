@@ -243,6 +243,44 @@ public class WiresPanelUi extends Composite {
         }
     }
 
+    private native void createComponentNative() /*-{
+                                                          parent.window.kuraWires.createNewComponent()
+                                                          }-*/;
+
+    private void createComponent(final String pid) {
+        EntryClassUi.showWaitModal();
+        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(final Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(final GwtXSRFToken token) {
+                gwtComponentService.findTrackedPids(token, new AsyncCallback<List<String>>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
+
+                    @Override
+                    public void onSuccess(List<String> result) {
+                        EntryClassUi.hideWaitModal();
+                        if (result.contains(pid)) {
+                            jsniShowDuplicatePidModal(pid);
+                        } else {
+                            createComponentNative();
+                        }
+                    }
+                });
+            }
+        });
+    }
+
     private void initButtons() {
         btnSave.setText(MSGS.apply());
         btnSave.addClickHandler(new ClickHandler() {
@@ -299,6 +337,16 @@ public class WiresPanelUi extends Composite {
         wiresComponentName.setText(MSGS.wiresComponentName());
         componentName.setPlaceholder(MSGS.wiresComponentNamePlaceholder());
         btnCreateComp.setText(MSGS.apply());
+        btnCreateComp.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                String value = componentName.getValue();
+                if (value != null && !value.isEmpty()) {
+                    createComponent(value);
+                }
+            }
+        });
         btnCancelComp.setText(MSGS.cancelButton());
     }
 

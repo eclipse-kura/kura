@@ -32,6 +32,20 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface GwtComponentService extends RemoteService {
 
     /**
+     * Return the list of PIDs of all the components that
+     * are tracked by the configuration service.
+     *
+     * @param xsrfToken
+     *            the cross site request forgery token.
+     * 
+     * @return list of PIDs for the registered components.
+     * 
+     * @throws GwtKuraException
+     *             if the list of components registered in the framework cannot be extracted.
+     */
+    public List<String> findTrackedPids(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    /**
      * Returns a the list of component configurations. This list is filtered from a set of services that need to be
      * hidden and not displayed in the "Services" section of the local web ui.
      * 
@@ -143,12 +157,12 @@ public interface GwtComponentService extends RemoteService {
      */
     public void updateComponentConfiguration(GwtXSRFToken xsrfToken, GwtConfigComponent configComponent)
             throws GwtKuraException;
-            
+
     public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid) throws GwtKuraException;
 
     public void deleteFactoryConfiguration(GwtXSRFToken xsrfToken, String pid, boolean takeSnapshot)
             throws GwtKuraException;
-    
+
     public List<String> findFactoryComponents(GwtXSRFToken xsrfToken) throws GwtKuraException;
     
     public boolean updateProperties(GwtXSRFToken xsrfToken, String pid, Map<String, Object> properties) throws GwtKuraException;

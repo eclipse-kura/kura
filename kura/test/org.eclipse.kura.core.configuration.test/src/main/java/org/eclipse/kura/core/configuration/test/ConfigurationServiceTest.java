@@ -364,7 +364,7 @@ public class ConfigurationServiceTest {
     public void testDeleteFactoryConfigurationWithSnapshot() throws KuraException, IOException, NoSuchFieldException {
         // positive test; pid registered in factory and service pids, configuration delete is expected, with snapshots
 
-//        String factoryPid = "fpid_" + System.currentTimeMillis();
+        // String factoryPid = "fpid_" + System.currentTimeMillis();
         final String factoryPid = "fpid_" + System.currentTimeMillis();
         final String servicePid = "spid_" + System.currentTimeMillis();
         final boolean takeSnapshot = true;
@@ -663,6 +663,7 @@ public class ConfigurationServiceTest {
 
         return cfgxml;
     }
+
     @Test
     public void testUpdateConfigurationPidPropertiesInvalid() throws KuraException {
         // try it with a registered component and an existing PID with invalid properties
@@ -882,7 +883,7 @@ public class ConfigurationServiceTest {
     public void testUpdateConfigurationsListOfComponentConfigurationBoolean()
             throws KuraException, NoSuchFieldException {
         // test that password encryption is attempted (but decrypt doesn't fail, which is OK) and some other calls are
-        // made - stop with usage of m_allActivatedPids in getComponentConfigurationsInternal
+        // made - stop with usage of allActivatedPids in getComponentConfigurationsInternal
 
         boolean takeSnapshot = false;
         final List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
@@ -901,7 +902,7 @@ public class ConfigurationServiceTest {
         when(cryptoServiceMock.decryptAes((char[]) anyObject())).thenReturn("dec".toCharArray());
 
         // make updateConfigurationsInternal fail with NPE
-        TestUtil.setFieldValue(cs, "m_allActivatedPids", null);
+        TestUtil.setFieldValue(cs, "allActivatedPids", null);
 
         try {
             cs.updateConfigurations(configs, takeSnapshot);

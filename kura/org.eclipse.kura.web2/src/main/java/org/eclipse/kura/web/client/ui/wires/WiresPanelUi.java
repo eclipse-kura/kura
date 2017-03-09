@@ -36,7 +36,6 @@ import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtWireService;
 import org.eclipse.kura.web.shared.service.GwtWireServiceAsync;
-import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.FormGroup;
@@ -44,12 +43,14 @@ import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.Heading;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
+import org.gwtbootstrap3.client.ui.ModalBody;
+import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.NavPills;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.TextBox;
-import org.gwtbootstrap3.client.ui.constants.AlertType;
+import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Strong;
 
 import com.google.gwt.core.client.GWT;
@@ -68,42 +69,61 @@ import com.google.gwt.user.client.ui.Widget;
 public class WiresPanelUi extends Composite {
 
     @UiField
-    static Modal assetModal;
-    @UiField
-    static Button btnDelete;
-    @UiField
-    static Button btnDeleteGraphYes;
-    @UiField
-    static Button btnDeleteGraphNo;
-    @UiField
-    static Button btnDeleteYes;
-    @UiField
-    static Button btnDeleteCancel;
-    @UiField
-    static Button btnGraphDelete;
-    @UiField
     static Button btnSave;
     @UiField
     static Button btnZoomIn;
     @UiField
     static Button btnZoomOut;
     @UiField
-    static Button btnSaveYes;
+    static Button btnDelete;
     @UiField
-    static Button btnSaveNo;
+    static Button btnGraphDelete;
+
     @UiField
     static FormLabel wiresComponentName;
     @UiField
     static TextBox componentName;
+
     @UiField
-    static Button btnCreateComp;
+    static Modal assetModal;
     @UiField
-    static Button btnCancelComp;
+    static Button btnAssetModalYes;
+    @UiField
+    static Button btnAssetModalNo;
+
+    @UiField
+    static Modal saveGraphModal;
+    @UiField
+    static ModalHeader saveGraphModalHeader;
+    @UiField
+    static ModalBody saveGraphModalBody;
+    @UiField
+    static Button btnSaveGraphModalYes;
+    @UiField
+    static Button btnSaveGraphModalNo;
 
     @UiField
     static Modal deleteGraphModal;
     @UiField
-    static Modal deleteModal;
+    static ModalHeader deleteGraphModalHeader;
+    @UiField
+    static ModalBody deleteGraphModalBody;
+    @UiField
+    static Button btnDeleteGraphModalYes;
+    @UiField
+    static Button btnDeleteGraphModalNo;
+
+    @UiField
+    static Modal deleteCompModal;
+    @UiField
+    static ModalHeader deleteCompModalHeader;
+    @UiField
+    static ModalBody deleteCompModalBody;
+    @UiField
+    static Button btnDeleteCompModalYes;
+    @UiField
+    static Button btnDeleteCompModalNo;
+
     @UiField
     static FormGroup driverInstanceForm;
     @UiField
@@ -126,17 +146,6 @@ public class WiresPanelUi extends Composite {
     @UiField
     static PanelHeader propertiesPanelHeader;
 
-    @UiField
-    static Alert saveGraphAlert;
-    @UiField
-    static Alert deleteModalAlert;
-    @UiField
-    static Alert deleteGraphAlert;
-
-    @UiField
-    static Strong saveGraphAlertText;
-    @UiField
-    static Modal saveModal;
     @UiField
     static Heading wiresComposerTitle;
     @UiField
@@ -295,14 +304,8 @@ public class WiresPanelUi extends Composite {
                         pids.add(getFormattedPid(componentId));
                     }
                 }
-                if (!pids.isEmpty()) {
-                    WiresPanelUi.saveGraphAlert.setType(AlertType.DANGER);
-                    WiresPanelUi.saveGraphAlertText.setText(MSGS.wiresSaveIfDirty());
-                } else {
-                    WiresPanelUi.saveGraphAlert.setType(AlertType.INFO);
-                    WiresPanelUi.saveGraphAlertText.setText(MSGS.wiresSave());
-                }
-                WiresPanelUi.saveModal.show();
+
+                WiresPanelUi.saveGraphModal.show();
             }
         });
 
@@ -314,7 +317,7 @@ public class WiresPanelUi extends Composite {
 
             @Override
             public void onClick(final ClickEvent event) {
-                WiresPanelUi.deleteModal.show();
+                WiresPanelUi.deleteCompModal.show();
             }
         });
 
@@ -336,8 +339,8 @@ public class WiresPanelUi extends Composite {
         wiresAvailableDrivers.setText(MSGS.wiresAvailableDrivers());
         wiresComponentName.setText(MSGS.wiresComponentName());
         componentName.setPlaceholder(MSGS.wiresComponentNamePlaceholder());
-        btnCreateComp.setText(MSGS.apply());
-        btnCreateComp.addClickHandler(new ClickHandler() {
+        btnAssetModalYes.setText(MSGS.apply());
+        btnAssetModalYes.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -347,29 +350,32 @@ public class WiresPanelUi extends Composite {
                 }
             }
         });
-        btnCancelComp.setText(MSGS.cancelButton());
+        btnAssetModalNo.setText(MSGS.cancelButton());
     }
 
     private void initComponentDeleteModal() {
-        deleteModalAlert.setText(MSGS.wiresComponentDeleteAlert());
-        btnDeleteYes.setText(MSGS.apply());
-        btnDeleteCancel.setText(MSGS.cancelButton());
+        deleteCompModalHeader.setTitle(MSGS.confirm());
+        deleteCompModalBody.add(new Span(MSGS.wiresComponentDeleteAlert()));
+        btnDeleteCompModalYes.setText(MSGS.apply());
+        btnDeleteCompModalNo.setText(MSGS.cancelButton());
 
-        btnDeleteYes.addClickHandler(new ClickHandler() {
+        btnDeleteCompModalYes.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(final ClickEvent event) {
                 WiresPanelUi.setDirty(true);
-                WiresPanelUi.deleteModal.hide();
+                WiresPanelUi.deleteCompModal.hide();
             }
         });
     }
 
     private void initSaveModal() {
-        btnSaveYes.setText(MSGS.apply());
-        btnSaveNo.setText(MSGS.cancelButton());
+        saveGraphModalHeader.setTitle(MSGS.confirm());
+        saveGraphModalBody.add(new Span(MSGS.wiresSave()));
+        btnSaveGraphModalYes.setText(MSGS.apply());
+        btnSaveGraphModalNo.setText(MSGS.cancelButton());
 
-        btnSaveYes.addClickHandler(new ClickHandler() {
+        btnSaveGraphModalYes.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(final ClickEvent event) {
@@ -377,16 +383,17 @@ public class WiresPanelUi extends Composite {
                     final PropertiesUi ui = entry.getValue();
                     ui.setDirty(false);
                 }
-                WiresPanelUi.saveModal.hide();
+                WiresPanelUi.saveGraphModal.hide();
             }
         });
     }
 
     private void initGraphDeleteModal() {
-        deleteGraphAlert.setText(MSGS.wiresGraphDeleteAlert());
-        btnDeleteGraphNo.setText(MSGS.cancelButton());
-        btnDeleteGraphYes.setText(MSGS.apply());
-        btnDeleteGraphYes.addClickHandler(new ClickHandler() {
+        deleteGraphModalHeader.setTitle(MSGS.confirm());
+        deleteGraphModalBody.add(new Span(MSGS.wiresGraphDeleteAlert()));
+        btnDeleteGraphModalNo.setText(MSGS.cancelButton());
+        btnDeleteGraphModalYes.setText(MSGS.apply());
+        btnDeleteGraphModalYes.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(final ClickEvent event) {
@@ -719,24 +726,24 @@ public class WiresPanelUi extends Composite {
                 gwtComponentService.findWireComponentConfigurationFromPid(token, pid, factoryPid, temporaryMap,
                         new AsyncCallback<GwtConfigComponent>() {
 
-                            @Override
-                            public void onFailure(final Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
+                    @Override
+                    public void onFailure(final Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
 
-                            @Override
-                            public void onSuccess(final GwtConfigComponent result) {
-                                // Component configuration retrieved
-                                // from the Configuration Service
-                                fillProperties(result, pid);
-                                configs.put(pid, result);
-                                if (propertiesUis.containsKey(pid)) {
-                                    propertiesUis.remove(pid);
-                                }
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
+                    @Override
+                    public void onSuccess(final GwtConfigComponent result) {
+                        // Component configuration retrieved
+                        // from the Configuration Service
+                        fillProperties(result, pid);
+                        configs.put(pid, result);
+                        if (propertiesUis.containsKey(pid)) {
+                            propertiesUis.remove(pid);
+                        }
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
             }
         });
     }
@@ -758,23 +765,23 @@ public class WiresPanelUi extends Composite {
                 gwtComponentService.findComponentConfiguration(token, pid,
                         new AsyncCallback<List<GwtConfigComponent>>() {
 
-                            @Override
-                            public void onFailure(final Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
+                    @Override
+                    public void onFailure(final Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
 
-                            @Override
-                            public void onSuccess(final List<GwtConfigComponent> components) {
-                                if (!components.isEmpty()) {
-                                    final GwtConfigComponent component = components.get(0);
-                                    Map<String, Object> props = new HashMap<>();
-                                    props.put(DELETED_WIRE_COMPONENT, true);
-                                    updateConfiguration(component.getComponentId(), props);
-                                }
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
+                    @Override
+                    public void onSuccess(final List<GwtConfigComponent> components) {
+                        if (!components.isEmpty()) {
+                            final GwtConfigComponent component = components.get(0);
+                            Map<String, Object> props = new HashMap<>();
+                            props.put(DELETED_WIRE_COMPONENT, true);
+                            updateConfiguration(component.getComponentId(), props);
+                        }
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
             }
 
         });

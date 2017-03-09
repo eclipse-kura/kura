@@ -85,12 +85,11 @@
             </b:Modal>
             <b:Modal closable="true" dataKeyboard="true" b:id="deleteModal" 
             	ui:field="deleteModal">
-			    <b:ModalBody>
-			    	<b:Alert type="WARNING" ui:field="deleteMessage"/>    
-			    </b:ModalBody>
+                <b:ModalHeader ui:field="deleteModalHeader" />
+                <b:ModalBody ui:field="deleteModalBody" />
 			    <b:ModalFooter>
-                    <b:Button type="PRIMARY" dataDismiss="MODAL" ui:field="cancelButton"/>
-			        <b:Button type="DANGER" dataDismiss="MODAL" ui:field="deleteButton"/>
+                    <b:Button addStyleNames="fa fa-times" type="PRIMARY" dataDismiss="MODAL" ui:field="cancelButton"/>
+			        <b:Button addStyleNames="fa fa-check" type="DANGER" dataDismiss="MODAL" ui:field="deleteButton"/>
 			    </b:ModalFooter>
 			</b:Modal>
         </b:Column>

@@ -171,7 +171,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug(message.activatingStore());
         this.wireRecordStoreOptions = new DbWireRecordStoreOptions(properties);
-        this.dbHelper = DbServiceHelper.getInstance(this.dbService);
+        this.dbHelper = DbServiceHelper.of(this.dbService);
         this.wireSupport = this.wireHelperService.newWireSupport(this);
         scheduleTruncation();
         logger.debug(message.activatingStoreDone());

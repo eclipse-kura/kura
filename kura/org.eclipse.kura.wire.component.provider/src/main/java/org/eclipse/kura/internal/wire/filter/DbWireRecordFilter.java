@@ -133,7 +133,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug(message.activatingFilter());
         this.options = new DbWireRecordFilterOptions(properties);
-        this.dbHelper = DbServiceHelper.getInstance(this.dbService);
+        this.dbHelper = DbServiceHelper.of(this.dbService);
         this.wireSupport = this.wireHelperService.newWireSupport(this);
         this.cacheExpirationInterval = this.options.getCacheExpirationInterval();
 

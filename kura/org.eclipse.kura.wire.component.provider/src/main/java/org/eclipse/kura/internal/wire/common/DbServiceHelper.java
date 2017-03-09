@@ -55,15 +55,15 @@ public final class DbServiceHelper {
     }
 
     /**
-     * Gets the single instance of DB Service Helper.
+     * Creates instance of {@link DbServiceHelper}
      *
      * @param dbService
-     *            the DB service
-     * @return single instance of Service Helper
+     *            the {@link DbService}
+     * @return the instance of {@link DbServiceHelper}
      * @throws KuraRuntimeException
      *             if argument is null
      */
-    public static DbServiceHelper getInstance(final DbService dbService) {
+    public static DbServiceHelper of(final DbService dbService) {
         return new DbServiceHelper(dbService);
     }
 
@@ -181,7 +181,7 @@ public final class DbServiceHelper {
     public String sanitizeSqlTableAndColumnName(final String string) {
         requireNonNull(string, message.stringNonNull());
         logger.debug(message.sanitize() + string);
-        String sanitizedName = string.replaceAll("(?=[]\\[+&|!(){}^\"~*?:\\\\-])", "_");
+        final String sanitizedName = string.replaceAll("(?=[]\\[+&|!(){}^\"~*?:\\\\-])", "_");
         return "\"" + sanitizedName + "\"";
     }
 }

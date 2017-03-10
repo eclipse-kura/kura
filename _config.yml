@@ -37,5 +37,6 @@ sections: [
     ['doc', 'Documentation'],
     ['tut', 'Tutorial'],
     ['ref', 'Reference'],
-    ['post', 'Posts']
+    ['post', 'Posts'],
+    ['qa', 'Quality Assurance']
 ]

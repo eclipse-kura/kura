@@ -125,5 +125,6 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
         <module>org.eclipse.kura.core.status.test</module>
         <module>org.eclipse.kura.core.system.test</module>
         <module>org.eclipse.kura.core.testutil</module>
+        <module>org.eclipse.kura.internal.wire.test</module>
     </modules>
 </project>

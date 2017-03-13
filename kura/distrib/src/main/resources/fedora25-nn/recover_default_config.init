@@ -19,48 +19,6 @@ case $response in
 	        fi
 	    fi
 	done
-	
-	echo Copying the $dflt_data_dir/udhcpd-usb0.conf file to the /etc directory ...
-	cp $dflt_data_dir/udhcpd-usb0.conf /etc
-	if [ "$?" = "0" ]; then
-		echo "  done"
-	fi
-
-	echo Copying the $dflt_data_dir/udhcpd-wlan0.conf file to the /etc directory ...
-	cp $dflt_data_dir/udhcpd-wlan0.conf /etc
-	if [ "$?" = "0" ]; then
-        echo "  done"
-    fi
-
-	echo Copying the $dflt_data_dir/hostapd.conf file to the /etc directory ...
-	cp $dflt_data_dir/hostapd.conf /etc
-	if [ "$?" = "0" ]; then
-        echo "  done"
-    fi
-	
-	echo Copying the $dflt_data_dir/ifcfg-eth0 file to the /etc/sysconfig/network-scripts directory ...
-    cp $dflt_data_dir/ifcfg-eth0 /etc/sysconfig/network-scripts
-    if [ "$?" = "0" ]; then
-        echo "  done"
-    fi
-
-    echo Copying the $dflt_data_dir/ifcfg-wlan0 file to the /etc/sysconfig/network-scripts directory ...
-    cp $dflt_data_dir/ifcfg-wlan0 /etc/sysconfig/network-scripts
-    if [ "$?" = "0" ]; then
-        echo "  done"
-    fi
-
-	echo Copying the $dflt_data_dir/iptables file to the /etc/sysconfig directory ...
-	cp $dflt_data_dir/iptables /etc/sysconfig
-	if [ "$?" = "0" ]; then
-        echo "  done"
-    fi
-
-	echo Copying the $dflt_data_dir/kuranet.conf file to the $data_dir directory ...
-	cp $dflt_data_dir/kuranet.conf $data_dir
-	if [ "$?" = "0" ]; then
-        echo "  done"
-    fi
 	echo
 	echo "Default configuration has been restored. Please reboot the unit for configuration to take effect."
         ;;

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2016 Red Hat Inc and others
+# Copyright (c) 2017 Red Hat Inc and others
 #
 #  All rights reserved. This program and the accompanying materials
 #  are made available under the terms of the Eclipse Public License v1.0
@@ -31,18 +31,6 @@ fi
 #set up recover default configuration script
 cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/.data/.recoverDefaultConfig.sh
 chmod +x ${INSTALL_DIR}/kura/.data/.recoverDefaultConfig.sh
-
-#set up networking configuration
-mac_addr=$(head /sys/class/net/eth0/address | tr '[:lower:]' '[:upper:]')
-
-OLD_PATH=$(pwd)
-SELINUX_KURA=$(semodule -l | grep selinuxKura)
-if [ -z $SELINUX_KURA ]; then
-	echo "Applying semodule..."
-	cd ${INSTALL_DIR}/kura/install/
-    semodule -i selinuxKura.pp
-    cd ${OLD_PATH}
-fi
 
 #copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/data/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml

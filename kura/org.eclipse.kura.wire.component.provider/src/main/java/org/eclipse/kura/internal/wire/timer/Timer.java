@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * The Class Timer represents a Wire Component which triggers a ticking event on
  * every interval as configured. It fires the event on every tick.
  */
-public final class Timer implements WireEmitter, ConfigurableComponent {
+public class Timer implements WireEmitter, ConfigurableComponent {
 
     /** Group Identifier for Quartz Job and Triggers */
     private static final String GROUP_ID = "wires";
@@ -105,7 +105,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
         this.wireSupport = this.wireHelperService.newWireSupport(this);
         this.timerOptions = new TimerOptions(properties);
         try {
-            this.scheduler = new StdSchedulerFactory().getScheduler();
+            this.scheduler = createScheduler();
             doUpdate();
         } catch (final SchedulerException e) {
             logger.error(message.schedulerException(), e);
@@ -123,7 +123,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
         logger.debug(message.updatingTimer());
         this.timerOptions = new TimerOptions(properties);
         try {
-            this.scheduler = new StdSchedulerFactory().getScheduler();
+            this.scheduler = createScheduler();
             doUpdate();
         } catch (final SchedulerException e) {
             logger.error(message.schedulerException(), e);
@@ -147,6 +147,10 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
             }
         }
         logger.debug(message.deactivatingTimerDone());
+    }
+
+    protected Scheduler createScheduler() throws SchedulerException {
+        return new StdSchedulerFactory().getScheduler();
     }
 
     /**

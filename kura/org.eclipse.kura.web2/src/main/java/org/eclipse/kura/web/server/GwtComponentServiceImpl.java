@@ -126,56 +126,65 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         checkXSRFToken(xsrfToken);
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         try {
-
             // Build the new properties
             Map<String, Object> properties = new HashMap<>();
-            ComponentConfiguration backupCC = cs.getComponentConfiguration(gwtCompConfig.getComponentId());
-            Map<String, Object> backupConfigProp = backupCC.getConfigurationProperties();
+            ComponentConfiguration currentCC = cs.getComponentConfiguration(gwtCompConfig.getComponentId());
+
+            Map<String, Object> currentConfigProp = currentCC.getConfigurationProperties();
             for (GwtConfigParameter gwtConfigParam : gwtCompConfig.getParameters()) {
                 Object objValue;
+                Object currentValue = currentConfigProp.get(gwtConfigParam.getId());
 
-                ComponentConfiguration currentCC = cs.getComponentConfiguration(gwtCompConfig.getComponentId());
-                Map<String, Object> currentConfigProp = currentCC.getConfigurationProperties();
-                Object currentObjValue = currentConfigProp.get(gwtConfigParam.getId());
-
-                int cardinality = gwtConfigParam.getCardinality();
-                if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
-
-                    String strValue = gwtConfigParam.getValue();
-
-                    if (currentObjValue instanceof Password && PLACEHOLDER.equals(strValue)) {
-                        objValue = currentConfigProp.get(gwtConfigParam.getId());
-                    } else {
-                        objValue = getObjectValue(gwtConfigParam, strValue);
-                    }
+                boolean isReadOnly = gwtConfigParam.getMin() != null
+                        && gwtConfigParam.getMin().equals(gwtConfigParam.getMax());
+                if (isReadOnly) {
+                    objValue = currentValue;
                 } else {
-
-                    String[] strValues = gwtConfigParam.getValues();
-
-                    if (currentObjValue instanceof Password[]) {
-                        Password[] currentPasswordValue = (Password[]) currentObjValue;
-                        for (int i = 0; i < strValues.length; i++) {
-                            if (PLACEHOLDER.equals(strValues[i])) {
-                                strValues[i] = new String(currentPasswordValue[i].getPassword());
-                            }
-                        }
-                    }
-
-                    objValue = getObjectValue(gwtConfigParam, strValues);
+                    objValue = getUserDefinedObject(gwtConfigParam, currentValue);
                 }
                 properties.put(gwtConfigParam.getId(), objValue);
             }
 
             // Force kura.service.pid into properties, if originally present
-            if (backupConfigProp.get(KURA_SERVICE_PID) != null) {
-                properties.put(KURA_SERVICE_PID, backupConfigProp.get(KURA_SERVICE_PID));
+            if (currentConfigProp.get(KURA_SERVICE_PID) != null) {
+                properties.put(KURA_SERVICE_PID, currentConfigProp.get(KURA_SERVICE_PID));
             }
             //
             // apply them
             cs.updateConfiguration(gwtCompConfig.getComponentId(), properties);
-        } catch (Throwable t) {
-            KuraExceptionHandler.handle(t);
+        } catch (KuraException e) {
+            KuraExceptionHandler.handle(e);
         }
+    }
+
+    private Object getUserDefinedObject(GwtConfigParameter gwtConfigParam, Object currentObjValue)
+            throws KuraException {
+        Object objValue;
+
+        int cardinality = gwtConfigParam.getCardinality();
+        if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
+            String strValue = gwtConfigParam.getValue();
+
+            if (currentObjValue instanceof Password && PLACEHOLDER.equals(strValue)) {
+                objValue = currentObjValue;
+            } else {
+                objValue = getObjectValue(gwtConfigParam, strValue);
+            }
+        } else {
+            String[] strValues = gwtConfigParam.getValues();
+
+            if (currentObjValue instanceof Password[]) {
+                Password[] currentPasswordValue = (Password[]) currentObjValue;
+                for (int i = 0; i < strValues.length; i++) {
+                    if (PLACEHOLDER.equals(strValues[i])) {
+                        strValues[i] = new String(currentPasswordValue[i].getPassword());
+                    }
+                }
+            }
+
+            objValue = getObjectValue(gwtConfigParam, strValues);
+        }
+        return objValue;
     }
 
     @Override
@@ -317,6 +326,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     private Object getObjectValue(GwtConfigParameter gwtConfigParam, String strValue) {
         Object objValue = null;
         GwtConfigParameterType gwtType = gwtConfigParam.getType();
+
         if (gwtType == GwtConfigParameterType.STRING) {
             objValue = strValue;
         } else if (strValue != null && !strValue.trim().isEmpty()) {

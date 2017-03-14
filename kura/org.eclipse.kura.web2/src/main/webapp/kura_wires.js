@@ -23,7 +23,7 @@ var kuraWires = (function() {
 	var paperScaleMax = 1.5;
 	var paperScaleMin = .5;
 	var paperScaling = .2;
-	var selectedElement, oldSelectedPid;
+	var selectedElement;
 	var oldCellView;
 	var elementsContainerTemp = [];
 	var eventSourceSessionId; // Server Sent Events Session ID
@@ -31,6 +31,7 @@ var kuraWires = (function() {
 	// Graph if any instance is recently deleted.
 	var isComponentDeleted;
 	var eventSource;
+	var selectionRefreshPending = false;
 
 	/*
 	 * / Public functions
@@ -54,6 +55,10 @@ var kuraWires = (function() {
 
 	function generateId() {
 		return new Date().getTime()
+	}
+	
+	client.selectionCompleted = function() {
+		selectionRefreshPending = false;
 	}
 
 	$(document).ready(function() {
@@ -242,9 +247,9 @@ var kuraWires = (function() {
 			}
 			if (typeof cellView !== 'undefined'
 					&& typeof cellView.sourceBBox === 'undefined') {
-				if (oldSelectedPid !== pid) {
+				if (!selectionRefreshPending) {
+					selectionRefreshPending = true;
 					jsniUpdateSelection(pid, factoryPid);
-					oldSelectedPid = pid;
 					isUpdateSelectionTriggered = true;
 				}
 				cellView.highlight();
@@ -255,7 +260,6 @@ var kuraWires = (function() {
 		paper.on('blank:pointerdown', function(cellView, evt, x, y) {
 			jsniUpdateSelection("", "");
 			selectedElement = "";
-			oldSelectedPid = null;
 			if (oldCellView != null) {
 				oldCellView.unhighlight();
 				oldCellView = null;

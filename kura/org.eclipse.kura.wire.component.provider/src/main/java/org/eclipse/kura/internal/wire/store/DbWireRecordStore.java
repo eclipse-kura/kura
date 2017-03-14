@@ -83,7 +83,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 
     private static final String SQL_CREATE_TABLE = "CREATE TABLE IF NOT EXISTS {0} (TIMESTAMP BIGINT NOT NULL PRIMARY KEY);";
 
-    private static final String SQL_DELETE_RANGE_TABLE = "DELETE FROM {0} LIMIT {1};";
+    private static final String SQL_DELETE_RANGE_TABLE = "DELETE FROM {0} WHERE rownum() <= (SELECT count(*) FROM {0}) - {1};";
 
     private static final String SQL_DROP_COLUMN = "ALTER TABLE {0} DROP COLUMN {1};";
 

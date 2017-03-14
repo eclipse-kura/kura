@@ -237,8 +237,8 @@
                 </b:Form>
             </b:ModalBody>
             <b:ModalFooter>
-                <b:Button icon="REMOVE" type="PRIMARY" dataDismiss="MODAL" ui:field="buttonNewComponentCancel" />
-                <b:Button type="PRIMARY" dataDismiss="MODAL" ui:field="buttonNewComponent" />
+                <b:Button addStyleNames="fa fa-times" type="PRIMARY" dataDismiss="MODAL" ui:field="buttonNewComponentCancel" />
+                <b:Button addStyleNames="fa fa-check" type="PRIMARY" dataDismiss="MODAL" ui:field="buttonNewComponent" />
             </b:ModalFooter>
         </b:Modal>
         <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="error-pid-modal"

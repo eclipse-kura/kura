@@ -83,8 +83,7 @@
 		</b:Row>
 		<b:Modal closable="true" fade="true" dataBackdrop="STATIC"
 			dataKeyboard="true" b:id="asset-comp-modal" ui:field="assetModal">
-			<b:ModalHeader addStyleNames="{style.asset-comp-modal-header}">
-			</b:ModalHeader>
+			<b:ModalHeader addStyleNames="{style.asset-comp-modal-header}"/>
 			<b:ModalBody addStyleNames="{style.asset-comp-modal-body}">
 				<b:Form>
 					<b:FormGroup ui:field="driverInstanceForm"
@@ -106,50 +105,39 @@
 				</b:Form>
 			</b:ModalBody>
 			<b:ModalFooter>
-                <b:Button b:id="btn-create-comp-cancel" icon="REMOVE" type="PRIMARY" dataDismiss="MODAL" ui:field="btnCancelComp"/>
+                <b:Button b:id="btn-create-comp-cancel" icon="REMOVE" type="PRIMARY" dataDismiss="MODAL" ui:field="btnAssetModalNo"/>
 				<b:Button icon="SAVE" type="PRIMARY" b:id="btn-create-comp"
-					ui:field="btnCreateComp"/>
+					ui:field="btnAssetModalYes"/>
 			</b:ModalFooter>
 		</b:Modal>
 		<b:Modal closable="true" fade="true" dataBackdrop="STATIC"
-			dataKeyboard="true" b:id="asset-comp-delete-modal" ui:field="deleteModal">
-			<b:ModalHeader addStyleNames="{style.asset-comp-modal-header}">
-			</b:ModalHeader>
-			<b:ModalBody>
-				<b:Alert type="DANGER" ui:field="deleteModalAlert"/>
-			</b:ModalBody>
+			dataKeyboard="true" b:id="asset-comp-delete-modal" ui:field="deleteCompModal">
+			<b:ModalHeader ui:field="deleteCompModalHeader" />
+			<b:ModalBody ui:field="deleteCompModalBody" />
 			<b:ModalFooter>
-                <b:Button icon="THUMBS_DOWN" type="PRIMARY" dataDismiss="MODAL" ui:field="btnDeleteCancel"/>
-				<b:Button icon="THUMBS_UP" type="PRIMARY" b:id="btn-delete-comp"
-					ui:field="btnDeleteYes"/>
+                <b:Button addStyleNames="fa fa-times" type="PRIMARY" dataDismiss="MODAL" ui:field="btnDeleteCompModalNo"/>
+				<b:Button addStyleNames="fa fa-check" type="PRIMARY" b:id="btn-delete-comp"
+					ui:field="btnDeleteCompModalYes"/>
 			</b:ModalFooter>
 		</b:Modal>
 		<b:Modal closable="true" fade="true" dataBackdrop="STATIC"
-			dataKeyboard="true" b:id="asset-comp-save-modal" ui:field="saveModal">
-			<b:ModalHeader addStyleNames="{style.asset-comp-modal-header}">
-			</b:ModalHeader>
-			<b:ModalBody>
-				<b:Alert type="INFO" ui:field="saveGraphAlert">
-					<b.html:Strong ui:field="saveGraphAlertText" />
-				</b:Alert>
-			</b:ModalBody>
+			dataKeyboard="true" b:id="asset-comp-save-modal" ui:field="saveGraphModal">
+			<b:ModalHeader ui:field="saveGraphModalHeader"/>
+			<b:ModalBody ui:field="saveGraphModalBody" />
 			<b:ModalFooter>
-				<b:Button icon="THUMBS_DOWN" type="PRIMARY" dataDismiss="MODAL" ui:field="btnSaveNo"/>
-                <b:Button icon="THUMBS_UP" type="PRIMARY" b:id="btn-save-graph"
-                    ui:field="btnSaveYes"/>
+				<b:Button addStyleNames="fa fa-times" type="PRIMARY" dataDismiss="MODAL" ui:field="btnSaveGraphModalNo"/>
+                <b:Button addStyleNames="fa fa-check" type="PRIMARY" b:id="btn-save-graph"
+                    ui:field="btnSaveGraphModalYes"/>
 			</b:ModalFooter>
 		</b:Modal>
 		<b:Modal closable="true" fade="true" dataBackdrop="STATIC"
 			dataKeyboard="true" b:id="delete-graph-modal" ui:field="deleteGraphModal">
-			<b:ModalHeader addStyleNames="{style.asset-comp-modal-header}">
-			</b:ModalHeader>
-			<b:ModalBody>
-				<b:Alert type="DANGER" ui:field="deleteGraphAlert"/>
-			</b:ModalBody>
+			<b:ModalHeader ui:field="deleteGraphModalHeader" />
+			<b:ModalBody ui:field="deleteGraphModalBody" />
 			<b:ModalFooter>
-                <b:Button icon="THUMBS_DOWN" type="PRIMARY" dataDismiss="MODAL" ui:field="btnDeleteGraphNo"/>
-				<b:Button icon="THUMBS_UP" type="PRIMARY" b:id="btn-delete-graph-confirm"
-					ui:field="btnDeleteGraphYes"/>
+                <b:Button addStyleNames="fa fa-times" type="PRIMARY" dataDismiss="MODAL" ui:field="btnDeleteGraphModalNo"/>
+				<b:Button addStyleNames="fa fa-check" type="PRIMARY" b:id="btn-delete-graph-confirm"
+					ui:field="btnDeleteGraphModalYes"/>
 			</b:ModalFooter>
 		</b:Modal>
 		<b:Modal closable="true" fade="true" dataBackdrop="STATIC"

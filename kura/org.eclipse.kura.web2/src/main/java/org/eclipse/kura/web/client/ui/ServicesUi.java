@@ -85,13 +85,18 @@ public class ServicesUi extends AbstractServicesUi {
     Button cancelButton;
 
     @UiField
-    Modal incompleteFieldsModal, deleteModal;
+    Modal incompleteFieldsModal;
     @UiField
     Alert incompleteFields;
     @UiField
     Text incompleteFieldsText;
+
     @UiField
-    Alert deleteMessage;
+    Modal deleteModal;
+    @UiField
+    ModalHeader deleteModalHeader;
+    @UiField
+    ModalBody deleteModalBody;
 
     //
     // Public methods
@@ -122,25 +127,26 @@ public class ServicesUi extends AbstractServicesUi {
             }
         });
 
-        delete.setText(MSGS.delete());
-        delete.addClickHandler(new ClickHandler() {
+        this.delete.setText(MSGS.delete());
+        this.delete.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                deleteModal.show();
+                ServicesUi.this.deleteModal.show();
             }
         });
 
-        deleteButton.addClickHandler(new ClickHandler() {
+        this.deleteButton.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
                 delete();
             }
         });
-        deleteButton.setText(MSGS.delete());
-        cancelButton.setText(MSGS.cancelButton());
-        deleteMessage.setText(MSGS.deleteWarning());
+        this.deleteButton.setText(MSGS.delete());
+        this.cancelButton.setText(MSGS.cancelButton());
+        this.deleteModalBody.add(new Span(MSGS.deleteWarning()));
+        this.deleteModalHeader.setTitle(MSGS.confirm());
 
         renderForm();
         initInvalidDataModal();
@@ -148,7 +154,7 @@ public class ServicesUi extends AbstractServicesUi {
         setDirty(false);
         this.apply.setEnabled(false);
         this.reset.setEnabled(false);
-        delete.setEnabled(configurableComponent.isFactoryComponent());
+        this.delete.setEnabled(this.configurableComponent.isFactoryComponent());
     }
 
     @Override
@@ -217,9 +223,9 @@ public class ServicesUi extends AbstractServicesUi {
     }
 
     public void delete() {
-        if (configurableComponent.isFactoryComponent()) {
+        if (this.configurableComponent.isFactoryComponent()) {
             EntryClassUi.showWaitModal();
-            gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+            this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                 @Override
                 public void onFailure(Throwable ex) {
@@ -229,8 +235,8 @@ public class ServicesUi extends AbstractServicesUi {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
-                    gwtComponentService.deleteFactoryConfiguration(token, configurableComponent.getComponentId(), true,
-                            new AsyncCallback<Void>() {
+                    ServicesUi.this.gwtComponentService.deleteFactoryConfiguration(token,
+                            ServicesUi.this.configurableComponent.getComponentId(), true, new AsyncCallback<Void>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
@@ -240,12 +246,11 @@ public class ServicesUi extends AbstractServicesUi {
 
                         @Override
                         public void onSuccess(Void result) {
-                            modal.hide();
-                            logger.info(MSGS.info() + ": " + MSGS.deviceConfigDeleted());
-                            apply.setEnabled(false);
-                            reset.setEnabled(false);
+                            ServicesUi.this.deleteModal.hide();
+                            ServicesUi.this.apply.setEnabled(false);
+                            ServicesUi.this.reset.setEnabled(false);
                             setDirty(false);
-                            entryClass.fetchAvailableServices();
+                            ServicesUi.this.entryClass.fetchAvailableServices();
                             EntryClassUi.hideWaitModal();
                         }
                     });
@@ -372,7 +377,7 @@ public class ServicesUi extends AbstractServicesUi {
                                         ServicesUi.this.apply.setEnabled(false);
                                         ServicesUi.this.reset.setEnabled(false);
                                         setDirty(false);
-                                        originalConfig = ServicesUi.this.configurableComponent;
+                                        ServicesUi.this.originalConfig = ServicesUi.this.configurableComponent;
                                         ServicesUi.this.entryClass.fetchAvailableServices();
                                         EntryClassUi.hideWaitModal();
                                     }

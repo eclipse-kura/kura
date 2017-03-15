@@ -2030,10 +2030,17 @@ public class NetworkConfiguration {
 
                     dnServers.add(routerAddress);
 
-                    DhcpServerConfigIP4 dhcpServerConfig = new DhcpServerConfigIP4(interfaceName, dhcpServerEnabled,
+                    DhcpServerConfigIP4 dhcpServerConfig = null;
+                    try {
+                    	dhcpServerConfig = DhcpServerConfigIP4.newDhcpServerConfigIP4(interfaceName, dhcpServerEnabled,
                             subnet, routerAddress, subnetMask, defaultLeaseTime, maximumLeaseTime, prefix, rangeStart,
                             rangeEnd, passDns, dnServers);
-                    netConfigs.add(dhcpServerConfig);
+                    } catch (KuraException e) {
+                    	s_logger.error("Failed to craete new DhcpServerConfigIP4 object - {}", e);
+                    }
+                    if (dhcpServerConfig != null) {
+                    	netConfigs.add(dhcpServerConfig);
+                    }
                 } else {
                     s_logger.trace("Not including DhcpServerConfig - router: " + routerAddress + ", range start: "
                             + rangeStart + ", range end: " + rangeEnd);

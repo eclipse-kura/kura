@@ -1220,11 +1220,21 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     s_logger.debug("DhcpServerConfigIP4 - start: {}, end: {}, prefix: {}, subnet: {}, subnetMask: {}",
                             new Object[] { rangeStart.getHostAddress(), rangeEnd.getHostAddress(), prefix,
                                     subnet.getHostAddress(), subnetMask.getHostAddress() });
-                    DhcpServerConfigIP4 dhcpServerConfigIP4 = new DhcpServerConfigIP4(config.getName(), true, subnet,
+                    DhcpServerConfigIP4 dhcpServerConfigIP4 = null;
+                    try {
+                    	dhcpServerConfigIP4 = DhcpServerConfigIP4.newDhcpServerConfigIP4(config.getName(), true, subnet,
                             routerAddress, subnetMask, defaultLeaseTime, maximumLeaseTime, prefix, rangeStart, rangeEnd,
                             passDns, dnsServers);
-
-                    netConfigs.add(dhcpServerConfigIP4);
+                    	if (dhcpServerConfigIP4 != null) {
+                        	netConfigs.add(dhcpServerConfigIP4);
+                        } else {
+                        	s_logger.error("Failed to craete new DhcpServerConfigIP4 object. Please verify that DHCP pool IP addresses (see below) are in the {} subnet.", subnet.getHostAddress());
+                        	s_logger.error("DHCP Pool: range from {} to {}", rangeStart.getHostAddress(), rangeEnd.getHostAddress());
+                        }
+                    } catch (KuraException e) {
+                    	s_logger.error("Failed to craete new DhcpServerConfigIP4 object - {}", e);
+                    }
+                    
                 }
 
                 if (routerMode.equals(GwtNetRouterMode.netRouterDchpNat.name())

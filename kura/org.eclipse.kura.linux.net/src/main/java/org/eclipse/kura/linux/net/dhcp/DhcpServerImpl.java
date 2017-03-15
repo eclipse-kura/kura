@@ -167,9 +167,12 @@ public class DhcpServerImpl implements DhcpServer {
                         + rangeEnd.getHostAddress() + "\n\t\tpassDns: " + passDns + "\n\t\tdnsList: "
                         + dnsList.toString());
 
-                this.m_dhcpServerConfig4 = new DhcpServerConfigIP4(interfaceName, enabled, subnet, router, netmask,
+                try {
+                	this.m_dhcpServerConfig4 = DhcpServerConfigIP4.newDhcpServerConfigIP4(interfaceName, enabled, subnet, router, netmask,
                         defaultLeaseTime, maxLeaseTime, (short) 24, rangeStart, rangeEnd, passDns, dnsList);
-
+                } catch (KuraException e) {
+                	s_logger.error("Failed to craete new DhcpServerConfigIP4 object - {}", e);
+                }
                 br.close();
                 br = null;
             } catch (FileNotFoundException e) {

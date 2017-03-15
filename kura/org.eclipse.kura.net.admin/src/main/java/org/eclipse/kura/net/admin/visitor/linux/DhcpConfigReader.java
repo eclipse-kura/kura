@@ -224,9 +224,12 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
                     + " | rangeStart: " + rangeStart.getHostAddress() + " | rangeEnd: " + rangeEnd.getHostAddress()
                     + " | passDns: " + passDns + " | dnsList: " + dnsList.toString());
 
-            dhcpServerConfigIP4 = new DhcpServerConfigIP4(interfaceName, enabled, subnet, router, netmask,
-                    defaultLeaseTime, maxLeaseTime, prefix, rangeStart, rangeEnd, passDns, dnsList);
-
+            try {
+	            dhcpServerConfigIP4 = DhcpServerConfigIP4.newDhcpServerConfigIP4(interfaceName, enabled, subnet, router, netmask,
+	                    defaultLeaseTime, maxLeaseTime, prefix, rangeStart, rangeEnd, passDns, dnsList);
+            } catch (KuraException e) {
+            	s_logger.error("Failed to craete new DhcpServerConfigIP4 object - {}", e);
+            }
         } catch (FileNotFoundException e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
         } catch (IOException e) {
@@ -313,8 +316,12 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
                     + " | rangeStart: " + rangeStart.getHostAddress() + " | rangeEnd: " + rangeEnd.getHostAddress()
                     + " | passDns: " + passDns + " | dnsList: " + dnsList.toString());
 
-            dhcpServerConfigIP4 = new DhcpServerConfigIP4(interfaceName, enabled, subnet, router, netmask,
+            try {
+            	dhcpServerConfigIP4 = DhcpServerConfigIP4.newDhcpServerConfigIP4(interfaceName, enabled, subnet, router, netmask,
                     defaultLeaseTime, maxLeaseTime, prefix, rangeStart, rangeEnd, passDns, dnsList);
+            } catch (KuraException e) {
+            	s_logger.error("Failed to craete new DhcpServerConfigIP4 object - {}", e);
+            }
 
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);

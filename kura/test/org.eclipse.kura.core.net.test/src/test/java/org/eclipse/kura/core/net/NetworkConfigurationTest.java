@@ -739,8 +739,16 @@ public class NetworkConfigurationTest {
 		NetInterfaceAddressConfigImpl addressConfig = new NetInterfaceAddressConfigImpl();
 
 		List<NetConfig> netConfigs = new ArrayList<>();
-		netConfigs
-				.add(new DhcpServerConfigIP4(null, false, null, null, null, 0, 0, (short) 0, null, null, false, null));
+		
+		DhcpServerConfigIP4 dhcpServerConfig = null;
+		try {
+			dhcpServerConfig = DhcpServerConfigIP4.newDhcpServerConfigIP4(null, false, null, null, null, 0, 0, (short) 0, null, null, false, null)
+		} catch (KuraException e) {
+			fail("failed: " + e);
+		}
+		if (dhcpServerConfig != null) {		
+			netConfigs.add(dhcpServerConfig);
+		}
 		netConfigs.add(new FirewallAutoNatConfig());
 		netConfigs.add(null);
 		netConfigs.add(new MockConfig());

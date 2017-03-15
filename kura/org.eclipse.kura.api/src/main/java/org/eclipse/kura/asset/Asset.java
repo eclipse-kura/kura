@@ -72,6 +72,25 @@ public interface Asset {
     public List<AssetRecord> read(List<Long> channelIds) throws KuraException;
 
     /**
+     * Performs a read on all READ or READ_WRITE channels that are defined on this asset and returns
+     * the result as a list of {@link AssetRecord} instances.
+     * 
+     * @see Asset#read(List)
+     *
+     * @throws KuraRuntimeException
+     *             if the method is not implemented by the asset then specific
+     *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
+     *             needs to be set in the thrown {@link KuraRuntimeException}
+     * @throws KuraException
+     *             if the connection to the asset was interrupted, then error
+     *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
+     *             in the thrown {@link KuraException}.
+     * @return the list of asset records which comprises the currently read
+     *         value in case of success or the reason of failure
+     */
+    public List<AssetRecord> readAllChannels() throws KuraException;
+
+    /**
      * Registers asset listener for the provided channel name for a monitor
      * operation on it.
      *

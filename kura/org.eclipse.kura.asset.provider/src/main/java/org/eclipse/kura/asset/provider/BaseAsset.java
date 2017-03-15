@@ -32,8 +32,10 @@ import static org.eclipse.kura.asset.ChannelType.WRITE;
 import static org.eclipse.kura.driver.DriverConstants.CHANNEL_ID;
 import static org.eclipse.kura.driver.DriverConstants.CHANNEL_VALUE_TYPE;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -47,6 +49,7 @@ import org.eclipse.kura.asset.AssetEvent;
 import org.eclipse.kura.asset.AssetRecord;
 import org.eclipse.kura.asset.AssetStatus;
 import org.eclipse.kura.asset.Channel;
+import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.asset.listener.AssetListener;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -60,10 +63,12 @@ import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.Driver.ConnectionException;
+import org.eclipse.kura.driver.DriverConstants;
 import org.eclipse.kura.driver.DriverEvent;
 import org.eclipse.kura.driver.DriverFlag;
 import org.eclipse.kura.driver.DriverRecord;
 import org.eclipse.kura.driver.DriverStatus;
+import org.eclipse.kura.driver.PreparedRead;
 import org.eclipse.kura.driver.listener.DriverListener;
 import org.eclipse.kura.internal.asset.provider.AssetOptions;
 import org.eclipse.kura.internal.asset.provider.DriverTrackerCustomizer;
@@ -113,6 +118,10 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     private ServiceTracker<Driver, Driver> driverServiceTracker;
 
+    private PreparedRead preparedRead;
+
+    private boolean hasReadChannels;
+
     /**
      * Instantiates a new asset instance.
      */
@@ -132,24 +141,22 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug(message.activating());
         this.context = componentContext;
-        this.properties = properties;
-        retrieveConfigurationsFromProperties(properties);
-        attachDriver(this.assetConfiguration.getDriverPid());
+        updated(properties);
         logger.debug(message.activatingDone());
     }
 
     /**
-     * OSGi service component callback while updation.
+     * OSGi service component update callback.
      *
      * @param properties
      *            the service properties
      */
     public void updated(final Map<String, Object> properties) {
         logger.debug(message.updating());
+        this.properties = properties;
         retrieveConfigurationsFromProperties(properties);
         attachDriver(this.assetConfiguration.getDriverPid());
         logger.debug(message.updatingDone());
-
     }
 
     /**
@@ -190,6 +197,10 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         requireNonNull(driverId, message.driverPidNonNull());
         logger.debug(message.driverAttach());
         try {
+            if (this.driverServiceTracker != null) {
+                this.driverServiceTracker.close();
+                this.driverServiceTracker = null;
+            }
             final DriverTrackerCustomizer driverTrackerCustomizer = new DriverTrackerCustomizer(
                     this.context.getBundleContext(), this, driverId);
             this.driverServiceTracker = new ServiceTracker<>(this.context.getBundleContext(), Driver.class.getName(),
@@ -251,8 +262,13 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         return this.assetConfiguration;
     }
 
-    public void setDriver(Driver driver) {
+    public synchronized void setDriver(Driver driver) {
         this.driver = driver;
+        if (driver != null) {
+            List<DriverRecord> readRecords = getAllReadRecords();
+            hasReadChannels = !readRecords.isEmpty();
+            tryPrepareRead(readRecords);
+        }
     }
 
     public Driver getDriver() {
@@ -446,6 +462,73 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         }
     }
 
+    private List<DriverRecord> getAllReadRecords() {
+        List<DriverRecord> readRecords = new ArrayList<DriverRecord>();
+
+        if (this.assetConfiguration != null) {
+            for (Entry<Long, Channel> e : assetConfiguration.getAssetChannels().entrySet()) {
+                final Channel channel = e.getValue();
+                if (channel.getType() == ChannelType.READ || channel.getType() == ChannelType.READ_WRITE) {
+                    readRecords.add(createDriverRecordForChannelRead(channel));
+                }
+            }
+        }
+
+        return readRecords;
+    }
+
+    private DriverRecord createDriverRecordForChannelRead(final Channel channel) {
+        final DriverRecord driverRecord = new DriverRecord();
+        final Map<String, Object> channelConfiguration = CollectionUtil.newHashMap();
+
+        if (channel != null) {
+            channelConfiguration.putAll(channel.getConfiguration());
+            channelConfiguration.put(CHANNEL_VALUE_TYPE.value(), channel.getValueType());
+        }
+        channelConfiguration.put(CHANNEL_ID.value(), channel.getId());
+        driverRecord.setChannelConfig(channelConfiguration);
+        return driverRecord;
+    }
+
+    private AssetRecord createAssetRecordFromDriverRecord(DriverRecord driverRecord) throws KuraException {
+        Long channelId = (Long) driverRecord.getChannelConfig().get(DriverConstants.CHANNEL_ID.value());
+
+        AssetRecord assetRecord = new AssetRecord(channelId);
+        prepareAssetRecord(driverRecord, assetRecord);
+        return assetRecord;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public List<AssetRecord> readAllChannels() throws KuraException {
+        requireNonNull(this.driver, message.driverNonNull());
+        logger.debug(message.readingChannels());
+
+        final List<AssetRecord> assetRecords = CollectionUtil.newArrayList();
+        final List<DriverRecord> driverRecords;
+
+        this.monitor.lock();
+        try {
+            if (preparedRead != null) {
+                driverRecords = preparedRead.execute();
+            } else {
+                driverRecords = driver.read(getAllReadRecords());
+            }
+        } catch (final ConnectionException ce) {
+            throw new KuraException(KuraErrorCode.CONNECTION_FAILED, ce);
+        } finally {
+            this.monitor.unlock();
+        }
+
+        if (driverRecords != null) {
+            for (final DriverRecord driverRecord : driverRecords) {
+                assetRecords.add(createAssetRecordFromDriverRecord(driverRecord));
+            }
+        }
+        logger.debug(message.readingChannelsDone());
+        return assetRecords;
+    }
+
     /** {@inheritDoc} */
     @Override
     public List<AssetRecord> read(final List<Long> channelIds) throws KuraException {
@@ -461,7 +544,6 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         final Map<Long, Channel> channels = this.assetConfiguration.getAssetChannels();
         for (final AssetRecord assetRecord : assetRecords) {
             final long id = assetRecord.getChannelId();
-            final Map<String, Object> channelConfiguration = CollectionUtil.newHashMap();
 
             final Channel channel = channels.get(id);
             if (channel == null) {
@@ -470,14 +552,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 assetRecord.setAssetStatus(new AssetStatus(FAILURE, message.channelTypeNotReadable(), null));
             }
 
-            final DriverRecord driverRecord = new DriverRecord();
-            if (channel != null) {
-                channelConfiguration.putAll(channel.getConfiguration());
-                channelConfiguration.put(CHANNEL_VALUE_TYPE.value(), channel.getValueType());
-            }
-            channelConfiguration.put(CHANNEL_ID.value(), assetRecord.getChannelId());
-            driverRecord.setChannelConfig(channelConfiguration);
-            driverRecords.add(driverRecord);
+            driverRecords.add(createDriverRecordForChannelRead(channel));
         }
 
         this.monitor.lock();
@@ -494,6 +569,10 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         }
         logger.debug(message.readingChannelsDone());
         return assetRecords;
+    }
+
+    public boolean hasReadChannels() {
+        return hasReadChannels;
     }
 
     /** {@inheritDoc} */
@@ -615,7 +694,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         } else {
             this.assetOptions.update(properties);
         }
-        if (this.assetConfiguration == null && this.assetOptions != null) {
+        if (this.assetOptions != null) {
             this.assetConfiguration = this.assetOptions.getAssetConfiguration();
         }
         logger.debug(message.retrievingConfDone());
@@ -648,6 +727,21 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         }
         this.assetListeners.remove(assetListener);
         logger.debug(message.unregisteringListenerDone());
+    }
+
+    private synchronized void tryPrepareRead(List<DriverRecord> readRecords) {
+        if (this.preparedRead != null) {
+            try {
+                this.preparedRead.close();
+            } catch (Exception e) {
+                logger.warn(message.errorClosingPreparingRead(), e);
+            }
+            this.preparedRead = null;
+        }
+
+        if (!readRecords.isEmpty() && driver != null) {
+            this.preparedRead = driver.prepareRead(readRecords);
+        }
     }
 
     /** {@inheritDoc} */
@@ -700,5 +794,4 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         logger.debug(message.writingDone());
         return assetRecords;
     }
-
 }

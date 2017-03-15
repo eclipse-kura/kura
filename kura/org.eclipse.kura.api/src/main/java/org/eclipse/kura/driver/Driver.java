@@ -211,4 +211,26 @@ public interface Driver {
      */
     public List<DriverRecord> write(List<DriverRecord> records) throws ConnectionException;
 
+    /**
+     * This method allows the driver to perform protocol specific optimizations in order to accelerate the execution of
+     * batches of read requests having the same channel configuration.
+     * The result of this optimization will be returned by the driver as a {@link PreparedRead} instance that can be
+     * used to perform the requests.
+     * In order to improve efficiency a driver should validate the channel configuration of the provided channels during
+     * this method call.
+     * It is also permitted to the implementation of the {@link PreparedRead#execute()} and
+     * {@link PreparedRead#getDriverRecords()} methods to return the same {@link DriverRecord} instances provided as an
+     * argument to this method.
+     * If the validation of the channel configuration fails for some channels, the driver must not throw an exception
+     * but it is required to return driver records with proper error flags set as a result of the
+     * {@link PreparedRead#execute()} call.
+     * 
+     * @see PreparedRead
+     * @param records
+     *            The list of driver records that represent the request to be optimized.
+     * @return The {@link PreparedRead} instance
+     * @throws NullPointerException
+     *             if the provided list is null
+     */
+    public PreparedRead prepareRead(List<DriverRecord> records);
 }

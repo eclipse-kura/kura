@@ -200,8 +200,11 @@ public class FileServlet extends HttpServlet {
                 }
                 MetaTypeInformation mti = mts.getMetaTypeInformation(b);
 
-                String[] pids = mti.getPids();
-                for (String p : pids) {
+                if (mti == null) {
+                    continue;
+                }
+
+                for (String p : mti.getPids()) {
                     if (p.equals(pid)) {
                         try {
                             InputStream is = mti.getObjectClassDefinition(pid, null).getIcon(32);

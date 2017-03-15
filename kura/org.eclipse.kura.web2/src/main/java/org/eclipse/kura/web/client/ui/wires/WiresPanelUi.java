@@ -741,6 +741,7 @@ public class WiresPanelUi extends Composite {
                         if (propertiesUis.containsKey(pid)) {
                             propertiesUis.remove(pid);
                         }
+                        selectionCompleted();
                         EntryClassUi.hideWaitModal();
                     }
                 });
@@ -900,6 +901,11 @@ public class WiresPanelUi extends Composite {
     private static native void wiresClose()
     /*-{
         parent.window.kuraWires.unload();
+    }-*/;
+
+    private static native void selectionCompleted()
+    /*-{
+        parent.window.kuraWires.selectionCompleted();
     }-*/;
 
     private static JSONArray createComponentsJson() {

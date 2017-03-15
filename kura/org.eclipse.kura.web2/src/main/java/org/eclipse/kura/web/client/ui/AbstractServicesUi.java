@@ -58,6 +58,7 @@ public abstract class AbstractServicesUi extends Composite {
 
     private static final String CONFIG_MAX_VALUE = "configMaxValue";
     private static final String CONFIG_MIN_VALUE = "configMinValue";
+    private static final String INVALID_VALUE = "invalidValue";
 
     protected static final Logger logger = Logger.getLogger(ServicesUi.class.getSimpleName());
     protected static final Logger errorLogger = Logger.getLogger("ErrorLogger");
@@ -607,7 +608,8 @@ public abstract class AbstractServicesUi extends Composite {
                     }
                 } catch (NumberFormatException e) {
                     this.valid.put(param.getId(), false);
-                    result.add(new BasicEditorError(box, box.getText(), e.getLocalizedMessage()));
+                    result.add(new BasicEditorError(box, box.getText(),
+                            MessageUtils.get(INVALID_VALUE, box.getText().trim())));
                 }
             }
         }

@@ -56,14 +56,79 @@ public class DhcpServerConfigIP4 extends DhcpServerConfigIP<IP4Address>implement
      * @param dnsServers
      *            the DNS servers that will get passed to DHCP clients if passDns is true
      */
-    private DhcpServerConfigIP4(String interfaceName, boolean enabled, IP4Address subnet, IP4Address routerAddress,
+	@Deprecated
+    public DhcpServerConfigIP4(String interfaceName, boolean enabled, IP4Address subnet, IP4Address routerAddress,
             IP4Address subnetMask, int defaultLeaseTime, int maximumLeaseTime, short prefix, IP4Address rangeStart,
             IP4Address rangeEnd, boolean passDns, List<IP4Address> dnsServers) {
 
     	super(interfaceName, enabled, subnet, routerAddress, subnetMask, defaultLeaseTime, maximumLeaseTime, prefix,
                 rangeStart, rangeEnd, passDns, dnsServers);
     }
-    
+	
+	/**
+     * Private constructor for a DhcpServerConfigIP4 to be invoked by the newDhcpServerConfigIP4 method
+     *
+     * @param enabled
+     *            the status of the DhcpServer as a boolean
+     * @param interfaceName
+     *            the interface name associated with the DhcpServerConfig
+     * @param subnet
+     *            the subnet of the DhcpServerConfig
+     * @param routerAddress
+     *            the router IPAddress
+     * @param subnetMask
+     *            the subnet mask of the DhcpServerConfig
+     * @param defaultLeaseTime
+     *            the default lease time to issue to DHCP clients
+     * @param maximumLeaseTime
+     *            the maximum lease time to issue to DHCP clients
+     * @param prefix
+     *            the network prefix associated with the DhcpServerConfig
+     * @param rangeStart
+     *            the network starting address to issue to DHCP clients
+     * @param rangeEnd
+     *            the network ending address to issue to DHCP clients
+     * @param passDns
+     *            whether or not to pass DNS to DHCP clients
+     * @param dnsServers
+     *            the DNS servers that will get passed to DHCP clients if passDns is true
+     */
+	private DhcpServerConfigIP4(boolean enabled, String interfaceName, IP4Address subnet, IP4Address routerAddress,
+            IP4Address subnetMask, int defaultLeaseTime, int maximumLeaseTime, short prefix, IP4Address rangeStart,
+            IP4Address rangeEnd, boolean passDns, List<IP4Address> dnsServers) {
+
+    	super(interfaceName, enabled, subnet, routerAddress, subnetMask, defaultLeaseTime, maximumLeaseTime, prefix,
+                rangeStart, rangeEnd, passDns, dnsServers);
+    }
+	
+	/**
+     * A method that invokes the Constructor after checking that DHCP pool IP addresses are in the subnet.
+     *
+     * @param interfaceName
+     *            the interface name associated with the DhcpServerConfig
+     * @param enabled
+     *            the status of the DhcpServer as a boolean
+     * @param subnet
+     *            the subnet of the DhcpServerConfig
+     * @param routerAddress
+     *            the router IPAddress
+     * @param subnetMask
+     *            the subnet mask of the DhcpServerConfig
+     * @param defaultLeaseTime
+     *            the default lease time to issue to DHCP clients
+     * @param maximumLeaseTime
+     *            the maximum lease time to issue to DHCP clients
+     * @param prefix
+     *            the network prefix associated with the DhcpServerConfig
+     * @param rangeStart
+     *            the network starting address to issue to DHCP clients
+     * @param rangeEnd
+     *            the network ending address to issue to DHCP clients
+     * @param passDns
+     *            whether or not to pass DNS to DHCP clients
+     * @param dnsServers
+     *            the DNS servers that will get passed to DHCP clients if passDns is true
+     */
     public static DhcpServerConfigIP4 newDhcpServerConfigIP4(String interfaceName, boolean enabled, IP4Address subnet, IP4Address routerAddress,
             IP4Address subnetMask, int defaultLeaseTime, int maximumLeaseTime, short prefix, IP4Address rangeStart,
             IP4Address rangeEnd, boolean passDns, List<IP4Address> dnsServers)  throws KuraException {
@@ -73,7 +138,7 @@ public class DhcpServerConfigIP4 extends DhcpServerConfigIP<IP4Address>implement
 				&& isIpAddressInSubnet(rangeEnd.getHostAddress(), subnet.getHostAddress(),
 						subnetMask.getHostAddress())) {
 
-			retVal = new DhcpServerConfigIP4(interfaceName, enabled, subnet, routerAddress, subnetMask, defaultLeaseTime, maximumLeaseTime, prefix,
+			retVal = new DhcpServerConfigIP4(enabled, interfaceName, subnet, routerAddress, subnetMask, defaultLeaseTime, maximumLeaseTime, prefix,
 	                rangeStart, rangeEnd, passDns, dnsServers);
 		} 
 

@@ -77,7 +77,7 @@ public class ConfigurationServiceTest {
         ConfigurationService cs = new ConfigurationServiceImpl();
 
         @SuppressWarnings("unchecked")
-        Set<String> s = (Set<String>) TestUtil.getFieldValue(cs, "m_factoryPids");
+        Set<String> s = (Set<String>) TestUtil.getFieldValue(cs, "factoryPids");
         s.addAll(Arrays.asList(expectedPIDs));
 
         Set<String> factoryComponentPids = cs.getFactoryComponentPids();
@@ -130,7 +130,7 @@ public class ConfigurationServiceTest {
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         pids.put(pid, pid);
 
         try {
@@ -377,7 +377,7 @@ public class ConfigurationServiceTest {
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_factoryPidByPid");
+        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
         pids.put(pid, pid);
 
         try {
@@ -414,10 +414,10 @@ public class ConfigurationServiceTest {
             }
         };
 
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_factoryPidByPid");
+        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
         pids.put(servicePid, factoryPid);
 
-        pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        pids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         pids.put(servicePid, servicePid);
 
         ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
@@ -456,10 +456,10 @@ public class ConfigurationServiceTest {
             }
         };
 
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_factoryPidByPid");
+        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
         pids.put(servicePid, factoryPid);
 
-        pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        pids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         pids.put(servicePid, servicePid);
 
         ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
@@ -487,10 +487,10 @@ public class ConfigurationServiceTest {
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_factoryPidByPid");
+        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
         pids.put(servicePid, factoryPid);
 
-        pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        pids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         pids.put(servicePid, servicePid);
 
         ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
@@ -528,7 +528,7 @@ public class ConfigurationServiceTest {
 
         String[] expectedPIDs = { "pid1", "pid2", "pid3" };
 
-        Set<String> s = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> s = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         s.addAll(Arrays.asList(expectedPIDs));
 
         Set<String> configurableComponentPids = cs.getConfigurableComponentPids();
@@ -690,7 +690,7 @@ public class ConfigurationServiceTest {
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
         Set<String> allPidsMock = mock(Set.class);
-        TestUtil.setFieldValue(cs, "m_allActivatedPids", allPidsMock);
+        TestUtil.setFieldValue(cs, "allActivatedPids", allPidsMock);
 
         String pid = null;
 
@@ -708,15 +708,15 @@ public class ConfigurationServiceTest {
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
         Set<String> allPidsMock = mock(Set.class);
-        TestUtil.setFieldValue(cs, "m_allActivatedPids", allPidsMock);
+        TestUtil.setFieldValue(cs, "allActivatedPids", allPidsMock);
 
         String pid = "pid";
 
         when(allPidsMock.contains(pid)).thenReturn(false);
         when(allPidsMock.add(pid)).thenReturn(true);
 
-        Map<String, String> spbp = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
-        Set<String> asc = (Set<String>) TestUtil.getFieldValue(cs, "m_activatedSelfConfigComponents");
+        Map<String, String> spbp = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
+        Set<String> asc = (Set<String>) TestUtil.getFieldValue(cs, "activatedSelfConfigComponents");
 
         assertEquals("empty service pids", 0, spbp.size());
         assertEquals("empty activated configured components", 0, asc.size());
@@ -737,15 +737,15 @@ public class ConfigurationServiceTest {
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
         Set<String> allPidsMock = mock(Set.class);
-        TestUtil.setFieldValue(cs, "m_allActivatedPids", allPidsMock);
+        TestUtil.setFieldValue(cs, "allActivatedPids", allPidsMock);
 
         String pid = "pid";
 
         when(allPidsMock.contains(pid)).thenReturn(true);
         when(allPidsMock.add(pid)).thenThrow(new RuntimeException());
 
-        Map<String, String> spbp = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
-        Set<String> asc = (Set<String>) TestUtil.getFieldValue(cs, "m_activatedSelfConfigComponents");
+        Map<String, String> spbp = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
+        Set<String> asc = (Set<String>) TestUtil.getFieldValue(cs, "activatedSelfConfigComponents");
 
         assertEquals("empty service pids", 0, spbp.size());
         assertEquals("empty activated configured components", 0, asc.size());
@@ -766,7 +766,7 @@ public class ConfigurationServiceTest {
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
         Set<String> allPidsMock = mock(Set.class);
-        TestUtil.setFieldValue(cs, "m_allActivatedPids", allPidsMock);
+        TestUtil.setFieldValue(cs, "allActivatedPids", allPidsMock);
 
         String pid = null;
 
@@ -785,11 +785,11 @@ public class ConfigurationServiceTest {
 
         String pid = "pid";
 
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         allPids.add(pid + "1");
-        Map<String, String> spbp = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> spbp = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         spbp.put(pid + "1", pid);
-        Set<String> asc = (Set<String>) TestUtil.getFieldValue(cs, "m_activatedSelfConfigComponents");
+        Set<String> asc = (Set<String>) TestUtil.getFieldValue(cs, "activatedSelfConfigComponents");
         asc.add(pid + "1");
 
         assertEquals("all pids size", 1, allPids.size());
@@ -1030,7 +1030,7 @@ public class ConfigurationServiceTest {
     public void testUpdateConfigurationsListOfComponentConfigurationBoolean()
             throws KuraException, NoSuchFieldException {
         // test that password encryption is attempted (but decrypt doesn't fail, which is OK) and some other calls are
-        // made - stop with usage of m_allActivatedPids in getComponentConfigurationsInternal
+        // made - stop with usage of allActivatedPids in getComponentConfigurationsInternal
 
         boolean takeSnapshot = false;
         final List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
@@ -1049,7 +1049,7 @@ public class ConfigurationServiceTest {
         when(cryptoServiceMock.decryptAes((char[]) anyObject())).thenReturn("dec".toCharArray());
 
         // make updateConfigurationsInternal fail with NPE
-        TestUtil.setFieldValue(cs, "m_allActivatedPids", null);
+        TestUtil.setFieldValue(cs, "allActivatedPids", null);
 
         try {
             cs.updateConfigurations(configs, takeSnapshot);
@@ -2320,7 +2320,7 @@ public class ConfigurationServiceTest {
         String pid = "123";
         Tocd ocd = null;
 
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         pids.put(pid, null);
 
         ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
@@ -2342,7 +2342,7 @@ public class ConfigurationServiceTest {
         Tocd ocd = null;
 
         String sPid = "1234";
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         pids.put(pid, sPid);
 
         ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
@@ -2473,10 +2473,10 @@ public class ConfigurationServiceTest {
         String servicePid = "spid";
         String factoryPid = null;
 
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         allPids.add(pid);
 
-        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         assertEquals("spid size OK", 0, sPids.size());
 
         cs.registerComponentConfiguration(pid, servicePid, factoryPid);
@@ -2494,10 +2494,10 @@ public class ConfigurationServiceTest {
         String servicePid = "spid";
         String factoryPid = null;
 
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         assertEquals("active pids size OK", 0, allPids.size());
 
-        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         assertEquals("spid size OK", 0, sPids.size());
 
         cs.registerComponentConfiguration(pid, servicePid, factoryPid);
@@ -2519,13 +2519,13 @@ public class ConfigurationServiceTest {
         String servicePid = "spid";
         String factoryPid = "fpid";
 
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         assertEquals("active pids size OK", 0, allPids.size());
 
-        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         assertEquals("spid size OK", 0, sPids.size());
 
-        Map<String, String> fPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_factoryPidByPid");
+        Map<String, String> fPids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
         assertEquals("fpid size OK", 0, fPids.size());
 
         cs.registerComponentConfiguration(pid, servicePid, factoryPid);
@@ -2550,16 +2550,16 @@ public class ConfigurationServiceTest {
         String servicePid = "spid";
         String factoryPid = "fpid";
 
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         assertEquals("active pids size OK", 0, allPids.size());
 
-        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         assertEquals("spid size OK", 0, sPids.size());
 
-        Map<String, String> fPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_factoryPidByPid");
+        Map<String, String> fPids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
         assertEquals("fpid size OK", 0, fPids.size());
 
-        Map<String, Tocd> ocds = (Map<String, Tocd>) TestUtil.getFieldValue(cs, "m_ocds");
+        Map<String, Tocd> ocds = (Map<String, Tocd>) TestUtil.getFieldValue(cs, "ocds");
         Tocd ocd = new Tocd();
         ocds.put(factoryPid, ocd);
 
@@ -2592,16 +2592,16 @@ public class ConfigurationServiceTest {
         String servicePid = "spid";
         String factoryPid = "fpid";
 
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         assertEquals("active pids size OK", 0, allPids.size());
 
-        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         assertEquals("spid size OK", 0, sPids.size());
 
-        Map<String, String> fPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_factoryPidByPid");
+        Map<String, String> fPids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
         assertEquals("fpid size OK", 0, fPids.size());
 
-        Map<String, Tocd> ocds = (Map<String, Tocd>) TestUtil.getFieldValue(cs, "m_ocds");
+        Map<String, Tocd> ocds = (Map<String, Tocd>) TestUtil.getFieldValue(cs, "ocds");
         Tocd ocd = new Tocd();
         ocds.put(factoryPid, ocd);
 
@@ -2781,11 +2781,11 @@ public class ConfigurationServiceTest {
         when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(5);
 
         String pid = "pid";
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         allPids.add(pid);
 
         ComponentContext componentCtxMock = mock(ComponentContext.class);
-        TestUtil.setFieldValue(cs, "m_ctx", componentCtxMock);
+        TestUtil.setFieldValue(cs, "ctx", componentCtxMock);
 
         BundleContext bundleCtxMock = mock(BundleContext.class);
         when(componentCtxMock.getBundleContext()).thenReturn(bundleCtxMock);
@@ -2864,11 +2864,11 @@ public class ConfigurationServiceTest {
         when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(5);
 
         String pid = "pid";
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         allPids.add(pid);
 
         ComponentContext componentCtxMock = mock(ComponentContext.class);
-        TestUtil.setFieldValue(cs, "m_ctx", componentCtxMock);
+        TestUtil.setFieldValue(cs, "ctx", componentCtxMock);
 
         BundleContext bundleCtxMock = mock(BundleContext.class);
         when(componentCtxMock.getBundleContext()).thenReturn(bundleCtxMock);
@@ -2952,11 +2952,11 @@ public class ConfigurationServiceTest {
         when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(5);
 
         String pid = "pid";
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         allPids.add(pid);
 
         ComponentContext componentCtxMock = mock(ComponentContext.class);
-        TestUtil.setFieldValue(cs, "m_ctx", componentCtxMock);
+        TestUtil.setFieldValue(cs, "ctx", componentCtxMock);
 
         BundleContext bundleCtxMock = mock(BundleContext.class);
         when(componentCtxMock.getBundleContext()).thenReturn(bundleCtxMock);

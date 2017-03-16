@@ -1228,7 +1228,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     	if (dhcpServerConfigIP4 != null) {
                         	netConfigs.add(dhcpServerConfigIP4);
                         } else {
-                        	s_logger.error("Failed to craete new DhcpServerConfigIP4 object. Please verify that DHCP pool IP addresses (see below) are in the {} subnet.", subnet.getHostAddress());
+                        	s_logger.error("Failed to create new DhcpServerConfigIP4 object. Please verify that DHCP pool IP addresses (see below) are in the {} subnet.", subnet.getHostAddress());
                         	s_logger.error("DHCP Pool: range from {} to {}", rangeStart.getHostAddress(), rangeEnd.getHostAddress());
                         }
                     } catch (KuraException e) {

@@ -47,12 +47,11 @@ public class JavaNtpClockSyncProvider extends AbstractNtpClockSyncProvider {
                 this.m_lastSync = new Date();
                 info.computeDetails();
                 Long delayValue = info.getDelay();
-                if(delayValue!=null && delayValue.longValue()<1000){                
-	                this.m_listener.onClockUpdate(info.getOffset());
-	                ret = true;
-                }
-                else{
-                    s_logger.error("Incorrect delay value({}), clock will not be updated",info.getDelay());
+                if (delayValue != null && delayValue.longValue() < 1000) {
+                    this.m_listener.onClockUpdate(info.getOffset());
+                    ret = true;
+                } else {
+                    s_logger.error("Incorrect delay value({}), clock will not be updated", info.getDelay());
                 }
             } catch (IOException e) {
                 s_logger.warn(
@@ -61,9 +60,8 @@ public class JavaNtpClockSyncProvider extends AbstractNtpClockSyncProvider {
             }
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
-        }
-        finally{
-            ntpClient.close();        	
+        } finally {
+            ntpClient.close();
         }
         return ret;
     }

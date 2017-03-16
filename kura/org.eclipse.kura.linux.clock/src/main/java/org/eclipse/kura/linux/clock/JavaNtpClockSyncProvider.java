@@ -46,17 +46,24 @@ public class JavaNtpClockSyncProvider extends AbstractNtpClockSyncProvider {
                 TimeInfo info = ntpClient.getTime(ntpHostAddr, this.m_ntpPort);
                 this.m_lastSync = new Date();
                 info.computeDetails();
-
-                this.m_listener.onClockUpdate(info.getOffset());
-                ret = true;
+                Long delayValue = info.getDelay();
+                if(delayValue!=null && delayValue.longValue()<1000){                
+	                this.m_listener.onClockUpdate(info.getOffset());
+	                ret = true;
+                }
+                else{
+                    s_logger.error("Incorrect delay value({}), clock will not be updated",info.getDelay());
+                }
             } catch (IOException e) {
-                ntpClient.close();
                 s_logger.warn(
                         "Error while synchronizing System Clock with NTP host {}. Please verify network connectivity ...",
                         this.m_ntpHost);
             }
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+        }
+        finally{
+            ntpClient.close();        	
         }
         return ret;
     }

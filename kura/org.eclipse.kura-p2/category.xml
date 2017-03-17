@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
 <site>
    <feature url="features/org.eclipse.kura.api_0.0.0.qualifier.jar" id="org.eclipse.kura.api" version="0.0.0">
       <category name="org.eclipse.kura.api"/>
@@ -6,17 +7,23 @@
    <feature url="features/org.eclipse.kura.api.source_0.0.0.qualifier.jar" id="org.eclipse.kura.api.source" version="0.0.0">
       <category name="org.eclipse.kura.api.sdk"/>
    </feature>
+   <feature url="features/org.eclipse.kura.camel_0.0.0.qualifier.jar" id="org.eclipse.kura.camel" version="0.0.0">
+      <category name="org.eclipse.kura.api"/>
+   </feature>
+   <feature url="features/org.eclipse.kura.camel.source_0.0.0.qualifier.jar" id="org.eclipse.kura.camel.source" version="0.0.0">
+      <category name="org.eclipse.kura.api.sdk"/>
+   </feature>
    <feature url="features/org.eclipse.kura.runtime_0.0.0.qualifier.jar" id="org.eclipse.kura.runtime" version="0.0.0">
       <category name="org.eclipse.kura.runtime"/>
    </feature>
    <category-def name="org.eclipse.kura.api" label="Eclipse Kura™ API">
       <description>
-         The main API bundles of Eclipse Kura™
+         The API bundles of Eclipse Kura™
       </description>
    </category-def>
    <category-def name="org.eclipse.kura.api.sdk" label="Eclipse Kura™ API SDK">
       <description>
-         Eclipse Kura™ bundles and sources for the main API
+         Bundles and sources for the Eclipse Kura™ API
       </description>
    </category-def>
    <category-def name="org.eclipse.kura.runtime" label="Eclipse Kura™ Runtime">

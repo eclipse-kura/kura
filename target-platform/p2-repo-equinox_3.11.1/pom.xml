@@ -14,7 +14,9 @@
 	<packaging>pom</packaging>
     
     <properties>
-        <equinox.download.url>http://ftp-stud.fht-esslingen.de/pub/Mirrors/eclipse/equinox/drops/R-Neon.1-201609071200/equinox-SDK-Neon.1.zip</equinox.download.url>
+        <equinox.release>R-Neon.3-201703010400</equinox.release>
+        <equinox.dropFile>equinox-SDK-Neon.3.zip</equinox.dropFile>
+        <equinox.download.url>http://ftp-stud.fht-esslingen.de/pub/Mirrors/eclipse/equinox/drops/${equinox.release}/${equinox.dropFile}</equinox.download.url>
     </properties>
 
 	<build>
@@ -174,7 +176,7 @@
             <!-- profile for falling back to non-mirror download links -->
             <id>no-mirror</id>
             <properties>
-                <equinox.download.url>http://download.eclipse.org/equinox/drops/R-Neon.1-201609071200/equinox-SDK-Neon.1.zip</equinox.download.url>
+                <equinox.download.url>http://download.eclipse.org/equinox/drops/${equinox.release}/${equinox.dropFile}</equinox.download.url>
             </properties>
         </profile>
         

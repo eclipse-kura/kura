@@ -204,4 +204,15 @@ sed -i 's/ps ax/ps/g' ${INSTALL_DIR}/kura/bin/start_kura_debug.sh
 # execute patch_sysctl.sh from installer install folder
 chmod 700 ${INSTALL_DIR}/kura/install/patch_sysctl.sh 
 ${INSTALL_DIR}/kura/install/patch_sysctl.sh ${INSTALL_DIR}/kura/install/sysctl.kura.conf /etc/sysctl.conf
-sysctl -p
+
+if ! [ -d /sys/class/net ]
+then
+ sysctl -p || true
+else
+ sysctl -w net.ipv6.conf.all.disable_ipv6=1
+ sysctl -w net.ipv6.conf.default.disable_ipv6=1
+ for INTERFACE in $(ls /sys/class/net)
+ do
+ 	sysctl -w net.ipv6.conf.${INTERFACE}.disable_ipv6=1
+ done
+fi

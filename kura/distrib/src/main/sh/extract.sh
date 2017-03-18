@@ -65,20 +65,22 @@ function do_backup {
 
   install -d "${BACKUP_ROOT}_"
 
-  for TARGET in ${BACKUP_FILES[@]};
+  for GLOB in ${BACKUP_FILES[@]};
   do
-    if ! [[ $TARGET ]] || ! [ -e $TARGET ] || [[ $(is_already_backed_up "$TARGET") == "true" ]];
-    then
-
-      continue
-    fi
-    SRC=$(abspath "$TARGET")
-    SRC_DIR=$(dirname "$SRC")
-    printf "\r\033[Kbackup: $TARGET -> ${BACKUP_ROOT}_${SRC}"
-    echo "backup: $TARGET -> ${BACKUP_ROOT}_${SRC}" >> $LOG 2>&1
-    install -d "${BACKUP_ROOT}_/$SRC_DIR"
-    cp -r "$SRC" "${BACKUP_ROOT}_/$SRC_DIR/"
-    BACKED_UP_FILES+=("$TARGET")
+  	for TARGET in ${GLOB}
+  	do
+    	if ! [[ $TARGET ]] || ! [ -e $TARGET ] || [[ $(is_already_backed_up "$TARGET") == "true" ]];
+    	then
+      		continue
+    	fi
+    	SRC=$(abspath "$TARGET")
+    	SRC_DIR=$(dirname "$SRC")
+    	printf "\r\033[Kbackup: $TARGET -> ${BACKUP_ROOT}_${SRC}"
+    	echo "backup: $TARGET -> ${BACKUP_ROOT}_${SRC}" >> $LOG 2>&1
+    	install -d "${BACKUP_ROOT}_/$SRC_DIR"
+    	cp -r "$SRC" "${BACKUP_ROOT}_/$SRC_DIR/"
+    	BACKED_UP_FILES+=("$TARGET")
+    done
   done
 
    mv "${BACKUP_ROOT}_" "$BACKUP_ROOT"
@@ -119,7 +121,18 @@ function do_delete_backup {
 
 function require_java_8 {
   require java
-  JAVA_VERSION=$(java -version 2>&1 | head -n 1 | sed 's/java version ["][^.]*[.]\([^.]*\).*/\1/g')
+  if [[ $SKIP_JAVA_VERSION_CHECK == "true" ]];
+  then
+    return 0;
+  fi
+  JAVA_VERSION=$(java -version 2>&1 | head -n 1 | sed 's/[^ ]* [^ ]* ["][^.]*[.]\([[:digit:]]*\).*/\1/g')
+  if ! [[ $JAVA_VERSION =~ ^[0-9]+$ ]];
+  then
+  	echo "Failed to determine Java version"
+    echo "If you are sure that Java 8 or greater is installed please re run this script setting the following environment variable:"
+    echo "SKIP_JAVA_VERSION_CHECK=\"true\""
+  	exit 1
+  fi
   if [ $JAVA_VERSION -lt 8 ];
   then
     echo "Java version 8 or greater is required for running Kura, please upgrade"
@@ -163,6 +176,8 @@ BACKUP_FILES+=("/var/log/esf.log")
 BACKUP_FILES+=("/var/log/kura.log")
 BACKUP_FILES+=("/etc/rc*.d/S*esf")
 BACKUP_FILES+=("/etc/rc*.d/S*kura")
+BACKUP_FILES+=("/etc/rc*.d/K*esf")
+BACKUP_FILES+=("/etc/rc*.d/K*kura")
 BACKUP_FILES+=("/etc/init.d/kura*")
 BACKUP_FILES+=("/etc/init.d/firewall")
 BACKUP_FILES+=("/etc/dhcpd-*.conf")

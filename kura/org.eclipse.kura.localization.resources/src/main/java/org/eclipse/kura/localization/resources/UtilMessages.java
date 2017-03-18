@@ -5,11 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.localization.resources;
 
@@ -37,6 +37,9 @@ public interface UtilMessages {
     @En("Dictionary cannot be null.")
     public String dictionaryNonNull();
 
+    @En("Filter cannot be null.")
+    public String filterNonNull();
+
     @En("Initial Array size must not be less than 0.")
     public String initialArraySize();
 
@@ -48,6 +51,12 @@ public interface UtilMessages {
 
     @En("Service References cannot be null.")
     public String referencesNonNull();
+
+    @En("Timeout period cannot be zero or negative")
+    public String timeoutError();
+
+    @En("TimeUnit cannot be null")
+    public String timeunitNonNull();
 
     @En("Value cannot be null.")
     public String valueNonNull();

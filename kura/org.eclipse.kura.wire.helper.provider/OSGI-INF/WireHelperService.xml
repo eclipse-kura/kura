@@ -26,4 +26,10 @@
    	          name="EventAdmin" 
    	          policy="static" 
    	          unbind="unbindEventAdmin"/>
+   <reference bind="bindWireService" 
+   	          cardinality="1..1" 
+   	          interface="org.eclipse.kura.wire.WireService" 
+   	          name="WireService" 
+   	          policy="static" 
+   	          unbind="unbindWireService"/>
 </scr:component>

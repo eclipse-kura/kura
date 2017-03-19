@@ -17,13 +17,19 @@ import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.wire.WireComponent;
+import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
+import org.eclipse.kura.wire.WireService;
 import org.eclipse.kura.wire.WireSupport;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -39,6 +45,7 @@ public final class WireHelperServiceImpl implements WireHelperService {
     private static final WireMessages wireMessages = LocalizationAdapter.adapt(WireMessages.class);
 
     private volatile EventAdmin eventAdmin;
+    private volatile WireService wireService;
 
     /**
      * Binds the Event Admin Service.
@@ -61,6 +68,30 @@ public final class WireHelperServiceImpl implements WireHelperService {
     public void unbindEventAdmin(final EventAdmin eventAdmin) {
         if (this.eventAdmin == eventAdmin) {
             this.eventAdmin = null;
+        }
+    }
+
+    /**
+     * Binds the {@link WireService} instance
+     *
+     * @param wireService
+     *            the new {@link WireService} instance
+     */
+    public void bindWireService(final WireService wireService) {
+        if (this.wireService == null) {
+            this.wireService = wireService;
+        }
+    }
+
+    /**
+     * Unbinds the {@link WireService} instance
+     *
+     * @param wireService
+     *            the new {@link WireService} instance
+     */
+    public void unbindWireService(final WireService wireService) {
+        if (this.wireService == wireService) {
+            this.wireService = null;
         }
     }
 
@@ -118,6 +149,41 @@ public final class WireHelperServiceImpl implements WireHelperService {
             ServiceUtil.ungetServiceReferences(context, refs);
         }
         return null;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Optional<WireConfiguration> getWireConfiguration(final String emitterPid, final String receiverPid) {
+        requireNonNull(emitterPid, wireMessages.emitterPidNonNull());
+        requireNonNull(receiverPid, wireMessages.receiverPidNonNull());
+
+        final WireConfiguration wireConfiguration = new WireConfiguration(emitterPid, receiverPid);
+        final Set<WireConfiguration> wireConfs = this.wireService.getWireConfigurations();
+
+        for (final WireConfiguration wc : wireConfs) {
+            if (wc.equals(wireConfiguration)) {
+                return Optional.of(wc);
+            }
+        }
+        return Optional.empty();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Set<WireConfiguration> getWireConfigurationsByEmitterPid(final String emitterPid) {
+        requireNonNull(emitterPid, wireMessages.emitterPidNonNull());
+        final Set<WireConfiguration> wireConfs = this.wireService.getWireConfigurations();
+        return wireConfs.stream().filter(wc -> wc.getEmitterPid().equalsIgnoreCase(emitterPid))
+                .collect(Collectors.toSet());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Set<WireConfiguration> getWireConfigurationsByReceiverPid(final String receiverPid) {
+        requireNonNull(receiverPid, wireMessages.receiverPidNonNull());
+        final Set<WireConfiguration> wireConfs = this.wireService.getWireConfigurations();
+        return wireConfs.stream().filter(wc -> wc.getReceiverPid().equalsIgnoreCase(receiverPid))
+                .collect(Collectors.toSet());
     }
 
     /** {@inheritDoc} */

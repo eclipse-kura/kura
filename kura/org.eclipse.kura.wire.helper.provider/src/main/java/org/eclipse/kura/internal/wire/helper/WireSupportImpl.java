@@ -19,11 +19,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireComponent;
+import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
@@ -49,9 +51,9 @@ final class WireSupportImpl implements WireSupport {
 
     private final WireComponent wireSupporter;
 
-    private String emitterPid;
+    private final String emitterPid;
 
-    private String pid;
+    private final String pid;
 
     /**
      * Instantiates a new wire support implementation.
@@ -90,14 +92,47 @@ final class WireSupportImpl implements WireSupport {
     public synchronized void emit(final List<WireRecord> wireRecords) {
         requireNonNull(wireRecords, message.wireRecordsNonNull());
         if (this.wireSupporter instanceof WireEmitter) {
-            final WireEnvelope wei = new WireEnvelope(emitterPid, wireRecords);
-            for (final Wire wire : this.outgoingWires) {
-                wire.update(wei);
+            final String emitterPid = this.wireHelperService.getServicePid(this.wireSupporter);
+            final String pid = this.wireHelperService.getPid(this.wireSupporter);
+            final Set<WireConfiguration> wireConfigurations = this.wireHelperService
+                    .getWireConfigurationsByEmitterPid(emitterPid);
+            final WireEnvelope wireEnvelope = new WireEnvelope(emitterPid, wireRecords);
+
+            for (final WireConfiguration wc : wireConfigurations) {
+                final String filter = wc.getFilter();
+                final Wire wire = wc.getWire();
+                if (filter == null) {
+                    wire.update(wireEnvelope);
+                    continue;
+                }
+                final WireEnvelope filteredWireEnvelope = new WireEnvelope(emitterPid, filter(wireRecords, filter));
+                wire.update(filteredWireEnvelope);
             }
+
+            // fire OSGi event for every emit operation
             final Map<String, Object> properties = CollectionUtil.newHashMap();
             properties.put("emitter", pid);
             this.eventAdmin.postEvent(new Event(WireSupport.EMIT_EVENT_TOPIC, properties));
         }
+    }
+
+    /**
+     * Filters out the key from the map of provided {@link WireRecord}s that matches the provided filter
+     *
+     * @param wireRecords
+     *            the list of {@link WireRecord}s
+     * @param filter
+     *            the filter to match
+     * @return the filtered list of {@link WireRecord}s
+     * @throws NullPointerException
+     *             if any of the arguments is null
+     */
+    private List<WireRecord> filter(final List<WireRecord> wireRecords, final String filter) {
+        requireNonNull(wireRecords, message.wireRecordsNonNull());
+        requireNonNull(filter, message.filterNonNull());
+
+        // add filter logic
+        return Collections.emptyList();
     }
 
     /**

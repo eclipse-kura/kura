@@ -204,6 +204,9 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 
         try {
             if ((Boolean) this.m_properties.get("enabled") && (Boolean) this.m_properties.get("static")) {
+                if (m_gpsDevice != null) {
+                    m_gpsDevice = null;
+                }
                 initializeDefaultPosition((Double) this.m_properties.get("latitude"),
                         (Double) this.m_properties.get("longitude"), (Double) this.m_properties.get("altitude"));
                 this.m_eventAdmin.postEvent(new PositionLockedEvent(new HashMap<String, Object>()));
@@ -392,7 +395,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
         Measurement l_longitude = new Measurement(java.lang.Math.toRadians(lon), Unit.rad);
         Measurement l_altitude = new Measurement(alt, Unit.m);
         Measurement l_speed = new Measurement(0, Unit.m_s); // conversion speed in knots to m/s : 1 m/s = 1.94384449
- // knots
+        // knots
         Measurement l_track = new Measurement(java.lang.Math.toRadians(0), Unit.rad);
         double l_latitudeNmea = lat;
         double l_longitudeNmea = lon;

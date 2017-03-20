@@ -38,6 +38,7 @@ import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Icon;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Option;
+import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.KuraExceptionHandler;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -58,6 +59,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     private static final String KURA_SERVICE_PID = ConfigurationService.KURA_SERVICE_PID;
     private static final String SERVICE_FACTORY_PID = "service.factoryPid";
     private static final String KURA_UI_SERVICE_HIDE = "kura.ui.service.hide";
+
+    private static final int SERVICE_WAIT_TIMEOUT = 60;
 
     private static final long serialVersionUID = -4176701819112753800L;
 
@@ -253,12 +256,15 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                 if (conf != null) {
                     conf.getConfigurationProperties().put(ConfigurationAdmin.SERVICE_FACTORYPID, factoryPid);
                 }
-                if ((conf != null) && (conf.getDefinition() == null)) {
+                if (conf != null && conf.getDefinition() == null) {
                     String temporaryName = String.valueOf(System.nanoTime());
                     cs.createFactoryConfiguration(factoryPid, temporaryName, extraProps, false);
                     try {
-                        // wait for the services to be up
-                        TimeUnit.MILLISECONDS.sleep(500);
+
+                        // track and wait for the wire Component
+                        String filterString = "(" + ConfigurationService.KURA_SERVICE_PID + "=" + temporaryName + ")";
+                        ServiceUtil.waitForService(filterString, SERVICE_WAIT_TIMEOUT, TimeUnit.SECONDS);
+
                         conf = cs.getComponentConfiguration(temporaryName);
                         comp = createMetatypeOnlyGwtComponentConfiguration(conf);
                         return comp;
@@ -607,8 +613,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                 gwtConfig.set(DRIVER_PID, props.get(DRIVER_PID));
             }
 
-            if ((props != null) && (props.get(SERVICE_FACTORY_PID) != null)) {
-                String pid = this.stripPidPrefix(config.getPid());
+            if (props != null && props.get(SERVICE_FACTORY_PID) != null) {
+                String pid = stripPidPrefix(config.getPid());
                 gwtConfig.setComponentName(pid);
                 gwtConfig.setFactoryComponent(true);
                 gwtConfig.setFactoryPid(String.valueOf(props.get(ConfigurationAdmin.SERVICE_FACTORYPID)));

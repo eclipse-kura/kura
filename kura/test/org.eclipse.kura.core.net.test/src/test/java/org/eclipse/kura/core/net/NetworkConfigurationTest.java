@@ -753,7 +753,7 @@ public class NetworkConfigurationTest {
 					null);
 			
 			netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
-		} catch (KuraException e) {
+		} catch (Exception e) {
 			fail("failed: " + e);
 		}
 		netConfigs.add(new FirewallAutoNatConfig());

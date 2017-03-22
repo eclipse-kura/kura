@@ -8,8 +8,11 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.asset;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,8 +25,8 @@ import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.driver.Driver;
-import org.eclipse.kura.driver.DriverFlag;
 import org.eclipse.kura.driver.Driver.ConnectionException;
+import org.eclipse.kura.driver.DriverFlag;
 import org.eclipse.kura.driver.DriverRecord;
 import org.eclipse.kura.driver.DriverStatus;
 import org.eclipse.kura.type.BooleanValue;
@@ -78,7 +81,7 @@ public class WireAssetTest {
         Driver mockDriver = mock(Driver.class);
         wireAsset.setDriver(mockDriver);
 
-        when(mockDriver.read(any())).then(invocation -> {
+        doAnswer(invocation -> {
             Object[] arguments = invocation.getArguments();
             assertEquals(1, arguments.length);
 
@@ -91,10 +94,10 @@ public class WireAssetTest {
             record.setTimestamp(42);
             record.setDriverStatus(new DriverStatus(DriverFlag.READ_SUCCESSFUL));
 
-            return records;
-        });
+            return null;
+        }).when(mockDriver).read(any());
 
-        when(mockDriver.write(any())).then(invocation -> {
+        doAnswer(invocation -> {
             Object[] arguments = invocation.getArguments();
             assertEquals(1, arguments.length);
 
@@ -108,12 +111,12 @@ public class WireAssetTest {
             assertEquals(DataType.BOOLEAN, channelConfig.get("channel.value.type"));
 
             assertEquals(new BooleanValue(true), record.getValue());
-            
+
             record.setTimestamp(111);
             record.setDriverStatus(new DriverStatus(DriverFlag.WRITE_SUCCESSFUL));
 
-            return records;
-        });
+            return null;
+        }).when(mockDriver).write(any());
 
         WireSupport mockWireSupport = mock(WireSupport.class);
         TestUtil.setFieldValue(wireAsset, "wireSupport", mockWireSupport);

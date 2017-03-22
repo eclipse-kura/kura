@@ -745,7 +745,7 @@ public class NetworkConfigurationTest {
 		
 		try {
 			DhcpServerCfg dhcpServerCfg = new DhcpServerCfg("eth0", true, 7200, 7200, false);
-			DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4((IP4Address) IPAddress.parseHostAddress("192.168.0.0"), 
+			DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4((IP4Address) IPAddress.parseHostAddress("192.168.1.0"), 
 					(IP4Address) IPAddress.parseHostAddress("255.255.255.0"), (short)24,
 					(IP4Address) IPAddress.parseHostAddress("192.168.1.1"), 
 					(IP4Address) IPAddress.parseHostAddress("192.168.1.100"), 

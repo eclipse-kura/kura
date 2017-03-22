@@ -84,6 +84,9 @@ public interface OpcUaMessages {
     @En("Driver Record cannot be null")
     public String recordNonNull();
 
+    @En("Driver Record list cannot be null")
+    public String recordListNonNull();
+
     @En("Updating OPC-UA Driver.....")
     public String updating();
 
@@ -116,4 +119,5 @@ public interface OpcUaMessages {
 
     @En("Operation Result Variant cannot be null")
     public String errorNullVariant();
+
 }

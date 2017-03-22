@@ -16,7 +16,6 @@ package org.eclipse.kura.internal.wire.asset;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.asset.ChannelType.READ;
 import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
 import static org.eclipse.kura.asset.ChannelType.WRITE;
 
@@ -209,7 +208,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * <li>Perform all write operations on associated writing channels</li>
      * <ul>
      *
-     * Both the aforementioned operations are performed as soon as this Wire Component 
+     * Both the aforementioned operations are performed as soon as this Wire Component
      * receives {@code Non Null} {@link WireEnvelop} from its upstream Wire Component(s).
      *
      * @param wireEnvelope
@@ -222,35 +221,19 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
         logger.debug(message.wireEnvelopeReceived(), this.wireSupport);
 
-        final List<Long> channelIds = determineReadingChannels();
-        readChannels(channelIds);
+        if (hasReadChannels()) {
+            try {
+                emitAssetRecords(readAllChannels());
+            } catch (final KuraException e) {
+                logger.error(message.errorPerformingRead(), e);
+            }
+        }
 
         final List<WireRecord> records = wireEnvelope.getRecords();
         for (WireRecord wireRecord : records) {
             final List<AssetRecord> assetRecordsToWriteChannels = determineWritingChannels(wireRecord);
             writeChannels(assetRecordsToWriteChannels);
         }
-    }
-
-    /**
-     * Determines the channels to read.
-     *
-     * @return the list of channel IDs
-     */
-    private List<Long> determineReadingChannels() {
-
-        final List<Long> channelsToRead = CollectionUtil.newArrayList();
-        final AssetConfiguration assetConfiguration = getAssetConfiguration();
-        final Map<Long, Channel> channels = assetConfiguration.getAssetChannels();
-        for (final Map.Entry<Long, Channel> channelEntry : channels.entrySet()) {
-            final Channel channel = channelEntry.getValue();
-            final ChannelType channelType = channel.getType();
-
-            if (channelType == READ || channelType == READ_WRITE) {
-                channelsToRead.add(channel.getId());
-            }
-        }
-        return channelsToRead;
     }
 
     /**
@@ -287,29 +270,6 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
             }
         }
         return assetRecordsToWriteChannels;
-    }
-
-    /**
-     * Perform Channel Read and Emit operations
-     *
-     * @param channelsToRead
-     *            the list of {@link Channel} IDs
-     * @throws NullPointerException
-     *             if the provided list is null
-     */
-    private void readChannels(final List<Long> channelsToRead) {
-        requireNonNull(channelsToRead, message.channelIdsNonNull());
-        try {
-            List<AssetRecord> recentlyReadRecords = null;
-            if (!channelsToRead.isEmpty()) {
-                recentlyReadRecords = read(channelsToRead);
-            }
-            if (nonNull(recentlyReadRecords)) {
-                emitAssetRecords(recentlyReadRecords);
-            }
-        } catch (final KuraException e) {
-            logger.error(message.errorPerformingRead(), e);
-        }
     }
 
     /**

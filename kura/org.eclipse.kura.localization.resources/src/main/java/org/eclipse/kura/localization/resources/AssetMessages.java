@@ -284,4 +284,10 @@ public interface AssetMessages {
     @En("Writing to channels...Done")
     public String writingDone();
 
+    @En("Failed to prepare read")
+    public String errorPreparingRead();
+
+    @En("Failed close prepared read")
+    public String errorClosingPreparingRead();
+
 }

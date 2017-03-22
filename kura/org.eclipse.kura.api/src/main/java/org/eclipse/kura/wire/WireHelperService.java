@@ -86,7 +86,7 @@ public interface WireHelperService {
      *
      * @param emitterPid
      *            the {@link WireEmitter} {@code ConfigurationService#KURA_SERVICE_PID}
-     * @return the collection of existent {@link WireConfiguration} instances
+     * @return the collection of existent {@link WireConfiguration} instances or empty
      * @throws NullPointerException
      *             if the argument is null
      */
@@ -98,7 +98,7 @@ public interface WireHelperService {
      *
      * @param receiverPid
      *            the {@link WireReceiver} {@code ConfigurationService#KURA_SERVICE_PID}
-     * @return the collection of existent {@link WireConfiguration} instances
+     * @return the collection of existent {@link WireConfiguration} instances or empty
      * @throws NullPointerException
      *             if the argument is null
      */

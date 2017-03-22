@@ -10,7 +10,7 @@
  *     Eurotech
  *     Red Hat Inc
  *     Amit Kumar Mondal
- *     
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire;
 
@@ -62,8 +62,10 @@ public final class WireServiceCommandProvider {
      */
     @Descriptor("Creates a Wire Configuration between the provided Emitter and Receiver")
     public void createWire(@Descriptor("Emitter PID") final String emitterPid,
-            @Descriptor("Receiver PID") final String receiverPid) throws KuraException {
-        this.wireService.createWireConfiguration(emitterPid, receiverPid);
+            @Descriptor("Receiver PID") final String receiverPid, @Descriptor("Filter") final String filter)
+            throws KuraException {
+        final WireConfiguration wireConfiguration = this.wireService.createWireConfiguration(emitterPid, receiverPid);
+        wireConfiguration.setFilter(filter);
     }
 
     /**
@@ -98,9 +100,8 @@ public final class WireServiceCommandProvider {
         final Set<WireConfiguration> configs = this.wireService.getWireConfigurations();
         int i = 0;
         for (final WireConfiguration config : configs) {
-            System.out.format("%d. Emitter PID ===> %s  Receiver PID ===> %s%n", i, config.getEmitterPid(),
-                    config.getReceiverPid());
-            i++;
+            System.out.format("%d. Emitter PID ===> %s  Receiver PID ===> %s  Filter ===> %s%n", ++i,
+                    config.getEmitterPid(), config.getReceiverPid(), config.getFilter());
         }
         System.out.println("===========================================================");
     }

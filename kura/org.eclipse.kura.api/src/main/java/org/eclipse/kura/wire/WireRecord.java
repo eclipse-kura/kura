@@ -24,8 +24,8 @@ import org.eclipse.kura.annotation.ThreadSafe;
 import org.eclipse.kura.type.TypedValue;
 
 /**
- * The Class WireRecord represents a record to be transmitted during wire
- * communication between wire emitter and wire receiver
+ * The Class {@link WireRecord} represents a record to be transmitted during wire
+ * communication between {@link WireEmitter} and {@link WireReceiver}
  *
  * @noextend This class is not intended to be extended by clients.
  */
@@ -43,9 +43,8 @@ public class WireRecord {
      * @throws NullPointerException
      *             if any of the argument is null
      */
-    public WireRecord(Map<String, TypedValue<?>> properties) {
+    public WireRecord(final Map<String, TypedValue<?>> properties) {
         requireNonNull(properties, "Properties cannot be null");
-
         this.properties = new HashMap<>(properties);
     }
 

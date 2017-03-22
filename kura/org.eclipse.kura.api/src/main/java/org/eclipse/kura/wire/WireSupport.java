@@ -36,9 +36,23 @@ public interface WireSupport extends Producer, Consumer {
      * Emit the provided {@link WireRecord}s
      *
      * @param wireRecords
-     *            a List of {@link WireRecord} objects that will be sent to the receiver.
+     *            a list of {@link WireRecord} objects that will be sent to the receiver.
      * @throws NullPointerException
      *             if the argument is null
      */
     public void emit(List<WireRecord> wireRecords);
+
+    /**
+     * Filters out the keys from the associated properties of provided {@link WireRecord}s
+     * that matches the provided filter
+     *
+     * @param wireRecords
+     *            the list of {@link WireRecord}s
+     * @param filter
+     *            the filter to match
+     * @return the list of {@link WireRecord}s containing the filtered peroperties
+     * @throws NullPointerException
+     *             if any of the arguments is null
+     */
+    public List<WireRecord> filter(List<WireRecord> wireRecords, String filter);
 }

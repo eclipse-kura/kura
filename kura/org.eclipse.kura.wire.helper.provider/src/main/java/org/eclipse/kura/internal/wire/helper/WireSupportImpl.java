@@ -14,15 +14,21 @@
 package org.eclipse.kura.internal.wire.helper;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toMap;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
+import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireConfiguration;
@@ -92,8 +98,7 @@ final class WireSupportImpl implements WireSupport {
     public synchronized void emit(final List<WireRecord> wireRecords) {
         requireNonNull(wireRecords, message.wireRecordsNonNull());
         if (this.wireSupporter instanceof WireEmitter) {
-            final String emitterPid = this.wireHelperService.getServicePid(this.wireSupporter);
-            final String pid = this.wireHelperService.getPid(this.wireSupporter);
+            final String emitterPid = this.wireHelperService.getPid(this.wireSupporter);
             final Set<WireConfiguration> wireConfigurations = this.wireHelperService
                     .getWireConfigurationsByEmitterPid(emitterPid);
             final WireEnvelope wireEnvelope = new WireEnvelope(emitterPid, wireRecords);
@@ -111,28 +116,57 @@ final class WireSupportImpl implements WireSupport {
 
             // fire OSGi event for every emit operation
             final Map<String, Object> properties = CollectionUtil.newHashMap();
-            properties.put("emitter", pid);
+            properties.put("emitter", emitterPid);
             this.eventAdmin.postEvent(new Event(WireSupport.EMIT_EVENT_TOPIC, properties));
         }
     }
 
-    /**
-     * Filters out the key from the map of provided {@link WireRecord}s that matches the provided filter
-     *
-     * @param wireRecords
-     *            the list of {@link WireRecord}s
-     * @param filter
-     *            the filter to match
-     * @return the filtered list of {@link WireRecord}s
-     * @throws NullPointerException
-     *             if any of the arguments is null
-     */
-    private List<WireRecord> filter(final List<WireRecord> wireRecords, final String filter) {
+    /** {@inheritDoc} */
+    @Override
+    public List<WireRecord> filter(final List<WireRecord> wireRecords, final String filter) {
         requireNonNull(wireRecords, message.wireRecordsNonNull());
         requireNonNull(filter, message.filterNonNull());
 
-        // add filter logic
-        return Collections.emptyList();
+        final List<WireRecord> filteredWireRecords = CollectionUtil.newArrayList();
+        for (final WireRecord wireRecord : wireRecords) {
+            final Map<String, TypedValue<?>> previousProperties = wireRecord.getProperties();
+            final Map<String, TypedValue<?>> filteredProperties = lookup(filter, previousProperties);
+
+            // If both the maps' references refer to the same map instance, there is no need
+            // to create a new WireRecord. This is an optimization functionality, in which
+            // the regular expression filter matches all the provided keys of the properties
+            if (previousProperties == filteredProperties) {
+                filteredWireRecords.add(wireRecord);
+                continue;
+            }
+            final WireRecord newWireRecord = new WireRecord(filteredProperties);
+            filteredWireRecords.add(newWireRecord);
+        }
+        return filteredWireRecords;
+    }
+
+    /**
+     * Filters out the keys from the provided {@link Map} instance
+     *
+     * @param regularExpression
+     *            the regular expression to match
+     * @param map
+     *            the {@link Map} instance to filter
+     * @return the {@link Map} instance comprising the keys
+     *         that match the provided regular expression
+     */
+    private static <V> Map<String, V> lookup(final String regularExpression, final Map<String, V> map) {
+        final Pattern pattern = Pattern.compile(regularExpression);
+        final Set<Entry<String, V>> entrySet = map.entrySet();
+        final Supplier<Stream<Entry<String, V>>> streamSupplier = () -> entrySet.stream();
+        // If the provided regular expression matches all the keys of the provided map,
+        // there is no need to create a new map instance
+        final boolean allMatch = streamSupplier.get().allMatch(entry -> pattern.matcher(entry.getKey()).matches());
+        if (allMatch) {
+            return map;
+        }
+        return streamSupplier.get().filter(entry -> pattern.matcher(entry.getKey()).matches())
+                .collect(toMap(Entry::getKey, Entry::getValue));
     }
 
     /**

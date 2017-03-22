@@ -40,6 +40,12 @@ public interface WireMessages {
     @En("Activating DB Wire Record Filter...Done")
     public String activatingFilterDone();
 
+    @En("Activating Wire Helper Service...")
+    public String activatingHelperService();
+
+    @En("Activating Wire Helper Service...Done")
+    public String activatingHelperServiceDone();
+
     @En("Activating Logger Wire Component...")
     public String activatingLogger();
 
@@ -201,6 +207,12 @@ public interface WireMessages {
 
     @En("Dectivating DB Wire Record Filter...Done")
     public String deactivatingFilterDone();
+
+    @En("Deactivating Wire Helper Service...")
+    public String deactivatingHelperService();
+
+    @En("Deactivating Wire Helper Service...Done")
+    public String deactivatingHelperServiceDone();
 
     @En("Deactivating Logger Wire Component...")
     public String deactivatingLogger();

@@ -16,8 +16,6 @@ package org.eclipse.kura.internal.wire.publisher;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.internal.wire.publisher.PayloadType.JSON;
-import static org.eclipse.kura.internal.wire.publisher.PayloadType.KURA_PAYLOAD;
 
 import java.util.List;
 import java.util.Map;
@@ -49,9 +47,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonObject;
-
 /**
  * The Class CloudPublisher is the specific Wire Component to publish a list of
  * {@link WireRecord}s as received in {@link WireEnvelope} to the configured cloud
@@ -59,8 +54,7 @@ import com.eclipsesource.json.JsonObject;
  * <br/>
  *
  * For every {@link WireRecord} as found in {@link WireEnvelope} will be wrapped inside a Kura
- * Payload and will be sent to the Cloud Platform. In addition, the user can
- * avail to wrap every {@link WireRecord} as a JSON object as well.
+ * Payload and will be sent to the Cloud Platform.
  */
 public final class CloudPublisher implements WireReceiver, CloudClientListener, ConfigurableComponent {
 
@@ -300,26 +294,6 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
     }
 
     /**
-     * Builds the JSON instance from the provided {@link WireRecord}.
-     *
-     * @param wireRecord
-     *            the {@link WireRecord}
-     * @return the JSON instance
-     * @throws NullPointerException
-     *             if the {@link WireRecord} provided is null
-     */
-    private JsonObject buildJsonObject(final WireRecord wireRecord) {
-        requireNonNull(wireRecord, message.wireRecordNonNull());
-        final JsonObject jsonObject = Json.object();
-
-        for (final Entry<String, TypedValue<?>> entry : wireRecord.getProperties().entrySet()) {
-            final Object wrappedValue = entry.getValue().getValue();
-            jsonObject.add(entry.getKey(), wrappedValue.toString());
-        }
-        return jsonObject;
-    }
-
-    /**
      * Builds the Kura payload from the provided {@link WireRecord}.
      *
      * @param wireRecord
@@ -366,37 +340,21 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
             for (final WireRecord dataRecord : wireRecords) {
                 // prepare the topic
                 final String appTopic = this.cloudPublisherOptions.getPublishingTopic();
-                final PayloadType payloadType = this.cloudPublisherOptions.getPayloadType();
-                if (payloadType == KURA_PAYLOAD) {
-                    publishKuraPayload(dataRecord, appTopic);
+                final KuraPayload kuraPayload = buildKuraPayload(dataRecord);
+                if (this.cloudPublisherOptions.isControlMessage()) {
+                    this.cloudClient.controlPublish(appTopic, kuraPayload,
+                            this.cloudPublisherOptions.getPublishingQos(),
+                            this.cloudPublisherOptions.getPublishingRetain(),
+                            this.cloudPublisherOptions.getPublishingPriority());
+                } else {
+                    this.cloudClient.publish(appTopic, kuraPayload, this.cloudPublisherOptions.getPublishingQos(),
+                            this.cloudPublisherOptions.getPublishingRetain(),
+                            this.cloudPublisherOptions.getPublishingPriority());
                 }
-                if (payloadType == JSON) {
-                    publishJson(dataRecord, appTopic);
-                }
+
             }
         } catch (final Exception e) {
             logger.error(message.errorPublishingWireRecords(), e);
-        }
-    }
-
-    private void publishJson(final WireRecord dataRecord, final String appTopic) throws KuraException {
-        final JsonObject jsonWire = buildJsonObject(dataRecord);
-        this.cloudClient.publish(appTopic, jsonWire.toString().getBytes(),
-                this.cloudPublisherOptions.getPublishingQos(), this.cloudPublisherOptions.getPublishingRetain(),
-                this.cloudPublisherOptions.getPublishingPriority());
-    }
-
-    private void publishKuraPayload(final WireRecord dataRecord, final String appTopic) throws KuraException {
-        final KuraPayload kuraPayload = buildKuraPayload(dataRecord);
-
-        if (this.cloudPublisherOptions.isControlMessage()) {
-            this.cloudClient.controlPublish(appTopic, kuraPayload, this.cloudPublisherOptions.getPublishingQos(),
-                    this.cloudPublisherOptions.getPublishingRetain(),
-                    this.cloudPublisherOptions.getPublishingPriority());
-        } else {
-            this.cloudClient.publish(appTopic, kuraPayload, this.cloudPublisherOptions.getPublishingQos(),
-                    this.cloudPublisherOptions.getPublishingRetain(),
-                    this.cloudPublisherOptions.getPublishingPriority());
         }
     }
 

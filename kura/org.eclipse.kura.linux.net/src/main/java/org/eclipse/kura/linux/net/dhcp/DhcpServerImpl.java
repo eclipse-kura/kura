@@ -27,6 +27,8 @@ import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.dhcp.DhcpServer;
+import org.eclipse.kura.net.dhcp.DhcpServerCfg;
+import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
 import org.slf4j.Logger;
@@ -168,8 +170,11 @@ public class DhcpServerImpl implements DhcpServer {
                         + dnsList.toString());
 
                 try {
-                	this.m_dhcpServerConfig4 = DhcpServerConfigIP4.newDhcpServerConfigIP4(interfaceName, enabled, subnet, router, netmask,
-                        defaultLeaseTime, maxLeaseTime, (short) 24, rangeStart, rangeEnd, passDns, dnsList);
+					DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(interfaceName, enabled, defaultLeaseTime,
+							maxLeaseTime, passDns);
+					DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, netmask, (short) 24, router,
+							rangeStart, rangeEnd, dnsList);
+					this.m_dhcpServerConfig4 = new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4);
                 } catch (KuraException e) {
                 	s_logger.error("Failed to craete new DhcpServerConfigIP4 object - {}", e);
                 }

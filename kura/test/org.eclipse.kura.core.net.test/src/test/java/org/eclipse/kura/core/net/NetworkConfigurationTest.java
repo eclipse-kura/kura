@@ -25,6 +25,7 @@ import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IP6Address;
+import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetConfigIP6;
@@ -32,6 +33,8 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
+import org.eclipse.kura.net.dhcp.DhcpServerCfg;
+import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.modem.ModemConfig;
@@ -740,14 +743,18 @@ public class NetworkConfigurationTest {
 
 		List<NetConfig> netConfigs = new ArrayList<>();
 		
-		DhcpServerConfigIP4 dhcpServerConfig = null;
 		try {
-			dhcpServerConfig = DhcpServerConfigIP4.newDhcpServerConfigIP4(null, false, null, null, null, 0, 0, (short) 0, null, null, false, null)
+			DhcpServerCfg dhcpServerCfg = new DhcpServerCfg("eth0", true, 7200, 7200, false);
+			DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4((IP4Address) IPAddress.parseHostAddress("192.168.0.0"), 
+					(IP4Address) IPAddress.parseHostAddress("255.255.255.0"), 24,
+					(IP4Address) IPAddress.parseHostAddress("192.168.1.1"), 
+					(IP4Address) IPAddress.parseHostAddress("192.168.1.100"), 
+					(IP4Address) IPAddress.parseHostAddress("192.168.1.254"), 
+					null);
+			
+			netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
 		} catch (KuraException e) {
 			fail("failed: " + e);
-		}
-		if (dhcpServerConfig != null) {		
-			netConfigs.add(dhcpServerConfig);
 		}
 		netConfigs.add(new FirewallAutoNatConfig());
 		netConfigs.add(null);

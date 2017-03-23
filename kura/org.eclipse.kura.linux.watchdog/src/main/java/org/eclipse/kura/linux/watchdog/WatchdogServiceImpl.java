@@ -16,6 +16,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -41,19 +42,19 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private static final String PROPERTY_WD_DEVICE = "watchdogDevice";
     private static final String WD_FILE = "/tmp/watchdog";
 
-    private volatile boolean isEnabled;
+    private volatile boolean enabled;
     private volatile boolean watchdogToStop;
     private int pingInterval;
     private String watchdogDevice;
-    private volatile boolean configEnabled;   // initialized in properties, if false -> no watchdog
-    private List<CriticalComponentImpl> criticalServiceList;
+    private volatile boolean configEnabled;
+    private List<CriticalComponentImpl> criticalComponentList;
 
     private ScheduledFuture<?> pollTask;
     private ScheduledExecutorService pollExecutor;
 
     protected void activate(Map<String, Object> properties) {
-        this.criticalServiceList = new CopyOnWriteArrayList<CriticalComponentImpl>();
-        this.isEnabled = false;
+        this.criticalComponentList = new CopyOnWriteArrayList<>();
+        this.enabled = false;
         this.watchdogToStop = false;
         this.pollExecutor = Executors.newSingleThreadScheduledExecutor();
 
@@ -75,13 +76,9 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             // stop the watchdog
             disableWatchdog();
         } else {
-            this.pollTask = this.pollExecutor.scheduleAtFixedRate(new Runnable() {
-
-                @Override
-                public void run() {
-                    Thread.currentThread().setName("WatchdogServiceImpl");
-                    checkCriticalComponents();
-                }
+            this.pollTask = this.pollExecutor.scheduleAtFixedRate(() -> {
+                Thread.currentThread().setName("WatchdogServiceImpl");
+                checkCriticalComponents();
             }, 0, this.pingInterval, TimeUnit.MILLISECONDS);
         }
     }
@@ -105,18 +102,20 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     public void registerCriticalComponent(CriticalComponent criticalComponent) {
         final CriticalComponentImpl component = new CriticalComponentImpl(criticalComponent);
         boolean existing = false;
-        for (CriticalComponentImpl csi : this.criticalServiceList) {
+        for (CriticalComponentImpl csi : this.criticalComponentList) {
             if (criticalComponent.equals(csi.getCriticalComponent())) {
                 existing = true;
+                break;
             }
         }
         if (!existing) {
-            this.criticalServiceList.add(component);
+            this.criticalComponentList.add(component);
         }
 
-        logger.debug("Added " + criticalComponent.getCriticalComponentName() + ", with timeout = "
-                + criticalComponent.getCriticalComponentTimeout() + ", list contains " + this.criticalServiceList.size()
-                + " critical services");
+        logger.debug(new StringBuilder("Added ").append(criticalComponent.getCriticalComponentName())
+                .append(", with timeout = ").append(criticalComponent.getCriticalComponentTimeout())
+                .append(", list contains ").append(this.criticalComponentList.size()).append(" critical services")
+                .toString());
     }
 
     @Override
@@ -127,11 +126,12 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     @Override
     public void unregisterCriticalComponent(CriticalComponent criticalComponent) {
-        for (CriticalComponentImpl csi : this.criticalServiceList) {
+        for (CriticalComponentImpl csi : this.criticalComponentList) {
             if (criticalComponent.equals(csi.getCriticalComponent())) {
-                this.criticalServiceList.remove(csi);
-                logger.debug("Critical service " + criticalComponent.getCriticalComponentName() + " removed, "
-                        + System.currentTimeMillis());
+                this.criticalComponentList.remove(csi);
+                logger.debug(new StringBuffer("Critical service ").append(criticalComponent.getCriticalComponentName())
+                        .append(" removed, ").append(System.currentTimeMillis()).toString());
+                break;
             }
         }
     }
@@ -144,28 +144,29 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     @Override
     public List<CriticalComponent> getCriticalComponents() {
-        List<CriticalComponent> componentList = new ArrayList<CriticalComponent>();
-        for (CriticalComponentImpl cci : this.criticalServiceList) {
+        List<CriticalComponent> componentList = new ArrayList<>();
+        for (CriticalComponentImpl cci : this.criticalComponentList) {
             componentList.add(cci.getCriticalComponent());
         }
-        return componentList;
+        return Collections.unmodifiableList(componentList);
     }
 
     @Override
     public void checkin(CriticalComponent criticalService) {
-        for (CriticalComponentImpl csi : this.criticalServiceList) {
+        for (CriticalComponentImpl csi : this.criticalComponentList) {
             if (criticalService.equals(csi.getCriticalComponent())) {
                 csi.update();
+                break;
             }
         }
     }
 
-    private void checkCriticalComponents() {
-        // isEnabled is set if the hw watchdog device is activated
-        if (this.isEnabled) {
+    private void checkCriticalComponents() { // is it possible to remove enabled and watchdogToStop?
+        // enabled is set if the hw watchdog device is activated
+        if (this.enabled) {
             boolean failure = false;
             // Critical Services
-            for (CriticalComponentImpl csi : this.criticalServiceList) {
+            for (CriticalComponentImpl csi : this.criticalComponentList) {
                 if (csi.isTimedOut()) {
                     failure = true;
                     logger.warn("Critical service {} failed -> SYSTEM REBOOT", csi.getName());
@@ -186,7 +187,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         } else {
             if (this.configEnabled) {
                 refreshWatchdog();
-                this.isEnabled = true;
+                this.enabled = true;
             }
         }
     }
@@ -205,9 +206,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         try {
             Process proc = Runtime.getRuntime().exec(command);
             proc.waitFor();
-        } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, e, "'" + command + "' failed");
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, e, "'" + command + "' failed");
         }
     }
@@ -217,30 +216,19 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     }
 
     private void disableWatchdog() {
-        if (this.isEnabled) {
+        if (this.enabled) {
             writeWatchdogDevice("V");
-            this.isEnabled = false;
+            this.enabled = false;
         }
     }
 
     private synchronized void writeWatchdogDevice(String value) {
-        File f = null;
-        FileWriter bw = null;
-        try {
-            f = new File(this.watchdogDevice);
-            bw = new FileWriter(f);
+        File f = new File(this.watchdogDevice);
+        try (FileWriter bw = new FileWriter(f);) {
             bw.write(value);
             logger.debug("write {} on watchdog device", value);
         } catch (IOException e) {
             logger.error("IOException on disable watchdog", e);
-        } finally {
-            try {
-                if (bw != null) {
-                    bw.close();
-                }
-            } catch (IOException e) {
-                logger.error("IOException on closing watchdog file", e);
-            }
         }
     }
 
@@ -253,21 +241,16 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         }
         if (properties.get(PROPERTY_ENABLED) != null) {
             this.configEnabled = (Boolean) properties.get(PROPERTY_ENABLED);
-            if (this.configEnabled) {
-                PrintWriter wdWriter = null;
-                try {
-                    wdWriter = new PrintWriter(WD_FILE);
-                    wdWriter.write(this.watchdogDevice);
-                } catch (IOException e) {
-                    logger.error("Unable to write watchdog config file", e);
-                } finally {
-                    if (wdWriter != null)
-                        wdWriter.close();
-                }
-                logger.debug("activating WatchdogService with watchdog enabled");
-            } else {
-                logger.debug("activating WatchdogService with watchdog disabled");
+        }
+        if (this.configEnabled) {
+            try (PrintWriter wdWriter = new PrintWriter(WD_FILE);) {
+                wdWriter.write(this.watchdogDevice);
+            } catch (IOException e) {
+                logger.error("Unable to write watchdog config file", e);
             }
+            logger.debug("activating WatchdogService with watchdog enabled");
+        } else {
+            logger.debug("activating WatchdogService with watchdog disabled");
         }
     }
 

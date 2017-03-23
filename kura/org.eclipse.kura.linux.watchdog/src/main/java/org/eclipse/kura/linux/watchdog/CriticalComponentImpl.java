@@ -15,15 +15,11 @@ import org.eclipse.kura.watchdog.CriticalComponent;
 
 public class CriticalComponentImpl {
 
-    private CriticalComponent criticalComponent;
+    private final CriticalComponent criticalComponent;
     private final String name;
     private final long timeout;
     private long updated;
 
-    /**
-     *
-     * @param criticalComponent
-     */
     public CriticalComponentImpl(CriticalComponent criticalComponent) {
         this.criticalComponent = criticalComponent;
         this.name = criticalComponent.getCriticalComponentName();
@@ -33,10 +29,6 @@ public class CriticalComponentImpl {
 
     public CriticalComponent getCriticalComponent() {
         return criticalComponent;
-    }
-
-    public void setCriticalComponent(CriticalComponent criticalComponent) {
-        this.criticalComponent = criticalComponent;
     }
 
     public String getName() {

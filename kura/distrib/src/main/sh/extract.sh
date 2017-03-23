@@ -62,7 +62,7 @@ function runKuraInstall {
 function stopWatchdog {
 	if [ -n "${PID}" ]; then
 		kill -9 $PID >> /dev/null 2>&1
-    fi
+	fi
     if [ -n "${WATCHDOG_DEVICE}" ]; then
         echo V > ${WATCHDOG_DEVICE}
     fi

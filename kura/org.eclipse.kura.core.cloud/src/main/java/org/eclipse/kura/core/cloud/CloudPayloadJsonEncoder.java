@@ -11,6 +11,27 @@
  *******************************************************************************/
 package org.eclipse.kura.core.cloud;
 
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.BODY;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.POSITION;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.TIMESTAMP;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.ALTITUDE;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.HEADING;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.LATITUDE;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.LONGITUDE;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.PRECISION;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.SATELLITES;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.SPEED;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.STATUS;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonTypes.BOOLEAN;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonTypes.BYTEARRAY;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonTypes.CHARACTER;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonTypes.DOUBLE;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonTypes.FLOAT;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonTypes.INTEGER;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonTypes.LONG;
+import static org.eclipse.kura.core.cloud.CloudPayloadJsonTypes.STRING;
+
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
 
@@ -20,12 +41,28 @@ import org.eclipse.kura.message.KuraPosition;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 
+/**
+ * This class provides a set of methods that allow to encode the {@link KuraPayload} into a byte[] message.
+ *
+ */
 public class CloudPayloadJsonEncoder {
+
+    private static final String JSON_METRIC_VALUE = "value";
+    private static final String JSON_METRIC_TYPE = "type";
 
     private CloudPayloadJsonEncoder() {
     }
 
-    public static JsonObject toJson(KuraPayload kuraPayload) {
+    /**
+     * This static method takes a {@link KuraPayload} and converts it into a {@code byte[]}
+     *
+     * @param kuraPayload
+     *            a {@link KuraPayload} object that has to be converted.
+     * @return a byte[] that maps the received {@link KuraPayload} object
+     * @throws IllegalArgumentException
+     *             if the conversion fails
+     */
+    public static byte[] getBytes(KuraPayload kuraPayload) {
         JsonObject json = Json.object();
 
         encodeTimestamp(kuraPayload, json);
@@ -36,13 +73,13 @@ public class CloudPayloadJsonEncoder {
 
         encodeBody(kuraPayload, json);
 
-        return json;
+        return json.toString().getBytes(StandardCharsets.UTF_8);
     }
 
     private static void encodeBody(KuraPayload kuraPayload, JsonObject json) {
         byte[] body = kuraPayload.getBody();
         if (body != null) {
-            json.add("body", Base64.getEncoder().encodeToString(body));
+            json.add(BODY.name(), Base64.getEncoder().encodeToString(body));
         }
     }
 
@@ -50,27 +87,47 @@ public class CloudPayloadJsonEncoder {
         for (String name : kuraPayload.metricNames()) {
             Object object = kuraPayload.getMetric(name);
             if (object instanceof Boolean) {
-                json.add(name, (Boolean) object);
+                JsonObject valueObject = Json.object();
+                valueObject.add(JSON_METRIC_TYPE, BOOLEAN.name());
+                valueObject.add(JSON_METRIC_VALUE, (Boolean) object);
+                json.add(name, valueObject);
             } else if (object instanceof Double) {
-                json.add(name, (Double) object);
+                JsonObject valueObject = Json.object();
+                valueObject.add(JSON_METRIC_TYPE, DOUBLE.name());
+                valueObject.add(JSON_METRIC_VALUE, (Double) object);
+                json.add(name, valueObject);
             } else if (object instanceof Float) {
-                json.add(name, (Float) object);
+                JsonObject valueObject = Json.object();
+                valueObject.add(JSON_METRIC_TYPE, FLOAT.name());
+                valueObject.add(JSON_METRIC_VALUE, (Float) object);
+                json.add(name, valueObject);
             } else if (object instanceof Integer) {
-                json.add(name, (Integer) object);
+                JsonObject valueObject = Json.object();
+                valueObject.add(JSON_METRIC_TYPE, INTEGER.name());
+                valueObject.add(JSON_METRIC_VALUE, (Integer) object);
+                json.add(name, valueObject);
             } else if (object instanceof Long) {
-                json.add(name, (Long) object);
+                JsonObject valueObject = Json.object();
+                valueObject.add(JSON_METRIC_TYPE, LONG.name());
+                valueObject.add(JSON_METRIC_VALUE, (Long) object);
+                json.add(name, valueObject);
             } else if (object instanceof String) {
-                json.add(name, (String) object);
+                JsonObject valueObject = Json.object();
+                valueObject.add(JSON_METRIC_TYPE, STRING.name());
+                valueObject.add(JSON_METRIC_VALUE, (String) object);
+                json.add(name, valueObject);
             } else if (object instanceof Character) {
-                json.add(name, (Character) object);
-            } else if (object instanceof Byte) {
-                json.add(name, (Byte) object);
-            } else if (object instanceof Short) {
-                json.add(name, (Short) object);
+                JsonObject valueObject = Json.object();
+                valueObject.add(JSON_METRIC_TYPE, CHARACTER.name());
+                valueObject.add(JSON_METRIC_VALUE, (Character) object);
+                json.add(name, valueObject);
             } else if (object instanceof byte[]) {
-                json.add(name, Base64.getEncoder().encodeToString((byte[]) object));
+                JsonObject valueObject = Json.object();
+                valueObject.add(JSON_METRIC_TYPE, BYTEARRAY.name());
+                valueObject.add(JSON_METRIC_VALUE, Base64.getEncoder().encodeToString((byte[]) object));
+                json.add(name, valueObject);
             } else {
-                json.add(name, object.toString());
+                throw new IllegalArgumentException("Cannot encode this value: " + object.toString());
             }
         }
     }
@@ -81,41 +138,42 @@ public class CloudPayloadJsonEncoder {
 
             JsonObject jsonPosition = Json.object();
             if (position.getLatitude() != null) {
-                jsonPosition.add("lat", position.getLatitude());
+                jsonPosition.add(LATITUDE.name(), position.getLatitude());
             }
             if (position.getLongitude() != null) {
-                jsonPosition.add("lat", position.getLongitude());
+                jsonPosition.add(LONGITUDE.name(), position.getLongitude());
             }
             if (position.getAltitude() != null) {
-                jsonPosition.add("alt", position.getAltitude());
+                jsonPosition.add(ALTITUDE.name(), position.getAltitude());
             }
             if (position.getHeading() != null) {
-                jsonPosition.add("head", position.getHeading());
+                jsonPosition.add(HEADING.name(), position.getHeading());
             }
             if (position.getPrecision() != null) {
-                jsonPosition.add("prec", position.getPrecision());
+                jsonPosition.add(PRECISION.name(), position.getPrecision());
             }
             if (position.getSatellites() != null) {
-                jsonPosition.add("sat", position.getSatellites());
+                jsonPosition.add(SATELLITES.name(), position.getSatellites());
             }
             if (position.getSpeed() != null) {
-                jsonPosition.add("speed", position.getSpeed());
+                jsonPosition.add(SPEED.name(), position.getSpeed());
             }
             if (position.getTimestamp() != null) {
-                jsonPosition.add("ts", position.getTimestamp().getTime());
+                jsonPosition.add(CloudPayloadJsonFields.CloudPayloadJsonPositionFields.TIMESTAMP.name(),
+                        position.getTimestamp().getTime());
             }
             if (position.getStatus() != null) {
-                jsonPosition.add("status", position.getStatus());
+                jsonPosition.add(STATUS.name(), position.getStatus());
             }
 
-            json.add("pos", jsonPosition);
+            json.add(POSITION.name(), jsonPosition);
         }
     }
 
     private static void encodeTimestamp(KuraPayload kuraPayload, JsonObject json) {
         Date timestamp = kuraPayload.getTimestamp();
         if (timestamp != null) {
-            json.add("ts", timestamp.getTime());
+            json.add(TIMESTAMP.name(), timestamp.getTime());
         }
     }
 }

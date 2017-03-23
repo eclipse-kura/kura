@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.core.cloud
 Bundle-SymbolicName: org.eclipse.kura.core.cloud;singleton:=true
 Bundle-Version: 1.1.0.qualifier
 Bundle-Vendor: Eclipse Kura
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .,
  lib/com.google.protobuf_2.6.0.jar

@@ -27,7 +27,7 @@ public enum CloudPayloadEncoding {
 
     /**
      * Allows to map a provided string with the corresponding {@link CloudPayloadEncoding}
-     * 
+     *
      * @param proposedEncoding
      *            the String that has to be mapped to the corresponding {@link CloudPayloadEncoding}
      * @return {@link CloudPayloadEncoding} if the matching between passed string and enum values succeeds

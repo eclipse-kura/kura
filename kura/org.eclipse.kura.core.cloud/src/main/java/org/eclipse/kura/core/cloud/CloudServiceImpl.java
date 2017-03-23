@@ -56,8 +56,6 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eclipsesource.json.JsonObject;
-
 public class CloudServiceImpl implements CloudService, DataServiceListener, ConfigurableComponent, EventHandler,
         CloudPayloadProtoBufEncoder, CloudPayloadProtoBufDecoder {
 
@@ -93,7 +91,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
     private final AtomicInteger messageId;
 
     public CloudServiceImpl() {
-        this.cloudClients = new CopyOnWriteArrayList<CloudClientImpl>();
+        this.cloudClients = new CopyOnWriteArrayList<>();
         this.messageId = new AtomicInteger();
     }
 
@@ -440,18 +438,14 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
         // notify listeners
         KuraTopic kuraTopic = new KuraTopic(topic, this.options.getTopicControlPrefix());
         if (TOPIC_MQTT_APP.equals(kuraTopic.getApplicationId()) || TOPIC_BA_APP.equals(kuraTopic.getApplicationId())) {
-            logger.info("Ignoring feedback message from " + topic);
+            logger.info("Ignoring feedback message from {}", topic);
         } else {
             KuraPayload kuraPayload = null;
-            try {
-                // try to decode the message into an KuraPayload
-                kuraPayload = new CloudPayloadProtoBufDecoderImpl(payload).buildFromByteArray();
-            } catch (Exception e) {
-                // Wrap the received bytes payload into an KuraPayload
-                logger.debug("Received message on topic {} that could not be decoded. Wrapping it into an KuraPayload.",
-                        topic);
-                kuraPayload = new KuraPayload();
-                kuraPayload.setBody(payload);
+
+            if (this.options.getPayloadEncoding() == JSON) {
+                kuraPayload = createKuraPayloadFromJson(payload);
+            } else if (this.options.getPayloadEncoding() == KURA_PROTOBUF) {
+                kuraPayload = createKuraPayloadFromProtoBuf(topic, payload);
             }
 
             for (CloudClientImpl cloudClient : this.cloudClients) {
@@ -710,7 +704,25 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
     }
 
     private byte[] encodeJsonPayload(KuraPayload payload) {
-        JsonObject jsonObject = CloudPayloadJsonEncoder.toJson(payload);
-        return jsonObject.toString().getBytes();
+        return CloudPayloadJsonEncoder.getBytes(payload);
+    }
+
+    private KuraPayload createKuraPayloadFromJson(byte[] payload) {
+        return CloudPayloadJsonDecoder.buildFromByteArray(payload);
+    }
+
+    private KuraPayload createKuraPayloadFromProtoBuf(String topic, byte[] payload) {
+        KuraPayload kuraPayload;
+        try {
+            // try to decode the message into an KuraPayload
+            kuraPayload = new CloudPayloadProtoBufDecoderImpl(payload).buildFromByteArray();
+        } catch (Exception e) {
+            // Wrap the received bytes payload into an KuraPayload
+            logger.debug("Received message on topic {} that could not be decoded. Wrapping it into an KuraPayload.",
+                    topic);
+            kuraPayload = new KuraPayload();
+            kuraPayload.setBody(payload);
+        }
+        return kuraPayload;
     }
 }

@@ -20,12 +20,12 @@
         <Icon resource="WatchdogService" size="32"/>
         
         <AD id="enabled"  
-            name="Enable the watchdog"
+            name="Watchdog enable"
             type="Boolean"
             cardinality="0" 
             required="true"
             default="false" 
-            description="If set to true the watchdog will be enabled. If the CONFIG_WATCHDOG_NOWAYOUT kernel parameter is set, disabling the watchdog once activated has no effect and the system will reboot."/>
+            description="The WatchdogService monitors CriticalComponentS and reboots the system if one of them hangs. Once enabled the WatchdogService starts refreshing the hardware watchdog which will reset the system if WatchdogService hangs."/>
         
         <AD id="pingInterval"
             name="Watchdog refresh interval"
@@ -33,7 +33,8 @@
             cardinality="0"
             required="true"
             default="10000"
-            description="Ping periodicity in ms. A value between 1 and 30 seconds is suggested."/>
+            max="60000"
+            description="Watchdog refresh interval in ms. The value can be set between 1 and 60 seconds."/>
 
         <AD id="watchdogDevice"
             name="Watchdog device path"
@@ -41,7 +42,7 @@
             cardinality="0"
             required="true"
             default="/dev/watchdog"
-            description="Watchdog device."/>
+            description="Watchdog device path e.g. /dev/watchdog."/>
             
     </OCD>
     <Designate pid="org.eclipse.kura.watchdog.WatchdogService">

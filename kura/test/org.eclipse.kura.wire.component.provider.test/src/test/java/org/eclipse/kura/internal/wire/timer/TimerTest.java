@@ -8,8 +8,14 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.timer;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,26 +41,28 @@ public class TimerTest {
     public void testActivateSimple() throws SchedulerException, NoSuchFieldException {
         WireHelperService mockWireHelperService = mock(WireHelperService.class);
         Scheduler mockScheduler = mock(Scheduler.class);
-        
+
         Timer timer = new Timer() {
-            
+
             @Override
             protected Scheduler createScheduler() throws SchedulerException {
                 return mockScheduler;
             }
         };
-        
+
         timer.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
         when(mockWireHelperService.newWireSupport(timer)).thenReturn(mockWireSupport);
 
         String expectedType = "SIMPLE";
-        int expectedInterval = 3;
+        int expectedIntervalSeconds = 1;
+        int expectedIntervalMilliseconds = expectedIntervalSeconds * 1000;
         Map<String, Object> properties = new HashMap<>();
         properties.put("type", expectedType);
-        properties.put("simple.interval", expectedInterval);
-        
+        properties.put("simple.interval", expectedIntervalSeconds);
+        properties.put("simple.time.unit", "SECONDS");
+
         doAnswer(invocation -> {
             Object[] arguments = invocation.getArguments();
 
@@ -62,27 +70,27 @@ public class TimerTest {
 
             JobDetail job = (JobDetail) arguments[0];
             Trigger trigger = (Trigger) arguments[1];
-            
+
             assertTrue(job.getJobDataMap() instanceof TimerJobDataMap);
             assertTrue(trigger instanceof SimpleTriggerImpl);
-            
+
             SimpleTriggerImpl simpleTriggerImpl = (SimpleTriggerImpl) trigger;
-            assertEquals((long) expectedInterval * 1000, simpleTriggerImpl.getRepeatInterval());
-            
+            assertEquals((long) expectedIntervalMilliseconds, simpleTriggerImpl.getRepeatInterval());
+
             return null;
         }).when(mockScheduler).scheduleJob(any(), any());
-        
+
         timer.activate(null, properties);
 
         assertEquals(mockWireSupport, TestUtil.getFieldValue(timer, "wireSupport"));
-        
+
         TimerOptions timerOptions = (TimerOptions) TestUtil.getFieldValue(timer, "timerOptions");
         assertEquals(expectedType, timerOptions.getType());
-        assertEquals(expectedInterval, timerOptions.getSimpleInterval());
+        assertEquals(expectedIntervalSeconds, timerOptions.getSimpleInterval());
 
         assertEquals(mockScheduler, TestUtil.getFieldValue(timer, "scheduler"));
         assertNotNull(TestUtil.getFieldValue(timer, "jobKey"));
-        
+
         verify(mockScheduler).start();
         verify(mockScheduler).scheduleJob(any(), any());
     }
@@ -91,20 +99,20 @@ public class TimerTest {
     public void testActivateCron() throws SchedulerException, NoSuchFieldException {
         WireHelperService mockWireHelperService = mock(WireHelperService.class);
         Scheduler mockScheduler = mock(Scheduler.class);
-        
+
         Timer timer = new Timer() {
-            
+
             @Override
             protected Scheduler createScheduler() throws SchedulerException {
                 return mockScheduler;
             }
         };
-        
+
         timer.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
         when(mockWireHelperService.newWireSupport(timer)).thenReturn(mockWireSupport);
-        
+
         SchedulerContext mockSchedulerContext = mock(SchedulerContext.class);
         when(mockScheduler.getContext()).thenReturn(mockSchedulerContext);
 
@@ -113,7 +121,7 @@ public class TimerTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("type", expectedType);
         properties.put("cron.interval", expectedCronExpression);
-        
+
         doAnswer(invocation -> {
             Object[] arguments = invocation.getArguments();
 
@@ -121,27 +129,27 @@ public class TimerTest {
 
             JobDetail job = (JobDetail) arguments[0];
             Trigger trigger = (Trigger) arguments[1];
-            
+
             assertTrue(job.getJobDataMap() instanceof TimerJobDataMap);
             assertTrue(trigger instanceof CronTriggerImpl);
-            
+
             CronTriggerImpl simpleTriggerImpl = (CronTriggerImpl) trigger;
             assertEquals(expectedCronExpression, simpleTriggerImpl.getCronExpression());
-            
+
             return null;
         }).when(mockScheduler).scheduleJob(any(), any());
-        
+
         timer.activate(null, properties);
 
         assertEquals(mockWireSupport, TestUtil.getFieldValue(timer, "wireSupport"));
-        
+
         TimerOptions timerOptions = (TimerOptions) TestUtil.getFieldValue(timer, "timerOptions");
         assertEquals(expectedType, timerOptions.getType());
         assertEquals(expectedCronExpression, timerOptions.getCronExpression());
 
         assertEquals(mockScheduler, TestUtil.getFieldValue(timer, "scheduler"));
         assertNotNull(TestUtil.getFieldValue(timer, "jobKey"));
-        
+
         verify(mockScheduler).getContext();
         verify(mockSchedulerContext).put("wireSupport", mockWireSupport);
         verify(mockScheduler).start();

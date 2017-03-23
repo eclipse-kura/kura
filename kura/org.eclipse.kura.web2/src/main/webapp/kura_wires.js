@@ -32,6 +32,7 @@ var kuraWires = (function() {
 	var isComponentDeleted;
 	var eventSource;
 	var selectionRefreshPending = false;
+	var emitterPidLink, receiverPidLink;
 
 	/*
 	 * / Public functions
@@ -41,6 +42,7 @@ var kuraWires = (function() {
 		clientConfig = JSON.parse(obj);
 		sse();
 		setup();
+		colorFilteredWires();
 		regiterFormInputFieldValidation();
 	};
 	
@@ -88,7 +90,34 @@ var kuraWires = (function() {
 			}
 		}
 	};
-
+	
+	function updateFilter(emitterPid, receiverPid, filterStr) {
+		var _links = graph.getLinks();
+		for (var i = 0; i < _links.length; i++) {
+			var link = _links[i];
+			var emitter = getPidById(link.attributes.source.id);
+			var receiver = getPidById(link.attributes.target.id);
+			if (emitter === emitterPid && receiver == receiverPid) {
+				var regex = filterStr.trim();
+				link.attributes.filter = regex;
+				jsniMakeUiDirty();
+			}
+		}
+	};
+	
+	function colorFilteredWires() {
+		var _links = graph.getLinks();
+		for (var i = 0; i < _links.length; i++) {
+			var link = _links[i];
+			var filter = link.attributes.filter;
+			if (!filter) {
+				link.attr('.connection/stroke', '#4b4f6a');
+			} else {
+				link.attr('.connection/stroke', '#90D4C5');
+			}
+		}
+	};
+	
 	var removeCellFunc = function(cell) {
 		jsniMakeUiDirty();
 		var _elements = graph.getElements();
@@ -169,6 +198,8 @@ var kuraWires = (function() {
 			$("#btn-delete-graph-confirm").on("click", deleteGraph);
 			$("#btn-zoom-in").on("click", zoomInPaper);
 			$("#btn-zoom-out").on("click", zoomOutPaper);
+			$("#btn-save-filter").on("click", saveFilter);
+			$("#btn-save-filter-cancel").on("click", cancelSaveFilter);
 
 			initialized = true;
 			elementsContainerTemp = [];
@@ -259,6 +290,16 @@ var kuraWires = (function() {
 				oldCellView = cellView;
 			}
 		});
+		
+		paper.on('cell:pointerdblclick', function(cellView, evt, x, y) {
+			var element = cellView.model;
+			if (element.isLink()) {
+				var filter = element.attributes.filter;
+				emitterPidLink = getPidById(element.attributes.source.id);
+				receiverPidLink = getPidById(element.attributes.target.id);
+				jsniShowFilterModal(filter);
+			}
+		});
 
 		paper.on('blank:pointerdown', function(cellView, evt, x, y) {
 			jsniUpdateSelection("", "");
@@ -308,7 +349,8 @@ var kuraWires = (function() {
 		for (var j = 0; j < wireConfigs.length; j++) {
 			var emitter = wireConfigs[j].emitter;
 			var receiver = wireConfigs[j].receiver;
-			createLinkBetween(emitter, receiver);
+			var filter = wireConfigs[j].filter;
+			createLinkBetween(emitter, receiver, filter);
 		}
 	}
 
@@ -323,7 +365,7 @@ var kuraWires = (function() {
 		return xPos + "," + yPos;
 	}
 
-	function createLinkBetween(emitterPid, receiverPid) {
+	function createLinkBetween(emitterPid, receiverPid, filterStr) {
 		var _elements = graph.getElements();
 		var emitter = null, receiver = null;
 		for (var i = 0; i < _elements.length; i++) {
@@ -342,7 +384,8 @@ var kuraWires = (function() {
 				},
 				target : {
 					id : receiver.id
-				}
+				},
+				filter : filterStr
 			});
 			graph.addCell(link);
 		}
@@ -584,6 +627,7 @@ var kuraWires = (function() {
 		if (!checkForCycleExistence()) {
 			jsniUpdateWireConfig(JSON.stringify(newConfig));
 		}
+		colorFilteredWires();
 	}
 
 	function prepareJsonFromGraph() {
@@ -593,9 +637,12 @@ var kuraWires = (function() {
 		var wires = {};
 		for (var i = 0; i < _links.length; i++) {
 			var link = _links[i];
+			var filter = link.attributes.filter;
+			var regex = filter == null ? "" : filter;
 			var entry = {
 				"producer" : getPidById(link.attributes.source.id),
-				"consumer" : getPidById(link.attributes.target.id)
+				"consumer" : getPidById(link.attributes.target.id),
+				"filter" : regex
 			}
 			wires[i] = entry;
 		}
@@ -681,6 +728,19 @@ var kuraWires = (function() {
 				isComponentDeleted = true;
 			}
 		}
+	}
+	
+	function saveFilter() {
+		var filter = $("#regexFilterInput").val();
+		updateFilter(emitterPidLink, receiverPidLink, filter);
+		emitterPidLink = null;
+		receiverPidLink = null;
+		jsniHideFilterModal();
+	}
+	
+	function cancelSaveFilter() {
+		emitterPidLink = null;
+		receiverPidLink = null;
 	}
 
 	function deleteGraph() {

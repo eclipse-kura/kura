@@ -128,11 +128,13 @@ public interface WireHelperService {
     public boolean isReceiver(final String wireComponentPid);
 
     /**
-     * Returns a Wire Support instance of the provided wire component
+     * Returns a {@link WireSupport} instance of the provided {@link WireComponent}
+     * instance
      *
      * @param wireComponent
-     *            the wire component
-     * @return the wire support instance
+     *            the {@link WireComponent}
+     *            instance
+     * @return the {@link WireSupport} instance
      * @throws NullPointerException
      *             if the argument is null
      */

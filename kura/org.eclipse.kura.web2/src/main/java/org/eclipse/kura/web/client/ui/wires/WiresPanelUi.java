@@ -90,6 +90,17 @@ public class WiresPanelUi extends Composite {
     static Button btnAssetModalYes;
     @UiField
     static Button btnAssetModalNo;
+    
+    @UiField
+    static Modal filterModal;
+    @UiField
+    static Button btnFilterModalYes;
+    @UiField
+    static Button btnFilterModalNo;
+    @UiField
+    static FormLabel regexFilterText;
+    @UiField
+    static TextBox regexFilterInput;
 
     @UiField
     static Modal saveGraphModal;
@@ -217,6 +228,8 @@ public class WiresPanelUi extends Composite {
         exportJSNIshowCycleExistenceError();
         exportJSNImakeUiDirty();
         exportJSNIDeactivateNavPils();
+        exportJSNIShowFilterModal();
+        exportJSNIHideFilterModal();
     }
 
     private String getFactoryPidFromDropUrl(String dropUrl) {
@@ -252,9 +265,10 @@ public class WiresPanelUi extends Composite {
         }
     }
 
-    private native void createComponentNative() /*-{
-                                                          parent.window.kuraWires.createNewComponent()
-                                                          }-*/;
+    private native void createComponentNative() 
+    /*-{
+    parent.window.kuraWires.createNewComponent()
+    }-*/;
 
     private void createComponent(final String pid) {
         EntryClassUi.showWaitModal();
@@ -636,6 +650,20 @@ public class WiresPanelUi extends Composite {
     @org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniMakeUiDirty()
     );
     }-*/;
+    
+    private static native void exportJSNIShowFilterModal()
+    /*-{
+    parent.window.jsniShowFilterModal = $entry(
+    @org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniShowFilterModal(Ljava/lang/String;)
+    );
+    }-*/;
+    
+    private static native void exportJSNIHideFilterModal()
+    /*-{
+    parent.window.jsniHideFilterModal = $entry(
+    @org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniHideFilterModal()
+    );
+    }-*/;
 
     private static native void exportJSNIshowCycleExistenceError()
     /*-{
@@ -693,6 +721,18 @@ public class WiresPanelUi extends Composite {
         WiresPanelUi.errorAlertText.setText(MSGS.wiresComponentNameAlreadyUsed(pid));
         WiresPanelUi.errorModal.show();
         assetModal.hide();
+    }
+    
+    public static void jsniShowFilterModal(final String filter) {
+        WiresPanelUi.regexFilterText.setText(MSGS.wiresRegularExpression());
+        WiresPanelUi.regexFilterInput.setText(filter);
+        WiresPanelUi.btnFilterModalYes.setText(MSGS.apply());
+        WiresPanelUi.btnFilterModalNo.setText(MSGS.cancelButton());
+        WiresPanelUi.filterModal.show();
+    }
+    
+    public static void jsniHideFilterModal() {
+        WiresPanelUi.filterModal.hide();
     }
 
     public static void jsniUpdateSelection(final String pid, final String factoryPid) {

@@ -3,35 +3,50 @@
 INSTALL_DIR=/opt/eclipse
 WD_TMP_FILE=/tmp/watchdog
 REFRESH_TIME=5
+TIMEOUT_TIME=300
 
 ##############################################
 # UTILITY FUNCTIONS
 ##############################################
-# Start refresh watchdog device
-function startRefreshWatchdog {
+# Run preRemove function and start watchdog if needed
+function runPreRemove {
     if [ -f "${WD_TMP_FILE}" ]; then
         WATCHDOG_DEVICE=`cat ${WD_TMP_FILE}`
-        refreshWatchdog &
+        preRemove &
         PID=$!
+        
+        (sleep $TIMEOUT_TIME; kill -9 $PID >> /dev/null 2>&1) & while [ -d "/proc/$PID" ]; do
+            echo w > ${WATCHDOG_DEVICE}
+            sleep $REFRESH_TIME
+        done
+        stopWatchdog
+    else
+        preRemove
     fi
-}
-
-# Refresh watchdog device
-function refreshWatchdog {
-    for (( ; ; ))
-    do
-        echo w > ${WATCHDOG_DEVICE}
-        sleep $REFRESH_TIME
-    done
 }
 
 # Deactivate watchdog device if possible
 function stopWatchdog {
-    if [ -n "${PID}" ]; then
-        kill -9 $PID >> /dev/null 2>&1
-    fi
     if [ -n "${WATCHDOG_DEVICE}" ]; then
         echo V > ${WATCHDOG_DEVICE}
+    fi
+}
+
+# Pre-remove script
+function preRemove {
+    #Remove INIT scripts
+    rm /etc/init.d/firewall
+    rm /etc/init.d/kura
+    update-rc.d firewall remove
+    update-rc.d kura remove
+    
+    #Delete Eclipse directory if present
+    if [ -d "${INSTALL_DIR}/kura/data" ] ; then
+      rm -rf ${INSTALL_DIR}/kura/data
+    fi
+    
+    if [ -d "${INSTALL_DIR}/kura" ] ; then
+      rm -rf ${INSTALL_DIR}/kura
     fi
 }
 ##############################################
@@ -58,22 +73,7 @@ if [ -f "/var/run/kura.pid" ] ; then
   done
 fi
 
-#Get watchdog device and start refreshing
-startRefreshWatchdog
-
-#Remove INIT scripts
-rm /etc/init.d/firewall
-rm /etc/init.d/kura
-update-rc.d firewall remove
-update-rc.d kura remove
-
-#Delete Eclipse directory if present
-if [ -d "${INSTALL_DIR}/kura/data" ] ; then
-  rm -rf ${INSTALL_DIR}/kura/data
-fi
-
-if [ -d "${INSTALL_DIR}/kura" ] ; then
-  rm -rf ${INSTALL_DIR}/kura
-fi
-
-stopWatchdog
+runPreRemove
+##############################################
+# END PRE-REMOVE SCRIPT
+##############################################

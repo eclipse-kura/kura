@@ -341,7 +341,7 @@ public final class OpcUaDriver implements Driver {
 
     /** {@inheritDoc} */
     @Override
-    public List<DriverRecord> read(final List<DriverRecord> records) throws ConnectionException {
+    public void read(final List<DriverRecord> records) throws ConnectionException {
         if (this.isBusy.get()) {
             throw new ConnectionException(message.errorDriverBusy());
         }
@@ -351,7 +351,6 @@ public final class OpcUaDriver implements Driver {
         for (final DriverRecord record : records) {
             OpcUaRequestInfo.extract(record).ifPresent(this::runReadRequest);
         }
-        return Collections.unmodifiableList(records);
     }
 
     /** {@inheritDoc} */
@@ -418,7 +417,7 @@ public final class OpcUaDriver implements Driver {
 
     /** {@inheritDoc} */
     @Override
-    public List<DriverRecord> write(final List<DriverRecord> records) throws ConnectionException {
+    public void write(final List<DriverRecord> records) throws ConnectionException {
         if (this.isBusy.get()) {
             throw new ConnectionException(message.errorDriverBusy());
         }
@@ -428,7 +427,6 @@ public final class OpcUaDriver implements Driver {
         for (final DriverRecord record : records) {
             OpcUaRequestInfo.extract(record).ifPresent(this::runWriteRequest);
         }
-        return Collections.unmodifiableList(records);
     }
 
     private static class OpcUaRequestInfo {

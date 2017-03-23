@@ -512,7 +512,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             if (preparedRead != null) {
                 driverRecords = preparedRead.execute();
             } else {
-                driverRecords = driver.read(getAllReadRecords());
+                driverRecords = getAllReadRecords();
+                driver.read(driverRecords);
             }
         } catch (final ConnectionException ce) {
             throw new KuraException(KuraErrorCode.CONNECTION_FAILED, ce);

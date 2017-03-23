@@ -1228,8 +1228,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 								routerAddress, rangeStart, rangeEnd, dnsServers);
 						netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
                     } catch (KuraException e) {
-                    	s_logger.error("Failed to create new DhcpServerConfigIP4 object. Please verify that DHCP pool IP addresses (see below) are in the {} subnet. - {}", subnet.getHostAddress(), e);
+                    	s_logger.error("Failed to create new DhcpServerConfigIP4 object. Please verify that DHCP pool IP addresses (see below) are in the {} subnet.", subnet.getHostAddress());
                     	s_logger.error("DHCP Pool: range from {} to {}", rangeStart.getHostAddress(), rangeEnd.getHostAddress());
+                    	s_logger.error("Exception: ", e);
                     }
                 }
 

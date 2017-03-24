@@ -45,12 +45,14 @@ var kuraWires = (function() {
 	};
 	
 	client.unload = function() {
-		eventSource.close();
-		eventSource = null;
-		var xmlHttp = new XMLHttpRequest();
-	    xmlHttp.open("GET", "/sse?session="
-				+ eventSourceSessionId + "&logout=" + eventSourceSessionId, true);
-	    xmlHttp.send(null);
+		if(typeof(EventSource) !== "undefined") {
+			eventSource.close();
+			eventSource = null;
+			var xmlHttp = new XMLHttpRequest();
+		    xmlHttp.open("GET", "/sse?session="
+					+ eventSourceSessionId + "&logout=" + eventSourceSessionId, true);
+		    xmlHttp.send(null);
+		}
 	};
 
 	function generateId() {
@@ -63,12 +65,13 @@ var kuraWires = (function() {
 
 	$(document).ready(function() {
 		$(window).bind("beforeunload", function() {
-			eventSource.close();
-			eventSource = null;
-			var xmlHttp = new XMLHttpRequest();
-		    xmlHttp.open("GET", "/sse?session="
-					+ eventSourceSessionId + "&logout=" + eventSourceSessionId, true);
-		    xmlHttp.send(null);
+			if(typeof(EventSource) !== "undefined") {
+				eventSource.close();
+				eventSource = null;
+				var xmlHttp = new XMLHttpRequest();
+				xmlHttp.open("GET", "/sse?session=" + eventSourceSessionId + "&logout=" + eventSourceSessionId, true);
+				xmlHttp.send(null);
+			}
 		});
 	});
 	
@@ -100,7 +103,7 @@ var kuraWires = (function() {
 	 * Interaction with OSGi Event Admin through Server Sent Events
 	 */
 	function sse() {
-		if(eventSource == null) {
+		if(typeof(EventSource) !== "undefined" && eventSource == null) {
 			eventSourceSessionId = generateId();
 			eventSource = new EventSource("/sse?session=" + eventSourceSessionId);
 			eventSource.onmessage = function(event) {

@@ -179,24 +179,6 @@ function KuraInstall {
 	# PRE-INSTALL SCRIPT
 	##############################################
 	
-	require_java_8
-	
-	require install
-	require basename
-	require dirname
-	require tar
-	require unzip
-	
-	echo ""
-	echo "Installing Kura..."
-	echo "Installing Kura..." > $LOG 2>&1
-	
-	#Get watchdog device and start refreshing
-	startRefreshWatchdog
-	 
-	#Kill JVM and monit for installation
-	{ killall monit java || true; } >> $LOG 2>&1
-	
 	rm -rf kura-*.zip >> $LOG 2>&1
 	rm -rf kura_*.zip >> $LOG 2>&1
 	
@@ -289,6 +271,21 @@ function KuraInstall {
 ##############################################
 # RUN INSTALLATION
 ##############################################
+require_java_8
+
+require install
+require basename
+require dirname
+require tar
+require unzip
+
+echo ""
+echo "Installing Kura..."
+echo "Installing Kura..." > $LOG 2>&1
+
+#Kill JVM and monit for installation
+{ killall monit java || true; } >> $LOG 2>&1
+	
 runKuraInstall
 
 # NOTE: Don't place any newline characters after the last line below.

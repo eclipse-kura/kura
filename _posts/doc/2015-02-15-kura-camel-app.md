@@ -12,6 +12,150 @@ As of 2.1.0 Kura provides a set of different ways to implement an application ba
  * Custom XML route configuration
  * Custom Java DSL definition 
 
+## Kura cloud endpoint
+
+Kura provides a special "Kura cloud endpoint" which allows to publish
+or subscribe to the Kura Cloud API. The default component name for this
+component is `kura-cloud` but it may be overridden in the following use cases.
+
+The default component will only be registered once the default Kura Cloud API is
+registered with OSGi. This instance is registered with the OSGi property `kura.service.pid=org.eclipse.kura.cloud.CloudService`.
+
+If you want to publish to a different cloud service instance you can either manually
+register a new instance of this endpoint, or e.g. use a functionality like
+the Simple XML router provides: also see [selecting a cloud service](#selecting-a-cloud-service).
+
+### Endpoint URI
+
+The URI syntax of the endpoint is (assuming the default component name): `kura-cloud:appid/topic`.
+Where `appid` is the application ID registered with the Cloud API and `topic` is the topic to use.
+
+The following URI parameters are supported by the endpoint: 
+
+<table>
+<thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+
+<tr>
+  <td><code>applicationId</code></td>
+  <td>String</td>
+  <td><em>From URI path</em></td>
+  <td>The application ID used with the Cloud API</td>
+</tr>
+
+<tr>
+  <td><code>topic</code></td>
+  <td>String</td>
+  <td><em>From URI path</em></td>
+  <td>The default topic name to publish/subscribe to when no header value is specified</td>
+</tr>
+
+<tr>
+  <td><code>qos</code></td>
+  <td>Integer</td>
+  <td>0</td>
+  <td>The QoS value when publishing to MQTT</td>
+</tr>
+
+<tr>
+  <td><code>retain</code></td>
+  <td>Boolean</td>
+  <td>false</td>
+  <td>The default retain flag when publishing to MQTT</td>
+</tr>
+
+<tr>
+  <td><code>priority</code></td>
+  <td>Integer</td>
+  <td>5</td>
+  <td>The default priority value</td>
+</tr>
+
+<tr>
+  <td><code>control</code></td>
+  <td>Boolean</td>
+  <td>false</td>
+  <td>Whether to publish/subscribe on the control or data topic hierarchy</td>
+</tr>
+
+<tr>
+  <td><code>deviceId</code></td>
+  <td>String</td>
+  <td><em>empty</em></td>
+  <td>The default device ID when publishing/subscribing to control topics</td>
+</tr>
+
+</tbody>
+</table>
+
+The following header fields are supported. If a value is not set when publishing it is taken from the endpoint configuration:
+
+<table>
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+
+<tr>
+  <td><code>CamelKuraCloudService.topic</code></td>
+  <td>String</td>
+  <td>The name of the topic to publish to or from which the message was received</td>
+</tr>
+
+<tr>
+  <td><code>CamelKuraCloudService.qos</code></td>
+  <td>Integer</td>
+  <td>The QoS to use when publishing to MQTT</td>
+</tr>
+
+<tr>
+  <td><code>CamelKuraCloudService.retain</code></td>
+  <td>Boolean</td>
+  <td>The value of the retain flag when publishing to MQTT</td>
+</tr>
+
+<tr>
+  <td><code>CamelKuraCloudService.control</code></td>
+  <td>Boolean</td>
+  <td>Whether to publish/subscribe on the control or data topic hierarchy</td>
+</tr>
+
+<tr>
+  <td><code>CamelKuraCloudService.deviceId</code></td>
+  <td>String</td>
+  <td>The device ID when publishing to control topics</td>
+</tr>
+
+</tbody>
+</table>
+
+### Cloud to cloud messaging
+
+As already described, header values override the endpoint settings. This allows for a finer grained
+control with Camel messaging. However this can cause unexpected behavior when two Cloud API endpoints
+are bridged. Camel can received from a Cloud endpoint but also publish to it. Now it is possible to
+write Camel routes with exchange messages, receiving from one Cloud API, pushing to another.
+
+    -------------------             -------------------
+    | Cloud Service A |    <--->    | Cloud Service B |
+    -------------------             -------------------
+
+Which could result in a Camel route XML like:
+
+    <route id="bridgeLocalToRemote">
+      <from uri="local-cloud:sensor/sensor1" />
+      <to   uri="upstream-cloud:gateway1/all-sensors" /> 
+    </route>
+
+However the Consumer (from) would set the topic header value with the topic name it received the message
+from. And the Producer (to) would get its topic from the URI overriden by that header value.
+
+In order to fix this behavior the header field has to be cleared before publishing:
+
+    <route id="bridgeLocalToRemote">
+      <from uri="local-cloud:sensor/sensor1" />
+      <removeHeaders pattern="CamelKuraCloudService.topic"/>
+      <to   uri="upstream-cloud:gateway1/all-sensors" /> 
+    </route>
+
 ## Simple XML routes
 
 Eclipse Kura 2.1.0 introduces a new "out-of-the-box" component which

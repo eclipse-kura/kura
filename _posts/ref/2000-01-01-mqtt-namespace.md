@@ -1,79 +1,12 @@
 ---
 layout: page
-title:  "MQTT Namespace Guidelines"
+title:  "Kura Remote Device Management"
 categories: [ref]
 ---
-
-[Overview](#overview)
-
-[MQTT Request/Response Conversations](#mqtt-request/response-conversations)
-
-*  [MQTT Request/Response Example](#mqtt-requestresponse-example)
-
-[MQTT Remote Resource Management](#mqtt-remote-resource-management)
-
-*  [Read Resources](#read-resources)
-
-*  [Create or Update Resources](#create-or-update-resources)
-
-*  [Delete Resources](#delete-resources)
-
-*  [Other Operations](#other-operations)
-
-[MQTT Unsolicited Events](#mqtt-unsolicited-events)
-
-[Discoverability](#discoverability)
-
-[Remote OSGi Management via MQTT](#remote-osgi-management-via-mqtt)
-
-*  [Remote OSGi ConfigurationAdmin Interactions via MQTT](#remote-osgi-configurationadmin-interactions-via-mqtt)
-
-    *  [Read All Configurations](#read-all-configurations)
-
-    *  [Read Configuration for a Given Service](#read-configuration-for-a-given-service)
-
-    *  [Update All Configurations](#update-all-configurations)
-
-    *  [Update the Configuration of a Given Service](#update-the-configuration-of-a-given-service)
-
-    *  [Example Management Web Application](#_Example_Management_Web)
-
-*  [Remote OSGi DeploymentAdmin Interactions via
-    MQTT](#remote-osgi-deploymentadmin-interactions-via-mqtt)
-
-    *  [DEPLOY-V1](#deploy-v1)
-
-        *  [Read All Deployment Packages](#read-all-deployment-packages)
-
-        *  [Install a Deployment Package](#install-a-deployment-package)
-
-        *  [Uninstall a Deployment Package](#uninstall-a-deployment-package)
-
-        *  [Read All Bundles](#read-all-bundles)
-
-        *  [Start a Bundle](#start-a-bundle)
-
-        *  [Stop a Bundle](#stop-a-bundle)
-
-        *  [Example Management Web Application](#example-management-web-application)
-
-    *  [DEPLOY-V2](#deploy-v2)
-
-        *  [Download Messages](#download-messages)
-
-        *  [Install Messages](#install-messages)
-
-        *  [Uninstall Messages](#uninstall-messages)
-
-        *  [Read All Bundles](#read-all-bundles)
-
-        *  [Start a Bundle](#start-a-bundle)
-
-        *  [Stop a Bundle](#stop-a-bundle)
-
+* don't delete this, it allows the TOC
+{:toc}
 
 ## Overview
-
 This section provides guidelines on how to structure the MQTT topic
 namespace for messaging interactions with applications running on IoT
 gateway devices.
@@ -85,14 +18,37 @@ event-driven patterns.
 
 The table below defines some basic terms used in this document:
 
-Field         |   
---------------|---
-**account_name** | Identifies a group of devices and users. It can be seen as partition of the MQTT topic namespace. For example, access control lists can be defined so that users are only given access to the child topics of a given account_name.
-**client_id**|Identifies a single gateway device within an account (typically the MAC address of a gateway’s primary network interface). The **client_id** maps to the Client Identifier (Client ID) as defined in the MQTT specifications.
-**app_id**|Identifies an application running on the gateway device. To support multiple versions of the application, it is recommended that a version number be assigned with the **app_id** (e.g., “CONF-V1”, “CONF-V2”, etc.)
-**resource_id**|Identifies a resource(s) that is owned and managed by a particular application. Management of resources (e.g., sensors, actuators, local files, or configuration options) includes listing them, reading the latest value, or updating them to a new value. A **resource_id** may be a hierarchical topic, where, for example, “sensors/temp” may identify a temperature sensor and “sensor/hum” a humidity sensor.
+<table class="table table-striped">
+    <colgroup>
+        <col width="15%" />
+        <col width="85%" />
+    </colgroup>
+    <thead>
+        <tr class="header">
+            <th>Field</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td markdown="span">**account_name**</td>
+            <td markdown="span">Identifies a group of devices and users. It can be seen as partition of the MQTT topic namespace. For example, access control lists can be defined so that users are only given access to the child topics of a given account_name.</td>
+        </tr>
+        <tr>
+            <td markdown="span">**client_id**</td>
+            <td markdown="span">Identifies a single gateway device within an account (typically the MAC address of a gateway’s primary network interface). The **client_id** maps to the Client Identifier (Client ID) as defined in the MQTT specifications.</td>
+        </tr>
+        <tr>
+            <td markdown="span">**app_id**</td>
+            <td markdown="span">Identifies an application running on the gateway device. To support multiple versions of the application, it is recommended that a version number be assigned with the **app_id** (e.g., “CONF-V1”, “CONF-V2”, etc.)</td>
+        </tr>
+        <tr>
+            <td markdown="span">**resource_id**</td>
+            <td markdown="span">Identifies a resource(s) that is owned and managed by a particular application. Management of resources (e.g., sensors, actuators, local files, or configuration options) includes listing them, reading the latest value, or updating them to a new value. A **resource_id** may be a hierarchical topic, where, for example, “sensors/temp” may identify a temperature sensor and “sensor/hum” a humidity sensor.</td>
+        </tr>
+    </tbody>
+</table>
 
-<br>
 A gateway, as identified by a specific **client_id** and belonging to a
 particular **account_name**, may have one or more applications running
 on it (e.g., “app_id1”, “app_id2”, etc.). Each application can manage
@@ -121,8 +77,8 @@ from data topics that are used in unsolicited reports and marks the
 associated messages as transient (not to be stored in the historical
 data archive, if present).
 
-NOTE: While **$EDC** will be used for reference for this document, this value is
-configurable through the CloudService topic.control-prefix variable. 
+{% include note.html message="While <b>$EDC</b> will be used for reference for this document, this value is
+configurable through the CloudService topic.control-prefix variable." %}
 
 A requester (i.e., the remote server) initiates a request/response
 conversation through the following events:
@@ -146,20 +102,18 @@ REPLY topic structured as:
 
 **$EDC/account_name/requester.client.id/app_id/REPLY/request.id**
 
-NOTE: While this recommendation does not mandate the format of the
+{% include note.html message="While this recommendation does not mandate the format of the
 message payload, which is application-specific, it is important that the
-**request.id** and **requester.client.id** fields are included in the
+<b>request.id</b> and <b>requester.client.id</b> fields are included in the
 payload. Eclipse Kura leverages an MQTT payload encoded through Google
 Protocol Buffers. Eclipse Kura includes the request.id and the
 requester.client.id as two named metrics of the Request messages. The
-Eclipse Kura payload definition can be found at the following link:
-
-*  https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.core.cloud/src/main/protobuf/kurapayload.proto
+Eclipse Kura payload definition can be found <a href='https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.core.cloud/src/main/protobuf/kurapayload.proto'>here</a>." %}
 
 Once the response for a given request is received, the requester
 unsubscribes from the REPLY topic.
 
-###<span id="mqtt-requestresponse-example" class="anchor"></span>MQTT Request/Response Example
+### MQTT Request/Response Example
 
 The following sample request/response conversation shows the device
 configuration being provided for an application:
@@ -195,23 +149,23 @@ following:
     *  **response.exception.message** (value is null or an exception stack
     trace)
 
-NOTE: In addition to the mandatory properties, the response payload may
+{% include note.html message="In addition to the mandatory properties, the response payload may
 also have custom properties whose description is beyond the scope of
-this document.
+this document." %}
 
 It is recommended that the requester server employs a timeout to control the length of time that it waits for a response from
 the gateway device. If a response is not received within the timeout
 interval, the server can expect that either the device or the
 application is offline.
 
-##MQTT Remote Resource Management
+## MQTT Remote Resource Management
 
 A remote server interacts with the application’s resources through
 *read*, *create* and *update*, *delete,* and *execute* operations. These
 operations are based on the previously described request/response
 conversations.
 
-###Read Resources
+### Read Resources
 
 An MQTT message published on the following topic is a read request for
 the resource identified by the **resource_id**:
@@ -235,7 +189,7 @@ Similarly, a read request issued to the topic
 with the latest value for only a temperature sensor that is being
 managed by the application.
 
-###Create or Update Resources
+### Create or Update Resources
 
 An MQTT message published on the following topic is a create or update
 request for the resource identified by the **resource_id**:
@@ -253,7 +207,7 @@ example, to set the value for an actuator, a message can be published to
 the topic "**$EDC/account_name/client_id/app_id/PUT/actuator/1**"
 with the new value suplliied in the message payload.
 
-###Delete Resources
+### Delete Resources
 
 An MQTT message published on the following topic is a delete request for
 the resource identified by the **resource_id**:
@@ -263,7 +217,7 @@ the resource identified by the **resource_id**:
 The receiving application deletes the specified resource, if it exists,
 and responds with a REPLY message.
 
-###Execute Resources
+### Execute Resources
 
 
 An MQTT message published on the following topic is an execute request
@@ -275,7 +229,7 @@ The receiving application executes the specified resource, if it exists,
 and responds with a REPLY message. The semantics of the execute
 operation is application specific.
 
-###Other Operations
+### Other Operations
 
 The IOT application may respond to certain commands, such as taking a
 snapshot of its configuration or executing an OS-level command. The
@@ -287,21 +241,21 @@ An MQTT message published with this topic triggers the execution of the
 associated command. The EXEC message may contain properties in the MQTT
 payload that can be used to parameterize the command execution.
 
-##MQTT Unsolicited Events
+## MQTT Unsolicited Events
 
 IOT applications have the ability to send unsolicited messages to a
 remote server using events to periodically report data readings from
 their resources, or to report special events and observed conditions.
 
-NOTE: It is recommended to *not* use MQTT control topics for unsolicited
-events, and subsequently, to avoid the $EDC topic prefix.
+{% include note.html message="It is recommended to *not* use MQTT control topics for unsolicited
+events, and subsequently, to avoid the $EDC topic prefix." %}
 
 Event MQTT topics generally follow the pattern shown below to report
 unsolicited data observations for a given resource:
 
 *  **account_name/client_id/app_id/resource_id**
 
-##Discoverability
+## Discoverability
 
 The MQTT namespace guidelines in this document do not address remote
 discoverability of a given device’s applications and its resources. The
@@ -309,7 +263,7 @@ described interaction pattern can be easily adopted to define an
 application whose only responsibility is reporting the device profile in
 terms of installed applications and available resources.
 
-##Remote OSGi Management via MQTT
+## Remote OSGi Management via MQTT
 
 The concepts previously described have been applied to develop a
 solution that allows for the remote management of certain aspects of an
@@ -325,14 +279,14 @@ The following sections describe the MQTT topic namespaces and the
 application payloads used to achieve the remote management of an OSGi
 container via MQTT.
 
-NOTE: For the scope of this document, some aspects concerning the
-encoding and compressing of the payload are not included.
+{% include note.html message="For the scope of this document, some aspects concerning the
+encoding and compressing of the payload are not included." %}
 
 The applicability of the remote management solution, as inspired by the
 OSGi component model, can be extended beyond OSGi as the contract with
 the managing server based on MQTT topics and XML payloads.
 
-###Remote OSGi ConfigurationAdmin Interactions via MQTT
+### Remote OSGi ConfigurationAdmin Interactions via MQTT
 
 An application bundle is installed in the gateway to allow for remote
 management of the configuration properties of the services running in
@@ -891,8 +845,7 @@ Request:
             Delay after which the device will be rebooted. Only meaningful if
             dp.reboot==true.
 
-Note: this operation can be retried. Anyway, if it fails once it's likely to fail again.
-
+{% include note.html message="This operation can be retried. Anyway, if it fails once it's likely to fail again." %}
 
 Response:
 

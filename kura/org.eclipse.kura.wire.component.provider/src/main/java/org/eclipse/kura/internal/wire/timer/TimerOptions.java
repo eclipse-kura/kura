@@ -17,6 +17,7 @@ import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
@@ -34,6 +35,8 @@ final class TimerOptions {
 
     /** The Constant denoting the simple interval property from the metatype */
     private static final String PROP_SIMPLE_INTERVAL = "simple.interval";
+
+    private static final String PROP_SIMPLE_TIME_UNIT = "simple.time.unit";
 
     private static final String PROP_INTERVAL_TYPE = "type";
 
@@ -90,5 +93,26 @@ final class TimerOptions {
             type = (String) timerType;
         }
         return type;
+    }
+
+    long getSimpleTimeUnitMultiplier() throws IllegalArgumentException {
+        String timeUnitString = (String) properties.getOrDefault(PROP_SIMPLE_TIME_UNIT, "SECONDS");
+        TimeUnit timeUnit = TimeUnit.SECONDS;
+
+        if (TimeUnit.MILLISECONDS.name().equals(timeUnitString)) {
+            timeUnit = TimeUnit.MILLISECONDS;
+        } else if (TimeUnit.SECONDS.name().equals(timeUnitString)) {
+            timeUnit = TimeUnit.SECONDS;
+        } else if (TimeUnit.MINUTES.name().equals(timeUnitString)) {
+            timeUnit = TimeUnit.MINUTES;
+        } else if (TimeUnit.HOURS.name().equals(timeUnitString)) {
+            timeUnit = TimeUnit.HOURS;
+        } else if (TimeUnit.DAYS.name().equals(timeUnitString)) {
+            timeUnit = TimeUnit.DAYS;
+        } else {
+            throw new IllegalArgumentException(message.invalidTimeUnit());
+        }
+
+        return timeUnit.toMillis(1);
     }
 }

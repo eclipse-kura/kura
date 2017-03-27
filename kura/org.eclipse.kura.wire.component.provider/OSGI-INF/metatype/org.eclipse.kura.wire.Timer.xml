@@ -29,9 +29,23 @@
             cardinality="0"
             required="true"
             default="10"
-            description="Interval of the timer ticks, in seconds (Needs to be set if SIMPLE type is selected)"
+            description="Interval of the timer ticks, in the time unit specified by the simple.time.unit property (Needs to be set if SIMPLE type is selected)"
             min="1"/>
-            
+        
+        <AD id="simple.time.unit"
+            name="simple.time.unit"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="SECONDS"
+            description="The time unit to be used if SIMPLE type is selected">
+            <Option label="MILLISECONDS" value="MILLISECONDS" />
+            <Option label="SECONDS" value="SECONDS" />
+            <Option label="MINUTES" value="MINUTES" />
+            <Option label="HOURS" value="HOURS" />
+            <Option label="DAYS" value="DAYS" />
+        </AD>    
+        
         <AD id="cron.interval"
             name="cron.interval"
             type="String"
@@ -39,6 +53,7 @@
             required="true"
             default="0/10 * * * * ?"
             description="Interval in CRON expression (Needs to be set if CRON type is selected) (For more information, please visit http://www.cronmaker.com/ to create your own CRON expression)"/>
+           
     </OCD>
     
     <Designate pid="org.eclipse.kura.wire.Timer" factoryPid="org.eclipse.kura.wire.Timer">

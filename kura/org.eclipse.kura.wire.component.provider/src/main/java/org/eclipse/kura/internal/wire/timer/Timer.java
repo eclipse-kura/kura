@@ -161,10 +161,8 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      *             if job scheduling fails
      */
     private void doUpdate() throws SchedulerException {
-        int interval;
         if ("SIMPLE".equalsIgnoreCase(this.timerOptions.getType())) {
-            interval = this.timerOptions.getSimpleInterval();
-            scheduleSimpleInterval(interval);
+            scheduleSimpleInterval(timerOptions.getSimpleInterval() * timerOptions.getSimpleTimeUnitMultiplier());
             return;
         }
         final String cronExpression = this.timerOptions.getCronExpression();
@@ -175,13 +173,13 @@ public class Timer implements WireEmitter, ConfigurableComponent {
      * Creates a trigger based on the provided interval
      *
      * @param interval
-     *            the interval
+     *            the interval in milliseconds
      * @throws SchedulerException
      *             if scheduling fails
      * @throws IllegalArgumentException
      *             if the interval is less than or equal to zero
      */
-    private void scheduleSimpleInterval(final int interval) throws SchedulerException {
+    private void scheduleSimpleInterval(final long interval) throws SchedulerException {
         if (interval <= 0) {
             throw new IllegalArgumentException(message.intervalNonLessThanEqualToZero());
         }
@@ -191,7 +189,8 @@ public class Timer implements WireEmitter, ConfigurableComponent {
         }
         this.jobKey = new JobKey("emitJob" + id, GROUP_ID);
         final Trigger trigger = TriggerBuilder.newTrigger().withIdentity("emitTrigger" + id, GROUP_ID)
-                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(interval).repeatForever())
+                .withSchedule(
+                        SimpleScheduleBuilder.simpleSchedule().withIntervalInMilliseconds(interval).repeatForever())
                 .build();
 
         final TimerJobDataMap jobDataMap = new TimerJobDataMap();

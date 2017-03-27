@@ -13,11 +13,14 @@
 
 set -e
 #Install failure trap
-trap 'do_restore; exit 1' SIGINT SIGTERM ERR
+trap 'do_restore; stopWatchdog; exit 1' SIGINT SIGTERM ERR
 
 INSTALL_DIR=/opt/eclipse
 TIMESTAMP=`date +%Y%m%d%H%M%S`
 LOG=/tmp/kura_install_${TIMESTAMP}.log
+WD_TMP_FILE=/tmp/watchdog
+REFRESH_TIME=5
+TIMEOUT_TIME=300
 
 ##############################################
 # UTILITY FUNCTIONS
@@ -36,6 +39,33 @@ function require {
     echo "$1 not found, please install it"
     exit 1
   fi
+}
+
+# Run install function and start watchdog if needed
+function runKuraInstall {
+    if [ -f "${WD_TMP_FILE}" ]; then
+        WATCHDOG_DEVICE=`cat ${WD_TMP_FILE}`
+        KuraInstall &
+        PID=$!
+        
+        (sleep $TIMEOUT_TIME; kill -9 $PID >> /dev/null 2>&1) & while [ -d "/proc/$PID" ]; do
+            echo w > ${WATCHDOG_DEVICE}
+            sleep $REFRESH_TIME
+        done
+        stopWatchdog
+    else
+        KuraInstall
+    fi
+}
+
+# Deactivate watchdog device if possible
+function stopWatchdog {
+	if [ -n "${PID}" ]; then
+		kill -9 $PID >> /dev/null 2>&1
+	fi
+    if [ -n "${WATCHDOG_DEVICE}" ]; then
+        echo V > ${WATCHDOG_DEVICE}
+    fi
 }
 
 ##############################################
@@ -144,10 +174,103 @@ function require_java_8 {
 # END JAVA 8 CHECK FUNCTION
 ##############################################
 
-##############################################
-# PRE-INSTALL SCRIPT
-##############################################
+function KuraInstall {
+	##############################################
+	# PRE-INSTALL SCRIPT
+	##############################################
+	
+	rm -rf kura-*.zip >> $LOG 2>&1
+	rm -rf kura_*.zip >> $LOG 2>&1
+	
+	#add existing files to backup
+	BACKUP_FILES+=("/opt/eclipse/data")
+	BACKUP_FILES+=("/opt/eclipse/kura*")
+	BACKUP_FILES+=("${INSTALL_DIR}/kura*")
+	BACKUP_FILES+=("/tmp/.kura/")
+	BACKUP_FILES+=("/tmp/coninfo-*")
+	BACKUP_FILES+=("/var/log/esf.log")
+	BACKUP_FILES+=("/var/log/kura.log")
+	BACKUP_FILES+=("/etc/rc*.d/S*esf")
+	BACKUP_FILES+=("/etc/rc*.d/S*kura")
+	BACKUP_FILES+=("/etc/rc*.d/K*esf")
+	BACKUP_FILES+=("/etc/rc*.d/K*kura")
+	BACKUP_FILES+=("/etc/init.d/kura*")
+	BACKUP_FILES+=("/etc/init.d/firewall")
+	BACKUP_FILES+=("/etc/dhcpd-*.conf")
+	BACKUP_FILES+=("/etc/named.conf")
+	BACKUP_FILES+=("/etc/wpa_supplicant.conf")
+	BACKUP_FILES+=("/etc/hostapd.conf")
+	BACKUP_FILES+=("/etc/ppp/chat")
+	BACKUP_FILES+=("/etc/ppp/peers")
+	BACKUP_FILES+=("/etc/ppp/scripts")
+	BACKUP_FILES+=("/etc/ppp/*ap-secrets")
+	
+	#clean up and/or install OS specific stuff
+	HOSTNAME=`hostname`
+	if [ ${HOSTNAME} == "mini-gateway" ] ; then
+		#MGW specific items
+		mkdir /var/named >> $LOG 2>&1
+	
+		#add original ntpd files to backup
+		BACKUP_FILES+=("/etc/rc2.d/S20ntpd")
+	    BACKUP_FILES+=("/etc/rc3.d/S20ntpd")
+	    BACKUP_FILES+=("/etc/rc4.d/S20ntpd")
+	    BACKUP_FILES+=("/etc/rc5.d/S20ntpd")
+	fi
+	
+	do_backup
+	
+	#remove existing files
+	for BACKED_UP_FILE in ${BACKUP_FILES[@]};
+	do
+		rm -rf "$BACKED_UP_FILE" >> $LOG 2>&1
+	done
+	
+	echo ""
+	##############################################
+	# END PRE-INSTALL SCRIPT
+	##############################################
+	
+	echo "Extracting Kura files"
+	SKIP=`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' $0`
+	
+	# take the tarfile and pipe it into tar and redirect the output
+	tail -n +$SKIP $0 | tar -xz >> $LOG 2>&1
+	
+	##############################################
+	# POST INSTALL SCRIPT
+	##############################################
+	mkdir -p ${INSTALL_DIR} >> $LOG 2>&1
+	unzip kura_*.zip -d ${INSTALL_DIR} >> $LOG 2>&1
+	
+	#install Kura files
+	sed -i "s|^INSTALL_DIR=.*|INSTALL_DIR=${INSTALL_DIR}|" ${INSTALL_DIR}/kura_*/install/kura_install.sh
+	sh ${INSTALL_DIR}/kura_*/install/kura_install.sh >> $LOG 2>&1
+	
+	#clean up
+	rm -rf ${INSTALL_DIR}/kura/install >> $LOG 2>&1
+	rm kura_*.zip >> $LOG 2>&1
+	
+	#move the log file
+	mkdir -p ${INSTALL_DIR}/kura/log
+	mv $LOG ${INSTALL_DIR}/kura/log/
+	
+	#flush all cached filesystem to disk
+	sync
+	
+	echo ""
+	echo ""
+	echo "Finished.  Kura has been installed to ${INSTALL_DIR}/kura and will start automatically after a reboot"
+	stopWatchdog
+	exit 0
+	##############################################
+	# END POST INSTALL SCRIPT
+	##############################################
+}
 
+##############################################
+# RUN INSTALLATION
+##############################################
 require_java_8
 
 require install
@@ -162,95 +285,8 @@ echo "Installing Kura..." > $LOG 2>&1
 
 #Kill JVM and monit for installation
 { killall monit java || true; } >> $LOG 2>&1
-
-rm -rf kura-*.zip >> $LOG 2>&1
-rm -rf kura_*.zip >> $LOG 2>&1
-
-#add existing files to backup
-BACKUP_FILES+=("/opt/eclipse/data")
-BACKUP_FILES+=("/opt/eclipse/kura*")
-BACKUP_FILES+=("${INSTALL_DIR}/kura*")
-BACKUP_FILES+=("/tmp/.kura/")
-BACKUP_FILES+=("/tmp/coninfo-*")
-BACKUP_FILES+=("/var/log/esf.log")
-BACKUP_FILES+=("/var/log/kura.log")
-BACKUP_FILES+=("/etc/rc*.d/S*esf")
-BACKUP_FILES+=("/etc/rc*.d/S*kura")
-BACKUP_FILES+=("/etc/rc*.d/K*esf")
-BACKUP_FILES+=("/etc/rc*.d/K*kura")
-BACKUP_FILES+=("/etc/init.d/kura*")
-BACKUP_FILES+=("/etc/init.d/firewall")
-BACKUP_FILES+=("/etc/dhcpd-*.conf")
-BACKUP_FILES+=("/etc/named.conf")
-BACKUP_FILES+=("/etc/wpa_supplicant.conf")
-BACKUP_FILES+=("/etc/hostapd.conf")
-BACKUP_FILES+=("/etc/ppp/chat")
-BACKUP_FILES+=("/etc/ppp/peers")
-BACKUP_FILES+=("/etc/ppp/scripts")
-BACKUP_FILES+=("/etc/ppp/*ap-secrets")
-
-#clean up and/or install OS specific stuff
-HOSTNAME=`hostname`
-if [ ${HOSTNAME} == "mini-gateway" ] ; then
-	#MGW specific items
-	mkdir /var/named >> $LOG 2>&1
-
-	#add original ntpd files to backup
-	BACKUP_FILES+=("/etc/rc2.d/S20ntpd")
-    BACKUP_FILES+=("/etc/rc3.d/S20ntpd")
-    BACKUP_FILES+=("/etc/rc4.d/S20ntpd")
-    BACKUP_FILES+=("/etc/rc5.d/S20ntpd")
-fi
-
-do_backup
-
-#remove existing files
-for BACKED_UP_FILE in ${BACKUP_FILES[@]};
-do
-	rm -rf "$BACKED_UP_FILE" >> $LOG 2>&1
-done
-
-echo ""
-##############################################
-# END PRE-INSTALL SCRIPT
-##############################################
-
-echo "Extracting Kura files"
-SKIP=`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' $0`
-
-# take the tarfile and pipe it into tar and redirect the output
-tail -n +$SKIP $0 | tar -xz >> $LOG 2>&1
-
-
-##############################################
-# POST INSTALL SCRIPT
-##############################################
-mkdir -p ${INSTALL_DIR} >> $LOG 2>&1
-unzip kura_*.zip -d ${INSTALL_DIR} >> $LOG 2>&1
-
-#install Kura files
-sed -i "s|^INSTALL_DIR=.*|INSTALL_DIR=${INSTALL_DIR}|" ${INSTALL_DIR}/kura_*/install/kura_install.sh
-sh ${INSTALL_DIR}/kura_*/install/kura_install.sh >> $LOG 2>&1
-
-#clean up
-rm -rf ${INSTALL_DIR}/kura/install >> $LOG 2>&1
-rm kura_*.zip >> $LOG 2>&1
-
-#move the log file
-mkdir -p ${INSTALL_DIR}/kura/log
-mv $LOG ${INSTALL_DIR}/kura/log/
-
-#flush all cached filesystem to disk
-sync
-
-echo ""
-do_delete_backup
-echo ""
-echo "Finished.  Kura has been installed to ${INSTALL_DIR}/kura and will start automatically after a reboot"
-exit 0
-#############################################
-# END POST INSTALL SCRIPT
-##############################################
+	
+runKuraInstall
 
 # NOTE: Don't place any newline characters after the last line below.
 __TARFILE_FOLLOWS__

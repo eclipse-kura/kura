@@ -122,6 +122,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     private boolean hasReadChannels;
 
+    private String kuraServicePid;
+
     /**
      * Instantiates a new asset instance.
      */
@@ -154,6 +156,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     public void updated(final Map<String, Object> properties) {
         logger.debug(message.updating());
         this.properties = properties;
+        this.kuraServicePid = (String) this.properties.get(ConfigurationService.KURA_SERVICE_PID);
         retrieveConfigurationsFromProperties(properties);
         attachDriver(this.assetConfiguration.getDriverPid());
         logger.debug(message.updatingDone());
@@ -399,6 +402,13 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      */
     protected String getFactoryPid() {
         return CONF_PID;
+    }
+
+    protected String getKuraServicePid() throws KuraException {
+        if (kuraServicePid == null) {
+            throw new KuraException(KuraErrorCode.CONFIGURATION_REQUIRED_ATTRIBUTE_MISSING);
+        }
+        return kuraServicePid;
     }
 
     /**

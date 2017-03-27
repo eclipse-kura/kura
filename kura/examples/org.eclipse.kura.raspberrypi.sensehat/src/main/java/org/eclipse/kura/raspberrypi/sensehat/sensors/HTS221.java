@@ -127,7 +127,7 @@ public class HTS221 {
 
     public boolean isHumidityReady() {
 
-        if ((read(STATUS_REG) & 0x00000002) >> 2 == 1) {
+        if ((read(STATUS_REG) & 0x00000002) == 2) {
             return true;
         } else {
             return false;

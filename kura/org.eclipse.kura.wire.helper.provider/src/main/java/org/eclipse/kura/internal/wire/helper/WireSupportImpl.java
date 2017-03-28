@@ -47,9 +47,11 @@ final class WireSupportImpl implements WireSupport {
 
     private List<Wire> outgoingWires;
 
-    private final WireHelperService wireHelperService;
-
     private final WireComponent wireSupporter;
+
+    private String emitterPid;
+
+    private String pid;
 
     /**
      * Instantiates a new wire support implementation.
@@ -71,8 +73,9 @@ final class WireSupportImpl implements WireSupport {
 
         this.outgoingWires = CollectionUtil.newArrayList();
         this.incomingWires = CollectionUtil.newArrayList();
+        this.emitterPid = wireHelperService.getServicePid(wireSupporter);
+        this.pid = wireHelperService.getPid(wireSupporter);
         this.wireSupporter = wireSupporter;
-        this.wireHelperService = wireHelperService;
         this.eventAdmin = eventAdmin;
     }
 
@@ -87,8 +90,6 @@ final class WireSupportImpl implements WireSupport {
     public synchronized void emit(final List<WireRecord> wireRecords) {
         requireNonNull(wireRecords, message.wireRecordsNonNull());
         if (this.wireSupporter instanceof WireEmitter) {
-            final String emitterPid = this.wireHelperService.getServicePid(this.wireSupporter);
-            final String pid = this.wireHelperService.getPid(this.wireSupporter);
             final WireEnvelope wei = new WireEnvelope(emitterPid, wireRecords);
             for (final Wire wire : this.outgoingWires) {
                 wire.update(wei);

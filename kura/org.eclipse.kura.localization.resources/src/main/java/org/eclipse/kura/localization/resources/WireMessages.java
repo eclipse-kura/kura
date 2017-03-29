@@ -388,6 +388,9 @@ public interface WireMessages {
     @En("outgoing_wires")
     public String outgoingWires();
 
+    @En("Partially emptying table {0}")
+    public String partiallyEmptyingTable(String sqlTableName);
+
     @En("Payload cannot be null")
     public String payloadNonNull();
 

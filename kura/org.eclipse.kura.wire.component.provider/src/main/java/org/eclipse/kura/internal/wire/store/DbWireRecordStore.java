@@ -64,10 +64,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The Class DbWireRecordStore is a wire component which is responsible to store
- * the received {@link WireRecord}. <br/>
- * <br/>
- * Also note that, every table name provided by DB Wire Record Store will be
- * prepended by {@code WR_}
+ * the received {@link WireRecord}.
  */
 public final class DbWireRecordStore implements WireEmitter, WireReceiver, ConfigurableComponent {
 
@@ -251,6 +248,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
                     logger.info(message.truncatingTable(sqlTableName));
                     this.dbHelper.execute(MessageFormat.format(SQL_TRUNCATE_TABLE, sqlTableName));
                 } else {
+                    logger.info(message.partiallyEmptyingTable(sqlTableName));
                     this.dbHelper
                             .execute(MessageFormat.format(SQL_DELETE_RANGE_TABLE, sqlTableName, noOfRecordsToKeep));
                 }

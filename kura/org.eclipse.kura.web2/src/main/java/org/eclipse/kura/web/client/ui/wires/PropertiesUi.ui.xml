@@ -42,6 +42,16 @@
 	.outer-column {
 		margin-bottom: -20px;
 	}
+	
+	.channel-name-validation-label {
+		color: red;
+		font-size: 0.35cm;
+		font-weight: normal;
+	}
+	
+	.channel-name-form {
+		margin-bottom: 0;
+	}
 	</ui:style>
 
 	<b:Container fluid="true">
@@ -91,6 +101,27 @@
 					</b:Panel>
 				</b:ModalBody>
 			</b:Modal>
+			<b:Modal closable="true" fade="true" dataBackdrop="STATIC"
+			dataKeyboard="true" b:id="new-channel-modal" ui:field="newChannelModal">
+			<b:ModalHeader/>
+			<b:ModalBody>
+				<b:Form>
+					<b:FormGroup addStyleNames="{style.channel-name-form}">
+						<b:FormLabel ui:field="newChannelNameLabel"/>
+						<g:FlowPanel>
+							<b:TextBox ui:field="newChannelNameInput" b:id="channelName" allowBlank="false"
+								autoComplete="false"/>
+						</g:FlowPanel>
+						<b:FormLabel addStyleNames="{style.channel-name-validation-label}" ui:field="newChannelNameError"/>
+					</b:FormGroup>
+				</b:Form>
+			</b:ModalBody>
+			<b:ModalFooter>
+                <b:Button b:id="btn-create-channel-cancel" icon="REMOVE" type="PRIMARY" dataDismiss="MODAL" ui:field="btnCancelCreatingNewChannel"/>
+				<b:Button icon="SAVE" type="PRIMARY" b:id="btn-create-channel"
+					ui:field="btnCreateNewChannel"/>
+			</b:ModalFooter>
+		</b:Modal>
 		</b:Column>
 	</b:Container>
 </ui:UiBinder> 

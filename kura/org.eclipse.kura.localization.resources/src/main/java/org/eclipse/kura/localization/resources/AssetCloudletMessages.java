@@ -58,19 +58,16 @@ public interface AssetCloudletMessages {
     @En("name")
     public String channel();
 
-    @En("Channel ID must be provided as an integer")
-    public String channelAsInteger();
-
-    @En("Channel IDs cannot be null")
-    public String channelIdNonNull();
+    @En("Channel Name cannot be null")
+    public String channelNameNonNull();
 
     @En("Channel cannot be null")
     public String channelNonNull();
 
-    @En("List of channel IDs cannot be empty")
+    @En("List of channel Names cannot be empty")
     public String channelsNonEmpty();
 
-    @En("List of channel IDs cannot be null")
+    @En("List of channel Names cannot be null")
     public String channelsNonNull();
 
     @En("Cloudlet GET Request received on the Asset Cloudlet")

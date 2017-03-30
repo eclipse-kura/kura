@@ -63,7 +63,6 @@ import org.slf4j.LoggerFactory;
  * <ul>
  * <li>{@code <channelName>}</li>
  * <li>{@code <channelName>_assetName}</li>
- * <li>{@code <channelName>_channelId}</li>
  * <li>{@code <channelName>_timestamp}</li>
  * </ul>
  *
@@ -73,7 +72,6 @@ import org.slf4j.LoggerFactory;
  * <pre>
  * 1. LED = true
  * 2. LED_assetName = MODICON_PLC
- * 3. LED_channelId = 5
  * 4. LED_timestamp = 201648274712
  * </pre>
  *
@@ -101,8 +99,6 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     private static final String ERROR_NOT_SPECIFIED_MESSAGE = "ERROR NOT SPECIFIED";
 
     private static final String ASSET_NAME = "assetName";
-
-    private static final String CHANNEL_ID = "channelId";
 
     private static final String TIMESTAMP = "timestamp";
 
@@ -250,8 +246,8 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
         final List<AssetRecord> assetRecordsToWriteChannels = CollectionUtil.newArrayList();
         final AssetConfiguration assetConfiguration = getAssetConfiguration();
-        final Map<Long, Channel> channels = assetConfiguration.getAssetChannels();
-        for (final Entry<Long, Channel> channelEntry : channels.entrySet()) {
+        final Map<String, Channel> channels = assetConfiguration.getAssetChannels();
+        for (final Entry<String, Channel> channelEntry : channels.entrySet()) {
             final Channel channel = channelEntry.getValue();
             final String channelName = channel.getName();
             final ChannelType channelType = channel.getType();
@@ -287,7 +283,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         requireNonNull(channel, message.channelNonNull());
         requireNonNull(value, message.valueNonNull());
 
-        final AssetRecord assetRecord = new AssetRecord(channel.getId());
+        final AssetRecord assetRecord = new AssetRecord(channel.getName());
         assetRecord.setValue(value);
         return assetRecord;
     }
@@ -313,9 +309,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         for (final AssetRecord assetRecord : assetRecords) {
             final AssetStatus assetStatus = assetRecord.getAssetStatus();
             final AssetFlag assetFlag = assetStatus.getAssetFlag();
-            final long channelId = assetRecord.getChannelId();
-            final AssetConfiguration assetConfiguration = getAssetConfiguration();
-            final String channelName = assetConfiguration.getAssetChannels().get(channelId).getName();
+            final String channelName = assetRecord.getChannelName();
 
             final TypedValue<?> typedValue;
             if (assetFlag == AssetFlag.FAILURE) {
@@ -334,8 +328,6 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
                 logger.error(message.configurationNonNull(), e);
             }
 
-            wireRecordProperties.put(channelName + PROPERTY_SEPARATOR + CHANNEL_ID,
-                    TypedValues.newLongValue(channelId));
             wireRecordProperties.put(channelName + PROPERTY_SEPARATOR + TIMESTAMP,
                     TypedValues.newLongValue(assetRecord.getTimestamp()));
         }

@@ -172,17 +172,15 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
     }
 
-    private GwtChannelInfo getChannelFromProperties(final int channelIndex, final GwtConfigComponent descriptor,
+    private GwtChannelInfo getChannelFromProperties(final String channelName, final GwtConfigComponent descriptor,
             final GwtConfigComponent asset) {
         final GwtChannelInfo ci = new GwtChannelInfo();
-        String indexPrefix = String.valueOf(channelIndex) + ".CH.";
-        ci.setName(asset.getParameter(indexPrefix + "name").getValue());
-        ci.setId(String.valueOf(channelIndex));
-        ci.setType(asset.getParameter(indexPrefix + "type").getValue());
-        ci.setValueType(asset.getParameter(indexPrefix + "value.type").getValue());
-        indexPrefix += "DRIVER.";
+        String prefix = channelName + AssetConstants.CHANNEL_PROPERTY_SEPARATOR.value();
+        ci.setName(channelName);
+        ci.setType(asset.getParameter(prefix + AssetConstants.TYPE.value()).getValue());
+        ci.setValueType(asset.getParameter(prefix + AssetConstants.VALUE_TYPE.value()).getValue());
         for (final GwtConfigParameter param : descriptor.getParameters()) {
-            ci.set(param.getName(), asset.getParameter(indexPrefix + param.getName()).getValue());
+            ci.set(param.getName(), asset.getParameter(prefix + param.getName()).getValue());
         }
 
         return ci;
@@ -284,22 +282,32 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 
     }
 
+    private String getChannelName(String propertyKey) {
+        int pos = propertyKey.indexOf(AssetConstants.CHANNEL_PROPERTY_SEPARATOR.value());
+        if (pos <= 0) {
+            return null;
+        }
+        return propertyKey.substring(0, pos);
+    }
+
     @Override
     public List<GwtChannelInfo> getGwtChannels(final GwtXSRFToken xsrfToken, final GwtConfigComponent descriptor,
             final GwtConfigComponent asset) throws GwtKuraException {
 
         final List<GwtChannelInfo> result = new ArrayList<>();
 
-        final Set<Integer> channelIndexes = new HashSet<>();
+        final Set<String> channelNames = new HashSet<>();
+
         for (final GwtConfigParameter param : asset.getParameters()) {
-            if (param != null && param.getName() != null && param.getName().endsWith("CH.name")) {
-                final String[] tokens = param.getName().split("\\.");
-                channelIndexes.add(Integer.parseInt(tokens[0]));
+            String channelName = getChannelName(param.getName());
+
+            if (channelName != null) {
+                channelNames.add(channelName);
             }
         }
 
-        for (final Integer index : channelIndexes) {
-            final GwtChannelInfo ci = getChannelFromProperties(index, descriptor, asset);
+        for (final String channelName : channelNames) {
+            final GwtChannelInfo ci = getChannelFromProperties(channelName, descriptor, asset);
             result.add(ci);
         }
 

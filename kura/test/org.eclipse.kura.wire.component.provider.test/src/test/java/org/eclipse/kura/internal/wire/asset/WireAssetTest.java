@@ -25,6 +25,7 @@ import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.driver.Driver;
+import org.eclipse.kura.driver.DriverConstants;
 import org.eclipse.kura.driver.Driver.ConnectionException;
 import org.eclipse.kura.driver.DriverFlag;
 import org.eclipse.kura.driver.DriverRecord;
@@ -47,17 +48,15 @@ public class WireAssetTest {
     @Test
     public void testOnWireReceive() throws NoSuchFieldException, ConnectionException {
         Map<String, Object> readChannel1Config = new HashMap<>();
-        readChannel1Config.put("channel.id", 1);
-        Channel readChannel1 = new Channel(1, "readChannel1", ChannelType.READ, DataType.BOOLEAN, readChannel1Config);
+        Channel readChannel1 = new Channel("readChannel1", ChannelType.READ, DataType.BOOLEAN, readChannel1Config);
 
         Map<String, Object> writeChannel2Config = new HashMap<>();
-        writeChannel2Config.put("channel.id", 2);
-        Channel writeChannel2 = new Channel(2, "writeChannel2", ChannelType.WRITE, DataType.BOOLEAN,
+        Channel writeChannel2 = new Channel("writeChannel2", ChannelType.WRITE, DataType.BOOLEAN,
                 writeChannel2Config);
 
-        Map<Long, Channel> channels = new HashMap<>();
-        channels.put(readChannel1.getId(), readChannel1);
-        channels.put(writeChannel2.getId(), writeChannel2);
+        Map<String, Channel> channels = new HashMap<>();
+        channels.put(readChannel1.getName(), readChannel1);
+        channels.put(writeChannel2.getName(), writeChannel2);
 
         AssetConfiguration assetConfiguration = new AssetConfiguration("description", "driverPid", channels);
 
@@ -65,7 +64,6 @@ public class WireAssetTest {
         Map<String, TypedValue<?>> writeWireRecordProperties = new HashMap<>();
         writeWireRecordProperties.put("writeChannel2_assetName", new StringValue("componentName"));
         writeWireRecordProperties.put("writeChannel2", new BooleanValue(true));
-        writeWireRecordProperties.put("writeChannel2_channelId", new LongValue(2));
         WireRecord writeWireRecord = new WireRecord(writeWireRecordProperties);
         writeWireRecords.add(writeWireRecord);
 
@@ -108,8 +106,8 @@ public class WireAssetTest {
 
             DriverRecord record = records.get(0);
             Map<String, Object> channelConfig = record.getChannelConfig();
-            assertEquals((long) 2, channelConfig.get("channel.id"));
-            assertEquals(DataType.BOOLEAN, channelConfig.get("channel.value.type"));
+            assertEquals("writeChannel2", channelConfig.get(DriverConstants.CHANNEL_NAME.value()));
+            assertEquals(DataType.BOOLEAN, channelConfig.get(DriverConstants.CHANNEL_VALUE_TYPE.value()));
 
             assertEquals(new BooleanValue(true), record.getValue());
 
@@ -131,10 +129,9 @@ public class WireAssetTest {
             assertEquals(1, wireRecords.size());
             Map<String, TypedValue<?>> properties = wireRecords.get(0).getProperties();
 
-            assertEquals(4, properties.size());
+            assertEquals(3, properties.size());
             assertEquals(new StringValue("componentName"), properties.get("readChannel1_assetName"));
             assertEquals(new BooleanValue(true), properties.get("readChannel1"));
-            assertEquals(new LongValue(1), properties.get("readChannel1_channelId"));
             assertEquals(new LongValue(42), properties.get("readChannel1_timestamp"));
 
             return null;

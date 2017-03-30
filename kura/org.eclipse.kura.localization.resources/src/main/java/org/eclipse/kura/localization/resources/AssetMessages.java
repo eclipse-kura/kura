@@ -29,9 +29,6 @@ public interface AssetMessages {
     @En("Activating Asset...Done")
     public String activatingDone();
 
-    @En("Attribute Definition Prefix cannot be null")
-    public String adPrefixNonNull();
-
     @En("asset_flag")
     public String assetFlag();
 
@@ -65,14 +62,11 @@ public interface AssetMessages {
     @En("BYTE")
     public String byteStr();
 
-    @En("Channel ID must be provided as an integer")
-    public String channelAsInteger();
-
-    @En("Channel ID cannot be zero or less")
-    public String channelIdNotLessThanZero();
-
     @En("Channel Key cannot be null")
     public String channelKeyNonNull();
+
+    @En("Channel not found")
+    public String channelNameNotFound();
 
     @En("channel_name")
     public String channelName();
@@ -89,7 +83,7 @@ public interface AssetMessages {
     @En("Associated Channels")
     public String channels();
 
-    @En("List of channel names cannot be empty")
+    @En("The provided set of channel names cannot be empty")
     public String channelsNonEmpty();
 
     @En("List of channel names cannot be null")

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,35 +15,29 @@ package org.eclipse.kura.asset;
  */
 public enum AssetConstants {
 
+    /** Separator for channel configuration property. */
+    CHANNEL_PROPERTY_SEPARATOR("#"),
+
+    /** Prefix for non driver specific properties. */
+    CHANNEL_DEFAULT_PROPERTY_PREFIX("+"),
+
+    /** Prohibited characters for channel name */
+    CHANNEL_NAME_PROHIBITED_CHARS(CHANNEL_PROPERTY_SEPARATOR.value() + "_ "),
+
     /** Asset Description Property to be used in the configuration. */
     ASSET_DESC_PROP("asset.desc"),
 
     /** Driver PID Property to be used in the configuration. */
     ASSET_DRIVER_PROP("driver.pid"),
 
-    /** Asset Severity Level to be used in the configuration. */
-    ASSET_SEVERITY_LEVEL("severity.level"),
-
-    /** String denoting a postfix for channel configuration property. */
-    CHANNEL_PROPERTY_POSTFIX("."),
-
-    /** String denoting a prefix for channel configuration property. */
-    CHANNEL_PROPERTY_PREFIX("CH"),
-
-    /**
-     * String denoting a postfix for driver specific channel configuration
-     * property.
-     */
-    DRIVER_PROPERTY_POSTFIX("DRIVER"),
-
     /** Name Property to be used in the configuration. */
-    NAME("name"),
+    NAME(CHANNEL_DEFAULT_PROPERTY_PREFIX.value() + "name"),
 
     /** Type Property to be used in the configuration. */
-    TYPE("type"),
+    TYPE(CHANNEL_DEFAULT_PROPERTY_PREFIX.value() + "type"),
 
     /** Value type Property to be used in the configuration. */
-    VALUE_TYPE("value.type");
+    VALUE_TYPE(CHANNEL_DEFAULT_PROPERTY_PREFIX.value() + "value.type");
 
     /** The value. */
     private String value;

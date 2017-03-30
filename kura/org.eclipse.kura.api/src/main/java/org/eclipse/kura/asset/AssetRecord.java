@@ -34,7 +34,7 @@ public class AssetRecord {
      * The associated channel identifier. The channel identifier for any asset
      * must be unique.
      */
-    private final long channelId;
+    private final String channelName;
 
     /** The timestamp of the record. */
     private long timestamp;
@@ -49,48 +49,19 @@ public class AssetRecord {
     /**
      * Instantiates a new asset record.
      *
-     * @param channelId
-     *            the channel identifier
+     * @param channelName
+     *            the channel name
+     * @throws NullPointerException
+     *             if the provided channel name is null
      * @throws IllegalArgumentException
-     *             if the channel identifier is less than or equal to zero
+     *             if the channel identifier is not valid
      */
-    public AssetRecord(final long channelId) {
-        if (channelId <= 0) {
-            throw new IllegalArgumentException("Channel ID cannot be zero or less");
+    public AssetRecord(final String channelName) {
+        requireNonNull(channelName, "The provided channel name cannot be null");
+        if (!Channel.isValidChannelName(channelName)) {
+            throw new IllegalArgumentException("The provided channel name is not valid");
         }
-        this.channelId = channelId;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (this.getClass() != obj.getClass()) {
-            return false;
-        }
-        final AssetRecord other = (AssetRecord) obj;
-        if (this.assetStatus != other.assetStatus) {
-            return false;
-        }
-        if (this.channelId != other.channelId) {
-            return false;
-        }
-        if (this.timestamp != other.timestamp) {
-            return false;
-        }
-        if (this.value == null) {
-            if (other.value != null) {
-                return false;
-            }
-        } else if (!this.value.equals(other.value)) {
-            return false;
-        }
-        return true;
+        this.channelName = channelName;
     }
 
     /**
@@ -107,8 +78,8 @@ public class AssetRecord {
      *
      * @return the channel identifier
      */
-    public long getChannelId() {
-        return this.channelId;
+    public String getChannelName() {
+        return this.channelName;
     }
 
     /**
@@ -127,18 +98,6 @@ public class AssetRecord {
      */
     public TypedValue<?> getValue() {
         return this.value;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = (prime * result) + ((this.assetStatus == null) ? 0 : this.assetStatus.hashCode());
-        result = (prime * result) + (int) (this.channelId ^ (this.channelId >>> 32));
-        result = (prime * result) + (int) (this.timestamp ^ (this.timestamp >>> 32));
-        result = (prime * result) + ((this.value == null) ? 0 : this.value.hashCode());
-        return result;
     }
 
     /**
@@ -180,8 +139,49 @@ public class AssetRecord {
     /** {@inheritDoc} */
     @Override
     public String toString() {
-        return "AssetRecord [assetStatus=" + this.assetStatus + ", channelId=" + this.channelId + ", timestamp="
+        return "AssetRecord [assetStatus=" + this.assetStatus + ", channelName=" + this.channelName + ", timestamp="
                 + this.timestamp + ", value=" + this.value + "]";
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((assetStatus == null) ? 0 : assetStatus.hashCode());
+        result = prime * result + ((channelName == null) ? 0 : channelName.hashCode());
+        result = prime * result + (int) (timestamp ^ (timestamp >>> 32));
+        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        return result;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AssetRecord other = (AssetRecord) obj;
+        if (assetStatus == null) {
+            if (other.assetStatus != null)
+                return false;
+        } else if (!assetStatus.equals(other.assetStatus))
+            return false;
+        if (channelName == null) {
+            if (other.channelName != null)
+                return false;
+        } else if (!channelName.equals(other.channelName))
+            return false;
+        if (timestamp != other.timestamp)
+            return false;
+        if (value == null) {
+            if (other.value != null)
+                return false;
+        } else if (!value.equals(other.value))
+            return false;
+        return true;
+    }
 }

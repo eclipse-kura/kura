@@ -22,6 +22,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.bluetooth.BluetoothGatt;
 import org.eclipse.kura.bluetooth.BluetoothGattCharacteristic;
+import org.eclipse.kura.bluetooth.BluetoothGattSecurityLevel;
 import org.eclipse.kura.bluetooth.BluetoothGattService;
 import org.eclipse.kura.bluetooth.BluetoothLeNotificationListener;
 import org.eclipse.kura.linux.bluetooth.util.BluetoothProcess;
@@ -55,6 +56,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
     private BluetoothLeNotificationListener m_listener;
     private String m_charValue;
     private String m_charValueUuid;
+    private String m_securityLevel;
 
     private BluetoothProcess m_proc;
     private BufferedWriter m_bufferedWriter;
@@ -277,6 +279,51 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
     public void processErrorStream(String string) {
     }
 
+    @Override
+    public BluetoothGattSecurityLevel getSecurityLevel() throws KuraException {
+
+        BluetoothGattSecurityLevel level = BluetoothGattSecurityLevel.UNKNOWN;
+        if (this.m_connected && this.m_proc != null) {
+            this.m_securityLevel = "";
+            this.m_bufferedWriter = this.m_proc.getWriter();
+            s_logger.info("Get security level...");
+            String command = "sec-level\n";
+            sendCmd(command);
+
+            // Wait until read is complete, error is received or timeout
+            long startTime = System.currentTimeMillis();
+            while ("".equals(this.m_securityLevel) && !this.m_securityLevel.startsWith("ERROR")
+                    && System.currentTimeMillis() - startTime < GATT_COMMAND_TIMEOUT) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    s_logger.error("Exception waiting for characteristics", e);
+                }
+            }
+            if ("".equals(this.m_securityLevel)) {
+                throw new KuraTimeoutException("Gatttool read timeout.");
+            } else if (this.m_securityLevel.startsWith("ERROR")) {
+                throw KuraException.internalError("Gatttool read error.");
+            }
+
+            level = BluetoothGattSecurityLevel.getBluetoothGattSecurityLevel(this.m_securityLevel);
+        }
+
+        return level;
+    }
+
+    @Override
+    public void setSecurityLevel(BluetoothGattSecurityLevel level) {
+
+        if (this.m_connected && this.m_proc != null) {
+            this.m_bufferedWriter = this.m_proc.getWriter();
+            s_logger.debug("Set security level to " + level.toString());
+            String command = "sec-level " + level.toString().toLowerCase() + "\n";
+            sendCmd(command);
+        }
+
+    }
+
     // --------------------------------------------------------------------
     //
     // Private methods
@@ -383,6 +430,13 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
         else if (checkString(line.toLowerCase(), ERROR_UUID)) {
             s_logger.info("ERROR_UUID");
             this.m_charValueUuid = "ERROR: Invalid UUID!";
+        }
+        // get security level
+        else if (line.toLowerCase().startsWith("sec-level:")) {
+            s_logger.debug("Received security level : {}",
+                    line.toLowerCase().substring("sec-level: ".length(), line.toLowerCase().length()));
+            this.m_securityLevel = line.toLowerCase().substring("sec-level: ".length(), line.toLowerCase().length())
+                    .replace("\n", "").replace("\r", "");
         }
 
     }

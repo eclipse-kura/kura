@@ -24,6 +24,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.BluetoothAdapter;
 import org.eclipse.kura.bluetooth.BluetoothDevice;
 import org.eclipse.kura.bluetooth.BluetoothGattCharacteristic;
+import org.eclipse.kura.bluetooth.BluetoothGattSecurityLevel;
 import org.eclipse.kura.bluetooth.BluetoothGattService;
 import org.eclipse.kura.bluetooth.BluetoothLeScanListener;
 import org.eclipse.kura.bluetooth.BluetoothService;
@@ -473,6 +474,11 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
             if (!myTiSensorTag.isConnected()) {
                 s_logger.info("Connecting to TiSensorTag...");
                 this.m_connected = myTiSensorTag.connect(this.iname);
+                if (this.m_connected) {
+                    s_logger.info("Set security level to high.");
+                    myTiSensorTag.setSecurityLevel(BluetoothGattSecurityLevel.HIGH);
+                    s_logger.info("Security Level : " + myTiSensorTag.getSecurityLevel().toString());
+                }
             } else {
                 s_logger.info("TiSensorTag already connected!");
                 this.m_connected = true;

@@ -17,6 +17,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.BluetoothDevice;
 import org.eclipse.kura.bluetooth.BluetoothGatt;
 import org.eclipse.kura.bluetooth.BluetoothGattCharacteristic;
+import org.eclipse.kura.bluetooth.BluetoothGattSecurityLevel;
 import org.eclipse.kura.bluetooth.BluetoothGattService;
 import org.eclipse.kura.bluetooth.BluetoothLeNotificationListener;
 import org.slf4j.Logger;
@@ -108,6 +109,25 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
             this.m_connected = false;
             return false;
         }
+    }
+
+    public void setSecurityLevel(BluetoothGattSecurityLevel level) {
+        if (this.m_bluetoothGatt != null) {
+            this.m_bluetoothGatt.setSecurityLevel(BluetoothGattSecurityLevel.HIGH);
+        }
+    }
+
+    public BluetoothGattSecurityLevel getSecurityLevel() {
+        BluetoothGattSecurityLevel level = BluetoothGattSecurityLevel.UNKNOWN;
+        try {
+            if (this.m_bluetoothGatt != null) {
+                level = this.m_bluetoothGatt.getSecurityLevel();
+            }
+        } catch (KuraException e) {
+            s_logger.error("Get security level failed", e);
+        }
+
+        return level;
     }
 
     public boolean getCC2650() {

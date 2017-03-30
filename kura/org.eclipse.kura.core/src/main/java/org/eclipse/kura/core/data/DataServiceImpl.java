@@ -35,6 +35,7 @@ import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.data.store.DbDataStore;
+import org.eclipse.kura.core.internal.data.TokenBucket;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
@@ -65,6 +66,8 @@ public class DataServiceImpl
     private static final String REPUBLISH_IN_FLIGHT_MSGS_PROP_NAME = "in-flight-messages.republish-on-new-session";
     private static final String MAX_IN_FLIGHT_MSGS_PROP_NAME = "in-flight-messages.max-number";
     private static final String IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_PROP_NAME = "in-flight-messages.congestion-timeout";
+    private static final String PUBLISH_RATE = "average.publish.rate";
+    private static final String BURST_SIZE = "publish.burst.size";
 
     private final Map<String, Object> properties = new HashMap<String, Object>();
 
@@ -88,6 +91,8 @@ public class DataServiceImpl
     private CloudConnectionStatusService cloudConnectionStatusService;
     private CloudConnectionStatusEnum notificationStatus = CloudConnectionStatusEnum.OFF;
 
+    private TokenBucket throttle;
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -103,6 +108,8 @@ public class DataServiceImpl
         this.congestionExecutor = Executors.newSingleThreadScheduledExecutor();
 
         this.properties.putAll(properties);
+
+        createThrottle();
 
         String[] parts = pid.split("-");
         String table = "ds_messages";
@@ -155,6 +162,8 @@ public class DataServiceImpl
 
         this.properties.clear();
         this.properties.putAll(properties);
+
+        createThrottle();
 
         this.store.update((Integer) this.properties.get(STORE_HOUSEKEEPER_INTERVAL_PROP_NAME),
                 (Integer) this.properties.get(STORE_PURGE_AGE_PROP_NAME),
@@ -526,6 +535,20 @@ public class DataServiceImpl
         return autoConnect;
     }
 
+    private void createThrottle() {
+        if (this.properties.get(PUBLISH_RATE) != null && this.properties.get(BURST_SIZE) != null) {
+            double publishRate = (double) this.properties.get(PUBLISH_RATE);
+            int burstLength = (int) this.properties.get(BURST_SIZE);
+            logger.info("Get Throttle with burst length {} and rate limit {} messages/second", burstLength,
+                    publishRate);
+            int publishPeriod = 0;
+            if (publishRate != 0) {
+                publishPeriod = (int) (1000 / publishRate);
+            }
+            this.throttle = new TokenBucket(burstLength, publishPeriod);
+        }
+    }
+
     private void stopReconnectTask() {
         if (this.reconnectFuture != null && !this.reconnectFuture.isDone()) {
 
@@ -572,14 +595,21 @@ public class DataServiceImpl
                             }
                         }
 
+                        if (DataServiceImpl.this.throttle != null) {
+                            logger.debug("Capacity {} Tokens {} Period {} Last {}",
+                                    DataServiceImpl.this.throttle.getCapacity(),
+                                    DataServiceImpl.this.throttle.getRemainingTokens(),
+                                    DataServiceImpl.this.throttle.getRefillPeriod(),
+                                    DataServiceImpl.this.throttle.getLastRefill());
+                            DataServiceImpl.this.throttle.waitForToken();
+                            logger.debug("Throttle: got token - remaining tokens {}",
+                                    DataServiceImpl.this.throttle.getRemainingTokens());
+                        }
                         publishInternal(message);
-
-                        // TODO: add a 'message throttle' configuration parameter to
-                        // slow down publish rate?
-
                         // Notify the listeners
                         DataServiceImpl.this.dataServiceListeners.onMessagePublished(message.getId(),
                                 message.getTopic());
+
                     }
                 } catch (KuraConnectException e) {
                     logger.info("DataPublisherService is not connected", e);

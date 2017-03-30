@@ -98,7 +98,25 @@
             default="0"
             min="0"
             description="Timeouts the in-flight messages congestion condition. The service will force a disconnect attempting to reconnect (0 to disable)."/>
-            
+
+        <AD id="average.publish.rate"
+            name="Average publish rate"
+            type="Double"
+            cardinality="0"
+            required="true"
+            default="0"
+            min="0"
+            description="The average message publish rate in messages/second (i.e. if set to 0.1, a message will be published every 10 seconds). If set to 0 the rate limit is disabled."/>
+        
+        <AD id="publish.burst.size"
+            name="Message burst size"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="1"
+            min="1"
+            description="When the average publish rate is set, this option enables the publishing of messages in bursts at maximum speed."/>
+                                    
     </OCD>
     <Designate pid="org.eclipse.kura.data.DataService" factoryPid="org.eclipse.kura.data.DataService">
         <Object ocdref="org.eclipse.kura.data.DataService"/>

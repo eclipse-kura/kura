@@ -550,10 +550,6 @@ public class ConfigurationServiceTest {
         }
     }
 
-    /*
-     * FIXME: default ComponentConfigurationImpl constructor doesn't initialize properties, but interface doesn't
-     * offer a setter method. Result... NPE.
-     */
     @Test
     public void testDecryptPasswords() throws KuraException {
         // test password decryption
@@ -615,23 +611,30 @@ public class ConfigurationServiceTest {
         assertEquals("config size after decryption", 1, props.size());
     }
 
-    /*
-     * FIXME: No input parameter checking performed!
-     */
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testMergeWithDefaultsNulls() throws KuraException {
-        // test with null parameters
+        // test with null parameters - null properties means error and NPE is expected
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
         OCD ocd = null;
         Map<String, Object> properties = null;
 
-        try {
-            cs.mergeWithDefaults(ocd, properties);
-        } catch (NullPointerException npe) {
-            // fail("Input parameters not checked.");
-        }
+        cs.mergeWithDefaults(ocd, properties);
+    }
+
+    @Test
+    public void testBla() throws Exception {
+        XmlComponentConfigurations configs = new XmlComponentConfigurations();
+
+        String marshal = XmlUtil.marshal(configs);
+
+        XmlComponentConfigurations unmarshal = XmlUtil.unmarshal(marshal, XmlComponentConfigurations.class);
+
+
+        String marshal2 = XmlUtil.marshal(unmarshal);
+
+        assertEquals(marshal, marshal2);
     }
 
     @Test
@@ -812,9 +815,6 @@ public class ConfigurationServiceTest {
         assertFalse("activated pids don't contain pid", asc.contains(pid));
     }
 
-    /*
-     * TODO: maybe fix implementation
-     */
     @Test
     public void testEncryptConfigsNull() throws NoSuchMethodException {
         // test with null parameter
@@ -826,7 +826,7 @@ public class ConfigurationServiceTest {
         try {
             TestUtil.invokePrivate(cs, "encryptConfigs", configs);
         } catch (Throwable e) {
-            // fail("Parameters not checked, but then again, it is a private method.");
+            fail("Parameters not checked.");
         }
 
     }
@@ -1160,9 +1160,6 @@ public class ConfigurationServiceTest {
         verify(systemServiceMock, times(1)).getKuraSnapshotsDirectory();
     }
 
-    /*
-     * FIXME: If directory in configuration is null => NPE.
-     */
     @Test
     public void testGetSnapshotFileNull() throws Throwable {
         // test if it works with null directory
@@ -1172,9 +1169,10 @@ public class ConfigurationServiceTest {
         cs.setSystemService(systemServiceMock);
 
         try {
-            TestUtil.invokePrivate(cs, "getSnapshotFile", 123);
+            Object obj = TestUtil.invokePrivate(cs, "getSnapshotFile", 123);
+            assertNull("Null expected to produce null", obj);
         } catch (NullPointerException e) {
-            // fail("Method result not checked.");
+            fail("Method result not checked.");
         }
 
         verify(systemServiceMock, times(1)).getKuraSnapshotsDirectory();
@@ -1198,9 +1196,6 @@ public class ConfigurationServiceTest {
         assertTrue("path pattern matches", file.getAbsolutePath().matches(".*dirGSF[/\\\\]snapshot_123.xml$"));
     }
 
-    /*
-     * FIXME: check for null result
-     */
     @Test
     public void testGetSnapshotNullXmlCfgs() throws KuraException {
         // test calling with null configurations list
@@ -1215,9 +1210,11 @@ public class ConfigurationServiceTest {
 
         long sid = 0;
         try {
-            cs.getSnapshot(sid);
+            List<ComponentConfiguration> snapshot = cs.getSnapshot(sid);
+            assertNotNull("Null not expected", snapshot);
+            assertTrue("Should be empty", snapshot.isEmpty());
         } catch (Exception e) {
-            // fail("Method result not checked.");
+            fail("Method result not checked.");
         }
     }
 
@@ -1331,9 +1328,6 @@ public class ConfigurationServiceTest {
         verify(systemServiceMock, times(1)).getKuraSnapshotsDirectory();
     }
 
-    /*
-     * FIXME: If crypto service returned null when decrypting, it would crash.
-     */
     @Test
     public void testLoadEncryptedSnapshotFileContentNullDecrypt() throws KuraException, IOException {
         // test decryption failure while loading an encrypted snapshot
@@ -1364,7 +1358,9 @@ public class ConfigurationServiceTest {
         try {
             cs.loadEncryptedSnapshotFileContent(snapshotID);
         } catch (NullPointerException e) {
-            // fail("Decryption result not checked for null value.");
+            fail("Decryption result not checked for null value.");
+        } catch (KuraException e) {
+            assertEquals(KuraErrorCode.DECODER_ERROR, e.getCode());
         }
 
         verify(systemServiceMock, times(1)).getKuraSnapshotsDirectory();
@@ -1623,13 +1619,10 @@ public class ConfigurationServiceTest {
             TestUtil.invokePrivate(cs, "encryptPlainSnapshots");
             fail("Exception expected.");
         } catch (KuraException e) {
-            assertEquals("exception code OK", KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, e.getCode());
+            assertEquals("exception code OK", KuraErrorCode.CONFIGURATION_ERROR, e.getCode());
         }
     }
 
-    /*
-     * XXX: Corrupted configuration file propagates exception. Maybe that's OK, since is's a private method.
-     */
     @Test
     public void testEncryptPlainSnapshotsEmptyFile() throws Throwable {
         // snapshot file is empty
@@ -1668,7 +1661,7 @@ public class ConfigurationServiceTest {
         try {
             TestUtil.invokePrivate(cs, "encryptPlainSnapshots");
         } catch (Exception e) {
-            // fail("Exception not caught beforehand.");
+            // exception is caught in the only consumer of this method
             assertTrue("exception...", e instanceof XMLStreamException);
         }
 
@@ -1859,11 +1852,6 @@ public class ConfigurationServiceTest {
         d1.delete();
     }
 
-    /*
-     * FIXME: If 0 snapshots are configured to remain and snapshot_0.xml exists, the method won't finish normally.
-     * NPE when unboxing null to long at pollFirst()
-     * API doesn't state 0 snapshots is illegal return value.
-     */
     @Test
     public void testGarbageCollectionOldSnapshotsZero() throws Throwable {
         // test scenario where 0 snapshots are configured to remain, but snapshot_0.xml prevents deletion of all of them
@@ -1891,12 +1879,13 @@ public class ConfigurationServiceTest {
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
 
+        // API doesn't state 0 snapshots is illegal return value
         when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(0);
 
         try {
             TestUtil.invokePrivate(cs, "garbageCollectionOldSnapshots");
-        } catch (Exception e) {
-            // fail("Exception not expected.");
+        } catch (NullPointerException e) {
+            fail("Exception not expected.");
         }
 
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();

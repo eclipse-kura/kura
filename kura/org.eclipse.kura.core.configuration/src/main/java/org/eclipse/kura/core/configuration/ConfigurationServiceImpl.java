@@ -126,7 +126,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private BundleTracker<Bundle> bundleTracker;
 
     @SuppressWarnings("unused")
-    private MetaTypeService m_metaTypeService;
+    private MetaTypeService metaTypeService;
     private ConfigurationAdmin configurationAdmin;
     private SystemService systemService;
     private CryptoService cryptoService;
@@ -167,11 +167,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     public void setMetaTypeService(MetaTypeService metaTypeService) {
-        this.m_metaTypeService = metaTypeService;
+        this.metaTypeService = metaTypeService;
     }
 
     public void unsetMetaTypeService(MetaTypeService metaTypeService) {
-        this.m_metaTypeService = null;
+        this.metaTypeService = null;
     }
 
     public void setSystemService(SystemService systemService) {
@@ -576,22 +576,24 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public List<ComponentConfiguration> getSnapshot(long sid) throws KuraException {
-        XmlComponentConfigurations xmlConfigs = loadEncryptedSnapshotFileContent(sid);
+        List<ComponentConfiguration> returnConfigs = new ArrayList<ComponentConfiguration>();
 
-        List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
-        for (ComponentConfigurationImpl config : configs) {
-            if (config != null) {
-                try {
-                    Map<String, Object> decryptedProperties = decryptPasswords(config);
-                    config.setProperties(decryptedProperties);
-                } catch (Throwable t) {
-                    logger.warn("Error during snapshot password decryption");
+        XmlComponentConfigurations xmlConfigs = loadEncryptedSnapshotFileContent(sid);
+        if (xmlConfigs != null) {
+            List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
+            for (ComponentConfigurationImpl config : configs) {
+                if (config != null) {
+                    try {
+                        Map<String, Object> decryptedProperties = decryptPasswords(config);
+                        config.setProperties(decryptedProperties);
+                    } catch (Throwable t) {
+                        logger.warn("Error during snapshot password decryption");
+                    }
                 }
             }
-        }
 
-        List<ComponentConfiguration> returnConfigs = new ArrayList<ComponentConfiguration>();
-        returnConfigs.addAll(xmlConfigs.getConfigurations());
+            returnConfigs.addAll(xmlConfigs.getConfigurations());
+        }
 
         return returnConfigs;
     }
@@ -856,6 +858,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     private void encryptConfigs(List<? extends ComponentConfiguration> configs) {
+        if (configs == null) {
+            return;
+        }
+
         for (ComponentConfiguration config : configs) {
             if (config instanceof ComponentConfigurationImpl) {
                 encryptPasswords(config);
@@ -895,8 +901,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         for (Long snapshot : snapshots) {
             File fSnapshot = getSnapshotFile(snapshot);
-            if (!fSnapshot.exists()) {
-                throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, snapshot);
+            if (fSnapshot == null || !fSnapshot.exists()) {
+                throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, snapshot);
             }
 
             //
@@ -967,6 +973,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     private void writeSnapshot(long sid, XmlComponentConfigurations conf) throws KuraException {
         File fSnapshot = getSnapshotFile(sid);
+        if (fSnapshot == null) {
+            throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND);
+        }
 
         // Marshall the configuration into an XML
         String xmlResult;
@@ -1164,6 +1173,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     private File getSnapshotFile(long id) {
         String configDir = getSnapshotsDirectory();
+
+        if (configDir == null) {
+            return null;
+        }
+
         StringBuilder sbSnapshot = new StringBuilder(configDir);
         sbSnapshot.append(File.separator).append("snapshot_").append(id).append(".xml");
 
@@ -1178,14 +1192,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         int currCount = sids.size();
         int maxCount = this.systemService.getKuraSnapshotsCount();
-        while (currCount > maxCount) {
+        while (currCount > maxCount && !sids.isEmpty()) { // stop if count reached or no more snapshots remain
 
             // preserve snapshot ID 0 as this will be considered the seeding
             // one.
             long sid = sids.pollFirst();
             if (sid != 0) {
                 File fSnapshot = getSnapshotFile(sid);
-                if (fSnapshot.exists()) {
+                if (fSnapshot != null && fSnapshot.exists()) {
                     logger.info("Snapshots Garbage Collector. Deleting {}", fSnapshot.getAbsolutePath());
                     fSnapshot.delete();
                     currCount--;
@@ -1279,7 +1293,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     XmlComponentConfigurations loadEncryptedSnapshotFileContent(long snapshotID) throws KuraException {
         File fSnapshot = getSnapshotFile(snapshotID);
-        if (!fSnapshot.exists()) {
+        if (fSnapshot == null || !fSnapshot.exists()) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, fSnapshot.getAbsolutePath());
         }
 
@@ -1312,7 +1326,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
 
         // File loaded, try to decrypt and unmarshall
-        String decryptedContent = new String(this.cryptoService.decryptAes(entireFile.toString().toCharArray()));
+        char[] decryptAes = this.cryptoService.decryptAes(entireFile.toString().toCharArray());
+        if (decryptAes == null) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+        }
+        String decryptedContent = new String(decryptAes);
 
         XmlComponentConfigurations xmlConfigs = null;
         try {

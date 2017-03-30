@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -298,7 +298,7 @@ public interface SystemService {
 
     /**
      * Returns the maximum number of snapshots to be retained in the file system.
-     * When the maximum number is reached, a garbage collector will deleted the older snapshots.
+     * When the maximum number is reached, a garbage collector will delete the older snapshots.
      *
      * @return maximum number of snapshots to be retained.
      */

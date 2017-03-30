@@ -24,6 +24,9 @@ public class ComponentConfigurationImpl implements ComponentConfiguration {
 
     protected Map<String, Object> properties;
 
+    /**
+     * Default constructor. Does not initialize any of the fields.
+     */
     // Required by JAXB
     public ComponentConfigurationImpl() {
     }

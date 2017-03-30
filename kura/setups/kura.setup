@@ -518,6 +518,9 @@
         <operand
             xsi:type="predicates:LocationPredicate"
             pattern=".*/target-platform.*"/>
+        <operand
+            xsi:type="predicates:LocationPredicate"
+            pattern=".*/target-definition.*"/>
       </predicate>
     </workingSet>
     <workingSet
@@ -588,10 +591,19 @@
             rootFolder="${git.clone.location}/kura"
             locateNestedProjects="true">
           <predicate
-              xsi:type="predicates:NotPredicate">
+              xsi:type="predicates:AndPredicate">
             <operand
-                xsi:type="predicates:LocationPredicate"
-                pattern=".*/features/.*"/>
+                xsi:type="predicates:NotPredicate">
+              <operand
+                  xsi:type="predicates:LocationPredicate"
+                  pattern=".*/features/.*"/>
+            </operand>
+            <operand
+                xsi:type="predicates:NotPredicate">
+              <operand
+                  xsi:type="predicates:LocationPredicate"
+                  pattern=".*/org.eclipse.kura.windows.*"/>
+            </operand>
           </predicate>
         </sourceLocator>
         <sourceLocator

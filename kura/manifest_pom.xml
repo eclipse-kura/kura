@@ -24,19 +24,12 @@
         <module>target-definition</module>
         <module>org.eclipse.kura.api</module>
 
-        <module>org.eclipse.kura.test</module>
-
         <module>org.eclipse.kura.asset.cloudlet.provider</module>
         <module>org.eclipse.kura.asset.provider</module>
         <module>org.eclipse.kura.asset.helper.provider</module>
 
-        <!-- test setup broken
-        <module>org.eclipse.kura.asset.provider.test</module>
-        -->
-
         <module>org.eclipse.kura.camel</module>
         <module>org.eclipse.kura.camel.cloud.factory</module>
-        <module>org.eclipse.kura.camel.test</module>
         <module>org.eclipse.kura.camel.xml</module>
         <module>org.eclipse.kura.core</module>
         <module>org.eclipse.kura.core.certificates</module>
@@ -44,7 +37,6 @@
         <module>org.eclipse.kura.core.comm</module>
         <module>org.eclipse.kura.core.configuration</module>
         <module>org.eclipse.kura.core.crypto</module>
-        <module>org.eclipse.kura.core.crypto.test</module>
         <module>org.eclipse.kura.core.deployment</module>
         <module>org.eclipse.kura.core.log</module>
         <module>org.eclipse.kura.core.net</module>
@@ -61,7 +53,6 @@
         <module>org.eclipse.kura.linux.command</module>
         <module>org.eclipse.kura.linux.gpio</module>
         <module>org.eclipse.kura.linux.net</module>
-        <module>org.eclipse.kura.linux.net.test</module>
         <module>org.eclipse.kura.linux.position</module>
 
         <module>org.eclipse.kura.linux.usb</module>
@@ -87,7 +78,6 @@
 
         <module>org.eclipse.kura.web2</module>
 
-        <module>org.eclipse.kura.core.test</module>
 
         <!--
         <module>org.eclipse.kura.windows.command</module>
@@ -97,8 +87,6 @@
         <module>org.eclipse.kura.wire.component.provider</module>
         <module>org.eclipse.kura.wire.helper.provider</module>
         <module>org.eclipse.kura.wire.provider</module>
-
-        <module>org.eclipse.kura.wire.provider.test</module>
 
         <module>features</module>
 
@@ -186,7 +174,6 @@
             </activation>
             <modules>
                 <module>org.eclipse.kura.protocol.can</module>
-                <!-- <module>org.eclipse.kura.protocol.can.test</module> -->
             </modules>
         </profile>
         <profile>

@@ -411,8 +411,6 @@ public class NetworkConfiguration {
     }
 
     public boolean isValid() throws KuraException {
-
-        // for(NetInterfaceConfig netInterfaceConfig : m_netInterfaceConfigs) {
         Iterator<String> it = this.m_netInterfaceConfigs.keySet().iterator();
         while (it.hasNext()) {
             NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig = this.m_netInterfaceConfigs
@@ -424,9 +422,9 @@ public class NetworkConfiguration {
             }
 
             NetInterfaceType type = netInterfaceConfig.getType();
-            if (type != NetInterfaceType.ETHERNET && type != NetInterfaceType.WIFI
+            if (type != NetInterfaceType.ETHERNET && type != NetInterfaceType.WIFI && type != NetInterfaceType.MODEM
                     && type != NetInterfaceType.LOOPBACK) {
-                s_logger.error("Type must be ETHERNET, WIFI, or LOOPBACK - type is " + type);
+                s_logger.error("Type must be ETHERNET, WIFI, MODEM, or LOOPBACK - type is " + type);
                 return false;
             }
 
@@ -761,11 +759,7 @@ public class NetworkConfiguration {
 
         properties.put(prefix + ".ssid", wifiConfig.getSSID());
         properties.put(prefix + ".driver", wifiConfig.getDriver());
-        if (wifiConfig.getMode() != null) {
-            properties.put(prefix + ".mode", wifiConfig.getMode().toString());
-        } else {
-            properties.put(prefix + ".mode", WifiMode.UNKNOWN.toString());
-        }
+        properties.put(prefix + ".mode", wifiConfig.getMode().toString());
         if (wifiConfig.getSecurity() != null) {
             properties.put(prefix + ".securityType", wifiConfig.getSecurity().toString());
         } else {
@@ -773,12 +767,12 @@ public class NetworkConfiguration {
         }
         properties.put(prefix + ".channel", sbChannel.toString());
         Password psswd = wifiConfig.getPasskey();
-        if (wifiConfig != null && psswd != null) {
+        if (psswd != null) {
             properties.put(prefix + ".passphrase", psswd);
         } else {
             properties.put(prefix + ".passphrase", new Password(""));
         }
-        if (wifiConfig != null && wifiConfig.getHardwareMode() != null) {
+        if (wifiConfig.getHardwareMode() != null) {
             properties.put(prefix + ".hardwareMode", wifiConfig.getHardwareMode());
         } else {
             properties.put(prefix + ".hardwareMode", "");
@@ -1423,7 +1417,7 @@ public class NetworkConfiguration {
 
     private void populateNetInterfaceConfiguration(
             AbstractNetInterface<? extends NetInterfaceAddressConfig> netInterfaceConfig, Map<String, Object> props)
-                    throws UnknownHostException, KuraException {
+            throws UnknownHostException, KuraException {
         String interfaceName = netInterfaceConfig.getName();
 
         StringBuffer keyBuffer = new StringBuffer();
@@ -1766,8 +1760,8 @@ public class NetworkConfiguration {
                 String configWifiMode = netIfPrefix + "wifi.mode";
                 if (props.containsKey(configWifiMode)) {
 
-                    WifiMode mode = WifiMode.INFRA;     // FIXME: INFRA for now while debugging - probably want this as
-     // UNKNOWN
+                    // FIXME: INFRA for now while debugging - probably want this as UNKNOWN
+                    WifiMode mode = WifiMode.INFRA;
                     if (props.get(configWifiMode) != null) {
                         mode = WifiMode.valueOf((String) props.get(configWifiMode));
                     }

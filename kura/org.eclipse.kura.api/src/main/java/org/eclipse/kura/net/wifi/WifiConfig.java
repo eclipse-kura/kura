@@ -174,8 +174,8 @@ public class WifiConfig implements NetConfig {
         return this.m_bgscan;
     }
 
-    public void setBgscan(WifiBgscan m_bgscan) {
-        this.m_bgscan = m_bgscan;
+    public void setBgscan(WifiBgscan bgscan) {
+        this.m_bgscan = bgscan;
     }
 
     public boolean pingAccessPoint() {

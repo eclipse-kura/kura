@@ -87,4 +87,13 @@ public class DhcpServerCfg {
 	public void setPassDns(boolean passDns) {
 		this.passDns = passDns;
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder(this.getClass().getName());
+		sb.append(": [").append("ifaceName=").append(this.interfaceName).append(", enabled?=").append(this.enabled)
+				.append(", defaultLeaseTime=").append(this.defaultLeaseTime).append(", maximumLeaseTime=")
+				.append(this.maximumLeaseTime).append(", passDNS?=").append(this.passDns).append(']');
+		return sb.toString();
+	}
 }

@@ -64,6 +64,20 @@ public class DhcpServerCfgIP4 extends DhcpServerCfgIP<IP4Address> {
 		return ret;
 	}
 	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder(this.getClass().getName());
+		sb.append(": [subnet=").append(this.getSubnet().getHostAddress()).append(", subnetMask=")
+				.append(this.getSubnetMask().getHostAddress()).append(", prefix=").append(this.getPrefix())
+				.append(", routerAddress=").append(this.getRouterAddress()).append(", rangeStart=")
+				.append(this.getRangeStart()).append(", rangeEnd=").append(this.getRangeEnd());
+		for (IP4Address dnsServer : this.getDnsServers()) {
+			sb.append(", dnsServer=").append(dnsServer);
+		}
+		sb.append(']');
+		return sb.toString();
+	}
+	
 	private static int inet4address2int(Inet4Address inet4addr) {
 
 		byte[] baInet4addr = inet4addr.getAddress();

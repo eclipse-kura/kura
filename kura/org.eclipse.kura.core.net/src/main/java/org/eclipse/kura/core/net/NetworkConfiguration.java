@@ -2032,13 +2032,13 @@ public class NetworkConfiguration {
 
                     dnServers.add(routerAddress);
 
+                    DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(interfaceName, dhcpServerEnabled, defaultLeaseTime, maximumLeaseTime, passDns);
+					DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, subnetMask, prefix,
+							routerAddress, rangeStart, rangeEnd, dnServers);
                     try {
-                    	DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(interfaceName, dhcpServerEnabled, defaultLeaseTime, maximumLeaseTime, passDns);
-						DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, subnetMask, prefix,
-								routerAddress, rangeStart, rangeEnd, dnServers);
 						netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
                     } catch (KuraException e) {
-                    	s_logger.error("Failed to craete new DhcpServerConfigIP4 object - {}", e);
+                    	s_logger.warn("This invalid DhcpServerCfgIP4 configuration is ignored - {}, {}", dhcpServerCfg, dhcpServerCfgIP4);
                     }
                 } else {
                     s_logger.trace("Not including DhcpServerConfig - router: " + routerAddress + ", range start: "

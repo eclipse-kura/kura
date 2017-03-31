@@ -74,19 +74,14 @@ public class HTS221Test {
         assertTrue(mt * (TEMP_H_REG << 8 | TEMP_L_REG) + qt == temperature);
     }
 
-    /*
-     * requires #1267 issue to be fixed
-     * fixed in PR #1271
-     * 
-     * @Test
-     * public void testIsHumidityReady() {
-     * HTS221 hts221 = HTS221.getHumiditySensor(1, 2, 1, 1);
-     * hts221.initDevice();
-     * boolean result = hts221.isHumidityReady();
-     * assertTrue("Humidity not ready", result);
-     * 
-     * }
-     */
+    @Test
+    public void testIsHumidityReady() {
+        HTS221 hts221 = HTS221.getHumiditySensor(1, 2, 1, 1);
+        hts221.initDevice();
+        boolean result = hts221.isHumidityReady();
+        assertTrue("Humidity not ready", result);
+
+    }
 
     @Test
     public void testIsTemperatureReady() {

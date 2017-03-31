@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -10,6 +10,7 @@
 
     Contributors:
       Eurotech
+      Red Hat Inc
 
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
@@ -19,7 +20,6 @@
                modified="updated">
    <implementation class="org.eclipse.kura.protocol.can.test.CanSocketTest"/>
    <service>
-      <provide interface="org.eclipse.kura.protocol.can.test.CanSocketTest"/>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.protocol.can.test.CanSocketTest"/>

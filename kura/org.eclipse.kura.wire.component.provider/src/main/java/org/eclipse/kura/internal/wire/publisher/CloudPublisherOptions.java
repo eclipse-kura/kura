@@ -9,7 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.publisher;
 
@@ -34,9 +34,6 @@ final class CloudPublisherOptions {
     /** The Constant denoting the publisher application. */
     private static final String CONF_APPLICATION = "publish.application";
 
-    /** The Constant denoting payload type. */
-    private static final String CONF_PAYLOAD_TYPE = "publish.payload.type";
-
     /** The Constant denoting if publishing has to be performed on control topics. */
     private static final String CONF_PUBLISH_CONTROL_MESSAGE = "publish.control.messages";
 
@@ -56,8 +53,6 @@ final class CloudPublisherOptions {
     private static final String DEFAULT_APPLICATION = "PUB";
 
     private static final boolean DEFAULT_CONTROL_MESSAGE = false;
-
-    private static final PayloadType DEFAULT_PAYLOAD_TYPE = PayloadType.KURA_PAYLOAD;
 
     private static final int DEFAULT_PRIORITY = 7;
 
@@ -80,21 +75,6 @@ final class CloudPublisherOptions {
     CloudPublisherOptions(final Map<String, Object> properties) {
         requireNonNull(properties, message.propertiesNonNull());
         this.properties = properties;
-    }
-
-    /**
-     * Returns the payload type to be used for wrapping {@link WireRecord}s.
-     *
-     * @return the type of the encoding message type
-     */
-    PayloadType getPayloadType() {
-        int configurationPayloadType = DEFAULT_PAYLOAD_TYPE.getValue();
-        final Object type = this.properties.get(CONF_PAYLOAD_TYPE);
-        if (nonNull(type) && type instanceof Integer) {
-            configurationPayloadType = (Integer) type;
-        }
-
-        return PayloadType.getPayloadType(configurationPayloadType);
     }
 
     /**

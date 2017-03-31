@@ -96,6 +96,17 @@
             <Option label="Publish birth on connect" value="birth-connect" />
             <Option label="Publish birth on connect and reconnect" value="birth-connect-reconnect" />
         </AD>
+        
+        <AD id="payload.encoding"
+            name="payload.encoding"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="kura-protobuf"
+            description="Specify the message payload encoding.">
+            <Option label="Kura Protobuf" value="kura-protobuf" />
+            <Option label="JSON" value="json" />
+        </AD>
     </OCD>
     
     <Designate pid="org.eclipse.kura.cloud.CloudService" factoryPid="org.eclipse.kura.cloud.CloudService">

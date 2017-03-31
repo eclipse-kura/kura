@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 
+import org.eclipse.kura.cloud.CloudPayloadEncoding;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
 import org.eclipse.kura.system.SystemService;
@@ -46,6 +47,7 @@ public class CloudServiceOptions {
     private static final String REPUB_BIRTH_ON_MODEM_DETECT = "republish.mqtt.birth.cert.on.modem.detect";
     private static final String ENABLE_DFLT_SUBSCRIPTIONS = "enable.default.subscriptions";
     private static final String BIRTH_CERT_POLICY = "birth.cert.policy";
+    private static final String PAYLOAD_ENCODING = "payload.encoding";
 
     private static final int LIFECYCLE_QOS = 0;
     private static final int LIFECYCLE_PRIORITY = 0;
@@ -223,6 +225,28 @@ public class CloudServiceOptions {
             republishBirt = false;
         }
         return republishBirt;
+    }
+
+    /**
+     * This method parses the Cloud Service configuration and returns the selected cloud payload encoding.
+     * By default, this method returns {@link CloudPayloadEncoding} {@code KURA_PROTOBUF}.
+     *
+     * @return a boolean value.
+     */
+    public CloudPayloadEncoding getPayloadEncoding() {
+        CloudPayloadEncoding result = CloudPayloadEncoding.KURA_PROTOBUF;
+        String encodingString = "";
+        if (this.properties != null && this.properties.get(PAYLOAD_ENCODING) != null
+                && this.properties.get(PAYLOAD_ENCODING) instanceof String) {
+            encodingString = (String) this.properties.get(PAYLOAD_ENCODING);
+        }
+        try {
+            result = CloudPayloadEncoding.getEncoding(encodingString);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Cannot parse the provided payload encoding.", e);
+        }
+
+        return result;
     }
 
     public String getTopicSeparator() {

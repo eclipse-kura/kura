@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.kura.core.cloud;
 
+import static org.eclipse.kura.cloud.CloudPayloadEncoding.JSON;
+import static org.eclipse.kura.cloud.CloudPayloadEncoding.KURA_PROTOBUF;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -28,6 +31,7 @@ import org.eclipse.kura.certificate.CertificatesService;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudConnectionEstablishedEvent;
 import org.eclipse.kura.cloud.CloudConnectionLostEvent;
+import org.eclipse.kura.cloud.CloudPayloadEncoding;
 import org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder;
 import org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder;
 import org.eclipse.kura.cloud.CloudService;
@@ -87,7 +91,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
     private final AtomicInteger messageId;
 
     public CloudServiceImpl() {
-        this.cloudClients = new CopyOnWriteArrayList<CloudClientImpl>();
+        this.cloudClients = new CopyOnWriteArrayList<>();
         this.messageId = new AtomicInteger();
     }
 
@@ -348,21 +352,16 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
     byte[] encodePayload(KuraPayload payload) throws KuraException {
         byte[] bytes = new byte[0];
-        if (payload == null) {
-            return bytes;
-        }
+        CloudPayloadEncoding preferencesEncoding = this.options.getPayloadEncoding();
 
-        CloudPayloadEncoder encoder = new CloudPayloadProtoBufEncoderImpl(payload);
-        if (this.options.getEncodeGzip()) {
-            encoder = new CloudPayloadGZipEncoder(encoder);
+        if (preferencesEncoding == KURA_PROTOBUF) {
+            bytes = encodeProtobufPayload(payload);
+        } else if (preferencesEncoding == JSON) {
+            bytes = encodeJsonPayload(payload);
+        } else {
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR);
         }
-
-        try {
-            bytes = encoder.getBytes();
-            return bytes;
-        } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, e);
-        }
+        return bytes;
     }
 
     // ----------------------------------------------------------------
@@ -439,18 +438,14 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
         // notify listeners
         KuraTopic kuraTopic = new KuraTopic(topic, this.options.getTopicControlPrefix());
         if (TOPIC_MQTT_APP.equals(kuraTopic.getApplicationId()) || TOPIC_BA_APP.equals(kuraTopic.getApplicationId())) {
-            logger.info("Ignoring feedback message from " + topic);
+            logger.info("Ignoring feedback message from {}", topic);
         } else {
             KuraPayload kuraPayload = null;
-            try {
-                // try to decode the message into an KuraPayload
-                kuraPayload = new CloudPayloadProtoBufDecoderImpl(payload).buildFromByteArray();
-            } catch (Exception e) {
-                // Wrap the received bytes payload into an KuraPayload
-                logger.debug("Received message on topic {} that could not be decoded. Wrapping it into an KuraPayload.",
-                        topic);
-                kuraPayload = new KuraPayload();
-                kuraPayload.setBody(payload);
+
+            if (this.options.getPayloadEncoding() == JSON) {
+                kuraPayload = createKuraPayloadFromJson(payload);
+            } else if (this.options.getPayloadEncoding() == KURA_PROTOBUF) {
+                kuraPayload = createKuraPayloadFromProtoBuf(topic, payload);
             }
 
             for (CloudClientImpl cloudClient : this.cloudClients) {
@@ -687,5 +682,47 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
                 logger.info("Interrupted while waiting for the message to be published", e);
             }
         }
+    }
+
+    private byte[] encodeProtobufPayload(KuraPayload payload) throws KuraException {
+        byte[] bytes = new byte[0];
+        if (payload == null) {
+            return bytes;
+        }
+
+        CloudPayloadEncoder encoder = new CloudPayloadProtoBufEncoderImpl(payload);
+        if (this.options.getEncodeGzip()) {
+            encoder = new CloudPayloadGZipEncoder(encoder);
+        }
+
+        try {
+            bytes = encoder.getBytes();
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, e);
+        }
+        return bytes;
+    }
+
+    private byte[] encodeJsonPayload(KuraPayload payload) {
+        return CloudPayloadJsonEncoder.getBytes(payload);
+    }
+
+    private KuraPayload createKuraPayloadFromJson(byte[] payload) {
+        return CloudPayloadJsonDecoder.buildFromByteArray(payload);
+    }
+
+    private KuraPayload createKuraPayloadFromProtoBuf(String topic, byte[] payload) {
+        KuraPayload kuraPayload;
+        try {
+            // try to decode the message into an KuraPayload
+            kuraPayload = new CloudPayloadProtoBufDecoderImpl(payload).buildFromByteArray();
+        } catch (Exception e) {
+            // Wrap the received bytes payload into an KuraPayload
+            logger.debug("Received message on topic {} that could not be decoded. Wrapping it into an KuraPayload.",
+                    topic);
+            kuraPayload = new KuraPayload();
+            kuraPayload.setBody(payload);
+        }
+        return kuraPayload;
     }
 }

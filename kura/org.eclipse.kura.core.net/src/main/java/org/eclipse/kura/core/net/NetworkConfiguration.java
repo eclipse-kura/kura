@@ -40,6 +40,8 @@ import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
+import org.eclipse.kura.net.dhcp.DhcpServerCfg;
+import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
@@ -2030,10 +2032,14 @@ public class NetworkConfiguration {
 
                     dnServers.add(routerAddress);
 
-                    DhcpServerConfigIP4 dhcpServerConfig = new DhcpServerConfigIP4(interfaceName, dhcpServerEnabled,
-                            subnet, routerAddress, subnetMask, defaultLeaseTime, maximumLeaseTime, prefix, rangeStart,
-                            rangeEnd, passDns, dnServers);
-                    netConfigs.add(dhcpServerConfig);
+                    DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(interfaceName, dhcpServerEnabled, defaultLeaseTime, maximumLeaseTime, passDns);
+					DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, subnetMask, prefix,
+							routerAddress, rangeStart, rangeEnd, dnServers);
+                    try {
+						netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
+                    } catch (KuraException e) {
+                    	s_logger.warn("This invalid DhcpServerCfgIP4 configuration is ignored - {}, {}", dhcpServerCfg, dhcpServerCfgIP4);
+                    }
                 } else {
                     s_logger.trace("Not including DhcpServerConfig - router: " + routerAddress + ", range start: "
                             + rangeStart + ", range end: " + rangeEnd);

@@ -19,6 +19,7 @@ import org.eclipse.kura.KuraException;
  * @author eurotech
  *
  */
+@FunctionalInterface
 public interface DhcpServer {
 
     /**

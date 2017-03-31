@@ -37,6 +37,8 @@ import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkAdminService;
 import org.eclipse.kura.net.NetworkPair;
+import org.eclipse.kura.net.dhcp.DhcpServerCfg;
+import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
@@ -1220,11 +1222,16 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     s_logger.debug("DhcpServerConfigIP4 - start: {}, end: {}, prefix: {}, subnet: {}, subnetMask: {}",
                             new Object[] { rangeStart.getHostAddress(), rangeEnd.getHostAddress(), prefix,
                                     subnet.getHostAddress(), subnetMask.getHostAddress() });
-                    DhcpServerConfigIP4 dhcpServerConfigIP4 = new DhcpServerConfigIP4(config.getName(), true, subnet,
-                            routerAddress, subnetMask, defaultLeaseTime, maximumLeaseTime, prefix, rangeStart, rangeEnd,
-                            passDns, dnsServers);
-
-                    netConfigs.add(dhcpServerConfigIP4);
+                    try {
+                    	DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(config.getName(), true, defaultLeaseTime, maximumLeaseTime, passDns);
+						DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, subnetMask, prefix,
+								routerAddress, rangeStart, rangeEnd, dnsServers);
+						netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
+                    } catch (KuraException e) {
+                    	s_logger.error("Failed to create new DhcpServerConfigIP4 object. Please verify that DHCP pool IP addresses (see below) are in the {} subnet.", subnet.getHostAddress());
+                    	s_logger.error("DHCP Pool: range from {} to {}", rangeStart.getHostAddress(), rangeEnd.getHostAddress());
+                    	s_logger.error("Exception: ", e);
+                    }
                 }
 
                 if (routerMode.equals(GwtNetRouterMode.netRouterDchpNat.name())

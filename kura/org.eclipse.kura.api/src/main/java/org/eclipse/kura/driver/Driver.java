@@ -131,8 +131,6 @@ public interface Driver {
      *            the records hold the information of what channels are to be
      *            read. They will be filled by this function with the records
      *            already read.
-     * @return the list of driver records which comprises the currently read
-     *         value in case of success or the reason of failure
      * @throws ConnectionException
      *             if the connection to the field device is interrupted
      * @throws NullPointerException
@@ -144,7 +142,7 @@ public interface Driver {
      *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
      *             needs to be set in the thrown {@link KuraRuntimeException}
      */
-    public List<DriverRecord> read(List<DriverRecord> records) throws ConnectionException;
+    public void read(List<DriverRecord> records) throws ConnectionException;
 
     /**
      * Registers driver listener for the provided channel configuration for a
@@ -196,8 +194,6 @@ public interface Driver {
      *            written and the values that are to written. They will be
      *            filled by this function with a driver flag stating whether the
      *            write process was successful or not.
-     * @return the list of driver records which comprises the status of the
-     *         write operations
      * @throws ConnectionException
      *             if the connection to the field device is interrupted
      * @throws NullPointerException
@@ -209,6 +205,28 @@ public interface Driver {
      *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
      *             needs to be set in the thrown {@link KuraRuntimeException}
      */
-    public List<DriverRecord> write(List<DriverRecord> records) throws ConnectionException;
+    public void write(List<DriverRecord> records) throws ConnectionException;
 
+    /**
+     * This method allows the driver to perform protocol specific optimizations in order to accelerate the execution of
+     * batches of read requests having the same channel configuration.
+     * The result of this optimization will be returned by the driver as a {@link PreparedRead} instance that can be
+     * used to perform the requests.
+     * In order to improve efficiency a driver should validate the channel configuration of the provided channels during
+     * this method call.
+     * It is also permitted to the implementation of the {@link PreparedRead#execute()} and
+     * {@link PreparedRead#getDriverRecords()} methods to return the same {@link DriverRecord} instances provided as an
+     * argument to this method.
+     * If the validation of the channel configuration fails for some channels, the driver must not throw an exception
+     * but it is required to return driver records with proper error flags set as a result of the
+     * {@link PreparedRead#execute()} call.
+     * 
+     * @see PreparedRead
+     * @param records
+     *            The list of driver records that represent the request to be optimized.
+     * @return The {@link PreparedRead} instance
+     * @throws NullPointerException
+     *             if the provided list is null
+     */
+    public PreparedRead prepareRead(List<DriverRecord> records);
 }

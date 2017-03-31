@@ -80,10 +80,20 @@
         optional="true"/>
     <requirement
         name="org.eclipse.egit.gitflow.feature.feature.group"/>
+    <requirement
+        name="com.mountainminds.eclemma.feature.feature.group"
+        optional="true"/>
+    <requirement
+        name="org.sonarlint.eclipse.feature.feature.group"
+        optional="true"/>
     <repository
         url="http://repo1.maven.org/maven2/.m2e/connectors/m2eclipse-tycho/0.9.0/N/LATEST/"/>
     <repository
         url="http://mtoolkit-neon.s3-website-us-east-1.amazonaws.com"/>
+    <repository
+        url="http://update.eclemma.org/"/>
+    <repository
+        url="http://eclipse.sonarlint.org/"/>
     <description>Install the tools needed in the IDE to work with the source code for ${scope.project.label}</description>
   </setupTask>
   <setupTask
@@ -465,10 +475,28 @@
     <workingSet
         name="${scope.project.label}">
       <predicate
-          xsi:type="predicates:OrPredicate">
+          xsi:type="predicates:AndPredicate">
         <operand
             xsi:type="predicates:NamePredicate"
             pattern="org.eclipse.kura.*"/>
+        <operand
+            xsi:type="predicates:NotPredicate">
+          <operand
+              xsi:type="predicates:NamePredicate"
+              pattern="org.eclipse.kura.*\.test.*"/>
+        </operand>
+        <operand
+            xsi:type="predicates:NotPredicate">
+          <operand
+              xsi:type="predicates:NamePredicate"
+              pattern="org.eclipse.kura.example.*"/>
+        </operand>
+        <operand
+            xsi:type="predicates:NotPredicate">
+          <operand
+              xsi:type="predicates:NamePredicate"
+              pattern="org.eclipse.kura.demo.*"/>
+        </operand>
       </predicate>
     </workingSet>
     <workingSet
@@ -490,6 +518,9 @@
         <operand
             xsi:type="predicates:LocationPredicate"
             pattern=".*/target-platform.*"/>
+        <operand
+            xsi:type="predicates:LocationPredicate"
+            pattern=".*/target-definition.*"/>
       </predicate>
     </workingSet>
     <workingSet
@@ -500,6 +531,33 @@
         <operand
             xsi:type="predicates:NamePredicate"
             pattern=".*\.feature$"/>
+      </predicate>
+    </workingSet>
+    <workingSet
+        name="Tests">
+      <predicate
+          xsi:type="predicates:OrPredicate">
+        <operand
+            xsi:type="predicates:LocationPredicate"
+            pattern=".*/test/.*"/>
+        <operand
+            xsi:type="predicates:NamePredicate"
+            pattern="org.eclipse.kura.*\.test.*"/>
+      </predicate>
+    </workingSet>
+    <workingSet
+        name="Examples">
+      <predicate
+          xsi:type="predicates:OrPredicate">
+        <operand
+            xsi:type="predicates:LocationPredicate"
+            pattern=".*/examples"/>
+        <operand
+            xsi:type="predicates:NamePredicate"
+            pattern="org.eclipse.kura.example.*"/>
+        <operand
+            xsi:type="predicates:NamePredicate"
+            pattern="org.eclipse.kura.demo.*"/>
       </predicate>
     </workingSet>
     <description>The dynamic working sets for ${scope.project.label}</description>
@@ -533,10 +591,19 @@
             rootFolder="${git.clone.location}/kura"
             locateNestedProjects="true">
           <predicate
-              xsi:type="predicates:NotPredicate">
+              xsi:type="predicates:AndPredicate">
             <operand
-                xsi:type="predicates:LocationPredicate"
-                pattern=".*/features/.*"/>
+                xsi:type="predicates:NotPredicate">
+              <operand
+                  xsi:type="predicates:LocationPredicate"
+                  pattern=".*/features/.*"/>
+            </operand>
+            <operand
+                xsi:type="predicates:NotPredicate">
+              <operand
+                  xsi:type="predicates:LocationPredicate"
+                  pattern=".*/org.eclipse.kura.windows.*"/>
+            </operand>
           </predicate>
         </sourceLocator>
         <sourceLocator

@@ -99,10 +99,10 @@
             type="Long"
             cardinality="0" 
             required="true"
-            default="4294967295" 
-            min = "-4294967296"
-            max = "4294967296"
-            description="Long metric. Metric range min -4294967296 max 4294967296."/>
+            default="9223372036854774999" 
+            min = "-9223372036854775000"
+            max = "9223372036854775000"
+            description="Long metric. Metric range min -9223372036854775000 max 9223372036854775000. Long min -9223372036854775808 max 9223372036854775807."/>
 
         <AD id="metric.integer"  
             name="metric.integer"

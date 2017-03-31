@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * The Class Timer represents a Wire Component which triggers a ticking event on
  * every interval as configured. It fires the event on every tick.
  */
-public final class Timer implements WireEmitter, ConfigurableComponent {
+public class Timer implements WireEmitter, ConfigurableComponent {
 
     /** Group Identifier for Quartz Job and Triggers */
     private static final String GROUP_ID = "wires";
@@ -105,7 +105,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
         this.wireSupport = this.wireHelperService.newWireSupport(this);
         this.timerOptions = new TimerOptions(properties);
         try {
-            this.scheduler = new StdSchedulerFactory().getScheduler();
+            this.scheduler = createScheduler();
             doUpdate();
         } catch (final SchedulerException e) {
             logger.error(message.schedulerException(), e);
@@ -123,7 +123,7 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
         logger.debug(message.updatingTimer());
         this.timerOptions = new TimerOptions(properties);
         try {
-            this.scheduler = new StdSchedulerFactory().getScheduler();
+            this.scheduler = createScheduler();
             doUpdate();
         } catch (final SchedulerException e) {
             logger.error(message.schedulerException(), e);
@@ -149,6 +149,10 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
         logger.debug(message.deactivatingTimerDone());
     }
 
+    protected Scheduler createScheduler() throws SchedulerException {
+        return new StdSchedulerFactory().getScheduler();
+    }
+
     /**
      * Perform update operation which internally emits a {@link WireRecord} every
      * interval
@@ -157,10 +161,8 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
      *             if job scheduling fails
      */
     private void doUpdate() throws SchedulerException {
-        int interval;
         if ("SIMPLE".equalsIgnoreCase(this.timerOptions.getType())) {
-            interval = this.timerOptions.getSimpleInterval();
-            scheduleSimpleInterval(interval);
+            scheduleSimpleInterval(timerOptions.getSimpleInterval() * timerOptions.getSimpleTimeUnitMultiplier());
             return;
         }
         final String cronExpression = this.timerOptions.getCronExpression();
@@ -171,13 +173,13 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
      * Creates a trigger based on the provided interval
      *
      * @param interval
-     *            the interval
+     *            the interval in milliseconds
      * @throws SchedulerException
      *             if scheduling fails
      * @throws IllegalArgumentException
      *             if the interval is less than or equal to zero
      */
-    private void scheduleSimpleInterval(final int interval) throws SchedulerException {
+    private void scheduleSimpleInterval(final long interval) throws SchedulerException {
         if (interval <= 0) {
             throw new IllegalArgumentException(message.intervalNonLessThanEqualToZero());
         }
@@ -187,7 +189,8 @@ public final class Timer implements WireEmitter, ConfigurableComponent {
         }
         this.jobKey = new JobKey("emitJob" + id, GROUP_ID);
         final Trigger trigger = TriggerBuilder.newTrigger().withIdentity("emitTrigger" + id, GROUP_ID)
-                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(interval).repeatForever())
+                .withSchedule(
+                        SimpleScheduleBuilder.simpleSchedule().withIntervalInMilliseconds(interval).repeatForever())
                 .build();
 
         final TimerJobDataMap jobDataMap = new TimerJobDataMap();

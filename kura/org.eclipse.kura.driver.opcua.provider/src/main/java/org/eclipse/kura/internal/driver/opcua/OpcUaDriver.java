@@ -25,6 +25,7 @@ import static org.eclipse.kura.driver.DriverFlag.WRITE_FAILURE;
 import static org.eclipse.kura.driver.DriverFlag.WRITE_SUCCESSFUL;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -42,6 +43,7 @@ import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.DriverRecord;
 import org.eclipse.kura.driver.DriverStatus;
+import org.eclipse.kura.driver.PreparedRead;
 import org.eclipse.kura.driver.listener.DriverListener;
 import org.eclipse.kura.driver.opcua.localization.OpcUaMessages;
 import org.eclipse.kura.localization.LocalizationAdapter;
@@ -81,7 +83,6 @@ import io.netty.util.internal.StringUtil;
  * the driver connection specific properties are enlisted in
  * {@link OpcUaOptions}
  *
- * @see Asset
  * @see Driver
  * @see OpcUaOptions
  * @see OpcUaChannelDescriptor
@@ -310,9 +311,37 @@ public final class OpcUaDriver implements Driver {
         }
     }
 
+    private void runReadRequest(OpcUaRequestInfo requestInfo) {
+        DriverRecord record = requestInfo.driverRecord;
+        final NodeId nodeId = new NodeId(requestInfo.nodeNamespaceIndex, requestInfo.nodeId);
+        final VariableNode node = this.client.getAddressSpace().createVariableNode(nodeId);
+        Object readResult = null;
+        try {
+            logger.debug("reading: ns={};s={}..", requestInfo.nodeNamespaceIndex, requestInfo.nodeId);
+            readResult = extractValue(runSafe(node.readValue()));
+            logger.debug("Read Successful");
+        } catch (final Exception e) {
+            record.setDriverStatus(new DriverStatus(READ_FAILURE, message.readFailed(), e));
+            record.setTimestamp(System.currentTimeMillis());
+            logger.warn(message.readFailed(), e);
+            return;
+        }
+
+        final Optional<TypedValue<?>> typedValue = this.getTypedValue(requestInfo.dataType, readResult);
+        if (!typedValue.isPresent()) {
+            record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION,
+                    message.errorValueTypeConversion(), null));
+            record.setTimestamp(System.currentTimeMillis());
+            return;
+        }
+        record.setValue(typedValue.get());
+        record.setDriverStatus(new DriverStatus(READ_SUCCESSFUL));
+        record.setTimestamp(System.currentTimeMillis());
+    }
+
     /** {@inheritDoc} */
     @Override
-    public List<DriverRecord> read(final List<DriverRecord> records) throws ConnectionException {
+    public void read(final List<DriverRecord> records) throws ConnectionException {
         if (this.isBusy.get()) {
             throw new ConnectionException(message.errorDriverBusy());
         }
@@ -320,34 +349,8 @@ public final class OpcUaDriver implements Driver {
             this.connect();
         }
         for (final DriverRecord record : records) {
-            OpcUaRequestInfo.extract(record).ifPresent(requestInfo -> {
-                final NodeId nodeId = new NodeId(requestInfo.nodeNamespaceIndex, requestInfo.nodeId);
-                final VariableNode node = this.client.getAddressSpace().createVariableNode(nodeId);
-                Object readResult = null;
-                try {
-                    logger.debug("reading: ns={};s={}..", requestInfo.nodeNamespaceIndex, requestInfo.nodeId);
-                    readResult = extractValue(runSafe(node.readValue()));
-                    logger.debug("Read Successful");
-                } catch (final Exception e) {
-                    record.setDriverStatus(new DriverStatus(READ_FAILURE, message.readFailed(), e));
-                    record.setTimestamp(System.currentTimeMillis());
-                    logger.warn(message.readFailed(), e);
-                    return;
-                }
-
-                final Optional<TypedValue<?>> typedValue = this.getTypedValue(requestInfo.dataType, readResult);
-                if (!typedValue.isPresent()) {
-                    record.setDriverStatus(new DriverStatus(DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION,
-                            message.errorValueTypeConversion(), null));
-                    record.setTimestamp(System.currentTimeMillis());
-                    return;
-                }
-                record.setValue(typedValue.get());
-                record.setDriverStatus(new DriverStatus(READ_SUCCESSFUL));
-                record.setTimestamp(System.currentTimeMillis());
-            });
+            OpcUaRequestInfo.extract(record).ifPresent(this::runReadRequest);
         }
-        return Collections.unmodifiableList(records);
     }
 
     /** {@inheritDoc} */
@@ -394,9 +397,27 @@ public final class OpcUaDriver implements Driver {
         logger.debug(message.updatingDone());
     }
 
+    private void runWriteRequest(OpcUaRequestInfo requestInfo) {
+        DriverRecord record = requestInfo.driverRecord;
+        final TypedValue<?> value = record.getValue();
+        final NodeId nodeId = new NodeId(requestInfo.nodeNamespaceIndex, requestInfo.nodeId);
+        final VariableNode node = this.client.getAddressSpace().createVariableNode(nodeId);
+        final DataValue newValue = new DataValue(new Variant(value.getValue()));
+        try {
+            logger.debug("writing: {} to ns={};s={}..", value, requestInfo.nodeNamespaceIndex, requestInfo.nodeId);
+            checkStatus(runSafe(node.writeValue(newValue)));
+            record.setDriverStatus(new DriverStatus(WRITE_SUCCESSFUL));
+            logger.debug("Write Successful");
+        } catch (final Exception e) {
+            record.setDriverStatus(new DriverStatus(WRITE_FAILURE, message.writeFailed(), e));
+            logger.warn(message.writeFailed(), e);
+        }
+        record.setTimestamp(System.currentTimeMillis());
+    }
+
     /** {@inheritDoc} */
     @Override
-    public List<DriverRecord> write(final List<DriverRecord> records) throws ConnectionException {
+    public void write(final List<DriverRecord> records) throws ConnectionException {
         if (this.isBusy.get()) {
             throw new ConnectionException(message.errorDriverBusy());
         }
@@ -404,25 +425,8 @@ public final class OpcUaDriver implements Driver {
             this.connect();
         }
         for (final DriverRecord record : records) {
-            OpcUaRequestInfo.extract(record).ifPresent((requestInfo) -> {
-                final TypedValue<?> value = record.getValue();
-                final NodeId nodeId = new NodeId(requestInfo.nodeNamespaceIndex, requestInfo.nodeId);
-                final VariableNode node = this.client.getAddressSpace().createVariableNode(nodeId);
-                final DataValue newValue = new DataValue(new Variant(value.getValue()));
-                try {
-                    logger.debug("writing: {} to ns={};s={}..", value, requestInfo.nodeNamespaceIndex,
-                            requestInfo.nodeId);
-                    checkStatus(runSafe(node.writeValue(newValue)));
-                    record.setDriverStatus(new DriverStatus(WRITE_SUCCESSFUL));
-                    logger.debug("Write Successful");
-                } catch (final Exception e) {
-                    record.setDriverStatus(new DriverStatus(WRITE_FAILURE, message.writeFailed(), e));
-                    logger.warn(message.writeFailed(), e);
-                }
-                record.setTimestamp(System.currentTimeMillis());
-            });
+            OpcUaRequestInfo.extract(record).ifPresent(this::runWriteRequest);
         }
-        return Collections.unmodifiableList(records);
     }
 
     private static class OpcUaRequestInfo {
@@ -430,11 +434,14 @@ public final class OpcUaDriver implements Driver {
         private final DataType dataType;
         private final int nodeNamespaceIndex;
         private final String nodeId;
+        private final DriverRecord driverRecord;
 
-        public OpcUaRequestInfo(final DataType dataType, final int nodeNamespaceIndex, final String nodeId) {
+        public OpcUaRequestInfo(final DriverRecord driverRecord, final DataType dataType, final int nodeNamespaceIndex,
+                final String nodeId) {
             this.dataType = dataType;
             this.nodeNamespaceIndex = nodeNamespaceIndex;
             this.nodeId = nodeId;
+            this.driverRecord = driverRecord;
         }
 
         private static void fail(final DriverRecord record, final String message) {
@@ -468,7 +475,52 @@ public final class OpcUaDriver implements Driver {
                 return Optional.empty();
             }
 
-            return Optional.of(new OpcUaRequestInfo(dataType, nodeNamespaceIndex, nodeId));
+            return Optional.of(new OpcUaRequestInfo(record, dataType, nodeNamespaceIndex, nodeId));
+        }
+    }
+
+    @Override
+    public PreparedRead prepareRead(List<DriverRecord> driverRecords) {
+        requireNonNull(driverRecords, message.recordListNonNull());
+
+        OpcUaPreparedRead preparedRead = new OpcUaPreparedRead();
+        preparedRead.driverRecords = driverRecords;
+
+        for (DriverRecord record : driverRecords) {
+            OpcUaRequestInfo.extract(record).ifPresent(preparedRead.requestInfos::add);
+        }
+        return preparedRead;
+    }
+
+    private class OpcUaPreparedRead implements PreparedRead {
+
+        private List<OpcUaRequestInfo> requestInfos = new ArrayList<OpcUaRequestInfo>();
+        private volatile List<DriverRecord> driverRecords;
+
+        @Override
+        public synchronized List<DriverRecord> execute() throws ConnectionException {
+            if (OpcUaDriver.this.isBusy.get()) {
+                throw new ConnectionException(message.errorDriverBusy());
+            }
+            if (OpcUaDriver.this.client == null) {
+                OpcUaDriver.this.connect();
+            }
+
+            for (OpcUaRequestInfo requestInfo : requestInfos) {
+                OpcUaDriver.this.runReadRequest(requestInfo);
+            }
+
+            return Collections.unmodifiableList(driverRecords);
+        }
+
+        @Override
+        public List<DriverRecord> getDriverRecords() {
+            return Collections.unmodifiableList(driverRecords);
+        }
+
+        @Override
+        public void close() {
+            // TODO Auto-generated method stub
         }
     }
 }

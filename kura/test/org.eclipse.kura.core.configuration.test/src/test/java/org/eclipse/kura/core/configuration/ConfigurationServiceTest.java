@@ -77,7 +77,7 @@ public class ConfigurationServiceTest {
         ConfigurationService cs = new ConfigurationServiceImpl();
 
         @SuppressWarnings("unchecked")
-        Set<String> s = (Set<String>) TestUtil.getFieldValue(cs, "m_factoryPids");
+        Set<String> s = (Set<String>) TestUtil.getFieldValue(cs, "factoryPids");
         s.addAll(Arrays.asList(expectedPIDs));
 
         Set<String> factoryComponentPids = cs.getFactoryComponentPids();
@@ -130,7 +130,7 @@ public class ConfigurationServiceTest {
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         pids.put(pid, pid);
 
         try {
@@ -377,7 +377,7 @@ public class ConfigurationServiceTest {
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_factoryPidByPid");
+        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
         pids.put(pid, pid);
 
         try {
@@ -414,10 +414,10 @@ public class ConfigurationServiceTest {
             }
         };
 
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_factoryPidByPid");
+        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
         pids.put(servicePid, factoryPid);
 
-        pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        pids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         pids.put(servicePid, servicePid);
 
         ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
@@ -456,10 +456,10 @@ public class ConfigurationServiceTest {
             }
         };
 
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_factoryPidByPid");
+        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
         pids.put(servicePid, factoryPid);
 
-        pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        pids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         pids.put(servicePid, servicePid);
 
         ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
@@ -487,10 +487,10 @@ public class ConfigurationServiceTest {
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_factoryPidByPid");
+        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
         pids.put(servicePid, factoryPid);
 
-        pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        pids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         pids.put(servicePid, servicePid);
 
         ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
@@ -528,7 +528,7 @@ public class ConfigurationServiceTest {
 
         String[] expectedPIDs = { "pid1", "pid2", "pid3" };
 
-        Set<String> s = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> s = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         s.addAll(Arrays.asList(expectedPIDs));
 
         Set<String> configurableComponentPids = cs.getConfigurableComponentPids();
@@ -550,10 +550,6 @@ public class ConfigurationServiceTest {
         }
     }
 
-    /*
-     * FIXME: default ComponentConfigurationImpl constructor doesn't initialize properties, but interface doesn't
-     * offer a setter method. Result... NPE.
-     */
     @Test
     public void testDecryptPasswords() throws KuraException {
         // test password decryption
@@ -615,23 +611,30 @@ public class ConfigurationServiceTest {
         assertEquals("config size after decryption", 1, props.size());
     }
 
-    /*
-     * FIXME: No input parameter checking performed!
-     */
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testMergeWithDefaultsNulls() throws KuraException {
-        // test with null parameters
+        // test with null parameters - null properties means error and NPE is expected
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
         OCD ocd = null;
         Map<String, Object> properties = null;
 
-        try {
-            cs.mergeWithDefaults(ocd, properties);
-        } catch (NullPointerException npe) {
-            // fail("Input parameters not checked.");
-        }
+        cs.mergeWithDefaults(ocd, properties);
+    }
+
+    @Test
+    public void testBla() throws Exception {
+        XmlComponentConfigurations configs = new XmlComponentConfigurations();
+
+        String marshal = XmlUtil.marshal(configs);
+
+        XmlComponentConfigurations unmarshal = XmlUtil.unmarshal(marshal, XmlComponentConfigurations.class);
+
+
+        String marshal2 = XmlUtil.marshal(unmarshal);
+
+        assertEquals(marshal, marshal2);
     }
 
     @Test
@@ -690,7 +693,7 @@ public class ConfigurationServiceTest {
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
         Set<String> allPidsMock = mock(Set.class);
-        TestUtil.setFieldValue(cs, "m_allActivatedPids", allPidsMock);
+        TestUtil.setFieldValue(cs, "allActivatedPids", allPidsMock);
 
         String pid = null;
 
@@ -708,15 +711,15 @@ public class ConfigurationServiceTest {
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
         Set<String> allPidsMock = mock(Set.class);
-        TestUtil.setFieldValue(cs, "m_allActivatedPids", allPidsMock);
+        TestUtil.setFieldValue(cs, "allActivatedPids", allPidsMock);
 
         String pid = "pid";
 
         when(allPidsMock.contains(pid)).thenReturn(false);
         when(allPidsMock.add(pid)).thenReturn(true);
 
-        Map<String, String> spbp = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
-        Set<String> asc = (Set<String>) TestUtil.getFieldValue(cs, "m_activatedSelfConfigComponents");
+        Map<String, String> spbp = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
+        Set<String> asc = (Set<String>) TestUtil.getFieldValue(cs, "activatedSelfConfigComponents");
 
         assertEquals("empty service pids", 0, spbp.size());
         assertEquals("empty activated configured components", 0, asc.size());
@@ -737,15 +740,15 @@ public class ConfigurationServiceTest {
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
         Set<String> allPidsMock = mock(Set.class);
-        TestUtil.setFieldValue(cs, "m_allActivatedPids", allPidsMock);
+        TestUtil.setFieldValue(cs, "allActivatedPids", allPidsMock);
 
         String pid = "pid";
 
         when(allPidsMock.contains(pid)).thenReturn(true);
         when(allPidsMock.add(pid)).thenThrow(new RuntimeException());
 
-        Map<String, String> spbp = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
-        Set<String> asc = (Set<String>) TestUtil.getFieldValue(cs, "m_activatedSelfConfigComponents");
+        Map<String, String> spbp = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
+        Set<String> asc = (Set<String>) TestUtil.getFieldValue(cs, "activatedSelfConfigComponents");
 
         assertEquals("empty service pids", 0, spbp.size());
         assertEquals("empty activated configured components", 0, asc.size());
@@ -766,7 +769,7 @@ public class ConfigurationServiceTest {
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
         Set<String> allPidsMock = mock(Set.class);
-        TestUtil.setFieldValue(cs, "m_allActivatedPids", allPidsMock);
+        TestUtil.setFieldValue(cs, "allActivatedPids", allPidsMock);
 
         String pid = null;
 
@@ -785,11 +788,11 @@ public class ConfigurationServiceTest {
 
         String pid = "pid";
 
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         allPids.add(pid + "1");
-        Map<String, String> spbp = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> spbp = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         spbp.put(pid + "1", pid);
-        Set<String> asc = (Set<String>) TestUtil.getFieldValue(cs, "m_activatedSelfConfigComponents");
+        Set<String> asc = (Set<String>) TestUtil.getFieldValue(cs, "activatedSelfConfigComponents");
         asc.add(pid + "1");
 
         assertEquals("all pids size", 1, allPids.size());
@@ -812,9 +815,6 @@ public class ConfigurationServiceTest {
         assertFalse("activated pids don't contain pid", asc.contains(pid));
     }
 
-    /*
-     * TODO: maybe fix implementation
-     */
     @Test
     public void testEncryptConfigsNull() throws NoSuchMethodException {
         // test with null parameter
@@ -826,7 +826,7 @@ public class ConfigurationServiceTest {
         try {
             TestUtil.invokePrivate(cs, "encryptConfigs", configs);
         } catch (Throwable e) {
-            // fail("Parameters not checked, but then again, it is a private method.");
+            fail("Parameters not checked.");
         }
 
     }
@@ -1030,7 +1030,7 @@ public class ConfigurationServiceTest {
     public void testUpdateConfigurationsListOfComponentConfigurationBoolean()
             throws KuraException, NoSuchFieldException {
         // test that password encryption is attempted (but decrypt doesn't fail, which is OK) and some other calls are
-        // made - stop with usage of m_allActivatedPids in getComponentConfigurationsInternal
+        // made - stop with usage of allActivatedPids in getComponentConfigurationsInternal
 
         boolean takeSnapshot = false;
         final List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
@@ -1049,7 +1049,7 @@ public class ConfigurationServiceTest {
         when(cryptoServiceMock.decryptAes((char[]) anyObject())).thenReturn("dec".toCharArray());
 
         // make updateConfigurationsInternal fail with NPE
-        TestUtil.setFieldValue(cs, "m_allActivatedPids", null);
+        TestUtil.setFieldValue(cs, "allActivatedPids", null);
 
         try {
             cs.updateConfigurations(configs, takeSnapshot);
@@ -1160,9 +1160,6 @@ public class ConfigurationServiceTest {
         verify(systemServiceMock, times(1)).getKuraSnapshotsDirectory();
     }
 
-    /*
-     * FIXME: If directory in configuration is null => NPE.
-     */
     @Test
     public void testGetSnapshotFileNull() throws Throwable {
         // test if it works with null directory
@@ -1172,9 +1169,10 @@ public class ConfigurationServiceTest {
         cs.setSystemService(systemServiceMock);
 
         try {
-            TestUtil.invokePrivate(cs, "getSnapshotFile", 123);
+            Object obj = TestUtil.invokePrivate(cs, "getSnapshotFile", 123);
+            assertNull("Null expected to produce null", obj);
         } catch (NullPointerException e) {
-            // fail("Method result not checked.");
+            fail("Method result not checked.");
         }
 
         verify(systemServiceMock, times(1)).getKuraSnapshotsDirectory();
@@ -1198,9 +1196,6 @@ public class ConfigurationServiceTest {
         assertTrue("path pattern matches", file.getAbsolutePath().matches(".*dirGSF[/\\\\]snapshot_123.xml$"));
     }
 
-    /*
-     * FIXME: check for null result
-     */
     @Test
     public void testGetSnapshotNullXmlCfgs() throws KuraException {
         // test calling with null configurations list
@@ -1215,9 +1210,11 @@ public class ConfigurationServiceTest {
 
         long sid = 0;
         try {
-            cs.getSnapshot(sid);
+            List<ComponentConfiguration> snapshot = cs.getSnapshot(sid);
+            assertNotNull("Null not expected", snapshot);
+            assertTrue("Should be empty", snapshot.isEmpty());
         } catch (Exception e) {
-            // fail("Method result not checked.");
+            fail("Method result not checked.");
         }
     }
 
@@ -1331,9 +1328,6 @@ public class ConfigurationServiceTest {
         verify(systemServiceMock, times(1)).getKuraSnapshotsDirectory();
     }
 
-    /*
-     * FIXME: If crypto service returned null when decrypting, it would crash.
-     */
     @Test
     public void testLoadEncryptedSnapshotFileContentNullDecrypt() throws KuraException, IOException {
         // test decryption failure while loading an encrypted snapshot
@@ -1364,7 +1358,9 @@ public class ConfigurationServiceTest {
         try {
             cs.loadEncryptedSnapshotFileContent(snapshotID);
         } catch (NullPointerException e) {
-            // fail("Decryption result not checked for null value.");
+            fail("Decryption result not checked for null value.");
+        } catch (KuraException e) {
+            assertEquals(KuraErrorCode.DECODER_ERROR, e.getCode());
         }
 
         verify(systemServiceMock, times(1)).getKuraSnapshotsDirectory();
@@ -1623,13 +1619,10 @@ public class ConfigurationServiceTest {
             TestUtil.invokePrivate(cs, "encryptPlainSnapshots");
             fail("Exception expected.");
         } catch (KuraException e) {
-            assertEquals("exception code OK", KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND, e.getCode());
+            assertEquals("exception code OK", KuraErrorCode.CONFIGURATION_ERROR, e.getCode());
         }
     }
 
-    /*
-     * XXX: Corrupted configuration file propagates exception. Maybe that's OK, since is's a private method.
-     */
     @Test
     public void testEncryptPlainSnapshotsEmptyFile() throws Throwable {
         // snapshot file is empty
@@ -1668,7 +1661,7 @@ public class ConfigurationServiceTest {
         try {
             TestUtil.invokePrivate(cs, "encryptPlainSnapshots");
         } catch (Exception e) {
-            // fail("Exception not caught beforehand.");
+            // exception is caught in the only consumer of this method
             assertTrue("exception...", e instanceof XMLStreamException);
         }
 
@@ -1859,11 +1852,6 @@ public class ConfigurationServiceTest {
         d1.delete();
     }
 
-    /*
-     * FIXME: If 0 snapshots are configured to remain and snapshot_0.xml exists, the method won't finish normally.
-     * NPE when unboxing null to long at pollFirst()
-     * API doesn't state 0 snapshots is illegal return value.
-     */
     @Test
     public void testGarbageCollectionOldSnapshotsZero() throws Throwable {
         // test scenario where 0 snapshots are configured to remain, but snapshot_0.xml prevents deletion of all of them
@@ -1891,12 +1879,13 @@ public class ConfigurationServiceTest {
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
 
+        // API doesn't state 0 snapshots is illegal return value
         when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(0);
 
         try {
             TestUtil.invokePrivate(cs, "garbageCollectionOldSnapshots");
-        } catch (Exception e) {
-            // fail("Exception not expected.");
+        } catch (NullPointerException e) {
+            fail("Exception not expected.");
         }
 
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
@@ -2320,7 +2309,7 @@ public class ConfigurationServiceTest {
         String pid = "123";
         Tocd ocd = null;
 
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         pids.put(pid, null);
 
         ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
@@ -2342,7 +2331,7 @@ public class ConfigurationServiceTest {
         Tocd ocd = null;
 
         String sPid = "1234";
-        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> pids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         pids.put(pid, sPid);
 
         ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
@@ -2473,10 +2462,10 @@ public class ConfigurationServiceTest {
         String servicePid = "spid";
         String factoryPid = null;
 
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         allPids.add(pid);
 
-        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         assertEquals("spid size OK", 0, sPids.size());
 
         cs.registerComponentConfiguration(pid, servicePid, factoryPid);
@@ -2494,10 +2483,10 @@ public class ConfigurationServiceTest {
         String servicePid = "spid";
         String factoryPid = null;
 
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         assertEquals("active pids size OK", 0, allPids.size());
 
-        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         assertEquals("spid size OK", 0, sPids.size());
 
         cs.registerComponentConfiguration(pid, servicePid, factoryPid);
@@ -2519,13 +2508,13 @@ public class ConfigurationServiceTest {
         String servicePid = "spid";
         String factoryPid = "fpid";
 
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         assertEquals("active pids size OK", 0, allPids.size());
 
-        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         assertEquals("spid size OK", 0, sPids.size());
 
-        Map<String, String> fPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_factoryPidByPid");
+        Map<String, String> fPids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
         assertEquals("fpid size OK", 0, fPids.size());
 
         cs.registerComponentConfiguration(pid, servicePid, factoryPid);
@@ -2550,16 +2539,16 @@ public class ConfigurationServiceTest {
         String servicePid = "spid";
         String factoryPid = "fpid";
 
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         assertEquals("active pids size OK", 0, allPids.size());
 
-        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         assertEquals("spid size OK", 0, sPids.size());
 
-        Map<String, String> fPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_factoryPidByPid");
+        Map<String, String> fPids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
         assertEquals("fpid size OK", 0, fPids.size());
 
-        Map<String, Tocd> ocds = (Map<String, Tocd>) TestUtil.getFieldValue(cs, "m_ocds");
+        Map<String, Tocd> ocds = (Map<String, Tocd>) TestUtil.getFieldValue(cs, "ocds");
         Tocd ocd = new Tocd();
         ocds.put(factoryPid, ocd);
 
@@ -2592,16 +2581,16 @@ public class ConfigurationServiceTest {
         String servicePid = "spid";
         String factoryPid = "fpid";
 
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         assertEquals("active pids size OK", 0, allPids.size());
 
-        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_servicePidByPid");
+        Map<String, String> sPids = (Map<String, String>) TestUtil.getFieldValue(cs, "servicePidByPid");
         assertEquals("spid size OK", 0, sPids.size());
 
-        Map<String, String> fPids = (Map<String, String>) TestUtil.getFieldValue(cs, "m_factoryPidByPid");
+        Map<String, String> fPids = (Map<String, String>) TestUtil.getFieldValue(cs, "factoryPidByPid");
         assertEquals("fpid size OK", 0, fPids.size());
 
-        Map<String, Tocd> ocds = (Map<String, Tocd>) TestUtil.getFieldValue(cs, "m_ocds");
+        Map<String, Tocd> ocds = (Map<String, Tocd>) TestUtil.getFieldValue(cs, "ocds");
         Tocd ocd = new Tocd();
         ocds.put(factoryPid, ocd);
 
@@ -2781,11 +2770,11 @@ public class ConfigurationServiceTest {
         when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(5);
 
         String pid = "pid";
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         allPids.add(pid);
 
         ComponentContext componentCtxMock = mock(ComponentContext.class);
-        TestUtil.setFieldValue(cs, "m_ctx", componentCtxMock);
+        TestUtil.setFieldValue(cs, "ctx", componentCtxMock);
 
         BundleContext bundleCtxMock = mock(BundleContext.class);
         when(componentCtxMock.getBundleContext()).thenReturn(bundleCtxMock);
@@ -2864,11 +2853,11 @@ public class ConfigurationServiceTest {
         when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(5);
 
         String pid = "pid";
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         allPids.add(pid);
 
         ComponentContext componentCtxMock = mock(ComponentContext.class);
-        TestUtil.setFieldValue(cs, "m_ctx", componentCtxMock);
+        TestUtil.setFieldValue(cs, "ctx", componentCtxMock);
 
         BundleContext bundleCtxMock = mock(BundleContext.class);
         when(componentCtxMock.getBundleContext()).thenReturn(bundleCtxMock);
@@ -2952,11 +2941,11 @@ public class ConfigurationServiceTest {
         when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(5);
 
         String pid = "pid";
-        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "m_allActivatedPids");
+        Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         allPids.add(pid);
 
         ComponentContext componentCtxMock = mock(ComponentContext.class);
-        TestUtil.setFieldValue(cs, "m_ctx", componentCtxMock);
+        TestUtil.setFieldValue(cs, "ctx", componentCtxMock);
 
         BundleContext bundleCtxMock = mock(BundleContext.class);
         when(componentCtxMock.getBundleContext()).thenReturn(bundleCtxMock);

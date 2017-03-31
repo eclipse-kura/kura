@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+f * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -355,6 +355,9 @@ public interface WireMessages {
     @En("Interval cannot be less than or equal to zero")
     public String intervalNonLessThanEqualToZero();
 
+    @En("Invalid time unit")
+    public String invalidTimeUnit();
+
     @En("latitude")
     public String latitude();
 
@@ -384,6 +387,9 @@ public interface WireMessages {
 
     @En("outgoing_wires")
     public String outgoingWires();
+
+    @En("Partially emptying table {0}")
+    public String partiallyEmptyingTable(String sqlTableName);
 
     @En("Payload cannot be null")
     public String payloadNonNull();

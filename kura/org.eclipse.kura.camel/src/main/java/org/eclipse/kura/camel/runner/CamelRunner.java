@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat Inc and others.
+ * Copyright (c) 2016, 2017 Red Hat Inc and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -587,9 +587,15 @@ public class CamelRunner {
      * Replace the current set of route with an new one
      *
      * @param routes
-     *            the new set of routes
+     *            the new set of routes, may be {@code null}
      */
     public void setRoutes(final RoutesProvider routes) {
+
+        if (routes == null) {
+            clearRoutes();
+            return;
+        }
+
         this.routes = routes;
 
         final CamelContext context = this.context;
@@ -606,7 +612,7 @@ public class CamelRunner {
      * Replace the current set of route with an new one
      *
      * @param xml
-     *            the new set of routes
+     *            the new set of routes, may be {@code null}
      */
     public void setRoutes(final String xml) throws Exception {
         logger.info("Setting routes...");
@@ -622,12 +628,16 @@ public class CamelRunner {
      * Replace the current set of route with an new one
      *
      * @param routes
-     *            the new set of routes
+     *            the new set of routes, may be {@code null}
      */
     public void setRoutes(final RoutesDefinition routes) throws Exception {
         logger.info("Setting routes...");
 
-        Objects.requireNonNull(routes);
+        if (routes == null) {
+            clearRoutes();
+            return;
+        }
+
         setRoutes(new SimpleRoutesProvider(routes));
     }
 
@@ -635,12 +645,16 @@ public class CamelRunner {
      * Replace the current set of route with an new one
      *
      * @param routeBuilder
-     *            the new set of routes
+     *            the new set of routes, may be {@code null}
      */
     public void setRoutes(final RouteBuilder routeBuilder) throws Exception {
         logger.info("Setting routes...");
 
-        Objects.requireNonNull(routeBuilder);
+        if (routeBuilder == null) {
+            clearRoutes();
+            return;
+        }
+
         setRoutes(new BuilderRoutesProvider(routeBuilder));
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -257,7 +257,8 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 
                     try {
                         pmt.join();
-                        if (pmt.getExitValue() == 0) {
+                        // until the process finishes, exitValue is null; in case of timeout, it remains null
+                        if (pmt.getExitValue() != null && pmt.getExitValue() == 0) {
                             return pmt.getStdout();
                         } else {
                             return pmt.getStderr();
@@ -352,8 +353,8 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
         String[] cmdarray = new String[1 + argsCount];
 
         cmdarray[0] = command;
-        for (int i = 0; i < argsCount; i++) {
-            cmdarray[1 + i] = args[i];
+        if (args != null) {
+            System.arraycopy(args, 0, cmdarray, 1, argsCount);
         }
 
         for (String element : cmdarray) {
@@ -364,21 +365,18 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
     }
 
     private void prepareResponseNoTimeout(KuraCommandResponsePayload resp, ProcessMonitorThread pmt) {
-
         if (pmt.getException() != null) {
             resp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
             resp.setException(pmt.getException());
-            resp.setStderr(pmt.getStderr());
-            resp.setStdout(pmt.getStdout());
         } else {
-            resp.setStderr(pmt.getStderr());
-            resp.setStdout(pmt.getStdout());
             resp.setTimedout(pmt.isTimedOut());
 
             if (!pmt.isTimedOut()) {
                 resp.setExitCode(pmt.getExitValue());
             }
         }
+        resp.setStderr(pmt.getStderr());
+        resp.setStdout(pmt.getStdout());
     }
 
     private void prepareTimeoutResponse(KuraCommandResponsePayload resp, ProcessMonitorThread pmt) {

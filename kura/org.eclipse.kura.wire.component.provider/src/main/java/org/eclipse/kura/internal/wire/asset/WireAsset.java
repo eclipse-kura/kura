@@ -329,8 +329,8 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
             try {
                 wireRecordProperties.put(channelName + PROPERTY_SEPARATOR + ASSET_NAME,
-                        TypedValues.newStringValue(getConfiguration().getPid()));
-            } catch (final KuraException e) {
+                        TypedValues.newStringValue(getKuraServicePid()));
+            } catch (KuraException e) {
                 logger.error(message.configurationNonNull(), e);
             }
 

@@ -75,6 +75,7 @@ public class WireAssetTest {
         assetProperties.put(ConfigurationService.KURA_SERVICE_PID, "componentName");
 
         WireAsset wireAsset = new WireAsset();
+        TestUtil.setFieldValue(wireAsset, "kuraServicePid", "componentName");
         TestUtil.setFieldValue(wireAsset, "properties", assetProperties);
         TestUtil.setFieldValue(wireAsset, "assetConfiguration", assetConfiguration);
 

@@ -117,4 +117,21 @@ public interface BluetoothGatt {
      *            Value to write to Characteristic
      */
     public void writeCharacteristicValue(String handle, String value);
+
+    /**
+     * Get security level.
+     *
+     * @throws KuraException
+     * @since {@link org.eclipse.kura.bluetooth} 1.4.0
+     */
+    public BluetoothGattSecurityLevel getSecurityLevel() throws KuraException;
+
+    /**
+     * Set security level.
+     *
+     * @param level
+     *            Security Level
+     * @since {@link org.eclipse.kura.bluetooth} 1.4.0
+     */
+    public void setSecurityLevel(BluetoothGattSecurityLevel level);
 }

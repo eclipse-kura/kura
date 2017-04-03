@@ -25,18 +25,18 @@ import org.eclipse.kura.net.IPAddress;
  */
 public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpServerConfig {
 
-    private String m_interfaceName;
-    private boolean m_enabled;
-    private T m_subnet;
-    private T m_routerAddress;
-    private T m_subnetMask;
-    private int m_defaultLeaseTime;
-    private int m_maximumLeaseTime;
-    private short m_prefix;
-    private T m_rangeStart;
-    private T m_rangeEnd;
-    private boolean m_passDns;
-    private List<T> m_dnsServers;
+    private String interfaceName;
+    private boolean enabled;
+    private T subnet;
+    private T routerAddress;
+    private T subnetMask;
+    private int defaultLeaseTime;
+    private int maximumLeaseTime;
+    private short prefix;
+    private T rangeStart;
+    private T rangeEnd;
+    private boolean passDns;
+    private List<T> dnsServers;
 
     /**
      * The basic Constructor for a DhcpServerConfigIP
@@ -66,28 +66,50 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
      * @param dnsServers
      *            the DNS servers that will get passed to DHCP clients if passDns is true
      */
+    @Deprecated
     public DhcpServerConfigIP(String interfaceName, boolean enabled, T subnet, T routerAddress, T subnetMask,
             int defaultLeaseTime, int maximumLeaseTime, short prefix, T rangeStart, T rangeEnd, boolean passDns,
             List<T> dnsServers) {
         super();
 
-        this.m_interfaceName = interfaceName;
-        this.m_enabled = enabled;
-        this.m_subnet = subnet;
-        this.m_routerAddress = routerAddress;
-        this.m_subnetMask = subnetMask;
-        this.m_defaultLeaseTime = defaultLeaseTime;
-        this.m_maximumLeaseTime = maximumLeaseTime;
-        this.m_prefix = prefix;
-        this.m_rangeStart = rangeStart;
-        this.m_rangeEnd = rangeEnd;
-        this.m_passDns = passDns;
-        this.m_dnsServers = dnsServers;
+        this.interfaceName = interfaceName;
+        this.enabled = enabled;
+        this.subnet = subnet;
+        this.routerAddress = routerAddress;
+        this.subnetMask = subnetMask;
+        this.defaultLeaseTime = defaultLeaseTime;
+        this.maximumLeaseTime = maximumLeaseTime;
+        this.prefix = prefix;
+        this.rangeStart = rangeStart;
+        this.rangeEnd = rangeEnd;
+        this.passDns = passDns;
+        this.dnsServers = dnsServers;
+    }
+    
+    /**
+     * The basic Constructor for a DhcpServerConfigIP
+     * 
+     * @param dhcpServerCfg DHCP server configuration
+     * @param dhcpServerCfgIP 'network' configuration 
+     */
+    public DhcpServerConfigIP(DhcpServerCfg dhcpServerCfg, DhcpServerCfgIP<T> dhcpServerCfgIP) {
+    	 this.interfaceName = dhcpServerCfg.getInterfaceName();
+         this.enabled = dhcpServerCfg.isEnabled();
+         this.subnet = dhcpServerCfgIP.getSubnet();
+         this.routerAddress = dhcpServerCfgIP.getRouterAddress();
+         this.subnetMask = dhcpServerCfgIP.getSubnetMask();
+         this.defaultLeaseTime = dhcpServerCfg.getDefaultLeaseTime();
+         this.maximumLeaseTime = dhcpServerCfg.getMaximumLeaseTime();
+         this.prefix = dhcpServerCfgIP.getPrefix();
+         this.rangeStart = dhcpServerCfgIP.getRangeStart();
+         this.rangeEnd = dhcpServerCfgIP.getRangeEnd();
+         this.passDns = dhcpServerCfg.isPassDns();
+         this.dnsServers = dhcpServerCfgIP.getDnsServers();
     }
 
     @Override
     public String getInterfaceName() {
-        return this.m_interfaceName;
+        return this.interfaceName;
     }
 
     /**
@@ -97,12 +119,12 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
      *            the interface name in the form of a {@link String}
      */
     public void setInterfaceName(String interfaceName) {
-        this.m_interfaceName = interfaceName;
+        this.interfaceName = interfaceName;
     }
 
     @Override
     public boolean isEnabled() {
-        return this.m_enabled;
+        return this.enabled;
     }
 
     /**
@@ -112,12 +134,12 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
      *            the Dhcp Server status in the form of a {@link boolean}
      */
     public void setEnabledRouterMode(boolean enabled) {
-        this.m_enabled = enabled;
+        this.enabled = enabled;
     }
 
     @Override
     public T getSubnet() {
-        return this.m_subnet;
+        return this.subnet;
     }
 
     /**
@@ -127,12 +149,12 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
      *            the subnet in the form of a {@link IPAddress}
      */
     public void setSubnet(T subnet) {
-        this.m_subnet = subnet;
+        this.subnet = subnet;
     }
 
     @Override
     public T getRouterAddress() {
-        return this.m_routerAddress;
+        return this.routerAddress;
     }
 
     /**
@@ -142,12 +164,12 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
      *            the router IPAddress in the form of a {@link IPAddress}
      */
     public void setRouterAddress(T routerAddress) {
-        this.m_routerAddress = routerAddress;
+        this.routerAddress = routerAddress;
     }
 
     @Override
     public T getSubnetMask() {
-        return this.m_subnetMask;
+        return this.subnetMask;
     }
 
     /**
@@ -157,12 +179,12 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
      *            the subnet mask in the form of a {@link IPAddress}
      */
     public void setSubnetMask(T subnetMask) {
-        this.m_subnetMask = subnetMask;
+        this.subnetMask = subnetMask;
     }
 
     @Override
     public int getDefaultLeaseTime() {
-        return this.m_defaultLeaseTime;
+        return this.defaultLeaseTime;
     }
 
     /**
@@ -172,12 +194,12 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
      *            the default lease time
      */
     public void setDefaultLeaseTime(int defaultLeaseTime) {
-        this.m_defaultLeaseTime = defaultLeaseTime;
+        this.defaultLeaseTime = defaultLeaseTime;
     }
 
     @Override
     public int getMaximumLeaseTime() {
-        return this.m_maximumLeaseTime;
+        return this.maximumLeaseTime;
     }
 
     /**
@@ -187,12 +209,12 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
      *            the maximum lease time
      */
     public void setMaximumLeaseTime(int maximumLeaseTime) {
-        this.m_maximumLeaseTime = maximumLeaseTime;
+        this.maximumLeaseTime = maximumLeaseTime;
     }
 
     @Override
     public short getPrefix() {
-        return this.m_prefix;
+        return this.prefix;
     }
 
     /**
@@ -202,12 +224,12 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
      *            the prefix
      */
     public void setPrefix(short prefix) {
-        this.m_prefix = prefix;
+        this.prefix = prefix;
     }
 
     @Override
     public T getRangeStart() {
-        return this.m_rangeStart;
+        return this.rangeStart;
     }
 
     /**
@@ -216,13 +238,13 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
      * @param m_rangeStart
      *            the starting IPAddress
      */
-    public void setRangeStart(T m_rangeStart) {
-        this.m_rangeStart = m_rangeStart;
+    public void setRangeStart(T rangeStart) {
+        this.rangeStart = rangeStart;
     }
 
     @Override
     public T getRangeEnd() {
-        return this.m_rangeEnd;
+        return this.rangeEnd;
     }
 
     /**
@@ -232,12 +254,12 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
      *            the ending IPAddress
      */
     public void setRangeEnd(T rangeEnd) {
-        this.m_rangeEnd = rangeEnd;
+        this.rangeEnd = rangeEnd;
     }
 
     @Override
     public boolean isPassDns() {
-        return this.m_passDns;
+        return this.passDns;
     }
 
     /**
@@ -247,12 +269,12 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
      *            true to pass, false to not
      */
     public void setPassDns(boolean passDns) {
-        this.m_passDns = passDns;
+        this.passDns = passDns;
     }
 
     @Override
     public List<T> getDnsServers() {
-        return this.m_dnsServers;
+        return this.dnsServers;
     }
 
     /**
@@ -261,36 +283,53 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
      * @param m_dnsServers
      *            the DNS servers to pass
      */
-    public void setDnsServers(List<T> m_dnsServers) {
-        this.m_dnsServers = m_dnsServers;
+    public void setDnsServers(List<T> dnsServers) {
+        this.dnsServers = dnsServers;
     }
 
     @Override
     public boolean isValid() {
-        // TODO - implement
+		if (this.interfaceName == null || !isValidSubnet() ) {
+			return false;
+		}
+        if (!isValidPoolRange() || !isValidLeaseTime() || this.prefix <= 0) {
+        	return false;
+        }
         return true;
+    }
+    
+    private boolean isValidSubnet() {
+    	return (this.subnet != null && this.subnetMask != null)? true : false;
+    }
+    
+    private boolean isValidPoolRange() {
+    	return (this.rangeStart !=null && this.rangeEnd != null)? true : false;
+    }
+    
+    private boolean isValidLeaseTime() {
+    	return (this.defaultLeaseTime > 0 && this.maximumLeaseTime > 0)? true : false;
     }
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
-        sb.append("# enabled? ").append(this.m_enabled).append("\n");
-        sb.append("# prefix: ").append(this.m_prefix).append("\n");
-        sb.append("# pass DNS? ").append(this.m_passDns).append("\n\n");
+        sb.append("# enabled? ").append(this.enabled).append("\n");
+        sb.append("# prefix: ").append(this.prefix).append("\n");
+        sb.append("# pass DNS? ").append(this.passDns).append("\n\n");
 
         sb.append(
-                "subnet " + this.m_subnet.getHostAddress() + " netmask " + this.m_subnetMask.getHostAddress() + " {\n");
+                "subnet " + this.subnet.getHostAddress() + " netmask " + this.subnetMask.getHostAddress() + " {\n");
 
         // DNS servers
-        if (this.m_passDns && this.m_dnsServers != null && this.m_dnsServers.size() > 0) {
+        if (this.passDns && this.dnsServers != null && !this.dnsServers.isEmpty()) {
             sb.append("    option domain-name-servers ");
-            for (int i = 0; i < this.m_dnsServers.size(); i++) {
-                if (this.m_dnsServers.get(i) != null) {
-                    sb.append(this.m_dnsServers.get(i).getHostAddress());
+            for (int i = 0; i < this.dnsServers.size(); i++) {
+                if (this.dnsServers.get(i) != null) {
+                    sb.append(this.dnsServers.get(i).getHostAddress());
                 }
 
-                if (i + 1 == this.m_dnsServers.size()) {
+                if (i + 1 == this.dnsServers.size()) {
                     sb.append(";\n\n");
                 } else {
                     sb.append(",");
@@ -298,32 +337,58 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
             }
         }
         // interface
-        if (this.m_interfaceName != null) {
-            sb.append("    interface " + this.m_interfaceName + ";\n");
+        if (this.interfaceName != null) {
+            sb.append("    interface " + this.interfaceName + ";\n");
         }
         // router address
-        if (this.m_routerAddress != null) {
-            sb.append("    option routers " + this.m_routerAddress.getHostAddress() + ";\n");
+        if (this.routerAddress != null) {
+            sb.append("    option routers " + this.routerAddress.getHostAddress() + ";\n");
         }
         // if DNS should not be forwarded, add the following lines
-        if (!this.m_passDns) {
+        if (!this.passDns) {
             sb.append("    ddns-update-style none;\n");
             sb.append("    ddns-updates off;\n");
         }
         // Lease times
-        sb.append("    default-lease-time " + this.m_defaultLeaseTime + ";\n");
-        if (this.m_maximumLeaseTime > -1) {
-            sb.append("    max-lease-time " + this.m_maximumLeaseTime + ";\n");
+        sb.append("    default-lease-time " + this.defaultLeaseTime + ";\n");
+        if (this.maximumLeaseTime > -1) {
+            sb.append("    max-lease-time " + this.maximumLeaseTime + ";\n");
         }
 
         // Add the pool and range
         sb.append("    pool {\n");
         sb.append(
-                "        range " + this.m_rangeStart.getHostAddress() + " " + this.m_rangeEnd.getHostAddress() + ";\n");
+                "        range " + this.rangeStart.getHostAddress() + " " + this.rangeEnd.getHostAddress() + ";\n");
         sb.append("    }\n");
         sb.append("}\n");
 
         return sb.toString();
+    }
+    
+    @Override
+    public int hashCode() {
+    	final int prime = 59;
+		int result = super.hashCode();
+		result = prime * result + (this.enabled? 1 : 0);
+		result = prime * result
+				+ ((this.interfaceName == null) ? 0 : this.interfaceName.hashCode());
+		result = prime * result
+				+ ((this.subnet == null) ? 0 : this.subnet.hashCode());
+		result = prime * result
+				+ ((this.subnetMask == null) ? 0 : this.subnetMask.hashCode());
+		result = prime * result
+				+ ((this.routerAddress == null) ? 0 : this.routerAddress.hashCode());
+		result = prime * result
+				+ ((this.rangeStart == null) ? 0 : this.rangeStart.hashCode());
+		result = prime * result
+				+ ((this.rangeEnd == null) ? 0 : this.rangeEnd.hashCode());
+		result = prime * result
+				+ ((this.dnsServers == null) ? 0 : this.dnsServers.hashCode());
+		result = prime * result + this.defaultLeaseTime;
+		result = prime * result + this.maximumLeaseTime;
+		result = prime * result + this.prefix;
+		result = prime * result + (this.passDns? 1 : 0);
+    	return result;
     }
 
     @Override
@@ -342,79 +407,79 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
         @SuppressWarnings("rawtypes")
         DhcpServerConfigIP other = (DhcpServerConfigIP) obj;
 
-        if (this.m_enabled != other.m_enabled) {
+        if (this.enabled != other.enabled) {
             return false;
         }
 
-        if (this.m_interfaceName == null) {
-            if (other.m_interfaceName != null) {
+        if (this.interfaceName == null) {
+            if (other.interfaceName != null) {
                 return false;
             }
-        } else if (!this.m_interfaceName.equals(other.m_interfaceName)) {
+        } else if (!this.interfaceName.equals(other.interfaceName)) {
             return false;
         }
 
-        if (this.m_subnet == null) {
-            if (other.m_subnet != null) {
+        if (this.subnet == null) {
+            if (other.subnet != null) {
                 return false;
             }
-        } else if (!this.m_subnet.equals(other.m_subnet)) {
+        } else if (!this.subnet.equals(other.subnet)) {
             return false;
         }
 
-        if (this.m_routerAddress == null) {
-            if (other.m_routerAddress != null) {
+        if (this.routerAddress == null) {
+            if (other.routerAddress != null) {
                 return false;
             }
-        } else if (!this.m_routerAddress.equals(other.m_routerAddress)) {
+        } else if (!this.routerAddress.equals(other.routerAddress)) {
             return false;
         }
 
-        if (this.m_subnetMask == null) {
-            if (other.m_subnetMask != null) {
+        if (this.subnetMask == null) {
+            if (other.subnetMask != null) {
                 return false;
             }
-        } else if (!this.m_subnetMask.equals(other.m_subnetMask)) {
+        } else if (!this.subnetMask.equals(other.subnetMask)) {
             return false;
         }
 
-        if (this.m_defaultLeaseTime != other.m_defaultLeaseTime) {
+        if (this.defaultLeaseTime != other.defaultLeaseTime) {
             return false;
         }
 
-        if (this.m_maximumLeaseTime != other.m_maximumLeaseTime) {
+        if (this.maximumLeaseTime != other.maximumLeaseTime) {
             return false;
         }
 
-        if (this.m_prefix != other.m_prefix) {
+        if (this.prefix != other.prefix) {
             return false;
         }
 
-        if (this.m_rangeStart == null) {
-            if (other.m_rangeStart != null) {
+        if (this.rangeStart == null) {
+            if (other.rangeStart != null) {
                 return false;
             }
-        } else if (!this.m_rangeStart.equals(other.m_rangeStart)) {
+        } else if (!this.rangeStart.equals(other.rangeStart)) {
             return false;
         }
 
-        if (this.m_rangeEnd == null) {
-            if (other.m_rangeEnd != null) {
+        if (this.rangeEnd == null) {
+            if (other.rangeEnd != null) {
                 return false;
             }
-        } else if (!this.m_rangeEnd.equals(other.m_rangeEnd)) {
+        } else if (!this.rangeEnd.equals(other.rangeEnd)) {
             return false;
         }
 
-        if (this.m_passDns != other.m_passDns) {
+        if (this.passDns != other.passDns) {
             return false;
         }
 
-        if (this.m_dnsServers == null) {
-            if (other.m_dnsServers != null) {
+        if (this.dnsServers == null) {
+            if (other.dnsServers != null) {
                 return false;
             }
-        } else if (!this.m_dnsServers.equals(other.m_dnsServers)) {
+        } else if (!this.dnsServers.equals(other.dnsServers)) {
             return false;
         }
 

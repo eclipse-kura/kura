@@ -37,6 +37,8 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
+import org.eclipse.kura.net.dhcp.DhcpServerCfg;
+import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
 import org.slf4j.Logger;
@@ -224,9 +226,15 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
                     + " | rangeStart: " + rangeStart.getHostAddress() + " | rangeEnd: " + rangeEnd.getHostAddress()
                     + " | passDns: " + passDns + " | dnsList: " + dnsList.toString());
 
-            dhcpServerConfigIP4 = new DhcpServerConfigIP4(interfaceName, enabled, subnet, router, netmask,
-                    defaultLeaseTime, maxLeaseTime, prefix, rangeStart, rangeEnd, passDns, dnsList);
-
+            try {
+				DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(interfaceName, enabled, defaultLeaseTime, maxLeaseTime,
+						passDns);
+				DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, netmask, prefix, router, rangeStart,
+						rangeEnd, dnsList);
+				dhcpServerConfigIP4 = new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4);
+            } catch (KuraException e) {
+            	s_logger.error("Failed to craete new DhcpServerConfigIP4 object - {}", e);
+            }
         } catch (FileNotFoundException e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
         } catch (IOException e) {
@@ -313,8 +321,15 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
                     + " | rangeStart: " + rangeStart.getHostAddress() + " | rangeEnd: " + rangeEnd.getHostAddress()
                     + " | passDns: " + passDns + " | dnsList: " + dnsList.toString());
 
-            dhcpServerConfigIP4 = new DhcpServerConfigIP4(interfaceName, enabled, subnet, router, netmask,
-                    defaultLeaseTime, maxLeaseTime, prefix, rangeStart, rangeEnd, passDns, dnsList);
+            try {
+            	DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(interfaceName, enabled, defaultLeaseTime, maxLeaseTime,
+						passDns);
+				DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, netmask, prefix, router, rangeStart,
+						rangeEnd, dnsList);
+				dhcpServerConfigIP4 = new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4);
+            } catch (KuraException e) {
+            	s_logger.error("Failed to craete new DhcpServerConfigIP4 object - {}", e);
+            }
 
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);

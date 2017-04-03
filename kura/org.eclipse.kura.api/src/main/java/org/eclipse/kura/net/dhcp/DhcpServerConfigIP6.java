@@ -13,6 +13,8 @@ package org.eclipse.kura.net.dhcp;
 
 import java.util.List;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.IP6Address;
 
 /**
@@ -51,6 +53,7 @@ public class DhcpServerConfigIP6 extends DhcpServerConfigIP<IP6Address>implement
      * @param dnsServers
      *            the DNS servers that will get passed to DHCP clients if passDns is true
      */
+	@Deprecated
     public DhcpServerConfigIP6(String interfaceName, boolean enabled, IP6Address subnet, IP6Address routerAddress,
             IP6Address subnetMask, int defaultLeaseTime, int maximumLeaseTime, short prefix, IP6Address rangeStart,
             IP6Address rangeEnd, boolean passDns, List<IP6Address> dnsServers) {
@@ -58,5 +61,20 @@ public class DhcpServerConfigIP6 extends DhcpServerConfigIP<IP6Address>implement
         super(interfaceName, enabled, subnet, routerAddress, subnetMask, defaultLeaseTime, maximumLeaseTime, prefix,
                 rangeStart, rangeEnd, passDns, dnsServers);
 
+    }
+	
+	/**
+     * The basic Constructor for a DhcpServerConfigIP6
+     * 
+     * @param dhcpServerCfg DHCP server configuration
+     * @param dhcpServerCfgIP4 'network' configuration 
+     * @throws KuraException
+     */
+	public DhcpServerConfigIP6(DhcpServerCfg dhcpServerCfg, DhcpServerCfgIP6 dhcpServerCfgIP6) throws KuraException {
+
+		super (dhcpServerCfg, dhcpServerCfgIP6);
+		if (!isValid() || !dhcpServerCfgIP6.isValid()) {
+			throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR);
+		}
     }
 }

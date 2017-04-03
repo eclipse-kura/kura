@@ -63,24 +63,24 @@ public final class LocalizationAdapter {
         private final T wrapped;
         private final HashMap<Method, String> cache = new HashMap<>();
 
-        public C10NWrapper(T wrapped) {
+        public C10NWrapper(final T wrapped) {
             this.wrapped = wrapped;
         }
 
         @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
             if (args != null && args.length > 0) {
-                return method.invoke(wrapped, args);
+                return method.invoke(this.wrapped, args);
             }
 
-            String cached = cache.get(method);
+            String cached = this.cache.get(method);
             if (cached != null) {
                 return cached;
             }
 
-            cached = (String) method.invoke(wrapped, args);
+            cached = (String) method.invoke(this.wrapped, args);
 
-            cache.put(method, cached);
+            this.cache.put(method, cached);
             return cached;
         }
     }
@@ -100,6 +100,26 @@ public final class LocalizationAdapter {
     public static <T> T adapt(final Class<T> clazz) {
         requireNonNull(clazz, "Class instance of localization resource cannot be null");
         return (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class<?>[] { clazz },
-                new C10NWrapper<T>(C10N.get(clazz, CURRENT_LOCALE)));
+                new C10NWrapper<>(C10N.get(clazz, CURRENT_LOCALE)));
+    }
+
+    /**
+     * Adapt the provided message resource to its C10N type with provided locale
+     *
+     * @param <T>
+     *            the generic type
+     * @param clazz
+     *            the message resource
+     * @param locale
+     *            the {@link Locale} instance to use
+     * @throws NullPointerException
+     *             if the argument is null
+     * @return the instance of the C10N resource
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T adapt(final Class<T> clazz, final Locale locale) {
+        requireNonNull(clazz, "Class instance of localization resource cannot be null");
+        return (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class<?>[] { clazz },
+                new C10NWrapper<>(C10N.get(clazz, locale)));
     }
 }

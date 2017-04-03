@@ -46,6 +46,12 @@ public interface WireMessages {
     @En("Activating Logger Wire Component...Done")
     public String activatingLoggerDone();
 
+    @En("Activating Regex Filter...")
+    public String activatingRegexFilter();
+
+    @En("Activating Regex Filter...Done")
+    public String activatingRegexFilterDone();
+
     @En("Activating DB Wire Record Store...")
     public String activatingStore();
 
@@ -283,6 +289,9 @@ public interface WireMessages {
     @En("Error while filtering Wire Records...")
     public String errorFiltering();
 
+    @En("Error while filtering using provided Regular Expression...")
+    public String errorFilteringRegex();
+
     @En("Error while performing read from the Wire Asset...")
     public String errorPerformingRead();
 
@@ -448,6 +457,12 @@ public interface WireMessages {
     @En("Refreshing string value {0}")
     public String refreshString(String value);
 
+    @En("{0} - Regular Expression Filtering started..")
+    public String regexFilteringStarted(String emitterName);
+
+    @En("{0} - Regular Expression Filtering finished..")
+    public String regexFilteringDone(String emitterName);
+
     @En("Registering Wire Emitter {0}...")
     public String registeringEmitter(String emitterName);
 
@@ -573,6 +588,12 @@ public interface WireMessages {
 
     @En("Updating Logger Wire Component...Done")
     public String updatingLoggerDone();
+
+    @En("Updating Regex Filter...")
+    public String updatingRegexFilter();
+
+    @En("Updating Regex Filter...Done")
+    public String updatingRegexFilterDone();
 
     @En("Updating DB Wire Record Store with...")
     public String updatingStore();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,13 +8,16 @@
  *
  * Contributors:
  *     Eurotech
+ *     Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.cloud;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.eclipse.kura.KuraInvalidMetricTypeException;
 import org.eclipse.kura.core.message.protobuf.KuraPayloadProto;
+import org.eclipse.kura.core.message.protobuf.KuraPayloadProto.KuraPayload.KuraMetric;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraPosition;
 import org.slf4j.Logger;
@@ -27,12 +30,12 @@ import com.google.protobuf.ByteString;
  */
 public class CloudPayloadProtoBufEncoderImpl implements CloudPayloadEncoder {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(CloudPayloadProtoBufEncoderImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(CloudPayloadProtoBufEncoderImpl.class);
 
-    private final KuraPayload m_kuraPayload;
+    private final KuraPayload kuraPayload;
 
     public CloudPayloadProtoBufEncoderImpl(KuraPayload kuraPayload) {
-        this.m_kuraPayload = kuraPayload;
+        this.kuraPayload = kuraPayload;
     }
 
     /**
@@ -46,46 +49,40 @@ public class CloudPayloadProtoBufEncoderImpl implements CloudPayloadEncoder {
         KuraPayloadProto.KuraPayload.Builder protoMsg = KuraPayloadProto.KuraPayload.newBuilder();
 
         // set the timestamp
-        if (this.m_kuraPayload.getTimestamp() != null) {
-            protoMsg.setTimestamp(this.m_kuraPayload.getTimestamp().getTime());
+        if (this.kuraPayload.getTimestamp() != null) {
+            protoMsg.setTimestamp(this.kuraPayload.getTimestamp().getTime());
         }
 
         // set the position
-        if (this.m_kuraPayload.getPosition() != null) {
+        if (this.kuraPayload.getPosition() != null) {
             protoMsg.setPosition(buildPositionProtoBuf());
         }
 
         // set the metrics
-        for (String name : this.m_kuraPayload.metricNames()) {
+        for (final Map.Entry<String, Object> entry : this.kuraPayload.metrics().entrySet()) {
+            final String name = entry.getKey();
+            final Object value = entry.getValue();
 
             // build a metric
-            Object value = this.m_kuraPayload.getMetric(name);
             try {
-                KuraPayloadProto.KuraPayload.KuraMetric.Builder metricB = KuraPayloadProto.KuraPayload.KuraMetric
-                        .newBuilder();
+                KuraMetric.Builder metricB = KuraMetric.newBuilder();
                 metricB.setName(name);
 
                 boolean result = setProtoKuraMetricValue(metricB, value);
                 if (result) {
-                    metricB.build();
-
                     // add it to the message
                     protoMsg.addMetric(metricB);
                 }
-            } catch (KuraInvalidMetricTypeException eihte) {
-                try {
-                    s_logger.error("During serialization, ignoring metric named: {}. Unrecognized value type: {}.",
-                            name, value.getClass().getName());
-                } catch (NullPointerException npe) {
-                    s_logger.error("During serialization, ignoring metric named: {}. The value is null.", name);
-                }
-                throw new RuntimeException(eihte);
+            } catch (KuraInvalidMetricTypeException e) {
+                logger.error("During serialization, ignoring metric named: {}. Unrecognized value type: {}.", name,
+                        value != null ? value.getClass().getName() : "<null>");
+                throw new RuntimeException(e);
             }
         }
 
         // set the body
-        if (this.m_kuraPayload.getBody() != null) {
-            protoMsg.setBody(ByteString.copyFrom(this.m_kuraPayload.getBody()));
+        if (this.kuraPayload.getBody() != null) {
+            protoMsg.setBody(ByteString.copyFrom(this.kuraPayload.getBody()));
         }
 
         return protoMsg.build().toByteArray();
@@ -98,7 +95,7 @@ public class CloudPayloadProtoBufEncoderImpl implements CloudPayloadEncoder {
         KuraPayloadProto.KuraPayload.KuraPosition.Builder protoPos = KuraPayloadProto.KuraPayload.KuraPosition
                 .newBuilder();
 
-        KuraPosition position = this.m_kuraPayload.getPosition();
+        KuraPosition position = this.kuraPayload.getPosition();
         if (position.getLatitude() != null) {
             protoPos.setLatitude(position.getLatitude());
         }
@@ -154,7 +151,7 @@ public class CloudPayloadProtoBufEncoderImpl implements CloudPayloadEncoder {
             metric.setType(KuraPayloadProto.KuraPayload.KuraMetric.ValueType.BYTES);
             metric.setBytesValue(ByteString.copyFrom((byte[]) o));
         } else if (o == null) {
-            s_logger.warn("Received a metric with a null value!");
+            logger.warn("Received a metric with a null value!");
             return false;
         } else {
             throw new KuraInvalidMetricTypeException(o.getClass().getName());

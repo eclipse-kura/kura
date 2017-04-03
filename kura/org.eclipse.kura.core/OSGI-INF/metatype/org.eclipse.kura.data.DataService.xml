@@ -25,7 +25,7 @@
             cardinality="0"
             required="true"
             default="false"
-            description="Enable automatic connect of the Data Publishers on startup."/>
+            description="Enable automatic connection of the Data Publishers on startup and after a disconnection."/>
                         
         <AD id="connect.retry-interval"
             name="connect.retry-interval"
@@ -34,25 +34,25 @@
             required="true"
             default="60"
             min="0"
-            description="Frequency in seconds to retry a connection of the Data Publishers after a disconnect (0 to disable)."/>
-            
-        <AD id="connect.retry-attempts"
-            name="connect.retry-attempts"
+            description="Time interval in seconds between connection attempts of the Data Publishers after a disconnect. If set to 0, the Data Publishers will try to connect only once."/>
+
+        <AD id="connect.critical.component.failures"
+            name="connect.critical.component.failures"
             type="Integer"
             cardinality="0" 
             required="true"
-            default="60"
+            default="0"
             min="0"
-            description="Number of connection attempts of the Data Publishers before reset."/>
-
-        <AD id="connect.monitor-interval"
-            name="connect.monitor-interval"
+            description="Number of failures in Data Publishers connection before give-up. The Data Publisher will be registered as critical component to the Watchdog Service. After the connect.critical.component.failures connection failures, the device will reboot. Note that the Watchdog Service has to be enabled to activate this feature and the watchdog will be triggered only if there are exceptions on the MQTT client (i.e. wrong username/password will not trigger the watchdog). If set to 0, the feature is disabled."/>
+            
+        <AD id="connect.critical.component.timeout"
+            name="connect.critical.component.timeout"
             type="Integer"
             cardinality="0" 
             required="true"
             default="90"
             min="0"
-            description="Interval in seconds to monitor the Data Publishers connections."/>
+            description="Critical component timeout in seconds. Note that the minimum allowed value is 1.5 times the connect.retry-interval."/>
             
         <AD id="disconnect.quiesce-timeout"
             name="disconnect.quiesce-timeout"

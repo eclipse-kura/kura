@@ -59,8 +59,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     private static final String AUTOCONNECT_PROP_NAME = "connect.auto-on-startup";
     private static final String CONNECT_DELAY_PROP_NAME = "connect.retry-interval";
-    private static final String CONNECT_ATTEMPTS_PROP_NAME = "connect.retry-attempts";
-    private static final String CONNECT_MONITOR_PROP_NAME = "connect.monitor-interval";
+    private static final String CONNECT_CC_FAILURES_PROP_NAME = "connect.critical.component.failures";
+    private static final String CONNECT_CC_TIMEOUT_PROP_NAME = "connect.critical.component.timeout";
     private static final String DISCONNECT_DELAY_PROP_NAME = "disconnect.quiesce-timeout";
     private static final String STORE_HOUSEKEEPER_INTERVAL_PROP_NAME = "store.housekeeper-interval";
     private static final String STORE_PURGE_AGE_PROP_NAME = "store.purge-age";
@@ -70,7 +70,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     private static final String IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_PROP_NAME = "in-flight-messages.congestion-timeout";
     private static final String CONNECTION_MONITOR_CHECKIN = "Connection monitor checkin";
 
-    private final Map<String, Object> properties = new HashMap<String, Object>();
+    private final Map<String, Object> properties = new HashMap<>();
 
     private DataTransportService dataTransportService;
     private DbService dbService;
@@ -94,6 +94,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     private CloudConnectionStatusService cloudConnectionStatusService;
     private CloudConnectionStatusEnum notificationStatus = CloudConnectionStatusEnum.OFF;
     private WatchdogService watchdogService;
+    private boolean watchdogEnabled;
 
     // ----------------------------------------------------------------
     //
@@ -127,7 +128,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             List<DataMessage> inFlightMsgs = this.store.allInFlightMessagesNoPayload();
 
             // The map associating a DataTransportToken with a message ID
-            this.inFlightMsgIds = new ConcurrentHashMap<DataTransportToken, Integer>();
+            this.inFlightMsgIds = new ConcurrentHashMap<>();
 
             if (inFlightMsgs != null) {
                 for (DataMessage message : inFlightMsgs) {
@@ -167,9 +168,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                 (Integer) this.properties.get(STORE_PURGE_AGE_PROP_NAME),
                 (Integer) this.properties.get(STORE_CAPACITY_PROP_NAME));
 
-        if (!this.dataTransportService.isConnected()) {
-            startConnectionMonitorTask();
-        }
+        startConnectionMonitorTask();
     }
 
     protected void deactivate() {
@@ -488,13 +487,16 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         // Establish a reconnect Thread based on the reconnect interval
         boolean autoConnect = (Boolean) this.properties.get(AUTOCONNECT_PROP_NAME);
         int reconnectInterval = (Integer) this.properties.get(CONNECT_DELAY_PROP_NAME);
-        final int maxConnectionTimeout = (Integer) this.properties.get(CONNECT_ATTEMPTS_PROP_NAME);
+        final int maxConnectionAttempts = (Integer) this.properties.get(CONNECT_CC_FAILURES_PROP_NAME);
+        this.watchdogEnabled = maxConnectionAttempts == 0 ? false : true;
         if (autoConnect) {
 
-            this.watchdogService.registerCriticalComponent(this);
-            this.watchdogService.checkin(this);
+            if (this.watchdogEnabled) {
+                this.watchdogService.registerCriticalComponent(this);
+                this.watchdogService.checkin(this);
+                this.connectionAttempts = 0;
+            }
 
-            this.connectionAttempts = 0;
             // Change notification status to slow blinking when connection is expected to happen in the future
             this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.SLOW_BLINKING);
             // add a delay on the reconnect
@@ -503,22 +505,19 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             int initialDelay = new Random().nextInt(maxDelay);
 
             logger.info("Starting reconnect task with initial delay {}", initialDelay);
-            this.monitorFuture = this.monitorExecutor.scheduleAtFixedRate(new Runnable() {
-
-                @Override
-                public void run() {
-                    Thread.currentThread().setName("DataServiceImpl:MonitorTask");
-                    monitorConnection(maxConnectionTimeout);
-                }
-
-            }, initialDelay,        // initial delay
-                    reconnectInterval,   // repeat every reconnect interval until we stopped.
+            Runnable r = () -> {
+                Thread.currentThread().setName("DataServiceImpl:MonitorTask");
+                monitorConnection(maxConnectionAttempts);
+            };
+            this.monitorFuture = this.monitorExecutor.scheduleAtFixedRate(r, initialDelay, reconnectInterval,
                     TimeUnit.SECONDS);
 
         } else {
             // Change notification status to off. Connection is not expected to happen in the future
             this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
-            this.watchdogService.unregisterCriticalComponent(this);
+            if (this.watchdogEnabled) {
+                this.watchdogService.unregisterCriticalComponent(this);
+            }
         }
         return autoConnect;
     }
@@ -530,13 +529,14 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
             this.monitorFuture.cancel(true);
         }
-        this.watchdogService.unregisterCriticalComponent(this);
+        if (this.watchdogEnabled) {
+            this.watchdogService.unregisterCriticalComponent(this);
+        }
 
     }
 
-    private void monitorConnection(final int maxConnectionTimeout) {
+    private void monitorConnection(int maxConnectionAttempts) {
         if (!isConnected()) {
-            this.connectionAttempts++;
             boolean connected = false;
             try {
                 logger.info("Connecting...");
@@ -545,20 +545,21 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                 connected = true;
             } catch (Exception e) {
                 logger.warn("Connect failed", e.getCause().getMessage());
-                if (!checkException(e) || this.connectionAttempts <= maxConnectionTimeout) {
-                    logger.debug(CONNECTION_MONITOR_CHECKIN + ": {}", this.connectionAttempts);
+                if (this.watchdogEnabled && (!checkException(e) || this.connectionAttempts < maxConnectionAttempts)) {
+                    this.connectionAttempts++;
                     this.watchdogService.checkin(DataServiceImpl.this);
+                    logger.debug(CONNECTION_MONITOR_CHECKIN + ": {}", this.connectionAttempts);
                 }
             } catch (Error e) {
                 // Log the error and don't checkin the watchdog
                 logger.error("Unexpected Error", e);
             } finally {
-                if (connected) {
+                if (this.watchdogEnabled && connected) {
                     logger.debug(CONNECTION_MONITOR_CHECKIN);
                     this.watchdogService.checkin(DataServiceImpl.this);
                 }
             }
-        } else {
+        } else if (this.watchdogEnabled) {
             logger.debug(CONNECTION_MONITOR_CHECKIN);
             this.watchdogService.checkin(DataServiceImpl.this);
             this.connectionAttempts = 0;
@@ -590,19 +591,15 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     // Submit a new publishing work if any
     // TODO: only one instance of the Runnable is needed
     private Future<?> submitPublishingWork() {
-        return this.publisherExecutor.submit(new Runnable() {
-
-            @Override
-            public void run() {
-                Thread.currentThread().setName("DataServiceImpl:Submit");
-                if (!DataServiceImpl.this.dataTransportService.isConnected()) {
-                    logger.info("DataPublisherService not connected");
-                    return;
-                }
-                publishWork();
+        Runnable r = () -> {
+            Thread.currentThread().setName("DataServiceImpl:Submit");
+            if (!DataServiceImpl.this.dataTransportService.isConnected()) {
+                logger.info("DataPublisherService not connected");
+                return;
             }
-
-        });
+            publishWork();
+        };
+        return this.publisherExecutor.submit(r);
     }
 
     private void publishWork() {
@@ -677,7 +674,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     private List<Integer> buildMessageIds(List<DataMessage> messages, String topicRegex) {
         Pattern topicPattern = Pattern.compile(topicRegex);
-        List<Integer> ids = new ArrayList<Integer>();
+        List<Integer> ids = new ArrayList<>();
 
         if (messages != null) {
             for (DataMessage message : messages) {
@@ -697,17 +694,15 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         // Do not schedule more that one task at a time
         if (timeout != 0 && (this.congestionFuture == null || this.congestionFuture.isDone())) {
             logger.warn("In-flight message congestion timeout started");
-            this.congestionFuture = this.congestionExecutor.schedule(new Runnable() {
-
-                @Override
-                public void run() {
-                    Thread.currentThread().setName("DataServiceImpl:InFlightCongestion");
-                    logger.warn("In-flight message congestion timeout elapsed. Disconnecting and reconnecting again");
-                    disconnect();
-                    startConnectionMonitorTask();
-                }
-            }, timeout, TimeUnit.SECONDS);
+            Runnable r = () -> {
+                Thread.currentThread().setName("DataServiceImpl:InFlightCongestion");
+                logger.warn("In-flight message congestion timeout elapsed. Disconnecting and reconnecting again");
+                disconnect();
+                startConnectionMonitorTask();
+            };
+            this.congestionFuture = this.congestionExecutor.schedule(r, timeout, TimeUnit.SECONDS);
         }
+
     }
 
     private void handleInFlightDecongestion() {
@@ -738,6 +733,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     @Override
     public int getCriticalComponentTimeout() {
-        return (Integer) this.properties.get(CONNECT_MONITOR_PROP_NAME) * 1000;
+        return Math.max((Integer) this.properties.get(CONNECT_CC_TIMEOUT_PROP_NAME) * 1000, getRetryInterval() * 1500);
     }
 }

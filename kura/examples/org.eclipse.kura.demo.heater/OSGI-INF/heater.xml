@@ -34,5 +34,6 @@
               bind="setCloudService"       
               unbind="unsetCloudService"       
               cardinality="1..1" 
-              interface="org.eclipse.kura.cloud.CloudService"/>
+              interface="org.eclipse.kura.cloud.CloudService"
+              target="(kura.service.pid=org.eclipse.kura.cloud.CloudService)"/>
 </scr:component>

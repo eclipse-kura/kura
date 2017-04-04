@@ -28,11 +28,4 @@
    <service>
        <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
-   
-   <reference name="CloudService"
-              policy="static"
-              bind="setCloudService"       
-              unbind="unsetCloudService"       
-              cardinality="1..1" 
-              interface="org.eclipse.kura.cloud.CloudService"/>
 </scr:component>

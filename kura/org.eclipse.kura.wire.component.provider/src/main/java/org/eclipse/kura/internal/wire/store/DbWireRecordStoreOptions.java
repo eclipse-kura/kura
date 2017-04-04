@@ -27,11 +27,13 @@ import org.eclipse.kura.localization.resources.WireMessages;
  */
 final class DbWireRecordStoreOptions {
 
+    private static final int DEFAULT_MAXIMUM_TABLE_SIZE = 10000;
+
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
-    private static final String PERIODIC_CLEANUP_ID = "periodic.cleanup";
+    private static final String MAXIMUM_TABLE_SIZE = "maximum.table.size";
 
-    private static final String PERIODIC_CLEANUP_RECORDS_ID = "periodic.cleanup.records.keep";
+    private static final String CLEANUP_RECORDS_KEEP = "cleanup.records.keep";
 
     private static final String TABLE_NAME = "table.name";
 
@@ -54,26 +56,21 @@ final class DbWireRecordStoreOptions {
      * @return the number of records
      */
     int getNoOfRecordsToKeep() {
-        int noOfRecords = 0;
-        final Object cleanUp = this.properties.get(PERIODIC_CLEANUP_RECORDS_ID);
+        int noOfRecords = 5000;
+        final Object cleanUp = this.properties.get(CLEANUP_RECORDS_KEEP);
         if (nonNull(cleanUp) && cleanUp instanceof Integer) {
             noOfRecords = (Integer) cleanUp;
         }
         return noOfRecords;
     }
 
-    /**
-     * Returns the period as configured for the periodic cleanup.
-     *
-     * @return the period
-     */
-    int getPeriodicCleanupRate() {
-        int period = 0;
-        final Object rate = this.properties.get(PERIODIC_CLEANUP_ID);
-        if (nonNull(rate) && rate instanceof Integer) {
-            period = (Integer) rate;
+    int getMaximumTableSize() {
+        int maximumSize = DEFAULT_MAXIMUM_TABLE_SIZE;
+        final Object propertiesMaximumSize = this.properties.get(MAXIMUM_TABLE_SIZE);
+        if (nonNull(propertiesMaximumSize) && propertiesMaximumSize instanceof Integer) {
+            maximumSize = (Integer) propertiesMaximumSize;
         }
-        return period;
+        return maximumSize;
     }
 
     /**

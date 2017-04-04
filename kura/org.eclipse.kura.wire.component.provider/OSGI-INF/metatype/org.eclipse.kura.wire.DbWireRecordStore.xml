@@ -20,22 +20,22 @@
             default="WR_data"
             description="The name of the table to be created and all the operations will be performed on it"/>   
         
-        <AD id="periodic.cleanup"
-            name="periodic.cleanup"
+        <AD id="maximum.table.size"
+            name="maximum.table.size"
             type="Integer"
             cardinality="0"
             required="true"
-            default="0"
-            description="Option for periodic cleanup of the data records collected! (in seconds) (0 denotes disabled)"
+            default="10000"
+            description="Maximum table size"
            	min="0">
         </AD>
         
-        <AD id="periodic.cleanup.records.keep"
-            name="periodic.cleanup.records.keep"
+        <AD id="cleanup.records.keep"
+            name="cleanup.records.keep"
             type="Integer"
             cardinality="0"
             required="true"
-            default="0"
+            default="5000"
             description="Option for the number of records in the table to keep while performing a cleanup operation (if set to 0 all the records will be deleted)"
            	min="0">
         </AD> 

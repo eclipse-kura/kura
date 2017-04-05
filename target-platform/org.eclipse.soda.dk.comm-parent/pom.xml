@@ -31,9 +31,7 @@
 
     <modules>
         <module>org.eclipse.soda.dk.comm</module>
-        <module>org.eclipse.soda.dk.comm.armv5sf</module>
         <module>org.eclipse.soda.dk.comm.armv6hf</module>
-        <module>org.eclipse.soda.dk.comm.x86</module>
         <module>org.eclipse.soda.dk.comm.x86_64</module>
     </modules>
 

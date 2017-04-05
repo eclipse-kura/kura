@@ -31,9 +31,7 @@
 
     <modules>
         <module>com.codeminders.hidapi</module>
-        <module>com.codeminders.hidapi.armv5sf</module>
         <module>com.codeminders.hidapi.armv6hf</module>
-        <module>com.codeminders.hidapi.x86</module>
         <module>com.codeminders.hidapi.x86_64</module>
     </modules>
 

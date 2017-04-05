@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,63 +8,62 @@
  *
  * Contributors:
  *  Eurotech
- *  Amit Kumar Mondal
  *
  *******************************************************************************/
 package org.eclipse.kura.type;
 
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.type.DataType.SHORT;
+import static org.eclipse.kura.type.DataType.FLOAT;
 
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
 /**
- * This class represents a {@link Short} value as a {@link TypedValue}.
+ * This class represents a {@link Float} value as a {@link TypedValue}.
  *
  * @noextend This class is not intended to be extended by clients.
  */
 @Immutable
 @ThreadSafe
-public class ShortValue implements TypedValue<Short> {
+public class FloatValue implements TypedValue<Float> {
 
     /**
      * The actual contained value that will be represented as
      * {@link TypedValue}.
      */
-    private final short value;
+    private final float value;
 
     /**
-     * Instantiates a new short value.
+     * Instantiates a new {@link Float} value.
      *
      * @param value
      *            the value
      */
-    public ShortValue(final short value) {
+    public FloatValue(final float value) {
         this.value = value;
     }
 
     /** {@inheritDoc} */
     @Override
-    public int compareTo(final TypedValue<Short> otherTypedValue) {
+    public int compareTo(final TypedValue<Float> otherTypedValue) {
         requireNonNull(otherTypedValue, "Typed Value cannot be null");
-        return Short.valueOf(this.value).compareTo(otherTypedValue.getValue());
+        return Float.valueOf(this.value).compareTo(otherTypedValue.getValue());
     }
 
     /** {@inheritDoc} */
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
         if (obj == null) {
             return false;
         }
-        if (this.getClass() != obj.getClass()) {
+        if (!(obj instanceof FloatValue)) {
             return false;
         }
-        final ShortValue other = (ShortValue) obj;
-        if (this.value != other.value) {
+        FloatValue other = (FloatValue) obj;
+        if (Float.floatToIntBits(value) != Float.floatToIntBits(other.value)) {
             return false;
         }
         return true;
@@ -73,12 +72,12 @@ public class ShortValue implements TypedValue<Short> {
     /** {@inheritDoc} */
     @Override
     public DataType getType() {
-        return SHORT;
+        return FLOAT;
     }
 
     /** {@inheritDoc} */
     @Override
-    public Short getValue() {
+    public Float getValue() {
         return this.value;
     }
 
@@ -87,14 +86,13 @@ public class ShortValue implements TypedValue<Short> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result) + this.value;
+        result = prime * result + Float.floatToIntBits(value);
         return result;
     }
 
     /** {@inheritDoc} */
     @Override
     public String toString() {
-        return "ShortValue [value=" + this.value + "]";
+        return "FloatValue [value=" + this.value + "]";
     }
-
 }

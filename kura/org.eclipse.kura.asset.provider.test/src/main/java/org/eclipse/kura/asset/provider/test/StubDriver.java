@@ -64,14 +64,11 @@ public final class StubDriver implements Driver {
             case BOOLEAN:
                 record.setValue(TypedValues.newBooleanValue(true));
                 break;
-            case SHORT:
-                record.setValue(TypedValues.newShortValue((short) 1));
+            case FLOAT:
+                record.setValue(TypedValues.newFloatValue(1f));
                 break;
             case LONG:
                 record.setValue(TypedValues.newLongValue(1L));
-                break;
-            case BYTE:
-                record.setValue(TypedValues.newByteValue((byte) 1));
                 break;
             case BYTE_ARRAY:
                 record.setValue(TypedValues.newByteArrayValue("dummy".getBytes()));

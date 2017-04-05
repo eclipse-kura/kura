@@ -42,12 +42,11 @@ import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.BooleanValue;
 import org.eclipse.kura.type.ByteArrayValue;
-import org.eclipse.kura.type.ByteValue;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.DoubleValue;
+import org.eclipse.kura.type.FloatValue;
 import org.eclipse.kura.type.IntegerValue;
 import org.eclipse.kura.type.LongValue;
-import org.eclipse.kura.type.ShortValue;
 import org.eclipse.kura.type.StringValue;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.util.collection.CollectionUtil;
@@ -477,8 +476,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
             case BOOLEAN:
                 stmt.setBoolean(i, ((BooleanValue) value).getValue());
                 break;
-            case BYTE:
-                stmt.setByte(i, ((ByteValue) value).getValue());
+            case FLOAT:
+                stmt.setFloat(i, ((FloatValue) value).getValue());
                 break;
             case DOUBLE:
                 stmt.setDouble(i, ((DoubleValue) value).getValue());
@@ -493,9 +492,6 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
                 byte[] byteArrayValue = ((ByteArrayValue) value).getValue();
                 InputStream is = new ByteArrayInputStream(byteArrayValue);
                 stmt.setBlob(i, is);
-                break;
-            case SHORT:
-                stmt.setShort(i, ((ShortValue) value).getValue());
                 break;
             case STRING:
                 stmt.setString(i, ((StringValue) value).getValue());

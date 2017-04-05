@@ -51,8 +51,7 @@ import org.eclipse.kura.util.collection.CollectionUtil;
  * <ul>
  * <li>INTEGER</li>
  * <li>DOUBLE</li>
- * <li>BYTE</li>
- * <li>SHORT</li>
+ * <li>FLOAT</li>
  * <li>LONG</li>
  * <li>BOOLEAN</li>
  * <li>STRING</li>

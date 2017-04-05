@@ -14,12 +14,11 @@
 package org.eclipse.kura.internal.wire.store;
 
 import static org.eclipse.kura.type.DataType.BOOLEAN;
-import static org.eclipse.kura.type.DataType.BYTE;
+import static org.eclipse.kura.type.DataType.FLOAT;
 import static org.eclipse.kura.type.DataType.BYTE_ARRAY;
 import static org.eclipse.kura.type.DataType.DOUBLE;
 import static org.eclipse.kura.type.DataType.INTEGER;
 import static org.eclipse.kura.type.DataType.LONG;
-import static org.eclipse.kura.type.DataType.SHORT;
 import static org.eclipse.kura.type.DataType.STRING;
 
 import java.sql.Types;
@@ -87,8 +86,7 @@ public final class DbDataTypeMapper {
     private static Map<Integer, DataType> jdbcTypeMap = CollectionUtil.newHashMap();
 
     static {
-        dataTypeMap.put(BYTE, new JdbcType(Types.TINYINT, "TINYINT"));
-        dataTypeMap.put(SHORT, new JdbcType(Types.SMALLINT, "SMALLINT"));
+        dataTypeMap.put(FLOAT, new JdbcType(Types.FLOAT, "FLOAT"));
         dataTypeMap.put(INTEGER, new JdbcType(Types.INTEGER, "INTEGER"));
         dataTypeMap.put(LONG, new JdbcType(Types.BIGINT, "BIGINT"));
         dataTypeMap.put(DOUBLE, new JdbcType(Types.DOUBLE, "DOUBLE"));
@@ -98,8 +96,7 @@ public final class DbDataTypeMapper {
     }
 
     static {
-        jdbcTypeMap.put(Types.TINYINT, DataType.BYTE);
-        jdbcTypeMap.put(Types.SMALLINT, DataType.SHORT);
+        jdbcTypeMap.put(Types.FLOAT, DataType.FLOAT);
         jdbcTypeMap.put(Types.INTEGER, DataType.INTEGER);
         jdbcTypeMap.put(Types.BIGINT, DataType.LONG);
         jdbcTypeMap.put(Types.DOUBLE, DataType.DOUBLE);

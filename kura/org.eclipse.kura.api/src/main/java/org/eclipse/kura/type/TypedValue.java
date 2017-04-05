@@ -22,10 +22,9 @@ package org.eclipse.kura.type;
  * @see TypedValues
  * @see BooleanValue
  * @see ByteArrayValue
- * @see ByteValue
+ * @see FloatValue
  * @see DoubleValue
  * @see IntegerValue
- * @see ShortValue
  * @see StringValue
  * @see DataType
  *

@@ -78,8 +78,7 @@ import org.slf4j.LoggerFactory;
  * <li>LONG</li>
  * <li>STRING</li>
  * <li>BOOLEAN</li>
- * <li>BYTE</li>
- * <li>SHORT</li>
+ * <li>FLOAT</li>
  * <li>DOUBLE</li>
  * </ul>
  *
@@ -442,17 +441,14 @@ public final class AssetCloudlet extends Cloudlet {
             if (BOOLEAN == dataType) {
                 value = TypedValues.newBooleanValue(Boolean.parseBoolean(userValue));
             }
-            if (BYTE == dataType) {
-                value = TypedValues.newByteValue(Byte.parseByte(userValue));
+            if (FLOAT == dataType) {
+                value = TypedValues.newFloatValue(Float.parseFloat(userValue));
             }
             if (DOUBLE == dataType) {
                 value = TypedValues.newDoubleValue(Double.parseDouble(userValue));
             }
             if (LONG == dataType) {
                 value = TypedValues.newLongValue(Long.parseLong(userValue));
-            }
-            if (SHORT == dataType) {
-                value = TypedValues.newShortValue(Short.parseShort(userValue));
             }
             if (STRING == dataType) {
                 value = TypedValues.newStringValue(userValue);

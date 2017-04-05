@@ -18,11 +18,10 @@ package org.eclipse.kura.web.shared.model;
  */
 public enum GwtWiresDataType {
     BOOLEAN,
-    BYTE,
+    FLOAT,
     BYTE_ARRAY,
     DOUBLE,
     INTEGER,
     LONG,
-    SHORT,
     STRING;
 }

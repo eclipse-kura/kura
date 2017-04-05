@@ -21,7 +21,7 @@ import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.annotation.ThreadSafe;
 
 /**
- * This class represents a {@link Short} value as a {@link TypedValue}.
+ * This class represents a {@link String} value as a {@link TypedValue}.
  *
  * @noextend This class is not intended to be extended by clients.
  */

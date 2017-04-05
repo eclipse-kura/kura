@@ -1,0 +1,220 @@
+#########################################################################
+# Copyright (c) 2014, Oracle and/or its affiliates. All rights reserved.
+# DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+#
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.  Oracle designates this
+# particular file as subject to the "Classpath" exception as provided
+# by Oracle in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+# or visit www.oracle.com if you need additional information or have any
+# questions.
+#
+#########################################################################
+# Functions
+
+# find-suffix-files
+# finds all files with given suffix below given directories
+# usage: $(call find-suffix-files <dir-list>,<suffix>)
+# note: <suffix> should not contain the '.'
+define find-suffix-files
+$(patsubst ./%,%, \
+  $(shell find $(1) -name "*.$(2)" -and -not -name ".*") \
+)
+endef
+
+LIB_NAME := dio
+
+###########################################################
+# check for required env vars
+# ifeq ($(PI_TOOLS),)
+#   $(error "PI_TOOLS is not defined. Please set PI_TOOLS to point to the location of the raspberry pi GNU toolchain")
+# endif
+
+ifeq ($(JAVA_HOME),)
+  $(error "JAVA_HOME is not defined. Please set JAVA_HOME to point to the location of the JDK8 installation")
+endif
+
+BUILD_DEVICEACCESS := true
+
+# specify java src directories
+DIO_JAVA_SRC_DIRS := \
+                     src/se/classes \
+                     src/share/classes
+
+# specify native src directories
+DIO_NATIVE_SRC_DIRS := \
+                       src/se/native \
+                       src/share/native \
+                       src/se/linux/native \
+                       src/share/linux/native
+
+STRIP_PACKAGES ?=
+# always strip out these apis (not yet implemented)
+STRIP_PACKAGES_INTERNAL = $(STRIP_PACKAGES) pwm counter mmio
+
+# specify sample java src directories
+DIO_SAM_JAVA_SRC_DIR := \
+                        samples/gpio/src
+
+# Output directorires
+BUILD_DIR := $(CURDIR)/build
+SO_OUT_DIR := $(BUILD_DIR)/so
+JAVA_OUT_DIR := $(BUILD_DIR)/classes
+SAM_JAVA_OUT_DIR := $(BUILD_DIR)/samples/classes
+NATIVE_OUT_DIR := $(BUILD_DIR)/obj
+JAR_OUT_DIR := $(BUILD_DIR)/jar
+DEVICE_IO_OUT_DIR := $(BUILD_DIR)/deviceio
+BUNDLE_OUT_DIR := $(BUILD_DIR)/bundles
+
+# find all src files
+CPP_SRC_FILES := $(call find-suffix-files, $(DIO_NATIVE_SRC_DIRS),cpp)
+C_SRC_FILES :=  $(call find-suffix-files, $(DIO_NATIVE_SRC_DIRS),c)
+JAVA_SRC_FILES := $(call find-suffix-files, $(DIO_JAVA_SRC_DIRS),java)
+SAM_JAVA_SRC_FILES := $(call find-suffix-files, $(DIO_SAM_JAVA_SRC_DIR),java)
+
+DIO_INCLUDE_DIRS := $(sort $(dir $(call find-suffix-files, $(DIO_NATIVE_SRC_DIRS),h)))
+
+# filter out apis we don't want in this build
+ifneq (,$(findstring i2c, $(STRIP_PACKAGES_INTERNAL)))
+  CPP_SRC_FILES := $(foreach f,$(CPP_SRC_FILES),$(if $(findstring i2c,$(f)),,$(f)))
+  C_SRC_FILES := $(foreach f,$(C_SRC_FILES),$(if $(findstring i2c,$(f)),,$(f)))
+  JAVA_SRC_FILES := $(foreach f,$(JAVA_SRC_FILES),$(if $(findstring i2c,$(f)),,$(f)))
+endif
+ifneq (,$(findstring spibus, $(STRIP_PACKAGES_INTERNAL)))
+  CPP_SRC_FILES := $(foreach f,$(CPP_SRC_FILES),$(if $(findstring spibus,$(f)),,$(f)))
+  C_SRC_FILES := $(foreach f,$(C_SRC_FILES),$(if $(findstring spibus,$(f)),,$(f)))
+  JAVA_SRC_FILES := $(foreach f,$(JAVA_SRC_FILES),$(if $(findstring spibus,$(f)),,$(f)))
+endif
+ifneq (,$(findstring uart, $(STRIP_PACKAGES_INTERNAL)))
+  CPP_SRC_FILES := $(foreach f,$(CPP_SRC_FILES),$(if $(findstring uart,$(f)),,$(f)))
+  C_SRC_FILES := $(foreach f,$(C_SRC_FILES),$(if $(findstring uart,$(f)),,$(f)))
+  JAVA_SRC_FILES := $(foreach f,$(JAVA_SRC_FILES),$(if $(findstring uart,$(f)),,$(f)))
+endif
+ifneq (,$(findstring counter, $(STRIP_PACKAGES_INTERNAL)))
+  CPP_SRC_FILES := $(foreach f,$(CPP_SRC_FILES),$(if $(findstring counter,$(f)),,$(f)))
+  C_SRC_FILES := $(foreach f,$(C_SRC_FILES),$(if $(findstring counter,$(f)),,$(f)))
+  JAVA_SRC_FILES := $(foreach f,$(JAVA_SRC_FILES),$(if $(findstring counter,$(f)),,$(f)))
+endif
+ifneq (,$(findstring pwm, $(STRIP_PACKAGES_INTERNAL)))
+  CPP_SRC_FILES := $(foreach f,$(CPP_SRC_FILES),$(if $(findstring pwm,$(f)),,$(f)))
+  C_SRC_FILES := $(foreach f,$(C_SRC_FILES),$(if $(findstring pwm,$(f)),,$(f)))
+  JAVA_SRC_FILES := $(foreach f,$(JAVA_SRC_FILES),$(if $(findstring pwm,$(f)),,$(f)))
+endif
+ifneq (,$(findstring gpio, $(STRIP_PACKAGES_INTERNAL)))
+  CPP_SRC_FILES := $(foreach f,$(CPP_SRC_FILES),$(if $(findstring gpio,$(f)),,$(f)))
+  C_SRC_FILES := $(foreach f,$(C_SRC_FILES),$(if $(findstring gpio,$(f)),,$(f)))
+  JAVA_SRC_FILES := $(foreach f,$(JAVA_SRC_FILES),$(if $(findstring gpio,$(f)),,$(f)))
+endif
+ifneq (,$(findstring mmio, $(STRIP_PACKAGES_INTERNAL)))
+  CPP_SRC_FILES := $(foreach f,$(CPP_SRC_FILES),$(if $(findstring mmio,$(f)),,$(f)))
+  C_SRC_FILES := $(foreach f,$(C_SRC_FILES),$(if $(findstring mmio,$(f)),,$(f)))
+  JAVA_SRC_FILES := $(foreach f,$(JAVA_SRC_FILES),$(if $(findstring mmio,$(f)),,$(f)))
+endif
+
+# calculate obj files needed
+CPP_OBJ_FILES := $(notdir $(subst .cpp,.o,$(CPP_SRC_FILES)))
+C_OBJ_FILES := $(notdir $(subst .c,.o,$(C_SRC_FILES)))
+
+# setup search paths
+vpath %.cpp $(sort $(dir $(CPP_SRC_FILES)))
+vpath %.c $(sort $(dir $(C_SRC_FILES)))
+vpath %.o $(NATIVE_OUT_DIR)
+
+
+#######################################################################################################
+# tool and flag setup for i586 (poky dora) build
+
+TARGET_CC := $(CC)
+TARGET_CXX := $(CXX)
+TARGET_LD := $(LD)
+JAVAC := $(JAVA_HOME)/bin/javac
+JAR := $(JAVA_HOME)/bin/jar
+MKDIR := mkdir -p
+TARGET_CPU_LEGACY_LIB := $(ARCH)
+TARGET_C_FLAGS = -fPIC $(CFLAGS) -DJAVACALL_REPORT_LEVEL=4 -DENABLE_DEVICEACCESS -c -MMD -MF $(NATIVE_OUT_DIR)/$(@).d
+TARGET_INCLUDES := $(foreach d,$(DIO_INCLUDE_DIRS),-I$(d)) -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux
+TARGET_CXX_FLAGS := -fPIC $(CXXFLAGS) -DJAVACALL_REPORT_LEVEL=4 -DENABLE_DEVICEACCESS -c
+TARGET_LD_FLAGS:=   \
+          -shared \
+          -lpthread -lrt \
+           -lstdc++ -lc -Wl
+
+ALL_TARGETS := dirs $(LIB_NAME).jar lib$(LIB_NAME).so device-io
+
+# Don't build samples if we're stripping extra packages. Build might fail.
+ifeq (,$(STRIP_PACKAGES))
+  ALL_TARGETS := $(ALL_TARGETS) $(LIB_NAME)-samples.jar
+endif
+
+#######################################################################################################
+#
+BUNDLE_NAME := device-io
+
+#######################################################################################################
+# targets
+
+.PHONY: clean all dirs device-io bundle
+
+all: $(ALL_TARGETS)
+
+dirs:
+	@echo "Creating output directories"
+	@$(MKDIR) $(SO_OUT_DIR)
+	@$(MKDIR) $(JAVA_OUT_DIR)
+	@$(MKDIR) $(SAM_JAVA_OUT_DIR)
+	@$(MKDIR) $(NATIVE_OUT_DIR)
+	@$(MKDIR) $(JAR_OUT_DIR)
+	@$(MKDIR) $(DEVICE_IO_OUT_DIR)
+	@$(MKDIR) $(BUNDLE_OUT_DIR)
+
+$(CPP_OBJ_FILES): %.o: %.cpp dirs
+	@echo Compiling $<
+	@$(TARGET_CC) $(TARGET_C_FLAGS) $(TARGET_INCLUDES) $< -o $(NATIVE_OUT_DIR)/$@
+
+$(C_OBJ_FILES): %.o: %.c dirs
+	@echo compiling $<
+	@$(TARGET_CC) $(TARGET_C_FLAGS) $(TARGET_INCLUDES) $< -o $(NATIVE_OUT_DIR)/$@
+
+lib$(LIB_NAME).so: $(CPP_OBJ_FILES) $(C_OBJ_FILES) dirs
+	@echo linking $@
+	@$(TARGET_LD) $(TARGET_LD_FLAGS) -o $(SO_OUT_DIR)/$@ $(foreach o,$(CPP_OBJ_FILES) $(C_OBJ_FILES),$(NATIVE_OUT_DIR)/$(o))
+
+$(LIB_NAME).jar: $(JAVA_SRC_FILES) dirs
+	@echo Compiling Java source files to $(JAR_OUT_DIR)/$@
+	@$(JAVAC) -d $(JAVA_OUT_DIR) $(JAVA_SRC_FILES)
+	@sed -e  "s/BUILD_NUMBER/b$(BUILD_NUMBER)/g" src/se/manifest.mf > $(BUILD_DIR)/manifest.mf
+	@$(JAR) cfm $(JAR_OUT_DIR)/$@ $(BUILD_DIR)/manifest.mf -C $(JAVA_OUT_DIR) .
+
+$(LIB_NAME)-samples.jar: $(SAM_JAVA_SRC_FILES) dirs $(LIB_NAME).jar
+	@echo Compiling Java source files to $(JAR_OUT_DIR)/$@
+	@$(JAVAC) -cp $(JAR_OUT_DIR)/$(LIB_NAME).jar -d $(SAM_JAVA_OUT_DIR) $(SAM_JAVA_SRC_FILES)
+	@$(JAR) cf $(JAR_OUT_DIR)/$@ -C $(SAM_JAVA_OUT_DIR) .
+
+device-io: dirs $(LIB_NAME).jar lib$(LIB_NAME).so
+	@$(MKDIR) $(DEVICE_IO_OUT_DIR)/lib/ext
+	@$(MKDIR) $(DEVICE_IO_OUT_DIR)/lib/$(TARGET_CPU_LEGACY_LIB)
+	@cp $(JAR_OUT_DIR)/$(LIB_NAME).jar $(DEVICE_IO_OUT_DIR)/lib/ext
+	@cp $(SO_OUT_DIR)/lib$(LIB_NAME).so $(DEVICE_IO_OUT_DIR)/lib/$(TARGET_CPU_LEGACY_LIB)
+
+bundle: device-io dirs
+	@echo creating $(BUNDLE_NAME).zip
+	@cp jrecreate/* $(BUILD_DIR)/deviceio
+	@(cd $(BUILD_DIR) ; zip -r $(BUNDLE_OUT_DIR)/$(BUNDLE_NAME).zip deviceio )
+
+clean:
+	@echo "clean: removing $(BUILD_DIR)"
+	@rm -rf $(BUILD_DIR)
+

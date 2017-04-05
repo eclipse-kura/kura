@@ -468,15 +468,13 @@ public class LinuxDns {
 
     public synchronized boolean isPppDnsSet() throws Exception {
         File file = new File(DNS_FILE_NAME);
+        boolean ret = false;
         if (isSymlink(file)) {
-            if (getRealPath(file).compareTo(getPppDnsFileName()) == 0) {
+            if (getRealPath(file).equals(getPppDnsFileName())) {
                 return true;
-            } else {
-                return false;
             }
-        } else {
-            return false;
         }
+        return ret;
     }
 
     private synchronized boolean isSymlink(File file) throws IOException {

@@ -538,9 +538,8 @@ public class PropertiesUi extends AbstractServicesUi {
         this.channelTable.addColumn(c2, new TextHeader(MSGS.wiresChannelOperation()));
 
         final List<String> valueTypeOptions = Arrays.asList(GwtWiresDataType.BOOLEAN.name(),
-                GwtWiresDataType.BYTE.name(), GwtWiresDataType.BYTE_ARRAY.name(), GwtWiresDataType.DOUBLE.name(),
-                GwtWiresDataType.INTEGER.name(), GwtWiresDataType.LONG.name(), GwtWiresDataType.SHORT.name(),
-                GwtWiresDataType.STRING.name());
+                GwtWiresDataType.BYTE_ARRAY.name(), GwtWiresDataType.FLOAT.name(), GwtWiresDataType.DOUBLE.name(),
+                GwtWiresDataType.INTEGER.name(), GwtWiresDataType.LONG.name(), GwtWiresDataType.STRING.name());
 
         final Column<GwtChannelInfo, String> c3 = new Column<GwtChannelInfo, String>(
                 new SelectionCell(valueTypeOptions)) {

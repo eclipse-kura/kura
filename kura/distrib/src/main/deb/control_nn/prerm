@@ -1,6 +1,75 @@
 #!/bin/bash
 
 INSTALL_DIR=/opt/eclipse
+WD_TMP_FILE=/tmp/watchdog
+REFRESH_TIME=5
+TIMEOUT_TIME=300
+
+##############################################
+# UTILITY FUNCTIONS
+##############################################
+# Run preRemove function and start watchdog if needed
+function runPreRemove {
+    if [ -f "${WD_TMP_FILE}" ]; then
+        WATCHDOG_DEVICE=`cat ${WD_TMP_FILE}`
+        preRemove &
+        PID=$!
+        START=$(date +%s)
+        
+        while [ -d "/proc/$PID" ]; do
+            echo w > ${WATCHDOG_DEVICE}
+            DELTA=$(($(date +%s) - $START))
+            if [ "$DELTA" -ge "$TIMEOUT_TIME" ]; then
+                echo "The installation process is not responding. It'll be stopped."
+                kill -9 $PID >> /dev/null 2>&1
+            fi
+            sleep $REFRESH_TIME
+        done
+        stopWatchdog
+    else
+        preRemove &
+        PID=$!
+        START=$(date +%s)
+        
+        while [ -d "/proc/$PID" ]; do
+            DELTA=$(($(date +%s) - $START))
+            if [ "$DELTA" -ge "$TIMEOUT_TIME" ]; then
+                echo "The installation process is not responding. It'll be stopped."
+                kill -9 $PID >> /dev/null 2>&1
+            fi
+            sleep $REFRESH_TIME
+        done
+    fi
+}
+
+# Deactivate watchdog device if possible
+function stopWatchdog {
+    if [ -n "${WATCHDOG_DEVICE}" ]; then
+        echo V > ${WATCHDOG_DEVICE}
+    fi
+}
+
+# Pre-remove script
+function preRemove {
+    #Remove INIT scripts
+    rm /etc/init.d/kura
+    update-rc.d kura remove
+    
+    #Delete Eclipse directory if present
+    if [ -d "${INSTALL_DIR}/kura/data" ] ; then
+      rm -rf ${INSTALL_DIR}/kura/data
+    fi
+    
+    if [ -d "${INSTALL_DIR}/kura" ] ; then
+      rm -rf ${INSTALL_DIR}/kura
+    fi
+    
+    echo ""
+    echo "Uninstalling KURA... Done!"
+}
+##############################################
+# END UTILITY FUNCTIONS
+##############################################
 
 ##############################################
 # PRE-REMOVE SCRIPT
@@ -22,16 +91,7 @@ if [ -f "/var/run/kura.pid" ] ; then
   done
 fi
 
-#Remove INIT scripts
-rm /etc/init.d/kura
-update-rc.d kura remove
-
-#Delete Eclipse directory if present
-if [ -d "${INSTALL_DIR}/kura/data" ] ; then
-  rm -rf ${INSTALL_DIR}/kura/data
-fi
-
-if [ -d "${INSTALL_DIR}/kura" ] ; then
-  rm -rf ${INSTALL_DIR}/kura
-fi
-
+runPreRemove
+##############################################
+# END PRE-REMOVE SCRIPT
+##############################################

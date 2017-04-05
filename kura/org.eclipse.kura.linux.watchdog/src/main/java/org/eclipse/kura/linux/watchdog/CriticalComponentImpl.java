@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,22 +11,24 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.watchdog;
 
+import org.eclipse.kura.watchdog.CriticalComponent;
+
 public class CriticalComponentImpl {
 
+    private final CriticalComponent criticalComponent;
     private final String name;
     private final long timeout;
     private long updated;
 
-    /**
-     *
-     * @param name
-     * @param timeout
-     *            timeout for reporting interval in seconds
-     */
-    public CriticalComponentImpl(String name, long timeout) {
-        this.name = name;
-        this.timeout = timeout;
+    public CriticalComponentImpl(CriticalComponent criticalComponent) {
+        this.criticalComponent = criticalComponent;
+        this.name = criticalComponent.getCriticalComponentName();
+        this.timeout = criticalComponent.getCriticalComponentTimeout();
         this.updated = System.currentTimeMillis();
+    }
+
+    public CriticalComponent getCriticalComponent() {
+        return criticalComponent;
     }
 
     public String getName() {

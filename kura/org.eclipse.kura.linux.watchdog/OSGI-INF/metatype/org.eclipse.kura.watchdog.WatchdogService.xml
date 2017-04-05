@@ -20,29 +20,30 @@
         <Icon resource="WatchdogService" size="32"/>
         
         <AD id="enabled"  
-            name="enabled"
+            name="Watchdog enable"
             type="Boolean"
             cardinality="0" 
             required="true"
             default="false" 
-            description="If set to true the watchdog will be enabled."/>
+            description="The WatchdogService monitors CriticalComponentS and reboots the system if one of them hangs. Once enabled the WatchdogService starts refreshing the hardware watchdog which will reset the system if WatchdogService hangs."/>
         
         <AD id="pingInterval"
-            name="pingInterval"
+            name="Watchdog refresh interval"
             type="Integer"
             cardinality="0"
             required="true"
             default="10000"
-            description="Ping periodicity in ms. A value between 1 and 30 seconds is suggested."/>
+            max="60000"
+            description="Watchdog refresh interval in ms. The value can be set between 1 and 60 seconds."/>
 
         <AD id="watchdogDevice"
-            name="watchdogDevice"
+            name="Watchdog device path"
             type="String"
             cardinality="0"
             required="true"
             default="/dev/watchdog"
-            description="Watchdog device."/>
-                        
+            description="Watchdog device path e.g. /dev/watchdog."/>
+            
     </OCD>
     <Designate pid="org.eclipse.kura.watchdog.WatchdogService">
         <Object ocdref="org.eclipse.kura.watchdog.WatchdogService"/>

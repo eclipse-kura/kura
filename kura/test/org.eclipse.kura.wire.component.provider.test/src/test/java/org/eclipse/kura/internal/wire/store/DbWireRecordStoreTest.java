@@ -170,8 +170,8 @@ public class DbWireRecordStoreTest {
         Map<String, Object> props = new HashMap<String, Object>();
         String tableName = "STORE_TEST";
         props.put("table.name", tableName);
-        props.put("periodic.cleanup.records.keep", 3);
-        props.put("periodic.cleanup", 2);
+        props.put("cleanup.records.keep", 3);
+        props.put("maximum.table.size", 5);
 
         // init
         store.activate(ctx, props);
@@ -186,43 +186,36 @@ public class DbWireRecordStoreTest {
         WireEnvelope wireEvelope = new WireEnvelope(emitterPid, wireRecords);
 
         // store a few records
-        store.onWireReceive(wireEvelope);
-        store.onWireReceive(wireEvelope);
-        store.onWireReceive(wireEvelope);
-        store.onWireReceive(wireEvelope);
-        store.onWireReceive(wireEvelope);
+        for (int i = 0; i < 3; i++) {
+            store.onWireReceive(wireEvelope);
+            // wait for the executor to do its duty and DB operation to finish
+            try {
+                Thread.sleep(2500);
+            } catch (InterruptedException e) {
+                // OK
+            }
+        }
 
         ResultSet resultSet = connection.prepareStatement("SELECT count(*) FROM " + tableName).executeQuery();
         resultSet.next();
         int count = resultSet.getInt(1);
-        assertEquals("Unexpected number of records", 5, count);
-
-        // wait for the executor to do its duty
-        try {
-            Thread.sleep(2500);
-        } catch (InterruptedException e) {
-            // OK
-        }
-
-        resultSet = connection.prepareStatement("SELECT count(*) FROM " + tableName).executeQuery();
-        resultSet.next();
-        count = resultSet.getInt(1);
         assertEquals("Unexpected number of records", 3, count);
 
-        props.put("periodic.cleanup.records.keep", 0);
-        store.updated(props);
-
-        // wait for the executor to do its duty and DB operation to finish
-        try {
-            Thread.sleep(2500);
-        } catch (InterruptedException e) {
-            // OK
+        // store a few records
+        for (int i = 0; i < 5; i++) {
+            store.onWireReceive(wireEvelope);
+            // wait for the executor to do its duty and DB operation to finish
+            try {
+                Thread.sleep(2500);
+            } catch (InterruptedException e) {
+                // OK
+            }
         }
 
         resultSet = connection.prepareStatement("SELECT count(*) FROM " + tableName).executeQuery();
         resultSet.next();
         count = resultSet.getInt(1);
-        assertEquals("Unexpected number of records", 0, count);
+        assertEquals("Unexpected number of records", 4, count);
 
         // deinit
         store.deactivate(null);

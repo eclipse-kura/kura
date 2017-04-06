@@ -2731,7 +2731,6 @@ public class ConfigurationServiceTest {
         assertTrue("delegated", calls[0]);
     }
 
-    @Test
     public void testRollbackIdPartialSvcRef() throws Exception {
         long id = 123;
         final String dir = "dirRIPSR";
@@ -2902,7 +2901,6 @@ public class ConfigurationServiceTest {
         assertEquals(expect, new String(chars));
     }
 
-    @Test
     public void testRollbackId() throws Exception {
         long id = 123;
         final String dir = "dirRI";

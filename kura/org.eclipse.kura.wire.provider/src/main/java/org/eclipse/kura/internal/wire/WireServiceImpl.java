@@ -230,13 +230,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
      */
     synchronized void createWires() {
         logger.debug(message.creatingWires());
-        final List<WireConfiguration> cloned = CollectionUtil.newArrayList();
-        for (final WireConfiguration wc : this.wireConfigs) {
-            final WireConfiguration wireConf = new WireConfiguration(wc.getEmitterPid(), wc.getReceiverPid());
-            wireConf.setFilter(wc.getFilter());
-            cloned.add(wireConf);
-        }
-        for (final WireConfiguration wireConfig : cloned) {
+        for (final WireConfiguration wireConfig : this.wireConfigs) {
             final String emitterPid = wireConfig.getEmitterPid();
             final String receiverPid = wireConfig.getReceiverPid();
 
@@ -246,9 +240,9 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
             if (emitterFound && receiverFound) {
                 logger.info(message.creatingWire(emitterPid, receiverPid));
                 createConfiguration(wireConfig, emitterPid, receiverPid);
-                logger.info(message.creatingWiresDone());
             }
         }
+        logger.debug(message.creatingWiresDone());
     }
 
     /**

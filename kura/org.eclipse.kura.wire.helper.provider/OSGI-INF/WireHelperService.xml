@@ -12,9 +12,11 @@
      	Amit Kumar Mondal
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
-    name="org.eclipse.kura.wire.WireHelperService" 
-    enabled="true" 
-    immediate="false">
+			activate="activate" 
+			deactivate="deactivate" 
+			enabled="true" 
+			immediate="false" 
+			name="org.eclipse.kura.wire.WireHelperService">
    <implementation class="org.eclipse.kura.internal.wire.helper.WireHelperServiceImpl"/>
    <property name="service.pid" value="org.eclipse.kura.wire.WireHelperService"/>
    <service>

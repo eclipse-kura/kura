@@ -13,8 +13,11 @@
  *******************************************************************************/
 package org.eclipse.kura.wire;
 
+import java.util.Optional;
+import java.util.Set;
+
 /**
- * The interface WireHelperService is an service utility API to provide quick
+ * The interface {@link WireHelperService} is an service utility API to provide quick
  * and necessary operations for Kura Wires topology.
  *
  * @noimplement This interface is not intended to be implemented by clients.
@@ -63,6 +66,45 @@ public interface WireHelperService {
     public String getServicePid(final WireComponent wireComponent);
 
     /**
+     * Retrieves the created {@link WireConfiguration} instance
+     *
+     * @param emitterPid
+     *            the {@link WireEmitter} {@code ConfigurationService#KURA_SERVICE_PID}
+     * @param receiverPid
+     *            the {@link WireReceiver} {@code ConfigurationService#KURA_SERVICE_PID}
+     * @return an {@link Optional} with the existent {@link WireConfiguration} instance if
+     *         existent {@link WireConfiguration} instance is {@code non-null}, otherwise
+     *         an empty {@link Optional}
+     * @throws NullPointerException
+     *             if any of the arguments is null
+     */
+    public Optional<WireConfiguration> getWireConfiguration(String emitterPid, String receiverPid);
+
+    /**
+     * Retrieves the created {@link WireConfiguration} instances associated with the
+     * provided {@link WireEmitter} {@code ConfigurationService#KURA_SERVICE_PID}
+     *
+     * @param emitterPid
+     *            the {@link WireEmitter} {@code ConfigurationService#KURA_SERVICE_PID}
+     * @return the collection of existent {@link WireConfiguration} instances or empty
+     * @throws NullPointerException
+     *             if the argument is null
+     */
+    public Set<WireConfiguration> getWireConfigurationsByEmitterPid(String emitterPid);
+
+    /**
+     * Retrieves the created {@link WireConfiguration} instances associated with the
+     * provided {@link WireReceiver} {@code ConfigurationService#KURA_SERVICE_PID}
+     *
+     * @param receiverPid
+     *            the {@link WireReceiver} {@code ConfigurationService#KURA_SERVICE_PID}
+     * @return the collection of existent {@link WireConfiguration} instances or empty
+     * @throws NullPointerException
+     *             if the argument is null
+     */
+    public Set<WireConfiguration> getWireConfigurationsByReceiverPid(String receiverPid);
+
+    /**
      * Checks whether the provided Wire Component PID belongs to a Wire Emitter
      *
      * @param wireComponentPid
@@ -86,11 +128,13 @@ public interface WireHelperService {
     public boolean isReceiver(final String wireComponentPid);
 
     /**
-     * Returns a Wire Support instance of the provided wire component
+     * Returns a {@link WireSupport} instance of the provided {@link WireComponent}
+     * instance
      *
      * @param wireComponent
-     *            the wire component
-     * @return the wire support instance
+     *            the {@link WireComponent}
+     *            instance
+     * @return the {@link WireSupport} instance
      * @throws NullPointerException
      *             if the argument is null
      */

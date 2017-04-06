@@ -364,6 +364,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             final GwtWireConfiguration config = new GwtWireConfiguration();
             config.setEmitterPid(wc.getEmitterPid());
             config.setReceiverPid(wc.getReceiverPid());
+            config.setFilter(wc.getFilter());
             wires.add(config);
         }
 
@@ -449,12 +450,13 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                 }
             }
 
-            // Create new wires
+            // Create new wires or update the filter
             final Set<WireConfiguration> wireConfs = wireService.getWireConfigurations();
             for (final GwtWireConfiguration conf : GwtWireServiceUtil
                     .getWireConfigurationsFromJson(jWireGraph.get("wires").asObject())) {
                 final String emitterPid = conf.getEmitterPid();
                 final String receiverPid = conf.getReceiverPid();
+                final String filter = conf.getFilter();
                 final WireConfiguration temp = new WireConfiguration(emitterPid, receiverPid);
                 if (!wireConfs.contains(temp)) {
                     // track and wait for the emitter and receiver
@@ -467,9 +469,18 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                     if (emitter.isPresent() && receiver.isPresent()) {
                         logger.info("Creating New Wire: Emitter PID -> " + emitterPid + " | Consumer PID -> "
                                 + receiverPid);
-                        wireService.createWireConfiguration(emitterPid, receiverPid);
+                        final WireConfiguration wc = wireService.createWireConfiguration(emitterPid, receiverPid);
+                        String regex = null;
+                        if (filter != null) {
+                            regex = filter.trim().isEmpty() ? null : filter;
+                        }
+                        wc.setFilter(regex);
                     }
+                } else {
+                    // update the filter
+                    updateFilter(wireConfs, filter, temp);
                 }
+
             }
 
             // Update configuration for all changes tracked in Wires Composer
@@ -515,6 +526,18 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             configurations.clear();
         } catch (final KuraException | InterruptedException | InvalidSyntaxException exception) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
+        }
+    }
+
+    private void updateFilter(final Set<WireConfiguration> wireConfs, final String filter,
+            final WireConfiguration temp) {
+        final Iterator<WireConfiguration> iter = wireConfs.iterator();
+        while (iter.hasNext()) {
+            final WireConfiguration elem = iter.next();
+            if (elem.equals(temp)) {
+                final String regex = filter.trim().isEmpty() ? null : filter;
+                elem.setFilter(regex);
+            }
         }
     }
 

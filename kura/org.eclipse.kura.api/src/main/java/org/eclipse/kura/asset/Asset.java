@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -10,6 +10,7 @@
 package org.eclipse.kura.asset;
 
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
@@ -39,21 +40,20 @@ public interface Asset {
     public AssetConfiguration getAssetConfiguration();
 
     /**
-     * Reads the provided communication channels that corresponds to the given
-     * asset records. The read result is returned by setting the value in the
-     * asset record. If for some reason no value can be read the value should be
-     * set anyways. In this case the asset flag needs to be specified in the
-     * asset record. The flag shall best describe the reason of failure. If no
-     * value is set the default flag is
-     * {@code AssetFlag#ASSET_ERROR_UNSPECIFIED}. If the connection to the asset
-     * is interrupted, then any necessary resources that correspond to this
-     * connection should be cleaned up and a {@code KuraException} shall be
+     * Reads the communication channels identified by the set of channel names provided as argument.
+     * The read result is returned as a list of asset records.
+     * If for some reason the value of a channel cannot be read,
+     * an asset record containing a proper asset flag should be returned anyways.
+     * The asset flag shall best describe the reason of failure. If no value is set
+     * the default flag is {@code AssetFlag#ASSET_ERROR_UNSPECIFIED}.
+     * If the connection to the asset is interrupted, then any necessary resources
+     * that correspond to this connection should be cleaned up and a {@code KuraException} shall be
      * thrown.
      *
-     * @param channelIds
-     *            the list of channel identifiers which are to be read. The
-     *            channel identifiers for an asset must be unique for every
-     *            channel belonging to an asset.
+     * @param channelNames
+     *            the set of channel names which are to be read. The channel name
+     *            must be unique for every channel belonging to an asset.
+     *            Channel names are case sensitive.
      * @throws KuraRuntimeException
      *             if the method is not implemented by the asset then specific
      *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
@@ -64,12 +64,10 @@ public interface Asset {
      *             in the thrown {@link KuraException}.
      * @throws NullPointerException
      *             if argument is null
-     * @throws IllegalArgumentException
-     *             if the argument is empty
      * @return the list of asset records which comprises the currently read
      *         value in case of success or the reason of failure
      */
-    public List<AssetRecord> read(List<Long> channelIds) throws KuraException;
+    public List<AssetRecord> read(Set<String> channelNames) throws KuraException;
 
     /**
      * Performs a read on all READ or READ_WRITE channels that are defined on this asset and returns
@@ -94,9 +92,10 @@ public interface Asset {
      * Registers asset listener for the provided channel name for a monitor
      * operation on it.
      *
-     * @param channelId
-     *            the channel identifier. The channel identifier for an asset
+     * @param channelName
+     *            the channel name. The channel name
      *            must be unique for every channel belonging to an asset.
+     *            Channel names are case sensitive.
      * @param assetListener
      *            the asset listener
      * @throws KuraRuntimeException
@@ -114,10 +113,10 @@ public interface Asset {
      * @throws NullPointerException
      *             if any of the arguments is null
      * @throws IllegalArgumentException
-     *             channel ID is less than or
-     *             equal to zero
+     *             If the provided channel name is not present in the configuration
+     *             of this asset
      */
-    public void registerAssetListener(long channelId, AssetListener assetListener) throws KuraException;
+    public void registerAssetListener(String channelName, AssetListener assetListener) throws KuraException;
 
     /**
      * Unregisters a already registered asset listener which has been registered
@@ -161,8 +160,6 @@ public interface Asset {
      *             in the thrown {@link KuraException}
      * @throws NullPointerException
      *             if argument is null
-     * @throws IllegalArgumentException
-     *             if the argument is empty
      * @return the list of asset records which comprises the status of the write
      *         operations
      */

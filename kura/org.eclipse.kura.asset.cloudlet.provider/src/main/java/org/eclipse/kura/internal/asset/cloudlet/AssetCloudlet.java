@@ -14,13 +14,19 @@
 package org.eclipse.kura.internal.asset.cloudlet;
 
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.type.DataType.*;
+import static org.eclipse.kura.type.DataType.BOOLEAN;
+import static org.eclipse.kura.type.DataType.DOUBLE;
+import static org.eclipse.kura.type.DataType.FLOAT;
+import static org.eclipse.kura.type.DataType.INTEGER;
+import static org.eclipse.kura.type.DataType.LONG;
+import static org.eclipse.kura.type.DataType.STRING;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
@@ -56,17 +62,17 @@ import org.slf4j.LoggerFactory;
  * <li>/assets</li> : to retrieve all the assets
  * <li>/assets/asset_pid</li> : to retrieve all the channels of the provided
  * asset PID
- * <li>/assets/asset_pid/channel_id</li> : to retrieve the value of the
+ * <li>/assets/asset_pid/channel_name</li> : to retrieve the value of the
  * specified channel from the provided asset PID
- * <li>/assets/asset_pid/channel_id1-channel_id2-channel_id3</li> : to retrieve
+ * <li>/assets/asset_pid/channel_name1#channel_name2#channel_name3</li> : to retrieve
  * the value of the several channels from the provided asset PID. Any number of
- * channels can be provided as well. Also note that {@code "-"} delimiter must
+ * channels can be provided as well. Also note that {@code "#"} delimiter must
  * be used to separate the channel IDs.
  * </ul>
  *
  * The available {@code PUT} commands are as follows
  * <ul>
- * <li>/assets/asset_pid/channel_id</li> : to write the provided {@code value}
+ * <li>/assets/asset_pid/channel_name</li> : to write the provided {@code value}
  * in the payload to the specified channel of the provided asset PID. The
  * payload must also include the {@code type} of the {@code value} provided.
  * </ul>
@@ -209,7 +215,7 @@ public final class AssetCloudlet extends Cloudlet {
             if (reqTopic.getResources().length == 3) {
                 final String assetPid = reqTopic.getResources()[1];
                 final String channelId = reqTopic.getResources()[2];
-                this.readChannelsByIds(respPayload, assetPid, channelId);
+                this.readChannelsByNames(respPayload, assetPid, channelId);
             }
         }
         logger.info(message.cloudGETReqReceived());
@@ -247,10 +253,11 @@ public final class AssetCloudlet extends Cloudlet {
 
         final Asset asset = this.assets.get(assetPid);
         final AssetConfiguration configuration = asset.getAssetConfiguration();
-        final Map<Long, Channel> assetConfiguredChannels = configuration.getAssetChannels();
-        for (final Map.Entry<Long, Channel> entry : assetConfiguredChannels.entrySet()) {
+        final Map<String, Channel> assetConfiguredChannels = configuration.getAssetChannels();
+        for (final Map.Entry<String, Channel> entry : assetConfiguredChannels.entrySet()) {
             final Channel channel = entry.getValue();
-            respPayload.addMetric(String.valueOf(channel.getId()), channel.getName());
+            String channelName = channel.getName();
+            respPayload.addMetric(channelName, true);
         }
     }
 
@@ -282,13 +289,12 @@ public final class AssetCloudlet extends Cloudlet {
             final String[] resources) {
         this.findAssets();
         final String assetPid = resources[1];
-        final String channelId = resources[2];
+        final String channelName = resources[2];
         final Asset asset = this.assets.get(assetPid);
         final AssetConfiguration configuration = asset.getAssetConfiguration();
-        final Map<Long, Channel> assetConfiguredChannels = configuration.getAssetChannels();
-        final long id = Long.parseLong(channelId);
-        if ((assetConfiguredChannels != null) && (id != 0)) {
-            final AssetRecord assetRecord = new AssetRecord(id);
+        final Map<String, Channel> assetConfiguredChannels = configuration.getAssetChannels();
+        if (assetConfiguredChannels != null) {
+            final AssetRecord assetRecord = new AssetRecord(channelName);
             final String userValue = (String) reqPayload.getMetric("value");
             final String userType = (String) reqPayload.getMetric("type");
             boolean flag = true;
@@ -327,42 +333,39 @@ public final class AssetCloudlet extends Cloudlet {
      *            the response paylaod to be prepared
      * @param assetPid
      *            the Asset PID
-     * @param channelId
-     *            the channel ID (might contain {@code -} for multiple reads)
+     * @param channelName
+     *            the channel name (might contain {@code #} for multiple reads)
      * @throws NullPointerException
      *             if any of the arguments is null
      */
-    private void readChannelsByIds(final KuraResponsePayload respPayload, final String assetPid,
-            final String channelId) {
+    private void readChannelsByNames(final KuraResponsePayload respPayload, final String assetPid,
+            final String channelName) {
         requireNonNull(respPayload, message.respPayloadNonNull());
         requireNonNull(assetPid, message.assetPidNonNull());
-        requireNonNull(channelId, message.channelIdNonNull());
+        requireNonNull(channelName, message.channelNameNonNull());
 
-        final String channelDelim = ",";
-        Set<String> channelIds = null;
-        if (channelId.contains(channelDelim)) {
-            channelIds = CollectionUtil.newHashSet(Arrays.asList(channelId.split(channelDelim)));
-            channelIds.removeAll(Collections.singleton(""));
+        final String channelDelim = "#";
+        Set<String> channelNames = null;
+        if (channelName.contains(channelDelim)) {
+            channelNames = CollectionUtil.newHashSet(Arrays.asList(channelName.split(channelDelim)));
+            channelNames.removeAll(Collections.singleton(""));
         }
         final Asset asset = this.assets.get(assetPid);
         final AssetConfiguration configuration = asset.getAssetConfiguration();
-        final Map<Long, Channel> assetConfiguredChannels = configuration.getAssetChannels();
+        final Map<String, Channel> assetConfiguredChannels = configuration.getAssetChannels();
 
-        final List<Long> channelIdsToRead = CollectionUtil.newArrayList();
-        long id;
-        if (channelIds == null) {
-            id = Long.parseLong(channelId);
-            channelIdsToRead.add(id);
+        final Set<String> channelNamesToRead = CollectionUtil.newHashSet();
+        if (channelNames == null) {
+            channelNamesToRead.add(channelName);
         } else {
-            for (final String chId : channelIds) {
-                id = Long.parseLong(chId);
-                channelIdsToRead.add(id);
+            for (final String chName : channelNames) {
+                channelNamesToRead.add(chName);
             }
         }
         if (assetConfiguredChannels != null) {
             List<AssetRecord> assetRecords = null;
             try {
-                assetRecords = asset.read(channelIdsToRead);
+                assetRecords = asset.read(channelNamesToRead);
             } catch (final KuraException e) {
                 // if connection exception occurs
                 logger.warn(message.connectionException() + e);
@@ -395,9 +398,8 @@ public final class AssetCloudlet extends Cloudlet {
             final AssetStatus assetStatus = assetRecord.getAssetStatus();
             final AssetFlag assetFlag = assetStatus.getAssetFlag();
 
-            final String prefix = assetRecord.getChannelId() + ".";
+            final String prefix = assetRecord.getChannelName() + "#";
             respPayload.addMetric(prefix + message.flag(), assetFlag.toString());
-            respPayload.addMetric(prefix + message.channel(), assetRecord.getChannelId());
             respPayload.addMetric(prefix + message.timestamp(), assetRecord.getTimestamp());
             respPayload.addMetric(prefix + message.value(), value);
 

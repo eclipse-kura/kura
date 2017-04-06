@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.kura.asset;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
@@ -35,9 +36,6 @@ public class Channel {
     /** The communication channel configuration. */
     private final Map<String, Object> configuration;
 
-    /** The unique identifier of the channel. */
-    private final long id;
-
     /** The name of the communication channel. */
     private String name;
 
@@ -52,8 +50,6 @@ public class Channel {
     /**
      * Instantiates a new channel.
      *
-     * @param id
-     *            the identifier
      * @param name
      *            the name
      * @param type
@@ -65,63 +61,26 @@ public class Channel {
      * @throws NullPointerException
      *             if any of the arguments is null
      * @throws IllegalArgumentException
-     *             if channel ID is 0 or
-     *             negative
+     *             if channel name is not valid
      */
-    public Channel(final long id, final String name, final ChannelType type, final DataType valueType,
+    public Channel(final String name, final ChannelType type, final DataType valueType,
             final Map<String, Object> config) {
-        if (id <= 0) {
-            throw new IllegalArgumentException("Channel ID cannot be 0 or negative");
-        }
         requireNonNull(name, "Channel name cannot be null");
         requireNonNull(type, "Channel type cannot be null");
         requireNonNull(valueType, "Channel value type cannot be null");
         requireNonNull(config, "Channel configuration cannot be null");
 
-        this.id = id;
+        if (!Channel.isValidChannelName(name)) {
+            throw new IllegalArgumentException("Channel name is not valid");
+        }
+
         this.configuration = config;
         this.name = name;
         this.type = type;
         this.valueType = valueType;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (this.getClass() != obj.getClass()) {
-            return false;
-        }
-        final Channel other = (Channel) obj;
-        if (this.configuration == null) {
-            if (other.configuration != null) {
-                return false;
-            }
-        } else if (!this.configuration.equals(other.configuration)) {
-            return false;
-        }
-        if (this.id != other.id) {
-            return false;
-        }
-        if (this.name == null) {
-            if (other.name != null) {
-                return false;
-            }
-        } else if (!this.name.equals(other.name)) {
-            return false;
-        }
-        if (this.type != other.type) {
-            return false;
-        }
-        if (this.valueType != other.valueType) {
-            return false;
-        }
-        return true;
+        config.put(AssetConstants.NAME.value(), name);
+        config.put(AssetConstants.TYPE.value(), type.toString());
+        config.put(AssetConstants.VALUE_TYPE.value(), valueType);
     }
 
     /**
@@ -131,15 +90,6 @@ public class Channel {
      */
     public Map<String, Object> getConfiguration() {
         return this.configuration;
-    }
-
-    /**
-     * Gets the ID.
-     *
-     * @return the id
-     */
-    public long getId() {
-        return this.id;
     }
 
     /**
@@ -167,19 +117,6 @@ public class Channel {
      */
     public DataType getValueType() {
         return this.valueType;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = (prime * result) + ((this.configuration == null) ? 0 : this.configuration.hashCode());
-        result = (prime * result) + (int) (this.id ^ (this.id >>> 32));
-        result = (prime * result) + ((this.name == null) ? 0 : this.name.hashCode());
-        result = (prime * result) + ((this.type == null) ? 0 : this.type.hashCode());
-        result = (prime * result) + ((this.valueType == null) ? 0 : this.valueType.hashCode());
-        return result;
     }
 
     /**
@@ -224,7 +161,69 @@ public class Channel {
     /** {@inheritDoc} */
     @Override
     public String toString() {
-        return "Channel [configuration=" + this.configuration + ", id=" + this.id + ", name=" + this.name + ", type="
-                + this.type + ", valueType=" + this.valueType + "]";
+        return "Channel [configuration=" + this.configuration + ", name=" + this.name + ", type=" + this.type
+                + ", valueType=" + this.valueType + "]";
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((configuration == null) ? 0 : configuration.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = prime * result + ((valueType == null) ? 0 : valueType.hashCode());
+        return result;
+    }
+
+    /**
+     * Determines if the provided String is suitable to be used as a channel name;
+     * 
+     * @param channelName
+     *            The String to be validated.
+     * @return
+     *         the result of the validation.
+     */
+    public static boolean isValidChannelName(String channelName) {
+        if (isNull(channelName) || (channelName = channelName.trim()).isEmpty())
+            return false;
+
+        final String prohibitedChars = AssetConstants.CHANNEL_NAME_PROHIBITED_CHARS.value();
+
+        for (int i = 0; i < channelName.length(); i++) {
+            if (prohibitedChars.indexOf(channelName.charAt(i)) != -1) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Channel other = (Channel) obj;
+        if (configuration == null) {
+            if (other.configuration != null)
+                return false;
+        } else if (!configuration.equals(other.configuration))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (type != other.type)
+            return false;
+        if (valueType != other.valueType)
+            return false;
+        return true;
     }
 }

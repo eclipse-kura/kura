@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,10 +23,6 @@ public class GwtChannelInfo extends KuraBaseModel implements Serializable {
         return super.get("driver." + key);
     }
 
-    public String getId() {
-        return super.get("id");
-    }
-
     public String getName() {
         return super.get("name");
     }
@@ -42,10 +38,6 @@ public class GwtChannelInfo extends KuraBaseModel implements Serializable {
     @Override
     public void set(final String name, final Object value) {
         super.set("driver." + name, value);
-    }
-
-    public void setId(final String id) {
-        super.set("id", id);
     }
 
     public void setName(final String name) {

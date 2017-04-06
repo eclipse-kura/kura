@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,10 +16,10 @@ package org.eclipse.kura.driver;
 public enum DriverConstants {
 
     /** Channel Name Property to be used in the configuration. */
-    CHANNEL_ID("channel.id"),
+    CHANNEL_NAME("+name"),
 
     /** Value type Property to be used in the configuration. */
-    CHANNEL_VALUE_TYPE("channel.value.type");
+    CHANNEL_VALUE_TYPE("+value.type");
 
     /** The value. */
     private String value;

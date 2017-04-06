@@ -37,6 +37,9 @@ public interface UtilMessages {
     @En("Dictionary cannot be null.")
     public String dictionaryNonNull();
 
+    @En("Service instance cannot be retrieved")
+    public String errorRetrievingService();
+
     @En("Filter cannot be null.")
     public String filterNonNull();
 
@@ -49,8 +52,17 @@ public interface UtilMessages {
     @En("Map cannot be null.")
     public String mapNonNull();
 
+    @En("Could not acquire bundle context for {0}")
+    public String noBundleContext(String clazz);
+
+    @En("Service Reference cannot be null.")
+    public String referenceNonNull();
+
     @En("Service References cannot be null.")
     public String referencesNonNull();
+
+    @En("Target Class Instance cannot be null")
+    public String targetNonNull();
 
     @En("Timeout period cannot be zero or negative")
     public String timeoutError();

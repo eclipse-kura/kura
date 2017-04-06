@@ -14,12 +14,13 @@
 package org.eclipse.kura.driver;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * The interface DriverService is an utility service API to provide useful
- * methods for drivers
+ * The interface {@link DriverService} is an utility service API to provide useful
+ * methods for {@link Driver}s
  *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 1.2
@@ -28,34 +29,37 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface DriverService {
 
     /**
-     * Gets the driver instance by the provided driver PID
+     * Gets the {@link Driver} instance by the provided {@link Driver} PID
      * ({@code kura.service.pid}).
      *
      * @param driverPid
-     *            the driver PID to check
-     * @return the driver instance
+     *            the {@link Driver} PID ({@code kura.service.pid}) to check
+     * @return the {@link Driver} instance wrapped in {@link Optional}
+     *         instance or an empty {@link Optional} instance
      * @throws NullPointerException
-     *             if the provided driver PID is null
+     *             if the provided {@link Driver} PID ({@code kura.service.pid})
+     *             is {@code null}
      */
-    public Driver getDriver(String driverPid);
+    public Optional<Driver> getDriver(String driverPid);
 
     /**
-     * Gets the driver PID. ({@code kura.service.pid}) by the provided driver
-     * instance
+     * Gets the {@link Driver} PID ({@code kura.service.pid}) by the provided
+     * {@link Driver} instance
      *
      * @param driver
-     *            the driver instance to check
-     * @return the driver PID
+     *            the {@link Driver} instance to check
+     * @return the {@link Driver} PID ({@code kura.service.pid}) wrapped in
+     *         {@link Optional} instance or an empty {@link Optional} instance
      * @throws NullPointerException
-     *             if the provided driver instance is null
+     *             if the provided {@link Driver} instance is {@code null}
      */
-    public String getDriverPid(Driver driver);
+    public Optional<String> getDriverPid(Driver driver);
 
     /**
-     * Returns the list containing all the available driver instances
+     * Returns the list containing all the available {@link Driver} instances
      *
-     * @return the list of drivers available in service registry or empty list
-     *         if no drivers are available
+     * @return the list of {@link Driver} instances available in service registry
+     *         or empty list if no {@link Driver} instance is available
      */
     public List<Driver> listDrivers();
 

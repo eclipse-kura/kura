@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
  *
  *******************************************************************************/
 package org.eclipse.kura.internal.asset.cloudlet;
@@ -13,6 +17,7 @@ import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetService;
@@ -27,16 +32,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The Class AssetTrackerCustomizer is responsible for tracking all the existing
+ * The Class {@link AssetTrackerCustomizer} is responsible for tracking all the existing
  * asset instances in the OSGi service registry
  */
 final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, Asset> {
 
     /** The Logger instance. */
-    private static final Logger s_logger = LoggerFactory.getLogger(AssetTrackerCustomizer.class);
+    private static final Logger logger = LoggerFactory.getLogger(AssetTrackerCustomizer.class);
 
     /** Localization Resource */
-    private static final AssetCloudletMessages s_message = LocalizationAdapter.adapt(AssetCloudletMessages.class);
+    private static final AssetCloudletMessages message = LocalizationAdapter.adapt(AssetCloudletMessages.class);
 
     /** The map of assets present in the OSGi service registry. */
     private final Map<String, Asset> assets;
@@ -58,8 +63,8 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
      *             if any of the arguments is null
      */
     AssetTrackerCustomizer(final BundleContext context, final AssetService assetService) throws InvalidSyntaxException {
-        requireNonNull(context, s_message.bundleContextNonNull());
-        requireNonNull(context, s_message.assetServiceNonNull());
+        requireNonNull(context, message.bundleContextNonNull());
+        requireNonNull(context, message.assetServiceNonNull());
 
         this.assets = CollectionUtil.newConcurrentHashMap();
         this.context = context;
@@ -70,7 +75,7 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
     @Override
     public Asset addingService(final ServiceReference<Asset> reference) {
         final Asset service = this.context.getService(reference);
-        s_logger.info(s_message.assetFoundAdding());
+        logger.info(message.assetFoundAdding());
         if (service != null) {
             return this.addService(service);
         }
@@ -87,9 +92,11 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
      * @return Asset service instance
      */
     private Asset addService(final Asset service) {
-        requireNonNull(service, s_message.assetServiceNonNull());
-        final String assetPid = this.assetService.getAssetPid(service);
-        this.assets.put(assetPid, service);
+        requireNonNull(service, message.assetServiceNonNull());
+        final Optional<String> assetPid = this.assetService.getAssetPid(service);
+        if (assetPid.isPresent()) {
+            this.assets.put(assetPid.get(), service);
+        }
         return service;
     }
 
@@ -114,10 +121,10 @@ final class AssetTrackerCustomizer implements ServiceTrackerCustomizer<Asset, As
     public void removedService(final ServiceReference<Asset> reference, final Asset service) {
         final String assetPid = String.valueOf(reference.getProperty(KURA_SERVICE_PID));
         this.context.ungetService(reference);
-        if ((assetPid != null) && this.assets.containsKey(assetPid)) {
+        if (assetPid != null && this.assets.containsKey(assetPid)) {
             this.assets.remove(assetPid);
         }
-        s_logger.info(s_message.assetRemoved() + service);
+        logger.info(message.assetRemoved() + service);
     }
 
 }

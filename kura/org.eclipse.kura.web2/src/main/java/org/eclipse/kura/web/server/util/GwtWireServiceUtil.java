@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *  Eurotech
+ *  Amit Kumar Mondal
  *
  *******************************************************************************/
 package org.eclipse.kura.web.server.util;
@@ -13,6 +17,7 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -40,9 +45,7 @@ import com.eclipsesource.json.JsonObject;
  */
 public final class GwtWireServiceUtil {
 
-    /**
-     * Instantiates a new gwt wire service util.
-     */
+    /** Constructor */
     private GwtWireServiceUtil() {
         // static factory methods container
     }
@@ -103,7 +106,7 @@ public final class GwtWireServiceUtil {
             final ServiceReference<?>[] refs = bundleContext.getServiceReferences(clazz, filter);
             return refs == null ? new ServiceReference[0] : refs;
         } catch (final InvalidSyntaxException ise) {
-            throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR, ise);
+            throw new KuraRuntimeException(KuraErrorCode.INVALID_PARAMETER, ise);
         }
     }
 
@@ -154,13 +157,15 @@ public final class GwtWireServiceUtil {
      */
     public static List<String> getWireComponents() throws GwtKuraException {
         final WireHelperService helperService = ServiceLocator.getInstance().getService(WireHelperService.class);
-        final List<String> list = new ArrayList<String>();
+        final List<String> list = new ArrayList<>();
         final BundleContext context = FrameworkUtil.getBundle(GwtWireServiceUtil.class).getBundleContext();
         final ServiceReference<?>[] refs = getServiceReferences(context, WireComponent.class.getName(), null);
         for (final ServiceReference<?> ref : refs) {
             final WireComponent wc = (WireComponent) context.getService(ref);
-            final String pid = helperService.getPid(wc);
-            list.add(pid);
+            final Optional<String> pid = helperService.getPid(wc);
+            if (pid.isPresent()) {
+                list.add(pid.get());
+            }
             context.ungetService(ref);
         }
         return list;
@@ -208,7 +213,7 @@ public final class GwtWireServiceUtil {
      */
     public static List<WireConfiguration> getWireConfigurationsByEmitterPid(final String pid) throws GwtKuraException {
         final WireService wireService = ServiceLocator.getInstance().getService(WireService.class);
-        final List<WireConfiguration> wireConfs = new ArrayList<WireConfiguration>();
+        final List<WireConfiguration> wireConfs = new ArrayList<>();
         for (final WireConfiguration wireConf : wireService.getWireConfigurations()) {
             final String emitterPid = wireConf.getEmitterPid();
             if (emitterPid.equalsIgnoreCase(pid)) {
@@ -229,7 +234,7 @@ public final class GwtWireServiceUtil {
      */
     public static List<WireConfiguration> getWireConfigurationsByReceiverPid(final String pid) throws GwtKuraException {
         final WireService wireService = ServiceLocator.getInstance().getService(WireService.class);
-        final List<WireConfiguration> wireConfs = new ArrayList<WireConfiguration>();
+        final List<WireConfiguration> wireConfs = new ArrayList<>();
         for (final WireConfiguration wireConf : wireService.getWireConfigurations()) {
             final String receiverPid = wireConf.getReceiverPid();
             if (receiverPid.equalsIgnoreCase(pid)) {
@@ -247,7 +252,7 @@ public final class GwtWireServiceUtil {
      * @return the wire configurations from JSON
      */
     public static List<GwtWireConfiguration> getWireConfigurationsFromJson(final JsonObject json) {
-        final List<GwtWireConfiguration> list = new ArrayList<GwtWireConfiguration>();
+        final List<GwtWireConfiguration> list = new ArrayList<>();
         for (int i = 0; i < json.size(); i++) {
             final JsonObject jsonObject = json.get(String.valueOf(i)).asObject();
             final String emitter = jsonObject.getString("producer", null);

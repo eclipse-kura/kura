@@ -22,11 +22,11 @@ import java.util.List;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;
-import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireReceiver;
+import org.eclipse.kura.wire.WireService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -35,32 +35,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The Class WireComponentTrackerCustomizer represents an OSGi service tracker
- * to track Wire Components (Wire Receiver and Wire Emitter)
+ * The Class {@link WireComponentTrackerCustomizer} represents an OSGi service tracker
+ * to track all {@link WireComponent}s
  */
 final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<WireComponent, WireComponent> {
 
     private static final Logger logger = LoggerFactory.getLogger(WireComponentTrackerCustomizer.class);
-
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
     private final BundleContext context;
-
     private final List<String> wireEmitterPids;
-
     private final List<String> wireReceiverPids;
-
     private final WireServiceImpl wireService;
 
     /**
-     * Instantiates a new wire service tracker.
+     * Constructor
      *
      * @param context
-     *            the bundle context
+     *            the {@link BundleContext}
      * @param wireService
-     *            the wire service
-     * @throws InvalidSyntaxException
-     *             the invalid syntax exception
+     *            the {@link WireService}
      * @throws NullPointerException
      *             if any of the arguments is null
      */
@@ -73,7 +67,6 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
         this.wireReceiverPids = CollectionUtil.newArrayList();
         this.wireService = wireService;
         this.context = context;
-        searchPreExistingWireComponents();
     }
 
     /** {@inheritDoc} */
@@ -98,18 +91,18 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
     }
 
     /**
-     * Gets the wire emitter PIDs.
+     * Gets the {@link WireEmitter} PIDs
      *
-     * @return the wire emitter PIDs
+     * @return the {@link WireEmitter} PIDs
      */
     List<String> getWireEmitters() {
         return this.wireEmitterPids;
     }
 
     /**
-     * Gets the wire receiver PIDs.
+     * Gets the {@link WireReceiver} PIDs
      *
-     * @return the wire receiver PIDs
+     * @return the {@link WireReceiver} PIDs
      */
     List<String> getWireReceivers() {
         return this.wireReceiverPids;
@@ -142,17 +135,17 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
     }
 
     /**
-     * Removes all the Wire Configurations related to the provided PID
+     * Removes all the {@link WireConfiguration}s related to the provided PID
      * (kura.service.pid)
      *
      * @param pid
-     *            the wire component PID
+     *            the {@link WireComponent} PID
      * @throws NullPointerException
      *             if the argument is null
      */
     private void removeWireComponent(final String pid) {
         requireNonNull(pid, message.pidNonNull());
-        Iterator<WireConfiguration> wireConfigsIterator = this.wireService.getWireConfigurations().iterator();
+        final Iterator<WireConfiguration> wireConfigsIterator = this.wireService.getWireConfigurations().iterator();
         while (wireConfigsIterator.hasNext()) {
             final WireConfiguration wireConfiguration = wireConfigsIterator.next();
             if (wireConfiguration.getWire() != null && (pid.equals(wireConfiguration.getEmitterPid())
@@ -160,24 +153,5 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
                 this.wireService.deleteWireConfiguration(wireConfiguration);
             }
         }
-    }
-
-    /**
-     * Searches for the service instances of type Wire Components
-     */
-    private void searchPreExistingWireComponents() {
-        final ServiceReference<WireComponent>[] refs = ServiceUtil.getServiceReferences(this.context,
-                WireComponent.class, null);
-        for (final ServiceReference<?> ref : refs) {
-            final WireComponent wc = (WireComponent) this.context.getService(ref);
-            final Object pidProperty = ref.getProperty(KURA_SERVICE_PID);
-            if (wc instanceof WireEmitter) {
-                this.wireEmitterPids.add(String.valueOf(pidProperty));
-            }
-            if (wc instanceof WireReceiver) {
-                this.wireReceiverPids.add(String.valueOf(pidProperty));
-            }
-        }
-        ServiceUtil.ungetServiceReferences(this.context, refs);
     }
 }

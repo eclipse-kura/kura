@@ -26,6 +26,7 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -747,10 +748,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         final ConfigurationAdmin configAdmin = ServiceLocator.getInstance().getService(ConfigurationAdmin.class);
         final WireHelperService wireHelperService = ServiceLocator.getInstance().getService(WireHelperService.class);
         try {
-            final String servicePid = wireHelperService.getServicePid(pid);
+            final Optional<String> servicePid = wireHelperService.getServicePid(pid);
             Configuration conf = null;
-            if (servicePid != null) {
-                conf = configAdmin.getConfiguration(servicePid);
+            if (servicePid.isPresent()) {
+                conf = configAdmin.getConfiguration(servicePid.get());
             }
             Dictionary<String, Object> props = null;
             if (conf != null) {

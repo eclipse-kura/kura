@@ -25,6 +25,7 @@ import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -181,13 +182,14 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
         requireNonNull(emitterPid, message.emitterPidNonNull());
         requireNonNull(receiverPid, message.receiverPidNonNull());
 
-        final String emitterServicePid = this.wireHelperService.getServicePid(emitterPid);
-        final String receiverServicePid = this.wireHelperService.getServicePid(receiverPid);
-        if (nonNull(emitterServicePid) && nonNull(receiverServicePid) && isNull(conf.getWire())) {
+        final Optional<String> emitterServicePid = this.wireHelperService.getServicePid(emitterPid);
+        final Optional<String> receiverServicePid = this.wireHelperService.getServicePid(receiverPid);
+        if (emitterServicePid.isPresent() && receiverServicePid.isPresent() && isNull(conf.getWire())) {
             try {
-                final boolean found = checkWireExistence(emitterServicePid, receiverServicePid);
+                final boolean found = checkWireExistence(emitterServicePid.get(), receiverServicePid.get());
                 if (!found) {
-                    final Wire wire = this.wireAdmin.createWire(emitterServicePid, receiverServicePid, null);
+                    final Wire wire = this.wireAdmin.createWire(emitterServicePid.get(), receiverServicePid.get(),
+                            null);
                     conf.setWire(wire);
                 }
             } catch (final InvalidSyntaxException e) {
@@ -206,16 +208,16 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
         logger.info(message.creatingWire(emitterPid, receiverPid));
         WireConfiguration conf = null;
         if (!emitterPid.equals(receiverPid)) {
-            final String emitterServicePid = this.wireHelperService.getServicePid(emitterPid);
-            final String receiverServicePid = this.wireHelperService.getServicePid(receiverPid);
-            if (isNull(emitterServicePid) || isNull(receiverServicePid)) {
+            final Optional<String> emitterServicePid = this.wireHelperService.getServicePid(emitterPid);
+            final Optional<String> receiverServicePid = this.wireHelperService.getServicePid(receiverPid);
+            if (!emitterServicePid.isPresent() || !receiverServicePid.isPresent()) {
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, message.componentPidsNull());
             }
             if (!(this.wireHelperService.isEmitter(emitterPid) || this.wireHelperService.isReceiver(receiverPid))) {
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, message.componentsNotApplicable());
             }
             conf = new WireConfiguration(emitterPid, receiverPid);
-            final Wire wire = this.wireAdmin.createWire(emitterServicePid, receiverServicePid, null);
+            final Wire wire = this.wireAdmin.createWire(emitterServicePid.get(), receiverServicePid.get(), null);
             if (nonNull(wire)) {
                 conf.setWire(wire);
                 this.wireConfigs.add(conf);
@@ -288,11 +290,13 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
         requireNonNull(producerPid, message.emitterPidNonNull());
         requireNonNull(consumerPid, message.receiverPidNonNull());
 
-        final String emitterServicePid = this.wireHelperService.getServicePid(wireConfiguration.getEmitterPid());
-        final String receiverServicePid = this.wireHelperService.getServicePid(wireConfiguration.getReceiverPid());
+        final Optional<String> emitterServicePid = this.wireHelperService
+                .getServicePid(wireConfiguration.getEmitterPid());
+        final Optional<String> receiverServicePid = this.wireHelperService
+                .getServicePid(wireConfiguration.getReceiverPid());
 
-        if (nonNull(emitterServicePid) && nonNull(receiverServicePid) && producerPid.equals(emitterServicePid)
-                && consumerPid.equals(receiverServicePid)) {
+        if (emitterServicePid.isPresent() && receiverServicePid.isPresent()
+                && producerPid.equals(emitterServicePid.get()) && consumerPid.equals(receiverServicePid.get())) {
             // just to make sure the deletion does not result in ConcurrentModification exception
             synchronized (this.wireConfigs) {
                 for (final Iterator<WireConfiguration> iter = this.wireConfigs.iterator(); iter.hasNext();) {

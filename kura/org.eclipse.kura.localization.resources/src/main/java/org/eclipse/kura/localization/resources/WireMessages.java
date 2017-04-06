@@ -58,6 +58,12 @@ public interface WireMessages {
     @En("Activating Timer...Done")
     public String activatingTimerDone();
 
+    @En("Activating Fifo...")
+    public String activatingFifo();
+
+    @En("Activating Fifo...Done")
+    public String activatingFifoDone();
+
     @En("Activating Wire Asset...")
     public String activatingWireAsset();
 
@@ -213,6 +219,12 @@ public interface WireMessages {
 
     @En("Deactivating DB Wire Record Store...Done")
     public String deactivatingStoreDone();
+
+    @En("Dectivating Fifo...")
+    public String deactivatingFifo();
+
+    @En("Dectivating Fifo...Done")
+    public String deactivatingFifoDone();
 
     @En("Dectivating Timer...")
     public String deactivatingTimer();
@@ -580,6 +592,12 @@ public interface WireMessages {
     @En("Updating DB Wire Record Store...Done")
     public String updatingStoreDone();
 
+    @En("Updating Fifo...")
+    public String updatingFifo();
+
+    @En("Updating Fifo...Done")
+    public String updatingFifoDone();
+
     @En("Updating Timer...")
     public String updatingTimer();
 
@@ -652,4 +670,12 @@ public interface WireMessages {
     @En("Wire supported component cannot be null")
     public String wireSupportedComponentNonNull();
 
+    @En("Unexpected exception while adding new envelope to queue")
+    public String fifoUnexpectedExceptionWhileSubmitting();
+
+    @En("Interrupted while adding new envelope to queue")
+    public String fifoInterruptedWhileSubmitting();
+
+    @En("Unexpected exception while dispatching envelope")
+    public String fifoUnexpectedExceptionWhileDispatching();
 }

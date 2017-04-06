@@ -1,0 +1,32 @@
+<project name="build_opcua_dp" default="build-dp" basedir="../../../">
+
+	<target name="build-dp">
+    	<echo message="Building the DP for opcua" />
+
+		<!-- Create the manifest -->
+		<echo file="${project.build.directory}/org.eclipse.kura.driver.opcua_${org.eclipse.kura.driver.opcua.provider.version}/dp_stage/META-INF/MANIFEST.MF" append="false">Manifest-Version: 1.0
+DeploymentPackage-SymbolicName: org.eclipse.kura.driver.opcua
+DeploymentPackage-Version: ${org.eclipse.kura.driver.opcua.provider.version}
+
+Name: org.eclipse.kura.driver.opcua.localization_${org.eclipse.kura.driver.opcua.localization.version}.jar
+Bundle-SymbolicName: org.eclipse.kura.driver.opcua.localization;singleton:=true
+Bundle-Version: ${org.eclipse.kura.driver.opcua.localization.version}
+
+Name: org.eclipse.kura.driver.opcua.provider_${org.eclipse.kura.driver.opcua.provider.version}.jar
+Bundle-SymbolicName: org.eclipse.kura.driver.opcua.provider
+Bundle-Version: ${org.eclipse.kura.driver.opcua.provider.version}</echo>
+
+	<!-- move everything into place -->
+        <copy    file="${project.build.directory}/plugins/org.eclipse.kura.driver.opcua.localization_${org.eclipse.kura.driver.opcua.localization.version}.jar"
+                 todir="${project.build.directory}/org.eclipse.kura.driver.opcua_${org.eclipse.kura.driver.opcua.provider.version}/dp_stage" />
+        
+        <copy    file="${project.build.directory}/plugins/org.eclipse.kura.driver.opcua.provider_${org.eclipse.kura.driver.opcua.provider.version}.jar"
+                 todir="${project.build.directory}/org.eclipse.kura.driver.opcua_${org.eclipse.kura.driver.opcua.provider.version}/dp_stage" />
+	
+
+        <jar destfile="${project.build.directory}/org.eclipse.kura.driver.opcua_${org.eclipse.kura.driver.opcua.provider.version}.dp"
+		manifest="${project.build.directory}/org.eclipse.kura.driver.opcua_${org.eclipse.kura.driver.opcua.provider.version}/dp_stage/META-INF/MANIFEST.MF"
+                basedir="${project.build.directory}/org.eclipse.kura.driver.opcua_${org.eclipse.kura.driver.opcua.provider.version}/dp_stage" />	
+    </target>
+    
+</project>

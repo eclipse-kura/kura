@@ -55,6 +55,9 @@
         <module>org.eclipse.kura.deployment.update</module>
 
         <module>org.eclipse.kura.driver.helper.provider</module>
+        
+        <module>org.eclipse.kura.driver.opcua.localization</module>
+        <module>org.eclipse.kura.driver.opcua.provider</module>
 
         <module>org.eclipse.kura.linux.bluetooth</module>
         <module>org.eclipse.kura.linux.clock</module>

@@ -20,16 +20,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.asset.AssetConfiguration;
-import org.eclipse.kura.asset.Channel;
-import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.driver.Driver;
-import org.eclipse.kura.driver.DriverConstants;
 import org.eclipse.kura.driver.Driver.ConnectionException;
-import org.eclipse.kura.driver.DriverFlag;
-import org.eclipse.kura.driver.DriverRecord;
-import org.eclipse.kura.driver.DriverStatus;
+import org.eclipse.kura.channel.Channel;
+import org.eclipse.kura.channel.ChannelType;
+import org.eclipse.kura.channel.ChannelFlag;
+import org.eclipse.kura.channel.ChannelRecord;
+import org.eclipse.kura.channel.ChannelStatus;
 import org.eclipse.kura.type.BooleanValue;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.LongValue;
@@ -84,14 +83,14 @@ public class WireAssetTest {
             Object[] arguments = invocation.getArguments();
             assertEquals(1, arguments.length);
 
-            List<DriverRecord> records = (List<DriverRecord>) arguments[0];
+            List<ChannelRecord> records = (List<ChannelRecord>) arguments[0];
 
             assertEquals(1, records.size());
 
-            DriverRecord record = records.get(0);
+            ChannelRecord record = records.get(0);
             record.setValue(new BooleanValue(true));
             record.setTimestamp(42);
-            record.setDriverStatus(new DriverStatus(DriverFlag.READ_SUCCESSFUL));
+            record.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
 
             return null;
         }).when(mockDriver).read(any());
@@ -100,19 +99,18 @@ public class WireAssetTest {
             Object[] arguments = invocation.getArguments();
             assertEquals(1, arguments.length);
 
-            List<DriverRecord> records = (List<DriverRecord>) arguments[0];
+            List<ChannelRecord> records = (List<ChannelRecord>) arguments[0];
 
             assertEquals(1, records.size());
 
-            DriverRecord record = records.get(0);
-            Map<String, Object> channelConfig = record.getChannelConfig();
-            assertEquals("writeChannel2", channelConfig.get(DriverConstants.CHANNEL_NAME.value()));
-            assertEquals(DataType.BOOLEAN, channelConfig.get(DriverConstants.CHANNEL_VALUE_TYPE.value()));
+            ChannelRecord record = records.get(0);
+            assertEquals("writeChannel2", record.getChannelName());
+            assertEquals(DataType.BOOLEAN, record.getValueType());
 
             assertEquals(new BooleanValue(true), record.getValue());
 
             record.setTimestamp(111);
-            record.setDriverStatus(new DriverStatus(DriverFlag.WRITE_SUCCESSFUL));
+            record.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
 
             return null;
         }).when(mockDriver).write(any());

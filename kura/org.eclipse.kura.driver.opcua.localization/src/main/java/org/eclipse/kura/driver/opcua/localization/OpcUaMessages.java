@@ -81,10 +81,10 @@ public interface OpcUaMessages {
     @En("OPC-UA Read Operation Failed")
     public String readFailed();
 
-    @En("Driver Record cannot be null")
+    @En("Channel Record cannot be null")
     public String recordNonNull();
 
-    @En("Driver Record list cannot be null")
+    @En("Channel Record list cannot be null")
     public String recordListNonNull();
 
     @En("Updating OPC-UA Driver.....")

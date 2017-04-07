@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.asset.provider;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DESC_PROP;
 import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
@@ -26,8 +27,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.kura.asset.AssetConfiguration;
-import org.eclipse.kura.asset.Channel;
-import org.eclipse.kura.asset.ChannelType;
+import org.eclipse.kura.asset.AssetConstants;
+import org.eclipse.kura.channel.Channel;
+import org.eclipse.kura.channel.ChannelType;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.AssetMessages;
 import org.eclipse.kura.type.DataType;
@@ -98,6 +100,29 @@ public final class AssetOptions {
     public String toString() {
         return "AssetOptions [Asset Description=" + this.assetDescription + ", Channels=" + this.channels
                 + ", Driver ID=" + this.driverPid + "]";
+    }
+
+    /**
+     * Determines if the provided String is suitable to be used as a channel name;
+     * 
+     * @param channelName
+     *            The String to be validated.
+     * @return
+     *         the result of the validation.
+     */
+    private boolean isValidChannelName(String channelName) {
+        if (isNull(channelName))
+            return false;
+
+        final String prohibitedChars = AssetConstants.CHANNEL_NAME_PROHIBITED_CHARS.value();
+
+        for (int i = 0; i < channelName.length(); i++) {
+            if (prohibitedChars.indexOf(channelName.charAt(i)) != -1) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -190,7 +215,7 @@ public final class AssetOptions {
                 continue;
             }
             alreadyProcessedChannelNames.add(channelName);
-            if (!Channel.isValidChannelName(channelName)) {
+            if (!isValidChannelName(channelName)) {
                 continue;
             }
             Channel channel = extractChannel(channelName, properties);

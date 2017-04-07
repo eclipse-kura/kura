@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,23 +11,22 @@
  *  Amit Kumar Mondal
  *
  *******************************************************************************/
-package org.eclipse.kura.asset;
+package org.eclipse.kura.channel;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.DataType;
+import org.eclipse.kura.type.TypedValue;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * The Class Channel represents a communication channel of an asset. The
+ * The Class Channel represents a communication channel. The
  * communication channel has all the required configuration to perform specific
- * operation (read/write/monitor).
- *
- * @see AssetConfiguration
+ * operation (read/write).
  *
  * @noextend This class is not intended to be extended by clients.
  * @since 1.2
@@ -54,7 +53,7 @@ public class Channel {
      * Instantiates a new channel.
      *
      * @param name
-     *            the name
+     *            the name for this channel
      * @param type
      *            the type
      * @param valueType
@@ -63,8 +62,6 @@ public class Channel {
      *            the configuration
      * @throws NullPointerException
      *             if any of the arguments is null
-     * @throws IllegalArgumentException
-     *             if channel name is not valid
      */
     public Channel(final String name, final ChannelType type, final DataType valueType,
             final Map<String, Object> config) {
@@ -73,17 +70,10 @@ public class Channel {
         requireNonNull(valueType, "Channel value type cannot be null");
         requireNonNull(config, "Channel configuration cannot be null");
 
-        if (!Channel.isValidChannelName(name)) {
-            throw new IllegalArgumentException("Channel name is not valid");
-        }
-
-        this.configuration = config;
+        this.configuration = Collections.unmodifiableMap(config);
         this.name = name;
         this.type = type;
         this.valueType = valueType;
-        config.put(AssetConstants.NAME.value(), name);
-        config.put(AssetConstants.TYPE.value(), type.toString());
-        config.put(AssetConstants.VALUE_TYPE.value(), valueType);
     }
 
     /**
@@ -168,7 +158,45 @@ public class Channel {
                 + ", valueType=" + this.valueType + "]";
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Creates a new {@link ChannelRecord} that represents a read request
+     * for the value of this {@code Channel}.
+     * 
+     * @return
+     *         the {@link ChannelRecord}
+     */
+    public ChannelRecord createReadRecord() {
+        ChannelRecord result = ChannelRecord.createReadRecord(this.name, this.valueType);
+        result.setChannelConfig(this.configuration);
+
+        return result;
+    }
+
+    /**
+     * Creates a new {@link ChannelRecord} that represents a write request for this
+     * {@code Channel}.
+     * 
+     * @param vlaue
+     *            The value to be written.
+     * @throws IllegalArgumentException
+     *             If the {@link DataType} of the provided value differs from the data type
+     *             of this channel
+     * @throws NullPointerException
+     *             If the provided value is null
+     * @return
+     *         the {@link CheannelRecord}
+     */
+    public ChannelRecord createWriteRecord(TypedValue<?> value) {
+        requireNonNull(value, "Value cannot be null");
+        if (value.getType() != valueType) {
+            throw new IllegalArgumentException("The value type of the argument must match the channel value type");
+        }
+        ChannelRecord result = ChannelRecord.createWriteRecord(this.name, value);
+        result.setChannelConfig(this.configuration);
+
+        return result;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -180,30 +208,6 @@ public class Channel {
         return result;
     }
 
-    /**
-     * Determines if the provided String is suitable to be used as a channel name;
-     * 
-     * @param channelName
-     *            The String to be validated.
-     * @return
-     *         the result of the validation.
-     */
-    public static boolean isValidChannelName(String channelName) {
-        if (isNull(channelName) || (channelName = channelName.trim()).isEmpty())
-            return false;
-
-        final String prohibitedChars = AssetConstants.CHANNEL_NAME_PROHIBITED_CHARS.value();
-
-        for (int i = 0; i < channelName.length(); i++) {
-            if (prohibitedChars.indexOf(channelName.charAt(i)) != -1) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

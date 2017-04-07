@@ -12,9 +12,12 @@ package org.eclipse.kura.asset;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
-import org.eclipse.kura.asset.listener.AssetListener;
+import org.eclipse.kura.channel.ChannelFlag;
+import org.eclipse.kura.channel.ChannelRecord;
+import org.eclipse.kura.channel.listener.ChannelListener;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -44,11 +47,10 @@ public interface Asset {
 
     /**
      * Reads the communication channels identified by the set of channel names provided as argument.
-     * The read result is returned as a list of asset records.
+     * The read result is returned as a list of channel records.
      * If for some reason the value of a channel cannot be read,
-     * an asset record containing a proper asset flag should be returned anyways.
-     * The asset flag shall best describe the reason of failure. If no value is set
-     * the default flag is {@code AssetFlag#ASSET_ERROR_UNSPECIFIED}.
+     * a channel record containing a proper channel flag should be returned anyways.
+     * The channel flag shall best describe the reason of failure.
      * If the connection to the asset is interrupted, then any necessary resources
      * that correspond to this connection should be cleaned up and a {@code KuraException} shall be
      * thrown.
@@ -67,14 +69,14 @@ public interface Asset {
      *             in the thrown {@link KuraException}.
      * @throws NullPointerException
      *             if argument is null
-     * @return the list of asset records which comprises the currently read
+     * @return the list of channel records which comprises the currently read
      *         value in case of success or the reason of failure
      */
-    public List<AssetRecord> read(Set<String> channelNames) throws KuraException;
+    public List<ChannelRecord> read(Set<String> channelNames) throws KuraException;
 
     /**
      * Performs a read on all READ or READ_WRITE channels that are defined on this asset and returns
-     * the result as a list of {@link AssetRecord} instances.
+     * the result as a list of {@link ChannelRecord} instances.
      * 
      * @see Asset#read(List)
      *
@@ -86,47 +88,47 @@ public interface Asset {
      *             if the connection to the asset was interrupted, then error
      *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
      *             in the thrown {@link KuraException}.
-     * @return the list of asset records which comprises the currently read
+     * @return the list of channel records which comprises the currently read
      *         value in case of success or the reason of failure
      */
-    public List<AssetRecord> readAllChannels() throws KuraException;
+    public List<ChannelRecord> readAllChannels() throws KuraException;
 
     /**
-     * Registers asset listener for the provided channel name for a monitor
+     * Registers a channel listener for the provided channel name for a monitor
      * operation on it.
      *
      * @param channelName
      *            the channel name. The channel name
      *            must be unique for every channel belonging to an asset.
      *            Channel names are case sensitive.
-     * @param assetListener
-     *            the asset listener
+     * @param channelListener
+     *            the channel listener
      * @throws KuraRuntimeException
      *             if the method is not implemented by the asset then specific
-     *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
+     *             error code {@link KuraErrorCode#OPERATION_NOT_SUPPORTED}
      *             needs to be set in the thrown {@link KuraRuntimeException}
      * @throws KuraException
      *             if the connection to the asset was interrupted, then error
-     *             code {@code KuraErrorCode#CONNECTION_FAILED} needs to be set
+     *             code {@link KuraErrorCode#CONNECTION_FAILED} needs to be set
      *             in the thrown {@link KuraException} and if the channel is not
-     *             present, error code {@code KuraErrorCode#INTERNAL_ERROR}
+     *             present, error code {@link KuraErrorCode#INTERNAL_ERROR}
      *             needs to be set in the thrown {@link KuraException}. For any
      *             other internal exception, then error code
-     *             {@code KuraErrorCode#INTERNAL_ERROR} will be set.
+     *             {@link KuraErrorCode#INTERNAL_ERROR} will be set.
      * @throws NullPointerException
      *             if any of the arguments is null
      * @throws IllegalArgumentException
      *             If the provided channel name is not present in the configuration
      *             of this asset
      */
-    public void registerAssetListener(String channelName, AssetListener assetListener) throws KuraException;
+    public void registerChannelListener(String channelName, ChannelListener channelListener) throws KuraException;
 
     /**
-     * Unregisters a already registered asset listener which has been registered
+     * Unregisters a already registered channel listener which has been registered
      * for a monitor operation
      *
-     * @param assetListener
-     *            the asset listener to unregister
+     * @param channelListener
+     *            the channel listener to unregister
      * @throws KuraRuntimeException
      *             if the method is not implemented by the asset then specific
      *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
@@ -137,21 +139,21 @@ public interface Asset {
      * @throws NullPointerException
      *             if argument is null
      */
-    public void unregisterAssetListener(AssetListener assetListener) throws KuraException;
+    public void unregisterChannelListener(ChannelListener channelListener) throws KuraException;
 
     /**
      * Writes the data to the provided communication channels that correspond to
-     * the given asset records. The write result is returned by setting the
-     * asset flag {@code AssetFlag#WRITE_SUCCESSFUL} in the provided asset
+     * the given channel records. The write result is returned by setting the
+     * channel flag {@link ChannelFlag#SUCCESS} in the provided channel
      * records. If the connection to the asset is interrupted, then any
      * necessary resources that correspond to this connection should be cleaned
-     * up and a {@code KuraException} with a suitable error code shall be
+     * up and a {@link KuraException} with a suitable error code shall be
      * thrown.
      *
-     * @param assetRecords
-     *            the asset records hold the information of what channels are to
+     * @param channelRecords
+     *            the channel records hold the information of what channels are to
      *            be written and the values that are to be written. They will be
-     *            filled by this function with a asset flag stating whether the
+     *            filled by this function with a channel flag stating whether the
      *            write process is successful or not.
      * @throws KuraRuntimeException
      *             if the method is not implemented by the asset then specific
@@ -163,9 +165,7 @@ public interface Asset {
      *             in the thrown {@link KuraException}
      * @throws NullPointerException
      *             if argument is null
-     * @return the list of asset records which comprises the status of the write
-     *         operations
      */
-    public List<AssetRecord> write(List<AssetRecord> assetRecords) throws KuraException;
+    public void write(List<ChannelRecord> channelRecords) throws KuraException;
 
 }

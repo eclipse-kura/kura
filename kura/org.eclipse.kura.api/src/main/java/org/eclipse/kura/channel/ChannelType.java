@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,7 +11,7 @@
  *  Amit Kumar Mondal
  *
  *******************************************************************************/
-package org.eclipse.kura.asset;
+package org.eclipse.kura.channel;
 
 /**
  * This provides the necessary constants to denote the type of the channel

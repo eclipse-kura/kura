@@ -40,11 +40,11 @@ public interface AssetCloudletMessages {
     @En("Asset PID cannot be null")
     public String assetPidNonNull();
 
-    @En("Asset Record cannot be null")
-    public String assetRecordNonNull();
+    @En("Channel Record cannot be null")
+    public String channelRecordNonNull();
 
-    @En("List of asset records cannot be null")
-    public String assetRecordsNonNull();
+    @En("List of channel records cannot be null")
+    public String channelRecordsNonNull();
 
     @En("Asset has been removed by Asset Cloudlet Tracker....")
     public String assetRemoved();

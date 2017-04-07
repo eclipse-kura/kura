@@ -111,7 +111,6 @@ public final class WireServiceTest {
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
-    @Test
     public void testGetConfiguration() throws KuraException {
         s_wireService.createWireConfiguration(emitterPid, receiverPid);
 

@@ -56,7 +56,7 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
      * @param wireService
      *            the {@link WireService}
      * @throws NullPointerException
-     *             if any of the arguments is null
+     *             if any of the arguments is {@code null}
      */
     WireComponentTrackerCustomizer(final BundleContext context, final WireServiceImpl wireService)
             throws InvalidSyntaxException {
@@ -83,26 +83,24 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
             this.wireReceiverPids.add(property);
             logger.debug(message.registeringReceiver(property));
         }
-
         this.wireService.createWires();
-
         logger.debug(message.addingWireComponentDone());
         return service;
     }
 
     /**
-     * Gets the {@link WireEmitter} PIDs
+     * Gets the {@link WireEmitter} PIDs ({@code kura.service.pid})
      *
-     * @return the {@link WireEmitter} PIDs
+     * @return the {@link WireEmitter} PIDs ({@code kura.service.pid})
      */
     List<String> getWireEmitters() {
         return this.wireEmitterPids;
     }
 
     /**
-     * Gets the {@link WireReceiver} PIDs
+     * Gets the {@link WireReceiver} PIDs ({@code kura.service.pid})
      *
-     * @return the {@link WireReceiver} PIDs
+     * @return the {@link WireReceiver} PIDs ({@code kura.service.pid})
      */
     List<String> getWireReceivers() {
         return this.wireReceiverPids;
@@ -136,12 +134,12 @@ final class WireComponentTrackerCustomizer implements ServiceTrackerCustomizer<W
 
     /**
      * Removes all the {@link WireConfiguration}s related to the provided PID
-     * (kura.service.pid)
+     * ({@code kura.service.pid})
      *
      * @param pid
-     *            the {@link WireComponent} PID
+     *            the {@link WireComponent} PID ({@code kura.service.pid})
      * @throws NullPointerException
-     *             if the argument is null
+     *             if the argument is {@code null}
      */
     private void removeWireComponent(final String pid) {
         requireNonNull(pid, message.pidNonNull());

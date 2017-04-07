@@ -5,25 +5,28 @@
  *   are made available under the terms of the Eclipse Public License v1.0
  *   which accompanies this distribution, and is available at
  *   http://www.eclipse.org/legal/epl-v10.html
+ *   
+ *   Contributors:
+ *      Eurotech
+ *      Amit Kumar Mondal
  ******************************************************************************/
 package org.eclipse.kura.internal.wire;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.eclipse.kura.internal.wire.WireConstants.EMITTER_POSTFIX;
+import static org.eclipse.kura.internal.wire.WireConstants.RECEIVER_POSTFIX;
+import static org.eclipse.kura.internal.wire.WireConstants.FILTER_POSTFIX;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.localization.LocalizationAdapter;
-import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.junit.Test;
 
 public class WireServiceOptionsTest {
-
-    private static final WireMessages messages = LocalizationAdapter.adapt(WireMessages.class);
 
     @Test
     public void testGetInstanceEmpty() {
@@ -51,8 +54,8 @@ public class WireServiceOptionsTest {
     public void testGetInstancePartialSeparator() {
         Map<String, Object> properties = new HashMap<String, Object>();
 
-        properties.put("1." + messages.emitter(), "emitterPid"); // 1.emitter
-        properties.put("1." + messages.receiver(), "receiverPid"); // 1.receiver
+        properties.put("1." + EMITTER_POSTFIX.value(), "emitterPid"); // 1.emitter
+        properties.put("1." + RECEIVER_POSTFIX.value(), "receiverPid"); // 1.receiver
         properties.put("1filter", "filter");
 
         WireServiceOptions options = WireServiceOptions.getInstance(properties);
@@ -71,9 +74,9 @@ public class WireServiceOptionsTest {
 
         Map<String, Object> properties = new HashMap<String, Object>();
 
-        properties.put("1." + messages.emitter(), "emitterPid"); // 1.emitter
-        properties.put("1." + messages.receiver(), "receiverPid"); // 1.receiver
-        properties.put("1." + messages.filter(), "filter"); // 1.filter
+        properties.put("1." + EMITTER_POSTFIX.value(), "emitterPid"); // 1.emitter
+        properties.put("1." + RECEIVER_POSTFIX.value(), "receiverPid"); // 1.receiver
+        properties.put("1." + FILTER_POSTFIX.value(), "filter"); // 1.filter
 
         WireServiceOptions options = WireServiceOptions.getInstance(properties);
 

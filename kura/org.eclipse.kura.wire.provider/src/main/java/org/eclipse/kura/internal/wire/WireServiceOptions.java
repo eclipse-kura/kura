@@ -14,6 +14,9 @@
 package org.eclipse.kura.internal.wire;
 
 import static java.util.Objects.requireNonNull;
+import static org.eclipse.kura.internal.wire.WireConstants.EMITTER_POSTFIX;
+import static org.eclipse.kura.internal.wire.WireConstants.FILTER_POSTFIX;
+import static org.eclipse.kura.internal.wire.WireConstants.RECEIVER_POSTFIX;
 
 import java.util.Iterator;
 import java.util.List;
@@ -36,20 +39,20 @@ final class WireServiceOptions {
     private static final String PATTERN = "%s.";
 
     /**
-     * The separator to be used for storing Wire Configuration properties in a
-     * flat style
+     * The separator to be used for storing {@link WireConfiguration} properties in a
+     * flattened format
      */
     public static final String SEPARATOR = ".";
 
     private final List<WireConfiguration> wireConfigurations;
 
     /**
-     * Instantiates a new wire service options.
+     * Instantiates a new {@link WireServiceOptions}.
      *
      * @param configurations
-     *            the list of Wire Configurations
+     *            the list of {@link WireConfiguration}s
      * @throws NullPointerException
-     *             if provided configurations is null
+     *             if provided list of {@link WireConfiguration}s is {@code null}
      */
     private WireServiceOptions(final List<WireConfiguration> configurations) {
         requireNonNull(configurations, message.configurationNonNull());
@@ -61,14 +64,17 @@ final class WireServiceOptions {
      *
      * @param properties
      *            the properties
-     * @param helperService
-     *            the Wire Helper Service instance
-     * @return the wire service options
+     * @return the {@link WireServiceOptions}
      * @throws NullPointerException
-     *             if provided properties is null
+     *             if provided properties is {@code null}
      */
     static WireServiceOptions getInstance(final Map<String, Object> properties) {
         requireNonNull(properties, message.wireServicePropNonNull());
+
+        final String emitterPostfix = EMITTER_POSTFIX.value();
+        final String receiverPostfix = RECEIVER_POSTFIX.value();
+        final String filterPostfix = FILTER_POSTFIX.value();
+
         final List<WireConfiguration> wireConfs = CollectionUtil.newCopyOnWriteArrayList();
         final Set<Long> wireIds = CollectionUtil.newHashSet();
         for (final Map.Entry<String, Object> entry : properties.entrySet()) {
@@ -91,14 +97,14 @@ final class WireServiceOptions {
                 if (!key.contains(SEPARATOR)) {
                     continue;
                 }
-                if ((key.startsWith(String.format(PATTERN, wireConfId)))) {
-                    if (key.contains(message.emitter())) {
+                if (key.startsWith(String.format(PATTERN, wireConfId))) {
+                    if (key.contains(emitterPostfix)) {
                         emitterPid = value;
                     }
-                    if (key.contains(message.receiver())) {
+                    if (key.contains(receiverPostfix)) {
                         receiverPid = value;
                     }
-                    if (key.contains(message.filter())) {
+                    if (key.contains(filterPostfix)) {
                         filter = value;
                     }
                 }

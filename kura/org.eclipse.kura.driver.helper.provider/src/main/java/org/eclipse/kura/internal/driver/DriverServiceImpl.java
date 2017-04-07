@@ -19,6 +19,7 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.DriverService;
@@ -34,55 +35,39 @@ import org.osgi.framework.ServiceReference;
  */
 public final class DriverServiceImpl implements DriverService {
 
-    /** Localization Resource */
-    private static final AssetMessages message = LocalizationAdapter.adapt(AssetMessages.class);
+	/** Localization Resource */
+	private static final AssetMessages message = LocalizationAdapter.adapt(AssetMessages.class);
 
-    /** {@inheritDoc} */
-    @Override
-    public Optional<Driver> getDriver(final String driverPid) {
-        requireNonNull(driverPid, message.driverPidNonNull());
-        final String filter = "(" + KURA_SERVICE_PID + "=" + driverPid + ")";
-        try (ServiceSupplier<Driver> driver = ServiceSupplier.supply(Driver.class, filter)) {
-            return firstElement(driver.get());
-        }
-    }
+	/** {@inheritDoc} */
+	@Override
+	public Optional<Driver> getDriver(final String driverPid) {
+		requireNonNull(driverPid, message.driverPidNonNull());
+		final String filter = "(" + KURA_SERVICE_PID + "=" + driverPid + ")";
+		try (ServiceSupplier<Driver> driver = ServiceSupplier.supply(Driver.class, filter)) {
+			return driver.get().findFirst();
+		}
+	}
 
-    /** {@inheritDoc} */
-    @Override
-    public Optional<String> getDriverPid(final Driver driver) {
-        requireNonNull(driver, message.driverNonNull());
-        final Collection<ServiceReference<Driver>> refs = ServiceUtil.getServiceReferences(Driver.class, null);
-        for (final ServiceReference<Driver> ref : refs) {
-            try (ServiceSupplier<Driver> driverRef = ServiceSupplier.supply(ref)) {
-                final Optional<Driver> driverOptional = firstElement(driverRef.get());
-                if (driverOptional.isPresent() && driverOptional.get() == driver) {
-                    return Optional.of(ref.getProperty(KURA_SERVICE_PID).toString());
-                }
-            }
-        }
-        return Optional.empty();
-    }
+	/** {@inheritDoc} */
+	@Override
+	public Optional<String> getDriverPid(final Driver driver) {
+		requireNonNull(driver, message.driverNonNull());
+		final Collection<ServiceReference<Driver>> refs = ServiceUtil.getServiceReferences(Driver.class, null);
+		for (final ServiceReference<Driver> ref : refs) {
+			try (ServiceSupplier<Driver> driverRef = ServiceSupplier.supply(ref)) {
+				final Optional<Driver> driverOptional = driverRef.get().findFirst();
+				return driverOptional.filter(c -> c == driver).map(r -> ref.getProperty(KURA_SERVICE_PID).toString());
+			}
+		}
+		return Optional.empty();
+	}
 
-    /** {@inheritDoc} */
-    @Override
-    public List<Driver> listDrivers() {
-        try (ServiceSupplier<Driver> driverRef = ServiceSupplier.supply(Driver.class, null)) {
-            return driverRef.get();
-        }
-    }
-
-    /**
-     * Returns the first element from the provided {@link List}
-     *
-     * @param elements
-     *            the {@link List} instance
-     * @return the first element if the {@link List} is not empty
-     */
-    private static <T> Optional<T> firstElement(final List<T> elements) {
-        if (elements.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(elements.get(0));
-    }
+	/** {@inheritDoc} */
+	@Override
+	public List<Driver> listDrivers() {
+		try (ServiceSupplier<Driver> driverRef = ServiceSupplier.supply(Driver.class, null)) {
+			return driverRef.get().collect(Collectors.toList());
+		}
+	}
 
 }

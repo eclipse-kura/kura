@@ -16,60 +16,66 @@ package org.eclipse.kura.localization.resources;
 import com.github.rodionmoiseev.c10n.annotations.En;
 
 /**
- * UtilMessages is considered to be a localization resource for {@code Util}
- * bundle. It contains all the necessary translation for every string literals
- * mentioned in {@code Utility} bundle.
+ * {@link UtilMessages} is considered to be a localization resource for
+ * {@code Utility} bundle. It contains all the necessary translations for every
+ * string literals mentioned in {@code Utility} bundle.
  */
 public interface UtilMessages {
 
-    @En("Bundle context cannot be null.")
-    public String bundleContextNonNull();
+	@En("Service supplier instance has already been closed.")
+	public String alreadyClosed();
 
-    @En("Class intance name cannot be null.")
-    public String clazzNonNull();
+	@En("Bundle context cannot be null.")
+	public String bundleContextNonNull();
 
-    @En("Collection cannot be null.")
-    public String collectionNonNull();
+	@En("Class intance name cannot be null.")
+	public String clazzNonNull();
 
-    @En("Delimiter cannot be null.")
-    public String delimiterNonNull();
+	@En("Exception while closing ServiceSupplier.")
+	public String closeFailed();
 
-    @En("Dictionary cannot be null.")
-    public String dictionaryNonNull();
+	@En("Collection cannot be null.")
+	public String collectionNonNull();
 
-    @En("Service instance cannot be retrieved")
-    public String errorRetrievingService();
+	@En("Delimiter cannot be null.")
+	public String delimiterNonNull();
 
-    @En("Filter cannot be null.")
-    public String filterNonNull();
+	@En("Dictionary cannot be null.")
+	public String dictionaryNonNull();
 
-    @En("Initial Array size must not be less than 0.")
-    public String initialArraySize();
+	@En("Service instance cannot be retrieved")
+	public String errorRetrievingService();
 
-    @En("Iterable elements cannot be null.")
-    public String iterableNonNull();
+	@En("Filter cannot be null.")
+	public String filterNonNull();
 
-    @En("Map cannot be null.")
-    public String mapNonNull();
+	@En("Initial array size must not be less than 0.")
+	public String initialArraySize();
 
-    @En("Could not acquire bundle context for {0}")
-    public String noBundleContext(String clazz);
+	@En("Iterable elements cannot be null.")
+	public String iterableNonNull();
 
-    @En("Service Reference cannot be null.")
-    public String referenceNonNull();
+	@En("Map cannot be null.")
+	public String mapNonNull();
 
-    @En("Service References cannot be null.")
-    public String referencesNonNull();
+	@En("Could not acquire bundle context for {0}")
+	public String noBundleContext(String clazz);
 
-    @En("Target Class Instance cannot be null")
-    public String targetNonNull();
+	@En("Service reference cannot be null.")
+	public String referenceNonNull();
 
-    @En("Timeout period cannot be zero or negative")
-    public String timeoutError();
+	@En("Service references cannot be null.")
+	public String referencesNonNull();
 
-    @En("TimeUnit cannot be null")
-    public String timeunitNonNull();
+	@En("Target Class Instance cannot be null.")
+	public String targetNonNull();
 
-    @En("Value cannot be null.")
-    public String valueNonNull();
+	@En("Timeout period cannot be zero or negative.")
+	public String timeoutError();
+
+	@En("TimeUnit cannot be null.")
+	public String timeunitNonNull();
+
+	@En("Value cannot be null.")
+	public String valueNonNull();
 }

@@ -16,6 +16,9 @@ package org.eclipse.kura.internal.wire;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
+import static org.eclipse.kura.internal.wire.WireConstants.EMITTER_POSTFIX;
+import static org.eclipse.kura.internal.wire.WireConstants.FILTER_POSTFIX;
+import static org.eclipse.kura.internal.wire.WireConstants.RECEIVER_POSTFIX;
 import static org.eclipse.kura.internal.wire.WireServiceOptions.SEPARATOR;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_CONSUMER_PID;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_PRODUCER_PID;
@@ -39,7 +42,9 @@ import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireConfiguration;
+import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireHelperService;
+import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireService;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
@@ -98,10 +103,10 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
             this.wireComponentServiceTracker = new ServiceTracker<>(componentContext.getBundleContext(),
                     WireComponent.class, this.wireComponentTrackerCustomizer);
             this.wireComponentServiceTracker.open();
+            createWires();
         } catch (final InvalidSyntaxException exception) {
             logger.error(message.error(), exception);
         }
-        createWires();
         logger.debug(message.activatingWireServiceDone());
     }
 
@@ -126,75 +131,6 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
     public void bindWireHelperService(final WireHelperService wireHelperService) {
         if (isNull(this.wireHelperService)) {
             this.wireHelperService = wireHelperService;
-        }
-    }
-
-    /**
-     * Checks for existence of {@link WireAdmin}'s {@link Wire} instance between the
-     * provided Emitter Service PID and Receiver Service PID
-     *
-     * @param emitterServicePid
-     *            Wire Emitter Service PID {@code service.pid}
-     * @param receiverServicePid
-     *            Wire Receiver Service PID {@code service.pid}
-     * @return true if exists, otherwise false
-     * @throws InvalidSyntaxException
-     *             If the {@link Wire} filter has an invalid LDAP syntax ({@code null} accepted}
-     * @throws NullPointerException
-     *             if any of the provided arguments is null
-     */
-    private boolean checkWireExistence(final String emitterServicePid, final String receiverServicePid)
-            throws InvalidSyntaxException {
-        requireNonNull(emitterServicePid, message.emitterServicePidNonNull());
-        requireNonNull(receiverServicePid, message.receiverServicePidNonNull());
-
-        boolean found = false;
-        final Wire[] wires = this.wireAdmin.getWires(null);
-        if (nonNull(wires)) {
-            for (final Wire w : wires) {
-                final Dictionary<?, ?> props = w.getProperties();
-                if (props.get(WIREADMIN_PRODUCER_PID).equals(emitterServicePid)
-                        && props.get(WIREADMIN_CONSUMER_PID).equals(receiverServicePid)) {
-                    found = true;
-                    break;
-                }
-            }
-        }
-        return found;
-    }
-
-    /**
-     * Creates the {@link WireAdmin}'s {@link Wire} instance between the provided
-     * Emitter PID and Receiver PID and sets the created {@link Wire} instance to the
-     * provided {@link WireConfiguration} instance
-     *
-     * @param conf
-     *            the {@link WireConfiguration} instance
-     * @param emitterPid
-     *            Wire Emitter PID
-     * @param receiverPid
-     *            Wire Receiver PID
-     * @throws NullPointerException
-     *             if any of the arguments is null
-     */
-    private void createConfiguration(final WireConfiguration conf, final String emitterPid, final String receiverPid) {
-        requireNonNull(conf, message.wireConfigurationNonNull());
-        requireNonNull(emitterPid, message.emitterPidNonNull());
-        requireNonNull(receiverPid, message.receiverPidNonNull());
-
-        final Optional<String> emitterServicePid = this.wireHelperService.getServicePid(emitterPid);
-        final Optional<String> receiverServicePid = this.wireHelperService.getServicePid(receiverPid);
-        if (emitterServicePid.isPresent() && receiverServicePid.isPresent() && isNull(conf.getWire())) {
-            try {
-                final boolean found = checkWireExistence(emitterServicePid.get(), receiverServicePid.get());
-                if (!found) {
-                    final Wire wire = this.wireAdmin.createWire(emitterServicePid.get(), receiverServicePid.get(),
-                            null);
-                    conf.setWire(wire);
-                }
-            } catch (final InvalidSyntaxException e) {
-                logger.error(message.errorCreatingWires(), e);
-            }
         }
     }
 
@@ -228,32 +164,6 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
     }
 
     /**
-     * Create the wires based on the provided wire configurations
-     */
-    synchronized void createWires() {
-        logger.debug(message.creatingWires());
-        final List<WireConfiguration> cloned = CollectionUtil.newArrayList();
-        for (final WireConfiguration wc : this.wireConfigs) {
-            final WireConfiguration wireConf = new WireConfiguration(wc.getEmitterPid(), wc.getReceiverPid());
-            wireConf.setFilter(wc.getFilter());
-            cloned.add(wireConf);
-        }
-        for (final WireConfiguration wireConfig : cloned) {
-            final String emitterPid = wireConfig.getEmitterPid();
-            final String receiverPid = wireConfig.getReceiverPid();
-
-            final boolean emitterFound = this.wireComponentTrackerCustomizer.getWireEmitters().contains(emitterPid);
-            final boolean receiverFound = this.wireComponentTrackerCustomizer.getWireReceivers().contains(receiverPid);
-
-            if (emitterFound && receiverFound) {
-                logger.info(message.creatingWire(emitterPid, receiverPid));
-                createConfiguration(wireConfig, emitterPid, receiverPid);
-                logger.info(message.creatingWiresDone());
-            }
-        }
-    }
-
-    /**
      * OSGi service component callback while deactivation
      *
      * @param componentContext
@@ -277,9 +187,9 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
      * @param wire
      *            the {@link Wire} instance
      * @param producerPid
-     *            Wire Emitter PID
+     *            {@link WireEmitter} PID ({@code kura.service.pid})
      * @param consumerPid
-     *            Wire Receiver PID
+     *            {@link WireReceiver} PID ({@code kura.service.pid})
      * @throws NullPointerException
      *             if any of the arguments is null
      */
@@ -365,20 +275,24 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
         wiresOCD.setName(message.name());
         wiresOCD.setDescription(message.description());
 
+        final String emitterPostfix = EMITTER_POSTFIX.value();
+        final String receiverPostfix = RECEIVER_POSTFIX.value();
+        final String filterPostfix = FILTER_POSTFIX.value();
+
         final Map<String, Object> props = CollectionUtil.newHashMap();
         for (final Map.Entry<String, Object> entry : this.properties.entrySet()) {
             final String key = entry.getKey();
-            final boolean isNotWireConfigurationProperty = !(key.endsWith(message.emitter())
-                    || key.endsWith(message.receiver()) || key.endsWith(message.filter()));
+            final boolean isNotWireConfigurationProperty = !(key.endsWith(emitterPostfix)
+                    || key.endsWith(receiverPostfix) || key.endsWith(filterPostfix));
             if (isNotWireConfigurationProperty) {
                 props.put(key, entry.getValue());
             }
         }
         int i = 0;
         for (final WireConfiguration wireConfiguration : this.wireConfigs) {
-            final String emitterKey = String.valueOf(++i) + SEPARATOR + message.emitter();
-            final String receiverKey = String.valueOf(i) + SEPARATOR + message.receiver();
-            final String filterKey = String.valueOf(i) + SEPARATOR + message.filter();
+            final String emitterKey = String.valueOf(++i) + SEPARATOR + emitterPostfix;
+            final String receiverKey = String.valueOf(i) + SEPARATOR + receiverPostfix;
+            final String filterKey = String.valueOf(i) + SEPARATOR + filterPostfix;
             props.put(emitterKey, wireConfiguration.getEmitterPid());
             props.put(receiverKey, wireConfiguration.getReceiverPid());
             props.put(filterKey, wireConfiguration.getFilter());
@@ -427,5 +341,102 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
         extractProperties(properties);
         createWires();
         logger.debug(message.updatingWireServiceDone());
+    }
+
+    /**
+     * Create the wires based on the provided wire configurations
+     */
+    synchronized void createWires() {
+        logger.debug(message.creatingWires());
+        final List<WireConfiguration> cloned = CollectionUtil.newArrayList();
+        for (final WireConfiguration wc : this.wireConfigs) {
+            final WireConfiguration wireConf = new WireConfiguration(wc.getEmitterPid(), wc.getReceiverPid());
+            wireConf.setFilter(wc.getFilter());
+            cloned.add(wireConf);
+        }
+        for (final WireConfiguration wireConfig : cloned) {
+            final String emitterPid = wireConfig.getEmitterPid();
+            final String receiverPid = wireConfig.getReceiverPid();
+
+            final boolean emitterFound = this.wireComponentTrackerCustomizer.getWireEmitters().contains(emitterPid);
+            final boolean receiverFound = this.wireComponentTrackerCustomizer.getWireReceivers().contains(receiverPid);
+
+            if (emitterFound && receiverFound) {
+                logger.info(message.creatingWire(emitterPid, receiverPid));
+                createConfiguration(wireConfig, emitterPid, receiverPid);
+                logger.info(message.creatingWiresDone());
+            }
+        }
+    }
+
+    /**
+     * Creates the {@link WireAdmin}'s {@link Wire} instance between the provided
+     * Emitter PID and Receiver PID and sets the created {@link Wire} instance to the
+     * provided {@link WireConfiguration} instance
+     *
+     * @param conf
+     *            the {@link WireConfiguration} instance
+     * @param emitterPid
+     *            {@link WireEmitter} PID ({@code kura.service.pid})
+     * @param receiverPid
+     *            {@link WireReceiver} PID ({@code kura.service.pid})
+     * @throws NullPointerException
+     *             if any of the arguments is {@code null}
+     */
+    private void createConfiguration(final WireConfiguration conf, final String emitterPid, final String receiverPid) {
+        requireNonNull(conf, message.wireConfigurationNonNull());
+        requireNonNull(emitterPid, message.emitterPidNonNull());
+        requireNonNull(receiverPid, message.receiverPidNonNull());
+
+        final Optional<String> emitterServicePid = this.wireHelperService.getServicePid(emitterPid);
+        final Optional<String> receiverServicePid = this.wireHelperService.getServicePid(receiverPid);
+        if (nonNull(emitterServicePid) && nonNull(receiverServicePid)) {
+            if (emitterServicePid.isPresent() && receiverServicePid.isPresent() && isNull(conf.getWire())) {
+                try {
+                    final boolean found = checkWireExistence(emitterServicePid.get(), receiverServicePid.get());
+                    if (!found) {
+                        final Wire wire = this.wireAdmin.createWire(emitterServicePid.get(), receiverServicePid.get(),
+                                null);
+                        conf.setWire(wire);
+                    }
+                } catch (final InvalidSyntaxException e) {
+                    logger.error(message.errorCreatingWires(), e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks for existence of {@link WireAdmin}'s {@link Wire} instance between the
+     * provided {@link WireEmitter} Service PID and {@link WireReceiver} Service PID
+     *
+     * @param emitterServicePid
+     *            {@link WireEmitter} Service PID {@code service.pid}
+     * @param receiverServicePid
+     *            {@link WireReceiver} Service PID {@code service.pid}
+     * @return true if exists, otherwise false
+     * @throws InvalidSyntaxException
+     *             If the {@link Wire} filter has an invalid LDAP syntax ({@code null} accepted}
+     * @throws NullPointerException
+     *             if any of the provided arguments is {@code null}
+     */
+    private boolean checkWireExistence(final String emitterServicePid, final String receiverServicePid)
+            throws InvalidSyntaxException {
+        requireNonNull(emitterServicePid, message.emitterServicePidNonNull());
+        requireNonNull(receiverServicePid, message.receiverServicePidNonNull());
+
+        boolean found = false;
+        final Wire[] wires = this.wireAdmin.getWires(null);
+        if (nonNull(wires)) {
+            for (final Wire w : wires) {
+                final Dictionary<?, ?> props = w.getProperties();
+                if (props.get(WIREADMIN_PRODUCER_PID).equals(emitterServicePid)
+                        && props.get(WIREADMIN_CONSUMER_PID).equals(receiverServicePid)) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        return found;
     }
 }

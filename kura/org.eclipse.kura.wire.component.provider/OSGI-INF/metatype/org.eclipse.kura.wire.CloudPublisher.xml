@@ -26,7 +26,7 @@
             type="String"
             cardinality="0"
             required="true"
-            default="APP"
+            default="W1"
             description="Application topic prefix to be used when publishing messages.">
         </AD>
 
@@ -35,7 +35,7 @@
             type="String"
             cardinality="0"
             required="true"
-            default="EVENT"
+            default="A1/$assetName"
             description="Application portion of the topic to be used when publishing messages.">
         </AD>
         

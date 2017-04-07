@@ -306,6 +306,12 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         }
 
         final Map<String, TypedValue<?>> wireRecordProperties = new HashMap<>();
+        try {
+            wireRecordProperties.put(ASSET_NAME, TypedValues.newStringValue(getKuraServicePid()));
+        } catch (KuraException e) {
+            logger.error(message.configurationNonNull(), e);
+        }
+
         for (final AssetRecord assetRecord : assetRecords) {
             final AssetStatus assetStatus = assetRecord.getAssetStatus();
             final AssetFlag assetFlag = assetStatus.getAssetFlag();
@@ -320,13 +326,6 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
             }
 
             wireRecordProperties.put(channelName, typedValue);
-
-            try {
-                wireRecordProperties.put(channelName + PROPERTY_SEPARATOR + ASSET_NAME,
-                        TypedValues.newStringValue(getKuraServicePid()));
-            } catch (KuraException e) {
-                logger.error(message.configurationNonNull(), e);
-            }
 
             wireRecordProperties.put(channelName + PROPERTY_SEPARATOR + TIMESTAMP,
                     TypedValues.newLongValue(assetRecord.getTimestamp()));

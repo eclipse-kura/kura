@@ -20,6 +20,8 @@ import static java.util.Objects.requireNonNull;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudClient;
@@ -98,6 +100,9 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
     private static final Logger logger = LoggerFactory.getLogger(CloudPublisher.class);
 
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
+
+    private static final String TOPIC_PATTERN_STRING = "\\$([^\\s/]+)";
+    private static final Pattern TOPIC_PATTERN = Pattern.compile(TOPIC_PATTERN_STRING);
 
     private BundleContext bundleContext;
 
@@ -339,7 +344,8 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
         try {
             for (final WireRecord dataRecord : wireRecords) {
                 // prepare the topic
-                final String appTopic = this.cloudPublisherOptions.getPublishingTopic();
+                final String appTopic = buildPublishAppTopic(dataRecord);
+
                 final KuraPayload kuraPayload = buildKuraPayload(dataRecord);
                 if (this.cloudPublisherOptions.isControlMessage()) {
                     this.cloudClient.controlPublish(appTopic, kuraPayload,
@@ -356,6 +362,26 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
         } catch (final Exception e) {
             logger.error(message.errorPublishingWireRecords(), e);
         }
+    }
+
+    private String buildPublishAppTopic(WireRecord dataRecord) {
+        Matcher matcher = TOPIC_PATTERN.matcher(this.cloudPublisherOptions.getPublishingTopic());
+        StringBuffer buffer = new StringBuffer();
+
+        while (matcher.find()) {
+            Map<String, TypedValue<?>> properties = dataRecord.getProperties();
+            if (properties.containsKey(matcher.group(1))) {
+                String replacement = matcher.group(0);
+
+                TypedValue<?> value = properties.get(matcher.group(1));
+                if (replacement != null) {
+                    matcher.appendReplacement(buffer, value.getValue().toString());
+                    continue;
+                }
+            }
+        }
+        matcher.appendTail(buffer);
+        return buffer.toString();
     }
 
     /**

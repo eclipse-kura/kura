@@ -32,31 +32,31 @@ public class SupportedUsbModems {
 
     private static class LsusbEntry {
 
-        private final String m_bus;
-        private final String m_device;
-        private final String m_vendor;
-        private final String m_product;
-        private String m_description;
+        private final String bus;
+        private final String device;
+        private final String vendor;
+        private final String product;
+        private String description;
 
         private LsusbEntry(String bus, String device, String vendor, String product) {
-            this.m_bus = bus;
-            this.m_device = device;
-            this.m_vendor = vendor;
-            this.m_product = product;
+            this.bus = bus;
+            this.device = device;
+            this.vendor = vendor;
+            this.product = product;
         }
 
         private LsusbEntry(String bus, String device, String vendor, String product, String description) {
             this(bus, device, vendor, product);
-            this.m_description = description;
+            this.description = description;
         }
 
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder("USB Modem :-> ");
-            sb.append("Bus ").append(this.m_bus).append(" Device ").append(this.m_device).append(" ID ")
-                    .append(this.m_vendor).append(':').append(this.m_product);
-            if (this.m_description != null) {
-                sb.append(" - ").append(this.m_description);
+            sb.append("Bus ").append(this.bus).append(" Device ").append(this.device).append(" ID ")
+                    .append(this.vendor).append(':').append(this.product);
+            if (this.description != null) {
+                sb.append(" - ").append(this.description);
             }
             return sb.toString();
         }
@@ -66,7 +66,7 @@ public class SupportedUsbModems {
         List<LsusbEntry> lsusbEntries = null;
         try {
             lsusbEntries = getLsusbInfo();
-        } catch (Exception e) {
+        } catch (IOException e) {
             s_logger.error("failed to obtain lsusb information", e);
         }
         for (SupportedUsbModemInfo modem : SupportedUsbModemInfo.values()) {
@@ -83,6 +83,10 @@ public class SupportedUsbModems {
                 s_logger.error("Failed to attach modem", e);
             }
         }
+    }
+    
+    private SupportedUsbModems() {
+    	
     }
 
     public static SupportedUsbModemInfo getModem(String vendorId, String productId, String productName) {
@@ -105,28 +109,30 @@ public class SupportedUsbModems {
     }
 
     public static boolean isAttached(String vendor, String product) throws IOException {
-        final String lsusbCmd = formLsusbCommand(vendor, product); // e.g. lsusb -d 1bc7:1010
-        final List<String> lines = execute(lsusbCmd);
-
-        for (final String line : lines) {
-            final LsusbEntry lsusbEntry = getLsusbEntry(line);
-            if (lsusbEntry != null && vendor != null && product != null && vendor.equals(lsusbEntry.m_vendor)
-                    && product.equals(lsusbEntry.m_product)) {
-                s_logger.info("The '{}' command detected {}", lsusbCmd, lsusbEntry);
-                return true;
-            }
-        }
-        return false;
+    	boolean retVal = false;
+    	if (vendor == null || product == null) {
+    		return retVal;
+    	}
+		List<LsusbEntry> lsusbEntries = getLsusbInfo();
+		if (lsusbEntries != null && !lsusbEntries.isEmpty()) {
+			for (LsusbEntry lsusbEntry : lsusbEntries) {
+				if (vendor.equals(lsusbEntry.vendor) && product.equals(lsusbEntry.product)) {
+					retVal = true;
+					break;
+				}
+			}
+		}	
+    	return retVal;
     }
-
-    private static boolean isAttached(String vendor, String product, List<LsusbEntry> lsusbEntries) throws Exception {
+    
+    private static boolean isAttached(String vendor, String product, List<LsusbEntry> lsusbEntries) throws IOException {
         boolean attached = false;
         if (lsusbEntries == null || lsusbEntries.isEmpty()) {
             attached = isAttached(vendor, product);
         } else {
             for (LsusbEntry lsusbEntry : lsusbEntries) {
-                if (vendor != null && product != null && vendor.equals(lsusbEntry.m_vendor)
-                        && product.equals(lsusbEntry.m_product)) {
+                if (vendor != null && product != null && vendor.equals(lsusbEntry.vendor)
+                        && product.equals(lsusbEntry.product)) {
                     s_logger.info("The 'lsusb' command detected {}", lsusbEntry);
                     attached = true;
                     break;
@@ -135,9 +141,9 @@ public class SupportedUsbModems {
         }
         return attached;
     }
-
+    
     /**
-     * Execute command an return splitted lines
+     * Execute command and return splitted lines
      *
      * @param command
      *            the command to execute
@@ -158,7 +164,7 @@ public class SupportedUsbModems {
         return IOUtils.readLines(new ByteArrayInputStream(out.toByteArray()));
     }
 
-    private static List<LsusbEntry> getLsusbInfo() throws Exception {
+    private static List<LsusbEntry> getLsusbInfo() throws IOException {
         final List<LsusbEntry> lsusbEntries = new ArrayList<LsusbEntry>();
 
         for (final String line : execute("lsusb")) {
@@ -190,11 +196,5 @@ public class SupportedUsbModems {
             lsusbEntry = new LsusbEntry(bus, device, vendor, product);
         }
         return lsusbEntry;
-    }
-
-    private static String formLsusbCommand(String vendor, String product) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("lsusb -d ").append(vendor).append(":").append(product);
-        return sb.toString();
     }
 }

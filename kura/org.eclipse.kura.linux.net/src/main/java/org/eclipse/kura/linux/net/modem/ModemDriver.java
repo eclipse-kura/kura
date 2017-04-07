@@ -69,7 +69,13 @@ public class ModemDriver {
             String gpioDirectionPath = gpioPath + GPIO_DIRECTION_SUFFIX_PATH;
             try {
                 exportGpio(gpioIndex, gpioPath);  // Prepare gpios
-                setGpioDirection(gpioDirectionPath, GPIO_DIRECTION);
+                if (!GPIO_DIRECTION.equals(getGpioDirection(gpioDirectionPath))) {
+                	setGpioDirection(gpioDirectionPath, GPIO_DIRECTION);
+                    String gpioValuePath = gpioPath + GPIO_VALUE_SUFFIX_PATH;
+                    // we need to invert GPIO pin value to turn the modem on since setting pin direction 
+                    // turns RG 10-11-36 off.
+                    invertGpioValue(gpioValuePath);
+                }
             } catch (IOException e) {
                 s_logger.warn("Failed to initialize GPIO {}", gpioIndex, e);
             }
@@ -124,7 +130,7 @@ public class ModemDriver {
         }
         boolean retVal = true;
         int remainingAttempts = 3;
-        do {
+        while (isOn()) {
             if (remainingAttempts <= 0) {
                 retVal = false;
                 break;
@@ -191,7 +197,7 @@ public class ModemDriver {
             }
             remainingAttempts--;
             sleep(5000);
-        } while (isOn());
+        }
 
         s_logger.info("turnModemOff() :: Modem is OFF? - {}", retVal);
         return retVal;
@@ -203,7 +209,7 @@ public class ModemDriver {
         }
         boolean retVal = true;
         int remainingAttempts = 5;
-        do {
+        while (!isOn()) {
             if (remainingAttempts <= 0) {
                 retVal = false;
                 break;
@@ -219,6 +225,7 @@ public class ModemDriver {
                 String gpioPath = BASE_GPIO_PATH + gpioIndex;
                 String gpioValuePath = gpioPath + GPIO_VALUE_SUFFIX_PATH;
                 invertGpioValue(gpioValuePath);
+                sleep(5000);
             } else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_20.getTargetName())) {
                 enable1020Gpio();
             } else if (TARGET_NAME.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getTargetName())) {
@@ -260,7 +267,7 @@ public class ModemDriver {
             }
             remainingAttempts--;
             sleep(10000);
-        } while (!isOn());
+        }
 
         s_logger.info("turnModemOn() :: Modem is ON? - {}", retVal);
         return retVal;
@@ -372,7 +379,7 @@ public class ModemDriver {
         }
     }
 
-    private void invertGpioValue(String valuePath) throws IOException {
+    private static void invertGpioValue(String valuePath) throws IOException {
         FileReader fGpioOldValueReader = null;  // read current value
         BufferedReader fGpioOldValue = null;
         int oldValue = 0;
@@ -433,6 +440,27 @@ public class ModemDriver {
             }
         }
     }
+    
+    private static String getGpioDirection(String directionPath) throws IOException {
+    	String direction = null;
+    	FileReader directionFileReader = null;
+        BufferedReader brGpioDirection = null;
+        try {
+        	directionFileReader = new FileReader(directionPath);
+            brGpioDirection = new BufferedReader(directionFileReader);
+            direction = brGpioDirection.readLine();
+        } catch (Exception e) {
+        	s_logger.debug("Error while trying to get gpio direction", e);
+        } finally {
+            if (brGpioDirection != null) {
+                brGpioDirection.close();
+            }
+            if (directionFileReader != null) {
+                directionFileReader.close();
+            }
+        }
+        return direction;
+    }
 
     private static void exportGpio(String gpio, String gpioPath) throws IOException {
         File fgpioFolder = new File(gpioPath);
@@ -467,7 +495,6 @@ public class ModemDriver {
     }
 
     private boolean isOn() throws KuraException {
-
         boolean isModemOn;
         if (this instanceof UsbModemDriver) {
             try {
@@ -481,7 +508,7 @@ public class ModemDriver {
             isModemOn = ((SerialModemDriver) this).isReachable();
             s_logger.info("isOn() :: Serial modem reachable? {}", isModemOn);
         } else {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Unsupported modem device");
+            throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");
         }
         return isModemOn;
     }

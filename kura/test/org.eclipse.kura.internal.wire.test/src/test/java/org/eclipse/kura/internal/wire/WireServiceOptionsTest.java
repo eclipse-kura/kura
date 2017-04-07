@@ -16,10 +16,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.localization.LocalizationAdapter;
+import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.junit.Test;
 
 public class WireServiceOptionsTest {
+
+    private static final WireMessages messages = LocalizationAdapter.adapt(WireMessages.class);
 
     @Test
     public void testGetInstanceEmpty() {
@@ -47,8 +51,8 @@ public class WireServiceOptionsTest {
     public void testGetInstancePartialSeparator() {
         Map<String, Object> properties = new HashMap<String, Object>();
 
-        properties.put("1.emitter", "emitterPid");
-        properties.put("1.receiver", "receiverPid");
+        properties.put("1." + messages.emitter(), "emitterPid"); // 1.emitter
+        properties.put("1." + messages.receiver(), "receiverPid"); // 1.receiver
         properties.put("1filter", "filter");
 
         WireServiceOptions options = WireServiceOptions.getInstance(properties);
@@ -64,11 +68,12 @@ public class WireServiceOptionsTest {
 
     @Test
     public void testGetInstance() {
+
         Map<String, Object> properties = new HashMap<String, Object>();
 
-        properties.put("1.emitter", "emitterPid");
-        properties.put("1.receiver", "receiverPid");
-        properties.put("1.filter", "filter");
+        properties.put("1." + messages.emitter(), "emitterPid"); // 1.emitter
+        properties.put("1." + messages.receiver(), "receiverPid"); // 1.receiver
+        properties.put("1." + messages.filter(), "filter"); // 1.filter
 
         WireServiceOptions options = WireServiceOptions.getInstance(properties);
 

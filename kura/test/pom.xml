@@ -130,5 +130,6 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
         <module>org.eclipse.kura.wire.component.provider.test</module>
         <module>org.eclipse.kura.stress.test</module>
         <module>org.eclipse.kura.raspberrypi.sensehat.test</module>
+        <module>org.eclipse.kura.core.util.test</module>
     </modules>
 </project>

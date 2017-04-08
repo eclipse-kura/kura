@@ -63,7 +63,7 @@
             type="Integer"
             cardinality="0"
             required="false"
-            default="1"
+            default="0"
             description="An integer specifying the quality of service the message was published on.">
             <Option label="0" value="0"/>
             <Option label="1" value="1"/>

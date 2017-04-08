@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -182,6 +182,10 @@ public class DbDataStore implements DataStore {
                 throw e;
             }
         }
+        
+        createIndex(this.m_table+"_PUBLISHEDON", this.m_table, "(PUBLISHEDON DESC)");
+		createIndex(this.m_table+"_CONFIRMEDON", this.m_table, "(CONFIRMEDON DESC)");
+		createIndex(this.m_table+"_DROPPEDON", this.m_table, "(DROPPEDON DESC)");
 
         // Test.
         // Initialize the sequence generator with 2147483647. This throws a sequence limit exceed exception on the
@@ -691,6 +695,30 @@ public class DbDataStore implements DataStore {
             close(conn);
         }
     }
+    
+    private void createIndex(String indexname, String table, String order)
+			throws KuraStoreException 
+	{
+		try {
+			execute("CREATE INDEX "+indexname+" ON "+table+" "+order+";");
+			s_logger.debug("Index {} created, order is {}", indexname, order);
+		}
+		catch (KuraStoreException e) {
+			boolean handled = false;
+			if (e.getCause() != null && e.getCause() instanceof SQLException) {
+				SQLException sqle = (SQLException) e.getCause();
+				if (sqle.getErrorCode() == -5504) {
+					// Object already exist. We can ignore it
+					handled = true;
+				}
+			}
+			if (!handled) {
+				throw e;
+			}
+		}
+
+	}
+    
 
     // ------------------------------------------------------------------
     //

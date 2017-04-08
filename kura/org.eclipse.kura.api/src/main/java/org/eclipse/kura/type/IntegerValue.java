@@ -18,14 +18,17 @@ import static org.eclipse.kura.type.DataType.INTEGER;
 
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This class represents a {@link Integer} value as a {@link TypedValue}.
  *
  * @noextend This class is not intended to be extended by clients.
+ * @since 1.2
  */
 @Immutable
 @ThreadSafe
+@ProviderType
 public class IntegerValue implements TypedValue<Integer> {
 
     /**

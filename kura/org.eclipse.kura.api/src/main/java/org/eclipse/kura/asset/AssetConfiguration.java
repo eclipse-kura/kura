@@ -21,6 +21,7 @@ import java.util.Map;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
 import org.eclipse.kura.type.DataType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The Class AssetConfiguration is responsible for storing the configuration for
@@ -74,9 +75,11 @@ import org.eclipse.kura.type.DataType;
  * @see DataType
  *
  * @noextend This class is not intended to be extended by clients.
+ * @since 1.2
  */
 @Immutable
 @ThreadSafe
+@ProviderType
 public class AssetConfiguration {
 
     /**

@@ -11,13 +11,18 @@
  *******************************************************************************/
 package org.eclipse.kura.net;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * Marker class for NetInterfaceConfig objects.
  * Network interfaces implementing this maker will return addresses of type NetInterfaceAddressConfig in their
  * getNetInterfaceAddresses() method.
  * NetInterfaceAddressConfig complements NetInterfaceAddress, which provides the current addresses associated to the
  * interface, with the NetConfig objects.
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface NetInterfaceConfig<T extends NetInterfaceAddressConfig> extends NetInterface<T> {
 
 }

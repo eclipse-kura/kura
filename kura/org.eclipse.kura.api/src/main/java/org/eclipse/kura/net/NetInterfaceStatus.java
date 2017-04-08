@@ -13,9 +13,6 @@ package org.eclipse.kura.net;
 
 /**
  * Used to track interface configuration status
- *
- * @author eurotech
- *
  */
 public enum NetInterfaceStatus {
     /** IPv4 configuration is disabled **/

@@ -12,7 +12,9 @@
 package org.eclipse.kura.linux.udev;
 
 import org.eclipse.kura.usb.UsbDevice;
+import org.osgi.annotation.versioning.ConsumerType;
 
+@ConsumerType
 public interface LinuxUdevListener {
 
     /**

@@ -12,6 +12,7 @@
 package org.eclipse.kura.data.listener;
 
 import org.eclipse.kura.data.DataService;
+import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * Implementors of this interface will be able to handle {@link DataService}
@@ -21,8 +22,9 @@ import org.eclipse.kura.data.DataService;
  * It expected that implementers of this interface do NOT perform long running tasks in the implementation of this
  * interface.
  *
- * @since {@link org.eclipse.kura.data.listener} 1.0.0
+ * @since 1.0.8
  */
+@ConsumerType
 public interface DataServiceListener {
 
     /**

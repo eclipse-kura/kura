@@ -13,11 +13,15 @@ package org.eclipse.kura.net.modem;
 
 import java.util.Map;
 
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.event.Event;
 
 /**
  * Emitted when a modem is removed from the gateway
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class ModemRemovedEvent extends Event {
 
     /** Topic of the ModemRemovedEvent */

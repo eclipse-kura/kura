@@ -11,12 +11,17 @@
  *******************************************************************************/
 package org.eclipse.kura;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 
 /**
  * KuraStoreCapacityReachedException is raised when a message can not be appended
  * to the publishing queue as the internal database buffer has reached its 
  * capacity for messages that are not yet published or they are still in transit.
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class KuraStoreCapacityReachedException extends KuraStoreException 
 {
 	private static final long serialVersionUID = 2622483579047285733L;

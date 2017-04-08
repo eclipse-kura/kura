@@ -14,6 +14,12 @@ package org.eclipse.kura.message;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import org.osgi.annotation.versioning.ProviderType;
+
+/**
+ * @noextend This class is not intended to be subclassed by clients.
+ */
+@ProviderType
 public class KuraResponsePayload extends KuraPayload {
 
     public static final int RESPONSE_CODE_OK = 200;

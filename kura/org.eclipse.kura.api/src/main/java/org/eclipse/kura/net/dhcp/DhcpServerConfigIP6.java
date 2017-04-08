@@ -16,13 +16,14 @@ import java.util.List;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.IP6Address;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The configuration representing a DHCP server configuration for an IPv6 network.
  *
- * @author eurotech
- *
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class DhcpServerConfigIP6 extends DhcpServerConfigIP<IP6Address>implements DhcpServerConfig6 {
 
     /**
@@ -69,6 +70,7 @@ public class DhcpServerConfigIP6 extends DhcpServerConfigIP<IP6Address>implement
      * @param dhcpServerCfg DHCP server configuration
      * @param dhcpServerCfgIP4 'network' configuration 
      * @throws KuraException
+	 * @since 1.2
      */
 	public DhcpServerConfigIP6(DhcpServerCfg dhcpServerCfg, DhcpServerCfgIP6 dhcpServerCfgIP6) throws KuraException {
 

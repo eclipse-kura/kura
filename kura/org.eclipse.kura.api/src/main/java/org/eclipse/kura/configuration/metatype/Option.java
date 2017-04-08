@@ -18,6 +18,8 @@
 
 package org.eclipse.kura.configuration.metatype;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * <p>
  * Java class for Toption complex type.
@@ -39,7 +41,10 @@ package org.eclipse.kura.configuration.metatype;
  *   &lt;/complexContent&gt;
  * &lt;/complexType&gt;
  * </pre>
+ *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface Option {
 
     /**

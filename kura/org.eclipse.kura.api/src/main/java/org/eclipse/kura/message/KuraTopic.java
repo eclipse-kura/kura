@@ -12,13 +12,17 @@
 package org.eclipse.kura.message;
 
 import org.eclipse.kura.cloud.CloudService;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Models a topic for messages posted to the Kura platform.
  * Topics are expected to be in the form of "account/asset/&lt;application_specific&gt;";
  * The system control topic prefix is defined in the {@link CloudService} and defaults
  * to $EDC.
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class KuraTopic {
 
     private String m_fullTopic;

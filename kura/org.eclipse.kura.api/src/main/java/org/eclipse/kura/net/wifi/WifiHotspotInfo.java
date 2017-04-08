@@ -13,6 +13,12 @@ package org.eclipse.kura.net.wifi;
 
 import java.util.EnumSet;
 
+import org.osgi.annotation.versioning.ProviderType;
+
+/**
+ * @noextend This class is not intended to be subclassed by clients.
+ */
+@ProviderType
 public class WifiHotspotInfo {
 
     private final String ssid;
@@ -74,10 +80,16 @@ public class WifiHotspotInfo {
         return this.groupCiphers;
     }
 
+    /**
+	 * @since 1.2
+	 */
     public void setPairCiphers(EnumSet<WifiSecurity> pairCiphers) {
         this.pairCiphers = pairCiphers;
     }
 
+    /**
+	 * @since 1.2
+	 */
     public void setGroupCiphers(EnumSet<WifiSecurity> groupCiphers) {
         this.groupCiphers = groupCiphers;
     }

@@ -12,6 +12,8 @@
 
 package org.eclipse.kura.ssl;
 
+import org.osgi.annotation.versioning.ConsumerType;
+
 /**
  * Listener interface to be implemented by applications that needs to be notified of events in the
  * {@link SslManagerService}.
@@ -19,7 +21,7 @@ package org.eclipse.kura.ssl;
  * It expected that implementers of this interface do NOT perform long running tasks in the implementation of this
  * interface.
  */
-
+@ConsumerType
 public interface SslServiceListener {
 
     /**

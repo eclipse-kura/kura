@@ -11,6 +11,7 @@ package org.eclipse.kura.driver;
 
 /**
  * This represents all the Kura driver specific flag codes.
+ * @since 1.2
  */
 public enum DriverFlag {
 

@@ -12,10 +12,14 @@
 package org.eclipse.kura.net.route;
 
 import org.eclipse.kura.net.IP6Address;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Implementation of IPv6 route configurations
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class RouteConfigIP6 extends RouteConfigIP<IP6Address>implements RouteConfig6 {
 
     public RouteConfigIP6(IP6Address destination, IP6Address gateway, IP6Address netmask, String interfaceName,

@@ -14,11 +14,15 @@ package org.eclipse.kura.clock;
 
 import java.util.Map;
 
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.event.Event;
 
 /**
  * ClockEvent is raised when a clock synchronization has been performed.
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class ClockEvent extends Event {
 
     /** Topic of the ClockEvent */

@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.message.KuraPayload;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The CloudClient is designed to be used by single application bundles.
@@ -74,7 +75,10 @@ import org.eclipse.kura.message.KuraPayload;
  * Note that the default subscription of a CloudClient allows remote servers
  * or applications running on other devices to publish messages addressed
  * to specific applications running on specific devices.
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface CloudClient {
 
     /**
@@ -149,7 +153,7 @@ public interface CloudClient {
      * @return The published message's ID.
      * @throws KuraException
      *             if one of the message composition or message publishing operation fails.
-     * @since {@link org.eclipse.kura.cloud} 1.1.0
+     * @since 1.2
      */
     public int publish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain)
             throws KuraException;
@@ -232,7 +236,7 @@ public interface CloudClient {
      * @return The published message's ID.
      * @throws KuraException
      *             if one of the message composition or message publishing operation fails.
-     * @since {@link org.eclipse.kura.cloud} 1.1.0
+     * @since 1.2
      */
     public int publish(String deviceId, String appTopic, KuraPayload payload, int qos, boolean retain, int priority)
             throws KuraException;
@@ -314,7 +318,7 @@ public interface CloudClient {
      * @return The published message's ID.
      * @throws KuraException
      *             if one of the message composition or message publishing operation fails.
-     * @since {@link org.eclipse.kura.cloud} 1.1.0
+     * @since 1.2
      */
     public int publish(String deviceId, String appTopic, byte[] payload, int qos, boolean retain, int priority)
             throws KuraException;
@@ -482,7 +486,7 @@ public interface CloudClient {
      *            An int containing the Quality of Service.
      * @throws KuraException
      *             if the subscription fails.
-     * @since {@link org.eclipse.kura.cloud} 1.1.0
+     * @since 1.2
      */
     public void subscribe(String deviceId, String appTopic, int qos) throws KuraException;
 
@@ -519,7 +523,7 @@ public interface CloudClient {
      *            An int containing the Quality of Service.
      * @throws KuraException
      *             if the subscription fails.
-     * @since {@link org.eclipse.kura.cloud} 1.1.0
+     * @since 1.2
      */
     public void controlSubscribe(String deviceId, String appTopic, int qos) throws KuraException;
 
@@ -552,7 +556,7 @@ public interface CloudClient {
      *            A String object containing the application topic.
      * @throws KuraException
      *             if the unsubscription fails.
-     * @since {@link org.eclipse.kura.cloud} 1.1.0
+     * @since 1.2
      */
     public void unsubscribe(String deviceId, String appTopic) throws KuraException;
 
@@ -585,7 +589,7 @@ public interface CloudClient {
      *            A String object containing the application topic.
      * @throws KuraException
      *             if the unsubscription fails.
-     * @since {@link org.eclipse.kura.cloud} 1.1.0
+     * @since 1.2
      */
     public void controlUnsubscribe(String deviceId, String appTopic) throws KuraException;
 

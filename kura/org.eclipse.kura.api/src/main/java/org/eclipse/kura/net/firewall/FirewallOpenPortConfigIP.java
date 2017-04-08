@@ -15,14 +15,16 @@ package org.eclipse.kura.net.firewall;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkPair;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The base class for firewall open port configurations
  *
- * @author eurotech
- *
  * @param <T>
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements FirewallOpenPortConfig {
 
     /** The port to open for inbound connections **/

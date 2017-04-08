@@ -16,14 +16,17 @@ package org.eclipse.kura.asset;
 import static java.util.Objects.requireNonNull;
 
 import org.eclipse.kura.annotation.NotThreadSafe;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This class represents an event occurred while monitoring specific channel
  * configuration by the asset
  *
  * @noextend This class is not intended to be extended by clients.
+ * @since 1.2
  */
 @NotThreadSafe
+@ProviderType
 public class AssetEvent {
 
     /**

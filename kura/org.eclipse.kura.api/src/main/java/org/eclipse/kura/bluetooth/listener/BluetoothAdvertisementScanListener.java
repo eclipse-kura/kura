@@ -11,11 +11,14 @@
  *******************************************************************************/
 package org.eclipse.kura.bluetooth.listener;
 
+import org.osgi.annotation.versioning.ConsumerType;
+
 /**
  * BluetoothAdvertisementScanListener must be implemented by any class
  * wishing to receive BLE advertisement data
  *
  */
+@ConsumerType
 public interface BluetoothAdvertisementScanListener {
 
     /**

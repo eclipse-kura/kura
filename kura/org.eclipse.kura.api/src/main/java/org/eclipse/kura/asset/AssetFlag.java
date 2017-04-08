@@ -15,6 +15,7 @@ package org.eclipse.kura.asset;
 
 /**
  * This represents all the Kura Asset specific flag codes
+ * @since 1.2
  */
 public enum AssetFlag {
     /**

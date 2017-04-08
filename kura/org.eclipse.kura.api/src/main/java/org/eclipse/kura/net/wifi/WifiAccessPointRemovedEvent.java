@@ -13,11 +13,15 @@ package org.eclipse.kura.net.wifi;
 
 import java.util.Map;
 
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.event.Event;
 
 /**
  * Emitted when an access point disappears from view of the device.
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class WifiAccessPointRemovedEvent extends Event {
 
     /** Topic of the WifiAccessPointAddedEvent */

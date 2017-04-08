@@ -16,13 +16,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * DbService offers APIs to acquire and use a JDBC Connection to the embedded SQL database running in the framework.
  * The configuration of the DbService will determine the configuration of the embedded SQL database.
  * The usage of API is typical for JDBC Connections; the connection is first acquired with getConnection(),
  * and it must be released when the operation is completed with close(). The implementation of the
  * DbService and the returned JdbcConnection will manage the concurrent access into the database appropriately.
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface DbService {
 
     /**

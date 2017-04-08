@@ -14,7 +14,12 @@ package org.eclipse.kura.net.firewall;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkPair;
+import org.osgi.annotation.versioning.ProviderType;
 
+/**
+ * @noextend This class is not intended to be subclassed by clients.
+ */
+@ProviderType
 public class FirewallPortForwardConfigIP4 extends FirewallPortForwardConfigIP<IP4Address>
         implements FirewallPortForwardConfig4 {
 

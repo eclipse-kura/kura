@@ -18,6 +18,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * EdcPayload defines the recommended payload structure for the messages sent to the Everyware Cloud platform.
  * Eurotech designed the format as an open format that is flexible from the aspect of data modeling
@@ -40,7 +42,10 @@ import java.util.Set;
  * This field will be stored into the platform database, but the Everyware Cloud cannot apply any statistical analysis
  * on it.
  * </ul>
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class KuraPayload {
 
     /**

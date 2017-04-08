@@ -20,6 +20,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
+import org.osgi.annotation.versioning.ConsumerType;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
  * <li>{@link Cloudlet#doExec} is used to perform applicatioon operation not necessary tied to a given resource.
  * </ul>
  */
+@ConsumerType
 public abstract class Cloudlet implements CloudClientListener {
 
     private static final Logger s_logger = LoggerFactory.getLogger(Cloudlet.class);

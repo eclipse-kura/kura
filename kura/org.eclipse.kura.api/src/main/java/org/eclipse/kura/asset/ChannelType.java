@@ -16,6 +16,7 @@ package org.eclipse.kura.asset;
 /**
  * This provides the necessary constants to denote the type of the channel
  * (whether the channel is for reading or writing or both)
+ * @since 1.2
  */
 public enum ChannelType {
 

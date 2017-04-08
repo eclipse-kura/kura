@@ -11,12 +11,14 @@
  *******************************************************************************/
 package org.eclipse.kura.net.dns;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * Placeholder for IPv6 DNS server configurations
  *
- * @author eurotech
- *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface DnsServerConfig6 extends DnsServerConfig {
 
 }

@@ -10,7 +10,7 @@ Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
 Import-Package: jdk.dio;version="1.0.1",
  jdk.dio.gpio;version="1.0.1",
- org.eclipse.kura.gpio;version="[1.0,1.1)",
+ org.eclipse.kura.gpio;version="[1.1,1.2)",
  org.eclipse.kura.system;version="1.0.0",
  org.osgi.service.component;version="1.2.0",
  org.slf4j;version="1.6.4"

@@ -13,7 +13,12 @@ package org.eclipse.kura.gpio;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.osgi.annotation.versioning.ProviderType;
 
+/**
+ * @noextend This class is not intended to be subclassed by clients.
+ */
+@ProviderType
 public class KuraUnavailableDeviceException extends KuraException {
 
     private static final long serialVersionUID = -5115093706356681148L;

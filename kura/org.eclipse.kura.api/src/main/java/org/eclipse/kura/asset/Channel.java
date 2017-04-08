@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.DataType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The Class Channel represents a communication channel of an asset. The
@@ -29,8 +30,10 @@ import org.eclipse.kura.type.DataType;
  * @see AssetConfiguration
  *
  * @noextend This class is not intended to be extended by clients.
+ * @since 1.2
  */
 @NotThreadSafe
+@ProviderType
 public class Channel {
 
     /** The communication channel configuration. */

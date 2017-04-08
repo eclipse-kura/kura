@@ -15,10 +15,14 @@ import java.util.List;
 
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Marker interface for all DHCP server configuration classes
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface DhcpServerConfig extends NetConfig {
 
     /**

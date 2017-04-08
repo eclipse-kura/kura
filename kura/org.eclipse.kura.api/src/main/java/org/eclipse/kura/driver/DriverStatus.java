@@ -18,15 +18,18 @@ import static java.util.Objects.requireNonNull;
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.annotation.ThreadSafe;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The Class DriverStatus is responsible for representing the status of any
  * driver specific operation
  *
  * @noextend This class is not intended to be extended by clients.
+ * @since 1.2
  */
 @Immutable
 @ThreadSafe
+@ProviderType
 public class DriverStatus {
 
     /** The driver flag. */

@@ -19,13 +19,15 @@ import java.util.List;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.IP4Address;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The configuration representing a 'networking' portion of DHCP server configuration for an IPv4 network.
- *
- * @author eurotech
- *
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
+ * @since 1.2
  */
+@ProviderType
 public class DhcpServerCfgIP4 extends DhcpServerCfgIP<IP4Address> {
 
 	/**

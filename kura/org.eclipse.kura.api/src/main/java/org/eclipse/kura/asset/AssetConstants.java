@@ -12,6 +12,7 @@ package org.eclipse.kura.asset;
 /**
  * The Enum AssetConstants contains all the necessary constants required for
  * Kura Asset Model
+ * @since 1.2
  */
 public enum AssetConstants {
 

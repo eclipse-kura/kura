@@ -12,10 +12,14 @@
 package org.eclipse.kura.net;
 
 import org.eclipse.kura.KuraException;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Configuration for a network interface based on IPv6 addresses.
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class NetConfigIP6 extends NetConfigIP<IP6Address>implements NetConfig6 {
 
     /**

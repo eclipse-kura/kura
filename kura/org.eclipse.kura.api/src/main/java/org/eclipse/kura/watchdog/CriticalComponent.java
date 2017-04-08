@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.watchdog;
 
+import org.osgi.annotation.versioning.ConsumerType;
+
 /**
  * CriticalComponent is an interface that can be used to denote a component of functionality that is
  * 'critical' to the nature of the system. If a component implements CriticalComponent then it must
@@ -21,6 +23,7 @@ package org.eclipse.kura.watchdog;
  * (such as rebooting the system).
  *
  */
+@ConsumerType
 public interface CriticalComponent {
 
     /**

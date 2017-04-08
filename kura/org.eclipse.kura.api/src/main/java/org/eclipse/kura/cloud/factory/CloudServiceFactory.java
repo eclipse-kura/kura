@@ -20,6 +20,7 @@ import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.component.ComponentContext;
 
 /**
@@ -55,8 +56,11 @@ import org.osgi.service.component.ComponentContext;
  * an implementation will use the {@link ConfigurationService}
  * to create component configurations.
  *
- * @since {@link org.eclipse.kura.cloud.factory} 1.0.0
+ * @since 1.0.8
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface CloudServiceFactory {
 
     /**
@@ -65,7 +69,7 @@ public interface CloudServiceFactory {
      * The property is set in the cloud service instance to relate it with the Factory that generated the whole cloud
      * stack.
      *
-     * @since {@link org.eclipse.kura.cloud.factory} 1.1.0
+     * @since 1.1.0
      */
     public static final String KURA_CLOUD_SERVICE_FACTORY_PID = "kura.cloud.service.factory.pid";
 
@@ -135,7 +139,7 @@ public interface CloudServiceFactory {
      * @throws KuraException
      *             if the specified <i>kura.service.pid</i> is not correct or compliant with what the factory
      *             implementation expects
-     * @since {@link org.eclipse.kura.cloud.factory} 1.1.0
+     * @since 1.1.0
      */
     List<String> getStackComponentsPids(String pid) throws KuraException;
 
@@ -161,7 +165,7 @@ public interface CloudServiceFactory {
      * @return the set of services, never returns {@code null}
      * @throws KuraException
      *
-     * @since {@link org.eclipse.kura.cloud.factory} 1.1.0
+     * @since 1.1.0
      */
     Set<String> getManagedCloudServicePids() throws KuraException;
 }

@@ -14,13 +14,14 @@ package org.eclipse.kura.net.firewall;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkPair;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The implementation of IPv4 firewall open port configurations
- *
- * @author eurotech
- *
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class FirewallOpenPortConfigIP4 extends FirewallOpenPortConfigIP<IP4Address>implements FirewallOpenPortConfig4 {
 
     public FirewallOpenPortConfigIP4() {

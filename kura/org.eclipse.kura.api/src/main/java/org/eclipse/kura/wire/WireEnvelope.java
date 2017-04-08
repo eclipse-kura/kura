@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.wireadmin.BasicEnvelope;
 import org.osgi.service.wireadmin.Envelope;
 
@@ -30,9 +31,11 @@ import org.osgi.service.wireadmin.Envelope;
  * @see BasicEnvelope
  *
  * @noextend This class is not intended to be extended by clients.
+ * @since 1.2
  */
 @Immutable
 @ThreadSafe
+@ProviderType
 public class WireEnvelope extends BasicEnvelope {
 
     /**

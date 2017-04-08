@@ -14,13 +14,15 @@ package org.eclipse.kura.net.dhcp;
 import java.util.List;
 
 import org.eclipse.kura.net.IP6Address;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The configuration representing a 'networking' portion of DHCP server configuration for an IPv6 network.
- *
- * @author eurotech
- *
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
+ * @since 1.2
  */
+@ProviderType
 public class DhcpServerCfgIP6 extends DhcpServerCfgIP<IP6Address> {
 
 	/**

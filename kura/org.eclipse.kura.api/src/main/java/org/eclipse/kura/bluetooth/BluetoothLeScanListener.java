@@ -13,12 +13,15 @@ package org.eclipse.kura.bluetooth;
 
 import java.util.List;
 
+import org.osgi.annotation.versioning.ConsumerType;
+
 /**
  * BluetoothLeScanListener must be implemented by any class
  * wishing to receive notifications on Bluetooth LE
  * scan events.
  *
  */
+@ConsumerType
 public interface BluetoothLeScanListener {
 
     /**

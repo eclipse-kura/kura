@@ -17,14 +17,17 @@ import static java.util.Objects.requireNonNull;
 
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.TypedValue;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The Class AssetRecord represents a record to perform read/write/monitor
  * operation on the provided channel using the associated driver.
  *
  * @noextend This class is not intended to be extended by clients.
+ * @since 1.2
  */
 @NotThreadSafe
+@ProviderType
 public class AssetRecord {
 
     /** The asset status. */

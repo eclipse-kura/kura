@@ -16,10 +16,14 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Configuration for a network interface based on IPv4 addresses.
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class NetConfigIP4 extends NetConfigIP<IP4Address>implements NetConfig4 {
 
     private List<IP4Address> winsServers;

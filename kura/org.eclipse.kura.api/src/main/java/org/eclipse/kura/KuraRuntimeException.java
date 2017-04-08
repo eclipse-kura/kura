@@ -14,6 +14,7 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.osgi.annotation.versioning.ProviderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,10 @@ import org.slf4j.LoggerFactory;
  * are stored in the {@code KuraExceptionMessagesBundle} Properties Bundle and they are keyed on the exception code.
  *
  * @see KuraErrorCode
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class KuraRuntimeException extends RuntimeException {
 
     /** The Constant denoting resource bundle. */

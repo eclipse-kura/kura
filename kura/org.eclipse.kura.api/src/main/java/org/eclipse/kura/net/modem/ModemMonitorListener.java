@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.kura.net.modem;
 
+import org.osgi.annotation.versioning.ConsumerType;
+
+@ConsumerType
 public interface ModemMonitorListener {
 
     public void setCellularSignalLevel(int signalLevel);

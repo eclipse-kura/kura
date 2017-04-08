@@ -14,6 +14,7 @@ package org.eclipse.kura.net;
 import java.util.List;
 
 import org.eclipse.kura.usb.UsbDevice;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * NetworkInterface represent a network interface of the system.
@@ -21,7 +22,10 @@ import org.eclipse.kura.usb.UsbDevice;
  * Compared to the standard Java API, this class provides additional information
  * such as the NetworkInterfaceType, whether the interface is provided to the system
  * through a USB Adapter, and additional low-level characteristics of the interface.
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface NetInterface<T extends NetInterfaceAddress> {
 
     /**

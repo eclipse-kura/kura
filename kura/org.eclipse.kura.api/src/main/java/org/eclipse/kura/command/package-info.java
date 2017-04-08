@@ -9,11 +9,4 @@
  * Contributors:
  * Eurotech
  *******************************************************************************/
-/**
- *
- */
-/**
- * @author dwoodard
- *
- */
 package org.eclipse.kura.command;

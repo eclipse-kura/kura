@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.position;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * The NmeaPosition class is similar to org.osgi.util.position.Position but with different units
  * and more fields.<br>
@@ -35,7 +37,10 @@ package org.eclipse.kura.position;
  * <li>HDOP : Horizontal Dilution of precision (from GPGSA)
  * <li>VDOP : Vertical Dilution of precision (from GPGSA)
  * </ul>
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class NmeaPosition {
 
     private double m_latitude;

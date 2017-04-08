@@ -13,8 +13,13 @@ package org.eclipse.kura.configuration;
 
 import java.util.Map;
 
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.event.Event;
 
+/**
+ * @noextend This class is not intended to be subclassed by clients.
+ */
+@ProviderType
 public class KuraNetConfigReadyEvent extends Event {
 
     /** Topic of the KuraConfigurationReadyEvent */

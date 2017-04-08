@@ -12,6 +12,7 @@ package org.eclipse.kura.driver;
 /**
  * The Enum DriverConstants contains all the necessary constants required for
  * Drivers of Kura Asset Model
+ * @since 1.2
  */
 public enum DriverConstants {
 

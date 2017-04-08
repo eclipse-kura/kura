@@ -13,12 +13,16 @@
  *******************************************************************************/
 package org.eclipse.kura.wire;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * The interface WireHelperService is an service utility API to provide quick
  * and necessary operations for Kura Wires topology.
  *
  * @noimplement This interface is not intended to be implemented by clients.
+ * @since 1.2
  */
+@ProviderType
 public interface WireHelperService {
 
     /**

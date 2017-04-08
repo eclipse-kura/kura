@@ -17,10 +17,14 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.kura.net.modem.ModemDevice;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Representation of USB modem devices
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class UsbModemDevice extends AbstractUsbDevice implements ModemDevice {
 
     /** The TTY devices associated with modem **/

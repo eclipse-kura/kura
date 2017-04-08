@@ -11,9 +11,14 @@
  *******************************************************************************/
 package org.eclipse.kura.usb;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * Representation of a USB block device. This includes storage type USB devices.
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class UsbBlockDevice extends AbstractUsbDevice {
 
     private final String m_deviceNode;

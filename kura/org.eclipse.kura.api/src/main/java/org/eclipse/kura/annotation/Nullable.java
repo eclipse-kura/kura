@@ -23,6 +23,7 @@ import java.lang.annotation.Target;
  * The existence of this annotation indicates that the author believes that the
  * annotated field or method or parameter or local variable can accept null
  * values
+ * @since 1.2
  */
 @Documented
 @Target({ FIELD, METHOD, PARAMETER, LOCAL_VARIABLE })

@@ -15,10 +15,14 @@ import java.net.URISyntaxException;
 
 import javax.comm.SerialPort;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * Represents a Uniform Resource Identifier (URI) for a Comm/Serial Port.
  *
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class CommURI {
 
     public static final int DATABITS_5 = SerialPort.DATABITS_5;
@@ -137,8 +141,8 @@ public class CommURI {
     /**
      * The open timeout associated with the port
      * 
-     * @since 1.1.0
      * @return an int representing the open timeout in milliseconds
+     * @since 1.2
      */
     public int getOpenTimeout() {
         return this.m_openTimeout;
@@ -147,8 +151,8 @@ public class CommURI {
     /**
      * The receive timeout associated with the port
      * 
-     * @since 1.1.0
      * @return an int representing the receive timeout in milliseconds
+     * @since 1.2
      */
     public int getReceiveTimeout() {
         return this.m_receiveTimeout;
@@ -217,11 +221,11 @@ public class CommURI {
     }
 
     /**
-     * Builder class used as a helper in building the components of a CommURI
-     *
-     * @author eurotech
-     *
+     * Builder class used as a helper in building the components of a CommURI.
+     * 
+     * @noextend This class is not intended to be subclassed by clients.
      */
+    @ProviderType
     public static class Builder {
 
         private final String m_port;
@@ -281,8 +285,8 @@ public class CommURI {
          * 
          * @param timeout
          *            The open timeout in milliseconds.
-         * @since 1.1.0
          * @return
+         * @since 1.2
          */
         public Builder withOpenTimeout(int timeout) {
             this.m_openTimeout = timeout;
@@ -295,8 +299,8 @@ public class CommURI {
          * 
          * @param timeout
          *            The receive timeout in milliseconds.
-         * @since 1.1.0
          * @return
+         * @since 1.2
          */
         public Builder withReceiveTimeout(int timeout) {
             this.m_receiveTimeout = timeout;

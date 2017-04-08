@@ -12,13 +12,14 @@
 package org.eclipse.kura.net.firewall;
 
 import org.eclipse.kura.net.NetConfig;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Represents a NAT configuration
  *
- * @author eurotech
- *
+ * @noextend This class is not intended to be subclassed by clients.
  */
+@ProviderType
 public class FirewallNatConfig implements NetConfig {
 
     /** The source interface (WAN interface) **/

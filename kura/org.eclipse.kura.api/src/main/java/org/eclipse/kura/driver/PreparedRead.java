@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.driver.Driver.ConnectionException;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This interface represents an optimized request that can be performed by a driver.
@@ -22,7 +23,11 @@ import org.eclipse.kura.driver.Driver.ConnectionException;
  * a call to the {@link Driver#prepareRead(java.util.List)} method.
  * 
  * @see Driver#prepareRead(java.util.List)
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
+ * @since 1.2
  */
+@ProviderType
 public interface PreparedRead extends AutoCloseable {
 
     /**

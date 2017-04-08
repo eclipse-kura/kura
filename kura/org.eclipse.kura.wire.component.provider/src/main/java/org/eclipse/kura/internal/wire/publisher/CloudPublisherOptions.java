@@ -50,7 +50,7 @@ final class CloudPublisherOptions {
     private static final String DEFAULT_CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
 
     /** The Constant application to perform (either publish or subscribe). */
-    private static final String DEFAULT_APPLICATION = "PUB";
+    private static final String DEFAULT_APPLICATION = "W1";
 
     private static final boolean DEFAULT_CONTROL_MESSAGE = false;
 
@@ -62,7 +62,7 @@ final class CloudPublisherOptions {
     private static final boolean DEFAULT_RETAIN = false;
 
     /** The Constant denoting default MQTT topic. */
-    private static final String DEFAULT_TOPIC = "EVENT";
+    private static final String DEFAULT_TOPIC = "A1/$assetName";
 
     private final Map<String, Object> properties;
 

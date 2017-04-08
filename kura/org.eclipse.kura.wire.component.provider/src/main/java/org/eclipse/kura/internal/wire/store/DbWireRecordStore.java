@@ -171,6 +171,9 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         this.wireRecordStoreOptions = new DbWireRecordStoreOptions(properties);
         this.dbHelper = DbServiceHelper.of(this.dbService);
         this.wireSupport = this.wireHelperService.newWireSupport(this);
+
+        final String tableName = this.wireRecordStoreOptions.getTableName();
+        reconcileDB(tableName);
         logger.debug(message.activatingStoreDone());
     }
 
@@ -183,6 +186,9 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
     public void updated(final Map<String, Object> properties) {
         logger.debug(message.updatingStore() + properties);
         this.wireRecordStoreOptions = new DbWireRecordStoreOptions(properties);
+
+        final String tableName = this.wireRecordStoreOptions.getTableName();
+        reconcileDB(tableName);
         logger.debug(message.updatingStoreDone());
     }
 
@@ -352,7 +358,23 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
                 reconcileColumns(tableName, wireRecord);
             }
         } catch (final SQLException ee) {
-            logger.error(message.errorStoring() + ee);
+            logger.error(message.errorStoring(), ee);
+        }
+    }
+
+    /**
+     * Tries to reconcile the database.
+     *
+     * @param tableName
+     *            the table name in the database that needs to be reconciled.
+     */
+    private void reconcileDB(final String tableName) {
+        try {
+            if (nonNull(tableName) && !tableName.isEmpty()) {
+                reconcileTable(tableName);
+            }
+        } catch (final SQLException ee) {
+            logger.error(message.errorStoring(), ee);
         }
     }
 

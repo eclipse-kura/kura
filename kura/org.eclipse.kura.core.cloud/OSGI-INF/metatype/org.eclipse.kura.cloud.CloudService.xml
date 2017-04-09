@@ -105,7 +105,7 @@
             default="kura-protobuf"
             description="Specify the message payload encoding.">
             <Option label="Kura Protobuf" value="kura-protobuf" />
-            <Option label="JSON" value="json" />
+            <Option label="Simple JSON" value="simple-json" />
         </AD>
     </OCD>
     

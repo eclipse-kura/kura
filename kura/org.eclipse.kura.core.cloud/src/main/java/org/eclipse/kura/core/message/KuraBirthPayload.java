@@ -46,6 +46,7 @@ public class KuraBirthPayload extends KuraPayload {
     private static final String MODEM_IMSI = "modem_imsi";
     private static final String MODEM_ICCID = "modem_iccid";
     private static final String MODEM_RSSI = "modem_rssi";
+    private static final String PAYLOAD_ENCODING = "payload_encoding";
 
     private static final String DEFAULT_APPLICATION_FRAMEWORK = "Kura";
 
@@ -177,6 +178,10 @@ public class KuraBirthPayload extends KuraPayload {
         return (String) getMetric(MODEM_RSSI);
     }
 
+    public String getPayloadEncoding() {
+        return (String) getMetric(PAYLOAD_ENCODING);
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("KuraBirthPayload [");
@@ -205,7 +210,8 @@ public class KuraBirthPayload extends KuraPayload {
         sb.append("getConnectionInterface()=").append(getConnectionInterface()).append(", ");
         sb.append("getConnectionIp()=").append(getConnectionIp()).append(", ");
         sb.append("getAcceptEncoding()=").append(getAcceptEncoding()).append(", ");
-        sb.append("getApplicationIdentifiers()=").append(getApplicationIdentifiers());
+        sb.append("getApplicationIdentifiers()=").append(getApplicationIdentifiers()).append(", ");
+        sb.append("getPayloadEncoding()=").append(getPayloadEncoding());
 
         sb.append("]");
 
@@ -243,6 +249,7 @@ public class KuraBirthPayload extends KuraPayload {
         private String modemIccid;
         private String modemImsi;
         private String modemRssi;
+        private String payloadEncoding;
 
         private KuraPosition position;
 
@@ -397,6 +404,11 @@ public class KuraBirthPayload extends KuraPayload {
             return this;
         }
 
+        public KuraBirthPayloadBuilder withPayloadEncoding(String payloadEncoding) {
+            this.payloadEncoding = payloadEncoding;
+            return this;
+        }
+
         public KuraBirthPayload build() {
             KuraBirthPayload birthPayload = new KuraBirthPayload();
 
@@ -489,6 +501,9 @@ public class KuraBirthPayload extends KuraPayload {
             }
             if (this.modemRssi != null) {
                 birthPayload.addMetric(MODEM_RSSI, this.modemRssi);
+            }
+            if (this.payloadEncoding != null) {
+                birthPayload.addMetric(PAYLOAD_ENCODING, this.payloadEncoding);
             }
             if (this.position != null) {
                 birthPayload.setPosition(this.position);

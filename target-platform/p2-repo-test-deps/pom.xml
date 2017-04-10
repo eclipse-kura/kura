@@ -10,7 +10,6 @@
 	</parent>
 
 	<artifactId>p2-repo-tests-deps</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<build>

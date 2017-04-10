@@ -23,7 +23,6 @@
 	</parent>
 
 	<artifactId>org.eclipse.kura.test.helloworld</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>

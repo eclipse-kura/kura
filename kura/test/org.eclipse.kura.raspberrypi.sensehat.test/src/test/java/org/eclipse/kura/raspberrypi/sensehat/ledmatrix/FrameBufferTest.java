@@ -181,6 +181,9 @@ public class FrameBufferTest {
             Field field = FrameBuffer.class.getDeclaredField("FrameBufferFile");
             field.setAccessible(true);
             field.set(null, new File("target/fb-test.output"));
+            Field graphicsFolderField = FrameBuffer.class.getDeclaredField("graphicsFolder");
+            graphicsFolderField.setAccessible(true);
+            graphicsFolderField.set(null, new File("src/test/resources/"));
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }

@@ -342,6 +342,16 @@
 									<artifactId>org.eclipse.kura.wire.provider</artifactId>
 									<version>${org.eclipse.kura.wire.provider.version}</version>
 								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.driver.opcua.localization</artifactId>
+									<version>${org.eclipse.kura.driver.opcua.localization.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.driver.opcua.provider</artifactId>
+									<version>${org.eclipse.kura.driver.opcua.provider.version}</version>
+								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -469,6 +479,8 @@
 							    <move file="target/plugins/org.eclipse.kura.wire.component.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.wire.helper.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.helper.provider_${org.eclipse.kura.wire.helper.provider.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.wire.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.driver.opcua.localization.jar" tofile="target/plugins/org.eclipse.kura.driver.opcua.localization_${org.eclipse.kura.driver.opcua.localization.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.driver.opcua.provider.jar" tofile="target/plugins/org.eclipse.kura.driver.opcua.provider_${org.eclipse.kura.driver.opcua.provider.version}.jar"/>
 							</tasks>
 						</configuration>
 					</execution>
@@ -2632,6 +2644,19 @@
 									<target if="${is.not.snapshot}">
 										<ant antfile="${basedir}/src/main/ant/build_camel-quickstart_dp.xml"
 											target="build-dp" />
+									</target>
+								</configuration>
+							</execution>
+							
+							<execution>
+								<id>opcua-dp</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target if="${is.not.snapshot}">
+										<ant antfile="${basedir}/src/main/ant/build_opcua_dp.xml" target="build-dp" />
 									</target>
 								</configuration>
 							</execution>

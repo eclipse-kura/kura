@@ -9,7 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 /**
  * Render the Content in the Wire Component Properties Panel based on Service (GwtBSConfigComponent) selected in Wire graph
@@ -18,6 +18,8 @@
  * for both numeric and other textual field with validate() checking if value in numeric fields is numeric
  */
 package org.eclipse.kura.web.client.ui.wires;
+
+import static org.eclipse.kura.web.shared.AssetConstants.CHANNEL_PROPERTY_SEPARATOR;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +33,7 @@ import java.util.logging.Level;
 
 import org.eclipse.kura.web.client.ui.AbstractServicesUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtChannelInfo;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
@@ -124,12 +127,6 @@ public class PropertiesUi extends AbstractServicesUi {
     Button btnCancelCreatingNewChannel;
 
     private static final String INVALID_CLASS_NAME = "error-text-box";
-
-    private static final String CHANNEL_VALUE_TYPE = "+value.type";
-    private static final String CHANNEL_TYPE = "+type";
-
-    private static final char CHANNEL_PROPERTY_SEPARATOR = '#';
-    private static final char[] CHANNEL_NAME_PHROIBITED_CHARS = { '_', CHANNEL_PROPERTY_SEPARATOR };
 
     private static final int MAXIMUM_PAGE_SIZE = 5;
 
@@ -280,7 +277,7 @@ public class PropertiesUi extends AbstractServicesUi {
     public void renderForm() {
         this.fields.clear();
         for (final GwtConfigParameter param : this.configurableComponent.getParameters()) {
-            final String[] tokens = param.getId().split(CHANNEL_PROPERTY_SEPARATOR + "");
+            final String[] tokens = param.getId().split(CHANNEL_PROPERTY_SEPARATOR.value());
             boolean isChannelData = tokens.length == 2;
             final boolean isDriverField = param.getId().equals(driverPidProp);
 
@@ -408,19 +405,20 @@ public class PropertiesUi extends AbstractServicesUi {
 
             for (final GwtChannelInfo ci : this.channelsDataProvider.getList()) {
                 StringBuilder prefixBuilder = new StringBuilder(ci.getName());
-                prefixBuilder.append(CHANNEL_PROPERTY_SEPARATOR);
+                prefixBuilder.append(CHANNEL_PROPERTY_SEPARATOR.value());
                 String prefix = prefixBuilder.toString();
 
-                final GwtConfigParameter newType = copyOf(this.baseDriverDescriptor.getParameter(CHANNEL_TYPE));
-                newType.setName(prefix + CHANNEL_TYPE);
-                newType.setId(prefix + CHANNEL_TYPE);
+                final GwtConfigParameter newType = copyOf(
+                        this.baseDriverDescriptor.getParameter(AssetConstants.TYPE.value()));
+                newType.setName(prefix + AssetConstants.TYPE.value());
+                newType.setId(prefix + AssetConstants.TYPE.value());
                 newType.setValue(ci.getType());
                 this.configurableComponent.getParameters().add(newType);
 
                 final GwtConfigParameter newValueType = copyOf(
-                        this.baseDriverDescriptor.getParameter(CHANNEL_VALUE_TYPE));
-                newValueType.setName(prefix + CHANNEL_VALUE_TYPE);
-                newValueType.setId(prefix + CHANNEL_VALUE_TYPE);
+                        this.baseDriverDescriptor.getParameter(AssetConstants.VALUE_TYPE.value()));
+                newValueType.setName(prefix + AssetConstants.VALUE_TYPE.value());
+                newValueType.setId(prefix + AssetConstants.VALUE_TYPE.value());
                 newValueType.setValue(ci.getValueType());
                 this.configurableComponent.getParameters().add(newValueType);
 
@@ -547,7 +545,8 @@ public class PropertiesUi extends AbstractServicesUi {
         final Iterator<GwtConfigParameter> it = params.iterator();
         while (it.hasNext()) {
             final GwtConfigParameter p = it.next();
-            if (p.getName() != null && p.getName().indexOf(CHANNEL_PROPERTY_SEPARATOR) != -1) {
+            if (p.getName() != null
+                    && p.getName().indexOf(AssetConstants.CHANNEL_PROPERTY_SEPARATOR.value().charAt(0)) != -1) {
                 it.remove();
             }
         }
@@ -754,7 +753,10 @@ public class PropertiesUi extends AbstractServicesUi {
             return result;
         }
 
-        for (char prohibitedChar : CHANNEL_NAME_PHROIBITED_CHARS) {
+        final String prohibitedChars = AssetConstants.CHANNEL_NAME_PROHIBITED_CHARS.value();
+
+        for (int i = 0; i < prohibitedChars.length(); i++) {
+            final char prohibitedChar = prohibitedChars.charAt(i);
             if (channelName.indexOf(prohibitedChar) != -1) {
                 result.setInvalid(true);
                 result.setValue(MSGS.wiresChannelNameInvalidCharacters() + " \'" + prohibitedChar + '\'');

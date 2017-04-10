@@ -31,47 +31,6 @@ import org.osgi.annotation.versioning.ProviderType;
  * Kura).<br>
  * <br>
  *
- * The properties as provided to an Asset must conform to the following
- * specifications.<br>
- * <br>
- *
- * <ul>
- * <li>The value associated with <b><i>driver.pid</i></b> key in the map denotes
- * the driver instance PID (kura.service.pid) to be consumed by this asset</li>
- * <li>A value associated with <b><i>asset.desc</i></b> key denotes the asset
- * description</li>
- * <li>[name#property]</li> where name is a string denoting the channel's unique
- * name and the {@code [property]} denotes the protocol specific properties.
- * The name of a channel must be unique in the channels configurations of an Asset, and is not
- * allowed to contain spaces or any of the following characters: <b>#</b>, <b>_</b>.
- * </ul>
- *
- * The configuration properties of a channel belong to one of this two groups: generic channel properties and
- * driver specific properties.
- * <br>
- * Generic channel properties begin with the '+' character, and are driver independent.
- * The following generic channel properties must always be present in the channel configuration:
- * <ul>
- * <li>{@code +type} identifies the channel type (READ, WRITE or READ_WRITE) as specified by {@link ChannelType}</li>
- * <li>{@code +value.type} identifies the {@link DataType} of the channel.</li>
- * </ul>
- * For example, the property keys above for a channel named channel1 would be encoded as channel1#+type and
- * channel1#+value.type<br>
- * 
- * The values of the <b>+value.type</b> and <b>+type</b> properties must me mappable
- * respectively to a {@link DataType} and {@link ChannelType} instance.
- * <br>
- * The value of these property can be either an instance of the corresponding type,
- * or a string representation that equals the value returned by calling the {@code toString()} method
- * on one of the enum variants of that type.
- * 
- * <br>
- * Driver specific properties are defined by the driver, their keys cannot begin with a '+' character.
- * For example, valid driver specific properties can be channel1#modbus.register,
- * channel1#modbus.unit.id etc.<br>
- * <br>
- *
- *
  * @see Channel
  * @see ChannelType
  * @see DataType

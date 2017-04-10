@@ -14,11 +14,12 @@ package org.eclipse.kura.internal.asset.provider;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.asset.AssetConstants.ASSET_DESC_PROP;
-import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
-import static org.eclipse.kura.asset.AssetConstants.CHANNEL_PROPERTY_SEPARATOR;
-import static org.eclipse.kura.asset.AssetConstants.TYPE;
-import static org.eclipse.kura.asset.AssetConstants.VALUE_TYPE;
+import static org.eclipse.kura.asset.provider.AssetConstants.ASSET_DESC_PROP;
+import static org.eclipse.kura.asset.provider.AssetConstants.ASSET_DRIVER_PROP;
+import static org.eclipse.kura.asset.provider.AssetConstants.CHANNEL_NAME_PROHIBITED_CHARS;
+import static org.eclipse.kura.asset.provider.AssetConstants.CHANNEL_PROPERTY_SEPARATOR;
+import static org.eclipse.kura.asset.provider.AssetConstants.TYPE;
+import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_TYPE;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,7 +28,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.kura.asset.AssetConfiguration;
-import org.eclipse.kura.asset.AssetConstants;
 import org.eclipse.kura.channel.Channel;
 import org.eclipse.kura.channel.ChannelType;
 import org.eclipse.kura.localization.LocalizationAdapter;
@@ -114,7 +114,7 @@ public final class AssetOptions {
         if (isNull(channelName))
             return false;
 
-        final String prohibitedChars = AssetConstants.CHANNEL_NAME_PROHIBITED_CHARS.value();
+        final String prohibitedChars = CHANNEL_NAME_PROHIBITED_CHARS.value();
 
         for (int i = 0; i < channelName.length(); i++) {
             if (prohibitedChars.indexOf(channelName.charAt(i)) != -1) {

@@ -7,13 +7,12 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  *******************************************************************************/
-package org.eclipse.kura.asset;
+package org.eclipse.kura.asset.provider;
 
 /**
- * The Enum AssetConstants contains all the necessary constants required for
- * Kura Asset Model
- * @since 1.2
+ * This class contains constants related to the {@link BaseAsset} configuration persistence.
  */
+
 public enum AssetConstants {
 
     /** Separator for channel configuration property. */
@@ -23,7 +22,7 @@ public enum AssetConstants {
     CHANNEL_DEFAULT_PROPERTY_PREFIX("+"),
 
     /** Prohibited characters for channel name */
-    CHANNEL_NAME_PROHIBITED_CHARS(CHANNEL_PROPERTY_SEPARATOR.value() + "_ "),
+    CHANNEL_NAME_PROHIBITED_CHARS(CHANNEL_PROPERTY_SEPARATOR.value() + "/+, "),
 
     /** Asset Description Property to be used in the configuration. */
     ASSET_DESC_PROP("asset.desc"),

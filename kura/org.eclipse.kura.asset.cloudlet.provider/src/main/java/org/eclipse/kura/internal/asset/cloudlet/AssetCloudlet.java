@@ -5,11 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.asset.cloudlet;
 
@@ -62,11 +62,11 @@ import org.slf4j.LoggerFactory;
  * <li>/assets</li> : to retrieve all the assets
  * <li>/assets/asset_pid</li> : to retrieve all the channels of the provided
  * asset PID
- * <li>/assets/asset_pid/channel_name</li> : to retrieve the value of the
+ * <li>/assets/asset_pid/channelname</li> : to retrieve the value of the
  * specified channel from the provided asset PID
- * <li>/assets/asset_pid/channel_name1#channel_name2#channel_name3</li> : to retrieve
+ * <li>/assets/asset_pid/channelname1_channelname2_channelname3</li> : to retrieve
  * the value of the several channels from the provided asset PID. Any number of
- * channels can be provided as well. Also note that {@code "#"} delimiter must
+ * channels can be provided as well. Also note that {@code "_"} delimiter must
  * be used to separate the channel names.
  * </ul>
  *
@@ -277,7 +277,7 @@ public final class AssetCloudlet extends Cloudlet {
 
     /**
      * Put operation specific for assets
-     * 
+     *
      * @param reqPayload
      *            a KuraRequestPayload
      * @param respPayload
@@ -335,7 +335,7 @@ public final class AssetCloudlet extends Cloudlet {
      * @param assetPid
      *            the Asset PID
      * @param channelName
-     *            the channel name (might contain {@code #} for multiple reads)
+     *            the channel name (might contain {@code _} for multiple reads)
      * @throws NullPointerException
      *             if any of the arguments is null
      */
@@ -345,7 +345,7 @@ public final class AssetCloudlet extends Cloudlet {
         requireNonNull(assetPid, message.assetPidNonNull());
         requireNonNull(channelName, message.channelNameNonNull());
 
-        final String channelDelim = "#";
+        final String channelDelim = "_";
         Set<String> channelNames = null;
         if (channelName.contains(channelDelim)) {
             channelNames = CollectionUtil.newHashSet(Arrays.asList(channelName.split(channelDelim)));
@@ -400,7 +400,7 @@ public final class AssetCloudlet extends Cloudlet {
             final ChannelStatus channelStatus = channelRecord.getChannelStatus();
             final ChannelFlag channelFlag = channelStatus.getChannelFlag();
 
-            final String prefix = channelRecord.getChannelName() + "#";
+            final String prefix = channelRecord.getChannelName() + "_";
             respPayload.addMetric(prefix + message.flag(), channelFlag.toString());
             respPayload.addMetric(prefix + message.timestamp(), channelRecord.getTimestamp());
             respPayload.addMetric(prefix + message.value(), value);

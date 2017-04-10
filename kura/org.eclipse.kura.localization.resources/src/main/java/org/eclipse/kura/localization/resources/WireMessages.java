@@ -97,11 +97,11 @@ public interface WireMessages {
     @En("asset_name")
     public String assetName();
 
-    @En("Asset Records cannot be empty")
-    public String assetRecordsNonEmpty();
+    @En("Channel Records cannot be empty")
+    public String channelRecordsNonEmpty();
 
-    @En("List of Asset Records cannot be null")
-    public String assetRecordsNonNull();
+    @En("List of Channel Records cannot be null")
+    public String channelRecordsNonNull();
 
     @En("Bundle context cannot be null")
     public String bundleContextNonNull();

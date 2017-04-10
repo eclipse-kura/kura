@@ -14,6 +14,7 @@ package org.eclipse.kura.driver;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.driver.Driver.ConnectionException;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -32,27 +33,27 @@ public interface PreparedRead extends AutoCloseable {
 
     /**
      * Performs the optimized read request described by this {@link PreparedRead} instance.
-     * In order to improve efficiency this method can return the same {@link DriverRecord} instances that were supplied
+     * In order to improve efficiency this method can return the same {@link ChannelRecord} instances that were supplied
      * as arguments to the {@link Driver#prepareRead(List)} call that created this {@link PreparedRead}.
      * The returned records should not be modified while a valid (not closed) {@link PreparedRead} holds a
      * reference to them, otherwise unpredictable behavior can occur.
      * 
-     * @return the result of the request as a list of {@link DriverRecord} instances.
+     * @return the result of the request as a list of {@link ChannelRecord} instances.
      * @throws KuraException
      *             if the provided {@link PreparedRead} is not valid (for example if it has been closed)
      * @throws ConnectionException
      *             if the connection to the field device is interrupted
      */
-    public List<DriverRecord> execute() throws ConnectionException, KuraException;
+    public List<ChannelRecord> execute() throws ConnectionException, KuraException;
 
     /**
-     * Returns the list of driver records associated with this prepared read.
-     * In order to improve efficiency this method can return the same {@link DriverRecord} instances that were supplied
+     * Returns the list of channel records associated with this prepared read.
+     * In order to improve efficiency this method can return the same {@link ChannelRecord} instances that were supplied
      * as arguments to the {@link Driver#prepareRead(List)} call that created this {@link PreparedRead}.
      * The returned records should not be modified while a valid (not closed) {@link PreparedRead} holds a
      * reference to them, otherwise unpredictable behavior can occur.
      * 
-     * @return The list of driver records associated with this prepared read.
+     * @return The list of channel records associated with this prepared read.
      */
-    public List<DriverRecord> getDriverRecords();
+    public List<ChannelRecord> getChannelRecords();
 }

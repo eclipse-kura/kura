@@ -30,11 +30,11 @@ import java.util.Set;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
-import org.eclipse.kura.asset.AssetFlag;
-import org.eclipse.kura.asset.AssetRecord;
 import org.eclipse.kura.asset.AssetService;
-import org.eclipse.kura.asset.AssetStatus;
-import org.eclipse.kura.asset.Channel;
+import org.eclipse.kura.channel.Channel;
+import org.eclipse.kura.channel.ChannelFlag;
+import org.eclipse.kura.channel.ChannelRecord;
+import org.eclipse.kura.channel.ChannelStatus;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.Cloudlet;
@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
  * <li>/assets/asset_pid/channel_name1#channel_name2#channel_name3</li> : to retrieve
  * the value of the several channels from the provided asset PID. Any number of
  * channels can be provided as well. Also note that {@code "#"} delimiter must
- * be used to separate the channel IDs.
+ * be used to separate the channel names.
  * </ul>
  *
  * The available {@code PUT} commands are as follows
@@ -294,28 +294,29 @@ public final class AssetCloudlet extends Cloudlet {
         final AssetConfiguration configuration = asset.getAssetConfiguration();
         final Map<String, Channel> assetConfiguredChannels = configuration.getAssetChannels();
         if (assetConfiguredChannels != null) {
-            final AssetRecord assetRecord = new AssetRecord(channelName);
             final String userValue = (String) reqPayload.getMetric("value");
             final String userType = (String) reqPayload.getMetric("type");
+            ChannelRecord channelRecord = null;
             boolean flag = true;
             try {
-                this.wrapValue(assetRecord, userValue, userType);
+                channelRecord = this.createWriteRecord(channelName, userValue, userType);
             } catch (final IllegalArgumentException e) {
                 flag = false;
-                assetRecord.setAssetStatus(new AssetStatus(AssetFlag.FAILURE, message.valueTypeConversionError(), e));
-                assetRecord.setTimestamp(System.currentTimeMillis());
+                channelRecord.setChannelStatus(
+                        new ChannelStatus(ChannelFlag.FAILURE, message.valueTypeConversionError(), e));
+                channelRecord.setTimestamp(System.currentTimeMillis());
             }
 
-            List<AssetRecord> assetRecords = Arrays.asList(assetRecord);
+            List<ChannelRecord> channelRecords = Arrays.asList(channelRecord);
             try {
                 if (flag) {
-                    assetRecords = asset.write(assetRecords);
+                    asset.write(channelRecords);
                 }
             } catch (final KuraException e) {
                 // if connection exception occurs
                 respPayload.addMetric(message.errorMessage(), message.connectionException());
             }
-            this.prepareResponse(respPayload, assetRecords);
+            this.prepareResponse(respPayload, channelRecords);
         }
     }
 
@@ -363,48 +364,49 @@ public final class AssetCloudlet extends Cloudlet {
             }
         }
         if (assetConfiguredChannels != null) {
-            List<AssetRecord> assetRecords = null;
+            List<ChannelRecord> channelRecords = null;
             try {
-                assetRecords = asset.read(channelNamesToRead);
+                channelRecords = asset.read(channelNamesToRead);
             } catch (final KuraException e) {
                 // if connection exception occurs
                 logger.warn(message.connectionException() + e);
                 respPayload.addMetric(message.errorMessage(), message.connectionException());
             }
-            if (assetRecords != null) {
-                this.prepareResponse(respPayload, assetRecords);
+            if (channelRecords != null) {
+                this.prepareResponse(respPayload, channelRecords);
             }
         }
     }
 
     /**
-     * Prepares the response payload based on the asset records as provided
+     * Prepares the response payload based on the channel records as provided
      *
      * @param respPayload
      *            the response payload to prepare
-     * @param assetRecords
-     *            the list of asset records
+     * @param channelRecords
+     *            the list of channel records
      * @throws NullPointerException
      *             if any of the arguments is null
      */
-    private void prepareResponse(final KuraResponsePayload respPayload, final List<AssetRecord> assetRecords) {
+    private void prepareResponse(final KuraResponsePayload respPayload,
+            final List<? extends ChannelRecord> channelRecords) {
         requireNonNull(respPayload, message.respPayloadNonNull());
-        requireNonNull(assetRecords, message.assetRecordsNonNull());
+        requireNonNull(channelRecords, message.channelRecordsNonNull());
 
-        for (final AssetRecord assetRecord : assetRecords) {
-            final TypedValue<?> assetValue = assetRecord.getValue();
+        for (final ChannelRecord channelRecord : channelRecords) {
+            final TypedValue<?> assetValue = channelRecord.getValue();
             final String value = (assetValue != null) ? String.valueOf(assetValue.getValue()) : "ERROR";
             String errorText;
-            final AssetStatus assetStatus = assetRecord.getAssetStatus();
-            final AssetFlag assetFlag = assetStatus.getAssetFlag();
+            final ChannelStatus channelStatus = channelRecord.getChannelStatus();
+            final ChannelFlag channelFlag = channelStatus.getChannelFlag();
 
-            final String prefix = assetRecord.getChannelName() + "#";
-            respPayload.addMetric(prefix + message.flag(), assetFlag.toString());
-            respPayload.addMetric(prefix + message.timestamp(), assetRecord.getTimestamp());
+            final String prefix = channelRecord.getChannelName() + "#";
+            respPayload.addMetric(prefix + message.flag(), channelFlag.toString());
+            respPayload.addMetric(prefix + message.timestamp(), channelRecord.getTimestamp());
             respPayload.addMetric(prefix + message.value(), value);
 
-            if (assetFlag == AssetFlag.FAILURE) {
-                final String exceptionMessage = assetStatus.getExceptionMessage();
+            if (channelFlag == ChannelFlag.FAILURE) {
+                final String exceptionMessage = channelStatus.getExceptionMessage();
                 errorText = (exceptionMessage != null) ? exceptionMessage : "";
                 respPayload.addMetric(prefix + message.errorMessage(), errorText);
             }
@@ -412,13 +414,12 @@ public final class AssetCloudlet extends Cloudlet {
     }
 
     /**
-     * Wraps the provided user provided value to the an instance of
-     * {@link TypedValue} in the asset record
+     * Creates a new channel record for a write operation from the provided parameters
      *
-     * @param assetRecord
-     *            the asset record to contain the typed value
+     * @param channelName
+     *            the name of the channel
      * @param userValue
-     *            the value to wrap
+     *            the value of the data type
      * @param userType
      *            the type to use
      * @throws NullPointerException
@@ -428,8 +429,8 @@ public final class AssetCloudlet extends Cloudlet {
      * @throws IllegalArgumentException
      *             if the {@code userType} cannot be converted to a {@link DataType}.
      */
-    private void wrapValue(final AssetRecord assetRecord, final String userValue, final String userType) {
-        requireNonNull(assetRecord, message.assetRecordNonNull());
+    private ChannelRecord createWriteRecord(final String channelName, final String userValue, final String userType) {
+        requireNonNull(channelName, message.channelNameNonNull());
         requireNonNull(userValue, message.valueNonNull());
         requireNonNull(userType, message.typeNonNull());
 
@@ -459,6 +460,6 @@ public final class AssetCloudlet extends Cloudlet {
             throw nfe;
         }
 
-        assetRecord.setValue(value);
+        return ChannelRecord.createWriteRecord(channelName, value);
     }
 }

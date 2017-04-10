@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,7 +11,7 @@
  *  Amit Kumar Mondal
  *
  *******************************************************************************/
-package org.eclipse.kura.asset;
+package org.eclipse.kura.channel;
 
 import static java.util.Objects.requireNonNull;
 
@@ -21,8 +21,8 @@ import org.eclipse.kura.annotation.ThreadSafe;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * The Class DriverStatus is responsible for representing the status of any
- * driver specific operation
+ * The Class ChannelStatus is responsible for representing the status of any
+ * channel specific operation
  *
  * @noextend This class is not intended to be extended by clients.
  * @since 1.2
@@ -30,10 +30,10 @@ import org.osgi.annotation.versioning.ProviderType;
 @Immutable
 @ThreadSafe
 @ProviderType
-public class AssetStatus {
+public class ChannelStatus {
 
-    /** The asset flag. */
-    private final AssetFlag assetFlag;
+    /** The channel flag. */
+    private final ChannelFlag channelFlag;
 
     /** The exception instance if needed. */
     @Nullable
@@ -46,14 +46,14 @@ public class AssetStatus {
     /**
      * Instantiates a new status.
      *
-     * @param assetFlag
-     *            the asset flag
+     * @param channelFlag
+     *            the channel flag
      * @throws NullPointerException
-     *             if the asset flag is null
+     *             if the channel flag is null
      */
-    public AssetStatus(final AssetFlag assetFlag) {
-        requireNonNull(assetFlag, "Asset Flag cannot be null");
-        this.assetFlag = assetFlag;
+    public ChannelStatus(final ChannelFlag channelFlag) {
+        requireNonNull(channelFlag, "Channel Flag cannot be null");
+        this.channelFlag = channelFlag;
         this.exceptionMessage = null;
         this.exception = null;
     }
@@ -61,19 +61,19 @@ public class AssetStatus {
     /**
      * Instantiates a new status.
      *
-     * @param assetFlag
-     *            the asset flag
+     * @param channelFlag
+     *            the channel flag
      * @param exceptionMessage
      *            the exception message
      * @param exception
      *            the exception
      * @throws NullPointerException
-     *             if the asset flag is null
+     *             if the channel flag is null
      */
-    public AssetStatus(final AssetFlag assetFlag, @Nullable final String exceptionMessage,
+    public ChannelStatus(final ChannelFlag channelFlag, @Nullable final String exceptionMessage,
             @Nullable final Exception exception) {
-        requireNonNull(assetFlag, "Driver Flag cannot be null");
-        this.assetFlag = assetFlag;
+        requireNonNull(channelFlag, "Driver Flag cannot be null");
+        this.channelFlag = channelFlag;
         this.exceptionMessage = exceptionMessage;
         this.exception = exception;
     }
@@ -90,8 +90,8 @@ public class AssetStatus {
         if (this.getClass() != obj.getClass()) {
             return false;
         }
-        final AssetStatus other = (AssetStatus) obj;
-        if (this.assetFlag != other.assetFlag) {
+        final ChannelStatus other = (ChannelStatus) obj;
+        if (this.channelFlag != other.channelFlag) {
             return false;
         }
         if (this.exception == null) {
@@ -112,12 +112,12 @@ public class AssetStatus {
     }
 
     /**
-     * Gets the asset flag.
+     * Gets the channel flag.
      *
-     * @return the asset flag
+     * @return the channel flag
      */
-    public AssetFlag getAssetFlag() {
-        return this.assetFlag;
+    public ChannelFlag getChannelFlag() {
+        return this.channelFlag;
     }
 
     /**
@@ -143,17 +143,15 @@ public class AssetStatus {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result) + ((this.assetFlag == null) ? 0 : this.assetFlag.hashCode());
+        result = (prime * result) + ((this.channelFlag == null) ? 0 : this.channelFlag.hashCode());
         result = (prime * result) + ((this.exception == null) ? 0 : this.exception.hashCode());
         result = (prime * result) + ((this.exceptionMessage == null) ? 0 : this.exceptionMessage.hashCode());
         return result;
     }
 
-    /** {@inheritDoc} */
     @Override
     public String toString() {
-        return "Status [driverFlag=" + this.assetFlag + ", exception=" + this.exception + ", exceptionMessage="
-                + this.exceptionMessage + "]";
+        return "ChannelStatus [channelFlag=" + channelFlag + ", exception=" + exception + ", exceptionMessage="
+                + exceptionMessage + "]";
     }
-
 }

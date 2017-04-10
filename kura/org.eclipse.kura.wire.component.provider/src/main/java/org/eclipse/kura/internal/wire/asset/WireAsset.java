@@ -16,8 +16,8 @@ package org.eclipse.kura.internal.wire.asset;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.asset.ChannelType.READ_WRITE;
-import static org.eclipse.kura.asset.ChannelType.WRITE;
+import static org.eclipse.kura.channel.ChannelType.READ_WRITE;
+import static org.eclipse.kura.channel.ChannelType.WRITE;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,13 +28,12 @@ import java.util.Map.Entry;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
-import org.eclipse.kura.asset.AssetFlag;
-import org.eclipse.kura.asset.AssetRecord;
-import org.eclipse.kura.asset.AssetStatus;
-import org.eclipse.kura.asset.Channel;
-import org.eclipse.kura.asset.ChannelType;
 import org.eclipse.kura.asset.provider.BaseAsset;
-import org.eclipse.kura.driver.DriverRecord;
+import org.eclipse.kura.channel.Channel;
+import org.eclipse.kura.channel.ChannelFlag;
+import org.eclipse.kura.channel.ChannelRecord;
+import org.eclipse.kura.channel.ChannelStatus;
+import org.eclipse.kura.channel.ChannelType;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.type.TypedValue;
@@ -89,8 +88,7 @@ import org.slf4j.LoggerFactory;
  * be written to {@code B}'s channel
  *
  * @see Channel
- * @see AssetRecord
- * @see DriverRecord
+ * @see ChannelRecord
  * @see WireRecord
  * @see Asset
  */
@@ -140,7 +138,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     }
 
     /**
-     * OSGi service component callback while activation.
+     * OSGi service component activation callback.
      *
      * @param componentContext
      *            the component context
@@ -156,7 +154,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     }
 
     /**
-     * OSGi service component callback while updation.
+     * OSGi service component update callback.
      *
      * @param properties
      *            the service properties
@@ -169,7 +167,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     }
 
     /**
-     * OSGi service component callback while deactivation.
+     * OSGi service component deactivate callback.
      *
      * @param context
      *            the context
@@ -219,7 +217,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
         if (hasReadChannels()) {
             try {
-                emitAssetRecords(readAllChannels());
+                emitChannelRecords(readAllChannels());
             } catch (final KuraException e) {
                 logger.error(message.errorPerformingRead(), e);
             }
@@ -227,8 +225,8 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
         final List<WireRecord> records = wireEnvelope.getRecords();
         for (WireRecord wireRecord : records) {
-            final List<AssetRecord> assetRecordsToWriteChannels = determineWritingChannels(wireRecord);
-            writeChannels(assetRecordsToWriteChannels);
+            final List<ChannelRecord> channelRecordsToWrite = determineWritingChannels(wireRecord);
+            writeChannels(channelRecordsToWrite);
         }
     }
 
@@ -237,14 +235,14 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      *
      * @param records
      *            the list of {@link WireRecord}s to parse
-     * @return list of Asset Records containing the values to be written
+     * @return list of Channel Records containing the values to be written
      * @throws NullPointerException
      *             if argument is null
      */
-    private List<AssetRecord> determineWritingChannels(final WireRecord record) {
+    private List<ChannelRecord> determineWritingChannels(final WireRecord record) {
         requireNonNull(record, message.wireRecordNonNull());
 
-        final List<AssetRecord> assetRecordsToWriteChannels = CollectionUtil.newArrayList();
+        final List<ChannelRecord> channelRecordsToWrite = CollectionUtil.newArrayList();
         final AssetConfiguration assetConfiguration = getAssetConfiguration();
         final Map<String, Channel> channels = assetConfiguration.getAssetChannels();
         for (final Entry<String, Channel> channelEntry : channels.entrySet()) {
@@ -261,48 +259,28 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
             if (wireRecordProperties.containsKey(channelName)) {
                 final TypedValue<?> value = wireRecordProperties.get(channelName);
                 if (channel.getValueType() == value.getType()) {
-                    assetRecordsToWriteChannels.add(prepareAssetRecord(channel, value));
+                    channelRecordsToWrite.add(channel.createWriteRecord(value));
                 }
             }
         }
-        return assetRecordsToWriteChannels;
+        return channelRecordsToWrite;
     }
 
     /**
-     * Create an asset record from the provided channel information.
+     * Emit the provided list of channel records to the associated wires.
      *
-     * @param channel
-     *            the channel to get the values from
-     * @param value
-     *            the value
-     * @return the asset record
-     * @throws NullPointerException
-     *             if any of the provided arguments is null
-     */
-    private AssetRecord prepareAssetRecord(final Channel channel, final TypedValue<?> value) {
-        requireNonNull(channel, message.channelNonNull());
-        requireNonNull(value, message.valueNonNull());
-
-        final AssetRecord assetRecord = new AssetRecord(channel.getName());
-        assetRecord.setValue(value);
-        return assetRecord;
-    }
-
-    /**
-     * Emit the provided list of asset records to the associated wires.
-     *
-     * @param assetRecords
-     *            the list of asset records conforming to the aforementioned
+     * @param channelRecords
+     *            the list of channel records conforming to the aforementioned
      *            specification
      * @throws NullPointerException
      *             if provided records list is null
      * @throws IllegalArgumentException
      *             if provided records list is empty
      */
-    private void emitAssetRecords(final List<AssetRecord> assetRecords) {
-        requireNonNull(assetRecords, message.assetRecordsNonNull());
-        if (assetRecords.isEmpty()) {
-            throw new IllegalArgumentException(message.assetRecordsNonEmpty());
+    private void emitChannelRecords(final List<ChannelRecord> channelRecords) {
+        requireNonNull(channelRecords, message.channelRecordsNonNull());
+        if (channelRecords.isEmpty()) {
+            throw new IllegalArgumentException(message.channelRecordsNonEmpty());
         }
 
         final Map<String, TypedValue<?>> wireRecordProperties = new HashMap<>();
@@ -312,32 +290,32 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
             logger.error(message.configurationNonNull(), e);
         }
 
-        for (final AssetRecord assetRecord : assetRecords) {
-            final AssetStatus assetStatus = assetRecord.getAssetStatus();
-            final AssetFlag assetFlag = assetStatus.getAssetFlag();
-            final String channelName = assetRecord.getChannelName();
+        for (final ChannelRecord channelRecord : channelRecords) {
+            final ChannelStatus channelStatus = channelRecord.getChannelStatus();
+            final ChannelFlag channelFlag = channelStatus.getChannelFlag();
+            final String channelName = channelRecord.getChannelName();
 
             final TypedValue<?> typedValue;
-            if (assetFlag == AssetFlag.FAILURE) {
-                logErrorMessage(assetStatus);
+            if (channelFlag == ChannelFlag.FAILURE) {
+                logErrorMessage(channelStatus);
                 continue;
             } else {
-                typedValue = assetRecord.getValue();
+                typedValue = channelRecord.getValue();
             }
 
             wireRecordProperties.put(channelName, typedValue);
 
             wireRecordProperties.put(channelName + PROPERTY_SEPARATOR + TIMESTAMP,
-                    TypedValues.newLongValue(assetRecord.getTimestamp()));
+                    TypedValues.newLongValue(channelRecord.getTimestamp()));
         }
         final WireRecord wireRecord = new WireRecord(wireRecordProperties);
         this.wireSupport.emit(Arrays.asList(wireRecord));
     }
 
-    private void logErrorMessage(final AssetStatus assetStatus) {
+    private void logErrorMessage(final ChannelStatus channelStatus) {
         String errorMessage = ERROR_NOT_SPECIFIED_MESSAGE;
-        final Exception exception = assetStatus.getException();
-        final String exceptionMsg = assetStatus.getExceptionMessage();
+        final Exception exception = channelStatus.getException();
+        final String exceptionMsg = channelStatus.getExceptionMessage();
         if (nonNull(exception) && nonNull(exceptionMsg)) {
             errorMessage = exceptionMsg + " " + exception.toString();
         } else if (isNull(exception) && nonNull(exceptionMsg)) {
@@ -351,19 +329,19 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     /**
      * Perform Channel Write operation
      *
-     * @param assetRecordsToWriteChannels
-     *            the list of {@link AssetRecord}s
+     * @param channelRecordsToWrite
+     *            the list of {@link ChannelRecord}s
      * @throws NullPointerException
      *             if the provided list is null
      */
-    private void writeChannels(final List<AssetRecord> assetRecordsToWriteChannels) {
-        requireNonNull(assetRecordsToWriteChannels, message.assetRecordsNonNull());
-        if (assetRecordsToWriteChannels.isEmpty()) {
+    private void writeChannels(final List<ChannelRecord> channelRecordsToWrite) {
+        requireNonNull(channelRecordsToWrite, message.channelRecordsNonNull());
+        if (channelRecordsToWrite.isEmpty()) {
             return;
         }
 
         try {
-            write(assetRecordsToWriteChannels);
+            write(channelRecordsToWrite);
         } catch (final KuraException e) {
             logger.error(message.errorPerformingWrite(), e);
         }

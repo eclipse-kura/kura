@@ -10,6 +10,6 @@
 /**
  * Provides all necessary APIs for Drivers of Kura Asset Component Model
  *
- * @since 1.0.10
+ * @since 1.2
  */
 package org.eclipse.kura.driver;

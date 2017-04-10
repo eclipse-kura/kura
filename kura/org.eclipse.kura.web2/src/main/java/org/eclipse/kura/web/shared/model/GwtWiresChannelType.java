@@ -13,7 +13,7 @@
 package org.eclipse.kura.web.shared.model;
 
 /**
- * This enum corresponds to the one provided in {@link org.eclipse.kura.asset.ChannelType}
+ * This enum corresponds to the one provided in {@code org.eclipse.kura.channel.ChannelType}
  *
  */
 public enum GwtWiresChannelType {

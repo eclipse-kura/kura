@@ -20,6 +20,8 @@ import java.util.Map;
 
 import org.eclipse.kura.annotation.Immutable;
 import org.eclipse.kura.annotation.ThreadSafe;
+import org.eclipse.kura.channel.Channel;
+import org.eclipse.kura.channel.ChannelType;
 import org.eclipse.kura.type.DataType;
 import org.osgi.annotation.versioning.ProviderType;
 

@@ -127,9 +127,9 @@ public interface GwtWireService extends RemoteService {
             Map<String, GwtConfigComponent> configurations) throws GwtKuraException;
 
     /**
-     * Returns the Driver Pid property as specified in {@link org.eclipse.kura.asset.AssetConstants}
+     * Returns the Driver Pid property as specified in {@link org.eclipse.kura.web.shared.AssetConstants}
      * 
-     * @return String representing the {@link org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP}
+     * @return String representing the {@link org.eclipse.kura.web.shared.AssetConstants.ASSET_DRIVER_PROP}
      */
     public String getDriverPidProp();
 }

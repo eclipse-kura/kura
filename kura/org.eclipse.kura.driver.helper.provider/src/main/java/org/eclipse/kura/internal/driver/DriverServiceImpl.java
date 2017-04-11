@@ -13,8 +13,8 @@
 package org.eclipse.kura.internal.driver;
 
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.asset.AssetConstants.ASSET_DRIVER_PROP;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
+import static org.eclipse.kura.driver.Driver.DRIVER_PID_PROPERTY_NAME;
 
 import java.util.List;
 
@@ -65,7 +65,7 @@ public final class DriverServiceImpl implements DriverService {
             for (final ServiceReference<Driver> ref : refs) {
                 final Driver driverRef = context.getService(ref);
                 if (driverRef == driver) {
-                    return ref.getProperty(ASSET_DRIVER_PROP.value()).toString();
+                    return ref.getProperty(DRIVER_PID_PROPERTY_NAME).toString();
                 }
             }
         } finally {

@@ -11,7 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.core.cloud;
 
-import static org.eclipse.kura.cloud.CloudPayloadEncoding.JSON;
+import static org.eclipse.kura.cloud.CloudPayloadEncoding.SIMPLE_JSON;
 import static org.eclipse.kura.cloud.CloudPayloadEncoding.KURA_PROTOBUF;
 
 import java.io.IOException;
@@ -356,7 +356,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
 
         if (preferencesEncoding == KURA_PROTOBUF) {
             bytes = encodeProtobufPayload(payload);
-        } else if (preferencesEncoding == JSON) {
+        } else if (preferencesEncoding == SIMPLE_JSON) {
             bytes = encodeJsonPayload(payload);
         } else {
             throw new KuraException(KuraErrorCode.ENCODE_ERROR);
@@ -442,7 +442,7 @@ public class CloudServiceImpl implements CloudService, DataServiceListener, Conf
         } else {
             KuraPayload kuraPayload = null;
 
-            if (this.options.getPayloadEncoding() == JSON) {
+            if (this.options.getPayloadEncoding() == SIMPLE_JSON) {
                 kuraPayload = createKuraPayloadFromJson(payload);
             } else if (this.options.getPayloadEncoding() == KURA_PROTOBUF) {
                 kuraPayload = createKuraPayloadFromProtoBuf(topic, payload);

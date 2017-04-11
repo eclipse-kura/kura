@@ -63,6 +63,8 @@ public class LifeCyclePayloadBuilder {
             deviceName = this.cloudServiceImpl.getSystemService().getDeviceName();
         }
 
+        String payloadEncoding = this.cloudServiceImpl.getCloudServiceOptions().getPayloadEncoding().name();
+
         // build birth certificate
         KuraBirthPayloadBuilder birthPayloadBuilder = new KuraBirthPayloadBuilder();
         birthPayloadBuilder.withUptime(deviceProfile.getUptime()).withDisplayName(deviceName)
@@ -77,7 +79,7 @@ public class LifeCyclePayloadBuilder {
                 .withApplicationIdentifiers(appIds).withAvailableProcessors(deviceProfile.getAvailableProcessors())
                 .withTotalMemory(deviceProfile.getTotalMemory()).withOsArch(deviceProfile.getOsArch())
                 .withOsgiFramework(deviceProfile.getOsgiFramework())
-                .withOsgiFrameworkVersion(deviceProfile.getOsgiFrameworkVersion());
+                .withOsgiFrameworkVersion(deviceProfile.getOsgiFrameworkVersion()).withPayloadEncoding(payloadEncoding);
 
         if (this.cloudServiceImpl.imei != null && this.cloudServiceImpl.imei.length() > 0
                 && !this.cloudServiceImpl.imei.equals(ERROR)) {
@@ -98,11 +100,11 @@ public class LifeCyclePayloadBuilder {
         }
 
         if (deviceProfile.getLatitude() != null && deviceProfile.getLongitude() != null) {
-            KuraPosition KuraPosition = new KuraPosition();
-            KuraPosition.setLatitude(deviceProfile.getLatitude());
-            KuraPosition.setLongitude(deviceProfile.getLongitude());
-            KuraPosition.setAltitude(deviceProfile.getAltitude());
-            birthPayloadBuilder.withPosition(KuraPosition);
+            KuraPosition kuraPosition = new KuraPosition();
+            kuraPosition.setLatitude(deviceProfile.getLatitude());
+            kuraPosition.setLongitude(deviceProfile.getLongitude());
+            kuraPosition.setAltitude(deviceProfile.getAltitude());
+            birthPayloadBuilder.withPosition(kuraPosition);
         }
 
         return birthPayloadBuilder.build();
@@ -119,9 +121,7 @@ public class LifeCyclePayloadBuilder {
             deviceName = systemService.getDeviceName();
         }
 
-        // build payload
-        KuraDisconnectPayload payload = new KuraDisconnectPayload(sysAdminService.getUptime(), deviceName);
-        return payload;
+        return new KuraDisconnectPayload(sysAdminService.getUptime(), deviceName);
     }
 
     public KuraDeviceProfile buildDeviceProfile() {
@@ -156,60 +156,8 @@ public class LifeCyclePayloadBuilder {
             s_logger.warn("Error while getting ConnetionIP and ConnectionInterface", se);
         }
 
-        String connectionIp = sbConnectionIp != null ? sbConnectionIp.toString() : "UNKNOWN";
-        String connectionInterface = sbConnectionInterface != null ? sbConnectionInterface.toString() : "UNKNOWN";
-
-        //
-        // get the network information
-        // String primaryNetInterface = systemService.getPrimaryNetworkInterfaceName();
-        // String connectionIp = UNKNOWN;
-        // String connectionInterface = UNKNOWN;
-        // try {
-        // List<NetInterface<? extends NetInterfaceAddress>> nis = networkService.getActiveNetworkInterfaces();
-        // if (!nis.isEmpty()) {
-        //
-        // // look for the primary network interface first
-        // for (NetInterface<? extends NetInterfaceAddress> ni : nis) {
-        // if (ni.getName().equals(primaryNetInterface)) {
-        // List<? extends NetInterfaceAddress> nias = ni.getNetInterfaceAddresses();
-        // if (nias != null && !nias.isEmpty()) {
-        // connectionInterface = buildConnectionInterface(ni);
-        // connectionIp = buildConnectionIp(ni);
-        // break;
-        // }
-        // }
-        // }
-        //
-        // // if not resolved, loop through all network interfaces until we find one with an address
-        // if (UNKNOWN.equals(connectionIp) || UNKNOWN.equals(connectionInterface)) {
-        // s_logger.warn("Unresolved connectionIp for primary Network Interface. Looping through all interfaces...");
-        // for (NetInterface<? extends NetInterfaceAddress> ni : nis) {
-        // List<? extends NetInterfaceAddress> nias = ni.getNetInterfaceAddresses();
-        // if (nias != null && !nias.isEmpty()) {
-        // connectionInterface = buildConnectionInterface(ni);
-        // connectionIp = buildConnectionIp(ni);
-        // break;
-        // }
-        // }
-        // }
-        // }
-        //
-        // if (UNKNOWN.equals(connectionIp) || UNKNOWN.equals(connectionInterface)) {
-        // s_logger.warn("Unresolved NetworkService reference or IP address. Defaulting to JVM Networking
-        // Information.");
-        // InetAddress addr = NetUtil.getCurrentInetAddress();
-        // if (addr != null) {
-        // connectionIp = addr.getHostAddress();
-        // NetworkInterface netInterface = NetworkInterface.getByInetAddress(addr);
-        // if (netInterface != null) {
-        // connectionInterface = NetUtil.hardwareAddressToString(netInterface.getHardwareAddress());
-        // }
-        // }
-        // }
-        // }
-        // catch (Exception se) {
-        // s_logger.warn("Error while getting ConnetionIP and ConnectionInterface", se);
-        // }
+        String connectionIp = sbConnectionIp != null ? sbConnectionIp.toString() : UNKNOWN;
+        String connectionInterface = sbConnectionInterface != null ? sbConnectionInterface.toString() : UNKNOWN;
 
         //
         // get the position information
@@ -229,36 +177,31 @@ public class LifeCyclePayloadBuilder {
 
         //
         // build the profile
-        KuraDeviceProfile KuraDeviceProfile = new KuraDeviceProfile(sysAdminService.getUptime(),
-                systemService.getDeviceName(), systemService.getModelName(), systemService.getModelId(),
-                systemService.getPartNumber(), systemService.getSerialNumber(), systemService.getFirmwareVersion(),
-                systemService.getBiosVersion(), systemService.getOsName(), systemService.getOsVersion(),
-                systemService.getJavaVmName(), systemService.getJavaVmVersion() + " " + systemService.getJavaVmInfo(),
+        return new KuraDeviceProfile(sysAdminService.getUptime(), systemService.getDeviceName(),
+                systemService.getModelName(), systemService.getModelId(), systemService.getPartNumber(),
+                systemService.getSerialNumber(), systemService.getFirmwareVersion(), systemService.getBiosVersion(),
+                systemService.getOsName(), systemService.getOsVersion(), systemService.getJavaVmName(),
+                systemService.getJavaVmVersion() + " " + systemService.getJavaVmInfo(),
                 systemService.getJavaVendor() + " " + systemService.getJavaVersion(), systemService.getKuraVersion(),
                 connectionInterface, connectionIp, latitude, longitude, altitude,
                 String.valueOf(systemService.getNumberOfProcessors()), String.valueOf(systemService.getTotalMemory()),
                 systemService.getOsArch(), systemService.getOsgiFwName(), systemService.getOsgiFwVersion());
-        return KuraDeviceProfile;
     }
 
     private String buildConnectionIp(NetInterface<? extends NetInterfaceAddress> ni) {
         String connectionIp = UNKNOWN;
         List<? extends NetInterfaceAddress> nias = ni.getNetInterfaceAddresses();
-        if (nias != null && !nias.isEmpty()) {
-            if (nias.get(0).getAddress() != null) {
-                connectionIp = nias.get(0).getAddress().getHostAddress();
-            }
+        if (nias != null && !nias.isEmpty() && nias.get(0).getAddress() != null) {
+            connectionIp = nias.get(0).getAddress().getHostAddress();
         }
         return connectionIp;
     }
 
     private String buildConnectionInterface(NetInterface<? extends NetInterfaceAddress> ni) {
-        String connectionInterface = UNKNOWN;
         StringBuilder sb = new StringBuilder();
         sb.append(ni.getName()).append(" (").append(NetUtil.hardwareAddressToString(ni.getHardwareAddress()))
                 .append(")");
-        connectionInterface = sb.toString();
-        return connectionInterface;
+        return sb.toString();
     }
 
     private String buildApplicationIDs() {

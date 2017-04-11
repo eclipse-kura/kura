@@ -21,11 +21,10 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>org.eclipse.soda.dk.comm-parent</artifactId>
-        <version>1.2.4-SNAPSHOT</version>
+        <version>1.2.100-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.eclipse.soda.dk.comm</artifactId>
-    <version>1.2.4-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <name>Serial Device based on SODA DK comm</name>

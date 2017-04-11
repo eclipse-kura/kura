@@ -21,7 +21,6 @@ Copyright (c) 2016 Eurotech and/or its affiliates and others
 
     <artifactId>org.eclipse.kura.core.testutil</artifactId>
     <packaging>eclipse-plugin</packaging>
-    <version>1.0.0-SNAPSHOT</version>
 
     <properties>
         <kura.basedir>${project.basedir}/../..</kura.basedir>

@@ -10,7 +10,6 @@
 	</parent>
 
 	<artifactId>p2-repo-equinox_3.11.1</artifactId>
-	<version>1.0.0</version>
 	<packaging>pom</packaging>
     
     <properties>

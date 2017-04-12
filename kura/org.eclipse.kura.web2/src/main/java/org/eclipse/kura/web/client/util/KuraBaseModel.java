@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,6 +20,8 @@ public class KuraBaseModel extends GwtBaseModel {
      */
     private static final long serialVersionUID = -2502956403624362215L;
 
+    private transient boolean unescaped;
+
     public KuraBaseModel() {
         super();
     }
@@ -30,6 +32,23 @@ public class KuraBaseModel extends GwtBaseModel {
             value = GwtSafeHtmlUtils.inputSanitize((String) value);
         }
         super.set(name, value);
+    }
+
+    public void setUnescaped(boolean unescaped) {
+        this.unescaped = unescaped;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <X> X get(String key) {
+        if (unescaped) {
+            Object value = super.get(key);
+            if (value instanceof String) {
+                return (X) GwtSafeHtmlUtils.htmlUnescape((String) value);
+            }
+            return (X) value;
+        } else {
+            return (X) super.get(key);
+        }
     }
 
 }

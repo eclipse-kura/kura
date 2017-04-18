@@ -13,7 +13,7 @@
 	<packaging>pom</packaging>
     
     <properties>
-        <equinox.download.url>http://eclipse.mirror.garr.it/mirrors/eclipse//equinox/drops/R-Neon.1-201609071200/equinox-SDK-Neon.1.zip</equinox.download.url>
+        <equinox.download.url>https://s3-us-west-2.amazonaws.com/kura-repo/R-Neon.1-201609071200/equinox-SDK-Neon.1.zip</equinox.download.url>
     </properties>
 
 	<build>

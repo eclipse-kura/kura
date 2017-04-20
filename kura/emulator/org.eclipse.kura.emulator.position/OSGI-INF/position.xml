@@ -16,6 +16,7 @@
    <implementation class="org.eclipse.kura.emulator.position.PositionServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.position.PositionService"/>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
       <!--
       <provide interface="org.osgi.service.event.EventHandler"/>
       -->

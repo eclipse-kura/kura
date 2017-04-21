@@ -344,6 +344,9 @@ public class PropertiesUi extends AbstractServicesUi {
                                                                 @Override
                                                                 public void onSuccess(
                                                                         final List<GwtChannelInfo> result) {
+                                                                    for (GwtChannelInfo channelInfo : result) {
+                                                                        channelInfo.setUnescaped(true);
+                                                                    }
                                                                     PropertiesUi.this.channelsDataProvider.getList()
                                                                             .clear();
                                                                     PropertiesUi.this.channelsDataProvider.getList()
@@ -479,16 +482,6 @@ public class PropertiesUi extends AbstractServicesUi {
             }
 
         };
-
-        c.setFieldUpdater(new FieldUpdater<GwtChannelInfo, String>() {
-
-            @Override
-            public void update(final int index, final GwtChannelInfo object, final String value) {
-                object.setName(value);
-                PropertiesUi.this.setDirty(true);
-                PropertiesUi.this.channelTable.redraw();
-            }
-        });
 
         this.channelTable.addColumn(c, new TextHeader(MSGS.wiresChannelName()));
 
@@ -698,6 +691,7 @@ public class PropertiesUi extends AbstractServicesUi {
                 }
 
                 final GwtChannelInfo ci = new GwtChannelInfo();
+                ci.setUnescaped(true);
                 ci.setName(newChannelName);
                 ci.setType(GwtWiresChannelType.READ.name());
                 ci.setValueType(GwtWiresDataType.INTEGER.name());

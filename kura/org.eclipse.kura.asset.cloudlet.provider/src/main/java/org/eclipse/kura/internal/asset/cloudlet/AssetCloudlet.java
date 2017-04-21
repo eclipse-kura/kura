@@ -14,22 +14,18 @@
 package org.eclipse.kura.internal.asset.cloudlet;
 
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.type.DataType.BOOLEAN;
-import static org.eclipse.kura.type.DataType.DOUBLE;
-import static org.eclipse.kura.type.DataType.FLOAT;
-import static org.eclipse.kura.type.DataType.INTEGER;
-import static org.eclipse.kura.type.DataType.LONG;
-import static org.eclipse.kura.type.DataType.STRING;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.Asset;
-import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.channel.Channel;
 import org.eclipse.kura.channel.ChannelFlag;
@@ -43,10 +39,8 @@ import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.AssetCloudletMessages;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
-import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
-import org.eclipse.kura.util.collection.CollectionUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -58,27 +52,64 @@ import org.slf4j.LoggerFactory;
  * asset. The application id is configured as {@code ASSET-V1}.
  *
  * The available {@code GET} commands are as follows
+ * <b>/assets</b><br>
+ * Retrieves the list of all assets available on this device.
+ * <b>/assets/${asset_name}</b><br>
+ * Can be used to perform the following operations on the Asset named ${asset_name},
+ * depending on the value of the <b>channel.name</b> metric in the payload:
  * <ul>
- * <li>/assets</li> : to retrieve all the assets
- * <li>/assets/asset_pid</li> : to retrieve all the channels of the provided
- * asset PID
- * <li>/assets/asset_pid/channelname</li> : to retrieve the value of the
- * specified channel from the provided asset PID
- * <li>/assets/asset_pid/channelname1_channelname2_channelname3</li> : to retrieve
- * the value of the several channels from the provided asset PID. Any number of
- * channels can be provided as well. Also note that {@code "_"} delimiter must
- * be used to separate the channel names.
+ * <li>If the <b>channel.name</b> metric is not present, the metadata for all the defined channels will be returned.
+ * The payload will contain, for each channel, the following two metrics:<br>
+ * 
+ * {@code channel.name}_type = {@code channel.value.type}<br>
+ * {@code channel.name}_mode = {@code channel.mode}<br>
+ * 
+ * where {@code channel.name} is the name of the channel, {@code channel.value.type} and {@code channel.mode} are
+ * respectively the channel value type and mode encoded as described below.
+ * </li>
+ * <li>
+ * If a metric named <b>channel.name</b> of String type is present in the payload and its value contains
+ * the <b>#</b> character, the values of all channels will be returned. The format of the response is
+ * described below.
+ * </li>
+ * <li>
+ * If a metric named <b>channel.name</b> of String type is present in the payload and its value is a
+ * comma separated list of channel names, the values for the specified channels will be returned.
+ * </li>
  * </ul>
+ * <br>
+ * 
+ * The available {@code PUT} commands are the following:<br>
+ * <b>/assets/${asset_name}</b></br>
+ * Performs a write operation on a specific set of channels.
+ * 
+ * A metric with the following structure must be present in the request payload for each channel to be written:<br>
+ * 
+ * {@code channel.name}={@code value}<br>
+ * 
+ * where {@code channel.name} is the name of the channel and {@code value} is the value to be written, the type of
+ * {@code value} must match the channel value type.
  *
- * The available {@code PUT} commands are as follows
+ * The metrics available in the response payload for read or write operations are described below.
  * <ul>
- * <li>/assets/asset_pid/channel_name</li> : to write the provided {@code value}
- * in the payload to the specified channel of the provided asset PID. The
- * payload must also include the {@code type} of the {@code value} provided.
+ * <li>
+ * <b>{@code channel.name}_value</b> contains the value that has been read/written from/to the channel. The type of this
+ * metric depends on the channel value type. This metric is present if and only if the requested operation completed
+ * successfully.
+ * </li>
+ * <li>
+ * <b>{@code channel.name}_error</b> is a String metric that reports an error message. This metric is present if and
+ * only if the requested operation failed.
+ * </li>
+ * <li>
+ * <b>{@code channel.name}_timestamp</b> is a Long metric that reports a device timestamp,
+ * obtained when the request completed.
+ * The value of the timestamp is the number of milliseconds since Unix Epoch.
+ * </li>
  * </ul>
+ * 
  *
- * The {@code type} key in the request payload can be one of the following
- * (case-insensitive)
+ * The channel value type is encoded as a String as follows:
  * <ul>
  * <li>INTEGER</li>
  * <li>LONG</li>
@@ -88,8 +119,12 @@ import org.slf4j.LoggerFactory;
  * <li>DOUBLE</li>
  * </ul>
  *
- * The {@code value} key in the request payload must contain the value to be
- * written
+ * The channel mode is encoded as a String as follows:
+ * <ul>
+ * <li>READ</li>
+ * <li>WRITE</li>
+ * <li>READ_WRITE</li>
+ * </ul>
  *
  * @see Cloudlet
  * @see CloudClient
@@ -100,14 +135,26 @@ import org.slf4j.LoggerFactory;
  */
 public final class AssetCloudlet extends Cloudlet {
 
-    /** Application Identifier for Cloudlet. */
     private static final String APP_ID = "ASSET-V1";
+
+    private static final String CHANNEL_NAME_METRIC_NAME = "channel.name";
+
+    private static final String TIMESTAMP_METRIC_SUFFIX = "timestamp";
+    private static final String VALUE_METRIC_SUFFIX = "value";
+    private static final String ERROR_METRIC_SUFFIX = "error";
+
+    private static final String CHANNEL_TYPE_SUFFIX = "type";
+    private static final String CHANNEL_MODE_SUFFIX = "mode";
+
+    private static final String ALL_CHANNELS_WILDCARD = "#";
+    private static final String REQUEST_CHANNEL_NAME_DELIMITER = ",";
+
+    private static final String RESPONSE_METRIC_DELIMITER = "_";
 
     private static final Logger logger = LoggerFactory.getLogger(AssetCloudlet.class);
 
     private static final AssetCloudletMessages message = LocalizationAdapter.adapt(AssetCloudletMessages.class);
 
-    /** The map of assets present in the OSGi service registry. */
     private Map<String, Asset> assets;
 
     private volatile AssetService assetService;
@@ -194,29 +241,51 @@ public final class AssetCloudlet extends Cloudlet {
         logger.debug(message.deactivatingDone());
     }
 
+    private String extractChannelName(final KuraRequestPayload reqPayload) {
+        Object channelName = reqPayload.getMetric(CHANNEL_NAME_METRIC_NAME);
+        if (channelName == null || !(channelName instanceof String)) {
+            return null;
+        }
+        return (String) channelName;
+    }
+
     /** {@inheritDoc} */
     @Override
     protected void doGet(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
             final KuraResponsePayload respPayload) {
+        final String[] resources = reqTopic.getResources();
+
         logger.info(message.cloudGETReqReceiving());
-        if ("assets".equals(reqTopic.getResources()[0])) {
+        if ("assets".equals(resources[0])) {
             // perform a search operation at the beginning
             this.findAssets();
-            if (reqTopic.getResources().length == 1) {
+            if (resources.length == 1) {
                 this.getAllAssets(respPayload);
+                return;
             }
             // Checks if the name of the asset is provided
-            if (reqTopic.getResources().length == 2) {
-                final String assetPid = reqTopic.getResources()[1];
-                this.getAllChannelsByAssetPid(respPayload, assetPid);
+            if (resources.length != 2) {
+                respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
+                return;
             }
-            // Checks if the name of the asset and the name of the channel are
-            // provided
-            if (reqTopic.getResources().length == 3) {
-                final String assetPid = reqTopic.getResources()[1];
-                final String channelId = reqTopic.getResources()[2];
-                this.readChannelsByNames(respPayload, assetPid, channelId);
+
+            final Asset asset = this.assets.get(resources[1].trim());
+            if (asset == null) {
+                respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
+                return;
             }
+
+            final String channelName = extractChannelName(reqPayload);
+            if (channelName == null) {
+                getChannelMetadata(respPayload, asset);
+            } else if (channelName.indexOf(ALL_CHANNELS_WILDCARD) != -1) {
+                readAllChannels(respPayload, asset);
+            } else {
+                readChannels(respPayload, asset, channelName);
+            }
+
+        } else {
+            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
         }
         logger.info(message.cloudGETReqReceived());
     }
@@ -235,30 +304,20 @@ public final class AssetCloudlet extends Cloudlet {
         for (final Map.Entry<String, Asset> assetEntry : this.assets.entrySet()) {
             respPayload.addMetric(String.valueOf(++i), assetEntry.getKey());
         }
+        respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
     }
 
-    /**
-     * Get all channels by the provided Asset PID
-     *
-     * @param respPayload
-     *            the response to prepare
-     * @param assetPid
-     *            the provided Asset PID
-     * @throws NullPointerException
-     *             if any of the argument is null
-     */
-    private void getAllChannelsByAssetPid(final KuraResponsePayload respPayload, final String assetPid) {
-        requireNonNull(respPayload, message.respPayloadNonNull());
-        requireNonNull(assetPid, message.assetPidNonNull());
-
-        final Asset asset = this.assets.get(assetPid);
-        final AssetConfiguration configuration = asset.getAssetConfiguration();
-        final Map<String, Channel> assetConfiguredChannels = configuration.getAssetChannels();
-        for (final Map.Entry<String, Channel> entry : assetConfiguredChannels.entrySet()) {
+    private void getChannelMetadata(final KuraResponsePayload respPayload, final Asset asset) {
+        for (final Map.Entry<String, Channel> entry : asset.getAssetConfiguration().getAssetChannels().entrySet()) {
             final Channel channel = entry.getValue();
-            String channelName = channel.getName();
-            respPayload.addMetric(channelName, true);
+            String channelName = entry.getValue().getName();
+
+            respPayload.addMetric(channelName + RESPONSE_METRIC_DELIMITER + CHANNEL_TYPE_SUFFIX,
+                    channel.getValueType().toString());
+            respPayload.addMetric(channelName + RESPONSE_METRIC_DELIMITER + CHANNEL_MODE_SUFFIX,
+                    channel.getType().toString());
         }
+        respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
     }
 
     /** {@inheritDoc} */
@@ -269,10 +328,28 @@ public final class AssetCloudlet extends Cloudlet {
         // Checks if the name of the asset and the name of the channel are
         // provided
         final String[] resources = reqTopic.getResources();
-        if ("assets".equalsIgnoreCase(resources[0]) && (resources.length > 2)) {
+        if ("assets".equalsIgnoreCase(resources[0]) && (resources.length > 1)) {
             doPutAssets(reqPayload, respPayload, resources);
         }
         logger.info(message.cloudPUTReqReceived());
+    }
+
+    private void encodeSuccess(KuraResponsePayload response, String channelName, long timestamp, Object value) {
+        response.addMetric(channelName + RESPONSE_METRIC_DELIMITER + TIMESTAMP_METRIC_SUFFIX, timestamp);
+        response.addMetric(channelName + RESPONSE_METRIC_DELIMITER + VALUE_METRIC_SUFFIX, value);
+    }
+
+    private void encodeFailure(KuraResponsePayload response, String channelName, long timestamp, String reason) {
+        response.addMetric(channelName + RESPONSE_METRIC_DELIMITER + TIMESTAMP_METRIC_SUFFIX, timestamp);
+        response.addMetric(channelName + RESPONSE_METRIC_DELIMITER + ERROR_METRIC_SUFFIX, reason);
+    }
+
+    private void encodeFailure(KuraResponsePayload response, Iterator<String> iterator, long timestamp, String reason) {
+        while (iterator.hasNext()) {
+            String channelName = iterator.next();
+            response.addMetric(channelName + RESPONSE_METRIC_DELIMITER + TIMESTAMP_METRIC_SUFFIX, timestamp);
+            response.addMetric(channelName + RESPONSE_METRIC_DELIMITER + ERROR_METRIC_SUFFIX, reason);
+        }
     }
 
     /**
@@ -288,35 +365,38 @@ public final class AssetCloudlet extends Cloudlet {
     private void doPutAssets(final KuraRequestPayload reqPayload, final KuraResponsePayload respPayload,
             final String[] resources) {
         this.findAssets();
-        final String assetPid = resources[1];
-        final String channelName = resources[2];
-        final Asset asset = this.assets.get(assetPid);
-        final AssetConfiguration configuration = asset.getAssetConfiguration();
-        final Map<String, Channel> assetConfiguredChannels = configuration.getAssetChannels();
-        if (assetConfiguredChannels != null) {
-            final String userValue = (String) reqPayload.getMetric("value");
-            final String userType = (String) reqPayload.getMetric("type");
-            ChannelRecord channelRecord = null;
-            boolean flag = true;
-            try {
-                channelRecord = this.createWriteRecord(channelName, userValue, userType);
-            } catch (final IllegalArgumentException e) {
-                flag = false;
-                channelRecord.setChannelStatus(
-                        new ChannelStatus(ChannelFlag.FAILURE, message.valueTypeConversionError(), e));
-                channelRecord.setTimestamp(System.currentTimeMillis());
+
+        final Asset asset = this.assets.get(resources[1].trim());
+        if (asset == null) {
+            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
+            return;
+        }
+
+        final ArrayList<ChannelRecord> writeRecords = new ArrayList<>();
+
+        for (Entry<String, Object> entry : reqPayload.metrics().entrySet()) {
+
+            if (KuraRequestPayload.METRIC_REQUEST_ID.equals(entry.getKey())
+                    || KuraRequestPayload.REQUESTER_CLIENT_ID.equals(entry.getKey())) {
+                continue;
             }
 
-            List<ChannelRecord> channelRecords = Arrays.asList(channelRecord);
             try {
-                if (flag) {
-                    asset.write(channelRecords);
-                }
-            } catch (final KuraException e) {
-                // if connection exception occurs
-                respPayload.addMetric(message.errorMessage(), message.connectionException());
+                writeRecords.add(
+                        ChannelRecord.createWriteRecord(entry.getKey(), TypedValues.newTypedValue(entry.getValue())));
+            } catch (Exception e) {
+                encodeFailure(respPayload, entry.getKey(), System.currentTimeMillis(),
+                        message.valueTypeConversionError());
             }
-            this.prepareResponse(respPayload, channelRecords);
+        }
+
+        try {
+            asset.write(writeRecords);
+            this.prepareResponse(respPayload, writeRecords);
+        } catch (final Exception e) {
+            final String exceptionMessage = Optional.of(e.getMessage()).orElse(message.unknownError());
+            encodeFailure(respPayload, writeRecords.stream().map((record) -> record.getChannelName()).iterator(),
+                    System.currentTimeMillis(), exceptionMessage);
         }
     }
 
@@ -327,139 +407,56 @@ public final class AssetCloudlet extends Cloudlet {
         this.assets = this.assetTrackerCustomizer.getRegisteredAssets();
     }
 
-    /**
-     * Read channels based on provided Asset PID
-     *
-     * @param respPayload
-     *            the response paylaod to be prepared
-     * @param assetPid
-     *            the Asset PID
-     * @param channelName
-     *            the channel name (might contain {@code _} for multiple reads)
-     * @throws NullPointerException
-     *             if any of the arguments is null
-     */
-    private void readChannelsByNames(final KuraResponsePayload respPayload, final String assetPid,
-            final String channelName) {
-        requireNonNull(respPayload, message.respPayloadNonNull());
-        requireNonNull(assetPid, message.assetPidNonNull());
-        requireNonNull(channelName, message.channelNameNonNull());
+    private void readChannels(final KuraResponsePayload respPayload, final Asset asset, final String channelName) {
 
-        final String channelDelim = "_";
-        Set<String> channelNames = null;
-        if (channelName.contains(channelDelim)) {
-            channelNames = CollectionUtil.newHashSet(Arrays.asList(channelName.split(channelDelim)));
-            channelNames.removeAll(Collections.singleton(""));
-        }
-        final Asset asset = this.assets.get(assetPid);
-        final AssetConfiguration configuration = asset.getAssetConfiguration();
-        final Map<String, Channel> assetConfiguredChannels = configuration.getAssetChannels();
+        Set<String> channelNames = Arrays.stream(channelName.split(REQUEST_CHANNEL_NAME_DELIMITER))
+                .map((name) -> name.trim()).filter((name) -> !name.isEmpty()).collect(Collectors.toSet());
 
-        final Set<String> channelNamesToRead = CollectionUtil.newHashSet();
-        if (channelNames == null) {
-            channelNamesToRead.add(channelName);
-        } else {
-            for (final String chName : channelNames) {
-                channelNamesToRead.add(chName);
-            }
+        if (channelNames.isEmpty()) {
+            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
+            return;
         }
-        if (assetConfiguredChannels != null) {
-            List<ChannelRecord> channelRecords = null;
-            try {
-                channelRecords = asset.read(channelNamesToRead);
-            } catch (final KuraException e) {
-                // if connection exception occurs
-                logger.warn(message.connectionException() + e);
-                respPayload.addMetric(message.errorMessage(), message.connectionException());
-            }
-            if (channelRecords != null) {
-                this.prepareResponse(respPayload, channelRecords);
-            }
+
+        try {
+            this.prepareResponse(respPayload, asset.read(channelNames));
+        } catch (final Exception e) {
+            final String exceptionMessage = Optional.of(e.getMessage()).orElse(message.unknownError());
+            encodeFailure(respPayload, channelNames.iterator(), System.currentTimeMillis(), exceptionMessage);
         }
     }
 
-    /**
-     * Prepares the response payload based on the channel records as provided
-     *
-     * @param respPayload
-     *            the response payload to prepare
-     * @param channelRecords
-     *            the list of channel records
-     * @throws NullPointerException
-     *             if any of the arguments is null
-     */
+    private void readAllChannels(final KuraResponsePayload respPayload, final Asset asset) {
+        try {
+            this.prepareResponse(respPayload, asset.readAllChannels());
+        } catch (final Exception e) {
+            final Map<String, Channel> channels = asset.getAssetConfiguration().getAssetChannels();
+            final String exceptionMessage = Optional.of(e.getMessage()).orElse(message.unknownError());
+            encodeFailure(respPayload, channels.keySet().iterator(), System.currentTimeMillis(), exceptionMessage);
+        }
+    }
+
     private void prepareResponse(final KuraResponsePayload respPayload,
             final List<? extends ChannelRecord> channelRecords) {
-        requireNonNull(respPayload, message.respPayloadNonNull());
-        requireNonNull(channelRecords, message.channelRecordsNonNull());
+
+        if (channelRecords == null) {
+            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+            return;
+        }
 
         for (final ChannelRecord channelRecord : channelRecords) {
-            final TypedValue<?> assetValue = channelRecord.getValue();
-            final String value = (assetValue != null) ? String.valueOf(assetValue.getValue()) : "ERROR";
-            String errorText;
             final ChannelStatus channelStatus = channelRecord.getChannelStatus();
             final ChannelFlag channelFlag = channelStatus.getChannelFlag();
 
-            final String prefix = channelRecord.getChannelName() + "_";
-            respPayload.addMetric(prefix + message.flag(), channelFlag.toString());
-            respPayload.addMetric(prefix + message.timestamp(), channelRecord.getTimestamp());
-            respPayload.addMetric(prefix + message.value(), value);
+            final TypedValue<?> assetValue;
 
-            if (channelFlag == ChannelFlag.FAILURE) {
-                final String exceptionMessage = channelStatus.getExceptionMessage();
-                errorText = (exceptionMessage != null) ? exceptionMessage : "";
-                respPayload.addMetric(prefix + message.errorMessage(), errorText);
+            if (channelFlag == ChannelFlag.FAILURE || (assetValue = channelRecord.getValue()) == null) {
+                encodeFailure(respPayload, channelRecord.getChannelName(), channelRecord.getTimestamp(),
+                        Optional.of(channelStatus.getExceptionMessage()).orElse(message.unknownError()));
+            } else {
+                encodeSuccess(respPayload, channelRecord.getChannelName(), channelRecord.getTimestamp(),
+                        assetValue.getValue());
             }
         }
-    }
-
-    /**
-     * Creates a new channel record for a write operation from the provided parameters
-     *
-     * @param channelName
-     *            the name of the channel
-     * @param userValue
-     *            the value of the data type
-     * @param userType
-     *            the type to use
-     * @throws NullPointerException
-     *             if any of the provided arguments is null
-     * @throws NumberFormatException
-     *             if the provided value cannot be parsed
-     * @throws IllegalArgumentException
-     *             if the {@code userType} cannot be converted to a {@link DataType}.
-     */
-    private ChannelRecord createWriteRecord(final String channelName, final String userValue, final String userType) {
-        requireNonNull(channelName, message.channelNameNonNull());
-        requireNonNull(userValue, message.valueNonNull());
-        requireNonNull(userType, message.typeNonNull());
-
-        final DataType dataType = DataType.getDataType(userType);
-
-        TypedValue<?> value = null;
-        try {
-            if (INTEGER == dataType) {
-                value = TypedValues.newIntegerValue(Integer.parseInt(userValue));
-            }
-            if (BOOLEAN == dataType) {
-                value = TypedValues.newBooleanValue(Boolean.parseBoolean(userValue));
-            }
-            if (FLOAT == dataType) {
-                value = TypedValues.newFloatValue(Float.parseFloat(userValue));
-            }
-            if (DOUBLE == dataType) {
-                value = TypedValues.newDoubleValue(Double.parseDouble(userValue));
-            }
-            if (LONG == dataType) {
-                value = TypedValues.newLongValue(Long.parseLong(userValue));
-            }
-            if (STRING == dataType) {
-                value = TypedValues.newStringValue(userValue);
-            }
-        } catch (final NumberFormatException nfe) {
-            throw nfe;
-        }
-
-        return ChannelRecord.createWriteRecord(channelName, value);
+        respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
     }
 }

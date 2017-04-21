@@ -70,7 +70,7 @@ cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/.data/kuranet.co
 
 OLD_PATH=$(pwd)
 SELINUX_KURA=$(semodule -l | grep selinuxKura)
-if [ -z $SELINUX_KURA ]; then
+if [ -z "$SELINUX_KURA" ]; then
 	echo "Applying semodule..."
 	cd ${INSTALL_DIR}/kura/install/
     semodule -i selinuxKura.pp

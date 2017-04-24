@@ -30,9 +30,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.DbService;
@@ -95,20 +92,11 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
 
     private volatile DbService dbService;
 
-    private final ExecutorService executorService;
-
     private DbWireRecordStoreOptions wireRecordStoreOptions;
-
-    /** The future handle of the thread pool executor service. */
-    private Future<?> tickHandle;
 
     private volatile WireHelperService wireHelperService;
 
     private WireSupport wireSupport;
-
-    public DbWireRecordStore() {
-        this.executorService = Executors.newSingleThreadScheduledExecutor();
-    }
 
     /**
      * Binds the DB service.
@@ -200,31 +188,16 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      */
     protected void deactivate(final ComponentContext componentContext) {
         logger.debug(message.deactivatingStore());
-        if (nonNull(this.tickHandle)) {
-            this.tickHandle.cancel(true);
-        }
-        this.executorService.shutdown();
         logger.debug(message.deactivatingStoreDone());
     }
 
     /**
-     * Schedule truncation of tables containing {@link WireRecord}s
+     * Truncates tables containing {@link WireRecord}s
      */
-    private void scheduleTruncation() {
+    private void truncate() {
         final int noOfRecordsToKeep = this.wireRecordStoreOptions.getNoOfRecordsToKeep();
-        // Cancel the current refresh view handle
-        if (nonNull(this.tickHandle)) {
-            this.tickHandle.cancel(true);
-        }
 
-        this.tickHandle = this.executorService.submit(new Runnable() {
-
-            /** {@inheritDoc} */
-            @Override
-            public void run() {
-                DbWireRecordStore.this.clear(noOfRecordsToKeep);
-            }
-        });
+        truncate(noOfRecordsToKeep);
     }
 
     /**
@@ -233,7 +206,7 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
      * @param noOfRecordsToKeep
      *            the no of records to keep in the table
      */
-    private void clear(final int noOfRecordsToKeep) {
+    private void truncate(final int noOfRecordsToKeep) {
         final String tableName = this.wireRecordStoreOptions.getTableName();
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
         Connection conn = null;
@@ -303,8 +276,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
         logger.debug(message.wireEnvelopeReceived() + this.wireSupport);
 
         try {
-            if (getTableSize() > this.wireRecordStoreOptions.getMaximumTableSize()) {
-                scheduleTruncation();
+            if (getTableSize() >= this.wireRecordStoreOptions.getMaximumTableSize()) {
+                truncate();
             }
         } catch (SQLException e) {
             logger.warn("Exception while trying to clean db");

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionListener;
 import org.eclipse.kura.position.PositionLockedEvent;
@@ -37,31 +38,33 @@ import org.osgi.util.position.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PositionServiceImpl implements PositionService {
+public class PositionServiceImpl implements PositionService, ConfigurableComponent {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(PositionServiceImpl.class);
+    private static final String USE_GPSD_PROPERTY_NAME = "useGpsd";
+
+    private static final Logger logger = LoggerFactory.getLogger(PositionServiceImpl.class);
 
     private static final String LOCATION = "boston";
 
-    private ComponentContext m_ctx;
-    private EventAdmin m_eventAdmin;
+    private ComponentContext ctx;
+    private EventAdmin eventAdmin;
 
-    private ScheduledExecutorService m_worker;
-    private ScheduledFuture<?> m_handle;
+    private ScheduledExecutorService worker;
+    private ScheduledFuture<?> handle;
 
     private GpsPoint[] gpsPoints;
     private Position currentPosition;
     private NmeaPosition currentNmeaPosition;
     private Date currentTime;
     private int index = 0;
-    private boolean m_useGpsd;
+    private boolean useGpsd;
 
     public void setEventAdmin(EventAdmin eventAdmin) {
-        this.m_eventAdmin = eventAdmin;
+        this.eventAdmin = eventAdmin;
     }
 
     public void unsetEventAdmin(EventAdmin eventAdmin) {
-        this.m_eventAdmin = null;
+        this.eventAdmin = null;
     }
 
     // ----------------------------------------------------------------
@@ -73,14 +76,14 @@ public class PositionServiceImpl implements PositionService {
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         //
         // save the bundle context
-        this.m_ctx = componentContext;
-        this.m_useGpsd = false;
+        this.ctx = componentContext;
+        this.useGpsd = false;
         if (properties != null) {
-            if (properties.get("useGpsd") != null) {
-                this.m_useGpsd = (Boolean) properties.get("useGpsd");
+            if (properties.get(USE_GPSD_PROPERTY_NAME) != null) {
+                this.useGpsd = (Boolean) properties.get(USE_GPSD_PROPERTY_NAME);
             }
-            if (this.m_useGpsd) {
-                s_logger.info("USE GPSD");
+            if (this.useGpsd) {
+                logger.info("USE GPSD");
             }
         }
 
@@ -89,17 +92,17 @@ public class PositionServiceImpl implements PositionService {
 
     public void updated(Map<String, Object> properties) {
         if (properties != null) {
-            if (properties.get("useGpsd") != null) {
-                this.m_useGpsd = (Boolean) properties.get("useGpsd");
+            if (properties.get(USE_GPSD_PROPERTY_NAME) != null) {
+                this.useGpsd = (Boolean) properties.get(USE_GPSD_PROPERTY_NAME);
             }
-            if (this.m_useGpsd) {
-                s_logger.info("USE GPSD");
+            if (this.useGpsd) {
+                logger.info("USE GPSD");
             }
         }
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        System.out.println("stopping");
+        logger.info("Stopping position service");
         stop();
     }
 
@@ -140,13 +143,13 @@ public class PositionServiceImpl implements PositionService {
         this.index = 0;
 
         String fileName = null;
-        if (LOCATION.equals("boston")) {
+        if ("boston".equals(LOCATION)) {
             fileName = "boston.gpx";
-        } else if (LOCATION.equals("denver")) {
+        } else if ("denver".equals(LOCATION)) {
             fileName = "denver.gpx";
-        } else if (LOCATION.equals("paris")) {
+        } else if ("paris".equals(LOCATION)) {
             fileName = "paris.gpx";
-        } else if (LOCATION.equals("test")) {
+        } else if ("test".equals(LOCATION)) {
             fileName = "test.gpx";
         }
 
@@ -156,37 +159,21 @@ public class PositionServiceImpl implements PositionService {
         try {
             // Create the builder and parse the file
             SAXParser parser = factory.newSAXParser();
-            s_logger.debug("Parsing: {}", fileName);
+            logger.debug("Parsing: {}", fileName);
 
-            BundleContext bundleContext = this.m_ctx.getBundleContext();
+            BundleContext bundleContext = this.ctx.getBundleContext();
             URL url = bundleContext.getBundle().getResource(fileName);
             InputStream is = url.openStream();
 
-            /*
-             * BufferedReader br = new BufferedReader(new
-             * InputStreamReader(getClass().getResourceAsStream("/src/main/resources/" + fileName)));
-             * StringBuffer buffer = new StringBuffer();
-             * String temp = null;
-             *
-             * while((temp = br.readLine()) != null) {
-             * buffer.append(temp);
-             * }
-             * br.close();
-             * br = null;
-             *
-             * String string = new String(buffer);
-             * byte[] data = string.getBytes();
-             * ByteArrayInputStream bais = new ByteArrayInputStream(data);
-             */
             parser.parse(is, handler);
             this.gpsPoints = handler.getGpsPoints();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.warn("Exception while parsing the position file", e);
         }
 
         // schedule a new worker based on the properties of the service
-        this.m_worker = Executors.newSingleThreadScheduledExecutor();
-        this.m_handle = this.m_worker.scheduleAtFixedRate(new Runnable() {
+        this.worker = Executors.newSingleThreadScheduledExecutor();
+        this.handle = this.worker.scheduleAtFixedRate(new Runnable() {
 
             @Override
             public void run() {
@@ -194,23 +181,23 @@ public class PositionServiceImpl implements PositionService {
             }
         }, 0, 5, TimeUnit.SECONDS);
 
-        s_logger.debug("posting event");
-        this.m_eventAdmin.postEvent(new PositionLockedEvent(new HashMap<String, Object>()));
+        logger.debug("posting event");
+        this.eventAdmin.postEvent(new PositionLockedEvent(new HashMap<String, Object>()));
     }
 
     public void stop() {
-        if (this.m_handle != null) {
-            this.m_handle.cancel(true);
-            this.m_handle = null;
+        if (this.handle != null) {
+            this.handle.cancel(true);
+            this.handle = null;
         }
 
-        this.m_worker = null;
+        this.worker = null;
     }
 
     private void updateGps() {
-        s_logger.debug("GPS Emulator index: {}", this.index);
+        logger.debug("GPS Emulator index: {}", this.index);
         if (this.index + 1 == this.gpsPoints.length) {
-            s_logger.debug("GPS Emulator - wrapping index");
+            logger.debug("GPS Emulator - wrapping index");
             this.index = 0;
         }
 
@@ -220,7 +207,9 @@ public class PositionServiceImpl implements PositionService {
                 Unit.rad);
         Measurement altitude = new Measurement(this.gpsPoints[this.index].getAltitude(), Unit.m);
 
-        s_logger.debug("Updating lat/long/altitude: " + latitude + "/" + longitude + "/" + altitude);
+        logger.debug("Updating latitude: {}", latitude);
+        logger.debug("Updating longitude: {}", longitude);
+        logger.debug("Updating altitude: {}", altitude);
 
         // Measurement lat, Measurement lon, Measurement alt, Measurement speed, Measurement track
         this.currentTime = new Date();

@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -239,6 +240,23 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         return result;
     }
 
+    // TODO this is a workaround that gives some time to a BaseAsset to track its driver so that it is
+    // able to return its OCD
+    private ComponentConfiguration waitForComponentConfiguration(ConfigurationService cs, String pid)
+            throws InterruptedException, KuraException {
+        final long DELAY_MS = 1000;
+        long waitTime = 0;
+        while (waitTime < SERVICE_WAIT_TIMEOUT * 1000) {
+            final ComponentConfiguration config = cs.getComponentConfiguration(pid);
+            if (config != null && config.getDefinition() != null) {
+                return config;
+            }
+            Thread.sleep(DELAY_MS);
+            waitTime += DELAY_MS;
+        }
+        throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR);
+    }
+
     @Override
     public GwtConfigComponent findWireComponentConfigurationFromPid(GwtXSRFToken xsrfToken, String pid,
             String factoryPid, Map<String, Object> extraProps) throws GwtKuraException {
@@ -265,9 +283,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                         String filterString = "(" + ConfigurationService.KURA_SERVICE_PID + "=" + temporaryName + ")";
                         ServiceUtil.waitForService(filterString, SERVICE_WAIT_TIMEOUT, TimeUnit.SECONDS);
 
-                        conf = cs.getComponentConfiguration(temporaryName);
-                        comp = createMetatypeOnlyGwtComponentConfiguration(conf);
-                        return comp;
+                        return createMetatypeOnlyGwtComponentConfiguration(
+                                waitForComponentConfiguration(cs, temporaryName));
                     } catch (Exception ex) {
                         throw new GwtKuraException(ex.getMessage());
                     } finally {

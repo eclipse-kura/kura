@@ -710,8 +710,9 @@ public class WiresPanelUi extends Composite {
         // properties. If it is already present in the map, it means the
         // component has already been accessed by the graph, and its
         // configuration has already been gathered from the ConfigurationService.
-        if (configs.containsKey(pid)) {
-            fillProperties(configs.get(pid), pid);
+        final GwtConfigComponent comp = configs.get(pid);
+        if (comp != null) {
+            fillProperties(comp, pid);
             selectionCompleted();
         } else {
             // Retrieve GwtComponentConfiguration to use for manipulating the properties.

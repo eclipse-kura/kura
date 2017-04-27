@@ -17,7 +17,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 import static org.osgi.service.cm.ConfigurationAdmin.SERVICE_FACTORYPID;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -530,23 +529,25 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         final ConfigurationAdmin configAdmin = ServiceLocator.getInstance().getService(ConfigurationAdmin.class);
         final WireHelperService wireHelperService = ServiceLocator.getInstance().getService(WireHelperService.class);
         try {
+            final String filter = "(" + KURA_SERVICE_PID + "=" + pid + ")";
+            if (!ServiceUtil.waitForService(filter, TIMEOUT, SECONDS).isPresent()) {
+                return;
+            }
             final String servicePid = wireHelperService.getServicePid(pid);
-            Configuration conf = null;
-            if (servicePid != null) {
-                conf = configAdmin.getConfiguration(servicePid);
+            if (servicePid == null) {
+                return;
             }
-            Dictionary<String, Object> props = null;
-            if (conf != null) {
-                props = conf.getProperties();
+            Configuration conf = configAdmin.getConfiguration(servicePid);
+            if (conf == null) {
+                return;
             }
+            Dictionary<String, Object> props = conf.getProperties();
             if (props != null) {
                 props.remove(DELETED_WIRE_COMPONENT);
-            }
-            if (conf != null) {
                 conf.update(props);
             }
-        } catch (final IOException e) {
-            // no need
+        } catch (final Exception exception) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
         }
     }
 

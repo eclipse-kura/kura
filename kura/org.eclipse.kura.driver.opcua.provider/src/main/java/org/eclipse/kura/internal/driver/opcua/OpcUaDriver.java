@@ -272,7 +272,7 @@ public final class OpcUaDriver implements Driver {
 
     /** {@inheritDoc} */
     @Override
-    public synchronized ChannelDescriptor getChannelDescriptor() {
+    public ChannelDescriptor getChannelDescriptor() {
         return new OpcUaChannelDescriptor();
     }
 
@@ -429,8 +429,8 @@ public final class OpcUaDriver implements Driver {
         private final String nodeId;
         private final ChannelRecord channelRecord;
 
-        public OpcUaRequestInfo(final ChannelRecord channelRecord, final DataType dataType, final int nodeNamespaceIndex,
-                final String nodeId) {
+        public OpcUaRequestInfo(final ChannelRecord channelRecord, final DataType dataType,
+                final int nodeNamespaceIndex, final String nodeId) {
             this.dataType = dataType;
             this.nodeNamespaceIndex = nodeNamespaceIndex;
             this.nodeId = nodeId;

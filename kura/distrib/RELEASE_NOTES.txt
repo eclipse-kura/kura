@@ -23,6 +23,7 @@ Compatibility Changes:
 
 Bug Fixes :
   * Fixed github issues:
+    * #1335: [Kura 3.0.0 QA] User workspace plugins BREE
     * #1329: Need to respect /etc/network/interfaces command options
     * #1295: [Wires] Wires DataType lacks the KuraPayload float type
     * #1294: [Wires] Remove ByteValue and ShortValue as they do not map to KuraPayload metric types
@@ -111,6 +112,11 @@ Bug Fixes :
     * #244:  [Web UI] Alphabetical ordering of metatype labels option in ListBoxes
 
   * Merged no issue-related Pull Requests:
+    * #1352: Minor Wires fixes
+    * #1350: Set security level to low
+    * #1349: Changes to the emulator launch profiles used when cloning directly the repo
+    * #1347: Modified emulator position.
+    * #1344: Minor fixes regarding emulator.position and osgi.annotation.
     * #1343: Hidden export to CSV buttons from Wires Web UI
     * #1341: Modified Asset Cloudlet protocol
     * #1340: Fixed selinux check in kura-install.sh file.
@@ -223,7 +229,6 @@ Know Issues :
   * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
   * #1092: Possible NPE and non-working check
   * #1016: ConfigurationServiceImpl creates duplicate instances
-  * #993:  Emulator does not start due to mandatory javax.comm dependency
   * #948:  [Kura 2.1.0 QA] NET-ETH0-014 Wrong lease time in DHCP mode
   * #923:  [Kura 2.1.0 QA] eth0 search domain configuration and storage
   * #910:  [Kura 2.1.0 QA] Unable to use WLAN as WAN interface

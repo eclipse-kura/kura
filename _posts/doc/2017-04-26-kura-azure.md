@@ -12,7 +12,7 @@ categories: [doc]
 
 [Kura Application Connecting to Azure IoT Hub](#kura-app)
 
-Eclipse Kura can connect to the Azure IoT Hub using the MQTT protocol. When doing so, Kura applications can send device-to-cloud messages. More information on the Azure IoT Hub and its support for the MQTT protocol can be found <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-mqtt-support" about="_blank">here</a>. This document outlines how to configure and connect a Kura application to the Azure IoT Hub.
+Starting from release 3.0, Eclipse Kura can connect to the Azure IoT Hub using the MQTT protocol. When doing so, Kura applications can send device-to-cloud messages. More information on the Azure IoT Hub and its support for the MQTT protocol can be found <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-mqtt-support" about="_blank">here</a>. This document outlines how to configure and connect a Kura application to the Azure IoT Hub.
 
 ## Get Azure IoT Hub&trade; information
 

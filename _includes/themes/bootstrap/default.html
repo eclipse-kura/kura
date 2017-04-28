@@ -51,12 +51,19 @@
               {% assign attr = section[0] %}
               {% assign label = section[1] %}
 
-              {% for page in site.categories[attr] reversed %}
-                {% if forloop.first %}
-                  <li class="nav-header">{{ label }}</li>
-                {% endif %}
-                <li><a href="{{ site.baseurl }}{{ page.url }}">{{ page.title }}</a></li>
-              {% endfor %}
+              <div>
+                {% for page in site.categories[attr] reversed %}
+                  {% if forloop.first %}
+                    <input type="checkbox" style="display:none" id="{{ label }}"></input>
+                    <label class="nav-header" for="{{ label }}" style="display:block; cursor:pointer">{{ label }}</label>
+                    <div>
+                      {% endif %}
+                      <li><a href="{{ site.baseurl }}{{ page.url }}">{{ page.title }}</a></li>
+                      {% if forloop.last %}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
             {% endfor %}
           </ul>
         </div>

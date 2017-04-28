@@ -43,6 +43,15 @@ p img {
 @media (min-width: 992px) {
   #navigation {
     width: 25% !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+  }
+}
+
+@media (max-width: 992px) {
+  #navigation {
+    max-height: 100% !important;
+    overflow-y: auto !important;
   }
 }
 
@@ -161,3 +170,35 @@ footer {
     list-style: decimal;
     display: inline-block;
 }
+
+input:not(:checked) ~ div {
+  display: none;
+}
+
+input:not(:checked) ~ label::before {
+  content: "+ "
+}
+
+input:checked ~ label::before {
+  content: "- "
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid transparent;
+}
+
+th, td {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+    border: 1px solid transparent;
+}
+
+th {
+  background-color: #4b8fd0;
+  color: white;
+}
+
+tr:nth-child(even){background-color: #f2f2f2}

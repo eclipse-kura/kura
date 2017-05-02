@@ -1,0 +1,50 @@
+#########################################################################
+# Copyright (c) 2014, Oracle and/or its affiliates. All rights reserved.
+# DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+#
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.  Oracle designates this
+# particular file as subject to the "Classpath" exception as provided
+# by Oracle in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+# or visit www.oracle.com if you need additional information or have any
+# questions.
+#
+#########################################################################
+
+2  = deviceType: gpio.GPIOPin, pinNumber:2, name:GPIO2, mode:1
+3  = deviceType: gpio.GPIOPin, pinNumber:3, name:GPIO3, mode:1
+4  = deviceType: gpio.GPIOPin, pinNumber:4, name:GPIO4
+17 = deviceType: gpio.GPIOPin, pinNumber:17, name:GPIO17
+27 = deviceType: gpio.GPIOPin, pinNumber:27, name:GPIO27
+22 = deviceType: gpio.GPIOPin, pinNumber:22, name:GPIO22
+10 = deviceType: gpio.GPIOPin, pinNumber:10, name:GPIO10
+9  = deviceType: gpio.GPIOPin, pinNumber:9, name:GPIO9
+11 = deviceType: gpio.GPIOPin, pinNumber:11, name:GPIO11
+14 = deviceType: gpio.GPIOPin, pinNumber:14, name:GPIO14, mode:4, direction:1
+15 = deviceType: gpio.GPIOPin, pinNumber:15, name:GPIO15, mode:4, direction:1
+18 = deviceType: gpio.GPIOPin, pinNumber:18, name:GPIO18, mode:4, direction:1
+23 = deviceType: gpio.GPIOPin, pinNumber:23, name:GPIO23, mode:4, direction:1
+24 = deviceType: gpio.GPIOPin, pinNumber:24, name:GPIO24, mode:4, direction:1
+25 = deviceType: gpio.GPIOPin, pinNumber:25, name:GPIO25, mode:4, direction:1
+8  = deviceType: gpio.GPIOPin, pinNumber:8, name:GPIO8, mode:4, direction:1
+7  = deviceType: gpio.GPIOPin, pinNumber:7, name:GPIO7, mode:4, direction:1
+
+12 = deviceType: spibus.SPIDevice, name:SPI_Slave, deviceNumber:0, address:0, csActive:1, wordLength:8, clockFrequency:500000, clockMode:1, bitOrdering:1
+
+40 = deviceType: uart.UART, deviceNumber:0, name:UART, baudRate:19200, dataBits:8, parity:0, stopBits:1, flowControl:0
+gpio.GPIOPin = initValue:0, deviceNumber:0, direction:0, mode:1, trigger:3
+uart.UART = baudRate:19200, parity:0, dataBits:8, stopBits:1, flowControl:0
+

@@ -1,0 +1,19 @@
+README:
+
+This file should be located at the root of the device-io OpenJDK Mercurial repository.
+ 
+People unfamiliar with Mercurial should read the first few chapters of
+  the Mercurial book: http://hgbook.red-bean.com/read/
+
+Simple Build Instructions for the Raspberry Pi:
+
+  The Device I/O build is currently supoorted as a cross-compile on a Linux x86 host for the Raspberry Pi.
+
+  Required tools: Linaro GCC 4.7.2 ARM toolchain, JDK 8, GNU make 3.81 or newer
+
+  export PI_TOOLS=<location of Linaro GCC tool install>
+  export JAVA_HOME=<location of JDK8 install>
+  make
+
+The resulting Device I/O library files should be found in build/jar and build/so
+ 

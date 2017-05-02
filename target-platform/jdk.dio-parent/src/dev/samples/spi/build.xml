@@ -1,0 +1,67 @@
+<!--
+   Copyright (c) 2014, Oracle and/or its affiliates. All rights reserved.
+
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ *   - Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *
+ *   - Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+
+ *   - Neither the name of Oracle nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
+<project name="dio-spi" basedir="." default="jar">
+
+    <property environment="env"/>
+
+    <!-- properties dio.build.dir should usually be defined on the command line,
+         but put a default here for those who run ant directly -->
+    <property name="dio.build.dir" value="../../build" />
+    <property name="spi.classes.dir" value="${dio.build.dir}/spi/classes"/>
+    <property name="spi.src.dir" value="./src"/>
+
+    <target name="jar-spi" depends="compile-spi,compile">
+        <jar destfile="${dio.build.dir}/jar/dio-spi.jar"
+             basedir="${spi.classes.dir}">
+            <service type="jdk.dio.spi.DeviceProvider"
+                     provider="dio.spi.MCP3008Provider"/>
+        </jar>
+    </target>
+
+    <target name="jar" depends="jar-spi"/>
+
+    <target name="compile-spi" depends="clean">
+        <mkdir dir="${spi.classes.dir}"/>
+        <javac destdir="${spi.classes.dir}"
+               includeantruntime="false"
+               classpath="./${dio.build.dir}/jar/dio.jar">
+            <src path="${spi.src.dir}"/>
+        </javac>
+    </target>
+
+    <target name="compile" depends="compile-spi"/>
+
+    <target name="clean">
+        <delete file="${spi.classes.dir}"/>
+        <delete file="${dio.build.dir}/jar/dio-spi.jar"/>
+    </target>
+
+</project>
+

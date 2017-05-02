@@ -1,0 +1,48 @@
+README:
+ 
+People unfamiliar with Mercurial should read the first few chapters of
+  the Mercurial book: http://hgbook.red-bean.com/read/
+
+Required:
+
+build sources
+	please reference README file to build the sources of device-io
+
+JDK 8
+	download JDK8
+	
+apache-ant
+	download apache-ant distribution
+	
+jtharness
+	wiki 
+		https://wiki.openjdk.java.net/display/CodeTools/JT+Harness
+	download link
+		https://adopt-openjdk.ci.cloudbees.com/job/jtharness/lastSuccessfulBuild/artifact/jtharness-62.tar.gz
+	javatest.jar and jh.jar from the distribution must be placed in the dev/tests/lib folder
+
+google-gson library v2.1
+	download link
+		https://google-gson.googlecode.com/files/google-gson-2.1-release.zip
+	gson-2.1.jar from the distribution must be placed in de/tests/lib folder
+	
+Start JT Harness:    
+
+	export JAVA_HOME=<location of JDK8 install>
+	export ANT_HOME=<location of apache-ant distribution>
+	
+	to compile:
+	${ANT_HOME}/bin/ant compile
+	
+	to build jar:
+	${ANT_HOME}/bin/ant jar
+	
+	to run JT Harness GUI:
+	${ANT_HOME}/bin/ant -Djavatest.mode.batch=false run-javatest
+	
+	to run JT Harness in batch mode:
+	${ANT_HOME}/bin/ant run-javatest
+	
+All information related to JT Harness configuration and tests can be found on a wiki page
+
+	https://wiki.openjdk.java.net/display/dio/Tests+Configuration+And+Execution

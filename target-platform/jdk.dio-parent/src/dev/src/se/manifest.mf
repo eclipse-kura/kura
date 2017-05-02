@@ -1,0 +1,7 @@
+Implementation-Title: jdk.dio
+Implementation-Vendor: Oracle Corporation
+Implementation-Version: BUILD_NUMBER
+Specification-Title: Device I/O
+Specification-Vendor: Oracle Corporation
+Specification-Version: 1.1
+

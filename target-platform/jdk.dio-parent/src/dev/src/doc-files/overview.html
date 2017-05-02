@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2013, 2014, Oracle and/or its affiliates. All rights reserved.
+-->
+<html>
+    <head>
+        <title>Device I/O API Overview</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+    </head>
+    <body>
+        <!Don't remove this line. Otherwise the first few parts shows twice in the generated overview>
+
+    <h1>Overview</h1>
+    This specification defines a generic peripheral device I/O API for Java 
+    applications running on small embedded devices. 
+    <h2>Targeted Platforms</h2>
+    This specification is targeted at embedded Java platforms.
+    It is an optional package primarily targeting the Java Platform, Micro Edition 8 Connected Limited Device Configuration
+    for small embedded devices. It is also compatible with Java Platform Standard Edition 8.
+    <h2>Devices</h2>
+    In this specification, a <i>Device</i> designates any kind
+    of <em>peripheral</em> devices, from a peripheral device external to the <em>host</em> device 
+    to a peripheral chip embedded in the <em>host</em> device.
+    Moreover, a peripheral <em>device</em> may not always designate the complete
+    hardware peripheral device but may sometimes designate a component or a resource
+    of that hardware peripheral device that can be accessed and controlled independently (to some extent) from
+    the other components or resources of that same hardware peripheral device.
+    For example, a single pin of a GPIO (General Purpose I/O) controller
+    may be viewed as an individual <i>Device</i>.
+    Conversely, a <i>Device</i> may not always correspond to 
+    a single hardware peripheral device or component thereof, but
+    may be composed of several other <i>Devices</i>: a <i>Composite Device</i>. For example,
+    a Touch Screen <i>Device</i> may be assembled from a Touch Screen
+    SPI (Serial Peripheral Interface bus) slave <i>Device</i> and a GPIO pin <i>Device</i> handling the Pen-Down signal.
+    <h2>Scope Of The Device I/O API</h2>
+    This specification defines APIs for some of the most common peripheral devices
+    that can be found nowadays on embedded platforms.
+    <dl>
+        <dt><b>General Purpose Input/Output (GPIO)</b></dt>
+        <dd>
+            GPIO pins as well as GPIO ports (grouping of GPIO pins) can be
+            accessed and controlled as individual <i>Devices</i>.
+            Any number of GPIO controller can be supported.
+            See <a href="jdk/dio/gpio/package-summary.html">jdk.dio.gpio</a>.
+        </dd>
+        <dt><b>Inter-Integrated Circuit Bus (I2C)</b></dt>
+        <dd>
+            I2C slave devices on the I2C bus can be accessed and controlled as
+            individual <i>Devices</i>. This specification only defines
+            support for the I2C master role; that is the host device is the I2C master.
+            Any number of I2C bus can be supported.
+            See <a href="jdk/dio/i2cbus/package-summary.html">jdk.dio.i2cbus</a>.
+        </dd>
+        <dt><b>Serial Peripheral Interface Bus (SPI)</b></dt>
+        <dd>
+            SPI slaves on the SPI bus can be accessed and controlled as
+            individual <i>Devices</i>. This specification only defines
+            support for the SPI master role; that is the host device is the SPI master.
+            Any number of SPI bus can be supported.
+            See <a href="jdk/dio/spibus/package-summary.html">jdk.dio.spibus</a>.
+        </dd>
+        <dt><b>Analog to Digital Converter (ADC)</b></dt>
+        <dd>
+            ADC channels of an ADC converter can be accessed and controlled as
+            individual <i>Devices</i>. 
+            Any number of ADC converters can be supported.
+            See <a href="jdk/dio/adc/package-summary.html">jdk.dio.adc</a>.
+        </dd>
+        <dt><b>Digital to Analog Converter (DAC)</b></dt>
+        <dd>
+            DAC channels of a DAC converter can be accessed and controlled as
+            individual <i>Devices</i>. 
+            Any number of DAC converters can be supported.
+            See <a href="jdk/dio/dac/package-summary.html">jdk.dio.dac</a>.
+        </dd>
+        <dt><b>Universal Asynchronous Receiver/Transmitter (UART)</b></dt>
+        <dd>
+            UART can be accessed and controlled as
+            individual <i>Devices</i>. See <a href="jdk/dio/uart/package-summary.html">jdk.dio.uart</a>.
+            <br />
+            This API additionally provides means to control the MODEM signals. See <a href="jdk/dio/modem/package-summary.html">jdk.dio.modem</a>.
+        </dd>
+        <dt><b>Memory-Mapped Input/Output (MMIO)</b></dt>
+        <dd>
+            Devices with memory-mapped registers and memory blocks can
+            be accessed and controlled as individual <i>Devices</i>.
+            MMIO allows for developing device drivers in the Java language
+            and therefore requires for each device only very minimal
+            support in the porting layer of the embedded platform.
+            See <a href="jdk/dio/mmio/package-summary.html">jdk.dio.mmio</a>.
+        </dd>
+        <dt><b>AT Command Devices</b></dt>
+        <dd>
+            MODEMs, and in general devices supporting AT commands, can be accessed
+            and controlled as individual <i>Devices</i>.
+            See <a href="jdk/dio/atcmd/package-summary.html">jdk.dio.atcmd</a>.
+        </dd>
+        <dt><b>Watchdog Timers</b></dt>
+        <dd>
+            Watchdog timers (WDT) can be accessed
+            and controlled as individual <i>Devices</i>.
+            See <a href="jdk/dio/watchdog/package-summary.html">jdk.dio.watchdog</a>.
+        </dd>
+        <dt><b>Pulse Counter</b></dt>
+        <dd>
+            Pulse counters can be accessed and controlled as individual <i>Devices</i>.
+            See <a href="jdk/dio/counter/package-summary.html">jdk.dio.counter</a>.
+        </dd>
+        <dt><b>Pulse Width Modulation (PWM) Generators</b></dt>
+        <dd>
+            PWM channels of a PWM generator can be accessed and controlled as
+            individual <i>Devices</i>. 
+            Any number of PWM generators can be supported.
+            See <a href="jdk/dio/pwm/package-summary.html">jdk.dio.pwm</a>.
+        </dd>
+        <dt><b>Generic Devices</b></dt>
+        <dd>
+            Other types of devices can be supported through
+            a set of generic device interfaces. 
+            See <a href="jdk/dio/generic/package-summary.html">jdk.dio.generic</a>.
+        </dd>
+        <dt><b><i>Future Extension</i></b></dt>
+        <dd>
+            This API allows for additional device types to be supported in the future
+            as additional sub-packages.
+        </dd>
+    </dl>
+    This API also provide support for <b>Power Management</b> of devices.
+    See <a href="jdk/dio/power/package-summary.html">jdk.dio.power</a>
+    <p />
+    Additionally, this API defines a framework for registering new <code>Devices</code>, or in essence
+    new device drivers (see <a href="jdk/dio/spi/package-summary.html">jdk.dio.spi</a>). The {@link jdk.dio.Device} interface can be extended to provide new
+    types of devices such as a Real Time Clock or a Touch Screen device. 
+    New implementations of the {@link jdk.dio.Device} sub-interfaces defined in this specification may also be
+    registered. For example, access to the pins and ports of an I2C GPIO expander primarily
+    supported as an I2C slave device may be provided by new {@link jdk.dio.gpio.GPIOPin}
+    and {@link jdk.dio.gpio.GPIOPort} implementations.
+    <h3>Optionality of Devices APIs and Devices Support</h3>
+    Because not all the types of peripheral devices addressed by this specification are present on all embedded platforms certain
+    of the individual device APIs included in the Device I/O API are optional.
+    The following packages and all the classes, interfaces and exceptions they define are mandatory:
+    <dl>
+        <dt>{@link jdk.dio}</dt>
+        <dd>Framework interfaces and classes for device I/O access and control.</dd>
+        <dt>{@link jdk.dio.power}</dt>
+        <dd>Interfaces and classes for power management of devices.</dd>
+        <dt>{@link jdk.dio.spi}</dt>
+        <dd>Service-provider interfaces and classes for  providing device driver implementations.</dd>
+    </dl>
+    All other packages are optional. When an optional package is included it must contain all the interfaces and classes defined for that package.
+    Some packages have dependencies on other packages; in which case if an optional package is included all the packages it depends on
+    must also be included. Interdependencies between packages are described in each package's documentation.
+    <p />
+    The version for each of the optional packages is that of this specification.
+    <p />
+    Additionally, device features vary greatly from hardware to hardware. Therefore some features defined 
+    by device APIs may be optionally supported. Such optional supports are handled as follows:
+    <ol>
+        <li>a {@link jdk.dio.UnsupportedDeviceTypeException} is thrown when attempting to {@link jdk.dio.DeviceManager#open open} a device whose type is not supported by the platform.</li>
+        <li>a {@link jdk.dio.DeviceNotFoundException} is thrown when attempting to {@link jdk.dio.DeviceManager#open open} a device with capabilities not supported by the platform.</li>
+        <li>a {@link java.lang.UnsupportedOperationException} is thrown when attempting to perform an operation on a device which is not supported by the driver or underlying hardware. Methods of {@code Device} interfaces
+            are documented appropriately and include the corresponding {@code @throws} clause documentation.</li>
+    </ol>
+
+    <h2>Device Identification And Lookup</h2>
+    Devices are primarily identified by their IDs and may be looked up using their IDs, types (interfaces),
+    names and/or properties. Additionally, when an <a href="#open-config">open device topology</a>
+    is supported, a device can be designated using its hardware addressing information.
+    <dl>
+        <dt><b>Device IDs</b></dt>
+        <dd>
+            Devices are uniquely identified by a numerical ID.
+            This ID is unrelated to the hardware number (hardware addressing information) that may be used to address a device such as a GPIO pin number
+            or an I2C slave device address.
+            The numerical ID of a device must be greater than or equal to <code>0</code> and must be unique.
+            Yet the same device may be directly and indirectly mapped through several IDs.
+            For example, an Analog Digital Converter may be both an I2C slave device and an ADC device.
+            In this case, there may be one ID to retrieve the device as an {@link jdk.dio.i2cbus.I2CDevice}
+            instance and four other IDs to retrieve each of its four ADC channels as {@link jdk.dio.adc.ADCChannel} instances.
+            Similarly, a Real-Time Clock device with memory-mapped registers may be mapped to an {@link jdk.dio.mmio.MMIODevice} through one ID
+            and to a user-defined {@link jdk.dio.Device} implementation providing a higher-level Real-Time Clock abstraction through an other ID
+            (see the <a href="#examples">example</a> below).
+        </dd>
+        <dt><b>Device Names</b></dt>
+        <dd>
+            Names of devices are free-form strings. The names of devices may not be unique. 
+            But a name would typically correspond to a single hardware device that may
+            be accessible through different instances of {@link jdk.dio.Device} 
+            offering different levels of abstractions. Each of these instances would have the same name.
+            In the last example above, both implementations of 
+            the real-time clock device may have the same name "RTC" though they have different IDs and interfaces.
+        </dd>
+        <dt><b>Device Properties</b></dt>
+        <dd>
+            Properties of devices are free-form strings describing the properties of a 
+            device such as its capabilities. These strings are platform and device-specific. 
+            For example, {@link jdk.dio.atcmd.ATDevice} defines - as properties - certain capabilities
+            for modems.
+            <p />
+            Properties can be use to represent intrinsic properties of a device such as its capabilities as well as
+            extrinsic properties of a device such as its placement on the board or whether a device is embedded, 
+            removable or even external to a module. Properties defined for a device driver may be published as part of its specification.  
+            <p />
+            Using the RTC example,
+            because of the tight dependency to its hardware chip, the memory-mapped Real-Time Clock 
+            device may have been registered with the following property: "com.acme.rtc.chip=146818", which actually refers to the RTC chip designation.
+            The user-defined {@link jdk.dio.Device} implementation
+            may then rely on this property to lookup the {@link jdk.dio.mmio.MMIODevice} for which it wants to provide 
+            a higher-level abstraction.
+            Another example is the properties of an I2C slave device which could include whether it supports the SMBus
+            specification (see <a href="http://smbus.org/specs/index.html">http://smbus.org/specs/index.html</a>) or the 
+            properties of a temperature sensor which may include its placement on the board or module.
+            <p />
+            By convention properties should use the following format:
+            <blockquote>
+                <em>&lt;name&gt;</em><code>=</code><em>&lt;value&gt;</em>
+            </blockquote>
+            Note that property-based lookup only uses exact (case-insensitive) matching and does not perform any semantic interpretation.
+            For example, a negatively asserted boolean property (eg. "com.foobar.rtc.alarm=false") will not match the absence of
+            the corresponding positively asserted boolean property (eg. "com.foobar.rtc.alarm=true").
+            <br />
+            To avoid conflicts, it is highly recommended that properties be named in accordance with the reverse domain name
+            convention. The property name prefixes {@code "java."}, {@code "javax."} are reserved for definition by this 
+            specification. According to this convention, the property of an I2C slave device to support the SMBus
+            specification should be named with the prefix {@code "org.smbus."}.
+        </dd>
+        <dt><b>Device Hardware Addressing Information</b></dt>
+        <dd>
+            When an <a href="#open-config">open device topology</a>
+            is supported, a device can be designated using its hardware addressing information, such as an I2C
+            bus number and slave device address or a GPIO controller number and pin index. Hardware addressing information
+            are device type-dependent and must be provided as part of {@link jdk.dio.DeviceConfig}
+            objects when opening a device with an adhoc configuration.
+        </dd>
+    </dl>
+    Note that device names in conjunction with properties and interfaces allow for a more flexible
+    lookup mechanism than with device IDs alone and allow for the following usecases:
+    <ol>
+        <li>Several abstractions of the same hardware device using the same name but different IDs.
+            <br />
+            Eg.: name={@code "RTC"}, interface={@code I2CSlaveDevice|RealTimeClock}</li>
+        <li>Several devices of the same type may have the same name but different properties.
+            <br />
+            Eg.: name={@code "TEMP_SENSOR"}, interface={@code "ADCChannel"}, property={@code "com.foobar.temp.orientation=TOP"|"com.foobar.temp.orientation=BOTTOM"|...}</li>
+        <li>A new device can be registered at runtime with a dynamically allocated ID; and applications may 
+            rely on a well-known name or a name defined in the spec of the device driver or of the application
+            registering the device.</li>
+        <li>A hardware device may be exposed as distinct virtualized abstractions registered with the same name but under different IDs.
+            <br />
+            Eg.: name={@code "WDT"}, interface={@code WatchdogTimer}</li>
+    </ol>
+    Note that this API relies on a registry of device configurations but is designed to be independent of
+    any specific device registry implementation. It is expected that such a registry is persistent across platform reboots and
+    in particular that a device configuration registered by an application remain registered after the application has terminated
+    and across platform reboots until it is explictly unregistered by an application (possibly the same) that has been granted the necessary permissions.
+    <h2>Device Topologies</h2>
+    This specification allows for both Closed and Open Device Topologies.
+    <dl>
+        <dt><b><a name="closed-config">Closed Device Topology</a>y</b></dt>
+        <dd>
+            A closed device topology,
+            is a topology which is fixed and which does not allow for installation of new devices other than through a platform
+            reconfiguration. In such a topology all the installed devices are pre-registered and pre-configured and have a fixed device ID.
+            Applications cannot change the configuration of a device beyond what is being exposed in the {@link jdk.dio.Device}
+            sub-interfaces. They are especially not granted the permission to use the {@link jdk.dio.DeviceManager#open(DeviceConfig)} to open
+            devices with an ad-hoc configuration.
+        </dd>
+        <dt><b><a name="open-config">Open Device Topology</a></b></dt>
+        <dd>
+            An open device topology allows for (in addition to what a closed topology allows for) the installation and de-installation of devices
+            during runtime and allows for already installed or newly installed applications to access these devices.
+            <p />
+            In such a topology, some of the devices may be pre-registered and pre-configured at the platform level 
+            and will have a fixed device ID (in a same way as in a closed topology). Applications will not be able to change the configuration of pre-configured device beyond what is being exposed in the {@link jdk.dio.Device}
+            interfaces.
+            Still applications will be able to discover or address devices which are not part of the pre-configured set
+            and especially new devices that may be added to the platform, for example on an I2C bus.
+            To address and access such a newly plugged in I2C slave device, an application may use an instance of {@link jdk.dio.i2cbus.I2CDeviceConfig}
+            with the bus number and slave address properly set.
+            In order to open a device with an adhoc configuration, an application must be granted the permission to use 
+            {@link jdk.dio.DeviceManager#open(DeviceConfig)}.
+            <p />
+        </dd>
+    </dl>
+    <h2>Device Provider Lookup</h2>
+    Drivers for devices may be dynamically looked up and loaded at runtime from 
+    shared libraries containing for each device both the <i>driver</i> code for the device and
+    its associated meta-data describing the provided <em>Service</em> (provider configuration file) as per
+    the <em>Service-Provider Loading</em> facility supported by the platform.
+    <p />
+    When attempting to open or register a specific device using its supported interface, configuration and properties such as by calling one of the 
+    {@link jdk.dio.DeviceManager#open(Class, jdk.dio.DeviceConfig) open} methods
+    or the {@link jdk.dio.DeviceManager#register(int, Class, jdk.dio.DeviceConfig, String, String[]) register}
+    method of the {@code DeviceManager} 
+    the device manager MUST use the <em>Service-Provider Loading</em> facility supported by the platform 
+    (typically going through the class path of shared libraries)
+    to locate a {@link jdk.dio.spi.DeviceProvider} that can open {@code Device} instances of the requested type,
+    configuration and properties.
+    The class implementing the {@link jdk.dio.spi.DeviceProvider} interface as well as the class implementing 
+    the {@link jdk.dio.Device} interface or sub-interface and all associated classes must be located in a shared library or already part of the platform'system libraries.
+    <h2>Device Registration</h2>
+    Devices of defined types are registered under a device ID and with optionally a name and a set of properties.
+    <dl>
+        <dt><b>Platform-registered Devices</b></dt>
+        <dd>
+            Devices may be pre-registered by the platform as part of the platform configuration; especially as part of a closed device topology.
+        </dd>
+        <dt><b>Application-registered Devices</b></dt>
+        <dd>
+            Devices may be programmatically registered at runtime by applications.
+            Because applications that may need access to these devices may run as separate 
+            tasks in different contexts, the <i>driver</i> code for devices registered
+            by applications should be part of shared libraries or already part of the platform'system libraries.
+            Note that whether a device instance registered by an application is accessible
+            by other applications is constrained by the security policy implemented by the platform.
+            An application may explicitly register a device by invoking the 
+            {@link jdk.dio.DeviceManager#register jdk.dio.DeviceManager.register}
+            method.
+            An application may unregister an application-registered device provided it is granted the {@link jdk.dio.DeviceMgmtPermission#UNREGISTER}
+            permission.
+        </dd>
+    </dl>
+    <h2><a name="access-model">Exclusive And Shared Access, And Thread-safety</a></h2>
+    The defined framework provides a fine access granularity to device hardware. For example,
+    individual GPIO pins are modeled as separate {@link jdk.dio.gpio.GPIOPin} instances and can be accessed concurrently even 
+    though they may be supported by the same GPIO controller hardware; individual ADC channels are modeled as separate {@link jdk.dio.adc.ADCChannel} 
+    instances and can be accessed concurrently. While access to the underlying hardware device may be <em>shared</em> and the sharing controlled by the underlying device driver,
+    access to individual device resources modeled as {@link jdk.dio.Device} instances may be <em>exclusive</em> or <em>shared</em>.
+    Whether access to individual device resources modeled as {@code Device} instances is <em>exclusive</em> or <em>shared</em>
+    depends on the device's type, configuration and on the underlying device driver implementation.
+    <p />
+    Three cases of device resource abstraction may be considered:
+    <dl>
+        <dt><b>Dedicated Device Resource Abstraction</b></dt>
+        <dd>
+            A {@code Device} instance may be a <em>dedicated</em> abstraction of a device resource. Only one {@code Device} instance
+            for that individual device resource may be open at a particular time and access to the resource through {@code Device} instance is <em>exclusive</em>.
+            Attempting to open such a device resource while it is already open will result in a {@link jdk.dio.UnavailableDeviceException} being thrown.
+            <br />
+            By default in this specification, {@code Device} instances are assumed to be <em>dedicated</em> abstraction of device resources.
+        </dd>
+        <dt><b>Virtualized Device Resource Abstraction</b></dt>
+        <dd>
+            A {@code Device} instance may be a <em>virtualized</em> abstraction of a device resource. Several {@code Device} instances
+            mapped onto that same individual device resource may be open concurrently and access to the resource through the {@code Device} instances 
+            may appear as <em>exclusive</em> as if <em>dedicated</em> abstractions.
+            <br />
+            A particular platform or driver implementation may for example map a <em>virtualized</em> abstraction of a device resource to a single 
+            device (configuration) ID or name that may allow for a unlimited or for a bound number of concurrently open instances. Or, a particular implementation
+            may map a <em>virtualized</em> abstraction of a device resource to distinct device (configuration) IDs or names that can be concurrently
+            open.
+            <br />
+            Watchdog timers is one such case of  <em>virtualized</em> abstraction: if the host device has a single physical watchdog timer,
+            several virtual watchdog timers may be mapped onto this one physical watchdog timer.
+        </dd>
+        <dt><b>Shared Device Resource Abstraction</b></dt>
+        <dd>
+            A {@code Device} instance may be a <em>shared</em> abstraction of a device resource. Several {@code Device} instance
+            mapped onto that same individual device resource may be open concurrently but access to the resource through the {@code Device} instances 
+            must be explicitly synchronized.
+            <br />
+            When a device is open in shared mode then to synchronize access to the shared resource an application may invoke
+            {@link jdk.dio.Device#tryLock Device.tryLock} and
+            {@link jdk.dio.Device#unlock Device.unlock}. An application may also rely
+            on device protocol-specific means to synchronize access to a shared device resource. For example, a particular implementation may 
+            configure a specific I2C EEPROM device to be shared. Access to the I2C EEPROM device 
+            through {@link jdk.dio.i2cbus.I2CDevice} instances will be by default synchronized on I2C transactions.
+        </dd>
+    </dl>
+    <p />
+    Note that the {@link jdk.dio.DeviceManager#open(int) DeviceManager.open}
+    methods always return a new instance upon each call regardless of whether it is a <em>dedicated</em>, <em>virtualized</em> or <em>shared</em>
+    device resource abstraction.
+    <p />
+    Instances of {@code Device} must be thread-safe.
+    For example, if a thread has already initiated an I/O operation upon a device through a {@code Device} instance, an
+    invocation of another I/O method on that same {@code Device} instance will block until the first operation is complete.
+    <h2>Hardware Interrupt and Software Signal Handling</h2>
+    This specification does not specify or require any deterministic handling of
+    hardware interrupts or other native software signals.
+    Hardware interrupts and native software signals that require handling by applications are encapsulated as event objects
+    (instances of {@link jdk.dio.DeviceEvent})
+    and are dispatched for processing by application-registered event listeners
+    (instances of {@link jdk.dio.DeviceEventListener}).
+    Because some events may be time-sensitive, events are time-stamped. Additionally, 
+    to account for event bursts, that is cases where events are produced more rapidly than they are handled, 
+    events may be coalesced. Coalesced events regroup in one event object several occurrences of events
+    of the same type and keep track of the number of events that have been coalesced.
+    Only the last occurring value that may be attached to the event such as the state of a GPIO pin, is retained.
+    Also, the timestamps of both the first occurrence and the last occurrence are retained.
+    Not all events can be coalesced. Coalescing of events are event and device -type-dependent.
+    <p />
+    Event handling methods should be implemented in such a way that they quickly process the events and return.
+    <p />
+    Event notification implements a unicast model. A single listener can be registered for a particular event type. 
+    <h2><a name="security-model">Security Model</a></h2>
+    The security model of this API is designed to protect the access to individual device hardware resources as well as 
+    the namespace under which their abstractions (provided as instances of {@code Device}-implementing classes) are registered.
+    <dl>
+        <dt><b>Protection Upon Registering A Device</b></dt>
+        <dd>
+            Prior to registering a new device of a certain type using the {@link jdk.dio.DeviceManager#register DeviceManager.register} method
+            the {@link jdk.dio.DeviceMgmtPermission}
+            is checked with a target name composed of the requested device name and ID and with the action {@link jdk.dio.DeviceMgmtPermission#REGISTER DeviceMgmtPermission.REGISTER}.
+            <p />
+            For example, if a device of type {@link jdk.dio.gpio.GPIOPin GPIOPin} is to be registered the
+            {@code DeviceMgmtPermission} is checked with a target name composed of the requested device name and ID
+            and with the action {@code DeviceMgmtPermission.REGISTER}.
+        </dd>
+        <dt><b>Protection Upon Opening A Device</b></dt>
+        <dd>
+            Prior to opening the {@code Device} instance with an adhoc configuration using one of the
+            {@link jdk.dio.DeviceManager#open(jdk.dio.DeviceConfig) DeviceManager.open(config, ...)} methods 
+            the permission (subclass of {@link jdk.dio.DevicePermission}) 
+            specific to that {@code Device} instance, if any defined, is checked with a target name
+            composed of the relevant hardware addressing information and with the action 
+            {@link jdk.dio.DevicePermission#OPEN DevicePermission.OPEN}.
+            In the case of a custom device driver, this permission check SHOULD be performed by the 
+            {@link jdk.dio.spi.DeviceProvider#open DeviceProvider.open} method of the device provider. 
+            <p />
+            For example,
+            if a device of type {@link jdk.dio.gpio.GPIOPin GPIOPin} is to be opened the
+            {@link jdk.dio.gpio.GPIOPinPermission GPIOPinPermission} is checked with a target name
+            composed of the relevant hardware addressing information (the device name or device 
+            number and the pin number) and with the action {@link jdk.dio.gpio.GPIOPinPermission#OPEN GPIOPinPermission.OPEN}.
+            <p />
+            Prior to opening the {@code Device} instance with a registered configuration using one of the
+            {@link jdk.dio.DeviceManager#open(int) DeviceManager.open(id, ...)} or
+            {@link jdk.dio.DeviceManager#open(String, Class, int, String[]) DeviceManager.open(name, ...)} methods 
+            the {@link jdk.dio.DeviceMgmtPermission} is checked with a target name
+            composed of the requested device ID and/or name and with the action
+            {@link jdk.dio.DeviceMgmtPermission#OPEN DeviceMgmtPermission.OPEN}.
+            Note that this permission check is performed prior to any permission checks that the device driver may performed when opening the device with
+            the designated configuration. 
+            <p />
+            <em>Note on Protection Upon Opening Compound Devices:</em> 
+            A compound/composite device is composed of different device components such as a Touch Screen Device assembled from
+            a Touch Screen SPI (Serial Peripheral Interface bus) slave Device and a GPIO pin Device handling the Pen-Down signal or a 
+            GPIO port configured from a set of individual GPIO pins. When a {@code Device} abstraction for such a compound device is assembled from
+            component {@code Device} abstractions the permissions that apply upon opening the component {@code Device} abstractions must be granted to the
+            calling application when opening the compound {@code Device} abstraction. Note that depending on the security architecture of the underlying platform (Java ME or Java SE -based) these permission
+            checks may or may not require the corresponding permissions to be explicitly granted to the calling application; either because (e.g. on Java SE) the preripheral's
+            driver code is marked as priviledged and is granted the necessary permission(s) (see <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/doprivileged.html">API for Priviledged Code</a>) and/or 
+            because (e.g. on Java ME) the {@code Device} configuration being opened is a <em>platform-registered</em> configuration for which the
+            required privileges and permissions are implicitly or explictly granted.
+        </dd>
+    </dl>
+    <p />
+    Each {@code Device}-implementing class may implement additional security checks to protect certain functions.
+    See {@link jdk.dio.gpio.GPIOPinPermission#SET_DIRECTION GPIOPinPermission.SET_DIRECTION} for an example.
+    <p />
+    A device provider may define a new permission (subclass of {@link jdk.dio.DevicePermission})
+    for new type of device (subinterface of {@link jdk.dio.Device}). As an example, see
+    the {@code RealTimeClockPermission} below.
+    <h1>Examples</h1>
+    <h2><a name="examples">Providing a Higher-Level Abstraction For a Memory-Mapped Real Time Clock</a></h2>
+    Below is a complete example showing how a new higher-level device 
+    abstraction <code>RealTimeClock</code>  can be provided for a memory-mapped Real-Time Clock 
+    chip accessible as an {@link jdk.dio.mmio.MMIODevice} device.
+    <p />
+    The Real Time Clock device interface:
+    <blockquote>
+        <pre>
+public interface RealTimeClock extends Device&lt;RealTimeClock&gt; {
+
+    int getHours() throws IOException;
+
+    int getMinutes() throws IOException;
+
+    int getSeconds() throws IOException;
+
+    void setAlarm(byte delaySeconds, byte delayMinutes, byte delayHours, AlarmListener listener) throws IOException;
+
+    void setHours(int hrs) throws IOException;
+
+    void setMinutes(int mins) throws IOException;
+
+    void setSeconds(int secs) throws IOException;
+
+    void cancelAlarm() throws IOException;
+
+    interface AlarmListener {
+        void fired(RealTimeClock rtc);
+    }
+}
+        </pre>
+    </blockquote>
+    The Real Time Clock device implementation class:
+    <blockquote>
+        <pre>
+class RealTimeClockImpl extends AbstractDevice&lt;RealTimeClock&gt; implements RealTimeClock {
+
+    static final String[] PROPERTIES = new String[]{
+        "com.foobar.rtc.alarm=true",
+        "com.foobar.rtc.time=true"
+    };
+    private static final int INTERRUPT = 0;
+    private RealTimeClockConfig config;
+    private MMIODevice rtc = null;
+    RawRegister&lt;Byte&gt; seconds;
+    RawRegister&lt;Byte&gt; secAlarm;
+    RawRegister&lt;Byte&gt; minutes;
+    RawRegister&lt;Byte&gt; minAlarm;
+    RawRegister&lt;Byte&gt; hours;
+    RawRegister&lt;Byte&gt; hrAlarm;
+    RawRegister&lt;Byte&gt; registerB;
+    RawRegister&lt;Byte&gt; registerC;
+    RawBlock userRAM;
+
+    RealTimeClockImpl(RealTimeClockConfig config) {
+        this.config = config;
+    }
+
+    void open() throws IOException, UnsupportedDeviceTypeException, DeviceNotFoundException, UnavailableDeviceException {
+        if (config != null) {
+            rtc = DeviceManager.open(MMIODevice.class, config.getMmioConfig());
+            AccessController.checkPermission(new RealTimeClockPermission(
+                    config.getMmioConfig().getDeviceName() + ":" + Long.toHexString(config.getMmioConfig().getAddress()),
+                    "open"));
+        } else {
+            AccessController.checkPermission(new RealTimeClockPermission("*", "open"));
+            rtc = DeviceManager.open(null, MMIODevice.class, "com.acme.rtc.chip=146818");
+        }
+
+        // The RealTimeClock device has 14 bytes of clock and control registers and 50 bytes
+        // of general purpose RAM (see the data sheet of the HITACHI HD146818 Real Time Clock).
+        seconds = rtc.getRegister("Seconds", Byte.class);
+        secAlarm = rtc.getRegister("SecAlarm", Byte.class);
+        minutes = rtc.getRegister("Minutes", Byte.class);
+        minAlarm = rtc.getRegister("MinAlarm", Byte.class);
+        hours = rtc.getRegister("Hours", Byte.class);
+        hrAlarm = rtc.getRegister("HrAlarm", Byte.class);
+        // More date registers... but not supported in this example
+        registerB = rtc.getRegister("RegisterB", Byte.class);
+        registerC = rtc.getRegister("RegisterC", Byte.class);
+        userRAM = rtc.getBlock("UserRam");
+    }
+
+    &#64;Override
+    public void setSeconds(int secs) throws IOException {
+        seconds.set((byte) secs);
+    }
+
+    &#64;Override
+    public int getSeconds() throws IOException {
+        return seconds.get();
+    }
+
+    &#64;Override
+    public void setMinutes(int mins) throws IOException {
+        minutes.set((byte) mins);
+    }
+
+    &#64;Override
+    public int getMinutes() throws IOException {
+        return minutes.get();
+    }
+
+    &#64;Override
+    public void setHours(int hrs) throws IOException {
+        hours.set((byte) hrs);
+    }
+
+    &#64;Override
+    public int getHours() throws IOException {
+        return hours.get();
+    }
+
+    // Sets the daily alarm for after some delay
+    &#64;Override
+    public void setAlarm(byte delaySeconds, byte delayMinutes, byte delayHours, final AlarmListener listener) throws IOException {
+        // Directly read from/write to the registers using RawByte instances.
+        byte currentSeconds = seconds.get();
+        byte currentMinutes = minutes.get();
+        byte currentHours = hours.get();
+        int i = (currentSeconds + delaySeconds) % 60;
+        int j = (currentSeconds + delaySeconds) / 60;
+        secAlarm.set((byte) i);
+        i = (currentMinutes + delayMinutes + j) % 60;
+        j = (currentMinutes + delayMinutes + j) / 60;
+        minAlarm.set((byte) i);
+        i = (currentHours + delayHours + j) % 24;
+        hrAlarm.set((byte) i);
+        rtc.setMMIOEventListener(INTERRUPT, new MMIOEventListener() {
+            &#64;Override
+            public void eventDispatched(MMIOEvent event) {
+                try {
+                    MMIODevice rtc = event.getDevice();
+                    RawRegister&lt;Byte&gt; registerC = rtc.getRegister("RegisterC", Byte.class);
+                    // Check the Alarm Interrupt Flag (AF)
+                    if ((registerC.get() & 0X20) != 0) {
+                        listener.fired(RealTimeClockImpl.this);
+                    }
+                } catch (IOException ex) {
+                }
+            }
+        });
+        // Set the Alarm Interrupt Enabled (AIE) flag
+        registerB.set((byte) (registerB.get() | 0X20));
+    }
+
+    &#64;Override
+    public void cancelAlarm() throws IOException {
+        // Clear the Alarm Interrupt Enabled (AIE) flag
+        registerB.set((byte) (registerB.get() & ~0X20));
+    }
+
+    &#64;Override
+    public void close() throws IOException {
+        if (rtc != null) {
+            rtc.close();
+        }
+    }
+
+    &#64;Override
+    public boolean isOpen() {
+        return rtc != null && rtc.isOpen();
+    }
+}
+        </pre>
+    </blockquote>
+    The Real Time Clock device provider class:
+    <blockquote>
+        <pre>
+public class RealTimeClockProvider implements DeviceProvider&lt;RealTimeClock&gt; {
+
+    public RealTimeClockProvider() {
+    }
+
+    &#64;Override
+    public RealTimeClock open(DeviceConfig&lt;? super RealTimeClock&gt; config, String[] properties, int mode)
+            throws IOException, DeviceException {
+        if (mode == DeviceManager.SHARED) {
+            throw new UnsupportedAccessModeException();
+        }
+        if (matches(properties)) { // Makes sure the requested properties are supported
+            RealTimeClockImpl rtc = new RealTimeClockImpl((RealTimeClockConfig) config);
+            rtc.open();
+            return rtc;
+        }
+        return null;
+    }
+
+    &#64;Override
+    public Class&lt;RealTimeClock&gt; getType() {
+        return RealTimeClock.class;
+    }
+
+    &#64;Override
+    public Class&lt;RealTimeClockConfig&gt; getConfigType() {
+        return RealTimeClockConfig.class;
+    }
+
+    &#64;Override
+    public boolean matches(String[] properties) {
+        if (properties != null) {
+            matched:
+            for (String property : properties) {
+                for (String c : RealTimeClockImpl.PROPERTIES) {
+                    if (c.equals(property)) {
+                        continue matched;
+                    }
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+}
+        </pre>
+    </blockquote>
+    <p />
+    The <code>DevicePermission</code> subclass for the Real Time Clock device:
+    <blockquote>
+        <pre>
+public class RealTimeClockPermission extends MMIOPermission {
+
+    public RealTimeClockPermission(String name) {
+        super(name);
+    }
+
+    public RealTimeClockPermission(String name, String actions) {
+        super(name);
+    }
+
+    //...
+}
+        </pre>
+    </blockquote>
+    Examples of how a new Real Time Clock device may be registered under the device ID# 10,
+    with the name "RTC" and with a specific set of properties/capabilities:
+    <blockquote>
+        <pre>
+try {
+    MMIODeviceConfig mmioConfig = new MMIODeviceConfig(0x0000FFFF, 64, Device.LITTLE_ENDIAN,
+            new MMIODeviceConfig.RawRegisterConfig&lt;&gt;(0x00, "Seconds", Byte.class),
+            new MMIODeviceConfig.RawRegisterConfig&lt;&gt;(0x01, "SecAlarm", Byte.class),
+            new MMIODeviceConfig.RawRegisterConfig&lt;&gt;(0x02, "Minutes", Byte.class),
+            new MMIODeviceConfig.RawRegisterConfig&lt;&gt;(0x03, "MinAlarm", Byte.class),
+            new MMIODeviceConfig.RawRegisterConfig&lt;&gt;(0x04, "Hours", Byte.class),
+            new MMIODeviceConfig.RawRegisterConfig&lt;&gt;(0x05, "HrAlarm", Byte.class),
+            new MMIODeviceConfig.RawRegisterConfig&lt;&gt;(0x06, "DayOfWk", Byte.class),
+            new MMIODeviceConfig.RawRegisterConfig&lt;&gt;(0x07, "DayOfMo", Byte.class),
+            new MMIODeviceConfig.RawRegisterConfig&lt;&gt;(0x08, "Month", Byte.class),
+            new MMIODeviceConfig.RawRegisterConfig&lt;&gt;(0x09, "Year", Byte.class),
+            new MMIODeviceConfig.RawRegisterConfig&lt;&gt;(0x0A, "RegisterA", Byte.class),
+            new MMIODeviceConfig.RawRegisterConfig&lt;&gt;(0x0B, "RegisterB", Byte.class),
+            new MMIODeviceConfig.RawRegisterConfig&lt;&gt;(0x0C, "RegisterC", Byte.class),
+            new MMIODeviceConfig.RawRegisterConfig&lt;&gt;(0x0D, "RegisterD", Byte.class),
+            new MMIODeviceConfig.RawBlockConfig(0x0E, "UserRam", 50));
+    DeviceManager.register(10, RealTimeClock.class, new RealTimeClockConfig(mmioConfig), "RTC",
+            "com.foobar.rtc.alarm=true",
+            "com.foobar.rtc.time=true");
+} catch (IOException ioe) {
+    Logger.getLogger(RealTimeClockTest.class.getName()).log(Level.SEVERE, null, ioe);
+}
+        </pre>
+    </blockquote>
+    <h2><a name="example2">Registering A New UART</a></h2>
+    Below is an example showing how a new UART device or a new configuration for such a device
+    can be registered under the device ID# 11, with name "HOST" and a set of capabilities.
+    <blockquote>
+        <pre>
+DeviceManager.register(11, // the device ID
+        UART.class, // the device type/interface
+        new UARTConfig(0, 0, 2400, UARTConfig.DATABITS_8, UARTConfig.PARITY_EVEN, UARTConfig.STOPBITS_1, UARTConfig.FLOWCONTROL_NONE), // the device configuration
+        "HOST", // the deviceName
+        "com.foobar.uart.xxx=true", "com.foobar.uart.yyy=true" // the device capabilities
+);
+        </pre>
+    </blockquote>
+    <h2><a name="example3">Registering A New UART With Modem Control</a></h2>
+    Below is an example showing how a new UART device with Modem signals control or a new configuration for such a device
+    can be registered under the device ID# 12, with name "MODEM" and a set of capabilities.
+    <blockquote>
+        <pre>
+DeviceManager.register(12, // the device ID
+        ModemUART.class, // the device type/interface
+        new UARTConfig(0, 0, 2400, UARTConfig.DATABITS_8, UARTConfig.PARITY_EVEN, UARTConfig.STOPBITS_1, UARTConfig.FLOWCONTROL_NONE), // the device configuration
+        "MODEM", // the deviceName
+        "com.foobar.modem.xxx=true", "com.foobar.modem.yyy=true" // the device capabilities
+);
+        </pre>
+    </blockquote>
+    <h2>References</h2>
+    <table class="Table" cellpadding="5" border="0">
+        <tbody>
+            <tr>
+                <td rowspan="1" colspan="1">
+                    <p class="TableText">[JPVS]</p>
+                </td>
+                <td rowspan="1" colspan="1">
+                    <a name="JPVS"></a>
+                    <p class="TableText">
+                        <cite>"Java™ Product Versioning Specification"</cite>,
+                        Sun Microsystems, 2002, Roger Riggs.
+                        Available at : 
+                        <a href="http://docs.oracle.com/javase/1.5.0/docs/guide/versioning/spec/versioning2.html">
+                            http://docs.oracle.com/javase/1.5.0/docs/guide/versioning/spec/versioning2.html</a>
+                    </p>
+                </td>
+            </tr>  
+        </tbody>
+    </table>
+</body>
+</html>

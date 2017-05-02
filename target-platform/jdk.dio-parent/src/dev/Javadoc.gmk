@@ -1,0 +1,61 @@
+#########################################################################
+# Copyright (c) 2014, Oracle and/or its affiliates. All rights reserved.
+# DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+#
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.  Oracle designates this
+# particular file as subject to the "Classpath" exception as provided
+# by Oracle in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+# or visit www.oracle.com if you need additional information or have any
+# questions.
+#
+#########################################################################
+
+CP := cp
+MKDIR := mkdir -p
+
+#########################################################################
+
+JAVADOC_BUILD_DIR := ./build/javadocs
+JAVADOC_HEADER := "<FONT size=\"-1\">"
+JAVADOC_FOOTER := ""
+
+ifeq ($(JAVA_HOME),)
+  $(error "JAVA_HOME is not defined. Please set JAVA_HOME to point to the location of the JDK8 installation")
+endif
+
+.PHONY: clean all docs dirs
+
+all: docs
+
+dirs:
+	$(MKDIR) $(JAVADOC_BUILD_DIR)/api
+
+docs: dirs
+	$(JAVA_HOME)/bin/javadoc -locale en_US -d $(JAVADOC_BUILD_DIR) -sourcepath ./src/share/classes:src/se/classes -Xdoclint:none \
+           -subpackages jdk.dio.adc:jdk.dio.counter:jdk.dio.dac:jdk.dio.atcmd:jdk.dio.generic:jdk.dio.gpio:jdk.dio.i2cbus:jdk.dio.spi:jdk.dio.spibus:jdk.dio.modem:jdk.dio.power:jdk.dio.pwm:jdk.dio.uart:jdk.dio.watchdog:jdk.dio.mmio \
+	   jdk.dio \
+	   -overview ./src/doc-files/overview.html -header "<FONT size=\"-1\">Device I/O API 1.0</FONT>" -footer "<FONT size=\"-1\">Device I/O API 1.0</FONT>" \
+	   -use -docencoding "iso-8859-1" -notree \
+	   -bottom "<span class=\"copyrightlogo\">Copyright &copy; 2012, 2014, Oracle and/or its affiliates. All rights reserved.</span><br />"
+
+clean:
+	rm -rf ./build/javadocs
+
+
+
+
+

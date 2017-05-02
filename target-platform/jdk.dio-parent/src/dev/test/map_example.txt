@@ -1,0 +1,4 @@
+C:\JDK\bin\java.exe /jdk/bin/java
+D:\DIOTests /home/user/DIOTests
+\ /
+; :

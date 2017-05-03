@@ -224,8 +224,8 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
                     this.dbHelper.execute(MessageFormat.format(SQL_TRUNCATE_TABLE, sqlTableName));
                 } else {
                     logger.info(message.partiallyEmptyingTable(sqlTableName));
-                    this.dbHelper
-                            .execute(MessageFormat.format(SQL_DELETE_RANGE_TABLE, sqlTableName, noOfRecordsToKeep));
+                    this.dbHelper.execute(MessageFormat.format(SQL_DELETE_RANGE_TABLE, sqlTableName,
+                            Integer.toString(noOfRecordsToKeep)));
                 }
             }
         } catch (final SQLException sqlException) {

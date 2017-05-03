@@ -31,6 +31,7 @@
         <module>jdk.dio</module>
         <module>jdk.dio.armv6hf</module>
         <module>jdk.dio.x86_64</module>
+        <module>jdk.dio.aarch64</module>
     </modules>
     
     <properties>

@@ -39,9 +39,9 @@ public class TelitDe910ConfigGenerator implements ModemPppConfigGenerator {
         pppPeer.setAllowBsdCompression(true);
         pppPeer.setAllowDeflateCompression(true);
         pppPeer.setAllowMagic(true);
-        pppPeer.setConnect_delay(10000);
-        pppPeer.setLcp_echo_failure(4);
-        pppPeer.setLcp_echo_interval(65535);
+        pppPeer.setConnectDelay(10000);
+        pppPeer.setLcpEchoFailure(4);
+        pppPeer.setLcpEchoInterval(65535);
 
         pppPeer.setLogfile(logFile);
         pppPeer.setProvider(deviceId);
@@ -53,8 +53,8 @@ public class TelitDe910ConfigGenerator implements ModemPppConfigGenerator {
         pppPeer.setMaxFail(modemConfig.getMaxFail());
         pppPeer.setIdleTime(modemConfig.getIdle());
         pppPeer.setActiveFilter(modemConfig.getActiveFilter());
-        pppPeer.setLcp_echo_interval(modemConfig.getLcpEchoInterval());
-        pppPeer.setLcp_echo_failure(modemConfig.getLcpEchoFailure());
+        pppPeer.setLcpEchoInterval(modemConfig.getLcpEchoInterval());
+        pppPeer.setLcpEchoFailure(modemConfig.getLcpEchoFailure());
 
         return pppPeer;
     }

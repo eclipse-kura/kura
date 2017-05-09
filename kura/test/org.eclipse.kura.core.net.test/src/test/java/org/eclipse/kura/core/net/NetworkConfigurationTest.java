@@ -1403,7 +1403,7 @@ public class NetworkConfigurationTest {
         expected.put("net.interface.if2.config.dialString", "dialString");
         expected.put("net.interface.if2.config.headerCompression", 100);
         expected.put("net.interface.if2.config.ipAddress", "");
-        expected.put("net.interface.if2.config.password", "password");
+        expected.put("net.interface.if2.config.password", new Password("password"));
         expected.put("net.interface.if2.config.pdpType", "");
         expected.put("net.interface.if2.config.pppNum", 123);
         expected.put("net.interface.if2.config.persist", true);

@@ -607,7 +607,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
                                     gwtModemConfig.setUsername(modemConfig.getUsername());
 
-                                    gwtModemConfig.setPassword(modemConfig.getPassword());
+                                    gwtModemConfig.setPassword(modemConfig.getPasswordAsPassword().toString());
 
                                     gwtModemConfig.setPppNum(modemConfig.getPppNumber());
 
@@ -1223,14 +1223,18 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                             new Object[] { rangeStart.getHostAddress(), rangeEnd.getHostAddress(), prefix,
                                     subnet.getHostAddress(), subnetMask.getHostAddress() });
                     try {
-                    	DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(config.getName(), true, defaultLeaseTime, maximumLeaseTime, passDns);
-						DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, subnetMask, prefix,
-								routerAddress, rangeStart, rangeEnd, dnsServers);
-						netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
+                        DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(config.getName(), true, defaultLeaseTime,
+                                maximumLeaseTime, passDns);
+                        DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, subnetMask, prefix,
+                                routerAddress, rangeStart, rangeEnd, dnsServers);
+                        netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
                     } catch (KuraException e) {
-                    	s_logger.error("Failed to create new DhcpServerConfigIP4 object. Please verify that DHCP pool IP addresses (see below) are in the {} subnet.", subnet.getHostAddress());
-                    	s_logger.error("DHCP Pool: range from {} to {}", rangeStart.getHostAddress(), rangeEnd.getHostAddress());
-                    	s_logger.error("Exception: ", e);
+                        s_logger.error(
+                                "Failed to create new DhcpServerConfigIP4 object. Please verify that DHCP pool IP addresses (see below) are in the {} subnet.",
+                                subnet.getHostAddress());
+                        s_logger.error("DHCP Pool: range from {} to {}", rangeStart.getHostAddress(),
+                                rangeEnd.getHostAddress());
+                        s_logger.error("Exception: ", e);
                     }
                 }
 

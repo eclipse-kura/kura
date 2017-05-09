@@ -42,8 +42,8 @@ public class TelitHe910ConfigGenerator implements ModemPppConfigGenerator {
         pppPeer.setAllowBsdCompression(false);
         pppPeer.setAllowDeflateCompression(false);
         pppPeer.setAllowMagic(false);
-        pppPeer.setConnect_delay(1000);
-        pppPeer.setLcp_echo_interval(0);
+        pppPeer.setConnectDelay(1000);
+        pppPeer.setLcpEchoInterval(0);
 
         // other config
         pppPeer.setLogfile(logFile);
@@ -54,14 +54,14 @@ public class TelitHe910ConfigGenerator implements ModemPppConfigGenerator {
         pppPeer.setApn(modemConfig.getApn());
         pppPeer.setAuthType(modemConfig.getAuthType());
         pppPeer.setUsername(modemConfig.getUsername());
-        pppPeer.setPassword(modemConfig.getPassword());
+        pppPeer.setPassword(modemConfig.getPasswordAsPassword());
         pppPeer.setDialString(modemConfig.getDialString());
         pppPeer.setPersist(modemConfig.isPersist());
         pppPeer.setMaxFail(modemConfig.getMaxFail());
         pppPeer.setIdleTime(modemConfig.getIdle());
         pppPeer.setActiveFilter(modemConfig.getActiveFilter());
-        pppPeer.setLcp_echo_interval(modemConfig.getLcpEchoInterval());
-        pppPeer.setLcp_echo_failure(modemConfig.getLcpEchoFailure());
+        pppPeer.setLcpEchoInterval(modemConfig.getLcpEchoInterval());
+        pppPeer.setLcpEchoFailure(modemConfig.getLcpEchoFailure());
 
         return pppPeer;
     }

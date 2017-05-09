@@ -342,7 +342,8 @@ public class NetworkConfiguration {
                                 sb.append(" :: Dial String: " + ((ModemConfig) netConfig).getDialString());
                                 sb.append(
                                         " :: Header Compression: " + ((ModemConfig) netConfig).getHeaderCompression());
-                                sb.append(" :: Password: " + ((ModemConfig) netConfig).getPassword());
+                                sb.append(" :: Password: "
+                                        + ((ModemConfig) netConfig).getPasswordAsPassword().toString());
                                 sb.append(" :: PPP number: " + ((ModemConfig) netConfig).getPppNumber());
                                 sb.append(" :: Profile ID: " + ((ModemConfig) netConfig).getProfileID());
                                 sb.append(" :: Username: " + ((ModemConfig) netConfig).getUsername());
@@ -644,13 +645,6 @@ public class NetworkConfiguration {
                     if (nia instanceof WifiInterfaceAddress) {
                         // access point
                         WifiAccessPoint wap = ((WifiInterfaceAddress) nia).getWifiAccessPoint();
-                        if (wap != null) {
-                            /*
-                             * TODO: need fields to reflect current state?
-                             * properties.put(sbNetIfPrefix+"wifi.ssid", wap.getSSID());
-                             * properties.put(sbNetIfPrefix+"wifi.mode", wap.getMode());
-                             */
-                        }
 
                         long bitrate = ((WifiInterfaceAddress) nia).getBitrate();
                         properties.put(netIfReadOnlyPrefix + "wifi.bitrate", Long.valueOf(bitrate));
@@ -701,25 +695,9 @@ public class NetworkConfiguration {
                         } else if (netConfig instanceof NetConfigIP4) {
                             s_logger.trace("adding netconfig NetConfigIP4 for {}", netInterfaceConfig.getName());
                             addNetConfigIP4Properties((NetConfigIP4) netConfig, netIfConfigPrefix, properties);
-
-                            /*
-                             * Iterator<String> it2 = properties.keySet().iterator();
-                             * while(it2.hasNext()) {
-                             * String key = it2.next();
-                             * System.out.println("\t\t\t"+key+"="+properties.get(key));
-                             * }
-                             */
                         } else if (netConfig instanceof NetConfigIP6) {
                             s_logger.trace("adding netconfig NetConfigIP6 for {}", netInterfaceConfig.getName());
                             addNetConfigIP6Properties((NetConfigIP6) netConfig, netIfConfigPrefix, properties);
-
-                            /*
-                             * Iterator<String> it = properties.keySet().iterator();
-                             * while(it.hasNext()) {
-                             * String key = it.next();
-                             * System.out.println("\t\t\t"+key+"="+properties.get(key));
-                             * }
-                             */
                         } else if (netConfig instanceof DhcpServerConfig4) {
                             s_logger.trace("adding netconfig DhcpServerConfig4 for {}", netInterfaceConfig.getName());
                             addDhcpServerConfig4((DhcpServerConfig4) netConfig, netIfConfigPrefix, properties);
@@ -801,14 +779,6 @@ public class NetworkConfiguration {
         properties.put(prefix + ".pingAccessPoint", wifiConfig.pingAccessPoint());
 
         properties.put(prefix + ".ignoreSSID", wifiConfig.ignoreSSID());
-
-        /*
-         * Iterator<Entry<String, Object>> it = properties.entrySet().iterator();
-         * while(it.hasNext()) {
-         * Entry<String, Object> entry = it.next();
-         * System.out.println(entry.getKey() + " = " + entry.getValue());
-         * }
-         */
     }
 
     private static WifiConfig getWifiConfig(String netIfConfigPrefix, WifiMode mode, Map<String, Object> properties)
@@ -931,14 +901,6 @@ public class NetworkConfiguration {
             s_logger.trace("bgscan is {}", bgscan);
             wifiConfig.setBgscan(new WifiBgscan(bgscan));
 
-            /*
-             * key = prefix + ".pairwiseCiphers";
-             * String pairwiseCiphers = (String)properties.get(key);
-             * if (pairwiseCiphers != null) {
-             * wifiConfig.setPairwiseCiphers(WifiCiphers.valueOf(pairwiseCiphers));
-             * }
-             */
-
             key = prefix + ".groupCiphers";
             String groupCiphers = (String) properties.get(key);
             if (groupCiphers != null) {
@@ -999,7 +961,7 @@ public class NetworkConfiguration {
         properties.put(prefix + "headerCompression", modemConfig.getHeaderCompression());
         properties.put(prefix + "ipAddress",
                 modemConfig.getIpAddress() != null ? modemConfig.getIpAddress().toString() : "");
-        properties.put(prefix + "password", modemConfig.getPassword());
+        properties.put(prefix + "password", modemConfig.getPasswordAsPassword());
         properties.put(prefix + "pdpType", modemConfig.getPdpType() != null ? modemConfig.getPdpType().toString() : "");
         properties.put(prefix + "pppNum", modemConfig.getPppNumber());
         properties.put(prefix + "persist", modemConfig.isPersist());
@@ -1010,9 +972,7 @@ public class NetworkConfiguration {
         properties.put(prefix + "lcpEchoInterval", modemConfig.getLcpEchoInterval());
         properties.put(prefix + "lcpEchoFailure", modemConfig.getLcpEchoFailure());
         properties.put(prefix + "profileId", modemConfig.getProfileID());
-        // properties.put(prefix+"provider", modemConfig.getProvider());
         properties.put(prefix + "username", modemConfig.getUsername());
-        ;
         properties.put(prefix + "enabled", modemConfig.isEnabled());
         properties.put(prefix + "gpsEnabled", modemConfig.isGpsEnabled());
     }
@@ -1086,7 +1046,7 @@ public class NetworkConfiguration {
         modemConfig.setIpAddress(ipAddress);
 
         // password
-        String password = (String) properties.get(prefix + "password");
+        Password password = (Password) properties.get(prefix + "password");
         s_logger.trace("Password is {}", password);
         modemConfig.setPassword(password);
 
@@ -1419,7 +1379,7 @@ public class NetworkConfiguration {
 
     private void populateNetInterfaceConfiguration(
             AbstractNetInterface<? extends NetInterfaceAddressConfig> netInterfaceConfig, Map<String, Object> props)
-            throws UnknownHostException, KuraException {
+                    throws UnknownHostException, KuraException {
         String interfaceName = netInterfaceConfig.getName();
 
         StringBuffer keyBuffer = new StringBuffer();
@@ -2026,13 +1986,15 @@ public class NetworkConfiguration {
 
                     dnServers.add(routerAddress);
 
-                    DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(interfaceName, dhcpServerEnabled, defaultLeaseTime, maximumLeaseTime, passDns);
-					DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, subnetMask, prefix,
-							routerAddress, rangeStart, rangeEnd, dnServers);
+                    DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(interfaceName, dhcpServerEnabled, defaultLeaseTime,
+                            maximumLeaseTime, passDns);
+                    DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, subnetMask, prefix, routerAddress,
+                            rangeStart, rangeEnd, dnServers);
                     try {
-						netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
+                        netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
                     } catch (KuraException e) {
-                    	s_logger.warn("This invalid DhcpServerCfgIP4 configuration is ignored - {}, {}", dhcpServerCfg, dhcpServerCfgIP4);
+                        s_logger.warn("This invalid DhcpServerCfgIP4 configuration is ignored - {}, {}", dhcpServerCfg,
+                                dhcpServerCfgIP4);
                     }
                 } else {
                     s_logger.trace("Not including DhcpServerConfig - router: " + routerAddress + ", range start: "

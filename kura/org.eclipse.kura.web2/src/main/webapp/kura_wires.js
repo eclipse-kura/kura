@@ -245,11 +245,16 @@ var kuraWires = (function() {
 			var factoryPid = cellView.model.attributes.factoryPid;
 			selectedElement = cellView.model;
 			if (oldCellView != null) {
+				jsniUpdateSelection("", "");
 				oldCellView.unhighlight();
 				oldCellView = null;
 			}
-			if (typeof cellView !== 'undefined'
-					&& typeof cellView.sourceBBox === 'undefined') {
+		});
+
+		paper.on('cell:pointerup', function(cellView, evt, x, y) {
+			var pid = cellView.model.attributes.label;
+			var factoryPid = cellView.model.attributes.factoryPid;
+			if (typeof cellView.sourceBBox === 'undefined') {
 				if (!selectionRefreshPending) {
 					selectionRefreshPending = true;
 					jsniUpdateSelection(pid, factoryPid);
@@ -259,7 +264,7 @@ var kuraWires = (function() {
 				oldCellView = cellView;
 			}
 		});
-
+		
 		paper.on('blank:pointerdown', function(cellView, evt, x, y) {
 			jsniUpdateSelection("", "");
 			selectedElement = "";

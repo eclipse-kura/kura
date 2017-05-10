@@ -27,6 +27,7 @@ import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.DropSupport;
 import org.eclipse.kura.web.client.util.DropSupport.DropEvent;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtWiresConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -189,8 +190,6 @@ public class WiresPanelUi extends Composite {
     private static String wires;
     private static GwtConfigComponent currentSelection = null;
     private static PropertiesUi propertiesUi;
-
-    private static String driverPidProp = "driver.pid";
 
     private static boolean panelLoaded = false;
 
@@ -551,22 +550,10 @@ public class WiresPanelUi extends Composite {
     }
 
     private static void fillProperties(final GwtConfigComponent config, final String pid) {
-        gwtWireService.getDriverPidProp(new AsyncCallback<String>() {
-
-            @Override
-            public void onFailure(final Throwable caught) {
-                FailureHandler.handle(caught);
-            }
-
-            @Override
-            public void onSuccess(String result) {
-                driverPidProp = result;
-                if (config != null && config.getFactoryId() != null && config.getFactoryId().contains(WIRE_ASSET)) {
-                    config.getProperties().put(driverPidProp, getDriver(pid));
-                }
-                render(config, pid);
-            }
-        });
+        if (config != null && config.getFactoryId() != null && config.getFactoryId().contains(WIRE_ASSET)) {
+            config.getProperties().put(AssetConstants.ASSET_DRIVER_PROP.value(), getDriver(pid));
+        }
+        render(config, pid);
     }
 
     private static List<String> getCommonElements(final List<String> firstList, final List<String> secondList) {
@@ -716,6 +703,7 @@ public class WiresPanelUi extends Composite {
             selectionCompleted();
         } else {
             // Retrieve GwtComponentConfiguration to use for manipulating the properties.
+            EntryClassUi.showWaitModal();
             gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                 @Override
@@ -730,7 +718,7 @@ public class WiresPanelUi extends Composite {
                     if (WIRE_ASSET_PID.equalsIgnoreCase(factoryPid)) {
                         temporaryMap = new HashMap<>();
                         temporaryMap.put(ASSET_DESCRIPTION_PROP, MSGS.wiresSampleAssetName());
-                        temporaryMap.put(driverPidProp, getDriver(pid));
+                        temporaryMap.put(AssetConstants.ASSET_DRIVER_PROP.value(), getDriver(pid));
                     }
                     gwtComponentService.findWireComponentConfigurationFromPid(token, pid, factoryPid, temporaryMap,
                             new AsyncCallback<GwtConfigComponent>() {
@@ -743,15 +731,12 @@ public class WiresPanelUi extends Composite {
 
                                 @Override
                                 public void onSuccess(final GwtConfigComponent result) {
+                                    EntryClassUi.hideWaitModal();
                                     // Component configuration retrieved
                                     // from the Configuration Service
                                     fillProperties(result, pid);
                                     configs.put(pid, result);
-                                    if (propertiesUis.containsKey(pid)) {
-                                        propertiesUis.remove(pid);
-                                    }
                                     selectionCompleted();
-                                    EntryClassUi.hideWaitModal();
                                 }
                             });
 
@@ -764,6 +749,7 @@ public class WiresPanelUi extends Composite {
         if (configs.containsKey(pid)) {
             configs.remove(pid);
         }
+        EntryClassUi.showWaitModal();
         gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override

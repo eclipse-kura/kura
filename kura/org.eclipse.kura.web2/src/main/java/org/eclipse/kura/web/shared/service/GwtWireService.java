@@ -125,11 +125,4 @@ public interface GwtWireService extends RemoteService {
      */
     public void updateWireConfiguration(GwtXSRFToken xsrfToken, String newJsonConfiguration,
             Map<String, GwtConfigComponent> configurations) throws GwtKuraException;
-
-    /**
-     * Returns the Driver Pid property as specified in {@link org.eclipse.kura.web.shared.AssetConstants}
-     * 
-     * @return String representing the {@link org.eclipse.kura.web.shared.AssetConstants.ASSET_DRIVER_PROP}
-     */
-    public String getDriverPidProp();
 }

@@ -26,7 +26,6 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -985,6 +984,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // Write snapshot
         writeSnapshot(sid, conf);
 
+        this.pendingDeletePids.clear();
+
         // Garbage Collector for number of Snapshots Saved
         garbageCollectionOldSnapshots();
         return sid;
@@ -1592,12 +1593,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
 
         // remove configurations being deleted
-        Iterator<String> it = this.pendingDeletePids.iterator();
-        while (it.hasNext()) {
-            String deletePid = it.next();
+        for (String deletedPid : this.pendingDeletePids) {
             for (ComponentConfiguration config : result) {
-                if (config.getPid().equals(deletePid)) {
-                    it.remove();
+                if (config.getPid().equals(deletedPid)) {
                     result.remove(config);
                     break;
                 }
@@ -1605,6 +1603,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
 
         return result;
+
     }
 
     private Tocd getOCDForPid(String pid) {

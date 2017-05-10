@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,6 +12,7 @@
 package org.eclipse.kura.web.client;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -52,8 +53,8 @@ public class denali implements EntryPoint {
 
     private final EntryClassUi binder = GWT.create(EntryClassUi.class);
 
-    private boolean isDevelopMode = false;
-    private boolean m_connected;
+    private boolean isDevelopMode;
+    private boolean connected;
 
     /**
      * Note, we defer all application initialization code to
@@ -106,14 +107,14 @@ public class denali implements EntryPoint {
                             if (pairs != null) {
                                 for (GwtGroupedNVPair pair : pairs) {
                                     String name = pair.getName();
-                                    if (name != null && name.equals("kura.have.net.admin")) {
+                                    if ("kura.have.net.admin".equals(name)) {
                                         Boolean value = Boolean.valueOf(pair.getValue());
                                         gwtSession.setNetAdminAvailable(value);
                                     }
-                                    if (name != null && name.equals("kura.version")) {
+                                    if ("kura.version".equals(name)) {
                                         gwtSession.setKuraVersion(pair.getValue());
                                     }
-                                    if (name != null && name.equals("kura.os.version")) {
+                                    if ("kura.os.version".equals(name)) {
                                         gwtSession.setOsVersion(pair.getValue());
                                     }
                                 }
@@ -140,45 +141,34 @@ public class denali implements EntryPoint {
 
                                     @Override
                                     public void onSuccess(ArrayList<GwtGroupedNVPair> pairs) {
-                                        denali.this.m_connected = false;
-                                        int connectionNameIndex = 0;
-                                        for (GwtGroupedNVPair result : pairs) {
-                                            if ("Connection Name".equals(result.getName())
-                                                    && "CloudService".equals(result.getValue())) {
-                                                GwtGroupedNVPair connectionStatus = pairs.get(connectionNameIndex + 1); // done
- // based
- // on
- // the
- // idea
- // that
- // in
- // the
- // pairs
- // data
- // connection
- // name
- // is
- // before
- // connection
- // status
-                                                if ("Connection Status".equals(connectionStatus.getName())
+                                        denali.this.connected = false;
+                                        Iterator<GwtGroupedNVPair> it = pairs.iterator();
+                                        while (it.hasNext()) {
+                                            GwtGroupedNVPair connectionName = it.next();
+                                            if ("Connection Name".equals(connectionName.getName())
+                                                    && connectionName.getValue().endsWith("CloudService")
+                                                    && it.hasNext()) {
+                                                // based on the assumption that in the ArrayList, "Service Status"
+                                                // immediately follows "Connection Name"
+                                                GwtGroupedNVPair connectionStatus = it.next();
+
+                                                if ("Service Status".equals(connectionStatus.getName())
                                                         && "CONNECTED".equals(connectionStatus.getValue())) {
-                                                    denali.this.m_connected = true;
+                                                    denali.this.connected = true;
                                                     break;
                                                 }
                                             }
-                                            connectionNameIndex++;
                                         }
+
                                         denali.this.gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
 
                                             @Override
                                             public void onFailure(Throwable caught) {
                                                 FailureHandler.handle(caught, denali.class.getSimpleName());
                                                 denali.this.binder.setFooter(gwtSession);
-                                                denali.this.binder.initSystemPanel(gwtSession, denali.this.m_connected);
+                                                denali.this.binder.initSystemPanel(gwtSession, denali.this.connected);
                                                 denali.this.binder.setSession(gwtSession);
                                                 denali.this.binder.fetchAvailableServices();
-                                                // binder.setDirty(false);
                                             }
 
                                             @Override
@@ -188,10 +178,9 @@ public class denali implements EntryPoint {
                                                     gwtSession.setDevelopMode(true);
                                                 }
                                                 denali.this.binder.setFooter(gwtSession);
-                                                denali.this.binder.initSystemPanel(gwtSession, denali.this.m_connected);
+                                                denali.this.binder.initSystemPanel(gwtSession, denali.this.connected);
                                                 denali.this.binder.setSession(gwtSession);
                                                 denali.this.binder.fetchAvailableServices();
-                                                // binder.setDirty(false);
                                             }
                                         });
                                     }
@@ -204,7 +193,7 @@ public class denali implements EntryPoint {
                     public void onFailure(Throwable caught) {
                         FailureHandler.handle(caught, denali.class.getSimpleName());
                         denali.this.binder.setFooter(new GwtSession());
-                        denali.this.binder.initSystemPanel(new GwtSession(), denali.this.m_connected);
+                        denali.this.binder.initSystemPanel(new GwtSession(), denali.this.connected);
                         denali.this.binder.setSession(new GwtSession());
                     }
                 });

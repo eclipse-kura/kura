@@ -426,6 +426,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
             registerComponentConfiguration(pid, servicePid, factoryPid);
 
+            this.pendingDeletePids.remove(pid);
+
             if (takeSnapshot) {
                 snapshot();
             }

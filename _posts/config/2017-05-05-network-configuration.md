@@ -31,7 +31,7 @@ The **TCP/IP** tab contains the following configuration parameters:
 
 - **Gateway** - specifies the default gateway for the unit. (Required field if the interface is designated as WAN and manually configured.)
 
-- **DNS Servers** - provides a list of DNS servers, if the interface is designated as WAN and is manually configured.  
+- **DNS Servers** - provides a list of space separated DNS servers, if the interface is designated as WAN and is manually configured.  
 
 - **Search Domains** - not implemented.
 
@@ -56,9 +56,9 @@ The **DHCP & NAT** tab contains the following configuration parameters:
 
 - **DHCP Subnet Mask** - defines the subnet mask that is assigned to a client.
 
-- **DHCP Default Lease Time** - sets the default time (in minutes) that the client retains the provided IP address.
+- **DHCP Default Lease Time** - sets the default time (in seconds) that the client retains the provided IP address.
 
-- **DHCP Max Lease Time** - sets the maximum time (in minutes) that the client retains the provided IP address.
+- **DHCP Max Lease Time** - sets the maximum time (in seconds) that the client retains the provided IP address.
 
 - **Pass DNS Servers through DHCP** - enables DNS Proxy (i.e., passing DNS servers through DHCP).
 

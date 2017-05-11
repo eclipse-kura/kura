@@ -30,9 +30,9 @@ These sections provide a summary of the network interfaces configurations as eth
 
 This section provides the GPS status and latest known position (if applicable) including the following details:
 
-- **Longitude** - longitude as reported by the _PositionService_ in radians.
+- **Longitude** - longitude as reported by the _PositionService_ in degrees.
 
-- **Latitude** - latitude as reported by the _PositionService_ in radians.
+- **Latitude** - latitude as reported by the _PositionService_ in degrees.
 
 - **Altitude** - altitude as reported by the _PositionService_ in meters.
 

@@ -32,19 +32,19 @@ To open a port using the Administration Console, select the **Firewall** option 
 
 The **New Open Port Entry** form contains the following configuration parameters:
 
-- **Port** - specifies the port to be opened. (Required field.)
+- **Port or Port Range** - specifies the port or port range (<high>:<low>) to be opened. (Required field.)
 
 - **Protocol** - defines the protocol (tcp or udp). (Required field.)
 
-- **Permitted Network** - only allows packets originated by a host on this network.
+- **Permitted Network** - only allows packets originated by a host on this network in CIDR notation (e.g. 172.16.1.0/24)
 
 - **Permitted Interface Name** - only allows packets arrived on this interface.
 
 - **Unpermitted Interface Name** - blocks packets arrived on this interface.
 
-- **Permitted MAC Address** - only allows packets originated by this host.
+- **Permitted MAC Address** - only allows packets originated by this host in the format XX:XX:XX:XX:XX:XX.
 
-- **Source Port Range** - only allows packets with source port in the defined range.
+- **Source Port Range** - only allows packets with source port in the defined range (<high>:<low>).
 
 Complete the **New Open Port Entry** form and click the **Submit** button when finished. Once the form is submitted, a new port entry will appear. Click the **Apply** button for the change to take effect.
 

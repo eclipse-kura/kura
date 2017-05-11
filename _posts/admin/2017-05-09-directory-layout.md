@@ -45,7 +45,7 @@ ESF regularly updates two log files in the **/var/log** directory:
 /opt/eclpse/kura/kura/log4j.properties
 ```
 
-The default logger level in this file is set to INFO. This level may be modified for the whole application or for a specific bundle as shown in the following example:
+The default logger level in this file is set to INFO. This level may be modified for the whole application or for a specific package as shown in the following example:
 
 ```
 log4j.logger.org.eclipse.kura=INFO

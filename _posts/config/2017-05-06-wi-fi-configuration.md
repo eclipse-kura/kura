@@ -178,14 +178,14 @@ wpa_gmk_rekey=86400
 ignore_broadcast_ssid=0
 ```
 
-When the Wi-Fi configuration for the _Access Point_ mode is submitted, Kura generates the /etc/wpa_supplicnt.conf file and launches the wpa_supplicant program as shown below.
+When the Wi-Fi configuration for the _Access Point_ mode is submitted, Kura generates the /etc/wpa_supplicant-wlan0.conf file and launches the wpa_supplicant program as shown below.
 
 ```
-wpa_supplicant:B:D nl80211:i wlan0:c /etc/wpa_supplicant.conf
+wpa_supplicant -B -D nl80211 -i wlan0 -c /etc/wpa_supplicant-wlan0.conf
 ```
 
 ```
-# /etc/wpa_supplicant.conf
+# /etc/wpa_supplicant-wlan0.conf
 # allow frontend (e.g., wpa_cli) to be used by all users in 'wheel' group
 ctrl_interface=/var/run/wpa_supplicant
 ctrl_interface_group=wheel

@@ -112,6 +112,9 @@ Bug Fixes :
     * #244:  [Web UI] Alphabetical ordering of metatype labels option in ListBoxes
 
   * Merged no issue-related Pull Requests:
+    * #1370: Fixed connection status icon at page load.
+    * #1365: Fixed deleted factory components not always being removed from snapshot (see also #1371)
+    * #1364: Fixed factory components not being created from uploaded snapshot
     * #1352: Minor Wires fixes
     * #1350: Set security level to low
     * #1349: Changes to the emulator launch profiles used when cloning directly the repo

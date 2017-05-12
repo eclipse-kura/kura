@@ -34,9 +34,16 @@ baseurl : /kura
 
 # Default categories (in order) to appear in the navigation
 sections: [
-    ['doc', 'Documentation'],
+    ['intro', 'Introduction'],
+    ['config', 'Configuration'],
+    ['admin', 'Administration'],
+    ['cloud', 'Cloud Platforms connection'],
+    ['camel', 'Apache Camel integration'],
+    ['wires', 'Kura Wires'],
+    ['dev', 'Development'],
     ['tut', 'Tutorial'],
     ['ref', 'Reference'],
     ['post', 'Posts'],
-    ['qa', 'Quality Assurance']
+    ['qa', 'Quality Assurance'],
+    ['doc', 'Documentation']
 ]

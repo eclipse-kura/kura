@@ -77,8 +77,7 @@ from data topics that are used in unsolicited reports and marks the
 associated messages as transient (not to be stored in the historical
 data archive, if present).
 
-{% include note.html message="While <b>$EDC</b> will be used for reference for this document, this value is
-configurable through the CloudService topic.control-prefix variable." %}
+{% include note.html message="While <b>$EDC</b> will be used for reference for this document, this value is configurable through the CloudService topic.control-prefix variable." %}
 
 A requester (i.e., the remote server) initiates a request/response
 conversation through the following events:
@@ -102,13 +101,7 @@ REPLY topic structured as:
 
 **$EDC/account_name/requester.client.id/app_id/REPLY/request.id**
 
-{% include note.html message="While this recommendation does not mandate the format of the
-message payload, which is application-specific, it is important that the
-<b>request.id</b> and <b>requester.client.id</b> fields are included in the
-payload. Eclipse Kura leverages an MQTT payload encoded through Google
-Protocol Buffers. Eclipse Kura includes the request.id and the
-requester.client.id as two named metrics of the Request messages. The
-Eclipse Kura payload definition can be found <a href='https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.core.cloud/src/main/protobuf/kurapayload.proto'>here</a>." %}
+{% include note.html message="While this recommendation does not mandate the format of the message payload, which is application-specific, it is important that the <b>request.id</b> and <b>requester.client.id</b> fields are included in the payload. Eclipse Kura leverages an MQTT payload encoded through Google Protocol Buffers. Eclipse Kura includes the request.id and the requester.client.id as two named metrics of the Request messages. The Eclipse Kura payload definition can be found <a href='https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.core.cloud/src/main/protobuf/kurapayload.proto'>here</a>." %}
 
 Once the response for a given request is received, the requester
 unsubscribes from the REPLY topic.
@@ -149,9 +142,7 @@ following:
     *  **response.exception.message** (value is null or an exception stack
     trace)
 
-{% include note.html message="In addition to the mandatory properties, the response payload may
-also have custom properties whose description is beyond the scope of
-this document." %}
+{% include note.html message="In addition to the mandatory properties, the response payload may also have custom properties whose description is beyond the scope of this document." %}
 
 It is recommended that the requester server employs a timeout to control the length of time that it waits for a response from
 the gateway device. If a response is not received within the timeout
@@ -247,8 +238,7 @@ IOT applications have the ability to send unsolicited messages to a
 remote server using events to periodically report data readings from
 their resources, or to report special events and observed conditions.
 
-{% include note.html message="It is recommended to *not* use MQTT control topics for unsolicited
-events, and subsequently, to avoid the $EDC topic prefix." %}
+{% include note.html message="It is recommended to *not* use MQTT control topics for unsolicited events, and subsequently, to avoid the $EDC topic prefix." %}
 
 Event MQTT topics generally follow the pattern shown below to report
 unsolicited data observations for a given resource:
@@ -279,8 +269,7 @@ The following sections describe the MQTT topic namespaces and the
 application payloads used to achieve the remote management of an OSGi
 container via MQTT.
 
-{% include note.html message="For the scope of this document, some aspects concerning the
-encoding and compressing of the payload are not included." %}
+{% include note.html message="For the scope of this document, some aspects concerning the encoding and compressing of the payload are not included." %}
 
 The applicability of the remote management solution, as inspired by the
 OSGi component model, can be extended beyond OSGi as the contract with

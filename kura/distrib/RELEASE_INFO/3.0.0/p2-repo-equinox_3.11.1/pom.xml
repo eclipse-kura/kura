@@ -1,0 +1,79 @@
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.eclipse.kura</groupId>
+		<artifactId>target-platform-previous</artifactId>
+		<version>3.0.0</version>
+	</parent>
+
+	<artifactId>p2-repo-equinox_3.11.1</artifactId>
+	<packaging>pom</packaging>
+    
+    <properties>
+        <equinox.download.url>https://s3-us-west-2.amazonaws.com/kura-repo/R-Neon.1-201609071200/equinox-SDK-Neon.1.zip</equinox.download.url>
+    </properties>
+
+	<build>
+		<plugins>
+			<plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>properties-maven-plugin</artifactId>
+            <version>1.0-alpha-2</version>
+            <executions>
+               <execution>
+                  <phase>initialize</phase>
+                  <goals>
+                     <goal>read-project-properties</goal>
+                  </goals>
+                  <configuration>
+                     <files>
+                        <file>${basedir}/../config/kura.target-platform.build.properties</file>
+                     </files>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-bundles-for-publishing</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.dependencymanager</artifactId>
+                                    <version>${org.apache.felix.dependencymanager.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.deploymentadmin</artifactId>
+                                    <version>${org.apache.felix.deploymentadmin.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.knowhowlab</groupId>
+                                    <artifactId>org.knowhowlab.osgi.monitoradmin</artifactId>
+                                    <version>${org.knowhowlab.osgi.monitoradmin.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>osgi</groupId>
+                                    <artifactId>osgi.cmpn</artifactId>
+                                    <version>${osgi.cmpn.version}</version>
+                                </artifactItem>
+							</artifactItems><stripVersion>true</stripVersion>
+							<stripVersion>true</stripVersion>
+							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

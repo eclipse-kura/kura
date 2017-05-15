@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>com.gwt.user</artifactId>
-	<version>1.0.100</version>
+	<version>1.0.200-SNAPSHOT</version>
 
 	<packaging>bundle</packaging>
 

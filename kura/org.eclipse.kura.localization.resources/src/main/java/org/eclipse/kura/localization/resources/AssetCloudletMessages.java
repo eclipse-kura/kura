@@ -55,9 +55,6 @@ public interface AssetCloudletMessages {
     @En("Bundle context cannot be null")
     public String bundleContextNonNull();
 
-    @En("name")
-    public String channel();
-
     @En("Channel Name cannot be null")
     public String channelNameNonNull();
 
@@ -70,20 +67,11 @@ public interface AssetCloudletMessages {
     @En("List of channel Names cannot be null")
     public String channelsNonNull();
 
-    @En("Cloudlet GET Request received on the Asset Cloudlet")
+    @En("Cloudlet GET Request received on the Asset Cloudlet...")
     public String cloudGETReqReceived();
 
-    @En("Cloudlet GET Request receiving on the Asset Cloudlet...")
-    public String cloudGETReqReceiving();
-
-    @En("Cloudlet PUT Request received on the Asset Cloudlet")
-    public String cloudPUTReqReceived();
-
-    @En("Cloudlet PUT Request receiving on the Asset Cloudlet...")
-    public String cloudPUTReqReceiving();
-
-    @En("Connection to the Modbus Device failed")
-    public String connectionException();
+    @En("Cloudlet EXEC Request received on the Asset Cloudlet...")
+    public String cloudEXECReqReceived();
 
     @En("Deactivating Asset Cloudlet...")
     public String deactivating();
@@ -91,28 +79,22 @@ public interface AssetCloudletMessages {
     @En("Deactivating Asset Cloudlet...Done")
     public String deactivatingDone();
 
-    @En("error")
-    public String errorMessage();
-
-    @En("flag")
-    public String flag();
-
     @En("Response Payload cannot be null")
     public String respPayloadNonNull();
 
-    @En("timestamp")
-    public String timestamp();
-
     @En("User Provided Type cannot be null")
     public String typeNonNull();
-
-    @En("value")
-    public String value();
 
     @En("User Provided Value cannot be null")
     public String valueNonNull();
 
     @En("The provided value type is erroneous")
     public String valueTypeConversionError();
+
+    @En("Unknown error")
+    public String unknownError();
+
+    @En("Asset not found")
+    public String assetNotFound();
 
 }

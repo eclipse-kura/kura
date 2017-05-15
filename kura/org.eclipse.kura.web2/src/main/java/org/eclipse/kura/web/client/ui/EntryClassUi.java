@@ -281,18 +281,18 @@ public class EntryClassUi extends Composite {
         this.currentSession = GwtSession;
     }
 
-    public void setFooter(GwtSession GwtSession) {
+    public void setFooter(GwtSession gwtSession) {
 
-        this.footerRight.setText(GwtSession.getKuraVersion());
+        this.footerRight.setText(gwtSession.getKuraVersion());
 
-        if (GwtSession.isDevelopMode()) {
+        if (gwtSession.isDevelopMode()) {
             this.footerCenter.setText(MSGS.developmentMode());
         }
     }
 
-    public void initSystemPanel(GwtSession GwtSession, boolean connectionStatus) {
+    public void initSystemPanel(GwtSession gwtSession, boolean connectionStatus) {
         final EntryClassUi instanceReference = this;
-        if (!GwtSession.isNetAdminAvailable()) {
+        if (!gwtSession.isNetAdminAvailable()) {
             this.network.setVisible(false);
             this.firewall.setVisible(false);
         }

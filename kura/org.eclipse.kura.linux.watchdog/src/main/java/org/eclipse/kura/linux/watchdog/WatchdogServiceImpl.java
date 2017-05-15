@@ -64,7 +64,9 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     protected void deactivate() {
         cancelPollTask();
         shutdownPollExecutor();
-        refreshWatchdog();
+        if (this.configEnabled) {
+            refreshWatchdog();
+        }
     }
 
     public void updated(Map<String, Object> properties) {

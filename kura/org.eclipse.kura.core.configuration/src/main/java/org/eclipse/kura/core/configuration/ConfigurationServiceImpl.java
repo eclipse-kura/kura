@@ -26,7 +26,6 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -427,6 +426,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
             registerComponentConfiguration(pid, servicePid, factoryPid);
 
+            this.pendingDeletePids.remove(pid);
+
             if (takeSnapshot) {
                 snapshot();
             }
@@ -739,11 +740,30 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                     try {
                         updateConfigurationInternal(config.getPid(), config.getConfigurationProperties(),
                                 snapshotOnConfirmation);
-                        break;
                     } catch (KuraException e) {
                         logger.warn("Error during updateConfigurations for component " + config.getPid(), e);
                         causes.add(e);
                     }
+                    break;
+                }
+            }
+        }
+
+        // this step creates any not yet existing factory configuration present in configsToUpdate
+        for (ComponentConfiguration config : configsToUpdate) {
+            String factoryPid = null;
+            final Map<String, Object> properties = config.getConfigurationProperties();
+            if (properties != null) {
+                factoryPid = (String) properties.get(ConfigurationAdmin.SERVICE_FACTORYPID);
+            }
+            if (factoryPid != null && !this.allActivatedPids.contains(config.getPid())) {
+                String pid = config.getPid();
+                logger.info("Creating configuration with pid: {} and factory pid: {}", pid, factoryPid);
+                try {
+                    createFactoryConfiguration(factoryPid, pid, properties, false);
+                    configs.add(config);
+                } catch (KuraException e) {
+                    logger.warn("Error creating configuration with pid: {} and factory pid: {}", pid, factoryPid, e);
                 }
             }
         }
@@ -966,6 +986,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // Write snapshot
         writeSnapshot(sid, conf);
 
+        this.pendingDeletePids.clear();
+
         // Garbage Collector for number of Snapshots Saved
         garbageCollectionOldSnapshots();
         return sid;
@@ -1127,11 +1149,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                                         }
                                     }
                                 } catch (KuraException e) {
-                                    logger.error(
-                                            "Error getting Configuration for component: " + pid + ". Ignoring it.", e);
+                                    logger.error("Error getting Configuration for component: {}. Ignoring it.", pid, e);
                                 }
                             } else {
-                                logger.error("Component " + obj + " is not a SelfConfiguringComponent. Ignoring it.");
+                                logger.error("Component {} is not a SelfConfiguringComponent. Ignoring it.", obj);
                             }
                         } finally {
                             this.ctx.getBundleContext().ungetService(ref);
@@ -1140,7 +1161,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 }
             }
         } catch (InvalidSyntaxException e) {
-            logger.error("Error getting Configuration for component: " + pid + ". Ignoring it.", e);
+            logger.error("Error getting Configuration for component: {}. Ignoring it.", pid, e);
         }
 
         return cc;
@@ -1227,7 +1248,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                         try {
                             createFactoryConfiguration(factoryPid, pid, props, false);
                         } catch (KuraException e) {
-                            logger.warn("Error creating configuration with pid: " + pid + " and factory pid: {}",
+                            logger.warn("Error creating configuration with pid: {} and factory pid: {}", pid,
                                     factoryPid, e);
                         }
                     } else {
@@ -1246,8 +1267,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                             cfg.update(CollectionsUtil.mapToDictionary(newProperties));
 
                         } catch (IOException e) {
-                            logger.warn("Error seeding initial properties to ConfigAdmin for pid: {}",
-                                    config.getPid(), e);
+                            logger.warn("Error seeding initial properties to ConfigAdmin for pid: {}", config.getPid(),
+                                    e);
                         }
                     }
                 }
@@ -1574,12 +1595,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
 
         // remove configurations being deleted
-        Iterator<String> it = this.pendingDeletePids.iterator();
-        while (it.hasNext()) {
-            String deletePid = it.next();
+        for (String deletedPid : this.pendingDeletePids) {
             for (ComponentConfiguration config : result) {
-                if (config.getPid().equals(deletePid)) {
-                    it.remove();
+                if (config.getPid().equals(deletedPid)) {
                     result.remove(config);
                     break;
                 }
@@ -1587,6 +1605,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
 
         return result;
+
     }
 
     private Tocd getOCDForPid(String pid) {

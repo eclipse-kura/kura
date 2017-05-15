@@ -89,6 +89,10 @@ public class DbWireRecordStoreTest {
         WireRecord record = new WireRecord(recordProps);
         wireRecords.add(record);
         WireEnvelope wireEvelope = new WireEnvelope(emitterPid, wireRecords);
+        
+        ResultSet resultSet = connection.prepareStatement("SELECT count(*) FROM " + tableName).executeQuery();
+        resultSet.next();
+        int startCount = resultSet.getInt(1);
 
         // store one record
         store.onWireReceive(wireEvelope);
@@ -102,10 +106,10 @@ public class DbWireRecordStoreTest {
         assertTrue("Only one table was expected", tables.isLast());
         assertEquals(tableName, dbTableName);
 
-        ResultSet resultSet = connection.prepareStatement("SELECT count(*) FROM " + tableName).executeQuery();
+        resultSet = connection.prepareStatement("SELECT count(*) FROM " + tableName).executeQuery();
         resultSet.next();
         int count = resultSet.getInt(1);
-        assertEquals("Only 1 record was expected", 1, count);
+        assertEquals("Unexpected number of records in the database.", startCount + 1, count);
 
         resultSet = connection.prepareStatement("SELECT * FROM " + tableName).executeQuery();
         resultSet.next();

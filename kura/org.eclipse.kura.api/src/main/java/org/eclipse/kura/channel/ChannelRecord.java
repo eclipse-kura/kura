@@ -162,6 +162,7 @@ public class ChannelRecord {
         requireNonNull(status, "Status cannot be null");
 
         ChannelRecord result = new ChannelRecord();
+        result.name = channelName;
         result.channelStatus = status;
 
         return result;

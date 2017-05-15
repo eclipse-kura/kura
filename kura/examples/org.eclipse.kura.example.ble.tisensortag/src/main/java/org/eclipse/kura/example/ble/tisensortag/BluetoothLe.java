@@ -430,8 +430,8 @@ public class BluetoothLe implements ConfigurableComponent, CloudClientListener, 
                 logger.info("Connecting to TiSensorTag...");
                 this.connected = myTiSensorTag.connect(this.iname);
                 if (this.connected) {
-                    logger.info("Set security level to high.");
-                    myTiSensorTag.setSecurityLevel(BluetoothGattSecurityLevel.HIGH);
+                    logger.info("Set security level to low.");
+                    myTiSensorTag.setSecurityLevel(BluetoothGattSecurityLevel.LOW);
                     logger.info("Security Level : " + myTiSensorTag.getSecurityLevel().toString());
                 }
             } else {

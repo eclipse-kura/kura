@@ -1,3 +1,267 @@
+Eclipse Kura - 3.0.0
+-------------------------------------------------------------------------
+Added Features :
+  * Eclipse Kura Wires
+    https://github.com/eclipse/kura/wiki/Kura-Wires:-introduction-and-references
+  * Eclipse Kura Drivers and Assets APIs and implementations
+  * Contributed Eclipse Kura OPC UA driver based on Eclipse Milo
+  * Improvements to local Web Console's usability and appearance
+  * Added support for MQTT over Websockets
+  * Added support for AWS IoT and Azure IoT platforms
+  * Simple JSON is now a supported encoding option in Eclipse Kura Cloud Service
+  * Introduced official support to Oomph installer
+  * Added support for Fedora 25 ARM based systems
+
+Compatibility Changes:
+  * Switched to Equinox 3.11.1
+  * Added support for Java 8. It is now the minimal JVM requirement to run Eclipse Kura
+  * Dropped support for all the native libraries but ARMv6 HF and x86_64 architectures
+  * Dropped support for Fedberry 24 systems
+  * The configuration service will only track so called "Relevant services" so the ones that, in their component
+    description files, will provide the ConfigurableComponent interface. The old behavior can be restored by setting the
+    "org.eclipse.kura.core.configuration.legacyServiceTracking" property to true.
+
+Bug Fixes :
+  * Fixed github issues:
+    * #1335: [Kura 3.0.0 QA] User workspace plugins BREE
+    * #1329: Need to respect /etc/network/interfaces command options
+    * #1295: [Wires] Wires DataType lacks the KuraPayload float type
+    * #1294: [Wires] Remove ByteValue and ShortValue as they do not map to KuraPayload metric types
+    * #1282: Apache FileUpload Upgrade
+    * #1277: PR #1126 breaks changes to wire graph that were not saved
+    * #1269: [Wires] Column names in DB Store
+    * #1246: [Wires] MQTT namespace
+    * #1241: Changes to the heater publisher
+    * #1240: Add JSON/Protobuf encoding option in CloudService
+    * #1239: Change wire publisher to remove the JSON/Kura payload serialization
+    * #1222: Commit aa2913dc1031e783d09779dae503018da55889f6 breaks asset persistent storage
+    * #1220: [Driver] DriverRecord and AssetRecord. Clean code vs efficiency
+    * #1216: [Wires] Sub-second Timer
+    * #1212: [Wires] DB WireComponent improvements
+    * #1211: [Wires] Implement regex filter WireComponent
+    * #1210: [Wires] Implement FIFO WireComponent
+    * #1208: [Asset] Driver read method should return void
+    * #1206: [Driver] Driver API optimizations
+    * #1203: [Asset] Document ASSET-V1 topic namespace
+    * #1202: [Asset] Drop channel ID and use unique name
+    * #1176: Kura Wires: Inconsistent design of DbServiceHelper class
+    * #1166: Wrong order of operations in WireAsset
+    * #1160: ClockService should ignore updates with long 'getDelay'
+    * #1139: Factory Components Configurations not deleted from the snapshot
+    * #1131: ConfigurableComponentTracker calls bundleContext.getService(ref) when it shouldn't
+    * #1125: [Kura 3.0.0 M1 QA] Wires: Unexpected component configuration is shown
+    * #1123: [Kura 3.0.0 M1 QA] Bugs in camel example publisher
+    * #1121: [Kura 3.0.0 M1 QA] Wires: cannot add component after deleting one
+    * #1119: [Kura 3.0.0 M1 QA] Wires DB Store partial cleanup
+    * #1118: [Kura 3.0.0 M1 QA] Wires: dirty Component instances warning
+    * #1116: [Kura 3.0.0 M1 QA] Wires: wire components selection
+    * #1113: [Kura 3.0.0 M1 QA] Kura Wires doesn't work on Internet Explorer
+    * #1107: [Kura 3.0.0 M1 QA] Issue with modal confirmation dialog(s)
+    * #1105: [Kura 3.0.0 M1 QA] Issue with binding services
+    * #1104: [Kura 3.0.0 M1 QA] RPi 2/3 installation package contains unwanted files
+    * #1100: Inconsistent use of installation status strings in deployment impl
+    * #1091: Kura doesn't properly report "ALREADY_DONE" state to Kapua
+    * #1069: Change Package Infos in API Bundle that contain @since annotation
+    * #1057: Kura Wires BaseAsset write issue
+    * #1056: Kura Wires severity level based filtering issue
+    * #1053: dhclient is not being killed if interface is switched from DHCP to static
+    * #1041: Restructure Wire Envelope to make compatible with Kura Payload
+    * #1033: Rename org.eclipse.kura.asset.provider.default to org.eclipse.kura.asset.utility.provider
+    * #1026: Dragging a wire component onto the wire graphs pops up the install dialog
+    * #1024: PR #1007 broke distribution for assets
+    * #1022: Move AssetComponent.xml to Asset Provider
+    * #1015: Fix Fedora target to use libudev.so.1
+    * #1013: Drop support for ARMv5 SF/soft float
+    * #1003: Switch to Fedora 25
+    * #1000: Memory leak and concurrency issue in 'EventHandlerServlet'
+    * #999:  Refactoring: PropertiesUi must extend AbstractServicesUi
+    * #990:  Script error in installer
+    * #959:  Replace Preconditions references with Objects
+    * #954:  Fix output of properties
+    * #932:  org.eclipse.kura.asset.provider provides API and service implementation
+    * #918:  [Kura 2.1.0 QA] DEN-POS-002 Position service keeps reporting old position
+    * #916:  DEN-CONF-005 Wrong range limit for "long"
+    * #915:  [Kura 2.1.0 QA] DEN-CONF-005: Internal message when a "too big" number is entered
+    * #914:  [Web UI] Fixed fields can be edited
+    * #911:  [Kura 2.1.0 QA] SSID selection not always shows all SSIDs
+    * #908:  Web UI shows its own WLAN for connecting
+    * #889:  [Kura 2.1.0 QA] Denali Configuration ExamplePublisher error descriptions
+    * #861:  Kura's WEB bundles detection
+    * #846:  Replace INTERNAL_ERROR with suitable error code in Kura Wires
+    * #841:  Add Discouraged Access in Javadoc for INTERNAL_ERROR error code
+    * #824:  SelfConfiguringComponent are not registered properly
+    * #817:  Fix Exception Javadoc
+    * #786:  Services Search throws Exception
+    * #770:  Following the Eclipse versioning schema for OSGi
+    * #736:  Kura installer continues despite errors occurred
+    * #725:  Serial receive timeout is not forwarded to javax.comm.CommPort
+    * #721:  Unnecessary toggles eth0 interface when wlan0 interface is disabled on Raspberry Pi.
+    * #696:  FileServlet fails with NPE when there is no MetaTypeInformation
+    * #688:  Modify Kura Wires Web Copyright Header
+    * #664:  Misconfiguration of eth0 (as dhcp server) filling /var/log directory and finally crashing kura
+    * #657:  No ability to set security level with Bluetooth API
+    * #556:  Add WebSocket as alternative mqtt transport
+    * #555:  CAN bus bundle only supports 11-bit identifiers
+    * #553:  [Modbus] Refactoring of Modbus example
+    * #550:  [Modbus] String evaluation returns false
+    * #476:  Kura makes use of system properties when filtering for native code libraries which is not supported
+    * #460:  Upgrade Equinox to 3.11 and use Java 8 a minimum requirement
+    * #372:  [BLE] BluetoothGattImpl.getCharacteristics(String startHandle, String endHandle) and getServices() methods return empty list
+    * #352:  [Semantic Versioning] Enable analysis through bnd-baseline-maven-plugin
+    * #288:  [Modbus] Implement the MBAP header for TCP/IP communication
+    * #244:  [Web UI] Alphabetical ordering of metatype labels option in ListBoxes
+
+  * Merged no issue-related Pull Requests:
+    * #1370: Fixed connection status icon at page load.
+    * #1365: Fixed deleted factory components not always being removed from snapshot (see also #1371)
+    * #1364: Fixed factory components not being created from uploaded snapshot
+    * #1352: Minor Wires fixes
+    * #1350: Set security level to low
+    * #1349: Changes to the emulator launch profiles used when cloning directly the repo
+    * #1347: Modified emulator position.
+    * #1344: Minor fixes regarding emulator.position and osgi.annotation.
+    * #1343: Hidden export to CSV buttons from Wires Web UI
+    * #1341: Modified Asset Cloudlet protocol
+    * #1340: Fixed selinux check in kura-install.sh file.
+    * #1339: Changes to have dev-env working.
+    * #1337: Fixed watchdog service deactivate method
+    * #1331: Switched equinox mirror.
+    * #1323: Fixed handling of special characters in Wires DB
+    * #1319: Moved Asset configuration constants and documentation out of the APIs.
+    * #1311: Set the wire publisher qos metatype value to 0.
+    * #1307: Add Everyware Cloud broker URL
+    * #1302: Added opcua dp build step.
+    * #1300: Fix modem driver code
+    * #1289: Cleanup the payload encoder a bit
+    * #1276: Asset cloudlet now starts immediately.
+    * #1273: Watchdog code refactor and improvements
+    * #1272: Improved performance of WireSupportImpl.emit()
+    * #1266: Fixed unnecessary allocations by WireAsset
+    * #1264: Heater demo example using Maven/BND.
+    * #1256: Make private method static
+    * #1238: Remove registration of service implementation classes
+    * #1234: [Developer workspace] Updated project setup
+    * #1227: Relax null handling, fix possible NPE, improve javadoc
+    * #1226: Allow providing an input stream for reading XML content
+    * #1224: Make it a functional interface
+    * #1200: Add feature for Camel API
+    * #1198: Changed wires component selection.
+    * #1194: Fix iptables-restore run in background
+    * #1192: WireEmitter/Receiver are ConsumerTypeS
+    * #1184: Partially revert net.wifi breaking change
+    * #1182: Removed timeout based on magic number.
+    * #1179: Drop support for "fedorapi"
+    * #1174: Switch default behavior to only track relevant services
+    * #1173: OPC-UA Driver: Minor Fixes and Cleanup
+    * #1168: Modified emulator launch.
+    * #1154: Use window.parent instead of top in wires js and GWT parts
+    * #1148: Enable JMX by default, allow overriding using system properties
+    * #1144: [Developer workspace] Added 2 plugins and worspaces
+    * #1143: Added support for enabling serial rx timeout
+    * #1140: Improve separation of concerns for camel java example
+    * #1136: Implement Kapua's applicationFramework/applicationFrameworkVersion
+    * #1127: Changes to prevent exception of wires panel refresh.
+    * #1122: Implement new Cloud Client API
+    * #1115: Few more fixes in wires:
+    * #1103: Added drag and drop support to the Wire Composer.
+    * #1102: Improved drag and drop for Eclipse Marketplace.
+    * #1099: Set of changes in EventHandlerServlet to prevent memory leak.
+    * #1097: Check modem up in resetModem method
+    * #1094: Modified jvm dependency.
+    * #1090: Modified interval check in GwtNetworkServiceImpl.java.
+    * #1088: Fixed Web Ui services search bar
+    * #1086: OPC-UA Driver
+    * #1085: Wires refactor 2
+    * #1084: Wire Service Implementation and Wire Configuration Refactoring
+    * #1083: Removing ThrowableUtil Reference
+    * #1076: Wire publisher can publish control messages.
+    * #1075: Fixed a few cases in Configuration Service where NPE could be thrown
+    * #1074: Minor Code Fixes in PropertiesUi for Wires
+    * #1073: Renamed asset cloudlet APP_ID to ASSET-V1.
+    * #1070: Modified log message in ConfigurationServiceImpl.java
+    * #1058: Wires related Web2 enhancements
+    * #1047: Extracted WireHelperService and WireSupport together to a new bundle
+    * #1043: Modified certificates policy in Cloud Service.
+    * #1036: Solved graphical glitch in Assets' channel definition.
+    * #1034: Fix a bunch of C code issues
+    * #1031: Fix wire component provider
+    * #1029: Fix a possible NPE in the Web UI
+    * #1028: Work around Kura sending empty string instead of null for Camel deps
+    * #1019: Fix private members
+    * #1010: Updates and fixes for Karaf
+    * #1005: Fix possible exception and service leak
+    * #1002: Fix M2E errors when directly importing Karaf projects
+    * #998:  Fix wires nulls
+    * #988:  Removed references to windows bundles in 2.1.0.
+    * #987:  Modified web2 bundle packaging.
+    * #986:  Add Eclipse Kura Nexus repository in order to fix the build
+    * #985:  Switch version of SODA Comm to 1.2.4-SNAPSHOT
+    * #982:  Activate maven batch mode by default and reduce console log
+    * #978:  Uniformed build steps, corrected some typos.
+    * #976:  Changed deb dependency requiring java 8.
+    * #953:  Convert P2 repository to Maven 2 repository
+    * #869:  Clean up and document IOUtil
+    * #868:  Fix concurrency issue in command service
+    * #803:  add pcengine-nn profile
+
+
+Know Issues :
+  * The implementation of the CryptoService performs encryption using a
+    password that is hardcoded and published.
+  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
+  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
+    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
+    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)
+    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on
+    gatttool and the BLE connection failes.
+  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
+    AccessPoint WiFi mode not working for Broadcom chipset.
+  * Hardware watchdog: not implemented on all platforms
+  * Only one WAN interface is currently supported. A warning in displayed
+    in the WEB UI if the user attempts to enable more than one WAN interface
+  * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network
+    interface which happened even if network configuration hasn't been modified.
+  * #1338: [Kura 3.0.0] camel.aggregation and camel.quickstart examples should be normalized
+  * #1325: [Wires] Exception if an Channel Descriptor contains in Option of Integer type
+  * #1201: Wifi password incorrectly read from snapshot in Access Point mode
+  * #1197: [Net] Network configuration cannot be restored purely from snapshot
+  * #1196: [Net] PPP password is not a (MetaType) Password
+  * #1195: [Net] Firewall IP Forwarding rules entered in the Web UI lost on reboot
+  * #1193: [Wires] Component avoidance during initial placement
+  * #1161: Incorrectly configuring a component can be irreversable.
+  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
+  * #1092: Possible NPE and non-working check
+  * #1016: ConfigurationServiceImpl creates duplicate instances
+  * #948:  [Kura 2.1.0 QA] NET-ETH0-014 Wrong lease time in DHCP mode
+  * #923:  [Kura 2.1.0 QA] eth0 search domain configuration and storage
+  * #910:  [Kura 2.1.0 QA] Unable to use WLAN as WAN interface
+  * #890:  [Kura 2.1.0 QA] Snapshot management in web UI
+  * #797:  Design of ServiceUtil is broken
+  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
+  * #752:  [DbDataStore] repair is very slow on big tables
+  * #751:  [DbDataStore] defrag and checkpoint are not per-table operations
+  * #654:  Clean up static initialization around "modem" functionality
+  * #651:  Call to "exit()" in native code
+  * #650:  Possible bug in "LinuxUdev.c"
+  * #645:  Clean up internal dependencies in Kura
+  * #572:  Unreadable errors in Web UI
+  * #558:  Update of DPs seems not to work
+  * #547:  [Configuration] Configuration Service may miss configuration-policy=optional components
+  * #522:  [Net] Modem monitor should monitor interfaces, not modems
+  * #520:  [Net] PppFactory is not a factory and its design is wrong
+  * #518:  [Net] Modem monitor concurrency issue with multiple modems
+  * #486:  Build environment broken on Windows
+  * #406:  Replace System.get* with calls to SystemService.getProperties
+  * #362:  Uninstaller leaves most of the files
+  * #329:  [DEPLOY-V2] Review/refactoring needed
+  * #311:  [Multiple Cloud Connections] Spurious component reactivations upon configuration change
+  * #307:  CloudCallService overrides client ID
+  * #297:  [Status led] What connection instance controls the status led?
+  * #253:  Check if bundle contexes correctly unget services after invoking getService
+  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
+  * #108:  CloudCallServiceImpl - call methods setting requester.client.id to #client-id sends response to local device
+
+
 Eclipse Kura - 2.1.0
 -------------------------------------------------------------------------
 Added Features :

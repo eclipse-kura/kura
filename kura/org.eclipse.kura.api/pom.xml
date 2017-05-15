@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -8,90 +8,91 @@
      http://www.eclipse.org/legal/epl-v10.html
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.eclipse.kura</groupId>
-		<artifactId>kura</artifactId>
-		<version>3.0.0-SNAPSHOT</version>
-		<relativePath>../manifest_pom.xml</relativePath>
-	</parent>
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>kura</artifactId>
+        <version>3.0.0</version>
+        <relativePath>../manifest_pom.xml</relativePath>
+    </parent>
 
-	<artifactId>org.eclipse.kura.api</artifactId>
-	<version>1.2.0-SNAPSHOT</version>
-	<packaging>eclipse-plugin</packaging>
+    <artifactId>org.eclipse.kura.api</artifactId>
+    <version>1.2.0</version>
+    <packaging>eclipse-plugin</packaging>
 
-	<properties>
-		<kura.basedir>${project.basedir}/..</kura.basedir>
-	</properties>
+    <properties>
+        <kura.basedir>${project.basedir}/..</kura.basedir>
+    </properties>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>properties-maven-plugin</artifactId>
-				<version>1.0-alpha-1</version>
-				<executions>
-					<execution>
-						<id>read-previous-release</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>read-project-properties</goal>
-						</goals>
-						<configuration>
-							<files>
-								<file>${basedir}/../distrib/RELEASE_INFO/version.properties</file>
-							</files>
-						</configuration>
-					</execution>
-					<execution>
-						<id>read-previous-release-versions</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>read-project-properties</goal>
-						</goals>
-						<configuration>
-							<files>
-								<file>${basedir}/../distrib/RELEASE_INFO/${kura.project.version.previous}/config/kura.build.properties</file>
-							</files>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0-alpha-1</version>
+                <executions>
+                    <execution>
+                        <id>read-previous-release</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>${basedir}/../distrib/RELEASE_INFO/version.properties</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>read-previous-release-versions</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>${basedir}/../distrib/RELEASE_INFO/${kura.project.version.previous}/config/kura.build.properties</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
 			<!-- This is needed to force the initial baseline (1.1.1) -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>previous-api-version</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<exportAntProperties>true</exportAntProperties>
-							<tasks>
-                                                                <condition property="org.eclipse.kura.api.lastversion" value="1.1.1" else="${org.eclipse.kura.api.version}">
-									<equals arg1="${org.eclipse.kura.api.version}" arg2="1.1.0"/>
-								</condition>
-							</tasks>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>previous-api-version</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <exportAntProperties>true</exportAntProperties>
+                            <tasks>
+                                <condition property="org.eclipse.kura.api.lastversion" value="1.1.1"
+                                    else="${org.eclipse.kura.api.version}">
+                                    <equals arg1="${org.eclipse.kura.api.version}" arg2="1.1.0" />
+                                </condition>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
-			<plugin>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bnd-baseline-maven-plugin</artifactId>
-				<configuration>
-					<base>
-						<version>${org.eclipse.kura.api.lastversion}</version>
-					</base>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-baseline-maven-plugin</artifactId>
+                <configuration>
+                    <base>
+                        <version>${org.eclipse.kura.api.lastversion}</version>
+                    </base>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

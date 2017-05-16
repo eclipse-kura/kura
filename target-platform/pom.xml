@@ -19,6 +19,7 @@
         <module>org.eclipse.soda.dk.comm-parent</module>
         <module>jdk.dio-parent</module>
         <module>com.gwt.user</module>
+        <module>tinyb-parent</module>
         <module>moquette-broker</module>
         <module>p2-repo-common</module>
         <module>p2-repo-equinox_3.11.1</module>

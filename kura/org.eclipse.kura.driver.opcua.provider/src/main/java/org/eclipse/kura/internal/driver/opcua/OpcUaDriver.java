@@ -177,9 +177,8 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
             logger.debug("Fetching endpoint descriptions");
             final EndpointDescription[] endpoints = runSafe(UaTcpStackClient.getEndpoints(endpointString));
 
-            final EndpointDescription endpoint = Arrays.stream(endpoints)
-                    .filter(e -> e.getSecurityPolicyUri()
-                            .equals(this.options.getSecurityPolicy().getSecurityPolicyUri()))
+            final EndpointDescription endpoint = Arrays.stream(endpoints).filter(
+                    e -> e.getSecurityPolicyUri().equals(this.options.getSecurityPolicy().getSecurityPolicyUri()))
                     .findFirst().orElseThrow(() -> new ConnectionException(message.connectionProblem()));
 
             final KeyStoreLoader loader = new KeyStoreLoader(this.options.getKeystoreType(),

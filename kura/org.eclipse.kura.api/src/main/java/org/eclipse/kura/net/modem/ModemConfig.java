@@ -187,6 +187,7 @@ public class ModemConfig implements NetConfig {
      * Reports password.
      *
      * @return password as {@link Password}
+     * @since 1.3
      */
     public Password getPasswordAsPassword() {
         return this.password;
@@ -207,6 +208,7 @@ public class ModemConfig implements NetConfig {
      *
      * @param password
      *            - password as {@link Password}
+     * @since 1.3
      */
     public void setPassword(Password password) {
         this.password = password;

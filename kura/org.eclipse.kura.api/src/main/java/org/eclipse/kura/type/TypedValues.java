@@ -25,7 +25,6 @@ import org.osgi.annotation.versioning.ProviderType;
  * The Class TypedValues is an utility class to quickly create different
  * {@link TypedValue}
  * 
- * @noextend This class is not intended to be extended by clients.
  * @since 1.2
  */
 @ProviderType

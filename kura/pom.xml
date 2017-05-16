@@ -54,6 +54,9 @@
         <module>org.eclipse.kura.driver.s7plc.localization</module>
         <module>org.eclipse.kura.driver.s7plc.provider</module>
         <module>org.eclipse.kura.linux.bluetooth</module>
+        <module>org.eclipse.kura.ble.provider</module>
+        <module>org.eclipse.kura.ble.ibeacon.provider</module>
+        <module>org.eclipse.kura.ble.eddystone.provider</module>
         <module>org.eclipse.kura.linux.clock</module>
         <module>org.eclipse.kura.linux.command</module>
         <module>org.eclipse.kura.linux.gpio</module>

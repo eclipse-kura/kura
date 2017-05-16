@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2017 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.example.ibeacon.scanner.IBeaconScanner"
+         name="iBeacon Scanner" 
+         description="The iBeacon Scanner detects iBeacon frames and publishes on the cloud the detected beacons.">
+         
+         <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/beacon.png" size="32"/>
+         
+         <AD id="enable.scanning"
+            name="Enable iBeacon scanning"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable scan for iBeacons."/>
+            
+        <AD id="scan.interval"
+            name="Scan interval"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="60"
+            description="iBeacon scan duration in seconds."/>
+            
+         <AD id="topic.prefix"
+            name="Topic"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="beacons"
+            description="Prefix for discovered items' topic"/>
+            
+        <AD id="iname"
+            name="Bluetooth interface name"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="hci0"
+            description="Name of bluetooth adapter."/>
+            
+        <AD id="publish.period"
+            name="Publish period"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="10"
+            description="Shortest time between publishes per beacon in seconds"/>
+                                
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.example.ibeacon.scanner.IBeaconScanner">
+        <Object ocdref="org.eclipse.kura.example.ibeacon.scanner.IBeaconScanner"/>
+    </Designate>
+</MetaData>

@@ -66,6 +66,21 @@
 									<version>${com.codeminders.hidapi.version}</version>
 								</artifactItem>
 								<artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>tinyb</artifactId>
+                                    <version>${tinyb.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>tinyb.armv6hf</artifactId>
+                                    <version>${tinyb.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>tinyb.x86_64</artifactId>
+                                    <version>${tinyb.version}</version>
+                                </artifactItem>
+								<artifactItem>
 									<groupId>org.apache</groupId>
 									<artifactId>org.apache.commons.net</artifactId>
 									<version>${org.apache.commons.net.version}</version>
@@ -410,6 +425,9 @@
 							    <move file="target/source/plugins/com.codeminders.hidapi.jar" tofile="target/source/plugins/com.codeminders.hidapi_${com.codeminders.hidapi.version}.jar"/>
 							    <move file="target/source/plugins/com.codeminders.hidapi.armv6hf.jar" tofile="target/source/plugins/com.codeminders.hidapi.armv6hf_${com.codeminders.hidapi.version}.jar"/>
 							    <move file="target/source/plugins/com.codeminders.hidapi.x86_64.jar" tofile="target/source/plugins/com.codeminders.hidapi.x86_64_${com.codeminders.hidapi.version}.jar"/>
+							    <move file="target/source/plugins/tinyb.jar" tofile="target/source/plugins/tinyb_${tinyb.version}.jar"/>
+                                <move file="target/source/plugins/tinyb.armv6hf.jar" tofile="target/source/plugins/tinyb.armv6hf_${tinyb.version}.jar"/>
+                                <move file="target/source/plugins/tinyb.x86_64.jar" tofile="target/source/plugins/tinyb.x86_64_${tinyb.version}.jar"/>
 								<move file="target/source/plugins/org.apache.commons.net.jar" tofile="target/source/plugins/org.apache.commons.net_${org.apache.commons.net.version}.jar"/>
 								<move file="target/source/plugins/commons-exec.jar" tofile="target/source/plugins/org.apache.commons.exec_${org.apache.commons.exec.version}.jar"/>
 								<move file="target/source/plugins/com.google.protobuf.jar" tofile="target/source/plugins/com.google.protobuf_${com.google.protobuf.version}.jar"/>

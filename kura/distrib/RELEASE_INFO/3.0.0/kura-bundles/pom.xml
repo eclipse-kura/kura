@@ -216,6 +216,16 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.linux.usb.armv6hf</artifactId>
+                                    <version>1.0.100</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.linux.usb.x86_64</artifactId>
+                                    <version>1.0.100</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.linux.watchdog</artifactId>
                                     <version>1.0.100</version>
                                 </artifactItem>

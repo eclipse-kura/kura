@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -154,10 +154,9 @@ public class NMEAParser {
                     m_validPosition = false;
                 }
                 if (!tokens[7].isEmpty()) {
-                    this.m_speedNmea = Double.parseDouble(tokens[7]) / 1.94384449; // conversion speed in knots to m/s :
-                                                                                   // 1
+                    // conversion speed in knots to m/s : 1 m/s = 1.94384449 knots
+                    this.m_speedNmea = Double.parseDouble(tokens[7]) / 1.94384449;
                 }
-                // m/s = 1.94384449 knots
                 if (!tokens[8].isEmpty()) {
                     this.m_trackNmea = Double.parseDouble(tokens[8]);
                 }
@@ -207,46 +206,37 @@ public class NMEAParser {
         }
     }
 
-    double convertPositionlat(String pos, String direction) {
-        double floatLatDegrees = 0;
-        double floatLatMinutes = 0;
-        String s;
-
+    /**
+     * @param pos
+     *            DDD?MM?.dddd
+     * @param direction
+     *            N/S, E/W
+     * @param degChars
+     *            number of characters representing degrees
+     * @return
+     */
+    private double convertPosition(String pos, String direction, int degChars) {
         if (pos.length() < 6) {
             return 0;
         }
 
-        // This copies the arrays to temporary arrays
-        s = pos.substring(0, 2);
-        floatLatDegrees = Double.parseDouble(s);
-        s = pos.substring(2);
-        floatLatMinutes = Double.parseDouble(s);
-        floatLatDegrees = floatLatDegrees + floatLatMinutes / 60;
-        if (direction.contains("S")) {
-            floatLatDegrees = floatLatDegrees * -1;
+        String s = pos.substring(0, degChars);
+        double deg = Double.parseDouble(s);
+        s = pos.substring(degChars);
+        double min = Double.parseDouble(s);
+        deg = deg + min / 60;
+        if (direction.contains("S") || direction.contains("W")) {
+            deg = -deg;
         }
-        return floatLatDegrees;
+        return deg;
+    }
+
+    double convertPositionlat(String pos, String direction) {
+        return convertPosition(pos, direction, 2);
     }
 
     double convertPositionlon(String pos, String direction) {
-        double floatLonDegrees = 0;
-        double floatLonMinutes = 0;
-        String s;
-
-        if (pos.length() < 6) {
-            return 0;
-        }
-
-        // This copies the arrays to temporary arrays
-        s = pos.substring(0, 3);
-        floatLonDegrees = Double.parseDouble(s);
-        s = pos.substring(3);
-        floatLonMinutes = Double.parseDouble(s);
-        floatLonDegrees = floatLonDegrees + floatLonMinutes / 60;
-        if (direction.contains("W")) {
-            floatLonDegrees = floatLonDegrees * -1;
-        }
-        return floatLonDegrees;
+        return convertPosition(pos, direction, 3);
     }
 
     public String get_timeNmea() {

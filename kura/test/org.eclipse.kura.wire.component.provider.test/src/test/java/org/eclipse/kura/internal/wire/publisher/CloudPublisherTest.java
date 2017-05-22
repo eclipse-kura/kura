@@ -52,7 +52,6 @@ public class CloudPublisherTest {
         cp.bindWireHelperService(wireHelperServiceMock);
 
         BundleContext bundleCtxMock = mock(BundleContext.class);
-        Filter filter = mock(Filter.class);
         when(bundleCtxMock.createFilter(anyString())).thenThrow(new InvalidSyntaxException("test", "filter"));
 
         ComponentContext ctxMock = mock(ComponentContext.class);

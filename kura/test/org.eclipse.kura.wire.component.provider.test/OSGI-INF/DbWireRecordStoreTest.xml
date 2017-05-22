@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+Copyright (c) 2017 Eurotech and/or its affiliates and others
+
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/legal/epl-v10.html
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="DbWireRecordStoreTest" activate="activate">
+   <implementation class="org.eclipse.kura.internal.wire.store.test.DbWireRecordStoreTest"/>
+   <reference bind="bindDbstore"
+              unbind="unbindDbstore"
+              cardinality="0..1"
+              interface="org.eclipse.kura.wire.WireComponent"
+              name="org.eclipse.kura.wire.DbWireRecordStore"
+              target="(kura.service.pid=foo)"
+              policy="dynamic"/>
+   <reference name="ConfigurationService"
+              policy="static"
+              cardinality="1..1"
+              bind="bindCfgSvc"
+              unbind="unbindCfgSvc"
+              interface="org.eclipse.kura.configuration.ConfigurationService"/>
+   <reference name="DbService"
+              policy="static"
+              cardinality="1..1"
+              bind="bindDbSvc"
+              unbind="unbindDbSvc"
+              interface="org.eclipse.kura.db.DbService"/>
+
+</scr:component>

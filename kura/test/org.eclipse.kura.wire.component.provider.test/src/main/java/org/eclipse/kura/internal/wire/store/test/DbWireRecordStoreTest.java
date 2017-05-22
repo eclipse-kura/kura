@@ -6,24 +6,27 @@
  *   which accompanies this distribution, and is available at
  *   http://www.eclipse.org/legal/epl-v10.html
  ******************************************************************************/
-package org.eclipse.kura.internal.wire.store;
+package org.eclipse.kura.internal.wire.store.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.db.DbService;
+import org.eclipse.kura.internal.wire.store.DbWireRecordStore;
 import org.eclipse.kura.type.BooleanValue;
 import org.eclipse.kura.type.ByteArrayValue;
 import org.eclipse.kura.type.DoubleValue;
@@ -33,53 +36,58 @@ import org.eclipse.kura.type.LongValue;
 import org.eclipse.kura.type.StringValue;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireEnvelope;
-import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireRecord;
-import org.eclipse.kura.wire.WireSupport;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.osgi.service.component.ComponentContext;
+
 
 public class DbWireRecordStoreTest {
 
+    private static final int maxSize = 1200;
+    private static final int cleanupSize = 1100;
+
+    private static CountDownLatch dependencyLatch = new CountDownLatch(2);
+
+    private static DbWireRecordStore dbstore; // DbWireRecordStore
+    private static ConfigurationService cfgsvc;
+    private static DbService dbsvc;
+
+    private String tableName = "STORE_TEST";
+
     @BeforeClass
-    public static void setup() {
+    public static void setup() throws KuraException {
         try {
-            DriverManager.registerDriver(new org.hsqldb.jdbcDriver());
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            dependencyLatch.await(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
-    private Connection getConnection() throws SQLException {
-        Connection connection = DriverManager.getConnection("jdbc:hsqldb:mem:proto;hsqldb.lock_file=false", "SA", "");
-        return connection;
+    protected void activate() throws KuraException {
+        if (cfgsvc != null) {
+            Map<String, Object> props = new HashMap<String, Object>();
+            props.put("table.name", tableName);
+            props.put("maximum.table.size", maxSize);
+            props.put("cleanup.records.keep", cleanupSize);
+
+            cfgsvc.createFactoryConfiguration("org.eclipse.kura.wire.DbWireRecordStore", "foo", props, false);
+        }
     }
 
     @Test
-    public void testSequence() throws SQLException {
-        // create DB, insert a few wire records, check they are actually in there
-        DbWireRecordStore store = new DbWireRecordStore();
+    public void testSvcs() {
+        assertNotNull(cfgsvc);
+        assertNotNull(dbsvc);
+        assertNotNull(dbstore);
+    }
 
-        Connection connection = getConnection();
+    @Test
+    public void testReceive() throws SQLException {
+        Connection connection = dbsvc.getConnection();
 
-        DbService dbServiceMock = mock(DbService.class);
-        when(dbServiceMock.getConnection()).thenReturn(connection);
-
-        WireHelperService whsMock = mock(WireHelperService.class);
-        WireSupport wireSupportMock = mock(WireSupport.class);
-        when(whsMock.newWireSupport(store)).thenReturn(wireSupportMock);
-
-        store.bindDbService(dbServiceMock);
-        store.bindWireHelperService(whsMock);
-
-        ComponentContext ctx = mock(ComponentContext.class);
-        Map<String, Object> props = new HashMap<String, Object>();
-        String tableName = "STORE_TEST";
-        props.put("table.name", tableName);
-
-        // init
-        store.activate(ctx, props);
+        ResultSet resultSet = connection.prepareStatement("SELECT count(*) FROM " + tableName).executeQuery();
+        resultSet.next();
+        int startCount = resultSet.getInt(1);
 
         String emitterPid = "emitter";
         List<WireRecord> wireRecords = new ArrayList<WireRecord>();
@@ -90,13 +98,10 @@ public class DbWireRecordStoreTest {
         wireRecords.add(record);
         WireEnvelope wireEvelope = new WireEnvelope(emitterPid, wireRecords);
 
-        ResultSet resultSet = connection.prepareStatement("SELECT count(*) FROM " + tableName).executeQuery();
-        resultSet.next();
-        int startCount = resultSet.getInt(1);
-
         // store one record
-        store.onWireReceive(wireEvelope);
+        dbstore.onWireReceive(wireEvelope);
 
+        // check the results
         DatabaseMetaData metaData = connection.getMetaData();
         ResultSet tables = metaData.getTables(null, null, tableName, null);
         tables.first();
@@ -116,12 +121,11 @@ public class DbWireRecordStoreTest {
         long tim = resultSet.getLong(1);
         String strval = resultSet.getString("key");
 
-        assertTrue(resultSet.isLast());
         assertTrue(tim <= System.currentTimeMillis());
         assertEquals("val", strval);
 
         // add couple more
-        store.onWireReceive(wireEvelope);
+        dbstore.onWireReceive(wireEvelope);
 
         recordProps = new HashMap<String, TypedValue<?>>();
         val = new ByteArrayValue("val".getBytes());
@@ -141,44 +145,20 @@ public class DbWireRecordStoreTest {
         recordProps.put("floatkey", val);
         record = new WireRecord(recordProps);
         wireRecords.add(record);
-        store.onWireReceive(wireEvelope); // adds 3, now
+        dbstore.onWireReceive(wireEvelope); // adds 3, now
 
         resultSet = connection.prepareStatement("SELECT count(*) FROM " + tableName).executeQuery();
         resultSet.next();
         count = resultSet.getInt(1);
-        assertEquals("Unexpected number of records", 5, count);
-
-        // deinit
-        store.deactivate(null);
-        connection.prepareStatement("SHUTDOWN").execute();
+        assertEquals("Unexpected number of records", startCount + 5, count);
     }
 
     @Test
     public void testCleanupSequence() throws SQLException {
         // create DB, insert a few wire records, check they are actually in there and clean the DB
-        DbWireRecordStore store = new DbWireRecordStore();
+        Connection connection = dbsvc.getConnection();
 
-        Connection connection = getConnection();
-
-        DbService dbServiceMock = mock(DbService.class);
-        when(dbServiceMock.getConnection()).thenReturn(connection);
-
-        WireHelperService whsMock = mock(WireHelperService.class);
-        WireSupport wireSupportMock = mock(WireSupport.class);
-        when(whsMock.newWireSupport(store)).thenReturn(wireSupportMock);
-
-        store.bindDbService(dbServiceMock);
-        store.bindWireHelperService(whsMock);
-
-        ComponentContext ctx = mock(ComponentContext.class);
-        Map<String, Object> props = new HashMap<String, Object>();
-        String tableName = "STORE_TEST";
-        props.put("table.name", tableName);
-        props.put("cleanup.records.keep", 3);
-        props.put("maximum.table.size", 5);
-
-        // init
-        store.activate(ctx, props);
+        connection.prepareStatement("TRUNCATE TABLE " + tableName).execute();
 
         String emitterPid = "emitter";
         List<WireRecord> wireRecords = new ArrayList<WireRecord>();
@@ -190,8 +170,15 @@ public class DbWireRecordStoreTest {
         WireEnvelope wireEvelope = new WireEnvelope(emitterPid, wireRecords);
 
         // store a few records
-        for (int i = 0; i < 3; i++) {
-            store.onWireReceive(wireEvelope);
+        for (int i = 0; i < maxSize; i++) {
+            dbstore.onWireReceive(wireEvelope);
+
+            // prevent key violations - timestamp only has a 1 ms resolution
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                // OK
+            }
         }
         // wait for the executor to do its duty and DB operation to finish
         try {
@@ -203,11 +190,18 @@ public class DbWireRecordStoreTest {
         ResultSet resultSet = connection.prepareStatement("SELECT count(*) FROM " + tableName).executeQuery();
         resultSet.next();
         int count = resultSet.getInt(1);
-        assertEquals("Unexpected number of records", 3, count);
+        assertEquals("Unexpected number of records", maxSize, count);
 
         // store a few records
         for (int i = 0; i < 5; i++) {
-            store.onWireReceive(wireEvelope);
+            dbstore.onWireReceive(wireEvelope);
+
+            // prevent key violations - timestamp only has a 1 ms resolution
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                // OK
+            }
         }
         // wait for the executor to do its duty and DB operation to finish
         try {
@@ -219,11 +213,36 @@ public class DbWireRecordStoreTest {
         resultSet = connection.prepareStatement("SELECT count(*) FROM " + tableName).executeQuery();
         resultSet.next();
         count = resultSet.getInt(1);
-        assertEquals("Unexpected number of records", 4, count);
+        assertEquals("Unexpected number of records", cleanupSize + 5, count);
+    }
 
-        // deinit
-        store.deactivate(null);
-        connection.prepareStatement("SHUTDOWN").execute();
+    public void bindDbstore(DbWireRecordStore dbstore) {
+        System.out.println(dbstore);
+        DbWireRecordStoreTest.dbstore = dbstore;
+    }
+
+    public void unbindDbstore(DbWireRecordStore dbstore) {
+        DbWireRecordStoreTest.dbstore = null;
+    }
+
+    public void bindCfgSvc(ConfigurationService cfgSvc) {
+        System.out.println(cfgSvc);
+        DbWireRecordStoreTest.cfgsvc = cfgSvc;
+        dependencyLatch.countDown();
+    }
+
+    public void unbindCfgSvc(ConfigurationService cfgSvc) {
+        DbWireRecordStoreTest.cfgsvc = null;
+    }
+
+    public void bindDbSvc(DbService dbSvc) {
+        System.out.println(dbSvc);
+        DbWireRecordStoreTest.dbsvc = dbSvc;
+        dependencyLatch.countDown();
+    }
+
+    public void unbindDbSvc(DbService dbSvc) {
+        DbWireRecordStoreTest.cfgsvc = null;
     }
 
 }

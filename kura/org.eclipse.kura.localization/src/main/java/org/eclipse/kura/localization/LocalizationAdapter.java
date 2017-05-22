@@ -51,7 +51,6 @@ public final class LocalizationAdapter {
         CURRENT_LOCALE = Locale.getDefault();
     }
 
-    /** Constructor */
     private LocalizationAdapter() {
         // Static Factory Methods container. No need to instantiate.
     }
@@ -84,7 +83,7 @@ public final class LocalizationAdapter {
     }
 
     /**
-     * Adapt the provided message resource to its {@code C10N} type
+     * Adapt the provided message resource to its {@code C10N} type with the current locale.
      *
      * @param <T>
      *            the generic type
@@ -99,7 +98,7 @@ public final class LocalizationAdapter {
     }
 
     /**
-     * Adapt the provided message resource to its {@code C10N} type with provided locale
+     * Adapt the provided message resource to its {@code C10N} type with provided locale.
      *
      * @param <T>
      *            the generic type

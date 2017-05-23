@@ -60,6 +60,9 @@ public interface OpcUaMessages {
     @En("Error while retrieving Node ID")
     public String errorRetrievingNodeId();
 
+    @En("Error while retrieving Node ID type")
+    public String errorRetrievingNodeIdType();
+
     @En("Error while retrieving Node Namespace index")
     public String errorRetrievingNodeNamespace();
 

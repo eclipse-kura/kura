@@ -1046,9 +1046,16 @@ public class NetworkConfiguration {
         modemConfig.setIpAddress(ipAddress);
 
         // password
-        Password password = (Password) properties.get(prefix + "password");
-        s_logger.trace("Password is {}", password);
-        modemConfig.setPassword(password);
+        Password password = null;
+        Object psswdObj = properties.get(prefix + "password");
+        if (psswdObj instanceof Password) {
+            password = (Password) psswdObj;
+        } else if (psswdObj instanceof String) {
+            password = new Password((String) psswdObj);
+        }
+        if (password != null) {
+            modemConfig.setPassword(password);
+        }
 
         // pdp type
         String pdpTypeString = (String) properties.get(prefix + "pdpType");

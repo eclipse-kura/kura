@@ -221,7 +221,7 @@ public class Fifo implements WireEmitter, WireReceiver, ConfigurableComponent {
                         if (!run) {
                             break;
                         }
-                        next = queue.remove(queue.size() - 1);
+                        next = queue.remove(0);
                         consumer.signal();
                     } finally {
                         lock.unlock();

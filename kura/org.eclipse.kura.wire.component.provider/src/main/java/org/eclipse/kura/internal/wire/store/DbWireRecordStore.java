@@ -375,11 +375,32 @@ public final class DbWireRecordStore implements WireEmitter, WireReceiver, Confi
                 // table does not exist, create it
                 logger.info(message.creatingTable(sqlTableName));
                 this.dbHelper.execute(MessageFormat.format(SQL_CREATE_TABLE, sqlTableName));
+                createIndex(sqlTableName + "_TIMESTAMP", sqlTableName, "(TIMESTAMP DESC)");
             }
         } finally {
             this.dbHelper.close(rsTbls);
             this.dbHelper.close(conn);
         }
+    }
+
+    private void createIndex(String indexname, String table, String order) throws SQLException {
+        try {
+            this.dbHelper.execute("CREATE INDEX " + indexname + " ON " + table + " " + order + ";");
+            logger.info("Index {} created, order is {}", indexname, order);
+        } catch (SQLException e) {
+            boolean handled = false;
+            if (e.getCause() != null && e.getCause() instanceof SQLException) {
+                SQLException sqle = (SQLException) e.getCause();
+                if (sqle.getErrorCode() == -5504) {
+                    // Object already exist. We can ignore it
+                    handled = true;
+                }
+            }
+            if (!handled) {
+                throw e;
+            }
+        }
+
     }
 
     /**

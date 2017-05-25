@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import static org.eclipse.kura.web.server.util.GwtServerUtil.PASSWORD_PLACEHOLDER;
+
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -113,16 +115,16 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 GwtWifiNetInterfaceConfig wifiConfig = (GwtWifiNetInterfaceConfig) netConfig;
                 GwtWifiConfig gwtAPWifiConfig = wifiConfig.getAccessPointWifiConfig();
                 if (gwtAPWifiConfig != null) {
-                    gwtAPWifiConfig.setPassword(PLACEHOLDER);
+                    gwtAPWifiConfig.setPassword(PASSWORD_PLACEHOLDER);
                 }
 
                 GwtWifiConfig gwtStationWifiConfig = wifiConfig.getStationWifiConfig();
                 if (gwtStationWifiConfig != null) {
-                    gwtStationWifiConfig.setPassword(PLACEHOLDER);
+                    gwtStationWifiConfig.setPassword(PASSWORD_PLACEHOLDER);
                 }
             } else if (netConfig instanceof GwtModemInterfaceConfig) {
                 GwtModemInterfaceConfig modemConfig = (GwtModemInterfaceConfig) netConfig;
-                modemConfig.setPassword(PLACEHOLDER);
+                modemConfig.setPassword(PASSWORD_PLACEHOLDER);
             }
         }
         return result;
@@ -838,7 +840,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                         WifiConfig wifiConfig = getWifiConfig(gwtWifiConfig);
 
                         String passKey = new String(wifiConfig.getPasskey().getPassword());
-                        if (passKey != null && passKey.equals(PLACEHOLDER)) {
+                        if (passKey != null && passKey.equals(PASSWORD_PLACEHOLDER)) {
 
                             List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations();
                             for (GwtNetInterfaceConfig netConfig : result) {
@@ -889,7 +891,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     modemConfig.setHeaderCompression(gwtModemConfig.getHeaderCompression());
 
                     String passKey = new String(gwtModemConfig.getPassword());
-                    if (passKey != null && passKey.equals(PLACEHOLDER)) {
+                    if (passKey != null && passKey.equals(PASSWORD_PLACEHOLDER)) {
                         List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations();
                         for (GwtNetInterfaceConfig netConfig : result) {
                             if (netConfig instanceof GwtModemInterfaceConfig) {

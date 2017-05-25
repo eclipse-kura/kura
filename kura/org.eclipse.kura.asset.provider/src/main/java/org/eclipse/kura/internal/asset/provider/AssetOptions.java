@@ -192,7 +192,10 @@ public final class AssetOptions {
             if (key.length() <= propertyBeginIndex) {
                 return null;
             }
-            channelConfig.put(key.substring(propertyBeginIndex), entry.getValue().toString());
+            final Object value = entry.getValue();
+            if (value != null) {
+                channelConfig.put(key.substring(propertyBeginIndex), value.toString());
+            }
         }
         return channelConfig;
     }

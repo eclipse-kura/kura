@@ -152,6 +152,9 @@ public interface AssetMessages {
     @En("Error while trying to track driver instances.")
     public String errorDriverTracking();
 
+    @En("Failed to update current configuration from Driver Descriptor")
+    public String errorUpdatingAssetConfiguration();
+
     @En("Error in disconnecting driver...")
     public String errorDriverDisconnection();
 

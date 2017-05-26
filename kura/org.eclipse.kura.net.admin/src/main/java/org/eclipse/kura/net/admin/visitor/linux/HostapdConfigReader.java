@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -88,12 +88,12 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
         }
     }
 
-    private static WifiConfig getWifiHostConfig(String ifaceName) throws KuraException {
+    private WifiConfig getWifiHostConfig(String ifaceName) throws KuraException {
         try {
             WifiConfig wifiConfig = new WifiConfig();
             wifiConfig.setMode(WifiMode.MASTER);
 
-            File configFile = new File(HostapdManager.getHostapdConfigFileName(ifaceName));
+            File configFile = getFinalFile(ifaceName);
             Properties hostapdProps = new Properties();
 
             s_logger.debug("parsing hostapd config file: " + configFile.getAbsolutePath());
@@ -242,5 +242,9 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
             s_logger.error("Exception getting WiFi configuration", e);
             throw KuraException.internalError(e);
         }
+    }
+
+    protected File getFinalFile(String ifaceName) {
+        return new File(HostapdManager.getHostapdConfigFileName(ifaceName));
     }
 }

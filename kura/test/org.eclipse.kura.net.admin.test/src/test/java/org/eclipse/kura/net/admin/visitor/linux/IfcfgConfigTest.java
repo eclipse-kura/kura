@@ -164,8 +164,10 @@ public class IfcfgConfigTest {
         String interfaceName = "testinterface";
 
         String finalFile = "/tmp/ifcfg/ifcfg";
+        File file = new File(finalFile);
+        file.getParentFile().mkdirs();
 
-        try (FileWriter fw = new FileWriter(finalFile)) {
+        try (FileWriter fw = new FileWriter(file)) {
             fw.write("#!kura!auto eth0\n");
             fw.write("iface eth0 inet static\n");
             fw.write(" mtu 1234\n");
@@ -181,7 +183,6 @@ public class IfcfgConfigTest {
             fw.write("auto eth1\n");
         }
 
-        File file = new File(finalFile);
         Properties result = IfcfgConfigReader.parseDebianConfigFile(file, interfaceName);
         file.delete();
 
@@ -206,8 +207,10 @@ public class IfcfgConfigTest {
         String interfaceName = "lo";
 
         String finalFile = "/tmp/ifcfg/ifcfg";
+        File file = new File(finalFile);
+        file.getParentFile().mkdirs();
 
-        try (FileWriter fw = new FileWriter(finalFile)) {
+        try (FileWriter fw = new FileWriter(file)) {
             fw.write("#!kura!auto eth0\n");
             fw.write("iface eth0 inet static\n");
             fw.write(" mtu 1234\n");
@@ -217,7 +220,6 @@ public class IfcfgConfigTest {
             fw.write("auto eth1\n");
         }
 
-        File file = new File(finalFile);
         Properties result = IfcfgConfigReader.parseDebianConfigFile(file, interfaceName);
         file.delete();
 

@@ -46,20 +46,20 @@ import org.slf4j.LoggerFactory;
 
 public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(HostapdConfigWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(HostapdConfigWriter.class);
 
     private static final String HEXES = "0123456789ABCDEF";
 
     private static final String HOSTAPD_TMP_CONFIG_FILE = "/etc/hostapd.conf.tmp";
 
-    private static HostapdConfigWriter s_instance;
+    private static HostapdConfigWriter instance;
 
     public static HostapdConfigWriter getInstance() {
-        if (s_instance == null) {
-            s_instance = new HostapdConfigWriter();
+        if (instance == null) {
+            instance = new HostapdConfigWriter();
         }
 
-        return s_instance;
+        return instance;
     }
 
     @Override
@@ -100,26 +100,26 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
                             try {
                                 if (netConfig instanceof WifiConfig) {
                                     if (((WifiConfig) netConfig).getMode() == WifiMode.MASTER) {
-                                        s_logger.debug("Found wifiConfig with mode set to master");
+                                        logger.debug("Found wifiConfig with mode set to master");
                                         interfaceDriver = ((WifiConfig) netConfig).getDriver();
                                         if (interfaceDriver != null) {
-                                            s_logger.debug("Writing wifiConfig: {}", netConfig);
+                                            logger.debug("Writing wifiConfig: {}", netConfig);
                                             apConfig = (WifiConfig) netConfig;
                                         } else {
-                                            s_logger.error("Can't generate hostapd config - no driver specified");
+                                            logger.error("Can't generate hostapd config - no driver specified");
                                         }
                                     }
                                 } else if (netConfig instanceof NetConfigIP4) {
                                     netInterfaceStatus = ((NetConfigIP4) netConfig).getStatus();
                                 }
                             } catch (Exception e) {
-                                s_logger.error("Failed to configure Hostapd");
+                                logger.error("Failed to configure Hostapd");
                                 throw KuraException.internalError(e);
                             }
                         }
 
                         if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusDisabled) {
-                            s_logger.info(
+                            logger.info(
                                     "Network interface status for {} is disabled - not overwriting hostapd configuration file",
                                     interfaceName);
                             return;
@@ -129,7 +129,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
                             try {
                                 generateHostapdConf(apConfig, interfaceName, interfaceDriver);
                             } catch (Exception e) {
-                                s_logger.error("Failed to generate hostapd configuration file for {} interface",
+                                logger.error("Failed to generate hostapd configuration file for {} interface",
                                         interfaceName);
                                 throw KuraException.internalError(e);
                             }
@@ -146,7 +146,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     private void generateHostapdConf(WifiConfig wifiConfig, String interfaceName, String interfaceDriver)
             throws Exception {
 
-        s_logger.debug("Generating Hostapd Config");
+        logger.debug("Generating Hostapd Config");
 
         String fileAsString;
 
@@ -174,7 +174,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
             fileAsString = updateWPA(wifiConfig, fileAsString);
         } else {
-            s_logger.error(
+            logger.error(
                     "Unsupported security type: {}. It must be WifiSecurity.NONE, WifiSecurity.SECURITY_NONE, WifiSecurity.SECURITY_WEP, WifiSecurity.SECURITY_WPA, or WifiSecurity.SECURITY_WPA2",
                     wifiConfig.getSecurity());
             throw KuraException.internalError("unsupported security type: " + wifiConfig.getSecurity());
@@ -306,7 +306,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             fileAsString = fileAsString.replaceFirst("KURA_DRIVER", interfaceDriver);
         } else {
             String drv = Hostapd.getDriver(interfaceName);
-            s_logger.warn("The 'driver' parameter must be set: setting to: {}", drv);
+            logger.warn("The 'driver' parameter must be set: setting to: {}", drv);
             fileAsString = fileAsString.replaceFirst("KURA_DRIVER", drv);
             // throw KuraException.internalError("the driver name can not be null");
         }
@@ -419,7 +419,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
                 try {
                     fos.close();
                 } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
+                    logger.error("I/O Exception while closing BufferedReader!");
                 }
             }
             if (pw != null) {
@@ -433,14 +433,14 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         File file = getFinalFile(ifaceName);
         if (!FileUtils.contentEquals(tmpFile, file)) {
             if (tmpFile.renameTo(file)) {
-                s_logger.trace("Successfully wrote hostapd.conf file");
+                logger.trace("Successfully wrote hostapd.conf file");
             } else {
-                s_logger.error("Failed to write hostapd.conf file");
+                logger.error("Failed to write hostapd.conf file");
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                         "error while building up new configuration file for hostapd");
             }
         } else {
-            s_logger.info("Not rewriting hostapd.conf file because it is the same");
+            logger.info("Not rewriting hostapd.conf file because it is the same");
         }
     }
 

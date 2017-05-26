@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 
 public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(IfcfgConfigReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(IfcfgConfigReader.class);
 
     private static final String REDHAT_NET_CONFIGURATION_DIRECTORY = "/etc/sysconfig/network-scripts/";
     private static final String DEBIAN_NET_CONFIGURATION_DIRECTORY = "/etc/network/";
@@ -88,8 +88,9 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 
     private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
             Properties kuraExtendedProps) throws KuraException {
+
         String interfaceName = netInterfaceConfig.getName();
-        s_logger.debug("Getting config for {}", interfaceName);
+        logger.debug("Getting config for {}", interfaceName);
 
         NetInterfaceType type = netInterfaceConfig.getType();
         if (type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI || type == NetInterfaceType.LOOPBACK) {
@@ -103,8 +104,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
             } else {
                 netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
             }
-            s_logger.debug(
-                    "Setting NetInterfaceStatus to " + netInterfaceStatus + " for " + netInterfaceConfig.getName());
+            logger.debug("Setting NetInterfaceStatus to {} for {}", netInterfaceStatus, netInterfaceConfig.getName());
 
             boolean autoConnect = false;
             // int mtu = -1; // MTU is not currently used
@@ -129,10 +129,10 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                 if (kuraProps != null) {
                     String onBoot = kuraProps.getProperty("ONBOOT");
                     if ("yes".equals(onBoot)) {
-                        s_logger.debug("Setting autoConnect to true");
+                        logger.debug("Setting autoConnect to true");
                         autoConnect = true;
                     } else {
-                        s_logger.debug("Setting autoConnect to false");
+                        logger.debug("Setting autoConnect to false");
                         autoConnect = false;
                     }
 
@@ -187,18 +187,18 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                         kuraProps.getProperty("BROADCAST");
                         try {
                             gateway = kuraProps.getProperty("GATEWAY");
-                            s_logger.debug("got gateway for " + interfaceName + ": " + gateway);
+                            logger.debug("got gateway for {}: {}", interfaceName, gateway);
                         } catch (Exception e) {
-                            s_logger.warn("missing gateway stanza for " + interfaceName);
+                            logger.warn("missing gateway stanza for {}", interfaceName);
                         }
 
                         if ("dhcp".equals(bootproto)) {
-                            s_logger.debug("currently set for DHCP");
+                            logger.debug("currently set for DHCP");
                             dhcp = true;
                             ipAddress = null;
                             netmask = null;
                         } else {
-                            s_logger.debug("currently set for static address");
+                            logger.debug("currently set for static address");
                             dhcp = false;
                         }
                     } catch (Exception e) {
@@ -210,7 +210,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                         try {
                             address = (IP4Address) IPAddress.parseHostAddress(ipAddress);
                         } catch (UnknownHostException e) {
-                            s_logger.warn("Error parsing address: " + ipAddress, e);
+                            logger.warn("Error parsing address: " + ipAddress, e);
                         }
                     }
 
@@ -264,7 +264,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 
                     NetConfigIP4 netConfig = new NetConfigIP4(netInterfaceStatus, autoConnect);
                     setNetConfigIP4(netConfig, autoConnect, dhcp, address, gateway, prefixString, netmask, kuraProps);
-                    s_logger.debug("NetConfig: {}", netConfig);
+                    logger.debug("NetConfig: {}", netConfig);
                     netConfigs.add(netConfig);
                 }
             }
@@ -312,13 +312,13 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
             }
 
         } catch (Exception e) {
-            s_logger.error("Could not get configuration for " + interfaceName, e);
+            logger.error("Could not get configuration for " + interfaceName, e);
         } finally {
             if (fis != null) {
                 try {
                     fis.close();
                 } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!", ex);
+                    logger.error("I/O Exception while closing BufferedReader!", ex);
                 }
             }
         }
@@ -345,7 +345,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                             // must be a line stating that interface starts on
                             // boot
                             if ("auto".equals(args[0]) && args[1].equals(interfaceName)) {
-                                s_logger.debug("Setting ONBOOT to yes for " + interfaceName);
+                                logger.debug("Setting ONBOOT to yes for {}", interfaceName);
                                 kuraProps.setProperty("ONBOOT", "yes");
                             }
                             // once the correct interface is found, read all
@@ -417,7 +417,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                                 break;
                             }
                         } catch (Exception e) {
-                            s_logger.warn("Possible malformed configuration file for " + interfaceName, e);
+                            logger.warn("Possible malformed configuration file for " + interfaceName, e);
                         }
                     }
                 }
@@ -443,7 +443,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                     try {
                         dnsServers.add((IP4Address) IPAddress.parseHostAddress(dns));
                     } catch (UnknownHostException e) {
-                        s_logger.error("Could not parse address: " + dns, e);
+                        logger.error("Could not parse address: " + dns, e);
                     }
                     count++;
                 } else {
@@ -459,7 +459,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                     try {
                         netConfig.setGateway((IP4Address) IPAddress.parseHostAddress(gateway));
                     } catch (UnknownHostException e) {
-                        s_logger.error("Could not parse address: " + gateway, e);
+                        logger.error("Could not parse address: " + gateway, e);
                     }
                 }
                 if (prefixString != null) {
@@ -482,7 +482,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
             try {
                 dnsServers = linuxDns.getDhcpDnsServers(interfaceName, address);
             } catch (KuraException e) {
-                s_logger.error("Error getting DHCP DNS servers", e);
+                logger.error("Error getting DHCP DNS servers", e);
             }
         }
 

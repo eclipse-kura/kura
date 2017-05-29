@@ -27,21 +27,6 @@
 		<module>p2-repo-test-deps</module>
 	</modules>
 
-	<profiles>
-		<profile>
-			<id>dio-skip</id>
-			<activation>
-				<property>
-					<name>dio.skip</name>
-					<value>true</value>
-				</property>
-			</activation>
-			<properties>
-				<org.eclipse.kura.dio.skip>true</org.eclipse.kura.dio.skip>
-			</properties>
-		</profile>
-	</profiles>
-
 	<repositories>
 		<repository>
 			<id>kura_addons</id>

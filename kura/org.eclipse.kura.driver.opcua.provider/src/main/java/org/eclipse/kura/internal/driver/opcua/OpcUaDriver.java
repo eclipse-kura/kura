@@ -92,12 +92,6 @@ public final class OpcUaDriver implements Driver {
     /** Localization Resource. */
     private static final OpcUaMessages message = LocalizationAdapter.adapt(OpcUaMessages.class);
 
-    /** Node Identifier Property */
-    private static final String NODE_ID = "node.id";
-
-    /** Node Namespace Index Property */
-    private static final String NODE_NAMESPACE_INDEX = "node.namespace.index";
-
     /** OPC-UA Client Connector */
     private OpcUaClient client;
 
@@ -319,11 +313,11 @@ public final class OpcUaDriver implements Driver {
 
     private void runReadRequest(OpcUaRequestInfo requestInfo) {
         ChannelRecord record = requestInfo.channelRecord;
-        final NodeId nodeId = new NodeId(requestInfo.nodeNamespaceIndex, requestInfo.nodeId);
-        final VariableNode node = this.client.getAddressSpace().createVariableNode(nodeId);
+        final VariableNode node = this.client.getAddressSpace().createVariableNode(requestInfo.nodeId);
         Object readResult = null;
         try {
-            logger.debug("reading: ns={};s={}..", requestInfo.nodeNamespaceIndex, requestInfo.nodeId);
+            logger.debug("reading:  namespace index: {} node id: {}", requestInfo.nodeNamespaceIndex,
+                    requestInfo.nodeId);
             readResult = extractValue(runSafe(node.readValue()));
             logger.debug("Read Successful");
         } catch (final Exception e) {
@@ -393,11 +387,11 @@ public final class OpcUaDriver implements Driver {
     private void runWriteRequest(OpcUaRequestInfo requestInfo) {
         ChannelRecord record = requestInfo.channelRecord;
         final TypedValue<?> value = record.getValue();
-        final NodeId nodeId = new NodeId(requestInfo.nodeNamespaceIndex, requestInfo.nodeId);
-        final VariableNode node = this.client.getAddressSpace().createVariableNode(nodeId);
+        final VariableNode node = this.client.getAddressSpace().createVariableNode(requestInfo.nodeId);
         final DataValue newValue = new DataValue(new Variant(value.getValue()));
         try {
-            logger.debug("writing: {} to ns={};s={}..", value, requestInfo.nodeNamespaceIndex, requestInfo.nodeId);
+            logger.debug("writing: {} namespace index: {} node id: {}..", value, requestInfo.nodeNamespaceIndex,
+                    requestInfo.nodeId);
             checkStatus(runSafe(node.writeValue(newValue)));
             record.setChannelStatus(new ChannelStatus(SUCCESS));
             logger.debug("Write Successful");
@@ -426,11 +420,11 @@ public final class OpcUaDriver implements Driver {
 
         private final DataType dataType;
         private final int nodeNamespaceIndex;
-        private final String nodeId;
+        private final NodeId nodeId;
         private final ChannelRecord channelRecord;
 
         public OpcUaRequestInfo(final ChannelRecord channelRecord, final DataType dataType,
-                final int nodeNamespaceIndex, final String nodeId) {
+                final int nodeNamespaceIndex, final NodeId nodeId) {
             this.dataType = dataType;
             this.nodeNamespaceIndex = nodeNamespaceIndex;
             this.nodeId = nodeId;
@@ -444,20 +438,28 @@ public final class OpcUaDriver implements Driver {
 
         public static Optional<OpcUaRequestInfo> extract(final ChannelRecord record) {
             final Map<String, Object> channelConfig = record.getChannelConfig();
-            int nodeNamespaceIndex;
-            String nodeId;
+            final int nodeNamespaceIndex;
+            final NodeIdType nodeIdType;
+            final NodeId nodeId;
 
             try {
-                nodeId = channelConfig.get(NODE_ID).toString();
+                nodeNamespaceIndex = OpcUaChannelDescriptor.getNodeNamespaceIndex(channelConfig);
             } catch (final Exception e) {
-                fail(record, message.errorRetrievingNodeId());
+                fail(record, message.errorRetrievingNodeNamespace());
                 return Optional.empty();
             }
 
             try {
-                nodeNamespaceIndex = Integer.parseInt(channelConfig.get(NODE_NAMESPACE_INDEX).toString());
+                nodeIdType = OpcUaChannelDescriptor.getNodeIdType(channelConfig);
             } catch (final Exception e) {
-                fail(record, message.errorRetrievingNodeNamespace());
+                fail(record, message.errorRetrievingNodeIdType());
+                return Optional.empty();
+            }
+
+            try {
+                nodeId = OpcUaChannelDescriptor.getNodeId(channelConfig, nodeNamespaceIndex, nodeIdType);
+            } catch (final Exception e) {
+                fail(record, message.errorRetrievingNodeId());
                 return Optional.empty();
             }
 

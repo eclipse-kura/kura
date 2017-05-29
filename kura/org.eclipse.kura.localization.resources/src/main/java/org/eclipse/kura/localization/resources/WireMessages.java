@@ -607,7 +607,7 @@ public interface WireMessages {
     @En("Updating Regex Filter...Done")
     public String updatingRegexFilterDone();
 
-    @En("Updating DB Wire Record Store with...")
+    @En("Updating DB Wire Record Store...")
     public String updatingStore();
 
     @En("Updating DB Wire Record Store...Done")

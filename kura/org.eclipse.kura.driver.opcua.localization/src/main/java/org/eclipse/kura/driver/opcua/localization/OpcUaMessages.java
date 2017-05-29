@@ -21,12 +21,6 @@ import com.github.rodionmoiseev.c10n.annotations.En;
  */
 public interface OpcUaMessages {
 
-    @En("Activating OPC-UA Driver.....")
-    public String activating();
-
-    @En("Activating OPC-UA Driver.....Done")
-    public String activatingDone();
-
     @En("Connecting to OPC-UA...")
     public String connecting();
 
@@ -38,12 +32,6 @@ public interface OpcUaMessages {
 
     @En("Crypto Service cannot be null")
     public String cryptoServiceNonNull();
-
-    @En("Deactivating OPC-UA Driver.....")
-    public String deactivating();
-
-    @En("Deactivating OPC-UA Driver.....Done")
-    public String deactivatingDone();
 
     @En("Disconnecting from OPC-UA...")
     public String disconnecting();
@@ -59,6 +47,9 @@ public interface OpcUaMessages {
 
     @En("Error while retrieving Node ID")
     public String errorRetrievingNodeId();
+
+    @En("Error while retrieving Node ID type")
+    public String errorRetrievingNodeIdType();
 
     @En("Error while retrieving Node Namespace index")
     public String errorRetrievingNodeNamespace();
@@ -86,12 +77,6 @@ public interface OpcUaMessages {
 
     @En("Channel Record list cannot be null")
     public String recordListNonNull();
-
-    @En("Updating OPC-UA Driver.....")
-    public String updating();
-
-    @En("Updating OPC-UA Driver.....Done")
-    public String updatingDone();
 
     @En("Value cannot be null")
     public String valueNonNull();

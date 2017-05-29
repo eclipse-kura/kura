@@ -143,7 +143,7 @@ final class OpcUaOptions {
     private final Map<String, Object> properties;
 
     /**
-     * Instantiates a new S7 PLC options.
+     * Instantiates a new OPCUA options.
      *
      * @param properties
      *            the properties

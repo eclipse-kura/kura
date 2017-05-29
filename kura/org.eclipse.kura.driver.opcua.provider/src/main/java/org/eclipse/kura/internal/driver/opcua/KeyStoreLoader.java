@@ -26,25 +26,18 @@ import java.security.cert.X509Certificate;
  */
 public final class KeyStoreLoader {
 
-    /** Keystore Certificate. */
     private final String certificate;
 
-    /** Keystore Client Alias. */
     private final String clientAlias;
 
-    /** Keystore Client Certificate. */
     private X509Certificate clientCertificate;
 
-    /** Keystore Key Pair. */
     private KeyPair clientKeyPair;
 
-    /** Keystore Type. */
     private final String keystoreType;
 
-    /** Keystore Password. */
     private final char[] password;
 
-    /** Keystore Server Alias. */
     @SuppressWarnings("unused")
     private final String serverAlias;
 
@@ -76,7 +69,7 @@ public final class KeyStoreLoader {
      *
      * @return the client certificate
      */
-    public X509Certificate getClientCertificate() {
+    X509Certificate getClientCertificate() {
         return this.clientCertificate;
     }
 
@@ -85,7 +78,7 @@ public final class KeyStoreLoader {
      *
      * @return the client key pair
      */
-    public KeyPair getClientKeyPair() {
+    KeyPair getClientKeyPair() {
         return this.clientKeyPair;
     }
 
@@ -96,7 +89,7 @@ public final class KeyStoreLoader {
      * @throws Exception
      *             if the load is unsuccessful
      */
-    public KeyStoreLoader load() throws Exception {
+    KeyStoreLoader load() throws Exception {
         final KeyStore keyStore = KeyStore.getInstance(this.keystoreType);
         keyStore.load(Files.newInputStream(Paths.get(this.certificate)), this.password);
         final Key clientPrivateKey = keyStore.getKey(this.clientAlias, this.password);

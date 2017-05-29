@@ -6,6 +6,6 @@ Bundle-Version: 1.0.100.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v1.0
 Bundle-Category: Localization
-Fragment-Host: org.eclipse.kura.localization;bundle-version="1.0.100"
+Fragment-Host: org.eclipse.kura.localization;bundle-version="[1.0, 2.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: org.eclipse.kura.driver.opcua.localization;version="1.0.0"
+Export-Package: org.eclipse.kura.driver.opcua.localization;version="1.1.0"

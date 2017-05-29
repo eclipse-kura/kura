@@ -198,7 +198,7 @@ public final class DbWireRecordFilter implements WireEmitter, WireReceiver, Conf
                 dataRecords.add(wireRecord);
             }
 
-            logger.info(message.refreshed());
+            logger.debug(message.refreshed());
         } catch (final SQLException e) {
             throw e;
         } finally {

@@ -47,13 +47,13 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.usb4java</artifactId>
-            <version>[1.0,2.0)</version>
+            <version>1.2.100</version>
         </dependency>
 
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.soda.dk.comm</artifactId>
-            <version>1.2.4-SNAPSHOT</version>
+            <version>1.2.100</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.eclipse.tycho</groupId>
@@ -65,7 +65,7 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>usb4java-javax</artifactId>
-            <version>[1.0,2.0)</version>
+            <version>1.2.100</version>
         </dependency>
 
         <dependency>

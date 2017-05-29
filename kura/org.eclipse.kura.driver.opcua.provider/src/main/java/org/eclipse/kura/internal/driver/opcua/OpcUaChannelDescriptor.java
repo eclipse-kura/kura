@@ -90,11 +90,11 @@ public final class OpcUaChannelDescriptor implements ChannelDescriptor {
         return elements;
     }
 
-    public static int getNodeNamespaceIndex(Map<String, Object> properties) {
+    static int getNodeNamespaceIndex(Map<String, Object> properties) {
         return Integer.parseInt((String) properties.get(NODE_NAMESPACE_INDEX));
     }
 
-    public static NodeIdType getNodeIdType(Map<String, Object> properties) {
+    static NodeIdType getNodeIdType(Map<String, Object> properties) {
         String nodeIdType = (String) properties.get(NODE_ID_TYPE);
         if (NodeIdType.NUMERIC.name().equals(nodeIdType)) {
             return NodeIdType.NUMERIC;
@@ -108,7 +108,7 @@ public final class OpcUaChannelDescriptor implements ChannelDescriptor {
         throw new IllegalArgumentException();
     }
 
-    public static NodeId getNodeId(Map<String, Object> properties, int nodeNamespaceIndex, NodeIdType nodeIdType) {
+    static NodeId getNodeId(Map<String, Object> properties, int nodeNamespaceIndex, NodeIdType nodeIdType) {
         String nodeIdString = (String) properties.get(NODE_ID);
         switch (nodeIdType) {
         case NUMERIC:

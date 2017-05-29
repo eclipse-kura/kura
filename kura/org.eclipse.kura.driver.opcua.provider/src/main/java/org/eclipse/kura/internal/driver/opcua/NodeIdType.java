@@ -10,7 +10,7 @@
 
 package org.eclipse.kura.internal.driver.opcua;
 
-public enum NodeIdType {
+enum NodeIdType {
     NUMERIC,
     STRING,
     GUID,

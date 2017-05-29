@@ -119,9 +119,9 @@ public final class OpcUaDriver implements Driver {
      *            the service properties
      */
     protected synchronized void activate(final Map<String, Object> properties) {
-        logger.debug(message.activating());
+        logger.debug("Activating OPC-UA Driver...");
         this.extractProperties(properties);
-        logger.debug(message.activatingDone());
+        logger.debug("Activating OPC-UA Driver... Done");
     }
 
     /**
@@ -176,8 +176,9 @@ public final class OpcUaDriver implements Driver {
             logger.debug("Fetching endpoint descriptions");
             final EndpointDescription[] endpoints = runSafe(UaTcpStackClient.getEndpoints(endpointString));
 
-            final EndpointDescription endpoint = Arrays.stream(endpoints).filter(
-                    e -> e.getSecurityPolicyUri().equals(this.options.getSecurityPolicy().getSecurityPolicyUri()))
+            final EndpointDescription endpoint = Arrays.stream(endpoints)
+                    .filter(e -> e.getSecurityPolicyUri()
+                            .equals(this.options.getSecurityPolicy().getSecurityPolicyUri()))
                     .findFirst().orElseThrow(() -> new ConnectionException(message.connectionProblem()));
 
             final KeyStoreLoader loader = new KeyStoreLoader(this.options.getKeystoreType(),
@@ -214,14 +215,14 @@ public final class OpcUaDriver implements Driver {
      *
      */
     protected synchronized void deactivate() {
-        logger.debug(message.deactivating());
+        logger.debug("Deactivating OPC-UA Driver...");
         try {
             this.disconnect();
         } catch (final ConnectionException e) {
             logger.error(message.errorDisconnecting(), e);
         }
         this.client = null;
-        logger.debug(message.deactivatingDone());
+        logger.debug("Deactivating OPC-UA Driver... Done");
     }
 
     /** {@inheritDoc} */
@@ -372,7 +373,7 @@ public final class OpcUaDriver implements Driver {
      *            the properties
      */
     public synchronized void updated(final Map<String, Object> properties) {
-        logger.debug(message.updating());
+        logger.debug("Updating OPC-UA Driver...");
         if (nonNull(this.client)) {
             try {
                 disconnect();
@@ -381,7 +382,7 @@ public final class OpcUaDriver implements Driver {
             }
         }
         this.extractProperties(properties);
-        logger.debug(message.updatingDone());
+        logger.debug("Updating OPC-UA Driver... Done");
     }
 
     private void runWriteRequest(OpcUaRequestInfo requestInfo) {
@@ -489,7 +490,7 @@ public final class OpcUaDriver implements Driver {
 
     private class OpcUaPreparedRead implements PreparedRead {
 
-        private List<OpcUaRequestInfo> requestInfos = new ArrayList<OpcUaRequestInfo>();
+        private List<OpcUaRequestInfo> requestInfos = new ArrayList<>();
         private volatile List<ChannelRecord> channelRecords;
 
         @Override

@@ -109,13 +109,8 @@ public class DhcpServerManager {
 
     public static String getConfigFilename(String interfaceName) {
         StringBuilder sb = new StringBuilder(FILE_DIR);
-        if (dhcpServerTool == DhcpServerTool.DHCPD) {
-            sb.append(DhcpServerTool.DHCPD.getValue());
-            sb.append('-');
-            sb.append(interfaceName);
-            sb.append(".conf");
-        } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
-            sb.append(DhcpServerTool.UDHCPD.getValue());
+        if (dhcpServerTool == DhcpServerTool.DHCPD || dhcpServerTool == DhcpServerTool.UDHCPD) {
+            sb.append(dhcpServerTool.getValue());
             sb.append('-');
             sb.append(interfaceName);
             sb.append(".conf");
@@ -132,13 +127,8 @@ public class DhcpServerManager {
 
     public static String getPidFilename(String interfaceName) {
         StringBuilder sb = new StringBuilder(PID_FILE_DIR);
-        if (dhcpServerTool == DhcpServerTool.DHCPD) {
-            sb.append(DhcpServerTool.DHCPD.getValue());
-            sb.append('-');
-            sb.append(interfaceName);
-            sb.append(".pid");
-        } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
-            sb.append(DhcpServerTool.UDHCPD.getValue());
+        if (dhcpServerTool == DhcpServerTool.DHCPD || dhcpServerTool == DhcpServerTool.UDHCPD) {
+            sb.append(dhcpServerTool.getValue());
             sb.append('-');
             sb.append(interfaceName);
             sb.append(".pid");

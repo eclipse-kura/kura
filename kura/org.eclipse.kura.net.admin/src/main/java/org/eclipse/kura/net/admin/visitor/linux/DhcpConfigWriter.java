@@ -63,9 +63,21 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
             if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
                     || netInterfaceConfig.getType() == NetInterfaceType.WIFI) {
                 writeConfig(netInterfaceConfig);
-                writeKuraExtendedConfig(netInterfaceConfig, KuranetConfig.getProperties());
+                writeKuraExtendedConfig(netInterfaceConfig, getKuranetProperties());
             }
         }
+    }
+
+    protected String getConfigFilename(String interfaceName) {
+        return DhcpServerManager.getConfigFilename(interfaceName);
+    }
+
+    protected Properties getKuranetProperties() {
+        return KuranetConfig.getProperties();
+    }
+
+    protected void storeKuranetProperties(Properties kuraExtendedProps) throws IOException, KuraException {
+        KuranetConfig.storeProperties(kuraExtendedProps);
     }
 
     /*
@@ -91,7 +103,7 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
          * StringBuffer().append(FILE_DIR).append("dhcpd-").append(interfaceName).append(".conf").append(".tmp").
          * toString();
          */
-        String dhcpConfigFileName = DhcpServerManager.getConfigFilename(interfaceName);
+        String dhcpConfigFileName = getConfigFilename(interfaceName);
         String tmpDhcpConfigFileName = new StringBuilder(dhcpConfigFileName).append(".tmp").toString();
 
         s_logger.debug("Writing DHCP config for {}", interfaceName);
@@ -162,6 +174,17 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
                 pw.println("opt subnet " + dhcpServerConfig.getSubnetMask().getHostAddress());
                 pw.println("opt router " + dhcpServerConfig.getRouterAddress().getHostAddress());
                 pw.println("opt lease " + dhcpServerConfig.getDefaultLeaseTime());
+
+                if (!dhcpServerConfig.getDnsServers().isEmpty()) {
+                    StringBuilder sb = new StringBuilder();
+                    for (IPAddress address : dhcpServerConfig.getDnsServers()) {
+                        if (address == null) {
+                            continue;
+                        }
+                        sb.append(address.getHostAddress()).append(" ");
+                    }
+                    pw.println("opt dns " + sb.toString().trim());
+                }
             }
             pw.flush();
             fos.getFD().sync();
@@ -226,7 +249,7 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
         // write it
         if (kuraExtendedProps != null && !kuraExtendedProps.isEmpty()) {
             try {
-                KuranetConfig.storeProperties(kuraExtendedProps);
+                storeKuranetProperties(kuraExtendedProps);
             } catch (Exception e) {
                 throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
             }

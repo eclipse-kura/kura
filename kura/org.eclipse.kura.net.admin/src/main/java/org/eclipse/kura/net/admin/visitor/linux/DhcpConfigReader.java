@@ -65,11 +65,19 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
                 .getNetInterfaceConfigs();
 
-        Properties kuraExtendedProps = KuranetConfig.getProperties();
+        Properties kuraExtendedProps = getKuranetProperties();
 
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
             getConfig(netInterfaceConfig, kuraExtendedProps);
         }
+    }
+
+    protected String getConfigFilename(String interfaceName) {
+        return DhcpServerManager.getConfigFilename(interfaceName);
+    }
+
+    protected Properties getKuranetProperties() {
+        return KuranetConfig.getProperties();
     }
 
     private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
@@ -81,7 +89,7 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
         if (type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI) {
             // StringBuffer configFilename = new
             // StringBuffer(FILE_DIR).append("dhcpd-").append(interfaceName).append(".conf");
-            String configFilename = DhcpServerManager.getConfigFilename(interfaceName);
+            String configFilename = getConfigFilename(interfaceName);
             File dhcpConfigFile = new File(configFilename);
 
             if (dhcpConfigFile.exists()) {
@@ -227,13 +235,13 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
                     + " | passDns: " + passDns + " | dnsList: " + dnsList.toString());
 
             try {
-				DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(interfaceName, enabled, defaultLeaseTime, maxLeaseTime,
-						passDns);
-				DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, netmask, prefix, router, rangeStart,
-						rangeEnd, dnsList);
-				dhcpServerConfigIP4 = new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4);
+                DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(interfaceName, enabled, defaultLeaseTime, maxLeaseTime,
+                        passDns);
+                DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, netmask, prefix, router, rangeStart,
+                        rangeEnd, dnsList);
+                dhcpServerConfigIP4 = new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4);
             } catch (KuraException e) {
-            	s_logger.error("Failed to craete new DhcpServerConfigIP4 object - {}", e);
+                s_logger.error("Failed to craete new DhcpServerConfigIP4 object - {}", e);
             }
         } catch (FileNotFoundException e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
@@ -322,13 +330,13 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
                     + " | passDns: " + passDns + " | dnsList: " + dnsList.toString());
 
             try {
-            	DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(interfaceName, enabled, defaultLeaseTime, maxLeaseTime,
-						passDns);
-				DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, netmask, prefix, router, rangeStart,
-						rangeEnd, dnsList);
-				dhcpServerConfigIP4 = new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4);
+                DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(interfaceName, enabled, defaultLeaseTime, maxLeaseTime,
+                        passDns);
+                DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, netmask, prefix, router, rangeStart,
+                        rangeEnd, dnsList);
+                dhcpServerConfigIP4 = new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4);
             } catch (KuraException e) {
-            	s_logger.error("Failed to craete new DhcpServerConfigIP4 object - {}", e);
+                s_logger.error("Failed to craete new DhcpServerConfigIP4 object - {}", e);
             }
 
         } catch (Exception e) {

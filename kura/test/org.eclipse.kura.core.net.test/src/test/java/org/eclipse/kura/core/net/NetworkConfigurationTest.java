@@ -82,7 +82,7 @@ public class NetworkConfigurationTest {
         NetworkConfiguration config = new NetworkConfiguration(properties);
 
         assertTrue(config.getNetInterfaceConfigs().isEmpty());
-        assertEquals(true, TestUtil.getFieldValue(config, "m_recomputeProperties"));
+        assertEquals(true, TestUtil.getFieldValue(config, "recomputeProperties"));
     }
 
     @Test
@@ -112,7 +112,7 @@ public class NetworkConfigurationTest {
         interfaceConfig.setNetInterfaceAddresses(interfaceAddresses);
 
         assertEquals(interfaceConfig, config.getNetInterfaceConfigs().get(0));
-        assertEquals(true, TestUtil.getFieldValue(config, "m_recomputeProperties"));
+        assertEquals(true, TestUtil.getFieldValue(config, "recomputeProperties"));
     }
 
     @Test
@@ -140,7 +140,7 @@ public class NetworkConfigurationTest {
         interfaceConfig.setNetInterfaceAddresses(interfaceAddresses);
 
         assertEquals(interfaceConfig, config.getNetInterfaceConfigs().get(0));
-        assertEquals(true, TestUtil.getFieldValue(config, "m_recomputeProperties"));
+        assertEquals(true, TestUtil.getFieldValue(config, "recomputeProperties"));
     }
 
     @Test
@@ -154,51 +154,51 @@ public class NetworkConfigurationTest {
         assertEquals(2, config.getModifiedInterfaceNames().size());
         assertEquals("if1", config.getModifiedInterfaceNames().get(0));
         assertEquals("if2", config.getModifiedInterfaceNames().get(1));
-        assertEquals(true, TestUtil.getFieldValue(config, "m_recomputeProperties"));
+        assertEquals(true, TestUtil.getFieldValue(config, "recomputeProperties"));
     }
 
     @Test
     public void testModifiedInterfaceNames() throws NoSuchFieldException {
         NetworkConfiguration config = new NetworkConfiguration();
 
-        assertEquals(false, TestUtil.getFieldValue(config, "m_recomputeProperties"));
+        assertEquals(false, TestUtil.getFieldValue(config, "recomputeProperties"));
 
         List<String> modifiedInterfaceNames = new ArrayList<>();
         modifiedInterfaceNames.add("if1");
         modifiedInterfaceNames.add("if2");
         config.setModifiedInterfaceNames(modifiedInterfaceNames);
         assertEquals(modifiedInterfaceNames, config.getModifiedInterfaceNames());
-        assertEquals(true, TestUtil.getFieldValue(config, "m_recomputeProperties"));
+        assertEquals(true, TestUtil.getFieldValue(config, "recomputeProperties"));
 
         modifiedInterfaceNames.clear();
         modifiedInterfaceNames.add("if3");
         config.setModifiedInterfaceNames(modifiedInterfaceNames);
         assertEquals(modifiedInterfaceNames, config.getModifiedInterfaceNames());
-        assertEquals(true, TestUtil.getFieldValue(config, "m_recomputeProperties"));
+        assertEquals(true, TestUtil.getFieldValue(config, "recomputeProperties"));
     }
 
     @Test
     public void testModifiedInterfaceNamesNull() throws NoSuchFieldException {
         NetworkConfiguration config = new NetworkConfiguration();
 
-        assertEquals(false, TestUtil.getFieldValue(config, "m_recomputeProperties"));
+        assertEquals(false, TestUtil.getFieldValue(config, "recomputeProperties"));
 
         List<String> modifiedInterfaceNames = null;
         config.setModifiedInterfaceNames(modifiedInterfaceNames);
         assertNull(config.getModifiedInterfaceNames());
-        assertEquals(false, TestUtil.getFieldValue(config, "m_recomputeProperties"));
+        assertEquals(false, TestUtil.getFieldValue(config, "recomputeProperties"));
     }
 
     @Test
     public void testModifiedInterfaceNamesEmpty() throws NoSuchFieldException {
         NetworkConfiguration config = new NetworkConfiguration();
 
-        assertEquals(false, TestUtil.getFieldValue(config, "m_recomputeProperties"));
+        assertEquals(false, TestUtil.getFieldValue(config, "recomputeProperties"));
 
         List<String> modifiedInterfaceNames = new ArrayList<>();
         config.setModifiedInterfaceNames(modifiedInterfaceNames);
         assertNull(config.getModifiedInterfaceNames());
-        assertEquals(false, TestUtil.getFieldValue(config, "m_recomputeProperties"));
+        assertEquals(false, TestUtil.getFieldValue(config, "recomputeProperties"));
     }
 
     @Test
@@ -234,7 +234,7 @@ public class NetworkConfigurationTest {
 
         assertEquals(1, config.getNetInterfaceConfigs().size());
         assertEquals(interfaceConfig, config.getNetInterfaceConfigs().get(0));
-        assertEquals(true, TestUtil.getFieldValue(config, "m_recomputeProperties"));
+        assertEquals(true, TestUtil.getFieldValue(config, "recomputeProperties"));
     }
 
     @Test
@@ -757,24 +757,24 @@ public class NetworkConfigurationTest {
         List<NetInterfaceAddressConfig> interfaceAddresses = new ArrayList<>();
         NetInterfaceAddressConfigImpl addressConfig = new NetInterfaceAddressConfigImpl();
 
-		List<NetConfig> netConfigs = new ArrayList<>();
-		
-		try {
-			DhcpServerCfg dhcpServerCfg = new DhcpServerCfg("eth0", true, 7200, 7200, false);
-			DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4((IP4Address) IPAddress.parseHostAddress("192.168.1.0"), 
-					(IP4Address) IPAddress.parseHostAddress("255.255.255.0"), (short)24,
-					(IP4Address) IPAddress.parseHostAddress("192.168.1.1"), 
-					(IP4Address) IPAddress.parseHostAddress("192.168.1.100"), 
-					(IP4Address) IPAddress.parseHostAddress("192.168.1.254"), 
-					null);
-			
-			netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
-		} catch (Exception e) {
-			fail("failed: " + e);
-		}
-		netConfigs.add(new FirewallAutoNatConfig());
-		netConfigs.add(null);
-		netConfigs.add(new MockConfig());
+        List<NetConfig> netConfigs = new ArrayList<>();
+
+        try {
+            DhcpServerCfg dhcpServerCfg = new DhcpServerCfg("eth0", true, 7200, 7200, false);
+            DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(
+                    (IP4Address) IPAddress.parseHostAddress("192.168.1.0"),
+                    (IP4Address) IPAddress.parseHostAddress("255.255.255.0"), (short) 24,
+                    (IP4Address) IPAddress.parseHostAddress("192.168.1.1"),
+                    (IP4Address) IPAddress.parseHostAddress("192.168.1.100"),
+                    (IP4Address) IPAddress.parseHostAddress("192.168.1.254"), null);
+
+            netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
+        } catch (Exception e) {
+            fail("failed: " + e);
+        }
+        netConfigs.add(new FirewallAutoNatConfig());
+        netConfigs.add(null);
+        netConfigs.add(new MockConfig());
 
         addressConfig.setNetConfigs(netConfigs);
 
@@ -882,7 +882,7 @@ public class NetworkConfigurationTest {
     public void testGetConfigurationPropertiesNull() throws NoSuchFieldException {
         NetworkConfiguration config = new NetworkConfiguration();
 
-        assertEquals(false, TestUtil.getFieldValue(config, "m_recomputeProperties"));
+        assertEquals(false, TestUtil.getFieldValue(config, "recomputeProperties"));
         assertNull(config.getConfigurationProperties());
     }
 
@@ -893,9 +893,9 @@ public class NetworkConfigurationTest {
         EthernetInterfaceConfigImpl interfaceConfig = new EthernetInterfaceConfigImpl("if1");
         config.addNetInterfaceConfig(interfaceConfig);
 
-        assertEquals(true, TestUtil.getFieldValue(config, "m_recomputeProperties"));
+        assertEquals(true, TestUtil.getFieldValue(config, "recomputeProperties"));
         Map<String, Object> properties = config.getConfigurationProperties();
-        assertEquals(false, TestUtil.getFieldValue(config, "m_recomputeProperties"));
+        assertEquals(false, TestUtil.getFieldValue(config, "recomputeProperties"));
 
         Map<String, Object> expected = new HashMap<>();
         expected.put("net.interfaces", "if1");
@@ -1051,7 +1051,7 @@ public class NetworkConfigurationTest {
 
         TestUtil.invokePrivate(config, "recomputeNetworkProperties");
 
-        Map<String, Object> properties = (Map<String, Object>) TestUtil.getFieldValue(config, "m_properties");
+        Map<String, Object> properties = (Map<String, Object>) TestUtil.getFieldValue(config, "properties");
         assertMapEquals(expected, properties);
     }
 
@@ -1070,7 +1070,7 @@ public class NetworkConfigurationTest {
 
         TestUtil.invokePrivate(config, "recomputeNetworkProperties");
 
-        Map<String, Object> properties = (Map<String, Object>) TestUtil.getFieldValue(config, "m_properties");
+        Map<String, Object> properties = (Map<String, Object>) TestUtil.getFieldValue(config, "properties");
         assertMapEquals(expected, properties);
     }
 
@@ -1186,7 +1186,7 @@ public class NetworkConfigurationTest {
 
         TestUtil.invokePrivate(config, "recomputeNetworkProperties");
 
-        Map<String, Object> properties = (Map<String, Object>) TestUtil.getFieldValue(config, "m_properties");
+        Map<String, Object> properties = (Map<String, Object>) TestUtil.getFieldValue(config, "properties");
         assertMapEquals(expected, properties);
     }
 
@@ -1288,7 +1288,7 @@ public class NetworkConfigurationTest {
 
         TestUtil.invokePrivate(config, "recomputeNetworkProperties");
 
-        Map<String, Object> properties = (Map<String, Object>) TestUtil.getFieldValue(config, "m_properties");
+        Map<String, Object> properties = (Map<String, Object>) TestUtil.getFieldValue(config, "properties");
         assertMapEquals(expected, properties);
     }
 
@@ -1422,7 +1422,7 @@ public class NetworkConfigurationTest {
 
         TestUtil.invokePrivate(config, "recomputeNetworkProperties");
 
-        Map<String, Object> properties = (Map<String, Object>) TestUtil.getFieldValue(config, "m_properties");
+        Map<String, Object> properties = (Map<String, Object>) TestUtil.getFieldValue(config, "properties");
         assertMapEquals(expected, properties);
     }
 

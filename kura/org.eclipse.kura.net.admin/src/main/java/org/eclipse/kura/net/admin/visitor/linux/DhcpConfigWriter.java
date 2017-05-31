@@ -39,19 +39,16 @@ import org.slf4j.LoggerFactory;
 
 public class DhcpConfigWriter implements NetworkConfigurationVisitor {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(DhcpConfigWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(DhcpConfigWriter.class);
 
-    // private static final String FILE_DIR = "/etc/";
-    // private static final String PID_FILE_DIR = "/var/run/";
-
-    private static DhcpConfigWriter s_instance;
+    private static DhcpConfigWriter instance;
 
     public static DhcpConfigWriter getInstance() {
-        if (s_instance == null) {
-            s_instance = new DhcpConfigWriter();
+        if (instance == null) {
+            instance = new DhcpConfigWriter();
         }
 
-        return s_instance;
+        return instance;
     }
 
     @Override
@@ -80,68 +77,55 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
         KuranetConfig.storeProperties(kuraExtendedProps);
     }
 
-    /*
-     * private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws
-     * KuraException {
-     * DhcpServerTool dhcpServerTool = DhcpServerManager.getTool();
-     * if (dhcpServerTool == DhcpServerTool.DHCPD) {
-     * writeDhcpdConfig(netInterfaceConfig);
-     * } else if (dhcpServerTool == DhcpServerTool.DHCPD) {
-     * writeUdhcpdConfig(netInterfaceConfig);
-     * }
-     * }
-     */
-
     private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
         String interfaceName = netInterfaceConfig.getName();
 
-        /*
-         * String dhcpConfigFileName = new
-         * StringBuffer().append(FILE_DIR).append("dhcpd-").append(interfaceName).append(".conf").toString();
-         * String tmpDhcpConfigFileName = new
-         * StringBuffer().append(FILE_DIR).append("dhcpd-").append(interfaceName).append(".conf").append(".tmp").
-         * toString();
-         */
         String dhcpConfigFileName = getConfigFilename(interfaceName);
         String tmpDhcpConfigFileName = new StringBuilder(dhcpConfigFileName).append(".tmp").toString();
 
-        s_logger.debug("Writing DHCP config for {}", interfaceName);
+        logger.debug("Writing DHCP config for {}", interfaceName);
 
         List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
                 .getNetInterfaceAddresses();
 
-        if (netInterfaceAddressConfigs != null && netInterfaceAddressConfigs.size() > 0) {
+        if (netInterfaceAddressConfigs != null && !netInterfaceAddressConfigs.isEmpty()) {
             for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-                List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
+                writeNetInterfaceConfig(interfaceName, dhcpConfigFileName, tmpDhcpConfigFileName,
+                        netInterfaceAddressConfig);
+            }
+        }
+    }
 
-                if (netConfigs != null) {
-                    for (NetConfig netConfig : netConfigs) {
-                        if (netConfig instanceof DhcpServerConfig4) {
-                            DhcpServerConfig4 dhcpServerConfig = (DhcpServerConfig4) netConfig;
-                            writeConfigFile(tmpDhcpConfigFileName, interfaceName, dhcpServerConfig);
-                            // move the file if we made it this far and they are different
-                            File tmpDhcpConfigFile = new File(tmpDhcpConfigFileName);
-                            File dhcpConfigFile = new File(dhcpConfigFileName);
-                            try {
-                                if (!FileUtils.contentEquals(tmpDhcpConfigFile, dhcpConfigFile)) {
-                                    if (tmpDhcpConfigFile.renameTo(dhcpConfigFile)) {
-                                        s_logger.trace("Successfully wrote DHCP config file");
-                                    } else {
-                                        s_logger.error("Failed to write DHCP config file for " + interfaceName);
-                                        throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
-                                                "error while building up new configuration files for dhcp server: "
-                                                        + interfaceName);
-                                    }
-                                } else {
-                                    s_logger.info("Not rewriting DHCP config file for " + interfaceName
-                                            + " because it is the same");
-                                }
-                            } catch (IOException e) {
+    private void writeNetInterfaceConfig(String interfaceName, String dhcpConfigFileName, String tmpDhcpConfigFileName,
+            NetInterfaceAddressConfig netInterfaceAddressConfig) throws KuraException {
+        List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
+
+        if (netConfigs != null) {
+            for (NetConfig netConfig : netConfigs) {
+                if (netConfig instanceof DhcpServerConfig4) {
+                    DhcpServerConfig4 dhcpServerConfig = (DhcpServerConfig4) netConfig;
+                    writeConfigFile(tmpDhcpConfigFileName, interfaceName, dhcpServerConfig);
+                    // move the file if we made it this far and they are different
+                    File tmpDhcpConfigFile = new File(tmpDhcpConfigFileName);
+                    File dhcpConfigFile = new File(dhcpConfigFileName);
+                    try {
+                        if (!FileUtils.contentEquals(tmpDhcpConfigFile, dhcpConfigFile)) {
+                            if (tmpDhcpConfigFile.renameTo(dhcpConfigFile)) {
+                                logger.trace("Successfully wrote DHCP config file");
+                            } else {
+                                logger.error("Failed to write DHCP config file for " + interfaceName);
                                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
-                                        "error while building up new configuration files for dhcp servers", e);
+                                        "error while building up new configuration files for dhcp server: "
+                                                + interfaceName);
                             }
+                        } else {
+                            logger.info("Not rewriting DHCP config file for " + interfaceName
+                                    + " because it is the same");
                         }
+                    } catch (IOException e) {
+                        throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
+                                "error while building up new configuration files for dhcp servers", e);
                     }
                 }
             }
@@ -150,12 +134,8 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
 
     private void writeConfigFile(String configFileName, String ifaceName, DhcpServerConfig4 dhcpServerConfig)
             throws KuraException {
-        FileOutputStream fos = null;
-        PrintWriter pw = null;
-        try {
-            fos = new FileOutputStream(configFileName);
-            pw = new PrintWriter(fos);
-            s_logger.trace("writing to {} with: {}", configFileName, dhcpServerConfig.toString());
+        try (FileOutputStream fos = new FileOutputStream(configFileName); PrintWriter pw = new PrintWriter(fos)) {
+            logger.trace("writing to {} with: {}", configFileName, dhcpServerConfig.toString());
             DhcpServerTool dhcpServerTool = DhcpServerManager.getTool();
             if (dhcpServerTool == DhcpServerTool.DHCPD) {
                 pw.print(dhcpServerConfig.toString());
@@ -175,33 +155,26 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
                 pw.println("opt router " + dhcpServerConfig.getRouterAddress().getHostAddress());
                 pw.println("opt lease " + dhcpServerConfig.getDefaultLeaseTime());
 
-                if (!dhcpServerConfig.getDnsServers().isEmpty()) {
-                    StringBuilder sb = new StringBuilder();
-                    for (IPAddress address : dhcpServerConfig.getDnsServers()) {
-                        if (address == null) {
-                            continue;
-                        }
-                        sb.append(address.getHostAddress()).append(" ");
-                    }
-                    pw.println("opt dns " + sb.toString().trim());
-                }
+                addDNSServersOption(dhcpServerConfig, pw);
             }
             pw.flush();
             fos.getFD().sync();
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                     "error while building up new configuration files for dhcp servers", e);
-        } finally {
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException ex) {
-                    s_logger.warn("Error while closing FileOutputStream");
+        }
+    }
+
+    private void addDNSServersOption(DhcpServerConfig4 dhcpServerConfig, PrintWriter pw) {
+        if (!dhcpServerConfig.getDnsServers().isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (IPAddress address : dhcpServerConfig.getDnsServers()) {
+                if (address == null) {
+                    continue;
                 }
+                sb.append(address.getHostAddress()).append(" ");
             }
-            if (pw != null) {
-                pw.close();
-            }
+            pw.println("opt dns " + sb.toString().trim());
         }
     }
 
@@ -216,13 +189,13 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
         } else if (netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
             netInterfaceAddressConfigs = ((WifiInterfaceConfigImpl) netInterfaceConfig).getNetInterfaceAddresses();
         } else {
-            s_logger.error("not adding config for " + netInterfaceConfig.getName());
+            logger.error("not adding config for " + netInterfaceConfig.getName());
         }
 
-        if (netInterfaceAddressConfigs != null && netInterfaceAddressConfigs.size() > 0) {
+        if (netInterfaceAddressConfigs != null && !netInterfaceAddressConfigs.isEmpty()) {
             for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
                 List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-                if (netConfigs != null && netConfigs.size() > 0) {
+                if (netConfigs != null && !netConfigs.isEmpty()) {
                     for (int i = 0; i < netConfigs.size(); i++) {
                         NetConfig netConfig = netConfigs.get(i);
                         if (netConfig instanceof DhcpServerConfig4) {
@@ -236,7 +209,7 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
 
         // set it all
         if (kuraExtendedProps == null) {
-            s_logger.debug("kuraExtendedProps was null");
+            logger.debug("kuraExtendedProps was null");
             kuraExtendedProps = new Properties();
         }
         StringBuilder sb = new StringBuilder().append("net.interface.").append(netInterfaceConfig.getName())

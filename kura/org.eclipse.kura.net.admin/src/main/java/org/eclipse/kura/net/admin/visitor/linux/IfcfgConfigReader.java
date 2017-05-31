@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -47,9 +47,10 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 
     private static final Logger s_logger = LoggerFactory.getLogger(IfcfgConfigReader.class);
 
-    private static final String OS_VERSION = System.getProperty("kura.os.version");
     private static final String REDHAT_NET_CONFIGURATION_DIRECTORY = "/etc/sysconfig/network-scripts/";
     private static final String DEBIAN_NET_CONFIGURATION_DIRECTORY = "/etc/network/";
+
+    private static String OS_VERSION = System.getProperty("kura.os.version");
 
     private static IfcfgConfigReader s_instance;
 
@@ -66,11 +67,23 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
                 .getNetInterfaceConfigs();
 
-        Properties kuraExtendedProps = KuranetConfig.getProperties();
+        Properties kuraExtendedProps = getKuranetProperties();
 
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
             getConfig(netInterfaceConfig, kuraExtendedProps);
         }
+    }
+
+    protected Properties getKuranetProperties() {
+        return KuranetConfig.getProperties();
+    }
+
+    protected String getIfcfgDirectory() {
+        if (isDebian()) {
+            return DEBIAN_NET_CONFIGURATION_DIRECTORY;
+        }
+
+        return REDHAT_NET_CONFIGURATION_DIRECTORY;
     }
 
     private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
@@ -103,34 +116,12 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
             String gateway = null;
 
             File ifcfgFile = null;
-            if (OS_VERSION
-                    .equals(KuraConstants.Mini_Gateway.getImageName() + "_"
-                            + KuraConstants.Mini_Gateway.getImageVersion())
-                    || OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
-                    || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
-                    || OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_"
-                            + KuraConstants.Intel_Edison.getImageVersion() + "_"
-                            + KuraConstants.Intel_Edison.getTargetName())
-                    || OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
-                            + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
-                ifcfgFile = new File(DEBIAN_NET_CONFIGURATION_DIRECTORY + "interfaces");
-            } else {
-                ifcfgFile = new File(REDHAT_NET_CONFIGURATION_DIRECTORY + "ifcfg-" + interfaceName);
-            }
+            ifcfgFile = getIfcfgFile(interfaceName);
 
             if (ifcfgFile.exists()) {
                 Properties kuraProps;
                 // found our match so load the properties
-                if (OS_VERSION
-                        .equals(KuraConstants.Mini_Gateway.getImageName() + "_"
-                                + KuraConstants.Mini_Gateway.getImageVersion())
-                        || OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
-                        || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
-                        || OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_"
-                                + KuraConstants.Intel_Edison.getImageVersion() + "_"
-                                + KuraConstants.Intel_Edison.getTargetName())
-                        || OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
-                                + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
+                if (isDebian()) {
                     kuraProps = parseDebianConfigFile(ifcfgFile, interfaceName);
                 } else {
                     kuraProps = parseRedhatConfigFile(ifcfgFile, interfaceName);
@@ -281,6 +272,30 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         }
     }
 
+    private boolean isDebian() {
+        return OS_VERSION
+                .equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())
+                || OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
+                || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
+                || OS_VERSION.equals(
+                        KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion()
+                                + "_" + KuraConstants.Intel_Edison.getTargetName())
+                || OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
+                        + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion());
+    }
+
+    private File getIfcfgFile(String interfaceName) {
+        String fileName = getIfcfgDirectory();
+
+        if (isDebian()) {
+            fileName += "/interfaces";
+        } else {
+            fileName += "/ifcfg-" + interfaceName;
+        }
+
+        return new File(fileName);
+    }
+
     private Properties parseRedhatConfigFile(File ifcfgFile, String interfaceName) {
         Properties kuraProps = new Properties();
         FileInputStream fis = null;
@@ -313,9 +328,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 
     static Properties parseDebianConfigFile(File ifcfgFile, String interfaceName) throws KuraException {
         Properties kuraProps = new Properties();
-        Scanner scanner = null;
-        try {
-            scanner = new Scanner(new FileInputStream(ifcfgFile));
+        try (Scanner scanner = new Scanner(new FileInputStream(ifcfgFile))) {
 
             // Debian specific routine to create Properties object
             kuraProps.setProperty("ONBOOT", "no");
@@ -413,10 +426,6 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 
         } catch (FileNotFoundException err) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, err);
-        } finally {
-            if (scanner != null) {
-                scanner.close();
-            }
         }
         return kuraProps;
     }

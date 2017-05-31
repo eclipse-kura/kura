@@ -29,7 +29,7 @@ import org.osgi.service.metatype.annotations.*;
 @interface HeaterConfig {
 
     @AttributeDefinition(
-            name = "mode",
+            name = "Mode",
             type = AttributeType.STRING,
             defaultValue = "Program",
             description = "Operating mode for the heater. If operatng mode is Vacation, set point is automatiaclly set to 6.0C.",
@@ -42,7 +42,7 @@ import org.osgi.service.metatype.annotations.*;
     String mode();
 
     @AttributeDefinition(
-            name = "program.startTime",
+            name = "Program start time",
             type = AttributeType.STRING,
             required = false,
             defaultValue = "06:00",
@@ -51,7 +51,7 @@ import org.osgi.service.metatype.annotations.*;
     String program_startTime();
 
     @AttributeDefinition(
-            name = "program.stopTime",
+            name = "Program stop time",
             type = AttributeType.STRING,
             required = false,
             defaultValue = "22:00",
@@ -60,7 +60,7 @@ import org.osgi.service.metatype.annotations.*;
     String program_stopTime();
 
     @AttributeDefinition(
-            name = "program.setPoint",
+            name = "Program set point",
             type = AttributeType.FLOAT,
             required = false,
             defaultValue = "20.5",
@@ -71,7 +71,7 @@ import org.osgi.service.metatype.annotations.*;
     String program_setPoint();
 
     @AttributeDefinition(
-            name = "manual.setPoint",
+            name = "Manual set point",
             type = AttributeType.FLOAT,
             required = false,
             defaultValue = "15.0",
@@ -82,7 +82,7 @@ import org.osgi.service.metatype.annotations.*;
     String manual_setPoint();
 
     @AttributeDefinition(
-            name = "temperature.initial",
+            name = "Initial temperature",
             type = AttributeType.FLOAT,
             required = false,
             defaultValue = "10",
@@ -91,7 +91,7 @@ import org.osgi.service.metatype.annotations.*;
     String temperature_initial();
 
     @AttributeDefinition(
-            name = "temperature.increment",
+            name = "Temperature increment",
             type = AttributeType.FLOAT,
             required = false,
             defaultValue = "0.25",
@@ -100,7 +100,7 @@ import org.osgi.service.metatype.annotations.*;
     String temperature_increment();
 
     @AttributeDefinition(
-            name = "publish.rate",
+            name = "Publish rate",
             type = AttributeType.INTEGER,
             defaultValue = "2",
             min = "1",
@@ -109,7 +109,7 @@ import org.osgi.service.metatype.annotations.*;
     String publish_rate();
 
     @AttributeDefinition(
-            name = "publish.semanticTopic",
+            name = "Publish semantic topic",
             type = AttributeType.STRING,
             defaultValue = "data",
             description = "Default semantic topic to publish the message to."
@@ -117,7 +117,7 @@ import org.osgi.service.metatype.annotations.*;
     String publish_semanticTopic();
 
     @AttributeDefinition(
-            name = "publish.qos",
+            name = "Publish QoS",
             type = AttributeType.INTEGER,
             defaultValue = "0",
             description = "Default QoS to publish the message with.",
@@ -130,7 +130,7 @@ import org.osgi.service.metatype.annotations.*;
     String publish_qos();
 
     @AttributeDefinition(
-            name = "publish.retain",
+            name = "Publish retain",
             type = AttributeType.BOOLEAN,
             defaultValue = "false",
             description = "Default retaining flag for the published message."

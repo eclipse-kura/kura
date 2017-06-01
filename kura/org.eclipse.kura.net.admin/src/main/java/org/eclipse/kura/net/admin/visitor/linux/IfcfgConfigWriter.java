@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 
 public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(IfcfgConfigWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(IfcfgConfigWriter.class);
 
     private static final String REDHAT_NET_CONFIGURATION_DIRECTORY = "/etc/sysconfig/network-scripts/";
     private static final String DEBIAN_NET_CONFIGURATION_FILE = "/etc/network/interfaces";
@@ -87,15 +87,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 
     private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
-        if (OS_VERSION
-                .equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())
-                || OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
-                || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
-                || OS_VERSION.equals(
-                        KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion()
-                                + "_" + KuraConstants.Intel_Edison.getTargetName())
-                || OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
-                        + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
+        if (isDebian()) {
             NetInterfaceType type = netInterfaceConfig.getType();
             if ((type == NetInterfaceType.LOOPBACK || type == NetInterfaceType.ETHERNET
                     || type == NetInterfaceType.WIFI) && configHasChanged(netInterfaceConfig)) {
@@ -107,6 +99,18 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
         }
     }
 
+    private boolean isDebian() {
+        return OS_VERSION
+                .equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())
+                || OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
+                || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
+                || OS_VERSION.equals(
+                        KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion()
+                                + "_" + KuraConstants.Intel_Edison.getTargetName())
+                || OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
+                        + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion());
+    }
+
     private void writeRedhatConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
         String interfaceName = netInterfaceConfig.getName();
@@ -114,7 +118,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                 .append(interfaceName).toString();
         String tmpOutputFileName = new StringBuilder().append(getRHConfigDirectory()).append("/ifcfg-")
                 .append(interfaceName).append(".tmp").toString();
-        s_logger.debug("Writing config for {}", interfaceName);
+        logger.debug("Writing config for {}", interfaceName);
 
         NetInterfaceType type = netInterfaceConfig.getType();
         if (type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI || type == NetInterfaceType.LOOPBACK) {
@@ -132,7 +136,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 
             List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
                     .getNetInterfaceAddresses();
-            s_logger.debug("There are {} NetInterfaceConfigs in this configuration", netInterfaceAddressConfigs.size());
+            logger.debug("There are {} NetInterfaceConfigs in this configuration", netInterfaceAddressConfigs.size());
 
             boolean allowWrite = false;
             for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
@@ -153,13 +157,13 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                             if (((NetConfigIP4) netConfig).isDhcp()) {
                                 // BOOTPROTO
                                 sb.append("BOOTPROTO=");
-                                s_logger.debug("new config is DHCP");
+                                logger.debug("new config is DHCP");
                                 sb.append("dhcp");
                                 sb.append("\n");
                             } else {
                                 // BOOTPROTO
                                 sb.append("BOOTPROTO=");
-                                s_logger.debug("new config is STATIC");
+                                logger.debug("new config is STATIC");
                                 sb.append("static");
                                 sb.append("\n");
 
@@ -198,19 +202,19 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                                     }
                                 }
                             } else {
-                                s_logger.debug("no DNS entries");
+                                logger.debug("no DNS entries");
                             }
 
                             allowWrite = true;
                         }
                     }
                 } else {
-                    s_logger.debug("writeRedhatConfig() :: netConfigs is null");
+                    logger.debug("writeRedhatConfig() :: netConfigs is null");
                 }
 
                 // WIFI
                 if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfig) {
-                    s_logger.debug("new config is a WifiInterfaceAddressConfig");
+                    logger.debug("new config is a WifiInterfaceAddressConfig");
                     sb.append("\n#Wireless configuration\n");
 
                     // MODE
@@ -223,7 +227,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                     } else if (wifiMode == WifiMode.ADHOC) {
                         mode = "Ad-Hoc";
                     } else if (wifiMode == null) {
-                        s_logger.error("WifiMode is null");
+                        logger.error("WifiMode is null");
                         mode = "null";
                     } else {
                         mode = wifiMode.toString();
@@ -242,14 +246,14 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                     pw.flush();
                     fos.getFD().sync();
                 } catch (Exception e) {
-                    s_logger.error("Failed to write redhat config file", e);
+                    logger.error("Failed to write redhat config file", e);
                     throw KuraException.internalError(e.getMessage());
                 } finally {
                     if (fos != null) {
                         try {
                             fos.close();
                         } catch (IOException ex) {
-                            s_logger.error("I/O Exception while closing BufferedReader!", ex);
+                            logger.error("I/O Exception while closing BufferedReader!", ex);
                         }
                     }
                     if (pw != null) {
@@ -263,24 +267,24 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                 try {
                     if (!FileUtils.contentEquals(tmpFile, outputFile)) {
                         if (tmpFile.renameTo(outputFile)) {
-                            s_logger.trace("Successfully wrote network interface file for {}", interfaceName);
+                            logger.trace("Successfully wrote network interface file for {}", interfaceName);
                         } else {
-                            s_logger.error("Failed to write network interface file");
+                            logger.error("Failed to write network interface file");
                             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                                     "error while building up new configuration file for network interface "
                                             + interfaceName);
                         }
                     } else {
-                        s_logger.info("Not rewriting network interfaces file for {} because it is the same",
+                        logger.info("Not rewriting network interfaces file for {} because it is the same",
                                 interfaceName);
                     }
                 } catch (IOException e) {
-                    s_logger.error("Failed to rename redhat configuration file {} to {} ", tmpFile.getName(),
+                    logger.error("Failed to rename redhat configuration file {} to {} ", tmpFile.getName(),
                             outputFile.getName(), e);
                     throw KuraException.internalError(e.getMessage());
                 }
             } else {
-                s_logger.warn("writeNewConfig :: operation is not allowed");
+                logger.warn("writeNewConfig :: operation is not allowed");
             }
         }
     }
@@ -313,7 +317,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                             // must be a line stating that interface starts on boot
                             if (args.length > 1) {
                                 if (args[1].equals(iName)) {
-                                    s_logger.debug("Found entry in interface file...");
+                                    logger.debug("Found entry in interface file...");
                                     appendConfig = false;
                                     sb.append(debianWriteUtility(netInterfaceConfig, iName));
 
@@ -336,7 +340,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                     }
                 }
             } catch (FileNotFoundException e1) {
-                s_logger.error("Debian config file is not found", e1);
+                logger.error("Debian config file is not found", e1);
                 throw KuraException.internalError(e1.getMessage());
             } finally {
                 scanner.close();
@@ -345,7 +349,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 
             // If config not present in file, append to end
             if (appendConfig) {
-                s_logger.debug("Appending entry to interface file...");
+                logger.debug("Appending entry to interface file...");
                 // append an empty line if not there
                 String s = sb.toString();
                 if (!"\\n".equals(s.substring(s.length() - 1))) {
@@ -364,14 +368,14 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                 pw.flush();
                 fos.getFD().sync();
             } catch (Exception e) {
-                s_logger.error("Failed to write debian configuration file", e);
+                logger.error("Failed to write debian configuration file", e);
                 throw KuraException.internalError(e.getMessage());
             } finally {
                 if (fos != null) {
                     try {
                         fos.close();
                     } catch (IOException ex) {
-                        s_logger.error("I/O Exception while closing BufferedReader!", ex);
+                        logger.error("I/O Exception while closing BufferedReader!", ex);
                     }
                 }
                 if (pw != null) {
@@ -391,15 +395,15 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                     } catch (IOException e) {
                         // TODO: check whether these error messages really make sense - rename is attempted here, but
                         // rename exception is thrown when comparing the original and temp files
-                        s_logger.error("Failed to write network interfaces file", e);
+                        logger.error("Failed to write network interfaces file", e);
                         throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                                 "error while building up new configuration file for network interfaces");
                     }
                 } else {
-                    s_logger.info("Not rewriting network interfaces file because it is the same");
+                    logger.info("Not rewriting network interfaces file because it is the same");
                 }
             } catch (IOException e) {
-                s_logger.error("Failed to rename debian tmp config file {} to {}", tmpFile.getName(), file.getName(),
+                logger.error("Failed to rename debian tmp config file {} to {}", tmpFile.getName(), file.getName(),
                         e);
                 throw KuraException.internalError(e.getMessage());
             }
@@ -429,7 +433,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                 .getNetInterfaceAddresses();
         StringBuilder sb = new StringBuilder();
 
-        s_logger.debug("There are {} NetInterfaceAddressConfigs in this configuration",
+        logger.debug("There are {} NetInterfaceAddressConfigs in this configuration",
                 netInterfaceAddressConfigs.size());
 
         for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
@@ -438,7 +442,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
             if (netConfigs != null) {
                 for (NetConfig netConfig : netConfigs) {
                     if (netConfig instanceof NetConfigIP4) {
-                        s_logger.debug("Writing netconfig {} for {}", netConfig.getClass().toString(), interfaceName);
+                        logger.debug("Writing netconfig {} for {}", netConfig.getClass().toString(), interfaceName);
 
                         // ONBOOT
                         if (((NetConfigIP4) netConfig).isAutoConnect()) {
@@ -461,10 +465,10 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                             sb.append("iface " + interfaceName + " inet ");
                         }
                         if (((NetConfigIP4) netConfig).isDhcp()) {
-                            s_logger.debug("new config is DHCP");
+                            logger.debug("new config is DHCP");
                             sb.append("dhcp\n");
                         } else {
-                            s_logger.debug("new config is STATIC");
+                            logger.debug("new config is STATIC");
                             sb.append("static\n");
                         }
 
@@ -523,12 +527,12 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                     }
                 }
             } else {
-                s_logger.debug("debianWriteUtility() :: netConfigs is null");
+                logger.debug("debianWriteUtility() :: netConfigs is null");
             }
 
             // WIFI
             if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfig) {
-                s_logger.debug("new config is a WifiInterfaceAddressConfig");
+                logger.debug("new config is a WifiInterfaceAddressConfig");
             }
         }
         return sb.toString();
@@ -581,7 +585,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
             netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
         }
 
-        s_logger.debug("Setting NetInterfaceStatus to " + netInterfaceStatus + " for " + netInterfaceConfig.getName());
+        logger.debug("Setting NetInterfaceStatus to " + netInterfaceStatus + " for " + netInterfaceConfig.getName());
 
         // set it all
         Properties kuraExtendedProps = getInstance().getKuranetProperties();
@@ -594,7 +598,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
             try {
                 KuranetConfig.storeProperties(kuraExtendedProps);
             } catch (IOException e) {
-                s_logger.error("Failed to store properties in the kuranet.conf file.", e);
+                logger.error("Failed to store properties in the kuranet.conf file.", e);
                 throw KuraException.internalError(e.getMessage());
             }
         }
@@ -606,7 +610,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                     .append(".config.ip4.status");
             KuranetConfig.deleteProperty(sb.toString());
         } catch (IOException e) {
-            s_logger.error("Failed to remove net.interface..config.ip4.status property from the kuranet.conf file.", e);
+            logger.error("Failed to remove net.interface..config.ip4.status property from the kuranet.conf file.", e);
             throw KuraException.internalError(e.getMessage());
         }
     }
@@ -666,7 +670,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                 }
             }
         } else {
-            s_logger.debug("netConfigs is null");
+            logger.debug("netConfigs is null");
         }
 
         return props;
@@ -680,40 +684,40 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
         // FIXME: assumes only one addressConfig
         Properties newConfig = parseNetInterfaceAddressConfig(netInterfaceConfig.getNetInterfaceAddresses().get(0));
 
-        s_logger.debug("Comparing configs for {}", netInterfaceConfig.getName());
-        s_logger.debug("oldProps: {}", oldConfig);
-        s_logger.debug("newProps: {}", newConfig);
+        logger.debug("Comparing configs for {}", netInterfaceConfig.getName());
+        logger.debug("oldProps: {}", oldConfig);
+        logger.debug("newProps: {}", newConfig);
 
         if (!compare(oldConfig, newConfig, "ONBOOT")) {
-            s_logger.debug("ONBOOT differs");
+            logger.debug("ONBOOT differs");
             return true;
         } else if (!compare(oldConfig, newConfig, "BOOTPROTO")) {
-            s_logger.debug("BOOTPROTO differs");
+            logger.debug("BOOTPROTO differs");
             return true;
         } else if (!compare(oldConfig, newConfig, "IPADDR")) {
-            s_logger.debug("IPADDR differs");
+            logger.debug("IPADDR differs");
             return true;
         } else if (!compare(oldConfig, newConfig, "NETMASK")) {
-            s_logger.debug("NETMASK differs");
+            logger.debug("NETMASK differs");
             return true;
         } else if (!compare(oldConfig, newConfig, "GATEWAY")) {
-            s_logger.debug("GATEWAY differs");
+            logger.debug("GATEWAY differs");
             return true;
         } else if (!compare(oldConfig, newConfig, "DNS1")) {
-            s_logger.debug("DNS1 differs");
+            logger.debug("DNS1 differs");
             return true;
         } else if (!compare(oldConfig, newConfig, "DNS2")) {
-            s_logger.debug("DNS2 differs");
+            logger.debug("DNS2 differs");
             return true;
         } else if (!compare(oldConfig, newConfig, "DNS3")) {
-            s_logger.debug("DNS3 differs");
+            logger.debug("DNS3 differs");
             return true;
         } else if (!compare(oldConfig, newConfig, "DEFROUTE")) {
-            s_logger.debug("DEFROUTE differs");
+            logger.debug("DEFROUTE differs");
             return true;
         }
 
-        s_logger.debug("Configs match");
+        logger.debug("Configs match");
         return false;
     }
 

@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.kura.net.modem;
 
+import java.util.Arrays;
+
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.osgi.annotation.versioning.ProviderType;
@@ -26,34 +29,40 @@ public class ModemConfig implements NetConfig {
     /**
      * Configuration for a cellular modem.
      */
-    public static enum PdpType {
-        IP, PPP, IPv6, UNKNOWN
-    };
+    public enum PdpType {
+        IP,
+        PPP,
+        IPv6,
+        UNKNOWN
+    }
 
-    public static enum AuthType {
-        NONE, AUTO, PAP, CHAP
-    };
+    public enum AuthType {
+        NONE,
+        AUTO,
+        PAP,
+        CHAP
+    }
 
-    private boolean m_enabled = false;
-    private String m_dialString = "";
-    private int m_pppNumber = 0;
-    private int m_profileID = 0;
-    private PdpType m_pdpType = PdpType.IP;
-    private AuthType m_authType = AuthType.NONE;
-    private String m_apn = "";
-    private String m_username = "";
-    private String m_password = "";
-    private boolean m_persist = false;
-    private int m_maxFail = 0;
-    private int m_idle = 0;
-    private String m_activeFilter = "";
-    private int m_lcpEchoInterval = 0;
-    private int m_lcpEchoFailure = 0;
-    private IPAddress m_ipAddress = null;
-    private int m_dataCompression = 0;			// FIXME: change to enum?
-    private int m_headerCompression = 0;		// FIXME: change to enum?
-    private boolean m_gpsEnabled = false;
-    private int m_resetTimeout = 0;
+    private boolean enabled = false;
+    private String dialString = "";
+    private int pppNumber = 0;
+    private int profileID = 0;
+    private PdpType pdpType = PdpType.IP;
+    private AuthType authType = AuthType.NONE;
+    private String apn = "";
+    private String username = "";
+    private Password password = new Password("");
+    private boolean persist = false;
+    private int maxFail = 0;
+    private int idle = 0;
+    private String activeFilter = "";
+    private int lcpEchoInterval = 0;
+    private int lcpEchoFailure = 0;
+    private IPAddress ipAddress = null;
+    private int dataCompression = 0;			// FIXME: change to enum?
+    private int headerCompression = 0;		// FIXME: change to enum?
+    private boolean gpsEnabled = false;
+    private int resetTimeout = 0;
 
     /**
      * Empty constructor
@@ -80,12 +89,12 @@ public class ModemConfig implements NetConfig {
     public ModemConfig(int profileID, PdpType pdpType, String apn, IPAddress ipAddress, int dataCompression,
             int headerCompresion) {
 
-        this.m_profileID = profileID;
-        this.m_pdpType = pdpType;
-        this.m_apn = apn;
-        this.m_ipAddress = ipAddress;
-        this.m_dataCompression = dataCompression;
-        this.m_headerCompression = headerCompresion;
+        this.profileID = profileID;
+        this.pdpType = pdpType;
+        this.apn = apn;
+        this.ipAddress = ipAddress;
+        this.dataCompression = dataCompression;
+        this.headerCompression = headerCompresion;
     }
 
     /**
@@ -94,7 +103,7 @@ public class ModemConfig implements NetConfig {
      * @return is enabled as {@link boolean}
      */
     public boolean isEnabled() {
-        return this.m_enabled;
+        return this.enabled;
     }
 
     /**
@@ -104,7 +113,7 @@ public class ModemConfig implements NetConfig {
      *            - enabled status as {@link boolean}
      */
     public void setEnabled(boolean enabled) {
-        this.m_enabled = enabled;
+        this.enabled = enabled;
     }
 
     /**
@@ -113,7 +122,7 @@ public class ModemConfig implements NetConfig {
      * @return dial string as {@link String}
      */
     public String getDialString() {
-        return this.m_dialString;
+        return this.dialString;
     }
 
     /**
@@ -123,7 +132,7 @@ public class ModemConfig implements NetConfig {
      *            - dial string as {@link String}
      */
     public void setDialString(String dialString) {
-        this.m_dialString = dialString;
+        this.dialString = dialString;
     }
 
     /**
@@ -132,7 +141,7 @@ public class ModemConfig implements NetConfig {
      * @return authentication type as {@link AuthType}
      */
     public AuthType getAuthType() {
-        return this.m_authType;
+        return this.authType;
     }
 
     /**
@@ -142,7 +151,7 @@ public class ModemConfig implements NetConfig {
      *            - authentication type as {@link AuthType}
      */
     public void setAuthType(AuthType authType) {
-        this.m_authType = authType;
+        this.authType = authType;
     }
 
     /**
@@ -151,7 +160,7 @@ public class ModemConfig implements NetConfig {
      * @return user name as {@link String}
      */
     public String getUsername() {
-        return this.m_username;
+        return this.username;
     }
 
     /**
@@ -161,16 +170,26 @@ public class ModemConfig implements NetConfig {
      *            - user name as {@link String}
      */
     public void setUsername(String username) {
-        this.m_username = username;
+        this.username = username;
     }
 
     /**
      * Reports password.
      *
      * @return password as {@link String}
+     * @deprecated
      */
     public String getPassword() {
-        return this.m_password;
+        return this.password.toString();
+    }
+
+    /**
+     * Reports password.
+     *
+     * @return password as {@link Password}
+     */
+    public Password getPasswordAsPassword() {
+        return this.password;
     }
 
     /**
@@ -180,7 +199,17 @@ public class ModemConfig implements NetConfig {
      *            - password as {@link String}
      */
     public void setPassword(String password) {
-        this.m_password = password;
+        this.password = new Password(password);
+    }
+
+    /**
+     * Sets password.
+     *
+     * @param password
+     *            - password as {@link Password}
+     */
+    public void setPassword(Password password) {
+        this.password = password;
     }
 
     /**
@@ -189,7 +218,7 @@ public class ModemConfig implements NetConfig {
      * @return 'persist' flag {@link boolean}
      */
     public boolean isPersist() {
-        return this.m_persist;
+        return this.persist;
     }
 
     /**
@@ -199,7 +228,7 @@ public class ModemConfig implements NetConfig {
      *            as {@link boolean}
      */
     public void setPersist(boolean persist) {
-        this.m_persist = persist;
+        this.persist = persist;
     }
 
     /**
@@ -208,7 +237,7 @@ public class ModemConfig implements NetConfig {
      * @return maximum number of failed connection attempts as {@link int}
      */
     public int getMaxFail() {
-        return this.m_maxFail;
+        return this.maxFail;
     }
 
     /**
@@ -218,7 +247,7 @@ public class ModemConfig implements NetConfig {
      *            - maximum number of failed connection attempts as {@link int}
      */
     public void setMaxFail(int maxFail) {
-        this.m_maxFail = maxFail;
+        this.maxFail = maxFail;
     }
 
     /**
@@ -228,7 +257,7 @@ public class ModemConfig implements NetConfig {
      * @return value of the 'idle' option as {@link int}
      */
     public int getIdle() {
-        return this.m_idle;
+        return this.idle;
     }
 
     /**
@@ -238,7 +267,7 @@ public class ModemConfig implements NetConfig {
      * @param idle
      */
     public void setIdle(int idle) {
-        this.m_idle = idle;
+        this.idle = idle;
     }
 
     /**
@@ -248,7 +277,7 @@ public class ModemConfig implements NetConfig {
      * @return value of the 'active-filter' option as {@link String}
      */
     public String getActiveFilter() {
-        return this.m_activeFilter;
+        return this.activeFilter;
     }
 
     /**
@@ -259,7 +288,7 @@ public class ModemConfig implements NetConfig {
      *            - active filter as {@link String}
      */
     public void setActiveFilter(String activeFilter) {
-        this.m_activeFilter = activeFilter;
+        this.activeFilter = activeFilter;
     }
 
     /**
@@ -268,7 +297,7 @@ public class ModemConfig implements NetConfig {
      * @return LCP echo interval (in sec) as {@link int}
      */
     public int getLcpEchoInterval() {
-        return this.m_lcpEchoInterval;
+        return this.lcpEchoInterval;
     }
 
     /**
@@ -278,7 +307,7 @@ public class ModemConfig implements NetConfig {
      *            - LCP Echo interval as {@link int}
      */
     public void setLcpEchoInterval(int lcpEchoInterval) {
-        this.m_lcpEchoInterval = lcpEchoInterval;
+        this.lcpEchoInterval = lcpEchoInterval;
     }
 
     /**
@@ -287,7 +316,7 @@ public class ModemConfig implements NetConfig {
      * @return number of failed LCP echo requests as {@link int}
      */
     public int getLcpEchoFailure() {
-        return this.m_lcpEchoFailure;
+        return this.lcpEchoFailure;
     }
 
     /**
@@ -297,7 +326,7 @@ public class ModemConfig implements NetConfig {
      * @param lcpEchoFailure
      */
     public void setLcpEchoFailure(int lcpEchoFailure) {
-        this.m_lcpEchoFailure = lcpEchoFailure;
+        this.lcpEchoFailure = lcpEchoFailure;
     }
 
     /**
@@ -306,7 +335,7 @@ public class ModemConfig implements NetConfig {
      * @return PPP number as {@link int}
      */
     public int getPppNumber() {
-        return this.m_pppNumber;
+        return this.pppNumber;
     }
 
     /**
@@ -316,7 +345,7 @@ public class ModemConfig implements NetConfig {
      *            - PPP number as {@link int}
      */
     public void setPppNumber(int pppNumber) {
-        this.m_pppNumber = pppNumber;
+        this.pppNumber = pppNumber;
     }
 
     /**
@@ -325,7 +354,7 @@ public class ModemConfig implements NetConfig {
      * @return PDP profile ID as {@link int}
      */
     public int getProfileID() {
-        return this.m_profileID;
+        return this.profileID;
     }
 
     /**
@@ -335,7 +364,7 @@ public class ModemConfig implements NetConfig {
      *            - PDP profile ID as {@link int}
      */
     public void setProfileID(int id) {
-        this.m_profileID = id;
+        this.profileID = id;
     }
 
     /**
@@ -344,7 +373,7 @@ public class ModemConfig implements NetConfig {
      * @return PDP type as {@link PdpType}
      */
     public PdpType getPdpType() {
-        return this.m_pdpType;
+        return this.pdpType;
     }
 
     /**
@@ -354,7 +383,7 @@ public class ModemConfig implements NetConfig {
      *            - PDP type as {@link PdpType}
      */
     public void setPdpType(PdpType pdpType) {
-        this.m_pdpType = pdpType;
+        this.pdpType = pdpType;
     }
 
     /**
@@ -363,7 +392,7 @@ public class ModemConfig implements NetConfig {
      * @return access point name as {@link String}
      */
     public String getApn() {
-        return this.m_apn;
+        return this.apn;
     }
 
     /**
@@ -373,7 +402,7 @@ public class ModemConfig implements NetConfig {
      *            - access point name as {@link String}
      */
     public void setApn(String apn) {
-        this.m_apn = apn;
+        this.apn = apn;
     }
 
     /**
@@ -382,7 +411,7 @@ public class ModemConfig implements NetConfig {
      * @return IP address as {@link IPAddress}
      */
     public IPAddress getIpAddress() {
-        return this.m_ipAddress;
+        return this.ipAddress;
     }
 
     /**
@@ -392,7 +421,7 @@ public class ModemConfig implements NetConfig {
      *            - IP address as {@link IPAddress}
      */
     public void setIpAddress(IPAddress address) {
-        this.m_ipAddress = address;
+        this.ipAddress = address;
     }
 
     /**
@@ -401,7 +430,7 @@ public class ModemConfig implements NetConfig {
      * @return PDP data compression as {@link int}
      */
     public int getDataCompression() {
-        return this.m_dataCompression;
+        return this.dataCompression;
     }
 
     /**
@@ -411,7 +440,7 @@ public class ModemConfig implements NetConfig {
      *            - PDP data compression as {@link int}
      */
     public void setDataCompression(int dataCompression) {
-        this.m_dataCompression = dataCompression;
+        this.dataCompression = dataCompression;
     }
 
     /**
@@ -420,7 +449,7 @@ public class ModemConfig implements NetConfig {
      * @return PDP header compression as {@link int}
      */
     public int getHeaderCompression() {
-        return this.m_headerCompression;
+        return this.headerCompression;
     }
 
     /**
@@ -430,7 +459,7 @@ public class ModemConfig implements NetConfig {
      *            headerCompression PDP header compression as {@link int}
      */
     public void setHeaderCompression(int headerCompression) {
-        this.m_headerCompression = headerCompression;
+        this.headerCompression = headerCompression;
     }
 
     /**
@@ -439,7 +468,7 @@ public class ModemConfig implements NetConfig {
      * @return {@link boolean}
      */
     public boolean isDataCompression() {
-        return this.m_dataCompression == 0 ? false : true;
+        return this.dataCompression == 0 ? false : true;
     }
 
     /**
@@ -448,23 +477,23 @@ public class ModemConfig implements NetConfig {
      * @return {@link boolean}
      */
     public boolean isHeaderCompression() {
-        return this.m_headerCompression == 0 ? false : true;
+        return this.headerCompression == 0 ? false : true;
     }
 
     public boolean isGpsEnabled() {
-        return this.m_gpsEnabled;
+        return this.gpsEnabled;
     }
 
     public int getResetTimeout() {
-        return this.m_resetTimeout;
+        return this.resetTimeout;
     }
 
     public void setResetTimeout(int tout) {
-        this.m_resetTimeout = tout;
+        this.resetTimeout = tout;
     }
 
     public void setGpsEnabled(boolean gpsEnabled) {
-        this.m_gpsEnabled = gpsEnabled;
+        this.gpsEnabled = gpsEnabled;
     }
 
     @Override
@@ -472,24 +501,24 @@ public class ModemConfig implements NetConfig {
         final int prime = 59;
         int result = super.hashCode();
 
-        result = prime * result + this.m_profileID;
-        result = prime * result + (this.m_pdpType == null ? 0 : this.m_pdpType.hashCode());
-        result = prime * result + (this.m_authType == null ? 0 : this.m_authType.hashCode());
-        result = prime * result + (this.m_apn == null ? 0 : this.m_apn.hashCode());
-        result = prime * result + (this.m_username == null ? 0 : this.m_username.hashCode());
-        result = prime * result + (this.m_password == null ? 0 : this.m_password.hashCode());
-        result = prime * result + (this.m_ipAddress == null ? 0 : this.m_ipAddress.hashCode());
-        result = prime * result + this.m_pppNumber;
-        result = prime * result + this.m_maxFail;
-        result = prime * result + this.m_resetTimeout;
-        result = prime * result + this.m_idle;
-        result = prime * result + (this.m_activeFilter == null ? 0 : this.m_activeFilter.hashCode());
-        result = prime * result + this.m_lcpEchoFailure;
-        result = prime * result + this.m_lcpEchoInterval;
-        result = prime * result + this.m_dataCompression;
-        result = prime * result + this.m_headerCompression;
-        result = prime * result + (this.m_persist ? 1 : 0);
-        result = prime * result + (this.m_gpsEnabled ? 1 : 0);
+        result = prime * result + this.profileID;
+        result = prime * result + (this.pdpType == null ? 0 : this.pdpType.hashCode());
+        result = prime * result + (this.authType == null ? 0 : this.authType.hashCode());
+        result = prime * result + (this.apn == null ? 0 : this.apn.hashCode());
+        result = prime * result + (this.username == null ? 0 : this.username.hashCode());
+        result = prime * result + (this.password == null ? 0 : this.password.hashCode());
+        result = prime * result + (this.ipAddress == null ? 0 : this.ipAddress.hashCode());
+        result = prime * result + this.pppNumber;
+        result = prime * result + this.maxFail;
+        result = prime * result + this.resetTimeout;
+        result = prime * result + this.idle;
+        result = prime * result + (this.activeFilter == null ? 0 : this.activeFilter.hashCode());
+        result = prime * result + this.lcpEchoFailure;
+        result = prime * result + this.lcpEchoInterval;
+        result = prime * result + this.dataCompression;
+        result = prime * result + this.headerCompression;
+        result = prime * result + (this.persist ? 1 : 0);
+        result = prime * result + (this.gpsEnabled ? 1 : 0);
 
         return result;
     }
@@ -502,64 +531,64 @@ public class ModemConfig implements NetConfig {
 
         ModemConfig otherConfig = (ModemConfig) obj;
 
-        if (this.m_enabled != otherConfig.isEnabled()) {
+        if (this.enabled != otherConfig.isEnabled()) {
             return false;
         }
 
-        if (this.m_pppNumber != otherConfig.getPppNumber()) {
+        if (this.pppNumber != otherConfig.getPppNumber()) {
             return false;
         }
 
-        if (this.m_persist != otherConfig.isPersist()) {
+        if (this.persist != otherConfig.isPersist()) {
             return false;
         }
 
-        if (this.m_maxFail != otherConfig.getMaxFail()) {
+        if (this.maxFail != otherConfig.getMaxFail()) {
             return false;
         }
 
-        if (this.m_resetTimeout != otherConfig.getResetTimeout()) {
+        if (this.resetTimeout != otherConfig.getResetTimeout()) {
             return false;
         }
 
-        if (this.m_idle != otherConfig.getIdle()) {
+        if (this.idle != otherConfig.getIdle()) {
             return false;
         }
 
-        if (this.m_lcpEchoInterval != otherConfig.getLcpEchoInterval()) {
+        if (this.lcpEchoInterval != otherConfig.getLcpEchoInterval()) {
             return false;
         }
 
-        if (this.m_lcpEchoFailure != otherConfig.getLcpEchoFailure()) {
+        if (this.lcpEchoFailure != otherConfig.getLcpEchoFailure()) {
             return false;
         }
 
-        if (this.m_profileID != otherConfig.getProfileID()) {
+        if (this.profileID != otherConfig.getProfileID()) {
             return false;
         }
 
-        if (this.m_pdpType != otherConfig.getPdpType()) {
+        if (this.pdpType != otherConfig.getPdpType()) {
             return false;
         }
 
-        if (this.m_authType != otherConfig.getAuthType()) {
+        if (this.authType != otherConfig.getAuthType()) {
             return false;
         }
 
-        if (this.m_dataCompression != otherConfig.getDataCompression()) {
+        if (this.dataCompression != otherConfig.getDataCompression()) {
             return false;
         }
 
-        if (this.m_headerCompression != otherConfig.getHeaderCompression()) {
+        if (this.headerCompression != otherConfig.getHeaderCompression()) {
             return false;
         }
 
-        if (this.m_gpsEnabled != otherConfig.isGpsEnabled()) {
+        if (this.gpsEnabled != otherConfig.isGpsEnabled()) {
             return false;
         }
 
-        if (this.m_dialString != null) {
-            if (!this.m_dialString.equals(otherConfig.getDialString())) {
+        if (this.dialString != null) {
+            if (!this.dialString.equals(otherConfig.getDialString())) {
                 return false;
             }
         } else {
@@ -567,8 +596,8 @@ public class ModemConfig implements NetConfig {
                 return false;
             }
         }
-        if (this.m_apn != null) {
-            if (!this.m_apn.equals(otherConfig.getApn())) {
+        if (this.apn != null) {
+            if (!this.apn.equals(otherConfig.getApn())) {
                 return false;
             }
         } else {
@@ -577,8 +606,8 @@ public class ModemConfig implements NetConfig {
             }
         }
 
-        if (this.m_username != null && this.m_username.length() > 0) {
-            if (!this.m_username.equals(otherConfig.getUsername())) {
+        if (this.username != null && this.username.length() > 0) {
+            if (!this.username.equals(otherConfig.getUsername())) {
                 return false;
             }
         } else {
@@ -587,18 +616,19 @@ public class ModemConfig implements NetConfig {
             }
         }
 
-        if (this.m_password != null && this.m_password.length() > 0) {
-            if (!this.m_password.equals(otherConfig.getPassword())) {
+        if (this.password != null && this.password.getPassword().length > 0) {
+            if (!Arrays.equals(this.password.getPassword(), otherConfig.getPasswordAsPassword().getPassword())) {
                 return false;
             }
         } else {
-            if (otherConfig.getPassword() != null && otherConfig.getPassword().length() > 0) {
+            Password otherConfigPassword = otherConfig.getPasswordAsPassword();
+            if (otherConfigPassword != null && otherConfigPassword.getPassword().length > 0) {
                 return false;
             }
         }
 
-        if (this.m_activeFilter != null && this.m_activeFilter.length() > 0) {
-            if (!this.m_activeFilter.equals(otherConfig.getActiveFilter())) {
+        if (this.activeFilter != null && this.activeFilter.length() > 0) {
+            if (!this.activeFilter.equals(otherConfig.getActiveFilter())) {
                 return false;
             }
         } else {
@@ -607,8 +637,8 @@ public class ModemConfig implements NetConfig {
             }
         }
 
-        if (this.m_ipAddress != null) {
-            if (!this.m_ipAddress.equals(otherConfig)) {
+        if (this.ipAddress != null) {
+            if (!this.ipAddress.equals(otherConfig)) {
                 return false;
             }
         } else {
@@ -622,31 +652,30 @@ public class ModemConfig implements NetConfig {
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(super.toString());
 
         sb.append("ModemConfig - ");
 
-        sb.append("Enabled: ").append(this.m_enabled);
-        sb.append(" - PPP Number: ").append(this.m_pppNumber);
-        sb.append(" - Dial String: ").append(this.m_dialString);
-        // sb.append(" - Provider: ").append(m_provider);
-        sb.append(" - Profile ID: ").append(this.m_profileID);
-        sb.append(" - PDP Type: ").append(this.m_pdpType);
-        sb.append(" - Auth Type: ").append(this.m_authType);
-        sb.append(" - APN: ").append(this.m_apn);
-        sb.append(" - Username: ").append(this.m_username);
-        sb.append(" - Password: ").append(this.m_password);
-        sb.append(" - IP Address: ").append(this.m_ipAddress == null ? "null" : this.m_ipAddress.getHostAddress());
-        sb.append(" - Data Compression: ").append(this.m_dataCompression);
-        sb.append(" - Header Compression: ").append(this.m_headerCompression);
+        sb.append("Enabled: ").append(this.enabled);
+        sb.append(" - PPP Number: ").append(this.pppNumber);
+        sb.append(" - Dial String: ").append(this.dialString);
+        sb.append(" - Profile ID: ").append(this.profileID);
+        sb.append(" - PDP Type: ").append(this.pdpType);
+        sb.append(" - Auth Type: ").append(this.authType);
+        sb.append(" - APN: ").append(this.apn);
+        sb.append(" - Username: ").append(this.username);
+        sb.append(" - Password: ").append(this.password);
+        sb.append(" - IP Address: ").append(this.ipAddress == null ? "null" : this.ipAddress.getHostAddress());
+        sb.append(" - Data Compression: ").append(this.dataCompression);
+        sb.append(" - Header Compression: ").append(this.headerCompression);
 
         return sb.toString();
     }
 
     @Override
     public boolean isValid() {
-        if (this.m_pppNumber < 0) {
+        if (this.pppNumber < 0) {
             return false;
         }
 

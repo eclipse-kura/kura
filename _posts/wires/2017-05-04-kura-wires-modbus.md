@@ -18,7 +18,7 @@ This tutorial will present how to collect data from a Modbus device and publish 
 
 ## Configure Kura Wires Modbus application
 
-1. Install the Modbus driver from [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/modbus-driver-eclipse-kura)
+1. Install the Modbus driver from [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/esf-modbus-driver-community-edition)
 2. On the Kura web interface, add the Modbus driver:
   * Under "Services", click the "+" button
   * Select "org.eclipse.kura.driver.modbus", type in a name and click "Apply": a new service will show up under Services.

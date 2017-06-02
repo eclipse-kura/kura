@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -95,6 +95,10 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         }
     }
 
+    protected String getKuranetProperty(String key) {
+        return KuranetConfig.getProperty(key);
+    }
+
     private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
 
@@ -104,7 +108,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         if (netInterfaceConfig instanceof ModemInterfaceConfigImpl) {
             StringBuilder key = new StringBuilder(
                     "net.interface." + netInterfaceConfig.getName() + ".modem.identifier");
-            String modemId = KuranetConfig.getProperty(key.toString());
+            String modemId = getKuranetProperty(key.toString());
             s_logger.debug("Getting modem identifier using key " + key + ": " + modemId);
 
             if (modemId != null) {
@@ -134,8 +138,8 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
                 netConfigs.add(getNetConfigIP4(interfaceName));
 
                 // Populate with DNS provided by PPP (displayed as read-only in Denali)
-                if (LinuxNetworkUtil.hasAddress("ppp" + modemConfig.getPppNumber())) {
-                    List<? extends IPAddress> pppDnsServers = LinuxDns.getInstance().getPppDnServers();
+                if (hasAddress(modemConfig.getPppNumber())) {
+                    List<? extends IPAddress> pppDnsServers = getPppDnServers();
                     if (pppDnsServers != null) {
                         ((ModemInterfaceAddressConfigImpl) netInterfaceAddressConfig).setDnsServers(pppDnsServers);
                     }
@@ -144,7 +148,15 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         }
     }
 
-    private static ModemConfig getModemConfig(String ifaceName, UsbDevice usbDevice) throws KuraException {
+    protected List<IPAddress> getPppDnServers() throws KuraException {
+        return LinuxDns.getInstance().getPppDnServers();
+    }
+
+    protected boolean hasAddress(int pppNumber) throws KuraException {
+        return LinuxNetworkUtil.hasAddress("ppp" + pppNumber);
+    }
+
+    private ModemConfig getModemConfig(String ifaceName, UsbDevice usbDevice) throws KuraException {
         s_logger.debug("parsePppPeerConfig()");
         boolean isGsmGprsUmtsHspa = false;
         List<ModemTechnologyType> technologyTypes = null;
@@ -359,14 +371,14 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 
         boolean gpsEnabled = false;
         StringBuilder key = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.gpsEnabled");
-        String statusString = KuranetConfig.getProperty(key.toString());
+        String statusString = getKuranetProperty(key.toString());
         if (statusString != null && !statusString.isEmpty()) {
             gpsEnabled = Boolean.parseBoolean(statusString);
         }
 
         int resetTout = 5;
         key = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.resetTimeout");
-        statusString = KuranetConfig.getProperty(key.toString());
+        statusString = getKuranetProperty(key.toString());
         if (statusString != null && !statusString.isEmpty()) {
             resetTout = Integer.parseInt(statusString);
         }
@@ -399,13 +411,13 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         return modemConfig;
     }
 
-    private static NetConfigIP4 getNetConfigIP4(String interfaceName) throws KuraException {
+    private NetConfigIP4 getNetConfigIP4(String interfaceName) throws KuraException {
         NetConfigIP4 netConfigIP4 = null;
         NetInterfaceStatus netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
 
         StringBuilder key = new StringBuilder().append("net.interface.").append(interfaceName)
                 .append(".config.ip4.status");
-        String statusString = KuranetConfig.getProperty(key.toString());
+        String statusString = getKuranetProperty(key.toString());
         if (statusString != null && !statusString.isEmpty()) {
             netInterfaceStatus = NetInterfaceStatus.valueOf(statusString);
         }
@@ -414,7 +426,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         netConfigIP4 = new NetConfigIP4(netInterfaceStatus, true, true);
 
         key = new StringBuilder("net.interface.").append(interfaceName).append(".config.dnsServers");
-        String dnsServersStr = KuranetConfig.getProperty(key.toString());
+        String dnsServersStr = getKuranetProperty(key.toString());
         List<IP4Address> dnsServersList = new ArrayList<IP4Address>();
 
         if (dnsServersStr != null && !dnsServersStr.isEmpty()) {
@@ -432,7 +444,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         return netConfigIP4;
     }
 
-    private static String getPeerFilename(String interfaceName, UsbDevice usbDevice) {
+    protected String getPeerFilename(String interfaceName, UsbDevice usbDevice) {
         String filename = null;
 
         // if interfaceName is a usb port address
@@ -454,7 +466,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
      * @param line
      * @return line without surrounding quotes
      */
-    private static String removeQuotes(String line) {
+    private String removeQuotes(String line) {
         if (line != null) {
             if (line.startsWith("'") && line.endsWith("'")      // remove surrounding quotes
                     || line.startsWith("\"") && line.endsWith("\"")) {
@@ -466,7 +478,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         return line;
     }
 
-    private static int getUnitNum(String interfaceName) {
+    private int getUnitNum(String interfaceName) {
         int unitNum = -1;
 
         if (interfaceName.matches("(?i)ppp\\d+")) {
@@ -478,7 +490,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         return unitNum;
     }
 
-    private static int getUnitNum() {
+    private int getUnitNum() {
 
         int unit = 0;
         try {

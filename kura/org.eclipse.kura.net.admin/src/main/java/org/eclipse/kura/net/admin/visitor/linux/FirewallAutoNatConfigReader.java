@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -52,8 +52,18 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
                 .getNetInterfaceConfigs();
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-            getConfig(netInterfaceConfig, KuranetConfig.getProperties());
+            getConfig(netInterfaceConfig, getKuranetProperties());
         }
+    }
+
+    protected Set<NATRule> getAutoNatRules() throws KuraException {
+        LinuxFirewall firewall = LinuxFirewall.getInstance();
+        Set<NATRule> natRules = firewall.getAutoNatRules();
+        return natRules;
+    }
+
+    protected Properties getKuranetProperties() {
+        return KuranetConfig.getProperties();
     }
 
     private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
@@ -126,8 +136,7 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
                 }
             } else {
                 // get it from the firewall file if possible
-                LinuxFirewall firewall = LinuxFirewall.getInstance();
-                Set<NATRule> natRules = firewall.getAutoNatRules();
+                Set<NATRule> natRules = getAutoNatRules();
                 if (natRules != null && !natRules.isEmpty()) {
                     Iterator<NATRule> it = natRules.iterator();
                     while (it.hasNext()) {

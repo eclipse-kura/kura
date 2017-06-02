@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -57,7 +57,7 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
             if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
                     || netInterfaceConfig.getType() == NetInterfaceType.WIFI) {
-                writeConfig(netInterfaceConfig, KuranetConfig.getProperties());
+                writeConfig(netInterfaceConfig, getKuranetProperties());
             }
         }
 
@@ -115,18 +115,26 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
 
         // write it
         if (kuraProps != null && !kuraProps.isEmpty()) {
-            try {
-                KuranetConfig.storeProperties(kuraProps);
-            } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-            }
+            storeKuranetProperties(kuraProps);
         }
     }
 
-    private void applyNatConfig(NetworkConfiguration networkConfig) throws KuraException {
+    protected void applyNatConfig(NetworkConfiguration networkConfig) throws KuraException {
         LinuxFirewall firewall = LinuxFirewall.getInstance();
         firewall.replaceAllNatRules(getNatConfigs(networkConfig));
         firewall.enable();
+    }
+
+    protected Properties getKuranetProperties() {
+        return KuranetConfig.getProperties();
+    }
+
+    protected void storeKuranetProperties(Properties kuraProps) throws KuraException {
+        try {
+            KuranetConfig.storeProperties(kuraProps);
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        }
     }
 
     private LinkedHashSet<NATRule> getNatConfigs(NetworkConfiguration networkConfig) {

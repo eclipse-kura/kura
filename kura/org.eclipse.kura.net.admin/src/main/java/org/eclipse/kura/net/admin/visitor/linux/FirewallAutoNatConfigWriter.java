@@ -36,16 +36,16 @@ import org.slf4j.LoggerFactory;
 
 public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(FirewallAutoNatConfigWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(FirewallAutoNatConfigWriter.class);
 
-    private static FirewallAutoNatConfigWriter s_instance;
+    private static FirewallAutoNatConfigWriter instance;
 
     public static FirewallAutoNatConfigWriter getInstance() {
 
-        if (s_instance == null) {
-            s_instance = new FirewallAutoNatConfigWriter();
+        if (instance == null) {
+            instance = new FirewallAutoNatConfigWriter();
         }
-        return s_instance;
+        return instance;
     }
 
     @Override
@@ -68,19 +68,19 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
             Properties kuraProps) throws KuraException {
 
         String interfaceName = netInterfaceConfig.getName();
-        s_logger.debug("Writing NAT config for {}", interfaceName);
+        logger.debug("Writing NAT config for {}", interfaceName);
 
-        List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = null;
-        netInterfaceAddressConfigs = netInterfaceConfig.getNetInterfaceAddresses();
+        List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
+                .getNetInterfaceAddresses();
 
         boolean natEnabled = false;
         boolean useMasquerade = false;
         String srcIface = null;
         String dstIface = null;
-        if (netInterfaceAddressConfigs != null && netInterfaceAddressConfigs.size() > 0) {
+        if (netInterfaceAddressConfigs != null && !netInterfaceAddressConfigs.isEmpty()) {
             for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
                 List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-                if (netConfigs != null && netConfigs.size() > 0) {
+                if (netConfigs != null && !netConfigs.isEmpty()) {
                     for (int i = 0; i < netConfigs.size(); i++) {
                         NetConfig netConfig = netConfigs.get(i);
                         if (netConfig instanceof FirewallAutoNatConfig) {
@@ -94,29 +94,33 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
             }
         }
 
+        updateKuranetPropertied(kuraProps, interfaceName, natEnabled, useMasquerade, srcIface, dstIface);
+    }
+
+    private void updateKuranetPropertied(Properties kuraProps, String interfaceName, boolean natEnabled,
+            boolean useMasquerade, String srcIface, String dstIface) throws KuraException {
+
         // set it all
         if (kuraProps == null) {
-            s_logger.debug("kuraExtendedProps was null");
+            logger.debug("kuraExtendedProps was null");
             kuraProps = new Properties();
         }
 
-        StringBuilder sb = new StringBuilder().append("net.interface.").append(netInterfaceConfig.getName())
+        StringBuilder sb = new StringBuilder().append("net.interface.").append(interfaceName)
                 .append(".config.nat.enabled");
         kuraProps.put(sb.toString(), Boolean.toString(natEnabled));
         if (natEnabled && srcIface != null && dstIface != null) {
-            sb = new StringBuilder().append("net.interface.").append(netInterfaceConfig.getName())
+            sb = new StringBuilder().append("net.interface.").append(interfaceName)
                     .append(".config.nat.dst.interface");
             kuraProps.put(sb.toString(), dstIface);
 
-            sb = new StringBuilder().append("net.interface.").append(netInterfaceConfig.getName())
+            sb = new StringBuilder().append("net.interface.").append(interfaceName)
                     .append(".config.nat.masquerade");
             kuraProps.put(sb.toString(), Boolean.toString(useMasquerade));
         }
 
         // write it
-        if (kuraProps != null && !kuraProps.isEmpty()) {
-            storeKuranetProperties(kuraProps);
-        }
+        storeKuranetProperties(kuraProps);
     }
 
     protected void applyNatConfig(NetworkConfiguration networkConfig) throws KuraException {
@@ -130,6 +134,10 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
     }
 
     protected void storeKuranetProperties(Properties kuraProps) throws KuraException {
+        if (kuraProps == null || kuraProps.isEmpty()) {
+            return;
+        }
+
         try {
             KuranetConfig.storeProperties(kuraProps);
         } catch (Exception e) {
@@ -138,11 +146,11 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
     }
 
     private LinkedHashSet<NATRule> getNatConfigs(NetworkConfiguration networkConfig) {
-        LinkedHashSet<NATRule> natConfigs = new LinkedHashSet<NATRule>();
+        LinkedHashSet<NATRule> natConfigs = new LinkedHashSet<>();
 
         if (networkConfig != null) {
-            ArrayList<String> wanList = new ArrayList<String>();
-            ArrayList<String> natList = new ArrayList<String>();
+            ArrayList<String> wanList = new ArrayList<>();
+            ArrayList<String> natList = new ArrayList<>();
 
             // get relevant interfaces
             for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : networkConfig
@@ -156,11 +164,11 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
                         if (netConfig instanceof NetConfigIP4) {
                             status = ((NetConfigIP4) netConfig).getStatus();
                         } else if (netConfig instanceof FirewallAutoNatConfig) {
-                            s_logger.debug("getNatConfigs() :: FirewallAutoNatConfig: {}",
+                            logger.debug("getNatConfigs() :: FirewallAutoNatConfig: {}",
                                     ((FirewallAutoNatConfig) netConfig).toString());
                             isNat = true;
                         } else if (netConfig instanceof FirewallNatConfig) {
-                            s_logger.debug("getNatConfigs() ::  FirewallNatConfig: {}",
+                            logger.debug("getNatConfigs() ::  FirewallNatConfig: {}",
                                     ((FirewallNatConfig) netConfig).toString());
                         }
                     }
@@ -176,7 +184,7 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
             // create a nat rule for each interface to all potential wan interfaces
             for (String sourceInterface : natList) {
                 for (String destinationInterface : wanList) {
-                    s_logger.debug(
+                    logger.debug(
                             "Got NAT rule for source: " + sourceInterface + ", destination: " + destinationInterface);
                     natConfigs.add(new NATRule(sourceInterface, destinationInterface, true));
                 }

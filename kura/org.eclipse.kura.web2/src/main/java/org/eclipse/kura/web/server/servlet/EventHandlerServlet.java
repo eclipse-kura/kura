@@ -14,6 +14,7 @@
 package org.eclipse.kura.web.server.servlet;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.util.base.StringUtil.isNullOrEmpty;
 import static org.eclipse.kura.wire.WireSupport.EMIT_EVENT_TOPIC;
@@ -45,7 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The Class EventHandlerServlet is responsible for interacting between Event
+ * The Class {@link EventHandlerServlet} is responsible for interacting between Event
  * Admin and Javascript through Server Sent Events (SSE). This is mainly required
  * for Kura Wires to delegate the emit events.
  */
@@ -56,6 +57,9 @@ public final class EventHandlerServlet extends HttpServlet {
 
     /** Session Timeout in Seconds - 5 minutes */
     private static final int MAX_INACTIVE_INTERVAL = 5 * 60;
+    
+    /** Required for IE9 */
+    private static byte[] prelude;
 
     /**
      * Maximum size of the queue to maintain the events. The queue does not care if any
@@ -139,6 +143,14 @@ public final class EventHandlerServlet extends HttpServlet {
         final BlockingQueue<String> eventQueue = new LinkedBlockingQueue<>(MAX_SIZE_OF_QUEUE);
         final ServletOutputStream outputStream = response.getOutputStream();
         final PrintStream printStream = new PrintStream(outputStream);
+        
+        //required for low-layer buffering in IE 9. We must send 2K prelude.
+        //https://blogs.msdn.microsoft.com/ieinternals/2010/04/05/comet-streaming-in-internet-explorer/
+        String userAgent = request.getHeader("User-Agent");
+        if (nonNull(userAgent) && userAgent.contains("MSIE 9.")) {
+            outputStream.write(getIE9Prelude());
+            outputStream.flush();
+        }
 
         // the asynchronous task to retrieve and remove head element from the queue
         final CompletableFuture<Void> elementRemovalFuture = CompletableFuture.runAsync(() -> {
@@ -243,6 +255,20 @@ public final class EventHandlerServlet extends HttpServlet {
                 }
             }
         } , props);
+    }
+    
+    /**
+     * Returns the MSIE-9 2K prelude.
+     */
+    private static byte[] getIE9Prelude() {
+        if (isNull(prelude)) {
+            prelude = new byte[2048];
+            prelude[0] = ':';
+            for (int i = 1; i < prelude.length - 1; i++)
+                prelude[i] = ' ';
+            prelude[prelude.length - 1] = '\n';
+        }
+        return prelude;
     }
 
     private void cleanRequest(final String requestId) {

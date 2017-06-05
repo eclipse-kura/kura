@@ -8,7 +8,7 @@ This tutorial will present how to collect data from a OPC/UA device and publish 
 
 ## Configure OPC/UA server simulator
 
-1. Download the [OPC/UA server simulator](http://???) bundle and install it on Kura. It will create a simulated OPC/UA server that exposes some sensors (light, temperature and water sensor) and some actuators (buzzer, led and fan).
+1. Download the [OPC/UA server simulator](https://s3.amazonaws.com/kura-resources/opcua_demo_server.dp) bundle and install it on Kura. It will create a simulated OPC/UA server that exposes some sensors (light, temperature and water sensor) and some actuators (buzzer, led and fan).
 2. On the Kura web interface, select "OPCUA Server demo" under "Services" and set "server.port" to 1234. Click "Apply" button. This will start a OPCUA server on port 1234.
 
 ## Configure Kura Wires OPC/UA application

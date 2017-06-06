@@ -40,6 +40,7 @@ import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,13 +96,32 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
     public void generateTempWpaSupplicantConf() throws KuraException {
 
         try {
-            String fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()),
+            String fileAsString = readResource(
                     "/src/main/resources/wifi/wpasupplicant.conf");
             File outputFile = new File(TMP_WPA_CONFIG_FILE);
             copyFile(fileAsString, outputFile);
         } catch (Exception e) {
             throw KuraException.internalError("Failed to generate wpa_supplicant.conf");
         }
+    }
+
+    protected String getFinalConfigFile(String ifaceName) {
+        return WpaSupplicantManager.getWpaSupplicantConfigFilename(ifaceName);
+    }
+
+    protected String getTemporaryConfigFile() {
+        return WPA_TMP_CONFIG_FILE;
+    }
+
+    protected String readResource(String path) throws IOException {
+        Bundle bundle = FrameworkUtil.getBundle(getClass());
+        String s = IOUtil.readResource(bundle, path);
+
+        return s;
+    }
+
+    protected void setKuranetProperty(String key, String value) throws IOException, KuraException {
+        KuranetConfig.setProperty(key, value);
     }
 
     private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
@@ -150,8 +170,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
                             StringBuilder key = new StringBuilder().append("net.interface.").append(interfaceName)
                                     .append(".config.wifi.infra.pingAccessPoint");
                             try {
-                                KuranetConfig.setProperty(key.toString(),
-                                        Boolean.toString(infraConfig.pingAccessPoint()));
+                                setKuranetProperty(key.toString(), Boolean.toString(infraConfig.pingAccessPoint()));
                             } catch (IOException e) {
                                 s_logger.warn("Error setting KuranetConfig property", e);
                             }
@@ -159,7 +178,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
                             key = new StringBuilder().append("net.interface.").append(interfaceName)
                                     .append(".config.wifi.infra.ignoreSSID");
                             try {
-                                KuranetConfig.setProperty(key.toString(), Boolean.toString(infraConfig.ignoreSSID()));
+                                setKuranetProperty(key.toString(), Boolean.toString(infraConfig.ignoreSSID()));
                             } catch (IOException e) {
                                 s_logger.warn("Error setting KuranetConfig property", e);
                             }
@@ -192,8 +211,8 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
                     try {
                         if (wpaSupplicantConfig != null) {
                             s_logger.debug("Writing wifiConfig: {}", wpaSupplicantConfig);
-                            generateWpaSupplicantConf(wpaSupplicantConfig, interfaceName, WPA_TMP_CONFIG_FILE);
-                            moveWpaSupplicantConf(interfaceName, WPA_TMP_CONFIG_FILE);
+                            generateWpaSupplicantConf(wpaSupplicantConfig, interfaceName, getTemporaryConfigFile());
+                            moveWpaSupplicantConf(interfaceName, getTemporaryConfigFile());
                         }
                     } catch (Exception e) {
                         s_logger.error("Failed to configure WPA Supplicant");
@@ -214,7 +233,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         StringBuilder key = new StringBuilder("net.interface." + interfaceName + ".config.wifi."
                 + wifiConfig.getMode().toString().toLowerCase() + ".driver");
         try {
-            KuranetConfig.setProperty(key.toString(), wifiConfig.getDriver());
+            setKuranetProperty(key.toString(), wifiConfig.getDriver());
         } catch (Exception e) {
             s_logger.error("Failed to save kuranet config", e);
             throw KuraException.internalError(e);
@@ -225,10 +244,10 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
             String fileAsString = null;
 
             if (wifiConfig.getMode() == WifiMode.INFRA) {
-                fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()),
+                fileAsString = readResource(
                         "/src/main/resources/wifi/wpasupplicant.conf_wep");
             } else if (wifiConfig.getMode() == WifiMode.ADHOC) {
-                fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()),
+                fileAsString = readResource(
                         "/src/main/resources/wifi/wpasupplicant.conf_adhoc_wep");
                 fileAsString = fileAsString.replaceFirst("KURA_FREQUENCY",
                         Integer.toString(WpaSupplicantUtil.convChannelToFrequency(wifiConfig.getChannels()[0])));
@@ -322,10 +341,10 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
             String fileAsString = null;
 
             if (wifiConfig.getMode() == WifiMode.INFRA) {
-                fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()),
+                fileAsString = readResource(
                         "/src/main/resources/wifi/wpasupplicant.conf_wpa");
             } else if (wifiConfig.getMode() == WifiMode.ADHOC) {
-                fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()),
+                fileAsString = readResource(
                         "/src/main/resources/wifi/wpasupplicant.conf_adhoc_wpa");
                 fileAsString = fileAsString.replaceFirst("KURA_FREQUENCY",
                         Integer.toString(WpaSupplicantUtil.convChannelToFrequency(wifiConfig.getChannels()[0])));
@@ -403,10 +422,10 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
             String fileAsString = null;
 
             if (wifiConfig.getMode() == WifiMode.INFRA) {
-                fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()),
+                fileAsString = readResource(
                         "/src/main/resources/wifi/wpasupplicant.conf_open");
             } else if (wifiConfig.getMode() == WifiMode.ADHOC) {
-                fileAsString = IOUtil.readResource(FrameworkUtil.getBundle(getClass()),
+                fileAsString = readResource(
                         "/src/main/resources/wifi/wpasupplicant.conf_adhoc_open");
                 fileAsString = fileAsString.replaceFirst("KURA_FREQUENCY",
                         Integer.toString(WpaSupplicantUtil.convChannelToFrequency(wifiConfig.getChannels()[0])));
@@ -448,7 +467,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
     private void moveWpaSupplicantConf(String ifaceName, String configFile) throws KuraException {
 
         File outputFile = new File(configFile);
-        File wpaConfigFile = new File(WpaSupplicantManager.getWpaSupplicantConfigFilename(ifaceName));
+        File wpaConfigFile = new File(getFinalConfigFile(ifaceName));
         try {
             if (!FileUtils.contentEquals(outputFile, wpaConfigFile)) {
                 if (outputFile.renameTo(wpaConfigFile)) {
@@ -506,8 +525,17 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         try {
             procChmod = ProcessUtil.exec("chmod 600 " + fileName);
             procChmod.waitFor();
-            procDos = ProcessUtil.exec("dos2unix " + fileName);
-            procDos.waitFor();
+
+            try {
+                procDos = ProcessUtil.exec("dos2unix " + fileName);
+                procDos.waitFor();
+            } catch (Exception e) {
+                // dos2unix may not exist on the target system resulting in
+                // java.io.IOException: Cannot run program "dos2unix": error=2, No such file or directory
+                if (!e.getMessage().contains("dos2unix")) {
+                    throw e;
+                }
+            }
         } catch (Exception e) {
             throw KuraException.internalError(e);
         } finally {

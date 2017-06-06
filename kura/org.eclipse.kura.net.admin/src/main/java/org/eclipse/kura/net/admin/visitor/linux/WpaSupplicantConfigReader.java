@@ -101,7 +101,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
         }
     }
 
-    private static WifiConfig getWifiClientConfig(String ifaceName, WifiMode wifiMode) throws KuraException {
+    private WifiConfig getWifiClientConfig(String ifaceName, WifiMode wifiMode) throws KuraException {
 
         WifiConfig wifiConfig = new WifiConfig();
 
@@ -123,7 +123,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
             if (ssid == null) {
                 s_logger.warn("WPA in client mode is not configured");
             } else {
-                s_logger.debug("curent wpa_supplicant.conf: ssid={}", ssid);
+                s_logger.debug("current wpa_supplicant.conf: ssid={}", ssid);
 
                 // wifi mode
                 int currentMode = props.getProperty("mode") != null ? Integer.parseInt(props.getProperty("mode"))
@@ -256,7 +256,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
         boolean pingAP = false;
         StringBuilder key = new StringBuilder().append("net.interface.").append(ifaceName)
                 .append(".config.wifi.infra.pingAccessPoint");
-        String statusString = KuranetConfig.getProperty(key.toString());
+        String statusString = getKuranetProperty(key.toString());
         if (statusString != null && !statusString.isEmpty()) {
             pingAP = Boolean.parseBoolean(statusString);
         }
@@ -264,7 +264,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 
         boolean ignoreSSID = false;
         key = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.wifi.infra.ignoreSSID");
-        statusString = KuranetConfig.getProperty(key.toString());
+        statusString = getKuranetProperty(key.toString());
         if (statusString != null && !statusString.isEmpty()) {
             ignoreSSID = Boolean.parseBoolean(statusString);
         }
@@ -274,7 +274,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
                 .append(".config.wifi.infra.driver");
         // StringBuilder adhocDriverKey = new
         // StringBuilder("net.interface.").append(ifaceName).append(".config.wifi.adhoc.driver");
-        String wifiDriver = KuranetConfig.getProperty(infraDriverKey.toString());
+        String wifiDriver = getKuranetProperty(infraDriverKey.toString());
         if (wifiDriver == null || wifiDriver.isEmpty()) {
             wifiDriver = "nl80211";
         }
@@ -283,13 +283,17 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
         return wifiConfig;
     }
 
-    private static Properties parseConfigFile(String ifaceName) throws KuraException {
+    protected String getKuranetProperty(String key) {
+        return KuranetConfig.getProperty(key);
+    }
+
+    private Properties parseConfigFile(String ifaceName) throws KuraException {
 
         Properties props = null;
 
         BufferedReader br = null;
         try {
-            File wpaConfigFile = new File(WpaSupplicantManager.getWpaSupplicantConfigFilename(ifaceName));
+            File wpaConfigFile = new File(getWpaSupplicantConfigFilename(ifaceName));
             if (wpaConfigFile.exists()) {
 
                 // Read into a string
@@ -336,5 +340,9 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
         }
 
         return props;
+    }
+
+    protected String getWpaSupplicantConfigFilename(String ifaceName) {
+        return WpaSupplicantManager.getWpaSupplicantConfigFilename(ifaceName);
     }
 }

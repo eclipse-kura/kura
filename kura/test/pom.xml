@@ -126,6 +126,7 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
         <!-- test setup broken
         <module>org.eclipse.kura.asset.provider.test</module>
         -->
+        <module>log4j.test.configuration</module>
         <module>org.eclipse.kura.camel.test</module>
         <module>org.eclipse.kura.cloud.test</module>
         <module>org.eclipse.kura.core.certificates.test</module>

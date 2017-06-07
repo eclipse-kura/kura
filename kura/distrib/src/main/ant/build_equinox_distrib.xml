@@ -115,7 +115,7 @@
 		<antcall target="wires-config" />
 
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
-		<available file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" property="web2.jar.present" />
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" property="is.web2.jar.available" />
 		<antcall target="web2-config" />
 
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" property="linux.gpio.jar.present" />
@@ -686,7 +686,7 @@ fi]]>
 		<antcall target="wires-config" />
 
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
-		<available file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" property="web2.jar.present" />
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" property="is.web2.jar.available" />
 		<antcall target="web2-config" />
 
 		<antcall target="emulator-gpio-config" />
@@ -1143,7 +1143,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</propertyfile>
 	</target>
 
-	<target name="web2-config" if="web2.jar.present">
+	<target name="web2-config" if="is.web2.jar.available">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				   value=", reference:file:${kura.install.dir}/kura/plugins/com.gwt.user_${com.gwt.user.version}.jar@3" />
@@ -1292,7 +1292,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</zip>
 	</target>
 
-	<target name="web2-jar" if="web2.jar.present">
+	<target name="web2-jar" if="is.web2.jar.available">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
@@ -1351,7 +1351,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</zip>
 	</target>
 
-	<target name="web2-jar-win" if="web2.jar.present">
+	<target name="web2-jar-win" if="is.web2.jar.available">
     	<echo message="web2-jar-win ${project.build.directory}/${build.output.name}/config.ini..." />
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
 			todir="${build.install.dir.kura}/kura/plugins" />

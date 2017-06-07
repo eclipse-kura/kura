@@ -382,16 +382,6 @@ fi]]>
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/${build.name}/udhcpd-wlan0.conf"
                         prefix="${build.output.name}/install" />
-
-			<zipfileset file="src/main/resources/${build.name}/dos2unix.bin"
-                        prefix="${build.output.name}/install" />
-
-			<zipfileset file="src/main/resources/${build.name}/named.bin"
-                        prefix="${build.output.name}/install" />
-			<zipfileset file="src/main/resources/${build.name}/rndc.bin"
-                        prefix="${build.output.name}/install" />
-			<zipfileset file="src/main/resources/${build.name}/rndc-confgen.bin"
-                        prefix="${build.output.name}/install" />
 			<!-- </intel-edison> -->
 			<zipfileset file="src/main/resources/common/named/named.conf"
                         prefix="${build.output.name}/install" />

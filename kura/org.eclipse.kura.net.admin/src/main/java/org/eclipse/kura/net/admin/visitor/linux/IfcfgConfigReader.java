@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -47,18 +47,19 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 
     private static final Logger s_logger = LoggerFactory.getLogger(IfcfgConfigReader.class);
 
-    private static final String OS_VERSION = System.getProperty("kura.os.version");
     private static final String REDHAT_NET_CONFIGURATION_DIRECTORY = "/etc/sysconfig/network-scripts/";
     private static final String DEBIAN_NET_CONFIGURATION_DIRECTORY = "/etc/network/";
 
-    private static IfcfgConfigReader s_instance;
+    private static String OS_VERSION = System.getProperty("kura.os.version");
+
+    private static IfcfgConfigReader instance;
 
     public static IfcfgConfigReader getInstance() {
-        if (s_instance == null) {
-            s_instance = new IfcfgConfigReader();
+        if (instance == null) {
+            instance = new IfcfgConfigReader();
         }
 
-        return s_instance;
+        return instance;
     }
 
     @Override
@@ -66,11 +67,23 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
                 .getNetInterfaceConfigs();
 
-        Properties kuraExtendedProps = KuranetConfig.getProperties();
+        Properties kuraExtendedProps = getKuranetProperties();
 
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
             getConfig(netInterfaceConfig, kuraExtendedProps);
         }
+    }
+
+    protected Properties getKuranetProperties() {
+        return KuranetConfig.getProperties();
+    }
+
+    protected String getIfcfgDirectory() {
+        if (isDebian()) {
+            return DEBIAN_NET_CONFIGURATION_DIRECTORY;
+        }
+
+        return REDHAT_NET_CONFIGURATION_DIRECTORY;
     }
 
     private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
@@ -81,7 +94,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         NetInterfaceType type = netInterfaceConfig.getType();
         if (type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI || type == NetInterfaceType.LOOPBACK) {
 
-            NetInterfaceStatus netInterfaceStatus = null;
+            NetInterfaceStatus netInterfaceStatus;
 
             StringBuilder sb = new StringBuilder().append("net.interface.").append(netInterfaceConfig.getName())
                     .append(".config.ip4.status");
@@ -102,35 +115,12 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
             String netmask = null;
             String gateway = null;
 
-            File ifcfgFile = null;
-            if (OS_VERSION
-                    .equals(KuraConstants.Mini_Gateway.getImageName() + "_"
-                            + KuraConstants.Mini_Gateway.getImageVersion())
-                    || OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
-                    || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
-                    || OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_"
-                            + KuraConstants.Intel_Edison.getImageVersion() + "_"
-                            + KuraConstants.Intel_Edison.getTargetName())
-                    || OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
-                            + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
-                ifcfgFile = new File(DEBIAN_NET_CONFIGURATION_DIRECTORY + "interfaces");
-            } else {
-                ifcfgFile = new File(REDHAT_NET_CONFIGURATION_DIRECTORY + "ifcfg-" + interfaceName);
-            }
+            File ifcfgFile = getIfcfgFile(interfaceName);
 
             if (ifcfgFile.exists()) {
                 Properties kuraProps;
                 // found our match so load the properties
-                if (OS_VERSION
-                        .equals(KuraConstants.Mini_Gateway.getImageName() + "_"
-                                + KuraConstants.Mini_Gateway.getImageVersion())
-                        || OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
-                        || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
-                        || OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_"
-                                + KuraConstants.Intel_Edison.getImageVersion() + "_"
-                                + KuraConstants.Intel_Edison.getTargetName())
-                        || OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
-                                + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion())) {
+                if (isDebian()) {
                     kuraProps = parseDebianConfigFile(ifcfgFile, interfaceName);
                 } else {
                     kuraProps = parseRedhatConfigFile(ifcfgFile, interfaceName);
@@ -181,7 +171,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                     // actual properties
                     if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusDisabled) {
                         if (autoConnect) {
-                            if (defroute.equals("no")) {
+                            if ("no".equals(defroute)) {
                                 netInterfaceStatus = NetInterfaceStatus.netIPv4StatusEnabledLAN;
                             } else {
                                 netInterfaceStatus = NetInterfaceStatus.netIPv4StatusEnabledWAN;
@@ -202,7 +192,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                             s_logger.warn("missing gateway stanza for " + interfaceName);
                         }
 
-                        if (bootproto.equals("dhcp")) {
+                        if ("dhcp".equals(bootproto)) {
                             s_logger.debug("currently set for DHCP");
                             dhcp = true;
                             ipAddress = null;
@@ -236,7 +226,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 
                 if (netInterfaceAddressConfigs == null) {
                     throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "InterfaceAddressConfig list is null");
-                } else if (netInterfaceAddressConfigs.size() == 0) {
+                } else if (netInterfaceAddressConfigs.isEmpty()) {
                     throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "InterfaceAddressConfig list has no entries");
                 }
 
@@ -244,7 +234,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                     List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
 
                     if (netConfigs == null) {
-                        netConfigs = new ArrayList<NetConfig>();
+                        netConfigs = new ArrayList<>();
                         if (netInterfaceAddressConfig instanceof NetInterfaceAddressConfigImpl) {
                             ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
                             if (dhcp) {
@@ -281,6 +271,30 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         }
     }
 
+    private boolean isDebian() {
+        return OS_VERSION
+                .equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())
+                || OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
+                || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
+                || OS_VERSION.equals(
+                        KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion()
+                                + "_" + KuraConstants.Intel_Edison.getTargetName())
+                || OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
+                        + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion());
+    }
+
+    private File getIfcfgFile(String interfaceName) {
+        String fileName = getIfcfgDirectory();
+
+        if (isDebian()) {
+            fileName += "/interfaces";
+        } else {
+            fileName += "/ifcfg-" + interfaceName;
+        }
+
+        return new File(fileName);
+    }
+
     private Properties parseRedhatConfigFile(File ifcfgFile, String interfaceName) {
         Properties kuraProps = new Properties();
         FileInputStream fis = null;
@@ -304,7 +318,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                 try {
                     fis.close();
                 } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
+                    s_logger.error("I/O Exception while closing BufferedReader!", ex);
                 }
             }
         }
@@ -313,9 +327,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 
     static Properties parseDebianConfigFile(File ifcfgFile, String interfaceName) throws KuraException {
         Properties kuraProps = new Properties();
-        Scanner scanner = null;
-        try {
-            scanner = new Scanner(new FileInputStream(ifcfgFile));
+        try (Scanner scanner = new Scanner(new FileInputStream(ifcfgFile))) {
 
             // Debian specific routine to create Properties object
             kuraProps.setProperty("ONBOOT", "no");
@@ -332,15 +344,15 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                         try {
                             // must be a line stating that interface starts on
                             // boot
-                            if (args[0].equals("auto") && args[1].equals(interfaceName)) {
+                            if ("auto".equals(args[0]) && args[1].equals(interfaceName)) {
                                 s_logger.debug("Setting ONBOOT to yes for " + interfaceName);
                                 kuraProps.setProperty("ONBOOT", "yes");
                             }
                             // once the correct interface is found, read all
                             // configuration information
-                            else if (args[0].equals("iface") && args[1].equals(interfaceName)) {
+                            else if ("iface".equals(args[0]) && args[1].equals(interfaceName)) {
                                 kuraProps.setProperty("BOOTPROTO", args[3]);
-                                if (args[3].equals("dhcp")) {
+                                if ("dhcp".equals(args[3])) {
                                     kuraProps.setProperty("DEFROUTE", "yes");
                                 }
                                 while (scanner.hasNextLine()) {
@@ -351,16 +363,16 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                                         }
 
                                         args = line.trim().split("\\s+");
-                                        if (args[0].equals("mtu")) {
+                                        if ("mtu".equals(args[0])) {
                                             kuraProps.setProperty("mtu", args[1]);
-                                        } else if (args[0].equals("address")) {
+                                        } else if ("address".equals(args[0])) {
                                             kuraProps.setProperty("IPADDR", args[1]);
-                                        } else if (args[0].equals("netmask")) {
+                                        } else if ("netmask".equals(args[0])) {
                                             kuraProps.setProperty("NETMASK", args[1]);
-                                        } else if (args[0].equals("gateway")) {
+                                        } else if ("gateway".equals(args[0])) {
                                             kuraProps.setProperty("GATEWAY", args[1]);
                                             kuraProps.setProperty("DEFROUTE", "yes");
-                                        } else if (args[0].equals("#dns-nameservers")) {
+                                        } else if ("#dns-nameservers".equals(args[0])) {
                                             /*
                                              * IAB:
                                              * If DNS servers are listed,
@@ -383,8 +395,8 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                                                     kuraProps.setProperty("DNS" + Integer.toString(i), args[i]);
                                                 }
                                             }
-                                        } else if (args[0].equals("post-up")) {
-                                            StringBuffer sb = new StringBuffer();
+                                        } else if ("post-up".equals(args[0])) {
+                                            StringBuilder sb = new StringBuilder();
                                             for (int i = 1; i < args.length; i++) {
                                                 sb.append(args[i]);
                                                 sb.append(' ');
@@ -397,7 +409,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                                 }
                                 // Debian makes assumptions about lo, handle
                                 // those here
-                                if (interfaceName.equals("lo") && kuraProps.getProperty("IPADDR") == null
+                                if ("lo".equals(interfaceName) && kuraProps.getProperty("IPADDR") == null
                                         && kuraProps.getProperty("NETMASK") == null) {
                                     kuraProps.setProperty("IPADDR", "127.0.0.1");
                                     kuraProps.setProperty("NETMASK", "255.0.0.0");
@@ -413,10 +425,6 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 
         } catch (FileNotFoundException err) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, err);
-        } finally {
-            if (scanner != null) {
-                scanner.close();
-            }
         }
         return kuraProps;
     }
@@ -427,10 +435,10 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         netConfig.setDhcp(dhcp);
         if (kuraProps != null) {
             // get the DNS
-            List<IP4Address> dnsServers = new ArrayList<IP4Address>();
+            List<IP4Address> dnsServers = new ArrayList<>();
             int count = 1;
             while (true) {
-                String dns = null;
+                String dns;
                 if ((dns = kuraProps.getProperty("DNS" + count)) != null) {
                     try {
                         dnsServers.add((IP4Address) IPAddress.parseHostAddress(dns));

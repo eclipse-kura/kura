@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -586,28 +587,33 @@ public class PropertiesUi extends AbstractServicesUi {
 
     private Column<GwtChannelInfo, String> getSelectionInputColumn(final GwtConfigParameter param) {
         final String id = param.getId();
-        final Map<String, String> options = param.getOptions();
-        final ArrayList<String> opts = new ArrayList<>(options.keySet());
-        final SelectionCell cell = new SelectionCell(opts);
+        final Map<String, String> labelsToValues = param.getOptions();
+        final Map<String, String> valuesToLabels = new HashMap<>();
+        for (Entry<String, String> entry : labelsToValues.entrySet()) {
+            valuesToLabels.put(entry.getValue(), entry.getKey());
+        }
+        final ArrayList<String> labels = new ArrayList<>(labelsToValues.keySet());
+        final SelectionCell cell = new SelectionCell(new ArrayList<>(labels));
         final Column<GwtChannelInfo, String> result = new Column<GwtChannelInfo, String>(cell) {
 
             @Override
             public String getValue(final GwtChannelInfo object) {
                 Object result = object.get(id);
-                if (result != null) {
-                    return result.toString();
+                if (result == null) {
+                    final String defaultValue = param.getDefault();
+                    result = (defaultValue != null) ? defaultValue : labelsToValues.get(labels.get(0));
+                    object.set(id, result);
                 }
-                final String defaultValue = param.getDefault();
-                return (defaultValue != null) ? defaultValue : opts.get(0);
+                return valuesToLabels.get(result.toString());
             }
         };
 
         result.setFieldUpdater(new FieldUpdater<GwtChannelInfo, String>() {
 
             @Override
-            public void update(final int index, final GwtChannelInfo object, final String value) {
+            public void update(final int index, final GwtChannelInfo object, final String label) {
                 PropertiesUi.this.setDirty(true);
-                object.set(param.getId(), value);
+                object.set(param.getId(), labelsToValues.get(label));
                 PropertiesUi.this.channelTable.redraw();
             }
         });

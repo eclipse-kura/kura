@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -67,19 +67,19 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         }
     }
 
-    private static final Logger s_logger = LoggerFactory.getLogger(PppConfigReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(PppConfigReader.class);
 
     public static final String PEERS_DIRECTORY = "/etc/ppp/peers/";
     public static final String SCRIPTS_DIRECTORY = "/etc/ppp/scripts/";
 
-    private static PppConfigReader s_instance;
+    private static PppConfigReader instance;
 
     public static PppConfigReader getInstance() {
-        if (s_instance == null) {
-            s_instance = new PppConfigReader();
+        if (instance == null) {
+            instance = new PppConfigReader();
         }
 
-        return s_instance;
+        return instance;
     }
 
     @Override
@@ -95,17 +95,21 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         }
     }
 
+    protected String getKuranetProperty(String key) {
+        return KuranetConfig.getProperty(key);
+    }
+
     private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
 
         String interfaceName = netInterfaceConfig.getName();
-        s_logger.debug("Getting ppp config for {}", interfaceName);
+        logger.debug("Getting ppp config for {}", interfaceName);
 
         if (netInterfaceConfig instanceof ModemInterfaceConfigImpl) {
             StringBuilder key = new StringBuilder(
                     "net.interface." + netInterfaceConfig.getName() + ".modem.identifier");
-            String modemId = KuranetConfig.getProperty(key.toString());
-            s_logger.debug("Getting modem identifier using key " + key + ": " + modemId);
+            String modemId = getKuranetProperty(key.toString());
+            logger.debug("Getting modem identifier using key " + key + ": " + modemId);
 
             if (modemId != null) {
                 ((ModemInterfaceConfigImpl) netInterfaceConfig).setModemIdentifier(modemId);
@@ -117,59 +121,51 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 
         for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
             if (netInterfaceAddressConfig instanceof ModemInterfaceAddressConfigImpl) {
-                List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-
-                if (netConfigs == null) {
-                    netConfigs = new ArrayList<NetConfig>();
-                    ((ModemInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
-                }
-
-                // Create a ModemConfig
-                ModemConfig modemConfig = getModemConfig(interfaceName, netInterfaceConfig.getUsbDevice());
-                if (modemConfig != null) {
-                    netConfigs.add(modemConfig);
-                }
-
-                // Create a NetConfigIP4
-                netConfigs.add(getNetConfigIP4(interfaceName));
-
-                // Populate with DNS provided by PPP (displayed as read-only in Denali)
-                if (LinuxNetworkUtil.hasAddress("ppp" + modemConfig.getPppNumber())) {
-                    List<? extends IPAddress> pppDnsServers = LinuxDns.getInstance().getPppDnServers();
-                    if (pppDnsServers != null) {
-                        ((ModemInterfaceAddressConfigImpl) netInterfaceAddressConfig).setDnsServers(pppDnsServers);
-                    }
-                }
+                addNetConfigs((ModemInterfaceAddressConfigImpl) netInterfaceAddressConfig,
+                        netInterfaceConfig.getUsbDevice(), interfaceName);
             }
         }
     }
 
-    private static ModemConfig getModemConfig(String ifaceName, UsbDevice usbDevice) throws KuraException {
-        s_logger.debug("parsePppPeerConfig()");
-        boolean isGsmGprsUmtsHspa = false;
-        List<ModemTechnologyType> technologyTypes = null;
-        if (usbDevice != null) {
-            SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem(usbDevice);
-            if (usbModemInfo != null) {
-                technologyTypes = usbModemInfo.getTechnologyTypes();
+    private void addNetConfigs(ModemInterfaceAddressConfigImpl netInterfaceAddressConfig, UsbDevice usbDevice,
+            String interfaceName) throws KuraException {
+        List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
 
-            }
-        } else {
-            SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-            if (serialModemInfo != null) {
-                technologyTypes = serialModemInfo.getTechnologyTypes();
-            }
+        if (netConfigs == null) {
+            netConfigs = new ArrayList<>();
+            netInterfaceAddressConfig.setNetConfigs(netConfigs);
         }
 
-        if (technologyTypes != null) {
-            for (ModemTechnologyType technologyType : technologyTypes) {
-                if (technologyType == ModemTechnologyType.GSM_GPRS || technologyType == ModemTechnologyType.UMTS
-                        || technologyType == ModemTechnologyType.HSDPA || technologyType == ModemTechnologyType.HSPA) {
-                    isGsmGprsUmtsHspa = true;
-                    break;
-                }
+        // Create a ModemConfig
+        ModemConfig modemConfig = getModemConfig(interfaceName, usbDevice);
+        netConfigs.add(modemConfig);
+
+        // Create a NetConfigIP4
+        netConfigs.add(getNetConfigIP4(interfaceName));
+
+        // Populate with DNS provided by PPP (displayed as read-only in Denali)
+        if (hasAddress(modemConfig.getPppNumber())) {
+            List<? extends IPAddress> pppDnsServers = getPppDnServers();
+            if (pppDnsServers != null) {
+                netInterfaceAddressConfig.setDnsServers(pppDnsServers);
             }
         }
+    }
+
+    protected List<IPAddress> getPppDnServers() throws KuraException {
+        return LinuxDns.getInstance().getPppDnServers();
+    }
+
+    protected boolean hasAddress(int pppNumber) throws KuraException {
+        return LinuxNetworkUtil.hasAddress("ppp" + pppNumber);
+    }
+
+    private ModemConfig getModemConfig(String ifaceName, UsbDevice usbDevice) throws KuraException {
+        logger.debug("parsePppPeerConfig()");
+
+        List<ModemTechnologyType> technologyTypes = getModemTechnologyTypes(usbDevice);
+
+        boolean isGsmGprsUmtsHspa = isGsmGprsUmtsHspa(technologyTypes);
 
         boolean enabled = true;
         int unitNum = getUnitNum(ifaceName);
@@ -178,8 +174,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         String pdpType = "UNKNOWN";
         String dialString = "";
         String username = "";
-        String password = "";
-        String model = "";
+        String pass = "";
         AuthType authType = AuthType.NONE;
         boolean persist = false;
         int maxFail = 0;
@@ -195,40 +190,14 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
             maxFail = 5;
             idle = 95;
             activeFilter = "inbound";
-            s_logger.warn("getModemConfig() :: PPPD peer file does not exist - {}", peerFilename);
+
+            logger.warn("getModemConfig() :: PPPD peer file does not exist - {}", peerFilename);
         } else {
-            s_logger.debug("getModemConfig() :: PPPD peer file exists - {}", peerFilename);
-            // Check if peer file is a symlink. If so, get information from the linked filename.
-            try {
-                if (!peerFile.getCanonicalPath().equals(peerFile.getAbsolutePath())) {
-                    Map<String, String> fileInfo = PppUtil.parsePeerFilename(peerFile.getCanonicalFile().getName());
-                    fileInfo.get("technology");
-                    model = fileInfo.get("model");
-                    fileInfo.get("serialNum");
-                    fileInfo.get("modemId");
-                }
-            } catch (IOException e) {
-                s_logger.error("Error checking for symlink", e);
-            }
+            logger.debug("getModemConfig() :: PPPD peer file exists - {}", peerFilename);
 
-            Properties props = new Properties();
-            FileInputStream fis = null;
-            try {
-                fis = new FileInputStream(peerFilename);
-                props.load(fis);
-            } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Error getting modem config", e);
-            } finally {
-                if (null != fis) {
-                    try {
-                        fis.close();
-                    } catch (IOException e) {
-                        throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Error getting modem config", e);
-                    }
-                }
-            }
+            Properties props = loadPeerFileProperties(peerFilename);
 
-            s_logger.debug("peer properties: {}", props);
+            logger.debug("peer properties: {}", props);
 
             if (props.getProperty("unit") != null) {
                 unitNum = Integer.parseInt(props.getProperty("unit"));
@@ -262,45 +231,19 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
                 lcpEchoFailure = Integer.parseInt(props.getProperty("lcp-echo-failure"));
             }
 
-            String chatFilename = "";
-            String connectProperty = removeQuotes(props.getProperty("connect"));
-            String[] args = connectProperty.split("\\s+");
-            for (int i = 0; i < args.length; i++) {
-                if (args[i].equals("-f") && args.length > i + 1) {
-                    chatFilename = args[i + 1];
-                    break;
-                }
-            }
+            String chatFilename = getChatFileName(props);
 
-            // String disconnectFilename = "";
-            // String disconnectProperty = removeQuotes(props.getProperty("disconnect"));
-            // args = disconnectProperty.split("\\s+");
-            // for(int i=0; i<args.length; i++) {
-            // if(args[i].equals("-f") && args.length > i+1) {
-            // disconnectFilename = args[i+1];
-            // break;
-            // }
-            // }
-
-            // Parse the connect script
-            ModemXchangeScript connectScript = null;
-
-            try {
-                connectScript = ModemXchangeScript.parseFile(chatFilename);
-            } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Error parsing " + chatFilename, e);
-            }
+            ModemXchangeScript connectScript = getConnectScript(chatFilename);
 
             if (connectScript != null) {
                 ModemXchangePair modemXchangePair = connectScript.getFirstModemXchangePair();
                 ModemXchangePair prevXchangePair = null;
-                String expectedStr, sendStr;
 
                 while (modemXchangePair != null) {
-                    expectedStr = modemXchangePair.getExpectString();
-                    sendStr = removeQuotes(modemXchangePair.getSendString());
+                    String expectedStr = modemXchangePair.getExpectString();
+                    String sendStr = removeQuotes(modemXchangePair.getSendString());
 
-                    if (expectedStr.equals("OK")) {
+                    if ("OK".equals(expectedStr)) {
                         // apn
                         if (sendStr.contains(",")) {
                             String[] sendArgs = sendStr.split(",");
@@ -309,8 +252,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
                                 apn = removeQuotes(sendArgs[2]);
                             }
                         }
-                        // } else if(expectedStr.equals("\"\"")) {
-                    } else if (expectedStr.equals("CONNECT")) {
+                    } else if ("CONNECT".equals(expectedStr)) {
                         // dial string
                         if (prevXchangePair != null) {
                             dialString = removeQuotes(prevXchangePair.getSendString());
@@ -322,54 +264,46 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
                 }
             }
 
-            s_logger.debug("* Enabled: {}", enabled);
-            s_logger.debug("* CHAT file: {}", chatFilename);
-            s_logger.debug("* UnitNum: {}", unitNum);
-            s_logger.debug("* dial string: {}", dialString);
-            s_logger.debug("* persist: {}", persist);
-            s_logger.debug("* maxfail: {}", maxFail);
-            s_logger.debug("* idle: {}", idle);
-            s_logger.debug("* active-filter: {}", activeFilter);
-            s_logger.debug("* LCP Echo Interval: {}", lcpEchoInterval);
-            s_logger.debug("* LCP Echo Failure: {}", lcpEchoFailure);
+            logger.debug("* Enabled: {}", enabled);
+            logger.debug("* CHAT file: {}", chatFilename);
+            logger.debug("* UnitNum: {}", unitNum);
+            logger.debug("* dial string: {}", dialString);
+            logger.debug("* persist: {}", persist);
+            logger.debug("* maxfail: {}", maxFail);
+            logger.debug("* idle: {}", idle);
+            logger.debug("* active-filter: {}", activeFilter);
+            logger.debug("* LCP Echo Interval: {}", lcpEchoInterval);
+            logger.debug("* LCP Echo Failure: {}", lcpEchoFailure);
 
             // Get the auth type and credentials
             // pppd will use CHAP if available, else PAP
-            password = "";
             if (isGsmGprsUmtsHspa) {
+                String model = checkIsPeerSymlink("", peerFile);
+
                 String chapSecret = ChapLinux.getInstance().getSecret(model, username, "*", "*");
                 String papSecret = PapLinux.getInstance().getSecret(model, username, "*", "*");
+
                 if (chapSecret != null && papSecret != null && chapSecret.equals(papSecret)) {
                     authType = AuthType.AUTO;
-                    password = chapSecret;
+                    pass = chapSecret;
                 } else if (chapSecret != null) {
                     authType = AuthType.CHAP;
-                    password = chapSecret;
+                    pass = chapSecret;
                 } else if (papSecret != null) {
                     authType = AuthType.PAP;
-                    password = papSecret;
+                    pass = papSecret;
                 }
 
-                s_logger.debug("* APN: {}", apn);
-                s_logger.debug("* auth: {}", authType);
-                s_logger.debug("* username: {}", username);
-                s_logger.debug("* password: {}", password);
+                logger.debug("* APN: {}", apn);
+                logger.debug("* auth: {}", authType);
+                logger.debug("* username: {}", username);
+                logger.debug("* password: {}", pass);
             }
         }
 
-        boolean gpsEnabled = false;
-        StringBuilder key = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.gpsEnabled");
-        String statusString = KuranetConfig.getProperty(key.toString());
-        if (statusString != null && !statusString.isEmpty()) {
-            gpsEnabled = Boolean.parseBoolean(statusString);
-        }
+        boolean gpsEnabled = isGpsEnabled(ifaceName);
 
-        int resetTout = 5;
-        key = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.resetTimeout");
-        statusString = KuranetConfig.getProperty(key.toString());
-        if (statusString != null && !statusString.isEmpty()) {
-            resetTout = Integer.parseInt(statusString);
-        }
+        int resetTout = getResetTimeout(ifaceName);
 
         // Populate the modem config
         ModemConfig modemConfig = new ModemConfig();
@@ -391,7 +325,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         if (isGsmGprsUmtsHspa) {
             modemConfig.setApn(apn);
             modemConfig.setAuthType(authType);
-            modemConfig.setPassword(password);
+            modemConfig.setPassword(pass);
             modemConfig.setPdpType(PdpType.valueOf(pdpType.toUpperCase()));
             modemConfig.setUsername(username);
         }
@@ -399,23 +333,146 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         return modemConfig;
     }
 
-    private static NetConfigIP4 getNetConfigIP4(String interfaceName) throws KuraException {
-        NetConfigIP4 netConfigIP4 = null;
+    private ModemXchangeScript getConnectScript(String chatFilename) throws KuraException {
+        // Parse the connect script
+        ModemXchangeScript connectScript = null;
+
+        try {
+            connectScript = ModemXchangeScript.parseFile(chatFilename);
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Error parsing " + chatFilename, e);
+        }
+
+        return connectScript;
+    }
+
+    private String getChatFileName(Properties props) {
+        String chatFilename = "";
+
+        String connectProperty = removeQuotes(props.getProperty("connect"));
+        String[] args = connectProperty.split("\\s+");
+        for (int i = 0; i < args.length; i++) {
+            if ("-f".equals(args[i]) && args.length > i + 1) {
+                chatFilename = args[i + 1];
+                break;
+            }
+        }
+
+        return chatFilename;
+    }
+
+    private Properties loadPeerFileProperties(String peerFilename) throws KuraException {
+        Properties props = new Properties();
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(peerFilename);
+            props.load(fis);
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Error getting modem config", e);
+        } finally {
+            if (null != fis) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Error getting modem config", e);
+                }
+            }
+        }
+
+        return props;
+    }
+
+    private int getResetTimeout(String ifaceName) {
+        int resetTout = 5;
+        StringBuilder key = new StringBuilder().append("net.interface.").append(ifaceName)
+                .append(".config.resetTimeout");
+        String statusString = getKuranetProperty(key.toString());
+        if (statusString != null && !statusString.isEmpty()) {
+            resetTout = Integer.parseInt(statusString);
+        }
+        return resetTout;
+    }
+
+    private boolean isGpsEnabled(String ifaceName) {
+        boolean gpsEnabled = false;
+
+        StringBuilder key = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.gpsEnabled");
+        String statusString = getKuranetProperty(key.toString());
+        if (statusString != null && !statusString.isEmpty()) {
+            gpsEnabled = Boolean.parseBoolean(statusString);
+        }
+
+        return gpsEnabled;
+    }
+
+    private String checkIsPeerSymlink(String defaultModel, File peerFile) {
+        String model = defaultModel;
+
+        // Check if peer file is a symlink. If so, get information from the linked filename.
+        try {
+            if (!peerFile.getCanonicalPath().equals(peerFile.getAbsolutePath())) {
+                Map<String, String> fileInfo = PppUtil.parsePeerFilename(peerFile.getCanonicalFile().getName());
+                fileInfo.get("technology");
+                model = fileInfo.get("model");
+                fileInfo.get("serialNum");
+                fileInfo.get("modemId");
+            }
+        } catch (IOException e) {
+            logger.error("Error checking for symlink", e);
+        }
+
+        return model;
+    }
+
+    private boolean isGsmGprsUmtsHspa(List<ModemTechnologyType> technologyTypes) {
+        boolean isGsmGprsUmtsHspa = false;
+
+        if (technologyTypes != null) {
+            for (ModemTechnologyType technologyType : technologyTypes) {
+                if (technologyType == ModemTechnologyType.GSM_GPRS || technologyType == ModemTechnologyType.UMTS
+                        || technologyType == ModemTechnologyType.HSDPA || technologyType == ModemTechnologyType.HSPA) {
+                    isGsmGprsUmtsHspa = true;
+                    break;
+                }
+            }
+        }
+
+        return isGsmGprsUmtsHspa;
+    }
+
+    private List<ModemTechnologyType> getModemTechnologyTypes(UsbDevice usbDevice) {
+        List<ModemTechnologyType> technologyTypes = null;
+        if (usbDevice != null) {
+            SupportedUsbModemInfo usbModemInfo = SupportedUsbModemsInfo.getModem(usbDevice);
+            if (usbModemInfo != null) {
+                technologyTypes = usbModemInfo.getTechnologyTypes();
+
+            }
+        } else {
+            SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
+            if (serialModemInfo != null) {
+                technologyTypes = serialModemInfo.getTechnologyTypes();
+            }
+        }
+        return technologyTypes;
+    }
+
+    private NetConfigIP4 getNetConfigIP4(String interfaceName) throws KuraException {
         NetInterfaceStatus netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
 
         StringBuilder key = new StringBuilder().append("net.interface.").append(interfaceName)
                 .append(".config.ip4.status");
-        String statusString = KuranetConfig.getProperty(key.toString());
+        String statusString = getKuranetProperty(key.toString());
         if (statusString != null && !statusString.isEmpty()) {
             netInterfaceStatus = NetInterfaceStatus.valueOf(statusString);
         }
-        s_logger.debug("Setting NetInterfaceStatus to " + netInterfaceStatus + " for " + interfaceName);
+        logger.debug("Setting NetInterfaceStatus to " + netInterfaceStatus + " for " + interfaceName);
 
-        netConfigIP4 = new NetConfigIP4(netInterfaceStatus, true, true);
+        NetConfigIP4 netConfigIP4 = new NetConfigIP4(netInterfaceStatus, true, true);
 
         key = new StringBuilder("net.interface.").append(interfaceName).append(".config.dnsServers");
-        String dnsServersStr = KuranetConfig.getProperty(key.toString());
-        List<IP4Address> dnsServersList = new ArrayList<IP4Address>();
+        String dnsServersStr = getKuranetProperty(key.toString());
+        List<IP4Address> dnsServersList = new ArrayList<>();
 
         if (dnsServersStr != null && !dnsServersStr.isEmpty()) {
             String[] serversArr = dnsServersStr.split(PppConfigWriter.DNS_DELIM);
@@ -432,8 +489,8 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         return netConfigIP4;
     }
 
-    private static String getPeerFilename(String interfaceName, UsbDevice usbDevice) {
-        String filename = null;
+    protected String getPeerFilename(String interfaceName, UsbDevice usbDevice) {
+        String filename;
 
         // if interfaceName is a usb port address
         if (interfaceName.matches(NetworkConfigurationServiceImpl.UNCONFIGURED_MODEM_REGEX)) {
@@ -454,7 +511,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
      * @param line
      * @return line without surrounding quotes
      */
-    private static String removeQuotes(String line) {
+    private String removeQuotes(String line) {
         if (line != null) {
             if (line.startsWith("'") && line.endsWith("'")      // remove surrounding quotes
                     || line.startsWith("\"") && line.endsWith("\"")) {
@@ -466,8 +523,8 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         return line;
     }
 
-    private static int getUnitNum(String interfaceName) {
-        int unitNum = -1;
+    private int getUnitNum(String interfaceName) {
+        int unitNum;
 
         if (interfaceName.matches("(?i)ppp\\d+")) {
             unitNum = Integer.parseInt(interfaceName.substring(3));
@@ -478,7 +535,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         return unitNum;
     }
 
-    private static int getUnitNum() {
+    private int getUnitNum() {
 
         int unit = 0;
         try {
@@ -504,7 +561,7 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.info(e.getMessage(), e);
         }
 
         return unit;

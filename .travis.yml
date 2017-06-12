@@ -18,6 +18,11 @@ before_script:
   - export PATH=$PWD/maven/bin:${PATH}
   - hash -r
 
+addons:
+  apt:
+    packages:
+      - dos2unix
+
 script: RUN_TESTS=true ./build-all.sh -Pbree
 
 

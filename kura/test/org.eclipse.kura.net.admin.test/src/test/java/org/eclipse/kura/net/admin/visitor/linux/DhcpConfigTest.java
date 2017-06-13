@@ -46,14 +46,14 @@ public class DhcpConfigTest {
 
     @Before
     public void setup() {
+        String dir = "/tmp/dhcpconfig";
+        File f = new File(dir);
+        f.mkdirs();
+
         writer = new DhcpConfigWriter() {
 
             @Override
             protected String getConfigFilename(String interfaceName) {
-                String dir = "/tmp/dhcpconfig";
-                File f = new File(dir);
-                f.mkdirs();
-
                 String file = dir + "/dhcpd.conf-" + interfaceName;
 
                 return file;

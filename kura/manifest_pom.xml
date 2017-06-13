@@ -42,54 +42,33 @@
         <module>org.eclipse.kura.core.net</module>
         <module>org.eclipse.kura.core.status</module>
         <module>org.eclipse.kura.deployment.agent</module>
-
         <module>org.eclipse.kura.driver.helper.provider</module>
-
         <module>org.eclipse.kura.driver.opcua.localization</module>
         <module>org.eclipse.kura.driver.opcua.provider</module>
-
         <module>org.eclipse.kura.linux.bluetooth</module>
         <module>org.eclipse.kura.linux.clock</module>
         <module>org.eclipse.kura.linux.command</module>
         <module>org.eclipse.kura.linux.gpio</module>
         <module>org.eclipse.kura.linux.net</module>
         <module>org.eclipse.kura.linux.position</module>
-
         <module>org.eclipse.kura.linux.usb</module>
         <module>org.eclipse.kura.linux.usb.armv6hf</module>
         <module>org.eclipse.kura.linux.usb.x86_64</module>
-
         <module>org.eclipse.kura.linux.watchdog</module>
-
         <module>org.eclipse.kura.localization</module>
         <module>org.eclipse.kura.localization.resources</module>
-
         <module>org.eclipse.kura.net.admin</module>
         <module>org.eclipse.kura.protocol.modbus</module>
-
         <module>org.eclipse.kura.stress</module>
-
         <module>org.eclipse.kura.util</module>
-
         <module>org.eclipse.kura.web2</module>
-
-
-        <!--
-        <module>org.eclipse.kura.windows.command</module>
-        <module>org.eclipse.kura.windows.clock</module>
-        -->
-
         <module>org.eclipse.kura.wire.script.filter.localization</module>
         <module>org.eclipse.kura.wire.script.filter.provider</module>
-
         <module>org.eclipse.kura.wire.component.provider</module>
         <module>org.eclipse.kura.wire.helper.provider</module>
         <module>org.eclipse.kura.wire.provider</module>
-
         <module>features</module>
-
         <module>emulator</module>
-
         <module>examples</module>
         <module>test</module>
 
@@ -493,8 +472,7 @@
                         <configuration>
                             <exportAntProperties>true</exportAntProperties>
                             <target name="verify.jdeps">
-                                <available file="jdeps"
-                                    filepath="${env.PATH}" property="jdeps.present" />
+                                <available file="jdeps" filepath="${env.PATH}" property="jdeps.present" />
                             </target>
                         </configuration>
                     </execution>
@@ -510,40 +488,48 @@
                                 <apply executable="jdeps">
                                     <arg value="-P" />
                                     <arg value="-dotoutput" />
-                                    <arg
-                                        value="${project.build.directory}/logfiles" />
-                                    <fileset
-                                        dir="${project.build.directory}">
+                                    <arg value="${project.build.directory}/logfiles" />
+                                    <fileset dir="${project.build.directory}">
                                         <include name="*.jar" />
                                     </fileset>
                                 </apply>
 
-                                <fileset id="compact3.file"
-                                    dir="${project.build.directory}/logfiles"
-                                    includes="*.dot" erroronmissingdir="false">
+                                <fileset id="compact3.file" dir="${project.build.directory}/logfiles" includes="*.dot"
+                                    erroronmissingdir="false">
                                     <contains text="compact3" />
                                 </fileset>
                                 <fail message="Compact3 profile not allowed!">
                                     <condition>
-                                        <resourcecount
-                                            when="greater" count="0"
-                                            refid="compact3.file" />
+                                        <resourcecount when="greater" count="0" refid="compact3.file" />
                                     </condition>
                                 </fail>
 
-                                <fileset id="fulljre.file"
-                                    dir="${project.build.directory}/logfiles"
-                                    includes="*.dot" erroronmissingdir="false">
+                                <fileset id="fulljre.file" dir="${project.build.directory}/logfiles" includes="*.dot"
+                                    erroronmissingdir="false">
                                     <contains text="Full JRE" />
                                 </fileset>
                                 <fail message="Full JRE profile not allowed!">
                                     <condition>
-                                        <resourcecount
-                                            when="greater" count="0"
-                                            refid="fulljre.file" />
+                                        <resourcecount when="greater" count="0" refid="fulljre.file" />
                                     </condition>
                                 </fail>
                             </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.honton.chas</groupId>
+                <artifactId>exists-maven-plugin</artifactId>
+                <version>0.0.3</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>remote</goal>
+                        </goals>
+                        <configuration>
+                            <skipIfSnapshot>true</skipIfSnapshot>
+                            <failIfExists>true</failIfExists>
                         </configuration>
                     </execution>
                 </executions>

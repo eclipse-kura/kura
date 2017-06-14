@@ -1245,9 +1245,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                 restartSupplicant = true;
             }
             logger.debug("verifyWifiCredentials() :: Restarting temporary instance of wpa_supplicant");
-            logger.warn(
-                    "<IAB> verifyWifiCredentials() :: Restarting temporary instance of wpa_supplicant ... driver={}",
-                    wifiConfig.getDriver());
             WpaSupplicantManager.startTemp(ifaceName, WifiMode.INFRA, wifiConfig.getDriver());
             wifiModeWait(ifaceName, WifiMode.INFRA, 10);
             ret = isWifiConnectionCompleted(ifaceName, tout);
@@ -1263,8 +1260,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         if (restartSupplicant) {
             try {
                 logger.debug("verifyWifiCredentials() :: Restarting wpa_supplicant");
-                logger.warn("<IAB> verifyWifiCredentials() :: Restarting wpa_supplicant ... driver={}",
-                        wifiConfig.getDriver());
                 WpaSupplicantManager.start(ifaceName, WifiMode.INFRA, wifiConfig.getDriver());
                 if (isWifiConnectionCompleted(ifaceName, tout)) {
                     renewDhcpLease(ifaceName);
@@ -1609,7 +1604,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         logger.debug("getWifiHotspots() :: Starting temporary instance of wpa_supplicant");
         StringBuilder key = new StringBuilder("net.interface." + ifaceName + ".config.wifi.infra.driver");
         String driver = KuranetConfig.getProperty(key.toString());
-        logger.warn("<IAB> getWifiHotspots() :: Starting temporary instance of wpa_supplicant ... Driver={}", driver);
         WpaSupplicantManager.startTemp(ifaceName, WifiMode.INFRA, driver);
         wifiModeWait(ifaceName, WifiMode.INFRA, 10);
     }

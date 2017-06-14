@@ -365,15 +365,41 @@ public class LinuxNetworkUtil {
         if (Character.isDigit(interfaceName.charAt(0))) {
             return false;
         }
+
         File interfaceFile = new File("/etc/sysconfig/network-scripts/ifcfg-" + interfaceName);
+        if (interfaceFile.exists()) {
+            return isAutoConnectRedhat(interfaceFile);
+        }
+
+        interfaceFile = new File("/etc/network/interfaces");
+        if (interfaceFile.exists()) {
+            return isAutoConnectDebian(interfaceName, interfaceFile);
+        }
+        return false;
+    }
+
+    private static boolean isAutoConnectRedhat(File interfaceFile) throws KuraException {
         try (FileReader fr = new FileReader(interfaceFile); BufferedReader br = new BufferedReader(fr)) {
-            if (!interfaceFile.exists()) {
-                return false;
-            }
             String line = null;
             boolean ret = false;
             while ((line = br.readLine()) != null) {
                 if (line.contains("ONBOOT=yes")) {
+                    ret = true;
+                    break;
+                }
+            }
+            return ret;
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    private static boolean isAutoConnectDebian(String ifaceName, File interfaceFile) throws KuraException {
+        try (FileReader fr = new FileReader(interfaceFile); BufferedReader br = new BufferedReader(fr)) {
+            String line = null;
+            boolean ret = false;
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith("auto") && line.endsWith(ifaceName)) {
                     ret = true;
                     break;
                 }

@@ -99,21 +99,42 @@
             min="0"
             description="Timeouts the in-flight messages congestion condition. The service will force a disconnect attempting to reconnect (0 to disable)."/>
 
-        <AD id="average.publish.rate"
-            name="Average publish rate"
-            type="Double"
+		<AD id="enable.rate.limiting"
+            name="enable.rate.limiting"
+            type="Boolean"
             cardinality="0"
             required="true"
-            default="0"
-            min="0"
-            description="The average message publish rate in messages/second (i.e. if set to 0.1, a message will be published every 10 seconds). If set to 0 the rate limit is disabled."/>
-        
-        <AD id="publish.burst.size"
-            name="Message burst size"
+            default="false"
+            description="Enables/disables the token bucket message rate limiting."/>
+
+        <AD id="average.publish.rate"
+            name="average.publish.rate"
             type="Integer"
             cardinality="0"
             required="true"
             default="1"
+            min="1"
+            description="The average message publish rate in messages per unit of time."/>
+        
+        <AD id="average.publish.rate.time.unit"
+            name="average.publish.rate.time.unit"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="SECONDS"
+            description="The time unit to be used if SIMPLE type is selected">
+            <Option label="SECONDS" value="SECONDS" />
+            <Option label="MINUTES" value="MINUTES" />
+            <Option label="HOURS" value="HOURS" />
+            <Option label="DAYS" value="DAYS" />
+        </AD>
+        
+        <AD id="publish.burst.size"
+            name="publish.burst.size"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="10"
             min="1"
             description="When the average publish rate is set, this option enables the publishing of messages in bursts at maximum speed."/>
                                     

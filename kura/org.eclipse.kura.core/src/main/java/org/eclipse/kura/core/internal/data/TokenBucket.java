@@ -11,7 +11,12 @@
  *******************************************************************************/
 package org.eclipse.kura.core.internal.data;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TokenBucket {
+
+    private static final Logger logger = LoggerFactory.getLogger(TokenBucket.class);
 
     private final int capacity;
     // period in mills between 1 token refill
@@ -20,60 +25,40 @@ public class TokenBucket {
     private long lastRefillTime;
 
     public TokenBucket(int capacity, long refillPeriod) {
-        // Set the capacity to zero means that no token will be retrieved from the bucket,
-        // hence no message can be published. So, set it to 1 at least.
-        this.capacity = (capacity == 0) ? 1 : capacity;
+        this.capacity = capacity;
         this.remainingTokens = capacity;
         this.refillPeriod = refillPeriod;
         this.lastRefillTime = System.currentTimeMillis();
     }
 
-    public long getCapacity() {
-        return this.capacity;
-    }
-
-    public long getRemainingTokens() {
-        return this.remainingTokens;
-    }
-
-    public long getRefillPeriod() {
-        return this.refillPeriod;
-    }
-
-    public long getLastRefill() {
-        return this.lastRefillTime;
-    }
-
-    public boolean hasToken() {
-        boolean success = false;
-        if (this.refillPeriod == 0) {
-            success = true;
-        } else {
-            if (refill() > 0) {
-                this.remainingTokens--;
-                success = true;
-            }
-        }
-        return success;
-    }
-
-    public void waitForToken() throws InterruptedException {
-        if (this.refillPeriod != 0) {
-            while (refill() == 0) {
-                Thread.sleep(100);
-            }
+    public boolean getToken() {
+        boolean result = false;
+        refill();
+        if (isTokenAvailable()) {
             this.remainingTokens--;
+            result = true;
         }
+        return result;
     }
 
-    private int refill() {
+    private boolean isTokenAvailable() {
+        logger.info("Available tokens: {}", this.remainingTokens);
+        return this.remainingTokens != 0;
+    }
+
+    private void refill() {
         long now = System.currentTimeMillis();
         if (now - this.lastRefillTime >= this.refillPeriod) {
             this.remainingTokens = (int) Math.min(this.capacity,
                     this.remainingTokens + (now - this.lastRefillTime) / this.refillPeriod);
+            this.remainingTokens = Math.max(1, this.remainingTokens);
             this.lastRefillTime = now;
         }
-        return this.remainingTokens;
     }
 
+    public long getNextRefillEta() {
+        long now = System.currentTimeMillis();
+        long refillEta = (this.lastRefillTime + this.refillPeriod) - now;
+        return Math.max(0, refillEta);
+    }
 }

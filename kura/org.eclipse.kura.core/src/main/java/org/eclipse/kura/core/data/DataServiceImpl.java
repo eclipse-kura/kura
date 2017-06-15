@@ -57,19 +57,9 @@ public class DataServiceImpl
 
     private static final int TRANSPORT_TASK_TIMEOUT = 1; // In seconds
 
-    private static final String AUTOCONNECT_PROP_NAME = "connect.auto-on-startup";
-    private static final String CONNECT_DELAY_PROP_NAME = "connect.retry-interval";
-    private static final String DISCONNECT_DELAY_PROP_NAME = "disconnect.quiesce-timeout";
-    private static final String STORE_HOUSEKEEPER_INTERVAL_PROP_NAME = "store.housekeeper-interval";
-    private static final String STORE_PURGE_AGE_PROP_NAME = "store.purge-age";
-    private static final String STORE_CAPACITY_PROP_NAME = "store.capacity";
-    private static final String REPUBLISH_IN_FLIGHT_MSGS_PROP_NAME = "in-flight-messages.republish-on-new-session";
-    private static final String MAX_IN_FLIGHT_MSGS_PROP_NAME = "in-flight-messages.max-number";
-    private static final String IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_PROP_NAME = "in-flight-messages.congestion-timeout";
-    private static final String PUBLISH_RATE = "average.publish.rate";
-    private static final String BURST_SIZE = "publish.burst.size";
+    private DataServiceOptions dataServiceOptions;
 
-    private final Map<String, Object> properties = new HashMap<String, Object>();
+    private final Map<String, Object> properties = new HashMap<>();
 
     private DataTransportService dataTransportService;
     private DbService dbService;
@@ -103,6 +93,8 @@ public class DataServiceImpl
         String pid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
         logger.info("Activating {}...", pid);
 
+        dataServiceOptions = new DataServiceOptions(properties);
+
         this.reconnectExecutor = Executors.newSingleThreadScheduledExecutor();
         this.publisherExecutor = Executors.newSingleThreadScheduledExecutor();
         this.congestionExecutor = Executors.newSingleThreadScheduledExecutor();
@@ -119,15 +111,14 @@ public class DataServiceImpl
         this.store = new DbDataStore(table);
 
         try {
-            this.store.start(this.dbService, (Integer) this.properties.get(STORE_HOUSEKEEPER_INTERVAL_PROP_NAME),
-                    (Integer) this.properties.get(STORE_PURGE_AGE_PROP_NAME),
-                    (Integer) this.properties.get(STORE_CAPACITY_PROP_NAME));
+            this.store.start(this.dbService, dataServiceOptions.getStoreHousekeeperInterval(),
+                    dataServiceOptions.getStorePurgeAge(), dataServiceOptions.getStoreCapacity());
 
             // The initial list of in-flight messages
             List<DataMessage> inFlightMsgs = this.store.allInFlightMessagesNoPayload();
 
             // The map associating a DataTransportToken with a message ID
-            this.inFlightMsgIds = new ConcurrentHashMap<DataTransportToken, Integer>();
+            this.inFlightMsgIds = new ConcurrentHashMap<>();
 
             if (inFlightMsgs != null) {
                 for (DataMessage message : inFlightMsgs) {
@@ -165,9 +156,8 @@ public class DataServiceImpl
 
         createThrottle();
 
-        this.store.update((Integer) this.properties.get(STORE_HOUSEKEEPER_INTERVAL_PROP_NAME),
-                (Integer) this.properties.get(STORE_PURGE_AGE_PROP_NAME),
-                (Integer) this.properties.get(STORE_CAPACITY_PROP_NAME));
+        this.store.update(dataServiceOptions.getStoreHousekeeperInterval(), dataServiceOptions.getStorePurgeAge(),
+                dataServiceOptions.getStoreCapacity());
 
         if (!this.dataTransportService.isConnected()) {
             startReconnectTask();
@@ -266,9 +256,7 @@ public class DataServiceImpl
         // in the DataPublisherService persistence.
 
         if (newSession) {
-            Boolean unpublishInFlightMsgs = (Boolean) this.properties.get(REPUBLISH_IN_FLIGHT_MSGS_PROP_NAME);
-
-            if (unpublishInFlightMsgs) {
+            if (dataServiceOptions.isPublishInFlightMessages()) {
                 logger.info(
                         "New session established. Unpublishing all in-flight messages. Disregarding the QoS level, this may cause duplicate messages.");
                 try {
@@ -398,7 +386,7 @@ public class DataServiceImpl
             }
         }
 
-        if (this.inFlightMsgIds.size() < (Integer) this.properties.get(MAX_IN_FLIGHT_MSGS_PROP_NAME)) {
+        if (this.inFlightMsgIds.size() < dataServiceOptions.getMaxInFlightMessages()) {
             handleInFlightDecongestion();
         }
 
@@ -420,12 +408,12 @@ public class DataServiceImpl
 
     @Override
     public boolean isAutoConnectEnabled() {
-        return (Boolean) this.properties.get(AUTOCONNECT_PROP_NAME);
+        return dataServiceOptions.isAutoConnect();
     }
 
     @Override
     public int getRetryInterval() {
-        return (Integer) this.properties.get(CONNECT_DELAY_PROP_NAME);
+        return dataServiceOptions.getConnectDelay();
     }
 
     @Override
@@ -483,8 +471,8 @@ public class DataServiceImpl
 
         //
         // Establish a reconnect Thread based on the reconnect interval
-        boolean autoConnect = (Boolean) this.properties.get(AUTOCONNECT_PROP_NAME);
-        int reconnectInterval = (Integer) this.properties.get(CONNECT_DELAY_PROP_NAME);
+        boolean autoConnect = dataServiceOptions.isAutoConnect();
+        int reconnectInterval = dataServiceOptions.getConnectDelay();
         if (autoConnect) {
 
             // Change notification status to slow blinking when connection is expected to happen in the future
@@ -525,8 +513,8 @@ public class DataServiceImpl
                         }
                     }
                 }
-            }, initialDelay,       		// initial delay
-                    reconnectInterval,       // repeat every reconnect interval until we stopped.
+            }, initialDelay,              		// initial delay
+                    reconnectInterval,              // repeat every reconnect interval until we stopped.
                     TimeUnit.SECONDS);
         } else {
             // Change notification status to off. Connection is not expected to happen in the future
@@ -536,16 +524,17 @@ public class DataServiceImpl
     }
 
     private void createThrottle() {
-        if (this.properties.get(PUBLISH_RATE) != null && this.properties.get(BURST_SIZE) != null) {
-            double publishRate = (double) this.properties.get(PUBLISH_RATE);
-            int burstLength = (int) this.properties.get(BURST_SIZE);
-            logger.info("Get Throttle with burst length {} and rate limit {} messages/second", burstLength,
+        if (dataServiceOptions.isRateLimitEnabled()) {
+            int publishRate = dataServiceOptions.getAveragePublishRate();
+            int burstLength = dataServiceOptions.getBurstSize();
+
+            long publishPeriod = dataServiceOptions.getSimpleTimeUnitMultiplier() / publishRate;
+
+            logger.info("Get Throttle with burst length {} and send a message every {} millis", burstLength,
                     publishRate);
-            int publishPeriod = 0;
-            if (publishRate != 0) {
-                publishPeriod = (int) (1000 / publishRate);
-            }
             this.throttle = new TokenBucket(burstLength, publishPeriod);
+        } else {
+            this.throttle = null;
         }
     }
 
@@ -559,7 +548,7 @@ public class DataServiceImpl
     }
 
     private void disconnect() {
-        long millis = (Integer) this.properties.get(DISCONNECT_DELAY_PROP_NAME) * 1000L;
+        long millis = dataServiceOptions.getDisconnectDelay() * 1000L;
         this.dataTransportService.disconnect(millis);
     }
 
@@ -586,30 +575,29 @@ public class DataServiceImpl
                     while ((message = DataServiceImpl.this.store.getNextMessage()) != null) {
 
                         // Further limit the maximum number of in-flight messages
-                        if (message.getQos() > 0) {
-                            if (DataServiceImpl.this.inFlightMsgIds.size() >= (Integer) DataServiceImpl.this.properties
-                                    .get(MAX_IN_FLIGHT_MSGS_PROP_NAME)) {
-                                logger.warn("The configured maximum number of in-flight messages has been reached");
-                                handleInFlightCongestion();
-                                break;
-                            }
+                        if (message.getQos() > 0 && DataServiceImpl.this.inFlightMsgIds.size() >= dataServiceOptions
+                                .getMaxInFlightMessages()) {
+                            logger.warn("The configured maximum number of in-flight messages has been reached");
+                            handleInFlightCongestion();
+                            break;
                         }
 
+                        boolean tokenAvailable = true;
                         if (DataServiceImpl.this.throttle != null) {
-                            logger.debug("Capacity {} Tokens {} Period {} Last {}",
-                                    DataServiceImpl.this.throttle.getCapacity(),
-                                    DataServiceImpl.this.throttle.getRemainingTokens(),
-                                    DataServiceImpl.this.throttle.getRefillPeriod(),
-                                    DataServiceImpl.this.throttle.getLastRefill());
-                            DataServiceImpl.this.throttle.waitForToken();
-                            logger.debug("Throttle: got token - remaining tokens {}",
-                                    DataServiceImpl.this.throttle.getRemainingTokens());
+                            tokenAvailable = DataServiceImpl.this.throttle.getToken();
+                            logger.info("Token Available? {}", tokenAvailable);
                         }
+
+                        if (!tokenAvailable) {
+                            long sleepingTime = DataServiceImpl.this.throttle.getNextRefillEta();
+                            logger.info("Sleeping for {} ms, while waiting for a token", sleepingTime);
+                            Thread.sleep(sleepingTime);
+                        }
+
                         publishInternal(message);
                         // Notify the listeners
                         DataServiceImpl.this.dataServiceListeners.onMessagePublished(message.getId(),
                                 message.getTopic());
-
                     }
                 } catch (KuraConnectException e) {
                     logger.info("DataPublisherService is not connected", e);
@@ -672,7 +660,7 @@ public class DataServiceImpl
     }
 
     private void handleInFlightCongestion() {
-        int timeout = (Integer) this.properties.get(IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_PROP_NAME);
+        int timeout = dataServiceOptions.getInFlightMessagesCongestionTimeout();
 
         // Do not schedule more that one task at a time
         if (timeout != 0 && (this.congestionFuture == null || this.congestionFuture.isDone())) {

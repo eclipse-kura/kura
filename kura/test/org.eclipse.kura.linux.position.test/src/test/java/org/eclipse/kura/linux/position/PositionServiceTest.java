@@ -242,7 +242,7 @@ public class PositionServiceTest {
 
         ps.activate(ctxMock, properties);
 
-        TestUtil.setFieldValue(ps, "m_isRunning", false);
+        TestUtil.setFieldValue(ps, "isRunning", false);
 
         String topic = UsbDeviceAddedEvent.USB_EVENT_DEVICE_ADDED_TOPIC;
         properties = new HashMap<String, Object>();
@@ -250,14 +250,14 @@ public class PositionServiceTest {
 
         ps.handleEvent(event);
 
-        assertTrue((boolean) TestUtil.getFieldValue(ps, "m_isRunning"));
+        assertTrue((boolean) TestUtil.getFieldValue(ps, "isRunning"));
 
         topic = UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC;
         properties = new HashMap<String, Object>();
         event = new Event(topic, properties);
 
         ps.handleEvent(event);
-        assertFalse((boolean) TestUtil.getFieldValue(ps, "m_isRunning"));
+        assertFalse((boolean) TestUtil.getFieldValue(ps, "isRunning"));
         assertFalse(ps.isLocked());
 
         ps.deactivate(ctxMock);
@@ -307,7 +307,7 @@ public class PositionServiceTest {
 
         ps.activate(ctxMock, properties);
 
-        TestUtil.setFieldValue(ps, "m_isRunning", false);
+        TestUtil.setFieldValue(ps, "isRunning", false);
 
         String topic = ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC;
         properties = new HashMap<String, Object>();
@@ -322,7 +322,7 @@ public class PositionServiceTest {
 
         ps.handleEvent(event);
 
-        Map<String, Object> props = (Map<String, Object>) TestUtil.getFieldValue(ps, "m_properties");
+        Map<String, Object> props = (Map<String, Object>) TestUtil.getFieldValue(ps, "properties");
         assertEquals("portt", properties.get("port"));
         assertEquals(19200, properties.get("baudRate"));
         assertEquals(1, properties.get("stopBits"));

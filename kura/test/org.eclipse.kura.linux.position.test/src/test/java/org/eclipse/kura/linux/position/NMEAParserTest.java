@@ -146,14 +146,14 @@ public class NMEAParserTest {
 
         parser.parseSentence("$GPGGA,121041.000,4655.3772,N,01513.6390,E,1,06,1.7,478.3,M,44.7,M,,0000*5d");
 
-        assertTrue(parser.is_validPosition());
-        assertEquals("121041.000", parser.get_timeNmea());
-        assertEquals(15.227317, parser.get_longNmea(), EPS);
-        assertEquals(46.922953, parser.get_latNmea(), EPS);
-        assertEquals(1, parser.get_fixQuality());
-        assertEquals(6, parser.get_nrSatellites());
-        assertEquals(1.7, parser.get_DOPNmea(), EPS);
-        assertEquals(478.3, parser.get_altNmea(), EPS);
+        assertTrue(parser.isValidPosition());
+        assertEquals("121041.000", parser.getTimeNmea());
+        assertEquals(15.227317, parser.getLongNmea(), EPS);
+        assertEquals(46.922953, parser.getLatNmea(), EPS);
+        assertEquals(1, parser.getFixQuality());
+        assertEquals(6, parser.getNrSatellites());
+        assertEquals(1.7, parser.getDOPNmea(), EPS);
+        assertEquals(478.3, parser.getAltNmea(), EPS);
     }
 
     @Test
@@ -162,14 +162,14 @@ public class NMEAParserTest {
 
         parser.parseSentence("$GPGGA,121041.000,4655.3772,N,01513.6390,E,0,06,1.7,478.3,M,44.7,M,,0000*5d");
 
-        assertFalse(parser.is_validPosition());
-        assertEquals("121041.000", parser.get_timeNmea());
-        assertEquals(15.227317, parser.get_longNmea(), EPS);
-        assertEquals(46.922953, parser.get_latNmea(), EPS);
-        assertEquals(0, parser.get_fixQuality());
-        assertEquals(6, parser.get_nrSatellites());
-        assertEquals(1.7, parser.get_DOPNmea(), EPS);
-        assertEquals(478.3, parser.get_altNmea(), EPS);
+        assertFalse(parser.isValidPosition());
+        assertEquals("121041.000", parser.getTimeNmea());
+        assertEquals(15.227317, parser.getLongNmea(), EPS);
+        assertEquals(46.922953, parser.getLatNmea(), EPS);
+        assertEquals(0, parser.getFixQuality());
+        assertEquals(6, parser.getNrSatellites());
+        assertEquals(1.7, parser.getDOPNmea(), EPS);
+        assertEquals(478.3, parser.getAltNmea(), EPS);
     }
 
     @Test
@@ -178,10 +178,10 @@ public class NMEAParserTest {
 
         parser.parseSentence("$GPGLL,4655.3772,N,01513.6390,E,121041.000,A,*0");
 
-        assertTrue(parser.is_validPosition());
-        assertEquals("121041.000", parser.get_timeNmea());
-        assertEquals(15.227317, parser.get_longNmea(), EPS);
-        assertEquals(46.922953, parser.get_latNmea(), EPS);
+        assertTrue(parser.isValidPosition());
+        assertEquals("121041.000", parser.getTimeNmea());
+        assertEquals(15.227317, parser.getLongNmea(), EPS);
+        assertEquals(46.922953, parser.getLatNmea(), EPS);
     }
 
     @Test
@@ -190,11 +190,11 @@ public class NMEAParserTest {
 
         parser.parseSentence("$GPGSA,A,3,25,23,07,27,20,04,,,,,,,4.9,1.7,4.6*39");
 
-        assertTrue(parser.is_validPosition());
-        assertEquals(3, parser.get_3DfixNmea());
-        assertEquals(4.9, parser.get_PDOPNmea(), EPS);
-        assertEquals(1.7, parser.get_HDOPNmea(), EPS);
-        assertEquals(4.6, parser.get_VDOPNmea(), EPS);
+        assertTrue(parser.isValidPosition());
+        assertEquals(3, parser.getFix3DNmea());
+        assertEquals(4.9, parser.getPDOPNmea(), EPS);
+        assertEquals(1.7, parser.getHDOPNmea(), EPS);
+        assertEquals(4.6, parser.getVDOPNmea(), EPS);
     }
 
     @Test
@@ -203,8 +203,8 @@ public class NMEAParserTest {
 
         parser.parseSentence("$GPGSA,A,1,25,23,07,27,20,04,,,,,,,4.9,1.7,4.6*39");
 
-        assertFalse(parser.is_validPosition());
-        assertEquals(1, parser.get_3DfixNmea());
+        assertFalse(parser.isValidPosition());
+        assertEquals(1, parser.getFix3DNmea());
     }
 
     @Test
@@ -213,13 +213,13 @@ public class NMEAParserTest {
 
         parser.parseSentence("$GPRMC,121041.000,A,4655.3772,N,01513.6390,E,0.31,319.55,220517,,*7");
 
-        assertTrue(parser.is_validPosition());
-        assertEquals("121041.000", parser.get_timeNmea());
-        assertEquals("220517", parser.get_dateNmea());
-        assertEquals(15.227317, parser.get_longNmea(), EPS);
-        assertEquals(46.922953, parser.get_latNmea(), EPS);
-        assertEquals(0.159478, parser.get_speedNmea(), EPS);
-        assertEquals(319.55, parser.get_trackNmea(), EPS);
+        assertTrue(parser.isValidPosition());
+        assertEquals("121041.000", parser.getTimeNmea());
+        assertEquals("220517", parser.getDateNmea());
+        assertEquals(15.227317, parser.getLongNmea(), EPS);
+        assertEquals(46.922953, parser.getLatNmea(), EPS);
+        assertEquals(0.159478, parser.getSpeedNmea(), EPS);
+        assertEquals(319.55, parser.getTrackNmea(), EPS);
     }
 
     @Test
@@ -228,14 +228,14 @@ public class NMEAParserTest {
 
         parser.parseSentence("$GPRMC,121041.000,V,4655.3772,N,01513.6390,E,0.31,319.55,220517,,*7");
 
-        assertFalse(parser.is_validPosition());
-        assertEquals("121041.000", parser.get_timeNmea());
-        assertEquals("220517", parser.get_dateNmea());
-        assertEquals(15.227317, parser.get_longNmea(), EPS);
-        assertEquals(46.922953, parser.get_latNmea(), EPS);
-        assertEquals(0, parser.get_fixQuality());
-        assertEquals(0.159478, parser.get_speedNmea(), EPS);
-        assertEquals(319.55, parser.get_trackNmea(), EPS);
+        assertFalse(parser.isValidPosition());
+        assertEquals("121041.000", parser.getTimeNmea());
+        assertEquals("220517", parser.getDateNmea());
+        assertEquals(15.227317, parser.getLongNmea(), EPS);
+        assertEquals(46.922953, parser.getLatNmea(), EPS);
+        assertEquals(0, parser.getFixQuality());
+        assertEquals(0.159478, parser.getSpeedNmea(), EPS);
+        assertEquals(319.55, parser.getTrackNmea(), EPS);
     }
 
     @Test
@@ -244,7 +244,7 @@ public class NMEAParserTest {
 
         parser.parseSentence("$GNVTG,,,,,,,12.34,,,,*4a");
 
-        assertEquals(12.34 / 3.6, parser.get_speedNmea(), EPS);
+        assertEquals(12.34 / 3.6, parser.getSpeedNmea(), EPS);
     }
 
 }

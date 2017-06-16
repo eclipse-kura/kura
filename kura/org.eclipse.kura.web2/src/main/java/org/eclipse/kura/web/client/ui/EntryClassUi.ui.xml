@@ -137,21 +137,21 @@
                                     <b:Heading size="H3" text="Services" />
                                 </b:PanelHeader>
                                 <b:PanelBody>
-                                        <b:FieldSet>
-                                            <b:FormGroup addStyleNames="services-form-group">
-                                                <b:InputGroup addStyleNames="services-input-group">
-                                                    <b:TextBox placeholder="Search" ui:field="textSearch"
-                                                        addStyleNames="services-search" />
-                                                    <b:InputGroupButton addStyleNames="services-add">
-                                                        <b:Tooltip title="Create a new factory component"
-                                                            placement="TOP">
-                                                            <b:Button icon="PLUS" size="SMALL" dataTarget="#myModal"
-                                                                dataToggle="MODAL" ui:field="factoriesButton" />
-                                                        </b:Tooltip>
-                                                    </b:InputGroupButton>
-                                                </b:InputGroup>
-                                            </b:FormGroup>
-                                        </b:FieldSet>
+                                    <b:FieldSet>
+                                        <b:FormGroup addStyleNames="services-form-group">
+                                            <b:InputGroup addStyleNames="services-input-group">
+                                                <b:TextBox placeholder="Search" ui:field="textSearch"
+                                                    addStyleNames="services-search" />
+                                                <b:InputGroupButton addStyleNames="services-add">
+                                                    <b:Tooltip title="Create a new factory component"
+                                                        placement="TOP">
+                                                        <b:Button icon="PLUS" size="SMALL" dataTarget="#myModal"
+                                                            dataToggle="MODAL" ui:field="factoriesButton" />
+                                                    </b:Tooltip>
+                                                </b:InputGroupButton>
+                                            </b:InputGroup>
+                                        </b:FormGroup>
+                                    </b:FieldSet>
                                     <g:ScrollPanel ui:field="servicesPanel">
                                         <b:NavPills stacked="true" ui:field="servicesMenu" />
                                     </g:ScrollPanel>
@@ -163,10 +163,36 @@
                 <b:Row addStyleNames='main-content'>
                     <b:Panel>
                         <b:PanelBody>
-                            <b:Modal title="Error" ui:field='errorPopup'>
+                            <b:Modal ui:field='errorPopup'>
                                 <b:ModalBody>
                                     <g:ScrollPanel styleName='customLogScrollPanel'>
-                                        <g:VerticalPanel ui:field='errorLogArea' styleName='errorLogArea' />
+                                        <b:PanelGroup b:id="accordion">
+                                            <b:Panel>
+                                                <b:Alert type="DANGER">
+                                                    <b:Heading size="H4">
+                                                        <g:Label ui:field="errorMessage" text="Error Message" />
+                                                    </b:Heading>
+                                                </b:Alert>
+                                            </b:Panel>
+                                            <b:Panel>
+                                                <b:PanelHeader>
+                                                    <b:Heading size="H6">
+                                                        <b:Anchor dataToggle="COLLAPSE" dataParent="#accordion"
+                                                            dataTarget="#collapseOne" ui:field="errorStackTraceAreaOneAnchor" />
+                                                    </b:Heading>
+                                                </b:PanelHeader>
+                                                <b:PanelCollapse b:id="collapseOne" ui:field="errorStackTraceAreaOneCollapse">
+                                                    <b:PanelBody>
+                                                        <b:Well>
+                                                            <b:Container fluid="true">
+                                                                <g:VerticalPanel ui:field="errorStackTraceAreaOne">
+                                                                </g:VerticalPanel>
+                                                            </b:Container>
+                                                        </b:Well>
+                                                    </b:PanelBody>
+                                                </b:PanelCollapse>
+                                            </b:Panel>
+                                        </b:PanelGroup>
                                     </g:ScrollPanel>
                                 </b:ModalBody>
                             </b:Modal>

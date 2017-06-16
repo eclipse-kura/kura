@@ -97,7 +97,8 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                             }
                         } catch (KuraConnectException e) {
                             s_logger.warn("Error connecting", e);
-                            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e, "Error connecting");
+                            throw new GwtKuraException(GwtKuraErrorCode.CONNECTION_FAILURE, e,
+                                    "Error connecting. Please review your configuration.");
                         } catch (InterruptedException e) {
                             s_logger.warn("Interrupt Exception", e);
                             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e, "Interrupt Exception");

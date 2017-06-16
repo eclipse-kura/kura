@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,20 +21,19 @@ import org.gwtbootstrap3.client.ui.Modal;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.StatusCodeException;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
-/**
- * Handles GwtExceptions from RCP calls.
- *
- * @author mcarrer
- *
- */
 public class FailureHandler {
 
-    private static final Messages CMSGS = GWT.create(Messages.class);
-    // private static final ValidationMessages MSGS = GWT.create(ValidationMessages.class);
-
+    private static final Messages MSGS = GWT.create(Messages.class);
     private static Logger logger = Logger.getLogger("ErrorLogger");
     private static Modal popup;
+    private static Label errorMessageLabel;
+    private static VerticalPanel errorStackTrace;
+
+    private FailureHandler() {
+    }
 
     public static void handle(Throwable caught, String name) {
         printMessage(caught, name);
@@ -45,109 +44,77 @@ public class FailureHandler {
     }
 
     private static void printMessage(Throwable caught, String name) {
+        StringBuilder errorMessageBuilder = new StringBuilder();
+        if (name != null && !"".equals(name.trim())) {
+            errorMessageBuilder.append(name);
+            errorMessageBuilder.append(": ");
+        }
+
         if (caught instanceof GwtKuraException) {
 
             GwtKuraException gee = (GwtKuraException) caught;
             GwtKuraErrorCode code = gee.getCode();
-            switch (code) {
 
+            switch (code) {
+            case DUPLICATE_NAME:
+                errorMessageBuilder.append(MSGS.duplicateNameError());
+                break;
+            case CONNECTION_FAILURE:
+                errorMessageBuilder.append(MSGS.connectionFailure());
+                break;
+            case ILLEGAL_ARGUMENT:
+                errorMessageBuilder.append(MSGS.illegalArgumentError());
+                break;
+            case ILLEGAL_NULL_ARGUMENT:
+                errorMessageBuilder.append(MSGS.illegalNullArgumentError());
+                break;
+
+            case CANNOT_REMOVE_LAST_ADMIN:
+            case ILLEGAL_ACCESS:
+            case INVALID_USERNAME_PASSWORD:
+            case INVALID_RULE_QUERY:
+            case INTERNAL_ERROR:
+            case OVER_RULE_LIMIT:
+            case UNAUTHENTICATED:
+            case WARNING:
+            case CURRENT_ADMIN_PASSWORD_DOES_NOT_MATCH:
+            case OPERATION_NOT_SUPPORTED:
+            case SERVICE_NOT_ENABLED:
             default:
-                logger.log(Level.INFO, name + ": " + caught.getLocalizedMessage(), caught);
-                popup.show();
+                errorMessageBuilder.append(MSGS.genericError());
                 break;
             }
         } else if (caught instanceof StatusCodeException && ((StatusCodeException) caught).getStatusCode() == 0) {
             // the current operation was interrupted as the user started a new one
             // or navigated away from the page.
             // we can ignore this error and do nothing.
+            return;
         } else {
-            logger.log(Level.INFO, name + ": " + caught.getLocalizedMessage(), caught);
-            popup.show();
+            String localizedMessage = caught.getLocalizedMessage();
+
+            if (!"".equals(localizedMessage)) {
+                errorMessageBuilder.append(localizedMessage);
+            } else {
+                errorMessageBuilder.append(MSGS.genericError());
+            }
         }
+
+        logger.log(Level.INFO, errorMessageBuilder.toString(), caught);
+        errorMessageLabel.setText(errorMessageBuilder.toString());
+
+        errorStackTrace.clear();
+        for (StackTraceElement element : caught.getStackTrace()) {
+            Label tempLabel = new Label();
+            tempLabel.setText(element.toString());
+            errorStackTrace.add(tempLabel);
+        }
+
+        popup.show();
     }
 
-    public static void setPopup(Modal uiElement) {
+    public static void setPopup(Modal uiElement, Label errorMessage, VerticalPanel errorStackTraceArea) {
         popup = uiElement;
+        errorMessageLabel = errorMessage;
+        errorStackTrace = errorStackTraceArea;
     }
-
-    /*
-     * @SuppressWarnings("unchecked")
-     * public static boolean handleFormException(FormPanel form, Throwable caught) {
-     *
-     * boolean isWarning = false;
-     * if (caught instanceof GwtKuraException) {
-     *
-     * List<Field<?>> fields = form.getFields();
-     * GwtKuraException gee = (GwtKuraException) caught;
-     * GwtKuraErrorCode code = gee.getCode();
-     * switch (code) {
-     *
-     * case DUPLICATE_NAME:
-     * boolean fieldFound = false;
-     * String duplicateFieldName = gee.getArguments()[0];
-     * for (Field<?> field : fields) {
-     * if (duplicateFieldName.equals(field.getName())) {
-     * TextField<String> textField = (TextField<String>) field;
-     * textField.markInvalid(MSGS.duplicateValue());
-     * fieldFound = true;
-     * break;
-     * }
-     * }
-     * if (!fieldFound) {
-     * Info.display(CMSGS.error(), caught.getLocalizedMessage());
-     * }
-     * break;
-     *
-     * case ILLEGAL_NULL_ARGUMENT:
-     * String invalidFieldName = gee.getArguments()[0];
-     * for (Field<?> field : fields) {
-     * if (invalidFieldName.equals(field.getName())) {
-     * TextField<String> textField = (TextField<String>) field;
-     * textField.markInvalid(MSGS.invalidNullValue());
-     * break;
-     * }
-     * }
-     * break;
-     *
-     * case ILLEGAL_ARGUMENT:
-     * String invalidFieldName1 = gee.getArguments()[0];
-     * for (Field<?> field : fields) {
-     * if (invalidFieldName1.equals(field.getName())) {
-     * TextField<String> textField = (TextField<String>) field;
-     * textField.markInvalid(gee.getCause().getMessage());
-     * break;
-     * }
-     * }
-     * break;
-     *
-     * case INVALID_RULE_QUERY:
-     * for (Field<?> field : fields) {
-     * if ("query".equals(field.getName())) {
-     * TextArea statement = (TextArea) field;
-     * statement.markInvalid(caught.getLocalizedMessage());
-     * break;
-     * }
-     * }
-     * break;
-     *
-     * case WARNING:
-     * isWarning = true;
-     * Info.display(CMSGS.warning(), caught.getLocalizedMessage());
-     * break;
-     *
-     * default:
-     * Info.display(CMSGS.error(), caught.getLocalizedMessage());
-     * caught.printStackTrace();
-     * break;
-     * }
-     * }
-     * else {
-     *
-     * Info.display(CMSGS.error(), caught.getLocalizedMessage());
-     * caught.printStackTrace();
-     * }
-     *
-     * return isWarning;
-     * }
-     */
 }

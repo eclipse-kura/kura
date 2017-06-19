@@ -178,6 +178,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         Dictionary<String, String[]> d = new Hashtable<>();
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
         ctx.getBundleContext().registerService(EventHandler.class.getName(), this, d);
+
         logger.debug("Done Activating NetworkAdmin Service...");
     }
 
@@ -1345,7 +1346,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                         networkComponentConfiguration.getConfigurationProperties());
                 this.networkConfigurationService.setNetworkConfiguration(netConfiguration);
             } catch (UnknownHostException e) {
-                logger.error("relback to snapshot_0 has failed ", e);
+                logger.error("rollback to snapshot_0 has failed ", e);
             }
         }
         return true;
@@ -1535,7 +1536,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     // Submit new configuration, waiting for network configuration change event before returning
     private void submitNetworkConfiguration(List<String> modifiedInterfaceNames,
             NetworkConfiguration networkConfiguration) throws KuraException {
-        short timeout = 30;		// in seconds
+        double timeout = 30;		// in seconds
 
         this.pendingNetworkConfigurationChange = true;
         if (modifiedInterfaceNames != null && !modifiedInterfaceNames.isEmpty()) {

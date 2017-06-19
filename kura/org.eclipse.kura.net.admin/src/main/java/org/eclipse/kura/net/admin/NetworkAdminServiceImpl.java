@@ -178,6 +178,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         Dictionary<String, String[]> d = new Hashtable<>();
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
         ctx.getBundleContext().registerService(EventHandler.class.getName(), this, d);
+
         logger.debug("Done Activating NetworkAdmin Service...");
     }
 
@@ -1034,7 +1035,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     @Override
     public void disableInterface(String interfaceName) throws KuraException {
 
-        if (!interfaceName.equals("lo")) {
+        if (!"lo".equals(interfaceName)) {
             try {
                 if (LinuxNetworkUtil.hasAddress(interfaceName)) {
                     logger.info("bringing interface {} down", interfaceName);
@@ -1063,19 +1064,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     @Override
     public void manageDhcpClient(String interfaceName, boolean enable) throws KuraException {
         try {
-            /*
-             * int pid = LinuxProcessUtil.getPid(formDhclientCommand(interfaceName, false));
-             * if (pid > -1) {
-             * s_logger.debug("manageDhcpClient() :: killing {}", formDhclientCommand(interfaceName, false));
-             * LinuxProcessUtil.kill(pid);
-             * } else {
-             * pid = LinuxProcessUtil.getPid(formDhclientCommand(interfaceName, true));
-             * if (pid > -1) {
-             * s_logger.debug("manageDhcpClient() :: killing {}", formDhclientCommand(interfaceName, true));
-             * LinuxProcessUtil.kill(pid);
-             * }
-             * }
-             */
             DhcpClientManager.disable(interfaceName);
             if (enable) {
                 renewDhcpLease(interfaceName);
@@ -1202,11 +1190,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                         continue;
                     }
 
-                    // if (!wap.getSSID().matches(SSID_REGEXP)){
-                    // s_logger.debug("Skipping undesired SSID");
-                    // continue;
-                    // }
-
                     logger.trace("getWifiHotspots() :: SSID={}", wap.getSSID());
                     logger.trace("getWifiHotspots() :: Signal={}", wap.getStrength());
                     logger.trace("getWifiHotspots() :: Frequency={}", wap.getFrequency());
@@ -1300,7 +1283,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
         rollbackItems
                 .add(new NetworkRollbackItem(srcDataDirectory + "/kuranet.conf", dstDataDirectory + "/kuranet.conf"));
-        // rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/firewall", "/etc/init.d/firewall"));
+
         if (OS_VERSION.equals(KuraConstants.Intel_Edison.getImageName() + "_"
                 + KuraConstants.Intel_Edison.getImageVersion() + "_" + KuraConstants.Intel_Edison.getTargetName())) {
             rollbackItems.add(new NetworkRollbackItem(srcDataDirectory + "/hostapd.conf", "/etc/hostapd/hostapd.conf"));
@@ -1345,7 +1328,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                         networkComponentConfiguration.getConfigurationProperties());
                 this.networkConfigurationService.setNetworkConfiguration(netConfiguration);
             } catch (UnknownHostException e) {
-                logger.error("relback to snapshot_0 has failed ", e);
+                logger.error("rollback to snapshot_0 has failed ", e);
             }
         }
         return true;
@@ -1449,7 +1432,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             }
             WpaSupplicantStatus wpaSupplicantStatus = new WpaSupplicantStatus(ifaceName);
             String wpaState = wpaSupplicantStatus.getWpaState();
-            if (wpaState != null && wpaState.equals("COMPLETED")) {
+            if (wpaState != null && "COMPLETED".equals(wpaState)) {
                 ret = true;
                 break;
             }
@@ -1486,11 +1469,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             WifiConfig wifiConfig) throws KuraException {
 
         // ignore mon.* interface
-        if (ifaceName.startsWith("mon.")) {
-            return;
-        }
         // ignore redpine vlan interface
-        if (ifaceName.startsWith("rpine")) {
+        if (ifaceName.startsWith("mon.") || ifaceName.startsWith("rpine")) {
             return;
         }
 
@@ -1535,7 +1515,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     // Submit new configuration, waiting for network configuration change event before returning
     private void submitNetworkConfiguration(List<String> modifiedInterfaceNames,
             NetworkConfiguration networkConfiguration) throws KuraException {
-        short timeout = 30;		// in seconds
+        short timeout = 30000;		// in milliseconds
+        final short sleep = 500;
 
         this.pendingNetworkConfigurationChange = true;
         if (modifiedInterfaceNames != null && !modifiedInterfaceNames.isEmpty()) {
@@ -1546,9 +1527,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         this.configurationService.snapshot();
 
         while (this.pendingNetworkConfigurationChange && timeout > 0) {
-            timeout -= 0.5;
+            timeout -= sleep;
             try {
-                Thread.sleep(500);
+                Thread.sleep(sleep);
             } catch (InterruptedException e) {
                 // ignore
             }
@@ -1561,8 +1542,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     private void submitFirewallConfiguration() throws KuraException {
-        // TODO
-        short timeout = 30;		// in seconds
+        short timeout = 30000;		// in milliseconds
+        final short sleep = 500;
 
         this.pendingFirewallConfigurationChange = true; // WTF: why this is set to true? the while and the if will be
         // always executed!
@@ -1570,9 +1551,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         this.configurationService.snapshot();
 
         while (this.pendingFirewallConfigurationChange && timeout > 0) {
-            timeout -= 0.5;
+            timeout -= sleep;
             try {
-                Thread.sleep(500);
+                Thread.sleep(sleep);
             } catch (InterruptedException e) {
                 // ignore
             }
@@ -1602,7 +1583,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         wpaSupplicantConfigWriter.generateTempWpaSupplicantConf();
 
         logger.debug("getWifiHotspots() :: Starting temporary instance of wpa_supplicant");
-        StringBuilder key = new StringBuilder("net.interface." + ifaceName + ".config.wifi.infra.driver");
+        StringBuilder key = new StringBuilder("net.interface.").append(ifaceName).append(".config.wifi.infra.driver");
         String driver = KuranetConfig.getProperty(key.toString());
         WpaSupplicantManager.startTemp(ifaceName, WifiMode.INFRA, driver);
         wifiModeWait(ifaceName, WifiMode.INFRA, 10);

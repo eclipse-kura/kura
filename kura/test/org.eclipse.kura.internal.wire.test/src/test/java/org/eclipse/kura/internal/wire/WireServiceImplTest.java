@@ -5,6 +5,10 @@
  *   are made available under the terms of the Eclipse Public License v1.0
  *   which accompanies this distribution, and is available at
  *   http://www.eclipse.org/legal/epl-v10.html
+ *
+ *   Contributors:
+ *      Eurotech
+ *      Amit Kumar Mondal
  ******************************************************************************/
 package org.eclipse.kura.internal.wire;
 
@@ -33,18 +37,18 @@ public class WireServiceImplTest {
 
     @Test
     public void testCreateWiresNoEmitterNoReceiver() throws NoSuchFieldException, InvalidSyntaxException {
-        WireServiceImpl wsi = new WireServiceImpl();
+        final WireServiceImpl wsi = new WireServiceImpl();
 
-        Set<WireConfiguration> wireConfigs = new HashSet<WireConfiguration>();
-        String emitterPid = "emmiter";
-        String receiverPid = "receiver";
-        WireConfiguration wc = new WireConfiguration(emitterPid, receiverPid);
+        final Set<WireConfiguration> wireConfigs = new HashSet<>();
+        final String emitterPid = "emitter";
+        final String receiverPid = "receiver";
+        final WireConfiguration wc = new WireConfiguration(emitterPid, receiverPid);
         wireConfigs.add(wc);
 
         TestUtil.setFieldValue(wsi, "wireConfigs", wireConfigs);
 
-        BundleContext bundleCtxMock = mock(BundleContext.class);
-        WireComponentTrackerCustomizer wctc = new WireComponentTrackerCustomizer(bundleCtxMock, wsi);
+        final BundleContext bundleCtxMock = mock(BundleContext.class);
+        final WireComponentTrackerCustomizer wctc = new WireComponentTrackerCustomizer(bundleCtxMock, wsi);
 
         TestUtil.setFieldValue(wsi, "wireComponentTrackerCustomizer", wctc);
 
@@ -53,30 +57,30 @@ public class WireServiceImplTest {
 
     @Test
     public void testCreateWires() throws NoSuchFieldException, InvalidSyntaxException {
-        WireServiceImpl wsi = new WireServiceImpl();
+        final WireServiceImpl wsi = new WireServiceImpl();
 
-        Set<WireConfiguration> wireConfigs = new HashSet<WireConfiguration>();
-        String emitterPid = "emmiter";
-        String receiverPid = "receiver";
-        WireConfiguration wc = new WireConfiguration(emitterPid, receiverPid);
+        final Set<WireConfiguration> wireConfigs = new HashSet<>();
+        final String emitterPid = "emitter";
+        final String receiverPid = "receiver";
+        final WireConfiguration wc = new WireConfiguration(emitterPid, receiverPid);
         wireConfigs.add(wc);
 
         TestUtil.setFieldValue(wsi, "wireConfigs", wireConfigs);
 
-        BundleContext bundleCtxMock = mock(BundleContext.class);
-        WireComponentTrackerCustomizer wctc = new WireComponentTrackerCustomizer(bundleCtxMock, wsi);
+        final BundleContext bundleCtxMock = mock(BundleContext.class);
+        final WireComponentTrackerCustomizer wctc = new WireComponentTrackerCustomizer(bundleCtxMock, wsi);
 
         TestUtil.setFieldValue(wsi, "wireComponentTrackerCustomizer", wctc);
 
-        List<String> wireEmitterPids = new ArrayList<String>();
+        final List<String> wireEmitterPids = new ArrayList<>();
         wireEmitterPids.add(emitterPid);
-        List<String> wireReceiverPids = new ArrayList<String>();
+        final List<String> wireReceiverPids = new ArrayList<>();
         wireReceiverPids.add(receiverPid);
 
         TestUtil.setFieldValue(wctc, "wireEmitterPids", wireEmitterPids);
         TestUtil.setFieldValue(wctc, "wireReceiverPids", wireReceiverPids);
 
-        WireHelperService whsMock = mock(WireHelperService.class);
+        final WireHelperService whsMock = mock(WireHelperService.class);
 
         TestUtil.setFieldValue(wsi, "wireHelperService", whsMock);
 
@@ -88,12 +92,12 @@ public class WireServiceImplTest {
 
     @Test
     public void testUpdatedCallback() throws NoSuchFieldException {
-        WireServiceImpl wsi = new WireServiceImpl();
+        final WireServiceImpl wsi = new WireServiceImpl();
 
         assertNull(TestUtil.getFieldValue(wsi, "properties"));
         assertNull(TestUtil.getFieldValue(wsi, "wireServiceOptions"));
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        final Map<String, Object> properties = new HashMap<>();
         wsi.updated(properties);
 
         assertEquals(properties, TestUtil.getFieldValue(wsi, "properties"));

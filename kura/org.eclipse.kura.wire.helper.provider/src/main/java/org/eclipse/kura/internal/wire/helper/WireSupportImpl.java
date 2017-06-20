@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
@@ -73,8 +74,12 @@ final class WireSupportImpl implements WireSupport {
 
         this.outgoingWires = CollectionUtil.newArrayList();
         this.incomingWires = CollectionUtil.newArrayList();
-        this.emitterPid = wireHelperService.getServicePid(wireSupporter);
-        this.pid = wireHelperService.getPid(wireSupporter);
+        final Optional<String> emitterPidOpt = wireHelperService.getServicePid(wireSupporter);
+        final Optional<String> pidOpt = wireHelperService.getPid(wireSupporter);
+        if (emitterPidOpt.isPresent() && pidOpt.isPresent()) {
+            this.emitterPid = emitterPidOpt.get();
+            this.pid = pidOpt.get();
+        }
         this.wireSupporter = wireSupporter;
         this.eventAdmin = eventAdmin;
     }
@@ -90,12 +95,12 @@ final class WireSupportImpl implements WireSupport {
     public synchronized void emit(final List<WireRecord> wireRecords) {
         requireNonNull(wireRecords, message.wireRecordsNonNull());
         if (this.wireSupporter instanceof WireEmitter) {
-            final WireEnvelope wei = new WireEnvelope(emitterPid, wireRecords);
+            final WireEnvelope wei = new WireEnvelope(this.emitterPid, wireRecords);
             for (final Wire wire : this.outgoingWires) {
                 wire.update(wei);
             }
             final Map<String, Object> properties = CollectionUtil.newHashMap();
-            properties.put("emitter", pid);
+            properties.put("emitter", this.pid);
             this.eventAdmin.postEvent(new Event(WireSupport.EMIT_EVENT_TOPIC, properties));
         }
     }

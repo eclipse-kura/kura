@@ -242,8 +242,11 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             throws GwtKuraException {
         final DriverService driverService = ServiceLocator.getInstance().getService(DriverService.class);
 
-        final Driver d = driverService.getDriver(driverPid);
-        final ChannelDescriptor cd = d.getChannelDescriptor();
+        final Optional<Driver> d = driverService.getDriver(driverPid);
+        if (!d.isPresent()) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+        }
+        final ChannelDescriptor cd = d.get().getChannelDescriptor();
         try {
             @SuppressWarnings("unchecked")
             final List<AD> params = (List<AD>) cd.getDescriptor();
@@ -533,11 +536,11 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             if (!ServiceUtil.waitForService(filter, TIMEOUT, SECONDS).isPresent()) {
                 return;
             }
-            final String servicePid = wireHelperService.getServicePid(pid);
-            if (servicePid == null) {
+            final Optional<String> servicePid = wireHelperService.getServicePid(pid);
+            if (!servicePid.isPresent()) {
                 return;
             }
-            Configuration conf = configAdmin.getConfiguration(servicePid);
+            Configuration conf = configAdmin.getConfiguration(servicePid.get());
             if (conf == null) {
                 return;
             }

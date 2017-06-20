@@ -14,12 +14,13 @@
 package org.eclipse.kura.asset;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * The interface AssetService is an utility service API to provide useful
- * methods for assets
+ * The interface {@link AssetService} is an utility service API to provide useful
+ * methods for {@link Asset}s
  *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 1.2
@@ -28,34 +29,37 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface AssetService {
 
     /**
-     * Gets the asset instance by the provided asset PID
-     * ({@code kura.service.pid}).
+     * Gets the {@link Asset} instance by the provided {@link Asset} PID
+     * ({@code kura.service.pid})
      *
      * @param assetPid
-     *            the asset PID to check
-     * @return the asset instance
+     *            the {@link Asset} PID ({@code kura.service.pid}) to check
+     * @return the {@link Asset} instance wrapped in {@link Optional}
+     *         instance or an empty {@link Optional} instance
      * @throws NullPointerException
-     *             if the provided asset PID is null
+     *             if the provided {@link Asset} PID ({@code kura.service.pid})
+     *             is {@code null}
      */
-    public Asset getAsset(String assetPid);
+    public Optional<Asset> getAsset(String assetPid);
 
     /**
-     * Gets the asset PID. ({@code kura.service.pid}) by the provided asset
-     * instance
+     * Gets the {@link Asset} PID ({@code kura.service.pid}) by the provided
+     * {@link Asset} instance
      *
      * @param asset
-     *            the asset instance to check
-     * @return the asset PID
+     *            the {@link Asset} instance to check
+     * @return the {@link Asset} PID ({@code kura.service.pid}) wrapped in
+     *         {@link Optional} instance or an empty {@link Optional} instance
      * @throws NullPointerException
-     *             if the provided asset instance is null
+     *             if the provided {@link Asset} instance is {@code null}
      */
-    public String getAssetPid(Asset asset);
+    public Optional<String> getAssetPid(Asset asset);
 
     /**
-     * Returns the list containing all the available asset instances
+     * Returns the list containing all the available {@link Asset} instances
      *
-     * @return the list of assets available in service registry or empty list
-     *         if no assets are available
+     * @return the list of {@link Asset} instances available in service
+     *         registry or empty list if no {@link Asset} instance is available
      */
     public List<Asset> listAssets();
 

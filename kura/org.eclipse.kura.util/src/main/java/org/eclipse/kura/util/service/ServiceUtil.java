@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.annotation.Nullable;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.UtilMessages;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
@@ -30,105 +31,104 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * The Class ServiceUtil contains all necessary static factory methods to deal
- * with OSGi services
+ * The Class {@link ServiceUtil} contains all necessary static factory methods
+ * to deal with OSGi services
  */
 public final class ServiceUtil {
 
-    private static final UtilMessages message = LocalizationAdapter.adapt(UtilMessages.class);
+	/** Localization instance */
+	private static final UtilMessages message = LocalizationAdapter.adapt(UtilMessages.class);
 
-    private ServiceUtil() {
-        // Static Factory Methods container. No need to instantiate.
-    }
+	/** Constructor */
+	private ServiceUtil() {
+		// Static Factory Methods Container. No need to instantiate.
+	}
 
-    /**
-     * Returns references to <em>all</em> services matching the given class name
-     * and OSGi filter.
-     *
-     * @param bundleContext
-     *            OSGi bundle context
-     * @param clazz
-     *            qualified class type
-     * @param filter
-     *            valid OSGi filter (can be {@code null})
-     * @return {@code non-null} array of references to matching services
-     * @throws NullPointerException
-     *             if {@code bundleContext} or {@code clazz} is {@code null}
-     * @throws IllegalArgumentException
-     *             if the specified {@code filter} contains an invalid filter expression that cannot be parsed.
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> ServiceReference<T>[] getServiceReferences(final BundleContext bundleContext,
-            final Class<T> clazz, @Nullable final String filter) {
-        requireNonNull(bundleContext, message.bundleContextNonNull());
-        requireNonNull(clazz, message.clazzNonNull());
+	/**
+	 * Returns {@link ServiceReference}s to <em>all</em> services matching the
+	 * target class name and OSGi filter
+	 *
+	 * @param target
+	 *            the service class instance to retrieve
+	 * @param filter
+	 *            valid OSGi filter (can be {@code null})
+	 * @return {@code non-null} collection of {@link ServiceReference}s to
+	 *         matching services
+	 * @throws NullPointerException
+	 *             if {@code target} is {@code null}
+	 * @throws IllegalArgumentException
+	 *             if the specified {@code filter} contains an invalid filter
+	 *             expression that cannot be parsed or the {@link BundleContext}
+	 *             instance for this bundle cannot be acquired
+	 * @throws IllegalStateException
+	 *             If this {@link BundleContext} instance is no longer valid.
+	 */
+	public static <T> Collection<ServiceReference<T>> getServiceReferences(final Class<T> target,
+			@Nullable final String filter) {
+		requireNonNull(target, message.targetNonNull());
+		final BundleContext context = getBundleContext();
+		try {
+			return context.getServiceReferences(target, filter);
+		} catch (final InvalidSyntaxException ise) {
+			throw new IllegalArgumentException(ise);
+		}
+	}
 
-        try {
-            final Collection<ServiceReference<T>> refs = bundleContext.getServiceReferences(clazz, filter);
-            return refs.toArray(new ServiceReference[0]);
-        } catch (final InvalidSyntaxException ise) {
-            throw new IllegalArgumentException(ise);
-        }
-    }
+	/**
+	 * Waits for the specified amount of time for the services that matches the
+	 * provided OSGi filter
+	 *
+	 * @param filter
+	 *            valid OSGi filter to match
+	 * @param timeout
+	 *            the timeout period
+	 * @param timeunit
+	 *            the {@link TimeUnit} for the timeout
+	 * @throws NullPointerException
+	 *             if the provided filter or the {@link TimeUnit} is
+	 *             {@code null}
+	 * @throws IllegalArgumentException
+	 *             if the timeout period is {@code zero} or {@code negative}
+	 * @throws InterruptedException
+	 *             if another thread has interrupted the current worker thread
+	 * @throws InvalidSyntaxException
+	 *             if the provided filter syntax is erroneous
+	 * @return an {@link Optional} with the tracked service instance if the
+	 *         service instance is {@code non-null}, otherwise an empty
+	 *         {@link Optional}
+	 */
+	public static Optional<Object> waitForService(final String filter, final long timeout, final TimeUnit timeunit)
+			throws InterruptedException, InvalidSyntaxException {
+		requireNonNull(filter, message.filterNonNull());
+		requireNonNull(timeunit, message.timeunitNonNull());
+		if (timeout <= 0) {
+			throw new IllegalArgumentException(message.timeoutError());
+		}
+		final long timeoutInMillis = timeunit.toMillis(timeout);
+		final BundleContext bundleContext = getBundleContext();
+		final Filter filterRef = bundleContext.createFilter(filter);
+		final ServiceTracker<Object, Object> serviceTracker = new ServiceTracker<>(bundleContext, filterRef, null);
+		serviceTracker.open();
+		final Object service = serviceTracker.waitForService(timeoutInMillis);
+		serviceTracker.close();
+		return Optional.ofNullable(service);
+	}
 
-    /**
-     * Resets all the provided service reference use counts. If the provided {@link BundleContext} bundle's use count
-     * for the provided service references are already zero, this would not further decrement the counters to
-     * negative. Otherwise, the provided {@link BundleContext} bundle's use counts for the provided service references
-     * is decremented by one.
-     *
-     * @param bundleContext
-     *            OSGi bundle context
-     * @param refs
-     *            {@code non-null} array of all service references
-     * @throws NullPointerException
-     *             if any of the arguments is {@code null}
-     */
-    public static void ungetServiceReferences(final BundleContext bundleContext, final ServiceReference<?>[] refs) {
-        requireNonNull(bundleContext, message.bundleContextNonNull());
-        requireNonNull(refs, message.referencesNonNull());
-
-        for (final ServiceReference<?> ref : refs) {
-            bundleContext.ungetService(ref);
-        }
-    }
-
-    /**
-     * Waits for the specified amount of time for the services that matches the provided OSGi filter
-     *
-     * @param filter
-     *            valid OSGi filter to match
-     * @param timeout
-     *            the timeout period
-     * @param timeunit
-     *            the {@link TimeUnit} for the timeout
-     * @throws NullPointerException
-     *             if the provided filter or the {@link TimeUnit} is {@code null}
-     * @throws IllegalArgumentException
-     *             if the timeout period is {@code zero} or {@code negative}
-     * @throws InterruptedException
-     *             if another thread has interrupted the current worker thread
-     * @throws InvalidSyntaxException
-     *             if the provided filter syntax is erroneous
-     * @return an {@link Optional} with the tracked service instance if the service instance
-     *         is {@code non-null}, otherwise an empty {@link Optional}
-     */
-    public static Optional<Object> waitForService(final String filter, final long timeout, final TimeUnit timeunit)
-            throws InterruptedException, InvalidSyntaxException {
-        requireNonNull(filter, message.filterNonNull());
-        requireNonNull(timeunit, message.timeunitNonNull());
-        if (timeout <= 0) {
-            throw new IllegalArgumentException(message.timeoutError());
-        }
-
-        final long timeoutInMillis = timeunit.toMillis(timeout);
-        final BundleContext bundleContext = FrameworkUtil.getBundle(ServiceUtil.class).getBundleContext();
-        final Filter filterRef = bundleContext.createFilter(filter);
-        final ServiceTracker<Object, Object> serviceTracker = new ServiceTracker<>(bundleContext, filterRef, null);
-        serviceTracker.open();
-        final Object service = serviceTracker.waitForService(timeoutInMillis);
-        serviceTracker.close();
-
-        return Optional.ofNullable(service);
-    }
+	/**
+	 * Returns {@link BundleContext} instance associated with this
+	 * {@link Bundle}
+	 *
+	 * @throws IllegalStateException
+	 *             if {@link BundleContext} instance cannot be acquired
+	 * @return {@link BundleContext} instance associated with this
+	 *         {@link Bundle}
+	 */
+	static BundleContext getBundleContext() {
+		final Bundle bundle = FrameworkUtil.getBundle(ServiceUtil.class);
+		final BundleContext context = bundle == null ? null : bundle.getBundleContext();
+		if (context == null) {
+			throw new IllegalStateException(message.noBundleContext(ServiceUtil.class.getCanonicalName()));
+		}
+		return context;
+	}
 }

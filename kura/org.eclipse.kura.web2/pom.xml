@@ -82,7 +82,8 @@
 				<configuration>
 					<style>OBF</style> <!-- DETAILED https://support.google.com/code/answer/55203?topic=10212 -->
 					<failOnError>true</failOnError>
-					<extraJvmArgs>-Xmx768M -Xss1024k</extraJvmArgs>
+					<extraJvmArgs>-Xmx512M -Xss1024k -XX:+UseParallelGC</extraJvmArgs>
+					<localWorkers>2</localWorkers>
 					<runTarget>denali.html</runTarget>
 					<i18nMessagesBundle>org.eclipse.kura.web.client.messages.Messages</i18nMessagesBundle>
 					<i18nConstantsWithLookupBundle>org.eclipse.kura.web.client.messages.ValidationMessages</i18nConstantsWithLookupBundle>

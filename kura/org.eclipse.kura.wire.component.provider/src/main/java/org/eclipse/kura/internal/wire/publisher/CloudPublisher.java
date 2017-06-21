@@ -24,6 +24,8 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudClientListener;
@@ -49,8 +51,6 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The Class CloudPublisher is the specific Wire Component to publish a list of
@@ -100,7 +100,7 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
         }
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(CloudPublisher.class);
+    private static final Logger logger = LogManager.getLogger();
 
     private static final String TOPIC_PATTERN_STRING = "\\$([^\\s/]+)";
     private static final Pattern TOPIC_PATTERN = Pattern.compile(TOPIC_PATTERN_STRING);

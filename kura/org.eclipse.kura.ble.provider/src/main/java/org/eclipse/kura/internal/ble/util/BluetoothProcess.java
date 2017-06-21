@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,12 +22,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.eclipse.kura.KuraException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class BluetoothProcess {
 
-    private static final Logger logger = LoggerFactory.getLogger(BluetoothProcess.class);
+    private static final Logger logger = LogManager.getLogger();
     private static final ExecutorService streamGobblers = Executors.newCachedThreadPool();
 
     private Process process;

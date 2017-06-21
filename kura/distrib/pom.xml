@@ -209,11 +209,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.core.log</artifactId>
-                                    <version>${org.eclipse.kura.core.log.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.core.net</artifactId>
                                     <version>${org.eclipse.kura.core.net.version}</version>
                                 </artifactItem>
@@ -575,8 +570,6 @@
                                     tofile="target/plugins/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.deployment.jar"
                                     tofile="target/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.core.log.jar"
-                                    tofile="target/plugins/org.eclipse.kura.core.log_${org.eclipse.kura.core.log.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.net.jar"
                                     tofile="target/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.deployment.agent.jar"
@@ -2681,9 +2674,6 @@
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar"
-                                            todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
-                                        <copy
-                                            file="${project.build.directory}/plugins/org.eclipse.kura.core.log_${org.eclipse.kura.core.log.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"

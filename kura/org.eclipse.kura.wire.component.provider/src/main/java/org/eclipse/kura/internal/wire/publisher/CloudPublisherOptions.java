@@ -18,8 +18,8 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The Class CloudPublisherOptions is responsible to provide all the required
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 final class CloudPublisherOptions {
 
-    private static final Logger logger = LoggerFactory.getLogger(CloudPublisherOptions.class);
+    private static final Logger logger = LogManager.getLogger();
 
     private static final String CLOUD_SERVICE_PID = "cloud.service.pid";
 

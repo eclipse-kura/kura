@@ -54,6 +54,26 @@
                             <autoStart>true</autoStart>
                             <level>3</level>
                         </bundleStartLevel>
+                        <bundle>
+                            <id>org.apache.log4j2-api-config</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.core</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                        	<id>org.apache.logging.log4j.slf4j-impl</id>
+                        	<level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
                     </bundleStartLevel>
                 </configuration>
             </plugin>
@@ -79,14 +99,19 @@
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                             <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>slf4j.log4j12</id>
-                                <versionRange>(1.7,2)</versionRange>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.api</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.core</id>
+                                <versionRange>0.0.0</versionRange>
                             </requirement>
                             <requirement>
                                 <type>eclipse-plugin</type>
-                                <id>log4j.test.configuration</id>
-                                <versionRange>1.0.0</versionRange>
+                                <id>org.apache.log4j2-api-config</id>
+                                <versionRange>0.0.0</versionRange>
                             </requirement>
                             <requirement>
                                 <type>eclipse-plugin</type>

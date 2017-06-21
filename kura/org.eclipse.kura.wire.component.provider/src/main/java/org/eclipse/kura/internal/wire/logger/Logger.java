@@ -22,6 +22,7 @@ import static org.eclipse.kura.internal.wire.logger.LoggingVerbosity.VERBOSE;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.logging.log4j.LogManager;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireComponent;
@@ -33,7 +34,6 @@ import org.eclipse.kura.wire.WireSupport;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
-import org.slf4j.LoggerFactory;
 
 /**
  * The Class Logger is the specific Wire Component to log a list of {@link WireRecord}s
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class Logger implements WireReceiver, ConfigurableComponent {
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Logger.class);
+    private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger();
 
     private static final String DEFAULT_LOG_LEVEL = QUIET.name();
 
@@ -121,7 +121,7 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
     @Override
     public void onWireReceive(final WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, "Wire Envelope cannot be null");
-        logger.info("Received WireEnvelope from {}", wireEnvelope.getEmitterPid());
+        logger.info("Received WireEnvelope from {}", () -> wireEnvelope.getEmitterPid());
 
         if (VERBOSE.name().equals(getLoggingLevel())) {
             logger.info("Record List content: ");
@@ -129,7 +129,7 @@ public final class Logger implements WireReceiver, ConfigurableComponent {
                 logger.info("  Record content: ");
 
                 for (Entry<String, TypedValue<?>> entry : record.getProperties().entrySet()) {
-                    logger.info("    {} : {}", entry.getKey(), entry.getValue().getValue());
+                    logger.info("    {} : {}", () -> entry.getKey(), () -> entry.getValue().getValue());
                 }
             }
             logger.info("");

@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.internal.wire.common.DbServiceHelper;
@@ -45,8 +47,6 @@ import org.eclipse.kura.wire.WireSupport;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The Class DbWireRecordFilter is responsible for representing a wire component
@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class DbWireRecordFilter implements WireEmitter, WireReceiver, ConfigurableComponent {
 
-    private static final Logger logger = LoggerFactory.getLogger(DbWireRecordFilter.class);
+    private static final Logger logger = LogManager.getLogger();
 
     private List<WireRecord> lastRecords;
 

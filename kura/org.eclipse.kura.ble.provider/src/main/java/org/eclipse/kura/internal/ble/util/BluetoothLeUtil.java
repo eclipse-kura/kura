@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,12 +21,12 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.bluetooth.le.beacon.AdvertisingReportRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class BluetoothLeUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(BluetoothLeUtil.class);
+    private static final Logger logger = LogManager.getLogger();
     private static final ExecutorService processExecutor = Executors.newSingleThreadExecutor();
 
     public static final String HCITOOL = "hcitool";

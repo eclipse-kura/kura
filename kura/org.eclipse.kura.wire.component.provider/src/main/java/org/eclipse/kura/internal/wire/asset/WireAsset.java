@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
@@ -51,8 +53,6 @@ import org.eclipse.kura.wire.WireSupport;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The Class WireAsset is a wire component which provides all necessary higher
@@ -98,7 +98,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class WireAsset extends BaseAsset implements WireEmitter, WireReceiver, ChannelListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(WireAsset.class);
+    private static final Logger logger = LogManager.getLogger();
 
     private volatile WireHelperService wireHelperService;
 
@@ -294,9 +294,9 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
         for (final ChannelRecord channelRecord : channelRecords) {
             if (emitErrors) {
-                this.fillRecordWithErrors(channelRecord, wireRecordProperties, timestampFiller);
+                fillRecordWithErrors(channelRecord, wireRecordProperties, timestampFiller);
             } else {
-                this.fillRecordWithoutErrors(channelRecord, wireRecordProperties, timestampFiller);
+                fillRecordWithoutErrors(channelRecord, wireRecordProperties, timestampFiller);
             }
         }
 

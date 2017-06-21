@@ -31,18 +31,19 @@ import javax.comm.PortInUseException;
 import javax.comm.SerialPort;
 import javax.comm.UnsupportedCommOperationException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CommConnectionImpl implements CommConnection, Closeable {
 
+    private static final String SEND_MESSAGE = "sendMessage() - {}";
     private static final String JAVA_EXT_DIRS = "java.ext.dirs";
     private static final String KURA_EXT_DIR = "kura.ext.dir";
 
-    private static final Logger logger = LoggerFactory.getLogger(CommConnectionImpl.class);
+    private static final Logger logger = LogManager.getLogger(CommConnectionImpl.class);
 
     // set up the appropriate ext dir for RXTX extra device nodes
     static {
@@ -175,9 +176,7 @@ public class CommConnectionImpl implements CommConnection, Closeable {
             throw new NullPointerException("Message must not be null");
         }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("sendMessage() - {}", getBytesAsString(message));
-        }
+        logger.debug(SEND_MESSAGE, () -> getBytesAsString(message));
 
         if (this.outputStream == null) {
             openOutputStream();
@@ -195,9 +194,7 @@ public class CommConnectionImpl implements CommConnection, Closeable {
             throw new NullPointerException("Serial command must not be null");
         }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("sendMessage() - {}", getBytesAsString(command));
-        }
+        logger.debug(SEND_MESSAGE, () -> getBytesAsString(command));
 
         if (this.outputStream == null) {
             openOutputStream();
@@ -232,7 +229,7 @@ public class CommConnectionImpl implements CommConnection, Closeable {
             throw new NullPointerException("Serial command must not be null");
         }
 
-        logger.debug("sendMessage() - {}", getBytesAsString(command));
+        logger.debug(SEND_MESSAGE, getBytesAsString(command));
 
         if (this.outputStream == null) {
             openOutputStream();

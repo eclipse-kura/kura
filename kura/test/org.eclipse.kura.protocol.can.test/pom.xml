@@ -12,93 +12,106 @@
       Eurotech
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-
-	<parent>
-		<groupId>org.eclipse.kura</groupId>
-		<artifactId>test</artifactId>
-		<version>3.0.0-SNAPSHOT</version>
-	</parent>
-
-	<artifactId>org.eclipse.kura.protocol.can.test</artifactId>
-	<version>3.1.0-SNAPSHOT</version>
-	<packaging>eclipse-test-plugin</packaging>
-
-	<properties>
-		<kura.basedir>${project.basedir}/../..</kura.basedir>
-	</properties>
-
-
-	<dependencies>
-    <dependency>
-      <groupId>org.eclipse.kura</groupId>
-      <artifactId>org.eclipse.kura.protocol.can</artifactId>
-      <version>[1.0,2.0)</version>
-    </dependency>
-  </dependencies>
-  
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>test</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>org.eclipse.kura.protocol.can.test</artifactId>
+    <version>3.1.0-SNAPSHOT</version>
+    <packaging>eclipse-test-plugin</packaging>
+    <properties>
+        <kura.basedir>${project.basedir}/../..</kura.basedir>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.protocol.can</artifactId>
+            <version>[1.0,2.0)</version>
+        </dependency>
+    </dependencies>
     <build>
-    <plugins>
-    		<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>target-platform-configuration</artifactId>
-				<configuration>
-					<pomDependencies>consider</pomDependencies>
-					<dependency-resolution>
-						<extraRequirements>
-							<requirement>
-								<type>eclipse-plugin</type>
-								<id>slf4j.log4j12</id>
-								<versionRange>(1.7,2)</versionRange>
-							</requirement>
-							<requirement>
-								<type>eclipse-plugin</type>
-								<id>log4j.test.configuration</id>
-								<versionRange>1.0.0</versionRange>
-							</requirement>
-							<requirement>
-								<type>eclipse-plugin</type>
-								<id>org.eclipse.equinox.cm</id>
-								<versionRange>1</versionRange>
-							</requirement>
-							<requirement>
-								<type>eclipse-plugin</type>
-								<id>org.eclipse.kura.api</id>
-								<versionRange>[1.2,2.0)</versionRange>
-							</requirement>
-							<requirement>
-								<type>eclipse-plugin</type>
-								<id>org.eclipse.kura.deployment.agent</id>
-								<versionRange>[1.0,2.0)</versionRange>
-							</requirement>
-							<requirement>
-								<type>eclipse-plugin</type>
-								<id>org.eclipse.kura.core</id>
-								<versionRange>[1.0,2.0)</versionRange>
-							</requirement>
-							<requirement>
-								<type>eclipse-plugin</type>
-								<id>org.eclipse.kura.emulator</id>
-								<versionRange>[1.0,2.0)</versionRange>
-							</requirement>
-							<requirement>
-								<type>eclipse-plugin</type>
-								<id>org.eclipse.kura.test</id>
-								<versionRange>[1.0,2.0)</versionRange>
-							</requirement>
-						</extraRequirements>
-					</dependency-resolution>
-				</configuration>
-			</plugin>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>target-platform-configuration</artifactId>
+                <configuration>
+                    <pomDependencies>consider</pomDependencies>
+                    <dependency-resolution>
+                        <extraRequirements>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>slf4j.log4j12</id>
+                                <versionRange>(1.7,2)</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>log4j.test.configuration</id>
+                                <versionRange>1.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.equinox.cm</id>
+                                <versionRange>1</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.api</id>
+                                <versionRange>[1.2,2.0)</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.deployment.agent</id>
+                                <versionRange>[1.0,2.0)</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.core</id>
+                                <versionRange>[1.0,2.0)</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.emulator</id>
+                                <versionRange>[1.0,2.0)</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.test</id>
+                                <versionRange>[1.0,2.0)</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.api</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.core</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.apache.log4j2-api-config</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.slf4j-impl</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                        </extraRequirements>
+                    </dependency-resolution>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-surefire-plugin</artifactId>
                 <version>${tycho-version}</version>
                 <configuration>
                     <providerHint>junit4</providerHint>
-<!--                                         
+                    <!--                                         
                     <testSuite>org.eclipse.kura.core.test</testSuite>
                     <testClass>org.eclipse.kura.core.test.AllCoreTests</testClass>
                     <testClass>org.eclipse.kura.core.test.CloudDeploymentHandlerTest</testClass>
@@ -110,204 +123,222 @@
                     <testClass>org.eclipse.kura.core.test.NetworkServiceTest</testClass>
                     <testClass>org.eclipse.kura.core.test.SystemAdminServiceTest</testClass>
                     <testClass>org.eclipse.kura.core.test.SystemServiceTest</testClass>
- -->                    
-		    <!-- Don't run tests in parallel because it breaks them
+ -->
+                    <!-- Don't run tests in parallel because it breaks them
                     <parallel>both</parallel>
 		    -->
-
                     <useUnlimitedThreads>true</useUnlimitedThreads>
-                    <argLine>-Dds.showtrace=true -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Deurotech.framework.mode=emulator -Dkura.configuration=file:../org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties  -Dlog4j.configuration=file:../org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
-
-		    <!-- This can be uncommented to debug the test in the event of a failure by telneting to port 5002 and seeing the state of the OSGi runtime 		    
+                    <argLine>${tycho.argline} -Dds.showtrace=true -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Deurotech.framework.mode=emulator -Dkura.configuration=file:../org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties</argLine>
+                    <!-- This can be uncommented to debug the test in the event of a failure by telneting to port 5002 and seeing the state of the OSGi runtime 		    
                     <appArgLine>-consoleLog -console 5002 -noExit</appArgLine>
             -->
-		    <bundleStartLevel>
-			<bundle>
-			    <id>org.eclipse.equinox.ds</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.equinox.console</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.apache.felix.gogo.shell</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.apache.felix.gogo.command</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.apache.felix.gogo.runtime</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.core.contenttype</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.core.jobs</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.core.runtime</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.equinox.io</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.equinox.app</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.equinox.cm</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.equinox.common</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.equinox.event</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.equinox.metatype</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.equinox.preferences</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.equinox.registry</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.equinox.util</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.osgi.services</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.osgi.util</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.hamcrest.core</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>osgi.cmpn</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.equinox.launcher</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.soda.dk.comm</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>slf4j.api</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>com.google.protobuf</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.paho.client.mqttv3</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.hsqldb.hsqldb</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.junit</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.apache.commons.io</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>javax.servlet</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.apache.felix.dependencymanager</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.apache.felix.deploymentadmin</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.kura.api</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.kura.core</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.kura.deployment.agent</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.kura.emulator</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-			<bundle>
-			    <id>org.eclipse.kura.protocol.can</id>
-			    <level>4</level>
-			    <autoStart>true</autoStart>
-			</bundle>
-		    </bundleStartLevel>
+                    <bundleStartLevel>
+                        <bundle>
+                            <id>org.eclipse.equinox.ds</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.console</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.felix.gogo.shell</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.felix.gogo.command</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.felix.gogo.runtime</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.core.contenttype</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.core.jobs</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.core.runtime</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.io</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.app</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.cm</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.common</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.event</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.metatype</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.preferences</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.registry</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.util</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.osgi.services</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.osgi.util</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.hamcrest.core</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>osgi.cmpn</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.equinox.launcher</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.soda.dk.comm</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>slf4j.api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.log4j2-api-config</id>
+                            <level>4</level>
+                            <autoStart>false</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.core</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.slf4j-impl</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>com.google.protobuf</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.paho.client.mqttv3</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.hsqldb.hsqldb</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.junit</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.commons.io</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>javax.servlet</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.felix.dependencymanager</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.felix.deploymentadmin</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.core</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.deployment.agent</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.emulator</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.protocol.can</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                    </bundleStartLevel>
                     <dependencies>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -316,7 +347,7 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.console</artifactId>
-                        </dependency>       
+                        </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.apache.felix.gogo.shell</artifactId>
@@ -328,7 +359,7 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.apache.felix.gogo.runtime</artifactId>
-                        </dependency>                        
+                        </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.core.contenttype</artifactId>
@@ -453,6 +484,5 @@
                 </configuration>
             </plugin>
         </plugins>
-	</build>
+    </build>
 </project>
-

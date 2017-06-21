@@ -39,7 +39,7 @@
                     <failIfNoTests>false</failIfNoTests>
                     <providerHint>junit4</providerHint>
                     <useUnlimitedThreads>false</useUnlimitedThreads>
-                    <argLine>${jacocoArgs}
+                    <argLine>${tycho.argline}
                         -DbuildingWithTycho=true -Dosgi.locking=none
                         -Dds.showtrace=true -Djava.io.tmpdir=/tmp
                         -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
@@ -47,8 +47,7 @@
                         -Dorg.eclipse.kura.mode=emulator
                         -Dkura.snapshots=${project.basedir}/target/
                         -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
-                        -Ddpa.configuration=/tmp/kura/dpa.properties
-                        -Dlog4j.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
+                        -Ddpa.configuration=/tmp/kura/dpa.properties</argLine>
                     <appArgLine>-consoleLog -console 1450</appArgLine>
                     <bundleStartLevel>
                         <bundle>
@@ -132,7 +131,17 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>slf4j.api</id>
+                            <id>org.apache.log4j2-api-config</id>
+                            <level>4</level>
+                            <autoStart>false</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.api</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.apache.logging.log4j.core</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -188,6 +197,11 @@
                         </bundle>
                         <bundle>
                             <id>org.eclipse.kura.json.marshaller.unmarshaller.provider</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -271,10 +285,6 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>slf4j.api</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
                             <artifactId>org.hsqldb.hsqldb</artifactId>
                         </dependency>
                         <dependency>
@@ -284,14 +294,6 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.apache.commons.io</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>log4j</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>log4j.apache-log4j-extras</artifactId>
                         </dependency>
                     </dependencies>
                 </configuration>
@@ -336,6 +338,21 @@
                             <requirement>
                                 <type>eclipse-plugin</type>
                                 <id>org.eclipse.kura.wire.helper.provider</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.api</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.apache.logging.log4j.core</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.apache.log4j2-api-config</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                         </extraRequirements>

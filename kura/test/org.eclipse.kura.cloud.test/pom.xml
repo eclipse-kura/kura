@@ -28,16 +28,4 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
         <kura.basedir>${project.basedir}/../..</kura.basedir>
     </properties>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-surefire-plugin</artifactId>
-                <version>${tycho-version}</version>
-                <configuration>
-                    <failIfNoTests>false</failIfNoTests>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

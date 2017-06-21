@@ -18,10 +18,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.db.H2DbService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The Class DbServiceHelper is responsible for providing {@link H2DbService}
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class H2DbServiceHelper {
 
-    private static final Logger logger = LoggerFactory.getLogger(H2DbServiceHelper.class);
+    private static final Logger logger = LogManager.getLogger(H2DbServiceHelper.class);
 
     private final H2DbService dbService;
 
@@ -78,9 +78,8 @@ public final class H2DbServiceHelper {
      *            the result sets
      */
     public void close(final ResultSet... rss) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Closing all result sets... {}", Arrays.toString(rss));
-        }
+        logger.debug("Closing all result sets... {}", () -> Arrays.toString(rss));
+
         this.dbService.close(rss);
         logger.debug("Closing all result sets... Done");
     }
@@ -92,9 +91,8 @@ public final class H2DbServiceHelper {
      *            the SQL statements
      */
     public void close(final Statement... stmts) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Closing all statements... {}", Arrays.toString(stmts));
-        }
+        logger.debug("Closing all statements... {}", () -> Arrays.toString(stmts));
+
         this.dbService.close(stmts);
         logger.debug("Closing all statements... Done");
     }

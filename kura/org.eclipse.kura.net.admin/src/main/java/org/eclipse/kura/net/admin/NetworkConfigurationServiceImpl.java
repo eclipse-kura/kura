@@ -74,20 +74,20 @@ public class NetworkConfigurationServiceImpl
 
     public static final String UNCONFIGURED_MODEM_REGEX = "^\\d+-\\d+(\\.\\d+)*$";
 
-    private static final Logger s_logger = LoggerFactory.getLogger(NetworkConfigurationServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(NetworkConfigurationServiceImpl.class);
 
-    private final static String[] EVENT_TOPICS = { KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC };
+    private static final String[] EVENT_TOPICS = { KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC };
 
-    private NetworkService m_networkService;
-    private EventAdmin m_eventAdmin;
-    private UsbService m_usbService;
-    private ModemManagerService m_modemManagerService;
+    private NetworkService networkService;
+    private EventAdmin eventAdmin;
+    private UsbService usbService;
+    private ModemManagerService modemManagerService;
 
-    private List<NetworkConfigurationVisitor> m_readVisitors;
-    private List<NetworkConfigurationVisitor> m_writeVisitors;
+    private List<NetworkConfigurationVisitor> readVisitors;
+    private List<NetworkConfigurationVisitor> writeVisitors;
 
-    private ScheduledExecutorService m_executorUtil;
-    private boolean m_firstConfig = true;
+    private ScheduledExecutorService executorUtil;
+    private boolean firstConfig = true;
 
     // ----------------------------------------------------------------
     //
@@ -95,37 +95,37 @@ public class NetworkConfigurationServiceImpl
     //
     // ----------------------------------------------------------------
     public void setNetworkService(NetworkService networkService) {
-        this.m_networkService = networkService;
+        this.networkService = networkService;
     }
 
     public void unsetNetworkService(NetworkService networkService) {
-        this.m_networkService = null;
+        this.networkService = null;
     }
 
     public void setEventAdmin(EventAdmin eventAdmin) {
-        this.m_eventAdmin = eventAdmin;
+        this.eventAdmin = eventAdmin;
     }
 
     public void unsetEventAdmin(EventAdmin eventAdmin) {
-        this.m_eventAdmin = null;
+        this.eventAdmin = null;
     }
 
     public void setUsbService(UsbService usbService) {
-        this.m_usbService = usbService;
+        this.usbService = usbService;
     }
 
     public void unsetUsbService(UsbService usbService) {
-        this.m_usbService = null;
+        this.usbService = null;
     }
 
     public void setModemManagerService(ModemManagerService modemManagerService) {
-        s_logger.debug("Set the modem manager service");
-        this.m_modemManagerService = modemManagerService;
+        logger.debug("Set the modem manager service");
+        this.modemManagerService = modemManagerService;
     }
 
     public void unsetModemManagerService(ModemManagerService modemManagerService) {
-        s_logger.debug("Unset the modem manager service");
-        this.m_modemManagerService = null;
+        logger.debug("Unset the modem manager service");
+        this.modemManagerService = null;
     }
 
     // ----------------------------------------------------------------
@@ -139,46 +139,42 @@ public class NetworkConfigurationServiceImpl
      */
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        s_logger.debug("activate(componentContext, properties)...");
+        logger.debug("activate(componentContext, properties)...");
 
-        Dictionary<String, String[]> d = new Hashtable<String, String[]>();
+        Dictionary<String, String[]> d = new Hashtable<>();
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
         componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
 
-        this.m_executorUtil = Executors.newSingleThreadScheduledExecutor();
+        this.executorUtil = Executors.newSingleThreadScheduledExecutor();
 
-        this.m_executorUtil.schedule(new Runnable() {
-
-            @Override
-            public void run() {
+        this.executorUtil.schedule(() -> {
                 // make sure we don't miss the setting of firstConfig
-                NetworkConfigurationServiceImpl.this.m_firstConfig = false;
-            }
+                NetworkConfigurationServiceImpl.this.firstConfig = false;
         }, 3, TimeUnit.MINUTES);
 
         initVisitors();
 
         // we are intentionally ignoring the properties from ConfigAdmin at startup
         if (properties == null) {
-            s_logger.debug("Got null properties...");
+            logger.debug("Got null properties...");
         } else {
-            s_logger.debug("Props...{}", properties);
+            logger.debug("Props...{}", properties);
         }
     }
 
     protected void initVisitors() {
-        this.m_readVisitors = new ArrayList<NetworkConfigurationVisitor>();
-        this.m_readVisitors.add(LinuxReadVisitor.getInstance());
+        this.readVisitors = new ArrayList<>();
+        this.readVisitors.add(LinuxReadVisitor.getInstance());
 
-        this.m_writeVisitors = new ArrayList<NetworkConfigurationVisitor>();
-        this.m_writeVisitors.add(LinuxWriteVisitor.getInstance());
+        this.writeVisitors = new ArrayList<>();
+        this.writeVisitors.add(LinuxWriteVisitor.getInstance());
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        s_logger.debug("deactivate()");
-        this.m_writeVisitors = null;
-        this.m_readVisitors = null;
-        this.m_executorUtil.shutdownNow();
+        logger.debug("deactivate()");
+        this.writeVisitors = null;
+        this.readVisitors = null;
+        this.executorUtil.shutdownNow();
     }
 
     protected List<String> getAllInterfaceNames() throws KuraException {
@@ -191,20 +187,16 @@ public class NetworkConfigurationServiceImpl
 
     @Override
     public void handleEvent(Event event) {
-        s_logger.debug("handleEvent - topic: {}", event.getTopic());
+        logger.debug("handleEvent - topic: {}", event.getTopic());
         String topic = event.getTopic();
         if (topic.equals(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC)) {
-            this.m_firstConfig = false;
-            this.m_executorUtil.schedule(new Runnable() {
-
-                @Override
-                public void run() {
-                    Map<String, Object> props = new HashMap<String, Object>();
-                    EventProperties eventProps = new EventProperties(props);
-                    s_logger.info("postInstalledEvent() :: posting KuraNetConfigReadyEvent");
-                    NetworkConfigurationServiceImpl.this.m_eventAdmin.postEvent(
-                            new Event(KuraNetConfigReadyEvent.KURA_NET_CONFIG_EVENT_READY_TOPIC, eventProps));
-                }
+            this.firstConfig = false;
+            this.executorUtil.schedule(() -> {
+                Map<String, Object> props = new HashMap<>();
+                EventProperties eventProps = new EventProperties(props);
+                logger.info("postInstalledEvent() :: posting KuraNetConfigReadyEvent");
+                NetworkConfigurationServiceImpl.this.eventAdmin
+                        .postEvent(new Event(KuraNetConfigReadyEvent.KURA_NET_CONFIG_EVENT_READY_TOPIC, eventProps));
             }, 5, TimeUnit.SECONDS);
         }
     }
@@ -216,19 +208,19 @@ public class NetworkConfigurationServiceImpl
 
     public synchronized void updated(Map<String, Object> properties) {
         // skip the first config
-        if (this.m_firstConfig) {
-            s_logger.debug("Ignoring first configuration");
-            this.m_firstConfig = false;
+        if (this.firstConfig) {
+            logger.debug("Ignoring first configuration");
+            this.firstConfig = false;
             return;
         }
 
         try {
             if (properties != null) {
-                s_logger.debug("new properties - updating");
-                s_logger.debug("modified.interface.names: {}", properties.get("modified.interface.names"));
+                logger.debug("new properties - updating");
+                logger.debug("modified.interface.names: {}", properties.get("modified.interface.names"));
 
                 // dynamically insert the type properties..
-                Map<String, Object> modifiedProps = new HashMap<String, Object>();
+                Map<String, Object> modifiedProps = new HashMap<>();
                 modifiedProps.putAll(properties);
                 String interfaces = (String) properties.get("net.interfaces");
                 StringTokenizer st = new StringTokenizer(interfaces, ",");
@@ -238,40 +230,48 @@ public class NetworkConfigurationServiceImpl
                     sb.append("net.interface.").append(interfaceName).append(".type");
 
                     NetInterfaceType type = getNetworkType(interfaceName);
-                    if (type == NetInterfaceType.UNKNOWN) {
-                        if (interfaceName.matches(UNCONFIGURED_MODEM_REGEX)) {
-                            // If the interface name is in a form such as "1-3.4" (USB address), assume it is a modem
-                            type = NetInterfaceType.MODEM;
-                        } else {
-                            SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-                            if (serialModemInfo != null && serialModemInfo.getModemName().equals(interfaceName)) {
-                                type = NetInterfaceType.MODEM;
-                            }
-                        }
-                    }
+                    type = updateUnknownType(interfaceName, type);
+
                     modifiedProps.put(sb.toString(), type.toString());
                 }
 
                 NetworkConfiguration networkConfig = new NetworkConfiguration(modifiedProps);
 
-                for (NetworkConfigurationVisitor visitor : this.m_writeVisitors) {
+                for (NetworkConfigurationVisitor visitor : this.writeVisitors) {
                     networkConfig.accept(visitor);
                 }
 
                 // raise the event because there was a change
-                this.m_eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
+                this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
             } else {
-                s_logger.debug("properties are null");
+                logger.debug("properties are null");
             }
         } catch (Exception e) {
             // TODO - would still want an event if partially successful?
-            s_logger.error("Error updating the configuration", e);
+            logger.error("Error updating the configuration", e);
         }
+    }
+
+    private NetInterfaceType updateUnknownType(String interfaceName, NetInterfaceType type) {
+        NetInterfaceType result = type;
+        if (type == NetInterfaceType.UNKNOWN) {
+            if (interfaceName.matches(UNCONFIGURED_MODEM_REGEX)) {
+                // If the interface name is in a form such as "1-3.4" (USB address), assume it is a modem
+                result = NetInterfaceType.MODEM;
+            } else {
+                SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
+                if (serialModemInfo != null && serialModemInfo.getModemName().equals(interfaceName)) {
+                    result = NetInterfaceType.MODEM;
+                }
+            }
+        }
+
+        return result;
     }
 
     @Override
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
-        s_logger.debug("getConfiguration()");
+        logger.debug("getConfiguration()");
         try {
             NetworkConfiguration networkConfiguration = getNetworkConfiguration();
             return new ComponentConfigurationImpl(PID, getDefinition(),
@@ -288,10 +288,10 @@ public class NetworkConfigurationServiceImpl
         NetworkConfiguration networkConfiguration = new NetworkConfiguration();
 
         // Get the current values
-        List<NetInterface<? extends NetInterfaceAddress>> allNetworkInterfaces = this.m_networkService
+        List<NetInterface<? extends NetInterfaceAddress>> allNetworkInterfaces = this.networkService
                 .getNetworkInterfaces();
-        Map<String, NetInterface<? extends NetInterfaceAddress>> allNetworkInterfacesMap = new HashMap<String, NetInterface<? extends NetInterfaceAddress>>();
-        Map<String, NetInterface<? extends NetInterfaceAddress>> activeNetworkInterfacesMap = new HashMap<String, NetInterface<? extends NetInterfaceAddress>>();
+        Map<String, NetInterface<? extends NetInterfaceAddress>> allNetworkInterfacesMap = new HashMap<>();
+        Map<String, NetInterface<? extends NetInterfaceAddress>> activeNetworkInterfacesMap = new HashMap<>();
         for (NetInterface<? extends NetInterfaceAddress> netInterface : allNetworkInterfaces) {
             allNetworkInterfacesMap.put(netInterface.getName(), netInterface);
             if (netInterface.isUp()) {
@@ -306,93 +306,86 @@ public class NetworkConfigurationServiceImpl
                 String interfaceName = netInterface.getName();
                 try {
                     // ignore mon interface
-                    if (interfaceName.startsWith("mon.")) {
-                        continue;
-                    }
-                    // ignore redpine vlan interface
-                    if (interfaceName.startsWith("rpine")) {
-                        continue;
-                    }
-                    // ignore usb0 for beaglebone
-                    if (interfaceName.startsWith("usb0") && System.getProperty("target.device").equals("beaglebone")) {
+                    if (shouldSkipNetworkConfiguration(interfaceName)) {
                         continue;
                     }
 
                     NetInterfaceType type = netInterface.getType();
-                    if (type == NetInterfaceType.UNKNOWN) {
-                        if (interfaceName.matches(UNCONFIGURED_MODEM_REGEX)) {
-                            // If the interface name is in a form such as "1-3.4", assume it is a modem
-                            type = NetInterfaceType.MODEM;
-                        } else {
-                            SupportedSerialModemInfo serialModemInfo = SupportedSerialModemsInfo.getModem();
-                            if (serialModemInfo != null && serialModemInfo.getModemName().equals(interfaceName)) {
-                                type = NetInterfaceType.MODEM;
-                            }
-                        }
-                    }
+                    type = updateUnknownType(interfaceName, type);
 
-                    s_logger.debug("Getting config for {} type: {}", interfaceName, type);
+                    logger.debug("Getting config for {} type: {}", interfaceName, type);
                     switch (type) {
                     case LOOPBACK:
                         LoopbackInterface<? extends NetInterfaceAddress> activeLoopInterface = (LoopbackInterface<? extends NetInterfaceAddress>) netInterface;
-                        LoopbackInterfaceConfigImpl loopbackInterfaceConfig = null;
-                        loopbackInterfaceConfig = new LoopbackInterfaceConfigImpl(activeLoopInterface);
+                        LoopbackInterfaceConfigImpl loopbackInterfaceConfig = new LoopbackInterfaceConfigImpl(
+                                activeLoopInterface);
                         networkConfiguration.addNetInterfaceConfig(loopbackInterfaceConfig);
                         break;
 
                     case ETHERNET:
                         EthernetInterface<? extends NetInterfaceAddress> activeEthInterface = (EthernetInterface<? extends NetInterfaceAddress>) netInterface;
-                        EthernetInterfaceConfigImpl ethernetInterfaceConfig = null;
-                        ethernetInterfaceConfig = new EthernetInterfaceConfigImpl(activeEthInterface);
+                        EthernetInterfaceConfigImpl ethernetInterfaceConfig = new EthernetInterfaceConfigImpl(
+                                activeEthInterface);
                         networkConfiguration.addNetInterfaceConfig(ethernetInterfaceConfig);
                         break;
 
                     case WIFI:
                         WifiInterfaceImpl<? extends NetInterfaceAddress> activeWifiInterface = (WifiInterfaceImpl<? extends NetInterfaceAddress>) netInterface;
-                        WifiInterfaceConfigImpl wifiInterfaceConfig = null;
-                        wifiInterfaceConfig = new WifiInterfaceConfigImpl(activeWifiInterface);
+                        WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiInterfaceConfigImpl(activeWifiInterface);
                         networkConfiguration.addNetInterfaceConfig(wifiInterfaceConfig);
                         break;
 
                     case MODEM:
                         ModemInterfaceImpl<? extends NetInterfaceAddress> activeModemInterface = (ModemInterfaceImpl<? extends NetInterfaceAddress>) netInterface;
                         addPropertiesInModemInterface(activeModemInterface);
-                        ModemInterfaceConfigImpl modemInterfaceConfig = null;
-                        modemInterfaceConfig = new ModemInterfaceConfigImpl(activeModemInterface);
+                        ModemInterfaceConfigImpl modemInterfaceConfig = new ModemInterfaceConfigImpl(
+                                activeModemInterface);
                         networkConfiguration.addNetInterfaceConfig(modemInterfaceConfig);
                         break;
 
                     case UNKNOWN:
-                        s_logger.debug("Found interface of unknown type in current configuration: {}. Ignoring it.",
+                        logger.debug("Found interface of unknown type in current configuration: {}. Ignoring it.",
                                 interfaceName);
                         break;
 
                     default:
-                        s_logger.debug("Unsupported type: {} - not adding to configuration. Ignoring it.", type);
+                        logger.debug("Unsupported type: {} - not adding to configuration. Ignoring it.", type);
                     }
                 } catch (Exception e) {
-                    s_logger.warn("Error fetching information for network interface: {}", interfaceName, e);
+                    logger.warn("Error fetching information for network interface: {}", interfaceName, e);
                 }
             }
         }
 
         // populate the NetInterfaceConfigs
-        for (NetworkConfigurationVisitor visitor : this.m_readVisitors) {
+        for (NetworkConfigurationVisitor visitor : this.readVisitors) {
             networkConfiguration.accept(visitor);
         }
 
         return networkConfiguration;
     }
 
+    private boolean shouldSkipNetworkConfiguration(String interfaceName) {
+        boolean result = false;
+
+        // ignore mon interface, redpine vlan interface and usb0 for beaglebone
+        if (interfaceName.startsWith("mon.") || interfaceName.startsWith("rpine")
+                || (interfaceName.startsWith("usb0") && "beaglebone".equals(System.getProperty("target.device")))) {
+            result = true;
+        }
+
+        return result;
+    }
+
     private void addPropertiesInModemInterface(ModemInterfaceImpl<? extends NetInterfaceAddress> modemInterface)
             throws KuraException {
         String interfaceName = modemInterface.getName();
-        if (this.m_modemManagerService != null) {
-            String modemPort = this.m_networkService.getModemUsbPort(interfaceName);
+        if (this.modemManagerService != null) {
+            String modemPort = this.networkService.getModemUsbPort(interfaceName);
             if (modemPort == null) {
                 modemPort = interfaceName;
             }
-            CellularModem modem = this.m_modemManagerService.getModemService(modemPort);
+            CellularModem modem = this.modemManagerService.getModemService(modemPort);
             if (modem != null) {
 
                 // set modem properties
@@ -404,10 +397,9 @@ public class NetworkConfigurationServiceImpl
                 // set modem driver
                 UsbModemDevice usbModemDevice = (UsbModemDevice) modemInterface.getUsbDevice();
                 if (usbModemDevice != null) {
-                    List<? extends UsbModemDriver> drivers = null;
-                    drivers = SupportedUsbModemsFactoryInfo.getDeviceDrivers(usbModemDevice.getVendorId(),
-                            usbModemDevice.getProductId());
-                    if (drivers != null && drivers.size() > 0) {
+                    List<? extends UsbModemDriver> drivers = SupportedUsbModemsFactoryInfo
+                            .getDeviceDrivers(usbModemDevice.getVendorId(), usbModemDevice.getProductId());
+                    if (drivers != null && !drivers.isEmpty()) {
                         UsbModemDriver driver = drivers.get(0);
                         modemInterface.setDriver(driver.getName());
                     }
@@ -425,7 +417,7 @@ public class NetworkConfigurationServiceImpl
         tocd.setDescription("Network Configuration Service");
 
         // get the USB network interfaces (if any)
-        List<UsbNetDevice> usbNetDevices = this.m_usbService.getUsbNetDevices();
+        List<UsbNetDevice> usbNetDevices = this.usbService.getUsbNetDevices();
 
         Tad tad = objectFactory.createTad();
         tad.setId("net.interfaces");
@@ -1015,99 +1007,6 @@ public class NetworkConfigurationServiceImpl
                         tad.setDescription(NetworkAdminConfigurationMessages
                                 .getMessage(NetworkAdminConfiguration.CONFIG_WIFI_MASTER_CHANNEL));
                         tocd.addAD(tad);
-
-                        /*
-                         * // ADHOC
-                         * tad = objectFactory.createTad();
-                         * tad.setId((new
-                         * StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.adhoc.ssid")).toString()
-                         * );
-                         * tad.setName((new
-                         * StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.adhoc.ssid")).toString()
-                         * );
-                         * tad.setType(Tscalar.STRING);
-                         * tad.setCardinality(0);
-                         * tad.setRequired(false);
-                         * tad.setDefault("");
-                         * tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.
-                         * CONFIG_WIFI_ADHOC_SSID));
-                         * tocd.addAD(tad);
-                         *
-                         * tad = objectFactory.createTad();
-                         * tad.setId((new
-                         * StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.adhoc.hardwareMode")).
-                         * toString());
-                         * tad.setName((new
-                         * StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.adhoc.hardwareMode")).
-                         * toString());
-                         * tad.setType(Tscalar.STRING);
-                         * tad.setCardinality(0);
-                         * tad.setRequired(false);
-                         * tad.setDefault("");
-                         * tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.
-                         * CONFIG_WIFI_ADHOC_HARDWARE_MODE));
-                         * tocd.addAD(tad);
-                         *
-                         * tad = objectFactory.createTad();
-                         * tad.setId((new
-                         * StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.adhoc.radioMode")).
-                         * toString());
-                         * tad.setName((new
-                         * StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.adhoc.radioMode")).
-                         * toString());
-                         * tad.setType(Tscalar.STRING);
-                         * tad.setCardinality(0);
-                         * tad.setRequired(false);
-                         * tad.setDefault("");
-                         * tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.
-                         * CONFIG_WIFI_ADHOC_HARDWARE_MODE));
-                         * tocd.addAD(tad);
-                         *
-                         * tad = objectFactory.createTad();
-                         * tad.setId((new
-                         * StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.adhoc.securityType")).
-                         * toString());
-                         * tad.setName((new
-                         * StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.adhoc.securityType")).
-                         * toString());
-                         * tad.setType(Tscalar.STRING);
-                         * tad.setCardinality(0);
-                         * tad.setRequired(false);
-                         * tad.setDefault("");
-                         * tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.
-                         * CONFIG_WIFI_ADHOC_SECURITY_TYPE));
-                         * tocd.addAD(tad);
-                         *
-                         * tad = objectFactory.createTad();
-                         * tad.setId((new
-                         * StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.adhoc.passphrase")).
-                         * toString());
-                         * tad.setName((new
-                         * StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.adhoc.passphrase")).
-                         * toString());
-                         * tad.setType(Tscalar.STRING);
-                         * tad.setCardinality(0);
-                         * tad.setRequired(false);
-                         * tad.setDefault("");
-                         * tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.
-                         * CONFIG_WIFI_ADHOC_PASSPHRASE));
-                         * tocd.addAD(tad);
-                         *
-                         * tad = objectFactory.createTad();
-                         * tad.setId((new
-                         * StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.adhoc.channel")).
-                         * toString());
-                         * tad.setName((new
-                         * StringBuffer().append(prefix).append(ifaceName).append(".config.wifi.adhoc.channel")).
-                         * toString());
-                         * tad.setType(Tscalar.STRING);
-                         * tad.setCardinality(0);
-                         * tad.setRequired(false);
-                         * tad.setDefault("");
-                         * tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.
-                         * CONFIG_WIFI_ADHOC_CHANNEL));
-                         * tocd.addAD(tad);
-                         */
                     }
 
                     // TODO - deal with USB devices (READ ONLY)

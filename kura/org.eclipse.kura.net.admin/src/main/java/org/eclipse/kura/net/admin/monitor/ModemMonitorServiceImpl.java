@@ -168,6 +168,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
         stopThread = new AtomicBoolean();
 
+        // must be initialized before trackModem() is called; risk of NPE otherwise
+        this.m_executor = Executors.newSingleThreadExecutor();
+
         // track currently installed modems
         try {
             this.m_networkConfig = this.m_netConfigService.getNetworkConfiguration();
@@ -182,8 +185,25 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
             s_logger.error("Error getting installed modems", e);
         }
 
+        submitMonitorTask();
+
+        this.m_serviceActivated = true;
+        s_logger.debug("ModemMonitor activated and ready to receive events");
+    }
+
+    private Future<?> submitMonitorTask() {
         stopThread.set(false);
-        this.m_executor = Executors.newSingleThreadExecutor();
+
+        // is task already prepared?
+        if (task != null) {
+            return task;
+        }
+
+        // is executor ready?
+        if (this.m_executor == null) {
+            return null;
+        }
+
         task = this.m_executor.submit(new Runnable() {
 
             @Override
@@ -195,16 +215,15 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                         monitorWait();
                     } catch (InterruptedException interruptedException) {
                         Thread.interrupted();
-                        s_logger.debug("modem monitor interrupted - {}", interruptedException);
+                        s_logger.debug("modem monitor interrupted", interruptedException);
                     } catch (Throwable t) {
-                        s_logger.error("activate() :: Exception while monitoring cellular connection {}", t);
+                        s_logger.error("Exception while monitoring cellular connection", t);
                     }
                 }
             }
         });
 
-        this.m_serviceActivated = true;
-        s_logger.debug("ModemMonitor activated and ready to receive events");
+        return task;
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -777,18 +796,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     }
 
     private void trackModem(ModemDevice modemDevice) {
-        Class<? extends CellularModemFactory> modemFactoryClass = null;
-
-        if (modemDevice instanceof UsbModemDevice) {
-            SupportedUsbModemInfo supportedUsbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) modemDevice);
-            UsbModemFactoryInfo usbModemFactoryInfo = SupportedUsbModemsFactoryInfo.getModem(supportedUsbModemInfo);
-            modemFactoryClass = usbModemFactoryInfo.getModemFactoryClass();
-        } else if (modemDevice instanceof SerialModemDevice) {
-            SupportedSerialModemInfo supportedSerialModemInfo = SupportedSerialModemsInfo.getModem();
-            SerialModemFactoryInfo serialModemFactoryInfo = SupportedSerialModemsFactoryInfo
-                    .getModem(supportedSerialModemInfo);
-            modemFactoryClass = serialModemFactoryInfo.getModemFactoryClass();
-        }
+        Class<? extends CellularModemFactory> modemFactoryClass = getModemFactoryClass(modemDevice);
 
         if (modemFactoryClass != null) {
             CellularModemFactory modemFactoryService = null;
@@ -798,7 +806,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                     getInstanceMethod.setAccessible(true);
                     modemFactoryService = (CellularModemFactory) getInstanceMethod.invoke(null, (Object[]) null);
                 } catch (Exception e) {
-                    s_logger.error("Error calling getInstance() method on " + modemFactoryClass.getName() + e);
+                    s_logger.error("Error calling getInstance() method on {}", modemFactoryClass.getName(), e);
                 }
 
                 // if unsuccessful in calling getInstance()
@@ -820,7 +828,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                     s_logger.info("posting ModemReadyEvent on topic {}", ModemReadyEvent.MODEM_EVENT_READY_TOPIC);
                     this.m_eventAdmin.postEvent(new ModemReadyEvent(modemInfoMap));
                 } catch (Exception e) {
-                    s_logger.error("Failed to post the ModemReadyEvent - {}", e);
+                    s_logger.error("Failed to post the ModemReadyEvent", e);
                 }
 
                 String ifaceName = this.m_networkService.getModemPppPort(modemDevice);
@@ -872,27 +880,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                             ((EvdoCellularModem) modem).provision();
                             if (task == null) {
                                 s_logger.info("trackModem() :: Restarting monitor task");
-                                stopThread.set(false);
-                                task = this.m_executor.submit(new Runnable() {
 
-                                    @Override
-                                    public void run() {
-                                        while (!stopThread.get()) {
-                                            Thread.currentThread().setName("ModemMonitor");
-                                            try {
-                                                monitor();
-                                                monitorWait();
-                                            } catch (InterruptedException interruptedException) {
-                                                Thread.interrupted();
-                                                s_logger.debug("modem monitor interrupted - {}", interruptedException);
-                                            } catch (Throwable t) {
-                                                s_logger.error(
-                                                        "trackModem() :: Exception while monitoring cellular connection {}",
-                                                        t);
-                                            }
-                                        }
-                                    }
-                                });
+                                submitMonitorTask();
                             } else {
                                 monitorNotity();
                             }
@@ -909,9 +898,27 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                     }
                 }
             } catch (Exception e) {
-                s_logger.error("trackModem() :: {}", e);
+                s_logger.error("trackModem() :: {}", e.getMessage(), e);
             }
         }
+    }
+
+    protected Class<? extends CellularModemFactory> getModemFactoryClass(ModemDevice modemDevice) {
+        Class<? extends CellularModemFactory> modemFactoryClass = null;
+
+        if (modemDevice instanceof UsbModemDevice) {
+            SupportedUsbModemInfo supportedUsbModemInfo = SupportedUsbModemsInfo.getModem((UsbModemDevice) modemDevice);
+            UsbModemFactoryInfo usbModemFactoryInfo = SupportedUsbModemsFactoryInfo.getModem(supportedUsbModemInfo);
+            modemFactoryClass = usbModemFactoryInfo.getModemFactoryClass();
+        } else if (modemDevice instanceof SerialModemDevice) {
+            SupportedSerialModemInfo supportedSerialModemInfo = SupportedSerialModemsInfo.getModem();
+            SerialModemFactoryInfo serialModemFactoryInfo = SupportedSerialModemsFactoryInfo
+                    .getModem(supportedSerialModemInfo);
+            modemFactoryClass = serialModemFactoryInfo.getModemFactoryClass();
+        }
+
+        return modemFactoryClass;
+
     }
 
     private boolean disableModemGps(CellularModem modem) throws KuraException {

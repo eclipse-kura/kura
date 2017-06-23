@@ -163,21 +163,6 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.deployment.customizer</artifactId>
-									<version>${org.eclipse.kura.deployment.customizer.version}</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.deployment.customizer.upgrade</artifactId>
-									<version>${org.eclipse.kura.deployment.customizer.upgrade.version}</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.kura</groupId>
-									<artifactId>org.eclipse.kura.deployment.update</artifactId>
-									<version>${org.eclipse.kura.deployment.update.version}</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.emulator</artifactId>
 									<version>${org.eclipse.kura.emulator.version}</version>
 								</artifactItem>
@@ -446,9 +431,6 @@
 							  	<move file="target/plugins/org.eclipse.kura.core.log.jar" tofile="target/plugins/org.eclipse.kura.core.log_${org.eclipse.kura.core.log.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.core.net.jar" tofile="target/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.deployment.agent.jar" tofile="target/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"/>
-							    <move file="target/plugins/org.eclipse.kura.deployment.customizer.jar" tofile="target/plugins/org.eclipse.kura.deployment.customizer_${org.eclipse.kura.deployment.customizer.version}.jar"/>
-							    <move file="target/plugins/org.eclipse.kura.deployment.customizer.upgrade.jar" tofile="target/plugins/org.eclipse.kura.deployment.customizer.upgrade_${org.eclipse.kura.deployment.customizer.upgrade.version}.jar"/>
-							    <move file="target/plugins/org.eclipse.kura.deployment.update.jar" tofile="target/plugins/org.eclipse.kura.deployment.update_${org.eclipse.kura.deployment.update.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.linux.clock.jar" tofile="target/plugins/org.eclipse.kura.linux.clock_${org.eclipse.kura.linux.clock.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.linux.command.jar" tofile="target/plugins/org.eclipse.kura.linux.command_${org.eclipse.kura.linux.command.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.linux.net.jar" tofile="target/plugins/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar"/>

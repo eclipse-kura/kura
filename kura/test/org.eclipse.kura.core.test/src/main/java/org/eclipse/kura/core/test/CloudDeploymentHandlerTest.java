@@ -49,11 +49,9 @@ public class CloudDeploymentHandlerTest extends TestCase {
     private static final Logger s_logger = LoggerFactory.getLogger(CloudDeploymentHandlerTest.class);
 
     private static CountDownLatch s_dependencyLatch = new CountDownLatch(2);	// initialize with number of
-	// dependencies
+    // dependencies
     private static CloudCallService s_cloudCallService;
     private static DeploymentAdmin s_deploymentAdmin;
-
-    private static long s_countdown = 30000;
 
     private static final String REMOTE_DP_NAME = "heater";
     private static final String REMOTE_DP_VERSION = "1.0.0";
@@ -83,20 +81,8 @@ public class CloudDeploymentHandlerTest extends TestCase {
     public void setUp() throws DeploymentException {
         // Wait for OSGi dependencies
         try {
-            s_dependencyLatch.await(5, TimeUnit.SECONDS);
-
-            // while (!s_cloudCallService.isConnected() && s_countdown > 0) {
-            // Thread.sleep(1000);
-            // s_countdown -= 1000;
-            // }
-            // if (!s_cloudCallService.isConnected()) {
-            // fail("Timed out waiting for the CloudCallService to connect");
-            // }
-            while (s_countdown > 0) {
-                Thread.sleep(1000);
-                s_countdown -= 1000;
-            }
-            if (s_countdown > 0) {
+            boolean ok = s_dependencyLatch.await(10, TimeUnit.SECONDS);
+            if (!ok) {
                 fail("Dependencies not resolved!");
             }
         } catch (InterruptedException e) {
@@ -105,12 +91,12 @@ public class CloudDeploymentHandlerTest extends TestCase {
 
         DeploymentPackage localDp = s_deploymentAdmin.getDeploymentPackage(LOCAL_BUNDLE_NAME);
         if (localDp != null) {
-        	localDp.uninstall();
+            localDp.uninstall();
         }
-        
+
         DeploymentPackage remoteDp = s_deploymentAdmin.getDeploymentPackage(REMOTE_BUNDLE_NAME);
         if (remoteDp != null) {
-        	remoteDp.uninstall();
+            remoteDp.uninstall();
         }
     }
 
@@ -155,7 +141,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
                 5000);
 
         s_logger.warn("Response code: " + resp.getResponseCode());
-        s_logger.warn("Response message: " + resp.getExceptionMessage());        
+        s_logger.warn("Response message: " + resp.getExceptionMessage());
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
     }
 
@@ -294,7 +280,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
 
         assertTrue(s_cloudCallService.isConnected());
         assertNull(s_deploymentAdmin.getDeploymentPackage(LOCAL_BUNDLE_NAME));
-        
+
         InputStream is = getTestDpUrl().openStream();
         s_deploymentAdmin.installDeploymentPackage(is);
 

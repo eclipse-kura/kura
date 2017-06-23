@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.moka7</groupId>
 	<artifactId>org.moka7</artifactId>
-	<version>1.0.2</version>
+	<version>1.0.2-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
 	<parent>

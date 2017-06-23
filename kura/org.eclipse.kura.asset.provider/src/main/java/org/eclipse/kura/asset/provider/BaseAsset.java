@@ -51,6 +51,7 @@ import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
+import org.eclipse.kura.core.configuration.util.ComponentUtil;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.Driver.ConnectionException;
@@ -297,7 +298,20 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     public synchronized void setDriver(Driver driver) {
         this.driver = driver;
+        if (preparedRead != null) {
+            try {
+                preparedRead.close();
+            } catch (Exception e) {
+                logger.warn(message.errorClosingPreparingRead(), e);
+            }
+            preparedRead = null;
+        }
         if (driver != null) {
+            try {
+                updateExistingProperties(driver);
+            } catch (KuraException e) {
+                logger.warn(message.errorUpdatingAssetConfiguration(), e);
+            }
             List<ChannelRecord> readRecords = getAllReadRecords();
             hasReadChannels = !readRecords.isEmpty();
             tryPrepareRead(readRecords);
@@ -387,6 +401,49 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                     mainOcd.addAD(newAttribute);
                 }
             }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void updateExistingProperties(final Driver driver) throws KuraException {
+        if (driver == null || properties == null || assetConfiguration == null) {
+            return;
+        }
+        final ChannelDescriptor channelDescriptor = driver.getChannelDescriptor();
+        if (channelDescriptor == null) {
+            return;
+        }
+        final Object driverDescriptor = channelDescriptor.getDescriptor();
+        if (!(driverDescriptor instanceof List<?>)) {
+            return;
+        }
+        Map<String, Object> newConfiguration = null;
+        final List<Tad> driverSpecificChannelConfiguration = (List<Tad>) driverDescriptor;
+        final Tocd tempOcd = new Tocd();
+        driverSpecificChannelConfiguration.forEach(tempOcd::addAD);
+        final Map<String, Object> defaultValues = ComponentUtil.getDefaultProperties(tempOcd, this.context);
+        final Map<String, Channel> channels = this.getAssetConfiguration().getAssetChannels();
+        for (Tad tad : driverSpecificChannelConfiguration) {
+            if (!tad.isRequired()) {
+                continue;
+            }
+            final String id = tad.getId();
+            for (final Channel channel : channels.values()) {
+                final Map<String, Object> config = channel.getConfiguration();
+                if (config.get(id) == null) {
+                    if (newConfiguration == null) {
+                        newConfiguration = CollectionUtil.newHashMap();
+                        newConfiguration.putAll(properties);
+                    }
+                    final Object defaultValue = defaultValues.get(id);
+                    newConfiguration.put(channel.getName() + AssetConstants.CHANNEL_PROPERTY_SEPARATOR.value() + id,
+                            defaultValue);
+                }
+            }
+        }
+        if (newConfiguration != null) {
+            this.properties = newConfiguration;
+            retrieveConfigurationsFromProperties(this.properties);
         }
     }
 

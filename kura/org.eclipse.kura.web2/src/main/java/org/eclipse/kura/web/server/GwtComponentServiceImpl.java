@@ -33,7 +33,6 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Icon;
@@ -144,7 +143,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                 if (isReadOnly) {
                     objValue = currentValue;
                 } else {
-                    objValue = getUserDefinedObject(gwtConfigParam, currentValue);
+                    objValue = GwtServerUtil.getUserDefinedObject(gwtConfigParam, currentValue);
                 }
                 properties.put(gwtConfigParam.getId(), objValue);
             }
@@ -159,36 +158,6 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         } catch (KuraException e) {
             KuraExceptionHandler.handle(e);
         }
-    }
-
-    private Object getUserDefinedObject(GwtConfigParameter gwtConfigParam, Object currentObjValue)
-            throws KuraException {
-        Object objValue;
-
-        int cardinality = gwtConfigParam.getCardinality();
-        if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
-            String strValue = gwtConfigParam.getValue();
-
-            if (currentObjValue instanceof Password && PLACEHOLDER.equals(strValue)) {
-                objValue = currentObjValue;
-            } else {
-                objValue = getObjectValue(gwtConfigParam, strValue);
-            }
-        } else {
-            String[] strValues = gwtConfigParam.getValues();
-
-            if (currentObjValue instanceof Password[]) {
-                Password[] currentPasswordValue = (Password[]) currentObjValue;
-                for (int i = 0; i < strValues.length; i++) {
-                    if (PLACEHOLDER.equals(strValues[i])) {
-                        strValues[i] = new String(currentPasswordValue[i].getPassword());
-                    }
-                }
-            }
-
-            objValue = getObjectValue(gwtConfigParam, strValues);
-        }
-        return objValue;
     }
 
     @Override
@@ -344,136 +313,6 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                 return name0.compareTo(name1);
             }
         });
-    }
-
-    private Object getObjectValue(GwtConfigParameter gwtConfigParam, String strValue) {
-        Object objValue = null;
-        GwtConfigParameterType gwtType = gwtConfigParam.getType();
-
-        if (gwtType == GwtConfigParameterType.STRING) {
-            objValue = strValue;
-        } else if (strValue != null && !strValue.trim().isEmpty()) {
-            switch (gwtType) {
-            case LONG:
-                objValue = Long.parseLong(strValue);
-                break;
-            case DOUBLE:
-                objValue = Double.parseDouble(strValue);
-                break;
-            case FLOAT:
-                objValue = Float.parseFloat(strValue);
-                break;
-            case INTEGER:
-                objValue = Integer.parseInt(strValue);
-                break;
-            case SHORT:
-                objValue = Short.parseShort(strValue);
-                break;
-            case BYTE:
-                objValue = Byte.parseByte(strValue);
-                break;
-            case BOOLEAN:
-                objValue = Boolean.parseBoolean(strValue);
-                break;
-            case PASSWORD:
-                objValue = new Password(strValue);
-                break;
-            case CHAR:
-                objValue = Character.valueOf(strValue.charAt(0));
-                break;
-            default:
-                break;
-            }
-        }
-        return objValue;
-    }
-
-    private Object[] getObjectValue(GwtConfigParameter gwtConfigParam, String[] defaultValues) {
-        List<Object> values = new ArrayList<>();
-        GwtConfigParameterType type = gwtConfigParam.getType();
-        switch (type) {
-        case BOOLEAN:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
-                    values.add(Boolean.valueOf(value));
-                }
-            }
-            return values.toArray(new Boolean[] {});
-
-        case BYTE:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
-                    values.add(Byte.valueOf(value));
-                }
-            }
-            return values.toArray(new Byte[] {});
-
-        case CHAR:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
-                    values.add(new Character(value.charAt(0)));
-                }
-            }
-            return values.toArray(new Character[] {});
-
-        case DOUBLE:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
-                    values.add(Double.valueOf(value));
-                }
-            }
-            return values.toArray(new Double[] {});
-
-        case FLOAT:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
-                    values.add(Float.valueOf(value));
-                }
-            }
-            return values.toArray(new Float[] {});
-
-        case INTEGER:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
-                    values.add(Integer.valueOf(value));
-                }
-            }
-            return values.toArray(new Integer[] {});
-
-        case LONG:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
-                    values.add(Long.valueOf(value));
-                }
-            }
-            return values.toArray(new Long[] {});
-
-        case SHORT:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
-                    values.add(Short.valueOf(value));
-                }
-            }
-            return values.toArray(new Short[] {});
-
-        case PASSWORD:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
-                    values.add(new Password(value));
-                }
-            }
-            return values.toArray(new Password[] {});
-
-        case STRING:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
-                    values.add(value);
-                }
-            }
-            return values.toArray(new String[] {});
-        default:
-            return null;
-        }
     }
 
     private String stripPidPrefix(String pid) {
@@ -713,7 +552,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             if (value != null) {
                 if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
                     if (gwtParam.getType().equals(GwtConfigParameterType.PASSWORD)) {
-                        gwtParam.setValue(PLACEHOLDER);
+                        gwtParam.setValue(GwtServerUtil.PASSWORD_PLACEHOLDER);
                     } else {
                         gwtParam.setValue(String.valueOf(value));
                     }
@@ -725,7 +564,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                         for (Object v : objValues) {
                             if (v != null) {
                                 if (gwtParam.getType().equals(GwtConfigParameterType.PASSWORD)) {
-                                    strValues.add(PLACEHOLDER);
+                                    strValues.add(GwtServerUtil.PASSWORD_PLACEHOLDER);
                                 } else {
                                     strValues.add(String.valueOf(v));
                                 }

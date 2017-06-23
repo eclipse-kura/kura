@@ -95,12 +95,15 @@ public final class ValidationInputCell extends AbstractInputCell<String, Validat
 
     /** {@inheritDoc} */
     @Override
-    public void render(final Context context, final String value, final SafeHtmlBuilder shb) {
+    public void render(final Context context, String value, final SafeHtmlBuilder shb) {
         final Object key = context.getKey();
         ValidationData validationViewData = this.getViewData(key);
         if ((validationViewData != null) && validationViewData.getValue().equals(value)) {
             this.clearViewData(key);
             validationViewData = null;
+        }
+        if (value == null) {
+            value = "";
         }
         final String processingValue = (validationViewData == null) ? null : validationViewData.getValue();
         final boolean invalid = (validationViewData == null) ? false : validationViewData.isInvalid();

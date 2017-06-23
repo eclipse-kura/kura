@@ -1248,13 +1248,15 @@ public class NetworkConfiguration {
 
     private static Password getPassword(String prefix, Map<String, Object> properties) throws KuraException {
         Password password = null;
-        Object psswdObj = properties.get(prefix + "password");
+        String key = prefix + "password";
+        Object psswdObj = properties.get(key);
         if (psswdObj instanceof Password) {
             password = (Password) psswdObj;
         } else if (psswdObj instanceof String) {
             password = new Password((String) psswdObj);
         } else {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, "Invalid password type.");
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, "Invalid password type.", key,
+                    psswdObj != null ? psswdObj.getClass() : null);
         }
         return password;
     }

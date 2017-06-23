@@ -114,14 +114,13 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
                             if (tmpDhcpConfigFile.renameTo(dhcpConfigFile)) {
                                 logger.trace("Successfully wrote DHCP config file");
                             } else {
-                                logger.error("Failed to write DHCP config file for " + interfaceName);
+                                logger.error("Failed to write DHCP config file for {}", interfaceName);
                                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                                         "error while building up new configuration files for dhcp server: "
                                                 + interfaceName);
                             }
                         } else {
-                            logger.info("Not rewriting DHCP config file for " + interfaceName
-                                    + " because it is the same");
+                            logger.info("Not rewriting DHCP config file for {} because it is the same", interfaceName);
                         }
                     } catch (IOException e) {
                         throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
@@ -189,7 +188,7 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
         } else if (netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
             netInterfaceAddressConfigs = ((WifiInterfaceConfigImpl) netInterfaceConfig).getNetInterfaceAddresses();
         } else {
-            logger.error("not adding config for " + netInterfaceConfig.getName());
+            logger.error("not adding config for {}", netInterfaceConfig.getName());
         }
 
         if (netInterfaceAddressConfigs != null && !netInterfaceAddressConfigs.isEmpty()) {

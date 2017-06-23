@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net.util;
 
 public class SignalStrengthConversion {
@@ -9,12 +20,16 @@ public class SignalStrengthConversion {
             -33, -32, -30, -29, -28, -27, -25, -24, -23, -22, -20, -19, -18, -17, -16, -15, -14, -13, -12, -10, -10,
             -10, -10, -10, -10, -10 };
 
+    private SignalStrengthConversion() {
+    }
+
     public static int getRssi(int percents) {
-        if (percents < 0) {
-            percents = 0;
-        } else if (percents > 100) {
-            percents = 100;
+        int pcents = percents;
+        if (pcents < 0) {
+            pcents = 0;
+        } else if (pcents > 100) {
+            pcents = 100;
         }
-        return s_lookup[percents];
+        return s_lookup[pcents];
     }
 }

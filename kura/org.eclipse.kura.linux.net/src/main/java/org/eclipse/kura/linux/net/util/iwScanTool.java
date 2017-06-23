@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -33,60 +33,58 @@ import org.slf4j.LoggerFactory;
 
 public class iwScanTool extends ScanTool implements IScanTool {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(iwScanTool.class);
+    private static final Logger logger = LoggerFactory.getLogger(iwScanTool.class);
     private static final String SCAN_THREAD_NAME = "iwScanThread";
+    private static final String FAILED_EXECUTE_SCAN_CMD_MSG = "failed to execute scan command ";
     private static final Object s_lock = new Object();
-    private String m_ifaceName;
-    private ExecutorService m_executor;
-    private static Future<?> m_task;
-
-    private int m_timeout;
+    private String ifaceName;
+    private int timeout;
 
     // FIXME:MC Is this process always closed?
-    private SafeProcess m_process;
-    private boolean m_status;
-    private String m_errmsg;
+    private SafeProcess process;
+    private boolean status;
+    private String errmsg;
 
     protected iwScanTool() {
-        this.m_timeout = 20;
+        this.timeout = 20;
     }
 
     protected iwScanTool(String ifaceName) {
         this();
-        this.m_ifaceName = ifaceName;
-        this.m_errmsg = "";
-        this.m_status = false;
+        this.ifaceName = ifaceName;
+        this.errmsg = "";
+        this.status = false;
     }
 
     protected iwScanTool(String ifaceName, int tout) {
         this(ifaceName);
-        this.m_timeout = tout;
+        this.timeout = tout;
     }
 
     @Override
     public List<WifiAccessPoint> scan() throws KuraException {
 
-        List<WifiAccessPoint> wifiAccessPoints = new ArrayList<WifiAccessPoint>();
+        List<WifiAccessPoint> wifiAccessPoints = new ArrayList<>();
         synchronized (s_lock) {
             StringBuilder sb = new StringBuilder();
 
             SafeProcess prIpLink = null;
             SafeProcess prIpAddr = null;
             try {
-                if (!LinuxNetworkUtil.hasAddress(this.m_ifaceName)) {
+                if (!LinuxNetworkUtil.hasAddress(this.ifaceName)) {
                     // activate the interface
-                    sb.append("ip link set ").append(this.m_ifaceName).append(" up");
+                    sb.append("ip link set ").append(this.ifaceName).append(" up");
                     prIpLink = ProcessUtil.exec(sb.toString());
                     prIpLink.waitFor();
 
                     // remove the previous ip address (needed on mgw)
                     sb = new StringBuilder();
-                    sb.append("ip addr flush dev ").append(this.m_ifaceName);
+                    sb.append("ip addr flush dev ").append(this.ifaceName);
                     prIpAddr = ProcessUtil.exec(sb.toString());
                     prIpAddr.waitFor();
                 }
             } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
             } finally {
                 if (prIpLink != null) {
                     ProcessUtil.destroy(prIpLink);
@@ -98,53 +96,53 @@ public class iwScanTool extends ScanTool implements IScanTool {
 
             long timerStart = System.currentTimeMillis();
 
-            this.m_executor = Executors.newSingleThreadExecutor();
-            m_task = this.m_executor.submit(new Runnable() {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Future<?> task = executor.submit(new Runnable() {
 
                 @Override
                 public void run() {
                     Thread.currentThread().setName(SCAN_THREAD_NAME);
                     int stat = -1;
-                    iwScanTool.this.m_process = null;
+                    iwScanTool.this.process = null;
                     StringBuilder sb = new StringBuilder();
-                    sb.append("iw dev ").append(iwScanTool.this.m_ifaceName).append(" scan");
-                    s_logger.info("scan() :: executing: {}", sb.toString());
-                    iwScanTool.this.m_status = false;
+                    sb.append("iw dev ").append(iwScanTool.this.ifaceName).append(" scan");
+                    logger.info("scan() :: executing: {}", sb.toString());
+                    iwScanTool.this.status = false;
                     try {
-                        iwScanTool.this.m_process = ProcessUtil.exec(sb.toString());
-                        stat = iwScanTool.this.m_process.waitFor();
-                        s_logger.info("scan() :: {} command returns status={}", sb.toString(), stat);
+                        iwScanTool.this.process = ProcessUtil.exec(sb.toString());
+                        stat = iwScanTool.this.process.waitFor();
+                        logger.info("scan() :: {} command returns status={}", sb.toString(), stat);
                         if (stat == 0) {
-                            iwScanTool.this.m_status = true;
+                            iwScanTool.this.status = true;
                         } else {
-                            s_logger.error("scan() :: failed to execute {} error code is {}", sb.toString(), stat);
-                            s_logger.error("scan() :: STDERR: " + LinuxProcessUtil
-                                    .getInputStreamAsString(iwScanTool.this.m_process.getErrorStream()));
+                            logger.error("scan() :: failed to execute {} error code is {}", sb.toString(), stat);
+                            logger.error("scan() :: STDERR: {}",
+                                    LinuxProcessUtil.getInputStreamAsString(iwScanTool.this.process.getErrorStream()));
                         }
                     } catch (Exception e) {
-                        iwScanTool.this.m_errmsg = "exception executing scan command";
-                        e.printStackTrace();
+                        iwScanTool.this.errmsg = "exception executing scan command";
+                        logger.error(FAILED_EXECUTE_SCAN_CMD_MSG, e);
                     }
                 }
             });
 
-            while (!m_task.isDone()) {
-                if (System.currentTimeMillis() > timerStart + this.m_timeout * 1000) {
-                    s_logger.warn("scan() :: scan timeout");
+            while (!task.isDone()) {
+                if (System.currentTimeMillis() > timerStart + this.timeout * 1000) {
+                    logger.warn("scan() :: scan timeout");
                     sb = new StringBuilder();
-                    sb.append("iw dev ").append(this.m_ifaceName).append(" scan");
+                    sb.append("iw dev ").append(this.ifaceName).append(" scan");
                     try {
                         int pid = LinuxProcessUtil.getPid(sb.toString());
                         if (pid >= 0) {
-                            s_logger.warn("scan() :: scan timeout :: killing pid {}", pid);
+                            logger.warn("scan() :: scan timeout :: killing pid {}", pid);
                             LinuxProcessUtil.kill(pid);
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        logger.error(FAILED_EXECUTE_SCAN_CMD_MSG, e);
                     }
-                    m_task.cancel(true);
-                    m_task = null;
-                    this.m_errmsg = "timeout executing scan command";
+                    task.cancel(true);
+                    task = null;
+                    this.errmsg = "timeout executing scan command";
                     break;
                 }
                 try {
@@ -153,51 +151,49 @@ public class iwScanTool extends ScanTool implements IScanTool {
                 }
             }
 
-            if (this.m_status == false || this.m_process == null) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, this.m_errmsg);
+            if (!this.status || this.process == null) {
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, this.errmsg);
             }
 
-            s_logger.info("scan() :: the 'iw scan' command executed successfully, parsing output ...");
+            logger.info("scan() :: the 'iw scan' command executed successfully, parsing output ...");
             try {
                 wifiAccessPoints = parse();
             } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "error parsing scan results");
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, "error parsing scan results");
             } finally {
-                s_logger.info("scan() :: destroing scan proccess ...");
-                if (this.m_process != null) {
-                    ProcessUtil.destroy(this.m_process);
+                logger.info("scan() :: destroing scan proccess ...");
+                if (this.process != null) {
+                    ProcessUtil.destroy(this.process);
                 }
-                this.m_process = null;
+                this.process = null;
 
-                s_logger.info("scan() :: Terminating {} ...", SCAN_THREAD_NAME);
-                this.m_executor.shutdownNow();
+                logger.info("scan() :: Terminating {} ...", SCAN_THREAD_NAME);
+                executor.shutdownNow();
                 try {
-                    this.m_executor.awaitTermination(2, TimeUnit.SECONDS);
+                    executor.awaitTermination(2, TimeUnit.SECONDS);
                 } catch (InterruptedException e) {
-                    s_logger.warn("Interrupted", e);
+                    logger.warn("Interrupted", e);
                 }
-                s_logger.info("scan() :: 'iw scan' thread terminated? - {}", this.m_executor.isTerminated());
-                this.m_executor = null;
+                logger.info("scan() :: 'iw scan' thread terminated? - {}", executor.isTerminated());
+                executor = null;
             }
         }
 
         return wifiAccessPoints;
     }
 
-    private List<WifiAccessPoint> parse() throws Exception {
-
-        List<IWAPParser> apInfos = new ArrayList<IWAPParser>();
+    private List<WifiAccessPoint> parse() throws KuraException {
+        List<IWAPParser> apInfos = new ArrayList<>();
         IWAPParser currentAP = null;
-
-        BufferedReader br = new BufferedReader(new InputStreamReader(this.m_process.getInputStream()));
-        try {
+        try (InputStreamReader isr = new InputStreamReader(this.process.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
             String line = null;
             while ((line = br.readLine()) != null) {
 
                 if (line.startsWith("scan aborted!")) {
                     br.close();
-                    s_logger.warn("parse() :: scan operation was aborted");
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "iw scan operation was aborted");
+                    logger.warn("parse() :: scan operation was aborted");
+                    throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, "iw scan operation was aborted");
                 }
 
                 if (line.startsWith("BSS")) {
@@ -225,17 +221,17 @@ public class iwScanTool extends ScanTool implements IScanTool {
                             currentAP.parsePropLine(propLine);
                         } catch (Exception e) {
                             currentAP = null;
-                            s_logger.error("Failed to parse line: {}; giving up on the current AP", propLine, e);
+                            logger.error("Failed to parse line: {}; giving up on the current AP", propLine, e);
                         }
                     }
                 }
             }
-        } finally {
-            br.close();
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
         }
 
         // Generate list of WifiAccessPoint objects
-        List<WifiAccessPoint> wifiAccessPoints = new ArrayList<WifiAccessPoint>();
+        List<WifiAccessPoint> wifiAccessPoints = new ArrayList<>();
         for (IWAPParser info : apInfos) {
             wifiAccessPoints.add(info.toWifiAccessPoint());
         }

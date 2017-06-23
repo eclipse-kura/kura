@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 public class WpaSupplicantStatus {
 
-    private static Logger s_logger = LoggerFactory.getLogger(WpaSupplicantStatus.class);
+    private static Logger logger = LoggerFactory.getLogger(WpaSupplicantStatus.class);
 
     private static final String PROP_MODE = "mode";
     private static final String PROP_BSSID = "bssid";
@@ -35,29 +35,29 @@ public class WpaSupplicantStatus {
     private static final String PROP_IP_ADDRESS = "ip_address";
     private static final String PROP_ADDRESS = "address";
 
-    private Properties m_props = null;
+    private Properties props = null;
 
     public WpaSupplicantStatus(String iface) throws KuraException {
 
-        this.m_props = new Properties();
+        this.props = new Properties();
         SafeProcess proc = null;
         try {
             proc = ProcessUtil.exec(formSupplicantStatusCommand(iface));
             if (proc.waitFor() != 0) {
-                s_logger.error("error executing command --- {} --- exit value = {}", formSupplicantStatusCommand(iface),
+                logger.error("error executing command --- {} --- exit value = {}", formSupplicantStatusCommand(iface),
                         proc.exitValue());
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR);
             }
 
-            this.m_props.load(proc.getInputStream());
+            this.props.load(proc.getInputStream());
 
-            Enumeration<Object> keys = this.m_props.keys();
+            Enumeration<Object> keys = this.props.keys();
             while (keys.hasMoreElements()) {
                 String key = (String) keys.nextElement();
-                s_logger.trace("[WpaSupplicant Status] {} = {}", key, this.m_props.getProperty(key));
+                logger.trace("[WpaSupplicant Status] {} = {}", key, this.props.getProperty(key));
             }
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, e);
         } finally {
             if (proc != null) {
                 ProcessUtil.destroy(proc);
@@ -66,39 +66,39 @@ public class WpaSupplicantStatus {
     }
 
     public String getMode() {
-        return this.m_props.getProperty(PROP_MODE);
+        return this.props.getProperty(PROP_MODE);
     }
 
     public String getBssid() {
-        return this.m_props.getProperty(PROP_BSSID);
+        return this.props.getProperty(PROP_BSSID);
     }
 
     public String getSsid() {
-        return this.m_props.getProperty(PROP_SSID);
+        return this.props.getProperty(PROP_SSID);
     }
 
     public String getPairwiseCipher() {
-        return this.m_props.getProperty(PROP_PAIRWISE_CIPHER);
+        return this.props.getProperty(PROP_PAIRWISE_CIPHER);
     }
 
     public String getGroupCipher() {
-        return this.m_props.getProperty(PROP_GROUP_CIPHER);
+        return this.props.getProperty(PROP_GROUP_CIPHER);
     }
 
     public String getKeyMgmt() {
-        return this.m_props.getProperty(PROP_KEY_MGMT);
+        return this.props.getProperty(PROP_KEY_MGMT);
     }
 
     public String getWpaState() {
-        return this.m_props.getProperty(PROP_WPA_STATE);
+        return this.props.getProperty(PROP_WPA_STATE);
     }
 
     public String getIpAddress() {
-        return this.m_props.getProperty(PROP_IP_ADDRESS);
+        return this.props.getProperty(PROP_IP_ADDRESS);
     }
 
     public String getAddress() {
-        return this.m_props.getProperty(PROP_ADDRESS);
+        return this.props.getProperty(PROP_ADDRESS);
     }
 
     private static String formSupplicantStatusCommand(String iface) {

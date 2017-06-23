@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
+
 package org.eclipse.kura.linux.net.util;
 
 import java.util.ArrayList;
@@ -43,11 +55,11 @@ class IWAPParser {
         wifiAccessPoint.setFrequency(this.frequency);
         wifiAccessPoint.setHardwareAddress(this.hardwareAddress);
         wifiAccessPoint.setMode(WifiMode.MASTER);				// FIME - is this right? - always MASTER - or maybe
-				// AD-HOC too?
+        // AD-HOC too?
         wifiAccessPoint.setRsnSecurity(this.rsn.getWifiSecurityFlags());
         wifiAccessPoint.setStrength(this.strength);
         wifiAccessPoint.setWpaSecurity(this.wpa.getWifiSecurityFlags());
-        if (this.capabilities != null && this.capabilities.size() > 0) {
+        if (this.capabilities != null && !this.capabilities.isEmpty()) {
             wifiAccessPoint.setCapabilities(this.capabilities);
         }
         return wifiAccessPoint;
@@ -88,7 +100,7 @@ class IWAPParser {
         } else if (propLine.startsWith("Supported rates: ")) {
             // Supported rates: 1.0* 2.0* 5.5* 11.0* 18.0 24.0 36.0 54.0
             if (this.bitrate == null) {
-                this.bitrate = new ArrayList<Long>();
+                this.bitrate = new ArrayList<>();
             }
             String[] rateStrings = propLine.replaceFirst("Supported rates: ", "").replaceAll("\\*", "").trim()
                     .split(" ");
@@ -99,7 +111,7 @@ class IWAPParser {
         } else if (propLine.startsWith("Extended supported rates: ")) {
             // Extended supported rates: 6.0 9.0 12.0 48.0
             if (this.bitrate == null) {
-                this.bitrate = new ArrayList<Long>();
+                this.bitrate = new ArrayList<>();
             }
 
             String[] rateStrings = propLine.replaceFirst("Extended supported rates: ", "").replaceAll("\\*", "").trim()
@@ -122,7 +134,7 @@ class IWAPParser {
                 this.strength = Math.abs((int) Float.parseFloat(strengthRaw));
             }
         } else if (propLine.startsWith("capability:")) {
-            this.capabilities = new ArrayList<String>();
+            this.capabilities = new ArrayList<>();
             String newLine = propLine.substring("capability:".length()).trim();
             StringTokenizer st = new StringTokenizer(newLine, " ");
             while (st.hasMoreTokens()) {

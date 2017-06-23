@@ -15,6 +15,7 @@
 		<module>com.codeminders.hidapi-parent</module>
 		<module>org.usb4java</module>
 		<module>usb4java-javax</module>
+		<module>org.moka7</module>
 		<module>org.eclipse.soda.dk.comm-parent</module>
 		<!--<module>org.eclipse.kura.windows.system</module>
 		<module>org.eclipse.kura.windows.service</module>
@@ -105,7 +106,7 @@
                 </executions>
             </plugin>
         </plugins>
-        
+
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -244,9 +245,9 @@
                 </plugin>
 			</plugins>
 		</pluginManagement>
-		
+
 	</build>
-	
+
 	<distributionManagement>
 		<repository>
 			<id>repo.eclipse.org</id>

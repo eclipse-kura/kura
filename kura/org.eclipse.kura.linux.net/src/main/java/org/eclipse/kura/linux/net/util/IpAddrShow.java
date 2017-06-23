@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
+
 package org.eclipse.kura.linux.net.util;
 
 import java.io.BufferedReader;
@@ -6,7 +18,6 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -20,16 +31,16 @@ public class IpAddrShow {
 
     private static final Logger s_logger = LoggerFactory.getLogger(IpAddrShow.class);
 
-    private String m_ifname;
-    private final ArrayList<LinuxIfconfig> m_configs = new ArrayList<LinuxIfconfig>();
+    private String ifaceName;
+    private final ArrayList<LinuxIfconfig> configs = new ArrayList<>();
 
     public IpAddrShow() {
         super();
     }
 
-    public IpAddrShow(String m_interfaceName) {
+    public IpAddrShow(String interfaceName) {
         super();
-        this.m_ifname = m_interfaceName;
+        this.ifaceName = interfaceName;
     }
 
     // ifconfig sucks. ip sucks too but at least the output is consistent.
@@ -41,13 +52,13 @@ public class IpAddrShow {
     public LinuxIfconfig[] exec() throws KuraException {
         execLink();
         execInet();
-        return this.m_configs.toArray(new LinuxIfconfig[0]);
+        return this.configs.toArray(new LinuxIfconfig[0]);
     }
 
     private void execLink() throws KuraException {
         StringBuilder sb = new StringBuilder("ip -o link show");
-        if (this.m_ifname != null) {
-            sb.append(" dev ").append(this.m_ifname);
+        if (this.ifaceName != null) {
+            sb.append(" dev ").append(this.ifaceName);
         }
         SafeProcess proc = null;
         BufferedReader br = null;
@@ -89,7 +100,7 @@ public class IpAddrShow {
                 String smtu = findValue(line, "mtu", " ");
                 s_logger.debug("mtu: '{}'", smtu);
                 if (smtu != null) {
-                    int mtu = Integer.valueOf(smtu);
+                    int mtu = Integer.parseInt(smtu);
                     config.setMtu(mtu);
                 }
 
@@ -120,7 +131,7 @@ public class IpAddrShow {
                 s_logger.debug("hwaddr: '{}'", hwaddr);
                 config.setMacAddress(hwaddr); // can be null
 
-                this.m_configs.add(config);
+                this.configs.add(config);
             }
         } catch (KuraException e) {
             throw e;
@@ -142,8 +153,8 @@ public class IpAddrShow {
 
     private void execInet() throws KuraException {
         StringBuilder sb = new StringBuilder("ip -o -4 addr show");
-        if (this.m_ifname != null) {
-            sb.append(" dev ").append(this.m_ifname);
+        if (this.ifaceName != null) {
+            sb.append(" dev ").append(this.ifaceName);
         }
         SafeProcess proc = null;
         BufferedReader br = null;
@@ -176,7 +187,7 @@ public class IpAddrShow {
                 }
 
                 LinuxIfconfig config = null;
-                for (LinuxIfconfig conf : this.m_configs) {
+                for (LinuxIfconfig conf : this.configs) {
                     if (conf.getName().equals(ifname)) {
                         config = conf;
                         break;
@@ -265,11 +276,11 @@ public class IpAddrShow {
     private String[] findFlags(String input) {
         int start = input.indexOf('<');
         if (start < 0) {
-            return null;
+            return new String[0];
         }
         int end = input.indexOf('>', start + 1);
         if (end < 0) {
-            return null;
+            return new String[0];
         }
         String flags = input.substring(start + 1, end).trim();
         return flags.split(",");
@@ -278,7 +289,7 @@ public class IpAddrShow {
     private boolean isMulticast(String[] flags) {
         boolean multicast = false;
         for (String flag : flags) {
-            if (flag.equals("MULTICAST")) {
+            if ("MULTICAST".equals(flag)) {
                 multicast = true;
                 break;
             }
@@ -289,7 +300,7 @@ public class IpAddrShow {
     private boolean isUp(String[] flags) {
         boolean up = false;
         for (String flag : flags) {
-            if (flag.equals("UP")) {
+            if ("UP".equals(flag)) {
                 up = true;
                 break;
             }
@@ -306,16 +317,5 @@ public class IpAddrShow {
 
         InetAddress netAddr = InetAddress.getByAddress(bytes);
         return netAddr.toString().substring(1); // strip the leading '/'
-    }
-
-    public static void main(String args[]) {
-        IpAddrShow ipAddrShow = new IpAddrShow();
-        try {
-            LinuxIfconfig[] ifconfigs = ipAddrShow.exec();
-            System.out.println(Arrays.toString(ifconfigs));
-        } catch (KuraException e) {
-            s_logger.warn("Failed", e);
-            System.out.println("Failed: " + e.getMessage());
-        }
     }
 }

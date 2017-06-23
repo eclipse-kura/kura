@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -45,17 +45,35 @@ public class LinuxNetworkUtil {
     private static final String OS_VERSION = System.getProperty("kura.os.version");
     private static final String TARGET_NAME = System.getProperty("target.device");
 
-    private static Map<String, LinuxIfconfig> s_ifconfigs = new HashMap<String, LinuxIfconfig>();
+    private static Map<String, LinuxIfconfig> ifconfigs = new HashMap<>();
 
     private static final String[] s_ignoreIfaces = { "can", "sit", "mon.wlan" };
 
-    private static final ArrayList<String> s_tools = new ArrayList<String>();
+    private static final ArrayList<String> s_tools = new ArrayList<>();
+
+    private static final String PPP_IFACE_REGEX = "^ppp\\d+$";
+    private static final String MODEM = "MODEM";
+    private static final String ETHERNET = "ETHERNET";
+    private static final String LINK_ENCAP = "Link encap:";
+    private static final String NAME = "name";
+    private static final String VERSION = "version";
+    private static final String FIRMWARE = "firmware";
+    private static final String UNKNOWN = "unknown";
+    private static final String IW = "iw";
+    private static final String IWCONFIG = "iwconfig";
+    private static final String EXECUTING_CMD_MSG = "Executing '{}'";
+    private static final String LINE_MSG = "line: {}";
+
+    private static final String ERR_EXECUTING_CMD_MSG = "error executing command --- {} --- exit value={}";
+
+    private LinuxNetworkUtil() {
+    }
 
     public static List<String> getAllInterfaceNames() throws KuraException {
         try {
             IpAddrShow ipAddrShow = new IpAddrShow();
             LinuxIfconfig[] configs = ipAddrShow.exec();
-            List<String> ifaces = new ArrayList<String>();
+            List<String> ifaces = new ArrayList<>();
             for (LinuxIfconfig config : configs) {
                 ifaces.add(config.getName());
             }
@@ -69,46 +87,43 @@ public class LinuxNetworkUtil {
     @Deprecated
     private static List<String> getAllInterfaceNamesInternal() throws KuraException {
         SafeProcess proc = null;
-        BufferedReader br = null;
+        String cmd = "ifconfig -a";
         try {
-            List<String> ifaces = new ArrayList<String>();
-
             // start the process
-            proc = ProcessUtil.exec("ifconfig -a");
+            proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() != 0) {
-                s_logger.error("error executing command --- ifconfig -a --- exit value = " + proc.exitValue());
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+                s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
             }
-
             // get the output
-            br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            String line = null;
-
-            while ((line = br.readLine()) != null) {
-                if (line.indexOf("Link encap:") > -1) {
-                    StringTokenizer st = new StringTokenizer(line);
-                    ifaces.add(st.nextToken());
-                }
-            }
-
-            return ifaces;
-        } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            return getAllInterfaceNamesInternalParse(cmd, proc);
         } catch (InterruptedException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
-
             if (proc != null) {
                 ProcessUtil.destroy(proc);
             }
         }
+    }
+
+    @Deprecated
+    private static List<String> getAllInterfaceNamesInternalParse(String cmd, SafeProcess proc) throws KuraException {
+        List<String> ifaces = new ArrayList<>();
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                if (line.indexOf(LINK_ENCAP) > -1) {
+                    StringTokenizer st = new StringTokenizer(line);
+                    ifaces.add(st.nextToken());
+                }
+            }
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
+        }
+        return ifaces;
     }
 
     /*
@@ -131,50 +146,47 @@ public class LinuxNetworkUtil {
         if (Character.isDigit(ifaceName.charAt(0))) {
             return null;
         }
-
         String ipAddress = null;
         SafeProcess proc = null;
-        BufferedReader br = null;
+        String cmd = formIfconfigIfaceCommand(ifaceName);
         try {
             // start the process
-            proc = ProcessUtil.exec("ifconfig " + ifaceName);
+            proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() != 0) {
-                s_logger.warn("getCurrentIpAddress() :: error executing command --- ifconfig {} --- exit value = {}",
-                        ifaceName, proc.exitValue());
+                s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
                 return ipAddress;
             }
-
             // get the output
-            br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            String line = null;
+            ipAddress = getCurrentIpAddressInternalParse(ifaceName, cmd, proc);
+        } catch (InterruptedException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
+        } finally {
+            if (proc != null) {
+                ProcessUtil.destroy(proc);
+            }
+        }
+        return ipAddress;
+    }
 
+    @Deprecated
+    private static String getCurrentIpAddressInternalParse(String ifaceName, String cmd, SafeProcess proc)
+            throws KuraException {
+        String ipAddress = null;
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            String line = null;
             while ((line = br.readLine()) != null) {
-                if (line.indexOf(ifaceName) > -1) {
-                    if ((line = br.readLine()) != null) {
-                        int i = line.indexOf("inet addr:");
-                        if (i > -1) {
-                            ipAddress = line.substring(i + 10, line.indexOf(' ', i + 10));
-                        }
-                    }
+                int i = -1;
+                if ((line.indexOf(ifaceName) > -1) && ((line = br.readLine()) != null)
+                        && ((i = line.indexOf("inet addr:")) > -1)) {
+                    ipAddress = line.substring(i + 10, line.indexOf(' ', i + 10));
                     break;
                 }
             }
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        } catch (InterruptedException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
-
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         }
         return ipAddress;
     }
@@ -201,44 +213,41 @@ public class LinuxNetworkUtil {
         }
 
         int mtu = -1;
-        String stringMtu = null;
         SafeProcess proc = null;
-        BufferedReader br = null;
+        String cmd = formIfconfigIfaceCommand(ifaceName);
         try {
             // start the process
-            proc = ProcessUtil.exec("ifconfig " + ifaceName);
+            proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() != 0) {
-                s_logger.warn("getCurrentMtu() :: error executing command --- ifconfig {} --- exit value = {}",
-                        ifaceName, proc.exitValue());
+                s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
                 return mtu;
             }
-
             // get the output
-            br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            String line = null;
-            while ((line = br.readLine()) != null) {
-                if (line.indexOf("MTU:") > -1) {
-                    stringMtu = line.substring(line.indexOf("MTU:") + 4, line.indexOf("Metric:") - 2);
-                    break;
-                }
-            }
-
-            mtu = Integer.parseInt(stringMtu);
-
+            mtu = Integer.parseInt(getCurrentMtuInternalParse(cmd, proc));
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
-
             if (proc != null) {
                 ProcessUtil.destroy(proc);
             }
+        }
+        return mtu;
+    }
+
+    @Deprecated
+    private static String getCurrentMtuInternalParse(String cmd, SafeProcess proc) throws KuraException {
+        String mtu = null;
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                if (line.indexOf("MTU:") > -1) {
+                    mtu = line.substring(line.indexOf("MTU:") + 4, line.indexOf("Metric:") - 2);
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         }
         return mtu;
     }
@@ -281,7 +290,7 @@ public class LinuxNetworkUtil {
             if (ifaceType == NetInterfaceType.WIFI) {
                 Collection<String> supportedWifiOptions = WifiOptions.getSupportedOptions(ifaceName);
                 LinkTool linkTool = null;
-                if (supportedWifiOptions != null && supportedWifiOptions.size() > 0) {
+                if (!supportedWifiOptions.isEmpty()) {
                     if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_NL80211)) {
                         linkTool = new IwLinkTool(ifaceName);
                     } else if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_WEXT)) {
@@ -292,9 +301,7 @@ public class LinuxNetworkUtil {
                 if (linkTool != null && linkTool.get()) {
                     return linkTool.isLinkDetected();
                 } else {
-                    // throw new KuraException(Kura`ErrorCode.INTERNAL_ERROR, "link tool failed to detect the status of
-                    // " + ifaceName);
-                    s_logger.error("link tool failed to detect the status of " + ifaceName);
+                    s_logger.error("link tool failed to detect the status of {}", ifaceName);
                     return false;
                 }
             } else if (ifaceType == NetInterfaceType.ETHERNET) {
@@ -310,7 +317,7 @@ public class LinuxNetworkUtil {
                         return linkTool.isLinkDetected();
                     } else {
                         if (TARGET_NAME.equals(KuraConstants.ReliaGATE_15_10.getTargetName())) {
-                            SafeProcess proc = ProcessUtil.exec("ifconfig " + ifaceName + " up");
+                            SafeProcess proc = ProcessUtil.exec(formIfconfigIfaceUpCommand(ifaceName));
                             if (proc.waitFor() == 0 && linkTool.get()) {
                                 return linkTool.isLinkDetected();
                             }
@@ -358,31 +365,48 @@ public class LinuxNetworkUtil {
         if (Character.isDigit(interfaceName.charAt(0))) {
             return false;
         }
-        BufferedReader br = null;
-        try {
-            File interfaceFile = new File("/etc/sysconfig/network-scripts/ifcfg-" + interfaceName);
-            if (interfaceFile.exists()) {
-                br = new BufferedReader(new FileReader(interfaceFile));
-                if (br != null) {
-                    String line = null;
-                    while ((line = br.readLine()) != null) {
-                        if (line.contains("ONBOOT=yes")) {
-                            return true;
-                        }
-                    }
+
+        File interfaceFile = new File("/etc/sysconfig/network-scripts/ifcfg-" + interfaceName);
+        if (interfaceFile.exists()) {
+            return isAutoConnectRedhat(interfaceFile);
+        }
+
+        interfaceFile = new File("/etc/network/interfaces");
+        if (interfaceFile.exists()) {
+            return isAutoConnectDebian(interfaceName, interfaceFile);
+        }
+        return false;
+    }
+
+    private static boolean isAutoConnectRedhat(File interfaceFile) throws KuraException {
+        try (FileReader fr = new FileReader(interfaceFile); BufferedReader br = new BufferedReader(fr)) {
+            String line = null;
+            boolean ret = false;
+            while ((line = br.readLine()) != null) {
+                if (line.contains("ONBOOT=yes")) {
+                    ret = true;
+                    break;
                 }
             }
-            return false;
+            return ret;
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
+        }
+    }
+
+    private static boolean isAutoConnectDebian(String ifaceName, File interfaceFile) throws KuraException {
+        try (FileReader fr = new FileReader(interfaceFile); BufferedReader br = new BufferedReader(fr)) {
+            String line = null;
+            boolean ret = false;
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith("auto") && line.endsWith(ifaceName)) {
+                    ret = true;
+                    break;
                 }
             }
+            return ret;
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
     }
 
@@ -402,7 +426,7 @@ public class LinuxNetworkUtil {
             // determine if wifi
             if (config.getType() == NetInterfaceType.ETHERNET) {
                 Collection<String> wifiOptions = WifiOptions.getSupportedOptions(ifaceName);
-                if (wifiOptions != null && !wifiOptions.isEmpty()) {
+                if (!wifiOptions.isEmpty()) {
                     for (String op : wifiOptions) {
                         s_logger.trace("WiFi option supported on {} : {}", ifaceName, op);
                     }
@@ -421,23 +445,21 @@ public class LinuxNetworkUtil {
             }
 
             // cache information
-            s_ifconfigs.put(ifaceName, config);
+            ifconfigs.put(ifaceName, config);
             return config;
         } catch (KuraException e) {
             if (e.getCode() == KuraErrorCode.OS_COMMAND_ERROR) {
                 // Assuming ifconfig fails because a PPP link went down and its interface cannot be found
-                if (ifaceName.matches("^ppp\\d+$")) {
+                if (ifaceName.matches(PPP_IFACE_REGEX)) {
                     File pppFile = new File(NetworkServiceImpl.PPP_PEERS_DIR + ifaceName);
                     if (pppFile.exists()) {
                         LinuxIfconfig config = new LinuxIfconfig(ifaceName);
-                        config.setType(NetInterfaceType.valueOf("MODEM"));
+                        config.setType(NetInterfaceType.valueOf(MODEM));
                         return config;
                     }
                 }
             } else {
                 s_logger.warn("FIXME: IpAddrShow failed. Falling back to old ifconfig method", e);
-
-                // FIXME: ifconfig is deprecated
                 return getInterfaceConfigurationInternal(ifaceName);
             }
         }
@@ -458,76 +480,25 @@ public class LinuxNetworkUtil {
 
         LinuxIfconfig linuxIfconfig = null;
         SafeProcess proc = null;
-        BufferedReader br = null;
         linuxIfconfig = new LinuxIfconfig(ifaceName);
+        String cmd = formIfconfigIfaceCommand(ifaceName);
         try {
             // start the process
-            proc = ProcessUtil.exec("ifconfig " + ifaceName);
+            proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() == 0) {
                 // get the output
-                br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-                String line = null;
-
-                while ((line = br.readLine()) != null) {
-
-                    int i = line.indexOf("Link encap:");
-                    if (i > -1) {
-                        linuxIfconfig.setType(getInterfaceType(ifaceName, line));
-
-                        i = line.indexOf("HWaddr ");
-                        if (i > -1) {
-                            String mac = line.substring(i + 7, line.length() - 2);
-                            linuxIfconfig.setMacAddress(mac);
-                        }
-                    }
-
-                    i = line.indexOf("inet addr:");
-                    if (i > -1) {
-                        String ipAddress = line.substring(i + 10, line.indexOf(' ', i + 10));
-                        linuxIfconfig.setInetAddress(ipAddress);
-
-                        i = line.indexOf("Mask:");
-                        if (i > -1) {
-                            String netmask = line.substring(i + 5);
-                            linuxIfconfig.setInetMask(netmask);
-                        }
-
-                        i = line.indexOf("Bcast:");
-                        if (i > -1) {
-                            String broadcast = line.substring(i + 6, line.indexOf(' ', i + 6));
-                            linuxIfconfig.setInetBcast(broadcast);
-                        }
-                    }
-
-                    i = line.indexOf("MTU:");
-                    if (i > -1) {
-                        String mtu = line.substring(i + 4, line.indexOf(' ', i + 4));
-                        linuxIfconfig.setMtu(Integer.parseInt(mtu));
-                    }
-
-                    if (line.contains("MULTICAST")) {
-                        linuxIfconfig.setMulticast(true);
-                    }
-                }
+                getInterfaceConfigurationInternalParse(ifaceName, cmd, linuxIfconfig, proc);
             } else {
                 File pppFile = new File(NetworkServiceImpl.PPP_PEERS_DIR + ifaceName);
-                if (pppFile.exists() || ifaceName.matches("^ppp\\d+$")) {
-                    linuxIfconfig.setType(NetInterfaceType.valueOf("MODEM"));
+                if (pppFile.exists() || ifaceName.matches(PPP_IFACE_REGEX)) {
+                    linuxIfconfig.setType(NetInterfaceType.valueOf(MODEM));
                 }
             }
-        } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         } catch (InterruptedException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ex) {
-                    s_logger.error("getInterfaceConfiguration() :: I/O Exception while closing BufferedReader!");
-                }
-            }
-
             if (proc != null) {
                 ProcessUtil.destroy(proc);
             }
@@ -544,8 +515,60 @@ public class LinuxNetworkUtil {
             }
         }
 
-        s_ifconfigs.put(ifaceName, linuxIfconfig);
+        ifconfigs.put(ifaceName, linuxIfconfig);
         return linuxIfconfig;
+    }
+
+    @Deprecated
+    private static void getInterfaceConfigurationInternalParse(String ifaceName, String cmd,
+            LinuxIfconfig linuxIfconfig, SafeProcess proc) throws KuraException {
+        String line = null;
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            while ((line = br.readLine()) != null) {
+
+                int i = line.indexOf(LINK_ENCAP);
+                if (i > -1) {
+                    linuxIfconfig.setType(getInterfaceType(ifaceName, line));
+
+                    i = line.indexOf("HWaddr ");
+                    if (i > -1) {
+                        String mac = line.substring(i + 7, line.length() - 2);
+                        linuxIfconfig.setMacAddress(mac);
+                    }
+                }
+
+                i = line.indexOf("inet addr:");
+                if (i > -1) {
+                    String ipAddress = line.substring(i + 10, line.indexOf(' ', i + 10));
+                    linuxIfconfig.setInetAddress(ipAddress);
+
+                    i = line.indexOf("Mask:");
+                    if (i > -1) {
+                        String netmask = line.substring(i + 5);
+                        linuxIfconfig.setInetMask(netmask);
+                    }
+
+                    i = line.indexOf("Bcast:");
+                    if (i > -1) {
+                        String broadcast = line.substring(i + 6, line.indexOf(' ', i + 6));
+                        linuxIfconfig.setInetBcast(broadcast);
+                    }
+                }
+
+                i = line.indexOf("MTU:");
+                if (i > -1) {
+                    String mtu = line.substring(i + 4, line.indexOf(' ', i + 4));
+                    linuxIfconfig.setMtu(Integer.parseInt(mtu));
+                }
+
+                if (line.contains("MULTICAST")) {
+                    linuxIfconfig.setMulticast(true);
+                }
+            }
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
+        }
     }
 
     /*
@@ -553,19 +576,14 @@ public class LinuxNetworkUtil {
      */
     public static boolean canPing(String ipAddress, int count) throws KuraException {
         SafeProcess proc = null;
+        String cmd = new StringBuilder().append("ping -c ").append(count).append(" ").append(ipAddress).toString();
         try {
-            proc = ProcessUtil.exec(
-                    new StringBuilder().append("ping -c ").append(count).append(" ").append(ipAddress).toString());
-            if (proc.waitFor() == 0) {
-                return true;
-            } else {
-                // FIXME: throw an exception?
-                return false;
-            }
+            proc = ProcessUtil.exec(cmd);
+            return (proc.waitFor() == 0) ? true : false;
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         } catch (InterruptedException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
         } finally {
             if (proc != null) {
                 ProcessUtil.destroy(proc);
@@ -590,8 +608,8 @@ public class LinuxNetworkUtil {
 
         NetInterfaceType ifaceType = null;
 
-        if (s_ifconfigs.containsKey(ifaceName)) {
-            LinuxIfconfig ifconfig = s_ifconfigs.get(ifaceName);
+        if (ifconfigs.containsKey(ifaceName)) {
+            LinuxIfconfig ifconfig = ifconfigs.get(ifaceName);
             ifaceType = ifconfig.getType();
         } else {
             LinuxIfconfig ifconfig = getInterfaceConfiguration(ifaceName);
@@ -617,61 +635,65 @@ public class LinuxNetworkUtil {
 
         NetInterfaceType ifaceType = NetInterfaceType.UNKNOWN;
 
-        if (s_ifconfigs.containsKey(ifaceName)) {
-            LinuxIfconfig ifconfig = s_ifconfigs.get(ifaceName);
+        if (ifconfigs.containsKey(ifaceName)) {
+            LinuxIfconfig ifconfig = ifconfigs.get(ifaceName);
             ifaceType = ifconfig.getType();
             s_logger.trace("getType() :: interface={}, type={}", ifaceName, ifaceType);
         } else {
-            s_ifconfigs.put(ifaceName, new LinuxIfconfig(ifaceName));
+            ifconfigs.put(ifaceName, new LinuxIfconfig(ifaceName));
         }
 
         if (ifaceType != NetInterfaceType.UNKNOWN) {
             return ifaceType;
         }
 
-        // String stringType = null;
         SafeProcess proc = null;
-        BufferedReader br = null;
+        String cmd = formIfconfigIfaceCommand(ifaceName);
         try {
             // start the process
-            proc = ProcessUtil.exec("ifconfig " + ifaceName);
+            proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() == 0) {
                 // get the output
-                br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-                String line = null;
-
-                while ((line = br.readLine()) != null) {
-                    int index = line.indexOf("Link encap:");
-                    if (index > -1) {
-                        ifaceType = getInterfaceType(ifaceName, line);
-                        break;
-                    }
-                }
+                ifaceType = getTypeInternalParse(ifaceName, cmd, proc);
             } else {
                 File pppFile = new File(NetworkServiceImpl.PPP_PEERS_DIR + ifaceName);
-                if (pppFile.exists() || ifaceName.matches("^ppp\\d+$")) {
-                    ifaceType = NetInterfaceType.valueOf("MODEM");
+                if (pppFile.exists() || ifaceName.matches(PPP_IFACE_REGEX)) {
+                    ifaceType = NetInterfaceType.valueOf(MODEM);
                 }
             }
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
-
             if (proc != null) {
                 ProcessUtil.destroy(proc);
             }
         }
 
         s_logger.trace("getType() :: interface={}, type={}", ifaceName, ifaceType);
-        LinuxIfconfig ifconfig = s_ifconfigs.get(ifaceName);
+        LinuxIfconfig ifconfig = ifconfigs.get(ifaceName);
         ifconfig.setType(ifaceType);
+
+        return ifaceType;
+    }
+
+    @Deprecated
+    private static NetInterfaceType getTypeInternalParse(String ifaceName, String cmd, SafeProcess proc)
+            throws KuraException {
+
+        NetInterfaceType ifaceType = NetInterfaceType.UNKNOWN;
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                int index = line.indexOf(LINK_ENCAP);
+                if (index > -1) {
+                    ifaceType = getInterfaceType(ifaceName, line);
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
+        }
 
         return ifaceType;
     }
@@ -681,24 +703,24 @@ public class LinuxNetworkUtil {
 
         NetInterfaceType ifaceType = NetInterfaceType.UNKNOWN;
 
-        String stringType = null;
+        String stringType;
         StringTokenizer st = new StringTokenizer(line);
         st.nextToken(); // skip iface name
         st.nextToken(); // skip Link
         stringType = st.nextToken();
         stringType = stringType.substring(6).toUpperCase();
-        if (stringType.equals("LOCAL")) {
+        if ("LOCAL".equals(stringType)) {
             stringType = "LOOPBACK";
-        } else if (stringType.equals("ETHERNET")) {
-            stringType = "ETHERNET";
-        } else if (stringType.equals("POINT-TO-POINT")) {
-            stringType = "MODEM";
+        } else if (ETHERNET.equals(stringType)) {
+            stringType = ETHERNET;
+        } else if ("POINT-TO-POINT".equals(stringType)) {
+            stringType = MODEM;
         }
 
         // determine if wifi
-        if ("ETHERNET".equals(stringType)) {
+        if (ETHERNET.equals(stringType)) {
             Collection<String> wifiOptions = WifiOptions.getSupportedOptions(ifaceName);
-            if (wifiOptions.size() > 0) {
+            if (!wifiOptions.isEmpty()) {
                 for (String op : wifiOptions) {
                     s_logger.trace("WiFi option supported on {} : {}", ifaceName, op);
                 }
@@ -724,15 +746,15 @@ public class LinuxNetworkUtil {
         Map<String, String> driver = null;
         // ignore logical interfaces like "1-1.2"
         if (Character.isDigit(interfaceName.charAt(0))) {
-            driver = new HashMap<String, String>();
-            driver.put("name", "unknown");
-            driver.put("version", "unkown");
-            driver.put("firmware", "unknown");
+            driver = new HashMap<>();
+            driver.put(NAME, UNKNOWN);
+            driver.put(VERSION, UNKNOWN);
+            driver.put(FIRMWARE, UNKNOWN);
             return driver;
         }
 
-        if (s_ifconfigs.containsKey(interfaceName)) {
-            LinuxIfconfig ifconfig = s_ifconfigs.get(interfaceName);
+        if (ifconfigs.containsKey(interfaceName)) {
+            LinuxIfconfig ifconfig = ifconfigs.get(interfaceName);
             driver = ifconfig.getDriver();
         }
 
@@ -740,63 +762,60 @@ public class LinuxNetworkUtil {
             return driver;
         }
 
-        driver = new HashMap<String, String>();
-        driver.put("name", "unknown");
-        driver.put("version", "unkown");
-        driver.put("firmware", "unknown");
+        driver = new HashMap<>();
+        driver.put(NAME, UNKNOWN);
+        driver.put(VERSION, UNKNOWN);
+        driver.put(FIRMWARE, UNKNOWN);
 
         SafeProcess procEthtool = null;
-        BufferedReader br = null;
+        String ifconfigIfaceUpCmd = formIfconfigIfaceUpCommand(interfaceName);
+        String ethtoolCmd = "ethtool -i " + interfaceName;
         try {
             // run ethtool
             if (toolExists("ethtool")) {
                 if (TARGET_NAME.equals(KuraConstants.ReliaGATE_15_10.getTargetName())) {
-                    SafeProcess proc = ProcessUtil.exec("ifconfig " + interfaceName + " up");
+                    SafeProcess proc = ProcessUtil.exec(ifconfigIfaceUpCmd);
                     if (proc.waitFor() != 0) {
-                        s_logger.warn("getEthernetDriver() :: error executing command --- ifconfig {} up",
-                                interfaceName);
+                        s_logger.error(ERR_EXECUTING_CMD_MSG, ifconfigIfaceUpCmd, proc.exitValue());
                     }
                 }
-                procEthtool = ProcessUtil.exec("ethtool -i " + interfaceName);
+                procEthtool = ProcessUtil.exec(ethtoolCmd);
                 if (procEthtool.waitFor() != 0) {
-                    s_logger.warn("getEthernetDriver() :: error executing command --- ethtool -i {}", interfaceName);
-                    // FIXME: throw exception
+                    s_logger.error(ERR_EXECUTING_CMD_MSG, ethtoolCmd, procEthtool.exitValue());
                     return driver;
                 }
+                getEthernetDriverParse(ethtoolCmd, driver, procEthtool);
             }
-
-            // get the output
-            if (procEthtool != null) {
-                br = new BufferedReader(new InputStreamReader(procEthtool.getInputStream()));
-                String line = null;
-                while ((line = br.readLine()) != null) {
-                    if (line.startsWith("driver: ")) {
-                        driver.put("name", line.substring(line.indexOf(": ") + 1));
-                    } else if (line.startsWith("version: ")) {
-                        driver.put("version", line.substring(line.indexOf(": ") + 1));
-                    } else if (line.startsWith("firmware-version: ")) {
-                        driver.put("firmware", line.substring(line.indexOf(": ") + 1));
-                    }
-                }
-            }
-
-        } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         } catch (InterruptedException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e,
+                    formInterruptedCommandMessage(ethtoolCmd));
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(ethtoolCmd));
         } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
             if (procEthtool != null) {
                 ProcessUtil.destroy(procEthtool);
             }
         }
         return driver;
+    }
+
+    private static void getEthernetDriverParse(String cmd, Map<String, String> driver, SafeProcess proc)
+            throws KuraException {
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith("driver: ")) {
+                    driver.put(NAME, line.substring(line.indexOf(": ") + 1));
+                } else if (line.startsWith("version: ")) {
+                    driver.put(VERSION, line.substring(line.indexOf(": ") + 1));
+                } else if (line.startsWith("firmware-version: ")) {
+                    driver.put(FIRMWARE, line.substring(line.indexOf(": ") + 1));
+                }
+            }
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
+        }
     }
 
     /*
@@ -811,18 +830,34 @@ public class LinuxNetworkUtil {
         }
 
         SafeProcess proc = null;
-        BufferedReader br = null;
+        String cmd = "iwlist " + ifaceName + " auth";
         try {
             // start the process
-            proc = ProcessUtil.exec("iwlist " + ifaceName + " auth");
+            proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() != 0) {
                 s_logger.warn("error executing command --- iwlist --- exit value = {}", proc.exitValue());
-                // FIXME: throw exception
-                return capabilities;
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
             }
 
             // get the output
-            br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            getWifiCapabilitiesParse(cmd, capabilities, proc);
+        } catch (InterruptedException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
+        } finally {
+            if (proc != null) {
+                ProcessUtil.destroy(proc);
+            }
+        }
+        return capabilities;
+    }
+
+    private static void getWifiCapabilitiesParse(String cmd, EnumSet<Capability> capabilities, SafeProcess proc)
+            throws KuraException {
+
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
             String line = null;
             while ((line = br.readLine()) != null) {
                 // Remove all whitespace
@@ -836,7 +871,6 @@ public class LinuxNetworkUtil {
                     capabilities.add(Capability.CIPHER_TKIP);
                 } else if ("CIPHER-CCMP".equals(cleanLine)) {
                     capabilities.add(Capability.CIPHER_CCMP);
-
                     // TODO: WEP options don't always seem to be displayed?
                 } else if ("WEP-104".equals(cleanLine)) {
                     capabilities.add(Capability.CIPHER_WEP104);
@@ -844,25 +878,9 @@ public class LinuxNetworkUtil {
                     capabilities.add(Capability.CIPHER_WEP40);
                 }
             }
-
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        } catch (InterruptedException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
-
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         }
-        return capabilities;
     }
 
     /*
@@ -876,85 +894,35 @@ public class LinuxNetworkUtil {
         WifiMode mode = WifiMode.UNKNOWN;
         SafeProcess procIw = null;
         SafeProcess procIwConfig = null;
-        BufferedReader br1 = null;
-        BufferedReader br2 = null;
-        String line = null;
+        String cmd = "";
         try {
-            if (toolExists("iw")) {
-                procIw = ProcessUtil.exec("iw dev " + ifaceName + " info");
+            cmd = formIwDevIfaceInfoCommand(ifaceName);
+            if (toolExists(IW)) {
+                procIw = ProcessUtil.exec(cmd);
                 if (procIw.waitFor() != 0) {
-                    s_logger.warn("error executing command --- iw --- exit value = {}; will try iwconfig ...",
-                            procIw.exitValue());
                     // fallback to iwconfig
-                }
-
-                br1 = new BufferedReader(new InputStreamReader(procIw.getInputStream()));
-                while ((line = br1.readLine()) != null) {
-                    int index = line.indexOf("type ");
-                    if (index > -1) {
-                        s_logger.debug("line: {}", line);
-                        String sMode = line.substring(index + "type ".length());
-                        if ("AP".equals(sMode)) {
-                            mode = WifiMode.MASTER;
-                        } else if ("managed".equals(sMode)) {
-                            mode = WifiMode.INFRA;
-                        }
-                        break;
-                    }
+                    s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIw.exitValue());
+                } else {
+                    mode = getWifiModeParseIw(cmd, procIw);
                 }
             }
 
-            if (mode.equals(WifiMode.UNKNOWN)) {
-                if (toolExists("iwconfig")) {
-                    procIwConfig = ProcessUtil.exec("iwconfig " + ifaceName);
-                    if (procIwConfig.waitFor() != 0) {
-                        s_logger.error("error executing command --- iwconfig --- exit value = {}",
-                                procIwConfig.exitValue());
-                        // FIXME: throw exception
-                        return mode;
-                    }
-
-                    // get the output
-                    br2 = new BufferedReader(new InputStreamReader(procIwConfig.getInputStream()));
-                    while ((line = br2.readLine()) != null) {
-                        int index = line.indexOf("Mode:");
-                        if (index > -1) {
-                            s_logger.debug("line: {}", line);
-                            StringTokenizer st = new StringTokenizer(line.substring(index));
-                            String modeStr = st.nextToken().substring(5);
-                            if ("Managed".equals(modeStr)) {
-                                mode = WifiMode.INFRA;
-                            } else if ("Master".equals(modeStr)) {
-                                mode = WifiMode.MASTER;
-                            } else if ("Ad-Hoc".equals(modeStr)) {
-                                mode = WifiMode.ADHOC;
-                            }
-                            break;
-                        }
-                    }
+            if (mode.equals(WifiMode.UNKNOWN) && toolExists(IWCONFIG)) {
+                cmd = formIwconfigIfaceCommand(ifaceName);
+                procIwConfig = ProcessUtil.exec(cmd);
+                if (procIwConfig.waitFor() != 0) {
+                    s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIwConfig.exitValue());
+                    throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, procIwConfig.exitValue());
                 }
+
+                // get the output
+                mode = getWifiModeParseIwconfig(cmd, procIw);
             }
-        } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         } catch (InterruptedException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         } finally {
-            if (br1 != null) {
-                try {
-                    br1.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
-
-            if (br2 != null) {
-                try {
-                    br2.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
-
             if (procIw != null) {
                 ProcessUtil.destroy(procIw);
             }
@@ -966,115 +934,169 @@ public class LinuxNetworkUtil {
         return mode;
     }
 
+    private static WifiMode getWifiModeParseIw(String cmd, SafeProcess proc) throws KuraException {
+
+        WifiMode mode = WifiMode.UNKNOWN;
+        String line = null;
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            while ((line = br.readLine()) != null) {
+                int index = line.indexOf("type ");
+                if (index > -1) {
+                    s_logger.debug(LINE_MSG, line);
+                    String sMode = line.substring(index + "type ".length());
+                    mode = getWifiModeParseGetMode(sMode);
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
+        }
+        return mode;
+    }
+
+    private static WifiMode getWifiModeParseIwconfig(String cmd, SafeProcess proc) throws KuraException {
+        WifiMode mode = WifiMode.UNKNOWN;
+        String line = null;
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            while ((line = br.readLine()) != null) {
+                int index = line.indexOf("Mode:");
+                if (index > -1) {
+                    s_logger.debug(LINE_MSG, line);
+                    StringTokenizer st = new StringTokenizer(line.substring(index));
+                    String modeStr = st.nextToken().substring(5);
+                    mode = getWifiModeParseGetMode(modeStr);
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
+        }
+        return mode;
+    }
+
+    private static WifiMode getWifiModeParseGetMode(String modeStr) {
+        WifiMode mode = WifiMode.UNKNOWN;
+        if ("Managed".equalsIgnoreCase(modeStr)) {
+            mode = WifiMode.INFRA;
+        } else if ("Master".equals(modeStr) || "AP".equals(modeStr)) {
+            mode = WifiMode.MASTER;
+        } else if ("Ad-Hoc".equals(modeStr)) {
+            mode = WifiMode.ADHOC;
+        }
+        return mode;
+    }
+
     /*
      * Returns 0 if the interface is not found or on error
      */
     public static long getWifiBitrate(String ifaceName) throws KuraException {
         long bitRate = 0;
-
         // ignore logical interfaces like "1-1.2"
         if (Character.isDigit(ifaceName.charAt(0))) {
             return bitRate;
         }
-
-        SafeProcess proc = null;
-        BufferedReader br = null;
-        String line = null;
+        SafeProcess procIw = null;
+        SafeProcess procIwConfig = null;
+        String cmd = null;
         try {
-            if (toolExists("iw")) {
+            if (toolExists(IW)) {
                 // start the process
-                proc = ProcessUtil.exec("iw dev " + ifaceName + " link");
-                if (proc.waitFor() != 0) {
-                    s_logger.warn("error executing command --- iw --- exit value = {}", proc.exitValue());
-                    // FIXME: why don't we fallback to iwconfig like in the case of getWifiMode()?
-                    return bitRate;
+                cmd = formIwDevIfaceLinkCommand(ifaceName);
+                procIw = ProcessUtil.exec(cmd);
+                if (procIw.waitFor() != 0) {
+                    // fallback to iwconfig
+                    s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIw.exitValue());
                 } else {
                     // get the output
-                    br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-                    line = null;
-
-                    while ((line = br.readLine()) != null) {
-                        int index = line.indexOf("tx bitrate: ");
-                        if (index > -1) {
-                            s_logger.debug("line: " + line);
-                            StringTokenizer st = new StringTokenizer(line.substring(index));
-                            st.nextToken();	// skip 'tx'
-                            st.nextToken(); // skip 'bitrate:'
-                            Double rate = Double.parseDouble(st.nextToken());
-                            int mult = 1;
-
-                            String unit = st.nextToken();
-                            if (unit.startsWith("kb")) {
-                                mult = 1000;
-                            } else if (unit.startsWith("Mb")) {
-                                mult = 1000000;
-                            } else if (unit.startsWith("Gb")) {
-                                mult = 1000000000;
-                            }
-
-                            bitRate = (long) (rate * mult);
-                            return bitRate;
-                        }
-                    }
+                    bitRate = getWifiBitrateParseIw(cmd, procIw);
                 }
             }
 
-            else if (toolExists("iwconfig")) {
+            if ((bitRate == 0) && toolExists(IWCONFIG)) {
                 // start the process
-                proc = ProcessUtil.exec("iwconfig " + ifaceName);
-                if (proc.waitFor() != 0) {
-                    s_logger.warn("error executing command --- iwconfig --- exit value = {}", proc.exitValue());
-                    // FIXME: throw exception
-                    return bitRate;
+                cmd = formIwconfigIfaceCommand(ifaceName);
+                procIwConfig = ProcessUtil.exec(cmd);
+                if (procIwConfig.waitFor() != 0) {
+                    s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIwConfig.exitValue());
+                    throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, procIwConfig.exitValue());
                 }
 
                 // get the output
-                br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-                line = null;
-
-                while ((line = br.readLine()) != null) {
-                    int index = line.indexOf("Bit Rate=");
-                    if (index > -1) {
-                        s_logger.debug("line: {}", line);
-                        StringTokenizer st = new StringTokenizer(line.substring(index));
-                        st.nextToken();	// skip 'Bit'
-                        Double rate = Double.parseDouble(st.nextToken().substring(5));
-                        int mult = 1;
-
-                        String unit = st.nextToken();
-                        if (unit.startsWith("kb")) {
-                            mult = 1000;
-                        } else if (unit.startsWith("Mb")) {
-                            mult = 1000000;
-                        } else if (unit.startsWith("Gb")) {
-                            mult = 1000000000;
-                        }
-
-                        bitRate = (long) (rate * mult);
-                        return bitRate;
-                    }
-                }
+                bitRate = getWifiBitrateParseIwconfig(cmd, procIw);
             }
-
-        } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         } catch (InterruptedException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
+            if (procIw != null) {
+                ProcessUtil.destroy(procIw);
             }
-
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
+            if (procIwConfig != null) {
+                ProcessUtil.destroy(procIwConfig);
             }
         }
 
         return bitRate;
+    }
+
+    private static long getWifiBitrateParseIw(String cmd, SafeProcess proc) throws KuraException {
+        long bitRate = 0;
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                int index = line.indexOf("tx bitrate: ");
+                if (index > -1) {
+                    s_logger.debug(LINE_MSG, line);
+                    StringTokenizer st = new StringTokenizer(line.substring(index));
+                    st.nextToken(); // skip 'tx'
+                    st.nextToken(); // skip 'bitrate:'
+                    Double rate = Double.parseDouble(st.nextToken());
+                    String unit = st.nextToken();
+                    return getWifiBitrateParseGetBitRate(rate, unit);
+                }
+            }
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
+        }
+        return bitRate;
+    }
+
+    private static long getWifiBitrateParseIwconfig(String cmd, SafeProcess proc) throws KuraException {
+        long bitRate = 0;
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                int index = line.indexOf("Bit Rate=");
+                if (index > -1) {
+                    s_logger.debug(LINE_MSG, line);
+                    StringTokenizer st = new StringTokenizer(line.substring(index));
+                    st.nextToken(); // skip 'Bit'
+                    Double rate = Double.parseDouble(st.nextToken().substring(5));
+                    String unit = st.nextToken();
+                    return getWifiBitrateParseGetBitRate(rate, unit);
+                }
+            }
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
+        }
+        return bitRate;
+    }
+
+    private static long getWifiBitrateParseGetBitRate(Double rate, String unit) {
+        int mult = 1;
+        if (unit.startsWith("kb")) {
+            mult = 1000;
+        } else if (unit.startsWith("Mb")) {
+            mult = 1000000;
+        } else if (unit.startsWith("Gb")) {
+            mult = 1000000000;
+        }
+        return (long) (rate * mult);
     }
 
     /*
@@ -1087,83 +1109,96 @@ public class LinuxNetworkUtil {
         }
 
         String ssid = null;
-        SafeProcess proc = null;
-        BufferedReader br = null;
+        SafeProcess procIw = null;
+        SafeProcess procIwConfig = null;
+        String cmd = null;
         try {
-            if (toolExists("iw")) {
+            if (toolExists(IW)) {
                 // start the process
-                proc = ProcessUtil.exec("iw dev " + ifaceName + " link");
-                if (proc.waitFor() != 0) {
-                    s_logger.warn("error executing command --- iw --- exit value = {}", proc.exitValue());
-                    // FIXME: why don't we fallback to iwconfig like in the case of getWifiMode()?
-                    return ssid;
-                }
-
-                // get the output
-                br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-                String line = null;
-
-                while ((line = br.readLine()) != null) {
-                    int index = line.indexOf("SSID:");
-                    if (index > -1) {
-                        s_logger.debug("line: {}", line);
-                        String lineSub = line.substring(index);
-                        StringTokenizer st = new StringTokenizer(lineSub);
-                        st.nextToken();
-                        ssid = st.nextToken();
-                        return ssid;
-                    }
+                cmd = formIwDevIfaceLinkCommand(ifaceName);
+                procIw = ProcessUtil.exec(cmd);
+                if (procIw.waitFor() != 0) {
+                    // fallback to iwconfig
+                    s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIw.exitValue());
+                } else {
+                    // get the output
+                    ssid = getSSIDParseIw(cmd, procIw);
                 }
             }
 
-            else if (toolExists("iwconfig")) {
+            if ((ssid == null) && toolExists(IWCONFIG)) {
                 // start the process
-                proc = ProcessUtil.exec("iwconfig " + ifaceName);
-                if (proc.waitFor() != 0) {
-                    s_logger.warn("error executing command --- iwconfig --- exit value = {}", proc.exitValue());
-                    // FIXME: throw exception
-                    return ssid;
+                cmd = formIwconfigIfaceCommand(ifaceName);
+                procIwConfig = ProcessUtil.exec(cmd);
+                if (procIwConfig.waitFor() != 0) {
+                    s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIwConfig.exitValue());
+                    throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, procIwConfig.exitValue());
                 }
 
                 // get the output
-                br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-                String line = null;
-
-                while ((line = br.readLine()) != null) {
-                    int index = line.indexOf("ESSID:");
-                    if (index > -1) {
-                        s_logger.debug("line: {}", line);
-                        String lineSub = line.substring(index);
-                        StringTokenizer st = new StringTokenizer(lineSub);
-                        String ssidStr = st.nextToken();
-                        if (ssidStr.startsWith("\"") && ssidStr.endsWith("\"")) {
-                            ssid = ssidStr.substring(lineSub.indexOf('"') + 1, lineSub.lastIndexOf('"')); // get value
-                            // between
-                            // quotes
-                        }
-                    }
-                    return ssid;
-                }
+                ssid = getSSIDParseIwconfig(cmd, procIwConfig);
             }
 
-        } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         } catch (InterruptedException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
+            if (procIw != null) {
+                ProcessUtil.destroy(procIw);
             }
-
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
+            if (procIwConfig != null) {
+                ProcessUtil.destroy(procIwConfig);
             }
         }
 
+        return ssid;
+    }
+
+    private static String getSSIDParseIw(String cmd, SafeProcess proc) throws KuraException {
+        String ssid = null;
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                int index = line.indexOf("SSID:");
+                if (index > -1) {
+                    s_logger.debug(LINE_MSG, line);
+                    String lineSub = line.substring(index);
+                    StringTokenizer st = new StringTokenizer(lineSub);
+                    st.nextToken();
+                    ssid = st.nextToken();
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
+        }
+        return ssid;
+    }
+
+    private static String getSSIDParseIwconfig(String cmd, SafeProcess proc) throws KuraException {
+        String ssid = null;
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                int index = line.indexOf("ESSID:");
+                if (index > -1) {
+                    s_logger.debug(LINE_MSG, line);
+                    String lineSub = line.substring(index);
+                    StringTokenizer st = new StringTokenizer(lineSub);
+                    String ssidStr = st.nextToken();
+                    if (ssidStr.startsWith("\"") && ssidStr.endsWith("\"")) {
+                        // get value between quotes
+                        ssid = ssidStr.substring(lineSub.indexOf('"') + 1, lineSub.lastIndexOf('"'));
+                        break;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
+        }
         return ssid;
     }
 
@@ -1246,15 +1281,11 @@ public class LinuxNetworkUtil {
         if (Character.isDigit(ifaceName.charAt(0))) {
             return false;
         }
-
         boolean ret = false;
         LinuxIfconfig ifconfig = getInterfaceConfigurationInternal(ifaceName);
-        if (ifconfig != null) {
-            if (ifconfig.getInetAddress() != null && ifconfig.getInetMask() != null) {
-                ret = true;
-            }
+        if ((ifconfig != null) && (ifconfig.getInetAddress() != null) && (ifconfig.getInetMask() != null)) {
+            ret = true;
         }
-
         return ret;
     }
 
@@ -1276,21 +1307,18 @@ public class LinuxNetworkUtil {
         // or, to delete all the interface address:
         // ip addr flush dev eth0
         SafeProcess proc = null;
+        String cmd = new StringBuilder().append("ifconfig ").append(interfaceName).append(" 0.0.0.0").toString();
         try {
             // start the SafeProcess
-            StringBuilder sb = new StringBuilder().append("ifconfig ").append(interfaceName).append(" 0.0.0.0");
-            proc = ProcessUtil.exec(sb.toString());
-
+            proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() != 0) {
-                // FIXME: throw an exception
-                s_logger.error(
-                        "error executing command --- " + sb.toString() + " --- exit value = " + proc.exitValue());
-                return;
+                s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
             }
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         } catch (InterruptedException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
         } finally {
             if (proc != null) {
                 ProcessUtil.destroy(proc);
@@ -1305,67 +1333,66 @@ public class LinuxNetworkUtil {
             return;
         }
         SafeProcess proc = null;
-        BufferedReader br = null;
+        String cmd = "ifconfig";
         try {
             // start the process
-            proc = ProcessUtil.exec("ifconfig");
+            proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() != 0) {
-                s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+                s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
             }
 
             // get the output
-            br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            String line = null;
-
-            while ((line = br.readLine()) != null) {
-                if (line.indexOf(interfaceName) > -1 && line.indexOf("mon." + interfaceName) < 0) {
-
-                    // so the interface is listed - power is already on
-                    // WTF: should this be !=, or even better, can we remove the statement below?
-                    if (LinuxNetworkUtil.getCurrentIpAddress(interfaceName) == null) {
-                        return;
-                    }
-                }
+            if (powerOnEthernetControllerInternalIsInterfaceOn(interfaceName, cmd, proc)) {
+                return;
             }
-        } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         } catch (InterruptedException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
-
             if (proc != null) {
                 ProcessUtil.destroy(proc);
             }
         }
 
         // power the controller since it is not on
+        cmd = new StringBuilder().append("ifconfig ").append(interfaceName).append(" 0.0.0.0").toString();
         try {
             // start the SafeProcess
-            StringBuilder sb = new StringBuilder().append("ifconfig ").append(interfaceName).append(" 0.0.0.0");
-            proc = ProcessUtil.exec(sb.toString());
-
+            proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() != 0) {
-                s_logger.error(
-                        "error executing command --- " + sb.toString() + " --- exit value = " + proc.exitValue());
+                s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
                 return;
             }
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         } catch (InterruptedException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
         } finally {
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
+            ProcessUtil.destroy(proc);
         }
+    }
+
+    @Deprecated
+    private static boolean powerOnEthernetControllerInternalIsInterfaceOn(String ifaceName, String cmd,
+            SafeProcess proc) throws KuraException {
+        boolean ret = false;
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                if ((line.indexOf(ifaceName) > -1) && (line.indexOf("mon." + ifaceName) < 0)
+                        && (LinuxNetworkUtil.getCurrentIpAddress(ifaceName) != null)) {
+                    // so the interface is listed and IP address is assigned - power is already on
+                    ret = true;
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
+        }
+        return ret;
     }
 
     /*
@@ -1385,50 +1412,52 @@ public class LinuxNetworkUtil {
 
     @Deprecated
     private static boolean isEthernetControllerPoweredInternal(String interfaceName) throws KuraException {
+        boolean result = false;
         // ignore logical interfaces like "1-1.2"
         if (Character.isDigit(interfaceName.charAt(0))) {
             return false;
         }
         SafeProcess proc = null;
-        BufferedReader br = null;
+        String cmd = "ifconfig";
         try {
             // start the process
-            proc = ProcessUtil.exec("ifconfig");
+            proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() != 0) {
-                s_logger.error("error executing command --- ifconfig --- exit value = " + proc.exitValue());
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+                s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
             }
-
             // get the output
-            br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            String line = null;
-
-            while ((line = br.readLine()) != null) {
-                if (line.indexOf(interfaceName) > -1 && line.indexOf("mon." + interfaceName) < 0) {
-
-                    // so the interface is listed - power is already on
-                    return true;
-                }
-            }
-        } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            result = isEthernetControllerPoweredInternalParse(interfaceName, cmd, proc);
         } catch (InterruptedException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
         } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
-
             if (proc != null) {
                 ProcessUtil.destroy(proc);
             }
         }
 
         return false;
+    }
+
+    @Deprecated
+    private static boolean isEthernetControllerPoweredInternalParse(String ifaceName, String cmd, SafeProcess proc)
+            throws KuraException {
+        boolean ret = false;
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                if (line.indexOf(ifaceName) > -1 && line.indexOf("mon." + ifaceName) < 0) {
+                    // so the interface is listed - power is already on
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
+        }
+        return ret;
     }
 
     public static boolean isKernelModuleLoaded(String interfaceName, WifiMode wifiMode) throws KuraException {
@@ -1445,33 +1474,18 @@ public class LinuxNetworkUtil {
             BufferedReader br = null;
             String cmd = "lsmod";
             try {
-                s_logger.debug("Executing '{}'", cmd);
+                s_logger.debug(EXECUTING_CMD_MSG, cmd);
                 proc = ProcessUtil.exec(cmd);
                 if (proc.waitFor() != 0) {
                     throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
                 }
-
                 // get the output
-                br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-                String line = null;
-                while ((line = br.readLine()) != null) {
-                    if (line.contains("bcmdhd")) {
-                        result = true;
-                        break;
-                    }
-                }
-            } catch (IOException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'" + cmd + "' failed");
+                result = isKernelModuleLoadedParse(cmd, proc);
             } catch (InterruptedException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'" + cmd + "' interrupted");
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
+            } catch (Exception e) {
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
             } finally {
-                if (br != null) {
-                    try {
-                        br.close();
-                    } catch (IOException e) {
-                        s_logger.warn("Failed to close process input stream", e);
-                    }
-                }
                 if (proc != null) {
                     proc.destroy();
                 }
@@ -1480,22 +1494,39 @@ public class LinuxNetworkUtil {
         return result;
     }
 
+    private static boolean isKernelModuleLoadedParse(String cmd, SafeProcess proc) throws KuraException {
+        boolean ret = false;
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                if (line.contains("bcmdhd")) {
+                    ret = true;
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
+        }
+        return ret;
+    }
+
     public static void unloadKernelModule(String interfaceName) throws KuraException {
         // FIXME: how to find the right kernel module by interface name?
         // Assume for now the interface name does not change
         if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(TARGET_NAME) && "wlan0".equals(interfaceName)) {
             SafeProcess proc = null;
+            String cmd = "rmmod bcmdhd";
             try {
-                String cmd = "rmmod bcmdhd";
-                s_logger.debug("Executing '{}'", cmd);
+                s_logger.debug(EXECUTING_CMD_MSG, cmd);
                 proc = ProcessUtil.exec(cmd);
                 if (proc.waitFor() != 0) {
                     throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
                 }
             } catch (IOException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'rmmod bcmdhd' failed");
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
             } catch (InterruptedException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'rmmod bcmdhd' interrupted");
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
             } finally {
                 if (proc != null) {
                     proc.destroy();
@@ -1522,15 +1553,15 @@ public class LinuxNetworkUtil {
             }
 
             try {
-                s_logger.debug("Executing '{}'", cmd);
+                s_logger.debug(EXECUTING_CMD_MSG, cmd);
                 proc = ProcessUtil.exec(cmd);
                 if (proc.waitFor() != 0) {
                     throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
                 }
             } catch (IOException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'" + cmd + "' failed");
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
             } catch (InterruptedException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'" + cmd + "' interrupted");
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
             } finally {
                 if (proc != null) {
                     proc.destroy();
@@ -1547,36 +1578,20 @@ public class LinuxNetworkUtil {
         // Assume for now the interface name does not change.
         if (KuraConstants.ReliaGATE_10_05.getTargetName().equals(TARGET_NAME) && "wlan0".equals(interfaceName)) {
             SafeProcess proc = null;
-            BufferedReader br = null;
             String cmd = "systool -vm bcmdhd";
             try {
-                s_logger.debug("Executing '{}'", cmd);
+                s_logger.debug(EXECUTING_CMD_MSG, cmd);
                 proc = ProcessUtil.exec(cmd);
                 if ((proc.waitFor()) != 0) {
                     throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
                 }
-
                 // get the output
-                br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-                String line = null;
-                while ((line = br.readLine()) != null) {
-                    if (line.contains("op_mode") && compareModes(line, wifiMode)) {
-                        result = true;
-                        break;
-                    }
-                }
-            } catch (IOException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'" + cmd + "' failed");
+                result = isKernelModuleLoadedForModeParse(cmd, wifiMode, proc);
             } catch (InterruptedException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "'" + cmd + "' interrupted");
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
+            } catch (Exception e) {
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
             } finally {
-                if (br != null) {
-                    try {
-                        br.close();
-                    } catch (IOException e) {
-                        s_logger.warn("Failed to close process input stream", e);
-                    }
-                }
                 if (proc != null) {
                     proc.destroy();
                 }
@@ -1585,6 +1600,24 @@ public class LinuxNetworkUtil {
             result = true;
         }
         return result;
+    }
+
+    private static boolean isKernelModuleLoadedForModeParse(String cmd, WifiMode wifiMode, SafeProcess proc)
+            throws KuraException {
+        boolean ret = false;
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                if (line.contains("op_mode") && compareModes(line, wifiMode)) {
+                    ret = true;
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formFailedCommandMessage(cmd));
+        }
+        return ret;
     }
 
     private static boolean compareModes(String line, WifiMode wifiMode) {
@@ -1624,5 +1657,47 @@ public class LinuxNetworkUtil {
             fw.write("1");
             fw.close();
         }
+    }
+
+    private static String formIfconfigIfaceCommand(String ifaceName) {
+        StringBuilder sb = new StringBuilder("ifconfig ");
+        sb.append(ifaceName);
+        return sb.toString();
+    }
+
+    private static String formIfconfigIfaceUpCommand(String ifaceName) {
+        StringBuilder sb = new StringBuilder("ifconfig ");
+        sb.append(ifaceName).append(" up");
+        return sb.toString();
+    }
+
+    private static String formIwDevIfaceInfoCommand(String ifaceName) {
+        StringBuilder sb = new StringBuilder("iw dev ");
+        sb.append(ifaceName).append(" info");
+        return sb.toString();
+    }
+
+    private static String formIwDevIfaceLinkCommand(String ifaceName) {
+        StringBuilder sb = new StringBuilder("iw dev ");
+        sb.append(ifaceName).append(" link");
+        return sb.toString();
+    }
+
+    private static String formIwconfigIfaceCommand(String ifaceName) {
+        StringBuilder sb = new StringBuilder("iwconfig ");
+        sb.append(ifaceName);
+        return sb.toString();
+    }
+
+    private static String formFailedCommandMessage(String cmd) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("'").append(cmd).append("' failed");
+        return sb.toString();
+    }
+
+    private static String formInterruptedCommandMessage(String cmd) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("'").append(cmd).append("' interrupted");
+        return sb.toString();
     }
 }

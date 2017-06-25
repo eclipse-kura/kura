@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,26 +21,22 @@ import java.util.Set;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * EdcPayload defines the recommended payload structure for the messages sent to the Everyware Cloud platform.
- * Eurotech designed the format as an open format that is flexible from the aspect of data modeling
- * yet is efficient when it comes to bandwidth conservation. The same payload model is used by the REST API
+ * KuraPayload defines the recommended payload structure for the messages sent to a remote cloud platform.
+ * It was defined as an open format that is flexible from the aspect of data modeling
+ * yet is efficient when it comes to bandwidth conservation. The same payload model could be used by the REST API
  * - in which case it is serialized into XML or JSON as requested by the client - or uses the efficient
  * Google ProtoBuf when sent over an MQTT connection when the bandwidth is very important.
- * The EdcPayload contains the following fields: sentOn timestamp, an optional set of metrics represented as
+ * The KuraPayload contains the following fields: sentOn timestamp, an optional set of metrics represented as
  * name-value pairs, an optional position field to capture a GPS position, and an optional binary body.
  * <ul>
- * <li>sentOn: it is the timestamp when the data was captured and sent to the Everyware Cloud platform.
+ * <li>sentOn: it is the timestamp when the data was captured and sent to the remote cloud platform.
  * <li>metrics: a metric is a data structure composed of the name, a value, and the type of the value.
  * When used with the REST API valid metric types are: string, double, int, float, long, boolean, base64Binary.
- * Data exposed into the payload metrics can be processed through the real-time rules offered by the
- * Everyware Cloud platform or used as query criteria when searching for messages through the messages/searchByMetric
- * API.
+ *
  * Each payload can have zero or more metrics.
  * <li>position: it is an optional field used to capture a geo position associated to this payload.
  * <li>body: it is an optional part of the payload that allows additional information to be transmitted in any format
  * determined by the user.
- * This field will be stored into the platform database, but the Everyware Cloud cannot apply any statistical analysis
- * on it.
  * </ul>
  * 
  * @noextend This class is not intended to be subclassed by clients.
@@ -49,7 +45,7 @@ import org.osgi.annotation.versioning.ProviderType;
 public class KuraPayload {
 
     /**
-     * Timestamp when the data was captured and sent to the Everyware Cloud platform.
+     * Timestamp when the data was captured and sent to the remote cloud platform.
      */
     private Date timestamp;
 
@@ -61,9 +57,6 @@ public class KuraPayload {
     /**
      * A metric is a data structure composed of the name, a value, and the type of the value.
      * When used with the REST API valid metric types are: string, double, int, float, long, boolean, base64Binary.
-     * Data exposed into the payload metrics can be processed through the real-time rules offered by the
-     * Everyware Cloud platform or used a query criteria when searching for messages through the messages/searchByMetric
-     * API.
      * Each payload can have zero or more metrics.
      */
     private final Map<String, Object> metrics;
@@ -71,13 +64,11 @@ public class KuraPayload {
     /**
      * It is an optional part of the payload that allows additional information to be transmitted in any format
      * determined by the user.
-     * This field will be stored into the platform database but the Everyware Cloud cannot apply any statistical
-     * analysis on it.
      */
     private byte[] body;
 
     public KuraPayload() {
-        this.metrics = new HashMap<String, Object>();
+        this.metrics = new HashMap<>();
         this.body = null;
     }
 

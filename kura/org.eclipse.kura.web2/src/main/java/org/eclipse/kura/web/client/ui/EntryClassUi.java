@@ -38,8 +38,7 @@ import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.gwtbootstrap3.client.shared.event.ModalHideEvent;
-import org.gwtbootstrap3.client.shared.event.ModalHideHandler;
+import org.gwtbootstrap3.client.ui.Anchor;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Column;
@@ -66,7 +65,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.logging.client.HasWidgetsLogHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -123,9 +121,13 @@ public class EntryClassUi extends Composite {
     @UiField
     NavPills servicesMenu;
     @UiField
-    VerticalPanel errorLogArea;
+    Anchor errorStackTraceAreaOneAnchor;
+    @UiField
+    VerticalPanel errorStackTraceAreaOne;
     @UiField
     Modal errorPopup;
+    @UiField
+    Label errorMessage;
     @UiField
     Modal newFactoryComponentModal;
     @UiField
@@ -153,7 +155,6 @@ public class EntryClassUi extends Composite {
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final Logger logger = Logger.getLogger(EntryClassUi.class.getSimpleName());
-    private static final Logger errorLogger = Logger.getLogger("ErrorLogger");
     private static final EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
 
     private static final String SELECT_COMPONENT = MSGS.servicesComponentFactorySelectorIdle();
@@ -202,6 +203,7 @@ public class EntryClassUi extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         initWaitModal();
         initNewComponentErrorModal();
+        initExceptionReportModal();
 
         Date now = new Date();
         @SuppressWarnings("deprecation")
@@ -223,16 +225,6 @@ public class EntryClassUi extends Composite {
             }
         });
 
-        // Set client side logging
-        errorLogger.addHandler(new HasWidgetsLogHandler(this.errorLogArea));
-        this.errorPopup.addHideHandler(new ModalHideHandler() {
-
-            @Override
-            public void onHide(ModalHideEvent evt) {
-                EntryClassUi.this.errorLogArea.clear();
-            }
-        });
-
         EventService.subscribe(ForwardedEventTopic.CLOUD_CONNECTION_STATUS_ESTABLISHED, new EventService.Handler() {
 
             @Override
@@ -248,11 +240,15 @@ public class EntryClassUi extends Composite {
             }
         });
 
-        FailureHandler.setPopup(this.errorPopup);
-
         showSidenav();
 
         initServicesTree();
+    }
+
+    private void initExceptionReportModal() {
+        this.errorPopup.setTitle(MSGS.warning());
+        this.errorStackTraceAreaOneAnchor.setText(MSGS.showStackTrace());
+        FailureHandler.setPopup(this.errorPopup, this.errorMessage, this.errorStackTraceAreaOne);
     }
 
     public void setSelectedAnchorListItem(AnchorListItem selected) {

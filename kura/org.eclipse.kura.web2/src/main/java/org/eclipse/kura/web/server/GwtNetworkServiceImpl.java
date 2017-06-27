@@ -1374,13 +1374,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             }
 
             nas.setFirewallPortForwardingConfiguration(firewallPortForwardConfigIPs);
-        } catch (KuraException e) {
-            logger.warn("Exception while updating firewall port forwards", e);
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        } catch (NumberFormatException e) {
-            logger.warn("Exception while updating firewall port forwards", e);
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        } catch (UnknownHostException e) {
+        } catch (KuraException | NumberFormatException | UnknownHostException e) {
             logger.warn("Exception while updating firewall port forwards", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }

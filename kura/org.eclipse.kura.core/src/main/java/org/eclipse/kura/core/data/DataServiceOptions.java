@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.core.data;
 
 import static java.util.Objects.requireNonNull;
@@ -16,10 +27,10 @@ public class DataServiceOptions {
     private static final String REPUBLISH_IN_FLIGHT_MSGS_PROP_NAME = "in-flight-messages.republish-on-new-session";
     private static final String MAX_IN_FLIGHT_MSGS_PROP_NAME = "in-flight-messages.max-number";
     private static final String IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_PROP_NAME = "in-flight-messages.congestion-timeout";
-    private static final String RATE_LIMIT_ENABLE_PROP_NAME = "enable.rate.limiting";
-    private static final String AVERAGE_PUBLISH_RATE_PROP_NAME = "average.publish.rate";
-    private static final String AVERAGE_PUBLISH_RATE_TIME_UNIT_PROP_NAME = "average.publish.rate.time.unit";
-    private static final String BURST_SIZE_PROP_NAME = "publish.burst.size";
+    private static final String RATE_LIMIT_ENABLE_PROP_NAME = "enable.rate.limit";
+    private static final String RATE_LIMIT_AVERAGE_RATE_PROP_NAME = "rate.limit.average";
+    private static final String RATE_LIMIT_TIME_UNIT_PROP_NAME = "rate.limit.time.unit";
+    private static final String RATE_LIMIT_BURST_SIZE_PROP_NAME = "rate.limit.burst.size";
 
     private static final boolean AUTOCONNECT_PROP_DEFAULT = false;
     private static final int CONNECT_DELAY_DEFAULT = 60;
@@ -30,10 +41,10 @@ public class DataServiceOptions {
     private static final boolean REPUBLISH_IN_FLIGHT_MSGS_DEFAULT = true;
     private static final int MAX_IN_FLIGHT_MSGS_DEFAULT = 9;
     private static final int IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_DEFAULT = 0;
-    private static final boolean RATE_LIMIT_ENABLE_DEFAULT = false;
-    private static final int AVERAGE_PUBLISH_RATE_DEFAULT = 1;
-    private static final String AVERAGE_PUBLISH_RATE_TIME_UNIT_DEFAULT = "SECONDS";
-    private static final int BURST_SIZE_DEFAULT = 10;
+    private static final boolean RATE_LIMIT_ENABLE_DEFAULT = true;
+    private static final int RATE_LIMIT_AVERAGE_RATE_DEFAULT = 1;
+    private static final String RATE_LIMIT_TIME_UNIT_DEFAULT = "SECONDS";
+    private static final int RATE_LIMIT_BURST_SIZE_DEFAULT = 1;
 
     private final Map<String, Object> properties;
 
@@ -85,17 +96,17 @@ public class DataServiceOptions {
         return (boolean) this.properties.getOrDefault(RATE_LIMIT_ENABLE_PROP_NAME, RATE_LIMIT_ENABLE_DEFAULT);
     }
 
-    int getAveragePublishRate() {
-        return (int) this.properties.getOrDefault(AVERAGE_PUBLISH_RATE_PROP_NAME, AVERAGE_PUBLISH_RATE_DEFAULT);
+    int getRateLimitAverageRate() {
+        return (int) this.properties.getOrDefault(RATE_LIMIT_AVERAGE_RATE_PROP_NAME, RATE_LIMIT_AVERAGE_RATE_DEFAULT);
     }
 
-    int getBurstSize() {
-        return (int) this.properties.getOrDefault(BURST_SIZE_PROP_NAME, BURST_SIZE_DEFAULT);
+    int getRateLimitBurstSize() {
+        return (int) this.properties.getOrDefault(RATE_LIMIT_BURST_SIZE_PROP_NAME, RATE_LIMIT_BURST_SIZE_DEFAULT);
     }
 
-    long getSimpleTimeUnitMultiplier() throws IllegalArgumentException {
-        String timeUnitString = (String) properties.getOrDefault(AVERAGE_PUBLISH_RATE_TIME_UNIT_PROP_NAME,
-                AVERAGE_PUBLISH_RATE_TIME_UNIT_DEFAULT);
+    long getRateLimitTimeUnit() throws IllegalArgumentException {
+        String timeUnitString = (String) properties.getOrDefault(RATE_LIMIT_TIME_UNIT_PROP_NAME,
+                RATE_LIMIT_TIME_UNIT_DEFAULT);
         TimeUnit timeUnit;
 
         if (TimeUnit.MILLISECONDS.name().equals(timeUnitString)) {

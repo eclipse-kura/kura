@@ -17,13 +17,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
 import org.eclipse.kura.KuraConnectException;
@@ -69,7 +71,7 @@ public class DataServiceImpl
     private ScheduledFuture<?> reconnectFuture;
 
     // A dedicated executor for the publishing task
-    private ScheduledExecutorService publisherExecutor;
+    private ExecutorService publisherExecutor;
 
     private DataStore store;
 
@@ -82,6 +84,12 @@ public class DataServiceImpl
     private CloudConnectionStatusEnum notificationStatus = CloudConnectionStatusEnum.OFF;
 
     private TokenBucket throttle;
+
+    private Lock lock = new ReentrantLock();
+    private boolean notifyPending;
+    private Condition lockCondition = lock.newCondition();
+
+    private volatile AtomicBoolean publisherEnabled = new AtomicBoolean();
 
     // ----------------------------------------------------------------
     //
@@ -96,12 +104,13 @@ public class DataServiceImpl
         dataServiceOptions = new DataServiceOptions(properties);
 
         this.reconnectExecutor = Executors.newSingleThreadScheduledExecutor();
-        this.publisherExecutor = Executors.newSingleThreadScheduledExecutor();
+        this.publisherExecutor = Executors.newSingleThreadExecutor();
         this.congestionExecutor = Executors.newSingleThreadScheduledExecutor();
 
         this.properties.putAll(properties);
 
         createThrottle();
+        submitPublishingWork();
 
         String[] parts = pid.split("-");
         String table = "ds_messages";
@@ -176,7 +185,13 @@ public class DataServiceImpl
 
         // Await termination of the publisher executor tasks
         try {
-            this.publisherExecutor.awaitTermination(TRANSPORT_TASK_TIMEOUT, TimeUnit.SECONDS);
+            // Waits to publish latest messages e.g. disconnect message
+            Thread.sleep(TRANSPORT_TASK_TIMEOUT * 1000);
+
+            // Clean publisher thread shutdown
+
+            publisherEnabled.set(false);
+            signalPublisher();
         } catch (InterruptedException e) {
             logger.info("Interrupted", e);
         }
@@ -279,8 +294,7 @@ public class DataServiceImpl
         // Notify the listeners
         this.dataServiceListeners.onConnectionEstablished();
 
-        // Schedule execution of a publisher task
-        submitPublishingWork();
+        signalPublisher();
     }
 
     @Override
@@ -289,18 +303,6 @@ public class DataServiceImpl
 
         // Notify the listeners
         this.dataServiceListeners.onDisconnecting();
-
-        // Schedule execution of a publisher task waiting until done or timeout.
-        Future<?> future = submitPublishingWork();
-        try {
-            future.get(TRANSPORT_TASK_TIMEOUT, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            logger.info("Interrupted while waiting for the publishing work to complete");
-        } catch (ExecutionException e) {
-            logger.warn("ExecutionException while waiting for the publishing work to complete", e);
-        } catch (TimeoutException e) {
-            logger.warn("Timeout while waiting for the publishing work to complete");
-        }
     }
 
     @Override
@@ -351,7 +353,7 @@ public class DataServiceImpl
         // Notify the listeners
         this.dataServiceListeners.onMessageArrived(topic, payload, qos, retained);
 
-        submitPublishingWork();
+        signalPublisher();
     }
 
     @Override
@@ -390,7 +392,7 @@ public class DataServiceImpl
             handleInFlightDecongestion();
         }
 
-        submitPublishingWork();
+        signalPublisher();
     }
 
     @Override
@@ -440,7 +442,7 @@ public class DataServiceImpl
         DataMessage dataMsg = this.store.store(topic, payload, qos, retain, priority);
         logger.info("Stored message on topic :{}, priority: {}", topic, priority);
 
-        submitPublishingWork();
+        signalPublisher();
 
         return dataMsg.getId();
     }
@@ -461,6 +463,13 @@ public class DataServiceImpl
     public List<Integer> getDroppedInFlightMessageIds(String topicRegex) throws KuraStoreException {
         List<DataMessage> messages = this.store.allDroppedInFlightMessagesNoPayload();
         return buildMessageIds(messages, topicRegex);
+    }
+
+    private void signalPublisher() {
+        lock.lock();
+        notifyPending = true;
+        lockCondition.signal();
+        lock.unlock();
     }
 
     private boolean startReconnectTask() {
@@ -513,9 +522,7 @@ public class DataServiceImpl
                         }
                     }
                 }
-            }, initialDelay,              		// initial delay
-                    reconnectInterval,              // repeat every reconnect interval until we stopped.
-                    TimeUnit.SECONDS);
+            }, initialDelay, reconnectInterval, TimeUnit.SECONDS);
         } else {
             // Change notification status to off. Connection is not expected to happen in the future
             this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
@@ -525,16 +532,14 @@ public class DataServiceImpl
 
     private void createThrottle() {
         if (dataServiceOptions.isRateLimitEnabled()) {
-            int publishRate = dataServiceOptions.getAveragePublishRate();
-            int burstLength = dataServiceOptions.getBurstSize();
+            int publishRate = dataServiceOptions.getRateLimitAverageRate();
+            int burstLength = dataServiceOptions.getRateLimitBurstSize();
 
-            long publishPeriod = dataServiceOptions.getSimpleTimeUnitMultiplier() / publishRate;
+            long publishPeriod = dataServiceOptions.getRateLimitTimeUnit() / publishRate;
 
             logger.info("Get Throttle with burst length {} and send a message every {} millis", burstLength,
-                    publishRate);
+                    publishPeriod);
             this.throttle = new TokenBucket(burstLength, publishPeriod);
-        } else {
-            this.throttle = null;
         }
     }
 
@@ -552,68 +557,14 @@ public class DataServiceImpl
         this.dataTransportService.disconnect(millis);
     }
 
-    // Submit a new publishing work if any
-    // TODO: only one instance of the Runnable is needed
-    private Future<?> submitPublishingWork() {
-        return this.publisherExecutor.submit(new Runnable() {
+    private void submitPublishingWork() {
+        publisherEnabled.set(true);
 
-            @Override
-            public void run() {
-                Thread.currentThread().setName("DataServiceImpl:Submit");
-                if (!DataServiceImpl.this.dataTransportService.isConnected()) {
-                    logger.info("DataPublisherService not connected");
-                    return;
-                }
-                try {
-
-                    // Compared with getting all unpublished messages, getting one message at a time
-                    // is a little bit inefficient (we query the underlying DB every time)
-                    // but improves responsiveness to high priority message.
-                    // TODO: add a getUnpublishedMessages with a limit argument?
-                    // getNextMessage is a special case with limit = 1.
-                    DataMessage message = null;
-                    while ((message = DataServiceImpl.this.store.getNextMessage()) != null) {
-
-                        // Further limit the maximum number of in-flight messages
-                        if (message.getQos() > 0 && DataServiceImpl.this.inFlightMsgIds.size() >= dataServiceOptions
-                                .getMaxInFlightMessages()) {
-                            logger.warn("The configured maximum number of in-flight messages has been reached");
-                            handleInFlightCongestion();
-                            break;
-                        }
-
-                        boolean tokenAvailable = true;
-                        if (DataServiceImpl.this.throttle != null) {
-                            tokenAvailable = DataServiceImpl.this.throttle.getToken();
-                            logger.info("Token Available? {}", tokenAvailable);
-                        }
-
-                        if (!tokenAvailable) {
-                            long sleepingTime = DataServiceImpl.this.throttle.getNextRefillEta();
-                            logger.info("Sleeping for {} ms, while waiting for a token", sleepingTime);
-                            Thread.sleep(sleepingTime);
-                        }
-
-                        publishInternal(message);
-                        // Notify the listeners
-                        DataServiceImpl.this.dataServiceListeners.onMessagePublished(message.getId(),
-                                message.getTopic());
-                    }
-                } catch (KuraConnectException e) {
-                    logger.info("DataPublisherService is not connected", e);
-                } catch (KuraTooManyInflightMessagesException e) {
-                    logger.info("Too many in-flight messages", e);
-                    handleInFlightCongestion();
-                } catch (Exception e) {
-                    logger.error("Probably an unrecoverable exception", e);
-                }
-            }
-        });
+        this.publisherExecutor.execute(new PublishManager());
     }
 
     // It's very important that the publishInternal and messageConfirmed methods are synchronized
-    private synchronized void publishInternal(DataMessage message)
-            throws KuraConnectException, KuraTooManyInflightMessagesException, KuraStoreException, KuraException {
+    private synchronized void publishInternal(DataMessage message) throws KuraException {
 
         String topic = message.getTopic();
         byte[] payload = message.getPayload();
@@ -634,7 +585,7 @@ public class DataServiceImpl
             // Check if the token is already tracked in the map (in which case we are in trouble)
             Integer trackedMsgId = this.inFlightMsgIds.get(token);
             if (trackedMsgId != null) {
-                logger.error("Token already tracked: " + token.getSessionId() + "-" + token.getMessageId());
+                logger.error("Token already tracked: {} -", token.getSessionId(), token.getMessageId());
             }
 
             this.inFlightMsgIds.put(token, msgId);
@@ -645,7 +596,7 @@ public class DataServiceImpl
 
     private List<Integer> buildMessageIds(List<DataMessage> messages, String topicRegex) {
         Pattern topicPattern = Pattern.compile(topicRegex);
-        List<Integer> ids = new ArrayList<Integer>();
+        List<Integer> ids = new ArrayList<>();
 
         if (messages != null) {
             for (DataMessage message : messages) {
@@ -697,5 +648,95 @@ public class DataServiceImpl
     @Override
     public void setNotificationStatus(CloudConnectionStatusEnum status) {
         this.notificationStatus = status;
+    }
+
+    private final class PublishManager implements Runnable {
+
+        @Override
+        public void run() {
+            Thread.currentThread().setName("DataServiceImpl:Submit");
+            while (publisherEnabled.get()) {
+                long sleepingTime = -1;
+                boolean messagePublished = false;
+                if (DataServiceImpl.this.dataTransportService.isConnected()) {
+                    try {
+                        DataMessage message = DataServiceImpl.this.store.getNextMessage();
+
+                        if (message != null) {
+                            checkInFlightMessages(message);
+
+                            if (dataServiceOptions.isRateLimitEnabled() && message.getPriority() >= 5) {
+                                messagePublished = publishMessageTokenBucket(message);
+                                sleepingTime = DataServiceImpl.this.throttle.getTokenWaitTime();
+                            } else {
+                                publishMessageUnbound(message);
+                                messagePublished = true;
+                            }
+                        }
+                    } catch (KuraNotConnectedException e) {
+                        logger.info("DataPublisherService is not connected");
+                    } catch (KuraTooManyInflightMessagesException e) {
+                        logger.info("Too many in-flight messages");
+                        handleInFlightCongestion();
+                    } catch (Exception e) {
+                        logger.error("Probably an unrecoverable exception", e);
+                    }
+                } else {
+                    logger.info("DataPublisherService not connected");
+                }
+
+                if (!messagePublished) {
+                    suspendPublisher(sleepingTime, TimeUnit.MILLISECONDS);
+                }
+            }
+            logger.debug("Exited publisher loop.");
+        }
+
+        private void checkInFlightMessages(DataMessage message) throws KuraTooManyInflightMessagesException {
+            if (message.getQos() > 0
+                    && DataServiceImpl.this.inFlightMsgIds.size() >= dataServiceOptions.getMaxInFlightMessages()) {
+                logger.warn("The configured maximum number of in-flight messages has been reached");
+                throw new KuraTooManyInflightMessagesException("Too many in-flight messages");
+            }
+        }
+
+        private void suspendPublisher(long timeout, TimeUnit timeUnit) {
+            if (!publisherEnabled.get()) {
+                return;
+            }
+            try {
+                lock.lock();
+                if (!notifyPending) {
+                    if (timeout == -1) {
+                        logger.debug("Suspending publishing thread indefinitely");
+                        lockCondition.await();
+                    } else {
+                        logger.debug("Suspending publishing thread for {} milliseconds", timeout);
+                        lockCondition.await(timeout, timeUnit);
+                    }
+                }
+                notifyPending = false;
+            } catch (InterruptedException e) {
+
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        private void publishMessageUnbound(DataMessage message) throws KuraException {
+            publishInternal(message);
+            // Notify the listeners
+            DataServiceImpl.this.dataServiceListeners.onMessagePublished(message.getId(), message.getTopic());
+        }
+
+        private boolean publishMessageTokenBucket(DataMessage message) throws KuraException, InterruptedException {
+            boolean tokenAvailable = DataServiceImpl.this.throttle.getToken();
+
+            if (tokenAvailable) {
+                publishMessageUnbound(message);
+                return true;
+            }
+            return false;
+        }
     }
 }

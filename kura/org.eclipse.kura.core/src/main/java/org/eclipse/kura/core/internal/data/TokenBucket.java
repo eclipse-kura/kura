@@ -11,15 +11,9 @@
  *******************************************************************************/
 package org.eclipse.kura.core.internal.data;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class TokenBucket {
 
-    private static final Logger logger = LoggerFactory.getLogger(TokenBucket.class);
-
     private final int capacity;
-    // period in mills between 1 token refill
     private final long refillPeriod;
     private int remainingTokens;
     private long lastRefillTime;
@@ -42,7 +36,6 @@ public class TokenBucket {
     }
 
     private boolean isTokenAvailable() {
-        logger.info("Available tokens: {}", this.remainingTokens);
         return this.remainingTokens != 0;
     }
 
@@ -52,13 +45,13 @@ public class TokenBucket {
             this.remainingTokens = (int) Math.min(this.capacity,
                     this.remainingTokens + (now - this.lastRefillTime) / this.refillPeriod);
             this.remainingTokens = Math.max(1, this.remainingTokens);
-            this.lastRefillTime = now;
+            this.lastRefillTime += ((now - lastRefillTime) / refillPeriod) * refillPeriod;
         }
     }
 
-    public long getNextRefillEta() {
+    public long getTokenWaitTime() {
         long now = System.currentTimeMillis();
-        long refillEta = (this.lastRefillTime + this.refillPeriod) - now;
-        return Math.max(0, refillEta);
+        long timeToRefill = (this.lastRefillTime + this.refillPeriod) - now;
+        return Math.max(0, timeToRefill);
     }
 }

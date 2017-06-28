@@ -45,7 +45,7 @@ public class TimerTest {
         Timer timer = new Timer() {
 
             @Override
-            protected Scheduler createScheduler() throws SchedulerException {
+            protected Scheduler getScheduler() throws SchedulerException {
                 return mockScheduler;
             }
         };
@@ -88,10 +88,8 @@ public class TimerTest {
         assertEquals(expectedType, timerOptions.getType());
         assertEquals(expectedIntervalSeconds, timerOptions.getSimpleInterval());
 
-        assertEquals(mockScheduler, TestUtil.getFieldValue(timer, "scheduler"));
         assertNotNull(TestUtil.getFieldValue(timer, "jobKey"));
 
-        verify(mockScheduler).start();
         verify(mockScheduler).scheduleJob(any(), any());
     }
 
@@ -103,7 +101,7 @@ public class TimerTest {
         Timer timer = new Timer() {
 
             @Override
-            protected Scheduler createScheduler() throws SchedulerException {
+            protected Scheduler getScheduler() throws SchedulerException {
                 return mockScheduler;
             }
         };
@@ -147,12 +145,10 @@ public class TimerTest {
         assertEquals(expectedType, timerOptions.getType());
         assertEquals(expectedCronExpression, timerOptions.getCronExpression());
 
-        assertEquals(mockScheduler, TestUtil.getFieldValue(timer, "scheduler"));
         assertNotNull(TestUtil.getFieldValue(timer, "jobKey"));
 
         verify(mockScheduler).getContext();
         verify(mockSchedulerContext).put("wireSupport", mockWireSupport);
-        verify(mockScheduler).start();
         verify(mockScheduler).scheduleJob(any(), any());
     }
 

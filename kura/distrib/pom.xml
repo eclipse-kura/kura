@@ -337,6 +337,16 @@
 									<artifactId>org.eclipse.kura.driver.opcua.provider</artifactId>
 									<version>${org.eclipse.kura.driver.opcua.provider.version}</version>
 								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.wire.script.filter.localization</artifactId>
+									<version>${org.eclipse.kura.wire.script.filter.localization.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.wire.script.filter.provider</artifactId>
+									<version>${org.eclipse.kura.wire.script.filter.provider.version}</version>
+								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -463,6 +473,8 @@
 							    <move file="target/plugins/org.eclipse.kura.wire.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.driver.opcua.localization.jar" tofile="target/plugins/org.eclipse.kura.driver.opcua.localization_${org.eclipse.kura.driver.opcua.localization.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.driver.opcua.provider.jar" tofile="target/plugins/org.eclipse.kura.driver.opcua.provider_${org.eclipse.kura.driver.opcua.provider.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.wire.script.filter.localization.jar" tofile="target/plugins/org.eclipse.kura.wire.script.filter.localization_${org.eclipse.kura.wire.script.filter.localization.version}.jar"/>
+							    <move file="target/plugins/org.eclipse.kura.wire.script.filter.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.script.filter.provider_${org.eclipse.kura.wire.script.filter.provider.version}.jar"/>
 							</tasks>
 						</configuration>
 					</execution>
@@ -2609,6 +2621,19 @@
 								<configuration>
 									<target if="${is.not.snapshot}">
 										<ant antfile="${basedir}/src/main/ant/build_opcua_dp.xml" target="build-dp" />
+									</target>
+								</configuration>
+							</execution>
+							
+							<execution>
+								<id>script-filter-dp</id>
+								<phase>install</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target if="${is.not.snapshot}">
+										<ant antfile="${basedir}/src/main/ant/build_script_filter_dp.xml" target="build-dp" />
 									</target>
 								</configuration>
 							</execution>

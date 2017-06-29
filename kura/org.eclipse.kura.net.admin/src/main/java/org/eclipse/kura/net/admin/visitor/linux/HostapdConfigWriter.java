@@ -26,7 +26,6 @@ import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
-import org.eclipse.kura.linux.net.wifi.Hostapd;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -46,20 +45,20 @@ import org.slf4j.LoggerFactory;
 
 public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(HostapdConfigWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(HostapdConfigWriter.class);
 
     private static final String HEXES = "0123456789ABCDEF";
 
     private static final String HOSTAPD_TMP_CONFIG_FILE = "/etc/hostapd.conf.tmp";
 
-    private static HostapdConfigWriter s_instance;
+    private static HostapdConfigWriter instance;
 
     public static HostapdConfigWriter getInstance() {
-        if (s_instance == null) {
-            s_instance = new HostapdConfigWriter();
+        if (instance == null) {
+            instance = new HostapdConfigWriter();
         }
 
-        return s_instance;
+        return instance;
     }
 
     @Override
@@ -88,7 +87,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
                 .getNetInterfaceAddresses();
 
-        if (netInterfaceAddressConfigs != null && netInterfaceAddressConfigs.size() > 0) {
+        if (netInterfaceAddressConfigs != null && !netInterfaceAddressConfigs.isEmpty()) {
             for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
                 if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
                     List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
@@ -100,26 +99,26 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
                             try {
                                 if (netConfig instanceof WifiConfig) {
                                     if (((WifiConfig) netConfig).getMode() == WifiMode.MASTER) {
-                                        s_logger.debug("Found wifiConfig with mode set to master");
+                                        logger.debug("Found wifiConfig with mode set to master");
                                         interfaceDriver = ((WifiConfig) netConfig).getDriver();
                                         if (interfaceDriver != null) {
-                                            s_logger.debug("Writing wifiConfig: {}", netConfig);
+                                            logger.debug("Writing wifiConfig: {}", netConfig);
                                             apConfig = (WifiConfig) netConfig;
                                         } else {
-                                            s_logger.error("Can't generate hostapd config - no driver specified");
+                                            logger.error("Can't generate hostapd config - no driver specified");
                                         }
                                     }
                                 } else if (netConfig instanceof NetConfigIP4) {
                                     netInterfaceStatus = ((NetConfigIP4) netConfig).getStatus();
                                 }
                             } catch (Exception e) {
-                                s_logger.error("Failed to configure Hostapd");
+                                logger.error("Failed to configure Hostapd");
                                 throw KuraException.internalError(e);
                             }
                         }
 
                         if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusDisabled) {
-                            s_logger.info(
+                            logger.info(
                                     "Network interface status for {} is disabled - not overwriting hostapd configuration file",
                                     interfaceName);
                             return;
@@ -129,7 +128,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
                             try {
                                 generateHostapdConf(apConfig, interfaceName, interfaceDriver);
                             } catch (Exception e) {
-                                s_logger.error("Failed to generate hostapd configuration file for {} interface",
+                                logger.error("Failed to generate hostapd configuration file for {} interface",
                                         interfaceName);
                                 throw KuraException.internalError(e);
                             }
@@ -146,7 +145,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     private void generateHostapdConf(WifiConfig wifiConfig, String interfaceName, String interfaceDriver)
             throws Exception {
 
-        s_logger.debug("Generating Hostapd Config");
+        logger.debug("Generating Hostapd Config");
 
         String fileAsString;
 
@@ -161,20 +160,10 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
                 || wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2
                 || wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA_WPA2) {
 
-            /*
-             * String resName = null;
-             * if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA) {
-             * resName = "/src/main/resources/wifi/hostapd.conf_master_wpa_psk";
-             * } else if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2) {
-             * resName = "/src/main/resources/wifi/hostapd.conf_master_wpa2_psk";
-             * }
-             */
-
             fileAsString = readResource("/src/main/resources/wifi/hostapd.conf_master_wpa_wpa2_psk");
-
             fileAsString = updateWPA(wifiConfig, fileAsString);
         } else {
-            s_logger.error(
+            logger.error(
                     "Unsupported security type: {}. It must be WifiSecurity.NONE, WifiSecurity.SECURITY_NONE, WifiSecurity.SECURITY_WEP, WifiSecurity.SECURITY_WPA, or WifiSecurity.SECURITY_WPA2",
                     wifiConfig.getSecurity());
             throw KuraException.internalError("unsupported security type: " + wifiConfig.getSecurity());
@@ -241,48 +230,47 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
     private String updateWepPassKey(WifiConfig wifiConfig, String fileAsString) throws KuraException {
         String passKey = new String(wifiConfig.getPasskey().getPassword());
-        if (passKey != null) {
-            String exceptionHex = "the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f";
 
-            if (passKey.length() == 10) {
-                // check to make sure it is all hex
-                try {
-                    Long.parseLong(passKey, 16);
-                } catch (Exception e) {
-                    throw KuraException.internalError(exceptionHex);
-                }
-            } else if (passKey.length() == 26) {
-                String part1 = passKey.substring(0, 13);
-                String part2 = passKey.substring(13);
+        String exceptionHex = "the WEP key (passwd) must be all HEX characters (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, and f";
 
-                try {
-                    Long.parseLong(part1, 16);
-                    Long.parseLong(part2, 16);
-                } catch (Exception e) {
-                    throw KuraException.internalError(exceptionHex);
-                }
-            } else if (passKey.length() == 32) {
-                String part1 = passKey.substring(0, 10);
-                String part2 = passKey.substring(10, 20);
-                String part3 = passKey.substring(20);
-                try {
-                    Long.parseLong(part1, 16);
-                    Long.parseLong(part2, 16);
-                    Long.parseLong(part3, 16);
-                } catch (Exception e) {
-                    throw KuraException.internalError(exceptionHex);
-                }
-            } else if (passKey.length() == 5 || passKey.length() == 13 || passKey.length() == 16) {
-                // 5, 13, or 16 ASCII characters
-                passKey = toHex(passKey);
-            } else {
-                throw KuraException
-                        .internalError("the WEP key (passwd) must be 10, 26, or 32 HEX characters in length");
+        if (passKey.length() == 10) {
+            // check to make sure it is all hex
+            try {
+                Long.parseLong(passKey, 16);
+            } catch (NumberFormatException e) {
+                throw KuraException.internalError(exceptionHex);
             }
+        } else if (passKey.length() == 26) {
+            String part1 = passKey.substring(0, 13);
+            String part2 = passKey.substring(13);
 
-            // since we're here - save the password
-            fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);
+            try {
+                Long.parseLong(part1, 16);
+                Long.parseLong(part2, 16);
+            } catch (NumberFormatException e) {
+                throw KuraException.internalError(exceptionHex);
+            }
+        } else if (passKey.length() == 32) {
+            String part1 = passKey.substring(0, 10);
+            String part2 = passKey.substring(10, 20);
+            String part3 = passKey.substring(20);
+            try {
+                Long.parseLong(part1, 16);
+                Long.parseLong(part2, 16);
+                Long.parseLong(part3, 16);
+            } catch (Exception e) {
+                throw KuraException.internalError(exceptionHex);
+            }
+        } else if (passKey.length() == 5 || passKey.length() == 13 || passKey.length() == 16) {
+            // 5, 13, or 16 ASCII characters
+            passKey = toHex(passKey);
+        } else {
+            throw KuraException.internalError("the WEP key (passwd) must be 10, 26, or 32 HEX characters in length");
         }
+
+        // since we're here - save the password
+        fileAsString = fileAsString.replaceFirst("KURA_WEP_KEY", passKey);
+
         return fileAsString;
     }
 
@@ -305,8 +293,8 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         if (interfaceDriver != null && interfaceDriver.length() > 0) {
             fileAsString = fileAsString.replaceFirst("KURA_DRIVER", interfaceDriver);
         } else {
-            String drv = Hostapd.getDriver(interfaceName);
-            s_logger.warn("The 'driver' parameter must be set: setting to: {}", drv);
+            String drv = HostapdManager.getDriver(interfaceName);
+            logger.warn("The 'driver' parameter must be set: setting to: {}", drv);
             fileAsString = fileAsString.replaceFirst("KURA_DRIVER", drv);
             // throw KuraException.internalError("the driver name can not be null");
         }
@@ -385,9 +373,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
     protected String readResource(String path) throws IOException {
         Bundle bundle = FrameworkUtil.getBundle(getClass());
-        String s = IOUtil.readResource(bundle, path);
-
-        return s;
+        return IOUtil.readResource(bundle, path);
     }
 
     protected File getFinalFile(String ifaceName) {
@@ -402,29 +388,14 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
      * This method copies supplied String to a file
      */
     private void copyFile(String data, File destination) throws KuraException {
-        FileOutputStream fos = null;
-        PrintWriter pw = null;
-        try {
-            fos = new FileOutputStream(destination);
-            pw = new PrintWriter(fos);
+
+        try (FileOutputStream fos = new FileOutputStream(destination); PrintWriter pw = new PrintWriter(fos)) {
             pw.write(data);
             pw.flush();
             fos.getFD().sync();
-
             setPermissions(destination.toString());
         } catch (IOException e) {
             throw KuraException.internalError(e);
-        } finally {
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
-            if (pw != null) {
-                pw.close();
-            }
         }
     }
 
@@ -433,14 +404,14 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         File file = getFinalFile(ifaceName);
         if (!FileUtils.contentEquals(tmpFile, file)) {
             if (tmpFile.renameTo(file)) {
-                s_logger.trace("Successfully wrote hostapd.conf file");
+                logger.trace("Successfully wrote hostapd.conf file");
             } else {
-                s_logger.error("Failed to write hostapd.conf file");
+                logger.error("Failed to write hostapd.conf file");
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                         "error while building up new configuration file for hostapd");
             }
         } else {
-            s_logger.info("Not rewriting hostapd.conf file because it is the same");
+            logger.info("Not rewriting hostapd.conf file because it is the same");
         }
     }
 
@@ -485,7 +456,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         }
         byte[] raw = s.getBytes();
 
-        StringBuffer hex = new StringBuffer(2 * raw.length);
+        StringBuilder hex = new StringBuilder(2 * raw.length);
         for (byte element : raw) {
             hex.append(HEXES.charAt((element & 0xF0) >> 4)).append(HEXES.charAt(element & 0x0F));
         }

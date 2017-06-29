@@ -122,6 +122,7 @@ public class AllCoreTests {
                     .getComponentConfiguration("org.eclipse.kura.data.DataService");
             Map<String, Object> dataProps = dataConfig.getConfigurationProperties();
             dataProps.put("connect.auto-on-startup", false);
+            dataProps.put("enable.rate.limit", false);
             s_configService.updateConfiguration("org.eclipse.kura.data.DataService", dataProps);
 
             // waiting for the configuration to be applied

@@ -18,6 +18,10 @@ before_script:
   - export PATH=$PWD/maven/bin:${PATH}
   - hash -r
 
-script: RUN_TESTS=true ./build-all.sh -Pbree
+addons:
+  apt:
+    packages:
+      - dos2unix
+      - oracle-java8-installer
 
-
+script: RUN_TESTS=true ./build-all.sh -Pbree -Dgwt.draftCompile=true -Dgwt.compiler.optimizationLevel=0 -Praspberry-pi-2-3

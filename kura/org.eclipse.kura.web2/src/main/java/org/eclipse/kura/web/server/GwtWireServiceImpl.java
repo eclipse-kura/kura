@@ -33,7 +33,6 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.provider.BaseChannelDescriptor;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.driver.ChannelDescriptor;
@@ -96,38 +95,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         }
         final Map<String, Object> backupConfigProp = backupCC.getConfigurationProperties();
         for (final GwtConfigParameter gwtConfigParam : config.getParameters()) {
-
-            Object objValue;
-
             final Map<String, Object> currentConfigProp = currentCC.getConfigurationProperties();
-            final Object currentObjValue = currentConfigProp.get(gwtConfigParam.getName());
-
-            final int cardinality = gwtConfigParam.getCardinality();
-            if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
-
-                final String strValue = gwtConfigParam.getValue();
-
-                if (currentObjValue instanceof Password && PLACEHOLDER.equals(strValue)) {
-                    objValue = currentConfigProp.get(gwtConfigParam.getName());
-                } else {
-                    objValue = GwtServerUtil.getObjectValue(gwtConfigParam, strValue);
-                }
-            } else {
-
-                final String[] strValues = gwtConfigParam.getValues();
-
-                if (currentObjValue instanceof Password[]) {
-                    final Password[] currentPasswordValue = (Password[]) currentObjValue;
-                    for (int i = 0; i < strValues.length; i++) {
-                        if (PLACEHOLDER.equals(strValues[i])) {
-                            strValues[i] = new String(currentPasswordValue[i].getPassword());
-                        }
-                    }
-                }
-
-                objValue = GwtServerUtil.getObjectValue(gwtConfigParam, strValues);
-            }
-            properties.put(gwtConfigParam.getName(), objValue);
+            properties.put(gwtConfigParam.getName(), GwtServerUtil.getUserDefinedObject(gwtConfigParam,
+                    currentConfigProp.get(gwtConfigParam.getName())));
         }
 
         // Force kura.service.pid into properties, if originally present

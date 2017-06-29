@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,6 +24,7 @@ import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
 import org.eclipse.kura.web.shared.model.GwtDeploymentPackage;
 import org.eclipse.kura.web.shared.model.GwtEventInfo;
+import org.eclipse.kura.web.shared.model.GwtMarketplacePackageDescriptor;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtPackageService;
@@ -45,12 +46,6 @@ import org.gwtbootstrap3.client.ui.html.Text;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -386,17 +381,17 @@ public class PackagesPanelUi extends Composite {
                 PackagesPanelUi.this.gwtPackageService.uninstallDeploymentPackage(token, selected.getName(),
                         new AsyncCallback<Void>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
-                    }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
+                            }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        EntryClassUi.hideWaitModal();
-                    }
-                });
+                            @Override
+                            public void onSuccess(Void result) {
+                                EntryClassUi.hideWaitModal();
+                            }
+                        });
             }
 
         });
@@ -448,41 +443,41 @@ public class PackagesPanelUi extends Composite {
                 PackagesPanelUi.this.gwtPackageService.findDeviceDeploymentPackages(token,
                         new AsyncCallback<List<GwtDeploymentPackage>>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        isRefreshPending = false;
-                        EntryClassUi.hideWaitModal();
-                        GwtDeploymentPackage pkg = new GwtDeploymentPackage();
-                        pkg.setName("Unavailable! Please click refresh");
-                        pkg.setVersion(caught.getLocalizedMessage());
-                        PackagesPanelUi.this.packagesDataProvider.getList().add(pkg);
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                isRefreshPending = false;
+                                EntryClassUi.hideWaitModal();
+                                GwtDeploymentPackage pkg = new GwtDeploymentPackage();
+                                pkg.setName("Unavailable! Please click refresh");
+                                pkg.setVersion(caught.getLocalizedMessage());
+                                PackagesPanelUi.this.packagesDataProvider.getList().add(pkg);
 
-                    }
+                            }
 
-                    @Override
-                    public void onSuccess(List<GwtDeploymentPackage> result) {
-                        isRefreshPending = false;
-                        EntryClassUi.hideWaitModal();
-                        for (GwtDeploymentPackage pair : result) {
-                            PackagesPanelUi.this.packagesDataProvider.getList().add(pair);
-                        }
-                        int size = PackagesPanelUi.this.packagesDataProvider.getList().size();
-                        PackagesPanelUi.this.packagesGrid.setVisibleRange(0, size);
-                        PackagesPanelUi.this.packagesDataProvider.flush();
+                            @Override
+                            public void onSuccess(List<GwtDeploymentPackage> result) {
+                                isRefreshPending = false;
+                                EntryClassUi.hideWaitModal();
+                                for (GwtDeploymentPackage pair : result) {
+                                    PackagesPanelUi.this.packagesDataProvider.getList().add(pair);
+                                }
+                                int size = PackagesPanelUi.this.packagesDataProvider.getList().size();
+                                PackagesPanelUi.this.packagesGrid.setVisibleRange(0, size);
+                                PackagesPanelUi.this.packagesDataProvider.flush();
 
-                        if (PackagesPanelUi.this.packagesDataProvider.getList().isEmpty()) {
-                            PackagesPanelUi.this.packagesGrid.setVisible(false);
-                            PackagesPanelUi.this.notification.setVisible(true);
-                            PackagesPanelUi.this.notification.setText(MSGS.devicePackagesNone());
-                        } else {
-                            PackagesPanelUi.this.packagesGrid.setVisible(true);
-                            PackagesPanelUi.this.notification.setVisible(false);
-                        }
-                        if (PackagesPanelUi.this.entryClassUi != null) {
-                            PackagesPanelUi.this.entryClassUi.fetchAvailableServices();
-                        }
-                    }
-                });
+                                if (PackagesPanelUi.this.packagesDataProvider.getList().isEmpty()) {
+                                    PackagesPanelUi.this.packagesGrid.setVisible(false);
+                                    PackagesPanelUi.this.notification.setVisible(true);
+                                    PackagesPanelUi.this.notification.setText(MSGS.devicePackagesNone());
+                                } else {
+                                    PackagesPanelUi.this.packagesGrid.setVisible(true);
+                                    PackagesPanelUi.this.notification.setVisible(false);
+                                }
+                                if (PackagesPanelUi.this.entryClassUi != null) {
+                                    PackagesPanelUi.this.entryClassUi.fetchAvailableServices();
+                                }
+                            }
+                        });
             }
         });
     }
@@ -495,8 +490,7 @@ public class PackagesPanelUi extends Composite {
     private void eclipseMarketplaceInstall(String url) {
 
         // Construct the REST URL for Eclipse Marketplace
-        String appId = url.split("=")[1];
-        final String empApi = "http://marketplace.eclipse.org/node/" + appId + "/api/p";
+        final String nodeId = url.split("=")[1];
 
         // Generate security token
         EntryClassUi.showWaitModal();
@@ -511,28 +505,28 @@ public class PackagesPanelUi extends Composite {
             @Override
             public void onSuccess(GwtXSRFToken token) {
                 // Retrieve the URL of the DP via the Eclipse Marketplace API
-                gwtPackageService.getMarketplaceUri(token, empApi, new AsyncCallback<String>() {
+                gwtPackageService.getMarketplacePackageDescriptor(token, nodeId,
+                        new AsyncCallback<GwtMarketplacePackageDescriptor>() {
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        EntryClassUi.hideWaitModal();
-                        logger.log(Level.SEVERE, ex.getMessage(), ex);
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                EntryClassUi.hideWaitModal();
+                                logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                FailureHandler.handle(ex, EntryClassUi.class.getName());
+                            }
 
-                    @Override
-                    public void onSuccess(String result) {
-                        installMarketplaceDp(result);
-                    }
-                });
+                            @Override
+                            public void onSuccess(GwtMarketplacePackageDescriptor result) {
+                                // TODO perform version check here
+                                installMarketplaceDp(result);
+                            }
+                        });
 
             }
         });
     }
 
-    private void installMarketplaceDp(final String uri) {
-        String url = "/" + GWT.getModuleName() + "/file/deploy/url";
-        final RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, URL.encode(url));
+    private void installMarketplaceDp(final GwtMarketplacePackageDescriptor descriptor) {
 
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
@@ -544,30 +538,19 @@ public class PackagesPanelUi extends Composite {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("xsrfToken=" + token.getToken());
-                sb.append("&packageUrl=" + uri);
+                gwtPackageService.installPackageFromMarketplace(token, descriptor, new AsyncCallback<Void>() {
 
-                builder.setHeader("Content-type", "application/x-www-form-urlencoded");
-                try {
-                    builder.sendRequest(sb.toString(), new RequestCallback() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        EntryClassUi.hideWaitModal();
+                    }
 
-                        @Override
-                        public void onResponseReceived(Request request, Response response) {
-                            logger.info(response.getText());
-                        }
-
-                        @Override
-                        public void onError(Request request, Throwable ex) {
-                            logger.log(Level.SEVERE, ex.getMessage(), ex);
-                            FailureHandler.handle(ex, EntryClassUi.class.getName());
-                        }
-
-                    });
-                } catch (RequestException e) {
-                    logger.log(Level.SEVERE, e.getMessage(), e);
-                    FailureHandler.handle(e, EntryClassUi.class.getName());
-                }
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                    }
+                });
             }
         });
     }

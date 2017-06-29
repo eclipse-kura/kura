@@ -50,13 +50,11 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
 
     private static final Logger s_logger = LoggerFactory.getLogger(ConfigurationServiceTest.class);
 
-    private static CountDownLatch dependencyLatch = new CountDownLatch(4);	// initialize with number of dependencies
+    private static CountDownLatch dependencyLatch = new CountDownLatch(3);	// initialize with number of dependencies
     private static Object lock = new Object(); // initialize with number of dependencies
     private static ConfigurationService configService;
     private static CloudCallService cloudCallService;
     private static SystemService systemService;
-
-    private static long s_countdown = 30000;
 
     @SuppressWarnings("unused")
     private static ComponentContext componentContext;
@@ -67,12 +65,8 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
     public void setUp() {
         // Wait for OSGi dependencies
         try {
-            dependencyLatch.await(5, TimeUnit.SECONDS);
-            while (s_countdown > 0) {
-                Thread.sleep(1000);
-                s_countdown -= 1000;
-            }
-            if (s_countdown > 0) {
+            boolean ok = dependencyLatch.await(10, TimeUnit.SECONDS);
+            if (!ok) {
                 fail("Dependencies not resolved!");
             }
         } catch (InterruptedException e) {

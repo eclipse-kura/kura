@@ -38,16 +38,16 @@ import org.slf4j.LoggerFactory;
 
 public class HostapdConfigReader implements NetworkConfigurationVisitor {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(HostapdConfigReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(HostapdConfigReader.class);
 
-    private static HostapdConfigReader s_instance;
+    private static HostapdConfigReader instance;
 
     public static HostapdConfigReader getInstance() {
-        if (s_instance == null) {
-            s_instance = new HostapdConfigReader();
+        if (instance == null) {
+            instance = new HostapdConfigReader();
         }
 
-        return s_instance;
+        return instance;
     }
 
     @Override
@@ -64,7 +64,7 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
 
     private void getConfig(WifiInterfaceConfigImpl wifiInterfaceConfig) throws KuraException {
         String interfaceName = wifiInterfaceConfig.getName();
-        s_logger.debug("Getting hostapd config for {}", interfaceName);
+        logger.debug("Getting hostapd config for {}", interfaceName);
 
         List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = wifiInterfaceConfig.getNetInterfaceAddresses();
 
@@ -96,7 +96,7 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
             File configFile = getFinalFile(ifaceName);
             Properties hostapdProps = new Properties();
 
-            s_logger.debug("parsing hostapd config file: " + configFile.getAbsolutePath());
+            logger.debug("parsing hostapd config file: {}", configFile.getAbsolutePath());
             if (configFile.exists()) {
                 FileInputStream fis = null;
                 try {
@@ -224,7 +224,7 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
                     }
                 }
             } else {
-                s_logger.warn("getWifiHostConfig() :: {} file doesn't exist, will generate default wifiConfig",
+                logger.warn("getWifiHostConfig() :: {} file doesn't exist, will generate default wifiConfig",
                         configFile.getName());
                 wifiConfig.setSSID("kura_gateway");
                 wifiConfig.setDriver("nl80211");
@@ -239,7 +239,7 @@ public class HostapdConfigReader implements NetworkConfigurationVisitor {
             }
             return wifiConfig;
         } catch (Exception e) {
-            s_logger.error("Exception getting WiFi configuration", e);
+            logger.error("Exception getting WiFi configuration", e);
             throw KuraException.internalError(e);
         }
     }

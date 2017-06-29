@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2017 Eurotech and/or its affiliates and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.wire.ScriptFilter" 
+         name="Javascript Filter" 
+         description="A wire component that provides scrpiting functionalities in JavaScript.">
+
+        <AD id="script"
+            name="script"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="// the following global variables are available:&#13;// input: an object that represents the received wire envelope&#13;// output: an object that can be used for emitting records&#13;// logger: a slf4j logger&#13;&#13;// input has two properties:&#13;// input.emitterPid contains the emitterPid of the received envelope&#13;// input.records is an immutable array that contains the received records&#13;&#13;logger.info('emitter pid is {}'\, input.emitterPid)&#13;&#13;var record = input.records[0] // get the first record\, it is assumed it comes from a Timer&#13;&#13;// input records are immutable&#13;// the properties of a record are TypedValues&#13;logger.info('timer value: {}'\, record.TIMER.getValue()) // print the timer value&#13;logger.info('timer value type: {}'\, record.TIMER.getType()) // print the timer value type&#13;&#13;for (var prop in record) { // it is possible to iterate over the properties of a record&#13;logger.info('{}: {}'\, prop\, record[prop])&#13;}&#13;&#13;// it is possible to write some logic dependent on the value type&#13;// The DataType enum variants are available as global variables&#13;if (record.TIMER.getType() === LONG) { &#13;logger.info('timer value type is long')&#13;}&#13;&#13;// the newWireRecord() function creates a new mutable wire record&#13;var outRecord = newWireRecord()&#13;&#13;// add some properties to the record&#13;// the properties must be TypedValues&#13;// the new&lt;Type&gt;Value() family of functions can be used for creating TypedValues&#13;// these functions are the same available in the TypedValues Java class&#13;&#13;outRecord.intTest = newIntegerValue(34)&#13;outRecord.timer = record.TIMER&#13;outRecord.timerHalf = newLongValue(record.TIMER.getValue() / 2)&#13;&#13;// the newByteArray function can be used to create a byte array of a given size&#13;var byteArray = newByteArray(4) &#13;byteArray[0] = 1&#13;byteArray[1] = 2&#13;byteArray[2] = 0xaa&#13;byteArray[3] = 0xbb&#13;&#13;outRecord.byteArrayTest = newByteArrayValue(byteArray)&#13;&#13;// add outRecord to the list of records to be emitted&#13;output.add(outRecord)&#13;&#13;// the script context is retained across different&#13;// invocations for a single ScriptFilter&#13;// this allows stateful computations&#13;&#13;// create a persistent counter&#13;counter = typeof(counter) === 'undefined' ? 0 : counter&#13;counter++&#13;&#13;// emit the counter value in a different WireRecord&#13;var counterRecord = newWireRecord()&#13;counterRecord.counter = newIntegerValue(counter)&#13;output.add(counterRecord)"
+            description="The Javascript code to be executed by this component when a wire envelope is received.|TextArea">
+        </AD>
+        
+        <AD id="script.context.drop"
+            name="script.context.drop"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="If set to true, the script context will be dropped and recreated when the component configuration is updated, resetting the values of global variables.">
+        </AD>
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.wire.ScriptFilter" factoryPid="org.eclipse.kura.wire.ScriptFilter">
+        <Object ocdref="org.eclipse.kura.wire.ScriptFilter"/>
+    </Designate>
+</MetaData>

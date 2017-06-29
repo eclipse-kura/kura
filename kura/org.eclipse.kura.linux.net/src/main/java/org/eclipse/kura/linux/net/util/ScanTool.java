@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,7 +22,7 @@ public abstract class ScanTool {
     public static IScanTool get(String ifaceName) throws KuraException {
         Collection<String> supportedWifiOptions = WifiOptions.getSupportedOptions(ifaceName);
         IScanTool scanTool = null;
-        if (supportedWifiOptions != null && supportedWifiOptions.size() > 0) {
+        if (!supportedWifiOptions.isEmpty()) {
             if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_NL80211)) {
                 scanTool = new iwScanTool(ifaceName);
             } else if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_WEXT)) {

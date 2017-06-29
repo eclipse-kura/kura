@@ -22,27 +22,18 @@
     </feature>
 
     <feature name="kura-linux-armv6hf" version="${project.version}" description="Eclipse Kura :: Linux :: ARMv6 HF">
-        <feature dependency="true">kura-linux-armv6hf-natives</feature>
+        <bundle start="false">mvn:org.eclipse.kura/org.eclipse.kura.linux.usb.armv6hf/${org.eclipse.kura.linux.usb.version}</bundle>
+        <bundle start="false">mvn:org.eclipse.kura/jdk.dio.armv6hf/${jdk.dio.version}</bundle>
+        <bundle start="false">mvn:org.eclipse.kura/com.codeminders.hidapi.armv6hf/${com.codeminders.hidapi.version}</bundle>
+        <bundle start="false">mvn:org.eclipse.kura/org.eclipse.soda.dk.comm.armv6hf/${org.eclipse.soda.dk.comm.version}</bundle>
         <feature>kura-linux</feature>
-    </feature>
-
-    <feature name="kura-linux-armv6hf-natives" version="${project.version}" hidden="true">
-        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.linux.usb.armv6hf/${org.eclipse.kura.linux.usb.version}</bundle>
-        <bundle>mvn:org.eclipse.kura/jdk.dio.armv6hf/${jdk.dio.version}</bundle>
-        <bundle>mvn:org.eclipse.kura/com.codeminders.hidapi.armv6hf/${com.codeminders.hidapi.version}</bundle>
-        <bundle>mvn:org.eclipse.kura/org.eclipse.soda.dk.comm.armv6hf/${org.eclipse.soda.dk.comm.version}</bundle>
     </feature>
 
     <feature name="kura-linux-x86_64" version="${project.version}" description="Eclipse Kura :: Linux :: x86-64">
-        <feature dependency="true">kura-linux-x86_64-natives</feature>
+    	<bundle start="false">mvn:org.eclipse.kura/org.eclipse.kura.linux.usb.x86_64/${org.eclipse.kura.linux.usb.version}</bundle>
+        <bundle start="false">mvn:org.eclipse.kura/jdk.dio.x86_64/${jdk.dio.version}</bundle>
+        <bundle start="false">mvn:org.eclipse.kura/com.codeminders.hidapi.x86_64/${com.codeminders.hidapi.version}</bundle>
+        <bundle start="false">mvn:org.eclipse.kura/org.eclipse.soda.dk.comm.x86_64/${org.eclipse.soda.dk.comm.version}</bundle>
         <feature>kura-linux</feature>
     </feature>
-
-    <feature name="kura-linux-x86_64-natives" version="${project.version}" hidden="true">
-        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.linux.usb.x86_64/${org.eclipse.kura.linux.usb.version}</bundle>
-        <bundle>mvn:org.eclipse.kura/jdk.dio.x86_64/${jdk.dio.version}</bundle>
-        <bundle>mvn:org.eclipse.kura/com.codeminders.hidapi.x86_64/${com.codeminders.hidapi.version}</bundle>
-        <bundle>mvn:org.eclipse.kura/org.eclipse.soda.dk.comm.x86_64/${org.eclipse.soda.dk.comm.version}</bundle>
-    </feature>
-
 </features>

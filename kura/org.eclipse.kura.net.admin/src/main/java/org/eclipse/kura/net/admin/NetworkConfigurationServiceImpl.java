@@ -156,11 +156,7 @@ public class NetworkConfigurationServiceImpl
             }
         }, 3, TimeUnit.MINUTES);
 
-        this.m_readVisitors = new ArrayList<NetworkConfigurationVisitor>();
-        this.m_readVisitors.add(LinuxReadVisitor.getInstance());
-
-        this.m_writeVisitors = new ArrayList<NetworkConfigurationVisitor>();
-        this.m_writeVisitors.add(LinuxWriteVisitor.getInstance());
+        initVisitors();
 
         // we are intentionally ignoring the properties from ConfigAdmin at startup
         if (properties == null) {
@@ -170,11 +166,27 @@ public class NetworkConfigurationServiceImpl
         }
     }
 
+    protected void initVisitors() {
+        this.m_readVisitors = new ArrayList<NetworkConfigurationVisitor>();
+        this.m_readVisitors.add(LinuxReadVisitor.getInstance());
+
+        this.m_writeVisitors = new ArrayList<NetworkConfigurationVisitor>();
+        this.m_writeVisitors.add(LinuxWriteVisitor.getInstance());
+    }
+
     protected void deactivate(ComponentContext componentContext) {
         s_logger.debug("deactivate()");
         this.m_writeVisitors = null;
         this.m_readVisitors = null;
         this.m_executorUtil.shutdownNow();
+    }
+
+    protected List<String> getAllInterfaceNames() throws KuraException {
+        return LinuxNetworkUtil.getAllInterfaceNames();
+    }
+
+    protected NetInterfaceType getNetworkType(String interfaceName) throws KuraException {
+        return LinuxNetworkUtil.getType(interfaceName);
     }
 
     @Override
@@ -225,7 +237,7 @@ public class NetworkConfigurationServiceImpl
                     StringBuilder sb = new StringBuilder();
                     sb.append("net.interface.").append(interfaceName).append(".type");
 
-                    NetInterfaceType type = LinuxNetworkUtil.getType(interfaceName);
+                    NetInterfaceType type = getNetworkType(interfaceName);
                     if (type == NetInterfaceType.UNKNOWN) {
                         if (interfaceName.matches(UNCONFIGURED_MODEM_REGEX)) {
                             // If the interface name is in a form such as "1-3.4" (USB address), assume it is a modem
@@ -427,10 +439,10 @@ public class NetworkConfigurationServiceImpl
 
         // Get the network interfaces on the platform
         try {
-            List<String> networkInterfaceNames = LinuxNetworkUtil.getAllInterfaceNames();
+            List<String> networkInterfaceNames = getAllInterfaceNames();
             for (String ifaceName : networkInterfaceNames) {
                 // get the current configuration for this interface
-                NetInterfaceType type = LinuxNetworkUtil.getType(ifaceName);
+                NetInterfaceType type = getNetworkType(ifaceName);
 
                 String prefix = "net.interface.";
 

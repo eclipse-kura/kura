@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -38,7 +39,6 @@ import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtChannelInfo;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
-import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.model.GwtWiresChannelType;
 import org.eclipse.kura.web.shared.model.GwtWiresDataType;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -396,7 +396,8 @@ public class PropertiesUi extends AbstractServicesUi {
                     final GwtConfigParameter newParam = copyOf(param);
                     newParam.setName(prefix + param.getName());
                     newParam.setId(prefix + param.getId());
-                    newParam.setValue(ci.get(param.getName()).toString());
+                    final Object value = ci.get(param.getName());
+                    newParam.setValue(value != null ? value.toString() : null);
                     this.configurableComponent.getParameters().add(newParam);
                 }
             }
@@ -546,9 +547,6 @@ public class PropertiesUi extends AbstractServicesUi {
 
     private Column<GwtChannelInfo, String> getInputCellColumn(final GwtConfigParameter param) {
         final String id = param.getId();
-        final GwtConfigParameterType type = param.getType();
-        final String max = param.getMax();
-        final String min = param.getMin();
         final ValidationInputCell cell = new ValidationInputCell();
         final Column<GwtChannelInfo, String> result = new Column<GwtChannelInfo, String>(cell) {
 
@@ -558,7 +556,7 @@ public class PropertiesUi extends AbstractServicesUi {
                 if (result != null) {
                     return result.toString();
                 }
-                return null;
+                return param.isRequired() ? param.getDefault() : null;
             }
         };
 
@@ -567,9 +565,7 @@ public class PropertiesUi extends AbstractServicesUi {
             @Override
             public void update(final int index, final GwtChannelInfo object, final String value) {
                 ValidationData viewData;
-                if (!PropertiesUi.this.validateType(type, value)
-                        || max != null && !PropertiesUi.this.validateMax(value, max)
-                        || min != null && !PropertiesUi.this.validateMin(value, min)) {
+                if (!isValid(param, value)) {
                     viewData = cell.getViewData(object);
                     viewData.setInvalid(true);
                     PropertiesUi.this.nonValidatedCells.add(object.getName());
@@ -591,27 +587,33 @@ public class PropertiesUi extends AbstractServicesUi {
 
     private Column<GwtChannelInfo, String> getSelectionInputColumn(final GwtConfigParameter param) {
         final String id = param.getId();
-        final Map<String, String> options = param.getOptions();
-        final ArrayList<String> opts = new ArrayList<>(options.keySet());
-        final SelectionCell cell = new SelectionCell(opts);
+        final Map<String, String> labelsToValues = param.getOptions();
+        final Map<String, String> valuesToLabels = new HashMap<>();
+        for (Entry<String, String> entry : labelsToValues.entrySet()) {
+            valuesToLabels.put(entry.getValue(), entry.getKey());
+        }
+        final ArrayList<String> labels = new ArrayList<>(labelsToValues.keySet());
+        final SelectionCell cell = new SelectionCell(new ArrayList<>(labels));
         final Column<GwtChannelInfo, String> result = new Column<GwtChannelInfo, String>(cell) {
 
             @Override
             public String getValue(final GwtChannelInfo object) {
                 Object result = object.get(id);
-                if (result != null) {
-                    return result.toString();
+                if (result == null) {
+                    final String defaultValue = param.getDefault();
+                    result = (defaultValue != null) ? defaultValue : labelsToValues.get(labels.get(0));
+                    object.set(id, result);
                 }
-                return null;
+                return valuesToLabels.get(result.toString());
             }
         };
 
         result.setFieldUpdater(new FieldUpdater<GwtChannelInfo, String>() {
 
             @Override
-            public void update(final int index, final GwtChannelInfo object, final String value) {
+            public void update(final int index, final GwtChannelInfo object, final String label) {
                 PropertiesUi.this.setDirty(true);
-                object.set(param.getId(), value);
+                object.set(param.getId(), labelsToValues.get(label));
                 PropertiesUi.this.channelTable.redraw();
             }
         });
@@ -624,7 +626,6 @@ public class PropertiesUi extends AbstractServicesUi {
         this.incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
     }
 
-    @SuppressWarnings("unchecked")
     private void initNewChannelModal() {
         this.newChannelModal.setTitle(MSGS.wiresCreateNewChannel());
         this.newChannelNameLabel.setText(MSGS.wiresCreateNewChannelName());
@@ -687,24 +688,6 @@ public class PropertiesUi extends AbstractServicesUi {
         });
     }
 
-    private boolean validateMax(final String value, final String maximum) {
-        final int val = Integer.parseInt(value);
-        final int max = Integer.parseInt(maximum);
-        if (val <= max) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean validateMin(final String value, final String minimum) {
-        final int val = Integer.parseInt(value);
-        final int min = Integer.parseInt(minimum);
-        if (val >= min) {
-            return true;
-        }
-        return false;
-    }
-
     private ValidationData validateChannelName(final String channelName) {
         ValidationData result = new ValidationData();
 
@@ -757,95 +740,6 @@ public class PropertiesUi extends AbstractServicesUi {
             suffix++;
         }
         return result;
-    }
-
-    private boolean validateType(final GwtConfigParameterType param, final String value) {
-        switch (param) {
-        case STRING:
-            return true;
-        case LONG:
-            return validateIfLong(value);
-        case DOUBLE:
-            return validateIfDouble(value);
-        case FLOAT:
-            return validateIfFloat(value);
-        case INTEGER:
-            return validateIfInteger(value);
-        case BYTE:
-            return validateIfByte(value);
-        case CHAR:
-            return Character.isLetter(value.charAt(0));
-        case BOOLEAN:
-            return validateIfBoolean(value);
-        case SHORT:
-            return validateIfShort(value);
-        default:
-            break;
-        }
-        return false;
-    }
-
-    private boolean validateIfShort(final String value) {
-        try {
-            Short.parseShort(value);
-            return true;
-        } catch (final NumberFormatException | NullPointerException e) {
-            return false;
-        }
-    }
-
-    private boolean validateIfBoolean(final String value) {
-        try {
-            Boolean.parseBoolean(value);
-            return true;
-        } catch (final NumberFormatException | NullPointerException e) {
-            return false;
-        }
-    }
-
-    private boolean validateIfByte(final String value) {
-        try {
-            Byte.parseByte(value);
-            return true;
-        } catch (final NumberFormatException | NullPointerException e) {
-            return false;
-        }
-    }
-
-    private boolean validateIfInteger(final String value) {
-        try {
-            Integer.parseInt(value);
-            return true;
-        } catch (final NumberFormatException | NullPointerException e) {
-            return false;
-        }
-    }
-
-    private boolean validateIfFloat(final String value) {
-        try {
-            Float.parseFloat(value);
-            return true;
-        } catch (final NumberFormatException | NullPointerException e) {
-            return false;
-        }
-    }
-
-    private boolean validateIfDouble(final String value) {
-        try {
-            Double.parseDouble(value);
-            return true;
-        } catch (final NumberFormatException | NullPointerException e) {
-            return false;
-        }
-    }
-
-    private boolean validateIfLong(final String value) {
-        try {
-            Long.parseLong(value);
-            return true;
-        } catch (final NumberFormatException | NullPointerException e) {
-            return false;
-        }
     }
 
 }

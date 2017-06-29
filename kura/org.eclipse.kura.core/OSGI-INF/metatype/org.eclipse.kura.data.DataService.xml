@@ -98,7 +98,46 @@
             default="0"
             min="0"
             description="Timeouts the in-flight messages congestion condition. The service will force a disconnect attempting to reconnect (0 to disable)."/>
-            
+        
+        <AD id="enable.rate.limit" 
+            name="enable.rate.limit" 
+            type="Boolean" 
+            cardinality="0" 
+            required="true" 
+            default="true"
+            description="Enables the token bucket message rate limiting." />
+
+        <AD id="rate.limit.average"
+            name="rate.limit.average"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="1"
+            min="1"
+            description="The average message publish rate in number of messages per unit of time. (e.g. 10 messages per MINUTE)"/>
+        
+        <AD id="rate.limit.time.unit"
+            name="rate.limit.time.unit"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="SECONDS"
+            description="The time unit for the rate.limit.average.">
+            <Option label="SECONDS" value="SECONDS" />
+            <Option label="MINUTES" value="MINUTES" />
+            <Option label="HOURS" value="HOURS" />
+            <Option label="DAYS" value="DAYS" />
+        </AD>
+        
+        <AD id="rate.limit.burst.size"
+            name="rate.limit.burst.size"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="1"
+            min="1"
+            description="The token bucket burst size."/>
+                                    
     </OCD>
     <Designate pid="org.eclipse.kura.data.DataService" factoryPid="org.eclipse.kura.data.DataService">
         <Object ocdref="org.eclipse.kura.data.DataService"/>

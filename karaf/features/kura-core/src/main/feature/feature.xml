@@ -14,6 +14,7 @@
 
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.api/${org.eclipse.kura.api.version}</bundle>
 
+        <bundle start-level="80">mvn:org.eclipse.paho/org.eclipse.paho.client.mqttv3/${org.eclipse.paho.client.mqttv3.version}</bundle>
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.core/${org.eclipse.kura.core.version}</bundle>
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.core.cloud/${org.eclipse.kura.core.cloud.version}</bundle>
         <bundle start-level="80">mvn:org.eclipse.kura/org.eclipse.kura.core.comm/${org.eclipse.kura.core.comm.version}</bundle>

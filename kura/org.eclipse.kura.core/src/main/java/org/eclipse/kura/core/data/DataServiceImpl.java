@@ -28,9 +28,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.KuraStoreException;
-import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -44,13 +42,16 @@ import org.eclipse.kura.db.DbService;
 import org.eclipse.kura.status.CloudConnectionStatusComponent;
 import org.eclipse.kura.status.CloudConnectionStatusEnum;
 import org.eclipse.kura.status.CloudConnectionStatusService;
+import org.eclipse.kura.watchdog.CriticalComponent;
+import org.eclipse.kura.watchdog.WatchdogService;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DataServiceImpl
-        implements DataService, DataTransportListener, ConfigurableComponent, CloudConnectionStatusComponent {
+public class DataServiceImpl implements DataService, DataTransportListener, ConfigurableComponent,
+        CloudConnectionStatusComponent, CriticalComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(DataServiceImpl.class);
 
@@ -58,6 +59,8 @@ public class DataServiceImpl
 
     private static final String AUTOCONNECT_PROP_NAME = "connect.auto-on-startup";
     private static final String CONNECT_DELAY_PROP_NAME = "connect.retry-interval";
+    private static final String CONNECT_CC_FAILURES_PROP_NAME = "connect.critical.component.failures";
+    private static final String CONNECT_CC_TIMEOUT_PROP_NAME = "connect.critical.component.timeout";
     private static final String DISCONNECT_DELAY_PROP_NAME = "disconnect.quiesce-timeout";
     private static final String STORE_HOUSEKEEPER_INTERVAL_PROP_NAME = "store.housekeeper-interval";
     private static final String STORE_PURGE_AGE_PROP_NAME = "store.purge-age";
@@ -65,15 +68,18 @@ public class DataServiceImpl
     private static final String REPUBLISH_IN_FLIGHT_MSGS_PROP_NAME = "in-flight-messages.republish-on-new-session";
     private static final String MAX_IN_FLIGHT_MSGS_PROP_NAME = "in-flight-messages.max-number";
     private static final String IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_PROP_NAME = "in-flight-messages.congestion-timeout";
+    private static final String CONNECTION_MONITOR_CHECKIN = "Connection monitor checkin";
 
-    private final Map<String, Object> properties = new HashMap<String, Object>();
+    private final Map<String, Object> properties = new HashMap<>();
 
     private DataTransportService dataTransportService;
     private DbService dbService;
     private DataServiceListenerS dataServiceListeners;
 
-    protected ScheduledExecutorService reconnectExecutor;
-    private ScheduledFuture<?> reconnectFuture;
+    protected ScheduledExecutorService monitorExecutor;
+    private ScheduledFuture<?> monitorFuture;
+
+    private int connectionAttempts = 0;
 
     // A dedicated executor for the publishing task
     private ScheduledExecutorService publisherExecutor;
@@ -87,6 +93,8 @@ public class DataServiceImpl
 
     private CloudConnectionStatusService cloudConnectionStatusService;
     private CloudConnectionStatusEnum notificationStatus = CloudConnectionStatusEnum.OFF;
+    private WatchdogService watchdogService;
+    private boolean watchdogEnabled;
 
     // ----------------------------------------------------------------
     //
@@ -98,7 +106,7 @@ public class DataServiceImpl
         String pid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
         logger.info("Activating {}...", pid);
 
-        this.reconnectExecutor = Executors.newSingleThreadScheduledExecutor();
+        this.monitorExecutor = Executors.newSingleThreadScheduledExecutor();
         this.publisherExecutor = Executors.newSingleThreadScheduledExecutor();
         this.congestionExecutor = Executors.newSingleThreadScheduledExecutor();
 
@@ -120,7 +128,7 @@ public class DataServiceImpl
             List<DataMessage> inFlightMsgs = this.store.allInFlightMessagesNoPayload();
 
             // The map associating a DataTransportToken with a message ID
-            this.inFlightMsgIds = new ConcurrentHashMap<DataTransportToken, Integer>();
+            this.inFlightMsgIds = new ConcurrentHashMap<>();
 
             if (inFlightMsgs != null) {
                 for (DataMessage message : inFlightMsgs) {
@@ -145,13 +153,13 @@ public class DataServiceImpl
 
         this.dataTransportService.addDataTransportListener(this);
 
-        startReconnectTask();
+        startConnectionMonitorTask();
     }
 
     public void updated(Map<String, Object> properties) {
         logger.info("Updating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
-        stopReconnectTask();
+        stopConnectionMonitorTask();
 
         this.properties.clear();
         this.properties.putAll(properties);
@@ -160,16 +168,14 @@ public class DataServiceImpl
                 (Integer) this.properties.get(STORE_PURGE_AGE_PROP_NAME),
                 (Integer) this.properties.get(STORE_CAPACITY_PROP_NAME));
 
-        if (!this.dataTransportService.isConnected()) {
-            startReconnectTask();
-        }
+        startConnectionMonitorTask();
     }
 
-    protected void deactivate(ComponentContext componentContext) {
+    protected void deactivate() {
         logger.info("Deactivating {}...", this.properties.get(ConfigurationService.KURA_SERVICE_PID));
 
-        stopReconnectTask();
-        this.reconnectExecutor.shutdownNow();
+        stopConnectionMonitorTask();
+        this.monitorExecutor.shutdownNow();
 
         this.congestionExecutor.shutdownNow();
 
@@ -216,6 +222,14 @@ public class DataServiceImpl
 
     public void unsetCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
         this.cloudConnectionStatusService = null;
+    }
+
+    public void setWatchdogService(WatchdogService watchdogService) {
+        this.watchdogService = watchdogService;
+    }
+
+    public void unsetWatchdogService(WatchdogService watchdogService) {
+        this.watchdogService = null;
     }
 
     @Override
@@ -298,11 +312,11 @@ public class DataServiceImpl
         try {
             future.get(TRANSPORT_TASK_TIMEOUT, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            logger.info("Interrupted while waiting for the publishing work to complete");
+            logger.info("Interrupted while waiting for the publishing work to complete", e);
         } catch (ExecutionException e) {
             logger.warn("ExecutionException while waiting for the publishing work to complete", e);
         } catch (TimeoutException e) {
-            logger.warn("Timeout while waiting for the publishing work to complete");
+            logger.warn("Timeout while waiting for the publishing work to complete", e);
         }
     }
 
@@ -318,14 +332,14 @@ public class DataServiceImpl
     @Override
     public void onConfigurationUpdating(boolean wasConnected) {
         logger.info("Notified DataTransportService configuration updating...");
-        stopReconnectTask();
+        stopConnectionMonitorTask();
         disconnect(0);
     }
 
     @Override
     public void onConfigurationUpdated(boolean wasConnected) {
         logger.info("Notified DataTransportService configuration updated.");
-        boolean autoConnect = startReconnectTask();
+        boolean autoConnect = startConnectionMonitorTask();
         if (!autoConnect && wasConnected) {
             try {
                 connect();
@@ -338,9 +352,6 @@ public class DataServiceImpl
     @Override
     public void onConnectionLost(Throwable cause) {
         logger.info("connectionLost");
-
-        stopReconnectTask(); // Just in case...
-        startReconnectTask();
 
         // Notify the listeners
         this.dataServiceListeners.onConnectionLost(cause);
@@ -398,7 +409,7 @@ public class DataServiceImpl
 
     @Override
     public void connect() throws KuraConnectException {
-        stopReconnectTask();
+        stopConnectionMonitorTask();
         if (!this.dataTransportService.isConnected()) {
             this.dataTransportService.connect();
         }
@@ -421,17 +432,17 @@ public class DataServiceImpl
 
     @Override
     public void disconnect(long quiesceTimeout) {
-        stopReconnectTask();
+        stopConnectionMonitorTask();
         this.dataTransportService.disconnect(quiesceTimeout);
     }
 
     @Override
-    public void subscribe(String topic, int qos) throws KuraTimeoutException, KuraException, KuraNotConnectedException {
+    public void subscribe(String topic, int qos) throws KuraException {
         this.dataTransportService.subscribe(topic, qos);
     }
 
     @Override
-    public void unsubscribe(String topic) throws KuraTimeoutException, KuraException, KuraNotConnectedException {
+    public void unsubscribe(String topic) throws KuraException {
         this.dataTransportService.unsubscribe(topic);
     }
 
@@ -466,8 +477,8 @@ public class DataServiceImpl
         return buildMessageIds(messages, topicRegex);
     }
 
-    private boolean startReconnectTask() {
-        if (this.reconnectFuture != null && !this.reconnectFuture.isDone()) {
+    private boolean startConnectionMonitorTask() {
+        if (this.monitorFuture != null && !this.monitorFuture.isDone()) {
             logger.error("Reconnect task already running");
             throw new IllegalStateException("Reconnect task already running");
         }
@@ -476,7 +487,15 @@ public class DataServiceImpl
         // Establish a reconnect Thread based on the reconnect interval
         boolean autoConnect = (Boolean) this.properties.get(AUTOCONNECT_PROP_NAME);
         int reconnectInterval = (Integer) this.properties.get(CONNECT_DELAY_PROP_NAME);
+        final int maxConnectionAttempts = (Integer) this.properties.get(CONNECT_CC_FAILURES_PROP_NAME);
+        this.watchdogEnabled = maxConnectionAttempts == 0 ? false : true;
         if (autoConnect) {
+
+            if (this.watchdogEnabled) {
+                this.watchdogService.registerCriticalComponent(this);
+                this.watchdogService.checkin(this);
+                this.connectionAttempts = 0;
+            }
 
             // Change notification status to slow blinking when connection is expected to happen in the future
             this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.SLOW_BLINKING);
@@ -486,116 +505,144 @@ public class DataServiceImpl
             int initialDelay = new Random().nextInt(maxDelay);
 
             logger.info("Starting reconnect task with initial delay {}", initialDelay);
-            this.reconnectFuture = this.reconnectExecutor.scheduleAtFixedRate(new Runnable() {
-
-                @Override
-                public void run() {
-                    String originalName = Thread.currentThread().getName();
-                    Thread.currentThread().setName("DataServiceImpl:ReconnectTask");
-                    boolean connected = false;
-                    try {
-                        logger.info("Connecting...");
-                        if (DataServiceImpl.this.dataTransportService.isConnected()) {
-                            logger.info("Already connected. Reconnect task will be terminated.");
-                        } else {
-                            DataServiceImpl.this.dataTransportService.connect();
-                            logger.info("Connected. Reconnect task will be terminated.");
-                        }
-                        connected = true;
-                    } catch (Exception e) {
-                        logger.warn("Connect failed", e);
-                    } catch (Error e) {
-                        // There's nothing we can do here but log an exception.
-                        logger.error("Unexpected Error. Task will be terminated", e);
-                        throw e;
-                    } finally {
-                        Thread.currentThread().setName(originalName);
-                        if (connected) {
-                            // Throwing an exception will suppress subsequent executions of this periodic task.
-                            throw new RuntimeException("Connected. Reconnect task will be terminated.");
-                        }
-                    }
-                }
-            }, initialDelay,       		// initial delay
-                    reconnectInterval,       // repeat every reconnect interval until we stopped.
+            Runnable r = () -> {
+                Thread.currentThread().setName("DataServiceImpl:MonitorTask");
+                monitorConnection(maxConnectionAttempts);
+            };
+            this.monitorFuture = this.monitorExecutor.scheduleAtFixedRate(r, initialDelay, reconnectInterval,
                     TimeUnit.SECONDS);
+
         } else {
             // Change notification status to off. Connection is not expected to happen in the future
             this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
+            if (this.watchdogEnabled) {
+                this.watchdogService.unregisterCriticalComponent(this);
+            }
         }
         return autoConnect;
     }
 
-    private void stopReconnectTask() {
-        if (this.reconnectFuture != null && !this.reconnectFuture.isDone()) {
+    private void stopConnectionMonitorTask() {
+        if (this.monitorFuture != null && !this.monitorFuture.isDone()) {
 
             logger.info("Reconnect task running. Stopping it");
 
-            this.reconnectFuture.cancel(true);
+            this.monitorFuture.cancel(true);
         }
+        if (this.watchdogEnabled) {
+            this.watchdogService.unregisterCriticalComponent(this);
+        }
+
+    }
+
+    private void monitorConnection(int maxConnectionAttempts) {
+        if (!isConnected()) {
+            boolean connected = false;
+            try {
+                logger.info("Connecting...");
+                DataServiceImpl.this.dataTransportService.connect();
+                logger.info("Connected. Reconnect task will be terminated.");
+                connected = true;
+            } catch (Exception e) {
+                logger.warn("Connect failed", e.getCause().getMessage());
+                if (this.watchdogEnabled && (!checkException(e) || this.connectionAttempts < maxConnectionAttempts)) {
+                    this.connectionAttempts++;
+                    this.watchdogService.checkin(DataServiceImpl.this);
+                    logger.debug(CONNECTION_MONITOR_CHECKIN + ": {}", this.connectionAttempts);
+                }
+            } catch (Error e) {
+                // Log the error and don't checkin the watchdog
+                logger.error("Unexpected Error", e);
+            } finally {
+                if (this.watchdogEnabled && connected) {
+                    logger.debug(CONNECTION_MONITOR_CHECKIN);
+                    this.watchdogService.checkin(DataServiceImpl.this);
+                }
+            }
+        } else if (this.watchdogEnabled) {
+            logger.debug(CONNECTION_MONITOR_CHECKIN);
+            this.watchdogService.checkin(DataServiceImpl.this);
+            this.connectionAttempts = 0;
+        }
+    }
+
+    private Boolean checkException(Exception exception) {
+        Boolean result = false;
+
+        if (exception == null || !(exception instanceof KuraConnectException)) {
+            result = false;
+        } else {
+            MqttException me = (MqttException) ((KuraConnectException) exception).getCause();
+            logger.debug("Connection monitor exception ReasonCode {} {}", me.getReasonCode(), me.getMessage());
+            if (me.getReasonCode() == MqttException.REASON_CODE_CLIENT_EXCEPTION
+                    || me.getReasonCode() > MqttException.REASON_CODE_NOT_AUTHORIZED) {
+                result = true;
+            }
+        }
+        return result;
     }
 
     private void disconnect() {
         long millis = (Integer) this.properties.get(DISCONNECT_DELAY_PROP_NAME) * 1000L;
         this.dataTransportService.disconnect(millis);
+        stopConnectionMonitorTask();
     }
 
     // Submit a new publishing work if any
     // TODO: only one instance of the Runnable is needed
     private Future<?> submitPublishingWork() {
-        return this.publisherExecutor.submit(new Runnable() {
-
-            @Override
-            public void run() {
-                Thread.currentThread().setName("DataServiceImpl:Submit");
-                if (!DataServiceImpl.this.dataTransportService.isConnected()) {
-                    logger.info("DataPublisherService not connected");
-                    return;
-                }
-                try {
-
-                    // Compared with getting all unpublished messages, getting one message at a time
-                    // is a little bit inefficient (we query the underlying DB every time)
-                    // but improves responsiveness to high priority message.
-                    // TODO: add a getUnpublishedMessages with a limit argument?
-                    // getNextMessage is a special case with limit = 1.
-                    DataMessage message = null;
-                    while ((message = DataServiceImpl.this.store.getNextMessage()) != null) {
-
-                        // Further limit the maximum number of in-flight messages
-                        if (message.getQos() > 0) {
-                            if (DataServiceImpl.this.inFlightMsgIds.size() >= (Integer) DataServiceImpl.this.properties
-                                    .get(MAX_IN_FLIGHT_MSGS_PROP_NAME)) {
-                                logger.warn("The configured maximum number of in-flight messages has been reached");
-                                handleInFlightCongestion();
-                                break;
-                            }
-                        }
-
-                        publishInternal(message);
-
-                        // TODO: add a 'message throttle' configuration parameter to
-                        // slow down publish rate?
-
-                        // Notify the listeners
-                        DataServiceImpl.this.dataServiceListeners.onMessagePublished(message.getId(),
-                                message.getTopic());
-                    }
-                } catch (KuraConnectException e) {
-                    logger.info("DataPublisherService is not connected", e);
-                } catch (KuraTooManyInflightMessagesException e) {
-                    logger.info("Too many in-flight messages", e);
-                    handleInFlightCongestion();
-                } catch (Exception e) {
-                    logger.error("Probably an unrecoverable exception", e);
-                }
+        Runnable r = () -> {
+            Thread.currentThread().setName("DataServiceImpl:Submit");
+            if (!DataServiceImpl.this.dataTransportService.isConnected()) {
+                logger.info("DataPublisherService not connected");
+                return;
             }
-        });
+            publishWork();
+        };
+        return this.publisherExecutor.submit(r);
+    }
+
+    private void publishWork() {
+        try {
+
+            // Compared with getting all unpublished messages, getting one message at a time
+            // is a little bit inefficient (we query the underlying DB every time)
+            // but improves responsiveness to high priority message.
+            // TODO: add a getUnpublishedMessages with a limit argument?
+            // getNextMessage is a special case with limit = 1.
+            DataMessage message = null;
+            while ((message = DataServiceImpl.this.store.getNextMessage()) != null) {
+
+                // Further limit the maximum number of in-flight messages
+                if (message.getQos() > 0) {
+                    if (DataServiceImpl.this.inFlightMsgIds
+                            .size() >= (Integer) DataServiceImpl.this.properties.get(MAX_IN_FLIGHT_MSGS_PROP_NAME)) {
+                        logger.warn("The configured maximum number of in-flight messages has been reached");
+                        handleInFlightCongestion();
+                        break;
+                    }
+                }
+
+                publishInternal(message);
+
+                // TODO: add a 'message throttle' configuration parameter to
+                // slow down publish rate?
+
+                // Notify the listeners
+                DataServiceImpl.this.dataServiceListeners.onMessagePublished(message.getId(), message.getTopic());
+            }
+        } catch (KuraConnectException e) {
+            logger.info("DataPublisherService is not connected", e);
+        } catch (KuraTooManyInflightMessagesException e) {
+            logger.info("Too many in-flight messages", e);
+            handleInFlightCongestion();
+        } catch (Exception e) {
+            logger.error("Probably an unrecoverable exception", e);
+        }
     }
 
     // It's very important that the publishInternal and messageConfirmed methods are synchronized
-    private synchronized void publishInternal(DataMessage message)
-            throws KuraConnectException, KuraTooManyInflightMessagesException, KuraStoreException, KuraException {
+    private synchronized void publishInternal(DataMessage message) throws KuraException {
 
         String topic = message.getTopic();
         byte[] payload = message.getPayload();
@@ -627,7 +674,7 @@ public class DataServiceImpl
 
     private List<Integer> buildMessageIds(List<DataMessage> messages, String topicRegex) {
         Pattern topicPattern = Pattern.compile(topicRegex);
-        List<Integer> ids = new ArrayList<Integer>();
+        List<Integer> ids = new ArrayList<>();
 
         if (messages != null) {
             for (DataMessage message : messages) {
@@ -647,17 +694,15 @@ public class DataServiceImpl
         // Do not schedule more that one task at a time
         if (timeout != 0 && (this.congestionFuture == null || this.congestionFuture.isDone())) {
             logger.warn("In-flight message congestion timeout started");
-            this.congestionFuture = this.congestionExecutor.schedule(new Runnable() {
-
-                @Override
-                public void run() {
-                    Thread.currentThread().setName("DataServiceImpl:InFlightCongestion");
-                    logger.warn("In-flight message congestion timeout elapsed. Disconnecting and reconnecting again");
-                    disconnect();
-                    startReconnectTask();
-                }
-            }, timeout, TimeUnit.SECONDS);
+            Runnable r = () -> {
+                Thread.currentThread().setName("DataServiceImpl:InFlightCongestion");
+                logger.warn("In-flight message congestion timeout elapsed. Disconnecting and reconnecting again");
+                disconnect();
+                startConnectionMonitorTask();
+            };
+            this.congestionFuture = this.congestionExecutor.schedule(r, timeout, TimeUnit.SECONDS);
         }
+
     }
 
     private void handleInFlightDecongestion() {
@@ -679,5 +724,15 @@ public class DataServiceImpl
     @Override
     public void setNotificationStatus(CloudConnectionStatusEnum status) {
         this.notificationStatus = status;
+    }
+
+    @Override
+    public String getCriticalComponentName() {
+        return "DataServiceImpl";
+    }
+
+    @Override
+    public int getCriticalComponentTimeout() {
+        return Math.max((Integer) this.properties.get(CONNECT_CC_TIMEOUT_PROP_NAME) * 1000, getRetryInterval() * 1500);
     }
 }

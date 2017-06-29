@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -35,6 +35,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -49,13 +50,15 @@ public class BundlesTabUi extends Composite {
     interface BundlesTabUiUiBinder extends UiBinder<Widget, BundlesTabUi> {
     }
 
-    private boolean isRequestRunning = false;
-
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final ValidationMessages msgs = GWT.create(ValidationMessages.class);
+    private static final String ROW_HEADER_STYLE = "rowHeader";
+    private static final String STATUS_TABLE_ROW_STYLE = "status-table-row";
 
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
+
+    private boolean isRequestRunning = false;
 
     @UiField
     Button bundlesRefresh;
@@ -215,7 +218,6 @@ public class BundlesTabUi extends Composite {
     }
 
     private void loadBundlesTable(CellTable<GwtGroupedNVPair> bundlesGrid2,
-
             ListDataProvider<GwtGroupedNVPair> dataProvider) {
 
         TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
@@ -225,8 +227,10 @@ public class BundlesTabUi extends Composite {
                 return object.getId();
             }
         };
-        col1.setCellStyleNames("status-table-row");
-        bundlesGrid2.addColumn(col1, MSGS.deviceBndId());
+        col1.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
+        TextHeader id = new TextHeader(MSGS.deviceBndId());
+        id.setHeaderStyleNames(ROW_HEADER_STYLE);
+        bundlesGrid2.addColumn(col1, id);
 
         TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
 
@@ -235,8 +239,10 @@ public class BundlesTabUi extends Composite {
                 return object.getName();
             }
         };
-        col2.setCellStyleNames("status-table-row");
-        bundlesGrid2.addColumn(col2, MSGS.deviceBndName());
+        col2.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
+        TextHeader name = new TextHeader(MSGS.deviceBndName());
+        name.setHeaderStyleNames(ROW_HEADER_STYLE);
+        bundlesGrid2.addColumn(col2, name);
 
         TextColumn<GwtGroupedNVPair> col3 = new TextColumn<GwtGroupedNVPair>() {
 
@@ -245,8 +251,10 @@ public class BundlesTabUi extends Composite {
                 return msgs.getString(object.getStatus());
             }
         };
-        col3.setCellStyleNames("status-table-row");
-        bundlesGrid2.addColumn(col3, MSGS.deviceBndState());
+        col3.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
+        TextHeader state = new TextHeader(MSGS.deviceBndState());
+        state.setHeaderStyleNames(ROW_HEADER_STYLE);
+        bundlesGrid2.addColumn(col3, state);
 
         TextColumn<GwtGroupedNVPair> col4 = new TextColumn<GwtGroupedNVPair>() {
 
@@ -255,8 +263,10 @@ public class BundlesTabUi extends Composite {
                 return object.getVersion();
             }
         };
-        col4.setCellStyleNames("status-table-row");
-        bundlesGrid2.addColumn(col4, MSGS.deviceBndVersion());
+        col4.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
+        TextHeader version = new TextHeader(MSGS.deviceBndVersion());
+        version.setHeaderStyleNames(ROW_HEADER_STYLE);
+        bundlesGrid2.addColumn(col4, version);
 
         dataProvider.addDataDisplay(bundlesGrid2);
     }

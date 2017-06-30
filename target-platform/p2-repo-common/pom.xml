@@ -32,11 +32,11 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- Copying common artifacts across all platforms into a known location 
-				${project.build.directory}/plugins/common is only one way how to create content 
-				to be published. Any other source of bundles and/or features can be used 
-				to be published as long as it end up in ${project.basedir}/target/source/plugins 
-				and or ~/features The publisher will use every content that is located in 
+			<!-- Copying common artifacts across all platforms into a known location
+				${project.build.directory}/plugins/common is only one way how to create content
+				to be published. Any other source of bundles and/or features can be used
+				to be published as long as it end up in ${project.basedir}/target/source/plugins
+				and or ~/features The publisher will use every content that is located in
 				this directory -->
 			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -124,6 +124,11 @@
 									<groupId>org.hsqldb</groupId>
 									<artifactId>org.hsqldb.hsqldb</artifactId>
 									<version>${org.hsqldb.hsqldb.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>com.h2database</groupId>
+									<artifactId>h2</artifactId>
+									<version>${com.h2database.h2.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
@@ -284,6 +289,7 @@
 								<move file="target/source/plugins/org.hamcrest.core.jar" tofile="target/source/plugins/org.hamcrest.core_${org.hamcrest.core.version}.jar"/>
 								<move file="target/source/plugins/org.usb4java.jar" tofile="target/source/plugins/org.usb4java_${org.usb4java.version}.jar"/>
 								<move file="target/source/plugins/org.hsqldb.hsqldb.jar" tofile="target/source/plugins/org.hsqldb.hsqldb_${org.hsqldb.hsqldb.version}.jar"/>
+								<move file="target/source/plugins/h2.jar" tofile="target/source/plugins/h2_${com.h2database.h2.version}.jar"/>
 								<move file="target/source/plugins/jdk.dio.jar" tofile="target/source/plugins/jdk.dio_${jdk.dio.version}.jar"/>
 								<move file="target/source/plugins/jdk.dio.armv6hf.jar" tofile="target/source/plugins/jdk.dio.armv6hf_${jdk.dio.version}.jar"/>
 								<move file="target/source/plugins/jdk.dio.x86_64.jar" tofile="target/source/plugins/jdk.dio.x86_64_${jdk.dio.version}.jar"/>

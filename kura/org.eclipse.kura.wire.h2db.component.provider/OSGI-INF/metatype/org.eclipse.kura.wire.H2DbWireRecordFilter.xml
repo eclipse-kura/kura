@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2017 Eurotech and/or its affiliates and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+     
+     Contributors:
+      Eurotech
+      Amit Kumar Mondal
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.wire.H2DbWireRecordFilter"
+         name="H2 DB Filter" 
+         description="A wire component that provides filtering and aggregation for Wire Records stored by the DbWireRecordStores.">
+
+        <AD id="sql.view"
+        	name="sql.view"
+        	type="String"
+        	cardinality="0"
+        	required="true"
+        	default="SELECT * FROM &quot;WR_data&quot; LIMIT 10;"
+        	description="SQL to be executed to build a view">
+        </AD>
+        
+        <AD id="cache.expiration.interval"
+        	name="cache.expiration.interval"
+        	type="Integer"
+        	cardinality="0"
+        	required="true"
+        	default="60"
+        	min="0"
+        	description="This value specifies the cache validity in seconds. When cache expires, it will cause a new read in the database. A database read will be performed for every trigger received if the value is set to 0.">
+        </AD>
+        
+        <AD id="db.service.pid"
+            name="db.service.pid"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="org.eclipse.kura.db.H2DbService"
+            description="The Kura service pid of the H2 database instance to be used. The pid of the default instance is org.eclipse.kura.db.H2DbService."/>
+
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.wire.H2DbWireRecordFilter" factoryPid="org.eclipse.kura.wire.H2DbWireRecordFilter">
+        <Object ocdref="org.eclipse.kura.wire.H2DbWireRecordFilter"/>
+    </Designate>
+</MetaData>

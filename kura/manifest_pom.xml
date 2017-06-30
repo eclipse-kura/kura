@@ -64,6 +64,7 @@
         <module>org.eclipse.kura.web2</module>
         <module>org.eclipse.kura.wire.script.filter.localization</module>
         <module>org.eclipse.kura.wire.script.filter.provider</module>
+        <module>org.eclipse.kura.wire.h2db.component.provider</module>
         <module>org.eclipse.kura.wire.component.provider</module>
         <module>org.eclipse.kura.wire.helper.provider</module>
         <module>org.eclipse.kura.wire.provider</module>

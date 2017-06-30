@@ -101,7 +101,7 @@ public class NetworkConfigurationServiceimplTest {
 
         verify(bundleCtxMock, times(1)).registerService(eq(EventHandler.class.getName()), eq(svc), anyObject());
 
-        ScheduledExecutorService executor = (ScheduledExecutorService) TestUtil.getFieldValue(svc, "m_executorUtil");
+        ScheduledExecutorService executor = (ScheduledExecutorService) TestUtil.getFieldValue(svc, "executorUtil");
 
         assertNotNull(executor);
         assertFalse(executor.isShutdown());
@@ -159,7 +159,7 @@ public class NetworkConfigurationServiceimplTest {
 
         assertTrue(posted.get());
 
-        assertFalse((boolean) TestUtil.getFieldValue(svc, "m_firstConfig"));
+        assertFalse((boolean) TestUtil.getFieldValue(svc, "firstConfig"));
     }
 
     @Test
@@ -168,11 +168,11 @@ public class NetworkConfigurationServiceimplTest {
 
         NetworkConfigurationServiceImpl svc = new NetworkConfigurationServiceImpl();
 
-        assertTrue((boolean) TestUtil.getFieldValue(svc, "m_firstConfig"));
+        assertTrue((boolean) TestUtil.getFieldValue(svc, "firstConfig"));
 
         svc.updated(null);
 
-        assertFalse((boolean) TestUtil.getFieldValue(svc, "m_firstConfig"));
+        assertFalse((boolean) TestUtil.getFieldValue(svc, "firstConfig"));
     }
 
     @Test
@@ -184,7 +184,7 @@ public class NetworkConfigurationServiceimplTest {
         EventAdmin eventAdminMock = mock(EventAdmin.class);
         svc.setEventAdmin(eventAdminMock);
 
-        TestUtil.setFieldValue(svc, "m_firstConfig", false);
+        TestUtil.setFieldValue(svc, "firstConfig", false);
 
         svc.updated(null);
 
@@ -206,7 +206,7 @@ public class NetworkConfigurationServiceimplTest {
         EventAdmin eventAdminMock = mock(EventAdmin.class);
         svc.setEventAdmin(eventAdminMock);
 
-        TestUtil.setFieldValue(svc, "m_firstConfig", false);
+        TestUtil.setFieldValue(svc, "firstConfig", false);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("modified.interface.names", "testIntf");
@@ -252,7 +252,7 @@ public class NetworkConfigurationServiceimplTest {
             return null;
         }).when(eventAdminMock).postEvent(anyObject());
 
-        TestUtil.setFieldValue(svc, "m_firstConfig", false);
+        TestUtil.setFieldValue(svc, "firstConfig", false);
 
         List<NetworkConfigurationVisitor> visitors = new ArrayList<>();
         NetworkConfigurationVisitor visitor = new NetworkConfigurationVisitor() {
@@ -268,7 +268,7 @@ public class NetworkConfigurationServiceimplTest {
             }
         };
         visitors.add(visitor);
-        TestUtil.setFieldValue(svc, "m_writeVisitors", visitors);
+        TestUtil.setFieldValue(svc, "writeVisitors", visitors);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("modified.interface.names", "testIntf");
@@ -347,7 +347,7 @@ public class NetworkConfigurationServiceimplTest {
             }
         };
         visitors.add(visitor);
-        TestUtil.setFieldValue(svc, "m_readVisitors", visitors);
+        TestUtil.setFieldValue(svc, "readVisitors", visitors);
 
         NetworkConfiguration networkConfiguration = svc.getNetworkConfiguration();
 
@@ -395,7 +395,7 @@ public class NetworkConfigurationServiceimplTest {
             }
         };
         visitors.add(visitor);
-        TestUtil.setFieldValue(svc, "m_readVisitors", visitors);
+        TestUtil.setFieldValue(svc, "readVisitors", visitors);
 
         UsbService usbServiceMock = mock(UsbService.class);
         svc.setUsbService(usbServiceMock);
@@ -479,7 +479,7 @@ public class NetworkConfigurationServiceimplTest {
             }
         };
         visitors.add(visitor);
-        TestUtil.setFieldValue(svc, "m_readVisitors", visitors);
+        TestUtil.setFieldValue(svc, "readVisitors", visitors);
 
         UsbService usbServiceMock = mock(UsbService.class);
         svc.setUsbService(usbServiceMock);

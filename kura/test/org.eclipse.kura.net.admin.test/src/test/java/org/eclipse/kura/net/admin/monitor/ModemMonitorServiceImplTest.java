@@ -71,7 +71,7 @@ public class ModemMonitorServiceImplTest {
 
         verify(bctxMock, times(1)).registerService(eq(EventHandler.class.getName()), eq(svc), anyObject());
 
-        assertTrue((boolean) TestUtil.getFieldValue(svc, "m_serviceActivated"));
+        assertTrue((boolean) TestUtil.getFieldValue(svc, "serviceActivated"));
     }
 
     @Test
@@ -107,8 +107,8 @@ public class ModemMonitorServiceImplTest {
 
         verify(bctxMock, times(1)).registerService(eq(EventHandler.class.getName()), eq(svc), anyObject());
 
-        assertTrue((boolean) TestUtil.getFieldValue(svc, "m_serviceActivated"));
-        assertTrue(((Map) TestUtil.getFieldValue(svc, "m_modems")).isEmpty());
+        assertTrue((boolean) TestUtil.getFieldValue(svc, "serviceActivated"));
+        assertTrue(((Map) TestUtil.getFieldValue(svc, "modems")).isEmpty());
     }
 
     @Test
@@ -214,9 +214,9 @@ public class ModemMonitorServiceImplTest {
         verify(bctxMock, times(1)).registerService(eq(EventHandler.class.getName()), eq(svc), anyObject());
         verify(eaMock, times(3)).postEvent(anyObject());
 
-        assertTrue((boolean) TestUtil.getFieldValue(svc, "m_serviceActivated"));
+        assertTrue((boolean) TestUtil.getFieldValue(svc, "serviceActivated"));
 
-        Map modems = (Map) TestUtil.getFieldValue(svc, "m_modems");
+        Map modems = (Map) TestUtil.getFieldValue(svc, "modems");
         assertEquals(1, modems.size());
         CellularModem modem = (CellularModem) modems.get("usb0");
         assertNotNull(modem);

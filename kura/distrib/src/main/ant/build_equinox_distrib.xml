@@ -280,9 +280,6 @@ fi]]>
 		<!-- Populate parameters -->
 		<copy file="src/main/resources/${build.name}/kura_install.sh"
               tofile="${project.build.directory}/${build.output.name}/kura_install.sh" />
-		<copy file="src/main/resources/common/kura.init.wrl"
-              tofile="${project.build.directory}/${build.output.name}/kura.init.wrl"
-              failonerror="false" />
 		<copy file="src/main/resources/common/kura.init.yocto"
               tofile="${project.build.directory}/${build.output.name}/kura.init.yocto"
               failonerror="false" />
@@ -293,7 +290,6 @@ fi]]>
               tofile="${project.build.directory}/${build.output.name}/kura.service"
         	  failonerror="false" />
 		<replaceregexp file="${project.build.directory}/${build.output.name}/kura_install.sh" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
-		<replaceregexp file="${project.build.directory}/${build.output.name}/kura.init.wrl" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
 		<replaceregexp file="${project.build.directory}/${build.output.name}/kura.init.yocto" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
 		<replaceregexp file="${project.build.directory}/${build.output.name}/kura.init.raspbian" match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
 		<replaceregexp file="${project.build.directory}/${build.output.name}/kura.service" match="INSTALL_DIR" replace="${kura.install.dir}" />
@@ -321,8 +317,6 @@ fi]]>
 			<zipfileset file="src/main/resources/${build.name}/kuranet.conf"
                         prefix="${build.output.name}/install/" />
 
-			<zipfileset file="${project.build.directory}/${build.output.name}/kura.init.wrl"
-                        prefix="${build.output.name}/install" />
 			<zipfileset file="${project.build.directory}/${build.output.name}/kura.init.yocto"
                         prefix="${build.output.name}/install" />
 			<zipfileset file="${project.build.directory}/${build.output.name}/kura.init.raspbian"

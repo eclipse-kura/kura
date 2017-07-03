@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2014 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2017 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -44,6 +44,14 @@
             default="10"
             min="0"
             description="Timeout used to try to complete the delivery of stored messages before forcing a disconnect of the Data Publisher."/>
+
+        <AD id="store.db.service.pid"
+            name="store.db.service.pid"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="org.eclipse.kura.db.H2DbService"
+            description="The Kura service pid of the H2 database instance to be used. The pid of the default instance is org.eclipse.kura.db.H2DbService."/>
 
         <AD id="store.housekeeper-interval"
             name="store.housekeeper-interval"

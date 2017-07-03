@@ -14,7 +14,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.wire.H2DbWireRecordFilter"
          name="H2 DB Filter" 
-         description="A wire component that provides filtering and aggregation for Wire Records stored by the DbWireRecordStores.">
+         description="A wire component that provides filtering and aggregation for Wire Records stored by the H2DbWireRecordStores.">
 
         <AD id="sql.view"
         	name="sql.view"

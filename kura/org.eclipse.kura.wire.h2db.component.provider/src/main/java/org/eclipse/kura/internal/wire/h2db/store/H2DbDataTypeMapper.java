@@ -5,11 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *  
+ *
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.h2db.store;
 
@@ -28,8 +28,7 @@ import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.util.collection.CollectionUtil;
 
 /**
- * The Class DbDataTypeMapper maps all the Kura specific data types to JDBC Data
- * Types
+ * This class maps all the Kura specific data types to JDBC Data Types
  */
 public final class H2DbDataTypeMapper {
 
@@ -41,36 +40,17 @@ public final class H2DbDataTypeMapper {
 
         private final int type;
 
-        /** The JDBC type represented as string. */
         private final String typeStr;
 
-        /**
-         * Instantiates a new JDBC type.
-         *
-         * @param type
-         *            the type
-         * @param typeStr
-         *            the type string
-         */
         JdbcType(final int type, final String typeStr) {
             this.type = type;
             this.typeStr = typeStr;
         }
 
-        /**
-         * Gets the type.
-         *
-         * @return the type
-         */
         int getType() {
             return this.type;
         }
 
-        /**
-         * Gets the type string.
-         *
-         * @return the type string
-         */
         String getTypeString() {
             return this.typeStr;
         }

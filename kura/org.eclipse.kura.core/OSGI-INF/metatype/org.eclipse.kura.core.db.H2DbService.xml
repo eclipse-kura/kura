@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2017 Eurotech and/or its affiliates, and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.htmls
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.core.db.H2DbService" 
+         name="DbService" 
+         description="H2 based database service.">
+
+        <AD id="db.connector.url"
+            name="db.connector.url"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="jdbc:h2:mem:kuradb"
+            description="JDBC connector URL of the database instance. See http://www.h2database.com/html/features.html for more information. 
+            Passing the USER and PASSWORD parameters in the connector URL is not supported, these paramters will be ignored if present. 
+            Please use the db.user and db.password fields to provide the credentials."/>
+
+        <AD id="db.user"
+            name="db.user"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="SA"
+            description="Specifies the user for the database connection."/>
+
+        <AD id="db.password"
+            name="db.password"
+            type="Password"
+            cardinality="0" 
+            required="false"
+            default=""
+            description="Specifies the password. The default password is the empty string."/>
+            
+        <AD id="db.checkpoint.interval.seconds"
+            name="db.checkpoint.interval.seconds"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="900"
+            min="5"
+            description="DbService instances support running periodic checkpoints to ensure data consistency. This parameter specifies the interval in seconds beetween two successive checkpoints. This setting has no effect for in-memory database instances."/>
+            
+         <AD id="db.connection.pool.max.size"
+            name="db.connection.pool.max.size"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="10"
+            min="1"
+            description="The H2DbService manages connections using a connection pool. This parameter defines the maximum number of connections for the pool"/>
+        </OCD>
+    <Designate pid="org.eclipse.kura.core.db.H2DbService" factoryPid="org.eclipse.kura.core.db.H2DbService">
+        <Object ocdref="org.eclipse.kura.core.db.H2DbService"/>
+    </Designate>
+</MetaData>

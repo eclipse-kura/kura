@@ -13,14 +13,19 @@ package org.eclipse.kura.core.data;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.db.H2DbService;
 
 public class DataServiceOptions {
 
     private static final String AUTOCONNECT_PROP_NAME = "connect.auto-on-startup";
     private static final String CONNECT_DELAY_PROP_NAME = "connect.retry-interval";
     private static final String DISCONNECT_DELAY_PROP_NAME = "disconnect.quiesce-timeout";
+    private static final String STORE_DB_SERVICE_INSTANCE_PROP_NAME = "store.db.service.pid";
     private static final String STORE_HOUSEKEEPER_INTERVAL_PROP_NAME = "store.housekeeper-interval";
     private static final String STORE_PURGE_AGE_PROP_NAME = "store.purge-age";
     private static final String STORE_CAPACITY_PROP_NAME = "store.capacity";
@@ -35,6 +40,7 @@ public class DataServiceOptions {
     private static final boolean AUTOCONNECT_PROP_DEFAULT = false;
     private static final int CONNECT_DELAY_DEFAULT = 60;
     private static final int DISCONNECT_DELAY_DEFAULT = 10;
+    private static final String DB_SERVICE_INSTANCE_DEFAULT = H2DbService.DEFAULT_INSTANCE_PID;
     private static final int STORE_HOUSEKEEPER_INTERVAL_DEFAULT = 900;
     private static final int STORE_PURGE_AGE_DEFAULT = 60;
     private static final int STORE_CAPACITY_DEFAULT = 10000;
@@ -50,7 +56,7 @@ public class DataServiceOptions {
 
     DataServiceOptions(Map<String, Object> properties) {
         requireNonNull(properties, "Required not null");
-        this.properties = properties;
+        this.properties = new HashMap<>(properties);
     }
 
     int getStoreHousekeeperInterval() {
@@ -124,5 +130,13 @@ public class DataServiceOptions {
         }
 
         return timeUnit.toMillis(1);
+    }
+
+    String getDbServiceInstancePid() {
+        return (String) this.properties.getOrDefault(STORE_DB_SERVICE_INSTANCE_PROP_NAME, DB_SERVICE_INSTANCE_DEFAULT);
+    }
+
+    String getKuraServicePid() {
+        return (String) this.properties.get(ConfigurationService.KURA_SERVICE_PID);
     }
 }

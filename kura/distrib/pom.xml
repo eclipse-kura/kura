@@ -314,6 +314,11 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.eclipse.kura.wire.h2db.component.provider</artifactId>
+									<version>${org.eclipse.kura.wire.h2db.component.provider.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>org.eclipse.kura.wire.component.provider</artifactId>
 									<version>${org.eclipse.kura.wire.component.provider.version}</version>
 								</artifactItem>
@@ -468,7 +473,8 @@
   								<move file="target/plugins/org.eclipse.kura.emulator.watchdog.jar" tofile="target/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar" />
   								<move file="target/plugins/org.eclipse.kura.example.camel.aggregation.jar" tofile="target/plugins/org.eclipse.kura.example.camel.aggregation_${org.eclipse.kura.example.camel.aggregation.version}.jar" failonerror="false"/>
 								<move file="target/plugins/org.eclipse.kura.example.camel.quickstart.jar" tofile="target/plugins/org.eclipse.kura.example.camel.quickstart_${org.eclipse.kura.example.camel.quickstart.version}.jar" failonerror="false"/>
-							    <move file="target/plugins/org.eclipse.kura.wire.component.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar"/>
+									<move file="target/plugins/org.eclipse.kura.wire.h2db.component.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.h2db.component.provider_${org.eclipse.kura.wire.h2db.component.provider.version}.jar"/>
+									<move file="target/plugins/org.eclipse.kura.wire.component.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.wire.helper.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.helper.provider_${org.eclipse.kura.wire.helper.provider.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.wire.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar"/>
 							    <move file="target/plugins/org.eclipse.kura.driver.opcua.localization.jar" tofile="target/plugins/org.eclipse.kura.driver.opcua.localization_${org.eclipse.kura.driver.opcua.localization.version}.jar"/>
@@ -904,7 +910,7 @@
 				</plugins>
 			</build>
 		</profile>
-		<profile>		
+		<profile>
 			<id>apu-debian-nn</id>
 				<properties>
 					<project.raspbian.dependencies.nn>dos2unix, unzip, telnet, default-jre-headless | java7-runtime-headless</project.raspbian.dependencies.nn>
@@ -936,7 +942,7 @@
 								</execution>
 							</executions>
 						</plugin>
-					
+
 						<plugin>
 							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-antrun-plugin</artifactId>
@@ -2099,9 +2105,9 @@
 					</plugin>
 				</plugins>
 			</build>
-		</profile>	
+		</profile>
 
-		
+
 		<profile>
 			<id>dev-env</id>
 			<activation>
@@ -2425,7 +2431,7 @@
 										<move
 											file="${project.build.directory}/staging/publisher/publisher.classpath"
 											tofile="${project.build.directory}/staging/publisher/.classpath" />
-                                            
+
                                         <!-- Stage the org.eclipse.kura.example.camel.quickstart Project -->
                                         <copy todir="${project.build.directory}/staging/camel_quickstart">
                                             <fileset dir="../examples/org.eclipse.kura.example.camel.quickstart" />
@@ -2443,7 +2449,7 @@
                                         <move
                                             file="${project.build.directory}/staging/camel_quickstart/camel_quickstart.classpath"
                                             tofile="${project.build.directory}/staging/camel_quickstart/.classpath" />
-                                            
+
                                         <!-- Stage the org.eclipse.kura.example.camel.publisher Project -->
                                         <copy todir="${project.build.directory}/staging/camel_publisher">
                                             <fileset dir="../examples/org.eclipse.kura.example.camel.publisher" />
@@ -2461,7 +2467,7 @@
                                         <move
                                             file="${project.build.directory}/staging/camel_publisher/camel_publisher.classpath"
                                             tofile="${project.build.directory}/staging/camel_publisher/.classpath" />
-                                            
+
                                         <!-- Stage the org.eclipse.kura.example.camel.aggregation Project -->
                                         <copy todir="${project.build.directory}/staging/camel_aggregation">
                                             <fileset dir="../examples/org.eclipse.kura.example.camel.aggregation" />
@@ -2583,7 +2589,7 @@
 									</target>
 								</configuration>
 							</execution>
-							
+
 							<execution>
 								<id>camel-aggregation-dp</id>
 								<phase>install</phase>
@@ -2597,7 +2603,7 @@
 									</target>
 								</configuration>
 							</execution>
-							
+
 							<execution>
 								<id>camel-quickstart-dp</id>
 								<phase>install</phase>
@@ -2611,7 +2617,7 @@
 									</target>
 								</configuration>
 							</execution>
-							
+
 							<execution>
 								<id>opcua-dp</id>
 								<phase>install</phase>
@@ -2624,7 +2630,7 @@
 									</target>
 								</configuration>
 							</execution>
-							
+
 							<execution>
 								<id>script-filter-dp</id>
 								<phase>install</phase>

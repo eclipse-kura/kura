@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class HsqlDbServiceImpl implements DbService {
 
-    private static Logger s_logger = LoggerFactory.getLogger(HsqlDbServiceImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(HsqlDbServiceImpl.class);
 
     static {
 
@@ -42,15 +42,15 @@ public class HsqlDbServiceImpl implements DbService {
         }
     }
 
-    private static final String s_username = "sa";
-    private static final String s_password = "";
-    private static final Object s_init_lock = "init lock";
-    private static boolean s_inited = false;
+    private static final String username = "sa";
+    private static final String password = "";
+    private static final Object init_lock = "init lock";
+    private static boolean inited = false;
 
     @SuppressWarnings("unused")
-    private ComponentContext m_ctx;
-    private SystemService m_systemService;
-    private KuraJDBCConnectionPool m_connPool;
+    private ComponentContext ctx;
+    private SystemService systemService;
+    private KuraJDBCConnectionPool connPool;
 
     // ----------------------------------------------------------------
     //
@@ -59,11 +59,11 @@ public class HsqlDbServiceImpl implements DbService {
     // ----------------------------------------------------------------
 
     public void setSystemService(SystemService systemService) {
-        this.m_systemService = systemService;
+        this.systemService = systemService;
     }
 
     public void unsetSystemService(SystemService systemService) {
-        this.m_systemService = null;
+        this.systemService = null;
     }
 
     // ----------------------------------------------------------------
@@ -73,14 +73,14 @@ public class HsqlDbServiceImpl implements DbService {
     // ----------------------------------------------------------------
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        s_logger.info("activate...");
+        logger.info("activate...");
 
         //
         // save the bundle context
-        this.m_ctx = componentContext;
+        this.ctx = componentContext;
 
-        synchronized (s_init_lock) {
-            if (!s_inited) {
+        synchronized (init_lock) {
+            if (!inited) {
 
                 // get a connection for this Message Store
                 // If this is the first connection, this will result into starting up the database
@@ -89,7 +89,7 @@ public class HsqlDbServiceImpl implements DbService {
                     conn = getConnection();
                 } catch (SQLException e) {
                     rollback(conn);
-                    s_logger.error("Error during HsqdbService startup", e);
+                    logger.error("Error during HsqdbService startup", e);
                     throw new ComponentException(e);
                 } finally {
                     close(conn);
@@ -100,9 +100,9 @@ public class HsqlDbServiceImpl implements DbService {
                 // If this is the first connection, this will result into starting up the database
                 try {
                     init();
-                    s_inited = true;
+                    inited = true;
                 } catch (SQLException e) {
-                    s_logger.error("Error during HsqdbService init", e);
+                    logger.error("Error during HsqdbService init", e);
                     throw new ComponentException(e);
                 }
             }
@@ -110,22 +110,22 @@ public class HsqlDbServiceImpl implements DbService {
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        s_logger.info("deactivate...");
+        logger.info("deactivate...");
         try {
             execute("SHUTDOWN");
-            s_inited = false;
+            inited = false;
         } catch (SQLException e) {
-            s_logger.error("Error during HsqlDbService shutdown", e);
+            logger.error("Error during HsqlDbService shutdown", e);
             throw new ComponentException(e);
         }
 
         try {
-            if (this.m_connPool != null) {
-                this.m_connPool.close(0); // no wait
-                this.m_connPool = null;
+            if (this.connPool != null) {
+                this.connPool.close(0); // no wait
+                this.connPool = null;
             }
         } catch (SQLException e) {
-            s_logger.error("Error during HsqlDbService connection close", e);
+            logger.error("Error during HsqlDbService connection close", e);
             throw new ComponentException(e);
         }
     }
@@ -138,23 +138,23 @@ public class HsqlDbServiceImpl implements DbService {
 
     @Override
     public synchronized Connection getConnection() throws SQLException {
-        if (this.m_connPool == null) {
+        if (this.connPool == null) {
 
-            String url = this.m_systemService.getProperties().getProperty(SystemService.DB_URL_PROPNAME);
-            s_logger.info("Opening database with url: " + url);
+            String url = this.systemService.getProperties().getProperty(SystemService.DB_URL_PROPNAME);
+            logger.info("Opening database with url: " + url);
 
             // m_connPool = new JDBCPool();
-            this.m_connPool = new KuraJDBCConnectionPool();
-            this.m_connPool.setUrl(url);
-            this.m_connPool.setUser(s_username);
-            this.m_connPool.setPassword(s_password);
+            this.connPool = new KuraJDBCConnectionPool();
+            this.connPool.setUrl(url);
+            this.connPool.setUser(username);
+            this.connPool.setPassword(password);
         }
 
         Connection conn = null;
         try {
-            conn = this.m_connPool.getConnection();
+            conn = this.connPool.getConnection();
         } catch (SQLException e) {
-            s_logger.error("Error getting connection", e);
+            logger.error("Error getting connection", e);
             closeSilently();
             throw e;
         }
@@ -168,7 +168,7 @@ public class HsqlDbServiceImpl implements DbService {
                 conn.rollback();
             }
         } catch (SQLException e) {
-            s_logger.error("Error during Connection rollback.", e);
+            logger.error("Error during Connection rollback.", e);
         }
     }
 
@@ -181,7 +181,7 @@ public class HsqlDbServiceImpl implements DbService {
                         rs.close();
                     }
                 } catch (SQLException e) {
-                    s_logger.error("Error during ResultSet closing", e);
+                    logger.error("Error during ResultSet closing", e);
                 }
             }
         }
@@ -196,7 +196,7 @@ public class HsqlDbServiceImpl implements DbService {
                         stmt.close();
                     }
                 } catch (SQLException e) {
-                    s_logger.error("Error during Statement closing", e);
+                    logger.error("Error during Statement closing", e);
                 }
             }
         }
@@ -209,13 +209,13 @@ public class HsqlDbServiceImpl implements DbService {
                 conn.close();
             }
         } catch (SQLException e) {
-            s_logger.error("Error during Connection closing", e);
+            logger.error("Error during Connection closing", e);
         }
     }
 
     public boolean isLogDataEnabled() {
         boolean isLogDataEnabled = true;
-        String sIsLogDataEnabled = this.m_systemService.getProperties().getProperty(SystemService.DB_LOG_DATA_PROPNAME);
+        String sIsLogDataEnabled = this.systemService.getProperties().getProperty(SystemService.DB_LOG_DATA_PROPNAME);
 
         if (sIsLogDataEnabled != null && !sIsLogDataEnabled.isEmpty()) {
             isLogDataEnabled = new Boolean(sIsLogDataEnabled);
@@ -244,7 +244,7 @@ public class HsqlDbServiceImpl implements DbService {
         execute("SET AUTOCOMMIT FALSE");
 
         // Sets the write delay_millies property, delay in milliseconds.
-        String writeDelayMillies = this.m_systemService.getProperties()
+        String writeDelayMillies = this.systemService.getProperties()
                 .getProperty(SystemService.DB_WRITE_DELAY_MILLIES_PROPNAME);
         if (writeDelayMillies == null || writeDelayMillies.isEmpty()) {
             writeDelayMillies = "500";
@@ -254,32 +254,32 @@ public class HsqlDbServiceImpl implements DbService {
         // use cache tables by default as they load only part of the data in mem
         execute("SET DATABASE DEFAULT TABLE TYPE CACHED");
 
-        String cacheRows = this.m_systemService.getProperties().getProperty(SystemService.DB_CACHE_ROWS_PROPNAME);
+        String cacheRows = this.systemService.getProperties().getProperty(SystemService.DB_CACHE_ROWS_PROPNAME);
         if (cacheRows != null && !cacheRows.isEmpty()) {
             execute("SET FILES CACHE ROWS " + cacheRows);
         }
 
-        String lobScale = this.m_systemService.getProperties().getProperty(SystemService.DB_LOB_FILE_PROPNAME);
+        String lobScale = this.systemService.getProperties().getProperty(SystemService.DB_LOB_FILE_PROPNAME);
         if (lobScale != null && !lobScale.isEmpty()) {
             execute("SET FILES LOB SCALE " + lobScale);
         }
 
-        String defragLimit = this.m_systemService.getProperties().getProperty(SystemService.DB_DEFRAG_LIMIT_PROPNAME);
+        String defragLimit = this.systemService.getProperties().getProperty(SystemService.DB_DEFRAG_LIMIT_PROPNAME);
         if (defragLimit != null && !defragLimit.isEmpty()) {
             execute("SET FILES DEFRAG " + defragLimit);
         }
 
-        String logData = this.m_systemService.getProperties().getProperty(SystemService.DB_LOG_DATA_PROPNAME);
+        String logData = this.systemService.getProperties().getProperty(SystemService.DB_LOG_DATA_PROPNAME);
         if (logData != null && !logData.isEmpty()) {
             execute("SET FILES LOG " + logData.toUpperCase());
         }
 
-        String logSize = this.m_systemService.getProperties().getProperty(SystemService.DB_LOG_SIZE_PROPNAME);
+        String logSize = this.systemService.getProperties().getProperty(SystemService.DB_LOG_SIZE_PROPNAME);
         if (logSize != null && !logSize.isEmpty()) {
             execute("SET FILES LOG SIZE " + logSize);
         }
 
-        String useNio = this.m_systemService.getProperties().getProperty(SystemService.DB_NIO_PROPNAME);
+        String useNio = this.systemService.getProperties().getProperty(SystemService.DB_NIO_PROPNAME);
         if (useNio != null && !useNio.isEmpty()) {
             execute("SET FILES NIO " + useNio.toUpperCase());
         }
@@ -314,13 +314,13 @@ public class HsqlDbServiceImpl implements DbService {
 
     private void closeSilently() {
         try {
-            if (this.m_connPool != null) {
-                this.m_connPool.close(0);
+            if (this.connPool != null) {
+                this.connPool.close(0);
             }
         } catch (Exception e) {
-            s_logger.warn("Error during HsqlDbService connection close", e);
+            logger.warn("Error during HsqlDbService connection close", e);
         } finally {
-            this.m_connPool = null;
+            this.connPool = null;
         }
     }
 }

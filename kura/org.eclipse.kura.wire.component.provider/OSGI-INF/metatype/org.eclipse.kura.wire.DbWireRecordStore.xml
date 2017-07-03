@@ -10,7 +10,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.wire.DbWireRecordStore"
          name="DB Store" 
-         description="A wire component that provides storage for Wire Records produced by connected WireEmitters.">
+         description="A wire component that provides storage for Wire Records produced by connected WireEmitters. This component is deprecated.">
 
         <AD id="table.name"
             name="table.name"

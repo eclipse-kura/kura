@@ -115,7 +115,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     @Override
     public ArrayList<GwtGroupedNVPair> findThreads(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-        List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
+        List<GwtGroupedNVPair> pairs = new ArrayList<>();
 
         // get root thread group
         ThreadGroup rootGroup = Thread.currentThread().getThreadGroup();
@@ -176,7 +176,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 }
             }
         }
-        return new ArrayList<GwtGroupedNVPair>(pairs);
+        return new ArrayList<>(pairs);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })

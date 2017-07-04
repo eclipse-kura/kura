@@ -33,9 +33,10 @@ jobs:
   include:
     - stage: Main-build
       script:
+        - rm -rf $HOME/.m2/repository/org/eclipse
         - $M2_HOME/bin/mvn -B -f target-platform/pom.xml clean install
-        - $M2_HOME/bin/mvn -B -f kura/pom.xml clean install 
-    - stage: distrib-examples-and-tests
+        - $M2_HOME/bin/mvn -B -f kura/pom.xml clean install -DskipTests
+    - stage: distrib-examples-tests-karaf
       script: $M2_HOME/bin/mvn -f kura/distrib/pom.xml clean install
     - # stage name not required, will continue to use the previous
       script:
@@ -43,3 +44,5 @@ jobs:
       - $M2_HOME/bin/mvn -f kura/examples/pom.xml clean install
     - # stage name not required, will continue to use the previous 
       script: $M2_HOME/bin/mvn -f kura/test/pom.xml clean install
+    - # stage name not required, will continue to use the previous
+      script: $M2_HOME/bin/mvn -f karaf/pom.xml clean install

@@ -25,6 +25,6 @@ mvn "$@" -f target-platform/pom.xml clean install $MAVEN_PROPS &&
 mvn "$@" -f kura/pom.xml clean install $MAVEN_PROPS &&
 mvn "$@" -f kura/distrib/pom.xml clean install $MAVEN_PROPS &&
 mvn "$@" -f kura/examples/pom.xml clean install $MAVEN_PROPS &&
-mvn "$@" -f kura/maven-central clean install $MAVEN_PROPS -Pweb &&
+mvn "$@" -f kura/maven-central clean install $MAVEN_PROPS &&
 mvn "$@" -f karaf/pom.xml clean install $MAVEN_PROPS
 

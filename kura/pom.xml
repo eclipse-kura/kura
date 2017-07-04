@@ -209,6 +209,17 @@
 				<module>tools</module>
 			</modules>
 		</profile>
+        <profile>
+            <id>tests</id>
+            <activation>
+                <property>
+                    <name>!skipTests</name>
+                </property>
+            </activation>
+            <modules>
+                <module>test</module>
+            </modules>
+        </profile>
 		
 		<profile>
 			<id>web</id>

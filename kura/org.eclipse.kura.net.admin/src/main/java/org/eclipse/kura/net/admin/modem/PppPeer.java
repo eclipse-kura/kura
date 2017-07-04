@@ -29,6 +29,8 @@ public class PppPeer {
 
     private static final String CHAT_PROGRAM = "chat";
 
+    private static final String AUTH_SECRETS_TYPE_PROVIDER = "provider";
+
     private boolean enabled = false;
 
     /* for a ppp0 or ppp1 etc interface name */
@@ -891,14 +893,14 @@ public class PppPeer {
                 break;
             case PAP:
                 // remove CHAP entry if exists
-                chapLinux.removeEntry("provider", this.provider);
+                chapLinux.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
                 if (!papLinux.checkForEntry(this.provider, this.username, "*", this.password.toString(), "*")) {
                     papLinux.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
                 }
                 break;
             case CHAP:
                 // remove PAP entry if exists
-                papLinux.removeEntry("provider", this.provider);
+                papLinux.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
                 if (!chapLinux.checkForEntry(this.provider, this.username, "*", this.password.toString(), "*")) {
                     chapLinux.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
                 }
@@ -908,8 +910,8 @@ public class PppPeer {
             }
         } else {
             // remove CHAP/PAP entries if exist
-            chapLinux.removeEntry("provider", this.provider);
-            papLinux.removeEntry("provider", this.provider);
+            chapLinux.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
+            papLinux.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
         }
 
         if (this.peerToSupplyLocalIP) {

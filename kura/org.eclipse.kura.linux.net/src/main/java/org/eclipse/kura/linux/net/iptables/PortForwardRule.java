@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -54,7 +54,7 @@ public class PortForwardRule {
      * @param permittedNetwork
      *            source network or ip address from which connection is allowed (such as 192.168.1.0)
      * @param permittedNetworkMask
-     *            source network mask from which connection is allowed (such as 255.255.255.0)
+     *            source network mask from which connection is allowed (e.g. 24 for 255.255.255.0)
      * @param permittedMAC
      *            MAC address from which connection is allowed (such as AA:BB:CC:DD:EE:FF)
      * @param sourcePortRange

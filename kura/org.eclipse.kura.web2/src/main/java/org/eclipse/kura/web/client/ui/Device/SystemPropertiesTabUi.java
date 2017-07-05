@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -29,6 +29,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -42,6 +43,7 @@ public class SystemPropertiesTabUi extends Composite {
     }
 
     private static final Messages MSGS = GWT.create(Messages.class);
+    private static final String ROW_HEADER_STYLE = "rowHeader";
 
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
@@ -74,7 +76,9 @@ public class SystemPropertiesTabUi extends Composite {
             }
         };
         col1.setCellStyleNames("status-table-row");
-        grid.addColumn(col1, MSGS.devicePropName());
+        TextHeader name = new TextHeader(MSGS.devicePropName());
+        name.setHeaderStyleNames(ROW_HEADER_STYLE);
+        grid.addColumn(col1, name);
 
         TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
 
@@ -84,10 +88,11 @@ public class SystemPropertiesTabUi extends Composite {
             }
         };
         col2.setCellStyleNames("status-table-row");
-        grid.addColumn(col2, MSGS.devicePropValue());
+        TextHeader value = new TextHeader(MSGS.devicePropValue());
+        value.setHeaderStyleNames(ROW_HEADER_STYLE);
+        grid.addColumn(col2, value);
 
         dataProvider.addDataDisplay(grid);
-
     }
 
     public void loadSystemPropertiesData() {
@@ -131,5 +136,4 @@ public class SystemPropertiesTabUi extends Composite {
 
         });
     }
-
 }

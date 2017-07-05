@@ -25,13 +25,13 @@ public class HouseKeeperTask implements Runnable {
     private static final Logger s_logger = LoggerFactory.getLogger(HouseKeeperTask.class);
 
     private final int m_purgeAge;
-    private final boolean m_doCheckpoint;
+    private boolean doRepair;
     private final DataStore m_store;
 
-    public HouseKeeperTask(DataStore store, int purgeAge, boolean doCheckpoint) {
+    public HouseKeeperTask(DataStore store, int purgeAge, boolean doRepair) {
         this.m_purgeAge = purgeAge;
-        this.m_doCheckpoint = doCheckpoint;
         this.m_store = store;
+        this.doRepair = doRepair;
     }
 
     @Override
@@ -42,8 +42,10 @@ public class HouseKeeperTask implements Runnable {
 
             //
             // check and attempt to repair the store
-            s_logger.info("HouseKeeperTask: Check store...");
-            this.m_store.repair();
+            if (doRepair) {
+                s_logger.info("HouseKeeperTask: Check store...");
+                this.m_store.repair();
+            }
 
             //
             // delete all confirmed messages
@@ -55,11 +57,6 @@ public class HouseKeeperTask implements Runnable {
             // String maxNumMsgsStr = m_config.getProperty("data.service.store.max_number_of_messages");
             // int maxNumMsgs = Integer.parseInt(maxNumMsgsStr);
             // m_store.deleteOverflowMessages(maxNumMsgs);
-
-            if (this.m_doCheckpoint) {
-                s_logger.info("HouseKeeperTask: Performing store checkpoint with defrag...");
-                this.m_store.defrag();
-            }
 
             s_logger.info("HouseKeeperTask ended.");
         }

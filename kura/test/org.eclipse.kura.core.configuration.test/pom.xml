@@ -138,7 +138,7 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.hsqldb.hsqldb</id>
+                            <id>org.h2</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -253,7 +253,7 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.hsqldb.hsqldb</artifactId>
+                            <artifactId>org.h2</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>

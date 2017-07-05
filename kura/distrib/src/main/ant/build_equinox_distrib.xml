@@ -79,14 +79,14 @@
               tofile="${project.build.directory}/${build.output.name}/jdk.dio.properties" />
 		<copy file="src/main/resources/common/jdk.dio.policy"
               tofile="${project.build.directory}/${build.output.name}/jdk.dio.policy" />
-              
+
         <!-- Populate config.ini with correct OSGi packages -->
 		<antcall target="osgi-base-config" />
 
 		<!-- Populate config.ini with correct versions -->
 		<replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{kura.build.version}" value="${kura.build.version}"/>
-		
+
 		<!-- Populate config.ini with correct Kura bundles -->
 		<antcall target="api-config" />
 		<antcall target="core-config" />
@@ -106,22 +106,22 @@
 		<antcall target="linux.usb-config" />
 		<antcall target="linux.bluetooth-config" />
 		<antcall target="linux.watchdog-config" />
-		
-		
+
+
 		<!-- Added Camel bundles configs -->
 		<antcall target="camel-config" />
-		
+
 		<!-- Wires bundles config -->
 		<antcall target="wires-config" />
 
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
-		<available file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" property="web2.jar.present" />
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" property="is.web2.jar.available" />
 		<antcall target="web2-config" />
 
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" property="linux.gpio.jar.present" />
 		<antcall target="gpio-config" />
 		<antcall target="emulator-gpio-config" />
-		
+
 
 		<condition property="is.nn">
 			<contains string="${build.name}" substring="-nn"/>
@@ -355,7 +355,7 @@ fi]]>
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/kura.logrotate"
                         prefix="${build.output.name}/install" />
-                        
+
             <zipfileset file="src/main/resources/common/sysctl.kura.conf"
                          prefix="${build.output.name}/install" />
             <zipfileset file="src/main/resources/common/sysctl.kura.raspbian.conf"
@@ -413,8 +413,8 @@ fi]]>
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/ip-up.local"
                         prefix="${build.output.name}/install" />
-                        
-			<zipfileset file="${project.build.directory}/${build.output.name}/selinuxKura.pp" 
+
+			<zipfileset file="${project.build.directory}/${build.output.name}/selinuxKura.pp"
                 prefix="${build.output.name}/install" />
 
 			<zipfileset file="${project.build.directory}/${build.output.name}/start_kura.sh"
@@ -437,29 +437,29 @@ fi]]>
 
 			<zipfileset dir="${kura.osgi.repo}/plugins/"
                         prefix="${build.output.name}/plugins">
-				
+
 				<!-- exclude source bundles -->
 				<exclude name="*.source_*.jar"/>
 				<!-- exclude .SNAPSHOT bundles -->
 				<exclude name="*.SNAPSHOT.jar"/>
-				
+
 			</zipfileset>
-			
+
 			<zipfileset dir="../target-definition/common/repository/plugins"
                         prefix="${build.output.name}/plugins">
-				
+
 				<exclude name="com.google.protobuf_2.6.0.jar"/>
 				<exclude name="org.eclipse.paho.*"/>
 				<exclude name="com.gwt.user_*"/>
 				<exclude name="org.eclipse.kura.windows.*"/>
 				<exclude name="org.junit*"/>
-				
+
 				<!-- exclude source bundles -->
 				<exclude name="*.source_*.jar"/>
-				
+
 				<!-- exclude .SNAPSHOT bundles -->
 				<exclude name="*.SNAPSHOT.jar"/>
-				
+
 			</zipfileset>
 
 			<!-- add .SNAPSHOT as -SNAPSHOT -->
@@ -471,7 +471,7 @@ fi]]>
 				<fileset dir="../target-definition/common/repository/plugins" includes="*.SNAPSHOT.jar" />
 				<globmapper from="*.SNAPSHOT.jar" to="${build.output.name}/plugins/*-SNAPSHOT.jar" />
 			</mappedresources>
-			
+
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar"
@@ -579,9 +579,9 @@ fi]]>
 
 <!-- ### WINDOWS ########################################################################################################################### -->
 
-    <target name="dist-windows"> 
-    	
-        <property name="build.output.name" value="kura_${project.version}_${build.name}"/> 
+    <target name="dist-windows">
+
+        <property name="build.output.name" value="kura_${project.version}_${build.name}"/>
 
         <!--
         Loads entries from a manifest file.
@@ -602,12 +602,12 @@ fi]]>
                 </loadproperties>
             </sequential>
         </macrodef>
-    	
+
     	<echo message="Building Kura Distribution for ${build.output.name}..." />
 
         <copy file="src/main/resources/${build.name}/kura.properties"
               tofile="${project.build.directory}/${build.output.name}/kura.properties" />
-        
+
 		<propertyfile file="${project.build.directory}/${build.output.name}/kura.properties">
 			<entry key="kura.version"   value="KURA_${kura.version}" />
 			<entry key="kura.home"   value="${kura.install.dir}/kura/kura" />
@@ -626,7 +626,7 @@ fi]]>
 		<replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.install.dir}" value="${kura.install.dir}"/>
         <replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.symlink}" value="${kura.symlink}"/>
 
-    	
+
     	<condition property="kura.osgi.repo" value="../target-definition/equinox_3.11.1/repository">
     		<or>
     			<not>
@@ -635,7 +635,7 @@ fi]]>
     			<equals arg1="${kura.osgi}" arg2="equinox"/>
     		</or>
     	</condition>
-    	
+
 		<!-- Copy the NSIS script to the intermediate directory then modify it to set the output filename based on the current build type -->
 
 		<copy file="src/main/resources/${build.name}/Kura_x64.nsi" tofile="${project.build.directory}/${build.output.name}/Kura_x64.nsi" />
@@ -652,7 +652,7 @@ fi]]>
 		<!-- Populate config.ini with correct versions -->
 		<replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{kura.build.version}" value="${kura.build.version}"/>
-		
+
 		<replace file="${project.build.directory}/${build.output.name}/config.ini"
                  token="{org.eclipse.kura.deployment.customizer.version}" value="${org.eclipse.kura.deployment.customizer.version}"/>
 		<replace file="${project.build.directory}/${build.output.name}/config.ini"
@@ -678,7 +678,7 @@ fi]]>
 		<antcall target="windows.command-config" />
 		<antcall target="emulator.usb-config" />
 		<antcall target="emulator.watchdog-config" />
-		
+
 		<!-- Added Camel bundles configs -->
 		<antcall target="camel-config" />
 
@@ -686,7 +686,7 @@ fi]]>
 		<antcall target="wires-config" />
 
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
-		<available file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" property="web2.jar.present" />
+		<available file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" property="is.web2.jar.available" />
 		<antcall target="web2-config" />
 
 		<antcall target="emulator-gpio-config" />
@@ -712,8 +712,8 @@ fi]]>
 
 
 
-        <property name="build.install.dir" value="${project.build.directory}/${build.output.name}"/> 
-        <property name="build.install.dir.kura" value="${build.install.dir}/KuraFiles"/> 
+        <property name="build.install.dir" value="${project.build.directory}/${build.output.name}"/>
+        <property name="build.install.dir.kura" value="${build.install.dir}/KuraFiles"/>
 
 		<copy file="${project.build.directory}/${build.output.name}/snapshot_0.xml"
 			todir="${build.install.dir.kura}/data/snapshots/" />
@@ -729,16 +729,16 @@ fi]]>
 
 		<copy file="RELEASE_NOTES.txt"
 			todir="${build.install.dir.kura}" />
-            
+
 		<copy file="notice.html"
 			todir="${build.install.dir.kura}" />
-            
+
 		<copy file="epl-v10.html"
 			todir="${build.install.dir.kura}" />
-            
+
 		<copy file="src/main/resources/${build.name}/log4j.properties"
 			todir="${build.install.dir.kura}/kura/" />
-            
+
 		<copy file="${project.build.directory}/${build.output.name}/kura.properties"
 			todir="${build.install.dir.kura}/kura/" />
 
@@ -748,20 +748,20 @@ fi]]>
 		<copy file="src/main/resources/${build.name}/SCH_Kura.xml" todir="${build.install.dir.kura}/" />
 
 		<copy todir="${build.install.dir.kura}/plugins">
-			
+
 			<!-- copy OSGi runtime bundles -->
 			<fileset dir="${kura.osgi.repo}/plugins">
 				<!-- exclude source bundles -->
 				<exclude name="*.source_*.jar"/>
 			</fileset>
-			
+
 			<!-- copy common bundles -->
 			<fileset dir="../target-definition/common/repository/plugins">
 				<exclude name="com.google.protobuf_2.6.0.jar,org.eclipse.paho.*,com.gwt.user_*,org.junit*"/>
 				<!-- exclude source bundles -->
 				<exclude name="*.source_*.jar"/>
 			</fileset>
-			
+
 		</copy>
 
 		<!-- fix -SNAPSHOT bundle naming which P2 can't handle -->
@@ -769,7 +769,7 @@ fi]]>
 			<fileset dir="${build.install.dir.kura}/plugins"/>
 			<globmapper from="*.SNAPSHOT.jar" to="*-SNAPSHOT.jar" />
 		</move>
-	
+
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
 			todir="${build.install.dir.kura}/kura/plugins" />
 
@@ -834,7 +834,7 @@ fi]]>
 		<copy file="../../target-platform/org.eclipse.kura.windows.system/src/main/c/Release/Win32/x64/KuraNativeWin.dll" todir="${build.install.dir}/system/x64"/>
 
 		<copy file="../../target-platform/org.eclipse.kura.windows.service/src/main/c/Release/Win32/x86/KURAService.exe" todir="${build.install.dir}/system/x86"/>
-		
+
 		<copy file="../../target-platform/org.eclipse.kura.windows.service/src/main/c/Release/Win32/x64/KURAService.exe" todir="${build.install.dir}/system/x64"/>
 
 		<!-- <copy file="../../target-platform/org.eclipse.kura.windows.launcher/src/main/c/Release/Win32/x86/KURALauncher.exe" todir="${build.install.dir.kura}"/> -->
@@ -848,7 +848,7 @@ fi]]>
 		<antcall target="emulator-gpio-jar-win" />
 
         <echo message="Building Kura Distribution for ${build.name}-jars..." />
-        
+
 		<exec executable="bash" dir="${build.install.dir}">
 			<arg value="build_installer.sh" />
 		</exec>
@@ -859,9 +859,9 @@ fi]]>
                 <zipfileset file="${project.build.directory}/${build.output.name}_upgrader.sh" />
                 <zipfileset file="src/main/sh/upgrade_wrapper.sh" />
         </zip>-->
-    	
-    	
-    	
+
+
+
     	<!-- Build the upgrade deployment package -->
     	<echo message="Building the upgrade DP" />
 
@@ -895,14 +895,14 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                 basedir="${project.build.directory}/${build.output.name}/dp_upgrade_stage" />	-->
     </target>
 
-	
+
 	<target name="set-http-port" if="http.port">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="org.osgi.service.http.port" operation="="
                    value="${http.port}" />
 		</propertyfile>
 	</target>
-	
+
 	<!-- OSGi base configs -->
 	<target name="osgi-base-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
@@ -987,6 +987,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.hsqldb.hsqldb_${org.hsqldb.hsqldb.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/plugins/org.h2_${com.h2database.h2.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/kura/plugins/com.codeminders.hidapi.${native.tag}_${com.codeminders.hidapi.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/com.codeminders.hidapi_${com.codeminders.hidapi.version}.jar@3:start" />
@@ -1003,7 +1005,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			<entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/kura/plugins/jdk.dio.${native.tag}_${jdk.dio.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/kura/plugins/jdk.dio_${jdk.dio.version}.jar@3" /> 
+				value=", reference:file:${kura.install.dir}/kura/plugins/jdk.dio_${jdk.dio.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.commons.net_${org.apache.commons.net.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
@@ -1011,7 +1013,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</propertyfile>
 	</target>
 
-	
+
 	<!-- Kura config targets -->
 	<target name="api-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
@@ -1019,63 +1021,63 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar@3:start" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="core-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar@4:start" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="core.certificates-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar@4:start" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="core.cloud-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar@4:start" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="core.comm-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar@4:start" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="core.configuration-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.jar@4:start" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="core.crypto-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.jar@3:start" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="core.deployment-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar@4:start" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="core.log-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.core.log_${org.eclipse.kura.core.log.version}.jar@4" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="core.net-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
@@ -1089,27 +1091,27 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar@5:start" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="linux.clock-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.linux.clock_${org.eclipse.kura.linux.clock.version}.jar@4" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="linux.command-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.linux.command_${org.eclipse.kura.linux.command.version}.jar@4" />
 		</propertyfile>
-	</target>	
-	
+	</target>
+
 	<target name="linux.position-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 			     value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.linux.position_${org.eclipse.kura.linux.position.version}.jar@4" />
 		</propertyfile>
-	</target>	
+	</target>
 
 	<target name="linux.usb-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
@@ -1119,29 +1121,29 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			     value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.linux.usb_${org.eclipse.kura.linux.usb.version}.jar@4" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="linux.bluetooth-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 			      value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar@4:start" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="linux.watchdog-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 		          value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar@4" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="core.status-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 	               value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.core.status_${org.eclipse.kura.core.status.version}.jar@4" />
 		</propertyfile>
 	</target>
-	
-	<target name="web2-config" if="web2.jar.present">
+
+	<target name="web2-config" if="is.web2.jar.available">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				   value=", reference:file:${kura.install.dir}/kura/plugins/com.gwt.user_${com.gwt.user.version}.jar@3" />
@@ -1156,7 +1158,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar@5:start" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="emulator-gpio-config" unless="linux.gpio.jar.present">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
@@ -1198,7 +1200,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.windows.command_${org.eclipse.kura.windows.command.version}.jar@4" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="wires-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
@@ -1216,6 +1218,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.util_${org.eclipse.kura.util.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.wire.h2db.component.provider_${org.eclipse.kura.wire.h2db.component.provider.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.wire.helper.provider_${org.eclipse.kura.wire.helper.provider.version}.jar@4:start" />
@@ -1223,7 +1227,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar@4:start" />
 		</propertyfile>
 	</target>
-	
+
 	<target name="wires-jar">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.asset.provider_${org.eclipse.kura.asset.provider.version}.jar"
@@ -1240,6 +1244,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.util_${org.eclipse.kura.util.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.wire.h2db.component.provider_${org.eclipse.kura.wire.h2db.component.provider.version}.jar"
+                        prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
             <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.wire.helper.provider_${org.eclipse.kura.wire.helper.provider.version}.jar"
@@ -1248,7 +1254,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>
-	
+
 	<!-- Camel config targets -->
 	<target name="camel-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
@@ -1270,7 +1276,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                    value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar@5:start" />
 		</propertyfile>
 	</target>
-	
+
 
 
 	<!-- Jar targets -->
@@ -1282,11 +1288,11 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
-			
+
 		</zip>
 	</target>
 
-	<target name="web2-jar" if="web2.jar.present">
+	<target name="web2-jar" if="is.web2.jar.available">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
@@ -1301,7 +1307,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                         prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>
-	
+
 	<target name="emulator-gpio-jar" unless="linux.gpio.jar.present">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar"
@@ -1345,7 +1351,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</zip>
 	</target>
 
-	<target name="web2-jar-win" if="web2.jar.present">
+	<target name="web2-jar-win" if="is.web2.jar.available">
     	<echo message="web2-jar-win ${project.build.directory}/${build.output.name}/config.ini..." />
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
 			todir="${build.install.dir.kura}/kura/plugins" />
@@ -1358,7 +1364,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar"
 			todir="${build.install.dir.kura}/kura/plugins" />
 	</target>
-	
+
     <target name="camel-jar-win">
         <copy file="${project.build.directory}/plugins/org.eclipse.kura.camel_${org.eclipse.kura.camel.version}.jar"
             todir="${build.install.dir.kura}/kura/plugins" />
@@ -1367,7 +1373,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
         <copy file="${project.build.directory}/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar"
             todir="${build.install.dir.kura}/kura/plugins" />
     </target>
-	
+
 	<target name="wires-jar-win">
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.asset.provider_${org.eclipse.kura.asset.provider.version}.jar"
             todir="${build.install.dir.kura}/kura/plugins" />
@@ -1382,6 +1388,8 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.localization.resources_${org.eclipse.kura.localization.resources.version}.jar"
             todir="${build.install.dir.kura}/kura/plugins" />
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.util_${org.eclipse.kura.util.version}.jar"
+            todir="${build.install.dir.kura}/kura/plugins" />
+		<copy file="${project.build.directory}/plugins/org.eclipse.kura.wire.h2db.component.provider_${org.eclipse.kura.wire.h2db.component.provider.version}.jar"
             todir="${build.install.dir.kura}/kura/plugins" />
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar"
             todir="${build.install.dir.kura}/kura/plugins" />

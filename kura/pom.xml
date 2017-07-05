@@ -62,15 +62,14 @@
         <module>org.eclipse.kura.protocol.modbus</module>
         <module>org.eclipse.kura.stress</module>
         <module>org.eclipse.kura.util</module>
-        <module>org.eclipse.kura.web2</module>
         <module>org.eclipse.kura.wire.script.filter.localization</module>
         <module>org.eclipse.kura.wire.script.filter.provider</module>
+        <module>org.eclipse.kura.wire.h2db.component.provider</module>
         <module>org.eclipse.kura.wire.component.provider</module>
         <module>org.eclipse.kura.wire.helper.provider</module>
         <module>org.eclipse.kura.wire.provider</module>
         <module>features</module>
         <module>emulator</module>
-        <module>examples</module>
         <module>test</module>
 
         <!-- final p2 repository -->
@@ -99,8 +98,10 @@
         <!-- BND baseline plugin -->
         <bnd.baseline.version>3.4.0-SNAPSHOT</bnd.baseline.version>
         <bnd.baseline.continueOnError>false</bnd.baseline.continueOnError>
+        
+        <kura.skip.can>true</kura.skip.can>
     </properties>
-
+    
     <distributionManagement>
         <repository>
             <id>repo.eclipse.org</id>
@@ -147,9 +148,12 @@
             </repositories>
         </profile>
         <profile>
-            <id>can</id>
+        	<id>can</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>kura.skip.can</name>
+                    <value>false</value>
+                </property>
             </activation>
             <modules>
                 <module>org.eclipse.kura.protocol.can</module>
@@ -198,6 +202,31 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+			<id>tools</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<modules>
+				<module>tools</module>
+			</modules>
+		</profile>
+		
+		<profile>
+			<id>web</id>
+			<properties>
+				<org.eclipse.kura.web.skip>false</org.eclipse.kura.web.skip>
+			</properties>
+			<activation>  <!-- deactivated if noweb property is selected -->
+                <property>
+                    <name>kura.skip.web</name>
+                    <value>!true</value>
+                </property>
+            </activation>
+            <modules>
+                <module>org.eclipse.kura.web2</module>
+            </modules>
+		</profile>
     </profiles>
 
     <repositories>

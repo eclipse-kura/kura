@@ -532,6 +532,10 @@ public class WiresPanelUi extends Composite {
                 return MSGS.wiresComponentDBStore();
             } else if ("DbWireRecordFilter".equalsIgnoreCase(lastString)) {
                 return MSGS.wiresComponentDBFilter();
+            } else if ("H2DbWireRecordStore".equalsIgnoreCase(lastString)) {
+                return MSGS.wiresComponentH2DBStore();
+            } else if ("H2DbWireRecordFilter".equalsIgnoreCase(lastString)) {
+                return MSGS.wiresComponentH2DBFilter();
             }
             return lastString;
         }

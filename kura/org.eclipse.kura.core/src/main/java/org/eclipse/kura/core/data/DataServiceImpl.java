@@ -12,7 +12,6 @@
 package org.eclipse.kura.core.data;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -43,12 +42,18 @@ import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.data.listener.DataServiceListener;
 import org.eclipse.kura.data.transport.listener.DataTransportListener;
-import org.eclipse.kura.db.DbService;
+import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.status.CloudConnectionStatusComponent;
 import org.eclipse.kura.status.CloudConnectionStatusEnum;
 import org.eclipse.kura.status.CloudConnectionStatusService;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,10 +66,8 @@ public class DataServiceImpl
 
     private DataServiceOptions dataServiceOptions;
 
-    private final Map<String, Object> properties = new HashMap<>();
-
     private DataTransportService dataTransportService;
-    private DbService dbService;
+    private H2DbService dbService;
     private DataServiceListenerS dataServiceListeners;
 
     protected ScheduledExecutorService reconnectExecutor;
@@ -85,11 +88,14 @@ public class DataServiceImpl
 
     private TokenBucket throttle;
 
-    private Lock lock = new ReentrantLock();
+    private final Lock lock = new ReentrantLock();
     private boolean notifyPending;
-    private Condition lockCondition = lock.newCondition();
+    private final Condition lockCondition = this.lock.newCondition();
 
     private volatile AtomicBoolean publisherEnabled = new AtomicBoolean();
+
+    private ServiceTracker<H2DbService, H2DbService> dbServiceTracker;
+    private ComponentContext componentContext;
 
     // ----------------------------------------------------------------
     //
@@ -101,13 +107,13 @@ public class DataServiceImpl
         String pid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
         logger.info("Activating {}...", pid);
 
-        dataServiceOptions = new DataServiceOptions(properties);
+        this.componentContext = componentContext;
+
+        this.dataServiceOptions = new DataServiceOptions(properties);
 
         this.reconnectExecutor = Executors.newSingleThreadScheduledExecutor();
         this.publisherExecutor = Executors.newSingleThreadExecutor();
         this.congestionExecutor = Executors.newSingleThreadScheduledExecutor();
-
-        this.properties.putAll(properties);
 
         createThrottle();
         submitPublishingWork();
@@ -119,9 +125,70 @@ public class DataServiceImpl
         }
         this.store = new DbDataStore(table);
 
+        restartDbServiceTracker(this.dataServiceOptions.getDbServiceInstancePid());
+
+        this.dataServiceListeners = new DataServiceListenerS(componentContext);
+
+        // Register the component in the CloudConnectionStatus Service
+        this.cloudConnectionStatusService.register(this);
+
+        this.dataTransportService.addDataTransportListener(this);
+
+        startReconnectTask();
+    }
+
+    private void restartDbServiceTracker(String kuraServicePid) {
+        stopDbServiceTracker();
         try {
-            this.store.start(this.dbService, dataServiceOptions.getStoreHousekeeperInterval(),
-                    dataServiceOptions.getStorePurgeAge(), dataServiceOptions.getStoreCapacity());
+            final Filter filter = FrameworkUtil
+                    .createFilter("(" + ConfigurationService.KURA_SERVICE_PID + "=" + kuraServicePid + ")");
+            this.dbServiceTracker = new ServiceTracker<>(this.componentContext.getBundleContext(), filter,
+                    new ServiceTrackerCustomizer<H2DbService, H2DbService>() {
+
+                        @Override
+                        public H2DbService addingService(ServiceReference<H2DbService> reference) {
+                            logger.info("H2DbService instance found");
+                            H2DbService dbService = DataServiceImpl.this.componentContext.getBundleContext()
+                                    .getService(reference);
+                            setH2DbService(dbService);
+                            return dbService;
+                        }
+
+                        @Override
+                        public void modifiedService(ServiceReference<H2DbService> reference, H2DbService service) {
+                            logger.info("H2DbService instance updated, recreating table if needed...");
+                            synchronized (DataServiceImpl.this) {
+                                DataServiceImpl.this.store.update(
+                                        DataServiceImpl.this.dataServiceOptions.getStoreHousekeeperInterval(),
+                                        DataServiceImpl.this.dataServiceOptions.getStorePurgeAge(),
+                                        DataServiceImpl.this.dataServiceOptions.getStoreCapacity());
+                            }
+                        }
+
+                        @Override
+                        public void removedService(ServiceReference<H2DbService> reference, H2DbService service) {
+                            logger.info("H2DbService instance removed");
+                            unsetH2DbService(DataServiceImpl.this.dbService);
+                            DataServiceImpl.this.componentContext.getBundleContext().ungetService(reference);
+                        }
+                    });
+            this.dbServiceTracker.open();
+        } catch (InvalidSyntaxException e) {
+            throw new ComponentException(e);
+        }
+    }
+
+    private void stopDbServiceTracker() {
+        if (this.dbServiceTracker != null) {
+            this.dbServiceTracker.close();
+            this.dbServiceTracker = null;
+        }
+    }
+
+    private synchronized void startDbStore() {
+        try {
+            this.store.start(this.dbService, this.dataServiceOptions.getStoreHousekeeperInterval(),
+                    this.dataServiceOptions.getStorePurgeAge(), this.dataServiceOptions.getStoreCapacity());
 
             // The initial list of in-flight messages
             List<DataMessage> inFlightMsgs = this.store.allInFlightMessagesNoPayload();
@@ -142,31 +209,30 @@ public class DataServiceImpl
             }
         } catch (KuraStoreException e) {
             logger.error("Failed to start store", e);
-            throw new ComponentException("Failed to start store", e);
         }
-
-        this.dataServiceListeners = new DataServiceListenerS(componentContext);
-
-        // Register the component in the CloudConnectionStatus Service
-        this.cloudConnectionStatusService.register(this);
-
-        this.dataTransportService.addDataTransportListener(this);
-
-        startReconnectTask();
     }
 
-    public void updated(Map<String, Object> properties) {
+    public synchronized void updated(Map<String, Object> properties) {
         logger.info("Updating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
         stopReconnectTask();
 
-        this.properties.clear();
-        this.properties.putAll(properties);
+        final String oldDbServicePid = this.dataServiceOptions.getDbServiceInstancePid();
+
+        this.dataServiceOptions = new DataServiceOptions(properties);
 
         createThrottle();
 
-        this.store.update(dataServiceOptions.getStoreHousekeeperInterval(), dataServiceOptions.getStorePurgeAge(),
-                dataServiceOptions.getStoreCapacity());
+        final String currentDbServicePid = this.dataServiceOptions.getDbServiceInstancePid();
+
+        if (oldDbServicePid.equals(currentDbServicePid)) {
+            if (this.dbService != null) {
+                this.store.update(this.dataServiceOptions.getStoreHousekeeperInterval(),
+                        this.dataServiceOptions.getStorePurgeAge(), this.dataServiceOptions.getStoreCapacity());
+            }
+        } else {
+            restartDbServiceTracker(currentDbServicePid);
+        }
 
         if (!this.dataTransportService.isConnected()) {
             startReconnectTask();
@@ -174,7 +240,7 @@ public class DataServiceImpl
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        logger.info("Deactivating {}...", this.properties.get(ConfigurationService.KURA_SERVICE_PID));
+        logger.info("Deactivating {}...", this.dataServiceOptions.getKuraServicePid());
 
         stopReconnectTask();
         this.reconnectExecutor.shutdownNow();
@@ -190,7 +256,7 @@ public class DataServiceImpl
 
             // Clean publisher thread shutdown
 
-            publisherEnabled.set(false);
+            this.publisherEnabled.set(false);
             signalPublisher();
         } catch (InterruptedException e) {
             logger.info("Interrupted", e);
@@ -200,6 +266,8 @@ public class DataServiceImpl
         this.dataTransportService.removeDataTransportListener(this);
 
         this.store.stop();
+
+        stopDbServiceTracker();
     }
 
     // ----------------------------------------------------------------
@@ -216,12 +284,16 @@ public class DataServiceImpl
         this.dataTransportService = null;
     }
 
-    public void setDbService(DbService dbService) {
+    public synchronized void setH2DbService(H2DbService dbService) {
         this.dbService = dbService;
+        startDbStore();
+        signalPublisher();
     }
 
-    public void unsetDbService(DbService dbService) {
+    public synchronized void unsetH2DbService(H2DbService dbService) {
         this.dbService = null;
+        disconnect();
+        this.store.stop();
     }
 
     public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
@@ -271,7 +343,7 @@ public class DataServiceImpl
         // in the DataPublisherService persistence.
 
         if (newSession) {
-            if (dataServiceOptions.isPublishInFlightMessages()) {
+            if (this.dataServiceOptions.isPublishInFlightMessages()) {
                 logger.info(
                         "New session established. Unpublishing all in-flight messages. Disregarding the QoS level, this may cause duplicate messages.");
                 try {
@@ -325,6 +397,7 @@ public class DataServiceImpl
     public void onConfigurationUpdated(boolean wasConnected) {
         logger.info("Notified DataTransportService configuration updated.");
         boolean autoConnect = startReconnectTask();
+
         if (!autoConnect && wasConnected) {
             try {
                 connect();
@@ -388,7 +461,7 @@ public class DataServiceImpl
             }
         }
 
-        if (this.inFlightMsgIds.size() < dataServiceOptions.getMaxInFlightMessages()) {
+        if (this.inFlightMsgIds.size() < this.dataServiceOptions.getMaxInFlightMessages()) {
             handleInFlightDecongestion();
         }
 
@@ -398,6 +471,9 @@ public class DataServiceImpl
     @Override
     public void connect() throws KuraConnectException {
         stopReconnectTask();
+        if (dbService == null) {
+            throw new KuraConnectException("H2DbService instance not attached, not connecting");
+        }
         if (!this.dataTransportService.isConnected()) {
             this.dataTransportService.connect();
         }
@@ -410,12 +486,12 @@ public class DataServiceImpl
 
     @Override
     public boolean isAutoConnectEnabled() {
-        return dataServiceOptions.isAutoConnect();
+        return this.dataServiceOptions.isAutoConnect();
     }
 
     @Override
     public int getRetryInterval() {
-        return dataServiceOptions.getConnectDelay();
+        return this.dataServiceOptions.getConnectDelay();
     }
 
     @Override
@@ -466,10 +542,10 @@ public class DataServiceImpl
     }
 
     private void signalPublisher() {
-        lock.lock();
-        notifyPending = true;
-        lockCondition.signal();
-        lock.unlock();
+        this.lock.lock();
+        this.notifyPending = true;
+        this.lockCondition.signal();
+        this.lock.unlock();
     }
 
     private boolean startReconnectTask() {
@@ -480,8 +556,8 @@ public class DataServiceImpl
 
         //
         // Establish a reconnect Thread based on the reconnect interval
-        boolean autoConnect = dataServiceOptions.isAutoConnect();
-        int reconnectInterval = dataServiceOptions.getConnectDelay();
+        boolean autoConnect = this.dataServiceOptions.isAutoConnect();
+        int reconnectInterval = this.dataServiceOptions.getConnectDelay();
         if (autoConnect) {
 
             // Change notification status to slow blinking when connection is expected to happen in the future
@@ -500,9 +576,14 @@ public class DataServiceImpl
                     Thread.currentThread().setName("DataServiceImpl:ReconnectTask");
                     boolean connected = false;
                     try {
+                        if (dbService == null) {
+                            logger.warn("H2DbService instance not attached, not connecting");
+                            return;
+                        }
                         logger.info("Connecting...");
                         if (DataServiceImpl.this.dataTransportService.isConnected()) {
                             logger.info("Already connected. Reconnect task will be terminated.");
+
                         } else {
                             DataServiceImpl.this.dataTransportService.connect();
                             logger.info("Connected. Reconnect task will be terminated.");
@@ -531,11 +612,11 @@ public class DataServiceImpl
     }
 
     private void createThrottle() {
-        if (dataServiceOptions.isRateLimitEnabled()) {
-            int publishRate = dataServiceOptions.getRateLimitAverageRate();
-            int burstLength = dataServiceOptions.getRateLimitBurstSize();
+        if (this.dataServiceOptions.isRateLimitEnabled()) {
+            int publishRate = this.dataServiceOptions.getRateLimitAverageRate();
+            int burstLength = this.dataServiceOptions.getRateLimitBurstSize();
 
-            long publishPeriod = dataServiceOptions.getRateLimitTimeUnit() / publishRate;
+            long publishPeriod = this.dataServiceOptions.getRateLimitTimeUnit() / publishRate;
 
             logger.info("Get Throttle with burst length {} and send a message every {} millis", burstLength,
                     publishPeriod);
@@ -553,12 +634,12 @@ public class DataServiceImpl
     }
 
     private void disconnect() {
-        long millis = dataServiceOptions.getDisconnectDelay() * 1000L;
+        long millis = this.dataServiceOptions.getDisconnectDelay() * 1000L;
         this.dataTransportService.disconnect(millis);
     }
 
     private void submitPublishingWork() {
-        publisherEnabled.set(true);
+        this.publisherEnabled.set(true);
 
         this.publisherExecutor.execute(new PublishManager());
     }
@@ -611,7 +692,7 @@ public class DataServiceImpl
     }
 
     private void handleInFlightCongestion() {
-        int timeout = dataServiceOptions.getInFlightMessagesCongestionTimeout();
+        int timeout = this.dataServiceOptions.getInFlightMessagesCongestionTimeout();
 
         // Do not schedule more that one task at a time
         if (timeout != 0 && (this.congestionFuture == null || this.congestionFuture.isDone())) {
@@ -655,7 +736,7 @@ public class DataServiceImpl
         @Override
         public void run() {
             Thread.currentThread().setName("DataServiceImpl:Submit");
-            while (publisherEnabled.get()) {
+            while (DataServiceImpl.this.publisherEnabled.get()) {
                 long sleepingTime = -1;
                 boolean messagePublished = false;
                 if (DataServiceImpl.this.dataTransportService.isConnected()) {
@@ -665,7 +746,8 @@ public class DataServiceImpl
                         if (message != null) {
                             checkInFlightMessages(message);
 
-                            if (dataServiceOptions.isRateLimitEnabled() && message.getPriority() >= 5) {
+                            if (DataServiceImpl.this.dataServiceOptions.isRateLimitEnabled()
+                                    && message.getPriority() >= 5) {
                                 messagePublished = publishMessageTokenBucket(message);
                                 sleepingTime = DataServiceImpl.this.throttle.getTokenWaitTime();
                             } else {
@@ -693,33 +775,33 @@ public class DataServiceImpl
         }
 
         private void checkInFlightMessages(DataMessage message) throws KuraTooManyInflightMessagesException {
-            if (message.getQos() > 0
-                    && DataServiceImpl.this.inFlightMsgIds.size() >= dataServiceOptions.getMaxInFlightMessages()) {
+            if (message.getQos() > 0 && DataServiceImpl.this.inFlightMsgIds
+                    .size() >= DataServiceImpl.this.dataServiceOptions.getMaxInFlightMessages()) {
                 logger.warn("The configured maximum number of in-flight messages has been reached");
                 throw new KuraTooManyInflightMessagesException("Too many in-flight messages");
             }
         }
 
         private void suspendPublisher(long timeout, TimeUnit timeUnit) {
-            if (!publisherEnabled.get()) {
+            if (!DataServiceImpl.this.publisherEnabled.get()) {
                 return;
             }
             try {
-                lock.lock();
-                if (!notifyPending) {
+                DataServiceImpl.this.lock.lock();
+                if (!DataServiceImpl.this.notifyPending) {
                     if (timeout == -1) {
                         logger.debug("Suspending publishing thread indefinitely");
-                        lockCondition.await();
+                        DataServiceImpl.this.lockCondition.await();
                     } else {
                         logger.debug("Suspending publishing thread for {} milliseconds", timeout);
-                        lockCondition.await(timeout, timeUnit);
+                        DataServiceImpl.this.lockCondition.await(timeout, timeUnit);
                     }
                 }
-                notifyPending = false;
+                DataServiceImpl.this.notifyPending = false;
             } catch (InterruptedException e) {
 
             } finally {
-                lock.unlock();
+                DataServiceImpl.this.lock.unlock();
             }
         }
 

@@ -2143,6 +2143,7 @@ public class NetworkConfiguration {
                 // ip6
                 String configIp6 = "net.interface." + interfaceName + ".config.ip6.address";
                 if (props.containsKey(configIp6)) {
+                    // FIXME: netConfigIP6 == null
 
                     // address
                     String addressIp6 = (String) props.get(configIp6);

@@ -49,6 +49,8 @@ import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.TakesValue;
@@ -208,18 +210,24 @@ public abstract class AbstractServicesUi extends Composite {
 
         formGroup.add(textBox);
 
-        textBox.setValidateOnBlur(true);
         textBox.addValidator(new Validator() {
 
             @Override
             public List<EditorError> validate(Editor editor, Object value) {
-                setDirty(true);
                 return validateTextBox(param, textBox, formGroup);
             }
 
             @Override
             public int getPriority() {
                 return 0;
+            }
+        });
+        textBox.addKeyUpHandler(new KeyUpHandler() {
+
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                setDirty(true);
+                textBox.validate(true);
             }
         });
     }
@@ -326,14 +334,13 @@ public abstract class AbstractServicesUi extends Composite {
             input.setEnabled(false);
         }
 
-        input.setValidateOnBlur(true);
         input.addValidator(new Validator() {
-
+            
             @Override
             public List<EditorError> validate(Editor editor, Object value) {
                 setDirty(true);
-
-                List<EditorError> result = new ArrayList<EditorError>();
+                
+                List<EditorError> result = new ArrayList<>();
                 if ((input.getText() == null || "".equals(input.getText().trim())) && param.isRequired()) {
                     // null in required field
                     result.add(new BasicEditorError(input, input.getText(), MSGS.formRequiredParameter()));
@@ -342,13 +349,22 @@ public abstract class AbstractServicesUi extends Composite {
                     param.setValue(input.getText());
                     AbstractServicesUi.this.valid.put(param.getName(), true);
                 }
-
+                
                 return result;
             }
-
+            
             @Override
             public int getPriority() {
                 return 0;
+            }
+        });
+
+        input.addKeyUpHandler(new KeyUpHandler() {
+
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                setDirty(true);
+                input.validate(true);
             }
         });
 

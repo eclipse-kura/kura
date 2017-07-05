@@ -47,6 +47,8 @@
 			<entry key="kura.home"   value="${kura.install.dir}/kura/kura" />
 			<entry key="kura.plugins"   value="${kura.install.dir}/kura/kura/plugins" />
 			<entry key="kura.packages"   value="${kura.install.dir}/kura/kura/packages" />
+			
+			<entry key="kura.marketplace.compatibility.version"   value="KURA_${kura.version}" />
 
 			<entry key="kura.data"   value="${kura.install.dir}/kura/data" />
 			<entry key="kura.snapshots"   value="${kura.install.dir}/kura/data/snapshots" />
@@ -613,6 +615,8 @@ fi]]>
 			<entry key="kura.home"   value="${kura.install.dir}/kura/kura" />
 			<entry key="kura.plugins"   value="${kura.install.dir}/kura/kura/plugins" />
 			<entry key="kura.packages"   value="${kura.install.dir}/kura/kura/packages" />
+			
+			<entry key="kura.marketplace.compatibility.version"   value="KURA_${kura.version}" />
 
 			<entry key="kura.data"   value="${kura.install.dir}/kura/data" />
 			<entry key="kura.snapshots"   value="${kura.install.dir}/kura/data/snapshots" />

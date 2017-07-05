@@ -48,7 +48,7 @@ public interface SystemService {
     /**
      * @since 1.3
      */
-    public static final String KEY_KURA_MARKETPLACE_COMPAT_VERSION = "kura.marketplace.compat.version";
+    public static final String KEY_KURA_MARKETPLACE_COMPATIBILITY_VERSION = "kura.marketplace.compatibility.version";
     public static final String KEY_DEVICE_NAME = "kura.device.name";
     public static final String KEY_PLATFORM = "kura.platform";
     public static final String KEY_MODEL_ID = "kura.model.id";
@@ -321,13 +321,13 @@ public interface SystemService {
     /**
      * Gets the Eclipse Marketplace compatibility product version for this unit.
      *
-     * The marketplace compatibility product version is defined in the kura.marketplace.compat.version property of the
-     * kura.properties file
-     * located in the ${BASE_DIR}/${KURA_SYMLINK}/kura directory.
+     * The marketplace compatibility product version is defined in the {@code kura.marketplace.compatibility.version}
+     * property of the kura.properties file located in the ${BASE_DIR}/${KURA_SYMLINK}/kura directory.
+     * If the variable {@code kura.marketplace.compatibility.version} cannot be located, it defaults to the value
+     * specified by {@link #getKuraVersion()}.
      * 
      * @since 1.3
-     * @return The marketplace compatibility Kura version string as denoted in kura.version property of the
-     *         kura.properties file.
+     * @return The marketplace compatibility Kura version string.
      */
     public String getKuraMarketplaceCompatibilityVersion();
 

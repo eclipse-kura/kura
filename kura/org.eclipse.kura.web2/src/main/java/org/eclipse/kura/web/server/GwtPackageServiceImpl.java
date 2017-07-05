@@ -58,25 +58,12 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
     private static final Logger logger = LoggerFactory.getLogger(GwtPackageServiceImpl.class);
     private static final int MARKETPLACE_FEEDBACK_REQUEST_TIMEOUT = 20 * 1000;
 
-    private String marketplaceCompatibilityVersionString;
-    private Version marketplaceCompatibilityVersion;
-
-    public GwtPackageServiceImpl(SystemService systemService) {
-        marketplaceCompatibilityVersionString = systemService.getKuraMarketplaceCompatibilityVersion();
-        try {
-            marketplaceCompatibilityVersion = new Version(marketplaceCompatibilityVersionString);
-            marketplaceCompatibilityVersionString = marketplaceCompatibilityVersion.toString();
-        } catch (Exception e) {
-            marketplaceCompatibilityVersion = null;
-        }
-    }
-
     @Override
     public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         DeploymentAdmin deploymentAdmin = ServiceLocator.getInstance().getService(DeploymentAdmin.class);
 
-        List<GwtDeploymentPackage> gwtDeploymentPackages = new ArrayList<GwtDeploymentPackage>();
+        List<GwtDeploymentPackage> gwtDeploymentPackages = new ArrayList<>();
         DeploymentPackage[] deploymentPackages = deploymentAdmin.listDeploymentPackages();
 
         if (deploymentPackages != null) {
@@ -85,7 +72,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
                 gwtDeploymentPackage.setName(GwtSafeHtmlUtils.htmlEscape(deploymentPackage.getName()));
                 gwtDeploymentPackage.setVersion(GwtSafeHtmlUtils.htmlEscape(deploymentPackage.getVersion().toString()));
 
-                List<GwtBundleInfo> gwtBundleInfos = new ArrayList<GwtBundleInfo>();
+                List<GwtBundleInfo> gwtBundleInfos = new ArrayList<>();
                 BundleInfo[] bundleInfos = deploymentPackage.getBundleInfos();
                 if (bundleInfos != null) {
                     for (BundleInfo bundleInfo : bundleInfos) {
@@ -187,8 +174,14 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
                 }
             }
 
-            descriptor.setCurrentKuraVersion(marketplaceCompatibilityVersionString);
-            checkCompatibility(descriptor, marketplaceCompatibilityVersion);
+            String kuraPropertyCompatibilityVersion = getMarketplaceCompatibilityVersionString();
+            Version kuraVersion = getMarketplaceCompatibilityVersion(kuraPropertyCompatibilityVersion);
+            if (kuraVersion != null) {
+                kuraPropertyCompatibilityVersion = kuraVersion.toString();
+            }
+
+            descriptor.setCurrentKuraVersion(kuraPropertyCompatibilityVersion);
+            checkCompatibility(descriptor, kuraVersion);
 
         } catch (Exception e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
@@ -201,6 +194,19 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
         return descriptor;
     }
 
+    private Version getMarketplaceCompatibilityVersion(String marketplaceCompatibilityVersion) {
+        try {
+            return new Version(marketplaceCompatibilityVersion);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String getMarketplaceCompatibilityVersionString() throws GwtKuraException {
+        return ServiceLocator.applyToServiceOptionally(SystemService.class,
+                systemService -> systemService.getKuraMarketplaceCompatibilityVersion());
+    }
+
     private void checkCompatibility(GwtMarketplacePackageDescriptor descriptor, Version currentProductVersion) {
         final String minKuraVersionString = descriptor.getMinKuraVersion();
         final String maxKuraVersionString = descriptor.getMaxKuraVersion();
@@ -210,10 +216,10 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
             boolean haveMaxKuraVersion = maxKuraVersionString != null && !maxKuraVersionString.isEmpty();
 
             if (haveMinKuraVersion && currentProductVersion.compareTo(new Version(minKuraVersionString)) < 0) {
-                throw new Exception();
+                throw new GwtKuraException(GwtKuraErrorCode.MARKETPLACE_COMPATIBILITY_VERSION_UNSUPPORTED);
             }
             if (haveMaxKuraVersion && currentProductVersion.compareTo(new Version(maxKuraVersionString)) > 0) {
-                throw new Exception();
+                throw new GwtKuraException(GwtKuraErrorCode.MARKETPLACE_COMPATIBILITY_VERSION_UNSUPPORTED);
             }
 
             descriptor.setCompatible(haveMinKuraVersion || haveMaxKuraVersion);

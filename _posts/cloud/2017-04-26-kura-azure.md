@@ -44,6 +44,27 @@ iothub-explorer sas-token {device-name}
 
 Be aware that the SAS token will expire in 1 hour by default, but using "-d" option it is possible to set a custom expiration time.
 
+### SSL certificates
+
+In order to connect to your IoT Hub instance, Kura should trust the remote broker through a SSL certificate. The simpler way to get the IotHub certificate is to run the following command on a shell:
+
+```
+openssl s_client -showcerts -tls1 -connect {iothubhostname}:8883
+```
+
+The result is the SSL certificate chain. Copy **all** the certificates in the format:
+
+```
+-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+```
+
+and paste them in to the "Server SSL Certificate" tab under "Settings" in Kura. Then click the Apply button and restart Kura to update the keystore.
+
 ## Configuring a Kura Cloud Stack for Azure IoT Hub
 
 The Kura Gateway Administrative Console exposes all services necessary to configure a connection to the Azure IoT Hub. You can follow the steps outlined below to configure the connection to the Azure IoT Hub.
@@ -109,9 +130,9 @@ The default settings for the CloudService should be modified as follow to allow 
 
 - **republish.mqtt.birth.cert.on.modem.detect** - should be set `false` to avoid sending additional messages on cellular modem update
 
-- **disable.default.subscriptions** - should be set `false` to avoid subscriptions on Kura control topics for cloud-to-device
+- **enable.default.subscriptions** - should be set `false` to avoid subscriptions on Kura control topics for cloud-to-device
 
-- **disable.republish.birth.cert.on.reconnect** - should be set `false` to avoid sending additional device profile messages on MQTT connect
+- **birth.cert.policy** - should be set `Disable publishing` to avoid sending additional device profile messages on MQTT connect
 
 - **payload.encoding** - should be set to `Simple JSON`
 

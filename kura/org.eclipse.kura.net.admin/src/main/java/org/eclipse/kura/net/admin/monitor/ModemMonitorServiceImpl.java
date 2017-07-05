@@ -97,7 +97,6 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
     private Future<?> task;
     private static AtomicBoolean stopThread;
-
     private SystemService systemService;
     private NetworkService networkService;
     private NetworkConfigurationService netConfigService;

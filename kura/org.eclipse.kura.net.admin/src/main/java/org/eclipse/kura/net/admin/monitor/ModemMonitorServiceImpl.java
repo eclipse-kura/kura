@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -95,10 +95,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
     private static Object lock = new Object();
 
-    private static Future<?> task;
+    private Future<?> task;
     private static AtomicBoolean stopThread;
-
-    private ComponentContext ctx;
 
     private SystemService systemService;
     private NetworkService networkService;
@@ -153,15 +151,12 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
     protected void activate(ComponentContext componentContext) {
 
-        // save the bundle context
-        this.ctx = componentContext;
-
         this.pppState = PppState.NOT_CONNECTED;
         this.resetTimerStart = 0L;
 
         Dictionary<String, String[]> d = new Hashtable<>();
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
-        this.ctx.getBundleContext().registerService(EventHandler.class.getName(), this, d);
+        componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
 
         this.modems = new HashMap<>();
         this.interfaceStatuses = new HashMap<>();
@@ -205,25 +200,20 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
             return null;
         }
 
-        task = this.executor.submit(new Runnable() {
-
-            @Override
-            public void run() {
-                while (!stopThread.get()) {
-                    Thread.currentThread().setName("ModemMonitor");
-                    try {
-                        monitor();
-                        monitorWait();
-                    } catch (InterruptedException interruptedException) {
-                        Thread.interrupted();
-                        logger.debug("modem monitor interrupted", interruptedException);
-                    } catch (Throwable t) {
-                        logger.error("Exception while monitoring cellular connection", t);
-                    }
+        task = this.executor.submit(() -> {
+            while (!stopThread.get()) {
+                Thread.currentThread().setName("ModemMonitor");
+                try {
+                    monitor();
+                    monitorWait();
+                } catch (InterruptedException interruptedException) {
+                    Thread.interrupted();
+                    logger.debug("modem monitor interrupted", interruptedException);
+                } catch (Throwable t) {
+                    logger.error("Exception while monitoring cellular connection", t);
                 }
             }
         });
-
         return task;
     }
 
@@ -274,15 +264,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                 try {
                     final NetworkConfiguration newNetworkConfig = new NetworkConfiguration(props);
                     ExecutorService ex = Executors.newSingleThreadExecutor();
-                    ex.submit(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            processNetworkConfigurationChangeEvent(newNetworkConfig);
-                        }
-                    });
+                    ex.submit(() -> processNetworkConfigurationChangeEvent(newNetworkConfig));
                 } catch (Exception e) {
-                    logger.error("Failed to handle the NetworkConfigurationChangeEvent - {}", e);
+                    logger.error("Failed to handle the NetworkConfigurationChangeEvent ", e);
                 }
             }
         } else if (topic.equals(ModemAddedEvent.MODEM_EVENT_ADDED_TOPIC)) {
@@ -290,13 +274,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
             final ModemDevice modemDevice = modemAddedEvent.getModemDevice();
             if (this.serviceActivated) {
                 ExecutorService ex = Executors.newSingleThreadExecutor();
-                ex.submit(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        trackModem(modemDevice);
-                    }
-                });
+                ex.submit(() -> trackModem(modemDevice));
             }
         } else if (topic.equals(ModemRemovedEvent.MODEM_EVENT_REMOVED_TOPIC)) {
             ModemRemovedEvent modemRemovedEvent = (ModemRemovedEvent) event;
@@ -417,7 +395,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                                         setInterfaceNumber(ifaceName, newNetConfigs);
                                         setNetInterfaceStatus(netInterfaceStatus, newNetConfigs);
                                     } catch (NumberFormatException e) {
-                                        logger.error("failed to set new interface number - {}", e);
+                                        logger.error("failed to set new interface number ", e);
                                     }
                                 }
                             }
@@ -474,8 +452,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                                             monitorNotity();
                                         }
                                     } else {
-                                        logger.info("NetworkConfigurationChangeEvent :: The " + modem.getModel()
-                                                + " is provisioned");
+                                        logger.info("NetworkConfigurationChangeEvent :: The {} is provisioned",
+                                                modem.getModel());
                                     }
                                 }
 
@@ -489,7 +467,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                         }
                     }
                 } catch (KuraException e) {
-                    logger.error("NetworkConfigurationChangeEvent :: Failed to process - {}", e);
+                    logger.error("NetworkConfigurationChangeEvent :: Failed to process ", e);
                 }
             }
         }
@@ -919,7 +897,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                     logger.debug("disableModemGps() waiting for PositionService to release serial port ...");
                 }
             } catch (Exception e) {
-                logger.debug("disableModemGps() waiting for PositionService to release serial port: ex={}", e);
+                logger.debug("disableModemGps() waiting for PositionService to release serial port ", e);
             }
         } while (System.currentTimeMillis() - startTimer < 20000L);
 

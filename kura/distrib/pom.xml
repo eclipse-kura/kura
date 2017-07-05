@@ -88,7 +88,6 @@
 						</goals>
 						<configuration>
 							<files>
-								<file>${basedir}/build.properties</file>
 								<file>${basedir}/config/kura.build.properties</file>
 								<file>${kura.basedir}/../../target-platform/config/kura.target-platform.build.properties</file>
 							</files>
@@ -639,6 +638,15 @@
 		</plugins>
 		<pluginManagement>
 			<plugins>
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-packaging-plugin</artifactId>
+                    <version>${tycho-version}</version>
+                    <configuration>
+                        <strictVersions>true</strictVersions>
+                        <format>${kura.build.version}</format>
+                    </configuration>
+                </plugin>
 				<!--This plugin's configuration is used to store Eclipse m2e settings
 					only. It has no influence on the Maven build itself. -->
 				<plugin>

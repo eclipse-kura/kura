@@ -37,4 +37,10 @@
               policy="dynamic"
               cardinality="0..n"
               interface="org.eclipse.kura.data.DataServiceListener"/>
+   <reference name="WatchdogService"
+   			  bind="setWatchdogService" 
+   			  unbind="unsetWatchdogService"
+   			  cardinality="1..1" 
+   			  interface="org.eclipse.kura.watchdog.WatchdogService"  
+   			  policy="static"/>   
 </scr:component>

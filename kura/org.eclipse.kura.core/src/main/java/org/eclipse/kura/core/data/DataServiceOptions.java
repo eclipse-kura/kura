@@ -13,7 +13,7 @@ package org.eclipse.kura.core.data;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -36,6 +36,8 @@ public class DataServiceOptions {
     private static final String RATE_LIMIT_AVERAGE_RATE_PROP_NAME = "rate.limit.average";
     private static final String RATE_LIMIT_TIME_UNIT_PROP_NAME = "rate.limit.time.unit";
     private static final String RATE_LIMIT_BURST_SIZE_PROP_NAME = "rate.limit.burst.size";
+    private static final String RECOVERY_ENABLE_PROP_NAME = "enable.recovery.on.connection.failure";
+    private static final String RECOVERY_MAX_FAILURES_PROP_NAME = "connection.recovery.max.failures";
 
     private static final boolean AUTOCONNECT_PROP_DEFAULT = false;
     private static final int CONNECT_DELAY_DEFAULT = 60;
@@ -51,12 +53,16 @@ public class DataServiceOptions {
     private static final int RATE_LIMIT_AVERAGE_RATE_DEFAULT = 1;
     private static final String RATE_LIMIT_TIME_UNIT_DEFAULT = "SECONDS";
     private static final int RATE_LIMIT_BURST_SIZE_DEFAULT = 1;
+    private static final boolean RECOVERY_ENABLE_DEFAULT = true;
+    private static final int RECOVERY_MAX_FAILURES_DEFAULT = 10;
+
+    private static final int CONNECT_CRITICAL_COMPONENT_TIMEOUT_MULTIPLIER = 1500;
 
     private final Map<String, Object> properties;
 
     DataServiceOptions(Map<String, Object> properties) {
         requireNonNull(properties, "Required not null");
-        this.properties = new HashMap<>(properties);
+        this.properties = Collections.unmodifiableMap(properties);
     }
 
     int getStoreHousekeeperInterval() {
@@ -138,5 +144,17 @@ public class DataServiceOptions {
 
     String getKuraServicePid() {
         return (String) this.properties.get(ConfigurationService.KURA_SERVICE_PID);
+    }
+
+    boolean isConnectionRecoveryEnabled() {
+        return (boolean) this.properties.getOrDefault(RECOVERY_ENABLE_PROP_NAME, RECOVERY_ENABLE_DEFAULT);
+    }
+
+    int getRecoveryMaximumAllowedFailures() {
+        return (int) this.properties.getOrDefault(RECOVERY_MAX_FAILURES_PROP_NAME, RECOVERY_MAX_FAILURES_DEFAULT);
+    }
+
+    int getCriticalComponentTimeout() {
+        return getConnectDelay() * CONNECT_CRITICAL_COMPONENT_TIMEOUT_MULTIPLIER;
     }
 }

@@ -26,8 +26,8 @@
             cardinality="0"
             required="true"
             default="device-name"
-            description="Friendly name of the device. Device name is the common name of the device (eg: Reliagate 50-21, Raspberry Pi, etc.). Hostname will use the linux hostname utility. 
-            				Custom allows for defining a unique string. Server defined relies on Eurotech Everware Cloud to define a name.">
+            description="Friendly name of the device. Device name is the common name of the device (eg: Reliagate 20-25, Raspberry Pi, etc.). Hostname will use the linux hostname utility. 
+            				Custom allows for defining a unique string. Server defined relies on the remote management server to define a name.">
         	<Option label="Set display name as device name" value="device-name" />
         	<Option label="Set display name from hostname" value="hostname" />
         	<Option label="Custom" value="custom" />
@@ -49,7 +49,7 @@
             cardinality="0"
             required="true"
             default="$EDC"
-            description='Topic prefix for system messages.'>
+            description='Topic prefix for system and device management messages.'>
         </AD>
                     
         <AD id="encode.gzip"
@@ -83,7 +83,7 @@
             cardinality="0"
             required="true"
             default="true"
-            description="By disabling default subscriptions the gateway will not be remotely manageable"/>
+            description="Manages the default subscriptions to the gateway management MQTT topics. When disabled, the gateway will not be remotely manageable."/>
             
         <AD id="birth.cert.policy"
             name="birth.cert.policy"

@@ -97,10 +97,10 @@
         <!-- BND baseline plugin -->
         <bnd.baseline.version>3.4.0-SNAPSHOT</bnd.baseline.version>
         <bnd.baseline.continueOnError>false</bnd.baseline.continueOnError>
-        
+
         <kura.skip.can>true</kura.skip.can>
     </properties>
-    
+
     <distributionManagement>
         <repository>
             <id>repo.eclipse.org</id>
@@ -147,7 +147,7 @@
             </repositories>
         </profile>
         <profile>
-        	<id>can</id>
+            <id>can</id>
             <activation>
                 <property>
                     <name>kura.skip.can</name>
@@ -202,14 +202,14 @@
             </build>
         </profile>
         <profile>
-			<id>tools</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<modules>
-				<module>tools</module>
-			</modules>
-		</profile>
+            <id>tools</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>tools</module>
+            </modules>
+        </profile>
         <profile>
             <id>tests</id>
             <activation>
@@ -221,13 +221,13 @@
                 <module>test</module>
             </modules>
         </profile>
-		
-		<profile>
-			<id>web</id>
-			<properties>
-				<org.eclipse.kura.web.skip>false</org.eclipse.kura.web.skip>
-			</properties>
-			<activation>  <!-- deactivated if noweb property is selected -->
+
+        <profile>
+            <id>web</id>
+            <properties>
+                <org.eclipse.kura.web.skip>false</org.eclipse.kura.web.skip>
+            </properties>
+            <activation>  <!-- deactivated if noweb property is selected -->
                 <property>
                     <name>kura.skip.web</name>
                     <value>!true</value>
@@ -236,7 +236,7 @@
             <modules>
                 <module>org.eclipse.kura.web2</module>
             </modules>
-		</profile>
+        </profile>
     </profiles>
 
     <repositories>

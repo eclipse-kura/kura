@@ -27,7 +27,7 @@ class DbConfiguration {
     private static final String DB_CONNECTOR_URL_DEFAULT = "jdbc:h2:mem:kuradb";
     private static final String DB_USER_DEFAULT = "SA";
     private static final String DB_PASSWORD_DEFAULT = "";
-    private static final long DB_CHECKPOINT_INTERVAL_SECONDS_DEFAULT = 900;
+    private static final int DB_CHECKPOINT_INTERVAL_SECONDS_DEFAULT = 900;
     private static final int DB_CONNECTION_POOL_MAX_SIZE_DEFAULT = 10;
 
     private static final Pattern USER_PATTERN = generatePatternForProperty("user");

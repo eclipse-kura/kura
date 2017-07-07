@@ -26,6 +26,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.client.util.GwtSafeHtmlUtils;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
@@ -37,6 +38,7 @@ import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtPackageService;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.Version;
 import org.osgi.service.deploymentadmin.BundleInfo;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
@@ -61,7 +63,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
         checkXSRFToken(xsrfToken);
         DeploymentAdmin deploymentAdmin = ServiceLocator.getInstance().getService(DeploymentAdmin.class);
 
-        List<GwtDeploymentPackage> gwtDeploymentPackages = new ArrayList<GwtDeploymentPackage>();
+        List<GwtDeploymentPackage> gwtDeploymentPackages = new ArrayList<>();
         DeploymentPackage[] deploymentPackages = deploymentAdmin.listDeploymentPackages();
 
         if (deploymentPackages != null) {
@@ -70,7 +72,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
                 gwtDeploymentPackage.setName(GwtSafeHtmlUtils.htmlEscape(deploymentPackage.getName()));
                 gwtDeploymentPackage.setVersion(GwtSafeHtmlUtils.htmlEscape(deploymentPackage.getVersion().toString()));
 
-                List<GwtBundleInfo> gwtBundleInfos = new ArrayList<GwtBundleInfo>();
+                List<GwtBundleInfo> gwtBundleInfos = new ArrayList<>();
                 BundleInfo[] bundleInfos = deploymentPackage.getBundleInfos();
                 if (bundleInfos != null) {
                     for (BundleInfo bundleInfo : bundleInfos) {
@@ -123,6 +125,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
     public GwtMarketplacePackageDescriptor getMarketplacePackageDescriptor(GwtXSRFToken xsrfToken, String nodeId)
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
+
         GwtMarketplacePackageDescriptor descriptor = null;
         URL mpUrl = null;
         HttpURLConnection connection = null;
@@ -171,6 +174,15 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
                 }
             }
 
+            String kuraPropertyCompatibilityVersion = getMarketplaceCompatibilityVersionString();
+            Version kuraVersion = getMarketplaceCompatibilityVersion(kuraPropertyCompatibilityVersion);
+            if (kuraVersion != null) {
+                kuraPropertyCompatibilityVersion = kuraVersion.toString();
+            }
+
+            descriptor.setCurrentKuraVersion(kuraPropertyCompatibilityVersion);
+            checkCompatibility(descriptor, kuraVersion);
+
         } catch (Exception e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         } finally {
@@ -180,6 +192,41 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
         }
 
         return descriptor;
+    }
+
+    private Version getMarketplaceCompatibilityVersion(String marketplaceCompatibilityVersion) {
+        try {
+            return new Version(marketplaceCompatibilityVersion);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String getMarketplaceCompatibilityVersionString() throws GwtKuraException {
+        return ServiceLocator.applyToServiceOptionally(SystemService.class,
+                systemService -> systemService.getKuraMarketplaceCompatibilityVersion());
+    }
+
+    private void checkCompatibility(GwtMarketplacePackageDescriptor descriptor, Version currentProductVersion) {
+        final String minKuraVersionString = descriptor.getMinKuraVersion();
+        final String maxKuraVersionString = descriptor.getMaxKuraVersion();
+
+        try {
+            boolean haveMinKuraVersion = minKuraVersionString != null && !minKuraVersionString.isEmpty();
+            boolean haveMaxKuraVersion = maxKuraVersionString != null && !maxKuraVersionString.isEmpty();
+
+            if (haveMinKuraVersion && currentProductVersion.compareTo(new Version(minKuraVersionString)) < 0) {
+                throw new GwtKuraException(GwtKuraErrorCode.MARKETPLACE_COMPATIBILITY_VERSION_UNSUPPORTED);
+            }
+            if (haveMaxKuraVersion && currentProductVersion.compareTo(new Version(maxKuraVersionString)) > 0) {
+                throw new GwtKuraException(GwtKuraErrorCode.MARKETPLACE_COMPATIBILITY_VERSION_UNSUPPORTED);
+            }
+
+            descriptor.setCompatible(haveMinKuraVersion || haveMaxKuraVersion);
+
+        } catch (Exception e) {
+            descriptor.setCompatible(false);
+        }
     }
 
     @Override
@@ -270,6 +317,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
                     registration.unregister();
                 }
             }
+
         }
     }
 

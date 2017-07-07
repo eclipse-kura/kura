@@ -25,7 +25,7 @@
             cardinality="0"
             required="true"
             default="false"
-            description="Enable automatic connect of the Data Publishers on startup."/>
+            description="Enable automatic connect of the Data Publishers on startup and after a disconnection."/>
                         
         <AD id="connect.retry-interval"
             name="connect.retry-interval"
@@ -35,6 +35,23 @@
             default="60"
             min="0"
             description="Frequency in seconds to retry a connection of the Data Publishers after a disconnect (0 to disable)."/>
+            
+        <AD id="enable.recovery.on.connection.failure"
+            name="enable.recovery.on.connection.failure"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enables the recovery feature on connection failure. If the device is not able to connect to a remote cloud platform, the service will wait for a specified amount of connection retries. If the recovery fails, the device will be rebooted. Being based on the Watchdog service, it needs to be activated as well."/>
+        
+        <AD id="connection.recovery.max.failures"
+            name="connection.recovery.max.failures"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="10"
+            min="1"
+            description="Number of failures in Data Publishers connection before forcing a reboot."/>
             
         <AD id="disconnect.quiesce-timeout"
             name="disconnect.quiesce-timeout"

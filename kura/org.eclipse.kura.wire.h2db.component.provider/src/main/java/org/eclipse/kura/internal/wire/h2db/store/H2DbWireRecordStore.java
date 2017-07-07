@@ -9,7 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.h2db.store;
 
@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
  * The Class DbWireRecordStore is a wire component which is responsible to store
  * the received {@link WireRecord}.
  */
-public final class H2DbWireRecordStore implements WireEmitter, WireReceiver, ConfigurableComponent {
+public class H2DbWireRecordStore implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     private static final String COLUMN_NAME = "COLUMN_NAME";
 
@@ -536,7 +536,7 @@ public final class H2DbWireRecordStore implements WireEmitter, WireReceiver, Con
         return stmt;
     }
 
-    private void restartDbServiceTracker() {
+    protected void restartDbServiceTracker() {
         stopDbServiceTracker();
         try {
             final Filter filter = FrameworkUtil.createFilter(

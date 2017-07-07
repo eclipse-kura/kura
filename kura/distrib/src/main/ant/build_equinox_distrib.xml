@@ -47,7 +47,7 @@
 			<entry key="kura.home"   value="${kura.install.dir}/kura/kura" />
 			<entry key="kura.plugins"   value="${kura.install.dir}/kura/kura/plugins" />
 			<entry key="kura.packages"   value="${kura.install.dir}/kura/kura/packages" />
-			
+
 			<entry key="kura.marketplace.compatibility.version"   value="KURA_${kura.version}" />
 
 			<entry key="kura.data"   value="${kura.install.dir}/kura/data" />
@@ -449,6 +449,7 @@ fi]]>
 				<exclude name="com.gwt.user_*"/>
 				<exclude name="org.eclipse.kura.windows.*"/>
 				<exclude name="org.junit*"/>
+				<exclude name="org.moka7*"/>
 
 				<!-- exclude source bundles -->
 				<exclude name="*.source_*.jar"/>
@@ -609,7 +610,7 @@ fi]]>
 			<entry key="kura.home"   value="${kura.install.dir}/kura/kura" />
 			<entry key="kura.plugins"   value="${kura.install.dir}/kura/kura/plugins" />
 			<entry key="kura.packages"   value="${kura.install.dir}/kura/kura/packages" />
-			
+
 			<entry key="kura.marketplace.compatibility.version"   value="KURA_${kura.version}" />
 
 			<entry key="kura.data"   value="${kura.install.dir}/kura/data" />

@@ -34,7 +34,7 @@
             cardinality="0"
             required="false"
             default="account-name"
-            description="The value of this attribute will replace the '#account-name' token found in publishing topics. For connections to the EDC platform, this attribute is mandatory and must match the name of the EDC account."/>
+            description="The value of this attribute will replace the '#account-name' token found in publishing topics. For connections to remote management servers, this is generally the name of the server side account."/>
 
         <AD id="username"  
             name="username"

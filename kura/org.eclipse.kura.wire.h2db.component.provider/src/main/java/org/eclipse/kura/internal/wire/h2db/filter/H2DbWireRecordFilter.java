@@ -9,7 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.h2db.filter;
 
@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
  * which is focused on performing an user defined SQL query in a database table and emitting the result as a Wire
  * Envelope.
  */
-public final class H2DbWireRecordFilter implements WireEmitter, WireReceiver, ConfigurableComponent {
+public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(H2DbWireRecordFilter.class);
 
@@ -281,7 +281,7 @@ public final class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Co
         }
     }
 
-    private void restartDbServiceTracker() {
+    protected void restartDbServiceTracker() {
         stopDbServiceTracker();
         try {
             final Filter filter = FrameworkUtil

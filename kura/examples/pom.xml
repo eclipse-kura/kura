@@ -77,7 +77,7 @@
                 <repository>
                     <id>p2-repo-equinox_3.11.1</id>
                     <layout>p2</layout>
-                    <url>file:////${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
+                    <url>file:///${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
                 </repository>
             </repositories>
         </profile>
@@ -93,7 +93,7 @@
                 <repository>
                     <id>p2-repo-equinox_3.11.1</id>
                     <layout>p2</layout>
-                    <url>file:////${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
+                    <url>file:///${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
                 </repository>
             </repositories>
         </profile>
@@ -137,12 +137,12 @@
         <repository>
     		<id>p2-repo</id>
 			<layout>p2</layout>
-            <url>file:////${kura.basedir}/org.eclipse.kura-p2/target/repository/</url>
+            <url>file:///${kura.basedir}/org.eclipse.kura-p2/target/repository/</url>
         </repository>
         <repository>
             <id>p2-repo-common</id>
             <layout>p2</layout>
-            <url>file:////${kura.basedir}/target-definition/common/repository/</url>
+            <url>file:///${kura.basedir}/target-definition/common/repository/</url>
         </repository>
     </repositories>
     

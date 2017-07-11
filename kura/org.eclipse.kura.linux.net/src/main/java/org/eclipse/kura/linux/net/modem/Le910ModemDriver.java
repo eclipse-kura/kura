@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,17 +16,17 @@ import org.slf4j.LoggerFactory;
 
 public class Le910ModemDriver extends OptionModemDriver {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(Le910ModemDriver.class);
-    private static final String s_vendor = "1bc7";
-    private static final String s_product = "1201";
+    private static final Logger logger = LoggerFactory.getLogger(Le910ModemDriver.class);
+    private static final String VENDOR = "1bc7";
+    private static final String PRODUCT = "1201";
 
     public Le910ModemDriver() {
-        super(s_vendor, s_product);
+        super(VENDOR, PRODUCT);
     }
 
     @Override
     public int install() throws Exception {
-        s_logger.info("Installing {} driver for Telit LE910 modem", getName());
+        logger.info("Installing {} driver for Telit LE910 modem", getName());
         return super.install();
     }
 }

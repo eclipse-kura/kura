@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,14 +20,14 @@ public class SerialModemAddedEvent extends Event {
 
     public static final String SERIAL_MODEM_EVENT_ADDED_TOPIC = "org/eclipse/kura/net/modem/serial-modem/ADDED";
 
-    private final SupportedSerialModemInfo m_supportedSerialModemInfo;
+    private final SupportedSerialModemInfo supportedSerialModemInfo;
 
     public SerialModemAddedEvent(SupportedSerialModemInfo supportedSerialModemInfo) {
         super(SERIAL_MODEM_EVENT_ADDED_TOPIC, (Map<String, ?>) null);
-        this.m_supportedSerialModemInfo = supportedSerialModemInfo;
+        this.supportedSerialModemInfo = supportedSerialModemInfo;
     }
 
     public SupportedSerialModemInfo getSupportedSerialModemInfo() {
-        return this.m_supportedSerialModemInfo;
+        return this.supportedSerialModemInfo;
     }
 }

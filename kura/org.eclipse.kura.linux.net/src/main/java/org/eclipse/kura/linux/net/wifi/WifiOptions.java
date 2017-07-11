@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 public class WifiOptions {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(WifiOptions.class);
+    private static final Logger logger = LoggerFactory.getLogger(WifiOptions.class);
 
     /**
      * Reports the class name representing this interface.
@@ -78,7 +78,7 @@ public class WifiOptions {
                 }
             }
         } catch (Exception e) {
-            s_logger.warn(FAILED_TO_EXECUTE_MSG, formIwDevInfoCommand(ifaceName), e);
+            logger.warn(FAILED_TO_EXECUTE_MSG, formIwDevInfoCommand(ifaceName), e);
         } finally {
             if (procIw != null) {
                 ProcessUtil.destroy(procIw);
@@ -97,12 +97,12 @@ public class WifiOptions {
         try {
             proc = ProcessUtil.exec(formIwconfigCommand(ifaceName));
             if (proc.waitFor() != 0) {
-                s_logger.warn(FAILED_TO_EXECUTE_MSG, formIwconfigCommand(ifaceName));
+                logger.warn(FAILED_TO_EXECUTE_MSG, formIwconfigCommand(ifaceName));
                 ProcessUtil.destroy(proc);
                 return ret;
             }
         } catch (Exception e) {
-            s_logger.warn(FAILED_TO_EXECUTE_MSG, formIwconfigCommand(ifaceName), e);
+            logger.warn(FAILED_TO_EXECUTE_MSG, formIwconfigCommand(ifaceName), e);
             if (proc != null) {
                 ProcessUtil.destroy(proc);
             }
@@ -118,7 +118,7 @@ public class WifiOptions {
                 }
             }
         } catch (Exception e) {
-            s_logger.warn(FAILED_TO_EXECUTE_MSG, formIwDevInfoCommand(ifaceName), e);
+            logger.warn(FAILED_TO_EXECUTE_MSG, formIwDevInfoCommand(ifaceName), e);
         } finally {
             ProcessUtil.destroy(proc);
         }

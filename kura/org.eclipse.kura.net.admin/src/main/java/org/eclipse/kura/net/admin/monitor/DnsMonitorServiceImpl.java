@@ -419,7 +419,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
                             } else {
                                 String currentAddress = LinuxNetworkUtil.getCurrentIpAddress(interfaceName);
                                 List<IPAddress> servers = linuxDns.getDhcpDnsServers(interfaceName, currentAddress);
-                                if (servers != null) {
+                                if (!servers.isEmpty()) {
                                     s_logger.debug("Configured for DHCP - adding DHCP servers: {}", servers);
                                     serverList.addAll(servers);
                                 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 public class OptionModemDriver extends UsbModemDriver {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(OptionModemDriver.class);
+    private static final Logger logger = LoggerFactory.getLogger(OptionModemDriver.class);
 
     private static final String USB_BUS_DRIVERS_PATH = "/sys/bus/usb-serial/drivers/option1/new_id";
 
@@ -33,7 +33,7 @@ public class OptionModemDriver extends UsbModemDriver {
     public int install() throws Exception {
         int status = super.install();
         if (status == 0) {
-            s_logger.info("submiting {}:{} information to option driver ...", getVendor(), getProduct());
+            logger.info("submiting {}:{} information to option driver ...", getVendor(), getProduct());
             File newIdFile = new File(USB_BUS_DRIVERS_PATH);
             if (newIdFile.exists()) {
                 writeToFile(newIdFile);
@@ -48,20 +48,9 @@ public class OptionModemDriver extends UsbModemDriver {
         sb.append(' ');
         sb.append(getProduct());
 
-        FileOutputStream fos = null;
-        PrintWriter pw = null;
-        try {
-            fos = new FileOutputStream(newIdFile);
-            pw = new PrintWriter(fos);
+        try (FileOutputStream fos = new FileOutputStream(newIdFile); PrintWriter pw = new PrintWriter(fos)) {
             pw.write(sb.toString());
             pw.flush();
-        } finally {
-            if (pw != null) {
-                pw.close();
-            }
-            if (fos != null) {
-                fos.close();
-            }
         }
     }
 }

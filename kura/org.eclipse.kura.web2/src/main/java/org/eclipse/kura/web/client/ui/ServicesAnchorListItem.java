@@ -9,6 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
+ *  Red Hat
  *  
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
@@ -43,7 +44,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
         this.item = service;
         this.instance = this;
 
-        IconType icon = getIcon(this.item.getComponentName());
+        IconType icon = getIcon(item);
         if (icon == null) {
             String imageURL = getImagePath();
             if (imageURL != null) {
@@ -123,9 +124,13 @@ public class ServicesAnchorListItem extends AnchorListItem {
         return this.item.getComponentName();
     }
 
-    private IconType getIcon(String name) {
+    private IconType getIcon(GwtConfigComponent item) {
+        final String name = item.getComponentName();
+
         if (name.startsWith("BluetoothService")) {
             return IconType.BTC;
+        } else if (name.startsWith("BrokerInstance")) {
+            return IconType.RSS;
         } else if (name.startsWith("CloudService")) {
             return IconType.CLOUD;
         } else if (name.startsWith("DiagnosticsService")) {
@@ -154,9 +159,14 @@ public class ServicesAnchorListItem extends AnchorListItem {
             return IconType.TERMINAL;
         } else if (name.startsWith("DenaliService")) {
             return IconType.SPINNER;
-        } else {
-            return null;
         }
+
+        final String id = item.getComponentId();
+        if (id.endsWith(".BrokerInstance")) {
+            return IconType.RSS;
+        }
+
+        return null;
     }
 
     private String getImagePath() {

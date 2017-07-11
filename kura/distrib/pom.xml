@@ -136,6 +136,21 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.broker.artemis.core</artifactId>
+                                    <version>${org.eclipse.kura.broker.artemis.core.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.broker.artemis.simple.mqtt</artifactId>
+                                    <version>${org.eclipse.kura.broker.artemis.simple.mqtt.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.broker.artemis.xml</artifactId>
+                                    <version>${org.eclipse.kura.broker.artemis.xml.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.camel</artifactId>
                                     <version>${org.eclipse.kura.camel.version}</version>
                                 </artifactItem>
@@ -474,6 +489,12 @@
                                     tofile="target/plugins/org.eclipse.kura.asset.cloudlet.provider_${org.eclipse.kura.asset.cloudlet.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.asset.helper.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.asset.helper.provider_${org.eclipse.kura.asset.helper.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.broker.artemis.core.jar"
+                                    tofile="target/plugins/org.eclipse.kura.broker.artemis.core_${org.eclipse.kura.broker.artemis.core.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.broker.artemis.simple.mqtt.jar"
+                                    tofile="target/plugins/org.eclipse.kura.broker.artemis.simple.mqtt_${org.eclipse.kura.broker.artemis.simple.mqtt.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.broker.artemis.xml.jar"
+                                    tofile="target/plugins/org.eclipse.kura.broker.artemis.xml_${org.eclipse.kura.broker.artemis.xml.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.driver.helper.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.driver.helper.provider_${org.eclipse.kura.driver.helper.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.camel.jar"

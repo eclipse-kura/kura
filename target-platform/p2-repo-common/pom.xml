@@ -261,6 +261,7 @@
 									<artifactId>osgi.annotation</artifactId>
 									<version>${osgi.annotation.version}</version>
 								</artifactItem>
+
 								<artifactItem>
 									<groupId>org.eclipse.kura</groupId>
 									<artifactId>com.eclipsesource.jaxrs.jersey-min</artifactId>
@@ -286,6 +287,112 @@
 									<artifactId>com.google.gson</artifactId>
 									<version>${com.google.gson.version}</version>
 								</artifactItem>
+
+								<!-- Artemis Broker -->
+								<artifactItem>
+									<groupId>com.google.guava</groupId>
+									<artifactId>guava</artifactId>
+									<version>19.0</version>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>org.apache.activemq</groupId>
+									<artifactId>artemis-amqp-protocol</artifactId>
+									<version>${org.apache.activemq.artemis.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.activemq</groupId>
+									<artifactId>artemis-mqtt-protocol</artifactId>
+									<version>${org.apache.activemq.artemis.version}</version>
+								</artifactItem>
+								<dependency>
+									<groupId>org.apache.activemq</groupId>
+									<artifactId>artemis-native</artifactId>
+									<version>${org.apache.activemq.artemis.version}</version>
+								</dependency>
+
+								<artifactItem>
+									<groupId>io.netty</groupId>
+									<artifactId>netty-buffer</artifactId>
+									<version>${io.netty.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>io.netty</groupId>
+									<artifactId>netty-codec</artifactId>
+									<version>${io.netty.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>io.netty</groupId>
+									<artifactId>netty-codec-http</artifactId>
+									<version>${io.netty.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>io.netty</groupId>
+									<artifactId>netty-codec-mqtt</artifactId>
+									<version>${io.netty.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>io.netty</groupId>
+									<artifactId>netty-common</artifactId>
+									<version>${io.netty.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>io.netty</groupId>
+									<artifactId>netty-handler</artifactId>
+									<version>${io.netty.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>io.netty</groupId>
+									<artifactId>netty-resolver</artifactId>
+									<version>${io.netty.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>io.netty</groupId>
+									<artifactId>netty-transport</artifactId>
+									<version>${io.netty.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>io.netty</groupId>
+									<artifactId>netty-transport-native-epoll</artifactId>
+									<version>${io.netty.version}</version>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>org.jboss.logging</groupId>
+									<artifactId>jboss-logging</artifactId>
+									<version>${org.jboss.logging.version}</version>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>commons-beanutils</groupId>
+									<artifactId>commons-beanutils</artifactId>
+									<version>${commons-beanutils.version}</version>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>commons-collections</groupId>
+									<artifactId>commons-collections</artifactId>
+									<version>${commons-collections.version}</version>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>org.apache.geronimo.specs</groupId>
+									<artifactId>geronimo-json_1.0_spec</artifactId>
+									<version>1.0-alpha-1</version>
+								</artifactItem>
+
+								<artifactItem>
+									<groupId>org.apache.geronimo.specs</groupId>
+									<artifactId>geronimo-jms_2.0_spec</artifactId>
+									<version>1.0-alpha-2</version>
+								</artifactItem>
+								
+								<artifactItem>
+									<groupId>org.apache.geronimo.specs</groupId>
+									<artifactId>geronimo-jta_1.1_spec</artifactId>
+									<version>${org.apache.geronimo.specs.jta.version}</version>
+								</artifactItem>
+
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -351,6 +458,27 @@
 								<move file="target/source/plugins/com.google.gson.jar" tofile="target/source/plugins/com.google.gson_${com.google.gson.version}.jar"/>
 								<!--<move file="target/source/plugins/org.eclipse.kura.windows.system.jar" tofile="target/source/plugins/org.eclipse.kura.windows.system_${org.eclipse.kura.windows.system.version}.jar"/>
 								<move file="target/source/plugins/org.eclipse.kura.windows.launcher.jar" tofile="target/source/plugins/org.eclipse.kura.windows.launcher_${org.eclipse.kura.windows.launcher.version}.jar"/>-->
+								
+								<!-- Artemis Broker -->
+								<move file="target/source/plugins/guava.jar" tofile="target/source/plugins/guava_${guava.version}.jar"/>
+								<move file="target/source/plugins/artemis-amqp-protocol.jar" tofile="target/source/plugins/artemis-amqp-protocol_${org.apache.activemq.artemis.version}.jar"/>
+								<move file="target/source/plugins/artemis-mqtt-protocol.jar" tofile="target/source/plugins/artemis-mqtt-protocol_${org.apache.activemq.artemis.version}.jar"/>
+								<move file="target/source/plugins/artemis-native.jar" tofile="target/source/plugins/artemis-native_${org.apache.activemq.artemis.version}.jar"/>
+								<move file="target/source/plugins/netty-buffer.jar" tofile="target/source/plugins/netty-buffer_${io.netty.version}.jar"/>
+								<move file="target/source/plugins/netty-codec.jar" tofile="target/source/plugins/netty-codec_${io.netty.version}.jar"/>
+								<move file="target/source/plugins/netty-common.jar" tofile="target/source/plugins/netty-common_${io.netty.version}.jar"/>
+								<move file="target/source/plugins/netty-codec-http.jar" tofile="target/source/plugins/netty-codec-http_${io.netty.version}.jar"/>
+								<move file="target/source/plugins/netty-codec-mqtt.jar" tofile="target/source/plugins/netty-codec-mqtt_${io.netty.version}.jar"/>
+								<move file="target/source/plugins/netty-handler.jar" tofile="target/source/plugins/netty-handler_${io.netty.version}.jar"/>
+								<move file="target/source/plugins/netty-resolver.jar" tofile="target/source/plugins/netty-resolver_${io.netty.version}.jar"/>
+								<move file="target/source/plugins/netty-transport.jar" tofile="target/source/plugins/netty-transport_${io.netty.version}.jar"/>
+								<move file="target/source/plugins/netty-transport-native-epoll.jar" tofile="target/source/plugins/netty-transport-native-epoll_${io.netty.version}.jar"/>
+								<move file="target/source/plugins/jboss-logging.jar" tofile="target/source/plugins/jboss-logging_${org.jboss.logging.version}.jar"/>
+								<move file="target/source/plugins/commons-beanutils.jar" tofile="target/source/plugins/commons-beanutils_${commons-beanutils.version}.jar"/>
+								<move file="target/source/plugins/commons-collections.jar" tofile="target/source/plugins/commons-collections_${commons-collections.version}.jar"/>
+								<move file="target/source/plugins/geronimo-json_1.0_spec.jar" tofile="target/source/plugins/geronimo-json_1.0_spec_${org.apache.geronimo.specs.json.version}.jar"/>
+								<move file="target/source/plugins/geronimo-jms_2.0_spec.jar" tofile="target/source/plugins/geronimo-jms_2.0_spec_${org.apache.geronimo.specs.jms.version}.jar"/>
+								<move file="target/source/plugins/geronimo-jta_1.1_spec.jar" tofile="target/source/plugins/geronimo-jta_1.1_spec_${org.apache.geronimo.specs.jta.version}.jar"/>
 							</tasks>
 						</configuration>
 					</execution>

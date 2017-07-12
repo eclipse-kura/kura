@@ -42,20 +42,22 @@
 			default="1883" />
 
 		<AD
-			id="users"
-			name="User configuration"
-			description="User configuration in the format: user=password|role1,role2,...|TextArea"
+			id="user"
+			name="User name"
+			description="The user name required to access to the broker"
 			type="String"
 			cardinality="1"
-			required="true" />
+			required="false"
+			default="mqtt" />
 
 		<AD
-			id="defaultUser"
-			name="Default user name"
-			description="The name of the default user"
-			type="String"
+			id="password"
+			name="Password of the user"
+			description="The password required to connect. If the password is empty, no password will be required to connect."
+			type="Password"
 			cardinality="1"
-			required="false" />
+			required="false"
+			/>
 
 	</OCD>
 

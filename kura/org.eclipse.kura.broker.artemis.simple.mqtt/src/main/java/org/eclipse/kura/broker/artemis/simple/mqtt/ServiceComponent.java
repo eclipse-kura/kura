@@ -27,6 +27,7 @@ import org.eclipse.kura.broker.artemis.core.ServerConfiguration;
 import org.eclipse.kura.broker.artemis.core.ServerManager;
 import org.eclipse.kura.broker.artemis.core.UserAuthentication;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.crypto.CryptoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -40,6 +41,11 @@ public class ServiceComponent implements ConfigurableComponent {
 
     private ServerConfiguration configuration;
     private ServerManager server;
+    private CryptoService cryptoService;
+
+    public void setCryptoService(CryptoService cryptoService) {
+        this.cryptoService = cryptoService;
+    }
 
     public void activate(final Map<String, Object> properties) throws Exception {
         final ServerConfiguration cfg = parse(properties);
@@ -52,12 +58,12 @@ public class ServiceComponent implements ConfigurableComponent {
         final ServerConfiguration cfg = parse(properties);
 
         if (this.configuration == cfg) {
-            logger.debug("Configuration identical .... skipping update");
+            logger.debug("Configuration identical ... skipping update");
             return;
         }
 
         if (this.configuration != null && this.configuration.equals(cfg)) {
-            logger.debug("Configuration equal .... skipping update");
+            logger.debug("Configuration equal ... skipping update");
             return;
         }
 
@@ -99,16 +105,25 @@ public class ServiceComponent implements ConfigurableComponent {
             return null;
         }
 
-        // create security configuration
+        // create single user security configuration
 
         final UserAuthentication.Builder auth = new UserAuthentication.Builder();
 
-        final String defaultUser = (String) properties.get("defaultUser");
-        if (defaultUser != null && !defaultUser.isEmpty()) {
-            auth.defaultUser(defaultUser);
+        String user = (String) properties.get("user");
+        String password = (String) properties.get("password");
+
+        if (user == null || user.isEmpty()) {
+            user = "mqtt";
         }
 
-        auth.parseUsers((String) properties.get("users"));
+        if (password == null || password.isEmpty()) {
+            auth.defaultUser(user);
+            password = "";
+        } else {
+            password = String.valueOf(cryptoService.decryptAes(password.toCharArray()));
+        }
+
+        auth.addUser(user, password, Collections.singleton("amq"));
 
         // create result
 

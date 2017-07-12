@@ -133,6 +133,7 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
         <module>org.eclipse.kura.core.configuration.test</module>
         <module>org.eclipse.kura.core.cloud.test</module>
         <module>org.eclipse.kura.core.crypto.test</module>
+        <module>org.eclipse.kura.core.db.test</module>
         <module>org.eclipse.kura.core.deployment.test</module>
         <module>org.eclipse.kura.core.net.test</module>
         <module>org.eclipse.kura.core.ssl.test</module>

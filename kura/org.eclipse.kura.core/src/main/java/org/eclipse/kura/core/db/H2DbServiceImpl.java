@@ -146,7 +146,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
         } catch (Exception e) {
             disposeConnectionPool();
             stopCheckpointTask();
-            logger.warn("Database initialization failed", e);
+            logger.error("Database initialization failed", e);
         }
     }
 

@@ -164,9 +164,19 @@ public interface GwtComponentService extends RemoteService {
             throws GwtKuraException;
 
     public List<String> findFactoryComponents(GwtXSRFToken xsrfToken) throws GwtKuraException;
-    
-    public boolean updateProperties(GwtXSRFToken xsrfToken, String pid, Map<String, Object> properties) throws GwtKuraException;
+
+    public boolean updateProperties(GwtXSRFToken xsrfToken, String pid, Map<String, Object> properties)
+            throws GwtKuraException;
 
     public GwtConfigComponent findWireComponentConfigurationFromPid(GwtXSRFToken xsrfToken, String pid,
             String factoryPid, Map<String, Object> extraProps) throws GwtKuraException;
+
+    /**
+     * Returns the driver factory IDs for the available configurable or self configuring components.
+     *
+     * @return a list containing the IDs for the available driver factories.
+     * @throws GwtKuraException
+     *             if the search operation fails.
+     */
+    public List<String> getDriverFactoriesList(GwtXSRFToken xsrfToken) throws GwtKuraException;
 }

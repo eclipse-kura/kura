@@ -15,18 +15,24 @@ package org.eclipse.kura.web.server;
 
 import static org.eclipse.kura.web.shared.service.GwtWireService.DELETED_WIRE_COMPONENT;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -42,16 +48,24 @@ import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.KuraExceptionHandler;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
+import org.eclipse.kura.web.shared.service.GwtWireService;
 import org.eclipse.kura.wire.WireHelperService;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements GwtComponentService {
 
@@ -59,6 +73,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     private static final String KURA_SERVICE_PID = ConfigurationService.KURA_SERVICE_PID;
     private static final String SERVICE_FACTORY_PID = "service.factoryPid";
     private static final String KURA_UI_SERVICE_HIDE = "kura.ui.service.hide";
+    private static final String PATTERN_SERVICE_PROVIDE_DRIVER = "provide interface=\"org.eclipse.kura.driver.Driver\"";
 
     private static final int SERVICE_WAIT_TIMEOUT = 60;
 
@@ -596,7 +611,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                 props = conf.getProperties();
             }
             if (props == null) {
-                props = new Hashtable<String, Object>();
+                props = new Hashtable<>();
             }
             for (Map.Entry<String, Object> entry : properties.entrySet()) {
                 String key = entry.getKey();
@@ -611,5 +626,62 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         }
 
         return true;
+    }
+    
+    @Override
+    public List<String> getDriverFactoriesList(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        this.checkXSRFToken(xsrfToken);
+        
+        List<String> driverFactoriesPids = new ArrayList<>();
+        final Bundle[] bundles = FrameworkUtil.getBundle(GwtWireService.class).getBundleContext().getBundles();
+        for (final Bundle bundle : bundles) {
+            final Enumeration<URL> enumeration = bundle.findEntries("OSGI-INF", "*.xml", false);
+            if (enumeration != null) {
+                while (enumeration.hasMoreElements()) {
+                    final URL entry = enumeration.nextElement();
+                    BufferedReader reader = null;
+                    try {
+                        reader = new BufferedReader(new InputStreamReader(entry.openConnection().getInputStream()));
+                        final StringBuilder contents = new StringBuilder();
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            contents.append(line);
+                        }
+                        // Configruation Policy=Require and
+                        // SelfConfiguringComponent or ConfigurableComponent
+                        if ((contents.toString().contains(GwtServerUtil.PATTERN_SERVICE_PROVIDE_SELF_CONFIGURING_COMP)
+                                || contents.toString().contains(GwtServerUtil.PATTERN_SERVICE_PROVIDE_CONFIGURABLE_COMP))
+                                && contents.toString().contains(GwtServerUtil.PATTERN_CONFIGURATION_REQUIRE)) {
+                            final Document dom = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+                                    .parse(entry.openConnection().getInputStream());
+                            final NodeList nl = dom.getElementsByTagName("property");
+                            for (int i = 0; i < nl.getLength(); i++) {
+                                final Node n = nl.item(i);
+                                if (n instanceof Element) {
+                                    final String name = ((Element) n).getAttribute("name");
+                                    if ("service.pid".equals(name)) {
+                                        final String factoryPid = ((Element) n).getAttribute("value");
+                                        if (contents.toString().contains(PATTERN_SERVICE_PROVIDE_DRIVER)) {
+                                            driverFactoriesPids.add(factoryPid);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } catch (final Exception ex) {
+                        throw new GwtKuraException(GwtKuraErrorCode.RESOURCE_FETCHING_FAILURE);
+                    } finally {
+                        try {
+                            if (reader != null) {
+                                reader.close();
+                            }
+                        } catch (final IOException e) {
+                            throw new GwtKuraException(GwtKuraErrorCode.FAILURE_CLOSING_RESOURCES);
+                        }
+                    }
+                }
+            }
+        }
+        return driverFactoriesPids;
     }
 }

@@ -9,149 +9,175 @@
      http://www.eclipse.org/legal/epl-v10.html
      
 -->
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:b="urn:import:org.gwtbootstrap3.client.ui"
+    xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
-	<ui:style>
-		.wire-components-list {
-		padding-left: 10px;
-		padding-right: 0px;
-		}
+    <ui:style>
+    .wire-components-list {
+    	padding-left: 10px;
+    	padding-right: 0px;
+    }
+    
+    .asset-comp-modal-header {
+    	display: none;
+    }
+    
+    .asset-comp-modal-body {
+    	padding-bottom: 40px;
+    }
+    
+    .drivers-list {
+    	padding-bottom: 30px;
+    }
+    </ui:style>
 
-		.asset-comp-modal-header {
-		display: none;
-		}
+    <b:Container fluid="true">
+        <b:Row ui:field="composerRow">
+            <b:Column size="MD_10">
+                <b:Row>
+                    <b:Panel>
+                        <b:ButtonToolBar>
+                            <b:ButtonGroup size="SMALL">
+                                <b:Button icon="SAVE" b:id="btn-config-save" ui:field="btnSave" />
+                            </b:ButtonGroup>
+                            <b:ButtonGroup size="SMALL">
+                                <b:Button icon="SEARCH_PLUS" b:id="btn-zoom-in" ui:field="btnZoomIn" />
+                                <b:Button icon="SEARCH_MINUS" b:id="btn-zoom-out" ui:field="btnZoomOut" />
+                            </b:ButtonGroup>
+                            <b:ButtonGroup size="SMALL" addStyleNames="pull-right">
+                                <b:Button icon="TRASH" b:id="btn-config-delete" ui:field="btnDelete" />
+                                <b:Button icon="TRASH" b:id="btn-delete-graph" ui:field="btnGraphDelete" />
+                            </b:ButtonGroup>
+                        </b:ButtonToolBar>
+                    </b:Panel>
+                </b:Row>
+                <b:Row>
+                    <b:Column size="MD_12,XS_12" b:id="wires-graph" addStyleNames="composer" ui:field="composer"></b:Column>
+                </b:Row>
+            </b:Column>
+            <b:Column size="MD_2">
+                <b:Row>
+                    <b:Column size="MD_12,XS_12" addStyleNames="{style.wire-components-list}">
+                        <b:Panel>
+                            <b:PanelHeader>
+                                <b:Heading size="H3" ui:field="wiresComposerTitle" />
+                            </b:PanelHeader>
+                            <b:PanelBody>
+                                <g:ScrollPanel>
+                                    <b:NavPills stacked="true" ui:field="wireComponentsMenu" />
+                                </g:ScrollPanel>
+                            </b:PanelBody>
+                        </b:Panel>
+                    </b:Column>
+                </b:Row>
+            </b:Column>
+        </b:Row>
+        <b:Row ui:field="configurationRow">
+            <b:Panel ui:field="propertiesPanel">
+                <b:PanelHeader ui:field="propertiesPanelHeader" />
+                <b:PanelBody ui:field="propertiesPanelBody" />
+            </b:Panel>
+        </b:Row>
+        <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="asset-comp-modal"
+            ui:field="assetModal">
+            <b:ModalHeader ui:field="newAssetModalHeader" />
+            <b:ModalBody addStyleNames="{style.asset-comp-modal-body}">
+                <b:Form>
+                    <b:FieldSet>
+                        <b:FormGroup addStyleNames="{style.drivers-list}">
+                            <b:FormLabel for="componentName" addStyleNames="col-md-4" ui:field="wiresComponentName" />
+                            <g:FlowPanel addStyleNames="col-md-8">
+                                <b:TextBox ui:field="componentName" b:id="componentName" allowBlank="false"
+                                    autoComplete="false" />
+                            </g:FlowPanel>
+                        </b:FormGroup>
+                        <b:TextBox ui:field="factoryPid" b:id="factoryPid" />
 
-		.asset-comp-modal-body {
-		padding-bottom: 40px;
-		}
+                        <b:FormGroup ui:field="driverInstanceForm" addStyleNames="{style.drivers-list}">
+                            <b:FormLabel for="driverPid" addStyleNames="col-md-4" ui:field="wiresAvailableDrivers" />
+                            <g:FlowPanel addStyleNames="col-md-8">
+                                <b:ListBox ui:field="driverPids" b:id="driverPids" />
+                                <b:Button size="SMALL" ui:field="factoriesButton" />
+                            </g:FlowPanel>
+                        </b:FormGroup>
+                    </b:FieldSet>
+                </b:Form>
+            </b:ModalBody>
+            <b:ModalFooter>
+                <b:Button b:id="btn-create-comp-cancel" icon="REMOVE" type="PRIMARY" dataDismiss="MODAL"
+                    ui:field="btnAssetModalNo" />
+                <b:Button icon="SAVE" type="PRIMARY" b:id="btn-create-comp" ui:field="btnAssetModalYes" />
+            </b:ModalFooter>
+        </b:Modal>
+        <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="asset-comp-modal"
+            ui:field="assetNewDriverModal">
+            <b:ModalHeader ui:field="newDriverModalHeader" />
+            <b:ModalBody addStyleNames="{style.asset-comp-modal-body}">
+                <b:Form>
+                    <b:FieldSet>
+                        <b:FormGroup addStyleNames="{style.drivers-list}">
+                            <b:FormLabel for="driverName" addStyleNames="col-md-4" ui:field="newDriverName" />
+                            <g:FlowPanel addStyleNames="col-md-8">
+                                <b:TextBox ui:field="driverName" b:id="driverName" allowBlank="false"
+                                    autoComplete="false" />
+                            </g:FlowPanel>
+                        </b:FormGroup>
+                        <b:FormGroup addStyleNames="{style.drivers-list}">
+                            <b:FormLabel for="driverFactoryPid" addStyleNames="col-md-4" ui:field="availableDriverFactories" />
+                            <g:FlowPanel addStyleNames="col-md-8">
+                                <b:ListBox ui:field="driverFactoriesList" b:id="driverFactoriesList" />
+                            </g:FlowPanel>
+                        </b:FormGroup>
+                    </b:FieldSet>
+                </b:Form>
+            </b:ModalBody>
+            <b:ModalFooter>
+                <b:Button b:id="btn-create-comp-cancel" icon="REMOVE" type="PRIMARY" dataDismiss="MODAL"
+                    ui:field="btnNewDriverModalNo" />
+                <b:Button icon="SAVE" type="PRIMARY" b:id="btn-create-comp" ui:field="btnNewDriverModalYes" />
+            </b:ModalFooter>
+        </b:Modal>
 
-		.drivers-list {
-		padding-bottom: 30px;
-		}
-	</ui:style>
-
-	<b:Container fluid="true">
-		<b:Row>
-			<b:Column size="MD_10">
-				<b:Row>
-					<b:Panel>
-						<b:ButtonToolBar>
-							<b:ButtonGroup size="SMALL">
-								<b:Button icon="SAVE" b:id="btn-config-save" ui:field="btnSave"/>
-							</b:ButtonGroup>
-							<b:ButtonGroup size="SMALL">
-								<b:Button icon="SEARCH_PLUS" b:id="btn-zoom-in" ui:field="btnZoomIn"/>
-								<b:Button icon="SEARCH_MINUS" b:id="btn-zoom-out" ui:field="btnZoomOut"/>
-							</b:ButtonGroup>
-							<b:ButtonGroup size="SMALL" addStyleNames="pull-right">
-								<b:Button icon="TRASH" b:id="btn-config-delete"
-									ui:field="btnDelete"/>
-								<b:Button icon="TRASH" b:id="btn-delete-graph"
-									ui:field="btnGraphDelete"/>
-							</b:ButtonGroup>
-						</b:ButtonToolBar>
-					</b:Panel>
-				</b:Row>
-				<b:Row>
-					<b:Column size="MD_12,XS_12" b:id="wires-graph" addStyleNames="composer" ui:field="composer"></b:Column>
-				</b:Row>
-			</b:Column>
-			<b:Column size="MD_2">
-				<b:Row>
-					<b:Column size="MD_12,XS_12" addStyleNames="{style.wire-components-list}">
-						<b:Panel>
-							<b:PanelHeader>
-								<b:Heading size="H3" ui:field="wiresComposerTitle"/>
-							</b:PanelHeader>
-							<b:PanelBody>
-								<g:ScrollPanel>
-									<b:NavPills stacked="true" ui:field="wireComponentsMenu" />
-								</g:ScrollPanel>
-							</b:PanelBody>
-						</b:Panel>
-					</b:Column>
-				</b:Row>
-			</b:Column>
-		</b:Row>
-		<b:Row>
-			<b:Panel ui:field="propertiesPanel">
-				<b:PanelHeader ui:field="propertiesPanelHeader"/>
-				<b:PanelBody ui:field="propertiesPanelBody"/>
-			</b:Panel>
-		</b:Row>
-		<b:Modal closable="true" fade="true" dataBackdrop="STATIC"
-			dataKeyboard="true" b:id="asset-comp-modal" ui:field="assetModal">
-			<b:ModalHeader addStyleNames="{style.asset-comp-modal-header}"/>
-			<b:ModalBody addStyleNames="{style.asset-comp-modal-body}">
-				<b:Form>
-					<b:FormGroup ui:field="driverInstanceForm"
-						addStyleNames="{style.drivers-list}">
-						<b:FormLabel for="driverPid" addStyleNames="col-md-4" ui:field="wiresAvailableDrivers"/>
-						<g:FlowPanel addStyleNames="col-md-8">
-							<b:ListBox ui:field="driverPids" b:id="driverPids">
-							</b:ListBox>
-						</g:FlowPanel>
-					</b:FormGroup>
-					<b:FormGroup>
-						<b:FormLabel for="componentName" addStyleNames="col-md-4" ui:field="wiresComponentName"/>
-						<g:FlowPanel addStyleNames="col-md-8">
-							<b:TextBox ui:field="componentName" b:id="componentName" allowBlank="false"
-								autoComplete="false"/>
-						</g:FlowPanel>
-					</b:FormGroup>
-					<b:TextBox ui:field="factoryPid" b:id="factoryPid"/>
-				</b:Form>
-			</b:ModalBody>
-			<b:ModalFooter>
-                <b:Button b:id="btn-create-comp-cancel" icon="REMOVE" type="PRIMARY" dataDismiss="MODAL" ui:field="btnAssetModalNo"/>
-				<b:Button icon="SAVE" type="PRIMARY" b:id="btn-create-comp"
-					ui:field="btnAssetModalYes"/>
-			</b:ModalFooter>
-		</b:Modal>
-		<b:Modal closable="true" fade="true" dataBackdrop="STATIC"
-			dataKeyboard="true" b:id="asset-comp-delete-modal" ui:field="deleteCompModal">
-			<b:ModalHeader ui:field="deleteCompModalHeader" />
-			<b:ModalBody ui:field="deleteCompModalBody" />
-			<b:ModalFooter>
-                <b:Button addStyleNames="fa fa-times" type="PRIMARY" dataDismiss="MODAL" ui:field="btnDeleteCompModalNo"/>
-				<b:Button addStyleNames="fa fa-check" type="PRIMARY" b:id="btn-delete-comp"
-					ui:field="btnDeleteCompModalYes"/>
-			</b:ModalFooter>
-		</b:Modal>
-		<b:Modal closable="true" fade="true" dataBackdrop="STATIC"
-			dataKeyboard="true" b:id="asset-comp-save-modal" ui:field="saveGraphModal">
-			<b:ModalHeader ui:field="saveGraphModalHeader"/>
-			<b:ModalBody ui:field="saveGraphModalBody" />
-			<b:ModalFooter>
-				<b:Button addStyleNames="fa fa-times" type="PRIMARY" dataDismiss="MODAL" ui:field="btnSaveGraphModalNo"/>
-                <b:Button addStyleNames="fa fa-check" type="PRIMARY" b:id="btn-save-graph"
-                    ui:field="btnSaveGraphModalYes"/>
-			</b:ModalFooter>
-		</b:Modal>
-		<b:Modal closable="true" fade="true" dataBackdrop="STATIC"
-			dataKeyboard="true" b:id="delete-graph-modal" ui:field="deleteGraphModal">
-			<b:ModalHeader ui:field="deleteGraphModalHeader" />
-			<b:ModalBody ui:field="deleteGraphModalBody" />
-			<b:ModalFooter>
-                <b:Button addStyleNames="fa fa-times" type="PRIMARY" dataDismiss="MODAL" ui:field="btnDeleteGraphModalNo"/>
-				<b:Button addStyleNames="fa fa-check" type="PRIMARY" b:id="btn-delete-graph-confirm"
-					ui:field="btnDeleteGraphModalYes"/>
-			</b:ModalFooter>
-		</b:Modal>
-		<b:Modal closable="true" fade="true" dataBackdrop="STATIC"
-			dataKeyboard="true" b:id="error-pid-modal" ui:field="errorModal">
-			<b:ModalHeader addStyleNames="{style.asset-comp-modal-header}">
-			</b:ModalHeader>
-			<b:ModalBody>
-				<b:Alert type="DANGER">
-					<b.html:Strong ui:field="errorAlertText" />
-				</b:Alert>
-			</b:ModalBody>
-			<b:ModalFooter>
-				<b:Button icon="REMOVE" type="PRIMARY" dataDismiss="MODAL" ui:field="errorModalClose"/>
-			</b:ModalFooter>
-		</b:Modal>
-	</b:Container>
+        <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="asset-comp-delete-modal"
+            ui:field="deleteCompModal">
+            <b:ModalHeader ui:field="deleteCompModalHeader" />
+            <b:ModalBody ui:field="deleteCompModalBody" />
+            <b:ModalFooter>
+                <b:Button addStyleNames="fa fa-times" type="PRIMARY" dataDismiss="MODAL" ui:field="btnDeleteCompModalNo" />
+                <b:Button addStyleNames="fa fa-check" type="PRIMARY" b:id="btn-delete-comp" ui:field="btnDeleteCompModalYes" />
+            </b:ModalFooter>
+        </b:Modal>
+        <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="asset-comp-save-modal"
+            ui:field="saveGraphModal">
+            <b:ModalHeader ui:field="saveGraphModalHeader" />
+            <b:ModalBody ui:field="saveGraphModalBody" />
+            <b:ModalFooter>
+                <b:Button addStyleNames="fa fa-times" type="PRIMARY" dataDismiss="MODAL" ui:field="btnSaveGraphModalNo" />
+                <b:Button addStyleNames="fa fa-check" type="PRIMARY" b:id="btn-save-graph" ui:field="btnSaveGraphModalYes" />
+            </b:ModalFooter>
+        </b:Modal>
+        <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="delete-graph-modal"
+            ui:field="deleteGraphModal">
+            <b:ModalHeader ui:field="deleteGraphModalHeader" />
+            <b:ModalBody ui:field="deleteGraphModalBody" />
+            <b:ModalFooter>
+                <b:Button addStyleNames="fa fa-times" type="PRIMARY" dataDismiss="MODAL" ui:field="btnDeleteGraphModalNo" />
+                <b:Button addStyleNames="fa fa-check" type="PRIMARY" b:id="btn-delete-graph-confirm" ui:field="btnDeleteGraphModalYes" />
+            </b:ModalFooter>
+        </b:Modal>
+        <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="error-pid-modal"
+            ui:field="errorModal">
+            <b:ModalHeader addStyleNames="{style.asset-comp-modal-header}">
+            </b:ModalHeader>
+            <b:ModalBody>
+                <b:Alert type="DANGER">
+                    <b.html:Strong ui:field="errorAlertText" />
+                </b:Alert>
+            </b:ModalBody>
+            <b:ModalFooter>
+                <b:Button icon="REMOVE" type="PRIMARY" dataDismiss="MODAL" ui:field="errorModalClose" />
+            </b:ModalFooter>
+        </b:Modal>
+    </b:Container>
 </ui:UiBinder> 

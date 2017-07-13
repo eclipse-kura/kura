@@ -9,7 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *
+ *  Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
@@ -47,6 +47,7 @@ import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Column;
 import org.gwtbootstrap3.client.ui.FormLabel;
+import org.gwtbootstrap3.client.ui.Heading;
 import org.gwtbootstrap3.client.ui.Icon;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
@@ -56,7 +57,6 @@ import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.NavPills;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
-import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.Row;
 import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TextBox;
@@ -102,7 +102,7 @@ public class EntryClassUi extends Composite {
     @UiField
     Strong errorAlertText;
     @UiField
-    PanelHeader contentPanelHeader;
+    Heading contentPanelHeader;
     @UiField
     PanelBody contentPanelBody;
     @UiField
@@ -306,7 +306,14 @@ public class EntryClassUi extends Composite {
                         if (EntryClassUi.this.modal != null) {
                             EntryClassUi.this.modal.hide();
                         }
-                        EntryClassUi.this.showStatusPanel();
+                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.status);
+                        EntryClassUi.this.contentPanel.setVisible(true);
+                        setHeader("Status", null);
+                        EntryClassUi.this.contentPanelBody.clear();
+                        EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.statusBinder);
+                        EntryClassUi.this.statusBinder.setSession(EntryClassUi.this.currentSession);
+                        EntryClassUi.this.statusBinder.setParent(instanceReference);
+                        EntryClassUi.this.statusBinder.loadStatusData();
                     }
                 });
 
@@ -329,7 +336,7 @@ public class EntryClassUi extends Composite {
                         }
                         EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.device);
                         EntryClassUi.this.contentPanel.setVisible(true);
-                        EntryClassUi.this.contentPanelHeader.setText(MSGS.device());
+                        setHeader(MSGS.device(), null);
                         EntryClassUi.this.contentPanelBody.clear();
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.deviceBinder);
                         EntryClassUi.this.deviceBinder.setSession(EntryClassUi.this.currentSession);
@@ -356,7 +363,7 @@ public class EntryClassUi extends Composite {
                             }
                             EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.network);
                             EntryClassUi.this.contentPanel.setVisible(true);
-                            EntryClassUi.this.contentPanelHeader.setText(MSGS.network());
+                            setHeader(MSGS.network(), null);
                             EntryClassUi.this.contentPanelBody.clear();
                             EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.networkBinder);
                             EntryClassUi.this.networkBinder.setSession(EntryClassUi.this.currentSession);
@@ -384,7 +391,7 @@ public class EntryClassUi extends Composite {
                             }
                             EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.firewall);
                             EntryClassUi.this.contentPanel.setVisible(true);
-                            EntryClassUi.this.contentPanelHeader.setText(MSGS.firewall());
+                            setHeader(MSGS.firewall(), null);
                             EntryClassUi.this.contentPanelBody.clear();
                             EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.firewallBinder);
                             EntryClassUi.this.firewallBinder.initFirewallPanel();
@@ -410,7 +417,7 @@ public class EntryClassUi extends Composite {
                         }
                         EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.packages);
                         EntryClassUi.this.contentPanel.setVisible(true);
-                        EntryClassUi.this.contentPanelHeader.setText(MSGS.packages());
+                        setHeader(MSGS.packages(), null);
                         EntryClassUi.this.contentPanelBody.clear();
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.packagesBinder);
                         EntryClassUi.this.packagesBinder.setSession(EntryClassUi.this.currentSession);
@@ -437,7 +444,7 @@ public class EntryClassUi extends Composite {
                         }
                         EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.settings);
                         EntryClassUi.this.contentPanel.setVisible(true);
-                        EntryClassUi.this.contentPanelHeader.setText(MSGS.settings());
+                        setHeader(MSGS.settings(), null);
                         EntryClassUi.this.contentPanelBody.clear();
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.settingsBinder);
                         EntryClassUi.this.settingsBinder.setSession(EntryClassUi.this.currentSession);
@@ -463,7 +470,7 @@ public class EntryClassUi extends Composite {
                         }
                         EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.cloudServices);
                         EntryClassUi.this.contentPanel.setVisible(true);
-                        EntryClassUi.this.contentPanelHeader.setText(MSGS.cloudServices());
+                        setHeader(MSGS.cloudServices(), null);
                         EntryClassUi.this.contentPanelBody.clear();
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.cloudServicesBinder);
                         EntryClassUi.this.cloudServicesBinder.refresh();
@@ -489,7 +496,7 @@ public class EntryClassUi extends Composite {
                         }
                         EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.wires);
                         EntryClassUi.this.contentPanel.setVisible(true);
-                        EntryClassUi.this.contentPanelHeader.setText(MSGS.wires());
+                        setHeader(MSGS.wires(), null);
                         EntryClassUi.this.contentPanelBody.clear();
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.wiresBinder);
                         EntryClassUi.this.wiresBinder.load();
@@ -728,14 +735,21 @@ public class EntryClassUi extends Composite {
         });
     }
 
+    private void setHeader(final String title, final String subTitle) {
+        this.contentPanelHeader.setText(title);
+        this.contentPanelHeader.setSubText(subTitle != null ? subTitle : "");
+    }
+
     public void render(GwtConfigComponent item) {
         // Do everything Content Panel related in ServicesUi
         this.contentPanelBody.clear();
         this.servicesUi = new ServicesUi(item, this);
         this.contentPanel.setVisible(true);
+
         if (item != null) {
-            this.contentPanelHeader.setText(item.getComponentName());
+            setHeader(item.getComponentName(), item.getComponentDescription());
         }
+
         this.contentPanelBody.add(this.servicesUi);
     }
 

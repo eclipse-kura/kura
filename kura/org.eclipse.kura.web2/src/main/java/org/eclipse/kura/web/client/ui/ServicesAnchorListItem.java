@@ -9,8 +9,7 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  Red Hat
- *  
+ *  Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
@@ -62,6 +61,11 @@ public class ServicesAnchorListItem extends AnchorListItem {
         } else {
             super.setIcon(icon);
             super.setText(this.item.getComponentName());
+        }
+
+        final String description = service.getComponentDescription();
+        if (description != null && !description.isEmpty()) {
+            super.setTitle(description);
         }
 
         super.addClickHandler(new ClickHandler() {

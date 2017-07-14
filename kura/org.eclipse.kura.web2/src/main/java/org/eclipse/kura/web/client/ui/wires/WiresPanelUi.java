@@ -315,15 +315,6 @@ public class WiresPanelUi extends Composite {
 
             @Override
             public void onClick(final ClickEvent event) {
-//                final List<String> pids = new ArrayList<>();
-//                for (final Map.Entry<String, ConfigurationAreaUi> entry : propertiesUis.entrySet()) {
-//                    final ConfigurationAreaUi ui = entry.getValue();
-//                    final String componentId = ui.getConfiguration().getComponentId();
-//                    if (ui.isDirty()) { // && !ui.isNonValidated()) { //TODO
-//                        pids.add(getFormattedPid(componentId));
-//                    }
-//                }
-
                 WiresPanelUi.saveGraphModal.show();
             }
         });

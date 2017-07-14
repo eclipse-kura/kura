@@ -37,6 +37,7 @@ import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.ChannelStatus;
 import org.eclipse.kura.channel.listener.ChannelListener;
+import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
@@ -84,7 +85,7 @@ import io.netty.util.internal.StringUtil;
  * @see OpcUaChannelDescriptor
  *
  */
-public final class OpcUaDriver implements Driver {
+public final class OpcUaDriver implements Driver, ConfigurableComponent {
 
     /** The Logger instance. */
     private static final Logger logger = LoggerFactory.getLogger(OpcUaDriver.class);

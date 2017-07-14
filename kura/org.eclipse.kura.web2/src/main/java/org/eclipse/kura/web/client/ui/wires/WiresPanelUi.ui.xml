@@ -79,63 +79,112 @@
                 <b:PanelBody ui:field="propertiesPanelBody" />
             </b:Panel>
         </b:Row>
-        <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="asset-comp-modal"
-            ui:field="assetModal">
+
+        <b:Modal closable="true" dataKeyboard="true" b:id="select-asset-modal" ui:field="selectAssetModal">
+            <b:ModalBody>
+                <g:HTMLPanel ui:field="selectAssetModalIntro" />
+                <b:Form type="HORIZONTAL">
+                    <b:FieldSet>
+                        <b:FormGroup>
+                            <b:FormLabel for="assetInstance" ui:field="assetInstanceLabel" />
+                            <b:ListBox b:id="assetInstance" ui:field="assetInstance" />
+                        </b:FormGroup>
+                    </b:FieldSet>
+                </b:Form>
+            </b:ModalBody>
+            <b:ModalFooter>
+                <b:Button addStyleNames="fa" b:id="btn-select-asset-cancel" type="PRIMARY" dataDismiss="MODAL" ui:field="buttonSelectAssetCancel" />
+                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="buttonNewAsset" />
+                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="buttonSelectAssetOk" />
+            </b:ModalFooter>
+        </b:Modal>
+
+        <b:Modal closable="true" hideOtherModals="true" dataKeyboard="true" b:id="select-driver-modal" ui:field="selectDriverModal">
+            <b:ModalBody>
+                <g:HTMLPanel ui:field="selectDriverModalIntro" />
+                <b:Form type="HORIZONTAL">
+                    <b:FieldSet>
+                        <b:FormGroup>
+                            <b:FormLabel for="driverInstance" ui:field="driverInstanceLabel" />
+                            <b:ListBox b:id="driverInstance" ui:field="driverInstance" />
+                        </b:FormGroup>
+                    </b:FieldSet>
+                </b:Form>
+            </b:ModalBody>
+            <b:ModalFooter>
+                <b:Button addStyleNames="fa" type="PRIMARY" dataDismiss="MODAL" ui:field="buttonSelectDriverCancel" />
+                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="buttonNewDriver" />
+                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="buttonSelectDriverOk" />
+            </b:ModalFooter>
+        </b:Modal>
+
+        <b:Modal closable="true" hideOtherModals="true" dataKeyboard="true" b:id="new-asset-modal" ui:field="newAssetModal">
+            <b:ModalBody>
+                <g:HTMLPanel ui:field="newAssetModalIntro" />
+                <b:Form type="HORIZONTAL">
+                    <b:FieldSet>
+                        <b:FormGroup>
+                            <b:FormLabel for="newAssetName" ui:field="newAssetNameLabel" />
+                            <b:TextBox ui:field="newAssetName" b:id="newAssetName" allowBlank="false"
+                                autoComplete="false" />
+                        </b:FormGroup>
+                        <b:FormGroup>
+                            <b:FormLabel for="newAssetDriverInstance" ui:field="newAssetDriverInstanceLabel" />
+                            <b:TextBox ui:field="newAssetDriverInstance" b:id="newAssetDriverInstance"
+                                allowBlank="false" autoComplete="false" />
+                        </b:FormGroup>
+                    </b:FieldSet>
+                </b:Form>
+            </b:ModalBody>
+            <b:ModalFooter>
+                <b:Button addStyleNames="fa" type="PRIMARY" dataDismiss="MODAL" ui:field="newAssetCancel" />
+                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="newAssetOk" />
+            </b:ModalFooter>
+        </b:Modal>
+
+        <b:Modal closable="true" hideOtherModals="true" dataKeyboard="true" b:id="new-driver-modal" ui:field="newDriverModal">
+            <b:ModalBody>
+                <g:HTMLPanel ui:field="newDriverModalIntro" />
+                <b:Form type="HORIZONTAL">
+                    <b:FieldSet>
+                        <b:FormGroup>
+                            <b:FormLabel for="newDriverName" ui:field="newDriverNameLabel" />
+                            <b:TextBox ui:field="newDriverName" b:id="newDriverName" allowBlank="false"
+                                autoComplete="false" />
+                        </b:FormGroup>
+                        <b:FormGroup>
+                            <b:FormLabel for="newDriverFactory" ui:field="newDriverFactoryLabel" />
+                            <b:ListBox ui:field="newDriverFactory" b:id="newDriverFactory" />
+                        </b:FormGroup>
+                    </b:FieldSet>
+                </b:Form>
+            </b:ModalBody>
+            <b:ModalFooter>
+                <b:Button addStyleNames="fa" type="PRIMARY" dataDismiss="MODAL" ui:field="newDriverCancel" />
+                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="newDriverOk" />
+            </b:ModalFooter>
+        </b:Modal>
+
+
+        <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="generic-comp-modal"
+            ui:field="genericCompModal">
             <b:ModalHeader ui:field="newAssetModalHeader" />
             <b:ModalBody addStyleNames="{style.asset-comp-modal-body}">
                 <b:Form>
-                    <b:FieldSet>
-                        <b:FormGroup addStyleNames="{style.drivers-list}">
-                            <b:FormLabel for="componentName" addStyleNames="col-md-4" ui:field="wiresComponentName" />
-                            <g:FlowPanel addStyleNames="col-md-8">
-                                <b:TextBox ui:field="componentName" b:id="componentName" allowBlank="false"
-                                    autoComplete="false" />
-                            </g:FlowPanel>
-                        </b:FormGroup>
-                        <b:TextBox ui:field="factoryPid" b:id="factoryPid" />
-
-                        <b:FormGroup ui:field="driverInstanceForm" addStyleNames="{style.drivers-list}">
-                            <b:FormLabel for="driverPid" addStyleNames="col-md-4" ui:field="wiresAvailableDrivers" />
-                            <g:FlowPanel addStyleNames="col-md-8">
-                                <b:ListBox ui:field="driverPids" b:id="driverPids" />
-                                <b:Button size="SMALL" ui:field="factoriesButton" />
-                            </g:FlowPanel>
-                        </b:FormGroup>
-                    </b:FieldSet>
+                    <b:FormGroup>
+                        <b:FormLabel for="componentName" addStyleNames="col-md-4" ui:field="componentNameLabel" />
+                        <g:FlowPanel addStyleNames="col-md-8">
+                            <b:TextBox ui:field="componentName" b:id="componentName" allowBlank="false"
+                                autoComplete="false" />
+                        </g:FlowPanel>
+                    </b:FormGroup>
+                    <b:TextBox ui:field="factoryPid" b:id="factoryPid" />
                 </b:Form>
             </b:ModalBody>
             <b:ModalFooter>
                 <b:Button b:id="btn-create-comp-cancel" icon="REMOVE" type="PRIMARY" dataDismiss="MODAL"
-                    ui:field="btnAssetModalNo" />
-                <b:Button icon="SAVE" type="PRIMARY" b:id="btn-create-comp" ui:field="btnAssetModalYes" />
-            </b:ModalFooter>
-        </b:Modal>
-        <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="asset-comp-modal"
-            ui:field="assetNewDriverModal">
-            <b:ModalHeader ui:field="newDriverModalHeader" />
-            <b:ModalBody addStyleNames="{style.asset-comp-modal-body}">
-                <b:Form>
-                    <b:FieldSet>
-                        <b:FormGroup addStyleNames="{style.drivers-list}">
-                            <b:FormLabel for="driverName" addStyleNames="col-md-4" ui:field="newDriverName" />
-                            <g:FlowPanel addStyleNames="col-md-8">
-                                <b:TextBox ui:field="driverName" b:id="driverName" allowBlank="false"
-                                    autoComplete="false" />
-                            </g:FlowPanel>
-                        </b:FormGroup>
-                        <b:FormGroup addStyleNames="{style.drivers-list}">
-                            <b:FormLabel for="driverFactoryPid" addStyleNames="col-md-4" ui:field="availableDriverFactories" />
-                            <g:FlowPanel addStyleNames="col-md-8">
-                                <b:ListBox ui:field="driverFactoriesList" b:id="driverFactoriesList" />
-                            </g:FlowPanel>
-                        </b:FormGroup>
-                    </b:FieldSet>
-                </b:Form>
-            </b:ModalBody>
-            <b:ModalFooter>
-                <b:Button b:id="btn-create-comp-cancel" icon="REMOVE" type="PRIMARY" dataDismiss="MODAL"
-                    ui:field="btnNewDriverModalNo" />
-                <b:Button icon="SAVE" type="PRIMARY" b:id="btn-create-comp" ui:field="btnNewDriverModalYes" />
+                    ui:field="btnComponentModalNo" />
+                <b:Button icon="SAVE" type="PRIMARY" b:id="btn-create-comp" ui:field="btnComponentModalYes" />
             </b:ModalFooter>
         </b:Modal>
 

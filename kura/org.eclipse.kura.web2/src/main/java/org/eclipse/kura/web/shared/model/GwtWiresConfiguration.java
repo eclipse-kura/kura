@@ -43,6 +43,8 @@ public final class GwtWiresConfiguration extends GwtBaseModel implements Seriali
 
     /** Wire Receiver Factory PIDs. */
     private List<String> wireReceiverFactoryPids;
+    
+    private List<String> wireComponentPids;
 
     /** Wires Configuration in JSON. */
     @Nullable
@@ -50,9 +52,10 @@ public final class GwtWiresConfiguration extends GwtBaseModel implements Seriali
 
     /** Constructor */
     public GwtWiresConfiguration() {
-        this.wireComponents = new ArrayList<String>();
-        this.wireEmitterFactoryPids = new ArrayList<String>();
-        this.wireReceiverFactoryPids = new ArrayList<String>();
+        this.wireComponents = new ArrayList<>();
+        this.wireEmitterFactoryPids = new ArrayList<>();
+        this.wireReceiverFactoryPids = new ArrayList<>();
+        this.wireComponentPids = new ArrayList<>();
         this.graph = "{}";
     }
 
@@ -80,6 +83,10 @@ public final class GwtWiresConfiguration extends GwtBaseModel implements Seriali
 
     public String getWireConfigurationsJson() {
         return this.wireConfigurationsJson;
+    }
+    
+    public List<String> getWireComponentPids() {
+        return this.wireComponentPids;
     }
 
     /**

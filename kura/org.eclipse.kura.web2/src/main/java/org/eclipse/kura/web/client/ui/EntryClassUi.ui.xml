@@ -120,13 +120,16 @@
                                         <b:AnchorListItem icon="CLOUD" iconFixedWidth="true" text="Cloud Services"
                                             ui:field="cloudServices" />
 
+                                        <b:AnchorListItem icon="EXCHANGE" iconFixedWidth="true" text="Drivers and Assets"
+                                            ui:field="driversAndTwinsServices" />
+                                        <b:AnchorListItem icon="RETWEET" iconFixedWidth="true" text="Wires"
+                                            ui:field="wires" />
+
                                         <b:AnchorListItem icon="CUBES" iconFixedWidth="true" text="Packages"
                                             ui:field="packages" />
 
                                         <b:AnchorListItem icon="GEAR" iconFixedWidth="true" text="Settings"
                                             ui:field="settings" />
-                                        <b:AnchorListItem icon="RETWEET" iconFixedWidth="true" text="Wires"
-                                            ui:field="wires" />
                                     </b:NavPills>
                                 </b:PanelBody>
                             </b:Panel>

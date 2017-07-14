@@ -32,19 +32,21 @@ public class GenericWireComponentUi extends AbstractServicesUi {
 
     private static GenericWireComponentUiUiBinder uiBinder = GWT.create(GenericWireComponentUiUiBinder.class);
 
+    private final GwtConfigComponent originalConfig;
+    private final WiresPanelUi parent;
+
     private boolean dirty;
 
     private boolean initialized;
 
-    private final GwtConfigComponent originalConfig;
-
     @UiField
     FieldSet fields;
 
-    public GenericWireComponentUi(final GwtConfigComponent addedItem) {
+    public GenericWireComponentUi(final GwtConfigComponent addedItem, final WiresPanelUi parent) {
         initWidget(uiBinder.createAndBindUi(this));
         this.initialized = false;
         this.originalConfig = addedItem;
+        this.parent = parent;
         restoreConfiguration(this.originalConfig);
         this.fields.clear();
 
@@ -57,7 +59,7 @@ public class GenericWireComponentUi extends AbstractServicesUi {
     public void setDirty(final boolean flag) {
         this.dirty = flag;
         if (this.dirty && this.initialized) {
-            WiresPanelUi.setDirty(true);
+            this.parent.setDirty(true);
         }
     }
 

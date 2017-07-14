@@ -1,16 +1,14 @@
 /*******************************************************************************
  * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
- *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
+ * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
- * Contributors:
- * 	Eurotech
- * 	Amit Kumar Mondal
+ * Contributors: Eurotech Amit Kumar Mondal
  * 
- *******************************************************************************/
+ ******************************************************************************/
 var kuraWires = (function() {
 	var client = {}; // Holds accessible elements of JS library
 	var clientConfig = {}; // Configuration passed from Kura OSGi
@@ -43,38 +41,43 @@ var kuraWires = (function() {
 		setup();
 		regiterFormInputFieldValidation();
 	};
-	
+
 	client.unload = function() {
-		if(typeof(EventSource) !== "undefined") {
+		if (typeof (EventSource) !== "undefined") {
 			eventSource.close();
 			eventSource = null;
 			var xmlHttp = new XMLHttpRequest();
-		    xmlHttp.open("GET", "/sse?session="
-					+ eventSourceSessionId + "&logout=" + eventSourceSessionId, true);
-		    xmlHttp.send(null);
+			xmlHttp.open("GET", "/sse?session=" + eventSourceSessionId
+					+ "&logout=" + eventSourceSessionId, true);
+			xmlHttp.send(null);
 		}
 	};
 
 	function generateId() {
 		return new Date().getTime()
 	}
-	
+
 	client.selectionCompleted = function() {
 		selectionRefreshPending = false;
 	}
 
-	$(document).ready(function() {
-		$(window).bind("beforeunload", function() {
-			if(typeof(EventSource) !== "undefined") {
-				eventSource.close();
-				eventSource = null;
-				var xmlHttp = new XMLHttpRequest();
-				xmlHttp.open("GET", "/sse?session=" + eventSourceSessionId + "&logout=" + eventSourceSessionId, true);
-				xmlHttp.send(null);
-			}
-		});
-	});
-	
+	$(document).ready(
+			function() {
+				$(window).bind(
+						"beforeunload",
+						function() {
+							if (typeof (EventSource) !== "undefined") {
+								eventSource.close();
+								eventSource = null;
+								var xmlHttp = new XMLHttpRequest();
+								xmlHttp.open("GET", "/sse?session="
+										+ eventSourceSessionId + "&logout="
+										+ eventSourceSessionId, true);
+								xmlHttp.send(null);
+							}
+						});
+			});
+
 	client.resetDeleteComponentState = function() {
 		isComponentDeleted = false;
 	};
@@ -103,9 +106,10 @@ var kuraWires = (function() {
 	 * Interaction with OSGi Event Admin through Server Sent Events
 	 */
 	function sse() {
-		if(typeof(EventSource) !== "undefined" && eventSource == null) {
+		if (typeof (EventSource) !== "undefined" && eventSource == null) {
 			eventSourceSessionId = generateId();
-			eventSource = new EventSource("/sse?session=" + eventSourceSessionId);
+			eventSource = new EventSource("/sse?session="
+					+ eventSourceSessionId);
 			eventSource.onmessage = function(event) {
 				_.each(graph.getElements(), function(c) {
 					if (c.attributes.label === event.data) {
@@ -163,6 +167,7 @@ var kuraWires = (function() {
 		// GWT entry point to be called
 		// Instantiate JointJS graph and paper
 		if (!initialized) {
+			$("#btn-select-asset-cancel").on("click", cancelCreateNewComponent);
 			$("#btn-create-comp-cancel").on("click", cancelCreateNewComponent);
 			$("#btn-save-graph").on("click", saveConfig);
 			$("#btn-delete-comp").on("click", deleteComponent);
@@ -264,7 +269,7 @@ var kuraWires = (function() {
 				oldCellView = cellView;
 			}
 		});
-		
+
 		paper.on('blank:pointerdown', function(cellView, evt, x, y) {
 			jsniUpdateSelection("", "");
 			selectedElement = "";
@@ -568,7 +573,7 @@ var kuraWires = (function() {
 			xPos = 300;
 			yPos = 300;
 		}
-		
+
 		if (flag) {
 			selectedElement = rect;
 			jsniUpdateSelection(comp.name, comp.fPid);
@@ -773,13 +778,54 @@ var kuraWires = (function() {
 			// Create the new component and store information in array
 			createComponent(newComp, true);
 			$("#componentName").val('');
-			$("#driverPids").val('--- Select Driver ---');
 			$("#factoryPid").val('');
-			$("#asset-comp-modal").modal('hide');
+			$("#generic-comp-modal").modal('hide');
 		}
 	}
-	
+
 	client.createNewComponent = createNewComponent;
+
+	function createNewAssetComponent(assetPid, driverPid) {
+		var newComp;
+
+		name = assetPid;
+
+		// validate all the existing elements' PIDs with the new element PID. If
+		// any of the existing element already has a PID which matches with the
+		// PID with the new element then it would show an error modal
+		var isFoundExistingElementWithSamePid;
+		_.each(graph.getElements(), function(c) {
+			if (c.attributes.pid === name) {
+				isFoundExistingElementWithSamePid = true;
+			}
+		});
+
+		if (isFoundExistingElementWithSamePid) {
+			jsniShowDuplicatePidModal(name);
+			return;
+		}
+
+		cType = "both";
+
+		newComp = {
+			fPid : "org.eclipse.kura.wire.WireAsset",
+			pid : "none",
+			name : name,
+			driver : driverPid,
+			type : cType,
+			x : xPos,
+			y : yPos
+		}
+
+		jsniMakeUiDirty();
+		jsniDeactivateNavPils();
+		toggleDeleteGraphButton(false);
+		// Create the new component and store information in array
+		createComponent(newComp, true);
+		$("#select-asset-modal").modal('hide');
+	}
+
+	client.createNewAssetComponent = createNewAssetComponent;
 
 	/*
 	 * / Setup Custom Elements

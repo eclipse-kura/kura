@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2017 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.example.can.CanSocketExample"
+         name="CAN Example" 
+         description="Can example application.">
+              
+        <AD id="can.name"
+            name="can.name"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="can0"
+            description="CAN socket Name."/>
+        
+        <AD id="can.identifier"
+            name="can.identifier"
+            type="Integer"
+            cardinality="0"
+            required="false"
+            default="0"
+            description="Can device identifier."/>
+            
+        <AD id="master"
+            name="master"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Whether this device will act as a master or a slave"/>
+            
+    </OCD>
+    <Designate pid="org.eclipse.kura.example.can.CanSocketExample">
+        <Object ocdref="org.eclipse.kura.example.can.CanSocketExample"/>
+    </Designate>
+</MetaData>

@@ -8,7 +8,8 @@
  *******************************************************************************/
 package org.eclipse.kura.core.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -16,126 +17,155 @@ import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ProcessUtilTest {
-	private static final String TEMP_SCRIPT_FILE_PATH = "/tmp/kura_test_script_ProcessUtilTest";
 
-	@Test
-	public void testExecString() throws Exception {
-		int[] values = new int[]{0, 1, 2};
-		String command = "/bin/sh " + TEMP_SCRIPT_FILE_PATH;
-		File file = new File(TEMP_SCRIPT_FILE_PATH);
-		file.deleteOnExit();
+    private static String TEMP_SCRIPT_FILE_PATH = "/tmp/kura_test_script_ProcessUtilTest";
 
-		for (int value : values) {
-			String stdout;
-			String stderr;
-			int errorCode = -1;
+    private static boolean win = System.getProperty("os.name").contains("indows");
 
-			try {
-				try (PrintWriter out = new PrintWriter(file)) {
-					out.println("echo stdout");
-					out.println("echo stderr 1>&2");
-					out.println("exit " + value);
-				}
+    @BeforeClass
+    public static void setup() {
+        if (win) {
+            TEMP_SCRIPT_FILE_PATH += ".bat";
 
-				SafeProcess process = ProcessUtil.exec(command);
+            File f = new File("/tmp");
+            if (!f.exists()) {
+                f.mkdirs();
+                f.deleteOnExit();
+            }
+        }
+    }
 
-				errorCode = process.exitValue();
-				stdout = IOUtils.toString(process.getInputStream(),
-						StandardCharsets.UTF_8);
-				stderr = IOUtils.toString(process.getErrorStream(),
-						StandardCharsets.UTF_8);
-			} catch (Exception e) {
-				throw e;
-			} finally {
-				file.delete();
-			}
+    @Test
+    public void testExecString() throws Exception {
+        int[] values = new int[] { 0, 1, 2 };
+        String command = "/bin/sh " + TEMP_SCRIPT_FILE_PATH;
+        if (win) {
+            command = TEMP_SCRIPT_FILE_PATH;
+        }
+        File file = new File(TEMP_SCRIPT_FILE_PATH);
+        file.deleteOnExit();
 
-			assertEquals(value, errorCode);
-			assertEquals("stdout\n", stdout);
-			assertEquals("stderr\n", stderr);
-		}
-	}
+        for (int value : values) {
+            String stdout;
+            String stderr;
+            int errorCode = -1;
 
-	@Test
-	public void testExecStringArray() throws Exception {
-		int[] values = new int[]{0, 1, 2};
-		String[] commandArray = {"/bin/sh", TEMP_SCRIPT_FILE_PATH};
-		File file = new File(TEMP_SCRIPT_FILE_PATH);
-		file.deleteOnExit();
+            try {
+                try (PrintWriter out = new PrintWriter(file)) {
+                    if (win) {
+                        out.println("@echo off");
+                    }
+                    out.println("echo stdout");
+                    out.println("echo stderr 1>&2");
+                    out.println("exit " + value);
+                }
 
-		for (int value : values) {
-			String stdout;
-			String stderr;
-			int errorCode = -1;
+                SafeProcess process = ProcessUtil.exec(command);
 
-			try {
-				try (PrintWriter out = new PrintWriter(file)) {
-					out.println("echo stdout");
-					out.println("echo stderr 1>&2");
-					out.println("exit " + value);
-				}
+                errorCode = process.exitValue();
+                stdout = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
+                stderr = IOUtils.toString(process.getErrorStream(), StandardCharsets.UTF_8);
+            } catch (Exception e) {
+                throw e;
+            } finally {
+                file.delete();
+            }
 
-				SafeProcess process = ProcessUtil.exec(commandArray);
+            assertEquals(value, errorCode);
+            assertEquals("stdout", stdout.trim());
+            assertEquals("stderr", stderr.trim());
+        }
+    }
 
-				errorCode = process.exitValue();
-				stdout = IOUtils.toString(process.getInputStream(),
-						StandardCharsets.UTF_8);
-				stderr = IOUtils.toString(process.getErrorStream(),
-						StandardCharsets.UTF_8);
-			} catch (Exception e) {
-				throw e;
-			} finally {
-				file.delete();
-			}
+    @Test
+    public void testExecStringArray() throws Exception {
+        int[] values = new int[] { 0, 1, 2 };
+        String[] commandArray = { "/bin/sh", TEMP_SCRIPT_FILE_PATH };
+        if (win) {
+            commandArray = new String[] { TEMP_SCRIPT_FILE_PATH };
+        }
+        File file = new File(TEMP_SCRIPT_FILE_PATH);
+        file.deleteOnExit();
 
-			assertEquals(value, errorCode);
-			assertEquals("stdout\n", stdout);
-			assertEquals("stderr\n", stderr);
-		}
-	}
+        for (int value : values) {
+            String stdout;
+            String stderr;
+            int errorCode = -1;
 
-	@Test
-	public void testDestroy() throws Exception {
-		// First execute the process
-		String[] commandArray = {"/bin/sh", TEMP_SCRIPT_FILE_PATH};
-		File file = new File(TEMP_SCRIPT_FILE_PATH);
-		file.deleteOnExit();
+            try {
+                try (PrintWriter out = new PrintWriter(file)) {
+                    if (win) {
+                        out.println("@echo off");
+                    }
+                    out.println("echo stdout");
+                    out.println("echo stderr 1>&2");
+                    out.println("exit " + value);
+                }
 
-		SafeProcess process;
+                SafeProcess process = ProcessUtil.exec(commandArray);
 
-		try {
-			try (PrintWriter out = new PrintWriter(file)) {
-				out.println("echo stdout");
-				out.println("echo stderr 1>&2");
-				out.println("exit 0");
-			}
+                errorCode = process.exitValue();
+                stdout = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
+                stderr = IOUtils.toString(process.getErrorStream(), StandardCharsets.UTF_8);
+            } catch (Exception e) {
+                throw e;
+            } finally {
+                file.delete();
+            }
 
-			process = ProcessUtil.exec(commandArray);
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			file.delete();
-		}
+            assertEquals(value, errorCode);
+            assertEquals("stdout", stdout.trim());
+            assertEquals("stderr", stderr.trim());
+        }
+    }
 
-		String stdout = IOUtils.toString(process.getInputStream(),
-				StandardCharsets.UTF_8);
-		String stderr = IOUtils.toString(process.getErrorStream(),
-				StandardCharsets.UTF_8);
+    @Test
+    public void testDestroy() throws Exception {
+        // First execute the process
+        String[] commandArray = { "/bin/sh", TEMP_SCRIPT_FILE_PATH };
+        if (win) {
+            commandArray = new String[] { TEMP_SCRIPT_FILE_PATH };
+        }
+        File file = new File(TEMP_SCRIPT_FILE_PATH);
+        file.deleteOnExit();
 
-		assertEquals("stdout\n", stdout);
-		assertEquals("stderr\n", stderr);
+        SafeProcess process;
 
-		// Then destroy it 
-		ProcessUtil.destroy(process);
+        try {
+            try (PrintWriter out = new PrintWriter(file)) {
+                if (win) {
+                    out.println("@echo off");
+                }
+                out.println("echo stdout");
+                out.println("echo stderr 1>&2");
+                out.println("exit 0");
+            }
 
-		assertNull(TestUtil.getFieldValue(process, "m_inBytes"));
-		assertNull(TestUtil.getFieldValue(process, "m_errBytes"));
-		assertNull(TestUtil.getFieldValue(process, "m_process"));
-	}
+            process = ProcessUtil.exec(commandArray);
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            file.delete();
+        }
+
+        String stdout = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
+        String stderr = IOUtils.toString(process.getErrorStream(), StandardCharsets.UTF_8);
+
+        assertEquals("stdout", stdout.trim());
+        assertEquals("stderr", stderr.trim());
+
+        // Then destroy it
+        ProcessUtil.destroy(process);
+
+        assertNull(TestUtil.getFieldValue(process, "m_inBytes"));
+        assertNull(TestUtil.getFieldValue(process, "m_errBytes"));
+        assertNull(TestUtil.getFieldValue(process, "m_process"));
+    }
 }

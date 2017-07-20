@@ -529,7 +529,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             // check if jObj is an empty JSON. It means all the existing
             // wire components need to be deleted
             if (length == 0) {
-                logger.info("Deleting Wire Component: PID -> " + componentPid);
+                logger.info("Deleting Wire Component: PID -> {}", componentPid);
                 configService.deleteFactoryConfiguration(componentPid, false);
                 continue;
             }
@@ -537,13 +537,13 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             for (int i = 0; i < length; i++) {
                 final JsonObject jsonObject = jWireGraph.get(String.valueOf(i)).asObject();
                 final String component = jsonObject.getString("pid", null);
-                if (component.equalsIgnoreCase(componentPid)) {
+                if (component.equals(componentPid)) {
                     isFound = true;
                     break;
                 }
             }
             if (!isFound) {
-                logger.info("Deleting Wire Component: PID -> " + componentPid);
+                logger.info("Deleting Wire Component: PID -> {}", componentPid);
                 configService.deleteFactoryConfiguration(componentPid, false);
             }
         }

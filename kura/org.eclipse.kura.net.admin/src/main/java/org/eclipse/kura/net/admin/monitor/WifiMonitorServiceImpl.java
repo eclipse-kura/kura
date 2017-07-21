@@ -77,7 +77,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private static final Logger logger = LoggerFactory.getLogger(WifiMonitorServiceImpl.class);
 
     private static final String[] EVENT_TOPICS = new String[] {
-            NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC, };
+            NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC };
 
     private static Object lock = new Object();
 
@@ -195,6 +195,27 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             logger.info("WifiMonitor Thread terminated? - {}", this.executor.isTerminated());
             this.executor = null;
         }
+    }
+
+    protected LinkTool getLinkTool(String interfaceName) throws KuraException {
+        Collection<String> supportedWifiOptions = WifiOptions.getSupportedOptions(interfaceName);
+        LinkTool linkTool = null;
+        if (!supportedWifiOptions.isEmpty()) {
+            if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_NL80211)) {
+                linkTool = new IwLinkTool(interfaceName);
+            } else if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_WEXT)) {
+                linkTool = new iwconfigLinkTool(interfaceName);
+            }
+        }
+        return linkTool;
+    }
+
+    protected NetInterfaceType getNetworkType(String interfaceName) throws KuraException {
+        return LinuxNetworkUtil.getType(interfaceName);
+    }
+
+    protected IScanTool getScanTool(String interfaceName) throws KuraException {
+        return ScanTool.get(interfaceName);
     }
 
     private void monitor() {
@@ -731,7 +752,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 
         for (String interfaceName : this.networkService.getAllNetworkInterfaceNames()) {
             // skip non-wifi interfaces
-            if (LinuxNetworkUtil.getType(interfaceName) != NetInterfaceType.WIFI) {
+            if (getNetworkType(interfaceName) != NetInterfaceType.WIFI) {
                 continue;
             }
 
@@ -894,7 +915,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private boolean isAccessPointAvailable(String interfaceName, String ssid) throws KuraException {
         boolean available = false;
         if (ssid != null) {
-            IScanTool scanTool = ScanTool.get(interfaceName);
+            IScanTool scanTool = getScanTool(interfaceName);
             if (scanTool != null) {
                 List<WifiAccessPoint> wifiAccessPoints = scanTool.scan();
                 for (WifiAccessPoint wap : wifiAccessPoints) {
@@ -918,15 +939,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         if (wifiState != null && ssid != null) {
             if (wifiState.isUp()) {
                 logger.trace("getSignalLevel() :: using 'iw dev wlan0 link' command ...");
-                Collection<String> supportedWifiOptions = WifiOptions.getSupportedOptions(interfaceName);
-                LinkTool linkTool = null;
-                if (!supportedWifiOptions.isEmpty()) {
-                    if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_NL80211)) {
-                        linkTool = new IwLinkTool(interfaceName);
-                    } else if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_WEXT)) {
-                        linkTool = new iwconfigLinkTool(interfaceName);
-                    }
-                }
+                LinkTool linkTool = getLinkTool(interfaceName);
 
                 if (linkTool != null && linkTool.get()) {
                     if (linkTool.isLinkDetected()) {
@@ -938,7 +951,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 
             if (rssi == 0) {
                 logger.trace("getSignalLevel() :: using 'iw dev wlan0 scan' command ...");
-                IScanTool scanTool = ScanTool.get(interfaceName);
+                IScanTool scanTool = getScanTool(interfaceName);
                 if (scanTool != null) {
                     List<WifiAccessPoint> wifiAccessPoints = scanTool.scan();
                     for (WifiAccessPoint wap : wifiAccessPoints) {

@@ -43,7 +43,7 @@ public class LinuxDns {
 
     private static final String GLOBAL_DHCP_LEASES_DIR = "/var/lib/dhcp";
     private static final String IFACE_DHCP_LEASES_DIR = "/var/lib/dhclient";
-    
+
     private static final String NAMESERVER = "nameserver";
 
     private static LinuxDns linuxDns = null;
@@ -134,7 +134,7 @@ public class LinuxDns {
     }
 
     public List<IPAddress> getDhcpDnsServers(String interfaceName, IPAddress address) throws KuraException {
-        
+
         if (interfaceName == null || interfaceName.isEmpty() || address == null || address.getAddress() == null) {
             return new ArrayList<>();
         }
@@ -166,7 +166,9 @@ public class LinuxDns {
             }
         }
 
-        logger.debug("getDhcpDnsServers() :: DHCP DNS servers = {}", servers);
+        if (!servers.isEmpty()) {
+            logger.debug("getDhcpDnsServers() :: DHCP DNS servers for {} interface {}", interfaceName, servers);
+        }
         return servers;
     }
 
@@ -175,7 +177,7 @@ public class LinuxDns {
         ArrayList<IPAddress> servers = new ArrayList<>();
         try (FileReader fr = new FileReader(dhClientFile); BufferedReader br = new BufferedReader(fr)) {
             String line = null;
-            
+
             ArrayList<String> leaseBlock = null;
             while ((line = br.readLine()) != null) {
                 if ("lease {".equals(line.trim())) {
@@ -193,10 +195,10 @@ public class LinuxDns {
 
         return servers;
     }
-    
+
     private ArrayList<IPAddress> parseDhclientLeaseBlock(ArrayList<String> leaseBlock, String interfaceMatch,
             String fixedAddressMatch) throws UnknownHostException {
-        
+
         if ((leaseBlock.size() > 2)
                 && (!leaseBlock.get(0).equals(interfaceMatch) || leaseBlock.get(1).equals(fixedAddressMatch))) {
             return new ArrayList<>();
@@ -208,13 +210,12 @@ public class LinuxDns {
                 break;
             }
         }
-        return (servers != null)? servers : new ArrayList<>();
+        return (servers != null) ? servers : new ArrayList<>();
     }
-    
+
     private ArrayList<IPAddress> parseDhclientDomainNameLine(String line) throws UnknownHostException {
         ArrayList<IPAddress> servers = new ArrayList<>();
-        StringTokenizer st = new StringTokenizer(
-                line.substring(line.indexOf("domain-name-servers") + 19), ", ;");
+        StringTokenizer st = new StringTokenizer(line.substring(line.indexOf("domain-name-servers") + 19), ", ;");
         while (st.hasMoreTokens()) {
             String nameServer = st.nextToken();
             logger.debug("Found nameserver... {}", nameServer);
@@ -225,7 +226,7 @@ public class LinuxDns {
         }
         return servers;
     }
-    
+
     public synchronized void removeDnsServer(IPAddress serverIpAddress) {
         try {
             if (isPppDnsSet()) {
@@ -277,7 +278,7 @@ public class LinuxDns {
         backupDnsFile();
         setDnsPppLink(sPppDnsFileName);
     }
-    
+
     public synchronized void unsetPppDns() throws KuraException {
         if (isPppDnsSet()) {
             String pppDnsFilename = getPppDnsFileName();
@@ -300,7 +301,7 @@ public class LinuxDns {
         }
         return ret;
     }
-    
+
     private void backupDnsFile() throws KuraException {
         File file = new File(DNS_FILE_NAME);
         if (file.exists()) {
@@ -308,14 +309,17 @@ public class LinuxDns {
             try {
                 proc = ProcessUtil.exec("mv " + DNS_FILE_NAME + " " + BACKUP_DNS_FILE_NAME);
                 if (proc.waitFor() != 0) {
-                    logger.error("Failed to move the {} file to {}. The 'mv' command has failed ...", DNS_FILE_NAME, BACKUP_DNS_FILE_NAME);
-                    throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Failed to backup DNS file " + DNS_FILE_NAME);
+                    logger.error("Failed to move the {} file to {}. The 'mv' command has failed ...", DNS_FILE_NAME,
+                            BACKUP_DNS_FILE_NAME);
+                    throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
+                            "Failed to backup DNS file " + DNS_FILE_NAME);
                 } else {
                     logger.info("successfully backed up {}", DNS_FILE_NAME);
                 }
             } catch (Exception e) {
                 logger.error("Failed to move the {} file to {}", DNS_FILE_NAME, BACKUP_DNS_FILE_NAME, e);
-                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, "Failed to backup DNS file " + DNS_FILE_NAME);
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
+                        "Failed to backup DNS file " + DNS_FILE_NAME);
             } finally {
                 if (proc != null) {
                     ProcessUtil.destroy(proc);
@@ -323,29 +327,31 @@ public class LinuxDns {
             }
         }
     }
-    
+
     private void setDnsPppLink(String sPppDnsFileName) throws KuraException {
         SafeProcess proc = null;
         try {
             proc = ProcessUtil.exec("ln -sf " + sPppDnsFileName + " " + DNS_FILE_NAME);
             if (proc.waitFor() != 0) {
                 logger.error("failed to create symbolic link: {} -> {}", DNS_FILE_NAME, sPppDnsFileName);
-                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "failed to create symbolic link to " + sPppDnsFileName);
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
+                        "failed to create symbolic link to " + sPppDnsFileName);
             } else {
                 logger.info("DNS is set to use ppp resolv.conf");
             }
         } catch (Exception e) {
             logger.error("failed to create symbolic link: {} -> {} ", DNS_FILE_NAME, sPppDnsFileName, e);
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, "failed to create symbolic link to " + sPppDnsFileName);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
+                    "failed to create symbolic link to " + sPppDnsFileName);
         } finally {
             if (proc != null) {
                 ProcessUtil.destroy(proc);
             }
         }
     }
-    
+
     private void unsetDnsPppLink(String pppDnsFilename) throws KuraException {
-        
+
         File file = new File(DNS_FILE_NAME);
         if (file.exists()) {
             SafeProcess proc = null;
@@ -370,7 +376,7 @@ public class LinuxDns {
             }
         }
     }
-    
+
     private void restoreDnsFile() throws KuraException {
         File file = new File(BACKUP_DNS_FILE_NAME);
         if (file.exists()) {
@@ -379,7 +385,7 @@ public class LinuxDns {
             createEmptyDnsFile();
         }
     }
-    
+
     private void restoreDnsFileFromBackup() throws KuraException {
         SafeProcess proc = null;
         try {
@@ -401,22 +407,20 @@ public class LinuxDns {
             }
         }
     }
-    
+
     private void createEmptyDnsFile() throws KuraException {
         SafeProcess proc = null;
         try {
             proc = ProcessUtil.exec("touch " + DNS_FILE_NAME);
             if (proc.waitFor() != 0) {
                 logger.error("failed to create empty {}", DNS_FILE_NAME);
-                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
-                        "failed to create empty " + DNS_FILE_NAME);
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "failed to create empty " + DNS_FILE_NAME);
             } else {
                 logger.info("successfully created empty {}", DNS_FILE_NAME);
             }
         } catch (Exception e) {
             logger.error("failed to create empty {}", DNS_FILE_NAME, e);
-            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
-                    "failed to create empty " + DNS_FILE_NAME);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, "failed to create empty " + DNS_FILE_NAME);
         } finally {
             if (proc != null) {
                 ProcessUtil.destroy(proc);

@@ -166,6 +166,7 @@ public class LinuxDns {
             }
         }
 
+        logger.debug("getDhcpDnsServers() :: DHCP DNS servers = {}", servers);
         return servers;
     }
 
@@ -180,8 +181,8 @@ public class LinuxDns {
                 if ("lease {".equals(line.trim())) {
                     leaseBlock = new ArrayList<>();
                 } else if ("}".equals(line.trim())) {
-                    leaseBlock = null;
                     servers = parseDhclientLeaseBlock(leaseBlock, interfaceMatch, fixedAddressMatch);
+                    leaseBlock = null;
                 } else if ((leaseBlock != null) && !line.trim().isEmpty()) {
                     leaseBlock.add(line.trim());
                 }

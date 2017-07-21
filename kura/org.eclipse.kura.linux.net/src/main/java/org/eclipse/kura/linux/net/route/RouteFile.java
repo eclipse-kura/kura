@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -31,17 +31,17 @@ import org.slf4j.LoggerFactory;
 
 public class RouteFile {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(RouteFile.class);
+    private static final Logger logger = LoggerFactory.getLogger(RouteFile.class);
 
-    private final String osRouteConfigDirectory = "/etc/sysconfig/network-scripts/";
+    private static final String OS_ROUTE_CONFIG_DIR = "/etc/sysconfig/network-scripts/";
     private final String interfaceName;
     private final File file;
     private ArrayList<RouteConfig> routes;
 
     public RouteFile(String interfaceName) {
         this.interfaceName = interfaceName;
-        this.routes = new ArrayList<RouteConfig>();
-        this.file = new File(this.osRouteConfigDirectory + "route-" + this.interfaceName);
+        this.routes = new ArrayList<>();
+        this.file = new File(OS_ROUTE_CONFIG_DIR + "route-" + this.interfaceName);
         if (this.file.exists()) {
             readFile();
         } else {
@@ -52,23 +52,13 @@ public class RouteFile {
     private void readFile() {
         int i = 0;
         RouteConfig newRoute = null;
-        FileInputStream in = null;
         Properties routeProps = new Properties();
-        try {
-            in = new FileInputStream(this.file);
+        try (FileInputStream in = new FileInputStream(this.file)) {
             routeProps.load(in);
         } catch (FileNotFoundException e) {
-            s_logger.warn("File not found", e);
+            logger.warn("File not found", e);
         } catch (IOException e) {
-            s_logger.warn("Exception while reading file", e);
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
+        	logger.warn("Exception while reading file", e);
         }
 
         newRoute = findRoute(routeProps, i);
@@ -92,7 +82,7 @@ public class RouteFile {
             gw = IPAddress.parseHostAddress((String) props.get("GATEWAY" + index));
             mask = IPAddress.parseHostAddress((String) props.get("NETMASK" + index));
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            logger.error("findRoute() :: failed to parse host address ", e);
         }
         if (dest != null && gw != null && mask != null) {
             if (dest instanceof IP4Address) {
@@ -123,7 +113,7 @@ public class RouteFile {
         return true;
     }
 
-    public boolean removeRoute(IPAddress destination, IPAddress gateway, IPAddress netmask, String iface) {
+    public boolean removeRoute(IPAddress destination, IPAddress gateway, IPAddress netmask) {
         RouteConfig route = null;
         if (destination instanceof IP4Address) {
             route = new RouteConfigIP4((IP4Address) destination, (IP4Address) gateway, (IP4Address) netmask,
@@ -142,17 +132,19 @@ public class RouteFile {
         return false;
     }
 
-    private void createFile() {
-        try {
-            this.file.createNewFile();
+    private boolean createFile() {
+        boolean ret = true;
+    	try {
+            ret = this.file.createNewFile();
         } catch (IOException e) {
-            s_logger.warn("Exception while creating file", e);
+            logger.warn("Exception while creating file", e);
         }
+    	return ret;
     }
 
     public RouteConfig[] getRoutes() {
-        if (this.routes.size() < 1) {
-            return null;
+        if (this.routes.isEmpty()) {
+            return new RouteConfig[0];
         }
         RouteConfig[] result = new RouteConfig[this.routes.size()];
         for (int i = 0; i < this.routes.size(); i++) {
@@ -162,7 +154,6 @@ public class RouteFile {
     }
 
     private void storeFile() {
-        FileOutputStream out = null;
         Properties props = new Properties();
         RouteConfig route = null;
         for (int i = 0; i < this.routes.size(); i++) {
@@ -171,25 +162,15 @@ public class RouteFile {
             props.put("GATEWAY" + i, route.getGateway().getHostAddress());
             props.put("NETMASK" + i, route.getNetmask().getHostAddress());
         }
-        try {
-            out = new FileOutputStream(this.file);
+        try (FileOutputStream out = new FileOutputStream(this.file)) {
             props.store(out, "Persistent routes for interface:  " + this.interfaceName);
             out.flush();
             out.close();
         } catch (FileNotFoundException e) {
-            s_logger.warn("File not found", e);
+            logger.warn("File not found", e);
         } catch (IOException e) {
-            s_logger.warn("Exception while reading file", e);
-        } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
+            logger.warn("Exception while reading file", e);
         }
-
     }
 
     private int routeIndex(RouteConfig route) {
@@ -203,7 +184,7 @@ public class RouteFile {
     }
 
     public void cleanFile() {
-        this.routes = new ArrayList<RouteConfig>();
+        this.routes = new ArrayList<>();
     }
 
 }

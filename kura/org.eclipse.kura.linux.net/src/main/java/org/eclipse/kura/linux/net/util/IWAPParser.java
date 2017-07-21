@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 class IWAPParser {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(IWAPParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(IWAPParser.class);
 
     // Top-level properties we'll be picking up
     private String ssid = null;
@@ -141,7 +141,7 @@ class IWAPParser {
                 this.capabilities.add(st.nextToken());
             }
         } else {
-            s_logger.debug("Ignoring line in scan result: {}", propLine);
+            logger.debug("Ignoring line in scan result: {}", propLine);
         }
     }
 }

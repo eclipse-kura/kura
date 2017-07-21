@@ -448,7 +448,7 @@ public class LinuxNetworkUtil {
             ifconfigs.put(ifaceName, config);
             return config;
         } catch (KuraException e) {
-            if (e.getCode() == KuraErrorCode.OS_COMMAND_ERROR) {
+            if ((e.getCode() == KuraErrorCode.OS_COMMAND_ERROR) || (e.getCode() == KuraErrorCode.PROCESS_EXECUTION_ERROR)) {
                 // Assuming ifconfig fails because a PPP link went down and its interface cannot be found
                 if (ifaceName.matches(PPP_IFACE_REGEX)) {
                     File pppFile = new File(NetworkServiceImpl.PPP_PEERS_DIR + ifaceName);

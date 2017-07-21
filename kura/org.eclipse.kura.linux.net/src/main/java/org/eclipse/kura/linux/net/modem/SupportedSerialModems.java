@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -26,57 +26,56 @@ import org.slf4j.LoggerFactory;
 
 public class SupportedSerialModems {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(SupportedSerialModems.class);
+    private static final Logger logger = LoggerFactory.getLogger(SupportedSerialModems.class);
     private static final String OS_VERSION = System.getProperty("kura.os.version");
     private static final String TARGET_NAME = System.getProperty("target.device");
 
     private static final String SERIAL_MODEM_INIT_WORKER_THREAD_NAME = "SerialModemInitWorker";
-    private final static long THREAD_INTERVAL = 2000;
+    private static final long THREAD_INTERVAL = 2000;
 
     private static boolean modemReachable = false;
 
-    private static Future<?> s_task;
-    private static AtomicBoolean s_stopThread;
-    private static ExecutorService s_executor;
+    private static Future<?> task;
+    private static AtomicBoolean stopThread;
+    private static ExecutorService executor;
 
-    private static ServiceTracker<EventAdmin, EventAdmin> s_serviceTracker;
+    private static ServiceTracker<EventAdmin, EventAdmin> serviceTracker;
 
     static {
         BundleContext bundleContext = FrameworkUtil.getBundle(SupportedSerialModems.class).getBundleContext();
-        s_serviceTracker = new ServiceTracker<EventAdmin, EventAdmin>(bundleContext, EventAdmin.class, null);
-        s_serviceTracker.open(true);
+        serviceTracker = new ServiceTracker<>(bundleContext, EventAdmin.class, null);
+        serviceTracker.open(true);
 
-        s_stopThread = new AtomicBoolean();
-        s_stopThread.set(false);
-        s_executor = Executors.newSingleThreadExecutor();
-        s_task = s_executor.submit(new Runnable() {
+        stopThread = new AtomicBoolean();
+        stopThread.set(false);
+        executor = Executors.newSingleThreadExecutor();
+        task = executor.submit(new Runnable() {
 
             @Override
             public void run() {
                 Thread.currentThread().setName(SERIAL_MODEM_INIT_WORKER_THREAD_NAME);
-                while (!s_stopThread.get()) {
+                while (!stopThread.get()) {
                     try {
                         worker();
                         workerWait();
                     } catch (InterruptedException interruptedException) {
                         Thread.interrupted();
-                        s_logger.debug("{} interrupted - {}", SERIAL_MODEM_INIT_WORKER_THREAD_NAME,
-                                interruptedException);
+                        logger.debug("{} interrupted - {}", SERIAL_MODEM_INIT_WORKER_THREAD_NAME, interruptedException);
                     } catch (Throwable t) {
-                        s_logger.error("activate() :: Exception while monitoring cellular connection {}", t);
+                        logger.error("activate() :: Exception while monitoring cellular connection ", t);
                     }
                 }
 
-                if (s_task != null && !s_task.isCancelled()) {
-                    s_logger.info("Cancelling {} task", SERIAL_MODEM_INIT_WORKER_THREAD_NAME);
-                    boolean status = s_task.cancel(true);
-                    s_logger.info("Task {} cancelled - {} ", SERIAL_MODEM_INIT_WORKER_THREAD_NAME, status);
-                    s_task = null;
+                if (task != null && !task.isCancelled()) {
+                    logger.info("Cancelling {} task", SERIAL_MODEM_INIT_WORKER_THREAD_NAME);
+                    boolean status = task.cancel(true);
+                    logger.info("Task {} cancelled - {} ", SERIAL_MODEM_INIT_WORKER_THREAD_NAME, status);
+                    task = null;
                 }
 
-                if (s_executor != null) {
-                    s_logger.info("Terminating {} Thread ...", SERIAL_MODEM_INIT_WORKER_THREAD_NAME);
-                    s_executor.shutdownNow();
+                if (executor != null) {
+                    logger.info("Terminating {} Thread ...", SERIAL_MODEM_INIT_WORKER_THREAD_NAME);
+                    executor.shutdownNow();
                 }
             }
         });
@@ -89,11 +88,11 @@ public class SupportedSerialModems {
             if (modem.getOsImageName().equals(imageName) && modem.getOsImageVersion().equals(imageVersion)
                     && modem.getTargetName().equals(targetName)) {
                 if (modemReachable) {
-                    s_logger.debug("The {} modem is attached", modem.getModemName());
+                    logger.debug("The {} modem is attached", modem.getModemName());
                     supportedSerialModemInfo = modem;
                 } else {
                     // do not return this modem if it isn't reachable
-                    s_logger.debug("The {} modem is not attached", modem.getModemName());
+                    logger.debug("The {} modem is not attached", modem.getModemName());
                 }
                 break;
             }
@@ -115,40 +114,40 @@ public class SupportedSerialModems {
 
         if (modem != null) {
 
-            s_logger.info("Installing modem driver for {} ...", modem.getModemName());
+            logger.info("Installing modem driver for {} ...", modem.getModemName());
             try {
                 if (!SupportedUsbModems.isAttached(SupportedUsbModemInfo.Telit_HE910_D.getVendorId(),
                         SupportedUsbModemInfo.Telit_HE910_D.getProductId())) {
-                    s_logger.warn("USB modem {}:{} is not detected ...",
+                    logger.warn("USB modem {}:{} is not detected ...",
                             SupportedUsbModemInfo.Telit_HE910_D.getVendorId(),
                             SupportedUsbModemInfo.Telit_HE910_D.getProductId());
                     if (modem.getDriver().install() == 0) {
                         for (String modemModel : modem.getModemModels()) {
                             if (modemModel.equals(modem.getDriver().getModemModel())) {
-                                s_logger.info(
+                                logger.info(
                                         "Driver for the {} modem has been installed. Modem is reachable as serial device.",
                                         modemModel);
-                                EventAdmin eventAdmin = s_serviceTracker.getService();
+                                EventAdmin eventAdmin = serviceTracker.getService();
 
                                 if (eventAdmin != null) {
-                                    s_logger.info("posting the SerialModemAddedEvent ...");
+                                    logger.info("posting the SerialModemAddedEvent ...");
                                     eventAdmin.postEvent(new SerialModemAddedEvent(modem));
                                 }
-                                s_stopThread.set(true);
+                                stopThread.set(true);
                                 workerNotity();
                                 modemReachable = true;
                             }
                         }
                     }
-                    s_logger.warn("Failed to install modem driver for {}", modem.getModemName());
+                    logger.warn("Failed to install modem driver for {}", modem.getModemName());
                 } else {
-                    s_logger.info("{} modem is reachable as a USB device ...", modem.getModemName());
-                    s_stopThread.set(true);
+                    logger.info("{} modem is reachable as a USB device ...", modem.getModemName());
+                    stopThread.set(true);
                     workerNotity();
                     modemReachable = true;
                 }
             } catch (Exception e) {
-                s_logger.error("Worker exception", e);
+                logger.error("Worker exception", e);
             }
 
         }
@@ -156,17 +155,17 @@ public class SupportedSerialModems {
     }
 
     private static void workerNotity() {
-        if (s_stopThread != null) {
-            synchronized (s_stopThread) {
-                s_stopThread.notifyAll();
+        if (stopThread != null) {
+            synchronized (stopThread) {
+                stopThread.notifyAll();
             }
         }
     }
 
     private static void workerWait() throws InterruptedException {
-        if (s_stopThread != null) {
-            synchronized (s_stopThread) {
-                s_stopThread.wait(THREAD_INTERVAL);
+        if (stopThread != null) {
+            synchronized (stopThread) {
+                stopThread.wait(THREAD_INTERVAL);
             }
         }
     }

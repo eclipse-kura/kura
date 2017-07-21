@@ -473,8 +473,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     }
 
     private boolean isConfigsEqual(List<NetConfig> oldConfig, List<NetConfig> newConfig) {
-        if (oldConfig == null && newConfig == null || oldConfig == null && newConfig != null
-                || oldConfig != null && newConfig == null) {
+        if (oldConfig == null || newConfig == null) {
             return false;
         }
         boolean ret = false;

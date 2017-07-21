@@ -27,6 +27,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
@@ -185,8 +186,17 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         return LinuxNetworkUtil.getType(interfaceName);
     }
 
+    protected RouteService getRouteService() {
+        RouteService rs = RouteServiceImpl.getInstance();
+        return rs;
+    }
+
     protected IScanTool getScanTool(String interfaceName) throws KuraException {
         return ScanTool.get(interfaceName);
+    }
+
+    protected boolean isWifiDeviceOn(String interfaceName) {
+        return LinuxNetworkUtil.isWifiDeviceOn(interfaceName);
     }
 
     private void monitor() {
@@ -904,7 +914,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 
     private boolean isAccessPointReachable(String interfaceName, int tout) throws KuraException {
         boolean ret = true;
-        RouteService rs = RouteServiceImpl.getInstance();
+        RouteService rs = getRouteService();
         RouteConfig rconf = rs.getDefaultRoute(interfaceName);
         if (rconf != null) {
             IPAddress ipAddress = rconf.getGateway();
@@ -941,7 +951,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 
     private boolean resetWifiDevice(String interfaceName) throws Exception {
         boolean ret = false;
-        if (LinuxNetworkUtil.isWifiDeviceOn(interfaceName)) {
+        if (isWifiDeviceOn(interfaceName)) {
             LinuxNetworkUtil.turnWifiDeviceOff(interfaceName);
         }
         if (isWifiDeviceReady(interfaceName, false, 10)) {
@@ -956,7 +966,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         long tmrStart = System.currentTimeMillis();
         do {
             sleep(1000);
-            boolean deviceOn = LinuxNetworkUtil.isWifiDeviceOn(interfaceName);
+            boolean deviceOn = isWifiDeviceOn(interfaceName);
             logger.trace("isWifiDeviceReady()? :: deviceOn={}, expected={}", deviceOn, expected);
             if (deviceOn == expected) {
                 deviceReady = true;

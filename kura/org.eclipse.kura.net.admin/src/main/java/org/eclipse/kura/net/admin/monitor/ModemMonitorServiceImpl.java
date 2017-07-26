@@ -669,7 +669,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                     }
 
                     if (modem.isGpsSupported() && isGpsEnabledInConfig(modem.getConfiguration())) {
-                        if ((modem instanceof HspaCellularModem) && !modem.isGpsEnabled()) {
+                        if (modem instanceof HspaCellularModem && !modem.isGpsEnabled()) {
                             modem.enableGps();
                         }
                         postModemGpsEvent(modem, true);

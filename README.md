@@ -1,5 +1,8 @@
 Eclipse Kura™
 =============
+[![Build Status](https://travis-ci.org/eclipse/kura.svg?branch=master)](https://travis-ci.org/eclipse/kura)
+[![Hudson](https://img.shields.io/jenkins/s/https/hudson.eclipse.org/kura/job/kura-develop.svg)](https://hudson.eclipse.org/kura/)
+
 An OSGi-based Application Framework for M2M Service Gateways
 
 

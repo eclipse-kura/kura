@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.eclipse.kura.broker.artemis.core
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v1.0
+Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: io.netty.bootstrap;version="[4.1,5)",
  io.netty.buffer;version="[4.1,5)",

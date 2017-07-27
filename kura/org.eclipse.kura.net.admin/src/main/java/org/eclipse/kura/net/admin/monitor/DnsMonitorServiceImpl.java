@@ -123,27 +123,25 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
                     }
                 }
 
-                if (fwds != null && !fwds.isEmpty()) {
-                    if (!fwds.equals(DnsMonitorServiceImpl.this.forwarders)) {
-                        // there was a change - deal with it
-                        logger.info("Detected DNS resolv.conf change - restarting DNS proxy");
-                        DnsMonitorServiceImpl.this.forwarders = fwds;
+                if (fwds != null && !fwds.isEmpty() && !fwds.equals(DnsMonitorServiceImpl.this.forwarders)) {
+                    // there was a change - deal with it
+                    logger.info("Detected DNS resolv.conf change - restarting DNS proxy");
+                    DnsMonitorServiceImpl.this.forwarders = fwds;
 
-                        try {
-                            LinuxNamed linuxNamed = LinuxNamed.getInstance();
-                            DnsServerConfigIP4 currentDnsServerConfig = linuxNamed.getDnsServerConfig();
-                            DnsServerConfigIP4 newDnsServerConfig = new DnsServerConfigIP4(
-                                    DnsMonitorServiceImpl.this.forwarders, DnsMonitorServiceImpl.this.allowedNetworks);
+                    try {
+                        LinuxNamed linuxNamed = LinuxNamed.getInstance();
+                        DnsServerConfigIP4 currentDnsServerConfig = linuxNamed.getDnsServerConfig();
+                        DnsServerConfigIP4 newDnsServerConfig = new DnsServerConfigIP4(
+                                DnsMonitorServiceImpl.this.forwarders, DnsMonitorServiceImpl.this.allowedNetworks);
 
-                            if (currentDnsServerConfig.equals(newDnsServerConfig)) {
-                                logger.debug("DNS server config has changed - updating from " + currentDnsServerConfig
-                                        + " to " + newDnsServerConfig);
+                        if (currentDnsServerConfig.equals(newDnsServerConfig)) {
+                            logger.debug("DNS server config has changed - updating from " + currentDnsServerConfig
+                                    + " to " + newDnsServerConfig);
 
-                                reconfigureDNSProxy(newDnsServerConfig);
-                            }
-                        } catch (KuraException e) {
-                            logger.warn(e.getMessage(), e);
+                            reconfigureDNSProxy(newDnsServerConfig);
                         }
+                    } catch (KuraException e) {
+                        logger.warn(e.getMessage(), e);
                     }
                 }
                 try {
@@ -173,6 +171,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
                 this.executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 logger.warn("Interrupted", e);
+                Thread.currentThread().interrupt();
             }
             logger.info("DnsMonitorServiceImpl Thread terminated? - {}", this.executor.isTerminated());
             this.executor = null;
@@ -250,20 +249,17 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
         this.allowedNetworks = new HashSet<>();
         this.forwarders = new HashSet<>();
 
-        if (this.networkConfiguration != null) {
-            if (this.networkConfiguration.getNetInterfaceConfigs() != null) {
-                List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = this.networkConfiguration
-                        .getNetInterfaceConfigs();
-
-                for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-                    if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
-                            || netInterfaceConfig.getType() == NetInterfaceType.WIFI
-                            || netInterfaceConfig.getType() == NetInterfaceType.MODEM) {
-                        try {
-                            getAllowedNetworks(netInterfaceConfig);
-                        } catch (KuraException e) {
-                            logger.error("Error updating dns proxy", e);
-                        }
+        if ((this.networkConfiguration != null) && (this.networkConfiguration.getNetInterfaceConfigs() != null)) {
+            List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = this.networkConfiguration
+                    .getNetInterfaceConfigs();
+            for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
+                if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
+                        || netInterfaceConfig.getType() == NetInterfaceType.WIFI
+                        || netInterfaceConfig.getType() == NetInterfaceType.MODEM) {
+                    try {
+                        getAllowedNetworks(netInterfaceConfig);
+                    } catch (KuraException e) {
+                        logger.error("Error updating dns proxy", e);
                     }
                 }
             }
@@ -296,18 +292,16 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
                 if (netConfigs != null && !netConfigs.isEmpty()) {
                     for (int i = 0; i < netConfigs.size(); i++) {
                         NetConfig netConfig = netConfigs.get(i);
-                        if (netConfig instanceof DhcpServerConfig) {
-                            if (((DhcpServerConfig) netConfig).isPassDns()) {
-                                logger.debug(
-                                        "Found an allowed network: " + ((DhcpServerConfig) netConfig).getRouterAddress()
-                                                + "/" + ((DhcpServerConfig) netConfig).getPrefix());
-                                this.enabled = true;
+                        if ((netConfig instanceof DhcpServerConfig) && ((DhcpServerConfig) netConfig).isPassDns()) {
+                            logger.debug(
+                                    "Found an allowed network: " + ((DhcpServerConfig) netConfig).getRouterAddress()
+                                            + "/" + ((DhcpServerConfig) netConfig).getPrefix());
+                            this.enabled = true;
 
-                                // this is an 'allowed network'
-                                this.allowedNetworks.add(new NetworkPair<IP4Address>(
-                                        (IP4Address) ((DhcpServerConfig) netConfig).getRouterAddress(),
-                                        ((DhcpServerConfig) netConfig).getPrefix()));
-                            }
+                            // this is an 'allowed network'
+                            this.allowedNetworks.add(new NetworkPair<IP4Address>(
+                                    (IP4Address) ((DhcpServerConfig) netConfig).getRouterAddress(),
+                                    ((DhcpServerConfig) netConfig).getPrefix()));
                         }
                     }
                 }
@@ -366,18 +360,17 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
                 // If there are multiple WAN interfaces, their configured DNS servers are all included in no particular
                 // order
                 for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-                    if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
+                    if ((netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
                             || netInterfaceConfig.getType() == NetInterfaceType.WIFI
-                            || netInterfaceConfig.getType() == NetInterfaceType.MODEM) {
-                        if (isEnabledForWan(netInterfaceConfig)) {
-                            try {
-                                Set<IPAddress> servers = getConfiguredDnsServers(netInterfaceConfig);
-                                logger.trace("{} is WAN, adding its dns servers: {}", netInterfaceConfig.getName(),
-                                        servers);
-                                serverList.addAll(servers);
-                            } catch (KuraException e) {
-                                logger.error("Error adding dns servers for " + netInterfaceConfig.getName(), e);
-                            }
+                            || netInterfaceConfig.getType() == NetInterfaceType.MODEM)
+                            && isEnabledForWan(netInterfaceConfig)) {
+                        try {
+                            Set<IPAddress> servers = getConfiguredDnsServers(netInterfaceConfig);
+                            logger.trace("{} is WAN, adding its dns servers: {}", netInterfaceConfig.getName(),
+                                    servers);
+                            serverList.addAll(servers);
+                        } catch (KuraException e) {
+                            logger.error("Error adding dns servers for " + netInterfaceConfig.getName(), e);
                         }
                     }
                 }
@@ -448,7 +441,8 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
             try {
                 Thread.sleep(end - now);
             } catch (InterruptedException e) {
-                logger.debug("sleep interrupted: " + e);
+                logger.debug("sleep interrupted: ", e);
+                Thread.currentThread().interrupt();
             }
 
             now = System.currentTimeMillis();

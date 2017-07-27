@@ -332,7 +332,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
         Set<IPAddress> currentServers = linuxDns.getDnServers();
 
         if (newServers == null || newServers.isEmpty()) {
-            logger.warn("Not Setting DNS servers to empty");
+            logger.debug("Not Setting DNS servers to empty");
             return;
         }
 
@@ -352,26 +352,22 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     // Get a list of dns servers for all WAN interfaces
     private Set<IPAddress> getConfiguredDnsServers() {
         LinkedHashSet<IPAddress> serverList = new LinkedHashSet<>();
-
-        if (this.networkConfiguration != null) {
-            if (this.networkConfiguration.getNetInterfaceConfigs() != null) {
-                List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = this.networkConfiguration
-                        .getNetInterfaceConfigs();
-                // If there are multiple WAN interfaces, their configured DNS servers are all included in no particular
-                // order
-                for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-                    if ((netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
-                            || netInterfaceConfig.getType() == NetInterfaceType.WIFI
-                            || netInterfaceConfig.getType() == NetInterfaceType.MODEM)
-                            && isEnabledForWan(netInterfaceConfig)) {
-                        try {
-                            Set<IPAddress> servers = getConfiguredDnsServers(netInterfaceConfig);
-                            logger.trace("{} is WAN, adding its dns servers: {}", netInterfaceConfig.getName(),
-                                    servers);
-                            serverList.addAll(servers);
-                        } catch (KuraException e) {
-                            logger.error("Error adding dns servers for " + netInterfaceConfig.getName(), e);
-                        }
+        if ((this.networkConfiguration != null) && (this.networkConfiguration.getNetInterfaceConfigs() != null)) {
+            List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = this.networkConfiguration
+                    .getNetInterfaceConfigs();
+            // If there are multiple WAN interfaces, their configured DNS servers are all included in no particular
+            // order
+            for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
+                if ((netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
+                        || netInterfaceConfig.getType() == NetInterfaceType.WIFI
+                        || netInterfaceConfig.getType() == NetInterfaceType.MODEM)
+                        && isEnabledForWan(netInterfaceConfig)) {
+                    try {
+                        Set<IPAddress> servers = getConfiguredDnsServers(netInterfaceConfig);
+                        logger.trace("{} is WAN, adding its dns servers: {}", netInterfaceConfig.getName(), servers);
+                        serverList.addAll(servers);
+                    } catch (KuraException e) {
+                        logger.error("Error adding dns servers for " + netInterfaceConfig.getName(), e);
                     }
                 }
             }

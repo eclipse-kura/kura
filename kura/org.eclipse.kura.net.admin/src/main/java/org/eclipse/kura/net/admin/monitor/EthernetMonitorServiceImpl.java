@@ -165,6 +165,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                 this.executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 logger.warn("Interrupted", e);
+                Thread.currentThread().interrupt();
             }
             logger.info("EthernetMonitor Thread terminated? - {}", this.executor.isTerminated());
             this.executor = null;
@@ -322,16 +323,14 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                             }
                         }
 
-                        if (!found) {
-                            if (isDhcpClient || staticGateway != null) {
-                                // disable the interface and reenable - something didn't happen at initialization as it
-                                // was supposed to
-                                logger.error(
-                                        "WAN interface {} did not have a route setting it as the default gateway, restarting it",
-                                        interfaceName);
-                                this.netAdminService.disableInterface(interfaceName);
-                                this.netAdminService.enableInterface(interfaceName, isDhcpClient);
-                            }
+                        if (!found && (isDhcpClient || staticGateway != null)) {
+                            // disable the interface and reenable - something didn't happen at initialization as it
+                            // was supposed to
+                            logger.error(
+                                    "WAN interface {} did not have a route setting it as the default gateway, restarting it",
+                                    interfaceName);
+                            this.netAdminService.disableInterface(interfaceName);
+                            this.netAdminService.enableInterface(interfaceName, isDhcpClient);
                         }
                     } else if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
                         if (isDhcpClient) {
@@ -340,8 +339,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                                 logger.debug("{} is configured for LAN/DHCP - removing GATEWAY route ...",
                                         rconf.getInterfaceName());
                                 this.routeService.removeStaticRoute(rconf.getDestination(), rconf.getGateway(),
-                                        rconf.getNetmask(),
-                                        rconf.getInterfaceName());
+                                        rconf.getNetmask(), rconf.getInterfaceName());
                             }
                         }
                     }
@@ -392,16 +390,14 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                 }
                 try {
                     NetworkConfiguration newNetworkConfig = new NetworkConfiguration(props);
-                    if (newNetworkConfig != null) {
-                        for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : newNetworkConfig
-                                .getNetInterfaceConfigs()) {
-                            if (netInterfaceConfig instanceof EthernetInterfaceConfigImpl) {
-                                logger.debug("Adding new ethernet config for {}", netInterfaceConfig.getName());
-                                EthernetInterfaceConfigImpl newEthernetConfig = (EthernetInterfaceConfigImpl) netInterfaceConfig;
-                                this.newNetworkConfiguration.put(netInterfaceConfig.getName(), newEthernetConfig);
-                                if (isEthernetEnabled(newEthernetConfig)) {
-                                    startMonitor(netInterfaceConfig.getName());
-                                }
+                    for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : newNetworkConfig
+                            .getNetInterfaceConfigs()) {
+                        if (netInterfaceConfig instanceof EthernetInterfaceConfigImpl) {
+                            logger.debug("Adding new ethernet config for {}", netInterfaceConfig.getName());
+                            EthernetInterfaceConfigImpl newEthernetConfig = (EthernetInterfaceConfigImpl) netInterfaceConfig;
+                            this.newNetworkConfiguration.put(netInterfaceConfig.getName(), newEthernetConfig);
+                            if (isEthernetEnabled(newEthernetConfig)) {
+                                startMonitor(netInterfaceConfig.getName());
                             }
                         }
                     }
@@ -518,21 +514,17 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
             if (tasks.get(interfaceName) == null) {
                 logger.info("Starting monitor for {}", interfaceName);
                 stopThreads.put(interfaceName, new AtomicBoolean(false));
-                Future<?> task = this.executor.submit(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        Thread.currentThread().setName("EthernetMonitor_" + interfaceName);
-                        while (!stopThreads.get(interfaceName).get()) {
-                            try {
-                                monitor(interfaceName);
-                                monitorWait(interfaceName);
-                            } catch (InterruptedException interruptedException) {
-                                Thread.interrupted();
-                                logger.debug("Ethernet monitor interrupted - {}", interruptedException);
-                            } catch (Throwable t) {
-                                logger.error("Exception while monitoring ethernet connection - {}", t);
-                            }
+                Future<?> task = this.executor.submit(() -> {
+                    Thread.currentThread().setName("EthernetMonitor_" + interfaceName);
+                    while (!stopThreads.get(interfaceName).get()) {
+                        try {
+                            monitor(interfaceName);
+                            monitorWait(interfaceName);
+                        } catch (InterruptedException interruptedException) {
+                            logger.debug("Ethernet monitor interrupted - {}", interruptedException);
+                            Thread.currentThread().interrupt();
+                        } catch (Throwable t) {
+                            logger.error("Exception while monitoring ethernet connection - {}", t);
                         }
                     }
                 });

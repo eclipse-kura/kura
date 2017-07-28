@@ -524,7 +524,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                             logger.debug("Ethernet monitor interrupted - {}", interruptedException);
                             Thread.currentThread().interrupt();
                         } catch (Throwable t) {
-                            logger.error("Exception while monitoring ethernet connection - {}", t);
+                            logger.error("Exception while monitoring ethernet connection ", t);
                         }
                     }
                 });

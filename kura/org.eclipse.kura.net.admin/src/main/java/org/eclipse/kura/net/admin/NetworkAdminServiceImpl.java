@@ -1378,19 +1378,15 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     private void copyFile(File sourceFile, File destFile) throws IOException {
-        if (!destFile.exists()) {
-            destFile.createNewFile();
+        if (!destFile.exists() && destFile.createNewFile()) {
+            logger.debug("copyFile() :: created new {} file", destFile.getName());
         }
-
-        FileInputStream sourceStream = null;
-        FileOutputStream destinationStream = null;
         FileChannel source = null;
         FileChannel destination = null;
 
-        try {
-            sourceStream = new FileInputStream(sourceFile);
+        try (FileInputStream sourceStream = new FileInputStream(sourceFile);
+                FileOutputStream destinationStream = new FileOutputStream(destFile)) {
             source = sourceStream.getChannel();
-            destinationStream = new FileOutputStream(destFile);
             destination = destinationStream.getChannel();
             destination.transferFrom(source, 0, source.size());
         } finally {
@@ -1399,12 +1395,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             }
             if (destination != null) {
                 destination.close();
-            }
-            if (sourceStream != null) {
-                sourceStream.close();
-            }
-            if (destinationStream != null) {
-                destinationStream.close();
             }
         }
     }
@@ -1428,6 +1418,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
             WpaSupplicantStatus wpaSupplicantStatus = new WpaSupplicantStatus(ifaceName);
             String wpaState = wpaSupplicantStatus.getWpaState();
@@ -1446,6 +1437,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
             try {
                 if (LinuxNetworkUtil.getWifiMode(ifaceName) == mode) {
@@ -1530,7 +1522,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             try {
                 Thread.sleep(sleep);
             } catch (InterruptedException e) {
-                // ignore
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -1553,7 +1545,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             try {
                 Thread.sleep(sleep);
             } catch (InterruptedException e) {
-                // ignore
+                Thread.currentThread().interrupt();
             }
         }
 

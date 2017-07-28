@@ -84,7 +84,7 @@ public class TestUtil {
     }
 
     private static boolean checkParameterTypes(Method m, Class... paramTypes) {
-        if (paramTypes == null || paramTypes.length == 0) {
+        if (paramTypes == null) {
             return true;
         }
 

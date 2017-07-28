@@ -135,8 +135,8 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
                                 DnsMonitorServiceImpl.this.forwarders, DnsMonitorServiceImpl.this.allowedNetworks);
 
                         if (currentDnsServerConfig.equals(newDnsServerConfig)) {
-                            logger.debug("DNS server config has changed - updating from " + currentDnsServerConfig
-                                    + " to " + newDnsServerConfig);
+                            logger.debug("DNS server config has changed - updating from {} to {}",
+                                    currentDnsServerConfig, newDnsServerConfig);
 
                             reconfigureDNSProxy(newDnsServerConfig);
                         }
@@ -294,8 +294,9 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
                         NetConfig netConfig = netConfigs.get(i);
                         if ((netConfig instanceof DhcpServerConfig) && ((DhcpServerConfig) netConfig).isPassDns()) {
                             logger.debug(
-                                    "Found an allowed network: " + ((DhcpServerConfig) netConfig).getRouterAddress()
-                                            + "/" + ((DhcpServerConfig) netConfig).getPrefix());
+                                    "Found an allowed network: {}/{}",
+                                    ((DhcpServerConfig) netConfig).getRouterAddress(),
+                                    ((DhcpServerConfig) netConfig).getPrefix());
                             this.enabled = true;
 
                             // this is an 'allowed network'
@@ -338,13 +339,13 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 
         if (currentServers != null && !currentServers.isEmpty()) {
             if (!currentServers.equals(newServers)) {
-                logger.info("Change to DNS - setting dns servers: " + newServers);
+                logger.info("Change to DNS - setting dns servers: {}", newServers);
                 linuxDns.setDnServers(newServers);
             } else {
                 logger.debug("No change to DNS servers - not updating");
             }
         } else {
-            logger.info("Current DNS servers are null - setting dns servers: " + newServers);
+            logger.info("Current DNS servers are null - setting dns servers: {}", newServers);
             linuxDns.setDnServers(newServers);
         }
     }
@@ -367,7 +368,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
                         logger.trace("{} is WAN, adding its dns servers: {}", netInterfaceConfig.getName(), servers);
                         serverList.addAll(servers);
                     } catch (KuraException e) {
-                        logger.error("Error adding dns servers for " + netInterfaceConfig.getName(), e);
+                        logger.error("Error adding dns servers for {}", netInterfaceConfig.getName(), e);
                     }
                 }
             }

@@ -807,7 +807,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
         //
         // SSL
-        if (brokerUrl.startsWith("ssl")) {
+        if (brokerUrl.startsWith("ssl") || brokerUrl.startsWith("wss")) {
             try {
                 String alias = (String) this.properties.get(SSL_CERT_ALIAS);
                 if (alias == null || "".equals(alias.trim())) {

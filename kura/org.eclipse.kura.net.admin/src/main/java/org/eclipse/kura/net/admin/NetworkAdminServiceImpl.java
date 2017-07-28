@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -1194,9 +1193,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                     logger.trace("getWifiHotspots() :: Signal={}", wap.getStrength());
                     logger.trace("getWifiHotspots() :: Frequency={}", wap.getFrequency());
 
-                    StringBuilder sbMacAddress = getMacAddress(wap.getHardwareAddress());
+                    String macAddress = getMacAddress(wap.getHardwareAddress());
                     WifiSecurity wifiSecurity = getWifiSecurity(wap);
-                    WifiHotspotInfo wifiHotspotInfo = new WifiHotspotInfo(wap.getSSID(), sbMacAddress.toString(),
+                    WifiHotspotInfo wifiHotspotInfo = new WifiHotspotInfo(wap.getSSID(), macAddress,
                             0 - wap.getStrength(), channel, frequency, wifiSecurity);
                     setCiphers(wifiHotspotInfo, wap, wifiSecurity);
                     wifiHotspotInfoList.add(wifiHotspotInfo);
@@ -1379,19 +1378,15 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     private void copyFile(File sourceFile, File destFile) throws IOException {
-        if (!destFile.exists()) {
-            destFile.createNewFile();
+        if (!destFile.exists() && destFile.createNewFile()) {
+            logger.debug("copyFile() :: created new {} file", destFile.getName());
         }
-
-        FileInputStream sourceStream = null;
-        FileOutputStream destinationStream = null;
         FileChannel source = null;
         FileChannel destination = null;
 
-        try {
-            sourceStream = new FileInputStream(sourceFile);
+        try (FileInputStream sourceStream = new FileInputStream(sourceFile);
+                FileOutputStream destinationStream = new FileOutputStream(destFile)) {
             source = sourceStream.getChannel();
-            destinationStream = new FileOutputStream(destFile);
             destination = destinationStream.getChannel();
             destination.transferFrom(source, 0, source.size());
         } finally {
@@ -1400,12 +1395,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             }
             if (destination != null) {
                 destination.close();
-            }
-            if (sourceStream != null) {
-                sourceStream.close();
-            }
-            if (destinationStream != null) {
-                destinationStream.close();
             }
         }
     }
@@ -1429,6 +1418,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
             WpaSupplicantStatus wpaSupplicantStatus = new WpaSupplicantStatus(ifaceName);
             String wpaState = wpaSupplicantStatus.getWpaState();
@@ -1447,6 +1437,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
             try {
                 if (LinuxNetworkUtil.getWifiMode(ifaceName) == mode) {
@@ -1531,7 +1522,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             try {
                 Thread.sleep(sleep);
             } catch (InterruptedException e) {
-                // ignore
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -1545,8 +1536,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         short timeout = 30000;		// in milliseconds
         final short sleep = 500;
 
-        this.pendingFirewallConfigurationChange = true; // WTF: why this is set to true? the while and the if will be
-        // always executed!
+        this.pendingFirewallConfigurationChange = true; // it will be set to false in handleEvent()
 
         this.configurationService.snapshot();
 
@@ -1555,7 +1545,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             try {
                 Thread.sleep(sleep);
             } catch (InterruptedException e) {
-                // ignore
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -1589,7 +1579,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         wifiModeWait(ifaceName, WifiMode.INFRA, 10);
     }
 
-    private StringBuilder getMacAddress(byte[] baMacAddress) {
+    private String getMacAddress(byte[] baMacAddress) {
         StringBuilder sbMacAddress = new StringBuilder();
         for (int i = 0; i < baMacAddress.length; i++) {
             sbMacAddress.append(String.format("%02x", baMacAddress[i] & 0x0ff).toUpperCase());
@@ -1597,7 +1587,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                 sbMacAddress.append(':');
             }
         }
-        return sbMacAddress;
+        return sbMacAddress.toString();
     }
 
     private void reloadKernelModule(String interfaceName, WifiMode wifiMode) throws KuraException {
@@ -1651,10 +1641,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         if (esWpaSecurity != null && !esWpaSecurity.isEmpty()) {
             wifiSecurity = WifiSecurity.SECURITY_WPA;
 
-            Iterator<WifiSecurity> itWpaSecurity = esWpaSecurity.iterator();
-            while (itWpaSecurity.hasNext()) {
-                logger.trace("getWifiHotspots() :: WPA Security={}", itWpaSecurity.next());
-            }
+            logger.trace("getWifiHotspots() :: WPA Security={}", esWpaSecurity);
         }
 
         EnumSet<WifiSecurity> esRsnSecurity = wap.getRsnSecurity();
@@ -1664,10 +1651,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             } else {
                 wifiSecurity = WifiSecurity.SECURITY_WPA2;
             }
-            Iterator<WifiSecurity> itRsnSecurity = esRsnSecurity.iterator();
-            while (itRsnSecurity.hasNext()) {
-                logger.trace("getWifiHotspots() :: RSN Security={}", itRsnSecurity.next());
-            }
+            logger.trace("getWifiHotspots() :: RSN Security={}", esRsnSecurity);
         }
 
         if (wifiSecurity == WifiSecurity.NONE) {
@@ -1702,14 +1686,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
     private void getCiphers(EnumSet<WifiSecurity> esSecurity, EnumSet<WifiSecurity> pairCiphers,
             EnumSet<WifiSecurity> groupCiphers) {
-        Iterator<WifiSecurity> itRsnSecurity = esSecurity.iterator();
-        while (itRsnSecurity.hasNext()) {
-            WifiSecurity securityEntry = itRsnSecurity.next();
-            if (securityEntry == WifiSecurity.PAIR_CCMP
-                    || securityEntry == WifiSecurity.PAIR_TKIP && !pairCiphers.contains(securityEntry)) {
+
+        for (WifiSecurity securityEntry : esSecurity) {
+            if (securityEntry == WifiSecurity.PAIR_CCMP || securityEntry == WifiSecurity.PAIR_TKIP) {
                 pairCiphers.add(securityEntry);
-            } else if (securityEntry == WifiSecurity.GROUP_CCMP
-                    || securityEntry == WifiSecurity.GROUP_TKIP && !groupCiphers.contains(securityEntry)) {
+            } else if (securityEntry == WifiSecurity.GROUP_CCMP || securityEntry == WifiSecurity.GROUP_TKIP) {
                 groupCiphers.add(securityEntry);
             }
         }

@@ -25,6 +25,7 @@ import static org.mockito.Mockito.withSettings;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,7 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.net.NetInterfaceStatus;
+import org.eclipse.kura.net.admin.event.FirewallConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.dhcp.DhcpServerCfg;
 import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
@@ -65,6 +67,7 @@ import org.eclipse.kura.net.modem.ModemInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiBgscan;
 import org.eclipse.kura.net.wifi.WifiConfig;
+import org.eclipse.kura.net.wifi.WifiHotspotInfo;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
@@ -1119,6 +1122,490 @@ public class NetworkAdminServiceImplTest {
         assertEquals(intf2.getNetInterfaceAddresses(), result);
     }
 
-    // TODO: anything more depends on heavier refactoring of the implementation
+    @Test
+    public void testGetCiphersEmpty() throws Throwable {
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        EnumSet<WifiSecurity> esSecurity = EnumSet.noneOf(WifiSecurity.class);
+        EnumSet<WifiSecurity> pairCiphers = EnumSet.noneOf(WifiSecurity.class);
+        EnumSet<WifiSecurity> groupCiphers = EnumSet.noneOf(WifiSecurity.class);
+
+        TestUtil.invokePrivate(svc, "getCiphers", esSecurity, pairCiphers, groupCiphers);
+
+        assertEquals(0, pairCiphers.size());
+        assertEquals(0, groupCiphers.size());
+    }
+
+    @Test
+    public void testGetCiphersSomeIn() throws Throwable {
+        // some ciphers are already populated
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        EnumSet<WifiSecurity> esSecurity = EnumSet.allOf(WifiSecurity.class);
+        EnumSet<WifiSecurity> pairCiphers = EnumSet.of(WifiSecurity.PAIR_TKIP);
+        EnumSet<WifiSecurity> groupCiphers = EnumSet.of(WifiSecurity.GROUP_TKIP);
+
+        TestUtil.invokePrivate(svc, "getCiphers", esSecurity, pairCiphers, groupCiphers);
+
+        assertEquals(2, pairCiphers.size());
+        assertTrue(pairCiphers.contains(WifiSecurity.PAIR_CCMP));
+        assertTrue(pairCiphers.contains(WifiSecurity.PAIR_TKIP));
+        assertEquals(2, groupCiphers.size());
+        assertTrue(groupCiphers.contains(WifiSecurity.GROUP_CCMP));
+        assertTrue(groupCiphers.contains(WifiSecurity.GROUP_TKIP));
+    }
+
+    @Test
+    public void testGetCiphersSomeOut() throws Throwable {
+        // some ciphers are already populated, but not available
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        EnumSet<WifiSecurity> esSecurity = EnumSet.of(WifiSecurity.PAIR_TKIP);
+        EnumSet<WifiSecurity> pairCiphers = EnumSet.of(WifiSecurity.PAIR_TKIP);
+        EnumSet<WifiSecurity> groupCiphers = EnumSet.of(WifiSecurity.GROUP_TKIP);
+
+        TestUtil.invokePrivate(svc, "getCiphers", esSecurity, pairCiphers, groupCiphers);
+
+        assertEquals(1, pairCiphers.size());
+        assertTrue(pairCiphers.contains(WifiSecurity.PAIR_TKIP));
+        assertEquals(1, groupCiphers.size());
+        assertTrue(groupCiphers.contains(WifiSecurity.GROUP_TKIP));
+    }
+
+    @Test
+    public void testGetCiphersSomeNotAvailable() throws Throwable {
+        // some ciphers are not available
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        EnumSet<WifiSecurity> esSecurityTemp = EnumSet.of(WifiSecurity.PAIR_CCMP, WifiSecurity.GROUP_TKIP);
+        EnumSet<WifiSecurity> esSecurity = EnumSet.complementOf(esSecurityTemp);
+
+        EnumSet<WifiSecurity> pairCiphers = EnumSet.noneOf(WifiSecurity.class);
+        EnumSet<WifiSecurity> groupCiphers = EnumSet.noneOf(WifiSecurity.class);
+
+        TestUtil.invokePrivate(svc, "getCiphers", esSecurity, pairCiphers, groupCiphers);
+
+        assertEquals(1, pairCiphers.size());
+        assertTrue(pairCiphers.contains(WifiSecurity.PAIR_TKIP));
+        assertEquals(1, groupCiphers.size());
+        assertTrue(groupCiphers.contains(WifiSecurity.GROUP_CCMP));
+    }
+
+    @Test
+    public void testGetCiphersAll() throws Throwable {
+        // all are available
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        EnumSet<WifiSecurity> esSecurity = EnumSet.allOf(WifiSecurity.class);
+        EnumSet<WifiSecurity> pairCiphers = EnumSet.noneOf(WifiSecurity.class);
+        EnumSet<WifiSecurity> groupCiphers = EnumSet.noneOf(WifiSecurity.class);
+
+        TestUtil.invokePrivate(svc, "getCiphers", esSecurity, pairCiphers, groupCiphers);
+
+        assertEquals(2, pairCiphers.size());
+        assertTrue(pairCiphers.contains(WifiSecurity.PAIR_CCMP));
+        assertTrue(pairCiphers.contains(WifiSecurity.PAIR_TKIP));
+        assertEquals(2, groupCiphers.size());
+        assertTrue(groupCiphers.contains(WifiSecurity.GROUP_CCMP));
+        assertTrue(groupCiphers.contains(WifiSecurity.GROUP_TKIP));
+    }
+
+    @Test
+    public void testSetCiphersNoSecurity() throws Throwable {
+        // tests with input mostly empty producing security_none result
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        String ssid = "testSSID";
+        WifiHotspotInfo wifiHotspotInfo = prepareWifiHotspotInfo(ssid);
+
+        WifiAccessPointImpl wap = prepareEmptyWap(ssid);
+
+        WifiSecurity wifiSecurity = WifiSecurity.SECURITY_NONE;
+
+        TestUtil.invokePrivate(svc, "setCiphers", wifiHotspotInfo, wap, wifiSecurity);
+
+        final EnumSet<WifiSecurity> groups = wifiHotspotInfo.getGroupCiphers();
+        assertNotNull(groups);
+        assertTrue(groups.isEmpty());
+
+        final EnumSet<WifiSecurity> pairs = wifiHotspotInfo.getPairCiphers();
+        assertNotNull(pairs);
+        assertTrue(pairs.isEmpty());
+    }
+
+    private WifiHotspotInfo prepareWifiHotspotInfo(String ssid) {
+        String macAddress = "12345678";
+        int signalLevel = 1;
+        int channel = 1;
+        int frequency = 1415;
+        WifiSecurity security = WifiSecurity.NONE;
+
+        WifiHotspotInfo wifiHotspotInfo = new WifiHotspotInfo(ssid, macAddress, signalLevel, channel, frequency,
+                security);
+
+        return wifiHotspotInfo;
+    }
+
+    private WifiAccessPointImpl prepareEmptyWap(String ssid) {
+        WifiAccessPointImpl wap = new WifiAccessPointImpl(ssid);
+
+        EnumSet<WifiSecurity> wpaSecurity = EnumSet.noneOf(WifiSecurity.class);
+        wap.setWpaSecurity(wpaSecurity);
+        EnumSet<WifiSecurity> rsnSecurity = EnumSet.noneOf(WifiSecurity.class);
+        wap.setRsnSecurity(rsnSecurity);
+
+        return wap;
+    }
+
+    private WifiAccessPointImpl prepareFilledWap(String ssid) {
+        WifiAccessPointImpl wap = new WifiAccessPointImpl(ssid);
+
+        EnumSet<WifiSecurity> wpaSecurity = EnumSet.of(WifiSecurity.PAIR_TKIP, WifiSecurity.GROUP_WEP40);
+        wap.setWpaSecurity(wpaSecurity);
+        EnumSet<WifiSecurity> rsnSecurity = EnumSet.of(WifiSecurity.GROUP_CCMP, WifiSecurity.KEY_MGMT_PSK);
+        wap.setRsnSecurity(rsnSecurity);
+
+        return wap;
+    }
+
+    @Test
+    public void testSetCiphersWpaSecurity() throws Throwable {
+        // WPA with both pair and group ciphers configured => both used
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        String ssid = "testSSID";
+        WifiHotspotInfo wifiHotspotInfo = prepareWifiHotspotInfo(ssid);
+
+        WifiAccessPointImpl wap = prepareFilledWap(ssid);
+
+        WifiSecurity wifiSecurity = WifiSecurity.SECURITY_WPA;
+
+        TestUtil.invokePrivate(svc, "setCiphers", wifiHotspotInfo, wap, wifiSecurity);
+
+        final EnumSet<WifiSecurity> groups = wifiHotspotInfo.getGroupCiphers();
+        assertNotNull(groups);
+        assertTrue(groups.isEmpty());
+
+        final EnumSet<WifiSecurity> pairs = wifiHotspotInfo.getPairCiphers();
+        assertNotNull(pairs);
+        assertEquals(1, pairs.size());
+        assertEquals(WifiSecurity.PAIR_TKIP, pairs.iterator().next());
+    }
+
+    @Test
+    public void testSetCiphersWpa2Security() throws Throwable {
+        // WPA2 with both pair and group ciphers configured => only group ciphers are used
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        String ssid = "testSSID";
+        WifiHotspotInfo wifiHotspotInfo = prepareWifiHotspotInfo(ssid);
+
+        WifiAccessPointImpl wap = prepareFilledWap(ssid);
+
+        WifiSecurity wifiSecurity = WifiSecurity.SECURITY_WPA2;
+
+        TestUtil.invokePrivate(svc, "setCiphers", wifiHotspotInfo, wap, wifiSecurity);
+
+        final EnumSet<WifiSecurity> groups = wifiHotspotInfo.getGroupCiphers();
+        assertNotNull(groups);
+        assertEquals(1, groups.size());
+        assertEquals(WifiSecurity.GROUP_CCMP, groups.iterator().next());
+
+        final EnumSet<WifiSecurity> pairs = wifiHotspotInfo.getPairCiphers();
+        assertNotNull(pairs);
+        assertTrue(pairs.isEmpty());
+    }
+
+    @Test
+    public void testSetCiphersWpaWpa2Security() throws Throwable {
+        // WPA_WPA2 with both pair and group ciphers configured => only pair ciphers are used
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        String ssid = "testSSID";
+        WifiHotspotInfo wifiHotspotInfo = prepareWifiHotspotInfo(ssid);
+
+        WifiAccessPointImpl wap = prepareFilledWap(ssid);
+
+        WifiSecurity wifiSecurity = WifiSecurity.SECURITY_WPA_WPA2;
+
+        TestUtil.invokePrivate(svc, "setCiphers", wifiHotspotInfo, wap, wifiSecurity);
+
+        final EnumSet<WifiSecurity> groups = wifiHotspotInfo.getGroupCiphers();
+        assertNotNull(groups);
+        assertEquals(1, groups.size());
+        assertEquals(WifiSecurity.GROUP_CCMP, groups.iterator().next());
+
+        final EnumSet<WifiSecurity> pairs = wifiHotspotInfo.getPairCiphers();
+        assertNotNull(pairs);
+        assertEquals(1, pairs.size());
+        assertEquals(WifiSecurity.PAIR_TKIP, pairs.iterator().next());
+
+        System.out.println(pairs.toString());
+    }
+
+    @Test
+    public void testGetWifiSecurityNoSecurity() throws Throwable {
+        // no ciphers allowed => no security
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        String ssid = "testSSID";
+        WifiAccessPointImpl wap = prepareEmptyWap(ssid);
+
+        WifiSecurity result = (WifiSecurity) TestUtil.invokePrivate(svc, "getWifiSecurity", wap);
+
+        assertEquals(WifiSecurity.NONE, result);
+    }
+
+    @Test
+    public void testGetWifiSecurityWrongWep() throws Throwable {
+        // no ciphers and no bad capability => no WEP
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        String ssid = "testSSID";
+        WifiAccessPointImpl wap = prepareEmptyWap(ssid);
+        List<String> capabilities = new ArrayList<>();
+        capabilities.add("WEP Privacy");
+        wap.setCapabilities(capabilities);
+
+        WifiSecurity result = (WifiSecurity) TestUtil.invokePrivate(svc, "getWifiSecurity", wap);
+
+        assertEquals(WifiSecurity.NONE, result);
+    }
+
+    @Test
+    public void testGetWifiSecurityWep() throws Throwable {
+        // no ciphers but Privacy capability => WEP
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        String ssid = "testSSID";
+        WifiAccessPointImpl wap = prepareEmptyWap(ssid);
+        List<String> capabilities = new ArrayList<>();
+        capabilities.add("Privacy");
+        wap.setCapabilities(capabilities);
+
+        WifiSecurity result = (WifiSecurity) TestUtil.invokePrivate(svc, "getWifiSecurity", wap);
+
+        assertEquals(WifiSecurity.SECURITY_WEP, result);
+    }
+
+    @Test
+    public void testGetWifiSecurityWpaWpa2() throws Throwable {
+        // filled values correspond to both WPA and WPA2
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        String ssid = "testSSID";
+        WifiAccessPointImpl wap = prepareFilledWap(ssid);
+
+        WifiSecurity result = (WifiSecurity) TestUtil.invokePrivate(svc, "getWifiSecurity", wap);
+
+        assertEquals(WifiSecurity.SECURITY_WPA_WPA2, result);
+    }
+
+    @Test
+    public void testGetWifiSecurityWpa2() throws Throwable {
+        // only rsn is filled => WPA2, but not WPA
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        String ssid = "testSSID";
+        WifiAccessPointImpl wap = prepareFilledWap(ssid);
+        wap.setWpaSecurity(null);
+
+        WifiSecurity result = (WifiSecurity) TestUtil.invokePrivate(svc, "getWifiSecurity", wap);
+
+        assertEquals(WifiSecurity.SECURITY_WPA2, result);
+    }
+
+    @Test
+    public void testGetWifiSecurityWpa() throws Throwable {
+        // only wpa is filled
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        String ssid = "testSSID";
+        WifiAccessPointImpl wap = prepareFilledWap(ssid);
+        wap.setRsnSecurity(null);
+
+        WifiSecurity result = (WifiSecurity) TestUtil.invokePrivate(svc, "getWifiSecurity", wap);
+
+        assertEquals(WifiSecurity.SECURITY_WPA, result);
+    }
+
+    @Test
+    public void testGetWifiModeEmpty() throws Throwable {
+        // wifi mode with no wifi => unknown
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        List<NetInterfaceAddressConfig> addresses = new ArrayList<>();
+
+        WifiMode result = (WifiMode) TestUtil.invokePrivate(svc, "getWifiMode", new Class[] { List.class }, addresses);
+
+        assertEquals(WifiMode.UNKNOWN, result);
+    }
+
+    @Test
+    public void testGetWifiModeWithWifi() throws Throwable {
+        // return the first configured wifi mode
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        List<WifiInterfaceAddressConfigImpl> addresses = new ArrayList<>();
+        WifiInterfaceAddressConfigImpl iac = new WifiInterfaceAddressConfigImpl();
+        WifiMode mode = WifiMode.INFRA; // this one will be used
+        iac.setMode(mode);
+        addresses.add(iac);
+        iac = new WifiInterfaceAddressConfigImpl();
+        iac.setMode(WifiMode.MASTER);
+        addresses.add(iac);
+
+        WifiMode result = (WifiMode) TestUtil.invokePrivate(svc, "getWifiMode", new Class[] { List.class }, addresses);
+
+        assertEquals(mode, result);
+    }
+
+    @Test
+    public void testGetWifiModeIntf() throws Throwable {
+        // return the first configured wifi mode
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        String interfaceName = "wlan3";
+
+        List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs;
+        NetworkConfigurationService ncsMock = mock(NetworkConfigurationService.class);
+        svc.setNetworkConfigurationService(ncsMock);
+
+        NetworkConfiguration nc = new NetworkConfiguration();
+        when(ncsMock.getNetworkConfiguration()).thenReturn(nc);
+
+        List<WifiInterfaceAddressConfig> addresses = new ArrayList<>();
+        WifiInterfaceAddressConfigImpl iac = new WifiInterfaceAddressConfigImpl();
+        WifiMode mode = WifiMode.INFRA; // this one is to be returned
+        iac.setMode(mode);
+        addresses.add(iac);
+        iac = new WifiInterfaceAddressConfigImpl();
+        iac.setMode(WifiMode.MASTER);
+        addresses.add(iac);
+
+        WifiInterfaceConfigImpl nic = new WifiInterfaceConfigImpl("testwlan3");
+        nc.addNetInterfaceConfig(nic);
+
+        nic = new WifiInterfaceConfigImpl(interfaceName);
+        nic.setNetInterfaceAddresses(addresses);
+        nc.addNetInterfaceConfig(nic);
+
+        WifiMode result = (WifiMode) TestUtil.invokePrivate(svc, "getWifiMode", new Class[] { String.class },
+                interfaceName);
+
+        assertEquals(mode, result);
+    }
+
+    @Test
+    public void testIsHotspotInListEmptyList() throws Throwable {
+        // no hotspots available
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        List<WifiHotspotInfo> list = new ArrayList<>();
+
+        boolean result = (boolean) TestUtil.invokePrivate(svc, "isHotspotInList", 1, "testSSID", list);
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsHotspotInListNotThere() throws Throwable {
+        // the sought hostpot is unavailable
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        List<WifiHotspotInfo> list = new ArrayList<>();
+        WifiHotspotInfo whi1 = prepareWifiHotspotInfo("someSsid");
+        list.add(whi1);
+        WifiHotspotInfo whi2 = prepareWifiHotspotInfo("testSsid");
+        list.add(whi2);
+
+        boolean result = (boolean) TestUtil.invokePrivate(svc, "isHotspotInList", 1, "testSSID", list);
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsHotspotInList() throws Throwable {
+        // it's there...
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        List<WifiHotspotInfo> list = new ArrayList<>();
+        WifiHotspotInfo whi1 = prepareWifiHotspotInfo("someSsid");
+        list.add(whi1);
+        final String ssid = "testSSID";
+        WifiHotspotInfo whi2 = prepareWifiHotspotInfo(ssid);
+        list.add(whi2);
+
+        boolean result = (boolean) TestUtil.invokePrivate(svc, "isHotspotInList", 1, "testSSID", list);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void testGetMacAddress() throws Throwable {
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        byte[] mac = { 10, 11, 12, 13, 14, (byte) 255 };
+
+        String result = (String) TestUtil.invokePrivate(svc, "getMacAddress", mac);
+
+        assertEquals("0A:0B:0C:0D:0E:FF", result);
+    }
+
+    @Test
+    public void testFrequencyToChannel() throws Throwable {
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        int[] freqs = { 0, 2412, 2417, 2422, 2427, 2432, 2437, 2442, 2447, 2452, 2457, 2462 };
+
+        for (int i = 1; i < freqs.length; i++) {
+            int result = (int) TestUtil.invokePrivate(svc, "frequencyMhz2Channel", freqs[i]);
+
+            assertEquals(i, result);
+        }
+    }
+
+    @Test(timeout = 2500)
+    public void testSubmitFirewallConfiguration() throws Throwable {
+        // this is to test that submitFirewallConfiguration works with handleEvent and that timeout won't happen
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
+
+        ConfigurationService csMock = mock(ConfigurationService.class);
+        svc.setConfigurationService(csMock);
+
+        new Thread(() -> {
+            try {
+                Thread.sleep(600);
+            } catch (InterruptedException e) {
+            }
+
+            svc.handleEvent(new FirewallConfigurationChangeEvent(null));
+        }).start();
+
+        TestUtil.invokePrivate(svc, "submitFirewallConfiguration");
+
+        verify(csMock, times(1)).snapshot();
+    }
+
+    // TODO: some heavier refactoring of the implementation
 
 }

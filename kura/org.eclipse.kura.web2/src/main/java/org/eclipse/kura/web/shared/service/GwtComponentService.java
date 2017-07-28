@@ -46,25 +46,6 @@ public interface GwtComponentService extends RemoteService {
     public List<String> findTrackedPids(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     /**
-     * Returns a the list of component configurations. This list is filtered from a set of services that need to be
-     * hidden and not displayed in the "Services" section of the local web ui.
-     * 
-     * @param xsrfToken
-     *            the cross site request forgery token.
-     * @return a list of GwtConfigComponent that represent the GWT Component Configuration that will be rendered in the
-     *         client part of the web ui.
-     * @throws GwtKuraException
-     *             if the XSRF verification fails.
-     * @throws GwtKuraException
-     *             if the Configuration Service cannot be located.
-     * @throws GwtKuraException
-     *             if the list of services that need to be hidden from rendering cannot be filled.
-     * @throws GwtKuraException
-     *             if the list of components registered in the framework cannot be extracted.
-     */
-    public List<GwtConfigComponent> findServicesConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException;
-
-    /**
      * Returns a filtered list of component configurations. This list is named filtered because the configurations of
      * the components tracked are not complete but mapped to the respective component metatype. This means that eventual
      * additional properties of the component that are tracked by the ConfigurationAdmin will not be reflected in the
@@ -118,6 +99,9 @@ public interface GwtComponentService extends RemoteService {
      *             if the component configurations cannot be extracted.
      */
     public List<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    public List<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken, String osgiFilter)
+            throws GwtKuraException;
 
     /**
      * This method returns a list containing the component configuration associated to the specified PID and tracked by
@@ -179,4 +163,5 @@ public interface GwtComponentService extends RemoteService {
      *             if the search operation fails.
      */
     public List<String> getDriverFactoriesList(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
 }

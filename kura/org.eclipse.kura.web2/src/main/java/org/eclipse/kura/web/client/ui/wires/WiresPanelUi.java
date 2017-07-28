@@ -88,7 +88,8 @@ public class WiresPanelUi extends Composite {
     @UiField
     static Modal assetModal;
     @UiField
-    ModalHeader newAssetModalHeader;
+    static ModalHeader newAssetModalHeader;
+
     @UiField
     static Button btnAssetModalYes;
     @UiField
@@ -351,7 +352,6 @@ public class WiresPanelUi extends Composite {
         wiresComponentName.setText(MSGS.wiresComponentName());
         componentName.setPlaceholder(MSGS.wiresComponentNamePlaceholder());
         factoriesButton.setText(MSGS.wiresDriverNew());
-        
         btnAssetModalYes.setText(MSGS.apply());
         btnAssetModalYes.addClickHandler(new ClickHandler() {
 
@@ -435,26 +435,27 @@ public class WiresPanelUi extends Composite {
                         gwtComponentService.createFactoryComponent(token, driverFactoryPid, driverPid,
                                 new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
-
-                            @Override
-                            public void onSuccess(Void result) {
-                                driverPids.addItem(driverPid);
-                                for (int i = 0; i < driverPids.getItemCount(); i++) {
-                                    if (driverPids.getItemText(i).equals(driverPid)) {
-                                        driverPids.setSelectedIndex(i);
+                                    @Override
+                                    public void onFailure(Throwable ex) {
+                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
                                     }
-                                }
-                                WiresPanelUi.this.assetNewDriverModal.hide();
-                            }
-                        });
+
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        driverPids.addItem(driverPid);
+                                        for (int i = 0; i < driverPids.getItemCount(); i++) {
+                                            if (driverPids.getItemText(i).equals(driverPid)) {
+                                                driverPids.setSelectedIndex(i);
+                                            }
+                                        }
+                                        WiresPanelUi.this.assetNewDriverModal.hide();
+                                    }
+                                });
                     }
                 });
             }
+
         });
         this.btnNewDriverModalNo.setText(MSGS.cancelButton());
     }
@@ -830,22 +831,22 @@ public class WiresPanelUi extends Composite {
                     gwtComponentService.findWireComponentConfigurationFromPid(token, pid, factoryPid, temporaryMap,
                             new AsyncCallback<GwtConfigComponent>() {
 
-                        @Override
-                        public void onFailure(final Throwable caught) {
-                            EntryClassUi.hideWaitModal();
-                            FailureHandler.handle(caught);
-                        }
+                                @Override
+                                public void onFailure(final Throwable caught) {
+                                    EntryClassUi.hideWaitModal();
+                                    FailureHandler.handle(caught);
+                                }
 
-                        @Override
-                        public void onSuccess(final GwtConfigComponent result) {
-                            EntryClassUi.hideWaitModal();
-                            // Component configuration retrieved
-                            // from the Configuration Service
-                            fillProperties(result, pid);
-                            configs.put(pid, result);
-                            selectionCompleted();
-                        }
-                    });
+                                @Override
+                                public void onSuccess(final GwtConfigComponent result) {
+                                    EntryClassUi.hideWaitModal();
+                                    // Component configuration retrieved
+                                    // from the Configuration Service
+                                    fillProperties(result, pid);
+                                    configs.put(pid, result);
+                                    selectionCompleted();
+                                }
+                            });
 
                 }
             });
@@ -870,23 +871,23 @@ public class WiresPanelUi extends Composite {
                 gwtComponentService.findComponentConfiguration(token, pid,
                         new AsyncCallback<List<GwtConfigComponent>>() {
 
-                    @Override
-                    public void onFailure(final Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
-                    }
+                            @Override
+                            public void onFailure(final Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
+                            }
 
-                    @Override
-                    public void onSuccess(final List<GwtConfigComponent> components) {
-                        if (!components.isEmpty()) {
-                            final GwtConfigComponent component = components.get(0);
-                            Map<String, Object> props = new HashMap<>();
-                            props.put(DELETED_WIRE_COMPONENT, true);
-                            updateConfiguration(component.getComponentId(), props);
-                        }
-                        EntryClassUi.hideWaitModal();
-                    }
-                });
+                            @Override
+                            public void onSuccess(final List<GwtConfigComponent> components) {
+                                if (!components.isEmpty()) {
+                                    final GwtConfigComponent component = components.get(0);
+                                    Map<String, Object> props = new HashMap<>();
+                                    props.put(DELETED_WIRE_COMPONENT, true);
+                                    updateConfiguration(component.getComponentId(), props);
+                                }
+                                EntryClassUi.hideWaitModal();
+                            }
+                        });
             }
 
         });
@@ -923,8 +924,12 @@ public class WiresPanelUi extends Composite {
 
     public static void showComponentCreationDialog(String factoryPid) {
         if (factoryPid.contains(WiresPanelUi.WIRE_ASSET)) {
+            WiresPanelUi.newAssetModalHeader.setTitle(MSGS.wiresAssetNew());
+            WiresPanelUi.wiresComponentName.setText(MSGS.wiresAssetName());
             WiresPanelUi.driverInstanceForm.setVisible(true);
         } else {
+            WiresPanelUi.newAssetModalHeader.setTitle(MSGS.wiresComponentNew());
+            WiresPanelUi.wiresComponentName.setText(MSGS.wiresComponentName());
             WiresPanelUi.driverInstanceForm.setVisible(false);
         }
         WiresPanelUi.factoryPid.setValue(factoryPid);

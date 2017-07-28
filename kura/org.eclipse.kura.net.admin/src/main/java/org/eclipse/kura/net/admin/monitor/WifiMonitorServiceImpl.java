@@ -163,6 +163,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 this.executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 logger.warn("Interrupted", e);
+                Thread.currentThread().interrupt();
             }
             logger.info("WifiMonitor Thread terminated? - {}", this.executor.isTerminated());
             this.executor = null;
@@ -687,8 +688,8 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                                 monitor();
                                 monitorWait();
                             } catch (InterruptedException interruptedException) {
-                                Thread.interrupted();
                                 logger.debug("WiFi monitor interrupted - {}", interruptedException);
+                                Thread.currentThread().interrupt();
                             } catch (Throwable t) {
                                 logger.error("Exception while monitoring WiFi connection - {}", t);
                             }
@@ -998,6 +999,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         try {
             Thread.sleep(timeToSleep);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 }

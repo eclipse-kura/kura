@@ -44,6 +44,7 @@ import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.linux.net.route.RouteService;
 import org.eclipse.kura.linux.net.util.IScanTool;
 import org.eclipse.kura.linux.net.util.LinkTool;
 import org.eclipse.kura.net.IP4Address;
@@ -61,6 +62,8 @@ import org.eclipse.kura.net.dhcp.DhcpServerCfg;
 import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
+import org.eclipse.kura.net.route.RouteConfig;
+import org.eclipse.kura.net.route.RouteConfigIP4;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiClientMonitorListener;
 import org.eclipse.kura.net.wifi.WifiConfig;
@@ -470,6 +473,8 @@ public class WifiMonitorServiceImplTest {
 
     @Test
     public void testUpdateInterfacesListsEnabled() throws Throwable {
+        // test finding new interfaces to enable
+
         WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl();
 
         String interfaceName = "wlan1";
@@ -483,7 +488,7 @@ public class WifiMonitorServiceImplTest {
 
         NetworkConfiguration nc = new NetworkConfiguration();
         nc.addNetInterfaceConfig(wifiInterfaceConfig);
-        TestUtil.setFieldValue(svc, "newNetConfiguration", nc);
+        TestUtil.setFieldValue(svc, "newNetConfiguration", nc); // add to new configurations - enabled for enabling
 
         TestUtil.invokePrivate(svc, "updateInterfacesLists", interfaces);
 
@@ -498,6 +503,8 @@ public class WifiMonitorServiceImplTest {
 
     @Test
     public void testUpdateInterfacesLists() throws Throwable {
+        // test combination of enabled and disabled interfaces
+
         WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl();
 
         String interfaceName = "wlan0";
@@ -509,10 +516,10 @@ public class WifiMonitorServiceImplTest {
 
         WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiBuilder(interfaceName)
                 .addWifiInterfaceAddressConfig(WifiMode.INFRA)
-                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true).build();
+                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true).build(); // to be enabled
         WifiInterfaceConfigImpl wifiInterfaceConfig2 = new WifiBuilder(interfaceName2)
                 .addWifiInterfaceAddressConfig(WifiMode.INFRA)
-                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusDisabled, true).build();
+                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusDisabled, true).build(); // to be disabled
 
         NetworkConfiguration nc = new NetworkConfiguration();
         nc.addNetInterfaceConfig(wifiInterfaceConfig);
@@ -534,6 +541,8 @@ public class WifiMonitorServiceImplTest {
 
     @Test
     public void testGetReconfiguredWifiInterfaces() throws Throwable {
+        // detect changes and prepare the lists - 1 enabled and 1 disabled interface
+
         WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl() {
 
             @Override
@@ -556,8 +565,9 @@ public class WifiMonitorServiceImplTest {
         String interfaceName3 = "wlan1";
         WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiBuilder(interfaceName)
                 .addWifiInterfaceAddressConfig(WifiMode.INFRA)
+                // enabled -> to be disabled
                 .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true).build();
-        WifiInterfaceConfigImpl wifiInterfaceConfig2 = new WifiBuilder(interfaceName2)
+        WifiInterfaceConfigImpl wifiInterfaceConfig2 = new WifiBuilder(interfaceName2) // to be skipped
                 .addWifiInterfaceAddressConfig(WifiMode.INFRA)
                 .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusDisabled, true).build();
 
@@ -568,10 +578,10 @@ public class WifiMonitorServiceImplTest {
 
         WifiInterfaceConfigImpl wifiInterfaceConfig3 = new WifiBuilder(interfaceName)
                 .addWifiInterfaceAddressConfig(WifiMode.INFRA)
-                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusDisabled, true).build();
+                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusDisabled, true).build(); // to be disabled
         WifiInterfaceConfigImpl wifiInterfaceConfig4 = new WifiBuilder(interfaceName3)
                 .addWifiInterfaceAddressConfig(WifiMode.INFRA)
-                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true).build();
+                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true).build(); // new -> to be enabled
 
         NetworkConfiguration nc2 = new NetworkConfiguration();
         nc2.addNetInterfaceConfig(wifiInterfaceConfig3);
@@ -583,9 +593,9 @@ public class WifiMonitorServiceImplTest {
 
         List<String> list = new ArrayList<>();
         list.add("eth0");
-        list.add("mon0");
-        list.add("wlan0");
-        list.add("wlan1");
+        list.add(interfaceName);
+        list.add(interfaceName2);
+        list.add(interfaceName3);
         when(nsMock.getAllNetworkInterfaceNames()).thenReturn(list);
 
         Collection<String> result = (Collection<String>) TestUtil.invokePrivate(svc, "getReconfiguredWifiInterfaces");
@@ -632,6 +642,8 @@ public class WifiMonitorServiceImplTest {
 
     @Test
     public void testCheckStatusChange() throws Throwable {
+        // test that proper events are sent with appropriate contents
+
         WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl();
 
         String wlan0 = "wlan0";
@@ -682,6 +694,8 @@ public class WifiMonitorServiceImplTest {
 
     @Test
     public void testIsAccessPointAvailableNoScanTool() throws Throwable {
+        // what happens if scan tool is not available? AP is not available
+
         WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl() {
 
             @Override
@@ -697,6 +711,8 @@ public class WifiMonitorServiceImplTest {
 
     @Test
     public void testIsAccessPointAvailableNoStrength() throws Throwable {
+        // what happens if strength is 0? AP is not available
+
         String ssid = "mySSID";
 
         WifiMonitorServiceImpl svc = getServiceWithScanTool(ssid, 0);
@@ -744,6 +760,8 @@ public class WifiMonitorServiceImplTest {
 
     @Test
     public void testIsAccessPointAvailableNegativeStrength() throws Throwable {
+        // negative strength also makes AP available
+
         String ssid = "mySSID";
 
         WifiMonitorServiceImpl svc = getServiceWithScanTool(ssid, -5);
@@ -755,6 +773,8 @@ public class WifiMonitorServiceImplTest {
 
     @Test
     public void testIsAccessPointAvailableWrongSSID() throws Throwable {
+        // if SSID is not correct, AP is not available
+
         String ssid = "mySSID";
 
         WifiMonitorServiceImpl svc = getServiceWithScanTool(ssid, 5);
@@ -766,6 +786,8 @@ public class WifiMonitorServiceImplTest {
 
     @Test
     public void testIsAccessPointAvailable() throws Throwable {
+        // positive strength => AP is available
+
         String ssid = "mySSID";
 
         WifiMonitorServiceImpl svc = getServiceWithScanTool(ssid, 5);
@@ -777,6 +799,8 @@ public class WifiMonitorServiceImplTest {
 
     @Test
     public void testGetSignalLevelNoInterface() throws NoSuchFieldException, UnknownHostException, KuraException {
+        // test with interface status not filled for the selected interface
+
         String wlan1 = "wlan1";
         String ssid = "mySSID";
 
@@ -791,7 +815,36 @@ public class WifiMonitorServiceImplTest {
     }
 
     @Test
+    public void testGetSignalLevelLink() throws NoSuchFieldException, UnknownHostException, KuraException {
+        // signal level != 0 => use link tool strength
+
+        String wlan1 = "wlan1";
+        String ssid = "mySSID";
+
+        LinkTool ltMock = mock(LinkTool.class);
+
+        when(ltMock.get()).thenReturn(true);
+        when(ltMock.isLinkDetected()).thenReturn(true);
+        when(ltMock.getSignal()).thenReturn(5);
+
+        WifiMonitorServiceImpl svc = getServiceWithScanTool(ssid, 0, ltMock);
+
+        Map<String, InterfaceState> stats = new HashMap<>();
+        stats.put(wlan1, new InterfaceState(wlan1, true, true, IPAddress.parseHostAddress("10.10.0.1")));
+
+        TestUtil.setFieldValue(svc, "interfaceStatuses", stats);
+
+        int level = svc.getSignalLevel(wlan1, ssid);
+
+        verify(ltMock, times(1)).getSignal();
+
+        assertEquals(5, level);
+    }
+
+    @Test
     public void testGetSignalLevelNegativeStrength() throws NoSuchFieldException, UnknownHostException, KuraException {
+        // strength of the selected interface is negative => signal level remains 0
+
         String wlan1 = "wlan1";
         String ssid = "mySSID";
 
@@ -817,6 +870,9 @@ public class WifiMonitorServiceImplTest {
 
     @Test
     public void testGetSignalLevel() throws NoSuchFieldException, UnknownHostException, KuraException {
+        // XXX: LinkTool and ScanTool return differently signed strengths - intentionally?
+        // positive signal level => if link tool returns 0, strength is inverted
+
         String wlan1 = "wlan1";
         String ssid = "mySSID";
 
@@ -838,6 +894,160 @@ public class WifiMonitorServiceImplTest {
         verify(ltMock, times(1)).getSignal();
 
         assertEquals(-5, level);
+    }
+
+    @Test
+    public void testIsAccessPointReachable() throws Throwable {
+        // test if a host is reachable, but the final call is not mocked
+
+        String interfaceName = "wlan1";
+
+        RouteService rsMock = mock(RouteService.class);
+
+        IP4Address destination = (IP4Address) IP4Address.parseHostAddress("10.10.2.0");
+        IP4Address gateway = (IP4Address) IP4Address.parseHostAddress("10.10.0.200");
+        IP4Address netmask = (IP4Address) IP4Address.parseHostAddress("255.255.255.0");
+        int metric = 1;
+        RouteConfig route = new RouteConfigIP4(destination, gateway, netmask, interfaceName, metric);
+        when(rsMock.getDefaultRoute(interfaceName)).thenReturn(route);
+
+        WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl() {
+
+            @Override
+            protected RouteService getRouteService() {
+                return rsMock;
+            }
+        };
+
+        int timeout = 100;
+
+        boolean result = (boolean) TestUtil.invokePrivate(svc, "isAccessPointReachable", interfaceName, timeout);
+
+        // will likely be false, but let's not presume it - concrete implementation is called
+        // we should be satisfied that no exception was thrown
+    }
+
+    @Test
+    public void testMonitor() throws Throwable {
+        // only makes part of the method traversal easier - can hardly avoid native calls... check nothing, in the end
+
+        WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl() {
+
+            @Override
+            protected NetInterfaceType getNetworkType(String interfaceName) throws KuraException {
+                NetInterfaceType type = NetInterfaceType.UNKNOWN;
+                if ("eth0".equals(interfaceName)) {
+                    type = NetInterfaceType.ETHERNET;
+                } else if (interfaceName.startsWith("wlan")) {
+                    type = NetInterfaceType.WIFI;
+                } else if ("mon0".equals(interfaceName)) {
+                    type = NetInterfaceType.WIFI;
+                }
+
+                return type;
+            }
+        };
+
+        String interfaceName = "wlan3";
+
+        WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiBuilder(interfaceName)
+                .addWifiInterfaceAddressConfig(WifiMode.INFRA)
+                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true)
+                .addWifiConfig("testDdriver", WifiMode.INFRA) // don't add this - calls a native binary
+                .build();
+
+        NetworkConfiguration nc = new NetworkConfiguration();
+        nc.addNetInterfaceConfig(wifiInterfaceConfig);
+        TestUtil.setFieldValue(svc, "newNetConfiguration", nc);
+
+        NetworkService nsMock = mock(NetworkService.class);
+        svc.setNetworkService(nsMock);
+
+        List<String> list = new ArrayList<>();
+        list.add("eth4");
+        list.add(interfaceName);
+        when(nsMock.getAllNetworkInterfaceNames()).thenReturn(list);
+
+        NetworkAdminService naMock = mock(NetworkAdminService.class);
+        svc.setNetworkAdminService(naMock);
+
+        EventAdmin eaMock = mock(EventAdmin.class);
+        svc.setEventAdmin(eaMock);
+
+        TestUtil.invokePrivate(svc, "monitor");
+
+        verify(nsMock, times(1)).getAllNetworkInterfaceNames();
+        verify(naMock, times(1)).disableInterface(interfaceName);
+        verify(eaMock, times(1)).postEvent(anyObject());
+    }
+
+    @Test
+    public void testIsWifiReady() throws Throwable {
+        // we expect the device to be on
+
+        WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl() {
+
+            @Override
+            protected boolean isWifiDeviceOn(String interfaceName) {
+                return true;
+            }
+        };
+
+        String interfaceName = "wlan0";
+        boolean expected = true;
+        int timeout = 100;
+
+        boolean ready = (boolean) TestUtil.invokePrivate(svc, "isWifiDeviceReady", interfaceName, expected, timeout);
+
+        assertTrue(ready);
+    }
+
+    @Test
+    public void testIsWifiReadyDiff() throws Throwable {
+        // we expect the device to be off
+
+        WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl() {
+
+            @Override
+            protected boolean isWifiDeviceOn(String interfaceName) {
+                return true;
+            }
+        };
+
+        String interfaceName = "wlan0";
+        boolean expected = false;
+        int timeout = 1;
+
+        boolean ready = (boolean) TestUtil.invokePrivate(svc, "isWifiDeviceReady", interfaceName, expected, timeout);
+
+        assertFalse(ready);
+    }
+
+    @Test
+    public void testIsWifiReadyDiffMulti() throws Throwable {
+        // we expect the device to be off
+
+        AtomicInteger cnt = new AtomicInteger(0);
+
+        WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl() {
+
+            @Override
+            protected boolean isWifiDeviceOn(String interfaceName) {
+                if (cnt.getAndIncrement() < 1) {
+                    return true;
+                }
+                return false;
+            }
+        };
+
+        String interfaceName = "wlan0";
+        boolean expected = false;
+        int timeout = 2;
+
+        boolean ready = (boolean) TestUtil.invokePrivate(svc, "isWifiDeviceReady", interfaceName, expected, timeout);
+
+        assertTrue(ready);
+        assertEquals(2, cnt.get());
     }
 
 }

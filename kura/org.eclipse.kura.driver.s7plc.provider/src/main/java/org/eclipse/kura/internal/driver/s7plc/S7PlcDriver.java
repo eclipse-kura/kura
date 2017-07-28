@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.channel.ChannelRecord;
+import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.block.BlockFactory;
@@ -56,7 +57,7 @@ import Moka7.S7Client;
  * @see S7PlcChannelDescriptor
  * @see S7PlcOptions
  */
-public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> {
+public final class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(S7PlcDriver.class);
 

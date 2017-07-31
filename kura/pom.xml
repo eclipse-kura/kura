@@ -97,7 +97,7 @@
         <sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 
         <!-- BND baseline plugin -->
-        <bnd.baseline.version>3.4.0-SNAPSHOT</bnd.baseline.version>
+        <bnd.baseline.version>3.4.0</bnd.baseline.version>
         <bnd.baseline.continueOnError>false</bnd.baseline.continueOnError>
 
         <kura.skip.can>true</kura.skip.can>
@@ -276,21 +276,6 @@
             <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
         </repository>
     </repositories>
-
-    <!--
-        See Github issue #1726
-        https://github.com/bndtools/bnd/issues/1726
-    -->
-    <pluginRepositories>
-        <pluginRepository>
-            <id>bnd-snapshots</id>
-            <url>https://bndtools.ci.cloudbees.com/job/bnd.master/lastSuccessfulBuild/artifact/dist/bundles/</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
 
     <build>
         <extensions>

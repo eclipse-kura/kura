@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -46,20 +46,7 @@ public abstract class IPAddress {
      */
     public static IPAddress getByAddress(byte[] addr) throws UnknownHostException {
         IPAddress result = null;
-        java.net.InetAddress jnetAddr = null;
-        if (addr.length == 16) {
-            StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < 16; i = i + 2) {
-                sb.append(Integer.toHexString(0xFF & addr[i]));
-                sb.append(Integer.toHexString(0xFF & addr[i + 1]));
-                if (i != 14) {
-                    sb.append(":");
-                }
-            }
-            jnetAddr = java.net.InetAddress.getByName(sb.toString());
-        } else {
-            jnetAddr = java.net.InetAddress.getByAddress(addr);
-        }
+        java.net.InetAddress jnetAddr = java.net.InetAddress.getByAddress(addr);
         if (jnetAddr instanceof java.net.Inet4Address) {
             result = new IP4Address(addr, jnetAddr);
         } else if (jnetAddr instanceof java.net.Inet6Address) {

@@ -849,14 +849,13 @@ public class NetworkConfiguration {
         // passphrase
         key = prefix + ".passphrase";
         Object psswdObj = properties.get(key);
-        Password psswd = null;
+        String passphrase = null;
         if (psswdObj instanceof Password) {
-            psswd = (Password) psswdObj;
+            Password psswd = (Password) psswdObj;
+            passphrase = new String(psswd.getPassword());
         } else if (psswdObj instanceof String) {
-            char[] tempPsswd = ((String) psswdObj).toCharArray();
-            psswd = new Password(tempPsswd);
+            passphrase = (String) psswdObj;
         }
-        String passphrase = new String(psswd.getPassword());
 
         logger.trace("passphrase is {}", passphrase);
         wifiConfig.setPasskey(passphrase);
@@ -2141,6 +2140,9 @@ public class NetworkConfiguration {
 
             if (!dhcp6Enabled) {
                 // ip6
+                netConfigIP6 = new NetConfigIP6(NetInterfaceStatus.valueOf(configStatus6), autoConnect, dhcp6Enabled);
+                netConfigs.add(netConfigIP6);
+
                 String configIp6 = "net.interface." + interfaceName + ".config.ip6.address";
                 if (props.containsKey(configIp6)) {
                     // FIXME: netConfigIP6 == null

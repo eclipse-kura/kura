@@ -49,12 +49,10 @@
             </b:Panel>
         </b:Row>
         <b:Row>
-            <b:Column size="MD_3">
-                <b:Panel ui:field="driversAndAssetsList" />
-            </b:Column>
-            <b:Column size="MD_9">
-                <b:Panel ui:field="driversAndAssetsMgmtPanel" />
-            </b:Column>
+            <b:Panel ui:field="driversAndAssetsList" />
+        </b:Row>
+        <b:Row>
+            <b:Panel ui:field="driversAndAssetsMgmtPanel" />
         </b:Row>
 
         <b:Modal closable="true" dataKeyboard="true" ui:field="newDriverModal">

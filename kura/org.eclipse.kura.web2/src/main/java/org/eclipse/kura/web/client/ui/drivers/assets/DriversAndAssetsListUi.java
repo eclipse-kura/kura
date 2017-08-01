@@ -19,6 +19,7 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.eclipse.kura.web.shared.model.GwtDriverAssetInfo;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtAssetService;
 import org.eclipse.kura.web.shared.service.GwtAssetServiceAsync;
@@ -26,21 +27,23 @@ import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtWireService;
-import org.eclipse.kura.web.shared.service.GwtWireServiceAsync;
-import org.gwtbootstrap3.client.ui.Anchor;
 import org.gwtbootstrap3.client.ui.Panel;
+import org.gwtbootstrap3.client.ui.gwt.CellTable;
 
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.DefaultHeaderOrFooterBuilder;
+import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Tree;
-import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 public class DriversAndAssetsListUi extends Composite {
 
@@ -54,20 +57,144 @@ public class DriversAndAssetsListUi extends Composite {
 
     private static final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
     private static final GwtAssetServiceAsync gwtAssetService = GWT.create(GwtAssetService.class);
-    private static final GwtWireServiceAsync gwtWireService = GWT.create(GwtWireService.class);
     private static final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+
+    private final ListDataProvider<GwtDriverAssetInfo> driversAssetsDataProvider = new ListDataProvider<>();
+    private final SingleSelectionModel<GwtDriverAssetInfo> selectionModel = new SingleSelectionModel<>();
+
+    private final Panel driversAndAssetsMgmtPanel;
 
     private DriverConfigUi driverConfigUi;
     private AssetMgmtUi assetMgmtUi;
 
-    private final Panel driversAndAssetsMgmtPanel;
-
     @UiField
-    Tree driversTree;
+    Label emptyListLabel;
+    @UiField
+    CellTable<GwtDriverAssetInfo> driversAssetsListTable;
 
     public DriversAndAssetsListUi(Panel driversAndAssetsMgmtPanel) {
         initWidget(uiBinder.createAndBindUi(this));
         this.driversAndAssetsMgmtPanel = driversAndAssetsMgmtPanel;
+
+        this.driversAssetsListTable.setSelectionModel(this.selectionModel);
+        this.driversAssetsDataProvider.addDataDisplay(this.driversAssetsListTable);
+
+        this.emptyListLabel.setText(MSGS.noDriversAvailable());
+
+        initTable();
+
+        this.selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                final GwtDriverAssetInfo selectedInstanceEntry = DriversAndAssetsListUi.this.selectionModel
+                        .getSelectedObject();
+
+                if (selectedInstanceEntry.getType().equals("Driver")) {
+                    gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+                        @Override
+                        public void onFailure(Throwable ex) {
+                            FailureHandler.handle(ex, EntryClassUi.class.getName());
+                        }
+
+                        @Override
+                        public void onSuccess(GwtXSRFToken token) {
+                            gwtComponentService.findFilteredComponentConfiguration(token,
+                                    selectedInstanceEntry.getInstancePid(),
+                                    new AsyncCallback<List<GwtConfigComponent>>() {
+
+                                @Override
+                                public void onFailure(Throwable ex) {
+                                    logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                    FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                }
+
+                                @Override
+                                public void onSuccess(List<GwtConfigComponent> result) {
+                                    cleanConfigurationArea();
+                                    for (GwtConfigComponent configuration : result) {
+                                        DriversAndAssetsListUi.this.driverConfigUi = new DriverConfigUi(configuration);
+                                        DriversAndAssetsListUi.this.driversAndAssetsMgmtPanel
+                                                .add(DriversAndAssetsListUi.this.driverConfigUi);
+                                        DriversAndAssetsListUi.this.driverConfigUi.renderForm();
+                                    }
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    final String assetPid = selectedInstanceEntry.getInstancePid().substring(3);
+                    gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+                        @Override
+                        public void onFailure(Throwable ex) {
+                            FailureHandler.handle(ex, EntryClassUi.class.getName());
+                        }
+
+                        @Override
+                        public void onSuccess(GwtXSRFToken token) {
+                            gwtComponentService.findFilteredComponentConfiguration(token, assetPid,
+                                    new AsyncCallback<List<GwtConfigComponent>>() {
+
+                                @Override
+                                public void onFailure(Throwable ex) {
+                                    logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                    FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                }
+
+                                @Override
+                                public void onSuccess(List<GwtConfigComponent> result) {
+                                    cleanConfigurationArea();
+
+                                    for (GwtConfigComponent configuration : result) {
+                                        DriversAndAssetsListUi.this.assetMgmtUi = new AssetMgmtUi(configuration);
+                                        DriversAndAssetsListUi.this.driversAndAssetsMgmtPanel
+                                                .add(DriversAndAssetsListUi.this.assetMgmtUi);
+                                        DriversAndAssetsListUi.this.assetMgmtUi.refresh();
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void initTable() {
+        this.driversAssetsListTable.setHeaderBuilder(
+                new DefaultHeaderOrFooterBuilder<GwtDriverAssetInfo>(this.driversAssetsListTable, false));
+
+        final Column<GwtDriverAssetInfo, String> c2 = new Column<GwtDriverAssetInfo, String>(new TextCell()) {
+
+            @Override
+            public String getValue(final GwtDriverAssetInfo object) {
+                return object.getInstancePid();
+            }
+        };
+
+        this.driversAssetsListTable.addColumn(c2, new TextHeader(MSGS.servicePidLabel()));
+
+        final Column<GwtDriverAssetInfo, String> c3 = new Column<GwtDriverAssetInfo, String>(new TextCell()) {
+
+            @Override
+            public String getValue(final GwtDriverAssetInfo object) {
+                return object.getType();
+            }
+        };
+
+        this.driversAssetsListTable.addColumn(c3, new TextHeader(MSGS.typeLabel()));
+
+        final Column<GwtDriverAssetInfo, String> c4 = new Column<GwtDriverAssetInfo, String>(new TextCell()) {
+
+            @Override
+            public String getValue(final GwtDriverAssetInfo object) {
+                return object.getFactoryPid();
+            }
+        };
+
+        this.driversAssetsListTable.addColumn(c4, new TextHeader(MSGS.factoryPidLabel()));
     }
 
     public void refresh() {
@@ -83,8 +210,7 @@ public class DriversAndAssetsListUi extends Composite {
 
             @Override
             public void onSuccess(final GwtXSRFToken token) {
-                // load the drivers
-                gwtWireService.getDriverInstances(token, new AsyncCallback<List<String>>() {
+                gwtAssetService.getDriverAssetInstances(token, new AsyncCallback<List<GwtDriverAssetInfo>>() {
 
                     @Override
                     public void onFailure(final Throwable caught) {
@@ -93,38 +219,22 @@ public class DriversAndAssetsListUi extends Composite {
                     }
 
                     @Override
-                    public void onSuccess(final List<String> result) {
-                        DriversAndAssetsListUi.this.driversTree.clear();
-
+                    public void onSuccess(final List<GwtDriverAssetInfo> result) {
                         if (result.isEmpty()) {
-                            TreeItem root = new TreeItem();
-                            root.setText(MSGS.noDriversAvailable());
-                            DriversAndAssetsListUi.this.driversTree.addItem(root);
+                            DriversAndAssetsListUi.this.emptyListLabel.setVisible(true);
+                            DriversAndAssetsListUi.this.driversAssetsListTable.setVisible(false);
                         } else {
-                            for (String tempDriverPid : result) {
-                                Anchor driverConfigAnchor = initDriverConfigButton(tempDriverPid);
-                                final TreeItem driverRoot = new TreeItem(driverConfigAnchor);
-                                DriversAndAssetsListUi.this.driversTree.addItem(driverRoot);
+                            DriversAndAssetsListUi.this.emptyListLabel.setVisible(false);
+                            DriversAndAssetsListUi.this.driversAssetsListTable.setVisible(true);
 
-                                gwtAssetService.getAssetInstancesByDriverPid(tempDriverPid,
-                                        new AsyncCallback<List<String>>() {
+                            DriversAndAssetsListUi.this.driversAssetsDataProvider.getList().clear();
+                            DriversAndAssetsListUi.this.driversAssetsDataProvider.getList().addAll(result);
+                            DriversAndAssetsListUi.this.driversAssetsDataProvider.refresh();
 
-                                    @Override
-                                    public void onFailure(final Throwable caught) {
-                                        EntryClassUi.hideWaitModal();
-                                        FailureHandler.handle(caught);
-                                    }
+                            int size = DriversAndAssetsListUi.this.driversAssetsDataProvider.getList().size();
+                            DriversAndAssetsListUi.this.driversAssetsListTable.setVisibleRange(0, size);
+                            DriversAndAssetsListUi.this.driversAssetsListTable.redraw();
 
-                                    @Override
-                                    public void onSuccess(final List<String> result) {
-                                        for (String twinPid : result) {
-                                            Anchor assetMgmtAnchor = initAssetMgmtButton(twinPid);
-                                            final TreeItem assetRoot = new TreeItem(assetMgmtAnchor);
-                                            driverRoot.addItem(assetRoot);
-                                        }
-                                    }
-                                });
-                            }
                         }
                         cleanConfigurationArea();
                         EntryClassUi.hideWaitModal();
@@ -139,98 +249,6 @@ public class DriversAndAssetsListUi extends Composite {
         this.driversAndAssetsMgmtPanel.clear();
         this.driverConfigUi = null;
         this.assetMgmtUi = null;
-    }
-
-    private Anchor initDriverConfigButton(final String driverPid) {
-        Anchor showDriverConfigAnchor = new Anchor();
-        showDriverConfigAnchor.setText(driverPid);
-        showDriverConfigAnchor.setTitle(driverPid);
-        showDriverConfigAnchor.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        gwtComponentService.findFilteredComponentConfiguration(token, driverPid,
-                                new AsyncCallback<List<GwtConfigComponent>>() {
-
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
-
-                            @Override
-                            public void onSuccess(List<GwtConfigComponent> result) {
-                                cleanConfigurationArea();
-                                for (GwtConfigComponent configuration : result) {
-                                    DriversAndAssetsListUi.this.driverConfigUi = new DriverConfigUi(configuration);
-                                    DriversAndAssetsListUi.this.driversAndAssetsMgmtPanel
-                                            .add(DriversAndAssetsListUi.this.driverConfigUi);
-                                    DriversAndAssetsListUi.this.driverConfigUi.renderForm();
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-        });
-
-        return showDriverConfigAnchor;
-    }
-
-    private Anchor initAssetMgmtButton(final String assetPid) {
-        Anchor showAssetConfigAnchor = new Anchor();
-        showAssetConfigAnchor.setText(assetPid);
-        showAssetConfigAnchor.setTitle(assetPid);
-        showAssetConfigAnchor.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        gwtComponentService.findFilteredComponentConfiguration(token, assetPid,
-                                new AsyncCallback<List<GwtConfigComponent>>() {
-
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
-
-                            @Override
-                            public void onSuccess(List<GwtConfigComponent> result) {
-                                cleanConfigurationArea();
-
-                                for (GwtConfigComponent configuration : result) {
-
-                                    DriversAndAssetsListUi.this.assetMgmtUi = new AssetMgmtUi(configuration);
-                                    DriversAndAssetsListUi.this.driversAndAssetsMgmtPanel
-                                    .add(DriversAndAssetsListUi.this.assetMgmtUi);
-                                    DriversAndAssetsListUi.this.assetMgmtUi.refresh();
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-        });
-
-        return showAssetConfigAnchor;
     }
 
     public boolean isDirty() {

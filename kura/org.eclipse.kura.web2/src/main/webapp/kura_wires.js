@@ -187,7 +187,7 @@ var kuraWires = (function() {
 			paper = new joint.dia.Paper({
 				el : $('#wires-graph'),
 				width : '100%',
-				height : 400,
+				height : '100%',
 				model : graph,
 				gridSize : 20,
 				snapLinks : true,

@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtChannelData;
+import org.eclipse.kura.web.shared.model.GwtDriverAssetInfo;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -38,6 +39,8 @@ public interface GwtAssetService extends RemoteService {
             throws GwtKuraException;
 
     public List<String> getAssetInstances(final GwtXSRFToken xsrfToken) throws GwtKuraException;
+    
+    public List<GwtDriverAssetInfo> getDriverAssetInstances(final GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     public List<String> getAssetInstancesByDriverPid(final String driverPid) throws GwtKuraException;
 }

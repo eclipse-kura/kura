@@ -19,6 +19,10 @@
     	padding-right: 0px;
     }
     
+    .wire-components-list-elems {
+    	height: 60vh;
+    }
+    
     .asset-comp-modal-header {
     	display: none;
     }
@@ -65,7 +69,9 @@
                             </b:PanelHeader>
                             <b:PanelBody>
                                 <g:ScrollPanel>
-                                    <b:NavPills stacked="true" ui:field="wireComponentsMenu" />
+                                    <b:Panel addStyleNames="{style.wire-components-list-elems}">
+                                        <b:NavPills stacked="true" ui:field="wireComponentsMenu" />
+                                    </b:Panel>
                                 </g:ScrollPanel>
                             </b:PanelBody>
                         </b:Panel>
@@ -93,7 +99,8 @@
                 </b:Form>
             </b:ModalBody>
             <b:ModalFooter>
-                <b:Button addStyleNames="fa" b:id="btn-select-asset-cancel" type="PRIMARY" dataDismiss="MODAL" ui:field="buttonSelectAssetCancel" />
+                <b:Button addStyleNames="fa" b:id="btn-select-asset-cancel" type="PRIMARY" dataDismiss="MODAL"
+                    ui:field="buttonSelectAssetCancel" />
                 <b:Button addStyleNames="fa" type="PRIMARY" ui:field="buttonNewAsset" />
                 <b:Button addStyleNames="fa" type="PRIMARY" ui:field="buttonSelectAssetOk" />
             </b:ModalFooter>

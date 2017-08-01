@@ -53,8 +53,7 @@ public class ConfigurationAreaUi extends Composite {
     private final boolean isWireAsset;
     private final GwtConfigComponent configurableComponent;
     private final String pid;
-private final WiresPanelUi parent;
-    
+
     private GenericWireComponentUi genericWireComponentUi;
     private AssetConfigurationUi assetWireComponentUi;
     private boolean initialized;
@@ -68,11 +67,9 @@ private final WiresPanelUi parent;
     @UiField
     TabPane tab2Pane;
 
-
     public ConfigurationAreaUi(final GwtConfigComponent addedItem, final String pid, final WiresPanelUi parent) {
         initWidget(uiBinder.createAndBindUi(this));
         this.initialized = false;
-        this.parent = parent;
 
         this.pid = pid;
         this.configurableComponent = addedItem;
@@ -104,7 +101,8 @@ private final WiresPanelUi parent;
                         @Override
                         public void onSuccess(List<GwtConfigComponent> result) {
                             for (GwtConfigComponent pair : result) {
-                                ConfigurationAreaUi.this.genericWireComponentUi = new GenericWireComponentUi(pair, parent);
+                                ConfigurationAreaUi.this.genericWireComponentUi = new GenericWireComponentUi(pair,
+                                        parent);
                             }
 
                             ConfigurationAreaUi.this.assetWireComponentUi = new AssetConfigurationUi(

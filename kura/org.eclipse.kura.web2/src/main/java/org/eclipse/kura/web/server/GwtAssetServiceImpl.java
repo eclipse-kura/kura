@@ -23,6 +23,7 @@ import java.util.Base64.Decoder;
 
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.channel.ChannelRecord;
+import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
@@ -31,6 +32,7 @@ import org.eclipse.kura.web.server.util.ServiceLocator.ServiceConsumer;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtChannelData;
+import org.eclipse.kura.web.shared.model.GwtDriverAssetInfo;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtAssetService;
 import org.osgi.framework.ServiceReference;
@@ -164,6 +166,39 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
             }
         }
         return assets;
+    }
+    
+    /** {@inheritDoc} */
+    @Override
+    public List<GwtDriverAssetInfo> getDriverAssetInstances(final GwtXSRFToken xsrfToken) throws GwtKuraException {
+        this.checkXSRFToken(xsrfToken);
+        List<GwtDriverAssetInfo> driverAssetInfoList = new ArrayList<>();
+        
+        final Collection<ServiceReference<Driver>> refs = ServiceLocator.getInstance()
+                .getServiceReferences(Driver.class, null);
+        
+        for (final ServiceReference<Driver> driverRef : refs) {
+            String driverPid = String.valueOf(driverRef.getProperty(KURA_SERVICE_PID));
+            GwtDriverAssetInfo driverInfo = new GwtDriverAssetInfo();
+            driverInfo.setInstancePid(driverPid);
+            driverInfo.setType("Driver");
+            driverInfo.setFactoryPid(String.valueOf(driverRef.getProperty("service.factoryPid")));
+            driverAssetInfoList.add(driverInfo);
+            
+            final Collection<ServiceReference<Asset>> assetRefs = ServiceLocator.getInstance().getServiceReferences(Asset.class,
+                    null);
+            for (final ServiceReference<Asset> assetRef : assetRefs) {
+                if (driverPid.equals(assetRef.getProperty("driver.pid"))) {
+                    GwtDriverAssetInfo assetInfo = new GwtDriverAssetInfo();
+                    assetInfo.setInstancePid(String.valueOf("-> " + assetRef.getProperty(KURA_SERVICE_PID)));
+                    assetInfo.setType("Asset");
+                    assetInfo.setFactoryPid(String.valueOf(assetRef.getProperty("service.factoryPid")));
+                    driverAssetInfoList.add(assetInfo);
+                }
+            }
+        }
+        
+        return driverAssetInfoList;
     }
 
 }

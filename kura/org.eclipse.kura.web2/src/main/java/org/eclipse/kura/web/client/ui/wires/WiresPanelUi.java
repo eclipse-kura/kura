@@ -260,7 +260,6 @@ public class WiresPanelUi extends Composite {
     private String wireConfigsJson;
     private String wires;
     private GwtConfigComponent currentSelection = null;
-    private ConfigurationAreaUi configurationAreaUi;
 
     private boolean panelLoaded = false;
 
@@ -275,7 +274,6 @@ public class WiresPanelUi extends Composite {
         initButtons();
         initComposer();
         initAssetModal();
-        initNewDriverModal();
         initComponentDeleteModal();
         initSaveModal();
         initGraphDeleteModal();
@@ -834,24 +832,25 @@ public class WiresPanelUi extends Composite {
 
     public void render(final GwtConfigComponent item, String pid) {
         refreshTrackedConfigs();
+        ConfigurationAreaUi configurationAreaUi;
 
         if (item != null) {
             WiresPanelUi.configurationRow.clear();
 
             if (!this.propertiesUis.containsKey(pid)) {
-                this.configurationAreaUi = new ConfigurationAreaUi(item, pid, this);
-                this.propertiesUis.put(pid, this.configurationAreaUi);
+                configurationAreaUi = new ConfigurationAreaUi(item, pid, this);
+                propertiesUis.put(pid, configurationAreaUi);
             } else {
-                this.configurationAreaUi = this.propertiesUis.get(pid);
+                configurationAreaUi = this.propertiesUis.get(pid);
             }
             WiresPanelUi.configurationRow.setVisible(true);
             if (pid == null) {
                 pid = "";
             }
 
-            this.configurationAreaUi.render();
+            configurationAreaUi.render();
             this.currentSelection = item;
-            WiresPanelUi.configurationRow.add(this.configurationAreaUi);
+            WiresPanelUi.configurationRow.add(configurationAreaUi);
         } else {
             deselectComponent();
         }

@@ -167,6 +167,11 @@ public class EntryClassUi extends Composite {
     private static final String SIDENAV_HIDDEN_STYLE_NAME = "sidenav-hidden";
     private static final String SELECTED_ANCHOR_LIST_ITEM_STYLE_NAME = "selected-item";
     private static final String NOT_SCROLLABLE_STYLE_NAME = "not-scrollable";
+    private static final String SERVICES_FILTER = FilterBuilder.of(not(or("service.pid=*SystemPropertiesService",
+            "service.pid=*NetworkAdminService", "service.pid=*NetworkConfigurationService",
+            "service.pid=*SslManagerService", "service.pid=*FirewallConfigurationService", "service.pid=*WireService",
+            "objectClass=org.eclipse.kura.wire.WireComponent", "objectClass=org.eclipse.kura.driver.Driver",
+            "kura.ui.service.hide=true")));
 
     private static PopupPanel waitModal;
 
@@ -182,11 +187,6 @@ public class EntryClassUi extends Composite {
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
-    private static String SERVICES_FILTER = FilterBuilder.of(not(or("service.pid=*SystemPropertiesService",
-            "service.pid=*NetworkAdminService", "service.pid=*NetworkConfigurationService",
-            "service.pid=*SslManagerService", "service.pid=*FirewallConfigurationService", "service.pid=*WireService",
-            "objectClass=org.eclipse.kura.wire.WireComponent", "objectClass=org.eclipse.kura.driver.Driver",
-            "kura.ui.service.hide=true")));
 
     private final KeyUpHandler searchBoxChangeHandler = new KeyUpHandler() {
 
@@ -597,25 +597,25 @@ public class EntryClassUi extends Composite {
                 EntryClassUi.this.gwtComponentService.findComponentConfigurations(token, SERVICES_FILTER,
                         new AsyncCallback<List<GwtConfigComponent>>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                    }
 
-                            @Override
-                            public void onSuccess(List<GwtConfigComponent> result) {
-                                sortConfigurationsByName(result);
-                                EntryClassUi.this.servicesMenu.clear();
-                                for (GwtConfigComponent pair : result) {
-                                    if (!pair.isWireComponent()) {
-                                        EntryClassUi.this.servicesMenu
-                                                .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
-                                    }
-                                }
-                                filterAvailableServices(EntryClassUi.this.textSearch.getValue());
+                    @Override
+                    public void onSuccess(List<GwtConfigComponent> result) {
+                        sortConfigurationsByName(result);
+                        EntryClassUi.this.servicesMenu.clear();
+                        for (GwtConfigComponent pair : result) {
+                            if (!pair.isWireComponent()) {
+                                EntryClassUi.this.servicesMenu
+                                        .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
                             }
-                        });
+                        }
+                        filterAvailableServices(EntryClassUi.this.textSearch.getValue());
+                    }
+                });
             }
         });
     }
@@ -644,22 +644,22 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.gwtComponentService.findFactoryComponents(token,
                                 new AsyncCallback<List<String>>() {
 
-                                    @Override
-                                    public void onFailure(Throwable ex) {
-                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                                    }
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                FailureHandler.handle(ex, EntryClassUi.class.getName());
+                            }
 
-                                    @Override
-                                    public void onSuccess(final List<String> result) {
-                                        EntryClassUi.this.factoriesList.clear();
-                                        EntryClassUi.this.factoriesList.addItem(SELECT_COMPONENT);
-                                        for (final String servicePid : result) {
-                                            EntryClassUi.this.factoriesList.addItem(servicePid);
-                                        }
-                                        EntryClassUi.this.newFactoryComponentModal.show();
-                                    }
-                                });
+                            @Override
+                            public void onSuccess(final List<String> result) {
+                                EntryClassUi.this.factoriesList.clear();
+                                EntryClassUi.this.factoriesList.addItem(SELECT_COMPONENT);
+                                for (final String servicePid : result) {
+                                    EntryClassUi.this.factoriesList.addItem(servicePid);
+                                }
+                                EntryClassUi.this.newFactoryComponentModal.show();
+                            }
+                        });
                     }
                 });
             }
@@ -699,17 +699,17 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.gwtComponentService.createFactoryComponent(token, factoryPid, pid,
                                 new AsyncCallback<Void>() {
 
-                                    @Override
-                                    public void onFailure(Throwable ex) {
-                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                                    }
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                FailureHandler.handle(ex, EntryClassUi.class.getName());
+                            }
 
-                                    @Override
-                                    public void onSuccess(Void result) {
-                                        fetchAvailableServices();
-                                    }
-                                });
+                            @Override
+                            public void onSuccess(Void result) {
+                                fetchAvailableServices();
+                            }
+                        });
                     }
                 });
             }

@@ -262,38 +262,34 @@ public class AssetConfigurationUi extends AbstractServicesUi {
                             AssetConfigurationUi.this.gwtXSRFService
                                     .generateSecurityToken(new BaseAsyncCallback<GwtXSRFToken>() {
 
+                                @Override
+                                public void onSuccess(final GwtXSRFToken result) {
+                                    AssetConfigurationUi.this.gwtWireService.getGwtChannelDescriptor(result,
+                                            AssetConfigurationUi.this.configurableComponent
+                                                    .get(AssetConstants.ASSET_DRIVER_PROP.value()).toString(),
+                                            new BaseAsyncCallback<GwtConfigComponent>() {
+
                                         @Override
-                                        public void onSuccess(final GwtXSRFToken result) {
-                                            AssetConfigurationUi.this.gwtWireService.getGwtChannelDescriptor(result,
-                                                    AssetConfigurationUi.this.configurableComponent
-                                                            .get(AssetConstants.ASSET_DRIVER_PROP.value()).toString(),
-                                                    new BaseAsyncCallback<GwtConfigComponent>() {
+                                        public void onSuccess(final GwtConfigComponent result) {
+                                            AssetConfigurationUi.this.driverDescriptor = result;
 
-                                                        @Override
-                                                        public void onSuccess(final GwtConfigComponent result) {
-                                                            AssetConfigurationUi.this.driverDescriptor = result;
+                                            int columnCount = AssetConfigurationUi.this.channelTable.getColumnCount();
+                                            for (int i = 0; i < columnCount; i++) {
+                                                AssetConfigurationUi.this.channelTable.removeColumn(0);
+                                            }
 
-                                                            int columnCount = AssetConfigurationUi.this.channelTable
-                                                                    .getColumnCount();
-                                                            for (int i = 0; i < columnCount; i++) {
-                                                                AssetConfigurationUi.this.channelTable.removeColumn(0);
-                                                            }
+                                            addDefaultColumns();
+                                            for (final GwtConfigParameter param : result.getParameters()) {
+                                                AssetConfigurationUi.this.channelTable.addColumn(
+                                                        getColumnFromParam(param), new TextHeader(param.getName()));
+                                            }
 
-                                                            addDefaultColumns();
-                                                            for (final GwtConfigParameter param : result
-                                                                    .getParameters()) {
-                                                                AssetConfigurationUi.this.channelTable.addColumn(
-                                                                        getColumnFromParam(param),
-                                                                        new TextHeader(param.getName()));
-                                                            }
-
-                                                            AssetConfigurationUi.this.gwtXSRFService
-                                                                    .generateSecurityToken(
-                                                                            new GetChannelDataCallback());
-                                                        }
-                                                    });
+                                            AssetConfigurationUi.this.gwtXSRFService
+                                                    .generateSecurityToken(new GetChannelDataCallback());
                                         }
                                     });
+                                }
+                            });
                         }
 
                     });
@@ -325,9 +321,7 @@ public class AssetConfigurationUi extends AbstractServicesUi {
     @Override
     public void setDirty(final boolean flag) {
         this.dirty = flag;
-        if (this.dirty) {
-            WiresPanelUi.setDirty(true);
-        }
+        WiresPanelUi.setDirty(flag);
     }
 
     public void setNonValidated(final boolean flag) {

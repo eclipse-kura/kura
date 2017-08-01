@@ -107,15 +107,11 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         try {
             final BundleContext context = FrameworkUtil.getBundle(GwtComponentServiceImpl.class).getBundleContext();
             final Set<String> matchingPids = Arrays.stream(context.getServiceReferences((String) null, osgiFilter))
-                    .map(reference -> {
-                        final Object pid = reference.getProperty("service.pid");
-                        return pid == null ? null : pid.toString();
-                    }).collect(Collectors.toSet());
+                    .map(reference -> (String) reference.getProperty(KURA_SERVICE_PID)).collect(Collectors.toSet());
             return ServiceLocator
-                    .applyToServiceOptionally(ConfigurationService.class,
-                            configurationService -> configurationService.getComponentConfigurations().stream()
-                                    .filter(config -> matchingPids
-                                            .contains(config.getConfigurationProperties().get("service.pid"))))
+                    .applyToServiceOptionally(ConfigurationService.class, configurationService -> configurationService
+                            .getComponentConfigurations().stream().filter(config -> matchingPids
+                                    .contains(config.getPid())))
                     .map(config -> createMetatypeOnlyGwtComponentConfigurationInternal(config)).filter(Objects::nonNull)
                     .collect(Collectors.toList());
         } catch (InvalidSyntaxException e) {

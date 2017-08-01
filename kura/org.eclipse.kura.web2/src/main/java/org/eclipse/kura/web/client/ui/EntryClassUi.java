@@ -13,6 +13,11 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
+import static org.eclipse.kura.web.client.util.FilterBuilder.not;
+import static org.eclipse.kura.web.client.util.FilterBuilder.or;
+
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -29,6 +34,7 @@ import org.eclipse.kura.web.client.ui.Status.StatusPanelUi;
 import org.eclipse.kura.web.client.ui.wires.WiresPanelUi;
 import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.util.FilterBuilder;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtEventInfo;
@@ -161,6 +167,11 @@ public class EntryClassUi extends Composite {
     private static final String SIDENAV_HIDDEN_STYLE_NAME = "sidenav-hidden";
     private static final String SELECTED_ANCHOR_LIST_ITEM_STYLE_NAME = "selected-item";
     private static final String NOT_SCROLLABLE_STYLE_NAME = "not-scrollable";
+    private static final String SERVICES_FILTER = FilterBuilder.of(not(or("service.pid=*SystemPropertiesService",
+            "service.pid=*NetworkAdminService", "service.pid=*NetworkConfigurationService",
+            "service.pid=*SslManagerService", "service.pid=*FirewallConfigurationService", "service.pid=*WireService",
+            "objectClass=org.eclipse.kura.wire.WireComponent", "objectClass=org.eclipse.kura.driver.Driver",
+            "kura.ui.service.hide=true")));
 
     private static PopupPanel waitModal;
 
@@ -175,6 +186,7 @@ public class EntryClassUi extends Composite {
 
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+
 
     private final KeyUpHandler searchBoxChangeHandler = new KeyUpHandler() {
 
@@ -542,6 +554,35 @@ public class EntryClassUi extends Composite {
         }
     }
 
+    private void sortConfigurationsByName(List<GwtConfigComponent> configs) {
+        Collections.sort(configs, new Comparator<GwtConfigComponent>() {
+
+            @Override
+            public int compare(GwtConfigComponent arg0, GwtConfigComponent arg1) {
+                String name0;
+                String pid0 = arg0.getComponentId();
+                String pid1 = arg1.getComponentId();
+                int start = pid0.lastIndexOf('.');
+                int substringIndex = start + 1;
+                if (start != -1 && substringIndex < pid0.length()) {
+                    name0 = pid0.substring(substringIndex);
+                } else {
+                    name0 = pid0;
+                }
+
+                String name1;
+                start = pid1.lastIndexOf('.');
+                substringIndex = start + 1;
+                if (start != -1 && substringIndex < pid1.length()) {
+                    name1 = pid1.substring(substringIndex);
+                } else {
+                    name1 = pid1;
+                }
+                return name0.compareTo(name1);
+            }
+        });
+    }
+
     public void fetchAvailableServices() {
         // (Re)Fetch Available Services
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
@@ -553,7 +594,7 @@ public class EntryClassUi extends Composite {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                EntryClassUi.this.gwtComponentService.findServicesConfigurations(token,
+                EntryClassUi.this.gwtComponentService.findComponentConfigurations(token, SERVICES_FILTER,
                         new AsyncCallback<List<GwtConfigComponent>>() {
 
                     @Override
@@ -564,6 +605,7 @@ public class EntryClassUi extends Composite {
 
                     @Override
                     public void onSuccess(List<GwtConfigComponent> result) {
+                        sortConfigurationsByName(result);
                         EntryClassUi.this.servicesMenu.clear();
                         for (GwtConfigComponent pair : result) {
                             if (!pair.isWireComponent()) {

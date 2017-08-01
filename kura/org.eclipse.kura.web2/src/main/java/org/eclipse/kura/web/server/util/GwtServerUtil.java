@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.web.server.util;
 
@@ -42,22 +42,22 @@ public final class GwtServerUtil {
     public static final String PASSWORD_PLACEHOLDER = "Placeholder";
 
     /** The Constant to check if configuration policy is set to require. */
-    private static final String PATTERN_CONFIGURATION_REQUIRE = "configuration-policy=\"require\"";
+    public static final String PATTERN_CONFIGURATION_REQUIRE = "configuration-policy=\"require\"";
 
     /** The Constant to check if the provided interface is a configurable component. */
-    private static final String PATTERN_SERVICE_PROVIDE_CONFIGURABLE_COMP = "provide interface=\"org.eclipse.kura.configuration.ConfigurableComponent\"";
+    public static final String PATTERN_SERVICE_PROVIDE_CONFIGURABLE_COMP = "provide interface=\"org.eclipse.kura.configuration.ConfigurableComponent\"";
 
     /** The Constant to check if provided interface is Wire Emitter. */
-    private static final String PATTERN_SERVICE_PROVIDE_EMITTER = "provide interface=\"org.eclipse.kura.wire.WireEmitter\"";
+    public static final String PATTERN_SERVICE_PROVIDE_EMITTER = "provide interface=\"org.eclipse.kura.wire.WireEmitter\"";
 
     /** The Constant to check if provided interface is Wire Receiver. */
-    private static final String PATTERN_SERVICE_PROVIDE_RECEIVER = "provide interface=\"org.eclipse.kura.wire.WireReceiver\"";
+    public static final String PATTERN_SERVICE_PROVIDE_RECEIVER = "provide interface=\"org.eclipse.kura.wire.WireReceiver\"";
 
     /** The Constant to check if the provided interface is a self configuring component. */
-    private static final String PATTERN_SERVICE_PROVIDE_SELF_CONFIGURING_COMP = "provide interface=\"org.eclipse.kura.configuration.SelfConfiguringComponent\"";
+    public static final String PATTERN_SERVICE_PROVIDE_SELF_CONFIGURING_COMP = "provide interface=\"org.eclipse.kura.configuration.SelfConfiguringComponent\"";
 
     /** The Logger instance. */
-    private static final Logger s_logger = LoggerFactory.getLogger(GwtServerUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(GwtServerUtil.class);
 
     /**
      * Fills the provided lists with the proper factory IDs of the available
@@ -111,14 +111,14 @@ public final class GwtServerUtil {
                             }
                         }
                     } catch (final Exception ex) {
-                        s_logger.error("Error while reading Component Definition file {}", entry.getPath());
+                        logger.error("Error while reading Component Definition file {}", entry.getPath());
                     } finally {
                         try {
                             if (reader != null) {
                                 reader.close();
                             }
                         } catch (final IOException e) {
-                            s_logger.error("Error closing File Reader!" + e);
+                            logger.error("Error closing File Reader!" + e);
                         }
                     }
                 }

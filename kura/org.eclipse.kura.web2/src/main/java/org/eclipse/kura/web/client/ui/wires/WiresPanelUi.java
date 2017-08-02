@@ -411,7 +411,7 @@ public class WiresPanelUi extends Composite {
 
                     @Override
                     public void onSuccess(GwtXSRFToken token) {
-                        gwtComponentService.findFactoryComponents(token, new AsyncCallback<List<String>>() {
+                        gwtComponentService.getDriverFactoriesList(token, new AsyncCallback<List<String>>() {
 
                             @Override
                             public void onFailure(Throwable ex) {

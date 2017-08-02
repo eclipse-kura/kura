@@ -122,7 +122,7 @@ public class EntryClassUi extends Composite {
     @UiField
     AnchorListItem cloudServices;
     @UiField
-    AnchorListItem driversAndTwinsServices;
+    AnchorListItem driversAndAssetsServices;
     @UiField
     ScrollPanel servicesPanel;
     @UiField
@@ -257,7 +257,7 @@ public class EntryClassUi extends Composite {
         });
 
         showSidenav();
-
+        
         initServicesTree();
     }
 
@@ -525,7 +525,7 @@ public class EntryClassUi extends Composite {
         });
         
      // Drivers and Twins services Panel
-        this.driversAndTwinsServices.addClickHandler(new ClickHandler() {
+        this.driversAndAssetsServices.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -537,7 +537,7 @@ public class EntryClassUi extends Composite {
                         if (EntryClassUi.this.modal != null) {
                             EntryClassUi.this.modal.hide();
                         }
-                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.driversAndTwinsServices);
+                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.driversAndAssetsServices);
                         EntryClassUi.this.contentPanel.setVisible(true);
                         EntryClassUi.this.contentPanelHeader.setText(MSGS.driversAndAssetsServices());
                         EntryClassUi.this.contentPanelBody.clear();

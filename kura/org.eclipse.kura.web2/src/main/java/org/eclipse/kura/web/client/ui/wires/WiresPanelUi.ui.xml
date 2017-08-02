@@ -31,6 +31,10 @@
     	padding-bottom: 40px;
     }
     
+    .composer-body {
+		padding-left: 0px;
+	}
+    
     .drivers-list {
     	padding-bottom: 30px;
     }
@@ -38,7 +42,7 @@
 
     <b:Container fluid="true">
         <b:Row ui:field="composerRow">
-            <b:Column size="MD_10">
+            <b:Column size="MD_10" addStyleNames="{style.composer-body}">
                 <b:Row>
                     <b:Panel>
                         <b:ButtonToolBar>

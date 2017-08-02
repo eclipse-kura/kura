@@ -62,6 +62,10 @@
     	padding: 1px;
     }
     
+    .content-panel-header {
+    	padding-left: 0px;
+    }
+    
     .modal-wait {
     	background-color: black;
     	border: solid 1px red;
@@ -120,12 +124,12 @@
                                         <b:AnchorListItem icon="CLOUD" iconFixedWidth="true" text="Cloud Services"
                                             ui:field="cloudServices" />
 
-                                        <b:AnchorListItem icon="EXCHANGE" iconFixedWidth="true" text="Drivers and Assets"
-                                            ui:field="driversAndTwinsServices" />
-                                        <b:AnchorListItem icon="RETWEET" iconFixedWidth="true" text="Wires"
+                                        <b:AnchorListItem icon="CUBE" iconFixedWidth="true" text="Drivers and Assets"
+                                            ui:field="driversAndAssetsServices" />
+                                        <b:AnchorListItem icon="SITEMAP" iconFixedWidth="true" text="Wires"
                                             ui:field="wires" />
 
-                                        <b:AnchorListItem icon="CUBES" iconFixedWidth="true" text="Packages"
+                                        <b:AnchorListItem icon="BRIEFCASE" iconFixedWidth="true" text="Packages"
                                             ui:field="packages" />
 
                                         <b:AnchorListItem icon="GEAR" iconFixedWidth="true" text="Settings"
@@ -202,7 +206,7 @@
                             <b:Row addStyleNames='content-wrapper'>
                                 <b:Column size="MD_10">
                                     <b:Panel ui:field="contentPanel" addStyleNames="content-panel">
-                                        <b:PanelHeader ui:field="contentPanelHeader">
+                                        <b:PanelHeader ui:field="contentPanelHeader" addStyleNames="{style.content-panel-header}">
                                         </b:PanelHeader>
                                         <b:PanelBody ui:field="contentPanelBody" addStyleNames="{style.content-panel-body}">
                                         </b:PanelBody>

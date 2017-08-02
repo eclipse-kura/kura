@@ -86,15 +86,15 @@
                                             <b:PanelHeader>
                                                 <b:ButtonToolBar>
                                                     <b:ButtonGroup size="SMALL">
-                                                        <b.html:Strong ui:field="channelTitle">Channels Table</b.html:Strong>
+                                                        <b.html:Strong ui:field="channelTitle">Channels</b.html:Strong>
                                                     </b:ButtonGroup>
                                                     <b:ButtonGroup size="SMALL" addStyleNames="pull-right hidden">
                                                         <b:Button icon="DOWNLOAD" ui:field="btnDownload">Download Channels</b:Button>
                                                         <b:Button icon="UPLOAD" ui:field="btnUpload">Upload Channels</b:Button>
                                                     </b:ButtonGroup>
                                                     <b:ButtonGroup size="SMALL" addStyleNames="pull-right">
-                                                        <b:Button icon="PLUS_SQUARE" ui:field="btnAdd">Add Channel</b:Button>
-                                                        <b:Button icon="MINUS_SQUARE" ui:field="btnRemove">Remove
+                                                        <b:Button icon="PLUS_SQUARE" ui:field="btnAdd">New Channel</b:Button>
+                                                        <b:Button icon="MINUS_SQUARE" ui:field="btnRemove">Delete
                                                             Channel</b:Button>
                                                     </b:ButtonGroup>
                                                 </b:ButtonToolBar>

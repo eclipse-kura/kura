@@ -37,20 +37,15 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     private static final Logger logger = LoggerFactory.getLogger(WatchdogServiceImpl.class);
 
-    private static final String PROPERTY_ENABLED = "enabled";
-    private static final String PROPERTY_PING_INTERVAL = "pingInterval";
-    private static final String PROPERTY_WD_DEVICE = "watchdogDevice";
-    private static final String WD_FILE = "/tmp/watchdog";
-
     private volatile boolean enabled;
     private volatile boolean watchdogToStop;
-    private int pingInterval;
-    private String watchdogDevice;
-    private volatile boolean configEnabled;
     private List<CriticalComponentImpl> criticalComponentList;
 
     private ScheduledFuture<?> pollTask;
     private ScheduledExecutorService pollExecutor;
+
+    private RebootCauseFileWriter rebootCauseWriter;
+    private WatchdogServiceOptions options;
 
     protected void activate(Map<String, Object> properties) {
         this.criticalComponentList = new CopyOnWriteArrayList<>();
@@ -64,24 +59,32 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     protected void deactivate() {
         cancelPollTask();
         shutdownPollExecutor();
-        if (this.configEnabled) {
+        if (this.options.isEnabled()) {
             refreshWatchdog();
         }
     }
 
     public void updated(Map<String, Object> properties) {
-        readProperties(properties);
-
         cancelPollTask();
 
-        if (!this.configEnabled) {
-            // stop the watchdog
-            disableWatchdog();
-        } else {
+        this.options = new WatchdogServiceOptions(properties);
+
+        if (this.options.isEnabled()) {
+            this.rebootCauseWriter = new RebootCauseFileWriter(this.options.getRebootCauseFilePath());
+
+            try (PrintWriter wdWriter = new PrintWriter(this.options.getWatchdogDevice());) {
+                wdWriter.write(this.options.getWatchdogDevice());
+            } catch (IOException e) {
+                logger.error("Unable to write watchdog config file", e);
+            }
+
             this.pollTask = this.pollExecutor.scheduleAtFixedRate(() -> {
                 Thread.currentThread().setName("WatchdogServiceImpl");
                 checkCriticalComponents();
-            }, 0, this.pingInterval, TimeUnit.MILLISECONDS);
+            }, 0, this.options.getPingInterval(), TimeUnit.MILLISECONDS);
+        } else {
+            // stop the watchdog
+            disableWatchdog();
         }
     }
 
@@ -171,6 +174,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             for (CriticalComponentImpl csi : this.criticalComponentList) {
                 if (csi.isTimedOut()) {
                     failure = true;
+                    this.rebootCauseWriter.writeRebootCause("failure in " + csi.getName());
                     logger.warn("Critical service {} failed -> SYSTEM REBOOT", csi.getName());
                     break;
                 }
@@ -187,7 +191,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
                 }
             }
         } else {
-            if (this.configEnabled) {
+            if (this.options.isEnabled()) {
                 refreshWatchdog();
                 this.enabled = true;
             }
@@ -225,34 +229,12 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     }
 
     private synchronized void writeWatchdogDevice(String value) {
-        File f = new File(this.watchdogDevice);
+        File f = new File(this.options.getWatchdogDevice());
         try (FileWriter bw = new FileWriter(f);) {
             bw.write(value);
             logger.debug("write {} on watchdog device", value);
         } catch (IOException e) {
             logger.error("IOException on disable watchdog", e);
-        }
-    }
-
-    private void readProperties(Map<String, Object> properties) {
-        if (properties.get(PROPERTY_PING_INTERVAL) != null) {
-            this.pingInterval = (Integer) properties.get(PROPERTY_PING_INTERVAL);
-        }
-        if (properties.get(PROPERTY_WD_DEVICE) != null && !((String) properties.get(PROPERTY_WD_DEVICE)).isEmpty()) {
-            this.watchdogDevice = (String) properties.get(PROPERTY_WD_DEVICE);
-        }
-        if (properties.get(PROPERTY_ENABLED) != null) {
-            this.configEnabled = (Boolean) properties.get(PROPERTY_ENABLED);
-        }
-        if (this.configEnabled) {
-            try (PrintWriter wdWriter = new PrintWriter(WD_FILE);) {
-                wdWriter.write(this.watchdogDevice);
-            } catch (IOException e) {
-                logger.error("Unable to write watchdog config file", e);
-            }
-            logger.debug("activating WatchdogService with watchdog enabled");
-        } else {
-            logger.debug("activating WatchdogService with watchdog disabled");
         }
     }
 

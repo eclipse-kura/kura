@@ -36,7 +36,20 @@ Kura Wires is an application built on top of two new Kura features:
   * Drivers, the low-level components responsible for the communication with the sensors and actuators;
   * Assets, an abstraction on top of Kura Drivers that allow the interaction with the underneath drivers in an easy way, by simply specifying "channels". The channel is a logical entity that eases the way to specify what has to be transferred to/from the driver.
 
-![From asset to Driver to Transducers](https://s3.amazonaws.com/kura-resources/Webminar-resources/asset_driver_device.png)
+![From asset to Driver to Transducers](https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/assets-drivers-ui-mockups/plc.png)
+
+Through the wires, the message flow is composed by Eclipse Kura Wire Envelopes.
+
+## Wire Envelopes
+The [Wire Envelope](http://download.eclipse.org/kura/docs/api/3.0.0/apidocs/org/eclipse/kura/wire/WireEnvelope.html) is a composite envelope to be used as an abstract data to be transmitted between the Wire Emitter and the Wire Receiver.
+
+Every Envelope transmitted is composed by an **Emitter PID** that univocally identifies the emitter of the envelope, and an unmodifiable list of [Wire Records](http://download.eclipse.org/kura/docs/api/3.0.0/apidocs/org/eclipse/kura/wire/WireRecord.html) that effectively carries all the information shared between the Emitter and the Receiver.
+
+Following, some references to the Envelopes code and structure:
+* [Wire Envelope](https://github.com/eclipse/kura/blob/KURA_3.0.0_RELEASE/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/wire/WireEnvelope.java);
+* [Wire Record](https://github.com/eclipse/kura/blob/KURA_3.0.0_RELEASE/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/wire/WireRecord.java).
+
+
 
 ## Wire Components provided in Kura 3.0.0
 
@@ -56,8 +69,10 @@ For some of them, the source code will be available in the [Kura Github Reposito
 
 As initial contributions, the following drivers are available in Eclipse Marketplace:
 
-  * **Modbus Driver**
-  * **OPC-UA Driver**
+  * [OPC-UA Driver](https://marketplace.eclipse.org/content/opc-ua-driver-kura)
+  * [Modbus Driver](https://marketplace.eclipse.org/content/esf-modbus-driver-community-edition)
+  * **S7** (Will be available with Kura 3.1.0, source code available [here](https://github.com/eclipse/kura/tree/develop/kura/org.eclipse.kura.driver.s7plc.provider))
+
 
 ## Additional information
 Additional information about Kura Wires is available at the following resources:

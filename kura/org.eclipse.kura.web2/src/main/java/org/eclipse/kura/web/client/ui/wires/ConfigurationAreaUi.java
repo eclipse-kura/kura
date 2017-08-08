@@ -51,10 +51,12 @@ public class ConfigurationAreaUi extends Composite {
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
 
     private final boolean isWireAsset;
-    private GenericWireComponentUi genericWireComponentUi;
-    private AssetConfigurationUi assetWireComponentUi;
     private final GwtConfigComponent configurableComponent;
     private final String pid;
+
+    private GenericWireComponentUi genericWireComponentUi;
+    private AssetConfigurationUi assetWireComponentUi;
+    private boolean initialized;
 
     @UiField
     TabListItem tab1NavTab;
@@ -65,9 +67,7 @@ public class ConfigurationAreaUi extends Composite {
     @UiField
     TabPane tab2Pane;
 
-    private boolean initialized;
-
-    public ConfigurationAreaUi(final GwtConfigComponent addedItem, final String pid) {
+    public ConfigurationAreaUi(final GwtConfigComponent addedItem, final String pid, final WiresPanelUi parent) {
         initWidget(uiBinder.createAndBindUi(this));
         this.initialized = false;
 
@@ -101,11 +101,12 @@ public class ConfigurationAreaUi extends Composite {
                         @Override
                         public void onSuccess(List<GwtConfigComponent> result) {
                             for (GwtConfigComponent pair : result) {
-                                ConfigurationAreaUi.this.genericWireComponentUi = new GenericWireComponentUi(pair);
+                                ConfigurationAreaUi.this.genericWireComponentUi = new GenericWireComponentUi(pair,
+                                        parent);
                             }
 
                             ConfigurationAreaUi.this.assetWireComponentUi = new AssetConfigurationUi(
-                                    ConfigurationAreaUi.this.configurableComponent);
+                                    ConfigurationAreaUi.this.configurableComponent, parent);
                             ConfigurationAreaUi.this.tab1Pane.add(ConfigurationAreaUi.this.assetWireComponentUi);
                             ConfigurationAreaUi.this.tab1NavTab.setText(WiresPanelUi
                                     .getFormattedPid(ConfigurationAreaUi.this.configurableComponent.getFactoryId())
@@ -122,7 +123,7 @@ public class ConfigurationAreaUi extends Composite {
             });
         } else {
             this.tab2NavTab.setVisible(false);
-            this.genericWireComponentUi = new GenericWireComponentUi(this.configurableComponent);
+            this.genericWireComponentUi = new GenericWireComponentUi(this.configurableComponent, parent);
             this.tab1Pane.add(this.genericWireComponentUi);
             this.tab1NavTab.setText(
                     WiresPanelUi.getFormattedPid(this.configurableComponent.getFactoryId()) + " - " + this.pid);

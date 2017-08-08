@@ -31,6 +31,7 @@ import org.eclipse.kura.web.client.ui.Network.NetworkPanelUi;
 import org.eclipse.kura.web.client.ui.Packages.PackagesPanelUi;
 import org.eclipse.kura.web.client.ui.Settings.SettingsPanelUi;
 import org.eclipse.kura.web.client.ui.Status.StatusPanelUi;
+import org.eclipse.kura.web.client.ui.drivers.assets.DriversAndAssetsUi;
 import org.eclipse.kura.web.client.ui.wires.WiresPanelUi;
 import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
@@ -121,6 +122,8 @@ public class EntryClassUi extends Composite {
     @UiField
     AnchorListItem cloudServices;
     @UiField
+    AnchorListItem driversAndAssetsServices;
+    @UiField
     ScrollPanel servicesPanel;
     @UiField
     TextBox textSearch;
@@ -183,6 +186,7 @@ public class EntryClassUi extends Composite {
     private final NetworkPanelUi networkBinder = GWT.create(NetworkPanelUi.class);
     private final CloudServicesUi cloudServicesBinder = GWT.create(CloudServicesUi.class);
     private final WiresPanelUi wiresBinder = GWT.create(WiresPanelUi.class);
+    private final DriversAndAssetsUi driversAndTwinsBinder = GWT.create(DriversAndAssetsUi.class);
 
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
@@ -223,7 +227,7 @@ public class EntryClassUi extends Composite {
         this.footerLeft.setText(MSGS.copyright(String.valueOf(year)));
         this.footerLeft.setStyleName("copyright");
         this.contentPanel.setVisible(false);
-
+        
         // Add handler for sidenav show/hide button
         this.sidenavButton.addClickHandler(new ClickHandler() {
 
@@ -253,7 +257,7 @@ public class EntryClassUi extends Composite {
         });
 
         showSidenav();
-
+        
         initServicesTree();
     }
 
@@ -512,8 +516,34 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.contentPanelHeader.setText(MSGS.wires());
                         EntryClassUi.this.contentPanelBody.clear();
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.wiresBinder);
-                        WiresPanelUi.load();
+                        wiresBinder.load();
                         // EntryClassUi.this.discardWiresPanelChanges();
+                    }
+                });
+                renderDirtyConfigModal(b);
+            }
+        });
+        
+     // Drivers and Twins services Panel
+        this.driversAndAssetsServices.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                Button b = new Button(MSGS.yesButton(), new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        forceTabsCleaning();
+                        if (EntryClassUi.this.modal != null) {
+                            EntryClassUi.this.modal.hide();
+                        }
+                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.driversAndAssetsServices);
+                        EntryClassUi.this.contentPanel.setVisible(true);
+                        EntryClassUi.this.contentPanelHeader.setText(MSGS.driversAndAssetsServices());
+                        EntryClassUi.this.contentPanelBody.clear();
+                        EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.driversAndTwinsBinder);
+                        EntryClassUi.this.driversAndTwinsBinder.refresh();
+
                     }
                 });
                 renderDirtyConfigModal(b);
@@ -761,6 +791,7 @@ public class EntryClassUi extends Composite {
         boolean isUiDirty = isServicesUiDirty() || isNetworkDirty();
         isUiDirty = isUiDirty || isFirewallDirty() || isSettingsDirty();
         isUiDirty = isUiDirty || isCloudServicesDirty() || isWiresDirty();
+        isUiDirty = isUiDirty || isDriversAndTwinsDirty();
 
         if (isUiDirty) {
             this.modal = new Modal();
@@ -839,7 +870,15 @@ public class EntryClassUi extends Composite {
 
     public boolean isWiresDirty() {
         if (this.wires.isVisible()) {
-            return WiresPanelUi.isDirty();
+            return wiresBinder.isDirty();
+        } else {
+            return false;
+        }
+    }
+    
+    public boolean isDriversAndTwinsDirty() {
+        if (this.driversAndTwinsBinder.isVisible()) {
+            return this.driversAndTwinsBinder.isDirty();
         } else {
             return false;
         }
@@ -857,6 +896,9 @@ public class EntryClassUi extends Composite {
         }
         if (this.settings.isVisible()) {
             this.settingsBinder.setDirty(false);
+        }
+        if (this.driversAndTwinsBinder.isVisible()) {
+            this.driversAndTwinsBinder.setDirty(false);
         }
     }
 
@@ -901,8 +943,8 @@ public class EntryClassUi extends Composite {
             this.cloudServicesBinder.setDirty(false);
         }
         if (this.wires.isVisible()) {
-            WiresPanelUi.setDirty(false);
-            WiresPanelUi.unload();
+            wiresBinder.setDirty(false);
+            wiresBinder.unload();
         }
     }
 

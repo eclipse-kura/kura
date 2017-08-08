@@ -181,9 +181,24 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     @Override
     public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
+        internalCreateFactoryComponent(factoryPid, pid, null);
+    }
+
+    @Override
+    public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid,
+            GwtConfigComponent properties) throws GwtKuraException {
+        this.checkXSRFToken(xsrfToken);
+
+        Map<String, Object> propertiesMap = GwtServerUtil.fillPropertiesFromConfiguration(properties, null);
+
+        internalCreateFactoryComponent(factoryPid, pid, propertiesMap);
+    }
+
+    private void internalCreateFactoryComponent(String factoryPid, String pid, Map<String, Object> properties)
+            throws GwtKuraException {
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         try {
-            cs.createFactoryConfiguration(factoryPid, pid, null, true);
+            cs.createFactoryConfiguration(factoryPid, pid, properties, true);
         } catch (KuraException e) {
             throw new GwtKuraException("A component with the same name already exists!");
         }
@@ -418,8 +433,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         try {
             ComponentConfiguration config = cs.getComponentConfiguration(componentPid);
 
-            GwtConfigComponent gwtConfigComponent = createMetatypeOnlyGwtComponentConfiguration(config);
-            gwtConfigs.add(gwtConfigComponent);
+            if (config != null) {
+                GwtConfigComponent gwtConfigComponent = createMetatypeOnlyGwtComponentConfiguration(config);
+                gwtConfigs.add(gwtConfigComponent);
+            }
         } catch (Throwable t) {
             KuraExceptionHandler.handle(t);
         }

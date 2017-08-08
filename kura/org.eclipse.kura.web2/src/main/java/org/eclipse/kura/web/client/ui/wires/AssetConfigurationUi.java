@@ -143,6 +143,8 @@ public class AssetConfigurationUi extends AbstractServicesUi {
 
     private final Set<String> nonValidatedCells;
 
+    private final WiresPanelUi parent;
+
     private boolean dirty;
 
     private GwtConfigComponent baseDriverDescriptor;
@@ -150,9 +152,10 @@ public class AssetConfigurationUi extends AbstractServicesUi {
 
     private boolean nonValidated;
 
-    public AssetConfigurationUi(final GwtConfigComponent addedItem) {
+    public AssetConfigurationUi(final GwtConfigComponent addedItem, final WiresPanelUi parent) {
         initWidget(uiBinder.createAndBindUi(this));
         this.configurableComponent = addedItem;
+        this.parent = parent;
         this.fields.clear();
 
         this.channelPager.setPageSize(MAXIMUM_PAGE_SIZE);
@@ -321,15 +324,15 @@ public class AssetConfigurationUi extends AbstractServicesUi {
     @Override
     public void setDirty(final boolean flag) {
         this.dirty = flag;
-        WiresPanelUi.setDirty(flag);
+        this.parent.setDirty(flag);
     }
 
     public void setNonValidated(final boolean flag) {
         this.nonValidated = flag;
         if (flag) {
-            WiresPanelUi.btnSave.setEnabled(false);
+            this.parent.btnSave.setEnabled(false);
         } else if (this.nonValidatedCells.isEmpty()) {
-            WiresPanelUi.btnSave.setEnabled(true);
+            this.parent.btnSave.setEnabled(true);
         }
     }
 

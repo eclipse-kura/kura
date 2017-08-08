@@ -336,7 +336,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     public ComponentConfiguration getComponentConfiguration(String pid) throws KuraException {
         ComponentConfiguration tempConfig = getComponentConfigurationInternal(pid);
         if (tempConfig != null && tempConfig.getConfigurationProperties() != null) {
-            decryptPasswords(tempConfig);
+            decryptConfigurationProperties(tempConfig.getConfigurationProperties());
         }
         return tempConfig;
     }
@@ -367,7 +367,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             throws KuraException { // don't call this method internally
         for (ComponentConfiguration config : configsToUpdate) {
             if (config != null) {
-                encryptPasswords(config);
+                encryptConfigurationProperties(config.getConfigurationProperties());
             }
         }
 
@@ -585,8 +585,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             for (ComponentConfigurationImpl config : configs) {
                 if (config != null) {
                     try {
-                        Map<String, Object> decryptedProperties = decryptPasswords(config);
-                        config.setProperties(decryptedProperties);
+                        decryptConfigurationProperties(
+                                config.getConfigurationProperties());
                     } catch (Throwable t) {
                         logger.warn("Error during snapshot password decryption");
                     }
@@ -706,19 +706,37 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         return ComponentUtil.getDefaultProperties(ocd, this.ctx);
     }
 
-    Map<String, Object> decryptPasswords(ComponentConfiguration config) {
-        Map<String, Object> configProperties = config.getConfigurationProperties();
+    void decryptConfigurationProperties(Map<String, Object> configProperties) {
         for (Entry<String, Object> property : configProperties.entrySet()) {
-            if (property.getValue() instanceof Password) {
+            Object configValue = property.getValue();
+
+            if (configValue instanceof Password || configValue instanceof Password[]) {
                 try {
-                    Password decryptedPassword = new Password(
-                            this.cryptoService.decryptAes(property.getValue().toString().toCharArray()));
-                    configProperties.put(property.getKey(), decryptedPassword);
+                    Object decryptedValue = decryptPasswordProperties(configValue);
+                    configProperties.put(property.getKey(), decryptedValue);
                 } catch (Exception e) {
                 }
             }
         }
-        return configProperties;
+    }
+
+    private Object decryptPasswordProperties(Object encryptedValue) throws KuraException {
+        Object decryptedValue = null;
+        if (encryptedValue instanceof Password) {
+            decryptedValue = decryptPassword((Password) encryptedValue);
+        } else if (encryptedValue instanceof Password[]) {
+            Password[] encryptedPasswords = (Password[]) encryptedValue;
+            Password[] decryptedPasswords = new Password[encryptedPasswords.length];
+            for (int i = 0; i < encryptedPasswords.length; i++) {
+                decryptedPasswords[i] = decryptPassword(encryptedPasswords[i]);
+            }
+            decryptedValue = decryptedPasswords;
+        }
+        return decryptedValue;
+    }
+
+    private Password decryptPassword(Password encryptedPassword) throws KuraException {
+        return new Password(this.cryptoService.decryptAes(encryptedPassword.getPassword()));
     }
 
     // ----------------------------------------------------------------
@@ -849,32 +867,57 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
     }
 
-    private void encryptPasswords(ComponentConfiguration config) {
-        Map<String, Object> propertiesToUpdate = config.getConfigurationProperties();
-        if (propertiesToUpdate != null) {
-            encryptPasswords(propertiesToUpdate);
+    private void encryptConfigurationProperties(Map<String, Object> propertiesToUpdate) {
+        if (propertiesToUpdate == null) {
+            return;
         }
-    }
 
-    private void encryptPasswords(Map<String, Object> propertiesToUpdate) {
         for (Entry<String, Object> property : propertiesToUpdate.entrySet()) {
-            if (property.getValue() != null && property.getValue() instanceof Password) {
-                encryptPassword(propertiesToUpdate, property.getKey(), (Password) property.getValue());
+            Object configValue = property.getValue();
+            if (configValue instanceof Password || configValue instanceof Password[]) {
+                try {
+                    Object encryptedValue = encryptPasswordProperties(configValue);
+                    propertiesToUpdate.put(property.getKey(), encryptedValue);
+                } catch (KuraException e) {
+                    logger.warn("Failed to encrypt Password property: {}", property.getKey());
+                    propertiesToUpdate.remove(property.getKey());
+                }
             }
         }
     }
 
-    private void encryptPassword(Map<String, Object> propertiesToUpdate, String key, Password password) {
-        try {
-            this.cryptoService.decryptAes(password.getPassword());
-        } catch (Exception e1) {
-            try {
-                propertiesToUpdate.put(key, new Password(this.cryptoService.encryptAes(password.getPassword())));
-            } catch (Exception e) {
-                logger.warn("Failed to encrypt Password property: {}", key);
-                propertiesToUpdate.remove(key);
+    private Object encryptPasswordProperties(Object configValue) throws KuraException {
+        Object encryptedValue = null;
+        if (configValue instanceof Password) {
+            encryptedValue = encryptPassword((Password) configValue);
+
+        } else if (configValue instanceof Password[]) {
+            Password[] passwordArray = (Password[]) configValue;
+            Password[] encryptedPasswords = new Password[passwordArray.length];
+
+            for (int i = 0; i < passwordArray.length; i++) {
+                encryptedPasswords[i] = encryptPassword(passwordArray[i]);
             }
+            encryptedValue = encryptedPasswords;
         }
+        return encryptedValue;
+    }
+
+    private boolean isEncrypted(Password configPassword) {
+        boolean result = false;
+        try {
+            this.cryptoService.decryptAes(configPassword.getPassword());
+            result = true;
+        } catch (Exception e1) {
+        }
+        return result;
+    }
+
+    private Password encryptPassword(Password password) throws KuraException {
+        if (!isEncrypted(password)) {
+            return new Password(this.cryptoService.encryptAes(password.getPassword()));
+        }
+        return password;
     }
 
     private void encryptConfigs(List<? extends ComponentConfiguration> configs) {
@@ -884,7 +927,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         for (ComponentConfiguration config : configs) {
             if (config instanceof ComponentConfigurationImpl) {
-                encryptPasswords(config);
+                encryptConfigurationProperties(config.getConfigurationProperties());
             }
         }
     }
@@ -937,7 +980,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 StringBuilder entireFile = new StringBuilder();
                 while ((line = br.readLine()) != null) {
                     entireFile.append(line);
-                }          // end while
+                }                    // end while
                 xmlConfigs = XmlUtil.unmarshal(entireFile.toString(), XmlComponentConfigurations.class);
             } finally {
                 if (br != null) {

@@ -16,10 +16,11 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Base64.Decoder;
+import java.util.Base64.Encoder;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.Base64.Decoder;
 
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.channel.ChannelRecord;
@@ -42,6 +43,7 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     private static final long serialVersionUID = 8627173534436639487L;
 
     private static final Decoder BASE64_DECODER = Base64.getDecoder();
+    private static final Encoder BASE64_ENCODER = Base64.getEncoder();
 
     @Override
     public List<GwtChannelData> read(GwtXSRFToken xsrfToken, String assetPid, final Set<String> channelNames)
@@ -57,7 +59,7 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
                 for (ChannelRecord channelRecord : assetData) {
                     GwtChannelData channelData = new GwtChannelData();
                     channelData.setName(channelRecord.getChannelName());
-                    channelData.setValue(channelRecord.getValue().getValue().toString());
+                    channelData.setValue(typedValueToString(channelRecord.getValue()));
                     result.add(channelData);
                 }
             }
@@ -78,7 +80,7 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
                 for (ChannelRecord channelRecord : assetData) {
                     GwtChannelData channelData = new GwtChannelData();
                     channelData.setName(channelRecord.getChannelName());
-                    channelData.setValue(channelRecord.getValue().getValue().toString());
+                    channelData.setValue(typedValueToString(channelRecord.getValue()));
                     result.add(channelData);
                 }
             }
@@ -140,7 +142,7 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
 
         throw new IllegalArgumentException();
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public List<String> getAssetInstances(final GwtXSRFToken xsrfToken) throws GwtKuraException {
@@ -153,7 +155,7 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
         }
         return assets;
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public List<String> getAssetInstancesByDriverPid(final String driverPid) throws GwtKuraException {
@@ -167,16 +169,16 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
         }
         return assets;
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public List<GwtDriverAssetInfo> getDriverAssetInstances(final GwtXSRFToken xsrfToken) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
         List<GwtDriverAssetInfo> driverAssetInfoList = new ArrayList<>();
-        
+
         final Collection<ServiceReference<Driver>> refs = ServiceLocator.getInstance()
                 .getServiceReferences(Driver.class, null);
-        
+
         for (final ServiceReference<Driver> driverRef : refs) {
             String driverPid = String.valueOf(driverRef.getProperty(KURA_SERVICE_PID));
             GwtDriverAssetInfo driverInfo = new GwtDriverAssetInfo();
@@ -184,9 +186,9 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
             driverInfo.setType("Driver");
             driverInfo.setFactoryPid(String.valueOf(driverRef.getProperty("service.factoryPid")));
             driverAssetInfoList.add(driverInfo);
-            
-            final Collection<ServiceReference<Asset>> assetRefs = ServiceLocator.getInstance().getServiceReferences(Asset.class,
-                    null);
+
+            final Collection<ServiceReference<Asset>> assetRefs = ServiceLocator.getInstance()
+                    .getServiceReferences(Asset.class, null);
             for (final ServiceReference<Asset> assetRef : assetRefs) {
                 if (driverPid.equals(assetRef.getProperty("driver.pid"))) {
                     GwtDriverAssetInfo assetInfo = new GwtDriverAssetInfo();
@@ -197,8 +199,14 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
                 }
             }
         }
-        
+
         return driverAssetInfoList;
     }
 
+    private String typedValueToString(TypedValue<?> typedValue) {
+        if (typedValue.getType() == DataType.BYTE_ARRAY) {
+            return BASE64_ENCODER.encodeToString((byte[]) typedValue.getValue());
+        }
+        return typedValue.getValue().toString();
+    }
 }

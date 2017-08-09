@@ -113,6 +113,12 @@
 		<!-- Added Camel bundles configs -->
 		<antcall target="camel-config" />
 
+		<!-- Rest bundles config -->
+		<antcall target="rest-config" />
+
+		<!-- Asset bundles config -->
+		<antcall target="asset-config" />
+
 		<!-- Wires bundles config -->
 		<antcall target="wires-config" />
 
@@ -514,6 +520,11 @@ fi]]>
 		</zip>
 
 		<antcall target="camel-jar" />
+
+		<antcall target="rest-jar" />
+
+		<antcall target="asset-jar" />
+
 		<antcall target="wires-jar" />
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
@@ -1009,6 +1020,16 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.commons.net_${org.apache.commons.net.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.commons.exec_${org.apache.commons.exec.version}.jar" />
+			<entry key="osgi.bundles" operation="+"
+					      value=", reference:file:${kura.install.dir}/kura/plugins/com.eclipsesource.jaxrs.jersey-min_${com.eclipsesource.jaxrs.jersey-min.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
+					      value=", reference:file:${kura.install.dir}/kura/plugins/com.eclipsesource.jaxrs.publisher_${com.eclipsesource.jaxrs.publisher.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+					      value=", reference:file:${kura.install.dir}/kura/plugins/com.eclipsesource.jaxrs.provider.gson_${com.eclipsesource.jaxrs.provider.gson.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+					      value=", reference:file:${kura.install.dir}/kura/plugins/com.eclipsesource.jaxrs.provider.security_${com.eclipsesource.jaxrs.provider.security.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+								value=", reference:file:${kura.install.dir}/kura/plugins/com.google.gson_${com.google.gson.version}.jar@3" />
 		</propertyfile>
 	</target>
 
@@ -1200,7 +1221,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</propertyfile>
 	</target>
 
-	<target name="wires-config">
+	<target name="asset-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.asset.provider_${org.eclipse.kura.asset.provider.version}.jar@4:start" />
@@ -1208,6 +1229,20 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.asset.cloudlet.provider_${org.eclipse.kura.asset.cloudlet.provider.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.asset.helper.provider_${org.eclipse.kura.asset.helper.provider.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.rest.asset.provider_${org.eclipse.kura.rest.asset.provider.version}.jar@4:start" />
+		</propertyfile>
+	</target>
+
+	<target name="rest-config">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.rest.provider_${org.eclipse.kura.rest.provider.version}.jar@4:start" />
+		</propertyfile>
+	</target>
+
+	<target name="wires-config">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.driver.helper.provider_${org.eclipse.kura.driver.helper.provider.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"
@@ -1225,6 +1260,26 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar@4:start" />
 		</propertyfile>
+	</target>
+
+	<target name="asset-jar">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.asset.provider_${org.eclipse.kura.asset.provider.version}.jar"
+				prefix="${build.output.name}/kura/plugins" />
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.asset.cloudlet.provider_${org.eclipse.kura.asset.cloudlet.provider.version}.jar"
+				prefix="${build.output.name}/kura/plugins" />
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.asset.helper.provider_${org.eclipse.kura.asset.helper.provider.version}.jar"
+				prefix="${build.output.name}/kura/plugins" />
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.rest.asset.provider_${org.eclipse.kura.rest.asset.provider.version}.jar"
+				prefix="${build.output.name}/kura/plugins" />
+		</zip>
+	</target>
+
+	<target name="rest-jar">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.rest.provider_${org.eclipse.kura.rest.provider.version}.jar"
+				prefix="${build.output.name}/kura/plugins" />
+		</zip>
 	</target>
 
 	<target name="wires-jar">

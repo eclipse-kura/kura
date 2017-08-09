@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" immediate="true" modified="updated" name="org.eclipse.kura.internal.rest.provider.RestService">
+   <implementation class="org.eclipse.kura.internal.rest.provider.RestService"/>
+   <property name="service.pid" type="String" value="org.eclipse.kura.internal.rest.provider.RestService"/>
+   <service>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+      <provide interface="com.eclipsesource.jaxrs.provider.security.AuthorizationHandler"/>
+      <provide interface="com.eclipsesource.jaxrs.provider.security.AuthenticationHandler"/>
+   </service>
+   <reference bind="setCryptoService" cardinality="1..1" interface="org.eclipse.kura.crypto.CryptoService" name="CryptoService" policy="static"/>
+</scr:component>

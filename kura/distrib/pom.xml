@@ -399,6 +399,16 @@
                                     <artifactId>org.moka7</artifactId>
                                     <version>${org.moka7.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.rest.provider</artifactId>
+                                    <version>${org.eclipse.kura.rest.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.rest.asset.provider</artifactId>
+                                    <version>${org.eclipse.kura.rest.asset.provider.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -573,6 +583,10 @@
                                     tofile="target/plugins/org.eclipse.kura.wire.script.filter.provider_${org.eclipse.kura.wire.script.filter.provider.version}.jar" />
                                 <move file="target/plugins/org.moka7.jar"
                                     tofile="target/plugins/org.moka7_${org.moka7.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.rest.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.rest.provider_${org.eclipse.kura.rest.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.rest.asset.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.rest.asset.provider_${org.eclipse.kura.rest.asset.provider.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>

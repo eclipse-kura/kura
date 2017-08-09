@@ -573,10 +573,11 @@ public class ConfigurationServiceTest {
 
         assertEquals("config size", 2, props.size());
 
-        Map<String, Object> result = cs.decryptPasswords(config);
+        cs.decryptConfigurationProperties(config.getConfigurationProperties());
 
         verify(cryptoServiceMock, times(1)).decryptAes(passStr.toCharArray());
 
+        Map<String, Object> result = config.getConfigurationProperties();
         assertNotNull("properties not null", result);
         assertEquals("config properties size", 2, result.size());
         assertTrue("contains password", result.containsKey(passKey));
@@ -604,7 +605,7 @@ public class ConfigurationServiceTest {
 
         assertEquals("config size before decryption", 1, props.size());
 
-        cs.decryptPasswords(config);
+        cs.decryptConfigurationProperties(config.getConfigurationProperties());
 
         verify(cryptoServiceMock, times(1)).decryptAes((char[]) Mockito.anyObject());
 
@@ -1241,7 +1242,7 @@ public class ConfigurationServiceTest {
             }
 
             @Override
-            Map<String, Object> decryptPasswords(ComponentConfiguration config) {
+            void decryptConfigurationProperties(Map<String,Object> configProps) {
                 calls[1] = true;
 
                 throw new RuntimeException("test");
@@ -1288,9 +1289,8 @@ public class ConfigurationServiceTest {
             }
 
             @Override
-            Map<String, Object> decryptPasswords(ComponentConfiguration config) {
+            void decryptConfigurationProperties(Map<String, Object> configProps) {
                 calls[1] = true;
-                return config.getConfigurationProperties();
             }
         };
 

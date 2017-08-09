@@ -2195,6 +2195,9 @@
                                             file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
                                         <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.wire.h2db.component.provider_${org.eclipse.kura.wire.h2db.component.provider.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                        <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.wire.helper.provider_${org.eclipse.kura.wire.helper.provider.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
                                         <copy
@@ -2230,8 +2233,9 @@
                                         <delete
                                             file="${project.build.directory}/staging/emulator/src/main/resources/Kura_Emulator_OSX.launch" />
                                         <copy file="RELEASE_NOTES.txt" todir="${project.build.directory}/staging/emulator/src/main/resources" />
-                                        <copy file="src/main/resources/common/Kura_Emulator_Linux.launch" todir="${project.build.directory}/staging/emulator/src/main/resources" />
-                                        <copy file="src/main/resources/common/Kura_Emulator_OSX.launch" todir="${project.build.directory}/staging/emulator/src/main/resources" />
+                                        <mkdir dir="${project.build.directory}/staging/emulator/launch_configs"/>
+                                        <copy file="src/main/resources/common/Kura_Emulator_Linux.launch" todir="${project.build.directory}/staging/emulator/launch_configs" />
+                                        <copy file="src/main/resources/common/Kura_Emulator_OSX.launch" todir="${project.build.directory}/staging/emulator/launch_configs" />
                                         <copy file="src/main/resources/common/classpaths/emulator.classpath"
                                             tofile="${project.build.directory}/staging/emulator/emulator.classpath" />
                                         <copy overwrite="true" file="src/main/resources/common/projects/emulator.project"

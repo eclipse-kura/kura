@@ -44,6 +44,14 @@
             default="/dev/watchdog"
             description="Watchdog device path e.g. /dev/watchdog."/>
             
+        <AD id="rebootCauseFilePath"
+            name="Reboot Cause File Path"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="/opt/eclipse/kura/data/kura-reboot-cause"
+            description="The path for the file that will contain the reboot cause information."/>
+            
     </OCD>
     <Designate pid="org.eclipse.kura.watchdog.WatchdogService">
         <Object ocdref="org.eclipse.kura.watchdog.WatchdogService"/>

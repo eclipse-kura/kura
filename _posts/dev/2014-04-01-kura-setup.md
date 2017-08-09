@@ -113,7 +113,7 @@ Download the latest Eclipse Installer appropriate for your platform from [Eclips
 * Switch to advanced mode (in simple mode you cannot add the custom installer)
 * Select "Eclipse for Committers" and select a JRE 1.8+ -> Next
 * Add a new installer by URL: https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup -> Check and next
-* Update Eclipse Kura Git repository's username (HTTPS, link to your fork) and customize further settings if you like (e.g. Root install folder, Installation folder name) -> Next
+* Update Eclipse Kura Git repository's username (prefer the anonymous HTTPS option, link to your fork) and customize further settings if you like (e.g. Root install folder, Installation folder name) -> Next
 * Leave all Bootstrap Tasks selected -> Finish
 * Accept the licenses and unsigned content
 * Wait for the installation to finish, a few additional plugins will be installed

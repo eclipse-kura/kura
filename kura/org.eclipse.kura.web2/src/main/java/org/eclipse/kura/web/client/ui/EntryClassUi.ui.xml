@@ -78,6 +78,10 @@
     .comp-modal-header {
     	display: none;
     }
+    
+    .rotateImg i {
+    	transform: rotate(-90deg);
+    }
     </ui:style>
 
     <b:Container fluid="true">
@@ -124,10 +128,10 @@
                                         <b:AnchorListItem icon="CLOUD" iconFixedWidth="true" text="Cloud Services"
                                             ui:field="cloudServices" />
 
-                                        <b:AnchorListItem icon="CUBE" iconFixedWidth="true" text="Drivers and Assets"
-                                            ui:field="driversAndAssetsServices" />
-                                        <b:AnchorListItem icon="SITEMAP" iconFixedWidth="true" text="Wires"
-                                            ui:field="wires" />
+                                        <b:AnchorListItem icon="CUBE" iconFixedWidth="true"
+                                            text="Drivers and Assets" ui:field="driversAndAssetsServices" />
+                                        <b:AnchorListItem icon="SITEMAP" addStyleNames="{style.rotateImg}"
+                                            iconFixedWidth="true" text="Wires" ui:field="wires" />
 
                                         <b:AnchorListItem icon="BRIEFCASE" iconFixedWidth="true" text="Packages"
                                             ui:field="packages" />

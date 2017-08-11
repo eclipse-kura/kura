@@ -18,10 +18,12 @@ public class WatchdogServiceOptions {
     private static final ConfigurationProperty<Integer> PROPERTY_PING_INTERVAL = new ConfigurationProperty<>(
             "pingInterval", 10000);
     private static final ConfigurationProperty<String> PROPERTY_WD_DEVICE = new ConfigurationProperty<>(
-            "watchdogDevice", "/tmp/watchdog");
+            "watchdogDevice", "/dev/watchdog");
     private static final ConfigurationProperty<String> PROPERTY_REBOOT_CAUSE_FILE_PATH = new ConfigurationProperty<>(
             "rebootCauseFilePath", "/opt/eclipse/kura/data/kura-reboot-cause");
 
+    private static final String WD_ENABLED_TEMPORARY_FILE_PATH = "/tmp/watchdog";
+    
     private Map<String, Object> properties;
 
     public WatchdogServiceOptions(Map<String, Object> properties) {
@@ -44,6 +46,10 @@ public class WatchdogServiceOptions {
         return PROPERTY_REBOOT_CAUSE_FILE_PATH.get(this.properties);
     }
 
+    public String getWatchdogEnabledTemporaryFilePath() {
+    		return WD_ENABLED_TEMPORARY_FILE_PATH;
+    }
+    
     private static class ConfigurationProperty<T> {
 
         private final String key;

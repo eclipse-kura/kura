@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE xml>
 <site>
-   <feature url="features/org.eclipse.kura.api_0.0.0.qualifier.jar" id="org.eclipse.kura.api" version="0.0.0">
+   <feature url="features/org.eclipse.kura.api.feature_0.0.0.qualifier.jar" id="org.eclipse.kura.api.feature" version="0.0.0">
       <category name="org.eclipse.kura.api"/>
    </feature>
-   <feature url="features/org.eclipse.kura.api.source_0.0.0.qualifier.jar" id="org.eclipse.kura.api.source" version="0.0.0">
+   <feature url="features/org.eclipse.kura.api.feature.source_0.0.0.qualifier.jar" id="org.eclipse.kura.api.feature.source" version="0.0.0">
       <category name="org.eclipse.kura.api.sdk"/>
    </feature>
-   <feature url="features/org.eclipse.kura.camel_0.0.0.qualifier.jar" id="org.eclipse.kura.camel" version="0.0.0">
+   <feature url="features/org.eclipse.kura.camel.feature_0.0.0.qualifier.jar" id="org.eclipse.kura.camel.feature" version="0.0.0">
       <category name="org.eclipse.kura.api"/>
    </feature>
-   <feature url="features/org.eclipse.kura.camel.source_0.0.0.qualifier.jar" id="org.eclipse.kura.camel.source" version="0.0.0">
+   <feature url="features/org.eclipse.kura.camel.feature.source_0.0.0.qualifier.jar" id="org.eclipse.kura.camel.feature.source" version="0.0.0">
       <category name="org.eclipse.kura.api.sdk"/>
    </feature>
-   <feature url="features/org.eclipse.kura.runtime_0.0.0.qualifier.jar" id="org.eclipse.kura.runtime" version="0.0.0">
+   <feature url="features/org.eclipse.kura.runtime.feature_0.0.0.qualifier.jar" id="org.eclipse.kura.runtime.feature" version="0.0.0">
       <category name="org.eclipse.kura.runtime"/>
    </feature>
    <category-def name="org.eclipse.kura.api" label="Eclipse Kura™ API">

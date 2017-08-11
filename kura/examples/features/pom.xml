@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2016, 2017 Red Hat Inc and others
+     Copyright (c) 2017 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
 
-    Contributors:
-      Eurotech
-      Red Hat Inc
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -20,15 +17,16 @@
 
     <parent>
         <groupId>org.eclipse.kura</groupId>
-        <artifactId>kura</artifactId>
+        <artifactId>examples</artifactId>
         <version>3.1.0-SNAPSHOT</version>
     </parent>
 
     <properties>
+      <kura.basedir>${project.basedir}/../..</kura.basedir>
       <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
     </properties>
 
-    <groupId>org.eclipse.kura.feature</groupId>
+    <groupId>org.eclipse.kura.examples.feature</groupId>
     <artifactId>features</artifactId>
     <packaging>pom</packaging>
 
@@ -36,42 +34,28 @@
 
     <repositories>
         <repository>
+            <id>license-feature</id>
+            <url>http://download.eclipse.org/cbi/updates/license/</url>
+            <layout>p2</layout>
+        </repository>
+        <repository>
             <id>p2-repo-equinox_3.11.1</id>
             <layout>p2</layout>
-            <url>file:///${basedir}/../../../target-platform/p2-repo-equinox_3.11.1/target/repository/</url>
+            <url>file:///${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
         </repository>
         <repository>
             <id>p2-repo-common</id>
             <layout>p2</layout>
-            <url>file:///${basedir}/../../../target-platform/p2-repo-common/target/repository/</url>
-        </repository>
-        <repository>
-            <id>p2-repo-test-deps</id>
-            <layout>p2</layout>
-            <url>file:///${basedir}/../../../target-platform/p2-repo-test-deps/target/repository/</url>
+            <url>file:///${kura.basedir}/target-definition/common/repository/</url>
         </repository>
     </repositories>
 
     <modules>
-        <module>org.eclipse.kura.api.feature</module>
-        <module>org.eclipse.kura.camel.feature</module>
-        <module>org.eclipse.kura.runtime.feature</module>
-        <module>org.eclipse.kura.protocol.modbus.feature</module>
-        <module>org.eclipse.kura.driver.opcua.feature</module>
-        <module>org.eclipse.kura.driver.s7plc.feature</module>
-        <module>org.eclipse.kura.wire.script.filter.feature</module>
+      <module>org.eclipse.kura.example.camel.aggregation.feature</module>
+      <module>org.eclipse.kura.example.camel.quickstart.feature</module>
     </modules>
 
     <profiles>
-        <profile>
-          <id>can</id>
-          <activation>
-            <activeByDefault>false</activeByDefault>
-          </activation>
-          <modules>
-            <module>org.eclipse.kura.protocol.can.feature</module>
-          </modules>
-        </profile>
         <profile>
             <id>source-feature-generation</id>
             <activation>

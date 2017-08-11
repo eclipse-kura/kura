@@ -11,6 +11,24 @@
 		<relativePath>..</relativePath>
 	</parent>
 
-	<artifactId>org.eclipse.kura.api.feature</artifactId>
+	<artifactId>org.eclipse.kura.wire.script.filter.feature</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
 	<packaging>eclipse-feature</packaging>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>de.dentrassi.maven</groupId>
+				<artifactId>osgi-dp</artifactId>
+				<version>${osgi-dp-plugin-version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>build</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

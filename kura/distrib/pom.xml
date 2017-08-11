@@ -38,6 +38,7 @@
 
         <kura.skip.can>true</kura.skip.can>
         <kura.skip.web>false</kura.skip.web>
+        <kura.skip.examples>true</kura.skip.examples>
     </properties>
 
     <repositories>
@@ -88,7 +89,7 @@
                         </goals>
                         <configuration>
                             <files>
-                                <file>${basedir}/config/kura.build.properties</file>
+                                <file>${kura.basedir}/config/kura.build.properties</file>
                                 <file>${kura.basedir}/../../target-platform/config/kura.target-platform.build.properties</file>
                             </files>
                         </configuration>
@@ -2392,133 +2393,136 @@
                             </execution>
                         </executions>
                     </plugin>
-
                 </plugins>
             </build>
         </profile>
         <profile>
-            <id>extra-dps</id> <!-- To be redistributed only in release phase. In snapshot phase them will not work.-->
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.7</version>
-                        <executions>
-                            <execution>
-                                <id>modbus-dp</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target if="${is.not.snapshot}">
-                                        <ant antfile="${basedir}/src/main/ant/build_modbus_dp.xml" target="build-dp" />
-                                    </target>
-                                </configuration>
-                            </execution>
-
-                            <execution>
-                                <id>check-can</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <exportAntProperties>true</exportAntProperties>
-                                    <target name="verify-can" if="${is.not.snapshot}">
-                                        <available
-                                            file="target/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar"
-                                            property="can.jar.present" />
-                                    </target>
-                                </configuration>
-                            </execution>
-
-                            <execution>
-                                <id>can-dp</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target name="dp-can" if="can.jar.present">
-                                        <ant antfile="${basedir}/src/main/ant/build_can_dp.xml" target="build-dp" />
-                                    </target>
-                                </configuration>
-                            </execution>
-
-                            <execution>
-                                <id>camel-aggregation-dp</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target if="${is.not.snapshot}">
-                                        <ant antfile="${basedir}/src/main/ant/build_camel-aggregation_dp.xml"
-                                            target="build-dp" />
-                                    </target>
-                                </configuration>
-                            </execution>
-
-                            <execution>
-                                <id>camel-quickstart-dp</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target if="${is.not.snapshot}">
-                                        <ant antfile="${basedir}/src/main/ant/build_camel-quickstart_dp.xml" target="build-dp" />
-                                    </target>
-                                </configuration>
-                            </execution>
-
-                            <execution>
-                                <id>opcua-dp</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target if="${is.not.snapshot}">
-                                        <ant antfile="${basedir}/src/main/ant/build_opcua_dp.xml" target="build-dp" />
-                                    </target>
-                                </configuration>
-                            </execution>
-
-                            <execution>
-                                <id>s7plc-dp</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target if="${is.not.snapshot}">
-                                        <ant antfile="${basedir}/src/main/ant/build_s7plc_dp.xml" target="build-dp" />
-                                    </target>
-                                </configuration>
-                            </execution>
-
-                            <execution>
-                                <id>script-filter-dp</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target if="${is.not.snapshot}">
-                                        <ant antfile="${basedir}/src/main/ant/build_script_filter_dp.xml" target="build-dp" />
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
+          <id>core-dp</id>
+          <activation>
+            <activeByDefault>true</activeByDefault>
+          </activation>
+          <build>
+            <plugins>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                  <execution>
+                      <id>core-dp</id>
+                      <phase>package</phase>
+                      <goals>
+                          <goal>copy</goal>
+                      </goals>
+                      <configuration>
+                        <artifactItems>
+                          <artifactItem>
+                            <groupId>org.eclipse.kura.feature</groupId>
+                            <artifactId>org.eclipse.kura.protocol.modbus.feature</artifactId>
+                            <version>${org.eclipse.kura.protocol.modbus.feature.version}</version>
+                            <type>dp</type>
+                          </artifactItem>
+                          <artifactItem>
+                            <groupId>org.eclipse.kura.feature</groupId>
+                            <artifactId>org.eclipse.kura.driver.opcua.feature</artifactId>
+                            <version>${org.eclipse.kura.driver.opcua.feature.version}</version>
+                            <type>dp</type>
+                          </artifactItem>
+                          <artifactItem>
+                            <groupId>org.eclipse.kura.feature</groupId>
+                            <artifactId>org.eclipse.kura.driver.s7plc.feature</artifactId>
+                            <version>${org.eclipse.kura.driver.s7plc.feature.version}</version>
+                            <type>dp</type>
+                          </artifactItem>
+                          <artifactItem>
+                            <groupId>org.eclipse.kura.feature</groupId>
+                            <artifactId>org.eclipse.kura.wire.script.filter.feature</artifactId>
+                            <version>${org.eclipse.kura.wire.script.filter.feature.version}</version>
+                            <type>dp</type>
+                          </artifactItem>
+                        </artifactItems>
+                        <outputDirectory>${project.build.directory}</outputDirectory>
+                      </configuration>
+                  </execution>
+                </executions>
+              </plugin>
+            </plugins>
+          </build>
+        </profile>
+        <profile>
+          <id>can-dp</id>
+          <activation>
+            <activeByDefault>true</activeByDefault>
+          </activation>
+          <build>
+            <plugins>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>can-dp</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                          <skip>${kura.skip.can}</skip>
+                          <artifactItems>
+                            <artifactItem>
+                              <groupId>org.eclipse.kura.feature</groupId>
+                              <artifactId>org.eclipse.kura.protocol.can.feature</artifactId>
+                              <version>${org.eclipse.kura.protocol.can.feature.version}</version>
+                              <type>dp</type>
+                            </artifactItem>
+                          </artifactItems>
+                          <outputDirectory>${project.build.directory}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+              </plugin>
+            </plugins>
+          </build>
+        </profile>
+        <profile>
+          <id>examples-dp</id>
+          <activation>
+            <activeByDefault>true</activeByDefault>
+          </activation>
+          <build>
+            <plugins>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>examples-dp</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                          <skip>${kura.skip.examples}</skip>
+                          <artifactItems>
+                            <artifactItem>
+                              <groupId>org.eclipse.kura.examples.feature</groupId>
+                              <artifactId>org.eclipse.kura.example.camel.aggregation.feature</artifactId>
+                              <version>${org.eclipse.kura.example.camel.aggregation.feature.version}</version>
+                              <type>dp</type>
+                            </artifactItem>
+                            <artifactItem>
+                              <groupId>org.eclipse.kura.examples.feature</groupId>
+                              <artifactId>org.eclipse.kura.example.camel.quickstart.feature</artifactId>
+                              <version>${org.eclipse.kura.example.camel.quickstart.feature.version}</version>
+                              <type>dp</type>
+                            </artifactItem>
+                          </artifactItems>
+                          <outputDirectory>${project.build.directory}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+              </plugin>
+            </plugins>
+          </build>
         </profile>
     </profiles>
 </project>

@@ -48,23 +48,23 @@ public final class WireServiceTest {
     private static final String receiverPid = "org.eclipse.kura.wire.test.receiver";
 
     /** Configuration Service Reference */
-    private static ConfigurationService s_configService;
+    private static ConfigurationService configService;
 
     /** Logger */
-    private static final Logger s_logger = LoggerFactory.getLogger(WireServiceTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(WireServiceTest.class);
 
     /** Configuration Service Reference */
-    private static WireService s_wireService;
+    private static WireService wireService;
 
     /**
      * Binds the configuration service dependency
      *
-     * @param configService
+     * @param cfgService
      *            the configuration service dependency
      */
-    public void bindConfigService(final ConfigurationService configService) {
-        if (s_configService == null) {
-            s_configService = configService;
+    public void bindConfigService(final ConfigurationService cfgService) {
+        if (configService == null) {
+            configService = cfgService;
             dependencyLatch.countDown();
         }
     }
@@ -76,8 +76,8 @@ public final class WireServiceTest {
      *            the wire service dependency
      */
     public void bindWireService(final WireService wireService) {
-        if (s_wireService == null) {
-            s_wireService = wireService;
+        if (WireServiceTest.wireService == null) {
+            WireServiceTest.wireService = wireService;
             dependencyLatch.countDown();
         }
     }
@@ -89,14 +89,14 @@ public final class WireServiceTest {
     @Test
     public void testCreateDeleteGetWireConfiguration() throws Exception {
         WireConfiguration configuration = null;
-        configuration = s_wireService.createWireConfiguration(emitterPid, receiverPid);
+        configuration = wireService.createWireConfiguration(emitterPid, receiverPid);
         assertNotNull(configuration);
         assertNotNull(configuration.getWire());
         assertEquals(configuration.getEmitterPid(), emitterPid);
         assertEquals(configuration.getReceiverPid(), receiverPid);
-        final Set<WireConfiguration> configs = s_wireService.getWireConfigurations();
+        final Set<WireConfiguration> configs = wireService.getWireConfigurations();
         assertEquals(1, configs.size());
-        s_wireService.deleteWireConfiguration(configuration);
+        wireService.deleteWireConfiguration(configuration);
         assertEquals(0, configs.size());
     }
 
@@ -107,26 +107,42 @@ public final class WireServiceTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test(expected = KuraException.class)
     public void testEmitterReceiverPidNotAvailable() throws KuraException {
-        s_wireService.createWireConfiguration("x", "y");
+        wireService.createWireConfiguration("x", "y");
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
     public void testGetConfiguration() throws KuraException {
-        s_wireService.createWireConfiguration(emitterPid, receiverPid);
+        // the test assumes that only English localization is provided when the test runs
 
-        ComponentConfiguration config = ((SelfConfiguringComponent) s_wireService).getConfiguration();
+        wireService.createWireConfiguration(emitterPid, receiverPid);
+
+        ComponentConfiguration config = ((SelfConfiguringComponent) wireService).getConfiguration();
 
         Map<String, Object> props = config.getConfigurationProperties();
 
         assertEquals("org.eclipse.kura.wire.WireService", config.getDefinition().getId());
-        assertEquals("WireService", config.getDefinition().getName());
-        assertTrue(config.getDefinition().getDescription().contains("Wire Components"));
-        assertTrue(props.containsKey("1.emitter"));
-        assertTrue(props.containsKey("1.filter"));
-        assertTrue(props.containsKey("1.receiver"));
-        assertEquals(emitterPid, props.get("1.emitter"));
-        assertNull(props.get("1.filter"));
-        assertEquals(receiverPid, props.get("1.receiver"));
+        assertTrue("Expected WireService for EN or WireMessages.name for other locales",
+                "WireService".equals(config.getDefinition().getName())
+                        || "WireMessages.name".equals(config.getDefinition().getName()));
+        assertTrue("Expected properly-localized description",
+                config.getDefinition().getDescription().contains("Wire Components")
+                        || "WireMessages.description".equals(config.getDefinition().getDescription()));
+        assertTrue("Expected the proper emitter key",
+                props.containsKey("1.emitter") || props.containsKey("1.WireMessages.emitter"));
+        assertTrue("Expected the proper filter key",
+                props.containsKey("1.filter") || props.containsKey("1.WireMessages.filter"));
+        assertTrue("Expected the proper receiver key",
+                props.containsKey("1.receiver") || props.containsKey("1.WireMessages.receiver"));
+        if (props.containsKey("1.emitter")) {
+            assertNull(props.get("1.filter"));
+            assertEquals(emitterPid, props.get("1.emitter"));
+            assertEquals(receiverPid, props.get("1.receiver"));
+        } else {
+            assertNull(props.get("1.WireMessages.filter"));
+            assertEquals(emitterPid, props.get("1.WireMessages.emitter"));
+            assertEquals(receiverPid, props.get("1.WireMessages.receiver"));
+        }
     }
 
     /**
@@ -135,7 +151,7 @@ public final class WireServiceTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testSameEmitterAndReceiverPid() throws KuraException {
-        final WireConfiguration configuration = s_wireService.createWireConfiguration(emitterPid, emitterPid);
+        final WireConfiguration configuration = wireService.createWireConfiguration(emitterPid, emitterPid);
         assertNull(configuration);
     }
 
@@ -145,31 +161,31 @@ public final class WireServiceTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testServiceExists() {
-        assertNotNull(WireServiceTest.s_wireService);
-        assertNotNull(WireServiceTest.s_configService);
+        assertNotNull(WireServiceTest.wireService);
+        assertNotNull(WireServiceTest.configService);
     }
 
     /**
      * Unbinds the configuration service dependency
      *
-     * @param configService
+     * @param cfgService
      *            the configuration service dependency
      */
-    public void unbindConfigService(final ConfigurationService configService) {
-        if (s_configService == configService) {
-            s_configService = null;
+    public void unbindConfigService(final ConfigurationService cfgService) {
+        if (configService == cfgService) {
+            configService = null;
         }
     }
 
     /**
      * Unbinds the wire service dependency
      *
-     * @param wireService
+     * @param wreService
      *            the wire service dependency
      */
-    public void unbindWireService(final WireService wireService) {
-        if (s_wireService == wireService) {
-            s_wireService = null;
+    public void unbindWireService(final WireService wreService) {
+        if (wireService == wreService) {
+            wireService = null;
         }
     }
 
@@ -182,7 +198,7 @@ public final class WireServiceTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         // Wait for OSGi dependencies
-        s_logger.info("Setting Up The Testcase....");
+        logger.info("Setting Up The Testcase....");
         try {
             boolean ok = dependencyLatch.await(10, TimeUnit.SECONDS);
 

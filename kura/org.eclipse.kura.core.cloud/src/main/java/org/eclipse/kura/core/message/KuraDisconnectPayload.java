@@ -27,14 +27,14 @@ public class KuraDisconnectPayload extends KuraPayload {
         addMetric(DISPLAY_NAME, displayName);
     }
 
-    public KuraDisconnectPayload(KuraPayload KuraMessage) {
-        Iterator<String> hdrIterator = KuraMessage.metricsIterator();
+    public KuraDisconnectPayload(KuraPayload kuraMessage) {
+        Iterator<String> hdrIterator = kuraMessage.metricsIterator();
         while (hdrIterator.hasNext()) {
             String hdrName = hdrIterator.next();
-            String hdrVal = (String) KuraMessage.getMetric(hdrName);
+            String hdrVal = (String) kuraMessage.getMetric(hdrName);
             addMetric(hdrName, hdrVal);
         }
-        setBody(KuraMessage.getBody());
+        setBody(kuraMessage.getBody());
     }
 
     public String getUptime() {

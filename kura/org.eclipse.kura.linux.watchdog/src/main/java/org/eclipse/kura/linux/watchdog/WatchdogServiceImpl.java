@@ -72,10 +72,10 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         if (this.options.isEnabled()) {
             this.rebootCauseWriter = new RebootCauseFileWriter(this.options.getRebootCauseFilePath());
 
-            try (PrintWriter wdWriter = new PrintWriter(this.options.getWatchdogDevice());) {
+            try (PrintWriter wdWriter = new PrintWriter(this.options.getWatchdogEnabledTemporaryFilePath())) {
                 wdWriter.write(this.options.getWatchdogDevice());
             } catch (IOException e) {
-                logger.error("Unable to write watchdog config file", e);
+                logger.error("Unable to write watchdog enabled temporary file", e);
             }
 
             this.pollTask = this.pollExecutor.scheduleAtFixedRate(() -> {
@@ -202,6 +202,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         // watchdogToStop is used to avoid multiple action executions and kill Kura after a while
         if (!this.watchdogToStop) {
             this.watchdogToStop = true;
+            runCommand("sync");
             runCommand("reboot");
         } else {
             refreshWatchdog();

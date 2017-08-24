@@ -4,8 +4,10 @@ Description=Kura
 [Service]
 Type=forking
 ExecStart=/bin/sh INSTALL_DIR/kura/bin/start_kura_background.sh
+ExecStopPost=/bin/sh -c 'if [ -f /tmp/watchdog ]; then echo w > `cat /tmp/watchdog`; fi'
 PIDFile=/var/run/kura.pid
+Restart=on-failure
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
-

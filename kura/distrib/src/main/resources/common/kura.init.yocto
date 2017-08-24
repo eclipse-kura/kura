@@ -28,6 +28,9 @@ case "$1" in
     start-stop-daemon --stop --quiet --pidfile $pidfile
     RETVAL=$?
     echo "."
+    if [ -f /tmp/watchdog ]; then
+        echo w > `cat /tmp/watchdog`
+    fi
     ;;
   restart)
     $0 stop

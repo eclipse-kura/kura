@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2017 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -69,7 +69,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DeploymentAgent implements DeploymentAgentService {
 
-    private static Logger s_logger = LoggerFactory.getLogger(DeploymentAgent.class);
+    private static Logger logger = LoggerFactory.getLogger(DeploymentAgent.class);
 
     private static final String DPA_CONF_PATH_PROPNAME = "dpa.configuration";
 
@@ -78,62 +78,62 @@ public class DeploymentAgent implements DeploymentAgentService {
     private static final String CONN_TIMEOUT_PROPNAME = "dpa.connection.timeout";
     private static final String READ_TIMEOUT_PROPNAME = "dpa.read.timeout";
 
-    private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
+    private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
 
-    private static Future<?> s_installerTask;
-    private static Future<?> s_uninstallerTask;
+    private static Future<?> installerTask;
+    private static Future<?> uninstallerTask;
 
-    private DeploymentAdmin m_deploymentAdmin;
-    private EventAdmin m_eventAdmin;
-    private SystemService m_systemService;
+    private DeploymentAdmin deploymentAdmin;
+    private EventAdmin eventAdmin;
+    private SystemService systemService;
 
-    private Queue<String> m_instPackageUrls;
-    private Queue<String> m_uninstPackageNames;
+    private Queue<String> instPackageUrls;
+    private Queue<String> uninstPackageNames;
 
-    private ExecutorService m_installerExecutor;
-    private ExecutorService m_uninstallerExecutor;
+    private ExecutorService installerExecutor;
+    private ExecutorService uninstallerExecutor;
 
-    private String m_dpaConfPath;
-    private String m_packagesPath;
+    private String dpaConfPath;
+    private String packagesPath;
 
-    private Properties m_deployedPackages;
+    private Properties deployedPackages;
 
-    private int m_connTimeout;
-    private int m_readTimeout;
+    private int connTimeout;
+    private int readTimeout;
 
     protected void activate(ComponentContext componentContext) {
 
-        this.m_deployedPackages = new Properties();
+        this.deployedPackages = new Properties();
 
-        this.m_dpaConfPath = System.getProperty(DPA_CONF_PATH_PROPNAME);
-        if (this.m_dpaConfPath == null || this.m_dpaConfPath.isEmpty()) {
+        this.dpaConfPath = System.getProperty(DPA_CONF_PATH_PROPNAME);
+        if (this.dpaConfPath == null || this.dpaConfPath.isEmpty()) {
             throw new ComponentException("The value of '" + DPA_CONF_PATH_PROPNAME + "' is not defined");
         }
 
-        final Properties kuraProperties = this.m_systemService.getProperties();
+        final Properties kuraProperties = this.systemService.getProperties();
 
-        this.m_packagesPath = kuraProperties.getProperty(PACKAGES_PATH_PROPNAME);
-        if (this.m_packagesPath == null || this.m_packagesPath.isEmpty()) {
+        this.packagesPath = kuraProperties.getProperty(PACKAGES_PATH_PROPNAME);
+        if (this.packagesPath == null || this.packagesPath.isEmpty()) {
             throw new ComponentException("The value of '" + PACKAGES_PATH_PROPNAME + "' is not defined");
         }
         if (kuraProperties.getProperty(PACKAGES_PATH_PROPNAME) != null
                 && kuraProperties.getProperty(PACKAGES_PATH_PROPNAME).trim().equals("kura/packages")) {
             kuraProperties.setProperty(PACKAGES_PATH_PROPNAME, "/opt/eclipse/kura/kura/packages");
-            this.m_packagesPath = kuraProperties.getProperty(PACKAGES_PATH_PROPNAME);
-            s_logger.warn("Overridding invalid kura.packages location");
+            this.packagesPath = kuraProperties.getProperty(PACKAGES_PATH_PROPNAME);
+            logger.warn("Overridding invalid kura.packages location");
         }
 
         String sConnTimeout = kuraProperties.getProperty(CONN_TIMEOUT_PROPNAME);
         if (sConnTimeout != null) {
-            this.m_connTimeout = Integer.valueOf(sConnTimeout);
+            this.connTimeout = Integer.valueOf(sConnTimeout);
         }
 
         String sReadTimeout = kuraProperties.getProperty(READ_TIMEOUT_PROPNAME);
         if (sReadTimeout != null) {
-            this.m_readTimeout = Integer.valueOf(sReadTimeout);
+            this.readTimeout = Integer.valueOf(sReadTimeout);
         }
 
-        File dpaConfFile = new File(this.m_dpaConfPath);
+        File dpaConfFile = new File(this.dpaConfPath);
         if (dpaConfFile.getParentFile() != null && !dpaConfFile.getParentFile().exists()) {
             dpaConfFile.getParentFile().mkdirs();
         }
@@ -145,138 +145,129 @@ public class DeploymentAgent implements DeploymentAgentService {
             }
         }
 
-        File packagesDir = new File(this.m_packagesPath);
+        File packagesDir = new File(this.packagesPath);
         if (!packagesDir.exists()) {
             if (!packagesDir.mkdirs()) {
                 throw new ComponentException("Cannot create packages directory");
             }
         }
 
-        this.m_instPackageUrls = new ConcurrentLinkedQueue<String>();
-        this.m_uninstPackageNames = new ConcurrentLinkedQueue<String>();
+        this.instPackageUrls = new ConcurrentLinkedQueue<>();
+        this.uninstPackageNames = new ConcurrentLinkedQueue<>();
 
-        this.m_installerExecutor = Executors.newSingleThreadExecutor();
+        this.installerExecutor = Executors.newSingleThreadExecutor();
 
-        this.m_uninstallerExecutor = Executors.newSingleThreadExecutor();
+        this.uninstallerExecutor = Executors.newSingleThreadExecutor();
 
-        s_installerTask = this.m_installerExecutor.submit(new Runnable() {
-
-            @Override
-            public void run() {
-                Thread.currentThread().setName("DeploymentAgent");
-                installer();
-            }
+        installerTask = this.installerExecutor.submit(() -> {
+            Thread.currentThread().setName("DeploymentAgent");
+            installer();
         });
 
-        s_uninstallerTask = this.m_uninstallerExecutor.submit(new Runnable() {
-
-            @Override
-            public void run() {
-                Thread.currentThread().setName("DeploymentAgent:Uninstall");
-                uninstaller();
-            }
+        uninstallerTask = this.uninstallerExecutor.submit(() -> {
+            Thread.currentThread().setName("DeploymentAgent:Uninstall");
+            uninstaller();
         });
 
         installPackagesFromConfFile();
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        if (s_installerTask != null && !s_installerTask.isDone()) {
-            s_logger.debug("Cancelling DeploymentAgent task ...");
-            s_installerTask.cancel(true);
-            s_logger.info("DeploymentAgent task cancelled? = {}", s_installerTask.isDone());
-            s_installerTask = null;
+        if (installerTask != null && !installerTask.isDone()) {
+            logger.debug("Cancelling DeploymentAgent task ...");
+            installerTask.cancel(true);
+            logger.info("DeploymentAgent task cancelled? = {}", installerTask.isDone());
+            installerTask = null;
         }
 
-        if (this.m_installerExecutor != null) {
-            s_logger.debug("Terminating DeploymentAgent Thread ...");
-            this.m_installerExecutor.shutdownNow();
+        if (this.installerExecutor != null) {
+            logger.debug("Terminating DeploymentAgent Thread ...");
+            this.installerExecutor.shutdownNow();
             try {
-                this.m_installerExecutor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+                this.installerExecutor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
-                s_logger.warn("Interrupted", e);
+                logger.warn("Interrupted", e);
             }
-            s_logger.info("DeploymentAgent Thread terminated? - {}", this.m_installerExecutor.isTerminated());
-            this.m_installerExecutor = null;
+            logger.info("DeploymentAgent Thread terminated? - {}", this.installerExecutor.isTerminated());
+            this.installerExecutor = null;
         }
 
-        if (s_uninstallerTask != null && !s_uninstallerTask.isDone()) {
-            s_logger.debug("Cancelling DeploymentAgent:Uninstall task ...");
-            s_uninstallerTask.cancel(true);
-            s_logger.info("DeploymentAgent:Uninstall task cancelled? = {}", s_uninstallerTask.isDone());
-            s_uninstallerTask = null;
+        if (uninstallerTask != null && !uninstallerTask.isDone()) {
+            logger.debug("Cancelling DeploymentAgent:Uninstall task ...");
+            uninstallerTask.cancel(true);
+            logger.info("DeploymentAgent:Uninstall task cancelled? = {}", uninstallerTask.isDone());
+            uninstallerTask = null;
         }
 
-        if (this.m_uninstallerExecutor != null) {
-            s_logger.debug("Terminating DeploymentAgent:Uninstall Thread ...");
-            this.m_uninstallerExecutor.shutdownNow();
+        if (this.uninstallerExecutor != null) {
+            logger.debug("Terminating DeploymentAgent:Uninstall Thread ...");
+            this.uninstallerExecutor.shutdownNow();
             try {
-                this.m_uninstallerExecutor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+                this.uninstallerExecutor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
-                s_logger.warn("Interrupted", e);
+                logger.warn("Interrupted", e);
             }
-            s_logger.info("DeploymentAgent:Uninstall Thread terminated? - {}",
-                    this.m_uninstallerExecutor.isTerminated());
-            this.m_uninstallerExecutor = null;
+            logger.info("DeploymentAgent:Uninstall Thread terminated? - {}", this.uninstallerExecutor.isTerminated());
+            this.uninstallerExecutor = null;
         }
 
-        this.m_dpaConfPath = null;
-        this.m_deployedPackages = null;
-        this.m_uninstPackageNames = null;
-        this.m_instPackageUrls = null;
+        this.dpaConfPath = null;
+        this.deployedPackages = null;
+        this.uninstPackageNames = null;
+        this.instPackageUrls = null;
     }
 
     public void setDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
-        this.m_deploymentAdmin = deploymentAdmin;
+        this.deploymentAdmin = deploymentAdmin;
     }
 
     public void unsetDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
-        this.m_deploymentAdmin = null;
+        this.deploymentAdmin = null;
     }
 
     protected void setEventAdmin(EventAdmin eventAdmin) {
-        this.m_eventAdmin = eventAdmin;
+        this.eventAdmin = eventAdmin;
     }
 
     protected void unsetEventAdmin(EventAdmin eventAdmin) {
-        this.m_eventAdmin = null;
+        this.eventAdmin = null;
     }
 
     public void setSystemService(SystemService systemService) {
-        this.m_systemService = systemService;
+        this.systemService = systemService;
     }
 
     public void unsetSystemService(SystemService systemService) {
-        this.m_systemService = null;
+        this.systemService = null;
     }
 
     @Override
     public void installDeploymentPackageAsync(String url) throws Exception {
-        if (this.m_instPackageUrls.contains(url)) {
+        if (this.instPackageUrls.contains(url)) {
             throw new Exception("Element already exists");
         }
 
-        this.m_instPackageUrls.offer(url);
-        synchronized (this.m_instPackageUrls) {
-            this.m_instPackageUrls.notifyAll();
+        this.instPackageUrls.offer(url);
+        synchronized (this.instPackageUrls) {
+            this.instPackageUrls.notifyAll();
         }
     }
 
     @Override
     public void uninstallDeploymentPackageAsync(String name) throws Exception {
-        if (this.m_uninstPackageNames.contains(name)) {
+        if (this.uninstPackageNames.contains(name)) {
             throw new Exception("Element already exists");
         }
 
-        this.m_uninstPackageNames.offer(name);
-        synchronized (this.m_uninstPackageNames) {
-            this.m_uninstPackageNames.notifyAll();
+        this.uninstPackageNames.offer(name);
+        synchronized (this.uninstPackageNames) {
+            this.uninstPackageNames.notifyAll();
         }
     }
 
     @Override
     public boolean isInstallingDeploymentPackage(String url) {
-        if (this.m_instPackageUrls.contains(url)) {
+        if (this.instPackageUrls.contains(url)) {
             return true;
         }
         return false;
@@ -284,7 +275,7 @@ public class DeploymentAgent implements DeploymentAgentService {
 
     @Override
     public boolean isUninstallingDeploymentPackage(String name) {
-        if (this.m_uninstPackageNames.contains(name)) {
+        if (this.uninstPackageNames.contains(name)) {
             return true;
         }
         return false;
@@ -293,38 +284,36 @@ public class DeploymentAgent implements DeploymentAgentService {
     private void installer() {
         do {
             try {
-                try {
-                    while (this.m_instPackageUrls.isEmpty()) {
-                        synchronized (this.m_instPackageUrls) {
-                            this.m_instPackageUrls.wait();
-                        }
+                while (this.instPackageUrls.isEmpty()) {
+                    synchronized (this.instPackageUrls) {
+                        this.instPackageUrls.wait();
                     }
-
-                    String url = this.m_instPackageUrls.peek();
-                    if (url != null) {
-                        s_logger.info("About to install package at URL {}", url);
-                        DeploymentPackage dp = null;
-                        Exception ex = null;
-                        try {
-                            dp = installDeploymentPackageInternal(url);
-                        } catch (Exception e) {
-                            ex = e;
-                            s_logger.error("Exception installing package at URL {}", url, e);
-                        } finally {
-                            boolean successful = dp != null ? true : false;
-                            s_logger.info("Posting INSTALLED event for package at URL {}: {}", url,
-                                    successful ? "successful" : "unsuccessful");
-                            this.m_instPackageUrls.poll();
-                            postInstalledEvent(dp, url, successful, ex);
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    s_logger.info("Exiting...");
-                    Thread.interrupted();
-                    return;
                 }
+
+                String url = this.instPackageUrls.peek();
+                if (url != null) {
+                    logger.info("About to install package at URL {}", url);
+                    DeploymentPackage dp = null;
+                    Exception ex = null;
+                    try {
+                        dp = installDeploymentPackageInternal(url);
+                    } catch (Exception e) {
+                        ex = e;
+                        logger.error("Exception installing package at URL {}", url, e);
+                    } finally {
+                        boolean successful = dp != null ? true : false;
+                        logger.info("Posting INSTALLED event for package at URL {}: {}", url,
+                                successful ? "successful" : "unsuccessful");
+                        this.instPackageUrls.poll();
+                        postInstalledEvent(dp, url, successful, ex);
+                    }
+                }
+            } catch (InterruptedException e) {
+                logger.info("Exiting...");
+                Thread.interrupted();
+                return;
             } catch (Throwable t) {
-                s_logger.error("Unexpected throwable", t);
+                logger.error("Unexpected throwable", t);
             }
         } while (true);
     }
@@ -332,55 +321,53 @@ public class DeploymentAgent implements DeploymentAgentService {
     private void uninstaller() {
         do {
             try {
-                try {
-                    while (this.m_uninstPackageNames.isEmpty()) {
-                        synchronized (this.m_uninstPackageNames) {
-                            this.m_uninstPackageNames.wait();
-                        }
+                while (this.uninstPackageNames.isEmpty()) {
+                    synchronized (this.uninstPackageNames) {
+                        this.uninstPackageNames.wait();
                     }
-
-                    String name = this.m_uninstPackageNames.peek();
-                    if (name != null) {
-                        s_logger.info("About to uninstall package ", name);
-                        DeploymentPackage dp = null;
-                        boolean successful = false;
-                        Exception ex = null;
-                        try {
-                            dp = this.m_deploymentAdmin.getDeploymentPackage(name);
-                            if (dp != null) {
-                                dp.uninstall();
-
-                                String sUrl = this.m_deployedPackages.getProperty(name);
-                                File dpFile = new File(new URL(sUrl).getPath());
-                                if (!dpFile.delete()) {
-                                    s_logger.warn("Cannot delete file at URL: {}", sUrl);
-                                }
-                                successful = true;
-                                removePackageFromConfFile(name);
-                            }
-                        } catch (Exception e) {
-                            ex = e;
-                            s_logger.error("Exception uninstalling package {}", name, e);
-                        } finally {
-                            s_logger.info("Posting UNINSTALLED event for package {}: {}", name,
-                                    successful ? "successful" : "unsuccessful");
-                            this.m_uninstPackageNames.poll();
-                            postUninstalledEvent(name, successful, ex);
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    s_logger.info("Exiting...");
-                    Thread.interrupted();
-                    return;
                 }
+
+                String name = this.uninstPackageNames.peek();
+                if (name != null) {
+                    logger.info("About to uninstall package ", name);
+                    DeploymentPackage dp = null;
+                    boolean successful = false;
+                    Exception ex = null;
+                    try {
+                        dp = this.deploymentAdmin.getDeploymentPackage(name);
+                        if (dp != null) {
+                            dp.uninstall();
+
+                            String sUrl = this.deployedPackages.getProperty(name);
+                            File dpFile = new File(new URL(sUrl).getPath());
+                            if (!dpFile.delete()) {
+                                logger.warn("Cannot delete file at URL: {}", sUrl);
+                            }
+                            successful = true;
+                            removePackageFromConfFile(name);
+                        }
+                    } catch (Exception e) {
+                        ex = e;
+                        logger.error("Exception uninstalling package {}", name, e);
+                    } finally {
+                        logger.info("Posting UNINSTALLED event for package {}: {}", name,
+                                successful ? "successful" : "unsuccessful");
+                        this.uninstPackageNames.poll();
+                        postUninstalledEvent(name, successful, ex);
+                    }
+                }
+            } catch (InterruptedException e) {
+                logger.info("Exiting...");
+                Thread.interrupted();
+                return;
             } catch (Throwable t) {
-                s_logger.error("Unexpected throwable", t);
+                logger.error("Unexpected throwable", t);
             }
         } while (true);
     }
 
     private void postInstalledEvent(DeploymentPackage dp, String url, boolean successful, Exception e) {
-        Map<String, Object> props = new HashMap<String, Object>();
+        Map<String, Object> props = new HashMap<>();
 
         if (dp != null) {
             props.put(EVENT_PACKAGE_NAME, dp.getName());
@@ -394,47 +381,37 @@ public class DeploymentAgent implements DeploymentAgentService {
         props.put(EVENT_SUCCESSFUL, successful);
         props.put(EVENT_EXCEPTION, e);
         EventProperties eventProps = new EventProperties(props);
-        this.m_eventAdmin.postEvent(new Event(EVENT_INSTALLED_TOPIC, eventProps));
+        this.eventAdmin.postEvent(new Event(EVENT_INSTALLED_TOPIC, eventProps));
     }
 
     private void postUninstalledEvent(String name, boolean successful, Exception e) {
-        Map<String, Object> props = new HashMap<String, Object>();
+        Map<String, Object> props = new HashMap<>();
         props.put(EVENT_PACKAGE_NAME, name);
         props.put(EVENT_SUCCESSFUL, successful);
         props.put(EVENT_EXCEPTION, e);
         EventProperties eventProps = new EventProperties(props);
-        this.m_eventAdmin.postEvent(new Event(EVENT_UNINSTALLED_TOPIC, eventProps));
+        this.eventAdmin.postEvent(new Event(EVENT_UNINSTALLED_TOPIC, eventProps));
     }
 
     private void installPackagesFromConfFile() {
 
-        if (this.m_dpaConfPath != null) {
-            FileReader fr = null;
-            try {
-                fr = new FileReader(this.m_dpaConfPath);
-                this.m_deployedPackages.load(fr);
+        if (this.dpaConfPath != null) {
+            try (FileReader fr = new FileReader(this.dpaConfPath)) {
+                this.deployedPackages.load(fr);
             } catch (IOException e) {
-                s_logger.error("Exception loading deployment packages configuration file", e);
-            } finally {
-                if (fr != null) {
-                    try {
-                        fr.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+                logger.error("Exception loading deployment packages configuration file", e);
             }
         }
 
-        Set<Object> packageNames = this.m_deployedPackages.keySet();
+        Set<Object> packageNames = this.deployedPackages.keySet();
         for (Object packageName : packageNames) {
-            String packageUrl = (String) this.m_deployedPackages.get(packageName);
+            String packageUrl = (String) this.deployedPackages.get(packageName);
 
-            s_logger.info("Deploying package name {} at URL {}", packageName, packageUrl);
+            logger.info("Deploying package name {} at URL {}", packageName, packageUrl);
             try {
                 installDeploymentPackageAsync(packageUrl);
             } catch (Exception e) {
-                s_logger.error("Error installing package {}", packageName, e);
+                logger.error("Error installing package {}", packageName, e);
             }
         }
     }
@@ -446,7 +423,7 @@ public class DeploymentAgent implements DeploymentAgentService {
         String urlPath = url.getPath();
         String[] parts = urlPath.split("/");
         String dpBasename = parts[parts.length - 1];
-        String dpPersistentFilePath = this.m_packagesPath + File.separator + dpBasename;
+        String dpPersistentFilePath = this.packagesPath + File.separator + dpBasename;
         File dpPersistentFile = new File(dpPersistentFilePath);
 
         DeploymentPackage dp = null;
@@ -456,23 +433,23 @@ public class DeploymentAgent implements DeploymentAgentService {
         try {
             // Download the package to a temporary file unless it already resides
             // on the local filesystem.
-            if (!url.getProtocol().equals("file")) {
+            if (!"file".equals(url.getProtocol())) {
                 dpFile = File.createTempFile("dpa", null);
                 dpFile.deleteOnExit();
 
-                FileUtils.copyURLToFile(url, dpFile, this.m_connTimeout, this.m_readTimeout);
+                FileUtils.copyURLToFile(url, dpFile, this.connTimeout, this.readTimeout);
             } else {
                 dpFile = new File(url.getPath());
             }
 
             dpInputStream = new FileInputStream(dpFile);
-            dp = this.m_deploymentAdmin.installDeploymentPackage(dpInputStream);
+            dp = this.deploymentAdmin.installDeploymentPackage(dpInputStream);
 
             // Now we need to copy the deployment package file to the Kura
             // packages directory unless it's already there.
             if (!dpFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
-                s_logger.debug("dpFile.getCanonicalPath(): {}", dpFile.getCanonicalPath());
-                s_logger.debug("dpPersistentFile.getCanonicalPath(): {}", dpPersistentFile.getCanonicalPath());
+                logger.debug("dpFile.getCanonicalPath(): {}", dpFile.getCanonicalPath());
+                logger.debug("dpPersistentFile.getCanonicalPath(): {}", dpPersistentFile.getCanonicalPath());
                 FileUtils.copyFile(dpFile, dpPersistentFile);
                 addPackageToConfFile(dp.getName(), "file:" + dpPersistentFilePath);
             }
@@ -485,7 +462,7 @@ public class DeploymentAgent implements DeploymentAgentService {
                 try {
                     br.close();
                 } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
+                    logger.error("I/O Exception while closing BufferedReader!");
                 }
             }
 
@@ -493,7 +470,7 @@ public class DeploymentAgent implements DeploymentAgentService {
                 try {
                     dpInputStream.close();
                 } catch (IOException e) {
-                    s_logger.warn("Cannot close input stream", e);
+                    logger.warn("Cannot close input stream", e);
                 }
             }
             // The file from which we have installed the deployment package will be deleted
@@ -507,40 +484,40 @@ public class DeploymentAgent implements DeploymentAgentService {
     }
 
     private void addPackageToConfFile(String packageName, String packageUrl) {
-        this.m_deployedPackages.setProperty(packageName, packageUrl);
+        this.deployedPackages.setProperty(packageName, packageUrl);
 
-        if (this.m_dpaConfPath == null) {
-            s_logger.warn("Configuration file not specified");
+        if (this.dpaConfPath == null) {
+            logger.warn("Configuration file not specified");
             return;
         }
 
         try {
-            FileOutputStream fos = new FileOutputStream(this.m_dpaConfPath);
-            this.m_deployedPackages.store(fos, null);
+            FileOutputStream fos = new FileOutputStream(this.dpaConfPath);
+            this.deployedPackages.store(fos, null);
             fos.flush();
             fos.getFD().sync();
             fos.close();
         } catch (IOException e) {
-            s_logger.error("Error writing package configuration file", e);
+            logger.error("Error writing package configuration file", e);
         }
     }
 
     private void removePackageFromConfFile(String packageName) {
-        this.m_deployedPackages.remove(packageName);
+        this.deployedPackages.remove(packageName);
 
-        if (this.m_dpaConfPath == null) {
-            s_logger.warn("Configuration file not specified");
+        if (this.dpaConfPath == null) {
+            logger.warn("Configuration file not specified");
             return;
         }
 
         try {
-            FileOutputStream fos = new FileOutputStream(this.m_dpaConfPath);
-            this.m_deployedPackages.store(fos, null);
+            FileOutputStream fos = new FileOutputStream(this.dpaConfPath);
+            this.deployedPackages.store(fos, null);
             fos.flush();
             fos.getFD().sync();
             fos.close();
         } catch (IOException e) {
-            s_logger.error("Error writing package configuration file", e);
+            logger.error("Error writing package configuration file", e);
         }
     }
 }

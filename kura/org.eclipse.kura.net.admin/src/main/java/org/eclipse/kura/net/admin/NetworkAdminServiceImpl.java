@@ -12,11 +12,10 @@
 package org.eclipse.kura.net.admin;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.EnumSet;
@@ -182,6 +181,19 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     protected void deactivate(ComponentContext componentContext) {
+    }
+
+    protected List<WifiAccessPoint> getWifiAccessPoints(String ifaceName) throws KuraException {
+        List<WifiAccessPoint> wifiAccessPoints;
+
+        IScanTool scanTool = ScanTool.get(ifaceName);
+        if (scanTool != null) {
+            wifiAccessPoints = scanTool.scan();
+        } else {
+            wifiAccessPoints = new ArrayList<>();
+        }
+
+        return wifiAccessPoints;
     }
 
     @Override
@@ -1175,31 +1187,28 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             }
 
             logger.info("getWifiHotspots() :: scanning for available access points ...");
-            IScanTool scanTool = ScanTool.get(ifaceName);
-            if (scanTool != null) {
-                List<WifiAccessPoint> wifiAccessPoints = scanTool.scan();
-                for (WifiAccessPoint wap : wifiAccessPoints) {
 
-                    int frequency = (int) wap.getFrequency();
-                    int channel = frequencyMhz2Channel(frequency);
+            List<WifiAccessPoint> wifiAccessPoints = getWifiAccessPoints(ifaceName);
+            for (WifiAccessPoint wap : wifiAccessPoints) {
+                int frequency = (int) wap.getFrequency();
+                int channel = frequencyMhz2Channel(frequency);
 
-                    if (wap.getSSID() == null || wap.getSSID().length() == 0
-                            || isHotspotInList(channel, wap.getSSID(), wifiHotspotInfoList)) {
-                        logger.debug("Skipping hidden SSID");
-                        continue;
-                    }
-
-                    logger.trace("getWifiHotspots() :: SSID={}", wap.getSSID());
-                    logger.trace("getWifiHotspots() :: Signal={}", wap.getStrength());
-                    logger.trace("getWifiHotspots() :: Frequency={}", wap.getFrequency());
-
-                    String macAddress = getMacAddress(wap.getHardwareAddress());
-                    WifiSecurity wifiSecurity = getWifiSecurity(wap);
-                    WifiHotspotInfo wifiHotspotInfo = new WifiHotspotInfo(wap.getSSID(), macAddress,
-                            0 - wap.getStrength(), channel, frequency, wifiSecurity);
-                    setCiphers(wifiHotspotInfo, wap, wifiSecurity);
-                    wifiHotspotInfoList.add(wifiHotspotInfo);
+                if (wap.getSSID() == null || wap.getSSID().length() == 0
+                        || isHotspotInList(channel, wap.getSSID(), wifiHotspotInfoList)) {
+                    logger.debug("Skipping hidden SSID");
+                    continue;
                 }
+
+                logger.trace("getWifiHotspots() :: SSID={}", wap.getSSID());
+                logger.trace("getWifiHotspots() :: Signal={}", wap.getStrength());
+                logger.trace("getWifiHotspots() :: Frequency={}", wap.getFrequency());
+
+                String macAddress = getMacAddress(wap.getHardwareAddress());
+                WifiSecurity wifiSecurity = getWifiSecurity(wap);
+                WifiHotspotInfo wifiHotspotInfo = new WifiHotspotInfo(wap.getSSID(), macAddress, 0 - wap.getStrength(),
+                        channel, frequency, wifiSecurity);
+                setCiphers(wifiHotspotInfo, wap, wifiSecurity);
+                wifiHotspotInfoList.add(wifiHotspotInfo);
             }
 
             if (wifiMode == WifiMode.MASTER) {
@@ -1370,31 +1379,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         if (srcFile.exists()) {
             try {
                 logger.debug("rollbackItem() :: copying {} to {} ...", srcFile, dstFile);
-                copyFile(srcFile, dstFile);
+                Files.copy(srcFile.toPath(), dstFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 logger.error("rollbackItem() :: Failed to recover {} file ", dstFile, e);
-            }
-        }
-    }
-
-    private void copyFile(File sourceFile, File destFile) throws IOException {
-        if (!destFile.exists() && destFile.createNewFile()) {
-            logger.debug("copyFile() :: created new {} file", destFile.getName());
-        }
-        FileChannel source = null;
-        FileChannel destination = null;
-
-        try (FileInputStream sourceStream = new FileInputStream(sourceFile);
-                FileOutputStream destinationStream = new FileOutputStream(destFile)) {
-            source = sourceStream.getChannel();
-            destination = destinationStream.getChannel();
-            destination.transferFrom(source, 0, source.size());
-        } finally {
-            if (source != null) {
-                source.close();
-            }
-            if (destination != null) {
-                destination.close();
             }
         }
     }

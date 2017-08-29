@@ -1606,6 +1606,127 @@ public class NetworkAdminServiceImplTest {
         verify(csMock, times(1)).snapshot();
     }
 
+    @Test
+    public void testGetWifiHotspotListException() throws KuraException {
+        // tests retrieval of available hotspots - exception case
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl() {
+
+            @Override
+            protected List<WifiAccessPoint> getWifiAccessPoints(String ifaceName) throws KuraException {
+                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "test");
+            }
+        };
+
+        NetworkConfigurationService ncsMock = mock(NetworkConfigurationService.class);
+        svc.setNetworkConfigurationService(ncsMock);
+
+        String ifaceName = "wlan3";
+
+        NetworkConfiguration nc = new NetworkConfiguration();
+        WifiInterfaceConfigImpl nic = new WifiInterfaceConfigImpl(ifaceName);
+        List<WifiInterfaceAddressConfig> ias = new ArrayList<>();
+        WifiInterfaceAddressConfigImpl wiac = new WifiInterfaceAddressConfigImpl();
+        wiac.setMode(WifiMode.ADHOC); // don't set to MASTER so as not to test the OS-specific functionality
+        ias.add(wiac);
+        nic.setNetInterfaceAddresses(ias);
+        nc.addNetInterfaceConfig(nic);
+        when(ncsMock.getNetworkConfiguration()).thenReturn(nc);
+
+        try {
+            svc.getWifiHotspotList(ifaceName);
+
+            fail("Exception was expected.");
+        } catch (KuraException e) {
+            assertEquals(KuraErrorCode.INTERNAL_ERROR, e.getCode());
+            assertEquals(KuraErrorCode.UNAVAILABLE_DEVICE, ((KuraException) e.getCause()).getCode());
+            assertTrue(e.getCause().getMessage().contains("test"));
+        }
+    }
+
+    @Test
+    public void testGetWifiHotspotListEmpty() throws KuraException {
+        // tests retrieval of all available hotspots - none
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl() {
+
+            @Override
+            protected List<WifiAccessPoint> getWifiAccessPoints(String ifaceName) throws KuraException {
+                List<WifiAccessPoint> list = new ArrayList<>();
+                return list;
+            }
+        };
+
+        NetworkConfigurationService ncsMock = mock(NetworkConfigurationService.class);
+        svc.setNetworkConfigurationService(ncsMock);
+
+        String ifaceName = "wlan3";
+
+        NetworkConfiguration nc = new NetworkConfiguration();
+        WifiInterfaceConfigImpl nic = new WifiInterfaceConfigImpl(ifaceName);
+        List<WifiInterfaceAddressConfig> ias = new ArrayList<>();
+        WifiInterfaceAddressConfigImpl wiac = new WifiInterfaceAddressConfigImpl();
+        wiac.setMode(WifiMode.ADHOC); // don't set to MASTER so as not to test the OS-specific functionality
+        ias.add(wiac);
+        nic.setNetInterfaceAddresses(ias);
+        nc.addNetInterfaceConfig(nic);
+        when(ncsMock.getNetworkConfiguration()).thenReturn(nc);
+
+        List<WifiHotspotInfo> hotspotList = svc.getWifiHotspotList(ifaceName);
+
+        assertNotNull(hotspotList);
+        assertTrue(hotspotList.isEmpty());
+    }
+
+    @Test
+    public void testGetWifiHotspotList() throws KuraException {
+        // tests retrieval of all available hotspots with shown SSIDs
+
+        String ssid = "testSSID";
+        byte[] mac = { 10, 11, 12, 13, 14, 15 };
+
+        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl() {
+
+            @Override
+            protected List<WifiAccessPoint> getWifiAccessPoints(String ifaceName) throws KuraException {
+                List<WifiAccessPoint> list = new ArrayList<>();
+                WifiAccessPointImpl wap = new WifiAccessPointImpl("");
+                list.add(wap);
+                wap = new WifiAccessPointImpl(ssid);
+                wap.setHardwareAddress(mac);
+                wap.setWpaSecurity(EnumSet.of(WifiSecurity.PAIR_TKIP));
+                list.add(wap);
+                return list;
+            }
+        };
+
+        NetworkConfigurationService ncsMock = mock(NetworkConfigurationService.class);
+        svc.setNetworkConfigurationService(ncsMock);
+
+        String ifaceName = "wlan3";
+
+        NetworkConfiguration nc = new NetworkConfiguration();
+        WifiInterfaceConfigImpl nic = new WifiInterfaceConfigImpl(ifaceName);
+        List<WifiInterfaceAddressConfig> ias = new ArrayList<>();
+        WifiInterfaceAddressConfigImpl wiac = new WifiInterfaceAddressConfigImpl();
+        wiac.setMode(WifiMode.ADHOC); // don't set to MASTER so as not to test the OS-specific functionality
+        ias.add(wiac);
+        nic.setNetInterfaceAddresses(ias);
+        nc.addNetInterfaceConfig(nic);
+        when(ncsMock.getNetworkConfiguration()).thenReturn(nc);
+
+        List<WifiHotspotInfo> hotspotList = svc.getWifiHotspotList(ifaceName);
+
+        assertNotNull(hotspotList);
+        assertEquals(1, hotspotList.size());
+
+        WifiHotspotInfo whi = hotspotList.get(0);
+        assertEquals(WifiSecurity.SECURITY_WPA, whi.getSecurity());
+        assertEquals(1, whi.getPairCiphers().size());
+        assertEquals(WifiSecurity.PAIR_TKIP, whi.getPairCiphers().iterator().next());
+        assertEquals(0, whi.getGroupCiphers().size());
+    }
+
     // TODO: some heavier refactoring of the implementation
 
 }

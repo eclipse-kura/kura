@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,98 +32,91 @@ import org.slf4j.LoggerFactory;
 
 public class WatchdogServiceImpl implements WatchdogService, ConfigurableComponent {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(WatchdogServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(WatchdogServiceImpl.class);
 
-    private Map<String, Object> m_properties;
-    private ScheduledExecutorService m_executor;
-    private ScheduledFuture<?> m_future;
+    private static List<CriticalServiceImpl> criticalServiceList;
+
+    private Map<String, Object> properties;
+    private ScheduledExecutorService executor;
+    private ScheduledFuture<?> future;
     private int pingInterval = 10000;	// milliseconds
-    private static ArrayList<CriticalServiceImpl> s_criticalServiceList;
-    private boolean m_configEnabled = false;	// initialized in properties, if false -> no watchdog
-    private boolean m_enabled;
+    private boolean configEnabled = false;	// initialized in properties, if false -> no watchdog
+    private boolean enabled;
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        this.m_properties = properties;
+        this.properties = properties;
         if (properties == null) {
-            s_logger.debug("activating WatchdogService with null props");
+            logger.debug("activating WatchdogService with null props");
         } else {
-            s_logger.debug("activating WatchdogService with {}", properties.toString());
+            logger.debug("activating WatchdogService with {}", properties.toString());
         }
-        s_criticalServiceList = new ArrayList<CriticalServiceImpl>();
-        this.m_enabled = false;
+        criticalServiceList = new ArrayList<CriticalServiceImpl>();
+        this.enabled = false;
 
         // clean up if this is not our first run
-        if (this.m_executor != null) {
-            this.m_executor.shutdown();
-            while (!this.m_executor.isTerminated()) {
+        if (this.executor != null) {
+            this.executor.shutdown();
+            while (!this.executor.isTerminated()) {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    logger.debug(e.getMessage(), e);
                 }
             }
-            this.m_executor = null;
+            this.executor = null;
         }
 
-        this.m_executor = Executors.newSingleThreadScheduledExecutor();
+        this.executor = Executors.newSingleThreadScheduledExecutor();
 
-        this.m_future = this.m_executor.scheduleAtFixedRate(new Runnable() {
-
-            @Override
-            public void run() {
-                Thread.currentThread().setName(getClass().getSimpleName());
-                if (WatchdogServiceImpl.this.m_configEnabled) {
-                    doWatchdogLoop();
-                }
+        this.future = this.executor.scheduleAtFixedRate(() -> {
+            Thread.currentThread().setName(getClass().getSimpleName());
+            if (WatchdogServiceImpl.this.configEnabled) {
+                doWatchdogLoop();
             }
         }, 0, this.pingInterval, TimeUnit.MILLISECONDS);
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        this.m_executor.shutdown();
-        while (!this.m_executor.isTerminated()) {
+        this.executor.shutdown();
+        while (!this.executor.isTerminated()) {
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.debug(e.getMessage(), e);
             }
         }
-        this.m_executor = null;
-        s_criticalServiceList = null;
+        this.executor = null;
+        criticalServiceList = null;
     }
 
     public void updated(Map<String, Object> properties) {
-        s_logger.debug("updated...");
-        this.m_properties = properties;
-        if (this.m_properties != null) {
-            if (this.m_properties.get("enabled") != null) {
-                if (this.m_properties.get("enabled") != null) {
-                    this.m_configEnabled = (Boolean) this.m_properties.get("enabled");
-                }
+        logger.debug("updated...");
+        this.properties = properties;
+        if (this.properties != null) {
+
+            Object enabled = this.properties.get("enabled");
+            if (enabled != null) {
+                this.configEnabled = (Boolean) enabled;
             }
-            if (!this.m_configEnabled) {
+            if (!this.configEnabled) {
                 return;
             }
-            if (this.m_properties.get("pingInterval") != null) {
-                this.pingInterval = (Integer) this.m_properties.get("pingInterval");
-                if (this.m_future != null) {
-                    this.m_future.cancel(false);
-                    while (!this.m_future.isDone()) {
+            if (this.properties.get("pingInterval") != null) {
+                this.pingInterval = (Integer) this.properties.get("pingInterval");
+                if (this.future != null) {
+                    this.future.cancel(false);
+                    while (!this.future.isDone()) {
                         try {
                             Thread.sleep(500);
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            logger.debug(e.getMessage(), e);
                         }
                     }
                 }
-                this.m_future = this.m_executor.scheduleAtFixedRate(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        Thread.currentThread().setName(getClass().getSimpleName());
-                        if (WatchdogServiceImpl.this.m_configEnabled) {
-                            doWatchdogLoop();
-                        }
+                this.future = this.executor.scheduleAtFixedRate(() -> {
+                    Thread.currentThread().setName(getClass().getSimpleName());
+                    if (WatchdogServiceImpl.this.configEnabled) {
+                        doWatchdogLoop();
                     }
                 }, 0, this.pingInterval, TimeUnit.MILLISECONDS);
             }
@@ -132,12 +125,12 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     @Override
     public void startWatchdog() {
-        this.m_enabled = true;
+        this.enabled = true;
     }
 
     @Override
     public void stopWatchdog() {
-        this.m_enabled = false;
+        this.enabled = false;
     }
 
     @Override
@@ -149,24 +142,27 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     public void registerCriticalComponent(CriticalComponent criticalComponent) {
         final CriticalServiceImpl service = new CriticalServiceImpl(criticalComponent.getCriticalComponentName(),
                 criticalComponent.getCriticalComponentTimeout());
-        synchronized (s_criticalServiceList) {
+        synchronized (criticalServiceList) {
             // avoid to add same component twice (eg in case of a package updating)
             boolean existing = false;
-            for (CriticalServiceImpl csi : s_criticalServiceList) {
+            for (CriticalServiceImpl csi : criticalServiceList) {
                 if (criticalComponent.getCriticalComponentName().compareTo(csi.getName()) == 0) {
                     existing = true;
                 }
             }
             if (!existing) {
-                s_criticalServiceList.add(service);
+                criticalServiceList.add(service);
             }
         }
 
-        s_logger.debug("Added " + criticalComponent.getCriticalComponentName() + ", with timeout = "
-                + criticalComponent.getCriticalComponentTimeout() + ", list contains " + s_criticalServiceList.size()
-                + " critical services");
+        logger.debug("Added {} , with timeout = {}, list contains {} critical services",
+                criticalComponent.getCriticalComponentName(), criticalComponent.getCriticalComponentTimeout(),
+                criticalServiceList.size());
     }
 
+    /**
+     * @deprecated use {@link WatchdogServiceImpl#registerCriticalComponent(CriticalComponent)}
+     */
     @Override
     @Deprecated
     public void registerCriticalService(CriticalComponent criticalComponent) {
@@ -175,19 +171,22 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     @Override
     public void unregisterCriticalComponent(CriticalComponent criticalComponent) {
-        synchronized (s_criticalServiceList) {
-            for (int i = 0; i < s_criticalServiceList.size(); i++) {
-                if (criticalComponent.getCriticalComponentName()
-                        .compareTo(s_criticalServiceList.get(i).getName()) == 0) {
-                    s_criticalServiceList.remove(i);
-                    s_logger.debug("Critical service " + criticalComponent.getCriticalComponentName() + " removed, "
-                            + System.currentTimeMillis());
+        synchronized (criticalServiceList) {
+            for (int i = 0; i < criticalServiceList.size(); i++) {
+                if (criticalComponent.getCriticalComponentName().compareTo(criticalServiceList.get(i).getName()) == 0) {
+                    criticalServiceList.remove(i);
+                    logger.debug("Critical service {} removed, {}", criticalComponent.getCriticalComponentName(),
+                            System.currentTimeMillis());
                 }
             }
         }
     }
 
+    /**
+     * @deprecated use {@link WatchdogServiceImpl#unregisterCriticalComponent(CriticalComponent)}
+     */
     @Override
+    @Deprecated
     public void unregisterCriticalService(CriticalComponent criticalComponent) {
         unregisterCriticalComponent(criticalComponent);
     }
@@ -199,8 +198,8 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
 
     @Override
     public void checkin(CriticalComponent criticalService) {
-        synchronized (s_criticalServiceList) {
-            for (CriticalServiceImpl csi : s_criticalServiceList) {
+        synchronized (criticalServiceList) {
+            for (CriticalServiceImpl csi : criticalServiceList) {
                 if (criticalService.getCriticalComponentName().compareTo(csi.getName()) == 0) {
                     csi.update();
                 }
@@ -209,49 +208,48 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     }
 
     private void doWatchdogLoop() {
-        if (!this.m_enabled) {
+        if (!this.enabled) {
             return;
         }
 
         boolean failure = false;
         // Critical Services
-        synchronized (s_criticalServiceList) {
-            if (!s_criticalServiceList.isEmpty()) {
-                for (CriticalServiceImpl csi : s_criticalServiceList) {
+        synchronized (criticalServiceList) {
+            if (!criticalServiceList.isEmpty()) {
+                for (CriticalServiceImpl csi : criticalServiceList) {
                     if (csi.isTimedOut()) {
                         failure = true;
-                        s_logger.warn("Critical service " + csi.getName() + " failed -> SYSTEM REBOOT");
+                        logger.warn("Critical service {} failed -> SYSTEM REBOOT", csi.getName());
                     }
                 }
             }
         }
         if (!failure) {
-            refresh_watchdog();
+            refreshWatchdog();
         }
     }
 
-    private void refresh_watchdog() {
+    private void refreshWatchdog() {
         File f = new File("/dev/watchdog");
         if (f.exists()) {
-            try {
+            try (
                 FileOutputStream fos = new FileOutputStream(f);
                 PrintWriter pw = new PrintWriter(fos);
+            ) {
                 pw.write("w");
                 pw.flush();
                 fos.getFD().sync();
-                pw.close();
-                fos.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.info(e.getMessage(), e);
             }
         }
     }
 
     public boolean isConfigEnabled() {
-        return this.m_configEnabled;
+        return this.configEnabled;
     }
 
     public void setConfigEnabled(boolean configEnabled) {
-        this.m_configEnabled = configEnabled;
+        this.configEnabled = configEnabled;
     }
 }

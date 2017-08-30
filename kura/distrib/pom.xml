@@ -2490,7 +2490,7 @@
             </build>
         </profile>
         <profile>
-            <id>octeontx-nn</id>
+            <id>aarch64-nn</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -2521,7 +2521,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>octeontx-nn-jars</id>
+                                <id>aarch64-nn-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -2532,8 +2532,8 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="octeontx-nn" />
-                                        <property name="target.device" value="octeontx-nn" />
+                                        <property name="build.name" value="aarch64-nn" />
+                                        <property name="target.device" value="aarch64-nn" />
                                         <property name="kura.os.version" value="debian" />
                                         <property name="native.tag" value="aarch64"/>
                                         <property name="kura.arch" value="aarch64" />

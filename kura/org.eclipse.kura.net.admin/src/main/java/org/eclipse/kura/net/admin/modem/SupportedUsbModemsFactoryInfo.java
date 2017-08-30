@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,6 +25,8 @@ import org.eclipse.kura.net.admin.modem.telit.de910.TelitDe910ModemFactory;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910ConfigGenerator;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910ModemFactory;
 import org.eclipse.kura.net.admin.modem.telit.le910.TelitLe910ModemFactory;
+import org.eclipse.kura.net.admin.modem.telit.le910v2.TelitLe910v2ConfigGenerator;
+import org.eclipse.kura.net.admin.modem.telit.le910v2.TelitLe910v2ModemFactory;
 import org.eclipse.kura.net.admin.modem.ublox.generic.UbloxModemFactory;
 
 public class SupportedUsbModemsFactoryInfo {
@@ -38,6 +40,7 @@ public class SupportedUsbModemsFactoryInfo {
         Telit_DE910_DUAL(SupportedUsbModemInfo.Telit_DE910_DUAL, TelitDe910ModemFactory.class, TelitDe910ConfigGenerator.class),
         Telit_CE910_DUAL(SupportedUsbModemInfo.Telit_CE910_DUAL, TelitDe910ModemFactory.class, TelitDe910ConfigGenerator.class),
         Telit_LE910(SupportedUsbModemInfo.Telit_LE910, TelitLe910ModemFactory.class, TelitHe910ConfigGenerator.class),
+        Telit_LE910_V2(SupportedUsbModemInfo.Telit_LE910_V2, TelitLe910v2ModemFactory.class, TelitLe910v2ConfigGenerator.class),
         Sierra_MC8775(SupportedUsbModemInfo.Sierra_MC8775, SierraMc87xxModemFactory.class, SierraMc87xxConfigGenerator.class),
         Sierra_MC8790(SupportedUsbModemInfo.Sierra_MC8790, SierraMc87xxModemFactory.class, SierraMc87xxConfigGenerator.class),
         Sierra_USB598(SupportedUsbModemInfo.Sierra_USB598, SierraUsb598ModemFactory.class, SierraUsb598ConfigGenerator.class),

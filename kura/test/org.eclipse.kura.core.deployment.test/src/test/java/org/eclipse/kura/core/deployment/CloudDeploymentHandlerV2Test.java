@@ -25,11 +25,15 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.DOWNLOAD_STATUS;
+import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.INSTALL_STATUS;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
 import org.eclipse.kura.core.deployment.download.impl.DownloadImpl;
 import org.eclipse.kura.core.deployment.hook.DeploymentHookManager;
+import org.eclipse.kura.core.deployment.download.impl.KuraNotifyPayload;
 import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
+import org.eclipse.kura.core.deployment.install.InstallImpl;
+import org.eclipse.kura.core.deployment.install.KuraInstallPayload;
 import org.eclipse.kura.core.deployment.uninstall.UninstallImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.data.DataTransportService;
@@ -42,6 +46,10 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Version;
+import org.osgi.service.deploymentadmin.BundleInfo;
+import org.osgi.service.deploymentadmin.DeploymentAdmin;
+import org.osgi.service.deploymentadmin.DeploymentPackage;
 
 public class CloudDeploymentHandlerV2Test {
 
@@ -76,7 +84,386 @@ public class CloudDeploymentHandlerV2Test {
     }
 
     @Test
+<<<<<<< 586d8870b078fa36cf99a882de1356bf22d5d654
     public void testDoDelNoResources() throws KuraException, NoSuchFieldException {
+=======
+    public void testDoGetDownloadNoPendingRequest() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/download");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        TestUtil.setFieldValue(deployment, "s_pendingPackageUrl", null);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(0, response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE));
+        assertEquals(100, response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS));
+        assertEquals(DOWNLOAD_STATUS.ALREADY_DONE.getStatusString(),
+                response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS));
+
+    }
+
+    @Test
+    public void testDoGetDownloadPendingRequest() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/download");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        DeploymentPackageDownloadOptions dlOptions = mock(DeploymentPackageDownloadOptions.class);
+        TestUtil.setFieldValue(deployment, "m_downloadOptions", dlOptions);
+        TestUtil.setFieldValue(deployment, "s_pendingPackageUrl", "someValidUrl");
+
+        DownloadImpl dlMock = mock(DownloadImpl.class);
+        TestUtil.setFieldValue(deployment, "s_downloadImplementation", dlMock);
+
+        DownloadCountingOutputStream stream = mock(DownloadCountingOutputStream.class);
+        when(dlMock.getDownloadHelper()).thenReturn(stream);
+
+        when(stream.getDownloadTransferStatus()).thenReturn(DOWNLOAD_STATUS.COMPLETED);
+
+        when(dlOptions.getJobId()).thenReturn(1234L);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        // assertEquals(0, response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE));
+        // assertEquals(100, response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS));
+        // assertEquals(DOWNLOAD_STATUS.ALREADY_DONE.getStatusString(),
+        // response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS));
+
+    }
+
+    @Test
+    public void testDoGetInstallNoPendingRequest() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/install");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        InstallImpl ilMock = new InstallImpl(null, null);
+        TestUtil.setFieldValue(deployment, "s_installImplementation", ilMock);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertNotNull(response.getTimestamp());
+        assertEquals(INSTALL_STATUS.IDLE.getStatusString(),
+                response.getMetric(KuraInstallPayload.METRIC_INSTALL_STATUS));
+    }
+
+    @Test
+    public void testDoGetInstallInProgress() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/install");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        String dpName = "heater";
+        String dpVersion = "1.0.0";
+        DeploymentPackageInstallOptions options = new DeploymentPackageInstallOptions(dpName, dpVersion);
+        InstallImpl ilMock = new InstallImpl(null, null);
+        TestUtil.setFieldValue(deployment, "s_installImplementation", ilMock);
+        TestUtil.setFieldValue(deployment, "m_isInstalling", true);
+        TestUtil.setFieldValue(ilMock, "options", options);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertNotNull(response.getTimestamp());
+        assertEquals(INSTALL_STATUS.IN_PROGRESS.getStatusString(),
+                response.getMetric(KuraInstallPayload.METRIC_INSTALL_STATUS));
+    }
+
+    @Test
+    public void testDoGetPackagesEmptyList() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/packages");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        DeploymentAdmin deploymentAdmin = mock(DeploymentAdmin.class);
+        DeploymentPackage[] deployedPackages = new DeploymentPackage[0];
+
+        TestUtil.setFieldValue(deployment, "m_deploymentAdmin", deploymentAdmin);
+
+        when(deploymentAdmin.listDeploymentPackages()).thenReturn(deployedPackages);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><packages/>",
+                new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetPackagesOneElementListNoBundleInfos() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/packages");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        DeploymentAdmin deploymentAdmin = mock(DeploymentAdmin.class);
+        DeploymentPackage[] deployedPackages = new DeploymentPackage[1];
+        DeploymentPackage dp = mock(DeploymentPackage.class);
+
+        deployedPackages[0] = dp;
+
+        TestUtil.setFieldValue(deployment, "m_deploymentAdmin", deploymentAdmin);
+
+        when(deploymentAdmin.listDeploymentPackages()).thenReturn(deployedPackages);
+        when(dp.getName()).thenReturn("heater");
+        when(dp.getVersion()).thenReturn(new Version("1.0.0"));
+        when(dp.getBundleInfos()).thenReturn(new BundleInfo[0]);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?><packages><package><name>heater</name><version>1.0.0</version><bundles/></package></packages>",
+                new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetPackagesOneElementList() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/packages");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        DeploymentAdmin deploymentAdmin = mock(DeploymentAdmin.class);
+        DeploymentPackage[] deployedPackages = new DeploymentPackage[1];
+        DeploymentPackage dp = mock(DeploymentPackage.class);
+
+        deployedPackages[0] = dp;
+
+        BundleInfo[] bundleInfos = new BundleInfo[1];
+        BundleInfo bundleInfo = mock(BundleInfo.class);
+        bundleInfos[0] = bundleInfo;
+
+        TestUtil.setFieldValue(deployment, "m_deploymentAdmin", deploymentAdmin);
+
+        when(deploymentAdmin.listDeploymentPackages()).thenReturn(deployedPackages);
+        when(dp.getName()).thenReturn("heater");
+        when(dp.getVersion()).thenReturn(new Version("1.0.0"));
+        when(dp.getBundleInfos()).thenReturn(bundleInfos);
+        when(bundleInfo.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundleInfo.getVersion()).thenReturn(new Version("1.0.0"));
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?><packages><package><name>heater</name><version>1.0.0</version><bundles><bundle><name>org.eclipse.kura.demo.heater</name><version>1.0.0</version></bundle></bundles></package></packages>",
+                new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetBundlesNoBundleInstalled() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/bundles");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        BundleContext context = mock(BundleContext.class);
+        TestUtil.setFieldValue(deployment, "m_bundleContext", context);
+
+        when(context.getBundles()).thenReturn(new Bundle[0]);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><bundles/>",
+                new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetBundlesBundleUninstalled() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/bundles");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        BundleContext context = mock(BundleContext.class);
+        TestUtil.setFieldValue(deployment, "m_bundleContext", context);
+
+        Bundle[] bundles = new Bundle[1];
+        Bundle bundle = mock(Bundle.class);
+        bundles[0] = bundle;
+
+        when(context.getBundles()).thenReturn(bundles);
+        when(bundle.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
+        when(bundle.getBundleId()).thenReturn(1L);
+        when(bundle.getState()).thenReturn(Bundle.UNINSTALLED);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?><bundles><bundle><name>org.eclipse.kura.demo.heater</name><version>1.0.0</version><id>1</id><state>UNINSTALLED</state></bundle></bundles>",
+                new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetBundlesBundleInstalled() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/bundles");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        BundleContext context = mock(BundleContext.class);
+        TestUtil.setFieldValue(deployment, "m_bundleContext", context);
+
+        Bundle[] bundles = new Bundle[1];
+        Bundle bundle = mock(Bundle.class);
+        bundles[0] = bundle;
+
+        when(context.getBundles()).thenReturn(bundles);
+        when(bundle.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
+        when(bundle.getBundleId()).thenReturn(1L);
+        when(bundle.getState()).thenReturn(Bundle.INSTALLED);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?><bundles><bundle><name>org.eclipse.kura.demo.heater</name><version>1.0.0</version><id>1</id><state>INSTALLED</state></bundle></bundles>",
+                new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetBundlesBundleResolved() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/bundles");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        BundleContext context = mock(BundleContext.class);
+        TestUtil.setFieldValue(deployment, "m_bundleContext", context);
+
+        Bundle[] bundles = new Bundle[1];
+        Bundle bundle = mock(Bundle.class);
+        bundles[0] = bundle;
+
+        when(context.getBundles()).thenReturn(bundles);
+        when(bundle.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
+        when(bundle.getBundleId()).thenReturn(1L);
+        when(bundle.getState()).thenReturn(Bundle.RESOLVED);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?><bundles><bundle><name>org.eclipse.kura.demo.heater</name><version>1.0.0</version><id>1</id><state>RESOLVED</state></bundle></bundles>",
+                new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetBundlesBundleStarting() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/bundles");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        BundleContext context = mock(BundleContext.class);
+        TestUtil.setFieldValue(deployment, "m_bundleContext", context);
+
+        Bundle[] bundles = new Bundle[1];
+        Bundle bundle = mock(Bundle.class);
+        bundles[0] = bundle;
+
+        when(context.getBundles()).thenReturn(bundles);
+        when(bundle.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
+        when(bundle.getBundleId()).thenReturn(1L);
+        when(bundle.getState()).thenReturn(Bundle.STARTING);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?><bundles><bundle><name>org.eclipse.kura.demo.heater</name><version>1.0.0</version><id>1</id><state>STARTING</state></bundle></bundles>",
+                new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetBundlesBundleStopping() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/bundles");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        BundleContext context = mock(BundleContext.class);
+        TestUtil.setFieldValue(deployment, "m_bundleContext", context);
+
+        Bundle[] bundles = new Bundle[1];
+        Bundle bundle = mock(Bundle.class);
+        bundles[0] = bundle;
+
+        when(context.getBundles()).thenReturn(bundles);
+        when(bundle.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
+        when(bundle.getBundleId()).thenReturn(1L);
+        when(bundle.getState()).thenReturn(Bundle.STOPPING);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?><bundles><bundle><name>org.eclipse.kura.demo.heater</name><version>1.0.0</version><id>1</id><state>STOPPING</state></bundle></bundles>",
+                new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetBundlesBundleActive() throws KuraException, NoSuchFieldException {
+        CloudDeploymentHandlerV2 deployment = new CloudDeploymentHandlerV2();
+        CloudletTopic topic = CloudletTopic.parseAppTopic("GET/bundles");
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraResponsePayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        BundleContext context = mock(BundleContext.class);
+        TestUtil.setFieldValue(deployment, "m_bundleContext", context);
+
+        Bundle[] bundles = new Bundle[1];
+        Bundle bundle = mock(Bundle.class);
+        bundles[0] = bundle;
+
+        when(context.getBundles()).thenReturn(bundles);
+        when(bundle.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
+        when(bundle.getBundleId()).thenReturn(1L);
+        when(bundle.getState()).thenReturn(Bundle.ACTIVE);
+
+        deployment.doGet(topic, request, response);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
+        assertEquals(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?><bundles><bundle><name>org.eclipse.kura.demo.heater</name><version>1.0.0</version><id>1</id><state>ACTIVE</state></bundle></bundles>",
+                new String(response.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoDelNoResources() throws KuraException {
+>>>>>>> First set of unit/integration tests for Deploy-v2
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
         TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
@@ -221,7 +608,6 @@ public class CloudDeploymentHandlerV2Test {
         handler.setDataTransportService(dtsMock);
 
         DownloadImpl dlMock = mock(DownloadImpl.class);
-        String mesg = "test";
         KuraException ex = new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
         when(dlMock.isAlreadyDownloaded()).thenThrow(ex);
         TestUtil.setFieldValue(handler, "downloadImplementation", dlMock);

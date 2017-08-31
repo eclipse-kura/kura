@@ -196,7 +196,7 @@ public class AbstractBlockDriverTest {
     }
 
     private List<ChannelRecord> getRecords(List<Pair<Integer, BlockTask>> tasks) {
-        return tasks.stream().map(pair -> ((TestTask) pair.getSecord()).getRecord()).collect(Collectors.toList());
+        return tasks.stream().map(pair -> ((TestTask) pair.getSecond()).getRecord()).collect(Collectors.toList());
     }
 
     private class TestBlockFactory implements BlockFactory<ToplevelBlockTask> {

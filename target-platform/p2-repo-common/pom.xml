@@ -261,6 +261,31 @@
 									<artifactId>osgi.annotation</artifactId>
 									<version>${osgi.annotation.version}</version>
 								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>com.eclipsesource.jaxrs.jersey-min</artifactId>
+									<version>${com.eclipsesource.jaxrs.jersey-min.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>com.eclipsesource.jaxrs.publisher</artifactId>
+									<version>${com.eclipsesource.jaxrs.publisher.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>com.eclipsesource.jaxrs.provider.gson</artifactId>
+									<version>${com.eclipsesource.jaxrs.provider.gson.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>com.eclipsesource.jaxrs.provider.security</artifactId>
+									<version>${com.eclipsesource.jaxrs.provider.security.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>com.google.gson</artifactId>
+									<version>${com.google.gson.version}</version>
+								</artifactItem>
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -319,6 +344,11 @@
 								<move file="target/source/plugins/minimal-json.jar" tofile="target/source/plugins/minimal-json_${com.eclipsesource.minimal-json.version}.jar"/>
 								<move file="target/source/plugins/osgi.annotation.jar" tofile="target/source/plugins/osgi.annotation_${osgi.annotation.version}.jar"/>
 								<move file="target/source/plugins/org.moka7.jar" tofile="target/source/plugins/org.moka7_${org.moka7.version}.jar"/>
+								<move file="target/source/plugins/com.eclipsesource.jaxrs.jersey-min.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.jersey-min_${com.eclipsesource.jaxrs.jersey-min.version}.jar"/>
+								<move file="target/source/plugins/com.eclipsesource.jaxrs.publisher.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.publisher_${com.eclipsesource.jaxrs.publisher.version}.jar"/>
+								<move file="target/source/plugins/com.eclipsesource.jaxrs.provider.gson.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.gson_${com.eclipsesource.jaxrs.provider.gson.version}.jar"/>
+								<move file="target/source/plugins/com.eclipsesource.jaxrs.provider.security.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.security_${com.eclipsesource.jaxrs.provider.security.version}.jar"/>
+								<move file="target/source/plugins/com.google.gson.jar" tofile="target/source/plugins/com.google.gson_${com.google.gson.version}.jar"/>
 								<!--<move file="target/source/plugins/org.eclipse.kura.windows.system.jar" tofile="target/source/plugins/org.eclipse.kura.windows.system_${org.eclipse.kura.windows.system.version}.jar"/>
 								<move file="target/source/plugins/org.eclipse.kura.windows.launcher.jar" tofile="target/source/plugins/org.eclipse.kura.windows.launcher_${org.eclipse.kura.windows.launcher.version}.jar"/>-->
 							</tasks>

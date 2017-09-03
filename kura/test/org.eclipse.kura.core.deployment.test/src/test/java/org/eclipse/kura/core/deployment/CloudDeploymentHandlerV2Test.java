@@ -35,12 +35,14 @@ import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
 import org.eclipse.kura.core.deployment.install.InstallImpl;
 import org.eclipse.kura.core.deployment.install.KuraInstallPayload;
 import org.eclipse.kura.core.deployment.uninstall.UninstallImpl;
+import org.eclipse.kura.core.deployment.util.FileUtilities;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.deployment.hook.DeploymentHook;
 import org.eclipse.kura.deployment.hook.RequestContext;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
+import org.eclipse.kura.ssl.SslManagerService;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -124,17 +126,19 @@ public class CloudDeploymentHandlerV2Test {
         DownloadCountingOutputStream stream = mock(DownloadCountingOutputStream.class);
         when(dlMock.getDownloadHelper()).thenReturn(stream);
 
-        when(stream.getDownloadTransferStatus()).thenReturn(DOWNLOAD_STATUS.COMPLETED);
+        when(stream.getDownloadTransferStatus()).thenReturn(DOWNLOAD_STATUS.IN_PROGRESS);
+        when(stream.getDownloadTransferProgressPercentage()).thenReturn(10L);
 
         when(dlOptions.getJobId()).thenReturn(1234L);
 
         deployment.doGet(topic, request, response);
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, response.getResponseCode());
-        // assertEquals(0, response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE));
-        // assertEquals(100, response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS));
-        // assertEquals(DOWNLOAD_STATUS.ALREADY_DONE.getStatusString(),
-        // response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS));
+        assertEquals(0, response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE));
+        assertEquals(10, response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS));
+        assertEquals(DOWNLOAD_STATUS.IN_PROGRESS.getStatusString(),
+                response.getMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS));
+        assertEquals(1234L, response.getMetric(KuraNotifyPayload.METRIC_JOB_ID));
 
     }
 
@@ -654,7 +658,7 @@ public class CloudDeploymentHandlerV2Test {
     }
 
     @Test
-    public void testDoExecInstallDownloaded() throws KuraException, NoSuchFieldException {
+    public void testDoExecInstallDownloadedExceptionInstalling() throws KuraException, NoSuchFieldException {
         // fail without file
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2() {
@@ -692,6 +696,54 @@ public class CloudDeploymentHandlerV2Test {
         assertEquals("Exception message should match", "test", respPayload.getExceptionMessage());
         assertEquals("Body should match", "Exception during install",
                 new String(respPayload.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoExecInstallDownloaded() throws KuraException, NoSuchFieldException, InterruptedException {
+
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2() {
+
+            @Override
+            protected File getDpDownloadFile(final DeploymentPackageInstallOptions options) throws IOException {
+                String dpName = FileUtilities.getFileName(options.getDpName(), options.getDpVersion(), ".dp");
+                String packageFilename = new StringBuilder().append("/tmp").append(File.separator).append(dpName)
+                        .toString();
+                return new File(packageFilename);
+            }
+        };
+
+        CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_INSTALL);
+        KuraRequestPayload reqPayload = new KuraRequestPayload();
+        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, "heater");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_VERSION, "1.0.0");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_JOB_ID, 1234L);
+        reqPayload.addMetric(DeploymentPackageInstallOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
+
+        DataTransportService dtsMock = mock(DataTransportService.class);
+        handler.setDataTransportService(dtsMock);
+
+        DownloadImpl dlMock = mock(DownloadImpl.class);
+        when(dlMock.isAlreadyDownloaded()).thenReturn(true);
+        TestUtil.setFieldValue(handler, "s_downloadImplementation", dlMock);
+
+        TestUtil.setFieldValue(handler, "m_isInstalling", false);
+        
+        InstallImpl installImpl = mock(InstallImpl.class);
+        TestUtil.setFieldValue(handler, "s_installImplementation", installImpl);
+        
+        handler.doExec(reqTopic, reqPayload, respPayload);
+
+        assertEquals("Response code should match expected", KuraResponsePayload.RESPONSE_CODE_OK,
+                respPayload.getResponseCode());
+
+        Thread.sleep(500);
+        assertNull(TestUtil.getFieldValue(handler, "m_installOptions"));
+        assertTrue(((boolean) TestUtil.getFieldValue(handler, "m_isInstalling")) == false);
+        
+//        DeploymentPackageInstallOptions options = new DeploymentPackageInstallOptions(reqPayload);
+//        verify(installImpl).installDp(options, new File("/tmp/heater-1.0.0.dp"));
     }
 
     @Test
@@ -841,6 +893,86 @@ public class CloudDeploymentHandlerV2Test {
 
         verify(dlMock).isAlreadyDownloaded();
         verify(dlMock).setSslManager(null);
+    }
+
+    @Test
+    public void testDoExecDownloadSuccessfulNoInstall() throws KuraException, NoSuchFieldException {
+        DownloadImpl dlMock = mock(DownloadImpl.class);
+
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2() {
+
+            @Override
+            protected DownloadImpl createDownloadImpl(DeploymentPackageDownloadOptions options) {
+                return dlMock;
+            }
+        };
+        CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
+        KuraRequestPayload reqPayload = new KuraRequestPayload();
+        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI,
+                "https://s3-us-west-2.amazonaws.com/kura-repo/drivers/3.0.0-RELEASE/org.eclipse.kura.demo.heater_1.0.100.dp");
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_PROTOCOL, "http");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, "heater");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_VERSION, "1.0.0");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_JOB_ID, 1234L);
+        reqPayload.addMetric(DeploymentPackageInstallOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
+
+        DataTransportService dtsMock = mock(DataTransportService.class);
+        handler.setDataTransportService(dtsMock);
+
+        SslManagerService sslManagerService = mock(SslManagerService.class);
+        handler.setSslManagerService(sslManagerService);
+
+        when(dlMock.isAlreadyDownloaded()).thenReturn(false);
+        when(dtsMock.getClientId()).thenReturn("ClientId");
+        TestUtil.setFieldValue(handler, "s_pendingPackageUrl", null);
+
+        handler.doExec(reqTopic, reqPayload, respPayload);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, respPayload.getResponseCode());
+    }
+
+    @Test
+    public void testDoExecDownloadFailure()
+            throws KuraException, NoSuchFieldException, IOException, InterruptedException {
+        DownloadImpl dlMock = mock(DownloadImpl.class);
+
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2() {
+
+            @Override
+            protected DownloadImpl createDownloadImpl(DeploymentPackageDownloadOptions options) {
+                return dlMock;
+            }
+        };
+        CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
+        KuraRequestPayload reqPayload = new KuraRequestPayload();
+        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI, "http://heater.value");
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_PROTOCOL, "http");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, "heater");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_VERSION, "1.0.0");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_JOB_ID, 1234L);
+        reqPayload.addMetric(DeploymentPackageInstallOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
+
+        DataTransportService dtsMock = mock(DataTransportService.class);
+        handler.setDataTransportService(dtsMock);
+
+        SslManagerService sslManagerService = mock(SslManagerService.class);
+        handler.setSslManagerService(sslManagerService);
+
+        when(dtsMock.getClientId()).thenReturn("ClientId");
+
+        when(dlMock.isAlreadyDownloaded()).thenReturn(false);
+        doThrow(new KuraException(KuraErrorCode.INTERNAL_ERROR)).when(dlMock).downloadDeploymentPackageInternal();
+
+        handler.doExec(reqTopic, reqPayload, respPayload);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, respPayload.getResponseCode());
+
+        Thread.sleep(500);
+        assertNull(TestUtil.getFieldValue(handler, "s_pendingPackageUrl"));
     }
 
     @Test

@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.output.CountingOutputStream;
-import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.DOWNLOAD_STATUS;
+import org.eclipse.kura.core.deployment.DownloadStatus;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.deployment.download.DownloadOptions;
 import org.eclipse.kura.core.deployment.progress.ProgressEvent;
@@ -43,7 +43,7 @@ public class GenericDownloadCountingOutputStream extends CountingOutputStream {
 
     private long m_currentStep = 1;
     // private long previous;
-    private DOWNLOAD_STATUS m_downloadStatus = DOWNLOAD_STATUS.FAILED;
+    private DownloadStatus m_downloadStatus = DownloadStatus.FAILED;
 
     public GenericDownloadCountingOutputStream(DownloadOptions downloadOptions) {
         super(downloadOptions.getOut());
@@ -54,7 +54,7 @@ public class GenericDownloadCountingOutputStream extends CountingOutputStream {
         this.m_alreadyDownloaded = downloadOptions.getAlreadyDownloaded();
     }
 
-    public DOWNLOAD_STATUS getDownloadTransferStatus() {
+    public DownloadStatus getDownloadTransferStatus() {
         return this.m_downloadStatus;
     }
 
@@ -87,7 +87,7 @@ public class GenericDownloadCountingOutputStream extends CountingOutputStream {
             // System.out.println("Bytes read: "+ (getByteCount() - previous));
             // previous = getByteCount();
             this.m_currentStep++;
-            postProgressEvent(this.options.getClientId(), getByteCount(), this.totalBytes, DOWNLOAD_STATUS.IN_PROGRESS,
+            postProgressEvent(this.options.getClientId(), getByteCount(), this.totalBytes, DownloadStatus.IN_PROGRESS,
                     null);
         }
         try {
@@ -97,7 +97,7 @@ public class GenericDownloadCountingOutputStream extends CountingOutputStream {
         }
     }
 
-    protected void postProgressEvent(String clientId, long progress, long total, DOWNLOAD_STATUS status,
+    protected void postProgressEvent(String clientId, long progress, long total, DownloadStatus status,
             String errorMessage) {
         Long perc = getDownloadTransferProgressPercentage();
         this.m_downloadStatus = status;

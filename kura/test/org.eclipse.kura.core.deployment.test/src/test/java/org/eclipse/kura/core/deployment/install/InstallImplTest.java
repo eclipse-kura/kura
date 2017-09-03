@@ -29,8 +29,8 @@ import java.util.Properties;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
-import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.INSTALL_STATUS;
 import org.eclipse.kura.core.deployment.DeploymentPackageOptions;
+import org.eclipse.kura.core.deployment.InstallStatus;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -103,7 +103,7 @@ public class InstallImplTest {
 
                 assertEquals("", clientId, kp.getClientId());
                 assertEquals("", 100, kp.getInstallProgress());
-                assertEquals("", INSTALL_STATUS.COMPLETED.getStatusString(), kp.getInstallStatus());
+                assertEquals("", InstallStatus.COMPLETED.getStatusString(), kp.getInstallStatus());
                 assertEquals("", jobid, kp.getJobId().longValue());
 
                 return null;
@@ -155,7 +155,7 @@ public class InstallImplTest {
 
                 assertEquals("", clientId, kp.getClientId());
                 assertEquals("", 0, kp.getInstallProgress());
-                assertEquals("", INSTALL_STATUS.FAILED.getStatusString(), kp.getInstallStatus());
+                assertEquals("", InstallStatus.FAILED.getStatusString(), kp.getInstallStatus());
                 assertEquals("", jobid, kp.getJobId().longValue());
                 assertEquals("", "test", kp.getErrorMessage());
 
@@ -275,7 +275,7 @@ public class InstallImplTest {
         assertNotNull(respPayload.getTimestamp());
         assertEquals(dpName, respPayload.getMetric(KuraInstallPayload.METRIC_DP_NAME));
         assertEquals(dpVersion, respPayload.getMetric(KuraInstallPayload.METRIC_DP_VERSION));
-        assertEquals(INSTALL_STATUS.IN_PROGRESS.getStatusString(),
+        assertEquals(InstallStatus.IN_PROGRESS.getStatusString(),
                 respPayload.getMetric(KuraInstallPayload.METRIC_INSTALL_STATUS));
     }
 
@@ -296,7 +296,7 @@ public class InstallImplTest {
         ii.installIdleSyncMessage(respPayload);
 
         assertNotNull(respPayload.getTimestamp());
-        assertEquals(INSTALL_STATUS.IDLE.getStatusString(),
+        assertEquals(InstallStatus.IDLE.getStatusString(),
                 respPayload.getMetric(KuraInstallPayload.METRIC_INSTALL_STATUS));
     }
 
@@ -349,7 +349,7 @@ public class InstallImplTest {
 
                 assertEquals("", "CLIENT_ID", kp.getClientId());
                 assertEquals("", 100, kp.getInstallProgress());
-                assertEquals("", INSTALL_STATUS.COMPLETED.getStatusString(), kp.getInstallStatus());
+                assertEquals("", InstallStatus.COMPLETED.getStatusString(), kp.getInstallStatus());
                 assertEquals("", 1234, kp.getJobId().longValue());
                 assertEquals("", "PERSISTANCE_FILE_NAME", kp.getMetric(KuraInstallPayload.METRIC_DP_NAME));
 
@@ -416,7 +416,7 @@ public class InstallImplTest {
 
                 assertEquals("", "CLIENT_ID", kp.getClientId());
                 assertEquals("", 0, kp.getInstallProgress());
-                assertEquals("", INSTALL_STATUS.FAILED.getStatusString(), kp.getInstallStatus());
+                assertEquals("", InstallStatus.FAILED.getStatusString(), kp.getInstallStatus());
                 assertEquals("", 1234, kp.getJobId().longValue());
                 assertEquals("", "PERSISTANCE_FILE_NAME", kp.getMetric(KuraInstallPayload.METRIC_DP_NAME));
 

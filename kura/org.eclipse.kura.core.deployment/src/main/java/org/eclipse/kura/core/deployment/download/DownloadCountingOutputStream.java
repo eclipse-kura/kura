@@ -15,7 +15,7 @@ package org.eclipse.kura.core.deployment.download;
 import java.io.IOException;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.DOWNLOAD_STATUS;
+import org.eclipse.kura.core.deployment.DownloadStatus;
 
 public interface DownloadCountingOutputStream {
 
@@ -23,7 +23,7 @@ public interface DownloadCountingOutputStream {
 
     public void startWork() throws KuraException;
 
-    public DOWNLOAD_STATUS getDownloadTransferStatus();
+    public DownloadStatus getDownloadTransferStatus();
 
     public Long getDownloadTransferProgressPercentage();
 

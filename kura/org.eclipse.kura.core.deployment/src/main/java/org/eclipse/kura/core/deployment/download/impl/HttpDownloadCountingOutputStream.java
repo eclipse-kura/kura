@@ -30,7 +30,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.DOWNLOAD_STATUS;
+import org.eclipse.kura.core.deployment.DownloadStatus;
 import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
 import org.eclipse.kura.core.deployment.download.DownloadOptions;
 import org.slf4j.Logger;
@@ -58,7 +58,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
             this.future.cancel(true);
             this.executor.shutdownNow();
 
-            postProgressEvent(this.options.getClientId(), getByteCount(), this.totalBytes, DOWNLOAD_STATUS.CANCELLED,
+            postProgressEvent(this.options.getClientId(), getByteCount(), this.totalBytes, DownloadStatus.CANCELLED,
                     "Download cancelled");
         }
     }
@@ -108,7 +108,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
 
                     setTotalBytes(s != null ? Integer.parseInt(s) : -1);
                     postProgressEvent(HttpDownloadCountingOutputStream.this.options.getClientId(), 0,
-                            HttpDownloadCountingOutputStream.this.totalBytes, DOWNLOAD_STATUS.IN_PROGRESS, null);
+                            HttpDownloadCountingOutputStream.this.totalBytes, DownloadStatus.IN_PROGRESS, null);
 
                     int bufferSize = getBufferSize();
 
@@ -125,11 +125,11 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
                     long numBytes = IOUtils.copyLarge(HttpDownloadCountingOutputStream.this.is,
                             HttpDownloadCountingOutputStream.this, new byte[bufferSize]);
                     postProgressEvent(HttpDownloadCountingOutputStream.this.options.getClientId(), numBytes,
-                            HttpDownloadCountingOutputStream.this.totalBytes, DOWNLOAD_STATUS.COMPLETED, null);
+                            HttpDownloadCountingOutputStream.this.totalBytes, DownloadStatus.COMPLETED, null);
 
                 } catch (IOException e) {
                     postProgressEvent(HttpDownloadCountingOutputStream.this.options.getClientId(), getByteCount(),
-                            HttpDownloadCountingOutputStream.this.totalBytes, DOWNLOAD_STATUS.FAILED, e.getMessage());
+                            HttpDownloadCountingOutputStream.this.totalBytes, DownloadStatus.FAILED, e.getMessage());
                     throw new KuraConnectException(e);
                 } finally {
                     if (HttpDownloadCountingOutputStream.this.is != null) {
@@ -168,12 +168,12 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
                 ((HttpsURLConnection) urlConnection)
                         .setSSLSocketFactory(this.m_sslManagerService.getSSLSocketFactory());
             } else if (!(urlConnection instanceof HttpURLConnection)) {
-                postProgressEvent(this.options.getClientId(), getByteCount(), this.totalBytes, DOWNLOAD_STATUS.FAILED,
+                postProgressEvent(this.options.getClientId(), getByteCount(), this.totalBytes, DownloadStatus.FAILED,
                         "The request URL is not supported");
                 throw new KuraConnectException("Unsupported protocol!");
             }
         } catch (GeneralSecurityException e) {
-            postProgressEvent(this.options.getClientId(), getByteCount(), this.totalBytes, DOWNLOAD_STATUS.FAILED,
+            postProgressEvent(this.options.getClientId(), getByteCount(), this.totalBytes, DownloadStatus.FAILED,
                     e.getMessage());
             throw new KuraConnectException(e, "Unsupported protocol!");
         }

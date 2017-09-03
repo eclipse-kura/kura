@@ -15,11 +15,8 @@ package org.eclipse.kura.core.deployment;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -58,7 +55,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
 import org.osgi.service.deploymentadmin.BundleInfo;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
@@ -69,10 +65,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
 
     private static final Logger logger = LoggerFactory.getLogger(CloudDeploymentHandlerV2.class);
     public static final String APP_ID = "DEPLOY-V2";
-
-    private static final String DPA_CONF_PATH_PROPNAME = "dpa.configuration";
-    private static final String PACKAGES_PATH_PROPNAME = "kura.packages";
-    private static final String KURA_DATA_DIR = "kura.data";
 
     public static final String RESOURCE_PACKAGES = "packages";
     public static final String RESOURCE_BUNDLES = "bundles";
@@ -89,74 +81,12 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
     public static final String METRIC_DOWNLOAD_STATUS = "download.status";
     public static final String METRIC_REQUESTER_CLIENT_ID = "requester.client.id";
 
-    /**
-     * Enum representing the different status of the download process
-     *
-     * {@link DeploymentAgentService.DOWNLOAD_STATUS.PROGRESS} Download in
-     * progress {@link DeploymentAgentService.DOWNLOAD_STATUS.COMPLETE} Download
-     * completed {@link DeploymentAgentService.DOWNLOAD_STATUS.FAILED} Download
-     * failed
-     */
-    public enum DOWNLOAD_STATUS {
-        IN_PROGRESS("IN_PROGRESS"),
-        COMPLETED("COMPLETED"),
-        FAILED("FAILED"),
-        ALREADY_DONE("ALREADY DONE"),
-        CANCELLED("CANCELLED");
-
-        private final String status;
-
-        DOWNLOAD_STATUS(String status) {
-            this.status = status;
-        }
-
-        public String getStatusString() {
-            return this.status;
-        }
-    }
-
-    public enum INSTALL_STATUS {
-        IDLE("IDLE"),
-        IN_PROGRESS("IN_PROGRESS"),
-        COMPLETED("COMPLETED"),
-        FAILED("FAILED"),
-        ALREADY_DONE("ALREADY DONE");
-
-        private final String status;
-
-        INSTALL_STATUS(String status) {
-            this.status = status;
-        }
-
-        public String getStatusString() {
-            return this.status;
-        }
-    }
-
-    public enum UNINSTALL_STATUS {
-        IDLE("IDLE"),
-        IN_PROGRESS("IN_PROGRESS"),
-        COMPLETED("COMPLETED"),
-        FAILED("FAILED"),
-        ALREADY_DONE("ALREADY DONE");
-
-        private final String status;
-
-        UNINSTALL_STATUS(String status) {
-            this.status = status;
-        }
-
-        public String getStatusString() {
-            return this.status;
-        }
-    }
-
-    private CloudDeploymentHandlerV2Options componentOptions;
-
     private static String pendingPackageUrl = null;
     private static DownloadImpl downloadImplementation;
     private static UninstallImpl uninstallImplementation;
     public static InstallImpl installImplementation;
+
+    private CloudDeploymentHandlerV2Options componentOptions;
 
     private SslManagerService sslManagerService;
     private DeploymentAdmin deploymentAdmin;
@@ -172,9 +102,6 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
 
     private DataTransportService dataTransportService;
 
-    private String dpaConfPath;
-    private String packagesPath;
-
     private DeploymentPackageDownloadOptions downloadOptions;
 
     private boolean isInstalling = false;
@@ -182,6 +109,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
 
     private String pendingUninstPackageName;
     private String installVerificationDir;
+
+    private CloudDeploymentHandlerOptions options;
 
     public CloudDeploymentHandlerV2() {
         super(APP_ID);
@@ -239,54 +168,29 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
     //
     // ----------------------------------------------------------------
 
-    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
+    @Override
+    protected void activate(ComponentContext componentContext) {
         logger.info("Cloud Deployment v2 is starting");
         super.activate(componentContext);
-        updated(properties);
 
         this.bundleContext = componentContext.getBundleContext();
 
-        this.dpaConfPath = System.getProperty(DPA_CONF_PATH_PROPNAME);
-        if (this.dpaConfPath == null || this.dpaConfPath.isEmpty()) {
-            throw new ComponentException("The value of '" + DPA_CONF_PATH_PROPNAME + "' is not defined");
-        }
+        this.options = new CloudDeploymentHandlerOptions(this.systemService.getProperties());
 
-        final Properties kuraProperties = this.systemService.getProperties();
-
-        this.packagesPath = kuraProperties.getProperty(PACKAGES_PATH_PROPNAME);
-        if (this.packagesPath == null || this.packagesPath.isEmpty()) {
-            throw new ComponentException("The value of '" + PACKAGES_PATH_PROPNAME + "' is not defined");
-        }
-        if (kuraProperties.getProperty(PACKAGES_PATH_PROPNAME) != null
-                && "kura/packages".equals(kuraProperties.getProperty(PACKAGES_PATH_PROPNAME).trim())) {
-            kuraProperties.setProperty(PACKAGES_PATH_PROPNAME, "/opt/eclipse/kura/kura/packages");
-            this.packagesPath = kuraProperties.getProperty(PACKAGES_PATH_PROPNAME);
-            logger.warn("Overridding invalid kura.packages location");
-        }
-
-        String kuraDataDir = kuraProperties.getProperty(KURA_DATA_DIR);
+        String dpaConfPath = this.options.getDpaConfigurationFilePath();
+        String packagesPath = this.options.getPackagesPath();
+        String kuraDataDir = this.options.getKuraDataDir();
 
         installImplementation = new InstallImpl(this, kuraDataDir);
-        installImplementation.setPackagesPath(this.packagesPath);
-        installImplementation.setDpaConfPath(this.dpaConfPath);
+        installImplementation.setPackagesPath(packagesPath);
+        installImplementation.setDpaConfPath(dpaConfPath);
         installImplementation.setDeploymentAdmin(this.deploymentAdmin);
         installImplementation.sendInstallConfirmations();
     }
 
-    protected void updated(Map<String, Object> properties) {
-        this.componentOptions = new CloudDeploymentHandlerV2Options(properties);
-        final Properties associations = new Properties();
-        try {
-            associations.load(new StringReader(this.componentOptions.getHookAssociations()));
-        } catch (Exception e) {
-            logger.warn("failed to parse hook associations from configuration", e);
-        }
-        this.deploymentHookManager.updateAssociations(associations);
-    }
-
     @Override
     protected void deactivate(ComponentContext componentContext) {
-        logger.info("Bundle " + APP_ID + " is deactivating!");
+        logger.info("Bundle {} is deactivating!", APP_ID);
         if (this.downloaderFuture != null) {
             this.downloaderFuture.cancel(true);
         }
@@ -501,7 +405,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
 
             response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
             response.setTimestamp(new Date());
-            response.addMetric(METRIC_DOWNLOAD_STATUS, DOWNLOAD_STATUS.IN_PROGRESS.getStatusString());
+            response.addMetric(METRIC_DOWNLOAD_STATUS, DownloadStatus.IN_PROGRESS.getStatusString());
             try {
                 response.setBody("Another resource is already in download".getBytes("UTF-8"));
             } catch (UnsupportedEncodingException e) {
@@ -543,7 +447,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
             downloadImplementation.setAlreadyDownloadedFlag(alreadyDownloaded);
             downloadImplementation.setVerificationDirectory(this.installVerificationDir);
 
-            logger.info("Downloading package from URL: " + options.getDeployUri());
+            logger.info("Downloading package from URL: {}", options.getDeployUri());
 
             this.downloaderFuture = executor.submit(new Runnable() {
 
@@ -552,8 +456,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
                     try {
 
                         downloadImplementation.downloadDeploymentPackageInternal();
-                    } catch (Exception e) {
-                        logger.warn("deployment package download failed", e);
+                    } catch (KuraException e) {
                         try {
                             File dpFile = getDpDownloadFile(options);
                             if (dpFile != null) {

@@ -19,8 +19,8 @@ import java.util.concurrent.CancellationException;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
-import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.DOWNLOAD_STATUS;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2Options;
+import org.eclipse.kura.core.deployment.DownloadStatus;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
 import org.eclipse.kura.core.deployment.download.DownloadOptions;
@@ -49,7 +49,7 @@ public class DownloadImplTest {
         Object source = "src";
         int transferSize = 1234;
         int transferProgress = 75;
-        String transferStatus = DOWNLOAD_STATUS.IN_PROGRESS.getStatusString();
+        String transferStatus = DownloadStatus.IN_PROGRESS.getStatusString();
         int downloadIndex = 1;
         String exceptionMessage = "test";
         ProgressEvent progressEvent = new ProgressEvent(source, options, transferSize, transferProgress, transferStatus,
@@ -153,7 +153,7 @@ public class DownloadImplTest {
                 assertNotNull(knp.getTimestamp());
                 assertEquals(0, knp.getTransferSize());
                 assertEquals(0, knp.getTransferProgress());
-                assertEquals(DOWNLOAD_STATUS.FAILED.getStatusString(), knp.getTransferStatus());
+                assertEquals(DownloadStatus.FAILED.getStatusString(), knp.getTransferStatus());
                 assertEquals(jobId, (long) knp.getJobId());
                 assertNotNull(knp.getErrorMessage());
                 assertEquals("Error during download process and verification!", knp.getErrorMessage());
@@ -180,7 +180,7 @@ public class DownloadImplTest {
 
         Long size = 1230L;
         Long progress = 75L;
-        DOWNLOAD_STATUS statuss = DOWNLOAD_STATUS.IN_PROGRESS;
+        DownloadStatus statuss = DownloadStatus.IN_PROGRESS;
         when(downloadHelper.getTotalBytes()).thenReturn(size);
         when(downloadHelper.getDownloadTransferProgressPercentage()).thenReturn(progress);
         when(downloadHelper.getDownloadTransferStatus()).thenReturn(statuss);
@@ -203,7 +203,7 @@ public class DownloadImplTest {
         assertNotNull(respPayload.getTimestamp());
         assertEquals(0, respPayload.getMetric(KuraNotifyPayload.METRIC_TRANSFER_SIZE));
         assertEquals(100, respPayload.getMetric(KuraNotifyPayload.METRIC_TRANSFER_PROGRESS));
-        assertEquals(DOWNLOAD_STATUS.ALREADY_DONE.getStatusString(),
+        assertEquals(DownloadStatus.ALREADY_DONE.getStatusString(),
                 respPayload.getMetric(KuraNotifyPayload.METRIC_TRANSFER_STATUS));
         assertNull(respPayload.getMetric(KuraNotifyPayload.METRIC_JOB_ID));
     }
@@ -390,7 +390,7 @@ public class DownloadImplTest {
                 assertNotNull(knp.getTimestamp());
                 assertEquals(0, knp.getTransferSize());
                 assertEquals(100, knp.getTransferProgress());
-                assertEquals(DOWNLOAD_STATUS.COMPLETED.getStatusString(), knp.getTransferStatus());
+                assertEquals(DownloadStatus.COMPLETED.getStatusString(), knp.getTransferStatus());
                 assertEquals(jobId, (long) knp.getJobId());
                 assertNull(knp.getErrorMessage());
 

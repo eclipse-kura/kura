@@ -297,11 +297,6 @@
 
 								<artifactItem>
 									<groupId>org.apache.activemq</groupId>
-									<artifactId>artemis-amqp-protocol</artifactId>
-									<version>${org.apache.activemq.artemis.version}</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.activemq</groupId>
 									<artifactId>artemis-mqtt-protocol</artifactId>
 									<version>${org.apache.activemq.artemis.version}</version>
 								</artifactItem>
@@ -461,7 +456,6 @@
 								
 								<!-- Artemis Broker -->
 								<move file="target/source/plugins/guava.jar" tofile="target/source/plugins/guava_${guava.version}.jar"/>
-								<move file="target/source/plugins/artemis-amqp-protocol.jar" tofile="target/source/plugins/artemis-amqp-protocol_${org.apache.activemq.artemis.version}.jar"/>
 								<move file="target/source/plugins/artemis-mqtt-protocol.jar" tofile="target/source/plugins/artemis-mqtt-protocol_${org.apache.activemq.artemis.version}.jar"/>
 								<move file="target/source/plugins/artemis-native.jar" tofile="target/source/plugins/artemis-native_${org.apache.activemq.artemis.version}.jar"/>
 								<move file="target/source/plugins/netty-buffer.jar" tofile="target/source/plugins/netty-buffer_${io.netty.version}.jar"/>

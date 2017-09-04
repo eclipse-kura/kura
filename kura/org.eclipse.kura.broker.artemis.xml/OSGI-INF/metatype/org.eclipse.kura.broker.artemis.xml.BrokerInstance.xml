@@ -39,7 +39,7 @@
 			type="String"
 			cardinality="-1"
 			required="false"
-			default="AMQP" />
+			default="MQTT" />
 
 		<AD
 			id="users"

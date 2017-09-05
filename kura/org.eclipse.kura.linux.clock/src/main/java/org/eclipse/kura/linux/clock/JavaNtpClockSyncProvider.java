@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2017 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 public class JavaNtpClockSyncProvider extends AbstractNtpClockSyncProvider {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(JavaNtpClockSyncProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(JavaNtpClockSyncProvider.class);
 
     // ----------------------------------------------------------------
     //
@@ -38,25 +38,25 @@ public class JavaNtpClockSyncProvider extends AbstractNtpClockSyncProvider {
         boolean ret = false;
         // connect and get the delta
         NTPUDPClient ntpClient = new NTPUDPClient();
-        ntpClient.setDefaultTimeout(this.m_ntpTimeout);
+        ntpClient.setDefaultTimeout(this.ntpTimeout);
         try {
             ntpClient.open();
             try {
-                InetAddress ntpHostAddr = InetAddress.getByName(this.m_ntpHost);
-                TimeInfo info = ntpClient.getTime(ntpHostAddr, this.m_ntpPort);
-                this.m_lastSync = new Date();
+                InetAddress ntpHostAddr = InetAddress.getByName(this.ntpHost);
+                TimeInfo info = ntpClient.getTime(ntpHostAddr, this.ntpPort);
+                this.lastSync = new Date();
                 info.computeDetails();
                 Long delayValue = info.getDelay();
                 if (delayValue != null && delayValue.longValue() < 1000) {
-                    this.m_listener.onClockUpdate(info.getOffset());
+                    this.listener.onClockUpdate(info.getOffset());
                     ret = true;
                 } else {
-                    s_logger.error("Incorrect delay value({}), clock will not be updated", info.getDelay());
+                    logger.error("Incorrect delay value({}), clock will not be updated", info.getDelay());
                 }
             } catch (IOException e) {
-                s_logger.warn(
+                logger.warn(
                         "Error while synchronizing System Clock with NTP host {}. Please verify network connectivity ...",
-                        this.m_ntpHost);
+                        this.ntpHost);
             }
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);

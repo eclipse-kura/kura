@@ -28,9 +28,14 @@
         <module>org.eclipse.kura.asset.provider</module>
         <module>org.eclipse.kura.asset.helper.provider</module>
 
+        <module>org.eclipse.kura.broker.artemis.core</module>
+        <module>org.eclipse.kura.broker.artemis.simple.mqtt</module>
+        <module>org.eclipse.kura.broker.artemis.xml</module>
+
         <module>org.eclipse.kura.camel</module>
         <module>org.eclipse.kura.camel.cloud.factory</module>
         <module>org.eclipse.kura.camel.xml</module>
+
         <module>org.eclipse.kura.core</module>
         <module>org.eclipse.kura.core.certificates</module>
         <module>org.eclipse.kura.core.cloud</module>

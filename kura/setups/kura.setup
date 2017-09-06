@@ -596,8 +596,15 @@
         filter="(kura.developer.type=developer)"
         name="Developer">
       <setupTask
+          xsi:type="launching:LaunchTask"
+          id="build-full"
+          launcher="setups/launchers/build-full.launch">
+        <description>Build Kura Core</description>
+      </setupTask>
+      <setupTask
           xsi:type="maven:MavenImportTask"
           id="import.core"
+          predecessor="build-full"
           projectNameTemplate="">
         <sourceLocator
             rootFolder="${git.clone.location}/kura"
@@ -620,12 +627,6 @@
         <sourceLocator
             rootFolder="${git.clone.location}/kura/features"
             locateNestedProjects="true"/>
-      </setupTask>
-      <setupTask
-          xsi:type="launching:LaunchTask"
-          predecessor="import.core"
-          launcher="setups/launchers/build-full.launch">
-        <description>Build Kura Core</description>
       </setupTask>
     </setupTask>
   </setupTask>

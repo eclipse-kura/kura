@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.clock;
 
+import java.io.IOException;
 import java.util.Date;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -36,8 +37,8 @@ public class NtpdClockSyncProvider extends AbstractNtpClockSyncProvider {
         SafeProcess proc = null;
         try {
             // Execute a native Linux command to perform the NTP time sync.
-            int ntpTimeout = this.m_ntpTimeout / 1000;
-            proc = ProcessUtil.exec("ntpdate -t " + ntpTimeout + " " + this.m_ntpHost);
+            int ntpTimeout = this.ntpTimeout / 1000;
+            proc = exec("ntpdate -t " + ntpTimeout + " " + this.ntpHost);
             proc.waitFor();
             if (proc.exitValue() == 0) {
                 s_logger.info("System Clock Synchronized with " + this.m_ntpHost);
@@ -60,5 +61,9 @@ public class NtpdClockSyncProvider extends AbstractNtpClockSyncProvider {
             }
         }
         return ret;
+    }
+
+    protected SafeProcess exec(String command) throws IOException {
+        return ProcessUtil.exec(command);
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2017 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.clock;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
@@ -181,7 +182,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
             long time = System.currentTimeMillis() + offset;
             SafeProcess proc = null;
             try {
-                proc = ProcessUtil.exec("date -s @" + time / 1000);		// divide by 1000 to switch to seconds
+                proc = exec("date -s @" + time / 1000);		// divide by 1000 to switch to seconds
                 proc.waitFor();
                 final int rc = proc.exitValue();
                 if (rc == 0) {
@@ -210,7 +211,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
         if (updateHwClock) {
             SafeProcess proc = null;
             try {
-                proc = ProcessUtil.exec("hwclock --utc --systohc");
+                proc = exec("hwclock --utc --systohc");
                 proc.waitFor();
                 final int rc = proc.exitValue();
                 if (rc == 0) {
@@ -231,5 +232,9 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
         if (bClockUpToDate) {
             this.eventAdmin.postEvent(EMPTY_EVENT);
         }
+    }
+
+    protected SafeProcess exec(String command) throws IOException {
+        return ProcessUtil.exec(command);
     }
 }

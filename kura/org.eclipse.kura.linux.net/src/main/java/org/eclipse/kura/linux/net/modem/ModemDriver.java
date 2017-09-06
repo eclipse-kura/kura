@@ -48,6 +48,9 @@ public class ModemDriver {
     private static final String RELIAGATE_10_05_GSM_RESET_GPIO_NUM = "252";
     private static final String RELIAGATE_10_05_GSM_USB_PATH = "/sys/bus/usb/devices/usb2/authorized";
 
+    private static final String BOLTGATE_20_25_PCIEX_SLOT3_POWER_GPIO_VALUE = "/dev/pciex_slot3_power/value";
+    private static final String BOLTGATE_20_25_PCIEX_W_DISABLE3_GPIO_VALUE = "/dev/pciex_w_disable3/value";
+
     private static final String GPIO_DIRECTION = "out";
 
     private static final String FAILED_INITIALIZE_GPIO_MSG = "Failed to initialize GPIO {}";
@@ -93,16 +96,16 @@ public class ModemDriver {
             if (baseGpio != -1) {
                 // export gpio for internal modem. (Modem Power)
                 exportGpio(30);
-                
+
                 // export gpio for internal modem. (pci-ex slot 3)
                 exportGpio(23);
-                
+
                 // export gpio for external modem. (J9 usb port)
                 exportGpio(35);
             }
         }
     }
-    
+
     private static void exportGpio(int offset) {
         String gpioIndex = Integer.toString(baseGpio + offset);
         String gpioPath = BASE_GPIO_PATH + gpioIndex;
@@ -180,6 +183,10 @@ public class ModemDriver {
                     gpioValuePath = gpioPath + GPIO_VALUE_SUFFIX_PATH;
                     invertGpioValue(gpioValuePath);
                 }
+            } else if (TARGET_NAME.equals(KuraConstants.BoltGATE_20_25.getTargetName())) {
+
+                turnOffGpio(BOLTGATE_20_25_PCIEX_SLOT3_POWER_GPIO_VALUE);
+
             } else {
                 logger.warn("turnModemOff() :: modem turnOff operation is not supported for the {} platform",
                         TARGET_NAME);
@@ -250,6 +257,14 @@ public class ModemDriver {
                     gpioValuePath = gpioPath + GPIO_VALUE_SUFFIX_PATH;
                     invertGpioValue(gpioValuePath);
                 }
+            } else if (TARGET_NAME.equals(KuraConstants.BoltGATE_20_25.getTargetName())) {
+
+                turnOnGpio(BOLTGATE_20_25_PCIEX_SLOT3_POWER_GPIO_VALUE);
+
+                Thread.sleep(1000);
+
+                toggleGpio(BOLTGATE_20_25_PCIEX_W_DISABLE3_GPIO_VALUE);
+
             } else {
                 logger.warn("turnModemOn() :: modem turnOn operation is not supported for the {} platform",
                         TARGET_NAME);
@@ -462,6 +477,20 @@ public class ModemDriver {
             throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");
         }
         return isModemOn;
+    }
+
+    private static void turnOffGpio(String valuePath) throws IOException {
+        try (FileWriter fw = new FileWriter(valuePath)) {
+            fw.write("0");
+            fw.flush();
+        }
+    }
+
+    private static void turnOnGpio(String valuePath) throws IOException {
+        try (FileWriter fw = new FileWriter(valuePath)) {
+            fw.write("1");
+            fw.flush();
+        }
     }
 
     private static void disable1020Gpio() throws IOException {

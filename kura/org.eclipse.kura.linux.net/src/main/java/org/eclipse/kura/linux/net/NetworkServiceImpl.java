@@ -384,13 +384,18 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             if (usbModem != null) {
                 // only add if there is not already a ppp interface for this modem
                 boolean addModem = true;
-                for (NetInterface<?> netInterface : netInterfaces) {
-                    UsbDevice usbDevice = netInterface.getUsbDevice();
-                    if ((usbDevice != null) && usbDevice.getUsbPort().equals(usbModem.getUsbPort())) {
+                for (NetInterface<?> netInterface : getInterfacesForUsbDevice(netInterfaces, usbModem.getUsbPort())) {
+                    if (netInterface.getType() == NetInterfaceType.MODEM) {
+                        // we already have a ppp interface associated to the usb modem, do not add
                         addModem = false;
-                        break;
+                    } else {
+                        // there is a network interface associated with the modem that is not managed by the ppp driver
+                        // this interface probably cannot be managed by Kura (e.g. a cdc_ncm interface)
+                        // completely ignore this interface
+                        netInterfaces.remove(netInterface);
                     }
                 }
+
                 if (addModem) {
                     netInterfaces.add(getModemInterface(usbModem.getUsbPort(), false, usbModem));
                 }
@@ -424,6 +429,24 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             }
         }
         return netInterfaces;
+    }
+
+    private List<NetInterface<?>> getInterfacesForUsbDevice(List<NetInterface<?>> netInterfaces, String usbPort) {
+        List<NetInterface<?>> result = new ArrayList<>();
+        for (NetInterface<?> netInterface : netInterfaces) {
+            final UsbDevice usbDevice = netInterface.getUsbDevice();
+            if (usbDevice == null) {
+                continue;
+            }
+            final String interfaceUsbPort = usbDevice.getUsbPort();
+            if (interfaceUsbPort == null) {
+                continue;
+            }
+            if (interfaceUsbPort.equals(usbPort)) {
+                result.add(netInterface);
+            }
+        }
+        return result;
     }
 
     @Override

@@ -148,6 +148,7 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
         <module>org.eclipse.kura.internal.driver.opcua.test</module>
         <module>org.eclipse.kura.internal.driver.s7plc.test</module>
         <module>org.eclipse.kura.internal.wire.test</module>
+        <module>org.eclipse.kura.linux.clock.test</module>
         <module>org.eclipse.kura.linux.net.test</module>
         <module>org.eclipse.kura.linux.position.test</module>
         <module>org.eclipse.kura.net.admin.test</module>

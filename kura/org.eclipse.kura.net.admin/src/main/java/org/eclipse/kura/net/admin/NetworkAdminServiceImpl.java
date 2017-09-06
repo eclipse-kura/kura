@@ -94,11 +94,15 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     private FirewallConfigurationService firewallConfigurationService;
     private SystemService systemService;
 
+    private Object wifiClientMonitorServiceLock;
+
     private boolean pendingNetworkConfigurationChange = false;
     private boolean pendingFirewallConfigurationChange = false;
 
     private static final String[] EVENT_TOPICS = new String[] {
             NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC, };
+
+    private ComponentContext context;
 
     private class NetworkRollbackItem {
 
@@ -148,6 +152,15 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         this.systemService = null;
     }
 
+    // hack to synchronize verifyWifiCredentials() with WifiClientMonitorService
+    public synchronized void setWifiClientMonitorServiceLock(Object lock) {
+        this.wifiClientMonitorServiceLock = lock;
+    }
+
+    public synchronized void unsetWifiClientMonitorServiceLock() {
+        this.wifiClientMonitorServiceLock = null;
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -159,7 +172,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         logger.debug("Activating NetworkAdmin Service...");
 
         // save the bundle context
-        ComponentContext ctx = componentContext;
+        this.context = componentContext;
 
         // since we are just starting up, start named if needed
         LinuxNamed linuxNamed;
@@ -175,7 +188,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
         Dictionary<String, String[]> d = new Hashtable<>();
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
-        ctx.getBundleContext().registerService(EventHandler.class.getName(), this, d);
+        this.context.getBundleContext().registerService(EventHandler.class.getName(), this, d);
 
         logger.debug("Done Activating NetworkAdmin Service...");
     }
@@ -1222,45 +1235,36 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     @Override
-    public boolean verifyWifiCredentials(String ifaceName, WifiConfig wifiConfig, int tout) {
+    public synchronized boolean verifyWifiCredentials(String ifaceName, WifiConfig wifiConfig, int tout) {
 
-        boolean ret = false;
-        boolean restartSupplicant = false;
-        WpaSupplicantConfigWriter wpaSupplicantConfigWriter = WpaSupplicantConfigWriter.getInstance();
-        try {
-            wpaSupplicantConfigWriter.generateTempWpaSupplicantConf(wifiConfig, ifaceName);
-
-            if (WpaSupplicantManager.isRunning(ifaceName)) {
-                logger.debug("verifyWifiCredentials() :: stoping wpa_supplicant");
-                WpaSupplicantManager.stop(ifaceName);
-                restartSupplicant = true;
-            }
-            logger.debug("verifyWifiCredentials() :: Restarting temporary instance of wpa_supplicant");
-            WpaSupplicantManager.startTemp(ifaceName, WifiMode.INFRA, wifiConfig.getDriver());
-            wifiModeWait(ifaceName, WifiMode.INFRA, 10);
-            ret = isWifiConnectionCompleted(ifaceName, tout);
-
-            if (WpaSupplicantManager.isTempRunning()) {
-                logger.debug("verifyWifiCredentials() :: stopping temporary instance of wpa_supplicant");
-                WpaSupplicantManager.stop(ifaceName);
-            }
-        } catch (KuraException e) {
-            logger.warn("Exception while managing the temporary instance of the Wpa supplicant.", e);
+        if (wifiClientMonitorServiceLock == null) {
+            return false;
         }
 
-        if (restartSupplicant) {
+        // hack to synchronize with WifiClientMonitorService
+        synchronized (wifiClientMonitorServiceLock) {
+            boolean ret = false;
+            WpaSupplicantConfigWriter wpaSupplicantConfigWriter = WpaSupplicantConfigWriter.getInstance();
             try {
-                logger.debug("verifyWifiCredentials() :: Restarting wpa_supplicant");
-                WpaSupplicantManager.start(ifaceName, WifiMode.INFRA, wifiConfig.getDriver());
-                if (isWifiConnectionCompleted(ifaceName, tout)) {
-                    renewDhcpLease(ifaceName);
-                }
-            } catch (KuraException e) {
-                logger.warn("Exception while trying to restart the Wpa supplicant.", e);
-            }
-        }
+                // Kill dhcp, hostapd and wpa_supplicant if running
+                manageDhcpClient(ifaceName, false);
+                manageDhcpServer(ifaceName, false);
+                disableWifiInterface(ifaceName);
 
-        return ret;
+                wpaSupplicantConfigWriter.generateTempWpaSupplicantConf(wifiConfig, ifaceName);
+
+                logger.debug("verifyWifiCredentials() :: Starting temporary instance of wpa_supplicant");
+                WpaSupplicantManager.startTemp(ifaceName, WifiMode.INFRA, wifiConfig.getDriver());
+                wifiModeWait(ifaceName, WifiMode.INFRA, 10);
+                ret = isWifiConnectionCompleted(ifaceName, tout);
+
+                // Disable wifi interface again, previous configuration will be restored by WifiMonitorService
+                disableWifiInterface(ifaceName);
+            } catch (Exception e) {
+                logger.warn("Exception while managing the temporary instance of the Wpa supplicant.", e);
+            }
+            return ret;
+        }
     }
 
     @Override

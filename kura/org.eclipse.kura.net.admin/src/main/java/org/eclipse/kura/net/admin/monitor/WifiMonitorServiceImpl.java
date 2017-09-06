@@ -50,6 +50,7 @@ import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkAdminService;
 import org.eclipse.kura.net.NetworkService;
+import org.eclipse.kura.net.admin.NetworkAdminServiceImpl;
 import org.eclipse.kura.net.admin.NetworkConfigurationService;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.event.NetworkStatusChangeEvent;
@@ -113,9 +114,15 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
 
     public void setNetworkAdminService(NetworkAdminService netAdminService) {
         this.netAdminService = netAdminService;
+        if (this.netAdminService instanceof NetworkAdminServiceImpl) {
+            ((NetworkAdminServiceImpl) this.netAdminService).setWifiClientMonitorServiceLock(lock);
+        }
     }
 
     public void unsetNetworkAdminService(NetworkAdminService netAdminService) {
+        if (this.netAdminService instanceof NetworkAdminServiceImpl) {
+            ((NetworkAdminServiceImpl) this.netAdminService).unsetWifiClientMonitorServiceLock();
+        }
         this.netAdminService = null;
     }
 

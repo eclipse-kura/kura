@@ -131,7 +131,7 @@ public class JavaNtpClockSyncProviderTest {
             lock.wait(500); // wait a bit so that synch runs once
         }
 
-        Thread.sleep(40); // wait just a bit longer, so that the exception propagates
+        Thread.sleep(100); // wait just a bit longer, so that the exception propagates
 
         assertEquals(0, TestUtil.getFieldValue(provider, "syncCount"));
         assertEquals(1, TestUtil.getFieldValue(provider, "numRetry"));

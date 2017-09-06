@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.clock;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -24,6 +25,8 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
+import org.eclipse.kura.linux.clock.ClockSyncListener;
+import org.eclipse.kura.linux.clock.ClockSyncProvider;
 import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionService;
 import org.osgi.framework.BundleContext;
@@ -179,7 +182,7 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
                         String MM = gpsDate.substring(2, 4);
                         String DD = gpsDate.substring(0, 2);
                         String commandDate = "date +%Y%m%d -s \"20" + YY + MM + DD + "\"";
-                        procDate = ProcessUtil.exec(commandDate);
+                        procDate = exec(commandDate);
                         procDate.waitFor();
                         if (procDate.exitValue() == 0) {
                             logger.info("System Clock Synchronized with GPS, date = {} ", gpsDate);
@@ -191,7 +194,7 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
 
                                 // time is in UTC => -u
                                 String commandTime = "date +%T -u -s \"" + hh + ":" + mm + ":" + ss + "\"";
-                                procTime = ProcessUtil.exec(commandTime);
+                                procTime = exec(commandTime);
                                 procTime.waitFor();
                                 if (procTime.exitValue() == 0) {
                                     logger.info("System Clock Synchronized with GPS, time = {}", gpsTime);
@@ -199,6 +202,9 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
                                     this.waitForLocked = false;
                                 } else {
                                     logger.error("Unexpected error while Synchronizing System Clock with GPS");
+
+                                    // FIXME? this value gets overwritten immediately and it likely makes no sense as
+                                    // the date command failed, not GPS
                                     this.waitForLocked = true;
                                 }
                             }
@@ -225,5 +231,9 @@ public class GpsClockSyncProvider implements ClockSyncProvider, EventHandler {
                 ProcessUtil.destroy(procTime);
             }
         }
+    }
+
+    protected SafeProcess exec(String command) throws IOException {
+        return ProcessUtil.exec(command);
     }
 }

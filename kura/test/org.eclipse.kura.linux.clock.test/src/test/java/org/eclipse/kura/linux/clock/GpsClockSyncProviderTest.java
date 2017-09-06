@@ -11,6 +11,10 @@ package org.eclipse.kura.linux.clock;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+<<<<<<< HEAD
+=======
+import static org.junit.Assert.assertNotNull;
+>>>>>>> 07cc194... refactored services for testability, added tests
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -21,6 +25,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+<<<<<<< HEAD
+=======
+import java.io.IOException;
+>>>>>>> 07cc194... refactored services for testability, added tests
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -30,6 +38,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.TestUtil;
+<<<<<<< HEAD
+=======
+import org.eclipse.kura.core.util.SafeProcess;
+>>>>>>> 07cc194... refactored services for testability, added tests
 import org.eclipse.kura.position.PositionService;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
@@ -38,6 +50,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 public class GpsClockSyncProviderTest {
+
     @Test
     public void testHandleEvent() throws NoSuchFieldException {
         // test handleEvent()
@@ -254,5 +267,149 @@ public class GpsClockSyncProviderTest {
 
         verify(scheduler, times(1)).shutdown();
         assertNull(TestUtil.getFieldValue(provider, "scheduler"));
+    }
+
+    @Test
+    public void testSynchNotLocked() throws KuraException, NoSuchFieldException {
+        // position service does not have a locked position
+
+        GpsClockSyncProvider provider = new GpsClockSyncProvider();
+
+        PositionService psMock = mock(PositionService.class);
+        TestUtil.setFieldValue(provider, "positionService", psMock);
+
+        when(psMock.isLocked()).thenReturn(false);
+
+        provider.synchClock();
+
+        assertTrue((boolean) TestUtil.getFieldValue(provider, "waitForLocked"));
+        assertNull(TestUtil.getFieldValue(provider, "lastSync"));
+    }
+
+    @Test
+    public void testSynchNoGPSDate() throws KuraException, NoSuchFieldException {
+        // position service is locked on, but date is invalid
+
+        GpsClockSyncProvider provider = new GpsClockSyncProvider();
+
+        PositionService psMock = mock(PositionService.class);
+        TestUtil.setFieldValue(provider, "positionService", psMock);
+
+        when(psMock.isLocked()).thenReturn(true);
+
+        when(psMock.getNmeaDate()).thenReturn("");
+
+        provider.synchClock();
+
+        assertFalse((boolean) TestUtil.getFieldValue(provider, "waitForLocked"));
+        assertNull(TestUtil.getFieldValue(provider, "lastSync"));
+    }
+
+    @Test
+    public void testSynchDate() throws KuraException, NoSuchFieldException {
+        // position service is locked on, date is OK
+
+        String date = "050917";
+        String date2 = "170905";
+        String time = "123456";
+        String time2 = "12:34:56";
+
+        AtomicInteger visitCount = new AtomicInteger(0);
+        GpsClockSyncProvider provider = new GpsClockSyncProvider() {
+
+            @Override
+            protected SafeProcess exec(String command) throws IOException {
+                assertTrue(String.format("date +%%Y%%m%%d -s \"20%s\"", date2).equals(command)
+                        || String.format("date +%%T -u -s \"%s\"", time2).equals(command));
+
+                int count = visitCount.getAndIncrement();
+
+                SafeProcess processMock = mock(SafeProcess.class);
+                when(processMock.exitValue()).thenReturn(count);
+
+                return processMock;
+            }
+        };
+
+        PositionService psMock = mock(PositionService.class);
+        TestUtil.setFieldValue(provider, "positionService", psMock);
+
+        when(psMock.isLocked()).thenReturn(true);
+
+        when(psMock.getNmeaDate()).thenReturn(date);
+        when(psMock.getNmeaTime()).thenReturn(time);
+
+        AtomicBoolean visited = new AtomicBoolean(false);
+        ClockSyncListener listener = new ClockSyncListener() {
+
+            @Override
+            public void onClockUpdate(long offset) {
+                visited.set(true);
+            }
+        };
+        TestUtil.setFieldValue(provider, "listener", listener);
+
+        provider.synchClock();
+
+        assertFalse((boolean) TestUtil.getFieldValue(provider, "waitForLocked"));
+        assertNotNull(TestUtil.getFieldValue(provider, "lastSync"));
+
+        assertTrue(visited.get());
+        assertEquals(2, visitCount.get());
+    }
+
+    @Test
+    public void testSynchDateTime() throws KuraException, NoSuchFieldException {
+        // position service is locked on, date is OK
+
+        String date = "050917";
+        String date2 = "170905";
+        String time = "123456";
+        String time2 = "12:34:56";
+
+        SafeProcess processMock = mock(SafeProcess.class);
+        when(processMock.exitValue()).thenReturn(0);
+
+        AtomicInteger visitCount = new AtomicInteger(0);
+        GpsClockSyncProvider provider = new GpsClockSyncProvider() {
+
+            @Override
+            protected SafeProcess exec(String command) throws IOException {
+                assertTrue(String.format("date +%%Y%%m%%d -s \"20%s\"", date2).equals(command)
+                        || String.format("date +%%T -u -s \"%s\"", time2).equals(command));
+
+                visitCount.incrementAndGet();
+
+                return processMock;
+            }
+        };
+
+        PositionService psMock = mock(PositionService.class);
+        TestUtil.setFieldValue(provider, "positionService", psMock);
+
+        when(psMock.isLocked()).thenReturn(true);
+
+        when(psMock.getNmeaDate()).thenReturn(date);
+        when(psMock.getNmeaTime()).thenReturn(time);
+
+        AtomicBoolean visited = new AtomicBoolean(false);
+        ClockSyncListener listener = new ClockSyncListener() {
+
+            @Override
+            public void onClockUpdate(long offset) {
+                visited.set(true);
+            }
+        };
+        TestUtil.setFieldValue(provider, "listener", listener);
+
+        provider.synchClock();
+
+        assertFalse((boolean) TestUtil.getFieldValue(provider, "waitForLocked"));
+        assertNotNull(TestUtil.getFieldValue(provider, "lastSync"));
+
+        assertTrue(visited.get());
+        assertEquals(2, visitCount.get());
+
+        verify(processMock, times(2)).destroy();
     }
 }

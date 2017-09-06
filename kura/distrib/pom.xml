@@ -2243,6 +2243,23 @@
                                             file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins"
                                             failonerror="false" />
+                                        <!-- Add REST bundles-->
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.rest.provider_${org.eclipse.kura.rest.provider.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.rest.asset.provider_${org.eclipse.kura.rest.asset.provider.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                        <!-- Add Artemis bundles-->
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.broker.artemis.core_${org.eclipse.kura.broker.artemis.core.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.broker.artemis.simple.mqtt_${org.eclipse.kura.broker.artemis.simple.mqtt.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.broker.artemis.xml_${org.eclipse.kura.broker.artemis.xml.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.11.1/repository/plugins" />
                                     </target>
                                 </configuration>
                             </execution>

@@ -12,16 +12,23 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.eclipse.kura.core.configuration.metatype.Tad;
+import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
+import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.eclipse.milo.opcua.stack.core.types.enumerated.IdType;
 import org.junit.Test;
 
 
 public class OpcUaChannelDescriptorTest {
 
+    private static final String NODE_ID = "node.id";
     private static final String NODE_ID_TYPE = "node.id.type";
     private static final String NODE_NAMESPACE_INDEX = "node.namespace.index";
 
@@ -34,7 +41,7 @@ public class OpcUaChannelDescriptorTest {
         assertNotNull(description);
         assertEquals(3, description.size());
 
-        assertEquals("node.id", description.get(0).getName());
+        assertEquals(NODE_ID, description.get(0).getName());
         assertEquals(NODE_NAMESPACE_INDEX, description.get(1).getName());
         assertEquals(NODE_ID_TYPE, description.get(2).getName());
         assertEquals(4, description.get(2).getOption().size());
@@ -73,10 +80,63 @@ public class OpcUaChannelDescriptorTest {
             // OK
         }
 
-        properties.put(NODE_ID_TYPE, "NUMERIC");
+        // acceptable types
+        for (NodeIdType type : NodeIdType.values()) {
+            properties.put(NODE_ID_TYPE, type.name());
 
-        NodeIdType result = OpcUaChannelDescriptor.getNodeIdType(properties);
+            NodeIdType result = OpcUaChannelDescriptor.getNodeIdType(properties);
 
-        assertEquals(NodeIdType.NUMERIC, result);
+            assertEquals(type, result);
+        }
+    }
+
+    @Test
+    public void testGetNodeId() {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(NODE_ID, "123");
+
+        int nodeNamespaceIndex = 1;
+
+        // numeric
+        NodeIdType nodeIdType = NodeIdType.NUMERIC;
+
+        NodeId node = OpcUaChannelDescriptor.getNodeId(properties, nodeNamespaceIndex, nodeIdType);
+
+        assertEquals(IdType.Numeric, node.getType());
+        assertEquals(UInteger.valueOf(123), node.getIdentifier());
+
+        // string
+        nodeIdType = NodeIdType.STRING;
+
+        node = OpcUaChannelDescriptor.getNodeId(properties, nodeNamespaceIndex, nodeIdType);
+
+        assertEquals(IdType.String, node.getType());
+        assertEquals("123", node.getIdentifier());
+
+        // guid
+        properties.put(NODE_ID, "12345678-1234-1234-1234-123456789012");
+        nodeIdType = NodeIdType.GUID;
+
+        node = OpcUaChannelDescriptor.getNodeId(properties, nodeNamespaceIndex, nodeIdType);
+
+        assertEquals(IdType.Guid, node.getType());
+        assertEquals(UUID.fromString("12345678-1234-1234-1234-123456789012"), node.getIdentifier());
+
+        // opaque
+        properties.put(NODE_ID, Base64.getEncoder().encodeToString("12345678".getBytes()));
+        nodeIdType = NodeIdType.OPAQUE;
+
+        node = OpcUaChannelDescriptor.getNodeId(properties, nodeNamespaceIndex, nodeIdType);
+
+        assertEquals(IdType.Opaque, node.getType());
+        assertEquals(ByteString.of("12345678".getBytes()), node.getIdentifier());
+
+        // exception case
+        try {
+            node = OpcUaChannelDescriptor.getNodeId(properties, nodeNamespaceIndex, null);
+            fail("Exception was expected.");
+        } catch (NullPointerException e) {
+            // OK
+        }
     }
 }

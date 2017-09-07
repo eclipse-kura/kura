@@ -459,6 +459,7 @@ fi]]>
 				<exclude name="org.eclipse.kura.windows.*"/>
 				<exclude name="org.junit*"/>
 				<exclude name="org.moka7*"/>
+				<exclude name="tinyb*"/>
 
 				<!-- exclude source bundles -->
 				<exclude name="*.source_*.jar"/>
@@ -467,14 +468,14 @@ fi]]>
 				<exclude name="*.SNAPSHOT.jar"/>
 
 			</zipfileset>
-
+			
 			<!-- add .SNAPSHOT as -SNAPSHOT -->
 			<mappedresources>
 				<fileset dir="${kura.osgi.repo}/plugins" includes="*.SNAPSHOT.jar" />
 				<globmapper from="*.SNAPSHOT.jar" to="${build.output.name}/plugins/*-SNAPSHOT.jar" />
 			</mappedresources>
 			<mappedresources>
-				<fileset dir="../target-definition/common/repository/plugins" includes="*.SNAPSHOT.jar" />
+				<fileset dir="../target-definition/common/repository/plugins" includes="*.SNAPSHOT.jar" excludes="tinyb*"/>
 				<globmapper from="*.SNAPSHOT.jar" to="${build.output.name}/plugins/*-SNAPSHOT.jar" />
 			</mappedresources>
 
@@ -512,6 +513,12 @@ fi]]>
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
+	        <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.ble.provider_${org.eclipse.kura.ble.provider.version}.jar"
+	                        prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.ble.ibeacon.provider_${org.eclipse.kura.ble.ibeacon.provider.version}.jar"
+                            prefix="${build.output.name}/kura/plugins" />
+            <zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.ble.eddystone.provider_${org.eclipse.kura.ble.eddystone.provider.version}.jar"
+                            prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar"
                         prefix="${build.output.name}/kura/plugins" />
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.core.status_${org.eclipse.kura.core.status.version}.jar"
@@ -538,6 +545,7 @@ fi]]>
 		<antcall target="emulator-gpio-jar" />
 		<antcall target="emulator-jars" />
 		<antcall target="linux-jars" />
+		<antcall target="tinyb-jars" />
 
 		<echo message="Building Kura Distribution for ${build.name}-jars..." />
 
@@ -1021,6 +1029,10 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
                 value=", reference:file:${kura.install.dir}/kura/plugins/jdk.dio.${native.tag}_${jdk.dio.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/jdk.dio_${jdk.dio.version}.jar@3" />
+	        <entry key="osgi.bundles" operation="+"
+	            value=", reference:file:${kura.install.dir}/kura/plugins/tinyb.${native.tag}_${tinyb.version}.jar@3" />
+	        <entry key="osgi.bundles" operation="+"
+	            value=", reference:file:${kura.install.dir}/kura/plugins/tinyb_${tinyb.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.commons.net_${org.apache.commons.net.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
@@ -1151,6 +1163,12 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 			      value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar@4:start" />
+	        <entry key="osgi.bundles" operation="+"
+	              value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.ble.provider_${org.eclipse.kura.ble.provider.version}.jar@4:start" />
+	        <entry key="osgi.bundles" operation="+"
+	              value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.ble.ibeacon.provider_${org.eclipse.kura.ble.ibeacon.provider.version}.jar@4:start" />
+	        <entry key="osgi.bundles" operation="+"
+	              value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.ble.eddystone.provider_${org.eclipse.kura.ble.eddystone.provider.version}.jar@4:start" />
 		</propertyfile>
 	</target>
 
@@ -1475,6 +1493,34 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</zip>
 	</target>
 
+	<target name="tinyb-jars">
+	    <condition property="is.tinyb.snapshot" value="">
+	        <contains string="${tinyb.version}" substring="SNAPSHOT"/>
+	    </condition>
+		<antcall target="tinyb-snapshot-jars" />
+		<antcall target="tinyb-no-snapshot-jars" />
+	</target>
+	
+    <target name="tinyb-snapshot-jars" if="is.tinyb.snapshot">
+        <zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+            <mappedresources>
+                <fileset dir="../target-definition/common/repository/plugins" includes="tinyb.${native.tag}_*.jar" />
+                <globmapper from="*.SNAPSHOT.jar" to="${build.output.name}/plugins/*-SNAPSHOT.jar" />
+            </mappedresources>
+            <mappedresources>
+                <fileset dir="../target-definition/common/repository/plugins" includes="tinyb_*.jar" />
+                <globmapper from="*.SNAPSHOT.jar" to="${build.output.name}/plugins/*-SNAPSHOT.jar" />
+            </mappedresources>        	
+        </zip>
+    </target>
+	
+	<target name="tinyb-no-snapshot-jars" unless="is.tinyb.snapshot">
+        <zipfileset file="../target-definition/common/repository/plugins/tinyb.${native.tag}_${tinyb.version}.jar"
+                    prefix="${build.output.name}/plugins" />
+        <zipfileset file="../target-definition/common/repository/plugins/tinyb_${tinyb.version}.jar"
+                    prefix="${build.output.name}/plugins" />
+	</target>	
+	
 	<target name="web2-jar-win" if="is.web2.jar.available">
     	<echo message="web2-jar-win ${project.build.directory}/${build.output.name}/config.ini..." />
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"

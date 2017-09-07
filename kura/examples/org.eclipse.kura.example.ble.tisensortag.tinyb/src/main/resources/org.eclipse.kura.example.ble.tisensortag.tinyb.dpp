@@ -1,0 +1,20 @@
+#Deployment Plugin Project File
+#Fri Sep 01 12:12:44 CEST 2017
+build.ant.name=<.>/src/main/resources/org.eclipse.kura.example.ble.tisensortag.tinyb_build.xml
+build.dp.file=<.>/target/org.eclipse.kura.example.ble.tisensortag.tinyb.dp
+build.location=
+bundles.0.bundle_path=<.>/target/org.eclipse.kura.example.ble.tisensortag.tinyb-1.0.0-SNAPSHOT.jar
+bundles.0.customizer=false
+bundles.0.headers.count=0
+bundles.0.missing=false
+bundles.0.name=bundles/org.eclipse.kura.example.ble.tisensortag.tinyb-1.0.0-SNAPSHOT.jar
+bundles.0.symbolic_name=org.eclipse.kura.example.ble.tisensortag.tinyb;singleton\:\=true
+bundles.0.version=1.0.0.201709010816
+bundles.count=1
+certificates.count=0
+general.signbundles=false
+headers.other.headers=
+headers.symbolic.name=org.eclipse.kura.example.ble.tisensortag
+headers.version=1.0.0
+resources.count=0
+

@@ -10,7 +10,7 @@
 <booleanAttribute key="default" value="true"/>
 <booleanAttribute key="default_auto_start" value="true"/>
 <intAttribute key="default_start_level" value="4"/>
-<stringAttribute key="deselected_workspace_plugins" value="org.eclipse.kura.example.beacon,org.eclipse.kura.example.ble.tisensortag,org.eclipse.kura.example.camel.publisher,org.eclipse.kura.example.publisher"/>
+<stringAttribute key="deselected_workspace_plugins" value="org.eclipse.kura.example.beacon,org.eclipse.kura.example.beacon.scanner,org.eclipse.kura.example.ble.tisensortag,org.eclipse.kura.example.ibeacon.advertiser,org.eclipse.kura.example.ibeacon.scanner,org.eclipse.kura.example.eddystone.advertiser,org.eclipse.kura.example.eddystone.scanner,org.eclipse.kura.example.ble.tisensortag.tinyb,org.eclipse.kura.example.camel.publisher,org.eclipse.kura.example.publisher"/>
 <booleanAttribute key="includeOptional" value="true"/>
 <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
 <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>

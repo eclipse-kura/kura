@@ -22,7 +22,7 @@
 
     <groupId>org.eclipse.kura</groupId>
     <artifactId>distrib</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.1.0</version>
 
     <packaging>pom</packaging>
 
@@ -663,7 +663,7 @@
 
                 				<!-- Copy target-platform/config/kura.target-platform.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
                                 <copy
-                                    file="${kura.basedir}/../../../target-platform/config/kura.target-platform.build.properties"
+                                    file="${kura.basedir}/../../target-platform/config/kura.target-platform.build.properties"
                                     todir="RELEASE_INFO/${project.version}/config" overwrite="true" />
 
 							    <!-- Copy src/main/resources/common/previous-version-pom-template.xml in distrib/RELEASE_INFO/${project.version}/pom.xml -->
@@ -691,7 +691,7 @@
                                 </exec>
 
 								<!-- Copy target-platform/p2-repo-common/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-common/pom.xml -->
-                                <copy file="${kura.basedir}/../../../target-platform/p2-repo-common/pom.xml"
+                                <copy file="${kura.basedir}/../../target-platform/p2-repo-common/pom.xml"
                                     tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" overwrite="true" />
 								<!-- replace artifactId -->
                                 <replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;" value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;"
@@ -711,7 +711,7 @@
                                 <move file="RELEASE_INFO/${project.version}/p2-repo-common/pom_.xml" tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" />
 
 								<!-- Copy target-platform/p2-repo-equinox_3.11.1/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-equinox_3.11.1/pom.xml -->
-                                <copy file="${kura.basedir}/../../../target-platform/p2-repo-equinox_3.11.1/pom.xml"
+                                <copy file="${kura.basedir}/../../target-platform/p2-repo-equinox_3.11.1/pom.xml"
                                     tofile="RELEASE_INFO/${project.version}/p2-repo-equinox_3.11.1/pom.xml" overwrite="true" />
 								<!-- replace artifactId -->
                                 <replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;" value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;"

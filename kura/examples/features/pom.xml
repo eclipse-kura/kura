@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+     Copyright (c) 2017 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>examples</artifactId>
+        <version>3.1.0-SNAPSHOT</version>
+    </parent>
+
+    <properties>
+      <kura.basedir>${project.basedir}/../..</kura.basedir>
+      <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
+    </properties>
+
+    <groupId>org.eclipse.kura.examples.feature</groupId>
+    <artifactId>features</artifactId>
+    <packaging>pom</packaging>
+
+    <!-- provide valid links for all feature projects -->
+
+    <repositories>
+        <repository>
+            <id>license-feature</id>
+            <url>http://download.eclipse.org/cbi/updates/license/</url>
+            <layout>p2</layout>
+        </repository>
+        <repository>
+            <id>p2-repo-equinox_3.11.1</id>
+            <layout>p2</layout>
+            <url>file:///${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
+        </repository>
+        <repository>
+            <id>p2-repo-common</id>
+            <layout>p2</layout>
+            <url>file:///${kura.basedir}/target-definition/common/repository/</url>
+        </repository>
+    </repositories>
+
+    <modules>
+      <module>org.eclipse.kura.example.camel.aggregation.feature</module>
+      <module>org.eclipse.kura.example.camel.quickstart.feature</module>
+    </modules>
+
+    <profiles>
+        <profile>
+            <id>source-feature-generation</id>
+            <activation>
+                <file>
+                    <exists>sourceTemplateFeature/feature.properties</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.eclipse.tycho.extras</groupId>
+                        <artifactId>tycho-source-feature-plugin</artifactId>
+                        <version>${tycho-version}</version>
+                        <executions>
+                            <execution>
+                                <id>source-feature</id>
+                                <goals>
+                                    <goal>source-feature</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.eclipse.tycho</groupId>
+                        <artifactId>tycho-p2-plugin</artifactId>
+                        <version>${tycho-version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-p2-metadata</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>p2-metadata</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                        <version>2.8.1</version>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

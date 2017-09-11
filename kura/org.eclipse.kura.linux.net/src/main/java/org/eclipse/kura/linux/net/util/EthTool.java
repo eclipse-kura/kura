@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class EthTool implements LinkTool {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);
 
     private static final String LINK_DETECTED = "Link detected:";
     private static final String LINK_DUPLEX = "Duplex:";
@@ -81,7 +81,7 @@ public class EthTool implements LinkTool {
             int ind = -1;
             while ((line = br.readLine()) != null) {
                 if ((ind = line.indexOf(LINK_DETECTED)) >= 0) {
-                    s_logger.trace("Link detected from: {}", line);
+                    logger.trace("Link detected from: {}", line);
                     line = line.substring(ind + LINK_DETECTED.length()).trim();
                     this.linkDetected = line.compareTo("yes") == 0 ? true : false;
                 } else if ((ind = line.indexOf(LINK_DUPLEX)) >= 0) {

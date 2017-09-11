@@ -16,6 +16,7 @@
                configuration-policy="require"> 
    <implementation class="org.eclipse.kura.internal.wire.subscriber.CloudSubscriber"/>
    <property name="service.pid" value="org.eclipse.kura.wire.CloudSubscriber"/>
+   <property name="kura.ui.service.hide" type="Boolean" value="true"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
       <provide interface="org.eclipse.kura.cloud.CloudClientListener"/>

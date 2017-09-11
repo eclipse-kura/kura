@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,14 +23,14 @@ import org.slf4j.LoggerFactory;
  */
 public class NATRule {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(NATRule.class);
+    private static final Logger logger = LoggerFactory.getLogger(NATRule.class);
 
-    private String m_sourceInterface;						// i.e. eth0
-    private String m_destinationInterface;				// i.e. ppp0
-    private String m_protocol;	// protocol (i.e. all, tcp, udp)
-    private String m_source; // source network/host (i.e. 192.168.1.0/24 or 192.168.1.1/32)
-    private String m_destination; // destination network/host (i.e. 192.168.1.0/24 or 192.168.1.1/32)
-    private boolean m_masquerade;
+    private String sourceInterface;						// i.e. eth0
+    private String destinationInterface;				// i.e. ppp0
+    private String protocol;	// protocol (i.e. all, tcp, udp)
+    private String source; // source network/host (i.e. 192.168.1.0/24 or 192.168.1.1/32)
+    private String destination; // destination network/host (i.e. 192.168.1.0/24 or 192.168.1.1/32)
+    private boolean masquerade;
 
     /**
      * Constructor of <code>NATRule</code> object.
@@ -43,25 +43,25 @@ public class NATRule {
      *            add masquerade entry
      */
     public NATRule(String sourceInterface, String destinationInterface, boolean masquerade) {
-        this.m_sourceInterface = sourceInterface;
-        this.m_destinationInterface = destinationInterface;
-        this.m_masquerade = masquerade;
+        this.sourceInterface = sourceInterface;
+        this.destinationInterface = destinationInterface;
+        this.masquerade = masquerade;
     }
 
     public NATRule(String sourceInterface, String destinationInterface, String protocol, String source,
             String destination, boolean masquerade) {
         this(sourceInterface, destinationInterface, masquerade);
-        this.m_source = source;
-        this.m_destination = destination;
-        this.m_protocol = protocol;
+        this.source = source;
+        this.destination = destination;
+        this.protocol = protocol;
     }
 
     /**
      * Constructor of <code>NATRule</code> object.
      */
     public NATRule() {
-        this.m_sourceInterface = null;
-        this.m_destinationInterface = null;
+        this.sourceInterface = null;
+        this.destinationInterface = null;
     }
 
     /**
@@ -70,7 +70,7 @@ public class NATRule {
      * @return A boolean representing whether all parameters have been set.
      */
     public boolean isComplete() {
-        if (this.m_sourceInterface != null && this.m_destinationInterface != null) {
+        if (this.sourceInterface != null && this.destinationInterface != null) {
             return true;
         }
         return false;
@@ -106,7 +106,7 @@ public class NATRule {
      *            A String representing the sourceInterface.
      */
     public void setSourceInterface(String sourceInterface) {
-        this.m_sourceInterface = sourceInterface;
+        this.sourceInterface = sourceInterface;
     }
 
     /**
@@ -116,7 +116,7 @@ public class NATRule {
      *            A String representing the destinationInterface.
      */
     public void setDestinationInterface(String destinationInterface) {
-        this.m_destinationInterface = destinationInterface;
+        this.destinationInterface = destinationInterface;
     }
 
     /**
@@ -126,19 +126,19 @@ public class NATRule {
      *            A boolean representing the masquerade.
      */
     public void setMasquerade(boolean masquerade) {
-        this.m_masquerade = masquerade;
+        this.masquerade = masquerade;
     }
 
     public String getSource() {
-        return this.m_source;
+        return this.source;
     }
 
     public String getDestination() {
-        return this.m_destination;
+        return this.destination;
     }
 
     public String getProtocol() {
-        return this.m_protocol;
+        return this.protocol;
     }
 
     /**
@@ -147,7 +147,7 @@ public class NATRule {
      * @return sourceInterface A String representing the sourceInterface.
      */
     public String getSourceInterface() {
-        return this.m_sourceInterface;
+        return this.sourceInterface;
     }
 
     /**
@@ -156,7 +156,7 @@ public class NATRule {
      * @return destinationInterface A String representing the destinationInterface.
      */
     public String getDestinationInterface() {
-        return this.m_destinationInterface;
+        return this.destinationInterface;
     }
 
     /**
@@ -165,19 +165,20 @@ public class NATRule {
      * @return masquerade A boolean representing the masquerade.
      */
     public boolean isMasquerade() {
-        return this.m_masquerade;
+        return this.masquerade;
     }
 
     public NatPostroutingChainRule getNatPostroutingChainRule() {
-        NatPostroutingChainRule ret = null;
-        if (this.m_protocol == null) {
-            ret = new NatPostroutingChainRule(this.m_destinationInterface, this.m_masquerade);
+        NatPostroutingChainRule ret;
+        if (this.protocol == null) {
+            ret = new NatPostroutingChainRule(this.destinationInterface, this.masquerade);
         } else {
             try {
-                ret = new NatPostroutingChainRule(this.m_destinationInterface, this.m_protocol, this.m_destination,
-                        this.m_source, this.m_masquerade);
+                ret = new NatPostroutingChainRule(this.destinationInterface, this.protocol, this.destination,
+                        this.source, this.masquerade);
             } catch (KuraException e) {
-                s_logger.error("failed to obtain NatPostroutingChainRule {}", e);
+                ret = null;
+                logger.error("failed to obtain NatPostroutingChainRule", e);
             }
         }
         return ret;
@@ -188,16 +189,16 @@ public class NATRule {
         String dstNetwork = null;
         short srcMask = 0;
         short dstMask = 0;
-        if (this.m_source != null) {
-            srcNetwork = this.m_source.split("/")[0];
-            srcMask = Short.parseShort(this.m_source.split("/")[1]);
+        if (this.source != null) {
+            srcNetwork = this.source.split("/")[0];
+            srcMask = Short.parseShort(this.source.split("/")[1]);
         }
-        if (this.m_destination != null) {
-            dstNetwork = this.m_destination.split("/")[0];
-            dstMask = Short.parseShort(this.m_destination.split("/")[1]);
+        if (this.destination != null) {
+            dstNetwork = this.destination.split("/")[0];
+            dstMask = Short.parseShort(this.destination.split("/")[1]);
         }
-        return new FilterForwardChainRule(this.m_sourceInterface, this.m_destinationInterface, srcNetwork, srcMask,
-                dstNetwork, dstMask, this.m_protocol, null, 0, 0);
+        return new FilterForwardChainRule(this.sourceInterface, this.destinationInterface, srcNetwork, srcMask,
+                dstNetwork, dstMask, this.protocol, null, 0, 0);
     }
 
     @Override
@@ -205,17 +206,17 @@ public class NATRule {
         final int prime = 71;
         int result = 1;
 
-        result = prime * result + (this.m_sourceInterface == null ? 0 : this.m_sourceInterface.hashCode());
+        result = prime * result + (this.sourceInterface == null ? 0 : this.sourceInterface.hashCode());
 
-        result = prime * result + (this.m_destinationInterface == null ? 0 : this.m_destinationInterface.hashCode());
+        result = prime * result + (this.destinationInterface == null ? 0 : this.destinationInterface.hashCode());
 
-        result = prime * result + (this.m_source == null ? 0 : this.m_source.hashCode());
+        result = prime * result + (this.source == null ? 0 : this.source.hashCode());
 
-        result = prime * result + (this.m_destination == null ? 0 : this.m_destination.hashCode());
+        result = prime * result + (this.destination == null ? 0 : this.destination.hashCode());
 
-        result = prime * result + (this.m_protocol == null ? 0 : this.m_protocol.hashCode());
+        result = prime * result + (this.protocol == null ? 0 : this.protocol.hashCode());
 
-        result = prime * result + (this.m_masquerade ? 1277 : 1279);
+        result = prime * result + (this.masquerade ? 1277 : 1279);
 
         return result;
     }
@@ -226,17 +227,17 @@ public class NATRule {
             return false;
         }
         NATRule other = (NATRule) o;
-        if (!compareObjects(this.m_sourceInterface, other.m_sourceInterface)) {
+        if (!compareObjects(this.sourceInterface, other.sourceInterface)) {
             return false;
-        } else if (!compareObjects(this.m_destinationInterface, other.m_destinationInterface)) {
+        } else if (!compareObjects(this.destinationInterface, other.destinationInterface)) {
             return false;
-        } else if (this.m_masquerade != other.isMasquerade()) {
+        } else if (this.masquerade != other.masquerade) {
             return false;
-        } else if (!compareObjects(this.m_protocol, other.m_protocol)) {
+        } else if (!compareObjects(this.protocol, other.protocol)) {
             return false;
-        } else if (!compareObjects(this.m_source, other.m_source)) {
+        } else if (!compareObjects(this.source, other.source)) {
             return false;
-        } else if (!compareObjects(this.m_destination, other.m_destination)) {
+        } else if (!compareObjects(this.destination, other.destination)) {
             return false;
         }
         return true;

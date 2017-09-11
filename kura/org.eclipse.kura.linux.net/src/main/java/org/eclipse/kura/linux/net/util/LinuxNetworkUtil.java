@@ -40,16 +40,16 @@ import org.slf4j.LoggerFactory;
 
 public class LinuxNetworkUtil {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);
 
     private static final String OS_VERSION = System.getProperty("kura.os.version");
     private static final String TARGET_NAME = System.getProperty("target.device");
 
     private static Map<String, LinuxIfconfig> ifconfigs = new HashMap<>();
 
-    private static final String[] s_ignoreIfaces = { "can", "sit", "mon.wlan" };
+    private static final String[] ignoreIfaces = { "can", "sit", "mon.wlan" };
 
-    private static final ArrayList<String> s_tools = new ArrayList<>();
+    private static final ArrayList<String> tools = new ArrayList<>();
 
     private static final String PPP_IFACE_REGEX = "^ppp\\d+$";
     private static final String MODEM = "MODEM";
@@ -79,7 +79,7 @@ public class LinuxNetworkUtil {
             }
             return ifaces;
         } catch (KuraException e) {
-            s_logger.warn("FIXME: IpAddrShow failed. Falling back to old method", e);
+            logger.warn("FIXME: IpAddrShow failed. Falling back to old method", e);
             return getAllInterfaceNamesInternal();
         }
     }
@@ -92,7 +92,7 @@ public class LinuxNetworkUtil {
             // start the process
             proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() != 0) {
-                s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
+                logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
                 throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
             }
             // get the output
@@ -153,7 +153,7 @@ public class LinuxNetworkUtil {
             // start the process
             proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() != 0) {
-                s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
+                logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
                 return ipAddress;
             }
             // get the output
@@ -219,7 +219,7 @@ public class LinuxNetworkUtil {
             // start the process
             proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() != 0) {
-                s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
+                logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
                 return mtu;
             }
             // get the output
@@ -274,7 +274,7 @@ public class LinuxNetworkUtil {
             // FIXME: should we throw an exception if config is null?
             return ifconfig != null ? ifconfig.isLinkUp() : false;
         } catch (KuraException e) {
-            s_logger.warn("FIXME: IpAddrShow failed. Falling back to old method", e);
+            logger.warn("FIXME: IpAddrShow failed. Falling back to old method", e);
             return isLinkUpInternal(ifaceType, ifaceName);
         }
     }
@@ -301,7 +301,7 @@ public class LinuxNetworkUtil {
                 if (linkTool != null && linkTool.get()) {
                     return linkTool.isLinkDetected();
                 } else {
-                    s_logger.error("link tool failed to detect the status of {}", ifaceName);
+                    logger.error("link tool failed to detect the status of {}", ifaceName);
                     return false;
                 }
             } else if (ifaceType == NetInterfaceType.ETHERNET) {
@@ -341,13 +341,13 @@ public class LinuxNetworkUtil {
         boolean ret = false;
         final String[] searchFolders = new String[] { "/sbin/", "/usr/sbin/", "/bin/" };
 
-        if (s_tools.contains(tool)) {
+        if (tools.contains(tool)) {
             ret = true;
         } else {
             for (String folder : searchFolders) {
                 File fTool = new File(folder + tool);
                 if (fTool.exists()) {
-                    s_tools.add(tool);
+                    tools.add(tool);
                     ret = true;
                     break;
                 }
@@ -428,7 +428,7 @@ public class LinuxNetworkUtil {
                 Collection<String> wifiOptions = WifiOptions.getSupportedOptions(ifaceName);
                 if (!wifiOptions.isEmpty()) {
                     for (String op : wifiOptions) {
-                        s_logger.trace("WiFi option supported on {} : {}", ifaceName, op);
+                        logger.trace("WiFi option supported on {} : {}", ifaceName, op);
                     }
                     config.setType(NetInterfaceType.WIFI);
                 }
@@ -440,7 +440,7 @@ public class LinuxNetworkUtil {
                     Map<String, String> driver = getEthernetDriver(ifaceName);
                     config.setDriver(driver);
                 } catch (KuraException e) {
-                    s_logger.error("getInterfaceConfiguration() :: failed to obtain driver information - {}", e);
+                    logger.error("getInterfaceConfiguration() :: failed to obtain driver information - {}", e);
                 }
             }
 
@@ -448,7 +448,7 @@ public class LinuxNetworkUtil {
             ifconfigs.put(ifaceName, config);
             return config;
         } catch (KuraException e) {
-            if (e.getCode() == KuraErrorCode.OS_COMMAND_ERROR) {
+            if ((e.getCode() == KuraErrorCode.OS_COMMAND_ERROR) || (e.getCode() == KuraErrorCode.PROCESS_EXECUTION_ERROR)) {
                 // Assuming ifconfig fails because a PPP link went down and its interface cannot be found
                 if (ifaceName.matches(PPP_IFACE_REGEX)) {
                     File pppFile = new File(NetworkServiceImpl.PPP_PEERS_DIR + ifaceName);
@@ -459,7 +459,7 @@ public class LinuxNetworkUtil {
                     }
                 }
             } else {
-                s_logger.warn("FIXME: IpAddrShow failed. Falling back to old ifconfig method", e);
+                logger.warn("FIXME: IpAddrShow failed. Falling back to old ifconfig method", e);
                 return getInterfaceConfigurationInternal(ifaceName);
             }
         }
@@ -472,7 +472,7 @@ public class LinuxNetworkUtil {
         if (Character.isDigit(ifaceName.charAt(0))) {
             return null;
         }
-        for (String ignoreIface : s_ignoreIfaces) {
+        for (String ignoreIface : ignoreIfaces) {
             if (ifaceName.startsWith(ignoreIface)) {
                 return null;
             }
@@ -511,7 +511,7 @@ public class LinuxNetworkUtil {
                     linuxIfconfig.setDriver(driver);
                 }
             } catch (KuraException e) {
-                s_logger.error("getInterfaceConfiguration() :: failed to obtain driver information - {}", e);
+                logger.error("getInterfaceConfiguration() :: failed to obtain driver information - {}", e);
             }
         }
 
@@ -600,7 +600,7 @@ public class LinuxNetworkUtil {
         if (Character.isDigit(ifaceName.charAt(0))) {
             return NetInterfaceType.UNKNOWN;
         }
-        for (String ignoreIface : s_ignoreIfaces) {
+        for (String ignoreIface : ignoreIfaces) {
             if (ifaceName.startsWith(ignoreIface)) {
                 return NetInterfaceType.UNKNOWN;
             }
@@ -617,7 +617,7 @@ public class LinuxNetworkUtil {
                 ifaceType = ifconfig.getType();
             }
         }
-        s_logger.trace("getType() :: interface={}, type={}", ifaceName, ifaceType);
+        logger.trace("getType() :: interface={}, type={}", ifaceName, ifaceType);
         return ifaceType;
     }
 
@@ -627,7 +627,7 @@ public class LinuxNetworkUtil {
         if (Character.isDigit(ifaceName.charAt(0))) {
             return NetInterfaceType.UNKNOWN;
         }
-        for (String ignoreIface : s_ignoreIfaces) {
+        for (String ignoreIface : ignoreIfaces) {
             if (ifaceName.startsWith(ignoreIface)) {
                 return NetInterfaceType.UNKNOWN;
             }
@@ -638,7 +638,7 @@ public class LinuxNetworkUtil {
         if (ifconfigs.containsKey(ifaceName)) {
             LinuxIfconfig ifconfig = ifconfigs.get(ifaceName);
             ifaceType = ifconfig.getType();
-            s_logger.trace("getType() :: interface={}, type={}", ifaceName, ifaceType);
+            logger.trace("getType() :: interface={}, type={}", ifaceName, ifaceType);
         } else {
             ifconfigs.put(ifaceName, new LinuxIfconfig(ifaceName));
         }
@@ -669,7 +669,7 @@ public class LinuxNetworkUtil {
             }
         }
 
-        s_logger.trace("getType() :: interface={}, type={}", ifaceName, ifaceType);
+        logger.trace("getType() :: interface={}, type={}", ifaceName, ifaceType);
         LinuxIfconfig ifconfig = ifconfigs.get(ifaceName);
         ifconfig.setType(ifaceType);
 
@@ -722,7 +722,7 @@ public class LinuxNetworkUtil {
             Collection<String> wifiOptions = WifiOptions.getSupportedOptions(ifaceName);
             if (!wifiOptions.isEmpty()) {
                 for (String op : wifiOptions) {
-                    s_logger.trace("WiFi option supported on {} : {}", ifaceName, op);
+                    logger.trace("WiFi option supported on {} : {}", ifaceName, op);
                 }
                 stringType = "WIFI";
             }
@@ -776,12 +776,12 @@ public class LinuxNetworkUtil {
                 if (TARGET_NAME.equals(KuraConstants.ReliaGATE_15_10.getTargetName())) {
                     SafeProcess proc = ProcessUtil.exec(ifconfigIfaceUpCmd);
                     if (proc.waitFor() != 0) {
-                        s_logger.error(ERR_EXECUTING_CMD_MSG, ifconfigIfaceUpCmd, proc.exitValue());
+                        logger.error(ERR_EXECUTING_CMD_MSG, ifconfigIfaceUpCmd, proc.exitValue());
                     }
                 }
                 procEthtool = ProcessUtil.exec(ethtoolCmd);
                 if (procEthtool.waitFor() != 0) {
-                    s_logger.error(ERR_EXECUTING_CMD_MSG, ethtoolCmd, procEthtool.exitValue());
+                    logger.error(ERR_EXECUTING_CMD_MSG, ethtoolCmd, procEthtool.exitValue());
                     return driver;
                 }
                 getEthernetDriverParse(ethtoolCmd, driver, procEthtool);
@@ -835,7 +835,7 @@ public class LinuxNetworkUtil {
             // start the process
             proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() != 0) {
-                s_logger.warn("error executing command --- iwlist --- exit value = {}", proc.exitValue());
+                logger.warn("error executing command --- iwlist --- exit value = {}", proc.exitValue());
                 throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
             }
 
@@ -901,7 +901,7 @@ public class LinuxNetworkUtil {
                 procIw = ProcessUtil.exec(cmd);
                 if (procIw.waitFor() != 0) {
                     // fallback to iwconfig
-                    s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIw.exitValue());
+                    logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIw.exitValue());
                 } else {
                     mode = getWifiModeParseIw(cmd, procIw);
                 }
@@ -911,7 +911,7 @@ public class LinuxNetworkUtil {
                 cmd = formIwconfigIfaceCommand(ifaceName);
                 procIwConfig = ProcessUtil.exec(cmd);
                 if (procIwConfig.waitFor() != 0) {
-                    s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIwConfig.exitValue());
+                    logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIwConfig.exitValue());
                     throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, procIwConfig.exitValue());
                 }
 
@@ -943,7 +943,7 @@ public class LinuxNetworkUtil {
             while ((line = br.readLine()) != null) {
                 int index = line.indexOf("type ");
                 if (index > -1) {
-                    s_logger.debug(LINE_MSG, line);
+                    logger.debug(LINE_MSG, line);
                     String sMode = line.substring(index + "type ".length());
                     mode = getWifiModeParseGetMode(sMode);
                     break;
@@ -963,7 +963,7 @@ public class LinuxNetworkUtil {
             while ((line = br.readLine()) != null) {
                 int index = line.indexOf("Mode:");
                 if (index > -1) {
-                    s_logger.debug(LINE_MSG, line);
+                    logger.debug(LINE_MSG, line);
                     StringTokenizer st = new StringTokenizer(line.substring(index));
                     String modeStr = st.nextToken().substring(5);
                     mode = getWifiModeParseGetMode(modeStr);
@@ -1007,19 +1007,17 @@ public class LinuxNetworkUtil {
                 procIw = ProcessUtil.exec(cmd);
                 if (procIw.waitFor() != 0) {
                     // fallback to iwconfig
-                    s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIw.exitValue());
+                    logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIw.exitValue());
                 } else {
                     // get the output
                     bitRate = getWifiBitrateParseIw(cmd, procIw);
                 }
-            }
-
-            if ((bitRate == 0) && toolExists(IWCONFIG)) {
+            } else if (toolExists(IWCONFIG)) {
                 // start the process
                 cmd = formIwconfigIfaceCommand(ifaceName);
                 procIwConfig = ProcessUtil.exec(cmd);
                 if (procIwConfig.waitFor() != 0) {
-                    s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIwConfig.exitValue());
+                    logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIwConfig.exitValue());
                     throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, procIwConfig.exitValue());
                 }
 
@@ -1050,7 +1048,7 @@ public class LinuxNetworkUtil {
             while ((line = br.readLine()) != null) {
                 int index = line.indexOf("tx bitrate: ");
                 if (index > -1) {
-                    s_logger.debug(LINE_MSG, line);
+                    logger.debug(LINE_MSG, line);
                     StringTokenizer st = new StringTokenizer(line.substring(index));
                     st.nextToken(); // skip 'tx'
                     st.nextToken(); // skip 'bitrate:'
@@ -1073,7 +1071,7 @@ public class LinuxNetworkUtil {
             while ((line = br.readLine()) != null) {
                 int index = line.indexOf("Bit Rate=");
                 if (index > -1) {
-                    s_logger.debug(LINE_MSG, line);
+                    logger.debug(LINE_MSG, line);
                     StringTokenizer st = new StringTokenizer(line.substring(index));
                     st.nextToken(); // skip 'Bit'
                     Double rate = Double.parseDouble(st.nextToken().substring(5));
@@ -1119,26 +1117,23 @@ public class LinuxNetworkUtil {
                 procIw = ProcessUtil.exec(cmd);
                 if (procIw.waitFor() != 0) {
                     // fallback to iwconfig
-                    s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIw.exitValue());
+                    logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIw.exitValue());
                 } else {
                     // get the output
                     ssid = getSSIDParseIw(cmd, procIw);
                 }
-            }
-
-            if ((ssid == null) && toolExists(IWCONFIG)) {
+            } else if (toolExists(IWCONFIG)) {
                 // start the process
                 cmd = formIwconfigIfaceCommand(ifaceName);
                 procIwConfig = ProcessUtil.exec(cmd);
                 if (procIwConfig.waitFor() != 0) {
-                    s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIwConfig.exitValue());
+                    logger.error(ERR_EXECUTING_CMD_MSG, cmd, procIwConfig.exitValue());
                     throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, procIwConfig.exitValue());
                 }
 
                 // get the output
                 ssid = getSSIDParseIwconfig(cmd, procIwConfig);
             }
-
         } catch (InterruptedException e) {
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, formInterruptedCommandMessage(cmd));
         } catch (Exception e) {
@@ -1163,7 +1158,7 @@ public class LinuxNetworkUtil {
             while ((line = br.readLine()) != null) {
                 int index = line.indexOf("SSID:");
                 if (index > -1) {
-                    s_logger.debug(LINE_MSG, line);
+                    logger.debug(LINE_MSG, line);
                     String lineSub = line.substring(index);
                     StringTokenizer st = new StringTokenizer(lineSub);
                     st.nextToken();
@@ -1185,7 +1180,7 @@ public class LinuxNetworkUtil {
             while ((line = br.readLine()) != null) {
                 int index = line.indexOf("ESSID:");
                 if (index > -1) {
-                    s_logger.debug(LINE_MSG, line);
+                    logger.debug(LINE_MSG, line);
                     String lineSub = line.substring(index);
                     StringTokenizer st = new StringTokenizer(lineSub);
                     String ssidStr = st.nextToken();
@@ -1312,7 +1307,7 @@ public class LinuxNetworkUtil {
             // start the SafeProcess
             proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() != 0) {
-                s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
+                logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
                 throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
             }
         } catch (IOException e) {
@@ -1338,7 +1333,7 @@ public class LinuxNetworkUtil {
             // start the process
             proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() != 0) {
-                s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
+                logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
                 throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
             }
 
@@ -1362,7 +1357,7 @@ public class LinuxNetworkUtil {
             // start the SafeProcess
             proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() != 0) {
-                s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
+                logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
                 return;
             }
         } catch (IOException e) {
@@ -1423,7 +1418,7 @@ public class LinuxNetworkUtil {
             // start the process
             proc = ProcessUtil.exec(cmd);
             if (proc.waitFor() != 0) {
-                s_logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
+                logger.error(ERR_EXECUTING_CMD_MSG, cmd, proc.exitValue());
                 throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
             }
             // get the output
@@ -1474,7 +1469,7 @@ public class LinuxNetworkUtil {
             BufferedReader br = null;
             String cmd = "lsmod";
             try {
-                s_logger.debug(EXECUTING_CMD_MSG, cmd);
+                logger.debug(EXECUTING_CMD_MSG, cmd);
                 proc = ProcessUtil.exec(cmd);
                 if (proc.waitFor() != 0) {
                     throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
@@ -1518,7 +1513,7 @@ public class LinuxNetworkUtil {
             SafeProcess proc = null;
             String cmd = "rmmod bcmdhd";
             try {
-                s_logger.debug(EXECUTING_CMD_MSG, cmd);
+                logger.debug(EXECUTING_CMD_MSG, cmd);
                 proc = ProcessUtil.exec(cmd);
                 if (proc.waitFor() != 0) {
                     throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
@@ -1533,7 +1528,7 @@ public class LinuxNetworkUtil {
                 }
             }
         } else {
-            s_logger.debug("Kernel module unload not needed by platform '{}'", TARGET_NAME);
+            logger.debug("Kernel module unload not needed by platform '{}'", TARGET_NAME);
         }
     }
 
@@ -1553,7 +1548,7 @@ public class LinuxNetworkUtil {
             }
 
             try {
-                s_logger.debug(EXECUTING_CMD_MSG, cmd);
+                logger.debug(EXECUTING_CMD_MSG, cmd);
                 proc = ProcessUtil.exec(cmd);
                 if (proc.waitFor() != 0) {
                     throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
@@ -1568,7 +1563,7 @@ public class LinuxNetworkUtil {
                 }
             }
         } else {
-            s_logger.debug("Kernel module load not needed by platform '{}'", TARGET_NAME);
+            logger.debug("Kernel module load not needed by platform '{}'", TARGET_NAME);
         }
     }
 
@@ -1580,7 +1575,7 @@ public class LinuxNetworkUtil {
             SafeProcess proc = null;
             String cmd = "systool -vm bcmdhd";
             try {
-                s_logger.debug(EXECUTING_CMD_MSG, cmd);
+                logger.debug(EXECUTING_CMD_MSG, cmd);
                 proc = ProcessUtil.exec(cmd);
                 if ((proc.waitFor()) != 0) {
                     throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, cmd, proc.exitValue());
@@ -1635,14 +1630,14 @@ public class LinuxNetworkUtil {
                 deviceOn = true;
             }
         }
-        s_logger.debug("isWifiDeviceOn()? {}", deviceOn);
+        logger.debug("isWifiDeviceOn()? {}", deviceOn);
         return deviceOn;
     }
 
     public static void turnWifiDeviceOn(String interfaceName) throws Exception {
         // FIXME Assume for now the interface name does not change
         if (KuraConstants.Reliagate_10_20.getTargetName().equals(TARGET_NAME) && "wlan0".equals(interfaceName)) {
-            s_logger.info("Turning Wifi device ON ...");
+            logger.info("Turning Wifi device ON ...");
             FileWriter fw = new FileWriter("/sys/bus/pci/rescan");
             fw.write("1");
             fw.close();
@@ -1652,7 +1647,7 @@ public class LinuxNetworkUtil {
     public static void turnWifiDeviceOff(String interfaceName) throws Exception {
         // FIXME Assume for now the interface name does not change
         if (KuraConstants.Reliagate_10_20.getTargetName().equals(TARGET_NAME) && "wlan0".equals(interfaceName)) {
-            s_logger.info("Turning Wifi device OFF ...");
+            logger.info("Turning Wifi device OFF ...");
             FileWriter fw = new FileWriter("/sys/bus/pci/devices/0000:01:00.0/remove");
             fw.write("1");
             fw.close();

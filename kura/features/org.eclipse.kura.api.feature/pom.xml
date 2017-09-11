@@ -11,6 +11,6 @@
 		<relativePath>..</relativePath>
 	</parent>
 
-	<artifactId>org.eclipse.kura.api</artifactId>
+	<artifactId>org.eclipse.kura.api.feature</artifactId>
 	<packaging>eclipse-feature</packaging>
 </project>

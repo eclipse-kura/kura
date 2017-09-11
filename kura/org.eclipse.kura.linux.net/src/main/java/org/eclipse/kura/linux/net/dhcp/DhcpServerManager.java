@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 public class DhcpServerManager {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(DhcpServerManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(DhcpServerManager.class);
 
     private static final String FILE_DIR = "/etc/";
     private static final String PID_FILE_DIR = "/var/run/";
@@ -58,7 +58,7 @@ public class DhcpServerManager {
             // Check if DHCP server is running
             if (DhcpServerManager.isRunning(interfaceName)) {
                 // If so, disable it
-                s_logger.error("DHCP server is already running for " + interfaceName + ", bringing it down...");
+                logger.error("DHCP server is already running for {}, bringing it down...", interfaceName);
                 DhcpServerManager.disable(interfaceName);
             }
             // Start DHCP server
@@ -66,11 +66,11 @@ public class DhcpServerManager {
             if (configFile.exists()) {
                 // FIXME:MC This leads to a process leak
                 if (LinuxProcessUtil.startBackground(DhcpServerManager.formDhcpdCommand(interfaceName), false) == 0) {
-                    s_logger.debug("DHCP server started.");
+                    logger.debug("DHCP server started.");
                     return true;
                 }
             } else {
-                s_logger.debug("Can't start DHCP server, config file does not exist: {}", configFile.getAbsolutePath());
+                logger.debug("Can't start DHCP server, config file does not exist: {}", configFile.getAbsolutePath());
             }
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -80,7 +80,7 @@ public class DhcpServerManager {
     }
 
     public static boolean disable(String interfaceName) throws KuraException {
-        s_logger.debug("Disable DHCP server for {}", interfaceName);
+        logger.debug("Disable DHCP server for {}", interfaceName);
 
         try {
             // Check if DHCP server is running
@@ -90,7 +90,7 @@ public class DhcpServerManager {
                 if (LinuxProcessUtil.stop(pid)) {
                     DhcpServerManager.removePidFile(interfaceName);
                 } else {
-                    s_logger.debug("Failed to stop process...try to kill");
+                    logger.debug("Failed to stop process...try to kill");
                     if (LinuxProcessUtil.kill(pid)) {
                         DhcpServerManager.removePidFile(interfaceName);
                     } else {
@@ -98,7 +98,7 @@ public class DhcpServerManager {
                     }
                 }
             } else {
-                s_logger.debug("tried to kill DHCP server for interface but it is not running");
+                logger.debug("tried to kill DHCP server for interface but it is not running");
             }
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -118,11 +118,13 @@ public class DhcpServerManager {
         return sb.toString();
     }
 
-    private static void removePidFile(String interfaceName) {
+    private static boolean removePidFile(String interfaceName) {
+        boolean ret = true;
         File pidFile = new File(DhcpServerManager.getPidFilename(interfaceName));
         if (pidFile.exists()) {
-            pidFile.delete();
+            ret = pidFile.delete();
         }
+        return ret;
     }
 
     public static String getPidFilename(String interfaceName) {

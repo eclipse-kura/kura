@@ -29,9 +29,14 @@
         <module>org.eclipse.kura.asset.provider</module>
         <module>org.eclipse.kura.asset.helper.provider</module>
 
+        <module>org.eclipse.kura.broker.artemis.core</module>
+        <module>org.eclipse.kura.broker.artemis.simple.mqtt</module>
+        <module>org.eclipse.kura.broker.artemis.xml</module>
+
         <module>org.eclipse.kura.camel</module>
         <module>org.eclipse.kura.camel.cloud.factory</module>
         <module>org.eclipse.kura.camel.xml</module>
+
         <module>org.eclipse.kura.core</module>
         <module>org.eclipse.kura.core.certificates</module>
         <module>org.eclipse.kura.core.cloud</module>
@@ -47,7 +52,12 @@
         <module>org.eclipse.kura.driver.opcua.localization</module>
         <module>org.eclipse.kura.driver.opcua.provider</module>
         <module>org.eclipse.kura.driver.block</module>
+        <module>org.eclipse.kura.driver.s7plc.localization</module>
+        <module>org.eclipse.kura.driver.s7plc.provider</module>
         <module>org.eclipse.kura.linux.bluetooth</module>
+        <module>org.eclipse.kura.ble.provider</module>
+        <module>org.eclipse.kura.ble.ibeacon.provider</module>
+        <module>org.eclipse.kura.ble.eddystone.provider</module>
         <module>org.eclipse.kura.linux.clock</module>
         <module>org.eclipse.kura.linux.command</module>
         <module>org.eclipse.kura.linux.gpio</module>
@@ -70,6 +80,10 @@
         <module>org.eclipse.kura.wire.component.provider</module>
         <module>org.eclipse.kura.wire.helper.provider</module>
         <module>org.eclipse.kura.wire.provider</module>
+
+        <module>org.eclipse.kura.rest.provider</module>
+        <module>org.eclipse.kura.rest.asset.provider</module>
+
         <module>features</module>
         <module>emulator</module>
 
@@ -97,7 +111,7 @@
         <sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 
         <!-- BND baseline plugin -->
-        <bnd.baseline.version>3.4.0-SNAPSHOT</bnd.baseline.version>
+        <bnd.baseline.version>3.4.0</bnd.baseline.version>
         <bnd.baseline.continueOnError>false</bnd.baseline.continueOnError>
 
         <kura.skip.can>true</kura.skip.can>
@@ -128,7 +142,7 @@
                 <repository>
                     <id>p2-repo-equinox_3.11.1</id>
                     <layout>p2</layout>
-                    <url>file:////${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
+                    <url>file:///${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
                 </repository>
             </repositories>
         </profile>
@@ -144,7 +158,7 @@
                 <repository>
                     <id>p2-repo-equinox_3.11.1</id>
                     <layout>p2</layout>
-                    <url>file:////${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
+                    <url>file:///${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
                 </repository>
             </repositories>
         </profile>
@@ -250,12 +264,12 @@
         <repository>
             <id>p2-repo-common</id>
             <layout>p2</layout>
-            <url>file:////${kura.basedir}/target-definition/common/repository/</url>
+            <url>file:///${kura.basedir}/target-definition/common/repository/</url>
         </repository>
         <repository>
             <id>p2-repo-test-deps</id>
             <layout>p2</layout>
-            <url>file:////${kura.basedir}/target-definition/test-deps/repository/</url>
+            <url>file:///${kura.basedir}/target-definition/test-deps/repository/</url>
         </repository>
         <repository>
             <id>kura_addons</id>
@@ -276,21 +290,6 @@
             <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
         </repository>
     </repositories>
-
-    <!--
-        See Github issue #1726
-        https://github.com/bndtools/bnd/issues/1726
-    -->
-    <pluginRepositories>
-        <pluginRepository>
-            <id>bnd-snapshots</id>
-            <url>https://bndtools.ci.cloudbees.com/job/bnd.master/lastSuccessfulBuild/artifact/dist/bundles/</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
 
     <build>
         <extensions>
@@ -328,6 +327,7 @@
                             <failsOnError>true</failsOnError>
                             <linkXRef>false</linkXRef>
                             <configLocation>../checkstyle_checks.xml</configLocation>
+                            <suppressionsLocation>../suppressions.xml</suppressionsLocation>
                         </configuration>
                         <goals>
                             <goal>check</goal>
@@ -726,6 +726,19 @@
                                         </versionRange>
                                         <goals>
                                             <goal>exec</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore></ignore>
+                                    </action>
+                                </pluginExecution>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>org.codehaus.mojo</groupId>
+                                        <artifactId>properties-maven-plugin</artifactId>
+                                        <versionRange>[1.0-alpha-1,)</versionRange>
+                                        <goals>
+                                            <goal>read-project-properties</goal>
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>

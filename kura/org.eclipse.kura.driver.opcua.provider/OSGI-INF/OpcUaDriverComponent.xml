@@ -22,6 +22,7 @@
    <property name="service.pid" value="org.eclipse.kura.driver.opcua"/>
    <service>
       <provide interface="org.eclipse.kura.driver.Driver"/>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
    <reference bind="bindCryptoService" 
    		cardinality="1..1" 

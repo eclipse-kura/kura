@@ -44,7 +44,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 
     private static final Logger logger = LoggerFactory.getLogger(PositionServiceImpl.class);
 
-    private static final String LOCATION = "boston";
+    private static String LOCATION = "boston";
 
     private ComponentContext ctx;
     private EventAdmin eventAdmin;

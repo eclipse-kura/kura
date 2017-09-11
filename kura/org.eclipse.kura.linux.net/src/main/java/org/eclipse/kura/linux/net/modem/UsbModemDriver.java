@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,37 +17,37 @@ import org.slf4j.LoggerFactory;
 
 public class UsbModemDriver extends ModemDriver {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(UsbModemDriver.class);
+    private static final Logger logger = LoggerFactory.getLogger(UsbModemDriver.class);
 
-    private final String m_name;
-    private final String m_vendor;
-    private final String m_product;
+    private final String name;
+    private final String vendor;
+    private final String product;
 
     public UsbModemDriver(String name, String vendor, String product) {
-        this.m_name = name;
-        this.m_vendor = vendor;
-        this.m_product = product;
+        this.name = name;
+        this.vendor = vendor;
+        this.product = product;
     }
 
     public int install() throws Exception {
-        s_logger.info("installing driver: {}", this.m_name);
-        return LinuxProcessUtil.start("modprobe " + this.m_name, true);
+        logger.info("installing driver: {}", this.name);
+        return LinuxProcessUtil.start("modprobe " + this.name, true);
     }
 
     public int remove() throws Exception {
-        s_logger.info("removing driver: {}", this.m_name);
-        return LinuxProcessUtil.start("rmmod " + this.m_name, true);
+        logger.info("removing driver: {}", this.name);
+        return LinuxProcessUtil.start("rmmod " + this.name, true);
     }
 
     public String getName() {
-        return this.m_name;
+        return this.name;
     }
 
     public String getVendor() {
-        return this.m_vendor;
+        return this.vendor;
     }
 
     public String getProduct() {
-        return this.m_product;
+        return this.product;
     }
 }

@@ -321,7 +321,7 @@ public abstract class AbstractBlockDriver<T> implements Driver {
             return first;
         }
 
-        public V getSecord() {
+        public V getSecond() {
             return second;
         }
     }

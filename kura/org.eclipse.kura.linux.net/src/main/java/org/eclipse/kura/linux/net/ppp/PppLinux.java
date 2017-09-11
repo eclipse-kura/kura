@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,7 +13,6 @@ package org.eclipse.kura.linux.net.ppp;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -31,8 +30,8 @@ import org.slf4j.LoggerFactory;
  */
 public class PppLinux {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(PppLinux.class);
-    private static Object s_lock = new Object();
+    private static final Logger logger = LoggerFactory.getLogger(PppLinux.class);
+    private static Object lock = new Object();
     private static final String PPP_DAEMON = "/usr/sbin/pppd";
 
     public static void connect(String iface, String port) throws KuraException {
@@ -41,10 +40,10 @@ public class PppLinux {
         try {
             int status = LinuxProcessUtil.start(cmd);
             if (status != 0) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, cmd + " command failed");
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, cmd + " command failed");
             }
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
         }
     }
 
@@ -52,12 +51,12 @@ public class PppLinux {
 
         int pid = getPid(iface, port);
         if (pid >= 0) {
-            s_logger.info("stopping {} pid={}", iface, pid);
+            logger.info("stopping {} pid={}", iface, pid);
 
             LinuxProcessUtil.stopAndKill(pid);
 
             if (LinuxProcessUtil.stop(pid)) {
-                s_logger.warn("Failed to disconnect {}", iface);
+                logger.warn("Failed to disconnect {}", iface);
             } else {
                 deleteLock(port);
             }
@@ -76,7 +75,7 @@ public class PppLinux {
         }
 
         boolean isPppRunning = false;
-        long timeout = tout * 1000;
+        long timeout = tout * 1000L;
 
         long now = System.currentTimeMillis();
         long startDelay = now;
@@ -88,7 +87,7 @@ public class PppLinux {
             if (isPppRunning) {
                 break;
             }
-            s_logger.info("Waiting {} ms for pppd to launch", timeout - dif);
+            logger.info("Waiting {} ms for pppd to launch", timeout - dif);
             try {
                 Thread.sleep(timeout - dif);
             } catch (InterruptedException e) {
@@ -103,29 +102,30 @@ public class PppLinux {
     }
 
     private static int getPid(String iface, String port) throws KuraException {
-        int pid = -1;
-        synchronized (s_lock) {
+        int pid;
+        synchronized (lock) {
             String[] pgrepCmd = { "pgrep", "-f", "" };
             pgrepCmd[2] = formConnectCommand(iface, port);
-
-            BufferedReader br = null;
             try {
                 ProcessStats processStats = LinuxProcessUtil.startWithStats(pgrepCmd);
-                br = new BufferedReader(new InputStreamReader(processStats.getInputStream()));
-                String line = br.readLine();
-                if (line != null && line.length() > 0) {
-                    pid = Integer.parseInt(line);
-                    s_logger.trace("getPid() :: pppd pid={} for {}", pid, iface);
-                }
+                pid = parseGetPid(processStats, iface);
             } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-            } finally {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    s_logger.warn("Error closing input stream", e);
-                }
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
             }
+        }
+        return pid;
+    }
+
+    private static int parseGetPid(ProcessStats processStats, String iface) throws KuraException {
+        int pid = -1;
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(processStats.getInputStream()))) {
+            String line = br.readLine();
+            if (line != null && line.length() > 0) {
+                pid = Integer.parseInt(line);
+                logger.trace("getPid() :: pppd pid={} for {}", pid, iface);
+            }
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
         }
         return pid;
     }
@@ -137,9 +137,9 @@ public class PppLinux {
         }
         File fLock = new File("/var/lock/LCK.." + portName);
         if (fLock.exists()) {
-            s_logger.warn("Deleting stale lock file {}", portName);
+            logger.warn("Deleting stale lock file {}", portName);
             if (!fLock.delete()) {
-                s_logger.warn("Failed to delete {}", fLock);
+                logger.warn("Failed to delete {}", fLock);
             }
         }
     }

@@ -15,18 +15,28 @@ package org.eclipse.kura.web.server;
 
 import static org.eclipse.kura.web.shared.service.GwtWireService.DELETED_WIRE_COMPONENT;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -42,16 +52,26 @@ import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.KuraExceptionHandler;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
+import org.eclipse.kura.web.shared.service.GwtWireService;
 import org.eclipse.kura.wire.WireHelperService;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements GwtComponentService {
 
@@ -59,6 +79,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     private static final String KURA_SERVICE_PID = ConfigurationService.KURA_SERVICE_PID;
     private static final String SERVICE_FACTORY_PID = "service.factoryPid";
     private static final String KURA_UI_SERVICE_HIDE = "kura.ui.service.hide";
+    private static final String PATTERN_SERVICE_PROVIDE_DRIVER = "provide interface=\"org.eclipse.kura.driver.Driver\"";
 
     private static final int SERVICE_WAIT_TIMEOUT = 60;
 
@@ -73,34 +94,31 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     }
 
     @Override
-    public List<GwtConfigComponent> findServicesConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-        List<String> hidePidsList = new ArrayList<>();
-
-        // identify the services to hide by component configuration property
-        fillServicesToHideList(hidePidsList);
-
-        List<GwtConfigComponent> gwtComponentConfigs = new ArrayList<>();
-        for (GwtConfigComponent gwtComponentConfig : findFilteredComponentConfigurationsInternal()) {
-            String componentPid = gwtComponentConfig.getComponentId();
-            if (hidePidsList.contains(componentPid) || componentPid.endsWith("SystemPropertiesService")
-                    || componentPid.endsWith("NetworkAdminService")
-                    || componentPid.endsWith("NetworkConfigurationService")
-                    || componentPid.endsWith("SslManagerService")
-                    || componentPid.endsWith("FirewallConfigurationService") || componentPid.endsWith("WireService")) {
-                continue;
-            }
-            gwtComponentConfigs.add(gwtComponentConfig);
-        }
-
-        return gwtComponentConfigs;
-    }
-
-    @Override
     public List<GwtConfigComponent> findFilteredComponentConfigurations(GwtXSRFToken xsrfToken)
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         return findFilteredComponentConfigurationsInternal();
+    }
+
+    @Override
+    public List<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken, String osgiFilter)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        try {
+            final BundleContext context = FrameworkUtil.getBundle(GwtComponentServiceImpl.class).getBundleContext();
+            final Set<String> matchingPids = Arrays.stream(context.getServiceReferences((String) null, osgiFilter))
+                    .map(reference -> (String) reference.getProperty(KURA_SERVICE_PID)).collect(Collectors.toSet());
+            return ServiceLocator
+                    .applyToServiceOptionally(ConfigurationService.class, configurationService -> configurationService
+                            .getComponentConfigurations().stream().filter(config -> matchingPids
+                                    .contains(config.getPid())))
+                    .map(config -> createMetatypeOnlyGwtComponentConfigurationInternal(config)).filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } catch (InvalidSyntaxException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+        } catch (Exception e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
     }
 
     @Override
@@ -163,9 +181,24 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     @Override
     public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
+        internalCreateFactoryComponent(factoryPid, pid, null);
+    }
+
+    @Override
+    public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid,
+            GwtConfigComponent properties) throws GwtKuraException {
+        this.checkXSRFToken(xsrfToken);
+
+        Map<String, Object> propertiesMap = GwtServerUtil.fillPropertiesFromConfiguration(properties, null);
+
+        internalCreateFactoryComponent(factoryPid, pid, propertiesMap);
+    }
+
+    private void internalCreateFactoryComponent(String factoryPid, String pid, Map<String, Object> properties)
+            throws GwtKuraException {
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         try {
-            cs.createFactoryConfiguration(factoryPid, pid, null, true);
+            cs.createFactoryConfiguration(factoryPid, pid, properties, true);
         } catch (KuraException e) {
             throw new GwtKuraException("A component with the same name already exists!");
         }
@@ -288,7 +321,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         return allWireComponents;
     }
 
-    private void sortConfigurationsByName(List<ComponentConfiguration> configs) {
+    private List<ComponentConfiguration> sortConfigurationsByName(List<ComponentConfiguration> configs) {
         Collections.sort(configs, new Comparator<ComponentConfiguration>() {
 
             @Override
@@ -313,6 +346,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                 return name0.compareTo(name1);
             }
         });
+        return configs;
     }
 
     private String stripPidPrefix(String pid) {
@@ -399,8 +433,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         try {
             ComponentConfiguration config = cs.getComponentConfiguration(componentPid);
 
-            GwtConfigComponent gwtConfigComponent = createMetatypeOnlyGwtComponentConfiguration(config);
-            gwtConfigs.add(gwtConfigComponent);
+            if (config != null) {
+                GwtConfigComponent gwtConfigComponent = createMetatypeOnlyGwtComponentConfiguration(config);
+                gwtConfigs.add(gwtConfigComponent);
+            }
         } catch (Throwable t) {
             KuraExceptionHandler.handle(t);
         }
@@ -453,9 +489,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         return gwtConfigs;
     }
 
-    private GwtConfigComponent createMetatypeOnlyGwtComponentConfiguration(ComponentConfiguration config)
-            throws GwtKuraException {
-        WireHelperService wireHelperService = ServiceLocator.getInstance().getService(WireHelperService.class);
+    private GwtConfigComponent createMetatypeOnlyGwtComponentConfigurationInternal(ComponentConfiguration config) {
         GwtConfigComponent gwtConfig = null;
 
         OCD ocd = config.getDefinition();
@@ -474,12 +508,9 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                 gwtConfig.setComponentName(pid);
                 gwtConfig.setFactoryComponent(true);
                 gwtConfig.setFactoryPid(String.valueOf(props.get(ConfigurationAdmin.SERVICE_FACTORYPID)));
-                // check if the PID is assigned to a Wire Component
-                gwtConfig.setWireComponent(wireHelperService.getServicePid(pid) != null);
             } else {
                 gwtConfig.setComponentName(ocd.getName());
                 gwtConfig.setFactoryComponent(false);
-                gwtConfig.setWireComponent(false);
             }
 
             gwtConfig.setComponentDescription(ocd.getDescription());
@@ -496,6 +527,14 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                 gwtParams.addAll(metatypeProps);
             }
         }
+        return gwtConfig;
+    }
+
+    private GwtConfigComponent createMetatypeOnlyGwtComponentConfiguration(ComponentConfiguration config)
+            throws GwtKuraException {
+        final GwtConfigComponent gwtConfig = createMetatypeOnlyGwtComponentConfigurationInternal(config);
+        gwtConfig.setWireComponent(ServiceLocator.applyToServiceOptionally(WireHelperService.class,
+                wireHelperService -> wireHelperService.getServicePid(gwtConfig.getComponentName()) != null));
         return gwtConfig;
     }
 
@@ -596,7 +635,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                 props = conf.getProperties();
             }
             if (props == null) {
-                props = new Hashtable<String, Object>();
+                props = new Hashtable<>();
             }
             for (Map.Entry<String, Object> entry : properties.entrySet()) {
                 String key = entry.getKey();
@@ -611,5 +650,63 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         }
 
         return true;
+    }
+
+    @Override
+    public List<String> getDriverFactoriesList(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        this.checkXSRFToken(xsrfToken);
+
+        List<String> driverFactoriesPids = new ArrayList<>();
+        final Bundle[] bundles = FrameworkUtil.getBundle(GwtWireService.class).getBundleContext().getBundles();
+        for (final Bundle bundle : bundles) {
+            final Enumeration<URL> enumeration = bundle.findEntries("OSGI-INF", "*.xml", false);
+            if (enumeration != null) {
+                while (enumeration.hasMoreElements()) {
+                    final URL entry = enumeration.nextElement();
+                    BufferedReader reader = null;
+                    try {
+                        reader = new BufferedReader(new InputStreamReader(entry.openConnection().getInputStream()));
+                        final StringBuilder contents = new StringBuilder();
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            contents.append(line);
+                        }
+                        // Configruation Policy=Require and
+                        // SelfConfiguringComponent or ConfigurableComponent
+                        if ((contents.toString().contains(GwtServerUtil.PATTERN_SERVICE_PROVIDE_SELF_CONFIGURING_COMP)
+                                || contents.toString()
+                                        .contains(GwtServerUtil.PATTERN_SERVICE_PROVIDE_CONFIGURABLE_COMP))
+                                && contents.toString().contains(GwtServerUtil.PATTERN_CONFIGURATION_REQUIRE)) {
+                            final Document dom = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+                                    .parse(entry.openConnection().getInputStream());
+                            final NodeList nl = dom.getElementsByTagName("property");
+                            for (int i = 0; i < nl.getLength(); i++) {
+                                final Node n = nl.item(i);
+                                if (n instanceof Element) {
+                                    final String name = ((Element) n).getAttribute("name");
+                                    if ("service.pid".equals(name)) {
+                                        final String factoryPid = ((Element) n).getAttribute("value");
+                                        if (contents.toString().contains(PATTERN_SERVICE_PROVIDE_DRIVER)) {
+                                            driverFactoriesPids.add(factoryPid);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } catch (final Exception ex) {
+                        throw new GwtKuraException(GwtKuraErrorCode.RESOURCE_FETCHING_FAILURE);
+                    } finally {
+                        try {
+                            if (reader != null) {
+                                reader.close();
+                            }
+                        } catch (final IOException e) {
+                            throw new GwtKuraException(GwtKuraErrorCode.FAILURE_CLOSING_RESOURCES);
+                        }
+                    }
+                }
+            }
+        }
+        return driverFactoriesPids;
     }
 }

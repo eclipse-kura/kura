@@ -79,7 +79,7 @@ public final class AssetOptions {
     private void extractProperties(final Map<String, Object> properties) {
         try {
             this.driverPid = (String) properties.get(ASSET_DRIVER_PROP.value());
-            this.assetDescription = (String) properties.get(ASSET_DESC_PROP.value());
+            this.assetDescription = (String) properties.getOrDefault(ASSET_DESC_PROP.value(), "");
             this.channels = retreiveChannelList(properties);
         } catch (final Exception ex) {
             logger.error(message.errorRetrievingChannels(), ex);

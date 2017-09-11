@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MiiTool implements LinkTool {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(MiiTool.class);
+    private static final Logger logger = LoggerFactory.getLogger(MiiTool.class);
     private static final String DUPLEX = null;
     private String ifaceName = null;
     private boolean linkDetected = false;
@@ -106,7 +106,7 @@ public class MiiTool implements LinkTool {
                 spd = -2;
             }
         } catch (Exception e) {
-            s_logger.warn("Exception while parsing string...", e);
+            logger.warn("Exception while parsing string...", e);
         }
         return spd;
     }

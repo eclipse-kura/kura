@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,43 +11,31 @@
  *******************************************************************************/
 package org.eclipse.kura.core.status.runnables;
 
-import java.io.IOException;
-
-import org.eclipse.kura.gpio.KuraClosedDeviceException;
-import org.eclipse.kura.gpio.KuraGPIOPin;
-import org.eclipse.kura.gpio.KuraUnavailableDeviceException;
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.status.LedManager;
 import org.eclipse.kura.status.CloudConnectionStatusEnum;
 
 public class HeartbeatStatusRunnable implements Runnable {
 
-    private final KuraGPIOPin local_pin;
+    private final LedManager ledManager;
 
-    public HeartbeatStatusRunnable(KuraGPIOPin local_pin) {
-        this.local_pin = local_pin;
+    public HeartbeatStatusRunnable(LedManager ledManager) {
+        this.ledManager = ledManager;
     }
 
     @Override
     public void run() {
         while (true) {
             try {
-                this.local_pin.setValue(true);
+                this.ledManager.writeLed(true);
                 Thread.sleep(CloudConnectionStatusEnum.HEARTBEAT_SYSTOLE_DURATION);
-                this.local_pin.setValue(false);
+                this.ledManager.writeLed(false);
                 Thread.sleep(CloudConnectionStatusEnum.HEARTBEAT_SYSTOLE_DURATION);
-                this.local_pin.setValue(true);
+                this.ledManager.writeLed(true);
                 Thread.sleep(CloudConnectionStatusEnum.HEARTBEAT_DIASTOLE_DURATION);
-                this.local_pin.setValue(false);
+                this.ledManager.writeLed(false);
                 Thread.sleep(CloudConnectionStatusEnum.HEARTBEAT_PAUSE_DURATION);
-            } catch (InterruptedException ex) {
-                break;
-            } catch (KuraUnavailableDeviceException ex) {
-                ex.printStackTrace();
-                break;
-            } catch (KuraClosedDeviceException ex) {
-                ex.printStackTrace();
-                break;
-            } catch (IOException ex) {
-                ex.printStackTrace();
+            } catch (InterruptedException | KuraException ex) {
                 break;
             }
         }

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2017 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+     
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.example.eddystone.advertiser.EddystoneAdvertiser"
+         name="Eddystone Advertiser" 
+         description="The Eddystone Advertiser broadcasts UID or URL frame types.">
+         
+         <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/eddystone_logo.png" size="32"/>
+         
+         <AD id="enable.advertising"
+            name="Enable Advertising"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable Beacon advertising."/>
+
+         <AD id="min.beacon.interval"
+            name="Minimum Beacon advertising interval"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="1000"
+            description="Minimum time interval between beacons (milliseconds)."/>
+            
+         <AD id="max.beacon.interval"
+            name="Maximum Beacon advertising interval"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="1000"
+            description="Maximum time interval between beacons (milliseconds)."/>
+
+         <AD id="tx.power"
+            name="Transmission power"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="0"
+            description="Transmission power measured at 1m away from the beacon expressed in dBm."/>
+            
+         <AD id="eddystone.type"  
+            name="Eddystone Frame Type"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="UID" 
+            description="Eddystone frame type">
+           <Option label="UID" value="UID"/>
+           <Option label="URL" value="URL"/>          
+         </AD>
+        
+         <AD id="eddystone.uid.namespace"  
+            name="Namespace for Eddystone UID frame"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="00112233445566778899" 
+            description="The 10-byte namespace for Eddystone UID frame in hexadecimal.">
+         </AD>
+
+         <AD id="eddystone.uid.instance"  
+            name="Instance for Eddystone UID frame"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="001122334455" 
+            description="The 6-byte instance for Eddystone UID frame in hexadecimal.">
+         </AD>
+
+         <AD id="eddystone.url"  
+            name="Url for Eddystone URL frame"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="http://www.eclipse.org/kura" 
+            description="The url for Eddystone URL frame.">
+         </AD>
+                            
+         <AD id="iname"
+            name="Bluetooth interface name"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="hci0"
+            description="Name of bluetooth adapter."/>
+                    
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.example.eddystone.advertiser.EddystoneAdvertiser">
+        <Object ocdref="org.eclipse.kura.example.eddystone.advertiser.EddystoneAdvertiser"/>
+    </Designate>
+</MetaData>

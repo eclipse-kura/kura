@@ -12,16 +12,14 @@
 package org.eclipse.kura.net.admin;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -96,11 +94,15 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     private FirewallConfigurationService firewallConfigurationService;
     private SystemService systemService;
 
+    private Object wifiClientMonitorServiceLock;
+
     private boolean pendingNetworkConfigurationChange = false;
     private boolean pendingFirewallConfigurationChange = false;
 
     private static final String[] EVENT_TOPICS = new String[] {
             NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC, };
+
+    private ComponentContext context;
 
     private class NetworkRollbackItem {
 
@@ -150,6 +152,15 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         this.systemService = null;
     }
 
+    // hack to synchronize verifyWifiCredentials() with WifiClientMonitorService
+    public synchronized void setWifiClientMonitorServiceLock(Object lock) {
+        this.wifiClientMonitorServiceLock = lock;
+    }
+
+    public synchronized void unsetWifiClientMonitorServiceLock() {
+        this.wifiClientMonitorServiceLock = null;
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -161,7 +172,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         logger.debug("Activating NetworkAdmin Service...");
 
         // save the bundle context
-        ComponentContext ctx = componentContext;
+        this.context = componentContext;
 
         // since we are just starting up, start named if needed
         LinuxNamed linuxNamed;
@@ -177,12 +188,25 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
         Dictionary<String, String[]> d = new Hashtable<>();
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
-        ctx.getBundleContext().registerService(EventHandler.class.getName(), this, d);
+        this.context.getBundleContext().registerService(EventHandler.class.getName(), this, d);
 
         logger.debug("Done Activating NetworkAdmin Service...");
     }
 
     protected void deactivate(ComponentContext componentContext) {
+    }
+
+    protected List<WifiAccessPoint> getWifiAccessPoints(String ifaceName) throws KuraException {
+        List<WifiAccessPoint> wifiAccessPoints;
+
+        IScanTool scanTool = ScanTool.get(ifaceName);
+        if (scanTool != null) {
+            wifiAccessPoints = scanTool.scan();
+        } else {
+            wifiAccessPoints = new ArrayList<>();
+        }
+
+        return wifiAccessPoints;
     }
 
     @Override
@@ -1176,31 +1200,28 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             }
 
             logger.info("getWifiHotspots() :: scanning for available access points ...");
-            IScanTool scanTool = ScanTool.get(ifaceName);
-            if (scanTool != null) {
-                List<WifiAccessPoint> wifiAccessPoints = scanTool.scan();
-                for (WifiAccessPoint wap : wifiAccessPoints) {
 
-                    int frequency = (int) wap.getFrequency();
-                    int channel = frequencyMhz2Channel(frequency);
+            List<WifiAccessPoint> wifiAccessPoints = getWifiAccessPoints(ifaceName);
+            for (WifiAccessPoint wap : wifiAccessPoints) {
+                int frequency = (int) wap.getFrequency();
+                int channel = frequencyMhz2Channel(frequency);
 
-                    if (wap.getSSID() == null || wap.getSSID().length() == 0
-                            || isHotspotInList(channel, wap.getSSID(), wifiHotspotInfoList)) {
-                        logger.debug("Skipping hidden SSID");
-                        continue;
-                    }
-
-                    logger.trace("getWifiHotspots() :: SSID={}", wap.getSSID());
-                    logger.trace("getWifiHotspots() :: Signal={}", wap.getStrength());
-                    logger.trace("getWifiHotspots() :: Frequency={}", wap.getFrequency());
-
-                    StringBuilder sbMacAddress = getMacAddress(wap.getHardwareAddress());
-                    WifiSecurity wifiSecurity = getWifiSecurity(wap);
-                    WifiHotspotInfo wifiHotspotInfo = new WifiHotspotInfo(wap.getSSID(), sbMacAddress.toString(),
-                            0 - wap.getStrength(), channel, frequency, wifiSecurity);
-                    setCiphers(wifiHotspotInfo, wap, wifiSecurity);
-                    wifiHotspotInfoList.add(wifiHotspotInfo);
+                if (wap.getSSID() == null || wap.getSSID().length() == 0
+                        || isHotspotInList(channel, wap.getSSID(), wifiHotspotInfoList)) {
+                    logger.debug("Skipping hidden SSID");
+                    continue;
                 }
+
+                logger.trace("getWifiHotspots() :: SSID={}", wap.getSSID());
+                logger.trace("getWifiHotspots() :: Signal={}", wap.getStrength());
+                logger.trace("getWifiHotspots() :: Frequency={}", wap.getFrequency());
+
+                String macAddress = getMacAddress(wap.getHardwareAddress());
+                WifiSecurity wifiSecurity = getWifiSecurity(wap);
+                WifiHotspotInfo wifiHotspotInfo = new WifiHotspotInfo(wap.getSSID(), macAddress, 0 - wap.getStrength(),
+                        channel, frequency, wifiSecurity);
+                setCiphers(wifiHotspotInfo, wap, wifiSecurity);
+                wifiHotspotInfoList.add(wifiHotspotInfo);
             }
 
             if (wifiMode == WifiMode.MASTER) {
@@ -1214,45 +1235,36 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     @Override
-    public boolean verifyWifiCredentials(String ifaceName, WifiConfig wifiConfig, int tout) {
+    public synchronized boolean verifyWifiCredentials(String ifaceName, WifiConfig wifiConfig, int tout) {
 
-        boolean ret = false;
-        boolean restartSupplicant = false;
-        WpaSupplicantConfigWriter wpaSupplicantConfigWriter = WpaSupplicantConfigWriter.getInstance();
-        try {
-            wpaSupplicantConfigWriter.generateTempWpaSupplicantConf(wifiConfig, ifaceName);
-
-            if (WpaSupplicantManager.isRunning(ifaceName)) {
-                logger.debug("verifyWifiCredentials() :: stoping wpa_supplicant");
-                WpaSupplicantManager.stop(ifaceName);
-                restartSupplicant = true;
-            }
-            logger.debug("verifyWifiCredentials() :: Restarting temporary instance of wpa_supplicant");
-            WpaSupplicantManager.startTemp(ifaceName, WifiMode.INFRA, wifiConfig.getDriver());
-            wifiModeWait(ifaceName, WifiMode.INFRA, 10);
-            ret = isWifiConnectionCompleted(ifaceName, tout);
-
-            if (WpaSupplicantManager.isTempRunning()) {
-                logger.debug("verifyWifiCredentials() :: stopping temporary instance of wpa_supplicant");
-                WpaSupplicantManager.stop(ifaceName);
-            }
-        } catch (KuraException e) {
-            logger.warn("Exception while managing the temporary instance of the Wpa supplicant.", e);
+        if (wifiClientMonitorServiceLock == null) {
+            return false;
         }
 
-        if (restartSupplicant) {
+        // hack to synchronize with WifiClientMonitorService
+        synchronized (wifiClientMonitorServiceLock) {
+            boolean ret = false;
+            WpaSupplicantConfigWriter wpaSupplicantConfigWriter = WpaSupplicantConfigWriter.getInstance();
             try {
-                logger.debug("verifyWifiCredentials() :: Restarting wpa_supplicant");
-                WpaSupplicantManager.start(ifaceName, WifiMode.INFRA, wifiConfig.getDriver());
-                if (isWifiConnectionCompleted(ifaceName, tout)) {
-                    renewDhcpLease(ifaceName);
-                }
-            } catch (KuraException e) {
-                logger.warn("Exception while trying to restart the Wpa supplicant.", e);
-            }
-        }
+                // Kill dhcp, hostapd and wpa_supplicant if running
+                manageDhcpClient(ifaceName, false);
+                manageDhcpServer(ifaceName, false);
+                disableWifiInterface(ifaceName);
 
-        return ret;
+                wpaSupplicantConfigWriter.generateTempWpaSupplicantConf(wifiConfig, ifaceName);
+
+                logger.debug("verifyWifiCredentials() :: Starting temporary instance of wpa_supplicant");
+                WpaSupplicantManager.startTemp(ifaceName, WifiMode.INFRA, wifiConfig.getDriver());
+                wifiModeWait(ifaceName, WifiMode.INFRA, 10);
+                ret = isWifiConnectionCompleted(ifaceName, tout);
+
+                // Disable wifi interface again, previous configuration will be restored by WifiMonitorService
+                disableWifiInterface(ifaceName);
+            } catch (Exception e) {
+                logger.warn("Exception while managing the temporary instance of the Wpa supplicant.", e);
+            }
+            return ret;
+        }
     }
 
     @Override
@@ -1371,41 +1383,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         if (srcFile.exists()) {
             try {
                 logger.debug("rollbackItem() :: copying {} to {} ...", srcFile, dstFile);
-                copyFile(srcFile, dstFile);
+                Files.copy(srcFile.toPath(), dstFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 logger.error("rollbackItem() :: Failed to recover {} file ", dstFile, e);
-            }
-        }
-    }
-
-    private void copyFile(File sourceFile, File destFile) throws IOException {
-        if (!destFile.exists()) {
-            destFile.createNewFile();
-        }
-
-        FileInputStream sourceStream = null;
-        FileOutputStream destinationStream = null;
-        FileChannel source = null;
-        FileChannel destination = null;
-
-        try {
-            sourceStream = new FileInputStream(sourceFile);
-            source = sourceStream.getChannel();
-            destinationStream = new FileOutputStream(destFile);
-            destination = destinationStream.getChannel();
-            destination.transferFrom(source, 0, source.size());
-        } finally {
-            if (source != null) {
-                source.close();
-            }
-            if (destination != null) {
-                destination.close();
-            }
-            if (sourceStream != null) {
-                sourceStream.close();
-            }
-            if (destinationStream != null) {
-                destinationStream.close();
             }
         }
     }
@@ -1429,6 +1409,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
             WpaSupplicantStatus wpaSupplicantStatus = new WpaSupplicantStatus(ifaceName);
             String wpaState = wpaSupplicantStatus.getWpaState();
@@ -1447,6 +1428,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
             try {
                 if (LinuxNetworkUtil.getWifiMode(ifaceName) == mode) {
@@ -1531,7 +1513,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             try {
                 Thread.sleep(sleep);
             } catch (InterruptedException e) {
-                // ignore
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -1545,8 +1527,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         short timeout = 30000;		// in milliseconds
         final short sleep = 500;
 
-        this.pendingFirewallConfigurationChange = true; // WTF: why this is set to true? the while and the if will be
-        // always executed!
+        this.pendingFirewallConfigurationChange = true; // it will be set to false in handleEvent()
 
         this.configurationService.snapshot();
 
@@ -1555,7 +1536,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             try {
                 Thread.sleep(sleep);
             } catch (InterruptedException e) {
-                // ignore
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -1589,7 +1570,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         wifiModeWait(ifaceName, WifiMode.INFRA, 10);
     }
 
-    private StringBuilder getMacAddress(byte[] baMacAddress) {
+    private String getMacAddress(byte[] baMacAddress) {
         StringBuilder sbMacAddress = new StringBuilder();
         for (int i = 0; i < baMacAddress.length; i++) {
             sbMacAddress.append(String.format("%02x", baMacAddress[i] & 0x0ff).toUpperCase());
@@ -1597,7 +1578,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                 sbMacAddress.append(':');
             }
         }
-        return sbMacAddress;
+        return sbMacAddress.toString();
     }
 
     private void reloadKernelModule(String interfaceName, WifiMode wifiMode) throws KuraException {
@@ -1651,10 +1632,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         if (esWpaSecurity != null && !esWpaSecurity.isEmpty()) {
             wifiSecurity = WifiSecurity.SECURITY_WPA;
 
-            Iterator<WifiSecurity> itWpaSecurity = esWpaSecurity.iterator();
-            while (itWpaSecurity.hasNext()) {
-                logger.trace("getWifiHotspots() :: WPA Security={}", itWpaSecurity.next());
-            }
+            logger.trace("getWifiHotspots() :: WPA Security={}", esWpaSecurity);
         }
 
         EnumSet<WifiSecurity> esRsnSecurity = wap.getRsnSecurity();
@@ -1664,10 +1642,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             } else {
                 wifiSecurity = WifiSecurity.SECURITY_WPA2;
             }
-            Iterator<WifiSecurity> itRsnSecurity = esRsnSecurity.iterator();
-            while (itRsnSecurity.hasNext()) {
-                logger.trace("getWifiHotspots() :: RSN Security={}", itRsnSecurity.next());
-            }
+            logger.trace("getWifiHotspots() :: RSN Security={}", esRsnSecurity);
         }
 
         if (wifiSecurity == WifiSecurity.NONE) {
@@ -1702,14 +1677,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
     private void getCiphers(EnumSet<WifiSecurity> esSecurity, EnumSet<WifiSecurity> pairCiphers,
             EnumSet<WifiSecurity> groupCiphers) {
-        Iterator<WifiSecurity> itRsnSecurity = esSecurity.iterator();
-        while (itRsnSecurity.hasNext()) {
-            WifiSecurity securityEntry = itRsnSecurity.next();
-            if (securityEntry == WifiSecurity.PAIR_CCMP
-                    || securityEntry == WifiSecurity.PAIR_TKIP && !pairCiphers.contains(securityEntry)) {
+
+        for (WifiSecurity securityEntry : esSecurity) {
+            if (securityEntry == WifiSecurity.PAIR_CCMP || securityEntry == WifiSecurity.PAIR_TKIP) {
                 pairCiphers.add(securityEntry);
-            } else if (securityEntry == WifiSecurity.GROUP_CCMP
-                    || securityEntry == WifiSecurity.GROUP_TKIP && !groupCiphers.contains(securityEntry)) {
+            } else if (securityEntry == WifiSecurity.GROUP_CCMP || securityEntry == WifiSecurity.GROUP_TKIP) {
                 groupCiphers.add(securityEntry);
             }
         }

@@ -34,20 +34,18 @@ import org.slf4j.LoggerFactory;
 
 public class GPIOServiceImpl implements GPIOService {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(GPIOServiceImpl.class);
-
-    // private static final HashMap<Integer, String> pins = new HashMap<Integer, String>();
+    private static final Logger logger = LoggerFactory.getLogger(GPIOServiceImpl.class);
 
     private static final HashSet<JdkDioPin> pins = new HashSet<JdkDioPin>();
 
-    private SystemService m_SystemService;
+    private SystemService systemService;
 
     public void setSystemService(SystemService systemService) {
-        this.m_SystemService = systemService;
+        this.systemService = systemService;
     }
 
     public void unsetSystemService(SystemService systemService) {
-        this.m_SystemService = null;
+        this.systemService = null;
     }
 
     /**
@@ -83,7 +81,7 @@ public class GPIOServiceImpl implements GPIOService {
     }
 
     protected void activate(ComponentContext componentContext) {
-        s_logger.debug("activating jdk.dio GPIOService");
+        logger.debug("activating jdk.dio GPIOService");
 
         FileReader fr = null;
         try {
@@ -91,23 +89,23 @@ public class GPIOServiceImpl implements GPIOService {
             if (configFile != null && !configFile.startsWith("file:")) {
                 configFile = "file:" + configFile;
             }
-            s_logger.debug("System property location: {}", configFile);
+            logger.debug("System property location: {}", configFile);
 
             if (configFile == null) {
                 // Testing for Kura home relative path
-                configFile = whenAvailable(this.m_SystemService.getKuraHome() + File.separator + "jdk.dio.properties");
-                s_logger.debug("Kura Home relative location: {}", configFile);
+                configFile = whenAvailable(this.systemService.getKuraHome() + File.separator + "jdk.dio.properties");
+                logger.debug("Kura Home relative location: {}", configFile);
             }
 
             if (configFile == null) {
                 // Emulator?
-                final String kuraConfig = this.m_SystemService.getProperties().getProperty(SystemService.KURA_CONFIG);
+                final String kuraConfig = this.systemService.getProperties().getProperty(SystemService.KURA_CONFIG);
                 if (kuraConfig != null) {
                     configFile = kuraConfig.replace("kura.properties", "jdk.dio.properties");
                 }
             }
 
-            s_logger.debug("Final location: {}", configFile);
+            logger.debug("Final location: {}", configFile);
 
             if (configFile == null) {
                 throw new IllegalStateException("Unable to locate 'jdk.dio.properties'");
@@ -130,29 +128,29 @@ public class GPIOServiceImpl implements GPIOService {
                         pins.add(p);
                     }
                 }
-                s_logger.info("Loaded File jdk.dio.properties: {}", dioPropsFile);
+                logger.info("Loaded File jdk.dio.properties: {}", dioPropsFile);
             } else {
-                s_logger.warn("File does not exist: {}", dioPropsFile);
+                logger.warn("File does not exist: {}", dioPropsFile);
             }
         } catch (IOException e) {
-            s_logger.error("Exception while accessing resource!", e);
+            logger.error("Exception while accessing resource!", e);
         } catch (URISyntaxException e) {
-            s_logger.error("Exception while accessing resource!", e);
+            logger.error("Exception while accessing resource!", e);
         } finally {
             if (fr != null) {
                 try {
                     fr.close();
                 } catch (IOException e) {
-                    s_logger.error("Exception while releasing resource!", e);
+                    logger.error("Exception while releasing resource!", e);
                 }
             }
         }
 
-        s_logger.debug("GPIOService activated.");
+        logger.debug("GPIOService activated.");
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        s_logger.debug("deactivating jdk.dio GPIOService");
+        logger.debug("deactivating jdk.dio GPIOService");
     }
 
     @Override
@@ -175,7 +173,7 @@ public class GPIOServiceImpl implements GPIOService {
                         try {
                             p.close();
                         } catch (IOException e) {
-                            s_logger.warn("Cannot close GPIO Pin {}", pinName);
+                            logger.warn("Cannot close GPIO Pin {}", pinName);
                             return p;
                         }
                     }
@@ -213,7 +211,7 @@ public class GPIOServiceImpl implements GPIOService {
                         try {
                             p.close();
                         } catch (IOException e) {
-                            s_logger.warn("Cannot close GPIO Pin {}", terminal);
+                            logger.warn("Cannot close GPIO Pin {}", terminal);
                             return p;
                         }
                     }

@@ -20,19 +20,19 @@ import java.util.List;
 public class PortForwardRule {
 
     // required
-    private String m_inboundIface;
-    private String m_outboundIface;
-    private String m_address;
-    private String m_protocol;
-    private int m_inPort;
-    private int m_outPort;
-    private boolean m_masquerade;
+    private String inboundIface;
+    private String outboundIface;
+    private String address;
+    private String protocol;
+    private int inPort;
+    private int outPort;
+    private boolean masquerade;
 
     // optional
-    private String m_permittedNetwork;
-    private int m_permittedNetworkMask;
-    private String m_permittedMAC;
-    private String m_sourcePortRange;
+    private String permittedNetwork;
+    private int permittedNetworkMask;
+    private String permittedMAC;
+    private String sourcePortRange;
 
     /**
      * Constructor of <code>PortForwardRule</code> object.
@@ -63,35 +63,35 @@ public class PortForwardRule {
     public PortForwardRule(String inboundIface, String outboundIface, String address, String protocol, int inPort,
             int outPort, boolean masquerade, String permittedNetwork, int permittedNetworkMask, String permittedMAC,
             String sourcePortRange) {
-        this.m_inboundIface = inboundIface;
-        this.m_outboundIface = outboundIface;
-        this.m_inPort = inPort;
-        this.m_protocol = protocol;
-        this.m_address = address;
-        this.m_outPort = outPort;
-        this.m_masquerade = masquerade;
+        this.inboundIface = inboundIface;
+        this.outboundIface = outboundIface;
+        this.inPort = inPort;
+        this.protocol = protocol;
+        this.address = address;
+        this.outPort = outPort;
+        this.masquerade = masquerade;
 
-        this.m_permittedNetwork = permittedNetwork;
-        this.m_permittedNetworkMask = permittedNetworkMask;
-        this.m_permittedMAC = permittedMAC;
-        this.m_sourcePortRange = sourcePortRange;
+        this.permittedNetwork = permittedNetwork;
+        this.permittedNetworkMask = permittedNetworkMask;
+        this.permittedMAC = permittedMAC;
+        this.sourcePortRange = sourcePortRange;
     }
 
     /**
      * Constructor of <code>PortForwardRule</code> object.
      */
     public PortForwardRule() {
-        this.m_inboundIface = null;
-        this.m_outboundIface = null;
-        this.m_inPort = 0;
-        this.m_protocol = null;
-        this.m_address = null;
-        this.m_outPort = 0;
-        this.m_masquerade = false;
-        this.m_permittedNetworkMask = 0;
-        this.m_permittedNetwork = null;
-        this.m_permittedMAC = null;
-        this.m_sourcePortRange = null;
+        this.inboundIface = null;
+        this.outboundIface = null;
+        this.inPort = 0;
+        this.protocol = null;
+        this.address = null;
+        this.outPort = 0;
+        this.masquerade = false;
+        this.permittedNetworkMask = 0;
+        this.permittedNetwork = null;
+        this.permittedMAC = null;
+        this.sourcePortRange = null;
     }
 
     /**
@@ -100,8 +100,8 @@ public class PortForwardRule {
      * @return A boolean representing whether all parameters have been set.
      */
     public boolean isComplete() {
-        if (this.m_protocol != null && this.m_inboundIface != null && this.m_outboundIface != null
-                && this.m_address != null && this.m_inPort != 0 && this.m_outPort != 0) {
+        if (this.protocol != null && this.inboundIface != null && this.outboundIface != null && this.address != null
+                && this.inPort != 0 && this.outPort != 0) {
             return true;
         }
         return false;
@@ -110,29 +110,28 @@ public class PortForwardRule {
     public NatPreroutingChainRule getNatPreroutingChainRule() {
         int srcPortFirst = 0;
         int srcPortLast = 0;
-        if (this.m_sourcePortRange != null) {
-            srcPortFirst = Integer.parseInt(this.m_sourcePortRange.split(":")[0]);
-            srcPortLast = Integer.parseInt(this.m_sourcePortRange.split(":")[1]);
+        if (this.sourcePortRange != null) {
+            srcPortFirst = Integer.parseInt(this.sourcePortRange.split(":")[0]);
+            srcPortLast = Integer.parseInt(this.sourcePortRange.split(":")[1]);
         }
-        return new NatPreroutingChainRule(this.m_inboundIface, this.m_protocol, this.m_inPort, this.m_outPort,
-                srcPortFirst, srcPortLast, this.m_address, this.m_permittedNetwork, this.m_permittedNetworkMask,
-                this.m_permittedMAC);
+        return new NatPreroutingChainRule(this.inboundIface, this.protocol, this.inPort, this.outPort, srcPortFirst,
+                srcPortLast, this.address, this.permittedNetwork, this.permittedNetworkMask, this.permittedMAC);
     }
 
     public NatPostroutingChainRule getNatPostroutingChainRule() {
-        return new NatPostroutingChainRule(this.m_address, (short) 32, this.m_permittedNetwork,
-                (short) this.m_permittedNetworkMask, this.m_outboundIface, this.m_protocol, this.m_masquerade);
+        return new NatPostroutingChainRule(this.address, (short) 32, this.permittedNetwork,
+                (short) this.permittedNetworkMask, this.outboundIface, this.protocol, this.masquerade);
     }
 
     public FilterForwardChainRule getFilterForwardChainRule() {
         int srcPortFirst = 0;
         int srcPortLast = 0;
-        if (this.m_sourcePortRange != null) {
-            srcPortFirst = Integer.parseInt(this.m_sourcePortRange.split(":")[0]);
-            srcPortLast = Integer.parseInt(this.m_sourcePortRange.split(":")[1]);
+        if (this.sourcePortRange != null) {
+            srcPortFirst = Integer.parseInt(this.sourcePortRange.split(":")[0]);
+            srcPortLast = Integer.parseInt(this.sourcePortRange.split(":")[1]);
         }
-        return new FilterForwardChainRule(this.m_inboundIface, this.m_outboundIface, this.m_permittedNetwork,
-                (short) this.m_permittedNetworkMask, this.m_address, (short) 32, this.m_protocol, this.m_permittedMAC,
+        return new FilterForwardChainRule(this.inboundIface, this.outboundIface, this.permittedNetwork,
+                (short) this.permittedNetworkMask, this.address, (short) 32, this.protocol, this.permittedMAC,
                 srcPortFirst, srcPortLast);
     }
 
@@ -154,7 +153,7 @@ public class PortForwardRule {
      * @return the iface
      */
     public String getInboundIface() {
-        return this.m_inboundIface;
+        return this.inboundIface;
     }
 
     /**
@@ -164,7 +163,7 @@ public class PortForwardRule {
      *            the iface to set
      */
     public void setInboundIface(String iface) {
-        this.m_inboundIface = iface;
+        this.inboundIface = iface;
     }
 
     /**
@@ -173,7 +172,7 @@ public class PortForwardRule {
      * @return the iface
      */
     public String getOutboundIface() {
-        return this.m_outboundIface;
+        return this.outboundIface;
     }
 
     /**
@@ -183,7 +182,7 @@ public class PortForwardRule {
      *            the iface to set
      */
     public void setOutboundIface(String iface) {
-        this.m_outboundIface = iface;
+        this.outboundIface = iface;
     }
 
     /**
@@ -192,7 +191,7 @@ public class PortForwardRule {
      * @return the address
      */
     public String getAddress() {
-        return this.m_address;
+        return this.address;
     }
 
     /**
@@ -202,7 +201,7 @@ public class PortForwardRule {
      *            the address to set
      */
     public void setAddress(String address) {
-        this.m_address = address;
+        this.address = address;
     }
 
     /**
@@ -211,7 +210,7 @@ public class PortForwardRule {
      * @return the protocol
      */
     public String getProtocol() {
-        return this.m_protocol;
+        return this.protocol;
     }
 
     /**
@@ -221,7 +220,7 @@ public class PortForwardRule {
      *            the protocol to set
      */
     public void setProtocol(String protocol) {
-        this.m_protocol = protocol;
+        this.protocol = protocol;
     }
 
     /**
@@ -230,7 +229,7 @@ public class PortForwardRule {
      * @return the inPort
      */
     public int getInPort() {
-        return this.m_inPort;
+        return this.inPort;
     }
 
     /**
@@ -240,7 +239,7 @@ public class PortForwardRule {
      *            the inPort to set
      */
     public void setInPort(int inPort) {
-        this.m_inPort = inPort;
+        this.inPort = inPort;
     }
 
     /**
@@ -249,7 +248,7 @@ public class PortForwardRule {
      * @return the outPort
      */
     public int getOutPort() {
-        return this.m_outPort;
+        return this.outPort;
     }
 
     /**
@@ -259,7 +258,7 @@ public class PortForwardRule {
      *            the outPort to set
      */
     public void setOutPort(int outPort) {
-        this.m_outPort = outPort;
+        this.outPort = outPort;
     }
 
     /**
@@ -268,7 +267,7 @@ public class PortForwardRule {
      * @return the 'masquerade' flag
      */
     public boolean isMasquerade() {
-        return this.m_masquerade;
+        return this.masquerade;
     }
 
     /**
@@ -278,7 +277,7 @@ public class PortForwardRule {
      *            - 'masquerade' flag
      */
     public void setMasquerade(boolean masquerade) {
-        this.m_masquerade = masquerade;
+        this.masquerade = masquerade;
     }
 
     /**
@@ -287,7 +286,7 @@ public class PortForwardRule {
      * @return the permittedNetwork
      */
     public String getPermittedNetwork() {
-        return this.m_permittedNetwork;
+        return this.permittedNetwork;
     }
 
     /**
@@ -297,7 +296,7 @@ public class PortForwardRule {
      *            the permittedNetwork to set
      */
     public void setPermittedNetwork(String permittedNetwork) {
-        this.m_permittedNetwork = permittedNetwork;
+        this.permittedNetwork = permittedNetwork;
     }
 
     /**
@@ -306,7 +305,7 @@ public class PortForwardRule {
      * @return the permittedNetworkMask
      */
     public int getPermittedNetworkMask() {
-        return this.m_permittedNetworkMask;
+        return this.permittedNetworkMask;
     }
 
     /**
@@ -316,7 +315,7 @@ public class PortForwardRule {
      *            of the permittedNetwork to set
      */
     public void setPermittedNetworkMask(int permittedNetworkMask) {
-        this.m_permittedNetworkMask = permittedNetworkMask;
+        this.permittedNetworkMask = permittedNetworkMask;
     }
 
     /**
@@ -325,7 +324,7 @@ public class PortForwardRule {
      * @return the permittedMAC
      */
     public String getPermittedMAC() {
-        return this.m_permittedMAC;
+        return this.permittedMAC;
     }
 
     /**
@@ -335,7 +334,7 @@ public class PortForwardRule {
      *            the permittedMAC to set
      */
     public void setPermittedMAC(String permittedMAC) {
-        this.m_permittedMAC = permittedMAC;
+        this.permittedMAC = permittedMAC;
     }
 
     /**
@@ -344,7 +343,7 @@ public class PortForwardRule {
      * @return the sourcePortRange
      */
     public String getSourcePortRange() {
-        return this.m_sourcePortRange;
+        return this.sourcePortRange;
     }
 
     /**
@@ -354,7 +353,7 @@ public class PortForwardRule {
      *            the sourcePortRange to set
      */
     public void setSourcePortRange(String sourcePortRange) {
-        this.m_sourcePortRange = sourcePortRange;
+        this.sourcePortRange = sourcePortRange;
     }
 
     @Override
@@ -365,27 +364,27 @@ public class PortForwardRule {
 
         PortForwardRule other = (PortForwardRule) o;
 
-        if (!compareObjects(this.m_inboundIface, other.m_inboundIface)) {
+        if (!compareObjects(this.inboundIface, other.inboundIface)) {
             return false;
-        } else if (!compareObjects(this.m_outboundIface, other.m_outboundIface)) {
+        } else if (!compareObjects(this.outboundIface, other.outboundIface)) {
             return false;
-        } else if (!compareObjects(this.m_address, other.m_address)) {
+        } else if (!compareObjects(this.address, other.address)) {
             return false;
-        } else if (!compareObjects(this.m_protocol, other.m_protocol)) {
+        } else if (!compareObjects(this.protocol, other.protocol)) {
             return false;
-        } else if (this.m_inPort != other.m_inPort) {
+        } else if (this.inPort != other.inPort) {
             return false;
-        } else if (this.m_outPort != other.m_outPort) {
+        } else if (this.outPort != other.outPort) {
             return false;
-        } else if (this.m_masquerade != other.m_masquerade) {
+        } else if (this.masquerade != other.masquerade) {
             return false;
-        } else if (!compareObjects(this.m_permittedNetwork, other.m_permittedNetwork)) {
+        } else if (!compareObjects(this.permittedNetwork, other.permittedNetwork)) {
             return false;
-        } else if (this.m_permittedNetworkMask != other.m_permittedNetworkMask) {
+        } else if (this.permittedNetworkMask != other.permittedNetworkMask) {
             return false;
-        } else if (!compareObjects(this.m_permittedMAC, other.m_permittedMAC)) {
+        } else if (!compareObjects(this.permittedMAC, other.permittedMAC)) {
             return false;
-        } else if (!compareObjects(this.m_sourcePortRange, other.m_sourcePortRange)) {
+        } else if (!compareObjects(this.sourcePortRange, other.sourcePortRange)) {
             return false;
         }
 
@@ -406,17 +405,17 @@ public class PortForwardRule {
     public int hashCode() {
         final int prime = 79;
         int result = 1;
-        result = prime * result + this.m_inPort;
-        result = prime * result + this.m_outPort;
-        result = prime * result + (this.m_inboundIface == null ? 0 : this.m_inboundIface.hashCode());
-        result = prime * result + (this.m_outboundIface == null ? 0 : this.m_outboundIface.hashCode());
-        result = prime * result + (this.m_masquerade ? 1231 : 1237);
-        result = prime * result + (this.m_address == null ? 0 : this.m_address.hashCode());
-        result = prime * result + (this.m_protocol == null ? 0 : this.m_protocol.hashCode());
-        result = prime * result + (this.m_permittedNetwork == null ? 0 : this.m_permittedNetwork.hashCode());
-        result = prime * result + this.m_permittedNetworkMask;
-        result = prime * result + (this.m_permittedMAC == null ? 0 : this.m_permittedMAC.hashCode());
-        result = prime * result + (this.m_sourcePortRange == null ? 0 : this.m_sourcePortRange.hashCode());
+        result = prime * result + this.inPort;
+        result = prime * result + this.outPort;
+        result = prime * result + (this.inboundIface == null ? 0 : this.inboundIface.hashCode());
+        result = prime * result + (this.outboundIface == null ? 0 : this.outboundIface.hashCode());
+        result = prime * result + (this.masquerade ? 1231 : 1237);
+        result = prime * result + (this.address == null ? 0 : this.address.hashCode());
+        result = prime * result + (this.protocol == null ? 0 : this.protocol.hashCode());
+        result = prime * result + (this.permittedNetwork == null ? 0 : this.permittedNetwork.hashCode());
+        result = prime * result + this.permittedNetworkMask;
+        result = prime * result + (this.permittedMAC == null ? 0 : this.permittedMAC.hashCode());
+        result = prime * result + (this.sourcePortRange == null ? 0 : this.sourcePortRange.hashCode());
 
         return result;
     }

@@ -18,6 +18,8 @@ package org.eclipse.kura;
  * corresponding message should be defined in the properties bundle named:
  * KuraExceptionMessagesBundle.properties.
  * 
+ * @since 1.3
+ * 
  */
 public enum KuraErrorCode {
     CONFIGURATION_ERROR,
@@ -32,7 +34,6 @@ public enum KuraErrorCode {
     CONFIGURATION_SNAPSHOT_LOADING,
     /**
      * @deprecated
-     * @noreference Indicates that clients should not reference this type
      */
     INTERNAL_ERROR,
     SERIAL_PORT_INVALID_CONFIGURATION,
@@ -74,5 +75,35 @@ public enum KuraErrorCode {
      * 
      * @since 1.2
      */
-    SUBSCRIPTION_ERROR
+    SUBSCRIPTION_ERROR,
+    /**
+     * Error for Bluetooth operations
+     * 
+     * @since 1.3
+     */
+    BLE_NOTIFICATION_ERROR,
+    /**
+     * @since 1.3
+     */
+    BLE_CONNECTION_ERROR,
+    /**
+     * @since 1.3
+     */
+    BLE_PAIR_ERROR,
+    /**
+     * @since 1.3
+     */
+    BLE_RESOURCE_NOT_FOUND,
+    /**
+     * @since 1.3
+     */
+    BLE_IO_ERROR,
+    /**
+     * @since 1.3
+     */
+    BLE_COMMAND_ERROR,
+    /**
+     * @since 1.3
+     */
+    BLE_DISCOVERY_ERROR
 }

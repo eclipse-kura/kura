@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 class IWSecuritySectionParser {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(IWSecuritySectionParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(IWSecuritySectionParser.class);
 
     private boolean foundGroup = false;
     private boolean foundPairwise = false;
@@ -78,7 +78,7 @@ class IWSecuritySectionParser {
                 this.security.add(WifiSecurity.KEY_MGMT_PSK);
             }
         } else {
-            s_logger.debug("Ignoring line in section: {}", line);
+            logger.debug("Ignoring line in section: {}", line);
         }
 
         return this.foundGroup && this.foundPairwise && this.foundAuthSuites;

@@ -24,6 +24,7 @@
       <provide interface="org.osgi.service.wireadmin.Consumer"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.wire.H2DbWireRecordStore"/>
+   <property name="kura.ui.service.hide" type="Boolean" value="true"/>
    <reference bind="bindWireHelperService" 
    	          cardinality="1..1" 
    	          interface="org.eclipse.kura.wire.WireHelperService" 

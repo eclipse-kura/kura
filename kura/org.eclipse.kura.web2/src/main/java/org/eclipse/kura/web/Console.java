@@ -19,6 +19,7 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.KuraConfigReadyEvent;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.web.server.GwtAssetServiceImpl;
 import org.eclipse.kura.web.server.GwtCertificatesServiceImpl;
 import org.eclipse.kura.web.server.GwtCloudServiceImpl;
 import org.eclipse.kura.web.server.GwtComponentServiceImpl;
@@ -286,6 +287,7 @@ public class Console implements ConfigurableComponent {
         this.m_httpService.registerServlet(servletRoot + "/ssl", new GwtSslServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/cloudservices", new GwtCloudServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/wires", new GwtWireServiceImpl(), null, httpCtx);
+        this.m_httpService.registerServlet(servletRoot + "/assetservices", new GwtAssetServiceImpl(), null, httpCtx);
         this.m_httpService.registerServlet("/sse", new EventHandlerServlet(), null, httpCtx);
         this.m_httpService.registerServlet(servletRoot + "/event", this.eventService, null, httpCtx);
         this.eventService.start();

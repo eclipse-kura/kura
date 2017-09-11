@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2017 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" immediate="true" modified="updated" name="org.eclipse.kura.core.db.H2DbServer">
+   <implementation class="org.eclipse.kura.core.db.H2DbServer"/>
+   <reference bind="setConfigurationService" cardinality="1..1" interface="org.eclipse.kura.configuration.ConfigurationService" name="ConfigurationService" policy="static" unbind="unsetConfigurationService"/>
+   <property name="service.pid" type="String" value="org.eclipse.kura.core.db.H2DbServer"/>
+   <service>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+   </service>
+</scr:component>

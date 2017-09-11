@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,10 +13,8 @@ package org.eclipse.kura.linux.net.dhcp;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -36,34 +34,32 @@ import org.slf4j.LoggerFactory;
 
 public class DhcpServerImpl implements DhcpServer {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(DhcpServerImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(DhcpServerImpl.class);
 
-    // public static final String CONFIGURATION_NAME = "org.eclipse.kura.linux.net.dhcp";
-    // private static final String TMP_FILE_DIR = "/tmp/.kura/org.eclipse.kura.linux.net.dhcp/";
     private static final String FILE_DIR = "/etc/";
     private static final String PID_FILE_DIR = "/var/run/";
 
-    private final String m_interfaceName;
-    private DhcpServerConfig4 m_dhcpServerConfig4;
+    private final String interfaceName;
+    private DhcpServerConfig4 dhcpServerConfig4;
 
-    private final String m_configFileName;
-    private final String m_pidFileName;
+    private final String configFileName;
+    private final String pidFileName;
     private final String persistentConfigFileName;
     private final String persistentPidFilename;
 
     DhcpServerImpl(String interfaceName, boolean enabled, boolean passDns) throws KuraException {
-        this.m_interfaceName = interfaceName;
+        this.interfaceName = interfaceName;
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("dhcpd-").append(interfaceName).append(".conf");
-        this.m_configFileName = sb.toString();
+        this.configFileName = sb.toString();
 
-        sb = new StringBuffer();
+        sb = new StringBuilder();
         sb.append("dhcpd-").append(interfaceName).append(".pid");
-        this.m_pidFileName = sb.toString();
+        this.pidFileName = sb.toString();
 
-        this.persistentConfigFileName = FILE_DIR + this.m_configFileName;
-        this.persistentPidFilename = PID_FILE_DIR + this.m_pidFileName;
+        this.persistentConfigFileName = FILE_DIR + this.configFileName;
+        this.persistentPidFilename = PID_FILE_DIR + this.pidFileName;
 
         readConfig(enabled, passDns);
     }
@@ -73,74 +69,54 @@ public class DhcpServerImpl implements DhcpServer {
         File configFile = new File(this.persistentConfigFileName);
         if (configFile.exists()) {
 
-            s_logger.debug("initing DHCP Server configuration for {}", this.m_interfaceName);
+            logger.debug("initing DHCP Server configuration for {}", this.interfaceName);
             // parse the file
-            /*
-             * # dhcpd.conf - DHCPD configuration file
-             *
-             * subnet 192.168.2.0 netmask 255.255.255.0 {
-             * interface eth1;
-             * default-lease-time 7200;
-             * max-lease-time 7200;
-             * option domain-name-servers 192.168.2.1;
-             * option routers 192.168.2.1;
-             * pool {
-             * range 192.168.2.100 192.168.2.110;
-             * }
-             * }
-             */
-
-            try {
+            try (FileReader fr = new FileReader(configFile); BufferedReader br = new BufferedReader(fr)) {
                 IP4Address subnet = null;
                 IP4Address netmask = null;
                 IP4Address router = null;
-                String interfaceName = null;
+                String ifaceName = null;
                 int defaultLeaseTime = -1;
                 int maxLeaseTime = -1;
                 IP4Address rangeStart = null;
                 IP4Address rangeEnd = null;
-                ArrayList<IP4Address> dnsList = new ArrayList<IP4Address>();
-
-                BufferedReader br = new BufferedReader(new FileReader(configFile));
-
-                String line = null;
+                ArrayList<IP4Address> dnsList = new ArrayList<>();
+                String line;
                 while ((line = br.readLine()) != null) {
                     // TODO - really simple for now
                     StringTokenizer st = new StringTokenizer(line);
                     while (st.hasMoreTokens()) {
                         String token = st.nextToken();
-                        if (token.equals("#")) {
+                        if ("#".equals(token)) {
                             break;
-                        } else if (token.equals("subnet")) {
+                        } else if ("subnet".equals(token)) {
                             subnet = (IP4Address) IPAddress.parseHostAddress(st.nextToken());
-                            if (!st.nextToken().equals("netmask")) {
-                                br.close();
-                                br = null;
+                            if (!"netmask".equals(st.nextToken())) {
                                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                                         "invalid dhcp config file: " + this.persistentConfigFileName);
                             }
                             netmask = (IP4Address) IPAddress.parseHostAddress(st.nextToken());
-                        } else if (token.equals("interface")) {
-                            interfaceName = st.nextToken();
-                            interfaceName = interfaceName.substring(0, interfaceName.indexOf(';'));
-                        } else if (token.equals("default-lease-time")) {
+                        } else if ("interface".equals(token)) {
+                            ifaceName = st.nextToken();
+                            ifaceName = ifaceName.substring(0, ifaceName.indexOf(';'));
+                        } else if ("default-lease-time".equals(token)) {
                             String leaseTime = st.nextToken();
                             defaultLeaseTime = Integer.parseInt(leaseTime.substring(0, leaseTime.indexOf(';')));
-                        } else if (token.equals("max-lease-time")) {
+                        } else if ("max-lease-time".equals(token)) {
                             String leaseTime = st.nextToken();
                             maxLeaseTime = Integer.parseInt(leaseTime.substring(0, leaseTime.indexOf(';')));
-                        } else if (token.equals("range")) {
+                        } else if ("range".equals(token)) {
                             rangeStart = (IP4Address) IPAddress.parseHostAddress(st.nextToken());
                             String rangeEndString = st.nextToken();
                             rangeEndString = rangeEndString.substring(0, rangeEndString.indexOf(';'));
                             rangeEnd = (IP4Address) IPAddress.parseHostAddress(rangeEndString);
-                        } else if (token.equals("option")) {
+                        } else if ("option".equals(token)) {
                             String option = st.nextToken();
-                            if (option.equals("routers")) {
+                            if ("routers".equals(option)) {
                                 String routerString = st.nextToken();
                                 routerString = routerString.substring(0, routerString.indexOf(';'));
                                 router = (IP4Address) IPAddress.parseHostAddress(routerString);
-                            } else if (option.equals("domain-name-servers")) {
+                            } else if ("domain-name-servers".equals(option)) {
                                 String dnsString = st.nextToken();
                                 dnsString = dnsString.substring(0, dnsString.indexOf(';'));
                                 dnsList.add((IP4Address) IPAddress.parseHostAddress(dnsString));
@@ -149,44 +125,26 @@ public class DhcpServerImpl implements DhcpServer {
                     }
                 }
 
-                boolean running = isRunning();
-
-                /*
-                 * LinuxNamed linuxNamed = LinuxNamed.getInstance();
-                 * DnsServerConfigIP4 dnsServerConfig = linuxNamed.getDnsServerConfig();
-                 * List<IP4Address> forwarders = dnsServerConfig.getForwarders();
-                 * List<NetworkPair<IP4Address>> allowedNetworks = dnsServerConfig.getAllowedNetworks();
-                 * boolean passDns = (forwarders != null && forwarders.size() > 0
-                 * && allowedNetworks != null && allowedNetworks.size() > 0);
-                 */
-
                 // FIXME - prefix still hardcoded
-                s_logger.debug("instantiating DHCP server configuration during init with " + "\n\t\tinterfaceName: "
-                        + interfaceName + "\n\t\trunning: " + running + "\n\t\tsubnet: " + subnet.getHostAddress()
-                        + "\n\t\trouter: " + router.getHostAddress() + "\n\t\tnetmask: " + netmask.getHostAddress()
-                        + "\n\t\tdefaultLeaseTime: " + defaultLeaseTime + "\n\t\tmaxLeaseTime: " + maxLeaseTime
-                        + "\n\t\trangeStart: " + rangeStart.getHostAddress() + "\n\t\trangeEnd: "
-                        + rangeEnd.getHostAddress() + "\n\t\tpassDns: " + passDns + "\n\t\tdnsList: "
-                        + dnsList.toString());
-
                 try {
-					DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(interfaceName, enabled, defaultLeaseTime,
-							maxLeaseTime, passDns);
-					DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, netmask, (short) 24, router,
-							rangeStart, rangeEnd, dnsList);
-					this.m_dhcpServerConfig4 = new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4);
+                    DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(ifaceName, enabled, defaultLeaseTime, maxLeaseTime,
+                            passDns);
+                    DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, netmask, (short) 24, router,
+                            rangeStart, rangeEnd, dnsList);
+
+                    logger.debug(
+                            "instantiating DHCP server configuration during init with dhcpServerCfg={} and dhcpServerCfgIP4={}",
+                            dhcpServerCfg, dhcpServerCfgIP4);
+
+                    this.dhcpServerConfig4 = new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4);
                 } catch (KuraException e) {
-                	s_logger.error("Failed to craete new DhcpServerConfigIP4 object - {}", e);
+                    logger.error("Failed to craete new DhcpServerConfigIP4 object ", e);
                 }
-                br.close();
-                br = null;
-            } catch (FileNotFoundException e) {
-                throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
             }
         } else {
-            s_logger.debug("There is no current DHCP server configuration for {}", this.m_interfaceName);
+            logger.debug("There is no current DHCP server configuration for {}", this.interfaceName);
         }
     }
 
@@ -202,13 +160,11 @@ public class DhcpServerImpl implements DhcpServer {
     }
 
     public boolean enable() throws KuraException {
-        s_logger.debug("enable()");
-        // write to config file;
+        logger.debug("enable()");
         try {
             writeConfig();
         } catch (Exception e1) {
-            s_logger.error("Error writing configuration to filesystem");
-            e1.printStackTrace();
+            logger.error("Error writing configuration to filesystem", e1);
             return false;
         }
 
@@ -216,14 +172,14 @@ public class DhcpServerImpl implements DhcpServer {
             // Check if dhcpd is running
             if (isRunning()) {
                 // If so, disable it
-                s_logger.error("DHCP server is already running, bringing it down...");
+                logger.error("DHCP server is already running, bringing it down...");
                 disable();
             }
             // Start dhcpd
             // FIXME:MC This leads to a process leak
             if (LinuxProcessUtil.startBackground(formDhcpdCommand(), false) == 0) {
-                s_logger.debug("DHCP server started.");
-                s_logger.trace(this.m_dhcpServerConfig4.toString());
+                logger.debug("DHCP server started.");
+                logger.trace(this.dhcpServerConfig4.toString());
                 return true;
             }
         } catch (Exception e) {
@@ -234,16 +190,13 @@ public class DhcpServerImpl implements DhcpServer {
     }
 
     public boolean disable() throws KuraException {
-        s_logger.debug("disable()");
-
-        // write to config file;
+        logger.debug("disable()");
         try {
-            if (this.m_dhcpServerConfig4 != null) {
+            if (this.dhcpServerConfig4 != null) {
                 writeConfig();
             }
         } catch (Exception e1) {
-            s_logger.error("Error writing configuration to filesystem");
-            e1.printStackTrace();
+            logger.error("Error writing configuration to filesystem", e1);
             return false;
         }
 
@@ -255,7 +208,7 @@ public class DhcpServerImpl implements DhcpServer {
                 if (LinuxProcessUtil.stop(pid)) {
                     removePidFile();
                 } else {
-                    s_logger.debug("Failed to stop process...try to kill");
+                    logger.debug("Failed to stop process...try to kill");
                     if (LinuxProcessUtil.kill(pid)) {
                         removePidFile();
                     } else {
@@ -263,7 +216,7 @@ public class DhcpServerImpl implements DhcpServer {
                     }
                 }
             } else {
-                s_logger.debug("tried to kill DHCP server for interface but it is not running");
+                logger.debug("tried to kill DHCP server for interface but it is not running");
             }
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -273,16 +226,16 @@ public class DhcpServerImpl implements DhcpServer {
     }
 
     public boolean isConfigured() {
-        return this.m_dhcpServerConfig4 != null;
+        return this.dhcpServerConfig4 != null;
     }
 
     public void setConfig(DhcpServerConfigIP4 dhcpServerConfig4) throws KuraException {
-        s_logger.debug("setConfig()");
+        logger.debug("setConfig()");
 
         try {
-            this.m_dhcpServerConfig4 = dhcpServerConfig4;
-            if (this.m_dhcpServerConfig4 == null) {
-                s_logger.warn("Set DHCP configuration to null");
+            this.dhcpServerConfig4 = dhcpServerConfig4;
+            if (this.dhcpServerConfig4 == null) {
+                logger.warn("Set DHCP configuration to null");
             }
 
             if (dhcpServerConfig4.isEnabled()) {
@@ -292,8 +245,8 @@ public class DhcpServerImpl implements DhcpServer {
                 disable();
             }
         } catch (Exception e) {
-            s_logger.error("Error setting subnet config for " + this.m_interfaceName);
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            logger.error("Error setting subnet config for {} ", this.interfaceName, e);
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
         }
     }
 
@@ -301,9 +254,9 @@ public class DhcpServerImpl implements DhcpServer {
         try {
             readConfig(enabled, passDns);
         } catch (Exception e) {
-            s_logger.error("Error reading config", e);
+            logger.error("Error reading config", e);
         }
-        return this.m_dhcpServerConfig4;
+        return this.dhcpServerConfig4;
     }
 
     public String getConfigFilename() {
@@ -311,33 +264,29 @@ public class DhcpServerImpl implements DhcpServer {
     }
 
     private void writeConfig() throws KuraException {
-        try {
-            s_logger.trace(
-                    "writing to " + FILE_DIR + this.m_configFileName + " with: " + this.m_dhcpServerConfig4.toString());
-            FileOutputStream fos = new FileOutputStream(FILE_DIR + this.m_configFileName);
-            PrintWriter pw = new PrintWriter(fos);
-            pw.write(this.m_dhcpServerConfig4.toString());
+        logger.trace("writing to {} with: {}", this.persistentConfigFileName, this.dhcpServerConfig4.toString());
+        try (FileOutputStream fos = new FileOutputStream(this.persistentConfigFileName);
+                PrintWriter pw = new PrintWriter(fos)) {
+            pw.write(this.dhcpServerConfig4.toString());
             pw.flush();
             fos.getFD().sync();
-            pw.close();
-            fos.close();
         } catch (Exception e) {
-            e.printStackTrace();
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
-                    "error while building up new configuration files for dhcp servers: " + e.getMessage());
+                    "error while building up new configuration files for dhcp servers: ", e);
         }
     }
 
-    private void removePidFile() {
-
+    private boolean removePidFile() {
+        boolean ret = true;
         File pidFile = new File(this.persistentPidFilename);
         if (pidFile.exists()) {
-            pidFile.delete();
+            ret = pidFile.delete();
         }
+        return ret;
     }
 
     private String formDhcpdCommand() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("dhcpd -cf ").append(this.persistentConfigFileName).append(" -pf ")
                 .append(this.persistentPidFilename);
         return sb.toString();

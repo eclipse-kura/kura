@@ -242,7 +242,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                                 // (displayed as read-only in Denali)
                                 List<? extends IPAddress> dhcpDnsServers = getDhcpDnsServers(interfaceName,
                                         netInterfaceAddressConfig.getAddress());
-                                if (dhcpDnsServers != null) {
+                                if (!dhcpDnsServers.isEmpty()) {
                                     ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig)
                                             .setDnsServers(dhcpDnsServers);
                                 }
@@ -254,7 +254,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                                 // (displayed as read-only in Denali)
                                 List<? extends IPAddress> dhcpDnsServers = getDhcpDnsServers(interfaceName,
                                         netInterfaceAddressConfig.getAddress());
-                                if (dhcpDnsServers != null) {
+                                if (!dhcpDnsServers.isEmpty()) {
                                     ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig)
                                             .setDnsServers(dhcpDnsServers);
                                 }
@@ -476,7 +476,6 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
 
     private static List<? extends IPAddress> getDhcpDnsServers(String interfaceName, IPAddress address) {
         List<IPAddress> dnsServers = null;
-
         if (address != null) {
             LinuxDns linuxDns = LinuxDns.getInstance();
             try {
@@ -485,7 +484,9 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                 logger.error("Error getting DHCP DNS servers", e);
             }
         }
-
+        if (dnsServers == null) {
+            dnsServers = new ArrayList<>();
+        }
         return dnsServers;
     }
 }

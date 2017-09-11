@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2017 Red Hat Inc
+
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+	<OCD
+		id="org.eclipse.kura.broker.artemis.simple.mqtt.BrokerInstance"
+		name="Simple Artemis MQTT Broker"
+		description="A simple MQTT broker instance based on Apache ActiveMQ Artemis">
+
+		<AD
+			id="enabled"
+			name="Enabled"
+			type="Boolean"
+			cardinality="1"
+			required="true"
+			default="false"
+			description="Enables the broker instance">
+		</AD>
+
+		<AD
+			id="address"
+			name="MQTT address"
+			description="MQTT broker listener address"
+			type="String"
+			cardinality="1"
+			required="false"
+			default="localhost" />
+
+		<AD
+			id="port"
+			name="MQTT port"
+			description="MQTT broker port"
+			type="Integer"
+			cardinality="1"
+			required="true"
+			default="1883" />
+
+		<AD
+			id="user"
+			name="User name"
+			description="The user name required to access to the broker"
+			type="String"
+			cardinality="1"
+			required="false"
+			default="mqtt" />
+
+		<AD
+			id="password"
+			name="Password of the user"
+			description="The password required to connect. If the password is empty, no password will be required to connect."
+			type="Password"
+			cardinality="1"
+			required="false"
+			/>
+
+	</OCD>
+
+	<Designate pid="org.eclipse.kura.broker.artemis.simple.mqtt.BrokerInstance">
+		<Object ocdref="org.eclipse.kura.broker.artemis.simple.mqtt.BrokerInstance" />
+	</Designate>
+</MetaData>

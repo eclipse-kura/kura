@@ -20,12 +20,12 @@
     <groupId>org.eclipse.kura</groupId>
     <artifactId>examples</artifactId>
     <version>3.1.0-SNAPSHOT</version>
-	
+
     <packaging>pom</packaging>
-    
+
     <properties>
         <tycho-version>0.26.0</tycho-version>
-        
+
         <!-- SCM: Note that we are in the "kura" sub-dir here already -->
         <tycho.scmUrl>scm:git:ssh://github.com/eclipse/kura/kura</tycho.scmUrl>
 
@@ -33,8 +33,10 @@
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <kura.basedir>${project.basedir}/..</kura.basedir>
         <kura.build.version>${maven.build.timestamp}</kura.build.version>
+
+        <skip.can.example>true</skip.can.example>
     </properties>
-    
+
     <distributionManagement>
         <repository>
             <id>repo.eclipse.org</id>
@@ -47,7 +49,7 @@
             <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
-    
+
     <modules>
     	<module>org.eclipse.kura.demo.heater</module>
         <module>org.eclipse.kura.demo.modbus</module>
@@ -56,15 +58,21 @@
         <module>org.eclipse.kura.example.serial.publisher</module>
         <module>org.eclipse.kura.example.gpio</module>
         <module>org.eclipse.kura.example.ble.tisensortag</module>
+        <module>org.eclipse.kura.example.ble.tisensortag.tinyb</module>
         <module>org.eclipse.kura.example.beacon</module>
         <module>org.eclipse.kura.example.beacon.scanner</module>
+        <module>org.eclipse.kura.example.ibeacon.advertiser</module>
+        <module>org.eclipse.kura.example.ibeacon.scanner</module>
+        <module>org.eclipse.kura.example.eddystone.advertiser</module>
+        <module>org.eclipse.kura.example.eddystone.scanner</module>
         <module>org.eclipse.kura.example.camel.quickstart</module>
         <module>org.eclipse.kura.example.camel.publisher</module>
         <module>org.eclipse.kura.example.camel.aggregation</module>
         <module>org.eclipse.kura.raspberrypi.sensehat</module>
         <module>org.eclipse.kura.raspberrypi.sensehat.example</module>
+        <module>features</module>
     </modules>
-    
+
     <profiles>
         <profile>
             <id>default</id>
@@ -77,7 +85,7 @@
                 <repository>
                     <id>p2-repo-equinox_3.11.1</id>
                     <layout>p2</layout>
-                    <url>file:////${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
+                    <url>file:///${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
                 </repository>
             </repositories>
         </profile>
@@ -93,7 +101,7 @@
                 <repository>
                     <id>p2-repo-equinox_3.11.1</id>
                     <layout>p2</layout>
-                    <url>file:////${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
+                    <url>file:///${kura.basedir}/target-definition/equinox_3.11.1/repository/</url>
                 </repository>
             </repositories>
         </profile>
@@ -131,22 +139,34 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>can</id>
+            <activation>
+                <property>
+                    <name>skip.can.example</name>
+                    <value>false</value>
+                </property>
+            </activation>
+            <modules>
+                <module>org.eclipse.kura.example.can</module>
+            </modules>
+        </profile>
     </profiles>
-    
+
     <repositories>
         <repository>
     		<id>p2-repo</id>
 			<layout>p2</layout>
-            <url>file:////${kura.basedir}/org.eclipse.kura-p2/target/repository/</url>
+            <url>file:///${kura.basedir}/org.eclipse.kura-p2/target/repository/</url>
         </repository>
         <repository>
             <id>p2-repo-common</id>
             <layout>p2</layout>
-            <url>file:////${kura.basedir}/target-definition/common/repository/</url>
+            <url>file:///${kura.basedir}/target-definition/common/repository/</url>
         </repository>
     </repositories>
-    
-    
+
+
     <build>
         <extensions>
             <extension>

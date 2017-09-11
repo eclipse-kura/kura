@@ -57,6 +57,7 @@ public interface BluetoothDevice {
      *
      * @return Standard Bluetooth connector
      */
+    @Deprecated
     public BluetoothConnector getBluetoothConnector();
 
     /**

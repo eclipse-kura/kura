@@ -49,6 +49,7 @@ import org.eclipse.kura.status.CloudConnectionStatusEnum;
 import org.eclipse.kura.status.CloudConnectionStatusService;
 import org.eclipse.kura.watchdog.CriticalComponent;
 import org.eclipse.kura.watchdog.WatchdogService;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -484,7 +485,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     @Override
     public void connect() throws KuraConnectException {
         stopConnectionMonitorTask();
-        if (dbService == null) {
+        if (this.dbService == null) {
             throw new KuraConnectException("H2DbService instance not attached, not connecting");
         }
 
@@ -596,7 +597,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                     Thread.currentThread().setName("DataServiceImpl:ReconnectTask");
                     boolean connected = false;
                     try {
-                        if (dbService == null) {
+                        if (DataServiceImpl.this.dbService == null) {
                             logger.warn("H2DbService instance not attached, not connecting");
                             return;
                         }
@@ -613,9 +614,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                         logger.warn("Connect failed", e);
 
                         if (DataServiceImpl.this.dataServiceOptions.isConnectionRecoveryEnabled()) {
-                            int currentConnectionAttempts = DataServiceImpl.this.connectionAttempts.getAndIncrement();
-                            if (currentConnectionAttempts < DataServiceImpl.this.dataServiceOptions
-                                    .getRecoveryMaximumAllowedFailures()) {
+                            if (isAuthenticationException(e) || DataServiceImpl.this.connectionAttempts
+                                    .getAndIncrement() < DataServiceImpl.this.dataServiceOptions
+                                            .getRecoveryMaximumAllowedFailures()) {
                                 logger.info("Checkin done.");
                                 DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
                             } else {
@@ -634,6 +635,20 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                             throw new RuntimeException("Connected. Reconnect task will be terminated.");
                         }
                     }
+                }
+
+                private boolean isAuthenticationException(KuraConnectException e) {
+                    boolean authenticationException = false;
+                    if (e.getCause() instanceof MqttException) {
+                        MqttException mqttException = (MqttException) e.getCause();
+                        if (mqttException.getReasonCode() == MqttException.REASON_CODE_FAILED_AUTHENTICATION
+                                || mqttException.getReasonCode() == MqttException.REASON_CODE_INVALID_CLIENT_ID
+                                || mqttException.getReasonCode() == MqttException.REASON_CODE_NOT_AUTHORIZED) {
+                            logger.info("Authentication exception encountered.");
+                            authenticationException = true;
+                        }
+                    }
+                    return authenticationException;
                 }
             }, initialDelay, reconnectInterval, TimeUnit.SECONDS);
         } else {

@@ -18,6 +18,7 @@
 
         <bundle>mvn:org.eclipse.kura/jdk.dio/${jdk.dio.version}</bundle>
         <bundle>mvn:org.eclipse.kura/com.codeminders.hidapi/${com.codeminders.hidapi.version}</bundle>
+        <bundle>mvn:org.eclipse.kura/tinyb/${tinyb.version}</bundle>
         <bundle>mvn:org.eclipse.kura/org.eclipse.soda.dk.comm/${org.eclipse.soda.dk.comm.version}</bundle>
     </feature>
 
@@ -25,6 +26,7 @@
         <bundle start="false">mvn:org.eclipse.kura/org.eclipse.kura.linux.usb.armv6hf/${org.eclipse.kura.linux.usb.version}</bundle>
         <bundle start="false">mvn:org.eclipse.kura/jdk.dio.armv6hf/${jdk.dio.version}</bundle>
         <bundle start="false">mvn:org.eclipse.kura/com.codeminders.hidapi.armv6hf/${com.codeminders.hidapi.version}</bundle>
+        <bundle>mvn:org.eclipse.kura/tinyb.armv6hf/${tinyb.version}</bundle>
         <bundle start="false">mvn:org.eclipse.kura/org.eclipse.soda.dk.comm.armv6hf/${org.eclipse.soda.dk.comm.version}</bundle>
         <feature>kura-linux</feature>
     </feature>
@@ -33,6 +35,7 @@
     	<bundle start="false">mvn:org.eclipse.kura/org.eclipse.kura.linux.usb.x86_64/${org.eclipse.kura.linux.usb.version}</bundle>
         <bundle start="false">mvn:org.eclipse.kura/jdk.dio.x86_64/${jdk.dio.version}</bundle>
         <bundle start="false">mvn:org.eclipse.kura/com.codeminders.hidapi.x86_64/${com.codeminders.hidapi.version}</bundle>
+        <bundle>mvn:org.eclipse.kura/tinyb.x86_64/${tinyb.version}</bundle>
         <bundle start="false">mvn:org.eclipse.kura/org.eclipse.soda.dk.comm.x86_64/${org.eclipse.soda.dk.comm.version}</bundle>
         <feature>kura-linux</feature>
     </feature>

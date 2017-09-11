@@ -98,10 +98,10 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
             DbConfiguration newConfiguration = new DbConfiguration(properties);
 
             if (this.configuration != null) {
-                if (!this.configuration.getDbUrl().equals(newConfiguration.getDbUrl())) {
+                final boolean urlChanged = !this.configuration.getDbUrl().equals(newConfiguration.getDbUrl());
+                final boolean userChanged = !this.configuration.getUser().equalsIgnoreCase(newConfiguration.getUser());
+                if (urlChanged || userChanged) {
                     shutdownDb();
-                } else if (!this.configuration.getUser().equalsIgnoreCase(newConfiguration.getUser())) {
-                    lastSessionPassword = null;
                 }
             }
 
@@ -146,7 +146,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
         } catch (Exception e) {
             disposeConnectionPool();
             stopCheckpointTask();
-            logger.warn("Database initialization failed", e);
+            logger.error("Database initialization failed", e);
         }
     }
 

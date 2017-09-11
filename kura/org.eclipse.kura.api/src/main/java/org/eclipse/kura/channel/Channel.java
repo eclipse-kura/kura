@@ -36,7 +36,7 @@ import org.osgi.annotation.versioning.ProviderType;
 public class Channel {
 
     /** The communication channel configuration. */
-    private final Map<String, Object> configuration;
+    private transient final Map<String, Object> configuration;
 
     /** The name of the communication channel. */
     private String name;

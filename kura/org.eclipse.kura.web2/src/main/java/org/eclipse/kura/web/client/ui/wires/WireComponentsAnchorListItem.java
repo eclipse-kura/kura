@@ -5,11 +5,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *  
+ *
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.wires;
 
@@ -23,14 +23,15 @@ import com.google.gwt.event.dom.client.ClickHandler;
 
 public class WireComponentsAnchorListItem extends AnchorListItem {
 
-    private boolean isEmitter;
-    private boolean isReceiver;
+    private final boolean isEmitter;
+    private final boolean isReceiver;
 
-    public WireComponentsAnchorListItem(final String factoryPid, final boolean isEmitter, final boolean isReceiver) {
+    public WireComponentsAnchorListItem(final String factoryPid, final boolean isEmitter, final boolean isReceiver,
+            final WiresPanelUi parent) {
         super();
         this.isEmitter = isEmitter;
         this.isReceiver = isReceiver;
-        super.setIcon(this.getFactoryIcon());
+        super.setIcon(getFactoryIcon());
         super.setText(WiresPanelUi.getFormattedPid(factoryPid));
 
         DragSupport drag = DragSupport.addIfSupported(this);
@@ -49,7 +50,7 @@ public class WireComponentsAnchorListItem extends AnchorListItem {
 
             @Override
             public void onClick(final ClickEvent event) {
-                WiresPanelUi.showComponentCreationDialog(factoryPid);
+                parent.showComponentCreationDialog(factoryPid);
                 WireComponentsAnchorListItem.this.setActive(true);
             }
         });

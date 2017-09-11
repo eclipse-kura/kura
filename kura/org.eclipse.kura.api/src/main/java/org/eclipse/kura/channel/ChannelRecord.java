@@ -72,7 +72,7 @@ public class ChannelRecord {
      * Provided channel configuration to perform read or write
      * operation.
      */
-    private Map<String, Object> channelConfiguration;
+    private transient Map<String, Object> channelConfiguration;
 
     /**
      * Represents a channel specific status which signifies the status

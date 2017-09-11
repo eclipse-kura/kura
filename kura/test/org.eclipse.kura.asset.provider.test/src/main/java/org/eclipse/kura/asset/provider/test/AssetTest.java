@@ -1,40 +1,53 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.asset.provider.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetConfiguration;
-import org.eclipse.kura.asset.AssetConstants;
-import org.eclipse.kura.asset.AssetEvent;
-import org.eclipse.kura.asset.AssetFlag;
-import org.eclipse.kura.asset.AssetRecord;
-import org.eclipse.kura.asset.Channel;
-import org.eclipse.kura.asset.ChannelType;
-import org.eclipse.kura.asset.listener.AssetListener;
+import org.eclipse.kura.asset.provider.AssetConstants;
 import org.eclipse.kura.asset.provider.BaseAsset;
+import org.eclipse.kura.channel.Channel;
+import org.eclipse.kura.channel.ChannelFlag;
+import org.eclipse.kura.channel.ChannelRecord;
+import org.eclipse.kura.channel.ChannelType;
+import org.eclipse.kura.channel.listener.ChannelEvent;
+import org.eclipse.kura.channel.listener.ChannelListener;
+import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.metatype.AD;
+import org.eclipse.kura.configuration.metatype.OCD;
+import org.eclipse.kura.driver.Driver.ConnectionException;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.util.collection.CollectionUtil;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -45,14 +58,18 @@ import org.slf4j.LoggerFactory;
  */
 public final class AssetTest {
 
+    /** Logger */
+    private static final Logger logger = LoggerFactory.getLogger(AssetTest.class);
+
     /** Asset Instance */
     private static Asset asset;
 
-    /** A latch to be initialized with the no of OSGi dependencies it needs */
-    private static CountDownLatch dependencyLatch = new CountDownLatch(2);
+    private static Object assetLock = new Object();
 
-    /** Logger */
-    private static final Logger s_logger = LoggerFactory.getLogger(AssetTest.class);
+    private static ConfigurationService cfgsvc;
+
+    /** A latch to be initialized with the no of OSGi dependencies it needs */
+    private static CountDownLatch dependencyLatch = new CountDownLatch(1);
 
     /** The Device Configuration instance. */
     public AssetConfiguration configuration;
@@ -62,6 +79,72 @@ public final class AssetTest {
 
     /** The Channel Configuration */
     public Map<String, Object> sampleChannelConfig;
+
+    /**
+     * JUnit Callback to be triggered before creating the instance of this suite
+     *
+     * @throws Exception
+     *             if the dependent services are null
+     */
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+        // Wait for OSGi dependencies
+        logger.info("Setting Up The Testcase....");
+        try {
+            boolean ok = dependencyLatch.await(10, TimeUnit.SECONDS);
+            assertTrue("Dependencies should be OK", ok);
+        } catch (final InterruptedException e) {
+            fail("OSGi dependencies unfulfilled");
+        }
+
+        // asset = new BaseAsset();
+
+        // initt();
+    }
+
+    @Before
+    public void init() throws InterruptedException {
+        // may need to wait for asset to be registered and injected
+        if (asset == null) {
+            synchronized (assetLock) {
+                assetLock.wait(3000);
+            }
+
+        }
+
+        initt();
+    }
+
+    /**
+     * Initializes asset data
+     */
+    private static void initt() {
+        final Map<String, Object> channels = CollectionUtil.newHashMap();
+        channels.put("kura.service.pid", "AssetTest");
+        channels.put(AssetConstants.ASSET_DESC_PROP.value(), "sample.asset.desc");
+        channels.put(AssetConstants.ASSET_DRIVER_PROP.value(), "org.eclipse.kura.asset.stub.driver");
+        channels.put("1.CH#name", "sample.channel1.name");
+        channels.put("1.CH#+type", "READ");
+        channels.put("1.CH#+value.type", "INTEGER");
+        channels.put("1.CH#DRIVER.modbus.register", "sample.channel1.modbus.register");
+        channels.put("1.CH#DRIVER.modbus.FC", "sample.channel1.modbus.FC");
+        channels.put("2.CH#name", "sample.channel2.name");
+        channels.put("2.CH#+type", "WRITE");
+        channels.put("2.CH#+value.type", "BOOLEAN");
+        channels.put("2.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
+        channels.put("2.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
+
+        ((BaseAsset) asset).updated(channels);
+    }
+
+    protected void activate() throws KuraException {
+        if (cfgsvc != null) {
+            Map<String, Object> props = new HashMap<String, Object>();
+            props.put("driver.pid", "org.eclipse.kura.asset.stub.driver");
+
+            cfgsvc.createFactoryConfiguration("org.eclipse.kura.asset", "testAsset", props, false);
+        }
+    }
 
     /**
      * Test generic asset properties.
@@ -83,21 +166,24 @@ public final class AssetTest {
     public void testChannelProperties() {
         final AssetConfiguration assetConfiguration = asset.getAssetConfiguration();
         assertNotNull(assetConfiguration);
-        final Map<Long, Channel> channels = assetConfiguration.getAssetChannels();
+        final Map<String, Channel> channels = assetConfiguration.getAssetChannels();
         assertEquals(2, channels.size());
-        final Channel channel1 = channels.get(1L);
-        assertEquals(1L, channel1.getId());
-        assertEquals("sample.channel1.name", channel1.getName());
+
+        final Channel channel1 = channels.get("1.CH");
+        // FIXME? should this be so:
+        // assertEquals("sample.channel1.name", channel1.getName());
+        // or so:
+        // assertEquals("sample.channel1.name", channel1.getConfiguration().get("name"));
         assertEquals(ChannelType.READ, channel1.getType());
         assertEquals(DataType.INTEGER, channel1.getValueType());
-        assertEquals("sample.channel1.modbus.register", channel1.getConfiguration().get("modbus.register"));
-        assertEquals("sample.channel1.modbus.FC", channel1.getConfiguration().get("modbus.FC"));
-        final Channel channel2 = channels.get(2L);
-        assertEquals(2L, channel2.getId());
+        assertEquals("sample.channel1.modbus.register", channel1.getConfiguration().get("DRIVER.modbus.register"));
+        assertEquals("sample.channel1.modbus.FC", channel1.getConfiguration().get("DRIVER.modbus.FC"));
+
+        final Channel channel2 = channels.get("2.CH");
         assertEquals(ChannelType.WRITE, channel2.getType());
         assertEquals(DataType.BOOLEAN, channel2.getValueType());
-        assertEquals("sample.channel2.modbus.register", channel2.getConfiguration().get("modbus.register"));
-        assertEquals("sample.channel2.modbus.FC", channel2.getConfiguration().get("modbus.DUMMY.NN"));
+        assertEquals("sample.channel2.modbus.register", channel2.getConfiguration().get("DRIVER.modbus.register"));
+        assertEquals("sample.channel2.modbus.FC", channel2.getConfiguration().get("DRIVER.modbus.DUMMY.NN"));
     }
 
     /**
@@ -106,15 +192,94 @@ public final class AssetTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testListen() throws KuraException {
-        final AssetListener listener = new AssetListener() {
+        AtomicBoolean invoked = new AtomicBoolean(false);
 
-            /** {@inheritDoc} */
+        final ChannelListener listener = new ChannelListener() {
+
             @Override
-            public void onAssetEvent(final AssetEvent event) {
-                assertEquals(1, event.getAssetRecord().getValue().getValue());
+            public void onChannelEvent(ChannelEvent event) {
+                assertEquals(1, event.getChannelRecord().getValue().getValue());
+
+                invoked.set(true);
             }
         };
-        asset.registerAssetListener(1, listener);
+
+        asset.registerChannelListener("1.CH", listener);
+
+        assertTrue(invoked.get());
+    }
+
+    /**
+     * Test listener unregistration.
+     */
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testUnlisten() throws KuraException {
+        AtomicInteger invoked = new AtomicInteger(0);
+
+        final ChannelListener listener = new ChannelListener() {
+
+            @Override
+            public void onChannelEvent(ChannelEvent event) {
+                int cnt = invoked.getAndIncrement();
+
+                if (cnt == 0) {
+                    assertEquals(1, event.getChannelRecord().getValue().getValue());
+                } else if (cnt == 1) {
+                    assertEquals("unregister", event.getChannelRecord().getChannelName());
+                    assertEquals(DataType.BOOLEAN, event.getChannelRecord().getValueType());
+                } else {
+                    fail("Unexpected invocation.");
+                }
+            }
+        };
+
+        asset.registerChannelListener("1.CH", listener);
+
+        assertEquals(1, invoked.get());
+
+        asset.unregisterChannelListener(listener);
+
+        assertEquals(2, invoked.get());
+    }
+
+    /**
+     * Test exception during listener unregistration.
+     */
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testUnlistenDriverException() throws KuraException {
+        AtomicInteger invoked = new AtomicInteger(0);
+
+        final ChannelListener listener = new ChannelListener() {
+
+            @Override
+            public void onChannelEvent(ChannelEvent event) {
+                int cnt = invoked.getAndIncrement();
+
+                if (cnt == 0) {
+                    assertEquals(1, event.getChannelRecord().getValue().getValue());
+                } else if (cnt == 1) {
+                    throw new IllegalArgumentException("test");
+                } else {
+                    fail("Unexpected invocation.");
+                }
+            }
+        };
+
+        asset.registerChannelListener("1.CH", listener);
+
+        assertEquals(1, invoked.get());
+
+        try {
+            asset.unregisterChannelListener(listener);
+        } catch (KuraException e) {
+            assertEquals(KuraErrorCode.CONNECTION_FAILED, e.getCode());
+            assertTrue(e.getCause() instanceof ConnectionException);
+            assertEquals("test", ((ConnectionException) e.getCause()).getMessage());
+        }
+
+        assertEquals(2, invoked.get());
     }
 
     /**
@@ -123,7 +288,9 @@ public final class AssetTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testRead() throws KuraException {
-        final List<AssetRecord> records = asset.read(Arrays.asList(1L));
+        final List<ChannelRecord> records = asset.read(new HashSet(Arrays.asList("1.CH")));
+
+        assertNotNull(records);
         assertEquals(1, records.size());
         assertEquals(1, records.get(0).getValue().getValue());
     }
@@ -132,9 +299,26 @@ public final class AssetTest {
      * Tests the condition in case the channel type is not readable
      */
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
-    @Test(expected = KuraRuntimeException.class)
+    @Test
     public void testReadChannelNotReadable() throws KuraException {
-        asset.read(Arrays.asList(2L));
+        List<ChannelRecord> result = asset.read(new HashSet(Arrays.asList("2.CH")));
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(ChannelFlag.FAILURE, result.get(0).getChannelStatus().getChannelFlag());
+    }
+
+    /**
+     * Test reading operation on all channels.
+     */
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testReadAllChannels() throws KuraException {
+        final List<ChannelRecord> records = asset.readAllChannels();
+
+        assertNotNull(records);
+        assertEquals(1, records.size());
+        assertEquals(1, records.get(0).getValue().getValue());
     }
 
     /**
@@ -143,60 +327,82 @@ public final class AssetTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testWrite() throws KuraException {
-        final AssetRecord assetRecord = new AssetRecord(2L);
-        assetRecord.setValue(TypedValues.newBooleanValue(true));
-        final List<AssetRecord> records = asset.write(Arrays.asList(assetRecord));
+        ChannelRecord channelRecord = ChannelRecord.createWriteRecord("2.CH", TypedValues.newBooleanValue(true));
+
+        List<ChannelRecord> records = new ArrayList<>();
+        records.add(channelRecord);
         assertEquals(1, records.size());
-        assertEquals(AssetFlag.SUCCESS, records.get(0).getAssetStatus().getAssetFlag());
+
+        asset.write(records);
+
+        assertEquals(ChannelFlag.SUCCESS, channelRecord.getChannelStatus().getChannelFlag());
     }
 
     /**
      * Tests the condition in case the channel type is not writable
      */
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
-    @Test(expected = KuraRuntimeException.class)
+    @Test
     public void testWriteChannelNotWritable() throws KuraException {
-        final AssetRecord assetRecord = new AssetRecord(1L);
-        asset.write(Arrays.asList(assetRecord));
+        ChannelRecord channelRecord = ChannelRecord.createWriteRecord("1.CH", TypedValues.newLongValue(1L));
+
+        List<ChannelRecord> list = Arrays.asList(channelRecord);
+        assertEquals(1, list.size());
+
+        asset.write(list);
+
+        assertEquals(ChannelFlag.FAILURE, channelRecord.getChannelStatus().getChannelFlag());
     }
 
-    /**
-     * Initializes asset data
-     */
-    private static void init() {
-        final Map<String, Object> channels = CollectionUtil.newHashMap();
-        channels.put(AssetConstants.ASSET_DESC_PROP.value(), "sample.asset.desc");
-        channels.put(AssetConstants.ASSET_DRIVER_PROP.value(), "org.eclipse.kura.asset.stub.driver");
-        channels.put("1.CH.name", "sample.channel1.name");
-        channels.put("1.CH.type", "READ");
-        channels.put("1.CH.value.type", "INTEGER");
-        channels.put("1.CH.DRIVER.modbus.register", "sample.channel1.modbus.register");
-        channels.put("1.CH.DRIVER.modbus.FC", "sample.channel1.modbus.FC");
-        channels.put("2.CH.name", "sample.channel2.name");
-        channels.put("2.CH.type", "WRITE");
-        channels.put("2.CH.value.type", "BOOLEAN");
-        channels.put("2.CH.DRIVER.modbus.register", "sample.channel2.modbus.register");
-        channels.put("2.CH.DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
-        ((BaseAsset) asset).updated(channels);
-    }
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testGetConfiguration() throws KuraException {
+        assumeTrue(asset instanceof BaseAsset);
 
-    /**
-     * JUnit Callback to be triggered before creating the instance of this suite
-     *
-     * @throws Exception
-     *             if the dependent services are null
-     */
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-        // Wait for OSGi dependencies
-        s_logger.info("Setting Up The Testcase....");
-        try {
-            dependencyLatch.await(10, TimeUnit.SECONDS);
-        } catch (final InterruptedException e) {
-            fail("OSGi dependencies unfulfilled");
+        ComponentConfiguration cfg = ((BaseAsset) asset).getConfiguration();
+
+        assertEquals("AssetTest", cfg.getPid());
+
+        OCD ocd = cfg.getDefinition();
+        assertEquals("org.eclipse.kura.asset", ocd.getId());
+        assertTrue("WireAsset".equals(ocd.getName()) || "AssetMessages.ocdName".equals(ocd.getName()));
+
+        List<AD> ads = ocd.getAD();
+        assertNotNull(ads);
+        assertEquals(10, ads.size()); // description, driver, 8 from BaseChannelDescriptor and StubChannelDescriptor
+
+        assertEquals("asset.desc", ads.get(0).getId());
+        assertEquals("driver.pid", ads.get(1).getId());
+
+        String[] expectedValues = { "#+name", "#+type", "#+value.type", "#unit.id" };
+        for (int i = 0; i < expectedValues.length; i += 2) {
+            String id = ads.get(i * 2 + 2).getId();
+            String id2 = ads.get(i * 2 + 3).getId();
+
+            assertEquals("1.CH" + expectedValues[i], id);
+            assertEquals("2.CH" + expectedValues[i], id2);
         }
-        asset = new BaseAsset();
-        init();
+    }
+
+    public static void bindAsset(Asset asset) {
+        AssetTest.asset = asset;
+
+        synchronized (assetLock) {
+            assetLock.notifyAll();
+        }
+    }
+
+    public static void unbindAsset(Asset asset) {
+        AssetTest.asset = null;
+    }
+
+    public void bindCfgSvc(ConfigurationService cfgSvc) {
+        AssetTest.cfgsvc = cfgSvc;
+        dependencyLatch.countDown();
+    }
+
+    public void unbindCfgSvc(ConfigurationService cfgSvc) {
+        AssetTest.cfgsvc = null;
     }
 
 }

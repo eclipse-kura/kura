@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
+
 package org.eclipse.kura.linux.net.iptables;
 
 import java.io.BufferedReader;
@@ -10,6 +22,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -21,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 public class IptablesConfig {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(IptablesConfig.class);
+    private static final Logger logger = LoggerFactory.getLogger(IptablesConfig.class);
     public static final String FIREWALL_CONFIG_FILE_NAME = "/etc/sysconfig/iptables";
     public static final String FIREWALL_TMP_CONFIG_FILE_NAME = "/tmp/iptables";
 
@@ -36,26 +49,26 @@ public class IptablesConfig {
             "-A INPUT -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j DROP",
             "-A OUTPUT -p icmp -m icmp --icmp-type 0 -m state --state RELATED,ESTABLISHED -j DROP" };
 
-    private final LinkedHashSet<LocalRule> m_localRules;
-    private final LinkedHashSet<PortForwardRule> m_portForwardRules;
-    private final LinkedHashSet<NATRule> m_autoNatRules;
-    private final LinkedHashSet<NATRule> m_natRules;
-    private boolean m_allowIcmp;
+    private final Set<LocalRule> localRules;
+    private final Set<PortForwardRule> portForwardRules;
+    private final Set<NATRule> autoNatRules;
+    private final Set<NATRule> natRules;
+    private boolean allowIcmp;
 
     public IptablesConfig() {
-        this.m_localRules = new LinkedHashSet<LocalRule>();
-        this.m_portForwardRules = new LinkedHashSet<PortForwardRule>();
-        this.m_autoNatRules = new LinkedHashSet<NATRule>();
-        this.m_natRules = new LinkedHashSet<NATRule>();
+        this.localRules = new LinkedHashSet<>();
+        this.portForwardRules = new LinkedHashSet<>();
+        this.autoNatRules = new LinkedHashSet<>();
+        this.natRules = new LinkedHashSet<>();
     }
 
-    public IptablesConfig(LinkedHashSet<LocalRule> localRules, LinkedHashSet<PortForwardRule> portForwardRules,
-            LinkedHashSet<NATRule> autoNatRules, LinkedHashSet<NATRule> natRules, boolean allowIcmp) {
-        this.m_localRules = localRules;
-        this.m_portForwardRules = portForwardRules;
-        this.m_autoNatRules = autoNatRules;
-        this.m_natRules = natRules;
-        this.m_allowIcmp = allowIcmp;
+    public IptablesConfig(Set<LocalRule> localRules, Set<PortForwardRule> portForwardRules, Set<NATRule> autoNatRules,
+            Set<NATRule> natRules, boolean allowIcmp) {
+        this.localRules = localRules;
+        this.portForwardRules = portForwardRules;
+        this.autoNatRules = autoNatRules;
+        this.natRules = natRules;
+        this.allowIcmp = allowIcmp;
     }
 
     /*
@@ -72,7 +85,7 @@ public class IptablesConfig {
             writer.println("*filter");
             writer.println("COMMIT");
         } catch (Exception e) {
-            s_logger.error("clear() :: failed to clear all chains - {}", e);
+            logger.error("clear() :: failed to clear all chains ", e);
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         } finally {
             if (writer != null) {
@@ -83,7 +96,7 @@ public class IptablesConfig {
                 try {
                     fos.close();
                 } catch (IOException e) {
-                    s_logger.error("clear() :: failed to close FileOutputStream - {}", e);
+                    logger.error("clear() :: failed to close FileOutputStream ", e);
                 }
             }
         }
@@ -94,11 +107,8 @@ public class IptablesConfig {
     }
 
     public static void applyBlockPolicy() throws KuraException {
-        FileOutputStream fos = null;
-        PrintWriter writer = null;
-        try {
-            fos = new FileOutputStream(FIREWALL_TMP_CONFIG_FILE_NAME);
-            writer = new PrintWriter(fos);
+        try (FileOutputStream fos = new FileOutputStream(FIREWALL_TMP_CONFIG_FILE_NAME);
+                PrintWriter writer = new PrintWriter(fos)) {
             writer.println("*nat");
             writer.println("COMMIT");
             writer.println("*filter");
@@ -106,20 +116,8 @@ public class IptablesConfig {
             writer.println(ALLOW_ONLY_INCOMING_TO_OUTGOING);
             writer.println("COMMIT");
         } catch (Exception e) {
-            s_logger.error("clear() :: failed to clear all chains - {}", e);
+            logger.error("applyBlockPolicy() :: failed to clear all chains ", e);
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        } finally {
-            if (writer != null) {
-                writer.flush();
-                writer.close();
-            }
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-                    s_logger.error("clear() :: failed to close FileOutputStream - {}", e);
-                }
-            }
         }
         File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
         if (configFile.exists()) {
@@ -132,40 +130,37 @@ public class IptablesConfig {
      */
     public static void save() throws KuraException {
         SafeProcess proc = null;
-        BufferedReader br = null;
-        PrintWriter out = null;
+
         try {
             int status = -1;
             proc = ProcessUtil.exec("iptables-save");
             status = proc.waitFor();
             if (status != 0) {
-                s_logger.error("save() :: failed - {}", LinuxProcessUtil.getInputStreamAsString(proc.getErrorStream()));
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Failed to execute the iptable-save command");
+                logger.error("save() :: failed - {}", LinuxProcessUtil.getInputStreamAsString(proc.getErrorStream()));
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Failed to execute the iptable-save command");
             }
-            String line = null;
-            br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            out = new PrintWriter(FIREWALL_CONFIG_FILE_NAME);
-            while ((line = br.readLine()) != null) {
-                out.println(line);
-            }
-            s_logger.debug("iptablesSave() :: completed!, status={}", status);
+            iptablesSave(proc);
+            logger.debug("iptablesSave() :: completed!, status={}", status);
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
         } finally {
-            if (out != null) {
-                out.flush();
-                out.close();
-            }
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    s_logger.error("iptablesSave() :: failed to close BufferedReader - {}", e);
-                }
-            }
             if (proc != null) {
                 ProcessUtil.destroy(proc);
             }
+        }
+    }
+
+    private static void iptablesSave(SafeProcess proc) throws KuraException {
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr);
+                PrintWriter out = new PrintWriter(FIREWALL_CONFIG_FILE_NAME)) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                out.println(line);
+            }
+        } catch (Exception e) {
+            logger.error("failed to write {} file ", FIREWALL_CONFIG_FILE_NAME, e);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
         }
     }
 
@@ -179,12 +174,12 @@ public class IptablesConfig {
             proc = ProcessUtil.exec("iptables-restore " + filename);
             int status = proc.waitFor();
             if (status != 0) {
-                s_logger.error("restore() :: failed - {}",
+                logger.error("restore() :: failed - {}",
                         LinuxProcessUtil.getInputStreamAsString(proc.getErrorStream()));
                 throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Failed to execute the iptable-restore command");
             }
         } catch (Exception e) {
-            s_logger.error("restore() :: exception={}", e);
+            logger.error("restore() :: Failed to execute the iptable-restore command ", e);
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         } finally {
             if (proc != null) {
@@ -192,7 +187,9 @@ public class IptablesConfig {
             }
             File configFile = new File(filename);
             if (configFile.exists()) {
-                configFile.delete();
+                if (configFile.delete()) {
+                    logger.debug("restore() :: removing the {} file", filename);
+                }
             }
         }
     }
@@ -202,15 +199,12 @@ public class IptablesConfig {
      * into specified temporary file
      */
     public void save(String filename) throws KuraException {
-        FileOutputStream fos = null;
-        PrintWriter writer = null;
-        try {
-            fos = new FileOutputStream(FIREWALL_TMP_CONFIG_FILE_NAME);
-            writer = new PrintWriter(fos);
+        try (FileOutputStream fos = new FileOutputStream(FIREWALL_TMP_CONFIG_FILE_NAME);
+                PrintWriter writer = new PrintWriter(fos)) {
             writer.println("*filter");
             writer.println(ALLOW_ALL_TRAFFIC_TO_LOOPBACK);
             writer.println(ALLOW_ONLY_INCOMING_TO_OUTGOING);
-            if (this.m_allowIcmp) {
+            if (this.allowIcmp) {
                 for (String sAllowIcmp : ALLOW_ICMP) {
                     writer.println(sAllowIcmp);
                 }
@@ -219,13 +213,13 @@ public class IptablesConfig {
                     writer.println(sDoNotAllowIcmp);
                 }
             }
-            if (this.m_localRules != null && !this.m_localRules.isEmpty()) {
-                for (LocalRule lr : this.m_localRules) {
+            if (this.localRules != null && !this.localRules.isEmpty()) {
+                for (LocalRule lr : this.localRules) {
                     writer.println(lr);
                 }
             }
-            if (this.m_portForwardRules != null && !this.m_portForwardRules.isEmpty()) {
-                for (PortForwardRule portForwardRule : this.m_portForwardRules) {
+            if (this.portForwardRules != null && !this.portForwardRules.isEmpty()) {
+                for (PortForwardRule portForwardRule : this.portForwardRules) {
                     List<String> filterForwardChainRules = portForwardRule.getFilterForwardChainRule().toStrings();
                     if (filterForwardChainRules != null && !filterForwardChainRules.isEmpty()) {
                         for (String filterForwardChainRule : filterForwardChainRules) {
@@ -234,8 +228,8 @@ public class IptablesConfig {
                     }
                 }
             }
-            if (this.m_autoNatRules != null && !this.m_autoNatRules.isEmpty()) {
-                for (NATRule autoNatRule : this.m_autoNatRules) {
+            if (this.autoNatRules != null && !this.autoNatRules.isEmpty()) {
+                for (NATRule autoNatRule : this.autoNatRules) {
                     List<String> filterForwardChainRules = autoNatRule.getFilterForwardChainRule().toStrings();
                     if (filterForwardChainRules != null && !filterForwardChainRules.isEmpty()) {
                         for (String filterForwardChainRule : filterForwardChainRules) {
@@ -244,8 +238,8 @@ public class IptablesConfig {
                     }
                 }
             }
-            if (this.m_natRules != null && !this.m_natRules.isEmpty()) {
-                for (NATRule natRule : this.m_natRules) {
+            if (this.natRules != null && !this.natRules.isEmpty()) {
+                for (NATRule natRule : this.natRules) {
                     List<String> filterForwardChainRules = natRule.getFilterForwardChainRule().toStrings();
                     if (filterForwardChainRules != null && !filterForwardChainRules.isEmpty()) {
                         for (String filterForwardChainRule : filterForwardChainRules) {
@@ -256,15 +250,15 @@ public class IptablesConfig {
             }
             writer.println("COMMIT");
             writer.println("*nat");
-            if (this.m_portForwardRules != null && !this.m_portForwardRules.isEmpty()) {
-                for (PortForwardRule portForwardRule : this.m_portForwardRules) {
+            if (this.portForwardRules != null && !this.portForwardRules.isEmpty()) {
+                for (PortForwardRule portForwardRule : this.portForwardRules) {
                     writer.println(portForwardRule.getNatPreroutingChainRule());
                     writer.println(portForwardRule.getNatPostroutingChainRule());
                 }
             }
-            if (this.m_autoNatRules != null && !this.m_autoNatRules.isEmpty()) {
+            if (this.autoNatRules != null && !this.autoNatRules.isEmpty()) {
                 List<NatPostroutingChainRule> appliedNatPostroutingChainRules = new ArrayList<NatPostroutingChainRule>();
-                for (NATRule autoNatRule : this.m_autoNatRules) {
+                for (NATRule autoNatRule : this.autoNatRules) {
                     boolean found = false;
                     NatPostroutingChainRule natPostroutingChainRule = autoNatRule.getNatPostroutingChainRule();
 
@@ -281,27 +275,15 @@ public class IptablesConfig {
                     }
                 }
             }
-            if (this.m_natRules != null && !this.m_natRules.isEmpty()) {
-                for (NATRule natRule : this.m_natRules) {
+            if (this.natRules != null && !this.natRules.isEmpty()) {
+                for (NATRule natRule : this.natRules) {
                     writer.println(natRule.getNatPostroutingChainRule());
                 }
             }
             writer.println("COMMIT");
         } catch (Exception e) {
-            s_logger.error("clear() :: failed to clear all chains - {}", e);
+            logger.error("save() :: failed to clear all chains ", e);
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        } finally {
-            if (writer != null) {
-                writer.flush();
-                writer.close();
-            }
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-                    s_logger.error("clear() :: failed to close FileOutputStream - {}", e);
-                }
-            }
         }
     }
 
@@ -310,30 +292,28 @@ public class IptablesConfig {
      * the iptables configuration file.
      */
     public void restore() throws KuraException {
-        BufferedReader br = null;
-        try {
-            List<NatPreroutingChainRule> natPreroutingChain = new ArrayList<NatPreroutingChainRule>();
-            List<NatPostroutingChainRule> natPostroutingChain = new ArrayList<NatPostroutingChainRule>();
-            List<FilterForwardChainRule> filterForwardChain = new ArrayList<FilterForwardChainRule>();
+        try (FileReader fr = new FileReader(FIREWALL_CONFIG_FILE_NAME); BufferedReader br = new BufferedReader(fr)) {
+            List<NatPreroutingChainRule> natPreroutingChain = new ArrayList<>();
+            List<NatPostroutingChainRule> natPostroutingChain = new ArrayList<>();
+            List<FilterForwardChainRule> filterForwardChain = new ArrayList<>();
 
-            br = new BufferedReader(new FileReader(FIREWALL_CONFIG_FILE_NAME));
             String line = null;
             boolean readingNatTable = false;
             boolean readingFilterTable = false;
             lineloop: while ((line = br.readLine()) != null) {
                 line = line.trim();
                 // skip any predefined lines or comment lines
-                if (line.equals("")) {
+                if ("".equals(line)) {
                     continue;
                 }
                 if (line.startsWith("#") || line.startsWith(":")) {
                     continue;
                 }
-                if (line.equals("*nat")) {
+                if ("*nat".equals(line)) {
                     readingNatTable = true;
-                } else if (line.equals("*filter")) {
+                } else if ("*filter".equals(line)) {
                     readingFilterTable = true;
-                } else if (line.equals("COMMIT")) {
+                } else if ("COMMIT".equals(line)) {
                     if (readingNatTable) {
                         readingNatTable = false;
                     }
@@ -353,24 +333,24 @@ public class IptablesConfig {
                     if (ALLOW_ONLY_INCOMING_TO_OUTGOING.equals(line)) {
                         continue;
                     }
-                    for (String allowIcmp : ALLOW_ICMP) {
-                        if (allowIcmp.equals(line)) {
-                            this.m_allowIcmp = true;
+                    for (String allowIcmpProto : ALLOW_ICMP) {
+                        if (allowIcmpProto.equals(line)) {
+                            this.allowIcmp = true;
                             continue lineloop;
                         }
                     }
-                    for (String allowIcmp : DO_NOT_ALLOW_ICMP) {
-                        if (allowIcmp.equals(line)) {
-                            this.m_allowIcmp = false;
+                    for (String allowIcmpProto : DO_NOT_ALLOW_ICMP) {
+                        if (allowIcmpProto.equals(line)) {
+                            this.allowIcmp = false;
                             continue lineloop;
                         }
                     }
                     try {
                         LocalRule localRule = new LocalRule(line);
-                        s_logger.debug("parseFirewallConfigurationFile() :: Adding local rule: {}", localRule);
-                        this.m_localRules.add(localRule);
+                        logger.debug("parseFirewallConfigurationFile() :: Adding local rule: {}", localRule);
+                        this.localRules.add(localRule);
                     } catch (KuraException e) {
-                        s_logger.error("Failed to parse Local Rule: {} - {}", line, e);
+                        logger.error("Failed to parse Local Rule: {} ", line, e);
                     }
                 }
             }
@@ -410,8 +390,8 @@ public class IptablesConfig {
                 PortForwardRule portForwardRule = new PortForwardRule(inboundIfaceName, outboundIfaceName, address,
                         protocol, inPort, outPort, masquerade, permittedNetwork, permittedNetworkMask, permittedMac,
                         sport);
-                s_logger.debug("Adding port forward rule: {}", portForwardRule);
-                this.m_portForwardRules.add(portForwardRule);
+                logger.debug("Adding port forward rule: {}", portForwardRule);
+                this.portForwardRules.add(portForwardRule);
             }
 
             for (NatPostroutingChainRule natPostroutingChainRule : natPostroutingChain) {
@@ -454,15 +434,15 @@ public class IptablesConfig {
                         for (FilterForwardChainRule filterForwardChainRule : filterForwardChain) {
                             if (natPostroutingChainRule.isMatchingForwardChainRule(filterForwardChainRule)) {
                                 String sourceInterface = filterForwardChainRule.getInputInterface();
-                                s_logger.debug("parseFirewallConfigurationFile() :: Parsed NAT rule with"
+                                logger.debug("parseFirewallConfigurationFile() :: Parsed NAT rule with"
                                         + "   sourceInterface: " + sourceInterface + "   destinationInterface: "
                                         + destinationInterface + "   masquerade: " + masquerade + "	protocol: "
                                         + protocol + "	source network/host: " + source + "	destination network/host "
                                         + destination);
                                 NATRule natRule = new NATRule(sourceInterface, destinationInterface, protocol, source,
                                         destination, masquerade);
-                                s_logger.debug("parseFirewallConfigurationFile() :: Adding NAT rule {}", natRule);
-                                this.m_natRules.add(natRule);
+                                logger.debug("parseFirewallConfigurationFile() :: Adding NAT rule {}", natRule);
+                                this.natRules.add(natRule);
                             }
                         }
                     }
@@ -472,49 +452,39 @@ public class IptablesConfig {
                     for (FilterForwardChainRule filterForwardChainRule : filterForwardChain) {
                         if (natPostroutingChainRule.isMatchingForwardChainRule(filterForwardChainRule)) {
                             String sourceInterface = filterForwardChainRule.getInputInterface();
-                            s_logger.debug("parseFirewallConfigurationFile() :: Parsed auto NAT rule with"
+                            logger.debug("parseFirewallConfigurationFile() :: Parsed auto NAT rule with"
                                     + "   sourceInterface: " + sourceInterface + "   destinationInterface: "
                                     + destinationInterface + "   masquerade: " + masquerade);
 
                             NATRule natRule = new NATRule(sourceInterface, destinationInterface, masquerade);
-                            s_logger.debug("parseFirewallConfigurationFile() :: Adding auto NAT rule {}", natRule);
-                            this.m_autoNatRules.add(natRule);
+                            logger.debug("parseFirewallConfigurationFile() :: Adding auto NAT rule {}", natRule);
+                            this.autoNatRules.add(natRule);
                         }
                     }
                 }
             }
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        } finally {
-            // close
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-                }
-                br = null;
-            }
         }
     }
 
-    public LinkedHashSet<LocalRule> getLocalRules() {
-        return this.m_localRules;
+    public Set<LocalRule> getLocalRules() {
+        return this.localRules;
     }
 
-    public LinkedHashSet<PortForwardRule> getPortForwardRules() {
-        return this.m_portForwardRules;
+    public Set<PortForwardRule> getPortForwardRules() {
+        return this.portForwardRules;
     }
 
-    public LinkedHashSet<NATRule> getAutoNatRules() {
-        return this.m_autoNatRules;
+    public Set<NATRule> getAutoNatRules() {
+        return this.autoNatRules;
     }
 
-    public LinkedHashSet<NATRule> getNatRules() {
-        return this.m_natRules;
+    public Set<NATRule> getNatRules() {
+        return this.natRules;
     }
 
     public boolean allowIcmp() {
-        return this.m_allowIcmp;
+        return this.allowIcmp;
     }
 }

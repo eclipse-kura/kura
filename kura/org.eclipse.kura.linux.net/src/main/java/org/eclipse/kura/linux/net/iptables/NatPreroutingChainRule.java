@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,33 +19,33 @@ import org.slf4j.LoggerFactory;
 
 public class NatPreroutingChainRule {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(NatPreroutingChainRule.class);
+    private static final Logger logger = LoggerFactory.getLogger(NatPreroutingChainRule.class);
 
-    private String m_rule;
-    private String m_inputInterface;
-    private String m_protocol;
-    private int m_externalPort;
-    private int m_internalPort;
-    private int m_srcPortFirst;
-    private int m_srcPortLast;
-    private String m_dstIpAddress;
-    private String m_permittedNetwork;
-    private int m_permittedNetworkMask;
-    private String m_permittedMacAddress;
+    private String rule;
+    private String inputInterface;
+    private String protocol;
+    private int externalPort;
+    private int internalPort;
+    private int srcPortFirst;
+    private int srcPortLast;
+    private String dstIpAddress;
+    private String permittedNetwork;
+    private int permittedNetworkMask;
+    private String permittedMacAddress;
 
     public NatPreroutingChainRule(String inputInterface, String protocol, int externalPort, int internalPort,
             int srcPortFirst, int srcPortLast, String dstIpAddress, String permittedNetwork, int permittedNetworkMask,
             String permittedMacAddress) {
-        this.m_inputInterface = inputInterface;
-        this.m_protocol = protocol;
-        this.m_externalPort = externalPort;
-        this.m_internalPort = internalPort;
-        this.m_srcPortFirst = srcPortFirst;
-        this.m_srcPortLast = srcPortLast;
-        this.m_dstIpAddress = dstIpAddress;
-        this.m_permittedNetwork = permittedNetwork;
-        this.m_permittedNetworkMask = permittedNetworkMask;
-        this.m_permittedMacAddress = permittedMacAddress;
+        this.inputInterface = inputInterface;
+        this.protocol = protocol;
+        this.externalPort = externalPort;
+        this.internalPort = internalPort;
+        this.srcPortFirst = srcPortFirst;
+        this.srcPortLast = srcPortLast;
+        this.dstIpAddress = dstIpAddress;
+        this.permittedNetwork = permittedNetwork;
+        this.permittedNetworkMask = permittedNetworkMask;
+        this.permittedMacAddress = permittedMacAddress;
     }
 
     public NatPreroutingChainRule(String rule) throws KuraException {
@@ -53,30 +53,30 @@ public class NatPreroutingChainRule {
             String[] aRuleTokens = rule.split(" ");
             for (int i = 0; i < aRuleTokens.length; i++) {
                 if ("-i".equals(aRuleTokens[i])) {
-                    this.m_inputInterface = aRuleTokens[++i];
+                    this.inputInterface = aRuleTokens[++i];
                 } else if ("-p".equals(aRuleTokens[i])) {
-                    this.m_protocol = aRuleTokens[++i];
+                    this.protocol = aRuleTokens[++i];
                 } else if ("--dport".equals(aRuleTokens[i])) {
-                    this.m_externalPort = Integer.parseInt(aRuleTokens[++i]);
+                    this.externalPort = Integer.parseInt(aRuleTokens[++i]);
                 } else if ("--sport".equals(aRuleTokens[i])) {
                     if (aRuleTokens[i + 1].indexOf(':') > 0) {
-                        this.m_srcPortFirst = Integer.parseInt(aRuleTokens[i + 1].split(":")[0]);
-                        this.m_srcPortLast = Integer.parseInt(aRuleTokens[++i].split(":")[1]);
+                        this.srcPortFirst = Integer.parseInt(aRuleTokens[i + 1].split(":")[0]);
+                        this.srcPortLast = Integer.parseInt(aRuleTokens[++i].split(":")[1]);
                     } else {
-                        this.m_srcPortFirst = Integer.parseInt(aRuleTokens[++i]);
-                        this.m_srcPortLast = this.m_srcPortFirst;
+                        this.srcPortFirst = Integer.parseInt(aRuleTokens[++i]);
+                        this.srcPortLast = this.srcPortFirst;
                     }
                 } else if ("--to-destination".equals(aRuleTokens[i])) {
-                    this.m_dstIpAddress = aRuleTokens[i + 1].split(":")[0];
-                    this.m_internalPort = Integer.parseInt(aRuleTokens[++i].split(":")[1]);
+                    this.dstIpAddress = aRuleTokens[i + 1].split(":")[0];
+                    this.internalPort = Integer.parseInt(aRuleTokens[++i].split(":")[1]);
                 } else if ("-s".equals(aRuleTokens[i])) {
-                    this.m_permittedNetwork = aRuleTokens[i + 1].split("/")[0];
-                    this.m_permittedNetworkMask = Integer.parseInt(aRuleTokens[++i].split("/")[1]);
+                    this.permittedNetwork = aRuleTokens[i + 1].split("/")[0];
+                    this.permittedNetworkMask = Integer.parseInt(aRuleTokens[++i].split("/")[1]);
                 } else if ("--mac-source".equals(aRuleTokens[i])) {
-                    this.m_permittedMacAddress = aRuleTokens[++i];
+                    this.permittedMacAddress = aRuleTokens[++i];
                 }
             }
-            this.m_rule = new StringBuilder("iptables -t nat ").append(rule).toString();
+            this.rule = new StringBuilder("iptables -t nat ").append(rule).toString();
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
@@ -85,19 +85,19 @@ public class NatPreroutingChainRule {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("-A PREROUTING");
-        if (this.m_permittedNetwork != null && !this.m_permittedNetwork.equals("0.0.0.0")) {
-            sb.append(" -s ").append(this.m_permittedNetwork).append('/').append(this.m_permittedNetworkMask);
+        if (this.permittedNetwork != null && !this.permittedNetwork.equals("0.0.0.0")) {
+            sb.append(" -s ").append(this.permittedNetwork).append('/').append(this.permittedNetworkMask);
         }
-        sb.append(" -i ").append(this.m_inputInterface).append(" -p ").append(this.m_protocol);
-        if (this.m_permittedMacAddress != null) {
-            sb.append(" -m mac --mac-source ").append(this.m_permittedMacAddress);
+        sb.append(" -i ").append(this.inputInterface).append(" -p ").append(this.protocol);
+        if (this.permittedMacAddress != null) {
+            sb.append(" -m mac --mac-source ").append(this.permittedMacAddress);
         }
-        sb.append(" -m ").append(this.m_protocol);
-        if (this.m_srcPortFirst > 0 && this.m_srcPortLast >= this.m_srcPortFirst) {
-            sb.append(" --sport ").append(this.m_srcPortFirst).append(':').append(this.m_srcPortLast);
+        sb.append(" -m ").append(this.protocol);
+        if (this.srcPortFirst > 0 && this.srcPortLast >= this.srcPortFirst) {
+            sb.append(" --sport ").append(this.srcPortFirst).append(':').append(this.srcPortLast);
         }
-        sb.append(" --dport ").append(this.m_externalPort);
-        sb.append(" -j DNAT --to-destination ").append(this.m_dstIpAddress).append(':').append(this.m_internalPort);
+        sb.append(" --dport ").append(this.externalPort);
+        sb.append(" -j DNAT --to-destination ").append(this.dstIpAddress).append(':').append(this.internalPort);
         return sb.toString();
     }
 
@@ -105,57 +105,57 @@ public class NatPreroutingChainRule {
     public int hashCode() {
         final int prime = 71;
         int result = 1;
-        result = prime * result + (this.m_rule == null ? 0 : this.m_rule.hashCode());
-        result = prime * result + (this.m_inputInterface == null ? 0 : this.m_inputInterface.hashCode());
-        result = prime * result + (this.m_protocol == null ? 0 : this.m_protocol.hashCode());
-        result = prime * result + this.m_externalPort;
-        result = prime * result + this.m_internalPort;
-        result = prime * result + this.m_srcPortFirst;
-        result = prime * result + this.m_srcPortLast;
-        result = prime * result + (this.m_dstIpAddress == null ? 0 : this.m_dstIpAddress.hashCode());
-        result = prime * result + (this.m_permittedNetwork == null ? 0 : this.m_permittedNetwork.hashCode());
-        result = prime * result + this.m_permittedNetworkMask;
-        result = prime * result + (this.m_permittedMacAddress == null ? 0 : this.m_permittedMacAddress.hashCode());
+        result = prime * result + (this.rule == null ? 0 : this.rule.hashCode());
+        result = prime * result + (this.inputInterface == null ? 0 : this.inputInterface.hashCode());
+        result = prime * result + (this.protocol == null ? 0 : this.protocol.hashCode());
+        result = prime * result + this.externalPort;
+        result = prime * result + this.internalPort;
+        result = prime * result + this.srcPortFirst;
+        result = prime * result + this.srcPortLast;
+        result = prime * result + (this.dstIpAddress == null ? 0 : this.dstIpAddress.hashCode());
+        result = prime * result + (this.permittedNetwork == null ? 0 : this.permittedNetwork.hashCode());
+        result = prime * result + this.permittedNetworkMask;
+        result = prime * result + (this.permittedMacAddress == null ? 0 : this.permittedMacAddress.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object o) {
-        NatPreroutingChainRule other = null;
+        NatPreroutingChainRule other;
         if (o instanceof NatPreroutingChainRule) {
             other = (NatPreroutingChainRule) o;
         } else if (o instanceof String) {
             try {
                 other = new NatPreroutingChainRule((String) o);
             } catch (KuraException e) {
-                s_logger.error("equals() :: failed to parse NatPreroutingChainRule - {}", e);
+                logger.error("equals() :: failed to parse NatPreroutingChainRule ", e);
                 return false;
             }
         } else {
             return false;
         }
 
-        if (!compareObjects(this.m_rule, other.m_rule)) {
+        if (!compareObjects(this.rule, other.rule)) {
             return false;
-        } else if (!compareObjects(this.m_inputInterface, other.m_inputInterface)) {
+        } else if (!compareObjects(this.inputInterface, other.inputInterface)) {
             return false;
-        } else if (!compareObjects(this.m_protocol, other.m_protocol)) {
+        } else if (!compareObjects(this.protocol, other.protocol)) {
             return false;
-        } else if (this.m_externalPort != other.m_externalPort) {
+        } else if (this.externalPort != other.externalPort) {
             return false;
-        } else if (this.m_internalPort != other.m_internalPort) {
+        } else if (this.internalPort != other.internalPort) {
             return false;
-        } else if (this.m_srcPortFirst != other.m_srcPortFirst) {
+        } else if (this.srcPortFirst != other.srcPortFirst) {
             return false;
-        } else if (this.m_srcPortLast != other.m_srcPortLast) {
+        } else if (this.srcPortLast != other.srcPortLast) {
             return false;
-        } else if (!compareObjects(this.m_dstIpAddress, other.m_dstIpAddress)) {
+        } else if (!compareObjects(this.dstIpAddress, other.dstIpAddress)) {
             return false;
-        } else if (!compareObjects(this.m_permittedNetwork, other.m_permittedNetwork)) {
+        } else if (!compareObjects(this.permittedNetwork, other.permittedNetwork)) {
             return false;
-        } else if (this.m_permittedNetworkMask != other.m_permittedNetworkMask) {
+        } else if (this.permittedNetworkMask != other.permittedNetworkMask) {
             return false;
-        } else if (!compareObjects(this.m_permittedMacAddress, other.m_permittedMacAddress)) {
+        } else if (!compareObjects(this.permittedMacAddress, other.permittedMacAddress)) {
             return false;
         }
         return true;
@@ -171,42 +171,42 @@ public class NatPreroutingChainRule {
     }
 
     public String getInputInterface() {
-        return this.m_inputInterface;
+        return this.inputInterface;
     }
 
     public String getProtocol() {
-        return this.m_protocol;
+        return this.protocol;
     }
 
     public int getExternalPort() {
-        return this.m_externalPort;
+        return this.externalPort;
     }
 
     public int getInternalPort() {
-        return this.m_internalPort;
+        return this.internalPort;
     }
 
     public int getSrcPortFirst() {
-        return this.m_srcPortFirst;
+        return this.srcPortFirst;
     }
 
     public int getSrcPortLast() {
-        return this.m_srcPortLast;
+        return this.srcPortLast;
     }
 
     public String getDstIpAddress() {
-        return this.m_dstIpAddress;
+        return this.dstIpAddress;
     }
 
     public String getPermittedMacAddress() {
-        return this.m_permittedMacAddress;
+        return this.permittedMacAddress;
     }
 
     public String getPermittedNetwork() {
-        return this.m_permittedNetwork;
+        return this.permittedNetwork;
     }
 
     public int getPermittedNetworkMask() {
-        return this.m_permittedNetworkMask;
+        return this.permittedNetworkMask;
     }
 }

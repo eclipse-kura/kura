@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2017 Red Hat Inc
+
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+	<OCD
+		id="org.eclipse.kura.broker.artemis.xml.BrokerInstance"
+		name="ActiveMQ Artemis Broker"
+		description="ActiveMQ Artemis Broker instance, configured using XML">
+
+		<AD
+			id="enabled"
+			name="Enabled"
+			type="Boolean"
+			cardinality="0"
+			required="true"
+			default="false"
+			description="Enables the broker instance">
+		</AD>
+
+		<AD
+			id="brokerXml"
+			name="Broker XML"
+			description="Broker XML configuration. An empty broker configuration will disable the broker.|TextArea"
+			type="String"
+			cardinality="1"
+			required="false"
+			default="" />
+
+		<AD
+			id="requiredProtocols"
+			name="Required protocols"
+			description="A comma seperated list of all required protocol factories (e.g. AMQP or MQTT)"
+			type="String"
+			cardinality="-1"
+			required="false"
+			default="MQTT" />
+
+		<AD
+			id="users"
+			name="User configuration"
+			description="User configuration in the format: user=password|role1,role2,...|TextArea"
+			type="String"
+			cardinality="1"
+			required="true" />
+
+		<AD
+			id="defaultUser"
+			name="Default user name"
+			description="The name of the default user"
+			type="String"
+			cardinality="1"
+			required="false" />
+
+	</OCD>
+
+	<Designate pid="org.eclipse.kura.broker.artemis.xml.BrokerInstance">
+		<Object ocdref="org.eclipse.kura.broker.artemis.xml.BrokerInstance" />
+	</Designate>
+</MetaData>

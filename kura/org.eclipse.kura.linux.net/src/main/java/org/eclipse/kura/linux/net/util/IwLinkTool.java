@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 public class IwLinkTool implements LinkTool {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(IwLinkTool.class);
+    private static final Logger logger = LoggerFactory.getLogger(IwLinkTool.class);
 
     private String interfaceName = null;
     private boolean linkDetected = false;
@@ -48,7 +48,7 @@ public class IwLinkTool implements LinkTool {
         try {
             proc = ProcessUtil.exec(formIwLinkCommand(this.interfaceName));
             if (proc.waitFor() != 0) {
-                s_logger.warn("The iw returned with exit value {}", proc.exitValue());
+                logger.warn("The iw returned with exit value {}", proc.exitValue());
                 return false;
             }
             return parse(proc);
@@ -98,7 +98,7 @@ public class IwLinkTool implements LinkTool {
                     this.linkDetected = true;
                 }
             } catch (NumberFormatException e) {
-                s_logger.debug("Could not parse '{}' as int in line: {}", parts[1], line);
+                logger.debug("Could not parse '{}' as int in line: {}", parts[1], line);
                 return false;
             }
         } else if (line.contains("tx bitrate:")) {
@@ -111,7 +111,7 @@ public class IwLinkTool implements LinkTool {
                 }
                 this.speed = (int) Math.round(bitrate);
             } catch (NumberFormatException e) {
-                s_logger.debug("Could not parse '{}' as double in line: {}", parts[2], line);
+                logger.debug("Could not parse '{}' as double in line: {}", parts[2], line);
                 return false;
             }
         }

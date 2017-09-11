@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 public class DhcpClientManager {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(DhcpClientManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(DhcpClientManager.class);
 
     private static DhcpClientTool dhcpClientTool = DhcpClientTool.NONE;
     private static final String PID_FILE_DIR = "/var/run";
@@ -72,10 +72,10 @@ public class DhcpClientManager {
             }
 
             if (pid >= 0) {
-                s_logger.info("enable() :: disabling DHCP client for {}", interfaceName);
+                logger.info("enable() :: disabling DHCP client for {}", interfaceName);
                 disable(interfaceName);
             }
-            s_logger.info("enable() :: Starting DHCP client for {}", interfaceName);
+            logger.info("enable() :: Starting DHCP client for {}", interfaceName);
             LinuxProcessUtil.start(formCommand(interfaceName, true, true, true), true);
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -91,7 +91,7 @@ public class DhcpClientManager {
                 pid = LinuxProcessUtil.getPid(DhcpClientTool.UDHCPC.getValue(), new String[] { interfaceName });
             }
             if (pid > -1) {
-                s_logger.info("disable() :: killing DHCP client for {}", interfaceName);
+                logger.info("disable() :: killing DHCP client for {}", interfaceName);
                 if (LinuxProcessUtil.kill(pid)) {
                     removePidFile(interfaceName);
                 } else {
@@ -111,11 +111,13 @@ public class DhcpClientManager {
         }
     }
 
-    private static void removePidFile(String interfaceName) {
+    private static boolean removePidFile(String interfaceName) {
+        boolean ret = true;
         File pidFile = new File(getPidFilename(interfaceName));
         if (pidFile.exists()) {
-            pidFile.delete();
+            ret = pidFile.delete();
         }
+        return ret;
     }
 
     private static String getPidFilename(String interfaceName) {
@@ -190,7 +192,7 @@ public class DhcpClientManager {
 
     private static String formLeasesOption(String interfaceName) {
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("-lf ");
         sb.append(LEASES_DIR);
         sb.append('/');

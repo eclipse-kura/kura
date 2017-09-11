@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,7 +13,6 @@ package org.eclipse.kura.linux.net;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -28,16 +27,16 @@ import org.slf4j.LoggerFactory;
 
 public class ConnectionInfoImpl implements ConnectionInfo {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(ConnectionInfo.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConnectionInfo.class);
     /**
      * The interface name associated with the connection information
      */
-    private String m_ifaceName = null;
+    private String ifaceName = null;
 
     /**
      * The properties representing the connection information
      */
-    private Properties m_props = null;
+    private Properties props = null;
 
     /**
      * Creates a ConnectionInfo instance with the previously persisted connection properties if they existed
@@ -48,26 +47,15 @@ public class ConnectionInfoImpl implements ConnectionInfo {
      */
     public ConnectionInfoImpl(String ifaceName) throws KuraException {
 
-        this.m_ifaceName = ifaceName;
-        this.m_props = new Properties();
+        this.ifaceName = ifaceName;
+        this.props = new Properties();
 
-        FileInputStream fis = null;
-        try {
-            // FIXME:MC Where is this file stored?
-            File coninfoFile = new File(formConinfoFileName(ifaceName));
-            if (coninfoFile.exists()) {
-                fis = new FileInputStream(coninfoFile);
-                this.m_props.load(fis);
-            }
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing FileInputStream!", ex);
-                }
+        File coninfoFile = new File(formConinfoFileName(ifaceName));
+        if (coninfoFile.exists()) {
+            try (FileInputStream fis = new FileInputStream(coninfoFile)) {
+                this.props.load(fis);
+            } catch (Exception e) {
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, e);
             }
         }
     }
@@ -75,12 +63,12 @@ public class ConnectionInfoImpl implements ConnectionInfo {
     @Override
     public IP4Address getIpAddress() {
         IP4Address ipAddress = null;
-        String sIpAddress = this.m_props.getProperty("IPADDR");
+        String sIpAddress = this.props.getProperty("IPADDR");
         if (sIpAddress != null) {
             try {
                 ipAddress = (IP4Address) IPAddress.parseHostAddress(sIpAddress);
             } catch (Exception e) {
-                s_logger.error("Error parsing IP address!", e);
+                logger.error("Error parsing IP address!", e);
             }
         }
 
@@ -96,12 +84,12 @@ public class ConnectionInfoImpl implements ConnectionInfo {
     public IP4Address getGateway() {
 
         IP4Address gateway = null;
-        String sGateway = this.m_props.getProperty("GATEWAY");
+        String sGateway = this.props.getProperty("GATEWAY");
         if (sGateway != null) {
             try {
                 gateway = (IP4Address) IPAddress.parseHostAddress(sGateway);
             } catch (Exception e) {
-                s_logger.error("Error parsing gateway address!", e);
+                logger.error("Error parsing gateway address!", e);
             }
         }
 
@@ -117,16 +105,16 @@ public class ConnectionInfoImpl implements ConnectionInfo {
     @Override
     public List<IP4Address> getDnsServers() {
 
-        List<IP4Address> lDnsServers = new ArrayList<IP4Address>(2);
+        List<IP4Address> lDnsServers = new ArrayList<>(2);
 
         for (int i = 1; i <= 2; i++) {
-            String sDns = this.m_props.getProperty("DNS" + i);
+            String sDns = this.props.getProperty("DNS" + i);
             if (sDns != null) {
                 try {
                     IP4Address dns = (IP4Address) IPAddress.parseHostAddress(sDns);
                     lDnsServers.add(dns);
                 } catch (Exception e) {
-                    s_logger.error("Error parsing DNS addresses!", e);
+                    logger.error("Error parsing DNS addresses!", e);
                 }
             }
         }
@@ -141,11 +129,11 @@ public class ConnectionInfoImpl implements ConnectionInfo {
      */
     @Override
     public String getIfaceName() {
-        return this.m_ifaceName;
+        return this.ifaceName;
     }
 
     private static String formConinfoFileName(String ifaceName) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("/tmp/.kura/coninfo-");
         sb.append(ifaceName);
 

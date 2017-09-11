@@ -50,6 +50,10 @@
                         -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
                         -Ddpa.configuration=/tmp/kura/dpa.properties
                         -Dlog4j.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
+<!--
+                       -Dosgi.noShutdown=true
+                    <appArgLine>-consoleLog -console 1450</appArgLine>
+-->
                     <bundleStartLevel>
                         <bundle>
                             <id>org.eclipse.equinox.ds</id>
@@ -188,6 +192,14 @@
                         </bundle>
                     </bundleStartLevel>
                     <dependencies>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.kura.core</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.console</artifactId>
+                        </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.ds</artifactId>

@@ -378,49 +378,45 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                         if (netInterfaceConfig != null) {
                             newNetConfigs = getNetConfigs(netInterfaceConfig);
                         } else {
-                            if (oldNetConfigs != null && pppService != null) {
-                                if (!ifaceName.equals(pppService.getIfaceName())) {
-                                    StringBuilder key = new StringBuilder().append("net.interface.").append(ifaceName)
-                                            .append(".config.ip4.status");
-                                    String statusString = KuranetConfig.getProperty(key.toString());
-                                    NetInterfaceStatus netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
-                                    if (statusString != null && !statusString.isEmpty()) {
-                                        netInterfaceStatus = NetInterfaceStatus.valueOf(statusString);
-                                    }
+                            if (oldNetConfigs != null && pppService != null
+                                    && !ifaceName.equals(pppService.getIfaceName())) {
+                                StringBuilder key = new StringBuilder().append("net.interface.").append(ifaceName)
+                                        .append(".config.ip4.status");
+                                String statusString = KuranetConfig.getProperty(key.toString());
+                                NetInterfaceStatus netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
+                                if (statusString != null && !statusString.isEmpty()) {
+                                    netInterfaceStatus = NetInterfaceStatus.valueOf(statusString);
+                                }
 
-                                    newNetConfigs = oldNetConfigs;
-                                    oldNetConfigs = null;
-                                    try {
-                                        setInterfaceNumber(ifaceName, newNetConfigs);
-                                        setNetInterfaceStatus(netInterfaceStatus, newNetConfigs);
-                                    } catch (NumberFormatException e) {
-                                        logger.error("failed to set new interface number ", e);
-                                    }
+                                newNetConfigs = oldNetConfigs;
+                                oldNetConfigs = null;
+                                try {
+                                    setInterfaceNumber(ifaceName, newNetConfigs);
+                                    setNetInterfaceStatus(netInterfaceStatus, newNetConfigs);
+                                } catch (NumberFormatException e) {
+                                    logger.error("failed to set new interface number ", e);
                                 }
                             }
                         }
 
                         if (oldNetConfigs == null || !isConfigsEqual(oldNetConfigs, newNetConfigs)) {
-                            logger.info("new configuration for cellular modem on usb port {} netinterface {}",
-                                    usbPort, ifaceName);
+                            logger.info("new configuration for cellular modem on usb port {} netinterface {}", usbPort,
+                                    ifaceName);
                             this.networkConfig = newNetworkConfig;
 
                             if (pppService != null) {
-                                PppState pppState = pppService.getPppState();
-                                if (pppState == PppState.CONNECTED || pppState == PppState.IN_PROGRESS) {
+                                PppState pppSt = pppService.getPppState();
+                                if (pppSt == PppState.CONNECTED || pppSt == PppState.IN_PROGRESS) {
                                     logger.info("disconnecting " + pppService.getIfaceName());
                                     pppService.disconnect();
                                 }
                                 PppFactory.releasePppService(pppService.getIfaceName());
                             }
 
-                            if (modem.isGpsEnabled()) {
-                                if (!disableModemGps(modem)) {
-                                    logger.error(
-                                            "processNetworkConfigurationChangeEvent() :: Failed to disable modem GPS");
-                                    modem.reset();
-                                    this.resetTimerStart = System.currentTimeMillis();
-                                }
+                            if (modem.isGpsEnabled() && !disableModemGps(modem)) {
+                                logger.error("processNetworkConfigurationChangeEvent() :: Failed to disable modem GPS");
+                                modem.reset();
+                                this.resetTimerStart = System.currentTimeMillis();
                             }
 
                             modem.setConfiguration(newNetConfigs);
@@ -456,11 +452,10 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                                     }
                                 }
 
-                                if (modem.isGpsSupported()) {
-                                    if (isGpsEnabledInConfig(newNetConfigs) && !modem.isGpsEnabled()) {
-                                        modem.enableGps();
-                                        postModemGpsEvent(modem, true);
-                                    }
+                                if (modem.isGpsSupported() && isGpsEnabledInConfig(newNetConfigs)
+                                        && !modem.isGpsEnabled()) {
+                                    modem.enableGps();
+                                    postModemGpsEvent(modem, true);
                                 }
                             }
                         }
@@ -473,8 +468,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     }
 
     private boolean isConfigsEqual(List<NetConfig> oldConfig, List<NetConfig> newConfig) {
-        if (oldConfig == null && newConfig == null || oldConfig == null && newConfig != null
-                || oldConfig != null && newConfig == null) {
+        if (oldConfig == null || newConfig == null) {
             return false;
         }
         boolean ret = false;
@@ -600,19 +594,19 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                 }
 
                 IModemLinkService pppService = null;
-                PppState pppState = null;
+                PppState pppSt = null;
                 NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(modem.getConfiguration());
                 try {
                     String ifaceName = this.networkService.getModemPppPort(modem.getModemDevice());
                     if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN && ifaceName != null) {
                         pppService = PppFactory.obtainPppService(ifaceName, modem.getDataPort());
-                        pppState = pppService.getPppState();
-                        if (this.pppState != pppState) {
+                        pppSt = pppService.getPppState();
+                        if (this.pppState != pppSt) {
                             logger.info("monitor() :: previous PppState={}", this.pppState);
-                            logger.info("monitor() :: current PppState={}", pppState);
+                            logger.info("monitor() :: current PppState={}", pppSt);
                         }
 
-                        if (pppState == PppState.NOT_CONNECTED) {
+                        if (pppSt == PppState.NOT_CONNECTED) {
                             boolean checkIfSimCardReady = false;
                             List<ModemTechnologyType> modemTechnologyTypes = modem.getTechnologyTypes();
                             for (ModemTechnologyType modemTechnologyType : modemTechnologyTypes) {
@@ -641,7 +635,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                                     this.resetTimerStart = System.currentTimeMillis();
                                 }
                             }
-                        } else if (pppState == PppState.IN_PROGRESS) {
+                        } else if (pppSt == PppState.IN_PROGRESS) {
                             long modemResetTout = getModemResetTimeoutMsec(ifaceName, modem.getConfiguration());
                             if (modemResetTout > 0) {
                                 long timeElapsed = System.currentTimeMillis() - this.resetTimerStart;
@@ -653,7 +647,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                                         logger.error("monitor() :: Failed to disable modem GPS");
                                     }
                                     modem.reset();
-                                    pppState = PppState.NOT_CONNECTED;
+                                    pppSt = PppState.NOT_CONNECTED;
                                     this.resetTimerStart = System.currentTimeMillis();
                                 } else {
                                     int timeTillReset = (int) (modemResetTout - timeElapsed) / 1000;
@@ -662,48 +656,42 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                                             timeTillReset);
                                 }
                             }
-                        } else if (pppState == PppState.CONNECTED) {
+                        } else if (pppSt == PppState.CONNECTED) {
                             this.resetTimerStart = System.currentTimeMillis();
                         }
 
-                        this.pppState = pppState;
+                        this.pppState = pppSt;
                         ConnectionInfo connInfo = new ConnectionInfoImpl(ifaceName);
                         InterfaceState interfaceState = new InterfaceState(ifaceName,
-                                LinuxNetworkUtil.hasAddress(ifaceName), pppState == PppState.CONNECTED,
+                                LinuxNetworkUtil.hasAddress(ifaceName), pppSt == PppState.CONNECTED,
                                 connInfo.getIpAddress());
                         newInterfaceStatuses.put(ifaceName, interfaceState);
                     }
 
-                    if (modem.isGpsSupported()) {
-                        if (isGpsEnabledInConfig(modem.getConfiguration())) {
-                            if (modem instanceof HspaCellularModem) {
-                                if (!modem.isGpsEnabled()) {
-                                    modem.enableGps();
-                                }
-                            }
-                            postModemGpsEvent(modem, true);
+                    if (modem.isGpsSupported() && isGpsEnabledInConfig(modem.getConfiguration())) {
+                        if (modem instanceof HspaCellularModem && !modem.isGpsEnabled()) {
+                            modem.enableGps();
                         }
+                        postModemGpsEvent(modem, true);
                     }
                 } catch (Exception e) {
                     logger.error("monitor() :: Exception", e);
-                    if (pppService != null && pppState != null) {
+                    if (pppService != null && pppSt != null) {
                         try {
                             logger.info("monitor() :: Exception :: PPPD disconnect");
                             pppService.disconnect();
                         } catch (KuraException e1) {
                             logger.error("monitor() :: Exception while disconnect", e1);
                         }
-                        this.pppState = pppState;
+                        this.pppState = pppSt;
                     }
 
-                    if (modem.isGpsEnabled()) {
-                        try {
-                            if (!disableModemGps(modem)) {
-                                logger.error("monitor() :: Failed to disable modem GPS");
-                            }
-                        } catch (KuraException e1) {
-                            logger.error("monitor() :: Exception disableModemGps", e1);
+                    try {
+                        if (modem.isGpsEnabled() && !disableModemGps(modem)) {
+                            logger.error("monitor() :: Failed to disable modem GPS");
                         }
+                    } catch (KuraException e1) {
+                        logger.error("monitor() :: Exception disableModemGps", e1);
                     }
 
                     try {
@@ -817,12 +805,10 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                 if (modem instanceof EvdoCellularModem) {
                     NetInterfaceStatus netIfaceStatus = getNetInterfaceStatus(netConfigs);
                     if (netIfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
-                        if (modem.isGpsEnabled()) {
-                            if (!disableModemGps(modem)) {
-                                logger.error("trackModem() :: Failed to disable modem GPS, resetting modem ...");
-                                modem.reset();
-                                this.resetTimerStart = System.currentTimeMillis();
-                            }
+                        if (modem.isGpsEnabled() && !disableModemGps(modem)) {
+                            logger.error("trackModem() :: Failed to disable modem GPS, resetting modem ...");
+                            modem.reset();
+                            this.resetTimerStart = System.currentTimeMillis();
                         }
 
                         if (!((EvdoCellularModem) modem).isProvisioned()) {
@@ -848,11 +834,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                         }
                     }
 
-                    if (modem.isGpsSupported()) {
-                        if (isGpsEnabledInConfig(netConfigs) && !modem.isGpsEnabled()) {
-                            modem.enableGps();
-                            postModemGpsEvent(modem, true);
-                        }
+                    if (modem.isGpsSupported() && isGpsEnabledInConfig(netConfigs) && !modem.isGpsEnabled()) {
+                        modem.enableGps();
+                        postModemGpsEvent(modem, true);
                     }
                 }
             } catch (Exception e) {

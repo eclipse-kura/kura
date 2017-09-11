@@ -37,6 +37,7 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
+import org.eclipse.kura.net.NetInterfaceConfigMode;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
@@ -154,19 +155,15 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                             }
                             sb.append("\n");
 
-                            if (((NetConfigIP4) netConfig).isDhcp()) {
-                                // BOOTPROTO
-                                sb.append("BOOTPROTO=");
+                            // BOOTPROTO
+                            sb.append("BOOTPROTO=");
+                            if (((NetConfigIP4) netConfig).getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeDhcp) {
                                 logger.debug("new config is DHCP");
-                                sb.append("dhcp");
-                                sb.append("\n");
-                            } else {
-                                // BOOTPROTO
-                                sb.append("BOOTPROTO=");
-                                logger.debug("new config is STATIC");
-                                sb.append("static");
-                                sb.append("\n");
-
+                                sb.append("dhcp\n");
+                            } else if (((NetConfigIP4) netConfig).getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeStatic) {
+                                logger.debug("new config is Static");
+                                sb.append("static\n");
+                                
                                 // IPADDR
                                 sb.append("IPADDR=").append(((NetConfigIP4) netConfig).getAddress().getHostAddress())
                                         .append("\n");
@@ -181,6 +178,9 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                                             .append(((NetConfigIP4) netConfig).getGateway().getHostAddress())
                                             .append("\n");
                                 }
+                            } else {
+                                logger.debug("new config is 'Manual'");
+                                sb.append("none\n");
                             }
 
                             // DEFROUTE
@@ -403,8 +403,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                     logger.info("Not rewriting network interfaces file because it is the same");
                 }
             } catch (IOException e) {
-                logger.error("Failed to rename debian tmp config file {} to {}", tmpFile.getName(), file.getName(),
-                        e);
+                logger.error("Failed to rename debian tmp config file {} to {}", tmpFile.getName(), file.getName(), e);
                 throw KuraException.internalError(e.getMessage());
             }
         }
@@ -464,15 +463,23 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                         } else {
                             sb.append("iface " + interfaceName + " inet ");
                         }
-                        if (((NetConfigIP4) netConfig).isDhcp()) {
+                        if (((NetConfigIP4) netConfig)
+                                .getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeDhcp) {
+                            // DHCP Client configuration ...
                             logger.debug("new config is DHCP");
                             sb.append("dhcp\n");
-                        } else {
+                            // DEFROUTE
+                            if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
+                                sb.append("\tpost-up route del default dev ");
+                                sb.append(interfaceName);
+                                sb.append("\n");
+                            }
+                        } else if (((NetConfigIP4) netConfig)
+                                .getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeStatic) {
+                            // STATIC configuration ...
                             logger.debug("new config is STATIC");
                             sb.append("static\n");
-                        }
 
-                        if (!((NetConfigIP4) netConfig).isDhcp()) {
                             // IPADDR
                             sb.append("\taddress ").append(((NetConfigIP4) netConfig).getAddress().getHostAddress())
                                     .append("\n");
@@ -490,12 +497,9 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                                         .append("\n");
                             }
                         } else {
-                            // DEFROUTE
-                            if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
-                                sb.append("\tpost-up route del default dev ");
-                                sb.append(interfaceName);
-                                sb.append("\n");
-                            }
+                            // 'Manual' configuration
+                            logger.debug("new config is Manual");
+                            sb.append("manual\n");
                         }
 
                         // DNS
@@ -628,10 +632,17 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                     // ONBOOT
                     props.setProperty("ONBOOT", netConfigIP4.isAutoConnect() ? "yes" : "no");
 
-                    // BOOTPROTO
-                    props.setProperty("BOOTPROTO", netConfigIP4.isDhcp() ? "dhcp" : "static");
-
-                    if (!netConfigIP4.isDhcp()) {
+                    if (netConfigIP4.getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeDhcp) {
+                        // BOOTPROTO=dhcp
+                        props.setProperty("BOOTPROTO", "dhcp");
+                        if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
+                            props.setProperty("DEFROUTE", "yes");
+                        } else {
+                            props.setProperty("DEFROUTE", "no");
+                        }
+                    } else if (netConfigIP4.getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeStatic){
+                        // BOOTPROTO=static
+                        props.setProperty("BOOTPROTO", "static");
                         // IPADDR
                         if (netConfigIP4.getAddress() != null) {
                             props.setProperty("IPADDR", netConfigIP4.getAddress().getHostAddress());
@@ -653,11 +664,8 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                             props.setProperty("DEFROUTE", "no");
                         }
                     } else {
-                        if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
-                            props.setProperty("DEFROUTE", "yes");
-                        } else {
-                            props.setProperty("DEFROUTE", "no");
-                        }
+                        // BOOTPROTO=none
+                        props.setProperty("BOOTPROTO", "manual");
                     }
 
                     // DNS

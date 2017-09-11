@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -36,69 +36,78 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
 
-    private NetInterfaceStatus m_status;
-    private boolean m_autoConnect;
-    private boolean m_dhcp;
-    private T m_address;
-    private short m_networkPrefixLength;
-    private T m_subnetMask;
-    private T m_gateway;
-    private List<T> m_dnsServers;
-    private List<String> m_domains;
-    private Map<String, Object> m_properties;
+    private NetInterfaceStatus status;
+    private NetInterfaceConfigMode configMode;
+    private boolean autoConnect;
+    private boolean dhcp;
+    private T address;
+    private short networkPrefixLength;
+    private T subnetMask;
+    private T gateway;
+    private List<T> dnsServers;
+    private List<String> domains;
+    private Map<String, Object> properties;
 
     NetConfigIP(NetInterfaceStatus status, boolean autoConnect) {
-        this.m_status = status;
-        this.m_autoConnect = autoConnect;
-        this.m_dhcp = false;
-        this.m_address = null;
-        this.m_networkPrefixLength = -1;
-        this.m_subnetMask = null;
-        this.m_gateway = null;
-        this.m_dnsServers = new ArrayList<T>();
-        this.m_domains = new ArrayList<String>();
-        this.m_properties = new HashMap<String, Object>();
+        this.status = status;
+        this.configMode = NetInterfaceConfigMode.netIPv4ConfigModeManual;
+        this.autoConnect = autoConnect;
+        this.dhcp = false;
+        this.address = null;
+        this.networkPrefixLength = -1;
+        this.subnetMask = null;
+        this.gateway = null;
+        this.dnsServers = new ArrayList<>();
+        this.domains = new ArrayList<>();
+        this.properties = new HashMap<>();
     }
 
     NetConfigIP(NetInterfaceStatus status, boolean autoConnect, boolean dhcp) {
-        this.m_status = status;
-        this.m_autoConnect = autoConnect;
-        this.m_dhcp = dhcp;
-        this.m_address = null;
-        this.m_networkPrefixLength = -1;
-        this.m_subnetMask = null;
-        this.m_gateway = null;
-        this.m_dnsServers = new ArrayList<T>();
-        this.m_domains = new ArrayList<String>();
-        this.m_properties = new HashMap<String, Object>();
+        this.status = status;
+        this.autoConnect = autoConnect;
+        this.dhcp = dhcp;
+        if (dhcp) {
+            this.configMode = NetInterfaceConfigMode.netIPv4ConfigModeDhcp;
+        } else {
+            this.configMode = NetInterfaceConfigMode.netIPv4ConfigModeManual;
+        }
+        this.address = null;
+        this.networkPrefixLength = -1;
+        this.subnetMask = null;
+        this.gateway = null;
+        this.dnsServers = new ArrayList<>();
+        this.domains = new ArrayList<>();
+        this.properties = new HashMap<>();
     }
 
     NetConfigIP(NetInterfaceStatus status, boolean autoConnect, T address, short networkPrefixLength, T gateway)
             throws KuraException {
-        this.m_status = status;
-        this.m_autoConnect = autoConnect;
-        this.m_dhcp = false;
-        this.m_address = address;
-        this.m_networkPrefixLength = networkPrefixLength;
-        this.m_subnetMask = calculateNetmaskFromNetworkPrefix(networkPrefixLength);
-        this.m_gateway = gateway;
-        this.m_dnsServers = new ArrayList<T>();
-        this.m_domains = new ArrayList<String>();
-        this.m_properties = new HashMap<String, Object>();
+        this.status = status;
+        this.configMode = NetInterfaceConfigMode.netIPv4ConfigModeStatic;
+        this.autoConnect = autoConnect;
+        this.dhcp = false;
+        this.address = address;
+        this.networkPrefixLength = networkPrefixLength;
+        this.subnetMask = calculateNetmaskFromNetworkPrefix(networkPrefixLength);
+        this.gateway = gateway;
+        this.dnsServers = new ArrayList<>();
+        this.domains = new ArrayList<>();
+        this.properties = new HashMap<>();
     }
 
     NetConfigIP(NetInterfaceStatus status, boolean autoConnect, T address, T subnetMask, T gateway)
             throws KuraException {
-        this.m_status = status;
-        this.m_autoConnect = autoConnect;
-        this.m_dhcp = false;
-        this.m_address = address;
-        this.m_networkPrefixLength = calculateNetworkPrefixFromNetmask(subnetMask.getHostAddress());
-        this.m_subnetMask = subnetMask;
-        this.m_gateway = gateway;
-        this.m_dnsServers = new ArrayList<T>();
-        this.m_domains = new ArrayList<String>();
-        this.m_properties = new HashMap<String, Object>();
+        this.status = status;
+        this.configMode = NetInterfaceConfigMode.netIPv4ConfigModeStatic;
+        this.autoConnect = autoConnect;
+        this.dhcp = false;
+        this.address = address;
+        this.networkPrefixLength = calculateNetworkPrefixFromNetmask(subnetMask.getHostAddress());
+        this.subnetMask = subnetMask;
+        this.gateway = gateway;
+        this.dnsServers = new ArrayList<>();
+        this.domains = new ArrayList<>();
+        this.properties = new HashMap<>();
     }
 
     /**
@@ -107,7 +116,7 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      * @return
      */
     public NetInterfaceStatus getStatus() {
-        return this.m_status;
+        return this.status;
     }
 
     /**
@@ -116,19 +125,35 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      * @param status
      */
     public void setStatus(NetInterfaceStatus status) {
-        this.m_status = status;
+        this.status = status;
+    }
+    
+    /**
+     * Returns network interface configuration mode (i.e. DHCP, Static, or Manual)
+     * @return NetInterfaceConfigMode
+     */
+    public NetInterfaceConfigMode getConfigMode() {
+        return this.configMode;
+    }
+    
+    /**
+     * Sets network interface configuration mode
+     * @param configMode - network interface configuration mode
+     */
+    public void setConfigMode(NetInterfaceConfigMode configMode) {
+        this.configMode = configMode;
     }
 
     public boolean isAutoConnect() {
-        return this.m_autoConnect;
+        return this.autoConnect;
     }
 
     public void setAutoConnect(boolean autoConnect) {
-        this.m_autoConnect = autoConnect;
+        this.autoConnect = autoConnect;
     }
 
     public boolean isDhcp() {
-        return this.m_dhcp;
+        return this.dhcp;
     }
 
     /**
@@ -140,9 +165,9 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      *            whether or not dhcp client mode should be used
      */
     public void setDhcp(boolean dhcp) {
-        this.m_dhcp = dhcp;
+        this.dhcp = dhcp;
     }
-
+    
     /**
      * Returns the address that should be statically assigned to the interface.
      * The returned address is IP4Address or IP6Address depending on
@@ -151,7 +176,7 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      * @return the static address for the interface
      */
     public T getAddress() {
-        return this.m_address;
+        return this.address;
     }
 
     /**
@@ -163,7 +188,7 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      *            - address to be statically assigned to the interface
      */
     public void setAddress(T address) throws KuraException {
-        this.m_address = address;
+        this.address = address;
     }
 
     /**
@@ -172,7 +197,7 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      * @return
      */
     public short getNetworkPrefixLength() {
-        return this.m_networkPrefixLength;
+        return this.networkPrefixLength;
     }
 
     /**
@@ -182,8 +207,8 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      * @throws KuraException
      */
     public void setNetworkPrefixLength(short networkPrefixLength) throws KuraException {
-        this.m_networkPrefixLength = networkPrefixLength;
-        this.m_subnetMask = calculateNetmaskFromNetworkPrefix(networkPrefixLength);
+        this.networkPrefixLength = networkPrefixLength;
+        this.subnetMask = calculateNetmaskFromNetworkPrefix(networkPrefixLength);
     }
 
     /**
@@ -192,7 +217,7 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      * @return
      */
     public T getSubnetMask() {
-        return this.m_subnetMask;
+        return this.subnetMask;
     }
 
     /**
@@ -202,8 +227,8 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      * @throws KuraException
      */
     public void setSubnetMask(T subnetMask) throws KuraException {
-        this.m_networkPrefixLength = calculateNetworkPrefixFromNetmask(subnetMask.getHostAddress());
-        this.m_subnetMask = subnetMask;
+        this.networkPrefixLength = calculateNetworkPrefixFromNetmask(subnetMask.getHostAddress());
+        this.subnetMask = subnetMask;
     }
 
     /**
@@ -212,7 +237,7 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      * @return
      */
     public T getGateway() {
-        return this.m_gateway;
+        return this.gateway;
     }
 
     /**
@@ -221,7 +246,7 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      * @param gateway
      */
     public void setGateway(T gateway) {
-        this.m_gateway = gateway;
+        this.gateway = gateway;
     }
 
     /**
@@ -232,10 +257,10 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      * @return list of address for the DNS Servers
      */
     public List<T> getDnsServers() {
-        if (this.m_dnsServers != null) {
-            return Collections.unmodifiableList(this.m_dnsServers);
+        if (this.dnsServers != null) {
+            return Collections.unmodifiableList(this.dnsServers);
         } else {
-            return null;
+            return new ArrayList<>();
         }
     }
 
@@ -245,7 +270,7 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      * the NetConfigIP instance used. This is only used if dhcp is set to false.
      */
     public void setDnsServers(List<T> dnsServers) {
-        this.m_dnsServers = dnsServers;
+        this.dnsServers = dnsServers;
     }
 
     /**
@@ -255,10 +280,10 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      * @return - list of DNS domains
      */
     public List<String> getDomains() {
-        if (this.m_domains != null) {
-            return Collections.unmodifiableList(this.m_domains);
+        if (this.domains != null) {
+            return Collections.unmodifiableList(this.domains);
         } else {
-            return null;
+            return new ArrayList<>();
         }
     }
 
@@ -269,35 +294,36 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      * @param domains
      */
     public void setDomains(List<String> domains) {
-        this.m_domains = domains;
+        this.domains = domains;
     }
 
     public Map<String, Object> getProperties() {
-        if (this.m_properties != null) {
-            return Collections.unmodifiableMap(this.m_properties);
+        if (this.properties != null) {
+            return Collections.unmodifiableMap(this.properties);
         } else {
             return null;
         }
     }
 
     public void setProperties(Map<String, Object> properties) {
-        this.m_properties = properties;
+        this.properties = properties;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (this.m_address == null ? 0 : this.m_address.hashCode());
-        result = prime * result + (this.m_autoConnect ? 1231 : 1237);
-        result = prime * result + (this.m_dhcp ? 1231 : 1237);
-        result = prime * result + (this.m_dnsServers == null ? 0 : this.m_dnsServers.hashCode());
-        result = prime * result + (this.m_domains == null ? 0 : this.m_domains.hashCode());
-        result = prime * result + (this.m_gateway == null ? 0 : this.m_gateway.hashCode());
-        result = prime * result + this.m_networkPrefixLength;
-        result = prime * result + (this.m_properties == null ? 0 : this.m_properties.hashCode());
-        result = prime * result + (this.m_status == null ? 0 : this.m_status.hashCode());
-        result = prime * result + (this.m_subnetMask == null ? 0 : this.m_subnetMask.hashCode());
+        result = prime * result + (this.address == null ? 0 : this.address.hashCode());
+        result = prime * result + (this.autoConnect ? 1231 : 1237);
+        result = prime * result + (this.dhcp ? 1231 : 1237);
+        result = prime * result + (this.dnsServers == null ? 0 : this.dnsServers.hashCode());
+        result = prime * result + (this.domains == null ? 0 : this.domains.hashCode());
+        result = prime * result + (this.gateway == null ? 0 : this.gateway.hashCode());
+        result = prime * result + this.networkPrefixLength;
+        result = prime * result + (this.properties == null ? 0 : this.properties.hashCode());
+        result = prime * result + (this.status == null ? 0 : this.status.hashCode());
+        result = prime * result + (this.configMode == null ? 0 : this.configMode.hashCode());
+        result = prime * result + (this.subnetMask == null ? 0 : this.subnetMask.hashCode());
         return result;
     }
 
@@ -314,58 +340,61 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
         }
         @SuppressWarnings("rawtypes")
         NetConfigIP other = (NetConfigIP) obj;
-        if (this.m_address == null) {
-            if (other.m_address != null) {
+        if (this.address == null) {
+            if (other.address != null) {
                 return false;
             }
-        } else if (!this.m_address.equals(other.m_address)) {
+        } else if (!this.address.equals(other.address)) {
             return false;
         }
-        if (this.m_autoConnect != other.m_autoConnect) {
+        if (this.autoConnect != other.autoConnect) {
             return false;
         }
-        if (this.m_dhcp != other.m_dhcp) {
+        if (this.dhcp != other.dhcp) {
             return false;
         }
-        if (this.m_dnsServers == null) {
-            if (other.m_dnsServers != null) {
+        if (this.dnsServers == null) {
+            if (other.dnsServers != null) {
                 return false;
             }
-        } else if (!this.m_dnsServers.equals(other.m_dnsServers)) {
+        } else if (!this.dnsServers.equals(other.dnsServers)) {
             return false;
         }
-        if (this.m_domains == null) {
-            if (other.m_domains != null) {
+        if (this.domains == null) {
+            if (other.domains != null) {
                 return false;
             }
-        } else if (!this.m_domains.equals(other.m_domains)) {
+        } else if (!this.domains.equals(other.domains)) {
             return false;
         }
-        if (this.m_gateway == null) {
-            if (other.m_gateway != null) {
+        if (this.gateway == null) {
+            if (other.gateway != null) {
                 return false;
             }
-        } else if (!this.m_gateway.equals(other.m_gateway)) {
+        } else if (!this.gateway.equals(other.gateway)) {
             return false;
         }
-        if (this.m_networkPrefixLength != other.m_networkPrefixLength) {
+        if (this.networkPrefixLength != other.networkPrefixLength) {
             return false;
         }
-        if (this.m_properties == null) {
-            if (other.m_properties != null) {
+        if (this.properties == null) {
+            if (other.properties != null) {
                 return false;
             }
-        } else if (!this.m_properties.equals(other.m_properties)) {
+        } else if (!this.properties.equals(other.properties)) {
             return false;
         }
-        if (this.m_status != other.m_status) {
+        if (this.status != other.status) {
             return false;
         }
-        if (this.m_subnetMask == null) {
-            if (other.m_subnetMask != null) {
+        if (this.configMode != other.configMode) {
+            return false;
+        }
+        if (this.subnetMask == null) {
+            if (other.subnetMask != null) {
                 return false;
             }
-        } else if (!this.m_subnetMask.equals(other.m_subnetMask)) {
+        } else if (!this.subnetMask.equals(other.subnetMask)) {
             return false;
         }
         return true;
@@ -374,21 +403,19 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
     @Override
     public boolean isValid() {
         // FIXME
-        if (this.m_dhcp) {
+        if (this.dhcp) {
             return true;
         } else {
             try {
-                this.m_address.getHostAddress();
+                this.address.getHostAddress();
             } catch (Exception e) {
-                e.printStackTrace();
                 return false;
             }
 
-            for (IPAddress dns : this.m_dnsServers) {
+            for (IPAddress dns : this.dnsServers) {
                 try {
                     dns.getHostAddress();
                 } catch (Exception e) {
-                    e.printStackTrace();
                     return false;
                 }
             }
@@ -401,26 +428,28 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("NetConfigIP [m_status=");
-        builder.append(this.m_status);
-        builder.append(", m_autoConnect=");
-        builder.append(this.m_autoConnect);
-        builder.append(", m_dhcp=");
-        builder.append(this.m_dhcp);
-        builder.append(", m_address=");
-        builder.append(this.m_address);
-        builder.append(", m_networkPrefixLength=");
-        builder.append(this.m_networkPrefixLength);
-        builder.append(", m_subnetMask=");
-        builder.append(this.m_subnetMask);
-        builder.append(", m_gateway=");
-        builder.append(this.m_gateway);
-        builder.append(", m_dnsServers=");
-        builder.append(this.m_dnsServers);
-        builder.append(", m_domains=");
-        builder.append(this.m_domains);
-        builder.append(", m_properties=");
-        builder.append(this.m_properties);
+        builder.append("NetConfigIP [status=");
+        builder.append(this.status);
+        builder.append(", configMode=");
+        builder.append(this.configMode);
+        builder.append(", autoConnect=");
+        builder.append(this.autoConnect);
+        builder.append(", dhcp=");
+        builder.append(this.dhcp);
+        builder.append(", address=");
+        builder.append(this.address);
+        builder.append(", networkPrefixLength=");
+        builder.append(this.networkPrefixLength);
+        builder.append(", subnetMask=");
+        builder.append(this.subnetMask);
+        builder.append(", gateway=");
+        builder.append(this.gateway);
+        builder.append(", dnsServers=");
+        builder.append(this.dnsServers);
+        builder.append(", domains=");
+        builder.append(this.domains);
+        builder.append(", properties=");
+        builder.append(this.properties);
         builder.append("]");
         return builder.toString();
     }
@@ -461,7 +490,7 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
     // TODO - only works on IPv4 now
     private T calculateNetmaskFromNetworkPrefix(int networkPrefixLength) throws KuraException {
         int mask = ~((1 << 32 - networkPrefixLength) - 1);
-        StringBuffer sb = new StringBuffer(15);
+        StringBuilder sb = new StringBuilder(15);
         for (int shift = 24; shift > 0; shift -= 8) {
             // process 3 bytes, from high order byte down.
             sb.append(Integer.toString(mask >>> shift & 0xff));

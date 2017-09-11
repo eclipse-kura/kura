@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,14 +9,19 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.shared.model;
+package org.eclipse.kura.net;
 
-import java.io.Serializable;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+public enum NetInterfaceConfigMode {
 
-public enum GwtNetIfConfigMode implements Serializable,IsSerializable {
-    netIPv4ConfigModeDHCP,
+    /** network interface is configured as DHCP client **/
+    netIPv4ConfigModeDhcp,
+    
+    /** network interface is configured with static IP address **/
     netIPv4ConfigModeStatic,
-    netIPv4ConfigModeUnmanaged;
+    
+    /** network interface is configured in 'manual' or 'BOOTPROTO=none' mode 
+     * and is not managed by Linux. 
+     */
+    netIPv4ConfigModeManual
 }

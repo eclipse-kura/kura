@@ -234,8 +234,19 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                         ? "Disabled"
                         : gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusEnabledLAN ? "LAN"
                                 : "WAN";
+                /* <IAB>
                 String currentConfigMode = gwtNetInterfaceConfig
                         .getConfigModeEnum() == GwtNetIfConfigMode.netIPv4ConfigModeDHCP ? "DHCP" : "Manual";
+                */
+                String currentConfigMode;
+                if (gwtNetInterfaceConfig.getConfigModeEnum() == GwtNetIfConfigMode.netIPv4ConfigModeDHCP) {
+                    currentConfigMode = "DHCP";
+                } else if (gwtNetInterfaceConfig.getConfigModeEnum() == GwtNetIfConfigMode.netIPv4ConfigModeUnmanaged) {
+                    currentConfigMode = "Unmanaged";
+                } else {
+                    currentConfigMode = "Static";
+                }
+                
                 String currentRouterMode;
                 if (gwtNetInterfaceConfig.getRouterModeEnum() == GwtNetRouterMode.netRouterDchp) {
                     currentRouterMode = "DHCPD";

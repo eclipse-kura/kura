@@ -33,6 +33,7 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
+import org.eclipse.kura.net.NetInterfaceConfigMode;
 import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
@@ -224,7 +225,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                         gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusDisabled.name());
                                     }
 
-                                    if (((NetConfigIP4) netConfig).isDhcp()) {
+                                    if (((NetConfigIP4) netConfig).getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeDhcp) {
                                         gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
 
                                         // since DHCP - populate current data
@@ -251,7 +252,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                         }
 
                                         // DHCP supplied DNS servers
-                                        StringBuffer sb = new StringBuffer();
+                                        StringBuilder sb = new StringBuilder();
                                         List<? extends IPAddress> dnsServers = addressConfig.getDnsServers();
                                         if (dnsServers != null && !dnsServers.isEmpty()) {
                                             String sep = "";
@@ -266,8 +267,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                             logger.debug("DNS Servers: [empty String]");
                                             gwtNetConfig.setReadOnlyDnsServers("");
                                         }
-                                    } else {
-                                        gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeManual.name());
+                                    } else if (((NetConfigIP4) netConfig).getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeStatic) {
+                                        gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeStatic.name());
 
                                         // since STATIC - populate with configured values
                                         // TODO - should we throw an error if current state doesn't match configuration?
@@ -291,6 +292,12 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                         } else {
                                             gwtNetConfig.setGateway("");
                                         }
+                                    } else {
+                                        // TODO 
+                                        // <IAB> Do we need to have something for the 'Manual' mode ??
+                                        gwtNetConfig.setIpAddress("");
+                                        gwtNetConfig.setSubnetMask("");
+                                        gwtNetConfig.setGateway("");
                                     }
 
                                     // Custom DNS servers
@@ -766,10 +773,12 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 String regexp = "[\\s,;\\n\\t]+";
 
                 if (GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name().equals(config.getConfigMode())) {
-                    logger.debug("mode is DHCP");
+                    logger.debug("Interface configuration mode is DHCP");
+                    netConfig4.setConfigMode(NetInterfaceConfigMode.netIPv4ConfigModeDhcp);
                     netConfig4.setDhcp(true);
-                } else {
-                    logger.debug("mode is STATIC");
+                } else if (GwtNetIfConfigMode.netIPv4ConfigModeStatic.name().equals(config.getConfigMode())) {
+                    logger.debug("Interface configuration mode is STATIC");
+                    netConfig4.setConfigMode(NetInterfaceConfigMode.netIPv4ConfigModeStatic);
                     netConfig4.setDhcp(false);
 
                     if (config.getIpAddress() != null && !config.getIpAddress().isEmpty()) {
@@ -799,6 +808,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                         }
                         netConfig4.setDnsServers(dnsServers);
                     }
+                } else {
+                    logger.debug("Interface configuration mode is 'Manual'");
+                    netConfig4.setConfigMode(NetInterfaceConfigMode.netIPv4ConfigModeManual);
+                    netConfig4.setDhcp(false);
                 }
 
                 String[] dnsServersString = config.getDnsServers().split(regexp);
@@ -1427,7 +1440,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
-
+    
     @Override
     @Deprecated
     public void rollbackDefaultConfiguration(GwtXSRFToken xsrfToken) {

@@ -1,0 +1,27 @@
+#Deployment Plugin Project File
+#Mon Sep 11 10:52:55 CEST 2017
+build.ant.name=<.>/src/main/resources/org.eclipse.kura.driver.ble.sensortag.provider_build.xml
+build.dp.file=<.>/target/org.eclipse.kura.driver.ble.sensortag.provider.dp
+build.location=
+bundles.0.bundle_path=<.>/target/org.eclipse.kura.driver.ble.sensortag.provider-1.0.0-SNAPSHOT.jar
+bundles.0.customizer=false
+bundles.0.headers.count=0
+bundles.0.missing=false
+bundles.0.name=bundles/org.eclipse.kura.driver.ble.sensortag.provider-1.0.0-SNAPSHOT.jar
+bundles.0.symbolic_name=org.eclipse.kura.driver.ble.sensortag.provider;singleton\:\=true
+bundles.0.version=1.0.0.201709081551
+bundles.1.bundle_path=<.>/../org.eclipse.kura.driver.ble.sensortag.localization/target/org.eclipse.kura.driver.ble.sensortag.localization-1.0.0-SNAPSHOT.jar
+bundles.1.customizer=false
+bundles.1.headers.count=0
+bundles.1.missing=false
+bundles.1.name=bundles/org.eclipse.kura.driver.ble.sensortag.localization-1.0.0-SNAPSHOT.jar
+bundles.1.symbolic_name=org.eclipse.kura.driver.ble.sensortag.localization;singleton\:\=true
+bundles.1.version=1.0.0.201709081357
+bundles.count=2
+certificates.count=0
+general.signbundles=false
+headers.other.headers=
+headers.symbolic.name=org.eclipse.kura.driver.ble.sensortag.provider
+headers.version=1.0.0
+resources.count=0
+

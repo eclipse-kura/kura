@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.example.ble.tisensortag.tinyb;
+package org.eclipse.kura.internal.driver.ble.sensortag;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;

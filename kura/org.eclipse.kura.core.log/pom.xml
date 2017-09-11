@@ -28,6 +28,6 @@
 	</properties>
 
 	<artifactId>org.eclipse.kura.core.log</artifactId>
-	<version>1.0.200-SNAPSHOT</version>
+	<version>1.0.200</version>
 	<packaging>eclipse-plugin</packaging>
 </project>

@@ -131,7 +131,7 @@ public class denali implements EntryPoint {
                             @Override
                             public void onSuccess(GwtXSRFToken token) {
                                 denali.this.gwtStatusService.getDeviceConfig(token, gwtSession.isNetAdminAvailable(),
-                                        new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+                                        new AsyncCallback<List<GwtGroupedNVPair>>() {
 
                                     @Override
                                     public void onFailure(Throwable caught) {
@@ -140,7 +140,7 @@ public class denali implements EntryPoint {
                                     }
 
                                     @Override
-                                    public void onSuccess(ArrayList<GwtGroupedNVPair> pairs) {
+                                    public void onSuccess(List<GwtGroupedNVPair> pairs) {
                                         denali.this.connected = false;
                                         Iterator<GwtGroupedNVPair> it = pairs.iterator();
                                         while (it.hasNext()) {

@@ -403,9 +403,10 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
     @Override
     public boolean isValid() {
         // FIXME
-        if (this.dhcp) {
+        if ((this.configMode == NetInterfaceConfigMode.netIPv4ConfigModeDhcp)
+                || (this.configMode == NetInterfaceConfigMode.netIPv4ConfigModeManual)) {
             return true;
-        } else {
+        } else if ((this.configMode == NetInterfaceConfigMode.netIPv4ConfigModeStatic)) {
             try {
                 this.address.getHostAddress();
             } catch (Exception e) {
@@ -422,6 +423,8 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
 
             // if we got here...
             return true;
+        } else {
+            return false;
         }
     }
 

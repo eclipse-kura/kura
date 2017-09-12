@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 
 public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements GwtStatusService {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
 
     private static final long serialVersionUID = 8256280782910423734L;
 
@@ -56,10 +56,10 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
     private static final String DATA_TRANSPORT_SERVICE_REFERENCE_NAME = "DataTransportService";
 
     @Override
-    public ArrayList<GwtGroupedNVPair> getDeviceConfig(GwtXSRFToken xsrfToken, boolean hasNetAdmin)
+    public List<GwtGroupedNVPair> getDeviceConfig(GwtXSRFToken xsrfToken, boolean hasNetAdmin)
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-        List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
+        List<GwtGroupedNVPair> pairs = new ArrayList<>();
 
         pairs.addAll(getCloudStatus());
         if (hasNetAdmin) {
@@ -67,7 +67,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         }
         pairs.addAll(getPositionStatus());
 
-        return new ArrayList<GwtGroupedNVPair>(pairs);
+        return new ArrayList<>(pairs);
     }
 
     @Override
@@ -96,14 +96,14 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                                 counter--;
                             }
                         } catch (KuraConnectException e) {
-                            s_logger.warn("Error connecting", e);
+                            logger.warn("Error connecting", e);
                             throw new GwtKuraException(GwtKuraErrorCode.CONNECTION_FAILURE, e,
                                     "Error connecting. Please review your configuration.");
                         } catch (InterruptedException e) {
-                            s_logger.warn("Interrupt Exception", e);
+                            logger.warn("Interrupt Exception", e);
                             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e, "Interrupt Exception");
                         } catch (IllegalStateException e) {
-                            s_logger.warn("Illegal client state", e);
+                            logger.warn("Illegal client state", e);
                             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e, "Illegal client state");
                         }
                     }
@@ -142,12 +142,12 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
     }
 
     private List<GwtGroupedNVPair> getCloudStatus() throws GwtKuraException {
-        final List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
+        final List<GwtGroupedNVPair> pairs = new ArrayList<>();
 
         try {
             final Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceLocator.getInstance()
                     .getServiceReferences(CloudService.class, null);
-            List<ServiceReference<CloudService>> cloudServiceReferencesList = new ArrayList<ServiceReference<CloudService>>(
+            List<ServiceReference<CloudService>> cloudServiceReferencesList = new ArrayList<>(
                     cloudServiceReferences);
             sortCloudServiceServiceReferences(cloudServiceReferencesList);
             for (ServiceReference<CloudService> cloudServiceReference : cloudServiceReferencesList) {
@@ -157,7 +157,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 }
             }
         } catch (GwtKuraException e) {
-            s_logger.warn("Get cloud status failed", e);
+            logger.warn("Get cloud status failed", e);
         }
 
         return pairs;
@@ -214,7 +214,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
     }
 
     private List<GwtGroupedNVPair> getNetworkStatus() throws GwtKuraException {
-        List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
+        List<GwtGroupedNVPair> pairs = new ArrayList<>();
         String nl = "<br />";
         String tab = "&nbsp&nbsp&nbsp&nbsp";
 
@@ -234,10 +234,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                         ? "Disabled"
                         : gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusEnabledLAN ? "LAN"
                                 : "WAN";
-                /* <IAB>
-                String currentConfigMode = gwtNetInterfaceConfig
-                        .getConfigModeEnum() == GwtNetIfConfigMode.netIPv4ConfigModeDHCP ? "DHCP" : "Manual";
-                */
+                
                 String currentConfigMode;
                 if (gwtNetInterfaceConfig.getConfigModeEnum() == GwtNetIfConfigMode.netIPv4ConfigModeDHCP) {
                     currentConfigMode = "DHCP";
@@ -305,7 +302,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 }
             }
         } catch (GwtKuraException e) {
-            s_logger.warn("Get network status failed", e);
+            logger.warn("Get network status failed", e);
             throw e;
         }
 
@@ -313,7 +310,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
     }
 
     private List<GwtGroupedNVPair> getPositionStatus() throws GwtKuraException {
-        final List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
+        final List<GwtGroupedNVPair> pairs = new ArrayList<>();
 
         ServiceLocator.applyToServiceOptionally(PositionService.class, new ServiceFunction<PositionService, Void>() {
 

@@ -293,15 +293,14 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                             gwtNetConfig.setGateway("");
                                         }
                                     } else {
-                                        // TODO 
-                                        // <IAB> Do we need to have something for the 'Manual' mode ??
+                                        gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeUnmanaged.name());
                                         gwtNetConfig.setIpAddress("");
                                         gwtNetConfig.setSubnetMask("");
                                         gwtNetConfig.setGateway("");
                                     }
 
                                     // Custom DNS servers
-                                    StringBuffer sb = new StringBuffer();
+                                    StringBuilder sb = new StringBuilder();
                                     List<IP4Address> dnsServers = ((NetConfigIP4) netConfig).getDnsServers();
                                     if (dnsServers != null && !dnsServers.isEmpty()) {
                                         for (IP4Address dnsServer : dnsServers) {
@@ -317,7 +316,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                     }
 
                                     // Search domains
-                                    sb = new StringBuffer();
+                                    sb = new StringBuilder();
                                     List<IP4Address> winsServers = ((NetConfigIP4) netConfig).getWinsServers();
                                     if (winsServers != null && !winsServers.isEmpty()) {
                                         for (IP4Address winServer : winsServers) {
@@ -436,7 +435,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                     if (channels != null) {
                                         ArrayList<Integer> alChannels = new ArrayList<>();
                                         for (int channel : channels) {
-                                            alChannels.add(new Integer(channel));
+                                            alChannels.add(channel);
                                         }
                                         gwtWifiConfig.setChannels(alChannels);
                                     }
@@ -974,7 +973,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     }
 
     @Override
-    public ArrayList<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken)
+    public List<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken)
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
@@ -1132,7 +1131,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     }
 
     @Override
-    public ArrayList<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards(GwtXSRFToken xsrfToken)
+    public List<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards(GwtXSRFToken xsrfToken)
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
@@ -1172,7 +1171,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     }
 
     @Override
-    public ArrayList<GwtFirewallNatEntry> findDeviceFirewallNATs(GwtXSRFToken xsrfToken) throws GwtKuraException {
+    public List<GwtFirewallNatEntry> findDeviceFirewallNATs(GwtXSRFToken xsrfToken) throws GwtKuraException {
 
         checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
@@ -1413,7 +1412,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 dstNetwork = "0.0.0.0/0";
             }
 
-            boolean masquerade = entry.getMasquerade().equals("yes") ? true : false;
+            boolean masquerade = "yes".equals(entry.getMasquerade()) ? true : false;
 
             FirewallNatConfig firewallNatConfig = new FirewallNatConfig(
                     GwtSafeHtmlUtils.htmlEscape(entry.getInInterface()),

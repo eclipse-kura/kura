@@ -124,6 +124,7 @@ public class ModemDriver {
         }
         boolean retVal = true;
         int remainingAttempts = 3;
+        final long turnOffDelay = getTurnOffDelay();
         while (isOn()) {
             if (remainingAttempts <= 0) {
                 retVal = false;
@@ -194,7 +195,8 @@ public class ModemDriver {
                 break;
             }
             remainingAttempts--;
-            sleep(5000);
+            logger.info("turnModemOff() :: sleeping for {} ms after modem shutdown", turnOffDelay);
+            sleep(turnOffDelay);
         }
 
         logger.info("turnModemOff() :: Modem is OFF? - {}", retVal);
@@ -458,6 +460,23 @@ public class ModemDriver {
         } finally {
             resourceValue.close();
         }
+    }
+
+    private SupportedUsbModemInfo getSupportedUsbModemInfo() {
+        if (!(this instanceof UsbModemDriver)) {
+            return null;
+        }
+
+        final UsbModemDriver self = (UsbModemDriver) this;
+        return SupportedUsbModems.getModem(self.getVendor(), self.getProduct());
+    }
+
+    private long getTurnOffDelay() {
+        final SupportedUsbModemInfo usbModemInfo = getSupportedUsbModemInfo();
+        if (usbModemInfo != null) {
+            return usbModemInfo.getTurnOffDelay();
+        }
+        return 5000;
     }
 
     private boolean isOn() throws KuraException {

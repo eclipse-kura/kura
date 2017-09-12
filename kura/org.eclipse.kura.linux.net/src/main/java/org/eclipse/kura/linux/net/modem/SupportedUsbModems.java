@@ -85,6 +85,20 @@ public class SupportedUsbModems {
         }
     }
 
+    public static SupportedUsbModemInfo getModem(String vendorId, String productId) {
+        if (vendorId == null || productId == null) {
+            return null;
+        }
+
+        for (SupportedUsbModemInfo modem : SupportedUsbModemInfo.values()) {
+            if (vendorId.equals(modem.getVendorId()) && productId.equals(modem.getProductId())) {
+                return modem;
+            }
+        }
+
+        return null;
+    }
+
     public static SupportedUsbModemInfo getModem(String vendorId, String productId, String productName) {
         if (vendorId == null || productId == null) {
             return null;

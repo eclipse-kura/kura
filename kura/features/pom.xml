@@ -54,7 +54,7 @@
 
     <modules>
         <module>org.eclipse.kura.api.feature</module>
-        <module>org.eclipse.kura.camel.feature</module>
+        <module>org.eclipse.kura.implementations.feature</module>
         <module>org.eclipse.kura.runtime.feature</module>
         <module>org.eclipse.kura.protocol.modbus.feature</module>
         <module>org.eclipse.kura.driver.opcua.feature</module>

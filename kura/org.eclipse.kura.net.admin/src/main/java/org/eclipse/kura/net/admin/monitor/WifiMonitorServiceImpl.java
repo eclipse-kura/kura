@@ -241,6 +241,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                     // Get current configuration
                     WifiInterfaceConfigImpl wifiInterfaceConfig = (WifiInterfaceConfigImpl) this.currentNetworkConfiguration
                             .getNetInterfaceConfig(interfaceName);
+                    NetConfigIP4 netConfig = getIP4config(wifiInterfaceConfig);
                     WifiConfig wifiConfig = getWifiConfig(wifiInterfaceConfig);
 
                     // Make sure we have enough information
@@ -266,7 +267,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                         // Update the current wifi state
                         this.interfaceStatuses.remove(interfaceName);
                         this.interfaceStatuses.put(interfaceName,
-                                new InterfaceState(NetInterfaceType.WIFI, interfaceName));
+                                new InterfaceState(NetInterfaceType.WIFI, interfaceName, netConfig.getConfigMode()));
                     }
 
                     // Get current state
@@ -942,9 +943,11 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             if (wifiInterfaceConfig == null) {
                 continue;
             }
+            NetConfigIP4 netConfig = getIP4config(wifiInterfaceConfig);
             WifiConfig wifiConfig = getWifiConfig(wifiInterfaceConfig);
             if (wifiConfig != null) {
-                statuses.put(interfaceName, new WifiInterfaceState(interfaceName, wifiConfig.getMode()));
+                statuses.put(interfaceName,
+                        new WifiInterfaceState(interfaceName, wifiConfig.getMode(), netConfig.getConfigMode()));
             }
         }
         return statuses;

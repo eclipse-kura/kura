@@ -36,6 +36,7 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
+import org.eclipse.kura.net.NetInterfaceConfigMode;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkAdminService;
@@ -172,8 +173,9 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
         }
     }
 
-    protected InterfaceState getEthernetInterfaceState(String interfaceName) throws KuraException {
-        return new InterfaceState(NetInterfaceType.ETHERNET, interfaceName);
+    protected InterfaceState getEthernetInterfaceState(String interfaceName, NetInterfaceConfigMode ifaceConfigMode)
+            throws KuraException {
+        return new InterfaceState(NetInterfaceType.ETHERNET, interfaceName, ifaceConfigMode);
     }
 
     protected void startInterfaceIfDown(String interfaceName) throws KuraException {
@@ -235,7 +237,8 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                 // (String interfaceName, boolean up, boolean link, IPAddress ipAddress)
                 // It will save a call to determine the iface type and it will keep InterfaceState
                 // as a state object as it should be. Maybe introduce an InterfaceStateBuilder.
-                currentInterfaceState = getEthernetInterfaceState(interfaceName);
+                NetInterfaceConfigMode ifaceConfigMode = this.getInterfaceConfigurationMode(currentInterfaceConfig);
+                currentInterfaceState = getEthernetInterfaceState(interfaceName, ifaceConfigMode);
                 if (!currentInterfaceState.equals(prevInterfaceState)) {
                     postStatusChangeEvent = true;
                 }
@@ -301,7 +304,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                 // Get the status after all ifdowns and ifups
                 // FIXME: reload the configuration IFF one of above enable/disable happened
                 if (interfaceStateChanged) {
-                    currentInterfaceState = getEthernetInterfaceState(interfaceName);
+                    currentInterfaceState = getEthernetInterfaceState(interfaceName, ifaceConfigMode);
                 }
 
                 // Manage the DHCP server and validate routes
@@ -491,6 +494,25 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
         }
 
         return status;
+    }
+
+    private NetInterfaceConfigMode getInterfaceConfigurationMode(EthernetInterfaceConfigImpl ethernetInterfaceConfig) {
+        NetInterfaceConfigMode ifaceConfigMode = NetInterfaceConfigMode.netIPv4ConfigModeManual;
+        if (ethernetInterfaceConfig != null) {
+            for (NetInterfaceAddressConfig addresses : ethernetInterfaceConfig.getNetInterfaceAddresses()) {
+                if (addresses != null) {
+                    List<NetConfig> netConfigs = addresses.getConfigs();
+                    if (netConfigs != null) {
+                        for (NetConfig netConfig : netConfigs) {
+                            if (netConfig instanceof NetConfigIP4) {
+                                ifaceConfigMode = ((NetConfigIP4) netConfig).getConfigMode();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return ifaceConfigMode;
     }
 
     // Initialize a monitor thread for each ethernet interface

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,6 +14,7 @@ package org.eclipse.kura.net.admin.monitor;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
+import org.eclipse.kura.net.NetInterfaceConfigMode;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.slf4j.Logger;
@@ -21,7 +22,8 @@ import org.slf4j.LoggerFactory;
 
 public class WifiInterfaceState extends InterfaceState {
 
-	private static final Logger s_logger = LoggerFactory.getLogger(WifiInterfaceState.class);
+    private static final Logger logger = LoggerFactory.getLogger(WifiInterfaceState.class);
+
     /**
      * WifiInterfaceState
      *
@@ -31,17 +33,18 @@ public class WifiInterfaceState extends InterfaceState {
      *            configured wifi mode as {@link WifiMode}
      * @throws KuraException
      */
-    public WifiInterfaceState(String interfaceName, WifiMode wifiMode) throws KuraException {
-        super(NetInterfaceType.WIFI, interfaceName);
+    public WifiInterfaceState(String interfaceName, WifiMode wifiMode, NetInterfaceConfigMode ifaceConfigMode)
+            throws KuraException {
+        super(NetInterfaceType.WIFI, interfaceName, ifaceConfigMode);
         if (WifiMode.MASTER.equals(wifiMode)) {
-            if (m_link) {
+            if (link) {
                 boolean isHostapdRunning = HostapdManager.isRunning(interfaceName);
                 boolean isIfaceInApMode = WifiMode.MASTER.equals(LinuxNetworkUtil.getWifiMode(interfaceName));
                 if (!isHostapdRunning || !isIfaceInApMode) {
-                    s_logger.warn("WifiInterfaceState() :: !! Link is down for the " + interfaceName
+                    logger.warn("WifiInterfaceState() :: !! Link is down for the " + interfaceName
                             + " interface. isHostapdRunning? " + isHostapdRunning + " isIfaceInApMode? "
                             + isIfaceInApMode);
-                    m_link = false;
+                    link = false;
                 }
             }
         }

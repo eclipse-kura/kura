@@ -33,6 +33,7 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
+import org.eclipse.kura.net.NetInterfaceConfigMode;
 import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
@@ -224,7 +225,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                         gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusDisabled.name());
                                     }
 
-                                    if (((NetConfigIP4) netConfig).isDhcp()) {
+                                    if (((NetConfigIP4) netConfig)
+                                            .getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeDhcp) {
                                         gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
 
                                         // since DHCP - populate current data
@@ -251,7 +253,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                         }
 
                                         // DHCP supplied DNS servers
-                                        StringBuffer sb = new StringBuffer();
+                                        StringBuilder sb = new StringBuilder();
                                         List<? extends IPAddress> dnsServers = addressConfig.getDnsServers();
                                         if (dnsServers != null && !dnsServers.isEmpty()) {
                                             String sep = "";
@@ -266,8 +268,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                             logger.debug("DNS Servers: [empty String]");
                                             gwtNetConfig.setReadOnlyDnsServers("");
                                         }
-                                    } else {
-                                        gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeManual.name());
+                                    } else if (((NetConfigIP4) netConfig)
+                                            .getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeStatic) {
+                                        gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeStatic.name());
 
                                         // since STATIC - populate with configured values
                                         // TODO - should we throw an error if current state doesn't match configuration?
@@ -291,10 +294,16 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                         } else {
                                             gwtNetConfig.setGateway("");
                                         }
+                                    } else {
+                                        gwtNetConfig
+                                                .setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeUnmanaged.name());
+                                        gwtNetConfig.setIpAddress("");
+                                        gwtNetConfig.setSubnetMask("");
+                                        gwtNetConfig.setGateway("");
                                     }
 
                                     // Custom DNS servers
-                                    StringBuffer sb = new StringBuffer();
+                                    StringBuilder sb = new StringBuilder();
                                     List<IP4Address> dnsServers = ((NetConfigIP4) netConfig).getDnsServers();
                                     if (dnsServers != null && !dnsServers.isEmpty()) {
                                         for (IP4Address dnsServer : dnsServers) {
@@ -310,7 +319,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                     }
 
                                     // Search domains
-                                    sb = new StringBuffer();
+                                    sb = new StringBuilder();
                                     List<IP4Address> winsServers = ((NetConfigIP4) netConfig).getWinsServers();
                                     if (winsServers != null && !winsServers.isEmpty()) {
                                         for (IP4Address winServer : winsServers) {
@@ -429,7 +438,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                     if (channels != null) {
                                         ArrayList<Integer> alChannels = new ArrayList<>();
                                         for (int channel : channels) {
-                                            alChannels.add(new Integer(channel));
+                                            alChannels.add(channel);
                                         }
                                         gwtWifiConfig.setChannels(alChannels);
                                     }
@@ -766,11 +775,13 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 String regexp = "[\\s,;\\n\\t]+";
 
                 if (GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name().equals(config.getConfigMode())) {
-                    logger.debug("mode is DHCP");
-                    netConfig4.setDhcp(true);
-                } else {
-                    logger.debug("mode is STATIC");
-                    netConfig4.setDhcp(false);
+                    logger.debug("updateNetInterfaceConfigurations() :: {} configuration mode is DHCP",
+                            config.getName());
+                    netConfig4.setConfigMode(NetInterfaceConfigMode.netIPv4ConfigModeDhcp);
+                } else if (GwtNetIfConfigMode.netIPv4ConfigModeStatic.name().equals(config.getConfigMode())) {
+                    logger.debug("updateNetInterfaceConfigurations() :: {} configuration mode is STATIC",
+                            config.getName());
+                    netConfig4.setConfigMode(NetInterfaceConfigMode.netIPv4ConfigModeStatic);
 
                     if (config.getIpAddress() != null && !config.getIpAddress().isEmpty()) {
                         logger.debug("setting address: {}", config.getIpAddress());
@@ -799,6 +810,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                         }
                         netConfig4.setDnsServers(dnsServers);
                     }
+                } else {
+                    logger.debug("updateNetInterfaceConfigurations() :: {} configuration mode is 'Manual'",
+                            config.getName());
+                    netConfig4.setConfigMode(NetInterfaceConfigMode.netIPv4ConfigModeManual);
                 }
 
                 String[] dnsServersString = config.getDnsServers().split(regexp);
@@ -961,8 +976,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     }
 
     @Override
-    public ArrayList<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken)
-            throws GwtKuraException {
+    public List<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         List<GwtFirewallOpenPortEntry> gwtOpenPortEntries = new ArrayList<>();
@@ -1119,7 +1133,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     }
 
     @Override
-    public ArrayList<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards(GwtXSRFToken xsrfToken)
+    public List<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards(GwtXSRFToken xsrfToken)
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
@@ -1159,7 +1173,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     }
 
     @Override
-    public ArrayList<GwtFirewallNatEntry> findDeviceFirewallNATs(GwtXSRFToken xsrfToken) throws GwtKuraException {
+    public List<GwtFirewallNatEntry> findDeviceFirewallNATs(GwtXSRFToken xsrfToken) throws GwtKuraException {
 
         checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
@@ -1400,7 +1414,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 dstNetwork = "0.0.0.0/0";
             }
 
-            boolean masquerade = entry.getMasquerade().equals("yes") ? true : false;
+            boolean masquerade = "yes".equals(entry.getMasquerade()) ? true : false;
 
             FirewallNatConfig firewallNatConfig = new FirewallNatConfig(
                     GwtSafeHtmlUtils.htmlEscape(entry.getInInterface()),

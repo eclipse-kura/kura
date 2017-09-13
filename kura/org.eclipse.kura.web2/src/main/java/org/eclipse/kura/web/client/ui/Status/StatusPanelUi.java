@@ -11,8 +11,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.Status;
 
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -165,7 +165,7 @@ public class StatusPanelUi extends Composite {
             public void onSuccess(GwtXSRFToken token) {
                 StatusPanelUi.this.gwtStatusService.getDeviceConfig(token,
                         StatusPanelUi.this.currentSession.isNetAdminAvailable(),
-                        new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+                        new AsyncCallback<List<GwtGroupedNVPair>>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -175,7 +175,7 @@ public class StatusPanelUi extends Composite {
                     }
 
                     @Override
-                    public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                    public void onSuccess(List<GwtGroupedNVPair> result) {
                         String title = "cloudStatus";
                         StatusPanelUi.this.statusGridProvider.getList()
                                 .add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));

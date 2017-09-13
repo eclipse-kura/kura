@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,30 +24,31 @@ import org.osgi.annotation.versioning.ProviderType;
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType
-public class NetConfigIP4 extends NetConfigIP<IP4Address>implements NetConfig4 {
+public class NetConfigIP4 extends NetConfigIP<IP4Address> implements NetConfig4 {
 
     private List<IP4Address> winsServers;
 
     public NetConfigIP4(NetInterfaceStatus status, boolean autoConnect) {
         super(status, autoConnect);
-        this.winsServers = new ArrayList<IP4Address>();
+        this.winsServers = new ArrayList<>();
     }
 
+    @Deprecated
     public NetConfigIP4(NetInterfaceStatus status, boolean autoConnect, boolean dhcp) {
         super(status, autoConnect, dhcp);
-        this.winsServers = new ArrayList<IP4Address>();
+        this.winsServers = new ArrayList<>();
     }
 
     public NetConfigIP4(NetInterfaceStatus status, boolean autoConnect, IP4Address address, short networkPrefixLength,
             IP4Address gateway) throws KuraException {
         super(status, autoConnect, address, networkPrefixLength, gateway);
-        this.winsServers = new ArrayList<IP4Address>();
+        this.winsServers = new ArrayList<>();
     }
 
     public NetConfigIP4(NetInterfaceStatus status, boolean autoConnect, IP4Address address, IP4Address subnetMask,
             IP4Address gateway) throws KuraException {
         super(status, autoConnect, address, subnetMask, gateway);
-        this.winsServers = new ArrayList<IP4Address>();
+        this.winsServers = new ArrayList<>();
     }
 
     /**

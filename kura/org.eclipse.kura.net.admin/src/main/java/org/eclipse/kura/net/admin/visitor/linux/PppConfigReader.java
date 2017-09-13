@@ -40,6 +40,7 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
+import org.eclipse.kura.net.NetInterfaceConfigMode;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.admin.NetworkConfigurationServiceImpl;
@@ -468,7 +469,8 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         }
         logger.debug("Setting NetInterfaceStatus to " + netInterfaceStatus + " for " + interfaceName);
 
-        NetConfigIP4 netConfigIP4 = new NetConfigIP4(netInterfaceStatus, true, true);
+        NetConfigIP4 netConfigIP4 = new NetConfigIP4(netInterfaceStatus, true);
+        netConfigIP4.setConfigMode(NetInterfaceConfigMode.netIPv4ConfigModeDhcp);
 
         key = new StringBuilder("net.interface.").append(interfaceName).append(".config.dnsServers");
         String dnsServersStr = getKuranetProperty(key.toString());

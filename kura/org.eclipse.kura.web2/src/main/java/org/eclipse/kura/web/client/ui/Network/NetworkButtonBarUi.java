@@ -44,7 +44,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 
 public class NetworkButtonBarUi extends Composite {
 
-    private static final String IPV4_MODE_MANUAL_NAME = GwtNetIfConfigMode.netIPv4ConfigModeManual.name();
+    private static final String IPV4_MODE_STATIC_NAME = GwtNetIfConfigMode.netIPv4ConfigModeStatic.name();
 
     private static NetworkButtonBarUiUiBinder uiBinder = GWT.create(NetworkButtonBarUiUiBinder.class);
     private static final Logger logger = Logger.getLogger(NetworkButtonBarUi.class.getSimpleName());
@@ -110,7 +110,7 @@ public class NetworkButtonBarUi extends Composite {
                         if (newNetwork != null) {
                             // if a static ip assigned, re-direct to the new
                             // location
-                            if (updatedNetIf.getConfigMode().equals(IPV4_MODE_MANUAL_NAME)
+                            if (updatedNetIf.getConfigMode().equals(IPV4_MODE_STATIC_NAME)
                                     && newNetwork.equals(prevNetwork)
                                     && Window.Location.getHost().equals(prevNetIf.getIpAddress())) {
                                 Timer t = new Timer() {

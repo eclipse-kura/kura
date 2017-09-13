@@ -37,6 +37,7 @@ import org.eclipse.kura.net.NetConfigIP6;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
+import org.eclipse.kura.net.NetInterfaceConfigMode;
 import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
@@ -117,7 +118,7 @@ public class NetworkConfiguration {
         if (availableInterfaces != null) {
             logger.debug("There are {} interfaces to add to the new configuration", availableInterfaces.length);
             for (String currentNetInterface : availableInterfaces) {
-                StringBuffer keyBuffer = new StringBuffer();
+                StringBuilder keyBuffer = new StringBuilder();
                 keyBuffer.append("net.interface.").append(currentNetInterface).append(".type");
                 NetInterfaceType type = NetInterfaceType.UNKNOWN;
                 if (properties.get(keyBuffer.toString()) != null) {
@@ -197,7 +198,7 @@ public class NetworkConfiguration {
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         Iterator<String> it = this.netInterfaceConfigs.keySet().iterator();
         while (it.hasNext()) {
@@ -373,30 +374,30 @@ public class NetworkConfiguration {
 
     // Returns a List of all modified NetInterfaceConfigs, or if none are specified, all NetInterfaceConfigs
     public List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getModifiedNetInterfaceConfigs() {
-        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = null;
+        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> networkInterfaceConfigs;
         if (this.modifiedInterfaceNames != null && !this.modifiedInterfaceNames.isEmpty()) {
-            netInterfaceConfigs = new ArrayList<>();
+            networkInterfaceConfigs = new ArrayList<>();
             for (String interfaceName : this.modifiedInterfaceNames) {
                 NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig = this.netInterfaceConfigs
                         .get(interfaceName);
                 if (netInterfaceConfig != null) {
-                    netInterfaceConfigs.add(this.netInterfaceConfigs.get(interfaceName));
+                    networkInterfaceConfigs.add(this.netInterfaceConfigs.get(interfaceName));
                 }
             }
         } else {
-            netInterfaceConfigs = getNetInterfaceConfigs();
+            networkInterfaceConfigs = getNetInterfaceConfigs();
         }
 
-        return netInterfaceConfigs;
+        return networkInterfaceConfigs;
     }
 
     public List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getNetInterfaceConfigs() {
-        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = new ArrayList<>();
+        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> networkInterfaceConfigs = new ArrayList<>();
         Iterator<String> it = this.netInterfaceConfigs.keySet().iterator();
         while (it.hasNext()) {
-            netInterfaceConfigs.add(this.netInterfaceConfigs.get(it.next()));
+            networkInterfaceConfigs.add(this.netInterfaceConfigs.get(it.next()));
         }
-        return netInterfaceConfigs;
+        return networkInterfaceConfigs;
     }
 
     public NetInterfaceConfig<? extends NetInterfaceAddressConfig> getNetInterfaceConfig(String interfaceName) {
@@ -458,10 +459,10 @@ public class NetworkConfiguration {
     private void recomputeNetworkProperties() {
         Map<String, Object> properties = new HashMap<>();
 
-        String netIfPrefix = null;
-        String netIfReadOnlyPrefix = null;
-        String netIfConfigPrefix = null;
-        StringBuilder sbPrefix = null;
+        String netIfPrefix;
+        String netIfReadOnlyPrefix;
+        String netIfConfigPrefix;
+        StringBuilder sbPrefix;
         StringBuilder sbInterfaces = new StringBuilder();
 
         if (this.modifiedInterfaceNames != null && !this.modifiedInterfaceNames.isEmpty()) {
@@ -562,7 +563,7 @@ public class NetworkConfiguration {
                 String delim;
 
                 // revision
-                StringBuffer revisionIdBuf = new StringBuffer();
+                StringBuilder revisionIdBuf = new StringBuilder();
                 String[] revisionId = ((ModemInterface<?>) netInterfaceConfig).getRevisionId();
                 if (revisionId != null) {
                     delim = null;
@@ -576,7 +577,7 @@ public class NetworkConfiguration {
                 }
 
                 // technology types
-                StringBuffer techTypesBuf = new StringBuffer();
+                StringBuilder techTypesBuf = new StringBuilder();
                 List<ModemTechnologyType> techTypes = ((ModemInterface<?>) netInterfaceConfig).getTechnologyTypes();
                 if (techTypes != null) {
                     delim = null;
@@ -723,7 +724,7 @@ public class NetworkConfiguration {
                 .append(mode.toString().toLowerCase());
 
         int[] channels = wifiConfig.getChannels();
-        StringBuffer sbChannel = new StringBuffer();
+        StringBuilder sbChannel = new StringBuilder();
         if (channels != null) {
             for (int i = 0; i < channels.length; i++) {
                 sbChannel.append(channels[i]);
@@ -1246,7 +1247,7 @@ public class NetworkConfiguration {
     }
 
     private static Password getPassword(String prefix, Map<String, Object> properties) throws KuraException {
-        Password password = null;
+        Password password;
         String key = prefix + "password";
         Object psswdObj = properties.get(key);
         if (psswdObj instanceof Password) {
@@ -1361,9 +1362,11 @@ public class NetworkConfiguration {
         }
         properties.put(netIfConfigPrefix + "ip4.dnsServers", sbDnsAddresses.toString());
 
-        if (nc.isDhcp()) {
+        if (nc.getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeDhcp) {
+            properties.put(netIfConfigPrefix + "ip4.mode", NetInterfaceConfigMode.netIPv4ConfigModeDhcp.name());
             properties.put(netIfConfigPrefix + "dhcpClient4.enabled", true);
-        } else {
+        } else if (nc.getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeStatic) {
+            properties.put(netIfConfigPrefix + "ip4.mode", NetInterfaceConfigMode.netIPv4ConfigModeStatic.name());
             properties.put(netIfConfigPrefix + "dhcpClient4.enabled", false);
 
             if (nc.getAddress() != null) {
@@ -1401,6 +1404,9 @@ public class NetworkConfiguration {
                 }
             }
             properties.put(netIfConfigPrefix + "domains", sbDomains.toString());
+        } else {
+            properties.put(netIfConfigPrefix + "ip4.mode", NetInterfaceConfigMode.netIPv4ConfigModeManual.name());
+            properties.put(netIfConfigPrefix + "dhcpClient4.enabled", false);
         }
     }
 
@@ -1513,7 +1519,7 @@ public class NetworkConfiguration {
 
     private void populateNetInterfaceConfiguration(
             AbstractNetInterface<? extends NetInterfaceAddressConfig> netInterfaceConfig, Map<String, Object> props)
-                    throws UnknownHostException, KuraException {
+            throws UnknownHostException, KuraException {
         String interfaceName = netInterfaceConfig.getName();
 
         StringBuilder keyBuffer = new StringBuilder();
@@ -1713,7 +1719,7 @@ public class NetworkConfiguration {
                                 ModemTechnologyType modemTechType = ModemTechnologyType.valueOf(techTypeString);
                                 technologyTypes.add(modemTechType);
                             } catch (IllegalArgumentException e) {
-                                logger.error("Could not parse type {}", techTypeString);
+                                logger.error("Could not parse type {}", techTypeString, e);
                             }
                         }
                     }
@@ -1897,19 +1903,32 @@ public class NetworkConfiguration {
 
             // POPULATE NetConfigs
 
+            // Configuration mode IP
+            String configMode4 = null;
+            String configMode4Key = "net.interface." + interfaceName + ".config.ip4.mode";
+            if (props.containsKey(configMode4Key)) {
+                configMode4 = (String) props.get(configMode4Key);
+            }
+            if (configMode4 == null) {
+                configMode4 = NetInterfaceConfigMode.netIPv4ConfigModeManual.name();
+            }
+            NetInterfaceConfigMode ifaceConfigMode = NetInterfaceConfigMode.valueOf(configMode4);
+            logger.trace("Configuration Mode Ipv4? {}", configMode4);
+
             // dhcp4
             String configDhcp4 = "net.interface." + interfaceName + ".config.dhcpClient4.enabled";
-            NetConfigIP4 netConfigIP4 = null;
+            NetConfigIP4 netConfigIP4;
             boolean dhcpEnabled = false;
             if (props.containsKey(configDhcp4)) {
                 dhcpEnabled = (Boolean) props.get(configDhcp4);
                 logger.trace("DHCP 4 enabled? {}", dhcpEnabled);
             }
 
-            netConfigIP4 = new NetConfigIP4(NetInterfaceStatus.valueOf(configStatus4), autoConnect, dhcpEnabled);
+            netConfigIP4 = new NetConfigIP4(NetInterfaceStatus.valueOf(configStatus4), autoConnect);
+            netConfigIP4.setConfigMode(ifaceConfigMode);
             netConfigs.add(netConfigIP4);
 
-            if (!dhcpEnabled) {
+            if (ifaceConfigMode == NetInterfaceConfigMode.netIPv4ConfigModeStatic) {
                 // NetConfigIP4
                 String configIp4 = "net.interface." + interfaceName + ".config.ip4.address";
                 if (props.containsKey(configIp4)) {
@@ -2018,10 +2037,10 @@ public class NetworkConfiguration {
                 boolean dhcpServerEnabled = (Boolean) props.get(configDhcpServerEnabled);
                 logger.trace("DHCP Server 4 enabled? {}", dhcpServerEnabled);
 
-                IP4Address subnet = null;
+                IP4Address subnet;
                 IP4Address routerAddress = dhcpEnabled ? (IP4Address) netInterfaceAddress.getAddress()
                         : netConfigIP4.getAddress();
-                IP4Address subnetMask = null;
+                IP4Address subnetMask;
                 int defaultLeaseTime = -1;
                 int maximumLeaseTime = -1;
                 short prefix = -1;
@@ -2116,7 +2135,7 @@ public class NetworkConfiguration {
                         netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
                     } catch (KuraException e) {
                         logger.warn("This invalid DhcpServerCfgIP4 configuration is ignored - {}, {}", dhcpServerCfg,
-                                dhcpServerCfgIP4);
+                                dhcpServerCfgIP4, e);
                     }
                 } else {
                     StringBuilder sb = new StringBuilder("Not including DhcpServerConfig - router: ");
@@ -2131,7 +2150,7 @@ public class NetworkConfiguration {
 
             // dhcp6
             String configDhcp6 = "net.interface." + interfaceName + ".config.dhcpClient6.enabled";
-            NetConfigIP6 netConfigIP6 = null;
+            NetConfigIP6 netConfigIP6;
             boolean dhcp6Enabled = false;
             if (props.containsKey(configDhcp6)) {
                 dhcp6Enabled = (Boolean) props.get(configDhcp6);

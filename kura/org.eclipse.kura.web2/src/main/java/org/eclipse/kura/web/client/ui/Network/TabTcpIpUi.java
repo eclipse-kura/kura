@@ -67,9 +67,11 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class TabTcpIpUi extends Composite implements NetworkTab {
 
-    private static final String IPV4_MODE_MANUAL = GwtNetIfConfigMode.netIPv4ConfigModeManual.name();
+    private static final String IPV4_MODE_STATIC = GwtNetIfConfigMode.netIPv4ConfigModeStatic.name();
+    private static final String IPV4_MODE_STATIC_MESSAGE = MessageUtils.get(IPV4_MODE_STATIC);
     private static final String IPV4_MODE_DHCP = GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name();
     private static final String IPV4_MODE_DHCP_MESSAGE = MessageUtils.get(IPV4_MODE_DHCP);
+    private static final String IPV4_MODE_UNMANAGED = GwtNetIfConfigMode.netIPv4ConfigModeUnmanaged.name();
     private static final String IPV4_STATUS_WAN = GwtNetIfStatus.netIPv4StatusEnabledWAN.name();
     private static final String IPV4_STATUS_WAN_MESSAGE = MessageUtils.get(IPV4_STATUS_WAN);
     private static final String IPV4_STATUS_LAN = GwtNetIfStatus.netIPv4StatusEnabledLAN.name();
@@ -193,8 +195,10 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 
             if (IPV4_MODE_DHCP_MESSAGE.equals(this.configure.getSelectedItemText())) {
                 updatedNetIf.setConfigMode(IPV4_MODE_DHCP);
+            } else if (IPV4_MODE_STATIC_MESSAGE.equals(this.configure.getSelectedItemText())) {
+                updatedNetIf.setConfigMode(IPV4_MODE_STATIC);
             } else {
-                updatedNetIf.setConfigMode(IPV4_MODE_MANUAL);
+                updatedNetIf.setConfigMode(IPV4_MODE_UNMANAGED);
             }
 
             if (this.ip.getValue() != null && !"".equals(this.ip.getValue().trim())) {
@@ -231,7 +235,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
         // check and make sure if 'Enabled for WAN' then either DHCP is selected
         // or STATIC and a gateway is set
         if (!IPV4_STATUS_DISABLED_MESSAGE.equals(this.status.getSelectedValue())
-                && this.configure.getSelectedItemText().equalsIgnoreCase(VMSGS.netIPv4ConfigModeManual())) {
+                && this.configure.getSelectedItemText().equalsIgnoreCase(VMSGS.netIPv4ConfigModeStatic())) {
             if ((this.gateway.getValue() == null || "".equals(this.gateway.getValue().trim()))
                     && IPV4_STATUS_WAN_MESSAGE.equals(this.status.getSelectedValue())) {
                 this.groupGateway.setValidationState(ValidationState.ERROR);
@@ -430,11 +434,16 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             this.gateway.setEnabled(false);
             this.renew.setEnabled(true);
 
-        } else if (this.configure.getSelectedItemText().equalsIgnoreCase(VMSGS.netIPv4ConfigModeManual())) {
+        } else if (this.configure.getSelectedItemText().equalsIgnoreCase(VMSGS.netIPv4ConfigModeStatic())) {
             // Manually selected
             this.ip.setEnabled(true);
             this.subnet.setEnabled(true);
             this.gateway.setEnabled(true);
+            this.renew.setEnabled(false);
+        } else {
+            this.ip.setEnabled(false);
+            this.subnet.setEnabled(false);
+            this.gateway.setEnabled(false);
             this.renew.setEnabled(false);
         }
 
@@ -755,7 +764,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                     	this.dns.setEnabled(false);
                     	this.search.setEnabled(false);
                     }
-                } else {
+                } else if (configureValue.equals(IPV4_MODE_STATIC_MESSAGE)){
                     this.ip.setEnabled(true);
                     this.subnet.setEnabled(true);
                     //this.gateway.setEnabled(true);
@@ -771,6 +780,13 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                         this.search.setEnabled(false);
                     }
                     this.renew.setEnabled(false);
+                } else {
+                    this.ip.setEnabled(false);
+                    this.subnet.setEnabled(false);
+                    this.gateway.setEnabled(false);
+                    this.renew.setEnabled(true);
+                    this.dns.setEnabled(false);
+                    this.search.setEnabled(false);
                 }
                 /*
                 this.dns.setEnabled(true);

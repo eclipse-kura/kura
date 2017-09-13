@@ -55,6 +55,7 @@ import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetConfigIP6;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
+import org.eclipse.kura.net.NetInterfaceConfigMode;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkAdminService;
@@ -976,16 +977,18 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                         wifiNetInterfaceAddressConfigs);
 
                 wifiMode = wifiInterfaceAddressConfig.getMode();
-                wifiInterfaceState = new WifiInterfaceState(interfaceName, wifiMode);
 
+                NetInterfaceConfigMode ifaceConfigMode = NetInterfaceConfigMode.netIPv4ConfigModeManual;
                 for (NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
                     if (netConfig instanceof NetConfigIP4) {
                         status = ((NetConfigIP4) netConfig).getStatus();
+                        ((NetConfigIP4) netConfig).getConfigMode();
                         logger.debug("Interface status is set to {}", status);
                     } else if (netConfig instanceof WifiConfig && ((WifiConfig) netConfig).getMode() == wifiMode) {
                         wifiConfig = (WifiConfig) netConfig;
                     }
                 }
+                wifiInterfaceState = new WifiInterfaceState(interfaceName, wifiMode, ifaceConfigMode);
             }
 
             if (!LinuxNetworkUtil.hasAddress(interfaceName)

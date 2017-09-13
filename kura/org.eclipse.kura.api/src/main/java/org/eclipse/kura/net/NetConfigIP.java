@@ -30,7 +30,7 @@ import org.osgi.annotation.versioning.ProviderType;
  *
  * @param <T>
  *            IPv4 or IPv6 address
- *            
+ * 
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType
@@ -62,6 +62,7 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
         this.properties = new HashMap<>();
     }
 
+    @Deprecated
     NetConfigIP(NetInterfaceStatus status, boolean autoConnect, boolean dhcp) {
         this.status = status;
         this.autoConnect = autoConnect;
@@ -127,20 +128,24 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
     public void setStatus(NetInterfaceStatus status) {
         this.status = status;
     }
-    
+
     /**
      * Returns network interface configuration mode (i.e. DHCP, Static, or Manual)
+     * 
      * @return NetInterfaceConfigMode
      */
     public NetInterfaceConfigMode getConfigMode() {
         return this.configMode;
     }
-    
+
     /**
      * Sets network interface configuration mode
-     * @param configMode - network interface configuration mode
+     * 
+     * @param configMode
+     *            - network interface configuration mode
      */
     public void setConfigMode(NetInterfaceConfigMode configMode) {
+        this.dhcp = (configMode == NetInterfaceConfigMode.netIPv4ConfigModeDhcp) ? true : false;
         this.configMode = configMode;
     }
 
@@ -167,7 +172,7 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
     public void setDhcp(boolean dhcp) {
         this.dhcp = dhcp;
     }
-    
+
     /**
      * Returns the address that should be statically assigned to the interface.
      * The returned address is IP4Address or IP6Address depending on

@@ -157,13 +157,15 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 
                             // BOOTPROTO
                             sb.append("BOOTPROTO=");
-                            if (((NetConfigIP4) netConfig).getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeDhcp) {
+                            if (((NetConfigIP4) netConfig)
+                                    .getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeDhcp) {
                                 logger.debug("new config is DHCP");
                                 sb.append("dhcp\n");
-                            } else if (((NetConfigIP4) netConfig).getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeStatic) {
+                            } else if (((NetConfigIP4) netConfig)
+                                    .getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeStatic) {
                                 logger.debug("new config is Static");
                                 sb.append("static\n");
-                                
+
                                 // IPADDR
                                 sb.append("IPADDR=").append(((NetConfigIP4) netConfig).getAddress().getHostAddress())
                                         .append("\n");
@@ -463,10 +465,12 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                         } else {
                             sb.append("iface " + interfaceName + " inet ");
                         }
+
+                        logger.debug("debianWriteUtility() :: new config mode for {} interface is: {}", interfaceName,
+                                ((NetConfigIP4) netConfig).getConfigMode());
                         if (((NetConfigIP4) netConfig)
                                 .getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeDhcp) {
                             // DHCP Client configuration ...
-                            logger.debug("new config is DHCP");
                             sb.append("dhcp\n");
                             // DEFROUTE
                             if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
@@ -477,7 +481,6 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                         } else if (((NetConfigIP4) netConfig)
                                 .getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeStatic) {
                             // STATIC configuration ...
-                            logger.debug("new config is STATIC");
                             sb.append("static\n");
 
                             // IPADDR
@@ -498,7 +501,6 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                             }
                         } else {
                             // 'Manual' configuration
-                            logger.debug("new config is Manual");
                             sb.append("manual\n");
                         }
 
@@ -640,7 +642,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                         } else {
                             props.setProperty("DEFROUTE", "no");
                         }
-                    } else if (netConfigIP4.getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeStatic){
+                    } else if (netConfigIP4.getConfigMode() == NetInterfaceConfigMode.netIPv4ConfigModeStatic) {
                         // BOOTPROTO=static
                         props.setProperty("BOOTPROTO", "static");
                         // IPADDR

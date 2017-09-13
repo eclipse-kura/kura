@@ -174,15 +174,18 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                         }
 
                         if ("dhcp".equals(bootproto)) {
-                            logger.debug("Interface configuration mode is currently set for DHCP");
+                            logger.debug("getConfig() :: {} configuration mode is currently set to DHCP",
+                                    interfaceName);
                             netInterfaceConfigMode = NetInterfaceConfigMode.netIPv4ConfigModeDhcp;
                             ipAddress = null;
                             netmask = null;
                         } else if ("static".equals(bootproto)) {
-                            logger.debug("Interface configuration mode is currently set for static IP address");
+                            logger.debug("getConfig() :: {} configuration mode is currently set to static IP address",
+                                    interfaceName);
                             netInterfaceConfigMode = NetInterfaceConfigMode.netIPv4ConfigModeStatic;
                         } else {
-                            logger.debug("Interface is curently set in the 'manual' mode");
+                            logger.debug("getConfig() :: {} configuration mode is currently set to 'manual'",
+                                    interfaceName);
                             netInterfaceConfigMode = NetInterfaceConfigMode.netIPv4ConfigModeManual;
                         }
                     } catch (Exception e) {
@@ -248,7 +251,8 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                     }
 
                     NetConfigIP4 netConfig = new NetConfigIP4(netInterfaceStatus, autoConnect);
-                    setNetConfigIP4(netConfig, autoConnect, netInterfaceConfigMode, address, gateway, prefixString, netmask, kuraProps);
+                    setNetConfigIP4(netConfig, autoConnect, netInterfaceConfigMode, address, gateway, prefixString,
+                            netmask, kuraProps);
                     logger.debug("NetConfig: {}", netConfig);
                     netConfigs.add(netConfig);
                 }
@@ -414,11 +418,11 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         return kuraProps;
     }
 
-    private static void setNetConfigIP4(NetConfigIP4 netConfig, boolean autoConnect, NetInterfaceConfigMode netInterfaceConfigMode, IP4Address address,
-            String gateway, String prefixString, String netmask, Properties kuraProps) throws KuraException {
-        
+    private static void setNetConfigIP4(NetConfigIP4 netConfig, boolean autoConnect,
+            NetInterfaceConfigMode netInterfaceConfigMode, IP4Address address, String gateway, String prefixString,
+            String netmask, Properties kuraProps) throws KuraException {
+
         netConfig.setConfigMode(netInterfaceConfigMode);
-        netConfig.setDhcp((netInterfaceConfigMode == NetInterfaceConfigMode.netIPv4ConfigModeDhcp)? true : false);
         if (kuraProps != null) {
             // get the DNS
             List<IP4Address> dnsServers = new ArrayList<>();

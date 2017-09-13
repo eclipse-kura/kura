@@ -11,17 +11,17 @@
  *******************************************************************************/
 package org.eclipse.kura.net;
 
-
 public enum NetInterfaceConfigMode {
 
     /** network interface is configured as DHCP client **/
     netIPv4ConfigModeDhcp,
-    
+
     /** network interface is configured with static IP address **/
     netIPv4ConfigModeStatic,
-    
-    /** network interface is configured in 'manual' or 'BOOTPROTO=none' mode 
-     * and is not managed by Linux. 
+
+    /**
+     * network interface is configured in 'manual' or 'BOOTPROTO=none' mode
+     * and is not managed by Linux.
      */
-    netIPv4ConfigModeManual
+    netIPv4ConfigModeManual;
 }

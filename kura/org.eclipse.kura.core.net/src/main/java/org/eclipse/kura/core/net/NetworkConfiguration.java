@@ -1519,7 +1519,7 @@ public class NetworkConfiguration {
 
     private void populateNetInterfaceConfiguration(
             AbstractNetInterface<? extends NetInterfaceAddressConfig> netInterfaceConfig, Map<String, Object> props)
-                    throws UnknownHostException, KuraException {
+            throws UnknownHostException, KuraException {
         String interfaceName = netInterfaceConfig.getName();
 
         StringBuilder keyBuffer = new StringBuilder();
@@ -1776,7 +1776,7 @@ public class NetworkConfiguration {
         if (configStatus6 == null) {
             configStatus6 = NetInterfaceStatus.netIPv6StatusDisabled.name();
         }
-        
+
         // POPULATE NetInterfaceAddresses
         for (NetInterfaceAddressConfig netInterfaceAddress : netInterfaceConfig.getNetInterfaceAddresses()) {
 
@@ -1902,7 +1902,7 @@ public class NetworkConfiguration {
             }
 
             // POPULATE NetConfigs
-            
+
             // Configuration mode IP
             String configMode4 = null;
             String configMode4Key = "net.interface." + interfaceName + ".config.ip4.mode";
@@ -1912,21 +1912,23 @@ public class NetworkConfiguration {
             if (configMode4 == null) {
                 configMode4 = NetInterfaceConfigMode.netIPv4ConfigModeManual.name();
             }
+            NetInterfaceConfigMode ifaceConfigMode = NetInterfaceConfigMode.valueOf(configMode4);
             logger.trace("Configuration Mode Ipv4? {}", configMode4);
-            
+
             // dhcp4
             String configDhcp4 = "net.interface." + interfaceName + ".config.dhcpClient4.enabled";
-            NetConfigIP4 netConfigIP4 = null;
+            NetConfigIP4 netConfigIP4;
             boolean dhcpEnabled = false;
             if (props.containsKey(configDhcp4)) {
                 dhcpEnabled = (Boolean) props.get(configDhcp4);
                 logger.trace("DHCP 4 enabled? {}", dhcpEnabled);
             }
 
-            netConfigIP4 = new NetConfigIP4(NetInterfaceStatus.valueOf(configStatus4), autoConnect, dhcpEnabled);
+            netConfigIP4 = new NetConfigIP4(NetInterfaceStatus.valueOf(configStatus4), autoConnect);
+            netConfigIP4.setConfigMode(ifaceConfigMode);
             netConfigs.add(netConfigIP4);
 
-            if (!dhcpEnabled) {
+            if (ifaceConfigMode == NetInterfaceConfigMode.netIPv4ConfigModeStatic) {
                 // NetConfigIP4
                 String configIp4 = "net.interface." + interfaceName + ".config.ip4.address";
                 if (props.containsKey(configIp4)) {

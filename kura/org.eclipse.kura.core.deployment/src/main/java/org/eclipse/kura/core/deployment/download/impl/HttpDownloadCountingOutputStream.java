@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -113,7 +113,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
                     int bufferSize = getBufferSize();
 
                     if (bufferSize == 0 && getTotalBytes() > 0) {
-                        int newSize = Math.round(HttpDownloadCountingOutputStream.this.totalBytes / 100 * 1);
+                        int newSize = Math.round(HttpDownloadCountingOutputStream.this.totalBytes / 100 + 1);
                         bufferSize = newSize;
                         setBufferSize(newSize);
                     } else if (bufferSize == 0) {

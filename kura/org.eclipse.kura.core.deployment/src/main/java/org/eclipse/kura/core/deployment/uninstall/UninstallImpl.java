@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -71,13 +71,13 @@ public class UninstallImpl {
                 DeploymentPackage dp = this.m_deploymentAdmin.getDeploymentPackage(name);
                 if (dp != null) {
                     dp.uninstall();
-                    String sUrl = CloudDeploymentHandlerV2.s_installImplementation.getDeployedPackages()
+                    String sUrl = CloudDeploymentHandlerV2.installImplementation.getDeployedPackages()
                             .getProperty(name);
                     File dpFile = new File(new URL(sUrl).getPath());
                     if (!dpFile.delete()) {
                         s_logger.warn("Cannot delete file at URL: {}", sUrl);
                     }
-                    CloudDeploymentHandlerV2.s_installImplementation.removePackageFromConfFile(name);
+                    CloudDeploymentHandlerV2.installImplementation.removePackageFromConfFile(name);
                 }
                 uninstallCompleteAsync(options, name);
 

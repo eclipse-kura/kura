@@ -178,7 +178,9 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
             if (runnable == null && this.properties.get("led") != null) {
                 runnable = getGpioStatusWorker(status);
             }
-            break;
+            if (runnable != null) {
+                break;
+            }
         case LOG:
             runnable = getLogStatusWorker(status);
             break;
@@ -219,7 +221,7 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
 
         return createLedRunnable(status, gpioLedManager);
     }
-    
+
     private Runnable createLedRunnable(CloudConnectionStatusEnum status, LedManager linuxLedManager) {
         Runnable runnable;
         switch (status) {

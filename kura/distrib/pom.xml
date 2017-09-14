@@ -326,16 +326,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.example.camel.aggregation</artifactId>
-                                    <version>${org.eclipse.kura.example.camel.aggregation.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.example.camel.quickstart</artifactId>
-                                    <version>${org.eclipse.kura.example.camel.quickstart.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.asset.provider</artifactId>
                                     <version>${org.eclipse.kura.asset.provider.version}</version>
                                 </artifactItem>
@@ -597,12 +587,6 @@
                                     tofile="target/plugins/org.eclipse.kura.emulator.usb_${org.eclipse.kura.emulator.usb.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.emulator.watchdog.jar"
                                     tofile="target/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.example.camel.aggregation.jar"
-                                    tofile="target/plugins/org.eclipse.kura.example.camel.aggregation_${org.eclipse.kura.example.camel.aggregation.version}.jar"
-                                    failonerror="false" />
-                                <move file="target/plugins/org.eclipse.kura.example.camel.quickstart.jar"
-                                    tofile="target/plugins/org.eclipse.kura.example.camel.quickstart_${org.eclipse.kura.example.camel.quickstart.version}.jar"
-                                    failonerror="false" />
                                 <move file="target/plugins/org.eclipse.kura.wire.h2db.component.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.wire.h2db.component.provider_${org.eclipse.kura.wire.h2db.component.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.component.provider.jar"
@@ -2645,47 +2629,6 @@
                               <groupId>org.eclipse.kura.feature</groupId>
                               <artifactId>org.eclipse.kura.protocol.can.feature</artifactId>
                               <version>${org.eclipse.kura.protocol.can.feature.version}</version>
-                              <type>dp</type>
-                            </artifactItem>
-                          </artifactItems>
-                          <outputDirectory>${project.build.directory}</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-              </plugin>
-            </plugins>
-          </build>
-        </profile>
-        <profile>
-          <id>examples-dp</id>
-          <activation>
-            <activeByDefault>true</activeByDefault>
-          </activation>
-          <build>
-            <plugins>
-              <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>examples-dp</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                          <skip>${kura.skip.examples}</skip>
-                          <artifactItems>
-                            <artifactItem>
-                              <groupId>org.eclipse.kura.examples.feature</groupId>
-                              <artifactId>org.eclipse.kura.example.camel.aggregation.feature</artifactId>
-                              <version>${org.eclipse.kura.example.camel.aggregation.feature.version}</version>
-                              <type>dp</type>
-                            </artifactItem>
-                            <artifactItem>
-                              <groupId>org.eclipse.kura.examples.feature</groupId>
-                              <artifactId>org.eclipse.kura.example.camel.quickstart.feature</artifactId>
-                              <version>${org.eclipse.kura.example.camel.quickstart.feature.version}</version>
                               <type>dp</type>
                             </artifactItem>
                           </artifactItems>

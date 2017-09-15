@@ -41,6 +41,13 @@
         <kura.skip.examples>true</kura.skip.examples>
     </properties>
 
+    <organization>
+        <name>Eclipse Kura</name>
+        <url>http://www.eclipse.org/kura/</url>
+    </organization>
+    <inceptionYear>2017</inceptionYear>
+    <description>Kura is a Java/OSGI-based framework for IoT gateways. Kura APIs offer access to the underlying hardware (serial ports, GPS, watchdog, GPIOs, I2C, etc.), management of network configurations, communications with M2M/IoT Integration Platforms, and gateway management.</description>
+    
     <repositories>
         <repository>
             <id>kura_releases</id>
@@ -1878,7 +1885,7 @@
         </profile>
 
         <profile>
-            <id>fedora25</id>
+            <id>fedora</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -1909,7 +1916,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>fedora25-jars</id>
+                                <id>fedora-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1920,7 +1927,7 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="fedora25" />
+                                        <property name="build.name" value="fedora" />
                                         <property name="target.device" value="raspberry-pi" />
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="fedora" />
@@ -1933,12 +1940,108 @@
                             </execution>
                         </executions>
                     </plugin>
+	                <plugin>
+                        <groupId>de.dentrassi.maven</groupId>
+                        <artifactId>rpm</artifactId>
+                        <version>0.8.0</version>
+                        <executions>
+                            <execution> 
+                                <id>fedora-rpm</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>rpm</goal>
+                                </goals>
+                                <configuration>
+                                    <packageName>kura-fedora</packageName>
+                                    <attach>true</attach>
+                                    <group>Application/Misc</group>
+                                    <license>EPL 1.0</license>
+                                    <architecture>armv7hl</architecture>
+                                    <requires>
+                                        <require>java</require>
+                                        <require>which</require>
+                                        <require>busybox</require>
+                                        <require>setserial</require>
+                                        <require>iptables</require>
+                                        <require>iptables-services</require>
+                                        <require>openssl</require>
+                                        <require>openssh</require>
+                                        <require>procps</require>
+                                        <require>iw</require>
+                                        <require>wireless-tools</require>
+                                        <require>bind</require>
+                                        <require>openvpn</require>
+                                        <require>ppp</require>
+                                        <require>monit</require>
+                                        <require>dhcp</require>
+                                        <require>dhcp-server</require>
+                                        <require>dhcp-client</require>
+                                        <require>net-tools</require>
+                                        <require>hostapd</require>
+                                        <require>wpa_supplicant</require>
+                                        <require>gzip</require>
+                                        <require>cronie</require>
+                                        <require>logrotate</require>
+                                        <require>telnet</require>
+                                        <require>bluez</require>
+                                        <require>bluez-hcidump</require>
+                                        <require>socat</require>
+                                        <require>usbutils</require>
+                                        <require>iproute</require>
+                                        <require>unzip</require>
+                                        <require>psmisc</require>
+                                        <require>tar</require>
+                                        <require>dos2unix</require>
+                                    </requires>
+                                    <entries>
+                                        <entry>
+											<name>/tmp/kura_${project.version}_fedora_installer.sh</name>
+											<file>${project.build.directory}/kura_${project.version}_fedora_installer.sh</file>
+											<user>root</user>
+											<group>root</group>
+											<mode>0755</mode>
+                                        </entry>
+                                    </entries>
+                                    <afterInstallation>
+                                        <script>/tmp/kura_${project.version}_fedora_installer.sh</script>
+                                    </afterInstallation>
+                                    <skipSigning>true</skipSigning>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <version>2.5</version>
+                        <executions>
+                            <execution>
+                                <id>fedora-clean</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>clean</goal>
+                                </goals>
+                                <configuration>
+                                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                                    <filesets>
+                                        <fileset>
+                                            <directory>${project.build.directory}</directory>
+                                            <includes>
+                                               <include>kura_${project.version}_fedora_installer.sh</include>
+                                               <include>kura_${project.version}_fedora_installer.sh.md5</include>
+                                               <include>kura_${project.version}_fedora_installer.sh.SHA-1</include>
+                                            </includes>
+                                        </fileset>
+                                    </filesets>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
 
         <profile>
-            <id>fedora25-nn</id>
+            <id>fedora-nn</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -1969,7 +2072,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>fedora25-nn-jars</id>
+                                <id>fedora-nn-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1980,7 +2083,7 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="fedora25-nn" />
+                                        <property name="build.name" value="fedora-nn" />
                                         <property name="target.device" value="raspberry-pi-nn" />
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="fedora" />
@@ -1989,6 +2092,89 @@
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>de.dentrassi.maven</groupId>
+                        <artifactId>rpm</artifactId>
+                        <version>0.8.0</version>
+                        <executions>
+                            <execution> 
+                                <id>fedora-nn-rpm</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>rpm</goal>
+                                </goals>
+                                <configuration>
+                                    <packageName>kura-fedora-nn</packageName>
+                                    <attach>true</attach>
+                                    <group>Application/Misc</group>
+                                    <license>EPL 1.0</license>
+                                    <architecture>armv7hl</architecture>
+                                    <requires>
+                                        <require>java</require>
+                                        <require>which</require>
+                                        <require>busybox</require>
+                                        <require>setserial</require>
+                                        <require>openssl</require>
+                                        <require>openssh</require>
+                                        <require>procps</require>
+                                        <require>openvpn</require>
+                                        <require>monit</require>
+                                        <require>gzip</require>
+                                        <require>cronie</require>
+                                        <require>logrotate</require>
+                                        <require>telnet</require>
+                                        <require>bluez</require>
+                                        <require>bluez-hcidump</require>
+                                        <require>socat</require>
+                                        <require>usbutils</require>
+                                        <require>unzip</require>
+                                        <require>psmisc</require>
+                                        <require>tar</require>
+                                        <require>dos2unix</require>
+                                    </requires>
+                                    <entries>
+                                        <entry>
+                                            <name>/tmp/kura_${project.version}_fedora-nn_installer.sh</name>
+                                            <file>${project.build.directory}/kura_${project.version}_fedora-nn_installer.sh</file>
+                                            <user>root</user>
+                                            <group>root</group>
+                                            <mode>0755</mode>
+                                        </entry>
+                                    </entries>
+                                    <afterInstallation>
+                                        <script>/tmp/kura_${project.version}_fedora-nn_installer.sh</script>
+                                    </afterInstallation>
+                                    <skipSigning>true</skipSigning>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <version>2.5</version>
+                        <executions>
+                            <execution>
+                                <id>fedora-clean</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>clean</goal>
+                                </goals>
+                                <configuration>
+                                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                                    <filesets>
+                                        <fileset>
+                                            <directory>${project.build.directory}</directory>
+                                            <includes>
+                                               <include>kura_${project.version}_fedora-nn_installer.sh</include>
+                                               <include>kura_${project.version}_fedora-nn_installer.sh.md5</include>
+                                               <include>kura_${project.version}_fedora-nn_installer.sh.SHA-1</include>
+                                            </includes>
+                                        </fileset>
+                                    </filesets>
                                 </configuration>
                             </execution>
                         </executions>

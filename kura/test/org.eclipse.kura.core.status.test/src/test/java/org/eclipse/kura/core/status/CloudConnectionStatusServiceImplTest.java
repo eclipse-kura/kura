@@ -71,16 +71,6 @@ public class CloudConnectionStatusServiceImplTest {
         assertEquals(1, componentRegistry.size());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void testActivateLinuxLed() throws NoSuchFieldException {
-        // Fails because we don't have that resource available and there are no gpios specified as a fallback option.
-        CloudConnectionStatusServiceImpl service = initCloudConnectionStatusService(
-                "ccs:linux_led:/sys/class/led/led1_green");
-
-        ComponentContext componentContext = mock(ComponentContext.class);
-        service.activate(componentContext);
-    }
-
     @Test
     public void testActivateLinuxGpioLed() throws NoSuchFieldException {
         CloudConnectionStatusServiceImpl service = initCloudConnectionStatusService(
@@ -205,7 +195,7 @@ public class CloudConnectionStatusServiceImplTest {
             assertEquals(selectedStatus, getStatus(service));
         }
     }
-    
+
     @Test
     public void testRegisterStatusesGpio() throws NoSuchFieldException {
         CloudConnectionStatusEnum[] statuses = { CloudConnectionStatusEnum.OFF, CloudConnectionStatusEnum.FAST_BLINKING,
@@ -222,7 +212,7 @@ public class CloudConnectionStatusServiceImplTest {
 
             ComponentContext componentContext = mock(ComponentContext.class);
             service.activate(componentContext);
-            
+
             // Make sure mockComponent is initially not in componentRegistry
             assertFalse(isInComponentRegistry(service, mockComponent));
 

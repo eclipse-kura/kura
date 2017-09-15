@@ -184,7 +184,7 @@ public class ModemDriver {
                     gpioValuePath = gpioPath + GPIO_VALUE_SUFFIX_PATH;
                     invertGpioValue(gpioValuePath);
                 }
-            } else if (TARGET_NAME.equals(KuraConstants.BoltGATE_20_25.getTargetName())) {
+            } else if (TARGET_NAME.equalsIgnoreCase(KuraConstants.BoltGATE_20_25.getTargetName())) {
 
                 turnOffGpio(BOLTGATE_20_25_PCIEX_SLOT3_POWER_GPIO_VALUE);
 
@@ -259,7 +259,7 @@ public class ModemDriver {
                     gpioValuePath = gpioPath + GPIO_VALUE_SUFFIX_PATH;
                     invertGpioValue(gpioValuePath);
                 }
-            } else if (TARGET_NAME.equals(KuraConstants.BoltGATE_20_25.getTargetName())) {
+            } else if (TARGET_NAME.equalsIgnoreCase(KuraConstants.BoltGATE_20_25.getTargetName())) {
 
                 turnOnGpio(BOLTGATE_20_25_PCIEX_SLOT3_POWER_GPIO_VALUE);
 

@@ -121,9 +121,6 @@
                     </bootFeatures>
                     <installedFeatures>
                         <feature>wrapper</feature>
-                        <feature>kura-example-publisher</feature>
-                        <feature>kura-example-camel-aggregation</feature>
-                        <feature>kura-example-camel-quickstart</feature>
                     </installedFeatures>
 
                     <javase>1.8</javase>

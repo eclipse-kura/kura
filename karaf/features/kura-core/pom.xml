@@ -69,10 +69,6 @@
                             <features>
                                 <feature>kura-core</feature>
                                 <feature>kura-camel</feature>
-
-                                <feature>kura-example-publisher</feature>
-                                <feature>kura-example-camel-aggregation</feature>
-                                <feature>kura-example-camel-quickstart</feature>
                             </features>
                         </configuration>
                     </execution>

@@ -441,6 +441,11 @@
                                     <artifactId>org.eclipse.kura.hook.file.move.provider</artifactId>
                                     <version>${org.eclipse.kura.hook.file.move.provider.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.misc.cloudcat</artifactId>
+                                    <version>${org.eclipse.kura.misc.cloudcat.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -627,6 +632,8 @@
                                     tofile="target/plugins/org.eclipse.kura.rest.asset.provider_${org.eclipse.kura.rest.asset.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.hook.file.move.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.hook.file.move.provider_${org.eclipse.kura.hook.file.move.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.misc.cloudcat.jar"
+                                    tofile="target/plugins/org.eclipse.kura.misc.cloudcat_${org.eclipse.kura.misc.cloudcat.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>

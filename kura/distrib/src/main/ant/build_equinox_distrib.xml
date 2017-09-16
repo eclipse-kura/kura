@@ -128,6 +128,9 @@
 		<!-- Wires bundles config -->
 		<antcall target="wires-config" />
 
+		<!-- Miscellaneous bundles config -->
+		<antcall target="misc-config" />
+		
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" property="is.web2.jar.available" />
 		<antcall target="web2-config" />
@@ -543,6 +546,8 @@ fi]]>
 		<antcall target="deployment-hooks-jar" />
 
 		<antcall target="wires-jar" />
+		
+		<antcall target="misc-jar" />
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web2-jar" />
@@ -1584,6 +1589,19 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
             todir="${build.install.dir.kura}/kura/plugins" />
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar"
             todir="${build.install.dir.kura}/kura/plugins" />
+	</target>
+	
+	<target name="misc-config">
+			<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+				<entry key="osgi.bundles" operation="+"
+					value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.misc.cloudcat_${org.eclipse.kura.misc.cloudcat.version}.jar@4:start" />
+			</propertyfile>
+	</target>
+	<target name="misc-jar">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.misc.cloudcat_${org.eclipse.kura.misc.cloudcat.version}.jar"
+				prefix="${build.output.name}/kura/plugins" />
+		</zip>
 	</target>
 
 </project>

@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>org.eclipse.soda.dk.comm-parent</artifactId>
-        <version>1.2.200-SNAPSHOT</version>
+        <version>1.2.200</version>
     </parent>
 
     <artifactId>org.eclipse.soda.dk.comm</artifactId>

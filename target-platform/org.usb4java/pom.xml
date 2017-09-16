@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>org.usb4java</artifactId>
-    <version>1.2.200-SNAPSHOT</version>
+    <version>1.2.200</version>
     <packaging>bundle</packaging>
 
     <name>usb4java</name>

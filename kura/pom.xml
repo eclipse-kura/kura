@@ -9,6 +9,7 @@
   Contributors:
       Eurotech
       Red Hat Inc
+      Cavium
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -66,6 +67,7 @@
         <module>org.eclipse.kura.linux.usb</module>
         <module>org.eclipse.kura.linux.usb.armv6hf</module>
         <module>org.eclipse.kura.linux.usb.x86_64</module>
+        <module>org.eclipse.kura.linux.usb.aarch64</module>
         <module>org.eclipse.kura.linux.watchdog</module>
         <module>org.eclipse.kura.localization</module>
         <module>org.eclipse.kura.localization.resources</module>

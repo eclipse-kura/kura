@@ -436,6 +436,11 @@
                                     <artifactId>org.eclipse.kura.rest.asset.provider</artifactId>
                                     <version>${org.eclipse.kura.rest.asset.provider.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.hook.file.move.provider</artifactId>
+                                    <version>${org.eclipse.kura.hook.file.move.provider.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -551,11 +556,11 @@
                                     tofile="target/plugins/org.eclipse.kura.linux.usb.x86_64_${org.eclipse.kura.linux.usb.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.bluetooth.jar"
                                     tofile="target/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.ble.provider.jar" 
+                                <move file="target/plugins/org.eclipse.kura.ble.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.ble.provider_${org.eclipse.kura.ble.provider.version}.jar"/>
-                                <move file="target/plugins/org.eclipse.kura.ble.ibeacon.provider.jar" 
+                                <move file="target/plugins/org.eclipse.kura.ble.ibeacon.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.ble.ibeacon.provider_${org.eclipse.kura.ble.ibeacon.provider.version}.jar"/>
-                                <move file="target/plugins/org.eclipse.kura.ble.eddystone.provider.jar" 
+                                <move file="target/plugins/org.eclipse.kura.ble.eddystone.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.ble.eddystone.provider_${org.eclipse.kura.ble.eddystone.provider.version}.jar"/>
                                 <move file="target/plugins/org.eclipse.kura.linux.watchdog.jar"
                                     tofile="target/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar" />
@@ -620,6 +625,8 @@
                                     tofile="target/plugins/org.eclipse.kura.rest.provider_${org.eclipse.kura.rest.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.asset.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.rest.asset.provider_${org.eclipse.kura.rest.asset.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.hook.file.move.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.hook.file.move.provider_${org.eclipse.kura.hook.file.move.provider.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>
@@ -2538,7 +2545,7 @@
                                             tofile="${project.build.directory}/staging/beacon.scanner/.project" />
                                         <move file="${project.build.directory}/staging/beacon.scanner/beacon.scanner.classpath"
                                             tofile="${project.build.directory}/staging/beacon.scanner/.classpath" />
-                                            
+
 										<!-- Stage the org.eclipse.kura.example.ibeacon.advertiser Project -->
                                         <copy todir="${project.build.directory}/staging/ibeacon.advertiser">
                                             <fileset dir="../examples/org.eclipse.kura.example.ibeacon.advertiser" />
@@ -2564,7 +2571,7 @@
                                             tofile="${project.build.directory}/staging/ibeacon.scanner/.project" />
                                         <move file="${project.build.directory}/staging/ibeacon.scanner/ibeacon.scanner.classpath"
                                             tofile="${project.build.directory}/staging/ibeacon.scanner/.classpath" />
-                                            
+
                                         <!-- Stage the org.eclipse.kura.example.eddystone.advertiser Project -->
                                         <copy todir="${project.build.directory}/staging/eddystone.advertiser">
                                             <fileset dir="../examples/org.eclipse.kura.example.eddystone.advertiser" />
@@ -2590,7 +2597,7 @@
                                             tofile="${project.build.directory}/staging/eddystone.scanner/.project" />
                                         <move file="${project.build.directory}/staging/eddystone.scanner/eddystone.scanner.classpath"
                                             tofile="${project.build.directory}/staging/eddystone.scanner/.classpath" />
-                                                                                        
+
 										<!-- Stage the org.eclipse.kura.example.ble.tisensortag Project -->
                                         <copy todir="${project.build.directory}/staging/tisensortag">
                                             <fileset dir="../examples/org.eclipse.kura.example.ble.tisensortag" />
@@ -2618,7 +2625,7 @@
                                             tofile="${project.build.directory}/staging/tisensortag.tinyb/.project" />
                                         <move file="${project.build.directory}/staging/tisensortag.tinyb/tisensortag.tinyb.classpath"
                                             tofile="${project.build.directory}/staging/tisensortag.tinyb/.classpath" />
-                                            
+
 										<!-- Stage the org.eclipse.kura.example.publisher Project -->
                                         <copy todir="${project.build.directory}/staging/publisher">
                                             <fileset dir="../examples/org.eclipse.kura.example.publisher" />

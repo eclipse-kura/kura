@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2017 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,8 +15,10 @@ package org.eclipse.kura.core.deployment;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,10 +28,12 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
 import org.eclipse.kura.core.deployment.download.DownloadFileUtilities;
 import org.eclipse.kura.core.deployment.download.impl.DownloadImpl;
+import org.eclipse.kura.core.deployment.hook.DeploymentHookManager;
 import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
 import org.eclipse.kura.core.deployment.install.InstallImpl;
 import org.eclipse.kura.core.deployment.uninstall.DeploymentPackageUninstallOptions;
@@ -42,6 +46,7 @@ import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
 import org.eclipse.kura.core.deployment.xml.XmlUtil;
 import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.data.DataTransportService;
+import org.eclipse.kura.deployment.hook.DeploymentHook;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -58,9 +63,9 @@ import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CloudDeploymentHandlerV2 extends Cloudlet {
+public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableComponent {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(CloudDeploymentHandlerV2.class);
+    private static final Logger logger = LoggerFactory.getLogger(CloudDeploymentHandlerV2.class);
     public static final String APP_ID = "DEPLOY-V2";
 
     private static final String DPA_CONF_PATH_PROPNAME = "dpa.configuration";
@@ -144,14 +149,17 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
         }
     }
 
-    private static String s_pendingPackageUrl = null;
-    private static DownloadImpl s_downloadImplementation;
-    private static UninstallImpl s_uninstallImplementation;
-    public static InstallImpl s_installImplementation;
+    private CloudDeploymentHandlerV2Options componentOptions;
 
-    private SslManagerService m_sslManagerService;
-    private DeploymentAdmin m_deploymentAdmin;
-    private SystemService m_systemService;
+    private static String pendingPackageUrl = null;
+    private static DownloadImpl downloadImplementation;
+    private static UninstallImpl uninstallImplementation;
+    public static InstallImpl installImplementation;
+
+    private SslManagerService sslManagerService;
+    private DeploymentAdmin deploymentAdmin;
+    private SystemService systemService;
+    private DeploymentHookManager deploymentHookManager;
 
     private static ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -160,18 +168,18 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 
     private BundleContext m_bundleContext;
 
-    private DataTransportService m_dataTransportService;
+    private DataTransportService dataTransportService;
 
-    private String m_dpaConfPath;
-    private String m_packagesPath;
+    private String dpaConfPath;
+    private String packagesPath;
 
-    private DeploymentPackageDownloadOptions m_downloadOptions;
+    private DeploymentPackageDownloadOptions downloadOptions;
 
-    private boolean m_isInstalling = false;
-    private DeploymentPackageInstallOptions m_installOptions;
+    private boolean isInstalling = false;
+    private DeploymentPackageInstallOptions installOptions;
 
-    private String m_pendingUninstPackageName;
-    private String m_installVerificationDir;
+    private String pendingUninstPackageName;
+    private String installVerificationDir;
 
     public CloudDeploymentHandlerV2() {
         super(APP_ID);
@@ -184,35 +192,43 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
     // ----------------------------------------------------------------
 
     public void setSslManagerService(SslManagerService sslManagerService) {
-        this.m_sslManagerService = sslManagerService;
+        this.sslManagerService = sslManagerService;
     }
 
     public void unsetSslManagerService(SslManagerService sslManagerService) {
-        this.m_sslManagerService = null;
+        this.sslManagerService = null;
     }
 
     protected void setDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
-        this.m_deploymentAdmin = deploymentAdmin;
+        this.deploymentAdmin = deploymentAdmin;
     }
 
     protected void unsetDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
-        this.m_deploymentAdmin = null;
+        this.deploymentAdmin = null;
     }
 
     public void setDataTransportService(DataTransportService dataTransportService) {
-        this.m_dataTransportService = dataTransportService;
+        this.dataTransportService = dataTransportService;
     }
 
     public void unsetDataTransportService(DataTransportService dataTransportService) {
-        this.m_dataTransportService = null;
+        this.dataTransportService = null;
     }
 
     public void setSystemService(SystemService systemService) {
-        this.m_systemService = systemService;
+        this.systemService = systemService;
     }
 
     public void unsetSystemService(SystemService systemService) {
-        this.m_systemService = null;
+        this.systemService = null;
+    }
+
+    public void setDeploymentHookManager(DeploymentHookManager deploymentHookManager) {
+        this.deploymentHookManager = deploymentHookManager;
+    }
+
+    public void unsetDeploymentHookManager(DeploymentHookManager deploymentHookManager) {
+        this.deploymentHookManager = null;
     }
 
     // ----------------------------------------------------------------
@@ -221,43 +237,54 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
     //
     // ----------------------------------------------------------------
 
-    @Override
-    protected void activate(ComponentContext componentContext) {
-        s_logger.info("Cloud Deployment v2 is starting");
+    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
+        logger.info("Cloud Deployment v2 is starting");
         super.activate(componentContext);
+        updated(properties);
 
         this.m_bundleContext = componentContext.getBundleContext();
 
-        this.m_dpaConfPath = System.getProperty(DPA_CONF_PATH_PROPNAME);
-        if (this.m_dpaConfPath == null || this.m_dpaConfPath.isEmpty()) {
+        this.dpaConfPath = System.getProperty(DPA_CONF_PATH_PROPNAME);
+        if (this.dpaConfPath == null || this.dpaConfPath.isEmpty()) {
             throw new ComponentException("The value of '" + DPA_CONF_PATH_PROPNAME + "' is not defined");
         }
 
-        final Properties kuraProperties = this.m_systemService.getProperties();
+        final Properties kuraProperties = this.systemService.getProperties();
 
-        this.m_packagesPath = kuraProperties.getProperty(PACKAGES_PATH_PROPNAME);
-        if (this.m_packagesPath == null || this.m_packagesPath.isEmpty()) {
+        this.packagesPath = kuraProperties.getProperty(PACKAGES_PATH_PROPNAME);
+        if (this.packagesPath == null || this.packagesPath.isEmpty()) {
             throw new ComponentException("The value of '" + PACKAGES_PATH_PROPNAME + "' is not defined");
         }
         if (kuraProperties.getProperty(PACKAGES_PATH_PROPNAME) != null
                 && "kura/packages".equals(kuraProperties.getProperty(PACKAGES_PATH_PROPNAME).trim())) {
             kuraProperties.setProperty(PACKAGES_PATH_PROPNAME, "/opt/eclipse/kura/kura/packages");
-            this.m_packagesPath = kuraProperties.getProperty(PACKAGES_PATH_PROPNAME);
-            s_logger.warn("Overridding invalid kura.packages location");
+            this.packagesPath = kuraProperties.getProperty(PACKAGES_PATH_PROPNAME);
+            logger.warn("Overridding invalid kura.packages location");
         }
 
         String kuraDataDir = kuraProperties.getProperty(KURA_DATA_DIR);
 
-        s_installImplementation = new InstallImpl(this, kuraDataDir);
-        s_installImplementation.setPackagesPath(this.m_packagesPath);
-        s_installImplementation.setDpaConfPath(this.m_dpaConfPath);
-        s_installImplementation.setDeploymentAdmin(this.m_deploymentAdmin);
-        s_installImplementation.sendInstallConfirmations();
+        installImplementation = new InstallImpl(this, kuraDataDir);
+        installImplementation.setPackagesPath(this.packagesPath);
+        installImplementation.setDpaConfPath(this.dpaConfPath);
+        installImplementation.setDeploymentAdmin(this.deploymentAdmin);
+        installImplementation.sendInstallConfirmations();
+    }
+
+    protected void updated(Map<String, Object> properties) {
+        this.componentOptions = new CloudDeploymentHandlerV2Options(properties);
+        final Properties associations = new Properties();
+        try {
+            associations.load(new StringReader(this.componentOptions.getHookAssociations()));
+        } catch (Exception e) {
+            logger.warn("failed to parse hook associations from configuration", e);
+        }
+        this.deploymentHookManager.updateAssociations(associations);
     }
 
     @Override
     protected void deactivate(ComponentContext componentContext) {
-        s_logger.info("Bundle " + APP_ID + " is deactivating!");
+        logger.info("Bundle " + APP_ID + " is deactivating!");
         if (this.downloaderFuture != null) {
             this.downloaderFuture.cancel(true);
         }
@@ -283,7 +310,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
             getCloudApplicationClient().controlPublish(options.getRequestClientId(), messageTopic, messagePayload, 1,
                     DFLT_RETAIN, DFLT_PRIORITY);
         } catch (KuraException e) {
-            s_logger.error("Error publishing response for command {} {}", messageType, e);
+            logger.error("Error publishing response for command {} {}", messageType, e);
         }
     }
 
@@ -300,8 +327,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
         String[] resources = reqTopic.getResources();
 
         if (resources == null || resources.length == 0) {
-            s_logger.error("Bad request topic: {}", reqTopic.toString());
-            s_logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
+            logger.error("Bad request topic: {}", reqTopic.toString());
+            logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
             return;
         }
@@ -315,8 +342,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
         } else if (resources[0].equals(RESOURCE_BUNDLES)) {
             doGetBundles(respPayload);
         } else {
-            s_logger.error("Bad request topic: {}", reqTopic.toString());
-            s_logger.error("Cannot find resource with name: {}", resources[0]);
+            logger.error("Bad request topic: {}", reqTopic.toString());
+            logger.error("Cannot find resource with name: {}", resources[0]);
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
             return;
         }
@@ -329,8 +356,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
         String[] resources = reqTopic.getResources();
 
         if (resources == null || resources.length == 0) {
-            s_logger.error("Bad request topic: {}", reqTopic.toString());
-            s_logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
+            logger.error("Bad request topic: {}", reqTopic.toString());
+            logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
             return;
         }
@@ -348,8 +375,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
             String bundleId = resources.length >= 2 ? resources[1] : null; // no checking is done before
             doExecStartStopBundle(respPayload, false, bundleId);
         } else {
-            s_logger.error("Bad request topic: {}", reqTopic.toString());
-            s_logger.error("Cannot find resource with name: {}", resources[0]);
+            logger.error("Bad request topic: {}", reqTopic.toString());
+            logger.error("Cannot find resource with name: {}", resources[0]);
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
             return;
         }
@@ -362,8 +389,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
         String[] resources = reqTopic.getResources();
 
         if (resources == null || resources.length == 0) {
-            s_logger.error("Bad request topic: {}", reqTopic.toString());
-            s_logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
+            logger.error("Bad request topic: {}", reqTopic.toString());
+            logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
             return;
         }
@@ -371,8 +398,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
         if (resources[0].equals(RESOURCE_DOWNLOAD)) {
             doDelDownload(reqPayload, respPayload);
         } else {
-            s_logger.error("Bad request topic: {}", reqTopic.toString());
-            s_logger.error("Cannot find resource with name: {}", resources[0]);
+            logger.error("Bad request topic: {}", reqTopic.toString());
+            logger.error("Cannot find resource with name: {}", resources[0]);
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
             return;
         }
@@ -384,7 +411,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
     }
 
     protected UninstallImpl createUninstallImpl() {
-        UninstallImpl uninstallImplementation = new UninstallImpl(this, this.m_deploymentAdmin);
+        UninstallImpl uninstallImplementation = new UninstallImpl(this, this.deploymentAdmin);
 
         return uninstallImplementation;
     }
@@ -402,14 +429,14 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
     private void doDelDownload(KuraRequestPayload request, KuraResponsePayload response) {
 
         try {
-            DownloadCountingOutputStream downloadHelper = s_downloadImplementation.getDownloadHelper();
+            DownloadCountingOutputStream downloadHelper = downloadImplementation.getDownloadHelper();
             if (downloadHelper != null) {
                 downloadHelper.cancelDownload();
-                s_downloadImplementation.deleteDownloadedFile();
+                downloadImplementation.deleteDownloadedFile();
             }
         } catch (Exception ex) {
             String errMsg = "Error cancelling download!";
-            s_logger.warn(errMsg, ex);
+            logger.warn(errMsg, ex);
             response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
             response.setTimestamp(new Date());
             try {
@@ -421,30 +448,54 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 
     }
 
+    private void checkHook(DeploymentPackageInstallOptions options) {
+        if (options.getRequestType() != null && options.getDeploymentHook() == null) {
+            throw new IllegalStateException("No DeploymentHook is currently associated to request type "
+                    + options.getRequestType() + ", aborting operation");
+        }
+    }
+
     private void doExecDownload(KuraRequestPayload request, KuraResponsePayload response) {
 
         final DeploymentPackageDownloadOptions options;
         try {
-            options = new DeploymentPackageDownloadOptions(request);
-            options.setClientId(this.m_dataTransportService.getClientId());
-            s_downloadImplementation = createDownloadImpl(options);
+            options = new DeploymentPackageDownloadOptions(request, this.deploymentHookManager,
+                    this.componentOptions.getDownloadsDirectory());
+            options.setClientId(this.dataTransportService.getClientId());
+            downloadImplementation = createDownloadImpl(options);
         } catch (Exception ex) {
-            s_logger.info("Malformed download request!");
+            logger.info("Malformed download request!");
             response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
             response.setTimestamp(new Date());
             try {
                 response.setBody("Malformed download request".getBytes("UTF-8"));
             } catch (UnsupportedEncodingException e) {
-                s_logger.info("Unsupported encoding");
+                logger.info("Unsupported encoding");
             }
             response.setException(ex);
 
             return;
         }
-        this.m_downloadOptions = options;
+        this.downloadOptions = options;
 
-        if (s_pendingPackageUrl != null) {
-            s_logger.info("Another request seems for the same URL is pending: {}.", s_pendingPackageUrl);
+        try {
+            checkHook(this.downloadOptions);
+        } catch (Exception ex) {
+            logger.warn(ex.getMessage());
+            response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+            response.setTimestamp(new Date());
+            try {
+                response.setBody(ex.getMessage().getBytes("UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                logger.info("Unsupported encoding");
+            }
+            response.setException(ex);
+
+            return;
+        }
+
+        if (pendingPackageUrl != null) {
+            logger.info("Another request seems for the same URL is pending: {}.", pendingPackageUrl);
 
             response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
             response.setTimestamp(new Date());
@@ -459,7 +510,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
         boolean alreadyDownloaded = false;
 
         try {
-            alreadyDownloaded = s_downloadImplementation.isAlreadyDownloaded();
+            alreadyDownloaded = downloadImplementation.isAlreadyDownloaded();
         } catch (KuraException ex) {
             response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
             response.setException(ex);
@@ -471,16 +522,26 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
             return;
         }
 
-        s_logger.info("About to download and install package at URL {}", options.getDeployUri());
+        logger.info("About to download and install package at URL {}", options.getDeployUri());
 
         try {
-            s_pendingPackageUrl = options.getDeployUri();
+            final DeploymentHook deploymentHook = options.getDeploymentHook();
+            if (deploymentHook != null) {
+                try {
+                    deploymentHook.preDownload(options.getHookRequestContext(), options.getHookProperties());
+                } catch (Exception e) {
+                    logger.warn("DeploymentHook cancelled operation at preDownload phase");
+                    throw e;
+                }
+            }
 
-            s_downloadImplementation.setSslManager(this.m_sslManagerService);
-            s_downloadImplementation.setAlreadyDownloadedFlag(alreadyDownloaded);
-            s_downloadImplementation.setVerificationDirectory(this.m_installVerificationDir);
+            pendingPackageUrl = options.getDeployUri();
 
-            s_logger.info("Downloading package from URL: " + options.getDeployUri());
+            downloadImplementation.setSslManager(this.sslManagerService);
+            downloadImplementation.setAlreadyDownloadedFlag(alreadyDownloaded);
+            downloadImplementation.setVerificationDirectory(this.installVerificationDir);
+
+            logger.info("Downloading package from URL: " + options.getDeployUri());
 
             this.downloaderFuture = executor.submit(new Runnable() {
 
@@ -488,8 +549,9 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
                 public void run() {
                     try {
 
-                        s_downloadImplementation.downloadDeploymentPackageInternal();
-                    } catch (KuraException e) {
+                        downloadImplementation.downloadDeploymentPackageInternal();
+                    } catch (Exception e) {
+                        logger.warn("deployment package download failed", e);
                         try {
                             File dpFile = getDpDownloadFile(options);
                             if (dpFile != null) {
@@ -498,15 +560,15 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
                         } catch (IOException e1) {
                         }
                     } finally {
-                        s_pendingPackageUrl = null;
+                        pendingPackageUrl = null;
                     }
                 }
             });
 
         } catch (Exception e) {
-            s_logger.error("Failed to download and install package at URL {}: {}", options.getDeployUri(), e);
+            logger.error("Failed to download and install package at URL {}: {}", options.getDeployUri(), e);
 
-            s_pendingPackageUrl = null;
+            pendingPackageUrl = null;
 
             response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
             response.setTimestamp(new Date());
@@ -522,10 +584,11 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
     private void doExecInstall(KuraRequestPayload request, KuraResponsePayload response) {
         final DeploymentPackageInstallOptions options;
         try {
-            options = new DeploymentPackageInstallOptions(request);
-            options.setClientId(this.m_dataTransportService.getClientId());
+            options = new DeploymentPackageInstallOptions(request, this.deploymentHookManager,
+                    this.componentOptions.getDownloadsDirectory());
+            options.setClientId(this.dataTransportService.getClientId());
         } catch (Exception ex) {
-            s_logger.error("Malformed install request!");
+            logger.error("Malformed install request!");
             response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
             response.setTimestamp(new Date());
             try {
@@ -538,11 +601,28 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
             return;
         }
 
-        this.m_installOptions = options;
+        this.installOptions = options;
+
+        try {
+            checkHook(this.installOptions);
+        } catch (Exception ex) {
+            logger.warn(ex.getMessage());
+            response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+            response.setTimestamp(new Date());
+            try {
+                response.setBody(ex.getMessage().getBytes("UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                logger.info("Unsupported encoding");
+            }
+            response.setException(ex);
+
+            return;
+        }
+
         boolean alreadyDownloaded = false;
 
         try {
-            alreadyDownloaded = s_downloadImplementation.isAlreadyDownloaded();
+            alreadyDownloaded = downloadImplementation.isAlreadyDownloaded();
         } catch (KuraException ex) {
             response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
             response.setException(ex);
@@ -554,35 +634,46 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
             return;
         }
 
-        if (alreadyDownloaded && !this.m_isInstalling) {
+        if (alreadyDownloaded && !this.isInstalling) {
             // Check if file exists
 
             try {
-                this.m_isInstalling = true;
-                final File dpFile = getDpDownloadFile(options);
-
-                s_installImplementation.setOptions(options);
 
                 // if yes, install
+
+                final DeploymentHook hook = options.getDeploymentHook();
+                if (hook != null) {
+                    try {
+                        hook.postDownload(options.getHookRequestContext(), options.getHookProperties());
+                    } catch (Exception e) {
+                        logger.warn("DeploymentHook cancelled operation at postDownload phase");
+                        throw e;
+                    }
+                }
+
+                this.isInstalling = true;
+                final File dpFile = getDpDownloadFile(options);
+
+                installImplementation.setOptions(options);
 
                 this.installerFuture = executor.submit(new Runnable() {
 
                     @Override
                     public void run() {
                         try {
-                            installDownloadedFile(dpFile, CloudDeploymentHandlerV2.this.m_installOptions);
+                            installDownloadedFile(dpFile, CloudDeploymentHandlerV2.this.installOptions);
                         } catch (KuraException e) {
-                            s_logger.error("Impossible to send an exception message to the cloud platform");
+                            logger.error("Impossible to send an exception message to the cloud platform");
                             if (dpFile != null) {
                                 dpFile.delete();
                             }
                         } finally {
-                            CloudDeploymentHandlerV2.this.m_installOptions = null;
-                            CloudDeploymentHandlerV2.this.m_isInstalling = false;
+                            CloudDeploymentHandlerV2.this.installOptions = null;
+                            CloudDeploymentHandlerV2.this.isInstalling = false;
                         }
                     }
                 });
-            } catch (IOException e) {
+            } catch (Exception e) {
                 response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
                 response.setException(e);
                 response.setTimestamp(new Date());
@@ -607,9 +698,9 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
         final DeploymentPackageUninstallOptions options;
         try {
             options = new DeploymentPackageUninstallOptions(request);
-            options.setClientId(this.m_dataTransportService.getClientId());
+            options.setClientId(this.dataTransportService.getClientId());
         } catch (Exception ex) {
-            s_logger.error("Malformed uninstall request!");
+            logger.error("Malformed uninstall request!");
             response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
             response.setTimestamp(new Date());
             try {
@@ -626,9 +717,8 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 
         //
         // We only allow one request at a time
-        if (!this.m_isInstalling && this.m_pendingUninstPackageName != null) {
-            s_logger.info("Another request seems still pending: {}. Checking if stale...",
-                    this.m_pendingUninstPackageName);
+        if (!this.isInstalling && this.pendingUninstPackageName != null) {
+            logger.info("Another request seems still pending: {}. Checking if stale...", this.pendingUninstPackageName);
 
             response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
             response.setTimestamp(new Date());
@@ -638,34 +728,34 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
                 // Ignore
             }
         } else {
-            s_logger.info("About to uninstall package {}", packageName);
+            logger.info("About to uninstall package {}", packageName);
 
             try {
-                this.m_isInstalling = true;
-                this.m_pendingUninstPackageName = packageName;
-                s_uninstallImplementation = createUninstallImpl();
+                this.isInstalling = true;
+                this.pendingUninstPackageName = packageName;
+                uninstallImplementation = createUninstallImpl();
 
-                s_logger.info("Uninstalling package...");
+                logger.info("Uninstalling package...");
                 this.installerFuture = executor.submit(new Runnable() {
 
                     @Override
                     public void run() {
                         try {
-                            s_uninstallImplementation.uninstaller(options, packageName);
+                            uninstallImplementation.uninstaller(options, packageName);
                         } catch (Exception e) {
                             try {
-                                s_uninstallImplementation.uninstallFailedAsync(options, packageName, e);
+                                uninstallImplementation.uninstallFailedAsync(options, packageName, e);
                             } catch (KuraException e1) {
 
                             }
                         } finally {
-                            CloudDeploymentHandlerV2.this.m_installOptions = null;
-                            CloudDeploymentHandlerV2.this.m_isInstalling = false;
+                            CloudDeploymentHandlerV2.this.installOptions = null;
+                            CloudDeploymentHandlerV2.this.isInstalling = false;
                         }
                     }
                 });
             } catch (Exception e) {
-                s_logger.error("Failed to uninstall package {}: {}", packageName, e);
+                logger.error("Failed to uninstall package {}: {}", packageName, e);
 
                 response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
                 response.setTimestamp(new Date());
@@ -675,15 +765,15 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
                     // Ignore
                 }
             } finally {
-                this.m_isInstalling = false;
-                this.m_pendingUninstPackageName = null;
+                this.isInstalling = false;
+                this.pendingUninstPackageName = null;
             }
         }
     }
 
     private void doExecStartStopBundle(KuraResponsePayload response, boolean start, String bundleId) {
         if (bundleId == null) {
-            s_logger.info("EXEC start/stop bundle: null bundle ID");
+            logger.info("EXEC start/stop bundle: null bundle ID");
 
             response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
 
@@ -694,7 +784,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
                 id = Long.valueOf(bundleId);
             } catch (NumberFormatException e) {
 
-                s_logger.error("EXEC start/stop bundle: bad bundle ID format: {}", e);
+                logger.error("EXEC start/stop bundle: bad bundle ID format: {}", e);
                 response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
                 response.setTimestamp(new Date());
                 response.setExceptionMessage(e.getMessage());
@@ -703,11 +793,11 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
 
             if (id != null) {
 
-                s_logger.info("Executing command {}", start ? RESOURCE_START : RESOURCE_STOP);
+                logger.info("Executing command {}", start ? RESOURCE_START : RESOURCE_STOP);
 
                 Bundle bundle = this.m_bundleContext.getBundle(id);
                 if (bundle == null) {
-                    s_logger.error("Bundle ID {} not found", id);
+                    logger.error("Bundle ID {} not found", id);
                     response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
                     response.setTimestamp(new Date());
                 } else {
@@ -717,12 +807,12 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
                         } else {
                             bundle.stop();
                         }
-                        s_logger.info("{} bundle ID {} ({})",
+                        logger.info("{} bundle ID {} ({})",
                                 new Object[] { start ? "Started" : "Stopped", id, bundle.getSymbolicName() });
                         response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
                         response.setTimestamp(new Date());
                     } catch (BundleException e) {
-                        s_logger.error("Failed to {} bundle {}: {}", new Object[] { start ? "start" : "stop", id, e });
+                        logger.error("Failed to {} bundle {}: {}", new Object[] { start ? "start" : "stop", id, e });
                         response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
                         response.setTimestamp(new Date());
                     }
@@ -732,24 +822,24 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
     }
 
     private void doGetInstall(KuraResponsePayload respPayload) {
-        if (this.m_isInstalling) {
-            s_installImplementation.installInProgressSyncMessage(respPayload);
+        if (this.isInstalling) {
+            installImplementation.installInProgressSyncMessage(respPayload);
         } else {
-            s_installImplementation.installIdleSyncMessage(respPayload);
+            installImplementation.installIdleSyncMessage(respPayload);
         }
     }
 
     private void doGetDownload(KuraResponsePayload respPayload) {
-        if (s_pendingPackageUrl != null) { // A download is pending
-            DownloadCountingOutputStream downloadHelper = s_downloadImplementation.getDownloadHelper();
-            DownloadImpl.downloadInProgressSyncMessage(respPayload, downloadHelper, this.m_downloadOptions);
+        if (pendingPackageUrl != null) { // A download is pending
+            DownloadCountingOutputStream downloadHelper = downloadImplementation.getDownloadHelper();
+            DownloadImpl.downloadInProgressSyncMessage(respPayload, downloadHelper, this.downloadOptions);
         } else { // No pending downloads
             DownloadImpl.downloadAlreadyDoneSyncMessage(respPayload); // is it right? Do we remove the last object
         }
     }
 
     private void doGetPackages(KuraResponsePayload response) {
-        DeploymentPackage[] dps = this.m_deploymentAdmin.listDeploymentPackages();
+        DeploymentPackage[] dps = this.deploymentAdmin.listDeploymentPackages();
         XmlDeploymentPackages xdps = new XmlDeploymentPackages();
         XmlDeploymentPackage[] axdp = new XmlDeploymentPackage[dps.length];
 
@@ -785,7 +875,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
             response.setTimestamp(new Date());
             response.setBody(s.getBytes("UTF-8"));
         } catch (Exception e) {
-            s_logger.error("Error getting resource {}: {}", RESOURCE_PACKAGES, e);
+            logger.error("Error getting resource {}: {}", RESOURCE_PACKAGES, e);
         }
     }
 
@@ -844,20 +934,25 @@ public class CloudDeploymentHandlerV2 extends Cloudlet {
             response.setTimestamp(new Date());
             response.setBody(s.getBytes("UTF-8"));
         } catch (Exception e) {
-            s_logger.error("Error getting resource {}: {}", RESOURCE_BUNDLES, e);
+            logger.error("Error getting resource {}: {}", RESOURCE_BUNDLES, e);
         }
     }
 
     public void installDownloadedFile(File dpFile, DeploymentPackageInstallOptions options) throws KuraException {
         try {
             if (options.getSystemUpdate()) {
-                s_installImplementation.installSh(options, dpFile);
+                installImplementation.installSh(options, dpFile);
             } else {
-                s_installImplementation.installDp(options, dpFile);
+                installImplementation.installDp(options, dpFile);
+            }
+            final DeploymentHook hook = options.getDeploymentHook();
+            if (hook != null) {
+                hook.postInstall(options.getHookRequestContext(), options.getHookProperties());
             }
         } catch (Exception e) {
-            s_logger.info("Install exception");
-            s_installImplementation.installFailedAsync(options, dpFile.getName(), e);
+            logger.info("Install exception");
+            installImplementation.installFailedAsync(options, dpFile.getName(), e);
         }
     }
+
 }

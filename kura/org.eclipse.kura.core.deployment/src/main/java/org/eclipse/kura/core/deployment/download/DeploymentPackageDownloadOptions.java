@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,6 +15,7 @@ package org.eclipse.kura.core.deployment.download;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraInvalidMessageException;
+import org.eclipse.kura.core.deployment.hook.DeploymentHookManager;
 import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
@@ -53,8 +54,12 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
         setDeployUri(deployUri);
     }
 
-    public DeploymentPackageDownloadOptions(KuraPayload request) throws KuraException {
-        super(null, null);
+    public DeploymentPackageDownloadOptions(KuraPayload request, DeploymentHookManager hookManager,
+            String downloadDirectory) throws KuraException {
+        super((String) null, (String) null);
+
+        setDownloadDirectory(downloadDirectory);
+
         setDeployUri((String) request.getMetric(METRIC_DP_DOWNLOAD_URI));
         if (getDeployUri() == null) {
             throw new KuraInvalidMessageException("Missing deployment package URL!");
@@ -145,6 +150,8 @@ public class DeploymentPackageDownloadOptions extends DeploymentPackageInstallOp
             if (metric != null) {
                 super.setVerifierURI((String) metric);
             }
+
+            parseHookRelatedOptions(request, hookManager);
 
         } catch (Exception ex) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);

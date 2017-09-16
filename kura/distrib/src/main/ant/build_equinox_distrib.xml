@@ -122,6 +122,9 @@
 		<!-- Added Artemis bundles configs -->
 		<antcall target="artemis-config" />
 
+		<!-- Deployment hook bundles configs -->
+		<antcall target="deployment-hooks-config" />
+
 		<!-- Wires bundles config -->
 		<antcall target="wires-config" />
 
@@ -468,7 +471,7 @@ fi]]>
 				<exclude name="*.SNAPSHOT.jar"/>
 
 			</zipfileset>
-			
+
 			<!-- add .SNAPSHOT as -SNAPSHOT -->
 			<mappedresources>
 				<fileset dir="${kura.osgi.repo}/plugins" includes="*.SNAPSHOT.jar" />
@@ -536,6 +539,8 @@ fi]]>
 		<antcall target="asset-jar" />
 
 		<antcall target="artemis-jar" />
+
+		<antcall target="deployment-hooks-jar" />
 
 		<antcall target="wires-jar" />
 
@@ -1264,6 +1269,13 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		</propertyfile>
 	</target>
 
+	<target name="deployment-hooks-config">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.hook.file.move.provider_${org.eclipse.kura.hook.file.move.provider.version}.jar@4:start" />
+		</propertyfile>
+	</target>
+
 	<target name="wires-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
@@ -1301,6 +1313,13 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<target name="rest-jar">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.rest.provider_${org.eclipse.kura.rest.provider.version}.jar"
+				prefix="${build.output.name}/kura/plugins" />
+		</zip>
+	</target>
+
+	<target name="deployment-hooks-jar">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.hook.file.move.provider_${org.eclipse.kura.hook.file.move.provider.version}.jar"
 				prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>
@@ -1357,10 +1376,10 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<!-- Artemis config targets -->
 	<target name="artemis-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
-			
+
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/com.google.guava_${guava.version}.jar@3" />
-			
+
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/io.netty.buffer_${io.netty.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
@@ -1384,12 +1403,12 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.activemq.artemis-mqtt-protocol_${org.apache.activemq.artemis.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.activemq.artemis-native_${org.apache.activemq.artemis.version}.jar@3" />
-			
+
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.commons.beanutils_${commons-beanutils.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.commons.collections_${commons-collections.version}.jar@3" />
-			
+
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/kura/plugins/org.apache.geronimo.specs.geronimo-jms_2.0_spec_${org.apache.geronimo.specs.jms.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
@@ -1500,7 +1519,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<antcall target="tinyb-snapshot-jars" />
 		<antcall target="tinyb-no-snapshot-jars" />
 	</target>
-	
+
     <target name="tinyb-snapshot-jars" if="is.tinyb.snapshot">
         <zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
             <mappedresources>
@@ -1510,17 +1529,17 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
             <mappedresources>
                 <fileset dir="../target-definition/common/repository/plugins" includes="tinyb_*.jar" />
                 <globmapper from="*.SNAPSHOT.jar" to="${build.output.name}/plugins/*-SNAPSHOT.jar" />
-            </mappedresources>        	
+            </mappedresources>
         </zip>
     </target>
-	
+
 	<target name="tinyb-no-snapshot-jars" unless="is.tinyb.snapshot">
         <zipfileset file="../target-definition/common/repository/plugins/tinyb.${native.tag}_${tinyb.version}.jar"
                     prefix="${build.output.name}/plugins" />
         <zipfileset file="../target-definition/common/repository/plugins/tinyb_${tinyb.version}.jar"
                     prefix="${build.output.name}/plugins" />
-	</target>	
-	
+	</target>
+
 	<target name="web2-jar-win" if="is.web2.jar.available">
     	<echo message="web2-jar-win ${project.build.directory}/${build.output.name}/config.ini..." />
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"

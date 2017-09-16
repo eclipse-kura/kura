@@ -14,11 +14,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.concurrent.CancellationException;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.DOWNLOAD_STATUS;
+import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2Options;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
 import org.eclipse.kura.core.deployment.download.DownloadOptions;
@@ -87,7 +89,7 @@ public class DownloadImplTest {
     }
 
     @Test
-    public void testDownloadDeploymentPackageInternalCancel() throws KuraException {
+    public void testDownloadDeploymentPackageInternalCancel() throws KuraException, NoSuchFieldException {
         String deployUri = "uri";
         String dpName = "name";
         String dpVersion = "version";
@@ -95,7 +97,9 @@ public class DownloadImplTest {
 
         DeploymentPackageDownloadOptions options = new DeploymentPackageDownloadOptions(deployUri, dpName, dpVersion);
         options.setJobId(jobId);
+
         CloudDeploymentHandlerV2 callback = mock(CloudDeploymentHandlerV2.class);
+        TestUtil.setFieldValue(callback, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         DownloadImpl di = new DownloadImpl(options, callback) {
 

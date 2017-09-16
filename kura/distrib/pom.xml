@@ -408,6 +408,16 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.driver.ble.sensortag.localization</artifactId>
+                                    <version>${org.eclipse.kura.driver.ble.sensortag.localization.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.driver.ble.sensortag.provider</artifactId>
+                                    <version>${org.eclipse.kura.driver.ble.sensortag.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.wire.script.filter.localization</artifactId>
                                     <version>${org.eclipse.kura.wire.script.filter.localization.version}</version>
                                 </artifactItem>
@@ -620,6 +630,10 @@
                                     tofile="target/plugins/org.eclipse.kura.driver.s7plc.localization_${org.eclipse.kura.driver.s7plc.localization.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.driver.s7plc.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.driver.s7plc.provider_${org.eclipse.kura.driver.s7plc.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.driver.ble.sensortag.localization.jar"
+                                    tofile="target/plugins/org.eclipse.kura.driver.ble.sensortag.localization_${org.eclipse.kura.driver.ble.sensortag.localization.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.driver.ble.sensortag.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.driver.ble.sensortag.provider_${org.eclipse.kura.driver.ble.sensortag.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.script.filter.localization.jar"
                                     tofile="target/plugins/org.eclipse.kura.wire.script.filter.localization_${org.eclipse.kura.wire.script.filter.localization.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.script.filter.provider.jar"
@@ -2788,6 +2802,12 @@
                             <groupId>org.eclipse.kura.feature</groupId>
                             <artifactId>org.eclipse.kura.driver.s7plc.feature</artifactId>
                             <version>${org.eclipse.kura.driver.s7plc.feature.version}</version>
+                            <type>dp</type>
+                          </artifactItem>
+                          <artifactItem>
+                            <groupId>org.eclipse.kura.feature</groupId>
+                            <artifactId>org.eclipse.kura.driver.ble.sensortag.feature</artifactId>
+                            <version>${org.eclipse.kura.driver.ble.sensortag.feature.version}</version>
                             <type>dp</type>
                           </artifactItem>
                           <artifactItem>

@@ -59,6 +59,7 @@
         <module>org.eclipse.kura.protocol.modbus.feature</module>
         <module>org.eclipse.kura.driver.opcua.feature</module>
         <module>org.eclipse.kura.driver.s7plc.feature</module>
+        <module>org.eclipse.kura.driver.ble.sensortag.feature</module>
         <module>org.eclipse.kura.wire.script.filter.feature</module>
     </modules>
 

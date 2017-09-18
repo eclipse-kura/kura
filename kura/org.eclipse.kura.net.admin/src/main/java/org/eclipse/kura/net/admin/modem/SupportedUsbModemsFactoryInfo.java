@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
-import org.eclipse.kura.net.admin.modem.hspa.HspaModemConfigGenerator;
 import org.eclipse.kura.net.admin.modem.sierra.mc87xx.SierraMc87xxConfigGenerator;
 import org.eclipse.kura.net.admin.modem.sierra.mc87xx.SierraMc87xxModemFactory;
 import org.eclipse.kura.net.admin.modem.sierra.usb598.SierraUsb598ConfigGenerator;
@@ -27,6 +26,7 @@ import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910ModemFactory;
 import org.eclipse.kura.net.admin.modem.telit.le910.TelitLe910ModemFactory;
 import org.eclipse.kura.net.admin.modem.telit.le910v2.TelitLe910v2ConfigGenerator;
 import org.eclipse.kura.net.admin.modem.telit.le910v2.TelitLe910v2ModemFactory;
+import org.eclipse.kura.net.admin.modem.ublox.generic.UbloxModemConfigGenerator;
 import org.eclipse.kura.net.admin.modem.ublox.generic.UbloxModemFactory;
 
 public class SupportedUsbModemsFactoryInfo {
@@ -44,7 +44,7 @@ public class SupportedUsbModemsFactoryInfo {
         Sierra_MC8775(SupportedUsbModemInfo.Sierra_MC8775, SierraMc87xxModemFactory.class, SierraMc87xxConfigGenerator.class),
         Sierra_MC8790(SupportedUsbModemInfo.Sierra_MC8790, SierraMc87xxModemFactory.class, SierraMc87xxConfigGenerator.class),
         Sierra_USB598(SupportedUsbModemInfo.Sierra_USB598, SierraUsb598ModemFactory.class, SierraUsb598ConfigGenerator.class),
-        Ublox_SARA_U2(SupportedUsbModemInfo.Ublox_SARA_U2, UbloxModemFactory.class, HspaModemConfigGenerator.class);
+        Ublox_SARA_U2(SupportedUsbModemInfo.Ublox_SARA_U2, UbloxModemFactory.class, UbloxModemConfigGenerator.class);
 
         private final SupportedUsbModemInfo m_usbModemInfo;
         private final Class<? extends CellularModemFactory> m_factoryClass;

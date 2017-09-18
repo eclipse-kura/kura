@@ -14,7 +14,8 @@ package org.eclipse.kura.net.admin.modem.ublox.generic;
 
 public enum UbloxModemAtCommands {
 
-    getGprsSessionDataVolume("at+ugcntrd\r\n");
+    getGprsSessionDataVolume("at+ugcntrd\r\n"),
+    getAuthentificationRequest("at+uauthreq");
 
     private String m_command;
 

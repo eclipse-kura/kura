@@ -54,6 +54,8 @@
         <module>org.eclipse.kura.driver.block</module>
         <module>org.eclipse.kura.driver.s7plc.localization</module>
         <module>org.eclipse.kura.driver.s7plc.provider</module>
+        <module>org.eclipse.kura.driver.ble.sensortag.localization</module>
+        <module>org.eclipse.kura.driver.ble.sensortag.provider</module>
         <module>org.eclipse.kura.linux.bluetooth</module>
         <module>org.eclipse.kura.ble.provider</module>
         <module>org.eclipse.kura.ble.ibeacon.provider</module>

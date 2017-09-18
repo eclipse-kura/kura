@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>com.codeminders.hidapi-parent</artifactId>
-        <version>1.1.200-SNAPSHOT</version>
+        <version>1.1.200</version>
     </parent>
 
     <artifactId>com.codeminders.hidapi.aarch64</artifactId>

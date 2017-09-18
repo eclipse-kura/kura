@@ -189,10 +189,10 @@
                                                 <b:PanelHeader>
                                                     <b:Heading size="H6">
                                                         <b:Anchor dataToggle="COLLAPSE" dataParent="#accordion"
-                                                            dataTarget="#collapseOne" ui:field="errorStackTraceAreaOneAnchor" />
+                                                            dataTarget="#collapseErrorStackTrace" ui:field="errorStackTraceAreaOneAnchor" />
                                                     </b:Heading>
                                                 </b:PanelHeader>
-                                                <b:PanelCollapse b:id="collapseOne" ui:field="errorStackTraceAreaOneCollapse">
+                                                <b:PanelCollapse b:id="collapseErrorStackTrace" ui:field="errorStackTraceAreaOneCollapse">
                                                     <b:PanelBody>
                                                         <b:Well>
                                                             <b:Container fluid="true">

@@ -11,7 +11,8 @@
   
     Contributors:
      Eurotech
- 
+     Cavium
+
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -33,6 +34,7 @@
         <module>org.eclipse.soda.dk.comm</module>
         <module>org.eclipse.soda.dk.comm.armv6hf</module>
         <module>org.eclipse.soda.dk.comm.x86_64</module>
+        <module>org.eclipse.soda.dk.comm.aarch64</module>
     </modules>
 
     <properties>

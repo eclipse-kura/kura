@@ -1,3 +1,206 @@
+Eclipse Kura - 3.1.0
+-------------------------------------------------------------------------
+Added Features :
+  * H2 Databases: This release will see the switch from HSQLDB to H2. This migration will allow
+    for a number of performance improvements as well the ability to maintain multiple database instances.
+  * REST API for Kura Drivers and Assets: To allow more flexibility, REST endpoints will be
+    added to Kura for interacting with the Kura Drivers and Assets instances.
+  * Embedded Artemis Broker: The addition of the Apache Artemis Broker will extend Kura's
+    messaging functionality.
+  * BLE via TinyB: To improve the reliability of BLE, Kura will switch to the TinyB library
+    to support BLE via Bluez.
+  * Kura Wires Functional Logic: To extend the usability of Kura Wires, this release will
+    include Functional Logic Wire Components. This will allow the use of plain JavaScript
+    inside a Wire component.
+  * Kura Web UI Update: A new UI element will be added for managing and editing Drivers and Assets.
+  * S7 Industrial Protocol: A new driver will be added to the Eclipse Marketplace to support S7.
+  * BLE/SensorTag: A new driver will be added to the Eclipse Marketplace to support BLE on
+    the TI SensorTag.
+  * MQTT publish rate improvement: A limit parameter will be added to the MQTT transport service
+    to allow throttling of MQTT messages to prevent unnecessary congestion on the MQTT broker.
+  * Connection Monitor: A connection monitor will be introduced to the DataService to further
+    improve connectivity reliability.
+  * RPMs: This release will provide RPM packaging for Fedora based distributions.
+
+Compatibility:
+  * Eclipse Kura v3.1.0 does not introduce API breakage with previous releases.
+  * This release does introduce a new set of APIs for TinyB for interacting with BLE devices.
+    Support for previous BLE APIs will still be present and functional.
+
+Target Environments:
+  * Kura is released as pre-compiled binary installers for the following platforms:
+    * Raspberry Pi based on Raspbian: Raspberry Pi, Raspberry Pi B+, Raspberry Pi 2/3
+    * BeagleBone Black based on Debian
+    * Fedora 25 ARM
+    * Intel Edison
+
+Bug Fixes :
+  * Fixed github issues:
+    * #1685: [WebUi] Security policy fingerprint UI does not expand
+    * #1680: getKuraMarketplaceCompatibilityVersion() always returns kura.version
+    * #1665: Create rpm installer for Fedora
+    * #1661: The driver configuration is not applied
+    * #1645: Development environment needs to be updated
+    * #1641: Oomph installer needs to be updated
+    * #1630: Wifi password check failing
+    * #1590: [Assets and Drivers] Byte arrays are not displayed properly
+    * #1588: Password arrays are not well managed by ConfigurationService
+    * #1585: [Messaging] Share cloud connection with external applications
+    * #1575: [Watchdog Service] Write the last reboot cause to a persistent file
+    * #1564: [MqttDataTransport] wss connections without hostname verification do not work
+    * #1556: connect.retry-interval=0 causes DataService activation failure
+    * #1541: Add support for polling to GPIO example
+    * #1531: Create "Drivers and Assets" tab
+    * #1530: Modify the wire composer to allow driver management
+    * #1517: Verify compatibility of the old Bluetooth implementation with Bluez 5.43
+    * #1513: H2 DB: Web app and TCP server are mutually exclusive
+    * #1511: Add Artemis broker to Kura core
+    * #1506: H2 DB: Changing the db user does not work
+    * #1502: H2 DB: Default service can be deleted
+    * #1501: H2 DB: invalid service configuration not indicated
+    * #1471: [Wires] Deleting a Timer instance might stop all other Timers
+    * #1462: Wire Components list has no scrollbar
+    * #1455: Wiki page documenting H2 use cases
+    * #1453: Remove unused lib directory from org.eclipse.kura.linux.usb
+    * #1447: New BLE beacon/advertisement API
+    * #1442: Add TinyB host and fragment bundles in target-platform
+    * #1435: Snapshot problem on wires
+    * #1429: Support arm 64 bits platform
+    * #1421: Replace HSQLDB with H2
+    * #1420: Promote Assets and Drivers like Cloud Services in the Web UI
+    * #1417: Implement DataService connection monitor as a CriticalComponent
+    * #1416: Limit the rate of messages published by the DataService
+    * #1413: Implementation of a SensorTag Kura Driver
+    * #1412: Beacon/advertisement implementation of the new BLE API
+    * #1411: GATT Implementation of the new Bluetooth Low Energy API
+    * #1409: New Bluetooth Low Energy API
+    * #1405: Fix trivial Sonar Lint problems in the network bundles
+    * #1396: [Beaglebone Black] Log4j log level set to DEBUG
+    * #1391: [Wires] Fifo is really FIFO only while it's full
+    * #1386: [Wires] Null properties in channel configuration are not properly handled
+    * #1384: OPC UA Driver channel descriptor property ids shouldn't be localised
+    * #1383: OPC UA Driver only supports string node ids
+    * #1378: [Wires] DB store primary key
+    * #1376: [Wires] Asset configuration is not updated after a ChannelDescriptor change.
+    * #1369: WiFi password (PSK) can't contain '&'
+    * #1363: [Documentation] Add tutorial on Eclipse Kapua connection
+    * #1362: [Documentation] Kura documentation improvements
+    * #1361: [Documentation] Improve Kura wires documentation
+    * #1360: [Documentation] Add Administration section in Kura documentation
+    * #1359: [Documentation] Add Configuration section in Kura documentation
+    * #1354: Document default tracking of services registering Configurable/SelfConfiguringComponent
+    * #1338: [Kura 3.0.0] camel.aggregation and camel.quickstart examples should be "normalized"
+    * #1325: [Wires] Exception if an Channel Descriptor contains in Option of Integer type
+    * #1321: 64bit Linux version broken
+    * #1288: Clean up JavaDoc of KuraPayload
+    * #1250: Drag and drop of Marketplace listing should send back a successful install count
+    * #1243: Distribute publishing over time
+    * #1207: [Driver] Contribute Siemens S7 Driver
+    * #1196: [Net] PPP password is not a (MetaType) Password
+    * #1032: Eclipse Drag and Drop Review
+    * #864:  [Web UI] Settings pages
+    * #752:  [DbDataStore] repair is very slow on big tables
+    * #751:  [DbDataStore] defrag and checkpoint are not per-table operations
+    * #572:  Unreadable errors in Web UI
+    * #308:  Add a BLE example for advertising as an Eddystone (Google) beacon
+    * #307:  CloudCallService overrides client ID
+    * #153:  Add JAX-RS to target platform
+    * #108:  CloudCallServiceImpl - call methods setting requester.client.id to #client-id sends response to local device
+
+  * Merged no issue-related Pull Requests:
+    * #1688: Added custom auth request command for Ublox modems
+    * #1687: Updated mapping between services and Ui icons.
+    * #1682: Reduced maximum size for custom icons to 14x14 to match the other build-in icons.
+    * #1676: Removed Karaf dependency from examples.
+    * #1675: Implemented DEPLOY-V2 hook support
+    * #1673: Added fallback into status bundle.
+    * #1671: Removed the dependency existing between examples and distrib.
+    * #1659: Fixed Telit LE 910 v2 reset
+    * #1640: Enhanced core.status bundle.
+    * #1624: Added basic support for Telit 910 LE v2
+    * #1599: Fixed startup scripts and WatchdogService
+    * #1598: Enabled snaphsot dp builds
+    * #1589: Added css to rotate the wires image properly.
+    * #1496: Updated for Windows build
+    * #1483: Added data transfer optimisation library for Drivers
+    * #1480: Changes in Device tab.
+    * #1460: [Testing][Refactoring] NetworkAdminServiceImpl tests, refactoring, fix
+    * #1459: [Refactoring] Linux.position refactoring
+    * #1458: [Testing][Refactoring] Added Camel unit tests
+    * #1454: Cleanup org eclipse kura linux net wifi
+    * #1450: Added exists-maven-plugin.
+    * #1445: Added protection code to prevent null pointer in GwtWireServiceUtil.
+    * #1443: Remove customizers
+    * #1375: Fixed Karaf native libs loading.
+    * #1371: Fixed regression in configuration service
+    * #1370: Fixed connection status icon at page load.
+    * #1368: Wires Web Ui fixes
+    * #1318: Code Cleanups in Localization Bundle
+
+Know Issues :
+  * The implementation of the CryptoService performs encryption using a
+    password that is hardcoded and published.
+  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
+  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
+    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
+    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)
+    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on
+    gatttool and the BLE connection will encounter a failure.
+  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
+    AccessPoint WiFi mode not working for Broadcom chipset.
+  * Hardware watchdog: not implemented on all platforms
+  * Only one WAN interface is currently supported. A warning in displayed
+    in the WEB UI if the user attempts to enable more than one WAN interface
+  * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network
+    interface which happened even if network configuration hasn't been modified.
+  * #1689: Instaling a dp can cause the WebUI to restart
+  * #1663: Authentication Issue with Deploy V2
+  * #1657: Bluetooth notifications do not work
+  * #1644: [Artemis] MQTT clients fail to reconnect after the broker is restarted
+  * #1638: Kura does not support Consistent Network Device Naming
+  * #1572: serial modbus has errors on some hardware
+  * #1558: CommandCloudApp doesn't use received working directory parameter
+  * #1533: MqttDataTransport client-id illegal character
+  * #1529: OSGI console is not redirected to Eclipse IDE with Kura 3.0
+  * #1451: PppAuthSecrets entry removal
+  * #1414: SCR exception running Kura Wires in Karaf
+  * #1373: [Kura 3.0.0 QA] Configuration service: mixing configurable services with factory components
+  * #1358: [GPS] With a USB GPS device, the position service keeps reporting the old position
+  * #1201: Wifi password incorrectly read from snapshot in Access Point mode
+  * #1197: [Net] Network configuration cannot be restored purely from snapshot
+  * #1195: [Net] Firewall IP Forwarding rules entered in the Web UI lost on reboot
+  * #1193: [Wires] Component avoidance during initial placement
+  * #1161: Incorrectly configuring a component can be irreversable.
+  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
+  * #1092: Possible NPE and non-working check
+  * #1016: ConfigurationServiceImpl creates duplicate instances
+  * #923:  [Kura 2.1.0 QA] eth0 search domain configuration and storage
+  * #890:  [Kura 2.1.0 QA] Snapshot management in web UI
+  * #797:  Design of ServiceUtil is broken
+  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
+  * #752:  [DbDataStore] repair is very slow on big tables
+  * #751:  [DbDataStore] defrag and checkpoint are not per-table operations
+  * #654:  Clean up static initialization around "modem" functionality
+  * #651:  Call to "exit()" in native code
+  * #650:  Possible bug in "LinuxUdev.c"
+  * #645:  Clean up internal dependencies in Kura
+  * #558:  Update of DPs seems not to work
+  * #547:  [Configuration] Configuration Service may miss configuration-policy=optional components
+  * #522:  [Net] Modem monitor should monitor interfaces, not modems
+  * #520:  [Net] PppFactory is not a factory and its design is wrong
+  * #518:  [Net] Modem monitor concurrency issue with multiple modems
+  * #486:  Build environment broken on Windows
+  * #406:  Replace System.get* with calls to SystemService.getProperties
+  * #362:  Uninstaller leaves most of the files
+  * #348:  WpaSupplicantConfigReader.getWifiClientConfig() should support cases where key_mgmt scheme is not set
+  * #329:  [DEPLOY-V2] Review/refactoring needed
+  * #311:  [Multiple Cloud Connections] Spurious component reactivations upon configuration change
+  * #307:  CloudCallService overrides client ID
+  * #297:  [Status led] What connection instance controls the status led?
+  * #253:  Check if bundle contexes correctly unget services after invoking getService
+  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
+
+
 Eclipse Kura - 3.0.0
 -------------------------------------------------------------------------
 Added Features :

@@ -11,7 +11,8 @@
   
     Contributors:
      Eurotech
- 
+     Cavium
+
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -33,6 +34,7 @@
         <module>com.codeminders.hidapi</module>
         <module>com.codeminders.hidapi.armv6hf</module>
         <module>com.codeminders.hidapi.x86_64</module>
+        <module>com.codeminders.hidapi.aarch64</module>
     </modules>
 
     <properties>

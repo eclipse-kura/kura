@@ -14,6 +14,7 @@
       Kevin Read, Om7Sense GmbH
       John Read, Om7Sense GmbH
       Amit Kumar Mondal
+      Cavium
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -289,6 +290,11 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.linux.usb.x86_64</artifactId>
+                                    <version>${org.eclipse.kura.linux.usb.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.linux.usb.aarch64</artifactId>
                                     <version>${org.eclipse.kura.linux.usb.version}</version>
                                 </artifactItem>
                                 <artifactItem>
@@ -569,6 +575,8 @@
                                     tofile="target/plugins/org.eclipse.kura.linux.usb.armv6hf_${org.eclipse.kura.linux.usb.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.usb.x86_64.jar"
                                     tofile="target/plugins/org.eclipse.kura.linux.usb.x86_64_${org.eclipse.kura.linux.usb.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.linux.usb.aarch64.jar"
+                                    tofile="target/plugins/org.eclipse.kura.linux.usb.aarch64_${org.eclipse.kura.linux.usb.version}.jar"/>
                                 <move file="target/plugins/org.eclipse.kura.linux.bluetooth.jar"
                                     tofile="target/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.ble.provider.jar"
@@ -2859,6 +2867,65 @@
               </plugin>
             </plugins>
           </build>
+        </profile>
+        <profile>
+            <id>aarch64-nn</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>create-timestamp</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>aarch64-nn-jars</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <property name="buildNumber" value="buildNumber" />
+                                        <property name="project.version" value="${project.version}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
+                                        <property name="build.name" value="aarch64-nn" />
+                                        <property name="target.device" value="aarch64-nn" />
+                                        <property name="kura.os.version" value="debian" />
+                                        <property name="native.tag" value="aarch64"/>
+                                        <property name="kura.arch" value="aarch64" />
+                                        <property name="kura.mem.size" value="256m" />
+                                        <property name="kura.install.dir" value="/opt/eclipse/" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>

@@ -51,7 +51,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
                 StringBuilder imageTag = new StringBuilder();
                 imageTag.append("<img src='");
                 imageTag.append(imageURL);
-                imageTag.append("' height='20' width='20'/>");
+                imageTag.append("' height='14' width='14'/>");
                 imageTag.append(" ");
                 imageTag.append(this.item.getComponentName());
                 super.anchor.setHTML(imageTag.toString());

@@ -9,7 +9,7 @@
      http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" immediate="false" name="org.eclipse.kura.core.deployment.hook.DeploymentHookManager">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="false" name="org.eclipse.kura.core.deployment.hook.DeploymentHookManager">
    <implementation class="org.eclipse.kura.core.deployment.hook.DeploymentHookManager"/>
    <service>
       <provide interface="org.eclipse.kura.core.deployment.hook.DeploymentHookManager"/>

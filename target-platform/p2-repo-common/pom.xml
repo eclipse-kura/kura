@@ -418,6 +418,12 @@
 									<version>${org.apache.geronimo.specs.jta.version}</version>
 								</artifactItem>
 
+								<artifactItem>
+									<groupId>org.eclipse.kura</groupId>
+									<artifactId>org.apache.activemq.artemis</artifactId>
+									<version>${org.apache.activemq.artemis.version}</version>
+								</artifactItem>
+
 							</artifactItems>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -509,6 +515,7 @@
 								<move file="target/source/plugins/geronimo-json_1.0_spec.jar" tofile="target/source/plugins/geronimo-json_1.0_spec_${org.apache.geronimo.specs.json.version}.jar"/>
 								<move file="target/source/plugins/geronimo-jms_2.0_spec.jar" tofile="target/source/plugins/geronimo-jms_2.0_spec_${org.apache.geronimo.specs.jms.version}.jar"/>
 								<move file="target/source/plugins/geronimo-jta_1.1_spec.jar" tofile="target/source/plugins/geronimo-jta_1.1_spec_${org.apache.geronimo.specs.jta.version}.jar"/>
+								<move file="target/source/plugins/org.apache.activemq.artemis.jar" tofile="target/source/plugins/org.apache.activemq.artemis_${org.apache.activemq.artemis.version}.jar"/>
 							</tasks>
 						</configuration>
 					</execution>

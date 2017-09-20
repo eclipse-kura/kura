@@ -23,59 +23,7 @@
 
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
-		<org.apache.activemq.artemis.version>2.1.0</org.apache.activemq.artemis.version>
 	</properties>
-
-	<dependencies>
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>artemis-server</artifactId>
-			<version>${org.apache.activemq.artemis.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>artemis-commons</artifactId>
-			<version>${org.apache.activemq.artemis.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>artemis-core-client</artifactId>
-			<version>${org.apache.activemq.artemis.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>artemis-jms-client</artifactId>
-			<version>${org.apache.activemq.artemis.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>artemis-jms-server</artifactId>
-			<version>${org.apache.activemq.artemis.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>artemis-journal</artifactId>
-			<version>${org.apache.activemq.artemis.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>artemis-selector</artifactId>
-			<version>${org.apache.activemq.artemis.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>artemis-service-extensions</artifactId>
-			<version>${org.apache.activemq.artemis.version}</version>
-		</dependency>
-	</dependencies>
-
 
 	<build>
 		<plugins>

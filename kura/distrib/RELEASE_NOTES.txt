@@ -48,6 +48,7 @@ Bug Fixes :
     * #1585: [Messaging] Share cloud connection with external applications
     * #1575: [Watchdog Service] Write the last reboot cause to a persistent file
     * #1564: [MqttDataTransport] wss connections without hostname verification do not work
+    * #1558: CommandCloudApp doesn't use received working directory parameter
     * #1556: connect.retry-interval=0 causes DataService activation failure
     * #1541: Add support for polling to GPIO example
     * #1531: Create "Drivers and Assets" tab

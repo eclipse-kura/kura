@@ -109,8 +109,9 @@ public class StatusPanelUi extends Composite {
 
             @Override
             public void handleEvent(GwtEventInfo eventInfo) {
-                if (StatusPanelUi.this.isVisible() && StatusPanelUi.this.isAttached())
+                if (StatusPanelUi.this.isVisible() && StatusPanelUi.this.isAttached()) {
                     loadStatusData();
+                }
             }
         };
 
@@ -188,14 +189,7 @@ public class StatusPanelUi extends Composite {
 
                                 // based on the assumption that in the ArrayList, "Service Status"
                                 // immediately follows "Connection Name"
-                                GwtGroupedNVPair connectionStatus = it.next();
-
-                                if ("Service Status".equals(connectionStatus.getName())
-                                        && "CONNECTED".equals(connectionStatus.getValue())) {
-                                    StatusPanelUi.this.parent.updateConnectionStatusImage(true);
-                                } else {
-                                    StatusPanelUi.this.parent.updateConnectionStatusImage(false);
-                                }
+                                it.next();
                             }
 
                             if (!title.equals(connectionName.getGroup())) {

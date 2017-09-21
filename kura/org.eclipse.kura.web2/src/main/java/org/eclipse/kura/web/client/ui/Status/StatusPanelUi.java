@@ -184,14 +184,6 @@ public class StatusPanelUi extends Composite {
                         Iterator<GwtGroupedNVPair> it = result.iterator();
                         while (it.hasNext()) {
                             GwtGroupedNVPair connectionName = it.next();
-                            if ("Connection Name".equals(connectionName.getName())
-                                    && connectionName.getValue().endsWith("CloudService") && it.hasNext()) {
-
-                                // based on the assumption that in the ArrayList, "Service Status"
-                                // immediately follows "Connection Name"
-                                it.next();
-                            }
-
                             if (!title.equals(connectionName.getGroup())) {
                                 title = connectionName.getGroup();
                                 StatusPanelUi.this.statusGridProvider.getList()

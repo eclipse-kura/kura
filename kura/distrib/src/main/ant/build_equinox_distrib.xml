@@ -1542,10 +1542,12 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
     </target>
 
 	<target name="tinyb-no-snapshot-jars" unless="is.tinyb.snapshot">
-        <zipfileset file="../target-definition/common/repository/plugins/tinyb.${native.tag}_${tinyb.version}.jar"
-                    prefix="${build.output.name}/plugins" />
-        <zipfileset file="../target-definition/common/repository/plugins/tinyb_${tinyb.version}.jar"
-                    prefix="${build.output.name}/plugins" />
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+            <zipfileset file="../target-definition/common/repository/plugins/tinyb.${native.tag}_${tinyb.version}.jar"
+                prefix="${build.output.name}/plugins" />
+            <zipfileset file="../target-definition/common/repository/plugins/tinyb_${tinyb.version}.jar"
+                prefix="${build.output.name}/plugins" />
+	    </zip>
 	</target>
 
 	<target name="web2-jar-win" if="is.web2.jar.available">

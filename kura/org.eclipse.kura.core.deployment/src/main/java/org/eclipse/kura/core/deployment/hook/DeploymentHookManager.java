@@ -18,8 +18,9 @@ import java.util.Properties;
 
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.deployment.hook.DeploymentHook;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,7 @@ public class DeploymentHookManager {
 
     private final Map<String, DeploymentHook> registeredHooks = new HashMap<>();
     private final Map<String, HookAssociation> associations = new HashMap<>();
-    private ComponentContext context;
+    private BundleContext bundleContext;
 
     public synchronized void bindHook(ServiceReference<DeploymentHook> hook) {
 
@@ -47,7 +48,7 @@ public class DeploymentHookManager {
             return;
         }
 
-        this.registeredHooks.put(hookId, context.getBundleContext().getService(hook));
+        this.registeredHooks.put(hookId, getBundleContext().getService(hook));
 
         logger.info("Hook registered: {}", hookId);
         updateAssociations();
@@ -67,16 +68,17 @@ public class DeploymentHookManager {
 
         updateAssociations();
         if (removedHook != null) {
-            context.getBundleContext().ungetService(hook);
+            getBundleContext().ungetService(hook);
             logger.info("Hook unregistered: {}", hookId);
         }
 
     }
 
-    public synchronized void activate(ComponentContext context) {
-        logger.info("activating...");
-        this.context = context;
-        logger.info("activating...done");
+    private BundleContext getBundleContext() {
+        if (this.bundleContext == null) {
+            this.bundleContext = FrameworkUtil.getBundle(DeploymentHookManager.class).getBundleContext();
+        }
+        return this.bundleContext;
     }
 
     public synchronized void updateAssociations(Properties properties) {

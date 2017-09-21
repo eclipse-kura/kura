@@ -17,11 +17,11 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.deployment.hook.DeploymentHookManager;
 import org.eclipse.kura.core.deployment.hook.DeploymentHookManager.HookAssociation;
+import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.deployment.hook.DeploymentHook;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentContext;
 
 public class DownloadHookManagerTest {
 
@@ -38,16 +38,14 @@ public class DownloadHookManagerTest {
         return reference;
     }
 
-    private DeploymentHookManager getDeploymentHookManager() {
+    private DeploymentHookManager getDeploymentHookManager() throws NoSuchFieldException {
         final DeploymentHookManager result = new DeploymentHookManager();
-        final ComponentContext mockComponentContext = mock(ComponentContext.class);
         final BundleContext mockBundleContext = mock(BundleContext.class);
-        when(mockComponentContext.getBundleContext()).thenReturn(mockBundleContext);
         when(mockBundleContext.getService(anyObject())).then(invocation -> {
             final ServiceReference<?> ref = invocation.getArgumentAt(0, ServiceReference.class);
             return ref.getProperty("service");
         });
-        result.activate(mockComponentContext);
+        TestUtil.setFieldValue(result, "bundleContext", mockBundleContext);
         return result;
     }
 
@@ -58,7 +56,7 @@ public class DownloadHookManagerTest {
     }
 
     @Test
-    public void shouldRegisterAssociations() throws KuraException, IOException {
+    public void shouldRegisterAssociations() throws KuraException, IOException, NoSuchFieldException {
         final DeploymentHookManager manager = getDeploymentHookManager();
         manager.updateAssociations(parseAssociations("type1=pid1\ntype2=pid2\ntype3=pid3\n#bad_type=bad_pid"));
 
@@ -81,7 +79,7 @@ public class DownloadHookManagerTest {
     }
 
     @Test
-    public void shouldClearAssociations() throws KuraException, IOException {
+    public void shouldClearAssociations() throws KuraException, IOException, NoSuchFieldException {
         final DeploymentHookManager manager = getDeploymentHookManager();
         manager.updateAssociations(null);
 
@@ -90,7 +88,7 @@ public class DownloadHookManagerTest {
     }
 
     @Test
-    public void shouldRegisterHooks() throws KuraException, IOException {
+    public void shouldRegisterHooks() throws KuraException, IOException, NoSuchFieldException {
         final DeploymentHookManager manager = getDeploymentHookManager();
         manager.bindHook(mockHookReference("pid1", mock(DeploymentHook.class)));
         manager.bindHook(mockHookReference("pid2", mock(DeploymentHook.class)));
@@ -106,7 +104,7 @@ public class DownloadHookManagerTest {
     }
 
     @Test
-    public void shouldUnregisterHooks() throws KuraException, IOException {
+    public void shouldUnregisterHooks() throws KuraException, IOException, NoSuchFieldException {
         final DeploymentHookManager manager = getDeploymentHookManager();
         manager.bindHook(mockHookReference("pid1", mock(DeploymentHook.class)));
         manager.bindHook(mockHookReference("pid2", mock(DeploymentHook.class)));
@@ -123,7 +121,7 @@ public class DownloadHookManagerTest {
     }
 
     @Test
-    public void shouldBindHooks() throws KuraException, IOException {
+    public void shouldBindHooks() throws KuraException, IOException, NoSuchFieldException {
         final DeploymentHookManager manager = getDeploymentHookManager();
 
         final ServiceReference<DeploymentHook> ref1 = mockHookReference("pid1", mock(DeploymentHook.class));
@@ -158,7 +156,7 @@ public class DownloadHookManagerTest {
     }
 
     @Test
-    public void shouldBindHooks2() throws KuraException, IOException {
+    public void shouldBindHooks2() throws KuraException, IOException, NoSuchFieldException {
         final DeploymentHookManager manager = getDeploymentHookManager();
 
         final ServiceReference<DeploymentHook> ref1 = mockHookReference("pid1", mock(DeploymentHook.class));
@@ -192,7 +190,7 @@ public class DownloadHookManagerTest {
     }
 
     @Test
-    public void shouldUnbindHooks() throws KuraException, IOException {
+    public void shouldUnbindHooks() throws KuraException, IOException, NoSuchFieldException {
         final DeploymentHookManager manager = getDeploymentHookManager();
 
         final ServiceReference<DeploymentHook> ref1 = mockHookReference("pid1", mock(DeploymentHook.class));
@@ -216,7 +214,7 @@ public class DownloadHookManagerTest {
     }
 
     @Test
-    public void shouldUnbindHooks2() throws KuraException, IOException {
+    public void shouldUnbindHooks2() throws KuraException, IOException, NoSuchFieldException {
         final DeploymentHookManager manager = getDeploymentHookManager();
 
         final ServiceReference<DeploymentHook> ref1 = mockHookReference("pid1", mock(DeploymentHook.class));

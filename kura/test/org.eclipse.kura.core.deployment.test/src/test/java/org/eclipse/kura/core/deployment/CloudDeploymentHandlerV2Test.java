@@ -42,7 +42,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentContext;
 
 public class CloudDeploymentHandlerV2Test {
 
@@ -704,16 +703,14 @@ public class CloudDeploymentHandlerV2Test {
         return reference;
     }
 
-    private DeploymentHookManager getDeploymentHookManager() {
+    private DeploymentHookManager getDeploymentHookManager() throws NoSuchFieldException {
         final DeploymentHookManager result = new DeploymentHookManager();
-        final ComponentContext mockComponentContext = mock(ComponentContext.class);
         final BundleContext mockBundleContext = mock(BundleContext.class);
-        when(mockComponentContext.getBundleContext()).thenReturn(mockBundleContext);
         when(mockBundleContext.getService(anyObject())).then(invocation -> {
             final ServiceReference<?> ref = invocation.getArgumentAt(0, ServiceReference.class);
             return ref.getProperty("service");
         });
-        result.activate(mockComponentContext);
+        TestUtil.setFieldValue(result, "bundleContext", mockBundleContext);
         return result;
     }
 

@@ -33,12 +33,9 @@ import org.eclipse.kura.web.client.ui.Settings.SettingsPanelUi;
 import org.eclipse.kura.web.client.ui.Status.StatusPanelUi;
 import org.eclipse.kura.web.client.ui.drivers.assets.DriversAndAssetsUi;
 import org.eclipse.kura.web.client.ui.wires.WiresPanelUi;
-import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.FilterBuilder;
-import org.eclipse.kura.web.shared.ForwardedEventTopic;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
-import org.eclipse.kura.web.shared.model.GwtEventInfo;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
@@ -191,7 +188,6 @@ public class EntryClassUi extends Composite {
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
-
     private final KeyUpHandler searchBoxChangeHandler = new KeyUpHandler() {
 
         @Override
@@ -227,7 +223,7 @@ public class EntryClassUi extends Composite {
         this.footerLeft.setText(MSGS.copyright(String.valueOf(year)));
         this.footerLeft.setStyleName("copyright");
         this.contentPanel.setVisible(false);
-        
+
         // Add handler for sidenav show/hide button
         this.sidenavButton.addClickHandler(new ClickHandler() {
 
@@ -241,23 +237,8 @@ public class EntryClassUi extends Composite {
             }
         });
 
-        EventService.subscribe(ForwardedEventTopic.CLOUD_CONNECTION_STATUS_ESTABLISHED, new EventService.Handler() {
-
-            @Override
-            public void handleEvent(GwtEventInfo eventInfo) {
-                updateConnectionStatusImage(true);
-            }
-        });
-        EventService.subscribe(ForwardedEventTopic.CLOUD_CONNECTION_STATUS_LOST, new EventService.Handler() {
-
-            @Override
-            public void handleEvent(GwtEventInfo eventInfo) {
-                updateConnectionStatusImage(false);
-            }
-        });
-
         showSidenav();
-        
+
         initServicesTree();
     }
 
@@ -310,7 +291,6 @@ public class EntryClassUi extends Composite {
         }
 
         // Status Panel
-        updateConnectionStatusImage(connectionStatus);
         this.status.addClickHandler(new ClickHandler() {
 
             @Override
@@ -516,15 +496,15 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.contentPanelHeader.setText(MSGS.wires());
                         EntryClassUi.this.contentPanelBody.clear();
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.wiresBinder);
-                        wiresBinder.load();
+                        EntryClassUi.this.wiresBinder.load();
                         // EntryClassUi.this.discardWiresPanelChanges();
                     }
                 });
                 renderDirtyConfigModal(b);
             }
         });
-        
-     // Drivers and Twins services Panel
+
+        // Drivers and Twins services Panel
         this.driversAndAssetsServices.addClickHandler(new ClickHandler() {
 
             @Override
@@ -757,34 +737,6 @@ public class EntryClassUi extends Composite {
         this.contentPanelBody.add(this.servicesUi);
     }
 
-    public void updateConnectionStatusImage(boolean isConnected) {
-        String imgColor;
-        String statusMessage;
-
-        if (isConnected) {
-            imgColor = "background-color: #007f00";
-            statusMessage = MSGS.connectionStatusConnected();
-        } else {
-            imgColor = "background-color: #eb3d00";
-            statusMessage = MSGS.connectionStatusDisconnected();
-        }
-
-        StringBuilder imageSB = new StringBuilder();
-        imageSB.append("<i class=\"fa fa-plug fa-fw\" ");
-        imageSB.append(
-                "style=\"float: right; width: 23px; height: 23px; line-height: 23px; color: white; border-radius: 23px; ");
-        imageSB.append(imgColor + "\"");
-        imageSB.append("\" title=\"");
-        imageSB.append(statusMessage);
-        imageSB.append("\"/>");
-
-        String html = this.status.getHTML();
-        String baseStatusHTML = html.substring(0, html.indexOf("Status") + "Status".length());
-        StringBuilder statusHTML = new StringBuilder(baseStatusHTML);
-        statusHTML.append(imageSB.toString());
-        this.status.setHTML(statusHTML.toString());
-    }
-
     // create the prompt for dirty configuration before switching to another tab
     private void renderDirtyConfigModal(Button b) {
 
@@ -870,12 +822,12 @@ public class EntryClassUi extends Composite {
 
     public boolean isWiresDirty() {
         if (this.wires.isVisible()) {
-            return wiresBinder.isDirty();
+            return this.wiresBinder.isDirty();
         } else {
             return false;
         }
     }
-    
+
     public boolean isDriversAndTwinsDirty() {
         if (this.driversAndTwinsBinder.isVisible()) {
             return this.driversAndTwinsBinder.isDirty();
@@ -943,8 +895,8 @@ public class EntryClassUi extends Composite {
             this.cloudServicesBinder.setDirty(false);
         }
         if (this.wires.isVisible()) {
-            wiresBinder.setDirty(false);
-            wiresBinder.unload();
+            this.wiresBinder.setDirty(false);
+            this.wiresBinder.unload();
         }
     }
 

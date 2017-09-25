@@ -36,7 +36,7 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
         }
         try {
             this.bluetoothManager = BluetoothManager.getBluetoothManager();
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | UnsatisfiedLinkError e) {
             logger.error("Failed to start bluetooth service", e);
         }
     }

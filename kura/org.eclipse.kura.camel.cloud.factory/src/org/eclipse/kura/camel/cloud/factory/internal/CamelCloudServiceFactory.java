@@ -163,7 +163,7 @@ public class CamelCloudServiceFactory implements CloudServiceFactory {
         final Set<String> result = new HashSet<>();
 
         for (final ComponentConfiguration cc : this.configurationService.getComponentConfigurations()) {
-            if (FACTORY_ID.equals(cc.getDefinition().getId())) {
+            if (cc.getDefinition() != null && FACTORY_ID.equals(cc.getDefinition().getId())) {
                 result.add(fromInternalPid(cc.getPid()));
             }
         }

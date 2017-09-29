@@ -56,17 +56,22 @@ following steps:
 
     <pre>sudo systemctl disable connman.service</pre>
 
-6. The tyme sync service conflicts with Kura Clock Service and needs to be disabled:
+6. The dnsmasq service conflicts with Kura DHCP server and needs to be disabled
+   performing the following command:
+
+    <pre>sudo systemctl disable dnsmasq.service</pre>
+
+7. The tyme sync service conflicts with Kura Clock Service and needs to be disabled:
 
     <pre>sudo timedatectl set-ntp false</pre>
 
-7.  Install the gdebi command line tool:
+8.  Install the gdebi command line tool:
 
     <pre>
     sudo apt-get update
     sudo apt-get install gdebi-core</pre>
 
-8.  Download the Kura package with:
+9.  Download the Kura package with:
 
     <pre>
     wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_beaglebone_debian_installer.deb
@@ -74,7 +79,7 @@ following steps:
 
     Note: replace \<version\> in the URL above with the version number of the latest release (e.g. 2.1.0).
 
-9.  Install Kura with: 
+10.  Install Kura with: 
 
     <pre>sudo gdebi kura_&lt;version&gt;_beaglebone_debian_installer.deb</pre>
 
@@ -85,13 +90,13 @@ following steps:
 
     <pre>sudo apt-get install oracle-java8-installer</pre>
 
-10. Reboot the BeagleBone Black with:
+11. Reboot the BeagleBone Black with:
 
     <pre>sudo reboot</pre>
 
     Kura starts on the target platform after reboot.
 
-11. Kura setups a local web ui that is available using a browser via:
+12. Kura setups a local web ui that is available using a browser via:
 
     <pre>http://&lt;device-ip&gt;</pre>
 

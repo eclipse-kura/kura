@@ -128,6 +128,8 @@ public class AssetRestService {
                             return new JsonPrimitive((String) value);
                         } else if (value instanceof byte[]) {
                             return new JsonPrimitive(BASE64_ENCODER.encodeToString((byte[]) value));
+                        } else if (value instanceof Boolean) {
+                            return new JsonPrimitive((Boolean) value);
                         }
                         return null;
                     }).create();

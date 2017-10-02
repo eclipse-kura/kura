@@ -55,7 +55,7 @@ public class TiSensorTag {
     private boolean cc2650;
     private boolean keysNotification;
     private byte[] pressureCalibration;
-    private Map<String, BluetoothLeGattService> gattServices;
+    private final Map<String, BluetoothLeGattService> gattServices;
 
     public TiSensorTag(BluetoothLeDevice bluetoothLeDevice) {
         this.device = bluetoothLeDevice;
@@ -185,17 +185,10 @@ public class TiSensorTag {
     /*
      * Read temperature sensor
      */
-    public double[] readTemperature() {
-        double[] temperatures = new double[2];
-        BluetoothLeGattCharacteristic tempValueChar;
-        try {
-            tempValueChar = this.gattServices.get(TEMPERATURE)
-                    .findCharacteristic(TiSensorTagGatt.UUID_TEMP_SENSOR_VALUE);
-            temperatures = calculateTemperature(tempValueChar.readValue());
-        } catch (KuraException e) {
-            logger.error("Temperature read failed", e);
-        }
-        return temperatures;
+    public double[] readTemperature() throws KuraException {
+        BluetoothLeGattCharacteristic tempValueChar = this.gattServices.get(TEMPERATURE)
+                .findCharacteristic(TiSensorTagGatt.UUID_TEMP_SENSOR_VALUE);
+        return calculateTemperature(tempValueChar.readValue());
     }
 
     /*
@@ -364,23 +357,17 @@ public class TiSensorTag {
     /*
      * Read accelerometer sensor
      */
-    public double[] readAcceleration() {
-        double[] acceleration = new double[3];
+    public double[] readAcceleration() throws KuraException {
         BluetoothLeGattCharacteristic accValueChar;
-        try {
-            if (this.cc2650) {
-                accValueChar = this.gattServices.get(MOVEMENT)
-                        .findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_VALUE);
-                acceleration = calculateAcceleration(accValueChar.readValue());
-            } else {
-                accValueChar = this.gattServices.get(ACCELEROMETER)
-                        .findCharacteristic(TiSensorTagGatt.UUID_ACC_SENSOR_VALUE);
-                acceleration = calculateAcceleration(accValueChar.readValue());
-            }
-        } catch (KuraException e) {
-            logger.error("Acceleration read failed", e);
+
+        if (this.cc2650) {
+            accValueChar = this.gattServices.get(MOVEMENT).findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_VALUE);
+        } else {
+            accValueChar = this.gattServices.get(ACCELEROMETER)
+                    .findCharacteristic(TiSensorTagGatt.UUID_ACC_SENSOR_VALUE);
         }
-        return acceleration;
+
+        return calculateAcceleration(accValueChar.readValue());
     }
 
     /*
@@ -437,7 +424,7 @@ public class TiSensorTag {
         byte[] periodBytes = { ByteBuffer.allocate(4).putInt(period).array()[3] };
         BluetoothLeGattCharacteristic tempPeriodChar;
         try {
-            if (this.isCC2650()) {
+            if (isCC2650()) {
                 tempPeriodChar = this.gattServices.get(MOVEMENT)
                         .findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_PERIOD);
                 tempPeriodChar.writeValue(periodBytes);
@@ -470,9 +457,9 @@ public class TiSensorTag {
             acceleration[1] = y / scale;
             acceleration[2] = z / scale * -1;
         } else {
-            int x = unsignedToSigned((int) valueByte[0], 8);
-            int y = unsignedToSigned((int) valueByte[1], 8);
-            int z = unsignedToSigned((int) valueByte[2], 8) * -1;
+            int x = unsignedToSigned(valueByte[0], 8);
+            int y = unsignedToSigned(valueByte[1], 8);
+            int z = unsignedToSigned(valueByte[2], 8) * -1;
 
             acceleration[0] = x / 64.0;
             acceleration[1] = y / 64.0;
@@ -527,16 +514,10 @@ public class TiSensorTag {
     /*
      * Read humidity sensor
      */
-    public float readHumidity() {
-        float humidity = 0F;
-        BluetoothLeGattCharacteristic humValueChar;
-        try {
-            humValueChar = this.gattServices.get(HUMIDITY).findCharacteristic(TiSensorTagGatt.UUID_HUM_SENSOR_VALUE);
-            humidity = calculateHumidity(humValueChar.readValue());
-        } catch (KuraException e) {
-            logger.error("Humidity read failed", e);
-        }
-        return humidity;
+    public float readHumidity() throws KuraException {
+        BluetoothLeGattCharacteristic humValueChar = this.gattServices.get(HUMIDITY)
+                .findCharacteristic(TiSensorTagGatt.UUID_HUM_SENSOR_VALUE);
+        return calculateHumidity(humValueChar.readValue());
     }
 
     /*
@@ -672,23 +653,17 @@ public class TiSensorTag {
     /*
      * Read magnetometer sensor
      */
-    public float[] readMagneticField() {
-        float[] magneticField = new float[3];
+    public float[] readMagneticField() throws KuraException {
         BluetoothLeGattCharacteristic magValueChar;
-        try {
-            if (this.cc2650) {
-                magValueChar = this.gattServices.get(MOVEMENT)
-                        .findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_VALUE);
-                magneticField = calculateMagneticField(magValueChar.readValue());
-            } else {
-                magValueChar = this.gattServices.get(MAGNETOMETER)
-                        .findCharacteristic(TiSensorTagGatt.UUID_MAG_SENSOR_VALUE);
-                magneticField = calculateMagneticField(magValueChar.readValue());
-            }
-        } catch (KuraException e) {
-            logger.error("Magnetic field read failed", e);
+
+        if (this.cc2650) {
+            magValueChar = this.gattServices.get(MOVEMENT).findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_VALUE);
+        } else {
+            magValueChar = this.gattServices.get(MAGNETOMETER)
+                    .findCharacteristic(TiSensorTagGatt.UUID_MAG_SENSOR_VALUE);
         }
-        return magneticField;
+
+        return calculateMagneticField(magValueChar.readValue());
     }
 
     /*
@@ -745,7 +720,7 @@ public class TiSensorTag {
         byte[] periodBytes = { ByteBuffer.allocate(4).putInt(period).array()[3] };
         BluetoothLeGattCharacteristic magPeriodChar;
         try {
-            if (this.isCC2650()) {
+            if (isCC2650()) {
                 magPeriodChar = this.gattServices.get(MOVEMENT)
                         .findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_PERIOD);
                 magPeriodChar.writeValue(periodBytes);
@@ -872,16 +847,11 @@ public class TiSensorTag {
     /*
      * Read pressure sensor
      */
-    public double readPressure() {
-        double pressure = 0;
-        BluetoothLeGattCharacteristic preValueChar;
-        try {
-            preValueChar = this.gattServices.get(PRESSURE).findCharacteristic(TiSensorTagGatt.UUID_PRE_SENSOR_VALUE);
-            pressure = calculatePressure(preValueChar.readValue());
-        } catch (KuraException e) {
-            logger.error("Pressure read failed", e);
-        }
-        return pressure;
+    public double readPressure() throws KuraException {
+        BluetoothLeGattCharacteristic preValueChar = this.gattServices.get(PRESSURE)
+                .findCharacteristic(TiSensorTagGatt.UUID_PRE_SENSOR_VALUE);
+
+        return calculatePressure(preValueChar.readValue());
     }
 
     /*
@@ -1055,23 +1025,16 @@ public class TiSensorTag {
     /*
      * Read gyroscope sensor
      */
-    public float[] readGyroscope() {
-        float[] gyroscope = new float[3];
+    public float[] readGyroscope() throws KuraException {
         BluetoothLeGattCharacteristic gyroValueChar;
-        try {
-            if (this.cc2650) {
-                gyroValueChar = this.gattServices.get(MOVEMENT)
-                        .findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_VALUE);
-                gyroscope = calculateGyroscope(gyroValueChar.readValue());
-            } else {
-                gyroValueChar = this.gattServices.get(GYROSCOPE)
-                        .findCharacteristic(TiSensorTagGatt.UUID_GYR_SENSOR_VALUE);
-                gyroscope = calculateGyroscope(gyroValueChar.readValue());
-            }
-        } catch (KuraException e) {
-            logger.error("Gyroscope read failed", e);
+
+        if (this.cc2650) {
+            gyroValueChar = this.gattServices.get(MOVEMENT).findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_VALUE);
+        } else {
+            gyroValueChar = this.gattServices.get(GYROSCOPE).findCharacteristic(TiSensorTagGatt.UUID_GYR_SENSOR_VALUE);
         }
-        return gyroscope;
+
+        return calculateGyroscope(gyroValueChar.readValue());
     }
 
     /*
@@ -1128,7 +1091,7 @@ public class TiSensorTag {
         byte[] periodBytes = { ByteBuffer.allocate(4).putInt(period).array()[3] };
         BluetoothLeGattCharacteristic gyroPeriodChar;
         try {
-            if (this.isCC2650()) {
+            if (isCC2650()) {
                 gyroPeriodChar = this.gattServices.get(MOVEMENT)
                         .findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_PERIOD);
                 gyroPeriodChar.writeValue(periodBytes);
@@ -1221,20 +1184,15 @@ public class TiSensorTag {
     /*
      * Read optical sensor
      */
-    public double readLight() {
-        double light = 0.0;
+    public double readLight() throws KuraException {
+        BluetoothLeGattCharacteristic optoValueChar;
         if (this.cc2650) {
-            try {
-                BluetoothLeGattCharacteristic optoValueChar;
-                optoValueChar = this.gattServices.get(OPTO).findCharacteristic(TiSensorTagGatt.UUID_OPTO_SENSOR_VALUE);
-                light = calculateLight(optoValueChar.readValue());
-            } catch (KuraException e) {
-                logger.error("Luxometer read failed", e);
-            }
+            optoValueChar = this.gattServices.get(OPTO).findCharacteristic(TiSensorTagGatt.UUID_OPTO_SENSOR_VALUE);
         } else {
             logger.info(OPTO_ERROR_MESSAGE);
+            throw new KuraBluetoothIOException(OPTO_ERROR_MESSAGE);
         }
-        return light;
+        return calculateLight(optoValueChar.readValue());
     }
 
     /*
@@ -1285,7 +1243,7 @@ public class TiSensorTag {
         byte[] periodBytes = { ByteBuffer.allocate(4).putInt(period).array()[3] };
         BluetoothLeGattCharacteristic optoPeriodChar;
         try {
-            if (this.isCC2650()) {
+            if (isCC2650()) {
                 optoPeriodChar = this.gattServices.get(OPTO)
                         .findCharacteristic(TiSensorTagGatt.UUID_OPTO_SENSOR_PERIOD);
                 optoPeriodChar.writeValue(periodBytes);
@@ -1412,7 +1370,7 @@ public class TiSensorTag {
             BluetoothLeGattCharacteristic ioValueChar;
             try {
                 ioValueChar = this.gattServices.get(IO).findCharacteristic(TiSensorTagGatt.UUID_IO_SENSOR_VALUE);
-                int status = (int) ioValueChar.readValue()[0] | 0x01;
+                int status = ioValueChar.readValue()[0] | 0x01;
                 byte[] value = { ByteBuffer.allocate(4).putInt(status).array()[3] };
                 ioValueChar.writeValue(value);
             } catch (KuraException e) {
@@ -1432,7 +1390,7 @@ public class TiSensorTag {
             BluetoothLeGattCharacteristic ioValueChar;
             try {
                 ioValueChar = this.gattServices.get(IO).findCharacteristic(TiSensorTagGatt.UUID_IO_SENSOR_VALUE);
-                int status = (int) ioValueChar.readValue()[0] & 0xFE;
+                int status = ioValueChar.readValue()[0] & 0xFE;
                 byte[] value = { ByteBuffer.allocate(4).putInt(status).array()[3] };
                 ioValueChar.writeValue(value);
             } catch (KuraException e) {
@@ -1452,7 +1410,7 @@ public class TiSensorTag {
             BluetoothLeGattCharacteristic ioValueChar;
             try {
                 ioValueChar = this.gattServices.get(IO).findCharacteristic(TiSensorTagGatt.UUID_IO_SENSOR_VALUE);
-                int status = (int) ioValueChar.readValue()[0] | 0x02;
+                int status = ioValueChar.readValue()[0] | 0x02;
                 byte[] value = { ByteBuffer.allocate(4).putInt(status).array()[3] };
                 ioValueChar.writeValue(value);
             } catch (KuraException e) {
@@ -1472,7 +1430,7 @@ public class TiSensorTag {
             BluetoothLeGattCharacteristic ioValueChar;
             try {
                 ioValueChar = this.gattServices.get(IO).findCharacteristic(TiSensorTagGatt.UUID_IO_SENSOR_VALUE);
-                int status = (int) ioValueChar.readValue()[0] & 0xFD;
+                int status = ioValueChar.readValue()[0] & 0xFD;
                 byte[] value = { ByteBuffer.allocate(4).putInt(status).array()[3] };
                 ioValueChar.writeValue(value);
             } catch (KuraException e) {
@@ -1492,7 +1450,7 @@ public class TiSensorTag {
             BluetoothLeGattCharacteristic ioValueChar;
             try {
                 ioValueChar = this.gattServices.get(IO).findCharacteristic(TiSensorTagGatt.UUID_IO_SENSOR_VALUE);
-                int status = (int) ioValueChar.readValue()[0] | 0x04;
+                int status = ioValueChar.readValue()[0] | 0x04;
                 byte[] value = { ByteBuffer.allocate(4).putInt(status).array()[3] };
                 ioValueChar.writeValue(value);
             } catch (KuraException e) {
@@ -1512,7 +1470,7 @@ public class TiSensorTag {
             BluetoothLeGattCharacteristic ioValueChar;
             try {
                 ioValueChar = this.gattServices.get(IO).findCharacteristic(TiSensorTagGatt.UUID_IO_SENSOR_VALUE);
-                int status = (int) ioValueChar.readValue()[0] & 0xFB;
+                int status = ioValueChar.readValue()[0] & 0xFB;
                 byte[] value = { ByteBuffer.allocate(4).putInt(status).array()[3] };
                 ioValueChar.writeValue(value);
             } catch (KuraException e) {
@@ -1550,7 +1508,7 @@ public class TiSensorTag {
 
     private static int shortSignedAtOffset(byte[] c, int offset) {
         int lowerByte = c[offset] & 0xFF;
-        int upperByte = (int) c[offset + 1]; // Interpret MSB as signedan
+        int upperByte = c[offset + 1]; // Interpret MSB as signedan
         return (upperByte << 8) + lowerByte;
     }
 
@@ -1569,20 +1527,22 @@ public class TiSensorTag {
 
     private void getGattServices() {
         try {
-            if (gattServices != null) {
-                gattServices.put(DEVINFO, this.device.findService(TiSensorTagGatt.UUID_DEVINFO_SERVICE));
-                gattServices.put(TEMPERATURE, this.device.findService(TiSensorTagGatt.UUID_TEMP_SENSOR_SERVICE));
-                gattServices.put(HUMIDITY, this.device.findService(TiSensorTagGatt.UUID_HUM_SENSOR_SERVICE));
-                gattServices.put(PRESSURE, this.device.findService(TiSensorTagGatt.UUID_PRE_SENSOR_SERVICE));
-                gattServices.put(KEYS, this.device.findService(TiSensorTagGatt.UUID_KEYS_SERVICE));
+            if (this.gattServices != null) {
+                this.gattServices.put(DEVINFO, this.device.findService(TiSensorTagGatt.UUID_DEVINFO_SERVICE));
+                this.gattServices.put(TEMPERATURE, this.device.findService(TiSensorTagGatt.UUID_TEMP_SENSOR_SERVICE));
+                this.gattServices.put(HUMIDITY, this.device.findService(TiSensorTagGatt.UUID_HUM_SENSOR_SERVICE));
+                this.gattServices.put(PRESSURE, this.device.findService(TiSensorTagGatt.UUID_PRE_SENSOR_SERVICE));
+                this.gattServices.put(KEYS, this.device.findService(TiSensorTagGatt.UUID_KEYS_SERVICE));
                 if (isCC2650()) {
-                    gattServices.put(OPTO, this.device.findService(TiSensorTagGatt.UUID_OPTO_SENSOR_SERVICE));
-                    gattServices.put(MOVEMENT, this.device.findService(TiSensorTagGatt.UUID_MOV_SENSOR_SERVICE));
-                    gattServices.put(IO, this.device.findService(TiSensorTagGatt.UUID_IO_SENSOR_SERVICE));
+                    this.gattServices.put(OPTO, this.device.findService(TiSensorTagGatt.UUID_OPTO_SENSOR_SERVICE));
+                    this.gattServices.put(MOVEMENT, this.device.findService(TiSensorTagGatt.UUID_MOV_SENSOR_SERVICE));
+                    this.gattServices.put(IO, this.device.findService(TiSensorTagGatt.UUID_IO_SENSOR_SERVICE));
                 } else {
-                    gattServices.put(ACCELEROMETER, this.device.findService(TiSensorTagGatt.UUID_ACC_SENSOR_SERVICE));
-                    gattServices.put(MAGNETOMETER, this.device.findService(TiSensorTagGatt.UUID_MAG_SENSOR_SERVICE));
-                    gattServices.put(GYROSCOPE, this.device.findService(TiSensorTagGatt.UUID_GYR_SENSOR_SERVICE));
+                    this.gattServices.put(ACCELEROMETER,
+                            this.device.findService(TiSensorTagGatt.UUID_ACC_SENSOR_SERVICE));
+                    this.gattServices.put(MAGNETOMETER,
+                            this.device.findService(TiSensorTagGatt.UUID_MAG_SENSOR_SERVICE));
+                    this.gattServices.put(GYROSCOPE, this.device.findService(TiSensorTagGatt.UUID_GYR_SENSOR_SERVICE));
                 }
             }
         } catch (KuraException e) {

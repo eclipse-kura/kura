@@ -51,11 +51,38 @@
     </repositories>
 
     <modules>
+      <module>org.eclipse.kura.demo.heater.feature</module>
+      <module>org.eclipse.kura.demo.modbus.feature</module>
+      <module>org.eclipse.kura.example.beacon.feature</module>
+      <module>org.eclipse.kura.example.beacon.scanner.feature</module>
+      <module>org.eclipse.kura.example.ble.tisensortag.feature</module>
+      <module>org.eclipse.kura.example.ble.tisensortag.tinyb.feature</module>
       <module>org.eclipse.kura.example.camel.aggregation.feature</module>
+      <module>org.eclipse.kura.example.camel.publisher.feature</module>
       <module>org.eclipse.kura.example.camel.quickstart.feature</module>
+      <module>org.eclipse.kura.example.eddystone.advertiser.feature</module>
+      <module>org.eclipse.kura.example.eddystone.scanner.feature</module>
+      <module>org.eclipse.kura.example.gpio.feature</module>
+      <module>org.eclipse.kura.example.ibeacon.advertiser.feature</module>
+      <module>org.eclipse.kura.example.ibeacon.scanner.feature</module>
+      <module>org.eclipse.kura.example.publisher.feature</module>
+      <module>org.eclipse.kura.example.serial.publisher.feature</module>
+      <module>org.eclipse.kura.example.raspberrypi.sensehat.feature</module>
     </modules>
 
     <profiles>
+        <profile>
+            <id>can</id>
+            <activation>
+                <property>
+                    <name>skip.can.example</name>
+                    <value>false</value>
+                </property>
+            </activation>
+            <modules>
+                <module>org.eclipse.kura.example.can.feature</module>
+            </modules>
+        </profile>
         <profile>
             <id>source-feature-generation</id>
             <activation>

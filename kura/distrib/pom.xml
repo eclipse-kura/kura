@@ -2795,33 +2795,33 @@
                       <configuration>
                         <artifactItems>
                           <artifactItem>
-                            <groupId>org.eclipse.kura.feature</groupId>
-                            <artifactId>org.eclipse.kura.protocol.modbus.feature</artifactId>
-                            <version>${org.eclipse.kura.protocol.modbus.feature.version}</version>
+                            <groupId>org.eclipse.kura</groupId>
+                            <artifactId>org.eclipse.kura.protocol.modbus</artifactId>
+                            <version>${org.eclipse.kura.protocol.modbus.version}</version>
                             <type>dp</type>
                           </artifactItem>
                           <artifactItem>
                             <groupId>org.eclipse.kura.feature</groupId>
-                            <artifactId>org.eclipse.kura.driver.opcua.feature</artifactId>
-                            <version>${org.eclipse.kura.driver.opcua.feature.version}</version>
+                            <artifactId>org.eclipse.kura.driver.opcua</artifactId>
+                            <version>${org.eclipse.kura.driver.opcua.version}</version>
                             <type>dp</type>
                           </artifactItem>
                           <artifactItem>
                             <groupId>org.eclipse.kura.feature</groupId>
-                            <artifactId>org.eclipse.kura.driver.s7plc.feature</artifactId>
-                            <version>${org.eclipse.kura.driver.s7plc.feature.version}</version>
+                            <artifactId>org.eclipse.kura.driver.s7plc</artifactId>
+                            <version>${org.eclipse.kura.driver.s7plc.version}</version>
                             <type>dp</type>
                           </artifactItem>
                           <artifactItem>
                             <groupId>org.eclipse.kura.feature</groupId>
-                            <artifactId>org.eclipse.kura.driver.ble.sensortag.feature</artifactId>
-                            <version>${org.eclipse.kura.driver.ble.sensortag.feature.version}</version>
+                            <artifactId>org.eclipse.kura.driver.ble.sensortag</artifactId>
+                            <version>${org.eclipse.kura.driver.ble.sensortag.version}</version>
                             <type>dp</type>
                           </artifactItem>
                           <artifactItem>
                             <groupId>org.eclipse.kura.feature</groupId>
-                            <artifactId>org.eclipse.kura.wire.script.filter.feature</artifactId>
-                            <version>${org.eclipse.kura.wire.script.filter.feature.version}</version>
+                            <artifactId>org.eclipse.kura.wire.script.filter</artifactId>
+                            <version>${org.eclipse.kura.wire.script.filter.version}</version>
                             <type>dp</type>
                           </artifactItem>
                         </artifactItems>
@@ -2854,9 +2854,9 @@
                           <skip>${kura.skip.can}</skip>
                           <artifactItems>
                             <artifactItem>
-                              <groupId>org.eclipse.kura.feature</groupId>
-                              <artifactId>org.eclipse.kura.protocol.can.feature</artifactId>
-                              <version>${org.eclipse.kura.protocol.can.feature.version}</version>
+                              <groupId>org.eclipse.kura</groupId>
+                              <artifactId>org.eclipse.kura.protocol.can</artifactId>
+                              <version>${org.eclipse.kura.protocol.can.version}</version>
                               <type>dp</type>
                             </artifactItem>
                           </artifactItems>

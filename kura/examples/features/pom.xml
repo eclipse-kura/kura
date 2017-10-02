@@ -23,7 +23,6 @@
 
     <properties>
       <kura.basedir>${project.basedir}/../..</kura.basedir>
-      <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
     </properties>
 
     <groupId>org.eclipse.kura.examples.feature</groupId>
@@ -51,8 +50,7 @@
     </repositories>
 
     <modules>
-      <module>org.eclipse.kura.example.camel.aggregation.feature</module>
-      <module>org.eclipse.kura.example.camel.quickstart.feature</module>
+      <module>org.eclipse.kura.raspberrypi.sensehat.example.bundle</module>
     </modules>
 
     <profiles>

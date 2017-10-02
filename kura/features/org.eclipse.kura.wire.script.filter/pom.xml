@@ -11,7 +11,7 @@
 		<relativePath>..</relativePath>
 	</parent>
 
-	<artifactId>org.eclipse.kura.driver.ble.sensortag.feature</artifactId>
+	<artifactId>org.eclipse.kura.wire.script.filter</artifactId>
 	<version>1.0.0</version>
 	<packaging>eclipse-feature</packaging>
 

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.eclipse.kura.example.camel.quickstart.feature"
+      id="org.eclipse.kura.driver.opcua"
       label="%featureName"
-      version="1.0.0"
+      version="1.0.100"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
@@ -20,7 +20,14 @@
    </license>
 
    <plugin
-         id="org.eclipse.kura.example.camel.quickstart"
+         id="org.eclipse.kura.driver.opcua.provider"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.kura.driver.opcua.localization"
          download-size="0"
          install-size="0"
          version="0.0.0"

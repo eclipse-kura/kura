@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.eclipse.kura.protocol.modbus.feature"
+      id="org.eclipse.kura.driver.s7plc"
       label="%featureName"
       version="1.0.0"
       provider-name="%providerName"
@@ -20,7 +20,21 @@
    </license>
 
    <plugin
-         id="org.eclipse.kura.protocol.modbus"
+         id="org.eclipse.kura.driver.s7plc.provider"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.kura.driver.s7plc.localization"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.moka7"
          download-size="0"
          install-size="0"
          version="0.0.0"

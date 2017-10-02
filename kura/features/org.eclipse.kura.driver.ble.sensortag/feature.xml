@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.eclipse.kura.driver.opcua.feature"
+      id="org.eclipse.kura.driver.ble.sensortag"
       label="%featureName"
       version="1.0.0"
       provider-name="%providerName"
@@ -20,14 +20,14 @@
    </license>
 
    <plugin
-         id="org.eclipse.kura.driver.opcua.provider"
+         id="org.eclipse.kura.driver.ble.sensortag.provider"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.kura.driver.opcua.localization"
+         id="org.eclipse.kura.driver.ble.sensortag.localization"
          download-size="0"
          install-size="0"
          version="0.0.0"

@@ -5,16 +5,20 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.eclipse.kura.feature</groupId>
+		<groupId>org.eclipse.kura.examples.feature</groupId>
 		<artifactId>features</artifactId>
 		<version>3.1.0</version>
 		<relativePath>..</relativePath>
 	</parent>
 
-	<artifactId>org.eclipse.kura.protocol.can.feature</artifactId>
+	<artifactId>org.eclipse.kura.example.raspberrypi.sensehat.bundle</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<version>1.0.0</version>
+	<version>1.0.100</version>
 
+	<properties>
+		<kura.basedir>${project.basedir}/../../..</kura.basedir>
+	</properties>
+<!--
 	<build>
 		<plugins>
 			<plugin>
@@ -31,4 +35,5 @@
 			</plugin>
 		</plugins>
 	</build>
+	-->
 </project>

@@ -35,6 +35,8 @@
         <kura.build.version>${maven.build.timestamp}</kura.build.version>
 
         <skip.can.example>true</skip.can.example>
+        
+        <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
     </properties>
 
     <distributionManagement>
@@ -426,6 +428,18 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+				<groupId>de.dentrassi.maven</groupId>
+				<artifactId>osgi-dp</artifactId>
+				<version>${osgi-dp-plugin-version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>build</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
         </plugins>
         <pluginManagement>
             <plugins>

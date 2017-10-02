@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.eclipse.kura.KuraBluetoothIOException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
@@ -133,7 +134,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
 
     private void doUpdate(Map<String, Object> properties) {
 
-        this.extractProperties(properties);
+        extractProperties(properties);
         // Get Bluetooth adapter and ensure it is enabled
         this.bluetoothLeAdapter = this.bluetoothLeService.getAdapter(this.options.getBluetoothInterfaceName());
         if (this.bluetoothLeAdapter != null) {
@@ -257,72 +258,62 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
         TiSensorTag sensorTag = getSensorTag(requestInfo);
 
         ChannelRecord record = requestInfo.channelRecord;
-        Object readResult = null;
-        switch (requestInfo.sensorName) {
-        case TEMP_AMBIENT:
-            readResult = sensorTag.readTemperature()[0];
-            break;
-        case TEMP_TARGET:
-            readResult = sensorTag.readTemperature()[1];
-            break;
-        case HUMIDITY:
-            readResult = sensorTag.readHumidity();
-            break;
-        case ACCELERATION_X:
-            readResult = sensorTag.readAcceleration()[0];
-            break;
-        case ACCELERATION_Y:
-            readResult = sensorTag.readAcceleration()[1];
-            break;
-        case ACCELERATION_Z:
-            readResult = sensorTag.readAcceleration()[2];
-            break;
-        case MAGNETIC_X:
-            readResult = sensorTag.readMagneticField()[0];
-            break;
-        case MAGNETIC_Y:
-            readResult = sensorTag.readMagneticField()[1];
-            break;
-        case MAGNETIC_Z:
-            readResult = sensorTag.readMagneticField()[2];
-            break;
-        case GYROSCOPE_X:
-            readResult = sensorTag.readGyroscope()[0];
-            break;
-        case GYROSCOPE_Y:
-            readResult = sensorTag.readGyroscope()[1];
-            break;
-        case GYROSCOPE_Z:
-            readResult = sensorTag.readGyroscope()[2];
-            break;
-        case LIGHT:
-            readResult = sensorTag.readLight();
-            break;
-        case PRESSURE:
-            readResult = sensorTag.readPressure();
-            break;
-        default:
-        }
-        if (readResult == null) {
+        try {
+            Object readResult = getReadResult(requestInfo.sensorName, sensorTag);
+            final Optional<TypedValue<?>> typedValue = getTypedValue(requestInfo.dataType, readResult);
+            if (!typedValue.isPresent()) {
+                record.setChannelStatus(new ChannelStatus(FAILURE, message.errorValueTypeConversion(), null));
+                record.setTimestamp(System.currentTimeMillis());
+                return;
+            }
+            record.setValue(typedValue.get());
+            record.setChannelStatus(new ChannelStatus(SUCCESS));
+            record.setTimestamp(System.currentTimeMillis());
+        } catch (KuraException e) {
             record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, message.readFailed(), null));
             record.setTimestamp(System.currentTimeMillis());
             logger.warn(message.readFailed());
             return;
         }
+    }
 
-        final Optional<TypedValue<?>> typedValue = this.getTypedValue(requestInfo.dataType, readResult);
-        if (!typedValue.isPresent()) {
-            record.setChannelStatus(new ChannelStatus(FAILURE, message.errorValueTypeConversion(), null));
-            record.setTimestamp(System.currentTimeMillis());
-            return;
+    private Object getReadResult(SensorName sensorName, TiSensorTag sensorTag) throws KuraException {
+        switch (sensorName) {
+        case TEMP_AMBIENT:
+            return sensorTag.readTemperature()[0];
+        case TEMP_TARGET:
+            return sensorTag.readTemperature()[1];
+        case HUMIDITY:
+            return sensorTag.readHumidity();
+        case ACCELERATION_X:
+            return sensorTag.readAcceleration()[0];
+        case ACCELERATION_Y:
+            return sensorTag.readAcceleration()[1];
+        case ACCELERATION_Z:
+            return sensorTag.readAcceleration()[2];
+        case MAGNETIC_X:
+            return sensorTag.readMagneticField()[0];
+        case MAGNETIC_Y:
+            return sensorTag.readMagneticField()[1];
+        case MAGNETIC_Z:
+            return sensorTag.readMagneticField()[2];
+        case GYROSCOPE_X:
+            return sensorTag.readGyroscope()[0];
+        case GYROSCOPE_Y:
+            return sensorTag.readGyroscope()[1];
+        case GYROSCOPE_Z:
+            return sensorTag.readGyroscope()[2];
+        case LIGHT:
+            return sensorTag.readLight();
+        case PRESSURE:
+            return sensorTag.readPressure();
+        default:
+            throw new KuraBluetoothIOException("Read is unsupported for sensor " + sensorName.toString());
         }
-        record.setValue(typedValue.get());
-        record.setChannelStatus(new ChannelStatus(SUCCESS));
-        record.setTimestamp(System.currentTimeMillis());
     }
 
     private TiSensorTag getSensorTag(SensorTagRequestInfo requestInfo) {
-        if (!tiSensorTagMap.containsKey(requestInfo.sensorTagAddress)) {
+        if (!this.tiSensorTagMap.containsKey(requestInfo.sensorTagAddress)) {
             Future<BluetoothLeDevice> future = this.bluetoothLeAdapter.findDeviceByAddress(TIMEOUT,
                     requestInfo.sensorTagAddress);
             BluetoothLeDevice device = null;
@@ -332,10 +323,10 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
                 logger.error("Get SensorTag {} failed", requestInfo.sensorTagAddress, e);
             }
             if (device != null) {
-                tiSensorTagMap.put(requestInfo.sensorTagAddress, new TiSensorTag(device));
+                this.tiSensorTagMap.put(requestInfo.sensorTagAddress, new TiSensorTag(device));
             }
         }
-        TiSensorTag sensorTag = tiSensorTagMap.get(requestInfo.sensorTagAddress);
+        TiSensorTag sensorTag = this.tiSensorTagMap.get(requestInfo.sensorTagAddress);
         if (!sensorTag.isConnected()) {
             connect(sensorTag);
         }
@@ -474,21 +465,21 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
 
     private class SensorTagPreparedRead implements PreparedRead {
 
-        private List<SensorTagRequestInfo> requestInfos = new ArrayList<>();
+        private final List<SensorTagRequestInfo> requestInfos = new ArrayList<>();
         private volatile List<ChannelRecord> channelRecords;
 
         @Override
         public synchronized List<ChannelRecord> execute() throws ConnectionException {
-            for (SensorTagRequestInfo requestInfo : requestInfos) {
-                SensorTagDriver.this.runReadRequest(requestInfo);
+            for (SensorTagRequestInfo requestInfo : this.requestInfos) {
+                runReadRequest(requestInfo);
             }
 
-            return Collections.unmodifiableList(channelRecords);
+            return Collections.unmodifiableList(this.channelRecords);
         }
 
         @Override
         public List<ChannelRecord> getChannelRecords() {
-            return Collections.unmodifiableList(channelRecords);
+            return Collections.unmodifiableList(this.channelRecords);
         }
 
         @Override

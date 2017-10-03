@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.eclipse.kura.example.raspberrypi.sensehat.bundle"
+      id="org.eclipse.kura.raspberrypi.sensehat.example.bundle"
       label="%featureName"
       version="1.0.100"
       provider-name="%providerName"

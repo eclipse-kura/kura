@@ -11,7 +11,7 @@
 		<relativePath>..</relativePath>
 	</parent>
 
-	<artifactId>org.eclipse.kura.example.raspberrypi.sensehat.bundle</artifactId>
+	<artifactId>org.eclipse.kura.raspberrypi.sensehat.example.bundle</artifactId>
 	<packaging>eclipse-feature</packaging>
 	<version>1.0.100</version>
 

@@ -30,6 +30,7 @@ class DbConfiguration {
     private static final int DB_CHECKPOINT_INTERVAL_SECONDS_DEFAULT = 900;
     private static final int DB_CONNECTION_POOL_MAX_SIZE_DEFAULT = 10;
 
+    private static final Pattern FILE_LOG_LEVEL_PATTERN = generatePatternForProperty("trace_level_file");
     private static final Pattern USER_PATTERN = generatePatternForProperty("user");
     private static final Pattern PASSWORD_PATTERN = generatePatternForProperty("password");
 
@@ -45,6 +46,8 @@ class DbConfiguration {
     private boolean isFileBased;
     private boolean isZipBased;
     private boolean isRemote;
+    private boolean isFileBasedLogLevelSpecified;
+
     private String baseUrl;
     private String dbDirectory;
     private String dbName;
@@ -125,6 +128,8 @@ class DbConfiguration {
             }
             this.dbName = file.getName();
         }
+
+        this.isFileBasedLogLevelSpecified = FILE_LOG_LEVEL_PATTERN.matcher(this.dbUrl).find();
     }
 
     public String getDbUrl() {
@@ -175,4 +180,7 @@ class DbConfiguration {
         return this.maxConnectionPoolSize;
     }
 
+    public boolean isFileBasedLogLevelSpecified() {
+        return this.isFileBasedLogLevelSpecified;
+    }
 }

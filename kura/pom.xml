@@ -120,6 +120,8 @@
         <bnd.baseline.continueOnError>false</bnd.baseline.continueOnError>
 
         <kura.skip.can>true</kura.skip.can>
+        
+        <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
     </properties>
 
     <distributionManagement>

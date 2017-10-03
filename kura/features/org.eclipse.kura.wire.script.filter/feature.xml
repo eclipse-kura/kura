@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.eclipse.kura.example.camel.aggregation.feature"
+      id="org.eclipse.kura.wire.script.filter"
       label="%featureName"
       version="1.0.0"
       provider-name="%providerName"
@@ -20,7 +20,14 @@
    </license>
 
    <plugin
-         id="org.eclipse.kura.example.camel.aggregation"
+         id="org.eclipse.kura.wire.script.filter.provider"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.kura.wire.script.filter.localization"
          download-size="0"
          install-size="0"
          version="0.0.0"

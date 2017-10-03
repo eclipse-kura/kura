@@ -11,9 +11,9 @@
 		<relativePath>..</relativePath>
 	</parent>
 
-	<artifactId>org.eclipse.kura.driver.opcua.feature</artifactId>
+	<artifactId>org.eclipse.kura.driver.opcua</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<version>1.0.0</version>
+	<version>1.0.100</version>
 
 	<build>
 		<plugins>

@@ -18,61 +18,101 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.watchdog.CriticalComponent;
-import org.junit.Before;
 import org.junit.Test;
 
 public class WatchdogServiceImplTest {
 
     private static final String WATCHDOG_TEST_DEVICE = "target/watchdogTestDevice";
 
-    @Before
-    public void init() {
-        File f = new File(WATCHDOG_TEST_DEVICE);
-        f.delete();
+    private class WatchdogTestWriter extends StringWriter {
+
+        private int lastLength = 0;
+
+        @Override
+        public synchronized void write(String str) {
+            super.write(str);
+            this.notify();
+        }
+
+        public synchronized boolean waitForData(int delayMs) { // waits for some data to be written since the last call
+                                                               // to this method
+            if (this.toString().length() == lastLength) {
+                try {
+                    this.wait(delayMs);
+                } catch (InterruptedException e) {
+                }
+            }
+            final int currentLength = this.toString().length();
+            final boolean result = currentLength != lastLength;
+            this.lastLength = currentLength;
+            return result;
+        }
+    }
+
+    public class TestWatchdogServiceImpl extends WatchdogServiceImpl {
+
+        private Writer testWriter;
+        private volatile boolean hasCheckedCriticalComponents;
+
+        public TestWatchdogServiceImpl(Writer fileWriter) {
+            this.testWriter = fileWriter;
+        }
+
+        @Override
+        protected Writer getWatchdogFileWriter() throws IOException {
+            return testWriter;
+        }
+
+        @Override
+        protected synchronized void checkCriticalComponents() {
+            // TODO Auto-generated method stub
+            super.checkCriticalComponents();
+            this.hasCheckedCriticalComponents = true;
+            this.notify();
+        }
+
+        public synchronized boolean waitForCriticalComponentCheck(int delayMs) {
+            if (!hasCheckedCriticalComponents) {
+                try {
+                    this.wait(delayMs);
+                } catch (InterruptedException e) {
+                }
+            }
+            return hasCheckedCriticalComponents;
+        }
     }
 
     @Test
-    public void testActivateDeactivate() throws NoSuchFieldException, IOException {
+    public void testActivateDeactivate() throws NoSuchFieldException, IOException, InterruptedException {
         // activate and deactivate
 
-        WatchdogServiceImpl svc = new WatchdogServiceImpl();
+        final WatchdogTestWriter watchdogWriter = new WatchdogTestWriter();
+        TestWatchdogServiceImpl svc = new TestWatchdogServiceImpl(watchdogWriter);
 
         Map<String, Object> properties = getProperties(true);
-
         svc.activate(properties);
 
-        File f = new File(WATCHDOG_TEST_DEVICE);
-
-        waitForFile(f);
-
-        assertTrue(f.exists());
-
-        FileReader reader = new FileReader(f);
-        char[] cbuf = new char[1];
-        int read = reader.read(cbuf);
-        reader.close();
-
-        assertEquals(1, read);
-        assertEquals('w', cbuf[0]);
-
-        f.delete();
+        assertTrue(svc.waitForCriticalComponentCheck(10000));
+        assertTrue(watchdogWriter.toString().startsWith("w")); // check that the watchdog has been kicked at least once
 
         assertTrue((boolean) TestUtil.getFieldValue(svc, "enabled"));
-
         assertNotNull(TestUtil.getFieldValue(svc, "pollExecutor"));
 
         Future task = (Future) TestUtil.getFieldValue(svc, "pollTask");
         assertNotNull(task);
+
         assertFalse(task.isCancelled());
 
         svc.deactivate();
@@ -81,7 +121,9 @@ public class WatchdogServiceImplTest {
         assertTrue(task.isCancelled());
         assertNull(TestUtil.getFieldValue(svc, "pollExecutor"));
 
-        assertTrue(f.exists());
+        assertTrue(watchdogWriter.waitForData(10000));
+        assertTrue(watchdogWriter.toString().endsWith("ww")); // check that the watchdog has been kicked at least twice
+                                                              // and it has not been disabled
     }
 
     private Map<String, Object> getProperties(boolean enabled) {
@@ -93,43 +135,36 @@ public class WatchdogServiceImplTest {
         return properties;
     }
 
-    private void waitForFile(File f) {
-        for (int i = 0; i < 10; i++) {
-            if (f.exists()) {
-                break;
-            }
-
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                // don't worry
-            }
-        }
-    }
-
     @Test
     public void testUpdatedDisabled() throws IOException, NoSuchFieldException {
         // run activate/update
 
-        WatchdogServiceImpl svc = new WatchdogServiceImpl();
+        final WatchdogTestWriter watchdogWriter = new WatchdogTestWriter();
+
+        WatchdogServiceImpl svc = new TestWatchdogServiceImpl(watchdogWriter);
 
         Map<String, Object> properties = getProperties(false);
 
         svc.activate(properties);
 
-        File f = new File(WATCHDOG_TEST_DEVICE);
-        assertFalse(f.exists());
+        assertFalse(watchdogWriter.waitForData(1000));
 
         assertFalse((boolean) TestUtil.getFieldValue(svc, "enabled"));
 
         svc.deactivate();
+
+        assertFalse(watchdogWriter.waitForData(1000));
+        assertTrue(watchdogWriter.toString().isEmpty());
     }
 
     @Test
     public void testDisable() throws Throwable {
         // disable the service and check that watchdog device is properly updated
 
-        WatchdogServiceImpl svc = new WatchdogServiceImpl();
+        final WatchdogTestWriter watchdogWriter = new WatchdogTestWriter();
+
+        WatchdogServiceImpl svc = new TestWatchdogServiceImpl(watchdogWriter);
+
         TestUtil.setFieldValue(svc, "enabled", true);
 
         Map<String, Object> properties = getProperties(false);
@@ -139,19 +174,8 @@ public class WatchdogServiceImplTest {
 
         TestUtil.invokePrivate(svc, "disableWatchdog");
 
-        File f = new File(WATCHDOG_TEST_DEVICE);
-
-        waitForFile(f);
-
-        assertTrue(f.exists());
-
-        FileReader reader = new FileReader(f);
-        char[] cbuf = new char[1];
-        int read = reader.read(cbuf);
-        reader.close();
-
-        assertEquals(1, read);
-        assertEquals('V', cbuf[0]);
+        assertTrue(watchdogWriter.waitForData(10000));
+        assertEquals("V", watchdogWriter.toString());
 
         assertFalse((boolean) TestUtil.getFieldValue(svc, "enabled"));
 
@@ -265,7 +289,9 @@ public class WatchdogServiceImplTest {
 
     @Test
     public void testCheck() throws Throwable {
-        WatchdogServiceImpl svc = new WatchdogServiceImpl();
+        final WatchdogTestWriter watchdogWriter = new WatchdogTestWriter();
+
+        WatchdogServiceImpl svc = new TestWatchdogServiceImpl(watchdogWriter);
 
         RebootCauseFileWriter causeWriterMock = mock(RebootCauseFileWriter.class);
         TestUtil.setFieldValue(svc, "rebootCauseWriter", causeWriterMock);
@@ -294,21 +320,45 @@ public class WatchdogServiceImplTest {
         verify(causeWriterMock, times(1)).writeRebootCause("failure in 1");
 
         // verify that reboot path was skipped
-        File f = new File(WATCHDOG_TEST_DEVICE);
+        assertTrue(watchdogWriter.waitForData(10000));
+        assertTrue(watchdogWriter.toString().equals("w"));
+    }
 
-        waitForFile(f);
+    @Test(expected = IOException.class)
+    public void testShouldThrowIfWatchdogFileDoesNotExist() throws Throwable {
+        WatchdogServiceImpl svc = new WatchdogServiceImpl();
 
-        assertTrue(f.exists());
+        Map<String, Object> properties = getProperties(true);
 
-        FileReader reader = new FileReader(f);
-        char[] cbuf = new char[1];
-        int read = reader.read(cbuf);
-        reader.close();
+        svc.activate(properties);
 
-        assertEquals(1, read);
-        assertEquals('w', cbuf[0]);
+        TestUtil.invokePrivate(svc, "getWatchdogFileWriter");
+    }
 
-        f.delete();
+    public void testShouldNotCreateWatchdogFile() throws InterruptedException {
+        final AtomicBoolean called = new AtomicBoolean(false);
+        WatchdogServiceImpl svc = new WatchdogServiceImpl() {
+
+            protected Writer getWatchdogFileWriter() throws IOException {
+                called.set(true);
+                called.notify();
+                return super.getWatchdogFileWriter();
+            }
+        };
+
+        Map<String, Object> properties = getProperties(true);
+
+        svc.activate(properties);
+
+        synchronized (called) {
+            called.wait(2000);
+        }
+        assertTrue(called.get());
+        assertFalse(new File(WATCHDOG_TEST_DEVICE).exists());
+
+        svc.deactivate();
+
+        assertFalse(new File(WATCHDOG_TEST_DEVICE).exists());
     }
 
 }

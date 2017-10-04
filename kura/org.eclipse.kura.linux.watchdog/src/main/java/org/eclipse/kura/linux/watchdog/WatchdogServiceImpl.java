@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +48,9 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private RebootCauseFileWriter rebootCauseWriter;
     private WatchdogServiceOptions options;
 
+    private String currentWatchdogDevice;
+    private Writer watchdogFileWriter;
+
     protected void activate(Map<String, Object> properties) {
         this.criticalComponentList = new CopyOnWriteArrayList<>();
         this.enabled = false;
@@ -62,6 +66,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         if (this.options.isEnabled()) {
             refreshWatchdog();
         }
+        closeWatchdogFileWriter();
     }
 
     public void updated(Map<String, Object> properties) {
@@ -166,7 +171,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         }
     }
 
-    private void checkCriticalComponents() { // is it possible to remove enabled and watchdogToStop?
+    protected void checkCriticalComponents() { // is it possible to remove enabled and watchdogToStop?
         // enabled is set if the hw watchdog device is activated
         if (this.enabled) {
             boolean failure = false;
@@ -225,17 +230,49 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private void disableWatchdog() {
         if (this.enabled) {
             writeWatchdogDevice("V");
+            closeWatchdogFileWriter();
             this.enabled = false;
         }
     }
 
+    protected Writer getWatchdogFileWriter() throws IOException {
+        final String watchdogDeviceFilePath = this.options.getWatchdogDevice();
+        if (this.watchdogFileWriter == null || !watchdogDeviceFilePath.equals(currentWatchdogDevice)) {
+
+            closeWatchdogFileWriter();
+
+            File watchdogFile = new File(watchdogDeviceFilePath);
+
+            if (!watchdogFile.exists()) {
+                throw new IOException("watchdog device file does not exist: " + watchdogDeviceFilePath);
+            }
+
+            this.watchdogFileWriter = new FileWriter(watchdogFile);
+            this.currentWatchdogDevice = watchdogDeviceFilePath;
+        }
+        return this.watchdogFileWriter;
+    }
+
+    private void closeWatchdogFileWriter() {
+        if (this.watchdogFileWriter != null) {
+            try {
+                this.watchdogFileWriter.close();
+                this.watchdogFileWriter = null;
+                this.currentWatchdogDevice = null;
+            } catch (IOException e) {
+                logger.warn("failed to close watchdog file writer", e);
+            }
+        }
+    }
+
     private synchronized void writeWatchdogDevice(String value) {
-        File f = new File(this.options.getWatchdogDevice());
-        try (FileWriter bw = new FileWriter(f);) {
-            bw.write(value);
+        try {
+            final Writer writer = getWatchdogFileWriter();
+            writer.write(value);
+            writer.flush();
             logger.debug("write {} on watchdog device", value);
         } catch (IOException e) {
-            logger.error("IOException on disable watchdog", e);
+            logger.error("IOException on watchdog write", e);
         }
     }
 

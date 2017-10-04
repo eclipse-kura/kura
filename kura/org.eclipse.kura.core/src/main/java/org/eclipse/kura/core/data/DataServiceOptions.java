@@ -56,7 +56,7 @@ public class DataServiceOptions {
     private static final boolean RECOVERY_ENABLE_DEFAULT = true;
     private static final int RECOVERY_MAX_FAILURES_DEFAULT = 10;
 
-    private static final int CONNECT_CRITICAL_COMPONENT_TIMEOUT_MULTIPLIER = 1500;
+    private static final int CONNECT_CRITICAL_COMPONENT_TIMEOUT_MULTIPLIER = 5000;
 
     private final Map<String, Object> properties;
 

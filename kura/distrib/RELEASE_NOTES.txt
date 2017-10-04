@@ -36,6 +36,8 @@ Target Environments:
 
 Bug Fixes :
   * Fixed github issues:
+    * #1707: [Kura 3.1.0 QA] BLE iBeacon* only react to company code 004c
+    * #1702: [Kura 3.1.0 QA] Artemis in emulator
     * #1685: [WebUi] Security policy fingerprint UI does not expand
     * #1680: getKuraMarketplaceCompatibilityVersion() always returns kura.version
     * #1665: Create rpm installer for Fedora
@@ -109,6 +111,12 @@ Bug Fixes :
     * #108:  CloudCallServiceImpl - call methods setting requester.client.id to #client-id sends response to local device
 
   * Merged no issue-related Pull Requests:
+    * #1718: Disabled h2 log file by default
+    * #1717: Fixed firewall init script 
+    * #1713: Refreshed kuraHome variable after loading from kura.properties file.
+    * #1711: Fixed component definition for can example
+    * #1699: Setting an higher value for the GPIO pins.
+    * #1697: Fixes a possible NPE in cloud services when a dp is removed.
     * #1688: Added custom auth request command for Ublox modems
     * #1687: Updated mapping between services and Ui icons.
     * #1682: Reduced maximum size for custom icons to 14x14 to match the other build-in icons.

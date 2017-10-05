@@ -159,13 +159,13 @@
                 <b:Form type="HORIZONTAL">
                     <b:FieldSet>
                         <b:FormGroup>
+                            <b:FormLabel for="newDriverFactory" ui:field="newDriverFactoryLabel" />
+                            <b:ListBox ui:field="newDriverFactory" b:id="newDriverFactory" />
+                        </b:FormGroup>
+                        <b:FormGroup>
                             <b:FormLabel for="newDriverName" ui:field="newDriverNameLabel" />
                             <b:TextBox ui:field="newDriverName" b:id="newDriverName" allowBlank="false"
                                 autoComplete="false" />
-                        </b:FormGroup>
-                        <b:FormGroup>
-                            <b:FormLabel for="newDriverFactory" ui:field="newDriverFactoryLabel" />
-                            <b:ListBox ui:field="newDriverFactory" b:id="newDriverFactory" />
                         </b:FormGroup>
                     </b:FieldSet>
                 </b:Form>

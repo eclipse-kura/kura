@@ -557,7 +557,7 @@ public class WiresPanelUi extends Composite {
         this.newDriverModal.setTitle(MSGS.newDriver());
         this.newDriverModalIntro.add(new Span("<p>" + MSGS.createNewDriverIntroLabel() + "</p>"));
         this.newDriverNameLabel.setText(MSGS.driverName());
-        this.newDriverFactoryLabel.setText(MSGS.driverName());
+        this.newDriverFactoryLabel.setText(MSGS.driverFactory());
         this.newDriverCancel.setText(MSGS.cancelButton());
 
         this.newDriverOk.setText(MSGS.okButton());

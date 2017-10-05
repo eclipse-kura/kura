@@ -109,9 +109,9 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             final Set<String> matchingPids = Arrays.stream(context.getServiceReferences((String) null, osgiFilter))
                     .map(reference -> (String) reference.getProperty(KURA_SERVICE_PID)).collect(Collectors.toSet());
             return ServiceLocator
-                    .applyToServiceOptionally(ConfigurationService.class, configurationService -> configurationService
-                            .getComponentConfigurations().stream().filter(config -> matchingPids
-                                    .contains(config.getPid())))
+                    .applyToServiceOptionally(ConfigurationService.class,
+                            configurationService -> configurationService.getComponentConfigurations().stream()
+                                    .filter(config -> matchingPids.contains(config.getPid())))
                     .map(config -> createMetatypeOnlyGwtComponentConfigurationInternal(config)).filter(Objects::nonNull)
                     .collect(Collectors.toList());
         } catch (InvalidSyntaxException e) {
@@ -533,8 +533,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
     private GwtConfigComponent createMetatypeOnlyGwtComponentConfiguration(ComponentConfiguration config)
             throws GwtKuraException {
         final GwtConfigComponent gwtConfig = createMetatypeOnlyGwtComponentConfigurationInternal(config);
-        gwtConfig.setWireComponent(ServiceLocator.applyToServiceOptionally(WireHelperService.class,
-                wireHelperService -> wireHelperService.getServicePid(gwtConfig.getComponentName()) != null));
+        if (gwtConfig != null) {
+            gwtConfig.setWireComponent(ServiceLocator.applyToServiceOptionally(WireHelperService.class,
+                    wireHelperService -> wireHelperService.getServicePid(gwtConfig.getComponentName()) != null));
+        }
         return gwtConfig;
     }
 

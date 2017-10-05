@@ -255,10 +255,10 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
     }
 
     private void runReadRequest(SensorTagRequestInfo requestInfo) {
-        TiSensorTag sensorTag = getSensorTag(requestInfo);
 
         ChannelRecord record = requestInfo.channelRecord;
         try {
+            TiSensorTag sensorTag = getSensorTag(requestInfo);
             Object readResult = getReadResult(requestInfo.sensorName, sensorTag);
             final Optional<TypedValue<?>> typedValue = getTypedValue(requestInfo.dataType, readResult);
             if (!typedValue.isPresent()) {
@@ -312,7 +312,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
         }
     }
 
-    private TiSensorTag getSensorTag(SensorTagRequestInfo requestInfo) {
+    private TiSensorTag getSensorTag(SensorTagRequestInfo requestInfo) throws KuraBluetoothIOException {
         if (!this.tiSensorTagMap.containsKey(requestInfo.sensorTagAddress)) {
             Future<BluetoothLeDevice> future = this.bluetoothLeAdapter.findDeviceByAddress(TIMEOUT,
                     requestInfo.sensorTagAddress);
@@ -327,6 +327,9 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
             }
         }
         TiSensorTag sensorTag = this.tiSensorTagMap.get(requestInfo.sensorTagAddress);
+        if (sensorTag == null) {
+            throw new KuraBluetoothIOException("Resource unavailable");
+        }
         if (!sensorTag.isConnected()) {
             connect(sensorTag);
         }
@@ -352,10 +355,18 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
     }
 
     private void runWriteRequest(SensorTagRequestInfo requestInfo) {
-        TiSensorTag sensorTag = getSensorTag(requestInfo);
-
         ChannelRecord record = requestInfo.channelRecord;
         record.setTimestamp(System.currentTimeMillis());
+
+        TiSensorTag sensorTag;
+        try {
+            sensorTag = getSensorTag(requestInfo);
+        } catch (KuraBluetoothIOException e) {
+            record.setChannelStatus(new ChannelStatus(FAILURE, message.writeFailed(), null));
+            logger.error("IO Exception encountered while connecting.");
+            return;
+        }
+
         final TypedValue<?> value = record.getValue();
         if (!value.getType().equals(DataType.BOOLEAN)) {
             record.setChannelStatus(new ChannelStatus(FAILURE, message.writeFailed(), null));

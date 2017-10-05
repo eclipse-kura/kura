@@ -26,6 +26,15 @@ Compatibility:
   * Eclipse Kura v3.1.0 does not introduce API breakage with previous releases.
   * This release does introduce a new set of APIs for TinyB for interacting with BLE devices.
     Support for previous BLE APIs will still be present and functional.
+  * In Kura v3.1.0 it is possible to instantiate a Driver instance from the Drivers and Assets
+    section or from Wire Composer only if the following requirements are met:
+      - the Driver implementation class must implement the following interfaces:
+        - Driver
+        - ConfigurableComponent or SelfConfigurableComponent
+      - the Driver must provide a component definition xml file that advertises that
+        the interfaces mentioned above are provided and that sets "required" as configuration policy.
+    It is advisable to update the deployment packages of non compliant drivers if needed.
+    It is still possible to instantiate non compliant drivers using the "+" button under "Services".
 
 Target Environments:
   * Kura is released as pre-compiled binary installers for the following platforms:
@@ -112,7 +121,8 @@ Bug Fixes :
 
   * Merged no issue-related Pull Requests:
     * #1718: Disabled h2 log file by default
-    * #1717: Fixed firewall init script 
+    * #1717: Fixed firewall init script
+    * #1716: Fixed "watchdog did not stop" messages in syslog
     * #1713: Refreshed kuraHome variable after loading from kura.properties file.
     * #1711: Fixed component definition for can example
     * #1699: Setting an higher value for the GPIO pins.
@@ -162,6 +172,7 @@ Know Issues :
     in the WEB UI if the user attempts to enable more than one WAN interface
   * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network
     interface which happened even if network configuration hasn't been modified.
+  * #1703: [Kura 3.1.0 QA] Wires page jumping up and down
   * #1689: Instaling a dp can cause the WebUI to restart
   * #1663: Authentication Issue with Deploy V2
   * #1657: Bluetooth notifications do not work

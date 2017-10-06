@@ -200,7 +200,7 @@ public class LinuxDns {
             String fixedAddressMatch) throws UnknownHostException {
 
         if ((leaseBlock.size() > 2)
-                && (!leaseBlock.get(0).equals(interfaceMatch) || leaseBlock.get(1).equals(fixedAddressMatch))) {
+                && (!leaseBlock.get(0).equals(interfaceMatch) || !leaseBlock.get(1).equals(fixedAddressMatch))) {
             return new ArrayList<>();
         }
         ArrayList<IPAddress> servers = null;

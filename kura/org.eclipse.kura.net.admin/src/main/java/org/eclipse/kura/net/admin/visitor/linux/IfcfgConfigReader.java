@@ -29,6 +29,7 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.linux.net.dhcp.DhcpClientLeases;
 import org.eclipse.kura.linux.net.dns.LinuxDns;
 import org.eclipse.kura.linux.net.util.KuraConstants;
 import org.eclipse.kura.net.IP4Address;
@@ -238,6 +239,14 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                         if (netInterfaceAddressConfig instanceof NetInterfaceAddressConfigImpl) {
                             ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
                             if (dhcp) {
+                                // obtain gateway provided by DHCP server
+                                List<? extends IPAddress> dhcpRouters = getDhcpRouters(interfaceName,
+                                        netInterfaceAddressConfig.getAddress());
+                                if (!dhcpRouters.isEmpty()) {
+                                    ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig)
+                                            .setGateway(dhcpRouters.get(0));
+                                }
+
                                 // Replace with DNS provided by DHCP server
                                 // (displayed as read-only in Denali)
                                 List<? extends IPAddress> dhcpDnsServers = getDhcpDnsServers(interfaceName,
@@ -250,6 +259,14 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                         } else if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
                             ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
                             if (dhcp) {
+                                // obtain gateway provided by DHCP server
+                                List<? extends IPAddress> dhcpRouters = getDhcpRouters(interfaceName,
+                                        netInterfaceAddressConfig.getAddress());
+                                if (!dhcpRouters.isEmpty()) {
+                                    ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig)
+                                            .setGateway(dhcpRouters.get(0));
+                                }
+
                                 // Replace with DNS provided by DHCP server
                                 // (displayed as read-only in Denali)
                                 List<? extends IPAddress> dhcpDnsServers = getDhcpDnsServers(interfaceName,
@@ -472,6 +489,22 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
                 // TODO netConfig.setWinsServers(winsServers);
             }
         }
+    }
+
+    private static List<? extends IPAddress> getDhcpRouters(String interfaceName, IPAddress address) {
+        List<IPAddress> routers = null;
+        if (address != null) {
+            DhcpClientLeases dhcpClientLeases = DhcpClientLeases.getInstance();
+            try {
+                routers = dhcpClientLeases.getDhcpGateways(interfaceName, address);
+            } catch (KuraException e) {
+                logger.error("Error getting DHCP DNS servers", e);
+            }
+        }
+        if (routers == null) {
+            routers = new ArrayList<>();
+        }
+        return routers;
     }
 
     private static List<? extends IPAddress> getDhcpDnsServers(String interfaceName, IPAddress address) {

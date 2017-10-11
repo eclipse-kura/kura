@@ -1,13 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     Eurotech
  *******************************************************************************/
 
 package org.eclipse.kura.linux.net.dhcp;
@@ -17,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.IPAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +61,11 @@ public class DhcpClientLeaseBlock {
      * @param leaseBlock
      *            - lease block
      */
-    public DhcpClientLeaseBlock(List<String> leaseBlock) {
+    public DhcpClientLeaseBlock(List<String> leaseBlock) throws KuraException {
+        parseLeaseBlock(leaseBlock);
+    }
+
+    private void parseLeaseBlock(List<String> leaseBlock) throws KuraException {
         for (String line : leaseBlock) {
             if (line.contains(INTERFACE_PARAM_NAME)) {
                 this.iface = parseString(line, INTERFACE_PARAM_NAME);
@@ -224,12 +228,13 @@ public class DhcpClientLeaseBlock {
         return sb.toString();
     }
 
-    private int parseInteger(String line, String name) {
+    private int parseInteger(String line, String name) throws KuraException {
         int ret = 0;
         try {
             ret = Integer.parseInt(line.substring(line.indexOf(name) + name.length(), line.length() - 1).trim());
         } catch (NumberFormatException e) {
             logger.error(FAILED_PARSE_LINE_MSG, line, e);
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, e);
         }
         return ret;
     }
@@ -239,18 +244,19 @@ public class DhcpClientLeaseBlock {
         return val.substring(1, val.length() - 1);
     }
 
-    private IPAddress parseIPaddress(String line, String name) {
+    private IPAddress parseIPaddress(String line, String name) throws KuraException {
         IPAddress ipAddress = null;
         try {
             ipAddress = IPAddress
                     .parseHostAddress(line.substring(line.indexOf(name) + name.length(), line.length() - 1).trim());
         } catch (UnknownHostException e) {
             logger.error(FAILED_PARSE_LINE_MSG, line, e);
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, e);
         }
         return ipAddress;
     }
 
-    private List<IPAddress> parseIPlist(String line, String name) {
+    private List<IPAddress> parseIPlist(String line, String name) throws KuraException {
         List<IPAddress> list = new ArrayList<>();
         StringTokenizer st = new StringTokenizer(line.substring(line.indexOf(name) + name.length()), ", ;");
         while (st.hasMoreTokens()) {
@@ -261,6 +267,7 @@ public class DhcpClientLeaseBlock {
                 }
             } catch (UnknownHostException e) {
                 logger.error(FAILED_PARSE_LINE_MSG, line, e);
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, e);
             }
         }
         return list;

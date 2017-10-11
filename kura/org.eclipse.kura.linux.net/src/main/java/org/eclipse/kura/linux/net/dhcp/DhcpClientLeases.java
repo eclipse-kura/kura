@@ -1,13 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     Eurotech
  *******************************************************************************/
 
 package org.eclipse.kura.linux.net.dhcp;
@@ -36,7 +34,7 @@ public class DhcpClientLeases {
     private static final String GLOBAL_DHCP_LEASES_DIR = "/var/lib/dhcp";
     private static final String IFACE_DHCP_LEASES_DIR = "/var/lib/dhclient";
 
-    private static DhcpClientLeases dhcpClientLeases = null;
+    private static DhcpClientLeases dhcpClientLeases;
 
     public static synchronized DhcpClientLeases getInstance() {
         if (dhcpClientLeases == null) {
@@ -108,7 +106,7 @@ public class DhcpClientLeases {
         } else {
             try {
                 if (interfaceDhClientFile.createNewFile()) {
-                    logger.debug("The {} doesn't exist, created new empty file ...", interfaceDhClientFile.getName());
+                    logger.info("The {} doesn't exist, created new empty file ...", interfaceDhClientFile.getName());
                 }
             } catch (Exception e) {
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
@@ -124,7 +122,7 @@ public class DhcpClientLeases {
             ipAddress = IPAddress.parseHostAddress(address);
         } catch (UnknownHostException e) {
             logger.error("Error parsing ip address {} ", address, e);
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, e);
         }
         return ipAddress;
     }
@@ -138,7 +136,7 @@ public class DhcpClientLeases {
                 if ("lease {".equals(line.trim())) {
                     leaseBlock = new ArrayList<>();
                 } else if ("}".equals(line.trim())) {
-                    leaseBlocks.add(new DhcpClientLeaseBlock(leaseBlock));
+                    addLeaseBlock(leaseBlock, leaseBlocks);
                     leaseBlock = null;
                 } else if ((leaseBlock != null) && !line.trim().isEmpty()) {
                     leaseBlock.add(line.trim());
@@ -148,6 +146,14 @@ public class DhcpClientLeases {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
         }
         return leaseBlocks;
+    }
+
+    private void addLeaseBlock(List<String> leaseBlock, List<DhcpClientLeaseBlock> leaseBlocks) {
+        try {
+            leaseBlocks.add(new DhcpClientLeaseBlock(leaseBlock));
+        } catch (KuraException e) {
+            logger.error("Failed to add a lease block due to an error parsing dhclient lease file", e);
+        }
     }
 
     private String formGlobalDhclientLeasesFilename() {

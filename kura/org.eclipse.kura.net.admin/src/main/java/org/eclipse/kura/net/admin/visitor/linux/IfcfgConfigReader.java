@@ -491,10 +491,14 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         }
     }
 
-    private static List<? extends IPAddress> getDhcpRouters(String interfaceName, IPAddress address) {
+    protected DhcpClientLeases getDhcpClientLeases() {
+        return DhcpClientLeases.getInstance();
+    }
+
+    private List<? extends IPAddress> getDhcpRouters(String interfaceName, IPAddress address) {
         List<IPAddress> routers = null;
         if (address != null) {
-            DhcpClientLeases dhcpClientLeases = DhcpClientLeases.getInstance();
+            DhcpClientLeases dhcpClientLeases = getDhcpClientLeases();
             try {
                 routers = dhcpClientLeases.getDhcpGateways(interfaceName, address);
             } catch (KuraException e) {
@@ -507,7 +511,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         return routers;
     }
 
-    private static List<? extends IPAddress> getDhcpDnsServers(String interfaceName, IPAddress address) {
+    private List<? extends IPAddress> getDhcpDnsServers(String interfaceName, IPAddress address) {
         List<IPAddress> dnsServers = null;
         if (address != null) {
             LinuxDns linuxDns = LinuxDns.getInstance();

@@ -1,6 +1,6 @@
 ---
 layout: default
-title:  "Eclipse Kura™ Documenation"
+title:  "Eclipse Kura™ Documentation"
 date:   2014-08-26 11:31:11
 ---
 

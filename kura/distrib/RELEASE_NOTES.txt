@@ -121,6 +121,8 @@ Bug Fixes :
     * #108:  CloudCallServiceImpl - call methods setting requester.client.id to #client-id sends response to local device
 
   * Merged no issue-related Pull Requests:
+    * #1731: Swapped commands in modem initialization
+    * #1729: Aligned dev-env kura.properties file to the one used in devices.
     * #1728: Fixed a bug in the parseDhclientLeaseBlock() method.
     * #1719: Changes to dp generation for examples and drivers.
     * #1718: Disabled h2 log file by default

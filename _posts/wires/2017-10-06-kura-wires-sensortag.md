@@ -8,6 +8,8 @@ Eclipse Kura provides a specific driver that can be used to interact with TI Sen
 
 This tutorial will explain how to configure a Wire graph that connects with a SensorTag, reads sensor values and publishes data the a cloud platform.
 
+{% include alerts.html message="The SensorTag driver can be used only with TI SensorTags with firmware version >1.20. If your device has an older firmware, please update it." %}
+
 ## Configure Kura Wires TI SensorTag application
 
 1. Install the TI SensorTag driver from the [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/???)

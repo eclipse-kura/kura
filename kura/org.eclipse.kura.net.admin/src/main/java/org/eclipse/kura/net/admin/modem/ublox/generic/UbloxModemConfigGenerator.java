@@ -84,11 +84,11 @@ public class UbloxModemConfigGenerator implements ModemPppConfigGenerator {
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"ERROR\"", "ABORT"));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"+++ath\"", "\"\""));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"AT\"", "OK"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair(formPDPcontext(pdpPid, PdpType.IP, apn), "OK"));
         if (!authType.equals(AuthType.NONE)) {
             modemXchange.addmodemXchangePair(
                     new ModemXchangePair(formAuthRequest(pdpPid, authType, username, password), "OK"));
         }
-        modemXchange.addmodemXchangePair(new ModemXchangePair(formPDPcontext(pdpPid, PdpType.IP, apn), "OK"));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"\\d\\d\\d\"", "OK"));
         modemXchange.addmodemXchangePair(new ModemXchangePair(formDialString(dialString), "\"\""));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"\\c\"", "CONNECT"));
@@ -115,7 +115,7 @@ public class UbloxModemConfigGenerator implements ModemPppConfigGenerator {
      * This method forms dial string
      */
     private String formDialString(String dialString) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append('"');
         if (dialString != null) {
             buf.append(dialString);
@@ -130,7 +130,7 @@ public class UbloxModemConfigGenerator implements ModemPppConfigGenerator {
      */
     private String formPDPcontext(int pdpPid, PdpType pdpType, String apn) {
 
-        StringBuffer pdpcontext = new StringBuffer(HspaModemAtCommands.pdpContext.getCommand());
+        StringBuilder pdpcontext = new StringBuilder(HspaModemAtCommands.pdpContext.getCommand());
         pdpcontext.append('=');
         pdpcontext.append(pdpPid);
         pdpcontext.append(',');
@@ -154,15 +154,13 @@ public class UbloxModemConfigGenerator implements ModemPppConfigGenerator {
     private String formAuthRequest(int pdpPid, AuthType authType, String username, Password password) {
 
         int auth = 3;
-        if (authType.equals(AuthType.NONE)) {
+        if (AuthType.NONE.equals(authType)) {
             auth = 0;
-        } else if (authType.equals(AuthType.PAP)) {
+        } else if (AuthType.PAP.equals(authType)) {
             auth = 1;
-        }
-        if (authType.equals(AuthType.CHAP)) {
+        } else if (AuthType.CHAP.equals(authType)) {
             auth = 2;
-        }
-        if (authType.equals(AuthType.AUTO)) {
+        } else if (AuthType.AUTO.equals(authType)) {
             auth = 3;
         }
 
@@ -177,7 +175,9 @@ public class UbloxModemConfigGenerator implements ModemPppConfigGenerator {
         authReq.append('"');
         authReq.append(',');
         authReq.append('"');
-        authReq.append(password.getPassword());
+        if (password != null) {
+            authReq.append(password.getPassword());
+        }
         authReq.append('"');
 
         return authReq.toString();

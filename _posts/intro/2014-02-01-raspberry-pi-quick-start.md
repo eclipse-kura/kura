@@ -38,6 +38,8 @@ in order to enable it follow the instructions available at the following URL:
 
 ## Eclipse Kura&trade; Installation
 
+{% include alerts.html message="The last Raspbian Stretch adopts the new <a href='https://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames/' target='_blank'>Consistent Network Device Naming</a>. To correctly run Eclipse Kura on the Raspberry Pi, it should be disabled adding the ```net.ifnames=0``` parameter at the end of the /boot/cmdline.txt file." %}
+
 To install Kura with its dependencies on the Raspberry Pi, perform the
 following steps:
 

@@ -7,10 +7,10 @@
    <feature url="features/org.eclipse.kura.api.feature.source_0.0.0.qualifier.jar" id="org.eclipse.kura.api.feature.source" version="0.0.0">
       <category name="org.eclipse.kura.api.sdk"/>
    </feature>
-   <feature url="features/org.eclipse.kura.camel.feature_0.0.0.qualifier.jar" id="org.eclipse.kura.camel.feature" version="0.0.0">
+   <feature url="features/org.eclipse.kura.implementations.feature_0.0.0.qualifier.jar" id="org.eclipse.kura.implementations.feature" version="0.0.0">
       <category name="org.eclipse.kura.api"/>
    </feature>
-   <feature url="features/org.eclipse.kura.camel.feature.source_0.0.0.qualifier.jar" id="org.eclipse.kura.camel.feature.source" version="0.0.0">
+   <feature url="features/org.eclipse.kura.implementations.feature.source_0.0.0.qualifier.jar" id="org.eclipse.kura.implementations.feature.source" version="0.0.0">
       <category name="org.eclipse.kura.api.sdk"/>
    </feature>
    <feature url="features/org.eclipse.kura.runtime.feature_0.0.0.qualifier.jar" id="org.eclipse.kura.runtime.feature" version="0.0.0">

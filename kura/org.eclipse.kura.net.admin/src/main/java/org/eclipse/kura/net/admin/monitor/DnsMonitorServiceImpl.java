@@ -293,8 +293,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
                     for (int i = 0; i < netConfigs.size(); i++) {
                         NetConfig netConfig = netConfigs.get(i);
                         if ((netConfig instanceof DhcpServerConfig) && ((DhcpServerConfig) netConfig).isPassDns()) {
-                            logger.debug(
-                                    "Found an allowed network: {}/{}",
+                            logger.debug("Found an allowed network: {}/{}",
                                     ((DhcpServerConfig) netConfig).getRouterAddress(),
                                     ((DhcpServerConfig) netConfig).getPrefix());
                             this.enabled = true;

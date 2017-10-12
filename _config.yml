@@ -36,9 +36,11 @@ baseurl : /kura
 sections: [
     ['intro', 'Introduction'],
     ['config', 'Configuration'],
+    ['builtin', 'Built-in Services'],
     ['admin', 'Administration'],
-    ['cloud', 'Cloud Platforms connection'],
-    ['camel', 'Apache Camel integration'],
+    ['cloud', 'Cloud Platforms Connection'],
+    ['camel', 'Apache Camel Integration'],
+    ['devices', 'Connect Field Devices'],
     ['wires', 'Kura Wires'],
     ['dev', 'Development'],
     ['tut', 'Tutorial'],

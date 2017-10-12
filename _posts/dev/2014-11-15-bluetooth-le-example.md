@@ -1,6 +1,6 @@
 ---
 layout: page
-title:  "Bluetooth LE Example"
+title:  "Legacy Bluetooth LE Example"
 categories: [dev]
 ---
 

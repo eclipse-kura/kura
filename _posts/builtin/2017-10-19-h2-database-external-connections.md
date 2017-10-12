@@ -1,7 +1,7 @@
 ---
 layout: page
 title:  "H2 database: Connecting external applications"
-categories: [config]
+categories: [builtin]
 ---
 
 This document presents several examples on how to access data contained in a H2 server instance managed by Eclipse Kura from external applications such as Libreoffice and Python scripts.
@@ -18,7 +18,7 @@ The first step involves creating a test database instance and filling it with so
 {:start="2"}
 2. Insert some data in the database, using Kura Wires. Create a Wire Graph as follows, where **Timer** is a `Timer` component with default settings and **Store** is a `DB Store` component configured to use the DB instance previously created by setting **db.service.pid** to `TestDb`. The Timer component will periodically emit a wire envelope containing a property named `TIMER` whose value is the current timestamp. The store component will create a column with the same name in the `WR_data` table of the database containing the received timestamps.
 
-![Wire Graph](https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/h2-examples/wire_graph.png)
+![Wire Graph]({{ site.baseurl }}/assets/images/database/wire_graph.png)
 
 {:start="3"}
 3. Start the H2 server, creating a new `H2DbServer` instance and configuring it to start in TCP mode as follows:
@@ -46,7 +46,7 @@ The H2 JDBC Driver can be used to access database data using Libreoffice. The st
   2. Open Libreoffice (any application) and open the preferences window.
 
   3. Select **Advanced** from the side menu under **LibreOffice** and press the **Class Path** button, the following window should appear:
-  ![Libreoffice Classpath](https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/h2-examples/libreoffice_classpath.png)
+  ![Libreoffice Classpath]({{ site.baseurl }}/assets/images/database/libreoffice_classpath.png)
 
   4. Click on the **Add Archive** button, select the h2 jar previously downloaded and press **Ok**
 
@@ -58,7 +58,7 @@ The H2 JDBC Driver can be used to access database data using Libreoffice. The st
 
 1. Open Libreoffice Base, the following wizard should appear.
 
-![Base](https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/h2-examples/base.png)
+![Base]({{ site.baseurl }}/assets/images/database/base.png)
 
 {:start="2"}
 2. Select **Connect to and existing database** and click next.
@@ -70,7 +70,7 @@ The H2 JDBC Driver can be used to access database data using Libreoffice. The st
 
   * **JDBC Driver**: `org.h2.Driver`
 
-![JDBC](https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/h2-examples/base_url.png)
+![JDBC]({{ site.baseurl }}/assets/images/database/base_url.png)
 
 {:start="4"}
 4. Click on **Test Class** to make sure that the driver can be loaded successfully.
@@ -79,25 +79,25 @@ The H2 JDBC Driver can be used to access database data using Libreoffice. The st
 
 {% include alerts.html message="Make sure that the port 9123 is open on the device firewall before connecting." %}
 
-![Credentials](https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/h2-examples/user_name.png)
+![Credentials]({{ site.baseurl }}/assets/images/database/user_name.png)
 
 {:start="6"}
 6. View database contents: after the previous steps you should see the screen below. Double click on the `WR_data` table then its contents should be displayed. At this point Libreoffice should have created a Datasource representing the database, so it can be used for importing data from the database to other Libreoffice applications, like Calc.
 
-![Main](https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/h2-examples/base_main.png)
+![Main]({{ site.baseurl }}/assets/images/database/base_main.png)
 
-![Query result](https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/h2-examples/query_result.png)
+![Query result]({{ site.baseurl }}/assets/images/database/query_result.png)
 
 **Importing the data in Calc**
 
 1. Open Calc, click on **View** > **Data sources** and the database file previously saved (in this case `test`) should be visible in the top left part of the screen. It should be possible to expand it and find the `TESTDB.PUBLIC.WR_data` table under **Tables**.
 
-![Data Sources](https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/h2-examples/data_sources.png)
+![Data Sources]({{ site.baseurl }}/assets/images/database/data_sources.png)
 
 {:start="2"}
 2. The data from the table can be imported in Calc by dragging and dropping the `TESTDB.PUBLIC.WR_data` table in an empty cell of the spreadsheet.
 
-![Imported data](https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/h2-examples/imported_data.png)
+![Imported data]({{ site.baseurl }}/assets/images/database/imported_data.png)
     
 #### Access the data using Python
 

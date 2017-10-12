@@ -1,6 +1,6 @@
 ---
 layout: page
-title:  "BLE Beacon Example"
+title:  "Legacy BLE Beacon Example"
 categories: [dev]
 ---
 

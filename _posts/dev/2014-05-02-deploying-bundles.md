@@ -12,23 +12,7 @@ categories: [dev]
 
 * [Local Emulation Mode](#local-emulation-mode)
 
-    * [Run Kura in Emulator Mode](#_Run_ESF_in)
-
-    * [List OSGi Bundles in Local Mode](#list-osgi-bundles-in-local-mode)
-
-    * [Start/Stop Bundle in Local Mode](#startstop-bundle-in-local-mode)
-
-    * [Install/Uninstall Bundle in Local Mode](#installuninstall-bundle-in-local-mode)
-
 * [Remote Target Device](#remote-target-device)
-
-    * [Connect to Remote OSGi Framework](#connect-to-remote-osgi-framework)
-
-    * [Open Port for OSGi Remote Connection](#open-port-for-osgi-remote-connection)
-
-    * [Install Single Bundle to Target Device](#_Install_Single_Bundle)
-
-    * [Install Deployment Package to Target Device](#install-deployment-package-to-target-device)
 
 [Connect to OSGi on Target Device](#_Connect_to_OSGi)
 

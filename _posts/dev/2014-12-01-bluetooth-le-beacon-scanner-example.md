@@ -1,6 +1,6 @@
 ---
 layout: page
-title:  "BLE Beacon Scanner Example"
+title:  "Legacy BLE Beacon Scanner Example"
 categories: [dev]
 ---
 

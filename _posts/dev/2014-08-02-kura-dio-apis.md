@@ -26,18 +26,17 @@ user needs (i.e. BeagleBone Black Device-Tree Overlay).
 In such cases the default configuration can be changed by modifying the
 default configuration files shipped with Kura.
 
-The current Device I/O implementation supports the following:
+The current Device I/O implementation supports the following hardware platforms:
 
-*  Hardware Platforms
+  *  ARMv6
 
-    *  ARMv6
+  *  ARMv7
 
-    *  ARMv7
+and the following devices:
 
-*  Devices
-	* GPIO
+  * GPIO
 
-	* I2C
+  * I2C
 
 ## Security Policy
 

@@ -40,11 +40,15 @@ Target Environments:
   * Kura is released as pre-compiled binary installers for the following platforms:
     * Raspberry Pi based on Raspbian: Raspberry Pi, Raspberry Pi B+, Raspberry Pi 2/3
     * BeagleBone Black based on Debian
-    * Fedora 25 ARM
-    * Intel Edison
+    * Fedora on ARM (Experimental) 
+    * Intel Edison (Experimental)
+    * APU Debian (Experimental)
+    * ARM_64 Debian (Experimental)
 
 Bug Fixes :
   * Fixed github issues:
+    * #1725: [Kura 3.1.0 QA] Cloud Services GUI crashes
+    * #1724: [Kura 3.1.0 QA] WiFi DHCP: Gateway IP wrong in GUI
     * #1720: [Kura 3.1.0 QA] SensorTagDriver NPE if wrong address
     * #1707: [Kura 3.1.0 QA] BLE iBeacon* only react to company code 004c
     * #1702: [Kura 3.1.0 QA] Artemis in emulator
@@ -200,12 +204,11 @@ Know Issues :
   * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
   * #1092: Possible NPE and non-working check
   * #1016: ConfigurationServiceImpl creates duplicate instances
+  * #924:  [Kura 2.1.0 QA enh] Non-trimmed values of configuration parameters
   * #923:  [Kura 2.1.0 QA] eth0 search domain configuration and storage
   * #890:  [Kura 2.1.0 QA] Snapshot management in web UI
   * #797:  Design of ServiceUtil is broken
   * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
-  * #752:  [DbDataStore] repair is very slow on big tables
-  * #751:  [DbDataStore] defrag and checkpoint are not per-table operations
   * #654:  Clean up static initialization around "modem" functionality
   * #651:  Call to "exit()" in native code
   * #650:  Possible bug in "LinuxUdev.c"
@@ -221,7 +224,6 @@ Know Issues :
   * #348:  WpaSupplicantConfigReader.getWifiClientConfig() should support cases where key_mgmt scheme is not set
   * #329:  [DEPLOY-V2] Review/refactoring needed
   * #311:  [Multiple Cloud Connections] Spurious component reactivations upon configuration change
-  * #307:  CloudCallService overrides client ID
   * #297:  [Status led] What connection instance controls the status led?
   * #253:  Check if bundle contexes correctly unget services after invoking getService
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation

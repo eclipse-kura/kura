@@ -16,13 +16,13 @@ categories: [dev]
 
 Starting from version 3.1.0, Eclipse Kura implements a new set of APIs for managing Bluetooth Low Energy and Beacon devices. The new APIs replace the existing Bluetooth APIs, but the old ones are still available and can be used. So, the applications developed before Kura 3.1.0 continue to work.
 
-The purpose of the new BLE Beacon APIs is to simplify the development of applications that interact with Bluetooth LE Beacon devices, offering clear and easy-to-use methods for advertising and scanning. Eclipse Kura offers out-of-the-box the implementation of the Beacon APIs for iBeacon&trade; and Eddystone&trade; technologies. Moreover, the new APIs allow to easily plug new beacon implementations in Eclipse Kura.
+The purpose of the new BLE Beacon APIs is to simplify the development of applications that interact with Bluetooth LE Beacon devices, offering clear and easy-to-use methods for advertising and scanning. Eclipse Kura offers out-of-the-box the implementation of the Beacon APIs for iBeacon&trade; and Eddystone&trade; technologies. Moreover, the new APIs allow to easily integrate new beacon implementations with Eclipse Kura.
 
 ## How to use Kura iBeacon&trade; APIs
 
 This section briefly presents how to use the iBeacon&trade; implementation of the Kura Beacon APIs, providing several code snippets to explain how to perform common operations on iBeacons. For a complete example on iBeacon advertising and scanning, please refer to the new <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ibeacon.advertiser" about="_blank">iBeacon&trade; advertiser</a> and <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ibeacon.scanner" about="_blank">iBeacon&trade; scanner</a> examples. For more information about iBeacon&trade; please refer to <a href="https://developer.apple.com/ibeacon/" about="_blank">official page</a>.
 
-An application that want to use the iBeacon&trade; implementation of Kura Beacon APIs should bind the **BluetoothLeService** and **BluetoothLeIBeaconService** OSGI services, as shown in the following Java snippet:
+An application that wants to use the iBeacon&trade; implementation of Kura Beacon APIs should bind the **BluetoothLeService** and **BluetoothLeIBeaconService** OSGI services, as shown in the following Java snippet:
 
 ```
 public void setBluetoothLeService(BluetoothLeService bluetoothLeService) {
@@ -71,7 +71,7 @@ if (this.bluetoothLeAdapter != null) {
 } 
 ````
 
-where **adapterName** is the name of the adapter, i.e. hci0.
+where **adapterName** is the name of the adapter, e.g. hci0.
 
 ### Create an iBeacon&trade; advertiser
 
@@ -85,7 +85,7 @@ try {
 }
 ```
 
-Then a **BluetoothLeIBeacon** object should be created, containing all the information to be broadcasted. In the following snippet, the **BluetoothLeIBeacon** object is instantiated and added to the advertiser. Then the broadcast time interval is set and the the beacon advertising is started.
+Then a **BluetoothLeIBeacon** object should be created, containing all the information to be broadcasted. In the following snippet, the **BluetoothLeIBeacon** object is instantiated and added to the advertiser. Then the broadcast time interval is set and the beacon advertising is started.
 
 ```
 try {
@@ -127,7 +127,7 @@ As done for the [advertiser](#create-an-ibeacontrade-advertiser), a **BluetoothL
 bluetoothLeBeaconScanner<BluetoothLeIBeacon> scanner = this.bluetoothLeIBeaconService.newBeaconScanner(this.bluetoothLeAdapter);
 ```
 
-A **BluetoothLeIBeaconScanner** needs a listener to collect the iBeacon packets that the Bluetooth adapter detects. In the following snippet, a simple listener that prints the iBeacon packet configuratin is added to the scanner object:
+A **BluetoothLeIBeaconScanner** needs a listener to collect the iBeacon packets that the Bluetooth adapter detects. In the following snippet, a simple listener that prints the iBeacon packet configuration is added to the scanner object:
 
 ```
 private class iBeaconListener implements BluetoothLeBeaconListener<BluetoothLeIBeacon> {
@@ -221,7 +221,7 @@ if (this.bluetoothLeAdapter != null) {
 } 
 ````
 
-where **adapterName** is the name of the adapter, i.e. hci0.
+where **adapterName** is the name of the adapter, e.g. hci0.
 
 ### Create an Eddystone&trade; advertiser
 
@@ -235,16 +235,16 @@ try {
 }
 ```
 
-The advertise has to be configured with a **BluetoothLeEddystone** object that contains all the information to be broadcasted. Currently, **UID** and **URL** frame types are supported. A UID frame can be created as follows:
+The advertiser has to be configured with a **BluetoothLeEddystone** object that contains all the information to be broadcasted. Currently, **UID** and **URL** frame types are supported. A UID frame can be created as follows:
 
 ```
 BluetoothLeEddystone eddystone = new BluetoothLeEddystone();
 eddystone.configureEddystoneUIDFrame(namespace, instance, txPower);
 ```
 
-where **namespace** and **instance** are respectively 10-bit and 6-bit long bytes that compose a unique 16-byte Beacon ID. The **txPower** is the calibrated transmission power at 0 m.
+where **namespace** and **instance** are respectively 10-byte and 6-byte long sequences that compose a unique 16-byte Beacon ID. The **txPower** is the calibrated transmission power at 0 m.
 
-A URL frame is create as follows:
+A URL frame is created as follows:
 
 ```
 BluetoothLeEddystone eddystone = new BluetoothLeEddystone();
@@ -253,7 +253,7 @@ eddystone.configureEddystoneURLFrame(url, txPower);
 
 where **url** is the URL to be broadcasted and the **txPower** is the calibrated transmission power at 0 m.
 
-After the **BluetoothLeEddystone** creation, the packet is added to the advertiser and the broadcat time insterval is set. Then the advertiser is started:
+After the **BluetoothLeEddystone** creation, the packet is added to the advertiser and the broadcast time interval is set. Then the advertiser is started:
 
 ```
 try {
@@ -326,19 +326,19 @@ this.bluetoothLeEddystoneService.deleteBeaconScanner(scanner);
 
 ## Add new Beacon APIs implementation
 
-Eclipse Kura offers the implementation for iBeacon&trade; and Eddystone&trade; protocols, but it is possible to add  implementations of different kins of beacon protocols.
+Eclipse Kura offers the implementation for iBeacon&trade; and Eddystone&trade; protocols, but it is possible to add  implementations of different kinds of beacon protocols.
 
 The **org.eclipse.kura.bluetooth.le.beacon** package contains the interfaces used by the beacon implementations:
 
-* **BluetoothLeBeaconService** is the entry point for applictions that want to use the Beacon APIs.
+* **BluetoothLeBeaconService** is the entry point for applications that want to use the Beacon APIs.
 * **BluetoothLeBeaconManager** is used by the BluetoothLeBeaconService and provides methods to create and delete Beacon advertisers and scanners.
-* **BluetoothLeBeaconAdvertiser** allows to configure advertisement packets and manage advertising.
+* **BluetoothLeBeaconAdvertiser** allows configuring advertisement packets and managing advertising.
 * **BluetoothLeBeaconScanner** is used to search for specific Beacon packets.
 * **BluetoothLeBeaconEncoder** implements methods for encoding a Beacon object to a stream of bytes.
 * **BluetoothLeBeaconDecoder** implements methods for decoding a stream of bytes in to a Beacon object.
 * **BluetoothLeBeacon** represents a generic Beacon packet.
 
-The **BluetoothLeBeaconManager**, **BluetoothLeBeaconScanner** and **BluetoothLeBeaconAdvertiser** interfaces handles generic **BluetoothLeBeacon** objects and their implementation are provided by the **org.eclipse.kura.ble.provider**. The others interfaces, instead, are Beacon specific and their implementations depend on the specific protocol that is used. As a consequence, who wants to support a new Beacon protocol, should provide the implementation of the **BluetoothLeBeaconService**, **BluetoothLeBeaconEncoder** and **BluetoothLeBeaconDecoder** interfaces and extend the **BluetoothLeBeacon** class.
+The **BluetoothLeBeaconManager**, **BluetoothLeBeaconScanner** and **BluetoothLeBeaconAdvertiser** interfaces handles generic **BluetoothLeBeacon** objects and their implementations are provided by the **org.eclipse.kura.ble.provider**. The others interfaces, instead, are Beacon specific and their implementations depend on the specific protocol that is used. As a consequence, who wants to support a new Beacon protocol, should provide the implementation of the **BluetoothLeBeaconService**, **BluetoothLeBeaconEncoder** and **BluetoothLeBeaconDecoder** interfaces and extend the **BluetoothLeBeacon** class.
 
 As an example, the <a href="https://github.com/eclipse/kura/tree/develop/kura/org.eclipse.kura.ble.ibeacon.provider" about="_blank">**org.eclipse.kura.ble.ibeacon.provider**</a> provides the implementation of the above APIs for the iBeacon&trade; protocol. In this case, the **org.eclipse.kura.ble.ibeacon** package contains the following:
 

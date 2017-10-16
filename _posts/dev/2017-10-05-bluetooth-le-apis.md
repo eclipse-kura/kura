@@ -35,9 +35,9 @@ Eclipse Kura provides the TinyB library for the following hardware architectures
 The new BLE APIs are exported in the **org.eclipse.kura.bluetooth.le** package. The interfaces are briefly described in the following.
 
 * **BluetoothLeService** is the entry point of the OSGI service. It allows to get all the Bluetooth interfaces installed on the gateway or a specific one using the name of the adapter.
-* **BluetoothLeAdapter** represents the physical Bluetooth adapter on the gatewat. It allows to start/stop a discovery, search a specific BLE device based on the BD address, power up/down the adapter and get information about the adapter.
+* **BluetoothLeAdapter** represents the physical Bluetooth adapter on the gateway. It allows to start/stop a discovery, search a specific BLE device based on the BD address, power up/down the adapter and get information about the adapter.
 * **BluetoothLeDevice** represents a Bluetooth LE device. The interface provides methods for connections and disconnections, list the GATT services or search a specific one based on the UUID and get generic information about the device.
-* **BluetoothLeGattService** represents a GATT service and it allows to list the GATT characteristics provided by the device.
+* **BluetoothLeGattService** represents a GATT service and allows listing the GATT characteristics provided by the device.
 * **BluetoothLeGattCharacteristic** represents a GATT characteristic. It provides methods to read from and write to the characteristic, enable or disable notifications and get the properties.
 * **BluetoothLeGattDescriptor** represents a GATT descriptor associated with the characteristic.
 
@@ -45,9 +45,9 @@ More information about the APIs can be found in [API Reference](../ref/api-ref.h
 
 ## How to use the Kura BLE API
 
-This section briefly presents how to use the Kura BLE APIs, providing several code snippets to exaplain how to perform common bluetooth operations. For a complete example, please refer to the new <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ble.tisensortag.tinyb" about="_blank">SensorTag application</a>.
+This section briefly presents how to use the Kura BLE APIs, providing several code snippets to explain how to perform common bluetooth operations. For a complete example, please refer to the new <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ble.tisensortag.tinyb" about="_blank">SensorTag application</a>.
 
-An application that want to use the Kura BLE APIs should bind the **BluetoothLeService** OSGI service, as shown in the following Java snippet:
+An application that wants to use the Kura BLE APIs should bind the **BluetoothLeService** OSGI service, as shown in the following Java snippet:
 
 ```
 public void setBluetoothLeService(BluetoothLeService bluetoothLeService) {
@@ -72,7 +72,7 @@ and in the component definition:
 
 ### Get the Bluetooth adapter
 
-Once binded to the **BluetoothLeService**, an application can get the Bluetooth adapter and power on it, if needed:
+Once bound to the **BluetoothLeService**, an application can get the Bluetooth adapter and power on it, if needed:
 
 ````
 this.bluetoothLeAdapter = this.bluetoothLeService.getAdapter(adapterName);
@@ -148,7 +148,7 @@ try {
 
 ### IO operations on GATT characteristics and descriptors
 
-The Kura BLE APIs provides methods to manage the IO operations on GATT characteristics and descriptors. The following snippet provide an example on how to read and write data to a characteristic.
+The Kura BLE APIs provides methods to manage the IO operations on GATT characteristics and descriptors. The following snippet provides an example on how to read and write data to a characteristic.
 
 ```
 try {
@@ -160,7 +160,7 @@ try {
 }
 ```
 
-In the following example, instead, a notification listener is configured to periodically receive the data from a GATT charactertistic and print the first value of the given array. The period is internally set by the BLE device.
+In the following example, instead, a notification listener is configured to periodically receive the data from a GATT characteristic and print the first value of the given array. The period is internally set by the BLE device.
 
 ```
 try {

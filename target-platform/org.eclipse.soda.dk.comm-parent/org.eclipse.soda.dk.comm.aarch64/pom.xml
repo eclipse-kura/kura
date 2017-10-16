@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>org.eclipse.soda.dk.comm-parent</artifactId>
-        <version>1.2.200</version>
+        <version>1.2.300-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.eclipse.soda.dk.comm.aarch64</artifactId>

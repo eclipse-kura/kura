@@ -12,6 +12,36 @@
     <groupId>org.eclipse.kura.karaf.targets</groupId>
     <artifactId>targets</artifactId>
     <packaging>pom</packaging>
+    
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>
+        <repository>
+            <id>kura_addons</id>
+            <url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>kura</id>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>repo.eclipse.org</id>
+            <name>Eclipse Kura Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+    </repositories>
 
     <modules>
         <module>docker-emulator-fedora</module>

@@ -13,7 +13,7 @@
 
 	<artifactId>org.eclipse.kura.raspberrypi.sensehat.example.bundle</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<version>1.0.100</version>
+	<version>1.0.200-SNAPSHOT</version>
 
 	<properties>
 		<kura.basedir>${project.basedir}/../../..</kura.basedir>

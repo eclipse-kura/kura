@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, PasswordCommandService {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(CommandCloudApp.class);
+    private static final Logger logger = LoggerFactory.getLogger(CommandCloudApp.class);
     private static final String EDC_PASSWORD_METRIC_NAME = "command.password";
     private static final String COMMAND_ENABLED_ID = "command.enable";
     private static final String COMMAND_PASSWORD_ID = "command.password.value";
@@ -45,7 +45,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
     private Map<String, Object> properties;
 
     private ComponentContext compCtx;
-    private CryptoService m_cryptoService;
+    private CryptoService cryptoService;
 
     private boolean currentStatus;
 
@@ -66,11 +66,11 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
     // class CloudApp.
 
     public void setCryptoService(CryptoService cryptoService) {
-        this.m_cryptoService = cryptoService;
+        this.cryptoService = cryptoService;
     }
 
     public void unsetCryptoService(CryptoService cryptoService) {
-        this.m_cryptoService = null;
+        this.cryptoService = null;
     }
 
     // ----------------------------------------------------------------
@@ -82,7 +82,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
     // This component inherits the activation methods from the parent
     // class CloudApp.
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        s_logger.info("Bundle " + APP_ID + " has started with config!");
+        logger.info("Cloudlet {} has started with config!", APP_ID);
         this.compCtx = componentContext;
         this.currentStatus = (Boolean) properties.get(COMMAND_ENABLED_ID);
         if (this.currentStatus) {
@@ -92,7 +92,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
     }
 
     public void updated(Map<String, Object> properties) {
-        s_logger.info("updated...: " + properties);
+        logger.info("updated...: {}", properties);
 
         this.properties = new HashMap<String, Object>();
 
@@ -102,7 +102,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
             if (key.equals(COMMAND_PASSWORD_ID)) {
                 try {
                     Password decryptedPassword = new Password(
-                            this.m_cryptoService.decryptAes(value.toString().toCharArray()));
+                            this.cryptoService.decryptAes(value.toString().toCharArray()));
                     this.properties.put(key, decryptedPassword);
                 } catch (Exception e) {
                     this.properties.put(key, new Password((String) value));
@@ -127,7 +127,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 
     @Override
     protected void deactivate(ComponentContext componentContext) {
-        s_logger.info("Bundle " + APP_ID + " is deactivating!");
+        logger.info("Cloudlet {} is deactivating!", APP_ID);
         if (getCloudApplicationClient() != null) {
             super.deactivate(this.compCtx);
         }
@@ -140,20 +140,20 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
         String[] resources = reqTopic.getResources();
 
         if (resources == null || resources.length != 1) {
-            s_logger.error("Bad request topic: {}", reqTopic.toString());
-            s_logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
+            logger.error("Bad request topic: {}", reqTopic);
+            logger.error("Expected one resource but found {}", resources != null ? resources.length : "none");
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
             return;
         }
 
         if (!resources[0].equals(RESOURCE_COMMAND)) {
-            s_logger.error("Bad request topic: {}", reqTopic.toString());
-            s_logger.error("Cannot find resource with name: {}", resources[0]);
+            logger.error("Bad request topic: {}", reqTopic);
+            logger.error("Cannot find resource with name: {}", resources[0]);
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
             return;
         }
 
-        s_logger.info("EXECuting resource: {}", RESOURCE_COMMAND);
+        logger.info("EXECuting resource: {}", RESOURCE_COMMAND);
 
         KuraCommandResponsePayload commandResp = execute(reqPayload);
 
@@ -178,22 +178,22 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
 
             String command = commandReq.getCommand();
             if (command == null || command.trim().isEmpty()) {
-                s_logger.error("null command");
+                logger.error("null command");
                 commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
                 return commandResp;
             }
 
             String[] cmdarray = prepareCommandArray(commandReq, command);
 
-            String dir = getDefaultWorkDir();
             String[] envp = getEnvironment(commandReq);
+            String dir = getDir(commandReq);
 
             byte[] zipBytes = commandReq.getZipBytes();
             if (zipBytes != null) {
                 try {
                     UnZip.unZipBytes(zipBytes, dir);
                 } catch (IOException e) {
-                    s_logger.error("Error unzipping command zip bytes", e);
+                    logger.error("Error unzipping command zip bytes", e);
                     commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
                     commandResp.setException(e);
                     return commandResp;
@@ -204,7 +204,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
             try {
                 proc = createExecutionProcess(dir, cmdarray, envp);
             } catch (Throwable t) {
-                s_logger.error("Error executing command {}", t);
+                logger.error("Error executing command {}", t);
                 commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
                 commandResp.setException(t);
                 return commandResp;
@@ -228,7 +228,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
             }
 
         } else {
-            s_logger.error("Password required but not correct and/or missing");
+            logger.error("Password required but not correct and/or missing");
             commandResp.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
             commandResp.setExceptionMessage("Password missing or not correct");
         }
@@ -301,6 +301,15 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
         return null;
     }
 
+    private String getDir(KuraCommandRequestPayload req) {
+        String dir = req.getWorkingDir();
+        String defaultDir = getDefaultWorkDir();
+        if (dir != null && !dir.isEmpty()) {
+            return dir;
+        }
+        return defaultDir;
+    }
+
     private int getTimeout(KuraCommandRequestPayload req) {
         Integer timeout = req.getTimeout();
         int defaultTimeout = getDefaultTimeout();
@@ -358,7 +367,7 @@ public class CommandCloudApp extends Cloudlet implements ConfigurableComponent, 
         }
 
         for (String element : cmdarray) {
-            s_logger.debug("cmdarray: {}", element);
+            logger.debug("cmdarray: {}", element);
         }
 
         return cmdarray;

@@ -14,6 +14,7 @@
       Kevin Read, Om7Sense GmbH
       John Read, Om7Sense GmbH
       Amit Kumar Mondal
+      Cavium
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -22,7 +23,7 @@
 
     <groupId>org.eclipse.kura</groupId>
     <artifactId>distrib</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.1.0</version>
 
     <packaging>pom</packaging>
 
@@ -41,6 +42,13 @@
         <kura.skip.examples>true</kura.skip.examples>
     </properties>
 
+    <organization>
+        <name>Eclipse Kura</name>
+        <url>http://www.eclipse.org/kura/</url>
+    </organization>
+    <inceptionYear>2017</inceptionYear>
+    <description>Kura is a Java/OSGI-based framework for IoT gateways. Kura APIs offer access to the underlying hardware (serial ports, GPS, watchdog, GPIOs, I2C, etc.), management of network configurations, communications with M2M/IoT Integration Platforms, and gateway management.</description>
+    
     <repositories>
         <repository>
             <id>kura_releases</id>
@@ -286,6 +294,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.linux.usb.aarch64</artifactId>
+                                    <version>${org.eclipse.kura.linux.usb.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.linux.bluetooth</artifactId>
                                     <version>${org.eclipse.kura.linux.bluetooth.version}</version>
                                 </artifactItem>
@@ -323,16 +336,6 @@
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.protocol.modbus</artifactId>
                                     <version>${org.eclipse.kura.protocol.modbus.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.example.camel.aggregation</artifactId>
-                                    <version>${org.eclipse.kura.example.camel.aggregation.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.example.camel.quickstart</artifactId>
-                                    <version>${org.eclipse.kura.example.camel.quickstart.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -411,6 +414,16 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.driver.ble.sensortag.localization</artifactId>
+                                    <version>${org.eclipse.kura.driver.ble.sensortag.localization.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.driver.ble.sensortag.provider</artifactId>
+                                    <version>${org.eclipse.kura.driver.ble.sensortag.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.wire.script.filter.localization</artifactId>
                                     <version>${org.eclipse.kura.wire.script.filter.localization.version}</version>
                                 </artifactItem>
@@ -438,6 +451,16 @@
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.rest.asset.provider</artifactId>
                                     <version>${org.eclipse.kura.rest.asset.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.hook.file.move.provider</artifactId>
+                                    <version>${org.eclipse.kura.hook.file.move.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.misc.cloudcat</artifactId>
+                                    <version>${org.eclipse.kura.misc.cloudcat.version}</version>
                                 </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
@@ -552,13 +575,15 @@
                                     tofile="target/plugins/org.eclipse.kura.linux.usb.armv6hf_${org.eclipse.kura.linux.usb.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.usb.x86_64.jar"
                                     tofile="target/plugins/org.eclipse.kura.linux.usb.x86_64_${org.eclipse.kura.linux.usb.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.linux.usb.aarch64.jar"
+                                    tofile="target/plugins/org.eclipse.kura.linux.usb.aarch64_${org.eclipse.kura.linux.usb.version}.jar"/>
                                 <move file="target/plugins/org.eclipse.kura.linux.bluetooth.jar"
                                     tofile="target/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.ble.provider.jar" 
+                                <move file="target/plugins/org.eclipse.kura.ble.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.ble.provider_${org.eclipse.kura.ble.provider.version}.jar"/>
-                                <move file="target/plugins/org.eclipse.kura.ble.ibeacon.provider.jar" 
+                                <move file="target/plugins/org.eclipse.kura.ble.ibeacon.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.ble.ibeacon.provider_${org.eclipse.kura.ble.ibeacon.provider.version}.jar"/>
-                                <move file="target/plugins/org.eclipse.kura.ble.eddystone.provider.jar" 
+                                <move file="target/plugins/org.eclipse.kura.ble.eddystone.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.ble.eddystone.provider_${org.eclipse.kura.ble.eddystone.provider.version}.jar"/>
                                 <move file="target/plugins/org.eclipse.kura.linux.watchdog.jar"
                                     tofile="target/plugins/org.eclipse.kura.linux.watchdog_${org.eclipse.kura.linux.watchdog.version}.jar" />
@@ -597,12 +622,6 @@
                                     tofile="target/plugins/org.eclipse.kura.emulator.usb_${org.eclipse.kura.emulator.usb.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.emulator.watchdog.jar"
                                     tofile="target/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.example.camel.aggregation.jar"
-                                    tofile="target/plugins/org.eclipse.kura.example.camel.aggregation_${org.eclipse.kura.example.camel.aggregation.version}.jar"
-                                    failonerror="false" />
-                                <move file="target/plugins/org.eclipse.kura.example.camel.quickstart.jar"
-                                    tofile="target/plugins/org.eclipse.kura.example.camel.quickstart_${org.eclipse.kura.example.camel.quickstart.version}.jar"
-                                    failonerror="false" />
                                 <move file="target/plugins/org.eclipse.kura.wire.h2db.component.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.wire.h2db.component.provider_${org.eclipse.kura.wire.h2db.component.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.component.provider.jar"
@@ -619,6 +638,10 @@
                                     tofile="target/plugins/org.eclipse.kura.driver.s7plc.localization_${org.eclipse.kura.driver.s7plc.localization.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.driver.s7plc.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.driver.s7plc.provider_${org.eclipse.kura.driver.s7plc.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.driver.ble.sensortag.localization.jar"
+                                    tofile="target/plugins/org.eclipse.kura.driver.ble.sensortag.localization_${org.eclipse.kura.driver.ble.sensortag.localization.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.driver.ble.sensortag.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.driver.ble.sensortag.provider_${org.eclipse.kura.driver.ble.sensortag.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.script.filter.localization.jar"
                                     tofile="target/plugins/org.eclipse.kura.wire.script.filter.localization_${org.eclipse.kura.wire.script.filter.localization.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.script.filter.provider.jar"
@@ -629,6 +652,10 @@
                                     tofile="target/plugins/org.eclipse.kura.rest.provider_${org.eclipse.kura.rest.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.asset.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.rest.asset.provider_${org.eclipse.kura.rest.asset.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.hook.file.move.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.hook.file.move.provider_${org.eclipse.kura.hook.file.move.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.misc.cloudcat.jar"
+                                    tofile="target/plugins/org.eclipse.kura.misc.cloudcat_${org.eclipse.kura.misc.cloudcat.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>
@@ -663,7 +690,7 @@
 
                 				<!-- Copy target-platform/config/kura.target-platform.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
                                 <copy
-                                    file="${kura.basedir}/../../../target-platform/config/kura.target-platform.build.properties"
+                                    file="${kura.basedir}/../../target-platform/config/kura.target-platform.build.properties"
                                     todir="RELEASE_INFO/${project.version}/config" overwrite="true" />
 
 							    <!-- Copy src/main/resources/common/previous-version-pom-template.xml in distrib/RELEASE_INFO/${project.version}/pom.xml -->
@@ -691,7 +718,7 @@
                                 </exec>
 
 								<!-- Copy target-platform/p2-repo-common/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-common/pom.xml -->
-                                <copy file="${kura.basedir}/../../../target-platform/p2-repo-common/pom.xml"
+                                <copy file="${kura.basedir}/../../target-platform/p2-repo-common/pom.xml"
                                     tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" overwrite="true" />
 								<!-- replace artifactId -->
                                 <replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;" value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;"
@@ -711,7 +738,7 @@
                                 <move file="RELEASE_INFO/${project.version}/p2-repo-common/pom_.xml" tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" />
 
 								<!-- Copy target-platform/p2-repo-equinox_3.11.1/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-equinox_3.11.1/pom.xml -->
-                                <copy file="${kura.basedir}/../../../target-platform/p2-repo-equinox_3.11.1/pom.xml"
+                                <copy file="${kura.basedir}/../../target-platform/p2-repo-equinox_3.11.1/pom.xml"
                                     tofile="RELEASE_INFO/${project.version}/p2-repo-equinox_3.11.1/pom.xml" overwrite="true" />
 								<!-- replace artifactId -->
                                 <replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;" value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;"
@@ -1894,7 +1921,7 @@
         </profile>
 
         <profile>
-            <id>fedora25</id>
+            <id>fedora</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -1925,7 +1952,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>fedora25-jars</id>
+                                <id>fedora-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1936,7 +1963,7 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="fedora25" />
+                                        <property name="build.name" value="fedora" />
                                         <property name="target.device" value="raspberry-pi" />
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="fedora" />
@@ -1949,12 +1976,108 @@
                             </execution>
                         </executions>
                     </plugin>
+	                <plugin>
+                        <groupId>de.dentrassi.maven</groupId>
+                        <artifactId>rpm</artifactId>
+                        <version>0.8.0</version>
+                        <executions>
+                            <execution> 
+                                <id>fedora-rpm</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>rpm</goal>
+                                </goals>
+                                <configuration>
+                                    <packageName>kura-fedora</packageName>
+                                    <attach>true</attach>
+                                    <group>Application/Misc</group>
+                                    <license>EPL 1.0</license>
+                                    <architecture>armv7hl</architecture>
+                                    <requires>
+                                        <require>java</require>
+                                        <require>which</require>
+                                        <require>busybox</require>
+                                        <require>setserial</require>
+                                        <require>iptables</require>
+                                        <require>iptables-services</require>
+                                        <require>openssl</require>
+                                        <require>openssh</require>
+                                        <require>procps</require>
+                                        <require>iw</require>
+                                        <require>wireless-tools</require>
+                                        <require>bind</require>
+                                        <require>openvpn</require>
+                                        <require>ppp</require>
+                                        <require>monit</require>
+                                        <require>dhcp</require>
+                                        <require>dhcp-server</require>
+                                        <require>dhcp-client</require>
+                                        <require>net-tools</require>
+                                        <require>hostapd</require>
+                                        <require>wpa_supplicant</require>
+                                        <require>gzip</require>
+                                        <require>cronie</require>
+                                        <require>logrotate</require>
+                                        <require>telnet</require>
+                                        <require>bluez</require>
+                                        <require>bluez-hcidump</require>
+                                        <require>socat</require>
+                                        <require>usbutils</require>
+                                        <require>iproute</require>
+                                        <require>unzip</require>
+                                        <require>psmisc</require>
+                                        <require>tar</require>
+                                        <require>dos2unix</require>
+                                    </requires>
+                                    <entries>
+                                        <entry>
+											<name>/tmp/kura_${project.version}_fedora_installer.sh</name>
+											<file>${project.build.directory}/kura_${project.version}_fedora_installer.sh</file>
+											<user>root</user>
+											<group>root</group>
+											<mode>0755</mode>
+                                        </entry>
+                                    </entries>
+                                    <afterInstallation>
+                                        <script>/tmp/kura_${project.version}_fedora_installer.sh</script>
+                                    </afterInstallation>
+                                    <skipSigning>true</skipSigning>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <version>2.5</version>
+                        <executions>
+                            <execution>
+                                <id>fedora-clean</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>clean</goal>
+                                </goals>
+                                <configuration>
+                                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                                    <filesets>
+                                        <fileset>
+                                            <directory>${project.build.directory}</directory>
+                                            <includes>
+                                               <include>kura_${project.version}_fedora_installer.sh</include>
+                                               <include>kura_${project.version}_fedora_installer.sh.md5</include>
+                                               <include>kura_${project.version}_fedora_installer.sh.SHA-1</include>
+                                            </includes>
+                                        </fileset>
+                                    </filesets>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
 
         <profile>
-            <id>fedora25-nn</id>
+            <id>fedora-nn</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -1985,7 +2108,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>fedora25-nn-jars</id>
+                                <id>fedora-nn-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1996,7 +2119,7 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="fedora25-nn" />
+                                        <property name="build.name" value="fedora-nn" />
                                         <property name="target.device" value="raspberry-pi-nn" />
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="fedora" />
@@ -2005,6 +2128,89 @@
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>de.dentrassi.maven</groupId>
+                        <artifactId>rpm</artifactId>
+                        <version>0.8.0</version>
+                        <executions>
+                            <execution> 
+                                <id>fedora-nn-rpm</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>rpm</goal>
+                                </goals>
+                                <configuration>
+                                    <packageName>kura-fedora-nn</packageName>
+                                    <attach>true</attach>
+                                    <group>Application/Misc</group>
+                                    <license>EPL 1.0</license>
+                                    <architecture>armv7hl</architecture>
+                                    <requires>
+                                        <require>java</require>
+                                        <require>which</require>
+                                        <require>busybox</require>
+                                        <require>setserial</require>
+                                        <require>openssl</require>
+                                        <require>openssh</require>
+                                        <require>procps</require>
+                                        <require>openvpn</require>
+                                        <require>monit</require>
+                                        <require>gzip</require>
+                                        <require>cronie</require>
+                                        <require>logrotate</require>
+                                        <require>telnet</require>
+                                        <require>bluez</require>
+                                        <require>bluez-hcidump</require>
+                                        <require>socat</require>
+                                        <require>usbutils</require>
+                                        <require>unzip</require>
+                                        <require>psmisc</require>
+                                        <require>tar</require>
+                                        <require>dos2unix</require>
+                                    </requires>
+                                    <entries>
+                                        <entry>
+                                            <name>/tmp/kura_${project.version}_fedora-nn_installer.sh</name>
+                                            <file>${project.build.directory}/kura_${project.version}_fedora-nn_installer.sh</file>
+                                            <user>root</user>
+                                            <group>root</group>
+                                            <mode>0755</mode>
+                                        </entry>
+                                    </entries>
+                                    <afterInstallation>
+                                        <script>/tmp/kura_${project.version}_fedora-nn_installer.sh</script>
+                                    </afterInstallation>
+                                    <skipSigning>true</skipSigning>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <version>2.5</version>
+                        <executions>
+                            <execution>
+                                <id>fedora-clean</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>clean</goal>
+                                </goals>
+                                <configuration>
+                                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                                    <filesets>
+                                        <fileset>
+                                            <directory>${project.build.directory}</directory>
+                                            <includes>
+                                               <include>kura_${project.version}_fedora-nn_installer.sh</include>
+                                               <include>kura_${project.version}_fedora-nn_installer.sh.md5</include>
+                                               <include>kura_${project.version}_fedora-nn_installer.sh.SHA-1</include>
+                                            </includes>
+                                        </fileset>
+                                    </filesets>
                                 </configuration>
                             </execution>
                         </executions>
@@ -2368,7 +2574,7 @@
                                             tofile="${project.build.directory}/staging/beacon.scanner/.project" />
                                         <move file="${project.build.directory}/staging/beacon.scanner/beacon.scanner.classpath"
                                             tofile="${project.build.directory}/staging/beacon.scanner/.classpath" />
-                                            
+
 										<!-- Stage the org.eclipse.kura.example.ibeacon.advertiser Project -->
                                         <copy todir="${project.build.directory}/staging/ibeacon.advertiser">
                                             <fileset dir="../examples/org.eclipse.kura.example.ibeacon.advertiser" />
@@ -2394,7 +2600,7 @@
                                             tofile="${project.build.directory}/staging/ibeacon.scanner/.project" />
                                         <move file="${project.build.directory}/staging/ibeacon.scanner/ibeacon.scanner.classpath"
                                             tofile="${project.build.directory}/staging/ibeacon.scanner/.classpath" />
-                                            
+
                                         <!-- Stage the org.eclipse.kura.example.eddystone.advertiser Project -->
                                         <copy todir="${project.build.directory}/staging/eddystone.advertiser">
                                             <fileset dir="../examples/org.eclipse.kura.example.eddystone.advertiser" />
@@ -2420,7 +2626,7 @@
                                             tofile="${project.build.directory}/staging/eddystone.scanner/.project" />
                                         <move file="${project.build.directory}/staging/eddystone.scanner/eddystone.scanner.classpath"
                                             tofile="${project.build.directory}/staging/eddystone.scanner/.classpath" />
-                                                                                        
+
 										<!-- Stage the org.eclipse.kura.example.ble.tisensortag Project -->
                                         <copy todir="${project.build.directory}/staging/tisensortag">
                                             <fileset dir="../examples/org.eclipse.kura.example.ble.tisensortag" />
@@ -2448,7 +2654,7 @@
                                             tofile="${project.build.directory}/staging/tisensortag.tinyb/.project" />
                                         <move file="${project.build.directory}/staging/tisensortag.tinyb/tisensortag.tinyb.classpath"
                                             tofile="${project.build.directory}/staging/tisensortag.tinyb/.classpath" />
-                                            
+
 										<!-- Stage the org.eclipse.kura.example.publisher Project -->
                                         <copy todir="${project.build.directory}/staging/publisher">
                                             <fileset dir="../examples/org.eclipse.kura.example.publisher" />
@@ -2589,27 +2795,33 @@
                       <configuration>
                         <artifactItems>
                           <artifactItem>
-                            <groupId>org.eclipse.kura.feature</groupId>
-                            <artifactId>org.eclipse.kura.protocol.modbus.feature</artifactId>
-                            <version>${org.eclipse.kura.protocol.modbus.feature.version}</version>
+                            <groupId>org.eclipse.kura</groupId>
+                            <artifactId>org.eclipse.kura.protocol.modbus</artifactId>
+                            <version>${org.eclipse.kura.protocol.modbus.version}</version>
                             <type>dp</type>
                           </artifactItem>
                           <artifactItem>
                             <groupId>org.eclipse.kura.feature</groupId>
-                            <artifactId>org.eclipse.kura.driver.opcua.feature</artifactId>
-                            <version>${org.eclipse.kura.driver.opcua.feature.version}</version>
+                            <artifactId>org.eclipse.kura.driver.opcua</artifactId>
+                            <version>${org.eclipse.kura.driver.opcua.version}</version>
                             <type>dp</type>
                           </artifactItem>
                           <artifactItem>
                             <groupId>org.eclipse.kura.feature</groupId>
-                            <artifactId>org.eclipse.kura.driver.s7plc.feature</artifactId>
-                            <version>${org.eclipse.kura.driver.s7plc.feature.version}</version>
+                            <artifactId>org.eclipse.kura.driver.s7plc</artifactId>
+                            <version>${org.eclipse.kura.driver.s7plc.version}</version>
                             <type>dp</type>
                           </artifactItem>
                           <artifactItem>
                             <groupId>org.eclipse.kura.feature</groupId>
-                            <artifactId>org.eclipse.kura.wire.script.filter.feature</artifactId>
-                            <version>${org.eclipse.kura.wire.script.filter.feature.version}</version>
+                            <artifactId>org.eclipse.kura.driver.ble.sensortag</artifactId>
+                            <version>${org.eclipse.kura.driver.ble.sensortag.version}</version>
+                            <type>dp</type>
+                          </artifactItem>
+                          <artifactItem>
+                            <groupId>org.eclipse.kura.feature</groupId>
+                            <artifactId>org.eclipse.kura.wire.script.filter</artifactId>
+                            <version>${org.eclipse.kura.wire.script.filter.version}</version>
                             <type>dp</type>
                           </artifactItem>
                         </artifactItems>
@@ -2642,9 +2854,9 @@
                           <skip>${kura.skip.can}</skip>
                           <artifactItems>
                             <artifactItem>
-                              <groupId>org.eclipse.kura.feature</groupId>
-                              <artifactId>org.eclipse.kura.protocol.can.feature</artifactId>
-                              <version>${org.eclipse.kura.protocol.can.feature.version}</version>
+                              <groupId>org.eclipse.kura</groupId>
+                              <artifactId>org.eclipse.kura.protocol.can</artifactId>
+                              <version>${org.eclipse.kura.protocol.can.version}</version>
                               <type>dp</type>
                             </artifactItem>
                           </artifactItems>
@@ -2657,45 +2869,63 @@
           </build>
         </profile>
         <profile>
-          <id>examples-dp</id>
-          <activation>
-            <activeByDefault>true</activeByDefault>
-          </activation>
-          <build>
-            <plugins>
-              <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>examples-dp</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                          <skip>${kura.skip.examples}</skip>
-                          <artifactItems>
-                            <artifactItem>
-                              <groupId>org.eclipse.kura.examples.feature</groupId>
-                              <artifactId>org.eclipse.kura.example.camel.aggregation.feature</artifactId>
-                              <version>${org.eclipse.kura.example.camel.aggregation.feature.version}</version>
-                              <type>dp</type>
-                            </artifactItem>
-                            <artifactItem>
-                              <groupId>org.eclipse.kura.examples.feature</groupId>
-                              <artifactId>org.eclipse.kura.example.camel.quickstart.feature</artifactId>
-                              <version>${org.eclipse.kura.example.camel.quickstart.feature.version}</version>
-                              <type>dp</type>
-                            </artifactItem>
-                          </artifactItems>
-                          <outputDirectory>${project.build.directory}</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-              </plugin>
-            </plugins>
-          </build>
+            <id>aarch64-nn</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>create-timestamp</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>aarch64-nn-jars</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <property name="buildNumber" value="buildNumber" />
+                                        <property name="project.version" value="${project.version}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
+                                        <property name="build.name" value="aarch64-nn" />
+                                        <property name="target.device" value="aarch64-nn" />
+                                        <property name="kura.os.version" value="debian" />
+                                        <property name="native.tag" value="aarch64"/>
+                                        <property name="kura.arch" value="aarch64" />
+                                        <property name="kura.mem.size" value="256m" />
+                                        <property name="kura.install.dir" value="/opt/eclipse/" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>

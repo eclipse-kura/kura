@@ -47,26 +47,4 @@
         <bundle>mvn:org.eclipse.kura/org.eclipse.kura.camel/${org.eclipse.kura.camel.version}</bundle>
         <bundle>mvn:org.eclipse.kura/org.eclipse.kura.camel.cloud.factory/${org.eclipse.kura.camel.cloud.factory.version}</bundle>
     </feature>
-
-    <!-- Examples -->
-
-    <feature name="kura-example-publisher" version="${project.version}" description="Eclipse Kura Examples :: Publisher">
-        <feature dependency="true">kura-core</feature>
-
-        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.example.publisher/${org.eclipse.kura.example.publisher.version}</bundle>
-    </feature>
-
-    <feature name="kura-example-camel-aggregation" version="${project.version}" description="Eclipse Kura Examples :: Camel :: Aggregation">
-        <feature dependency="true">kura-core</feature>
-        <feature dependency="true">kura-camel</feature>
-
-        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.example.camel.aggregation/${org.eclipse.kura.example.camel.aggregation.version}</bundle>
-    </feature>
-
-    <feature name="kura-example-camel-quickstart" version="${project.version}" description="Eclipse Kura Examples :: Camel :: Quickstart">
-        <feature dependency="true">kura-core</feature>
-        <feature dependency="true">kura-camel</feature>
-
-        <bundle>mvn:org.eclipse.kura/org.eclipse.kura.example.camel.quickstart/${org.eclipse.kura.example.camel.quickstart.version}</bundle>
-    </feature>
 </features>

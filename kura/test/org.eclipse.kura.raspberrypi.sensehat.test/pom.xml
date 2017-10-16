@@ -22,7 +22,7 @@
 
     <artifactId>org.eclipse.kura.raspberrypi.sensehat.test</artifactId>
     <packaging>eclipse-test-plugin</packaging>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.1.0</version>
 
     <properties>
         <kura.basedir>${project.basedir}/../..</kura.basedir>

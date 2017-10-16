@@ -17,11 +17,11 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>test</artifactId>
-		<version>3.1.0-SNAPSHOT</version>
+		<version>3.1.0</version>
 	</parent>
 
 	<artifactId>org.eclipse.kura.protocol.modbus.test</artifactId>
-	<version>3.1.0-SNAPSHOT</version>
+	<version>3.1.0</version>
 	<packaging>eclipse-test-plugin</packaging>
 
     <properties>

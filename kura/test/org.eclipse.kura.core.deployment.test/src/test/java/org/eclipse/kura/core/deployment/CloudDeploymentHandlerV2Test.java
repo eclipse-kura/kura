@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -14,30 +16,40 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2.DOWNLOAD_STATUS;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
 import org.eclipse.kura.core.deployment.download.impl.DownloadImpl;
+import org.eclipse.kura.core.deployment.hook.DeploymentHookManager;
 import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
 import org.eclipse.kura.core.deployment.uninstall.UninstallImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.data.DataTransportService;
+import org.eclipse.kura.deployment.hook.DeploymentHook;
+import org.eclipse.kura.deployment.hook.RequestContext;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
 
 public class CloudDeploymentHandlerV2Test {
 
     @Test
-    public void testDoGetNoResources() throws KuraException {
+    public void testDoGetNoResources() throws KuraException, NoSuchFieldException {
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("GET");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -49,8 +61,10 @@ public class CloudDeploymentHandlerV2Test {
     }
 
     @Test
-    public void testDoGetOtherwise() throws KuraException {
+    public void testDoGetOtherwise() throws KuraException, NoSuchFieldException {
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("GET/test");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -62,8 +76,10 @@ public class CloudDeploymentHandlerV2Test {
     }
 
     @Test
-    public void testDoDelNoResources() throws KuraException {
+    public void testDoDelNoResources() throws KuraException, NoSuchFieldException {
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("DEL");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -75,8 +91,10 @@ public class CloudDeploymentHandlerV2Test {
     }
 
     @Test
-    public void testDoDelOtherwise() throws KuraException {
+    public void testDoDelOtherwise() throws KuraException, NoSuchFieldException {
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("DEL/test");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -90,9 +108,10 @@ public class CloudDeploymentHandlerV2Test {
     @Test
     public void testDoDelNormal() throws Exception {
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         DownloadImpl dlMock = mock(DownloadImpl.class);
-        TestUtil.setFieldValue(handler, "s_downloadImplementation", dlMock);
+        TestUtil.setFieldValue(handler, "downloadImplementation", dlMock);
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("DEL/" + CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -113,11 +132,12 @@ public class CloudDeploymentHandlerV2Test {
     @Test
     public void testDoDelException() throws Exception {
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         DownloadImpl dlMock = mock(DownloadImpl.class);
         String mesg = "test";
         when(dlMock.getDownloadHelper()).thenThrow(new RuntimeException(mesg));
-        TestUtil.setFieldValue(handler, "s_downloadImplementation", dlMock);
+        TestUtil.setFieldValue(handler, "downloadImplementation", dlMock);
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("DEL/" + CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -134,8 +154,10 @@ public class CloudDeploymentHandlerV2Test {
     }
 
     @Test
-    public void testDoExecNoResources() throws KuraException {
+    public void testDoExecNoResources() throws KuraException, NoSuchFieldException {
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -147,8 +169,10 @@ public class CloudDeploymentHandlerV2Test {
     }
 
     @Test
-    public void testDoExecOtherwise() throws KuraException {
+    public void testDoExecOtherwise() throws KuraException, NoSuchFieldException {
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/test");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -160,10 +184,12 @@ public class CloudDeploymentHandlerV2Test {
     }
 
     @Test
-    public void testDoExecInstallDeploymentOptionsException() throws KuraException {
+    public void testDoExecInstallDeploymentOptionsException() throws KuraException, NoSuchFieldException {
         // fail immediately after calling doExecInstall
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_INSTALL);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -180,6 +206,8 @@ public class CloudDeploymentHandlerV2Test {
         // fail at pending test
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_INSTALL);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -196,7 +224,7 @@ public class CloudDeploymentHandlerV2Test {
         String mesg = "test";
         KuraException ex = new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
         when(dlMock.isAlreadyDownloaded()).thenThrow(ex);
-        TestUtil.setFieldValue(handler, "s_downloadImplementation", dlMock);
+        TestUtil.setFieldValue(handler, "downloadImplementation", dlMock);
 
         handler.doExec(reqTopic, reqPayload, respPayload);
 
@@ -212,6 +240,8 @@ public class CloudDeploymentHandlerV2Test {
         // fail because not downloaded
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_INSTALL);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -226,7 +256,7 @@ public class CloudDeploymentHandlerV2Test {
 
         DownloadImpl dlMock = mock(DownloadImpl.class);
         when(dlMock.isAlreadyDownloaded()).thenReturn(false);
-        TestUtil.setFieldValue(handler, "s_downloadImplementation", dlMock);
+        TestUtil.setFieldValue(handler, "downloadImplementation", dlMock);
 
         handler.doExec(reqTopic, reqPayload, respPayload);
 
@@ -248,6 +278,7 @@ public class CloudDeploymentHandlerV2Test {
                 throw new IOException("test");
             }
         };
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
 
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_INSTALL);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
@@ -263,9 +294,9 @@ public class CloudDeploymentHandlerV2Test {
 
         DownloadImpl dlMock = mock(DownloadImpl.class);
         when(dlMock.isAlreadyDownloaded()).thenReturn(true);
-        TestUtil.setFieldValue(handler, "s_downloadImplementation", dlMock);
+        TestUtil.setFieldValue(handler, "downloadImplementation", dlMock);
 
-        TestUtil.setFieldValue(handler, "m_isInstalling", false);
+        TestUtil.setFieldValue(handler, "isInstalling", false);
 
         handler.doExec(reqTopic, reqPayload, respPayload);
 
@@ -282,6 +313,8 @@ public class CloudDeploymentHandlerV2Test {
         // fail soon after calling doExecDownload
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -300,6 +333,8 @@ public class CloudDeploymentHandlerV2Test {
         // fail at pending url
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -316,11 +351,11 @@ public class CloudDeploymentHandlerV2Test {
 
         when(dtsMock.getClientId()).thenReturn("ClientId");
 
-        TestUtil.setFieldValue(handler, "s_pendingPackageUrl", "url");
+        TestUtil.setFieldValue(handler, "pendingPackageUrl", "url");
 
         handler.doExec(reqTopic, reqPayload, respPayload);
 
-        TestUtil.setFieldValue(handler, "s_pendingPackageUrl", null);
+        TestUtil.setFieldValue(handler, "pendingPackageUrl", null);
 
         assertEquals("Response code should match expected", KuraResponsePayload.RESPONSE_CODE_ERROR,
                 respPayload.getResponseCode());
@@ -344,6 +379,8 @@ public class CloudDeploymentHandlerV2Test {
                 return dlMock;
             }
         };
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -387,6 +424,8 @@ public class CloudDeploymentHandlerV2Test {
                 return dlMock;
             }
         };
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -423,6 +462,8 @@ public class CloudDeploymentHandlerV2Test {
         // fail soon after calling doExecUninstall
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_UNINSTALL);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -441,6 +482,8 @@ public class CloudDeploymentHandlerV2Test {
         // fail at installing/pending package name
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_UNINSTALL);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -453,8 +496,8 @@ public class CloudDeploymentHandlerV2Test {
 
         when(dtsMock.getClientId()).thenReturn("ClientId");
 
-        TestUtil.setFieldValue(handler, "m_isInstalling", false);
-        TestUtil.setFieldValue(handler, "m_pendingUninstPackageName", "");
+        TestUtil.setFieldValue(handler, "isInstalling", false);
+        TestUtil.setFieldValue(handler, "pendingUninstPackageName", "");
 
         handler.doExec(reqTopic, reqPayload, respPayload);
 
@@ -477,6 +520,8 @@ public class CloudDeploymentHandlerV2Test {
                 throw new RuntimeException(testMesg);
             }
         };
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_UNINSTALL);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -493,7 +538,7 @@ public class CloudDeploymentHandlerV2Test {
 
         when(dtsMock.getClientId()).thenReturn("ClientId");
 
-        TestUtil.setFieldValue(handler, "m_isInstalling", true);
+        TestUtil.setFieldValue(handler, "isInstalling", true);
 
         handler.doExec(reqTopic, reqPayload, respPayload);
 
@@ -502,8 +547,8 @@ public class CloudDeploymentHandlerV2Test {
         assertNotNull("Response timestamp should be set", respPayload.getTimestamp());
         assertEquals("Body should match", testMesg, new String(respPayload.getBody(), Charset.forName("UTF-8")));
 
-        assertFalse((boolean) TestUtil.getFieldValue(handler, "m_isInstalling"));
-        assertNull(TestUtil.getFieldValue(handler, "m_pendingUninstPackageName"));
+        assertFalse((boolean) TestUtil.getFieldValue(handler, "isInstalling"));
+        assertNull(TestUtil.getFieldValue(handler, "pendingUninstPackageName"));
     }
 
     @Test
@@ -511,6 +556,8 @@ public class CloudDeploymentHandlerV2Test {
         // don't fail before the actual call
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_STOP);
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -545,6 +592,8 @@ public class CloudDeploymentHandlerV2Test {
         // fail because of String bundle id
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_START + "/aa");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -564,6 +613,8 @@ public class CloudDeploymentHandlerV2Test {
         // fail because of null bundle
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_START + "/99");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -587,6 +638,8 @@ public class CloudDeploymentHandlerV2Test {
         // fail because of start exception
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_START + "/99");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -615,6 +668,8 @@ public class CloudDeploymentHandlerV2Test {
         // OK
 
         CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
         CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_STOP + "/99");
         KuraRequestPayload reqPayload = new KuraRequestPayload();
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
@@ -633,6 +688,197 @@ public class CloudDeploymentHandlerV2Test {
 
         verify(ctxMock).getBundle(99);
         verify(bundleMock).stop();
+    }
+
+    private ServiceReference<DeploymentHook> mockHookReference(String kuraServicePid, DeploymentHook deploymentHook) {
+        @SuppressWarnings("unchecked")
+        final ServiceReference<DeploymentHook> reference = mock(ServiceReference.class);
+        when(reference.getProperty(anyString())).then(invocation -> {
+            String arg = invocation.getArgumentAt(0, String.class);
+            if (ConfigurationService.KURA_SERVICE_PID.equals(arg)) {
+                return kuraServicePid;
+            }
+            return deploymentHook;
+        });
+        return reference;
+    }
+
+    private DeploymentHookManager getDeploymentHookManager() throws NoSuchFieldException {
+        final DeploymentHookManager result = new DeploymentHookManager();
+        final BundleContext mockBundleContext = mock(BundleContext.class);
+        when(mockBundleContext.getService(anyObject())).then(invocation -> {
+            final ServiceReference<?> ref = invocation.getArgumentAt(0, ServiceReference.class);
+            return ref.getProperty("service");
+        });
+        TestUtil.setFieldValue(result, "bundleContext", mockBundleContext);
+        return result;
+    }
+
+    @Test
+    public void testDoExecDownloadNoRegisteredHookException() throws KuraException, NoSuchFieldException {
+
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
+        final DeploymentHookManager manager = getDeploymentHookManager();
+        handler.setDeploymentHookManager(manager);
+        handler.setDataTransportService(mock(DataTransportService.class));
+
+        CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
+        KuraRequestPayload reqPayload = new KuraRequestPayload();
+
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI, "http://localhost:1234");
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_PROTOCOL, "HTTP");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, "test");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_VERSION, "1.0");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_JOB_ID, 1234L);
+        reqPayload.addMetric(DeploymentPackageInstallOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_REQUEST_TYPE, "someRequestType");
+
+        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        handler.doExec(reqTopic, reqPayload, respPayload);
+
+        assertEquals("Response code should match expected", KuraResponsePayload.RESPONSE_CODE_ERROR,
+                respPayload.getResponseCode());
+        assertNotNull("Response timestamp should be set", respPayload.getTimestamp());
+        assertEquals("Body should match",
+                "No DeploymentHook is currently associated to request type someRequestType, aborting operation",
+                new String(respPayload.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoExecInstallNoRegisteredHookException() throws KuraException, NoSuchFieldException {
+
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
+        final DeploymentHookManager manager = getDeploymentHookManager();
+        handler.setDeploymentHookManager(manager);
+        handler.setDataTransportService(mock(DataTransportService.class));
+
+        CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_INSTALL);
+        KuraRequestPayload reqPayload = new KuraRequestPayload();
+
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, "test");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_VERSION, "1.0");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_JOB_ID, 1234L);
+        reqPayload.addMetric(DeploymentPackageInstallOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_REQUEST_TYPE, "someRequestType");
+
+        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        handler.doExec(reqTopic, reqPayload, respPayload);
+
+        assertEquals("Response code should match expected", KuraResponsePayload.RESPONSE_CODE_ERROR,
+                respPayload.getResponseCode());
+        assertNotNull("Response timestamp should be set", respPayload.getTimestamp());
+        assertEquals("Body should match",
+                "No DeploymentHook is currently associated to request type someRequestType, aborting operation",
+                new String(respPayload.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoExecDownloadShouldAbortOnPreDownload() throws KuraException, NoSuchFieldException {
+
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
+        final DeploymentHookManager manager = getDeploymentHookManager();
+        manager.bindHook(mockHookReference("testHook", new DeploymentHook() {
+
+            @Override
+            public void preDownload(RequestContext context, Map<String, Object> properties) throws KuraException {
+                throw new IllegalStateException("Aborted by hook");
+            }
+
+            @Override
+            public void postInstall(RequestContext context, Map<String, Object> properties) throws KuraException {
+            }
+
+            @Override
+            public void postDownload(RequestContext context, Map<String, Object> properties) throws KuraException {
+            }
+        }));
+        final Properties associations = new Properties();
+        associations.setProperty("testRequest", "testHook");
+        manager.updateAssociations(associations);
+
+        handler.setDeploymentHookManager(manager);
+        handler.setDataTransportService(mock(DataTransportService.class));
+
+        CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
+        KuraRequestPayload reqPayload = new KuraRequestPayload();
+
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI, "");
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_PROTOCOL, "");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, "");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_VERSION, "");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_JOB_ID, 1234L);
+        reqPayload.addMetric(DeploymentPackageInstallOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, true);
+        reqPayload.addMetric(DeploymentPackageDownloadOptions.METRIC_REQUEST_TYPE, "testRequest");
+
+        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        handler.doExec(reqTopic, reqPayload, respPayload);
+
+        assertEquals("Response code should match expected", KuraResponsePayload.RESPONSE_CODE_ERROR,
+                respPayload.getResponseCode());
+        assertNotNull("Response timestamp should be set", respPayload.getTimestamp());
+        assertEquals("Exception should match", "Aborted by hook",
+                new String(respPayload.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoExecInstallShouldAbortOnPostDownload() throws KuraException, NoSuchFieldException {
+
+        CloudDeploymentHandlerV2 handler = new CloudDeploymentHandlerV2();
+        TestUtil.setFieldValue(handler, "componentOptions", new CloudDeploymentHandlerV2Options(new HashMap<>()));
+
+        final DeploymentHookManager manager = getDeploymentHookManager();
+        manager.bindHook(mockHookReference("testHook", new DeploymentHook() {
+
+            @Override
+            public void preDownload(RequestContext context, Map<String, Object> properties) throws KuraException {
+            }
+
+            @Override
+            public void postInstall(RequestContext context, Map<String, Object> properties) throws KuraException {
+            }
+
+            @Override
+            public void postDownload(RequestContext context, Map<String, Object> properties) throws KuraException {
+                throw new IllegalStateException("Aborted by hook");
+            }
+        }));
+        final Properties associations = new Properties();
+        associations.setProperty("testRequest", "testHook");
+        manager.updateAssociations(associations);
+        assertTrue(manager.getHook("testRequest") != null);
+
+        handler.setDeploymentHookManager(manager);
+        handler.setDataTransportService(mock(DataTransportService.class));
+        final DownloadImpl mockDownloadImpl = mock(DownloadImpl.class);
+        when(mockDownloadImpl.isAlreadyDownloaded()).thenReturn(true);
+        TestUtil.setFieldValue(handler, "downloadImplementation", mockDownloadImpl);
+
+        CloudletTopic reqTopic = CloudletTopic.parseAppTopic("EXEC/" + CloudDeploymentHandlerV2.RESOURCE_INSTALL);
+        KuraRequestPayload reqPayload = new KuraRequestPayload();
+
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, "test");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_DP_VERSION, "1.0");
+        reqPayload.addMetric(DeploymentPackageOptions.METRIC_JOB_ID, 1237L);
+        reqPayload.addMetric(DeploymentPackageInstallOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, true);
+        reqPayload.addMetric(DeploymentPackageInstallOptions.METRIC_REQUEST_TYPE, "testRequest");
+
+        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+
+        handler.doExec(reqTopic, reqPayload, respPayload);
+
+        assertEquals("Response code should match expected", KuraResponsePayload.RESPONSE_CODE_ERROR,
+                respPayload.getResponseCode());
+        assertNotNull("Response timestamp should be set", respPayload.getTimestamp());
+        assertEquals("Exception should match", "Aborted by hook", respPayload.getExceptionMessage());
     }
 
     public void testPublishMessage() {

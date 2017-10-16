@@ -10,6 +10,7 @@
 
     Contributors:
       Red Hat Inc - Initial API and implementation
+      Cavium
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -19,18 +20,19 @@
     <parent>
     	<groupId>org.eclipse.kura</groupId>
     	<artifactId>target-platform</artifactId>
-    	<version>3.1.0-SNAPSHOT</version>
+    	<version>3.1.0</version>
         <relativePath>..</relativePath>
     </parent>
     
 	<artifactId>jdk.dio-parent</artifactId>
-	<version>1.0.200-SNAPSHOT</version>
+	<version>1.0.200</version>
 	<packaging>pom</packaging>
 
     <modules>
         <module>jdk.dio</module>
         <module>jdk.dio.armv6hf</module>
         <module>jdk.dio.x86_64</module>
+        <module>jdk.dio.aarch64</module>
     </modules>
     
     <properties>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -280,10 +280,10 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory {
 
     @Override
     public Set<String> getManagedCloudServicePids() throws KuraException {
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
 
         for (ComponentConfiguration cc : this.configurationService.getComponentConfigurations()) {
-            if (CLOUD_SERVICE_PID.equals(cc.getDefinition().getId())) {
+            if (cc.getDefinition() != null && CLOUD_SERVICE_PID.equals(cc.getDefinition().getId())) {
                 result.add(cc.getPid());
             }
         }

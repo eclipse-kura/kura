@@ -174,6 +174,11 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 logger.error("Could not located kura.properties with kura.home "); // +kuraHome
             }
 
+            // Try to reload kuraHome with the value set in kura.properties file.
+            if (kuraHome == null) {
+                kuraHome = kuraDefaults.getProperty(KEY_KURA_HOME_DIR);
+            }
+
             // load custom kura properties
             // look for kura_custom.properties as resource in the classpath
             // if not found, look for such file in the kura.home directory
@@ -818,7 +823,10 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     @Override
     public String getKuraMarketplaceCompatibilityVersion() {
         String marketplaceCompatibilityVersion = (String) this.kuraProperties
-                .getOrDefault(KEY_KURA_MARKETPLACE_COMPATIBILITY_VERSION, getKuraVersion());
+                .getProperty(KEY_KURA_MARKETPLACE_COMPATIBILITY_VERSION);
+        if (marketplaceCompatibilityVersion == null) {
+            marketplaceCompatibilityVersion = getKuraVersion();
+        }
         return marketplaceCompatibilityVersion.replaceAll("KURA[-_ ]", "").replaceAll("[-_]", ".");
     }
 

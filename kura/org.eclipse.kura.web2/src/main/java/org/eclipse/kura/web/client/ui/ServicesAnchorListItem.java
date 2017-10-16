@@ -51,7 +51,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
                 StringBuilder imageTag = new StringBuilder();
                 imageTag.append("<img src='");
                 imageTag.append(imageURL);
-                imageTag.append("' height='20' width='20'/>");
+                imageTag.append("' height='14' width='14'/>");
                 imageTag.append(" ");
                 imageTag.append(this.item.getComponentName());
                 super.anchor.setHTML(imageTag.toString());
@@ -150,7 +150,7 @@ public class ServicesAnchorListItem extends AnchorListItem {
         } else if (name.startsWith("VpnService")) {
             return IconType.CONNECTDEVELOP;
         } else if (name.startsWith("ProvisioningService")) {
-            return IconType.EXCLAMATION_CIRCLE;
+            return IconType.CLOUD_DOWNLOAD;
         } else if (name.startsWith("CommandPasswordService")) {
             return IconType.CHAIN;
         } else if (name.startsWith("WebConsole")) {
@@ -159,6 +159,18 @@ public class ServicesAnchorListItem extends AnchorListItem {
             return IconType.TERMINAL;
         } else if (name.startsWith("DenaliService")) {
             return IconType.SPINNER;
+        } else if (name.contains("H2Db")) {
+            return IconType.DATABASE;
+        } else if (name.startsWith("DeploymentService")) {
+            return IconType.DOWNLOAD;
+        } else if (name.startsWith("RebootService")) {
+            return IconType.REFRESH;
+        } else if (name.startsWith("VpnClient")) {
+            return IconType.ARROWS_H;
+        } else if (name.startsWith("TerminalClientService")) {
+            return IconType.RANDOM;
+        } else if (name.startsWith("TerminalServerService")) {
+            return IconType.RANDOM;
         }
 
         final String id = item.getComponentId();

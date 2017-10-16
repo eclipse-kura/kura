@@ -242,8 +242,9 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
     // ----------------------------------------------------------------
 
     private void setParameters(DbConfiguration configuration) throws SQLException {
-        // use slf4j for logging
-        execute("SET TRACE_LEVEL_FILE 4");
+        if (!configuration.isFileBasedLogLevelSpecified()) {
+            execute("SET TRACE_LEVEL_FILE 0");
+        }
 
         this.connectionPool.setMaxConnections(configuration.getConnectionPoolMaxSize());
     }

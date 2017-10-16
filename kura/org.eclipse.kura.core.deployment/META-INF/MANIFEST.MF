@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.core.deployment
 Bundle-SymbolicName: org.eclipse.kura.core.deployment;singleton:=true
-Bundle-Version: 1.1.200.qualifier
+Bundle-Version: 1.1.200
 Bundle-Vendor: Eclipse Kura
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
@@ -17,8 +17,10 @@ Import-Package: javax.net.ssl,
  org.apache.commons.io.output;version="2.4.0",
  org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.cloud;version="[1.1,1.2)",
+ org.eclipse.kura.configuration;version="[1.1,2.0)",
  org.eclipse.kura.core.util;version="[1.0,2.0)",
  org.eclipse.kura.data;version="[1.0,2.0)",
+ org.eclipse.kura.deployment.hook;version="[1.0,2.0)",
  org.eclipse.kura.message;version="[1.0,2.0)",
  org.eclipse.kura.ssl;version="[1.0,2.0)",
  org.eclipse.kura.system;version="1.1.0",
@@ -30,4 +32,5 @@ Import-Package: javax.net.ssl,
 Export-Package: org.eclipse.kura.core.deployment;version="1.0.0",
  org.eclipse.kura.core.deployment.download;version="1.0.0",
  org.eclipse.kura.core.deployment.install;version="1.0.0",
- org.eclipse.kura.core.deployment.xml;version="1.0.0"
+ org.eclipse.kura.core.deployment.xml;version="1.0.0",
+ org.eclipse.kura.core.deployment.hook;version="1.0.0"

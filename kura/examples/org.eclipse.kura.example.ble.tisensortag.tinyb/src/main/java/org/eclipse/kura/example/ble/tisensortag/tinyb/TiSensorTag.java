@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
+import org.eclipse.kura.KuraBluetoothIOException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattCharacteristic;
@@ -289,7 +290,7 @@ public class TiSensorTag {
      * Enable accelerometer sensor
      */
     public void enableAccelerometer(byte[] config) {
-        BluetoothLeGattCharacteristic accEnableChar;
+        BluetoothLeGattCharacteristic enableChar;
         if (this.cc2650) {
             // 0: gyro X, 1: gyro Y, 2: gyro Z
             // 3: acc X, 4: acc Y, 5: acc Z
@@ -297,9 +298,8 @@ public class TiSensorTag {
             // 7: wake-on-motion
             // 8-9: acc range (0 : 2g, 1 : 4g, 2 : 8g, 3 : 16g)
             try {
-                accEnableChar = this.gattServices.get(MOVEMENT)
-                        .findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_ENABLE);
-                accEnableChar.writeValue(config);
+                enableChar = this.gattServices.get(MOVEMENT).findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_ENABLE);
+                writeOnCharacteristic(config, enableChar);
             } catch (KuraException e) {
                 logger.error(MOV_ERROR_MESSAGE, e);
             }
@@ -307,9 +307,9 @@ public class TiSensorTag {
             // Write "01" in order to enable the sensor in 2g range
             // Write "01" in order to select 2g range, "02" for 4g, "03" for 8g (only for firmware > 1.5)
             try {
-                accEnableChar = this.gattServices.get(ACCELEROMETER)
+                enableChar = this.gattServices.get(ACCELEROMETER)
                         .findCharacteristic(TiSensorTagGatt.UUID_ACC_SENSOR_ENABLE);
-                accEnableChar.writeValue(config);
+                enableChar.writeValue(config);
             } catch (KuraException e) {
                 logger.error("Accelerometer enable failed", e);
             }
@@ -320,22 +320,21 @@ public class TiSensorTag {
      * Disable accelerometer sensor
      */
     public void disableAccelerometer() {
-        BluetoothLeGattCharacteristic accEnableChar;
+        BluetoothLeGattCharacteristic enableChar;
         if (this.cc2650) {
             byte[] config = { 0x00, 0x00 };
             try {
-                accEnableChar = this.gattServices.get(MOVEMENT)
-                        .findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_ENABLE);
-                accEnableChar.writeValue(config);
+                enableChar = this.gattServices.get(MOVEMENT).findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_ENABLE);
+                writeOnCharacteristic(config, enableChar);
             } catch (KuraException e) {
                 logger.error(MOV_ERROR_MESSAGE, e);
             }
         } else {
             byte[] config = { 0x00 };
             try {
-                accEnableChar = this.gattServices.get(ACCELEROMETER)
+                enableChar = this.gattServices.get(ACCELEROMETER)
                         .findCharacteristic(TiSensorTagGatt.UUID_ACC_SENSOR_ENABLE);
-                accEnableChar.writeValue(config);
+                enableChar.writeValue(config);
             } catch (KuraException e) {
                 logger.error("Accelerometer enable failed", e);
             }
@@ -576,7 +575,7 @@ public class TiSensorTag {
      * Enable magnetometer sensor
      */
     public void enableMagnetometer(byte[] config) {
-        BluetoothLeGattCharacteristic magEnableChar;
+        BluetoothLeGattCharacteristic enableChar;
         if (this.cc2650) {
             // 0: gyro X, 1: gyro Y, 2: gyro Z
             // 3: acc X, 4: acc Y, 5: acc Z
@@ -584,18 +583,17 @@ public class TiSensorTag {
             // 7: wake-on-motion
             // 8-9: acc range (0 : 2g, 1 : 4g, 2 : 8g, 3 : 16g)
             try {
-                magEnableChar = this.gattServices.get(MOVEMENT)
-                        .findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_ENABLE);
-                magEnableChar.writeValue(config);
+                enableChar = this.gattServices.get(MOVEMENT).findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_ENABLE);
+                writeOnCharacteristic(config, enableChar);
             } catch (KuraException e) {
                 logger.error(MOV_ERROR_MESSAGE, e);
             }
         } else {
             // Write "01" in order to enable the sensor
             try {
-                magEnableChar = this.gattServices.get(MAGNETOMETER)
+                enableChar = this.gattServices.get(MAGNETOMETER)
                         .findCharacteristic(TiSensorTagGatt.UUID_MAG_SENSOR_ENABLE);
-                magEnableChar.writeValue(config);
+                enableChar.writeValue(config);
             } catch (KuraException e) {
                 logger.error("Magnetometer enable failed", e);
             }
@@ -606,22 +604,21 @@ public class TiSensorTag {
      * Disable magnetometer sensor
      */
     public void disableMagnetometer() {
-        BluetoothLeGattCharacteristic magEnableChar;
+        BluetoothLeGattCharacteristic enableChar;
         if (this.cc2650) {
             byte[] config = { 0x00, 0x00 };
             try {
-                magEnableChar = this.gattServices.get(MOVEMENT)
-                        .findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_ENABLE);
-                magEnableChar.writeValue(config);
+                enableChar = this.gattServices.get(MOVEMENT).findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_ENABLE);
+                writeOnCharacteristic(config, enableChar);
             } catch (KuraException e) {
                 logger.error(MOV_ERROR_MESSAGE, e);
             }
         } else {
             byte[] config = { 0x00 };
             try {
-                magEnableChar = this.gattServices.get(MAGNETOMETER)
+                enableChar = this.gattServices.get(MAGNETOMETER)
                         .findCharacteristic(TiSensorTagGatt.UUID_MAG_SENSOR_ENABLE);
-                magEnableChar.writeValue(config);
+                enableChar.writeValue(config);
             } catch (KuraException e) {
                 logger.error("Magnetometer enable failed", e);
             }
@@ -934,7 +931,7 @@ public class TiSensorTag {
      * Enable gyroscope sensor
      */
     public void enableGyroscope(byte[] config) {
-        BluetoothLeGattCharacteristic gyroEnableChar;
+        BluetoothLeGattCharacteristic enableChar;
         if (this.cc2650) {
             // 0: gyro X, 1: gyro Y, 2: gyro Z
             // 3: acc X, 4: acc Y, 5: acc Z
@@ -942,9 +939,8 @@ public class TiSensorTag {
             // 7: wake-on-motion
             // 8-9: acc range (0 : 2g, 1 : 4g, 2 : 8g, 3 : 16g)
             try {
-                gyroEnableChar = this.gattServices.get(MOVEMENT)
-                        .findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_ENABLE);
-                gyroEnableChar.writeValue(config);
+                enableChar = this.gattServices.get(MOVEMENT).findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_ENABLE);
+                writeOnCharacteristic(config, enableChar);
             } catch (KuraException e) {
                 logger.error(MOV_ERROR_MESSAGE, e);
             }
@@ -952,9 +948,9 @@ public class TiSensorTag {
             // Write "00" to turn off gyroscope, "01" to enable X axis only, "02" to enable Y axis only,
             // "03" = X and Y, "04" = Z only, "05" = X and Z, "06" = Y and Z and "07" = X, Y and Z.
             try {
-                gyroEnableChar = this.gattServices.get(GYROSCOPE)
+                enableChar = this.gattServices.get(GYROSCOPE)
                         .findCharacteristic(TiSensorTagGatt.UUID_GYR_SENSOR_ENABLE);
-                gyroEnableChar.writeValue(config);
+                enableChar.writeValue(config);
             } catch (KuraException e) {
                 logger.error("Gyroscope enable failed", e);
             }
@@ -965,22 +961,21 @@ public class TiSensorTag {
      * Disable gyroscope sensor
      */
     public void disableGyroscope() {
-        BluetoothLeGattCharacteristic accEnableChar;
+        BluetoothLeGattCharacteristic enableChar;
         if (this.cc2650) {
             byte[] config = { 0x00, 0x00 };
             try {
-                accEnableChar = this.gattServices.get(MOVEMENT)
-                        .findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_ENABLE);
-                accEnableChar.writeValue(config);
+                enableChar = this.gattServices.get(MOVEMENT).findCharacteristic(TiSensorTagGatt.UUID_MOV_SENSOR_ENABLE);
+                writeOnCharacteristic(config, enableChar);
             } catch (KuraException e) {
                 logger.error(MOV_ERROR_MESSAGE, e);
             }
         } else {
             byte[] config = { 0x00 };
             try {
-                accEnableChar = this.gattServices.get(GYROSCOPE)
+                enableChar = this.gattServices.get(GYROSCOPE)
                         .findCharacteristic(TiSensorTagGatt.UUID_GYR_SENSOR_ENABLE);
-                accEnableChar.writeValue(config);
+                enableChar.writeValue(config);
             } catch (KuraException e) {
                 logger.error("Gyroscope enable failed", e);
             }
@@ -1495,5 +1490,14 @@ public class TiSensorTag {
         } catch (KuraException e) {
             logger.error("Failed to get GATT service", e);
         }
+    }
+
+    private void writeOnCharacteristic(byte[] config, BluetoothLeGattCharacteristic enableChar)
+            throws KuraBluetoothIOException {
+        byte[] oldConfig = enableChar.readValue();
+        Integer newConfig = ByteBuffer.wrap(config).getShort() | ByteBuffer.wrap(oldConfig).getShort();
+        ByteBuffer bb = ByteBuffer.allocate(2);
+        bb.putShort(newConfig.shortValue());
+        enableChar.writeValue(bb.array());
     }
 }

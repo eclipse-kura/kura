@@ -9,6 +9,7 @@
   Contributors:
       Eurotech
       Red Hat Inc
+      Cavium
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -16,7 +17,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.eclipse.kura</groupId>
     <artifactId>kura</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.1.0</version>
 
     <packaging>pom</packaging>
 
@@ -47,12 +48,15 @@
         <module>org.eclipse.kura.core.net</module>
         <module>org.eclipse.kura.core.status</module>
         <module>org.eclipse.kura.deployment.agent</module>
+        <module>org.eclipse.kura.hook.file.move.provider</module>
         <module>org.eclipse.kura.driver.helper.provider</module>
         <module>org.eclipse.kura.driver.opcua.localization</module>
         <module>org.eclipse.kura.driver.opcua.provider</module>
         <module>org.eclipse.kura.driver.block</module>
         <module>org.eclipse.kura.driver.s7plc.localization</module>
         <module>org.eclipse.kura.driver.s7plc.provider</module>
+        <module>org.eclipse.kura.driver.ble.sensortag.localization</module>
+        <module>org.eclipse.kura.driver.ble.sensortag.provider</module>
         <module>org.eclipse.kura.linux.bluetooth</module>
         <module>org.eclipse.kura.ble.provider</module>
         <module>org.eclipse.kura.ble.ibeacon.provider</module>
@@ -65,6 +69,7 @@
         <module>org.eclipse.kura.linux.usb</module>
         <module>org.eclipse.kura.linux.usb.armv6hf</module>
         <module>org.eclipse.kura.linux.usb.x86_64</module>
+        <module>org.eclipse.kura.linux.usb.aarch64</module>
         <module>org.eclipse.kura.linux.watchdog</module>
         <module>org.eclipse.kura.localization</module>
         <module>org.eclipse.kura.localization.resources</module>
@@ -81,6 +86,8 @@
 
         <module>org.eclipse.kura.rest.provider</module>
         <module>org.eclipse.kura.rest.asset.provider</module>
+
+        <module>org.eclipse.kura.misc.cloudcat</module>
 
         <module>features</module>
         <module>emulator</module>
@@ -113,6 +120,8 @@
         <bnd.baseline.continueOnError>false</bnd.baseline.continueOnError>
 
         <kura.skip.can>true</kura.skip.can>
+        
+        <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
     </properties>
 
     <distributionManagement>

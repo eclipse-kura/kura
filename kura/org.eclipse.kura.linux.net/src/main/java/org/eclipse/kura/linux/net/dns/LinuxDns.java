@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.PrintWriter;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +27,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
-import org.eclipse.kura.linux.net.dhcp.DhcpClientTool;
+import org.eclipse.kura.linux.net.dhcp.DhcpClientLeases;
 import org.eclipse.kura.net.IPAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,9 +39,6 @@ public class LinuxDns {
     private static final String DNS_FILE_NAME = "/etc/resolv.conf";
     private static final String[] PPP_DNS_FILES = { "/var/run/ppp/resolv.conf", "/etc/ppp/resolv.conf" };
     private static final String BACKUP_DNS_FILE_NAME = "/etc/resolv.conf.save";
-
-    private static final String GLOBAL_DHCP_LEASES_DIR = "/var/lib/dhcp";
-    private static final String IFACE_DHCP_LEASES_DIR = "/var/lib/dhclient";
 
     private static final String NAMESERVER = "nameserver";
 
@@ -123,108 +119,11 @@ public class LinuxDns {
     }
 
     public List<IPAddress> getDhcpDnsServers(String interfaceName, String address) throws KuraException {
-        IPAddress ipAddress;
-        try {
-            ipAddress = IPAddress.parseHostAddress(address);
-        } catch (UnknownHostException e) {
-            logger.error("Error parsing ip address {} ", address, e);
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        }
-        return getDhcpDnsServers(interfaceName, ipAddress);
+        return DhcpClientLeases.getInstance().getDhcpDnsServers(interfaceName, address);
     }
 
     public List<IPAddress> getDhcpDnsServers(String interfaceName, IPAddress address) throws KuraException {
-
-        if (interfaceName == null || interfaceName.isEmpty() || address == null || address.getAddress() == null) {
-            return new ArrayList<>();
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append("interface \"").append(interfaceName).append("\";");
-        String interfaceMatch = sb.toString();
-
-        sb = new StringBuilder();
-        sb.append("fixed-address ").append(address.getHostAddress()).append(";");
-        String fixedAddressMatch = sb.toString();
-
-        File globalDhClientFile = new File(formGlobalDhclientLeasesFilename());
-        File interfaceDhClientFile = new File(formInterfaceDhclientLeasesFilename(interfaceName));
-
-        ArrayList<IPAddress> servers;
-        if (interfaceDhClientFile.exists()) {
-            servers = parseDhclientFile(interfaceDhClientFile, interfaceMatch, fixedAddressMatch);
-        } else if (globalDhClientFile.exists()) {
-            servers = parseDhclientFile(globalDhClientFile, interfaceMatch, fixedAddressMatch);
-        } else {
-            servers = new ArrayList<>();
-            File dhclientFile = new File(formInterfaceDhclientLeasesFilename(interfaceName));
-            try {
-                if (!dhclientFile.exists() && dhclientFile.createNewFile()) {
-                    logger.debug("The {} doesn't exist, created new empty file ...", dhclientFile.getName());
-                }
-            } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
-            }
-        }
-
-        if (!servers.isEmpty()) {
-            logger.debug("getDhcpDnsServers() :: DHCP DNS servers for {} interface {}", interfaceName, servers);
-        }
-        return servers;
-    }
-
-    private ArrayList<IPAddress> parseDhclientFile(File dhClientFile, String interfaceMatch, String fixedAddressMatch)
-            throws KuraException {
-        ArrayList<IPAddress> servers = new ArrayList<>();
-        try (FileReader fr = new FileReader(dhClientFile); BufferedReader br = new BufferedReader(fr)) {
-            String line = null;
-
-            ArrayList<String> leaseBlock = null;
-            while ((line = br.readLine()) != null) {
-                if ("lease {".equals(line.trim())) {
-                    leaseBlock = new ArrayList<>();
-                } else if ("}".equals(line.trim())) {
-                    servers = parseDhclientLeaseBlock(leaseBlock, interfaceMatch, fixedAddressMatch);
-                    leaseBlock = null;
-                } else if ((leaseBlock != null) && !line.trim().isEmpty()) {
-                    leaseBlock.add(line.trim());
-                }
-            }
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
-        }
-
-        return servers;
-    }
-
-    private ArrayList<IPAddress> parseDhclientLeaseBlock(ArrayList<String> leaseBlock, String interfaceMatch,
-            String fixedAddressMatch) throws UnknownHostException {
-
-        if ((leaseBlock.size() > 2)
-                && (!leaseBlock.get(0).equals(interfaceMatch) || leaseBlock.get(1).equals(fixedAddressMatch))) {
-            return new ArrayList<>();
-        }
-        ArrayList<IPAddress> servers = null;
-        for (String line : leaseBlock) {
-            if (line.indexOf("domain-name-servers") >= 0) {
-                servers = parseDhclientDomainNameLine(line);
-                break;
-            }
-        }
-        return (servers != null) ? servers : new ArrayList<>();
-    }
-
-    private ArrayList<IPAddress> parseDhclientDomainNameLine(String line) throws UnknownHostException {
-        ArrayList<IPAddress> servers = new ArrayList<>();
-        StringTokenizer st = new StringTokenizer(line.substring(line.indexOf("domain-name-servers") + 19), ", ;");
-        while (st.hasMoreTokens()) {
-            String nameServer = st.nextToken();
-            logger.debug("Found nameserver... {}", nameServer);
-            IPAddress ipa = IPAddress.parseHostAddress(nameServer);
-            if (!servers.contains(ipa)) {
-                servers.add(IPAddress.parseHostAddress(nameServer));
-            }
-        }
-        return servers;
+        return DhcpClientLeases.getInstance().getDhcpDnsServers(interfaceName, address);
     }
 
     public synchronized void removeDnsServer(IPAddress serverIpAddress) {
@@ -529,23 +428,5 @@ public class LinuxDns {
         }
 
         return pppDnsFileName;
-    }
-
-    private String formGlobalDhclientLeasesFilename() {
-        StringBuilder sb = new StringBuilder(GLOBAL_DHCP_LEASES_DIR);
-        sb.append('/');
-        sb.append(DhcpClientTool.DHCLIENT.getValue());
-        sb.append(".leases");
-        return sb.toString();
-    }
-
-    private String formInterfaceDhclientLeasesFilename(String ifaceName) {
-        StringBuilder sb = new StringBuilder(IFACE_DHCP_LEASES_DIR);
-        sb.append('/');
-        sb.append(DhcpClientTool.DHCLIENT.getValue());
-        sb.append('.');
-        sb.append(ifaceName);
-        sb.append(".leases");
-        return sb.toString();
     }
 }

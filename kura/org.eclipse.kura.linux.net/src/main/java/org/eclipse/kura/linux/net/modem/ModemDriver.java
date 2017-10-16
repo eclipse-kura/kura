@@ -124,6 +124,7 @@ public class ModemDriver {
         }
         boolean retVal = true;
         int remainingAttempts = 3;
+        final long turnOffDelay = getTurnOffDelay();
         while (isOn()) {
             if (remainingAttempts <= 0) {
                 retVal = false;
@@ -183,7 +184,7 @@ public class ModemDriver {
                     gpioValuePath = gpioPath + GPIO_VALUE_SUFFIX_PATH;
                     invertGpioValue(gpioValuePath);
                 }
-            } else if (TARGET_NAME.equals(KuraConstants.BoltGATE_20_25.getTargetName())) {
+            } else if (TARGET_NAME.equalsIgnoreCase(KuraConstants.BoltGATE_20_25.getTargetName())) {
 
                 turnOffGpio(BOLTGATE_20_25_PCIEX_SLOT3_POWER_GPIO_VALUE);
 
@@ -194,7 +195,8 @@ public class ModemDriver {
                 break;
             }
             remainingAttempts--;
-            sleep(5000);
+            logger.info("turnModemOff() :: sleeping for {} ms after modem shutdown", turnOffDelay);
+            sleep(turnOffDelay);
         }
 
         logger.info("turnModemOff() :: Modem is OFF? - {}", retVal);
@@ -257,7 +259,7 @@ public class ModemDriver {
                     gpioValuePath = gpioPath + GPIO_VALUE_SUFFIX_PATH;
                     invertGpioValue(gpioValuePath);
                 }
-            } else if (TARGET_NAME.equals(KuraConstants.BoltGATE_20_25.getTargetName())) {
+            } else if (TARGET_NAME.equalsIgnoreCase(KuraConstants.BoltGATE_20_25.getTargetName())) {
 
                 turnOnGpio(BOLTGATE_20_25_PCIEX_SLOT3_POWER_GPIO_VALUE);
 
@@ -458,6 +460,23 @@ public class ModemDriver {
         } finally {
             resourceValue.close();
         }
+    }
+
+    private SupportedUsbModemInfo getSupportedUsbModemInfo() {
+        if (!(this instanceof UsbModemDriver)) {
+            return null;
+        }
+
+        final UsbModemDriver self = (UsbModemDriver) this;
+        return SupportedUsbModems.getModem(self.getVendor(), self.getProduct());
+    }
+
+    private long getTurnOffDelay() {
+        final SupportedUsbModemInfo usbModemInfo = getSupportedUsbModemInfo();
+        if (usbModemInfo != null) {
+            return usbModemInfo.getTurnOffDelay();
+        }
+        return 5000;
     }
 
     private boolean isOn() throws KuraException {

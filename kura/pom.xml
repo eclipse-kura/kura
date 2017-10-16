@@ -262,6 +262,12 @@
                 <module>org.eclipse.kura.web2</module>
             </modules>
         </profile>
+        <profile>
+            <id>skip-exists-plugin</id>
+            <properties>
+            	<check.plugins.exist.remote>false</check.plugins.exist.remote>
+            </properties>
+        </profile>
     </profiles>
 
     <repositories>

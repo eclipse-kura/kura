@@ -70,7 +70,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <check.plugins.exist.remote>true</check.plugins.exist.remote>
     </properties>
-
+    
+    <profiles>
+        <profile>
+            <id>skip-exists-plugin</id>
+            <properties>
+            	<check.plugins.exist.remote>false</check.plugins.exist.remote>
+            </properties>
+        </profile>
+    </profiles>
+    
     <build>
         <plugins>
             <plugin>

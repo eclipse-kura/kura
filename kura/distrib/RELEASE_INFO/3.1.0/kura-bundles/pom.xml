@@ -334,36 +334,6 @@
                                     <artifactId>org.eclipse.kura.misc.cloudcat</artifactId>
                                     <version>1.0.0</version>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId></artifactId>
-                                    <version></version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>## features versions</artifactId>
-                                    <version></version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.driver.opcua</artifactId>
-                                    <version>1.0.100</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.driver.s7plc</artifactId>
-                                    <version>1.0.0</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.driver.ble.sensortag</artifactId>
-                                    <version>1.0.0</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.wire.script.filter</artifactId>
-                                    <version>1.0.0</version>
-                                </artifactItem>
                           </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

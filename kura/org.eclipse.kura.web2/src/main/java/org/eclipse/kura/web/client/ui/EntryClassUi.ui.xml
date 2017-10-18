@@ -192,7 +192,8 @@
                                                             dataTarget="#collapseErrorStackTrace" ui:field="errorStackTraceAreaOneAnchor" />
                                                     </b:Heading>
                                                 </b:PanelHeader>
-                                                <b:PanelCollapse b:id="collapseErrorStackTrace" ui:field="errorStackTraceAreaOneCollapse">
+                                                <b:PanelCollapse b:id="collapseErrorStackTrace"
+                                                    ui:field="errorStackTraceAreaOneCollapse">
                                                     <b:PanelBody>
                                                         <b:Well>
                                                             <b:Container fluid="true">
@@ -228,21 +229,21 @@
                             <b:Panel>
                                 <b:PanelFooter>
                                     <b:Row>
-                                        <b:Column size="MD_12">
+                                        <b:Column size="MD_6,XS_6">
                                             <b.html:Paragraph alignment="LEFT">
                                                 <g:Label ui:field='footerLeft' text="Footer Left" />
-                                            </b.html:Paragraph>
-                                        </b:Column>
-                                    </b:Row>
-                                    <b:Row>
-                                        <b:Column size="MD_6,XS_6">
-                                            <b.html:Paragraph alignment="CENTER">
-                                                <g:Label ui:field='footerCenter' text="" addStyleNames="{style.red}" />
                                             </b.html:Paragraph>
                                         </b:Column>
                                         <b:Column size="MD_6,XS_6">
                                             <b.html:Paragraph alignment="RIGHT">
                                                 <g:Label ui:field='footerRight' text="Footer Right" />
+                                            </b.html:Paragraph>
+                                        </b:Column>
+                                    </b:Row>
+                                    <b:Row ui:field='footerCenterRow'>
+                                        <b:Column size="MD_6,XS_6">
+                                            <b.html:Paragraph alignment="CENTER">
+                                                <g:Label ui:field='footerCenter' text="" addStyleNames="{style.red}" />
                                             </b.html:Paragraph>
                                         </b:Column>
                                     </b:Row>

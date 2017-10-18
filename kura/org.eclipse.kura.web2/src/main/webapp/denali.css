@@ -515,7 +515,6 @@ Footer START
 
 .footer {
 	background-color: rgb(242, 242, 242);
-	height: 2.1cm;
 	z-index: 1;
 	position: absolute;
 	bottom: 0;
@@ -906,7 +905,7 @@ img.x-tree3-node-icon {
 
 div.copyright:after {
 	content:
-		' Eurotech and others. Made available under the terms of the Eclipse Public License v1.0';
+		' Eurotech and others. EPL v1.0';
 }
 
 div.headerLogo { 

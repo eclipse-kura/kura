@@ -48,7 +48,7 @@
         </b:Row>
 
         <b:Row>
-            <b:Well addStyleNames="{style.center-panel}"
+            <b:Well addStyleNames="bundles-well"
                 ui:field="content" />
         </b:Row>
 

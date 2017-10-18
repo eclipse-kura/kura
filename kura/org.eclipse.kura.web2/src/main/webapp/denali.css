@@ -97,7 +97,6 @@ body {
 .main-content .col-xs-12, .main-content .col-md-12 {
 		padding-left: 0.1cm !important;
 	padding-right: 0.1cm !important;
-	margin: 0.1cm !important;
 }
 
 .center-panel .panel {
@@ -162,7 +161,7 @@ table {
 	background: none !important;
 	font-weight: 500;
     line-height: 1.1;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .btn-group {

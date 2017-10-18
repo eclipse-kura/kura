@@ -54,7 +54,6 @@ import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
-import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
@@ -85,6 +84,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -216,7 +216,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     @UiField
     PanelHeader helpTitle;
     @UiField
-    PanelBody helpText;
+    ScrollPanel helpText;
     @UiField
     Button buttonSsid;
     @UiField
@@ -681,7 +681,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
             @Override
             public String getHelpText() {
-                if (wireless.getSelectedItemText().equals(MessageUtils.get(NET_WIFI_WIRELESS_MODE_STATION))) {
+                if (TabWirelessUi.this.wireless.getSelectedItemText()
+                        .equals(MessageUtils.get(NET_WIFI_WIRELESS_MODE_STATION))) {
                     return MSGS.netWifiToolTipWirelessModeStation();
                 } else {
                     return MSGS.netWifiToolTipWirelessModeAccessPoint();
@@ -747,7 +748,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 TabWirelessUi.this.netTabs.adjustInterfaceTabs();
                 setPasswordValidation();
                 update();
-                wirelessHelp.updateHelpText();
+                TabWirelessUi.this.wirelessHelp.updateHelpText();
             }
 
         });

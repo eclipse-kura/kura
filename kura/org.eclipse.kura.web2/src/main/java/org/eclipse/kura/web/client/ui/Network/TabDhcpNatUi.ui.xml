@@ -25,7 +25,7 @@
     }
     
     .center-panel {
-    	font-size: 11px;
+    	font-size: 12px;
     	font-weight: normal;
     }
     
@@ -35,6 +35,14 @@
     
     .help {
     	height: 300px;
+    }
+    
+    .help-header {
+    	font-size: 14px;
+    }
+    
+    .help-body {
+    	width: 275px;
     }
     </ui:style>
 
@@ -122,21 +130,17 @@
             </b:Row>
         </b:Column>
 
-        <b:Column size="MD_5" addStyleNames="{style.center-panel}"
-            visibleOn="MD_LG">
-            <b:Column addStyleNames="{style.padding}" size="MD_12">
-            </b:Column>
+        <b:Column size="MD_5" addStyleNames="{style.center-panel}" visibleOn="MD_LG">
             <b:Column size="MD_12">
-                <b:Row>
+                <b:Row addStyleNames="affix" b:id="help">
                     <b:Panel>
-                        <b:PanelHeader ui:field="helpTitle" />
-                        <b:PanelBody addStyleNames="{style.help}"
-                            ui:field="helpText" />
+                        <b:PanelHeader addStyleNames="{style.help-header}" ui:field="helpTitle" />
+                        <b:PanelBody addStyleNames="{style.help-body}">
+                            <g:ScrollPanel addStyleNames="{style.help}" ui:field="helpText" />
+                        </b:PanelBody>
                     </b:Panel>
                 </b:Row>
             </b:Column>
         </b:Column>
-
-
     </b:Container>
 </ui:UiBinder> 

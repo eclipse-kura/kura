@@ -36,9 +36,9 @@
         <b:Row>
             <b:Panel>
                 <b:ButtonGroup size="SMALL">
-                    <b:Button ui:field="packagesRefresh" addStyleNames="fa fa-refresh"></b:Button>
                     <b:Button ui:field="packagesInstall" addStyleNames="fa fa-plus"></b:Button>
                     <b:Button ui:field="packagesUninstall" addStyleNames="fa fa-minus"></b:Button>
+                    <b:Button ui:field="packagesRefresh" addStyleNames="fa fa-refresh"></b:Button>
                 </b:ButtonGroup>
             </b:Panel>
         </b:Row>

@@ -46,6 +46,7 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.service.io.ConnectionFactory;
 
 public class PositionServiceTest {
+
     private static final double EPS = 0.000001;
 
     @Test
@@ -184,7 +185,7 @@ public class PositionServiceTest {
 
         // it takes some time for the event to be sent...
         synchronized (o) {
-            o.wait(1000);
+            o.wait(10000);
         }
 
         verify(eventAdminMock, times(1)).postEvent(anyObject());

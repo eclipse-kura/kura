@@ -67,6 +67,7 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -835,6 +836,8 @@ public class WiresPanelUi extends Composite {
         ConfigurationAreaUi configurationAreaUi;
 
         if (item != null) {
+            Window.scrollTo(0 ,0);
+            WiresPanelUi.configurationRow.setVisible(false);
             WiresPanelUi.configurationRow.clear();
 
             if (!this.propertiesUis.containsKey(pid)) {
@@ -843,7 +846,6 @@ public class WiresPanelUi extends Composite {
             } else {
                 configurationAreaUi = this.propertiesUis.get(pid);
             }
-            WiresPanelUi.configurationRow.setVisible(true);
             if (pid == null) {
                 pid = "";
             }
@@ -851,6 +853,7 @@ public class WiresPanelUi extends Composite {
             configurationAreaUi.render();
             this.currentSelection = item;
             WiresPanelUi.configurationRow.add(configurationAreaUi);
+            WiresPanelUi.configurationRow.setVisible(true);
         } else {
             deselectComponent();
         }

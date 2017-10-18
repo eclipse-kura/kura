@@ -25,11 +25,10 @@
     
     .center-panel {
     	padding: 0px;
-    	margin: 2px;
     }
     
-    .interfaces {
-    	height: 40vh;
+    .interfaces-panel {
+    	padding-left: 0px;
     }
     </ui:style>
 
@@ -39,7 +38,7 @@
             </g:HTMLPanel>
         </b:Row>
         <b:Row>
-            <b:Column size="MD_2">
+            <b:Column size="MD_2" addStyleNames="{style.interfaces-panel}">
                     <b:Panel ui:field="interfacesTable"/>
             </b:Column>
 

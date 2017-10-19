@@ -235,6 +235,11 @@ table {
     pointer-events: none !important;
 }
 
+.network-panel .navbar {
+    background-color: inherit !important;
+    border: none !important;
+}
+
 /**********************
 Overriding Bootstrap END
 ***********************/

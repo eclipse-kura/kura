@@ -27,7 +27,7 @@
     }
     </ui:style>
 
-    <b:Well addStyleNames="bundles-well">
+    <b:Well addStyleNames="bundles-well center-panel">
         <b:ButtonGroup>
             <b:ButtonGroup size="SMALL">
                 <b:Button ui:field="bundleStart" addStyleNames="fa fa-play"></b:Button>

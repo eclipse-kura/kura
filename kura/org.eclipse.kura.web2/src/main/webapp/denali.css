@@ -184,14 +184,39 @@ table {
 	border: none !important;
 }
 
+.device-well .tab-content {
+	margin: 0;
+	padding: 0;
+}
+
+.device-well .nav-tabs {
+    background-color: #f5f5f5;
+    border-top: solid 1px #e7e7e7 !important;
+    border-right: solid 1px #e7e7e7 !important;
+    border-left: solid 1px #e7e7e7 !important;
+}
+
+.device-well .tab-content {
+    width: 100%;
+    overflow-x: scroll;
+}
+
 .bundles-well {
+	border: none !important;
+	border-bottom: solid 1px #e7e7e7 !important;
+    border-right: solid 1px #e7e7e7 !important;
+    border-left: solid 1px #e7e7e7 !important;
 	padding-top: 0 !important;
 	padding-bottom: 0 !important;
+	-webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    
 }
 
 .command-panel {
-	background-color: rgb(242,242,242);
+	background-color: #f5f5f5;
     border: solid 1px #e7e7e7 !important;
+    border-top: none !important
 }
 
 .container-fluid {

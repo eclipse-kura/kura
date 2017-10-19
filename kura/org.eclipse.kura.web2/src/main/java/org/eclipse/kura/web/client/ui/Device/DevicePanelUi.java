@@ -13,8 +13,7 @@ package org.eclipse.kura.web.client.ui.Device;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.shared.model.GwtSession;
-import org.gwtbootstrap3.client.ui.AnchorListItem;
-import org.gwtbootstrap3.client.ui.Well;
+import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
@@ -29,12 +28,6 @@ import com.google.gwt.user.client.ui.Widget;
 public class DevicePanelUi extends Composite {
 
     private static DevicePanelUiUiBinder uiBinder = GWT.create(DevicePanelUiUiBinder.class);
-    private static ProfileTabUi profileBinder = GWT.create(ProfileTabUi.class);
-    private static BundlesTabUi bundlesBinder = GWT.create(BundlesTabUi.class);
-    private static ThreadsTabUi threadsBinder = GWT.create(ThreadsTabUi.class);
-
-    private static SystemPropertiesTabUi systemPropertiesBinder = GWT.create(SystemPropertiesTabUi.class);
-    private static CommandTabUi commandBinder = GWT.create(CommandTabUi.class);
 
     private GwtSession session;
 
@@ -44,29 +37,32 @@ public class DevicePanelUi extends Composite {
     private static final Messages MSGS = GWT.create(Messages.class);
 
     @UiField
-    Well content;
-    @UiField
     HTMLPanel deviceIntro;
 
     @UiField
-    AnchorListItem profile, bundles, threads, systemProperties, command;
+    TabListItem profile, bundles, threads, systemProperties, command;
+
+    @UiField
+    ProfileTabUi profilePanel;
+    @UiField
+    BundlesTabUi bundlesPanel;
+    @UiField
+    ThreadsTabUi threadsPanel;
+    @UiField
+    SystemPropertiesTabUi systemPropertiesPanel;
+    @UiField
+    CommandTabUi commandPanel;
 
     public DevicePanelUi() {
         initWidget(uiBinder.createAndBindUi(this));
         // Profile selected by Default
         this.deviceIntro.add(new Span("<p>" + MSGS.deviceIntro() + "</p"));
-        this.content.clear();
-        setSelectedActive(this.profile);
-        this.content.add(profileBinder);
 
         this.profile.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                setSelectedActive(DevicePanelUi.this.profile);
-                DevicePanelUi.this.content.clear();
-                DevicePanelUi.this.content.add(profileBinder);
-                profileBinder.loadProfileData();
+                profilePanel.loadProfileData();
                 // test.setSize("12345px", "16512px");
             }
         });
@@ -75,10 +71,7 @@ public class DevicePanelUi extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                setSelectedActive(DevicePanelUi.this.bundles);
-                DevicePanelUi.this.content.clear();
-                DevicePanelUi.this.content.add(bundlesBinder);
-                bundlesBinder.loadBundlesData();
+                bundlesPanel.loadBundlesData();
             }
         });
 
@@ -86,10 +79,7 @@ public class DevicePanelUi extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                setSelectedActive(DevicePanelUi.this.threads);
-                DevicePanelUi.this.content.clear();
-                DevicePanelUi.this.content.add(threadsBinder);
-                threadsBinder.loadThreadsData();
+                threadsPanel.loadThreadsData();
             }
         });
 
@@ -97,42 +87,19 @@ public class DevicePanelUi extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                setSelectedActive(DevicePanelUi.this.systemProperties);
-                DevicePanelUi.this.content.clear();
-                DevicePanelUi.this.content.add(systemPropertiesBinder);
-                systemPropertiesBinder.loadSystemPropertiesData();
-            }
-        });
-
-        this.command.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                setSelectedActive(DevicePanelUi.this.command);
-                DevicePanelUi.this.content.clear();
-                DevicePanelUi.this.content.add(commandBinder);
+                systemPropertiesPanel.loadSystemPropertiesData();
             }
         });
 
     }
 
     public void initDevicePanel() {
-        profileBinder.loadProfileData();
-        commandBinder.setSession(this.session);
+        profilePanel.loadProfileData();
+        commandPanel.setSession(this.session);
     }
 
     public void setSession(GwtSession currentSession) {
         this.session = currentSession;
-    }
-
-    public void setSelectedActive(AnchorListItem item) {
-        this.profile.setActive(false);
-        this.bundles.setActive(false);
-        this.threads.setActive(false);
-        this.systemProperties.setActive(false);
-        this.command.setActive(false);
-        item.setActive(true);
-
     }
 
 }

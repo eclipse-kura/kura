@@ -263,8 +263,10 @@ public class BluetoothLe implements ConfigurableComponent {
                     payload.addMetric("Type", "CC2541");
                 }
 
-                doServicesDiscovery(myTiSensorTag);
-                doCharacteristicsDiscovery(myTiSensorTag);
+                if (this.options.isEnableServicesDiscovery()) {
+                    doServicesDiscovery(myTiSensorTag);
+                    doCharacteristicsDiscovery(myTiSensorTag);
+                }
 
                 payload.addMetric("Firmware", myTiSensorTag.getFirmareRevision());
 

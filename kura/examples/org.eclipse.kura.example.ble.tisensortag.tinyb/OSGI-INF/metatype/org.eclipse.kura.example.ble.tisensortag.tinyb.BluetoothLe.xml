@@ -128,6 +128,14 @@
             required="true"
             default="false"
             description="Switch on the buzzer."/>
+            
+         <AD id="discoverServicesAndCharacteristics"
+            name="discoverServicesAndCharacteristics"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Perform a discovery of GATT services and characteristics."/>
                         
         <AD id="publishTopic"  
             name="publishTopic"

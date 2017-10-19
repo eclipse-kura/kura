@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.example.ble.tisensortag.tinyb;
+package org.eclipse.kura.example.ble.tisensortag;
 
 import static java.util.Objects.requireNonNull;
 

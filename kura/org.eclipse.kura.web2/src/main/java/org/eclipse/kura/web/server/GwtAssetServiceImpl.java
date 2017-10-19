@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.kura.asset.Asset;
+import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.type.DataType;
@@ -78,10 +79,12 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
             public void consume(final Asset asset) throws Exception {
                 List<ChannelRecord> assetData = asset.readAllChannels();
                 for (ChannelRecord channelRecord : assetData) {
-                    GwtChannelData channelData = new GwtChannelData();
-                    channelData.setName(channelRecord.getChannelName());
-                    channelData.setValue(typedValueToString(channelRecord.getValue()));
-                    result.add(channelData);
+                    if (ChannelFlag.SUCCESS.equals(channelRecord.getChannelStatus().getChannelFlag())) {
+                        GwtChannelData channelData = new GwtChannelData();
+                        channelData.setName(channelRecord.getChannelName());
+                        channelData.setValue(typedValueToString(channelRecord.getValue()));
+                        result.add(channelData);
+                    }
                 }
             }
         });

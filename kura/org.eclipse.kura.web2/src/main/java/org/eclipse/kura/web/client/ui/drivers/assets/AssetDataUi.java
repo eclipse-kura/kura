@@ -379,7 +379,7 @@ public class AssetDataUi extends Composite {
                                 channelData.setType(channelInfo.getType());
                                 channelData.setValueType(channelInfo.getValueType());
                                 channelData.setProperties(channelInfo.getProperties());
-                                channelData.setValue("0");
+                                channelData.setValue("Read Error!");
                                 channelData.setUnescaped(true);
                                 channelsData.add(channelData);
                             }

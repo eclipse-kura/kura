@@ -7,4 +7,11 @@
  * http://www.eclipse.org/legal/epl-v10.html
  * 
  *******************************************************************************/
+/**
+ *
+ */
+/**
+ * Provides APIs to manage connections to Bluetooth LE devices.
+ *
+ */
 package org.eclipse.kura.bluetooth.le;

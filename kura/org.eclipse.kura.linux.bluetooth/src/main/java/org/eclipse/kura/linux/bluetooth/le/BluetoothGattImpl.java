@@ -50,6 +50,10 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
     private static final String ERROR_HANDLE = "invalid handle";
     private static final String[] ERROR_UUID = { "invalid uuid",
             "read characteristics by uuid failed: attribute can't be read" };
+    private static final String ERROR_CHAR_MESSAGE = "Exception waiting for characteristics";
+    private static final String ERROR_GATT_READ_MESSAGE = "Gatttool read timeout.";
+    private static final String ERROR_GATT_TIMEOUT_MESSAGE = "Gatttool read error.";
+    private static final String ERROR = "ERROR";
 
     private List<BluetoothGattService> bluetoothServices;
     private List<BluetoothGattCharacteristic> bluetoothGattCharacteristics;
@@ -96,6 +100,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
                     logger.error("Exception waiting for connection", e);
+                    Thread.currentThread().interrupt();
                 }
             }
             if (!this.ready) {
@@ -134,6 +139,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
                     logger.error("Exception waiting for connection", e);
+                    Thread.currentThread().interrupt();
                 }
             }
             if (!this.ready) {
@@ -157,13 +163,14 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
     @Override
     public List<BluetoothGattService> getServices() {
         if (this.proc != null) {
-            this.bluetoothServices = new ArrayList<BluetoothGattService>();
+            this.bluetoothServices = new ArrayList<>();
             String command = "primary\n";
             sendCmd(command);
             try {
                 Thread.sleep(GATT_SERVICE_TIMEOUT);
             } catch (InterruptedException e) {
                 logger.error("Exception waiting for services", e);
+                Thread.currentThread().interrupt();
             }
         }
         return this.bluetoothServices;
@@ -173,13 +180,14 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
     public List<BluetoothGattCharacteristic> getCharacteristics(String startHandle, String endHandle) {
         logger.info("getCharacteristics {} : {}", startHandle, endHandle);
         if (this.proc != null) {
-            this.bluetoothGattCharacteristics = new ArrayList<BluetoothGattCharacteristic>();
+            this.bluetoothGattCharacteristics = new ArrayList<>();
             String command = "characteristics " + startHandle + " " + endHandle + "\n";
             sendCmd(command);
             try {
                 Thread.sleep(GATT_SERVICE_TIMEOUT);
             } catch (InterruptedException e) {
-                logger.error("Exception waiting for characteristics", e);
+                logger.error(ERROR_CHAR_MESSAGE, e);
+                Thread.currentThread().interrupt();
             }
         }
         return this.bluetoothGattCharacteristics;
@@ -194,19 +202,20 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 
             // Wait until read is complete, error is received or timeout
             long startTime = System.currentTimeMillis();
-            while ("".equals(this.charValue) && !this.charValue.startsWith("ERROR")
+            while ("".equals(this.charValue) && !this.charValue.startsWith(ERROR)
                     && System.currentTimeMillis() - startTime < GATT_COMMAND_TIMEOUT) {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
-                    logger.error("Exception waiting for characteristics", e);
+                    logger.error(ERROR_CHAR_MESSAGE, e);
+                    Thread.currentThread().interrupt();
                 }
             }
             if ("".equals(this.charValue)) {
-                throw new KuraTimeoutException("Gatttool read timeout.");
+                throw new KuraTimeoutException(ERROR_GATT_READ_MESSAGE);
             }
-            if (this.charValue.startsWith("ERROR")) {
-                throw KuraException.internalError("Gatttool read error.");
+            if (this.charValue.startsWith(ERROR)) {
+                throw KuraException.internalError(ERROR_GATT_TIMEOUT_MESSAGE);
             }
 
         }
@@ -218,26 +227,27 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
     public String readCharacteristicValueByUuid(UUID uuid) throws KuraException {
         if (this.proc != null) {
             this.charValueUuid = "";
-            String l_uuid = uuid.toString();
-            String command = "char-read-uuid " + l_uuid + "\n";
+            String uuidString = uuid.toString();
+            String command = "char-read-uuid " + uuidString + "\n";
             logger.info("send command : {}", command);
             sendCmd(command);
 
             // Wait until read is complete, error is received or timeout
             long startTime = System.currentTimeMillis();
-            while ("".equals(this.charValueUuid) && !this.charValueUuid.startsWith("ERROR")
+            while ("".equals(this.charValueUuid) && !this.charValueUuid.startsWith(ERROR)
                     && System.currentTimeMillis() - startTime < GATT_COMMAND_TIMEOUT) {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
-                    logger.error("Exception waiting for characteristics", e);
+                    logger.error(ERROR_CHAR_MESSAGE, e);
+                    Thread.currentThread().interrupt();
                 }
             }
             if ("".equals(this.charValueUuid)) {
-                throw new KuraTimeoutException("Gatttool read timeout.");
+                throw new KuraTimeoutException(ERROR_GATT_READ_MESSAGE);
             }
-            if (this.charValueUuid.startsWith("ERROR")) {
-                throw KuraException.internalError("Gatttool read error.");
+            if (this.charValueUuid.startsWith(ERROR)) {
+                throw KuraException.internalError(ERROR_GATT_TIMEOUT_MESSAGE);
             }
         }
 
@@ -272,10 +282,12 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 
     @Override
     public void processInputStream(String string) {
+        // Not implemented
     }
 
     @Override
     public void processErrorStream(String string) {
+        // Not implemented
     }
 
     @Override
@@ -291,18 +303,19 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
 
             // Wait until read is complete, error is received or timeout
             long startTime = System.currentTimeMillis();
-            while ("".equals(this.securityLevel) && !this.securityLevel.startsWith("ERROR")
+            while ("".equals(this.securityLevel) && !this.securityLevel.startsWith(ERROR)
                     && System.currentTimeMillis() - startTime < GATT_COMMAND_TIMEOUT) {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
-                    logger.error("Exception waiting for characteristics", e);
+                    logger.error(ERROR_CHAR_MESSAGE, e);
+                    Thread.currentThread().interrupt();
                 }
             }
             if ("".equals(this.securityLevel)) {
-                throw new KuraTimeoutException("Gatttool read timeout.");
-            } else if (this.securityLevel.startsWith("ERROR")) {
-                throw KuraException.internalError("Gatttool read error.");
+                throw new KuraTimeoutException(ERROR_GATT_READ_MESSAGE);
+            } else if (this.securityLevel.startsWith(ERROR)) {
+                throw KuraException.internalError(ERROR_GATT_TIMEOUT_MESSAGE);
             }
 
             level = BluetoothGattSecurityLevel.getBluetoothGattSecurityLevel(this.securityLevel);
@@ -372,11 +385,9 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
             String endHandle = attr[6];
             String uuid = attr[8];
 
-            if (this.bluetoothServices != null) {
-                if (isNewService(uuid)) {
-                    logger.debug("Adding new GATT service: " + uuid + ":" + startHandle + ":" + endHandle);
-                    this.bluetoothServices.add(new BluetoothGattServiceImpl(uuid, startHandle, endHandle));
-                }
+            if (this.bluetoothServices != null && isNewService(uuid)) {
+                logger.debug("Adding new GATT service: {} : {} : {}", uuid, startHandle, endHandle);
+                this.bluetoothServices.add(new BluetoothGattServiceImpl(uuid, startHandle, endHandle));
             }
         }
         // characteristics are being returned
@@ -390,13 +401,11 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
             String properties = attr[4].substring(0, attr[4].length() - 1);
             String valueHandle = attr[8].substring(0, attr[8].length() - 1);
             String uuid = attr[10].substring(0, attr[10].length() - 1);
-            if (this.bluetoothGattCharacteristics != null) {
-                if (isNewGattCharacteristic(uuid)) {
-                    logger.debug("Adding new GATT characteristic: {}", uuid);
-                    logger.debug(handle + "  " + properties + "  " + valueHandle);
-                    this.bluetoothGattCharacteristics
-                            .add(new BluetoothGattCharacteristicImpl(uuid, handle, properties, valueHandle));
-                }
+            if (this.bluetoothGattCharacteristics != null && isNewGattCharacteristic(uuid)) {
+                logger.debug("Adding new GATT characteristic: {}", uuid);
+                logger.debug("{} {} {}", handle, properties, valueHandle);
+                this.bluetoothGattCharacteristics
+                        .add(new BluetoothGattCharacteristicImpl(uuid, handle, properties, valueHandle));
             }
         }
         // characteristic read by handle returned
@@ -413,8 +422,7 @@ public class BluetoothGattImpl implements BluetoothGatt, BluetoothProcessListene
             logger.debug("Receiving notification: {}", line);
             // Parse the characteristic line, line is expected to be:
             // Notification handle = 0xmmmm value: <value>
-            String x = "Notification hanlde = ";
-            String sub = line.substring(x.length()).trim();
+            String sub = line.substring(line.toLowerCase().indexOf(NOTIFICATION) + NOTIFICATION.length() + 3).trim();
             String[] attr = sub.split(":");
             String handle = attr[0].split("\\s")[0];
             String value = attr[1].trim();

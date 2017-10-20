@@ -64,7 +64,7 @@ urn:activemq:jms https://raw.githubusercontent.com/apache/activemq-artemis/maste
 </configuration>
 ```
 
-the **User configuration** to 
+the **User configuration** to
 
 ```
 guest=test12|guest
@@ -85,3 +85,5 @@ Configuring the **MqttDataTransport** in System -> Cloud Services -> MqttDataTra
 - **password** - test12
 
 Clicking on the **Connect** button will result in a successful connection of Kura cloud service to the Apache ActiveMQ Artemis MQTT broker.
+
+> Note: The XML configuration above only allows connections originating from the gateway itself. In order to allow external connection the bind URLs specified using the `acceptor` tag must be modified by specifying an external accessible address instead of `localhost`. If the bind address is set to `0.0.0.0`, the broker will listen on all available addresses.

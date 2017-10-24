@@ -1,6 +1,6 @@
 ---
 layout: page
-title:  "Build In Cloud Services"
+title:  "Built-in Cloud Services"
 categories: [cloud]
 ---
 

@@ -720,7 +720,6 @@ img.x-tree3-node-icon {
 
 /* elements */
 .devs text {
-	text-transform: uppercase;
 	font-weight: 800;
 }
 
@@ -757,6 +756,10 @@ img.x-tree3-node-icon {
 
 .devs.Atomic .body {
 	stroke: #009ae0;
+}
+
+.devs.Atomic .body.temporary {
+	opacity: 0.5;
 }
 
 .devs.Atomic .label {
@@ -824,6 +827,12 @@ img.x-tree3-node-icon {
          opacity: initial;
      }
  }
+
+#wires-overlay-buttons {
+    position: absolute !important;
+    bottom: 10px !important;
+    right: 10px !important;
+}
 
 /******************************
 ***

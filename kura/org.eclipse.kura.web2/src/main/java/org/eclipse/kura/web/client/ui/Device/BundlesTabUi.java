@@ -11,7 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.Device;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
@@ -69,9 +69,9 @@ public class BundlesTabUi extends Composite implements Tab {
     Button bundleStop;
 
     @UiField
-    CellTable<GwtGroupedNVPair> bundlesGrid = new CellTable<GwtGroupedNVPair>();
-    private final ListDataProvider<GwtGroupedNVPair> bundlesDataProvider = new ListDataProvider<GwtGroupedNVPair>();
-    private final SingleSelectionModel<GwtGroupedNVPair> selectionModel = new SingleSelectionModel<GwtGroupedNVPair>();
+    CellTable<GwtGroupedNVPair> bundlesGrid = new CellTable<>();
+    private final ListDataProvider<GwtGroupedNVPair> bundlesDataProvider = new ListDataProvider<>();
+    private final SingleSelectionModel<GwtGroupedNVPair> selectionModel = new SingleSelectionModel<>();
 
     private final GwtDeviceServiceAsync deviceService = GWT.create(GwtDeviceService.class);
     private final GwtSecurityTokenServiceAsync securityTokenService = GWT.create(GwtSecurityTokenService.class);
@@ -309,7 +309,7 @@ public class BundlesTabUi extends Composite implements Tab {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                BundlesTabUi.this.gwtDeviceService.findBundles(token, new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+                BundlesTabUi.this.gwtDeviceService.findBundles(token, new AsyncCallback<List<GwtGroupedNVPair>>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -320,7 +320,7 @@ public class BundlesTabUi extends Composite implements Tab {
                     }
 
                     @Override
-                    public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                    public void onSuccess(List<GwtGroupedNVPair> result) {
                         EntryClassUi.hideWaitModal();
                         BundlesTabUi.this.isRequestRunning = false;
                         for (GwtGroupedNVPair resultPair : result) {

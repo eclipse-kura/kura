@@ -11,7 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.Device;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
@@ -59,7 +59,7 @@ public class ThreadsTabUi extends Composite implements Tab {
 
     private void loadProfileTable(CellTable<GwtGroupedNVPair> threadsGrid2,
 
-    ListDataProvider<GwtGroupedNVPair> dataProvider) {
+            ListDataProvider<GwtGroupedNVPair> dataProvider) {
 
         TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
 
@@ -117,7 +117,7 @@ public class ThreadsTabUi extends Composite implements Tab {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                ThreadsTabUi.this.gwtDeviceService.findThreads(token, new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+                ThreadsTabUi.this.gwtDeviceService.findThreads(token, new AsyncCallback<List<GwtGroupedNVPair>>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -129,7 +129,7 @@ public class ThreadsTabUi extends Composite implements Tab {
                     }
 
                     @Override
-                    public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                    public void onSuccess(List<GwtGroupedNVPair> result) {
                         for (GwtGroupedNVPair resultPair : result) {
                             ThreadsTabUi.this.threadsDataProvider.getList().add(resultPair);
                         }

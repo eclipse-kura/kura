@@ -412,6 +412,8 @@ fi]]>
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/ifup-local.raspbian"
                         prefix="${build.output.name}/install" />
+			<zipfileset file="src/main/resources/common/merge-network-inderfaces-debian.py"
+                        prefix="${build.output.name}/install" />
 
 			<zipfileset file="${project.build.directory}/${build.output.name}/selinuxKura.pp"
                 prefix="${build.output.name}/install" />

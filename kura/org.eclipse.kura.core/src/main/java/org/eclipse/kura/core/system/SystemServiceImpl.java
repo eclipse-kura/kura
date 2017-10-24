@@ -14,12 +14,10 @@ package org.eclipse.kura.core.system;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -40,14 +38,10 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.core.util.SafeProcess;
-import org.eclipse.kura.net.NetInterface;
-import org.eclipse.kura.net.NetInterfaceAddress;
-import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
@@ -62,25 +56,19 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     private static final String CLOUDBEES_SECURITY_SETTINGS_PATH = "/private/eurotech/settings-security.xml";
     private static final String KURA_PATH = "/opt/eclipse/kura";
 
+    private static final String SH_CMD = "/bin/sh";
+    private static final String DMIDECODE_CMD = "dmidecode -t system";
+
+    private static final String LINUX_WR42_VERSION = "2.6.34.9-WR4.2.0.0_standard";
+    private static final String LINUX_WR43_VERSION = "2.6.34.12-WR4.3.0.0_standard";
+    private static final String WINDOWS_STRING = "Windows";
+    private static final String DPA_CONFIGURATION_STRING = "dpa.configuration";
+    private static final String LOG4J_CONFIGURATION_STRING = "log4j.configuration";
+
     private static boolean onCloudbees = false;
 
     private Properties kuraProperties;
     private ComponentContext componentContext;
-
-    private NetworkService networkService;
-
-    // ----------------------------------------------------------------
-    //
-    // Dependencies
-    //
-    // ----------------------------------------------------------------
-    public void setNetworkService(NetworkService networkService) {
-        this.networkService = networkService;
-    }
-
-    public void unsetNetworkService(NetworkService networkService) {
-        this.networkService = null;
-    }
 
     // ----------------------------------------------------------------
     //
@@ -101,32 +89,31 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                     onCloudbees = new File(CLOUDBEES_SECURITY_SETTINGS_PATH).exists();
                     return null; // nothing to return
                 } catch (Exception e) {
-                    System.out.println("Unable to execute privileged in SystemService");
+                    logger.error("Unable to execute privileged in SystemService", e);
                     return null;
                 }
             }
         });
 
         // load the defaults from the kura.properties files
-        Properties kuraDefaults = new Properties();
         boolean updateTriggered = false;
         try {
             // special cases for older versions to fix relative path bug in v2.0.4 and earlier
             if (System.getProperty(KURA_CONFIG) != null
-                    && System.getProperty(KURA_CONFIG).trim().equals("file:kura/kura.properties")) {
+                    && "file:kura/kura.properties".equals(System.getProperty(KURA_CONFIG).trim())) {
                 System.setProperty(KURA_CONFIG, "file:/opt/eclipse/kura/kura/kura.properties");
                 updateTriggered = true;
                 logger.warn("Overridding invalid kura.properties location");
             }
-            if (System.getProperty("dpa.configuration") != null
-                    && System.getProperty("dpa.configuration").trim().equals("kura/dpa.properties")) {
-                System.setProperty("dpa.configuration", "/opt/eclipse/kura/kura/dpa.properties");
+            if (System.getProperty(DPA_CONFIGURATION_STRING) != null
+                    && "kura/dpa.properties".equals(System.getProperty(DPA_CONFIGURATION_STRING).trim())) {
+                System.setProperty(DPA_CONFIGURATION_STRING, "/opt/eclipse/kura/kura/dpa.properties");
                 updateTriggered = true;
                 logger.warn("Overridding invalid dpa.properties location");
             }
-            if (System.getProperty("log4j.configuration") != null
-                    && System.getProperty("log4j.configuration").trim().equals("file:kura/log4j.properties")) {
-                System.setProperty("log4j.configuration", "file:/opt/eclipse/kura/kura/log4j.properties");
+            if (System.getProperty(LOG4J_CONFIGURATION_STRING) != null
+                    && "file:kura/log4j.properties".equals(System.getProperty(LOG4J_CONFIGURATION_STRING).trim())) {
+                System.setProperty(LOG4J_CONFIGURATION_STRING, "file:/opt/eclipse/kura/kura/log4j.properties");
                 updateTriggered = true;
                 logger.warn("Overridding invalid log4j.properties location");
             }
@@ -135,44 +122,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             // look for kura.properties as resource in the classpath
             // if not found, look for such file in the kura.home directory
             String kuraHome = System.getProperty(KEY_KURA_HOME_DIR);
-            String kuraConfig = System.getProperty(KURA_CONFIG);
-            String kuraProperties = readResource(KURA_PROPS_FILE);
-
-            if (kuraProperties != null) {
-                kuraDefaults.load(new StringReader(kuraProperties));
-                logger.info("Loaded Jar Resource kura.properties.");
-            } else if (kuraConfig != null) {
-                try {
-                    final URL kuraConfigUrl = new URL(kuraConfig);
-                    final InputStream in = kuraConfigUrl.openStream();
-                    try {
-                        kuraDefaults.load(in);
-                    } finally {
-                        if (in != null) {
-                            in.close();
-                        }
-                    }
-                    logger.info("Loaded URL kura.properties: {}", kuraConfig);
-                } catch (Exception e) {
-                    logger.warn("Could not open kuraConfig URL", e);
-                }
-            } else if (kuraHome != null) {
-                File kuraPropsFile = new File(kuraHome + File.separator + KURA_PROPS_FILE);
-                if (kuraPropsFile.exists()) {
-                    final FileReader fr = new FileReader(kuraPropsFile);
-                    try {
-                        kuraDefaults.load(fr);
-                    } finally {
-                        fr.close();
-                    }
-                    logger.info("Loaded File kura.properties: {}", kuraPropsFile);
-                } else {
-                    logger.warn("File does not exist: {}", kuraPropsFile);
-                }
-
-            } else {
-                logger.error("Could not located kura.properties with kura.home "); // +kuraHome
-            }
+            Properties kuraDefaults = getKuraProperties(kuraHome, KURA_CONFIG, KURA_PROPS_FILE);
 
             // Try to reload kuraHome with the value set in kura.properties file.
             if (kuraHome == null) {
@@ -182,63 +132,26 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             // load custom kura properties
             // look for kura_custom.properties as resource in the classpath
             // if not found, look for such file in the kura.home directory
-            Properties kuraCustomProps = new Properties();
-            String kuraCustomConfig = System.getProperty(KURA_CUSTOM_CONFIG);
-            String kuraCustomProperties = readResource(KURA_CUSTOM_PROPS_FILE);
-
-            if (kuraCustomProperties != null) {
-                kuraCustomProps.load(new StringReader(kuraCustomProperties));
-                logger.info("Loaded Jar Resource: {}", KURA_CUSTOM_PROPS_FILE);
-            } else if (kuraCustomConfig != null) {
-                try {
-                    final URL kuraConfigUrl = new URL(kuraCustomConfig);
-                    final InputStream in = kuraConfigUrl.openStream();
-                    try {
-                        kuraCustomProps.load(in);
-                    } finally {
-                        if (in != null) {
-                            in.close();
-                        }
-                    }
-                    logger.info("Loaded URL kura_custom.properties: {}", kuraCustomConfig);
-                } catch (Exception e) {
-                    logger.warn("Could not open kuraCustomConfig URL: ", e);
-                }
-            } else if (kuraHome != null) {
-                File kuraCustomPropsFile = new File(kuraHome + File.separator + KURA_CUSTOM_PROPS_FILE);
-                if (kuraCustomPropsFile.exists()) {
-                    Reader reader = new FileReader(kuraCustomPropsFile);
-                    try {
-                        kuraCustomProps.load(reader);
-                    } finally {
-                        reader.close();
-                    }
-                    logger.info("Loaded File {}: {}", KURA_CUSTOM_PROPS_FILE, kuraCustomPropsFile);
-                } else {
-                    logger.warn("File does not exist: {}", kuraCustomPropsFile);
-                }
-            } else {
-                logger.info("Did not locate a kura_custom.properties file in {}", kuraHome);
-            }
+            Properties kuraCustomProps = getKuraProperties(kuraHome, KURA_CUSTOM_CONFIG, KURA_CUSTOM_PROPS_FILE);
 
             // Override defaults with values from kura_custom.properties
             kuraDefaults.putAll(kuraCustomProps);
 
             // more path overrides based on earlier Kura problem with relative paths
             if (kuraDefaults.getProperty(KEY_KURA_HOME_DIR) != null
-                    && kuraDefaults.getProperty(KEY_KURA_HOME_DIR).trim().equals("kura")) {
+                    && "kura".equals(kuraDefaults.getProperty(KEY_KURA_HOME_DIR).trim())) {
                 kuraDefaults.setProperty(KEY_KURA_HOME_DIR, "/opt/eclipse/kura/kura");
                 updateTriggered = true;
                 logger.warn("Overridding invalid kura.home location");
             }
             if (kuraDefaults.getProperty(KEY_KURA_PLUGINS_DIR) != null
-                    && kuraDefaults.getProperty(KEY_KURA_PLUGINS_DIR).trim().equals("kura/plugins")) {
+                    && "kura/plugins".equals(kuraDefaults.getProperty(KEY_KURA_PLUGINS_DIR).trim())) {
                 kuraDefaults.setProperty(KEY_KURA_PLUGINS_DIR, "/opt/eclipse/kura/kura/plugins");
                 updateTriggered = true;
                 logger.warn("Overridding invalid kura.plugins location");
             }
             if (kuraDefaults.getProperty(KEY_KURA_PACKAGES_DIR) != null
-                    && kuraDefaults.getProperty(KEY_KURA_PACKAGES_DIR).trim().equals("kura/packages")) {
+                    && "kura/packages".equals(kuraDefaults.getProperty(KEY_KURA_PACKAGES_DIR).trim())) {
                 kuraDefaults.setProperty(KEY_KURA_PACKAGES_DIR, "/opt/eclipse/kura/kura/packages");
                 updateTriggered = true;
                 logger.warn("Overridding invalid kura.packages location");
@@ -256,7 +169,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 }
             }
 
-            // build the m_kuraProperties instance with the defaults
+            // build the this.kuraProperties instance with the defaults
             this.kuraProperties = new Properties(kuraDefaults);
 
             // take care of the CloudBees environment
@@ -281,6 +194,10 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             }
             if (System.getProperty(KEY_KURA_VERSION) != null) {
                 this.kuraProperties.put(KEY_KURA_VERSION, System.getProperty(KEY_KURA_VERSION));
+            }
+            if (System.getProperty(KEY_KURA_NET_INTERFACE_BLACKLIST) != null) {
+                this.kuraProperties.put(KEY_KURA_NET_INTERFACE_BLACKLIST,
+                        System.getProperty(KEY_KURA_NET_INTERFACE_BLACKLIST));
             }
             if (System.getProperty(KEY_DEVICE_NAME) != null) {
                 this.kuraProperties.put(KEY_DEVICE_NAME, System.getProperty(KEY_DEVICE_NAME));
@@ -463,6 +380,41 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         this.kuraProperties = null;
     }
 
+    private Properties getKuraProperties(String kuraHome, String kuraConfigPropName, String kuraPropFile)
+            throws IOException {
+        String kuraConfig = System.getProperty(kuraConfigPropName);
+        String kuraProp = readResource(kuraPropFile);
+        Properties retKuraProperties = new Properties();
+        if (kuraProp != null) {
+            retKuraProperties.load(new StringReader(kuraProp));
+            logger.info("Loaded Jar Resource kura.properties.");
+        } else if (kuraConfig != null) {
+            try {
+                URL kuraConfigUrl = new URL(kuraConfig);
+                try (InputStream in = kuraConfigUrl.openStream()) {
+                    retKuraProperties.load(in);
+                }
+                logger.info("Loaded URL kura.properties: {}", kuraConfig);
+            } catch (Exception e) {
+                logger.warn("Could not open kuraConfig URL", e);
+            }
+        } else if (kuraHome != null) {
+            File kuraPropsFile = new File(kuraHome + File.separator + kuraPropFile);
+            if (kuraPropsFile.exists()) {
+                try (FileReader fr = new FileReader(kuraPropsFile);) {
+                    retKuraProperties.load(fr);
+                }
+                logger.info("Loaded File kura.properties: {}", kuraPropsFile);
+            } else {
+                logger.warn("File does not exist: {}", kuraPropsFile);
+            }
+
+        } else {
+            logger.error("Did not locate kura.properties file in {}", kuraHome);
+        }
+        return retKuraProperties;
+    }
+
     public void updated(Map<String, Object> properties) {
         // nothing to do
         // all properties of the System service are read-only
@@ -497,10 +449,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             try {
                 logger.info("executing: ifconfig and looking for {}", primaryNetworkInterfaceName);
                 proc = ProcessUtil.exec("ifconfig");
-                BufferedReader br = null;
-                try {
+                try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                        BufferedReader br = new BufferedReader(isr)) {
                     proc.waitFor();
-                    br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
                     String line = null;
                     while ((line = br.readLine()) != null) {
                         if (line.startsWith(primaryNetworkInterfaceName)) {
@@ -520,14 +471,6 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                     }
                 } catch (InterruptedException e) {
                     logger.error("Exception while executing ifconfig!", e);
-                } finally {
-                    if (br != null) {
-                        try {
-                            br.close();
-                        } catch (IOException ex) {
-                            logger.error("I/O Exception while closing BufferedReader!");
-                        }
-                    }
                 }
             } catch (Exception e) {
                 logger.error("Failed to get network interfaces", e);
@@ -536,7 +479,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                     ProcessUtil.destroy(proc);
                 }
             }
-        } else if (getOsName().contains("Windows")) {
+        } else if (getOsName().contains(WINDOWS_STRING)) {
             try {
                 logger.info("executing: InetAddress.getLocalHost {}", primaryNetworkInterfaceName);
                 ip = InetAddress.getLocalHost();
@@ -553,25 +496,13 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 macAddress = NetUtil.hardwareAddressToString(mac);
                 logger.info("macAddress {}", macAddress);
             } catch (UnknownHostException e) {
-                logger.error(e.getLocalizedMessage());
+                logger.error("Failed to get an IP address of the local host", e);
             } catch (SocketException e) {
-                logger.error(e.getLocalizedMessage());
+                logger.error("Failed to get primary IP address", e);
             }
         } else {
-            try {
-                List<NetInterface<? extends NetInterfaceAddress>> interfaces = this.networkService
-                        .getNetworkInterfaces();
-                if (interfaces != null) {
-                    for (NetInterface<? extends NetInterfaceAddress> iface : interfaces) {
-                        if (iface.getName() != null && getPrimaryNetworkInterfaceName().equals(iface.getName())) {
-                            macAddress = NetUtil.hardwareAddressToString(iface.getHardwareAddress());
-                            break;
-                        }
-                    }
-                }
-            } catch (KuraException e) {
-                logger.error("Failed to get network interfaces", e);
-            }
+            macAddress = NetUtil.getPrimaryMacAddress();
+            logger.info("macAddress {}", macAddress);
         }
 
         return macAddress;
@@ -612,7 +543,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 return "en0";
             } else if (OS_LINUX.equals(getOsName())) {
                 return "eth0";
-            } else if (getOsName().contains("Windows")) {
+            } else if (getOsName().contains(WINDOWS_STRING)) {
                 return "windows";
             } else {
                 logger.error("Unsupported platform");
@@ -646,50 +577,34 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         return System.getProperty(KEY_OS_NAME);
     }
 
-    @Override
+    @Override    
     public String getOsVersion() {
         String override = this.kuraProperties.getProperty(KEY_OS_VER);
         if (override != null) {
             return override;
         }
-
         StringBuilder sbOsVersion = new StringBuilder();
         sbOsVersion.append(System.getProperty(KEY_OS_VER));
-        if (OS_LINUX.equals(getOsName())) {
-            BufferedReader in = null;
-            File linuxKernelVersion = null;
-            FileReader fr = null;
-            try {
-                linuxKernelVersion = new File("/proc/sys/kernel/version");
-                if (linuxKernelVersion.exists()) {
-                    StringBuilder kernelVersionData = new StringBuilder();
-                    fr = new FileReader(linuxKernelVersion);
-                    in = new BufferedReader(fr);
-                    String tempLine = null;
-                    while ((tempLine = in.readLine()) != null) {
-                        kernelVersionData.append(" ");
-                        kernelVersionData.append(tempLine);
-                    }
-                    sbOsVersion.append(kernelVersionData.toString());
-                }
-            } catch (FileNotFoundException e) {
-            } catch (IOException e) {
-            } finally {
-                try {
-                    if (fr != null) {
-                        fr.close();
-                    }
-                    if (in != null) {
-                        in.close();
-                    }
-                } catch (IOException e) {
-                    logger.error("Exception while closing resources!", e);
-                }
-            }
+        if (!OS_LINUX.equals(getOsName())) {
+            return sbOsVersion.toString();
         }
-
+        File linuxKernelVersion = new File("/proc/sys/kernel/version");
+        try (FileReader fr = new FileReader(linuxKernelVersion); BufferedReader in = new BufferedReader(fr)) {
+            if (linuxKernelVersion.exists()) {
+                StringBuilder kernelVersionData = new StringBuilder();
+                String tempLine = null;
+                while ((tempLine = in.readLine()) != null) {
+                    kernelVersionData.append(" ");
+                    kernelVersionData.append(tempLine);
+                }
+                sbOsVersion.append(kernelVersionData.toString());
+            }
+        } catch (Exception e) {
+            logger.error("Failed to get OS version", e);
+        }
         return sbOsVersion.toString();
     }
+    
 
     @Override
     public String getOsDistro() {
@@ -821,6 +736,18 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     }
 
     @Override
+    public List<String> getBlacklistedNetworkInterfaces() {
+        List<String> blacklistedNetworkInterfaces = new ArrayList<>();
+        String prop = this.kuraProperties.getProperty(KEY_KURA_NET_INTERFACE_BLACKLIST);
+        if (prop == null)
+            return blacklistedNetworkInterfaces;
+        String[] netIfaces = prop.split(",");
+        for (String iface : netIfaces)
+            blacklistedNetworkInterfaces.add(iface.trim());
+        return blacklistedNetworkInterfaces;
+    }
+
+    @Override
     public String getKuraMarketplaceCompatibilityVersion() {
         String marketplaceCompatibilityVersion = (String) this.kuraProperties
                 .getProperty(KEY_KURA_MARKETPLACE_COMPATIBILITY_VERSION);
@@ -920,8 +847,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String biosVersion = UNSUPPORTED;
 
         if (OS_LINUX.equals(getOsName())) {
-            if ("2.6.34.9-WR4.2.0.0_standard".equals(getOsVersion())
-                    || "2.6.34.12-WR4.3.0.0_standard".equals(getOsVersion())) {
+            if (LINUX_WR42_VERSION.equals(getOsVersion()) || LINUX_WR43_VERSION.equals(getOsVersion())) {
                 biosVersion = runSystemCommand("eth_vers_bios");
             } else {
                 String biosTmp = runSystemCommand("dmidecode -s bios-version");
@@ -930,12 +856,12 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 }
             }
         } else if (OS_MAC_OSX.equals(getOsName())) {
-            String[] cmds = { "/bin/sh", "-c", "system_profiler SPHardwareDataType | grep 'Boot ROM'" };
+            String[] cmds = { SH_CMD, "-c", "system_profiler SPHardwareDataType | grep 'Boot ROM'" };
             String biosTmp = runSystemCommand(cmds);
             if (biosTmp.contains(": ")) {
                 biosVersion = biosTmp.split(":\\s+")[1];
             }
-        } else if (getOsName().contains("Windows")) {
+        } else if (getOsName().contains(WINDOWS_STRING)) {
             String[] cmds = { "wmic", "bios", "get", "smbiosbiosversion" };
             String biosTmp = runSystemCommand(cmds);
             if (biosTmp.contains("SMBIOSBIOSVersion")) {
@@ -979,8 +905,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String fwVersion = UNSUPPORTED;
 
         if (OS_LINUX.equals(getOsName()) && getOsVersion() != null) {
-            if (getOsVersion().startsWith("2.6.34.9-WR4.2.0.0_standard")
-                    || getOsVersion().startsWith("2.6.34.12-WR4.3.0.0_standard")) {
+            if (getOsVersion().startsWith(LINUX_WR42_VERSION) || getOsVersion().startsWith(LINUX_WR43_VERSION)) {
                 fwVersion = runSystemCommand("eth_vers_cpld") + " " + runSystemCommand("eth_vers_uctl");
             } else if (getOsVersion().startsWith("3.0.35-12.09.01+yocto")) {
                 fwVersion = runSystemCommand("eth_vers_avr");
@@ -1004,7 +929,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 modelId = modelTmp;
             }
         } else if (OS_LINUX.equals(getOsName())) {
-            String modelTmp = runSystemCommand("dmidecode -t system");
+            String modelTmp = runSystemCommand(DMIDECODE_CMD);
             if (modelTmp.contains("Version: ")) {
                 modelId = modelTmp.split("Version:\\s+")[1].split("\n")[0];
             }
@@ -1023,13 +948,13 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String modelName = UNKNOWN;
 
         if (OS_MAC_OSX.equals(getOsName())) {
-            String[] cmds = { "/bin/sh", "-c", "system_profiler SPHardwareDataType | grep 'Model Name'" };
+            String[] cmds = { SH_CMD, "-c", "system_profiler SPHardwareDataType | grep 'Model Name'" };
             String modelTmp = runSystemCommand(cmds);
             if (modelTmp.contains(": ")) {
                 modelName = modelTmp.split(":\\s+")[1];
             }
         } else if (OS_LINUX.equals(getOsName())) {
-            String modelTmp = runSystemCommand("dmidecode -t system");
+            String modelTmp = runSystemCommand(DMIDECODE_CMD);
             if (modelTmp.contains("Product Name: ")) {
                 modelName = modelTmp.split("Product Name:\\s+")[1].split("\n")[0];
             }
@@ -1047,11 +972,10 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
         String partNumber = UNSUPPORTED;
 
-        if (OS_LINUX.equals(getOsName())) {
-            if ("2.6.34.9-WR4.2.0.0_standard".equals(getOsVersion())
-                    || "2.6.34.12-WR4.3.0.0_standard".equals(getOsVersion())) {
-                partNumber = runSystemCommand("eth_partno_bsp") + " " + runSystemCommand("eth_partno_epr");
-            }
+        if (OS_LINUX.equals(getOsName())
+                && (LINUX_WR42_VERSION.equals(getOsVersion()) || LINUX_WR43_VERSION.equals(getOsVersion()))) {
+            partNumber = runSystemCommand("eth_partno_bsp") + " " + runSystemCommand("eth_partno_epr");
+
         }
 
         return partNumber;
@@ -1067,13 +991,13 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String serialNum = UNKNOWN;
 
         if (OS_MAC_OSX.equals(getOsName())) {
-            String[] cmds = { "/bin/sh", "-c", "system_profiler SPHardwareDataType | grep 'Serial Number'" };
+            String[] cmds = { SH_CMD, "-c", "system_profiler SPHardwareDataType | grep 'Serial Number'" };
             String serialTmp = runSystemCommand(cmds);
             if (serialTmp.contains(": ")) {
                 serialNum = serialTmp.split(":\\s+")[1];
             }
         } else if (OS_LINUX.equals(getOsName())) {
-            String serialTmp = runSystemCommand("dmidecode -t system");
+            String serialTmp = runSystemCommand(DMIDECODE_CMD);
             if (serialTmp.contains("Serial Number: ")) {
                 serialNum = serialTmp.split("Serial Number:\\s+")[1].split("\n")[0];
             }
@@ -1089,7 +1013,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         if (keyStorePwd != null) {
             return keyStorePwd.toCharArray();
         }
-        return null;
+        return new char[0];
     }
 
     @Override
@@ -1099,13 +1023,13 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         if (trustStorePwd != null) {
             return trustStorePwd.toCharArray();
         }
-        return null;
+        return new char[0];
     }
 
     @Override
     public Bundle[] getBundles() {
         if (this.componentContext == null) {
-            return null;
+            return new Bundle[0];
         }
         return this.componentContext.getBundleContext().getBundles();
     }
@@ -1116,7 +1040,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         if (servicesToIgnore != null && !servicesToIgnore.trim().isEmpty()) {
             String[] servicesArray = servicesToIgnore.split(",");
             if (servicesArray != null && servicesArray.length > 0) {
-                List<String> services = new ArrayList<String>();
+                List<String> services = new ArrayList<>();
                 for (String service : servicesArray) {
                     services.add(service);
                 }
@@ -1124,7 +1048,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             }
         }
 
-        return null;
+        return new ArrayList<>();
     }
 
     // ----------------------------------------------------------------

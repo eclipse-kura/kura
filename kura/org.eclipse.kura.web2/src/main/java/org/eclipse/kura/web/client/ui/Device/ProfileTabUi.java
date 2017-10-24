@@ -11,7 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.Device;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.kura.web.client.messages.ValidationMessages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
@@ -123,36 +123,36 @@ public class ProfileTabUi extends Composite implements Tab {
             @Override
             public void onSuccess(GwtXSRFToken token) {
                 ProfileTabUi.this.gwtDeviceService.findDeviceConfiguration(token,
-                        new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+                        new AsyncCallback<List<GwtGroupedNVPair>>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        ProfileTabUi.this.profileDataProvider.getList().clear();
-                        FailureHandler.handle(caught);
-                        ProfileTabUi.this.profileDataProvider.flush();
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                ProfileTabUi.this.profileDataProvider.getList().clear();
+                                FailureHandler.handle(caught);
+                                ProfileTabUi.this.profileDataProvider.flush();
 
-                    }
-
-                    @Override
-                    public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-                        String oldGroup = DEV_INFO;
-                        ProfileTabUi.this.profileDataProvider.getList()
-                                .add(new GwtGroupedNVPair(DEV_INFO, DEV_INFO, "  "));
-                        for (GwtGroupedNVPair resultPair : result) {
-                            if (!oldGroup.equals(resultPair.getGroup())) {
-                                ProfileTabUi.this.profileDataProvider.getList()
-                                        .add(new GwtGroupedNVPair(resultPair.getGroup(), resultPair.getGroup(), "  "));
-                                oldGroup = resultPair.getGroup();
                             }
-                            ProfileTabUi.this.profileDataProvider.getList().add(resultPair);
-                        }
-                        int size = ProfileTabUi.this.profileDataProvider.getList().size();
-                        ProfileTabUi.this.profileGrid.setVisibleRange(0, size);
-                        ProfileTabUi.this.profileDataProvider.flush();
-                        EntryClassUi.hideWaitModal();
-                    }
-                });
+
+                            @Override
+                            public void onSuccess(List<GwtGroupedNVPair> result) {
+                                String oldGroup = DEV_INFO;
+                                ProfileTabUi.this.profileDataProvider.getList()
+                                        .add(new GwtGroupedNVPair(DEV_INFO, DEV_INFO, "  "));
+                                for (GwtGroupedNVPair resultPair : result) {
+                                    if (!oldGroup.equals(resultPair.getGroup())) {
+                                        ProfileTabUi.this.profileDataProvider.getList().add(new GwtGroupedNVPair(
+                                                resultPair.getGroup(), resultPair.getGroup(), "  "));
+                                        oldGroup = resultPair.getGroup();
+                                    }
+                                    ProfileTabUi.this.profileDataProvider.getList().add(resultPair);
+                                }
+                                int size = ProfileTabUi.this.profileDataProvider.getList().size();
+                                ProfileTabUi.this.profileGrid.setVisibleRange(0, size);
+                                ProfileTabUi.this.profileDataProvider.flush();
+                                EntryClassUi.hideWaitModal();
+                            }
+                        });
             }
 
         });

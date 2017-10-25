@@ -49,10 +49,6 @@
                             <b:ButtonGroup size="SMALL">
                                 <b:Button icon="SAVE" b:id="btn-config-save" ui:field="btnSave" />
                             </b:ButtonGroup>
-                            <b:ButtonGroup size="SMALL">
-                                <b:Button icon="SEARCH_PLUS" b:id="btn-zoom-in" ui:field="btnZoomIn" />
-                                <b:Button icon="SEARCH_MINUS" b:id="btn-zoom-out" ui:field="btnZoomOut" />
-                            </b:ButtonGroup>
                             <b:ButtonGroup size="SMALL" addStyleNames="pull-right">
                                 <b:Button icon="TRASH" b:id="btn-config-delete" ui:field="btnDelete" />
                                 <b:Button icon="TRASH" b:id="btn-delete-graph" ui:field="btnGraphDelete" />
@@ -61,7 +57,13 @@
                     </b:Panel>
                 </b:Row>
                 <b:Row>
-                    <b:Column size="MD_12,XS_12" b:id="wires-graph" addStyleNames="composer" ui:field="composer"></b:Column>
+                    <b:Column size="MD_12,XS_12" b:id="wires-graph" addStyleNames="composer" ui:field="composer">
+                    <b:Panel b:id="wires-overlay-buttons" addStyleNames="btn-group-vertical">
+                            <b:Button icon="SEARCH_PLUS" b:id="btn-zoom-in" ui:field="btnZoomIn" />
+                            <b:Button icon="SEARCH_MINUS" b:id="btn-zoom-out" ui:field="btnZoomOut" />
+                            <b:Button icon="ARROWS_ALT" b:id="btn-zoom-fit" ui:field="btnZoomFit" />
+                    </b:Panel>
+                    </b:Column>
                 </b:Row>
             </b:Column>
             <b:Column size="MD_2">

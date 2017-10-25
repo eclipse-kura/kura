@@ -627,6 +627,10 @@ public class PackagesPanelUi extends Composite {
                 public boolean onDragOver(DropEvent event) {
                     return true;
                 }
+
+                @Override
+                public void onDragLeave(DropEvent event) {
+                }
             });
         } else {
             marketplaceInstallWell.setVisible(false);

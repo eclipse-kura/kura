@@ -50,15 +50,26 @@ public class DropSupport {
         return listener.onDrop(new DropEvent(nativeObject));
     }
 
+    private void dispatchDragLeave(JavaScriptObject nativeObject) {
+        if (listener == null) {
+            return;
+        }
+        listener.onDragLeave(new DropEvent(nativeObject));
+    }
+
     private native void attachNativeEventHandlers(Element element) /*-{
                                                                     var self = this
                                                                     element.addEventListener('dragover', function (event) {
-                                                                        if (self.@org.eclipse.kura.web.client.util.DropSupport::dispatchDragOver(Lcom/google/gwt/core/client/JavaScriptObject;)(event.dataTransfer)) {
+                                                                        if (self.@org.eclipse.kura.web.client.util.DropSupport::dispatchDragOver(Lcom/google/gwt/core/client/JavaScriptObject;)(event)) {
                                                                             event.preventDefault()
+                                                                            return true
                                                                         }
                                                                     })
+                                                                    element.addEventListener('dragleave', function (event) {
+                                                                        self.@org.eclipse.kura.web.client.util.DropSupport::dispatchDragLeave(Lcom/google/gwt/core/client/JavaScriptObject;)(event)
+                                                                    })
                                                                     element.addEventListener('drop', function (event) {
-                                                                        if (self.@org.eclipse.kura.web.client.util.DropSupport::dispatchDrop(Lcom/google/gwt/core/client/JavaScriptObject;)(event.dataTransfer)) {
+                                                                        if (self.@org.eclipse.kura.web.client.util.DropSupport::dispatchDrop(Lcom/google/gwt/core/client/JavaScriptObject;)(event)) {
                                                                             event.preventDefault()
                                                                         }
                                                                     })
@@ -67,6 +78,8 @@ public class DropSupport {
     public interface Listener {
 
         public boolean onDragOver(DropEvent event);
+
+        public void onDragLeave(DropEvent event);
 
         public boolean onDrop(DropEvent event);
     }
@@ -84,20 +97,32 @@ public class DropSupport {
         }
 
         private native String getAsTextNative(JavaScriptObject nativeObject) /*-{
-                                                                                  return nativeObject.getData('text')
+                                                                                  return nativeObject.dataTransfer.getData('text')
                                                                               }-*/;
 
         private native boolean hasTypeNative(JavaScriptObject nativeObject, String type) /*-{
-                                                                                               for (var i=0; i<nativeObject.types.length; i++) {
-                                                                                                   if (nativeObject.types[i] === type) {
+                                                                                               for (var i=0; i<nativeObject.dataTransfer.types.length; i++) {
+                                                                                                   if (nativeObject.dataTransfer.types[i] === type) {
                                                                                                        return true
                                                                                                    }
                                                                                                    return false
                                                                                                }
                                                                                            }-*/;
 
-        public boolean hasType(String type) {
-            return hasTypeNative(nativeDataTransfer, type);
+        private native double getClientXNative(JavaScriptObject nativeObject) /*-{
+                                                                              return nativeObject.clientX
+                                                                              }-*/;
+
+        private native double getClientYNative(JavaScriptObject nativeObject) /*-{
+                                                                              return nativeObject.clientY
+                                                                              }-*/;
+
+        public double getClientX() {
+            return getClientXNative(this.nativeDataTransfer);
+        }
+
+        public double getClientY() {
+            return getClientYNative(this.nativeDataTransfer);
         }
 
         public String getAsText() {

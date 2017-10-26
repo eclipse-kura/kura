@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -34,7 +35,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 
-public class ThreadsTabUi extends Composite {
+public class ThreadsTabUi extends Composite implements Tab {
 
     private static ThreadsTabUiUiBinder uiBinder = GWT.create(ThreadsTabUiUiBinder.class);
 
@@ -58,7 +59,7 @@ public class ThreadsTabUi extends Composite {
 
     private void loadProfileTable(CellTable<GwtGroupedNVPair> threadsGrid2,
 
-    ListDataProvider<GwtGroupedNVPair> dataProvider) {
+            ListDataProvider<GwtGroupedNVPair> dataProvider) {
 
         TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
 
@@ -87,7 +88,22 @@ public class ThreadsTabUi extends Composite {
         dataProvider.addDataDisplay(threadsGrid2);
     }
 
-    public void loadThreadsData() {
+    @Override
+    public void setDirty(boolean flag) {
+    }
+
+    @Override
+    public boolean isDirty() {
+        return true;
+    }
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
+    public void refresh() {
         this.threadsDataProvider.getList().clear();
 
         EntryClassUi.showWaitModal();

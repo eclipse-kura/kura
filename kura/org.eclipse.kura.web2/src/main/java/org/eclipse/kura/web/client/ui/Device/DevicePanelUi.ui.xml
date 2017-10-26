@@ -18,21 +18,7 @@
     xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
     xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
     xmlns:device="urn:import:org.eclipse.kura.web.client.ui.Device">
-    <ui:style>
-    .important {
-    	font-weight: bold;
-    }
-    
-    .spacing {
-    	margin-top: 10px;
-    	margin-left: -20px;
-    }
-    
-    .center-panel {
-    	height: 100%;
-    	padding: 0px;
-    }
-    </ui:style>
+
     <b:Container fluid="true" addStyleNames="device-panel">
         <b:Row>
             <g:HTMLPanel ui:field="deviceIntro">
@@ -40,7 +26,7 @@
         </b:Row>
 
         <b:Row>
-            <b:Well addStyleNames="{style.center-panel} device-well">
+            <b:Well addStyleNames="device-well" size="SMALL">
                 <b:NavTabs>
                     <b:TabListItem dataTarget="#profilePanel" text="Profile"
                         ui:field="profile" active="true"/>

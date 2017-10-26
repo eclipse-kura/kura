@@ -17,13 +17,15 @@
 
     <b:Row>
         <b:Panel>
-            <b:ButtonGroup size="SMALL">
-                <b:Button ui:field="apply" addStyleNames="fa fa-check"></b:Button>
-                <b:Button ui:field="reset" addStyleNames="fa fa-times"></b:Button>
-                <b:Button ui:field="create" addStyleNames="fa fa-plus"></b:Button>
-                <b:Button ui:field="edit" addStyleNames="fa fa-pencil"></b:Button>
-                <b:Button ui:field="delete" addStyleNames="fa fa-trash"></b:Button>
-            </b:ButtonGroup>
+            <b:NavPills justified="true">
+                <b:ButtonGroup size="SMALL">
+                    <b:Button ui:field="apply" addStyleNames="fa fa-check"></b:Button>
+                    <b:Button ui:field="reset" addStyleNames="fa fa-times"></b:Button>
+                    <b:Button ui:field="create" addStyleNames="fa fa-plus"></b:Button>
+                    <b:Button ui:field="edit" addStyleNames="fa fa-pencil"></b:Button>
+                    <b:Button ui:field="delete" addStyleNames="fa fa-trash"></b:Button>
+                </b:ButtonGroup>
+            </b:NavPills>
         </b:Panel>
     </b:Row>
 

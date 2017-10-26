@@ -86,7 +86,7 @@ public class SnapshotsTabUi extends Composite implements Tab {
     Hidden xsrfTokenField;
     @UiField
     CellTable<GwtSnapshot> snapshotsGrid = new CellTable<GwtSnapshot>();
-    
+
     private Element downloadIframe;
 
     private final ListDataProvider<GwtSnapshot> snapshotsDataProvider = new ListDataProvider<GwtSnapshot>();
@@ -101,7 +101,7 @@ public class SnapshotsTabUi extends Composite implements Tab {
         this.snapshotsGrid.setSelectionModel(this.selectionModel);
 
         initDownloadIframe();
-        
+
         initInterfaceButtons();
 
         initUploadModalHandlers();
@@ -122,7 +122,7 @@ public class SnapshotsTabUi extends Composite implements Tab {
             }
         });
     }
-    
+
     @Override
     public void setDirty(boolean flag) {
     }
@@ -154,36 +154,36 @@ public class SnapshotsTabUi extends Composite implements Tab {
                 SnapshotsTabUi.this.gwtSnapshotService.findDeviceSnapshots(token,
                         new AsyncCallback<ArrayList<GwtSnapshot>>() {
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(ex);
-                    }
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(ex);
+                            }
 
-                    @Override
-                    public void onSuccess(ArrayList<GwtSnapshot> result) {
-                        SnapshotsTabUi.this.snapshotsDataProvider.getList().clear();
-                        for (GwtSnapshot pair : result) {
-                            SnapshotsTabUi.this.snapshotsDataProvider.getList().add(pair);
-                        }
-                        int snapshotsDataSize = SnapshotsTabUi.this.snapshotsDataProvider.getList().size();
-                        if (snapshotsDataSize == 0) {
-                            SnapshotsTabUi.this.snapshotsGrid.setVisible(false);
-                            SnapshotsTabUi.this.notification.setVisible(true);
-                            SnapshotsTabUi.this.notification.setText("No Snapshots Available");
-                            SnapshotsTabUi.this.download.setEnabled(false);
-                            SnapshotsTabUi.this.rollback.setEnabled(false);
-                        } else {
-                            SnapshotsTabUi.this.snapshotsGrid.setVisibleRange(0, snapshotsDataSize);
-                            SnapshotsTabUi.this.snapshotsGrid.setVisible(true);
-                            SnapshotsTabUi.this.notification.setVisible(false);
-                            SnapshotsTabUi.this.download.setEnabled(true);
-                            SnapshotsTabUi.this.rollback.setEnabled(true);
-                        }
-                        SnapshotsTabUi.this.snapshotsDataProvider.flush();
-                        EntryClassUi.hideWaitModal();
-                    }
-                });
+                            @Override
+                            public void onSuccess(ArrayList<GwtSnapshot> result) {
+                                SnapshotsTabUi.this.snapshotsDataProvider.getList().clear();
+                                for (GwtSnapshot pair : result) {
+                                    SnapshotsTabUi.this.snapshotsDataProvider.getList().add(pair);
+                                }
+                                int snapshotsDataSize = SnapshotsTabUi.this.snapshotsDataProvider.getList().size();
+                                if (snapshotsDataSize == 0) {
+                                    SnapshotsTabUi.this.snapshotsGrid.setVisible(false);
+                                    SnapshotsTabUi.this.notification.setVisible(true);
+                                    SnapshotsTabUi.this.notification.setText("No Snapshots Available");
+                                    SnapshotsTabUi.this.download.setEnabled(false);
+                                    SnapshotsTabUi.this.rollback.setEnabled(false);
+                                } else {
+                                    SnapshotsTabUi.this.snapshotsGrid.setVisibleRange(0, snapshotsDataSize);
+                                    SnapshotsTabUi.this.snapshotsGrid.setVisible(true);
+                                    SnapshotsTabUi.this.notification.setVisible(false);
+                                    SnapshotsTabUi.this.download.setEnabled(true);
+                                    SnapshotsTabUi.this.rollback.setEnabled(true);
+                                }
+                                SnapshotsTabUi.this.snapshotsDataProvider.flush();
+                                EntryClassUi.hideWaitModal();
+                            }
+                        });
             }
 
         });
@@ -301,12 +301,12 @@ public class SnapshotsTabUi extends Composite implements Tab {
     }
 
     private native void initDownloadIframe() /*-{
-		var iframe = document.createElement('iframe');
-		iframe.style.display = 'none'
-		document.getElementsByTagName('body')[0].appendChild(iframe);
-		this.@org.eclipse.kura.web.client.ui.Settings.SnapshotsTabUi::downloadIframe = iframe;
-	}-*/;
-    
+                                             var iframe = document.createElement('iframe');
+                                             iframe.style.display = 'none'
+                                             document.getElementsByTagName('body')[0].appendChild(iframe);
+                                             this.@org.eclipse.kura.web.client.ui.Settings.SnapshotsTabUi::downloadIframe = iframe;
+                                             }-*/;
+
     private void rollback() {
         final GwtSnapshot snapshot = this.selectionModel.getSelectedObject();
         if (snapshot != null) {
@@ -335,18 +335,18 @@ public class SnapshotsTabUi extends Composite implements Tab {
                             SnapshotsTabUi.this.gwtSnapshotService.rollbackDeviceSnapshot(token, snapshot,
                                     new AsyncCallback<Void>() {
 
-                                @Override
-                                public void onFailure(Throwable ex) {
-                                    EntryClassUi.hideWaitModal();
-                                    FailureHandler.handle(ex);
-                                }
+                                        @Override
+                                        public void onFailure(Throwable ex) {
+                                            EntryClassUi.hideWaitModal();
+                                            FailureHandler.handle(ex);
+                                        }
 
-                                @Override
-                                public void onSuccess(Void result) {
-                                    EntryClassUi.hideWaitModal();
-                                    refresh();
-                                }
-                            });
+                                        @Override
+                                        public void onSuccess(Void result) {
+                                            EntryClassUi.hideWaitModal();
+                                            refresh();
+                                        }
+                                    });
                         }
 
                     });
@@ -379,11 +379,11 @@ public class SnapshotsTabUi extends Composite implements Tab {
 
         downloadFile(sbUrl.toString());
     }
-    
+
     private native void downloadFile(String url) /*-{
-    		var downloadIframe = this.@org.eclipse.kura.web.client.ui.Settings.SnapshotsTabUi::downloadIframe;
-    		downloadIframe.setAttribute('src', url);
-    }-*/;
+                                                 var downloadIframe = this.@org.eclipse.kura.web.client.ui.Settings.SnapshotsTabUi::downloadIframe;
+                                                 downloadIframe.setAttribute('src', url);
+                                                 }-*/;
 
     private void uploadAndApply() {
         this.uploadModal.show();

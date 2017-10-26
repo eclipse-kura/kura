@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
@@ -43,7 +44,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class BundlesTabUi extends Composite {
+public class BundlesTabUi extends Composite implements Tab {
 
     private static BundlesTabUiUiBinder uiBinder = GWT.create(BundlesTabUiUiBinder.class);
 
@@ -97,7 +98,7 @@ public class BundlesTabUi extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                loadBundlesData();
+                refresh();
 
             }
         });
@@ -124,7 +125,7 @@ public class BundlesTabUi extends Composite {
             @Override
             public void handleEvent(GwtEventInfo eventInfo) {
                 if (BundlesTabUi.this.isVisible() && BundlesTabUi.this.isAttached()) {
-                    loadBundlesData();
+                    refresh();
                 }
             }
         };
@@ -271,8 +272,22 @@ public class BundlesTabUi extends Composite {
         dataProvider.addDataDisplay(bundlesGrid2);
     }
 
-    public void loadBundlesData() {
+    @Override
+    public void setDirty(boolean flag) {
+    }
 
+    @Override
+    public boolean isDirty() {
+        return true;
+    }
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
+    public void refresh() {
         if (this.isRequestRunning) {
             return;
         }

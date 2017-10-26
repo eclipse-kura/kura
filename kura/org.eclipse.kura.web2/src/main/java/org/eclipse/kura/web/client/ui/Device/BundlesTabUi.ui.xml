@@ -27,7 +27,7 @@
     }
     </ui:style>
 
-    <b:Well addStyleNames="bundles-well center-panel">
+    <b:Panel addStyleNames="bundles-well center-panel">
         <b:ButtonGroup>
             <b:ButtonGroup size="SMALL">
                 <b:Button ui:field="bundleStart" addStyleNames="fa fa-play"></b:Button>
@@ -40,5 +40,5 @@
         <gwt:CellTable bordered="true" condensed="true"
             striped="true" hover="true" height="100%" width="100%"
             ui:field="bundlesGrid" />
-    </b:Well>
+    </b:Panel>
 </ui:UiBinder> 

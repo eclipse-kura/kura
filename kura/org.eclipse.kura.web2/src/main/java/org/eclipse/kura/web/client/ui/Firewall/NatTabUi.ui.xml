@@ -20,22 +20,19 @@
     .important {
     	font-weight: bold;
     }
-    
-    .center-panel {
-    	padding: 2px;
-    }
     </ui:style>
 
-    <b:Container fluid="true" addStyleNames="{style.center-panel}">
+    <b:Container fluid="true">
 
-        <firewall:ButtonBar ui:field="buttonBar"></firewall:ButtonBar>
-
-        <b:Row>
-            <b:Alert type="WARNING" ui:field="notification" />
-            <gwt:CellTable bordered="true" condensed="true"
-                striped="true" hover="true" height="100%" width="100%"
-                ui:field="natGrid" />
-        </b:Row>
+        <b:Column size="MD_12">
+            <firewall:ButtonBar ui:field="buttonBar"></firewall:ButtonBar>
+            <b:Row>
+                <b:Alert type="WARNING" ui:field="notification" />
+                <gwt:CellTable bordered="true" condensed="true"
+                    striped="true" hover="true" height="100%" width="100%"
+                    ui:field="natGrid" />
+            </b:Row>
+        </b:Column>
 
 
 		<!--******Modals***** -->

@@ -179,26 +179,9 @@ table {
 	border: none;
 }
 
-.status-well, .device-well, .connections-well {
+.status-well, .connections-well {
 	background-color: white !important;
 	border: none !important;
-}
-
-.device-well .tab-content {
-	margin: 0;
-	padding: 0;
-}
-
-.device-well .nav-tabs {
-    background-color: #f5f5f5;
-    border-top: solid 1px #e7e7e7 !important;
-    border-right: solid 1px #e7e7e7 !important;
-    border-left: solid 1px #e7e7e7 !important;
-}
-
-.device-well .tab-content {
-    width: 100%;
-    overflow-x: scroll;
 }
 
 .bundles-well {
@@ -213,10 +196,12 @@ table {
     
 }
 
-.command-panel {
-	background-color: #f5f5f5;
-    border: solid 1px #e7e7e7 !important;
-    border-top: none !important
+.bundles-well table {
+	border: 1px solid #ddd !important;
+}
+
+.device-well .container-fluid {
+	padding-top: 0.4cm;
 }
 
 .container-fluid {
@@ -626,6 +611,10 @@ Help panel START
 	float: right;
     margin-right: 6%;
     padding: 0.1cm !important;
+}
+
+.help-block:empty {
+	display: none;
 }
 
 /**********************

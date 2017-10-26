@@ -60,6 +60,7 @@ import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -137,12 +138,20 @@ public class PackagesPanelUi extends Composite {
     @UiField
     Button btnConfirmMarketplaceInstall;
 
+    @UiField
+    HTMLPanel packagesIntro;
+
     private GwtMarketplacePackageDescriptor marketplaceDescriptor;
 
     public PackagesPanelUi() {
 
         // TODO - ServiceTree
         initWidget(uiBinder.createAndBindUi(this));
+
+        Paragraph description = new Paragraph();
+        description.setText(MSGS.packagesIntro());
+        this.packagesIntro.add(description);
+
         this.packagesGrid.setSelectionModel(this.selectionModel);
         initTable();
 

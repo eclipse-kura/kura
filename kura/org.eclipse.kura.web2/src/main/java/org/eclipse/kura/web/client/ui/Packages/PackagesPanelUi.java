@@ -96,34 +96,59 @@ public class PackagesPanelUi extends Composite {
 
     @UiField
     Modal uploadModal;
+
     @UiField
-    FormPanel packagesFormFile, packagesFormUrl;
+    FormPanel packagesFormFile;
     @UiField
-    Button fileCancel, fileSubmit, urlCancel, urlSubmit;
+    FormPanel packagesFormUrl;
+
+    @UiField
+    Button fileCancel;
+    @UiField
+    Button fileSubmit;
+    @UiField
+    Button urlCancel;
+    @UiField
+    Button urlSubmit;
+    @UiField
+    Button packagesRefresh;
+    @UiField
+    Button packagesInstall;
+    @UiField
+    Button packagesUninstall;
+
     @UiField
     TabListItem fileLabel;
 
     @UiField
     Alert notification;
+
     @UiField
     Modal uploadErrorModal;
+
     @UiField
     Text uploadErrorText;
-    @UiField
-    Button packagesRefresh, packagesInstall, packagesUninstall;
+
     @UiField
     CellTable<GwtDeploymentPackage> packagesGrid = new CellTable<>(10);
+
     @UiField
     FileUpload filePath;
+
     @UiField
     TextBox formUrl;
+
     @UiField
-    Hidden xsrfTokenFieldFile, xsrfTokenFieldUrl;
+    Hidden xsrfTokenFieldFile;
+    @UiField
+    Hidden xsrfTokenFieldUrl;
+
     @UiField
     Well marketplaceInstallWell;
 
     @UiField
     Modal versionCheckModal;
+
     @UiField
     Paragraph versionMismatchErrorText;
     @UiField
@@ -255,7 +280,7 @@ public class PackagesPanelUi extends Composite {
                     modal.add(modalBody);
                     modal.add(modalFooter);
                     modal.show();
-                }    // end if null
+                }       // end if null
             }// end on click
         });
     }
@@ -332,9 +357,9 @@ public class PackagesPanelUi extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (marketplaceDescriptor != null) {
-                    installMarketplaceDp(marketplaceDescriptor);
-                    marketplaceDescriptor = null;
+                if (PackagesPanelUi.this.marketplaceDescriptor != null) {
+                    installMarketplaceDp(PackagesPanelUi.this.marketplaceDescriptor);
+                    PackagesPanelUi.this.marketplaceDescriptor = null;
                 }
             }
         });
@@ -424,17 +449,17 @@ public class PackagesPanelUi extends Composite {
                 PackagesPanelUi.this.gwtPackageService.uninstallDeploymentPackage(token, selected.getName(),
                         new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
+                    @Override
+                    public void onSuccess(Void result) {
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
             }
 
         });
@@ -466,17 +491,17 @@ public class PackagesPanelUi extends Composite {
     }
 
     private void loadPackagesData() {
-        if (isRefreshPending) {
+        if (this.isRefreshPending) {
             return;
         }
-        isRefreshPending = true;
+        this.isRefreshPending = true;
         EntryClassUi.showWaitModal();
         this.packagesDataProvider.getList().clear();
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onFailure(Throwable ex) {
-                isRefreshPending = false;
+                PackagesPanelUi.this.isRefreshPending = false;
                 EntryClassUi.hideWaitModal();
                 FailureHandler.handle(ex);
             }
@@ -486,41 +511,41 @@ public class PackagesPanelUi extends Composite {
                 PackagesPanelUi.this.gwtPackageService.findDeviceDeploymentPackages(token,
                         new AsyncCallback<List<GwtDeploymentPackage>>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                isRefreshPending = false;
-                                EntryClassUi.hideWaitModal();
-                                GwtDeploymentPackage pkg = new GwtDeploymentPackage();
-                                pkg.setName("Unavailable! Please click refresh");
-                                pkg.setVersion(caught.getLocalizedMessage());
-                                PackagesPanelUi.this.packagesDataProvider.getList().add(pkg);
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        PackagesPanelUi.this.isRefreshPending = false;
+                        EntryClassUi.hideWaitModal();
+                        GwtDeploymentPackage pkg = new GwtDeploymentPackage();
+                        pkg.setName("Unavailable! Please click refresh");
+                        pkg.setVersion(caught.getLocalizedMessage());
+                        PackagesPanelUi.this.packagesDataProvider.getList().add(pkg);
 
-                            }
+                    }
 
-                            @Override
-                            public void onSuccess(List<GwtDeploymentPackage> result) {
-                                isRefreshPending = false;
-                                EntryClassUi.hideWaitModal();
-                                for (GwtDeploymentPackage pair : result) {
-                                    PackagesPanelUi.this.packagesDataProvider.getList().add(pair);
-                                }
-                                int size = PackagesPanelUi.this.packagesDataProvider.getList().size();
-                                PackagesPanelUi.this.packagesGrid.setVisibleRange(0, size);
-                                PackagesPanelUi.this.packagesDataProvider.flush();
+                    @Override
+                    public void onSuccess(List<GwtDeploymentPackage> result) {
+                        PackagesPanelUi.this.isRefreshPending = false;
+                        EntryClassUi.hideWaitModal();
+                        for (GwtDeploymentPackage pair : result) {
+                            PackagesPanelUi.this.packagesDataProvider.getList().add(pair);
+                        }
+                        int size = PackagesPanelUi.this.packagesDataProvider.getList().size();
+                        PackagesPanelUi.this.packagesGrid.setVisibleRange(0, size);
+                        PackagesPanelUi.this.packagesDataProvider.flush();
 
-                                if (PackagesPanelUi.this.packagesDataProvider.getList().isEmpty()) {
-                                    PackagesPanelUi.this.packagesGrid.setVisible(false);
-                                    PackagesPanelUi.this.notification.setVisible(true);
-                                    PackagesPanelUi.this.notification.setText(MSGS.devicePackagesNone());
-                                } else {
-                                    PackagesPanelUi.this.packagesGrid.setVisible(true);
-                                    PackagesPanelUi.this.notification.setVisible(false);
-                                }
-                                if (PackagesPanelUi.this.entryClassUi != null) {
-                                    PackagesPanelUi.this.entryClassUi.fetchAvailableServices();
-                                }
-                            }
-                        });
+                        if (PackagesPanelUi.this.packagesDataProvider.getList().isEmpty()) {
+                            PackagesPanelUi.this.packagesGrid.setVisible(false);
+                            PackagesPanelUi.this.notification.setVisible(true);
+                            PackagesPanelUi.this.notification.setText(MSGS.devicePackagesNone());
+                        } else {
+                            PackagesPanelUi.this.packagesGrid.setVisible(true);
+                            PackagesPanelUi.this.notification.setVisible(false);
+                        }
+                        if (PackagesPanelUi.this.entryClassUi != null) {
+                            PackagesPanelUi.this.entryClassUi.fetchAvailableServices();
+                        }
+                    }
+                });
             }
         });
     }
@@ -559,26 +584,26 @@ public class PackagesPanelUi extends Composite {
             @Override
             public void onSuccess(GwtXSRFToken token) {
                 // Retrieve the URL of the DP via the Eclipse Marketplace API
-                gwtPackageService.getMarketplacePackageDescriptor(token, nodeId,
+                PackagesPanelUi.this.gwtPackageService.getMarketplacePackageDescriptor(token, nodeId,
                         new AsyncCallback<GwtMarketplacePackageDescriptor>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                EntryClassUi.hideWaitModal();
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        EntryClassUi.hideWaitModal();
+                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                    }
 
-                            @Override
-                            public void onSuccess(GwtMarketplacePackageDescriptor descriptor) {
-                                if (!descriptor.isCompatible()) {
-                                    EntryClassUi.hideWaitModal();
-                                    showVersionMismatchDialog(descriptor);
-                                } else {
-                                    installMarketplaceDp(descriptor);
-                                }
-                            }
-                        });
+                    @Override
+                    public void onSuccess(GwtMarketplacePackageDescriptor descriptor) {
+                        if (!descriptor.isCompatible()) {
+                            EntryClassUi.hideWaitModal();
+                            showVersionMismatchDialog(descriptor);
+                        } else {
+                            installMarketplaceDp(descriptor);
+                        }
+                    }
+                });
 
             }
         });
@@ -596,7 +621,8 @@ public class PackagesPanelUi extends Composite {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                gwtPackageService.installPackageFromMarketplace(token, descriptor, new AsyncCallback<Void>() {
+                PackagesPanelUi.this.gwtPackageService.installPackageFromMarketplace(token, descriptor,
+                        new AsyncCallback<Void>() {
 
                     @Override
                     public void onSuccess(Void result) {
@@ -618,7 +644,7 @@ public class PackagesPanelUi extends Composite {
     }
 
     private void initDragDrop() {
-        DropSupport drop = DropSupport.addIfSupported(marketplaceInstallWell);
+        DropSupport drop = DropSupport.addIfSupported(this.marketplaceInstallWell);
         if (drop != null) {
             drop.setListener(new DropSupport.Listener() {
 
@@ -642,7 +668,7 @@ public class PackagesPanelUi extends Composite {
                 }
             });
         } else {
-            marketplaceInstallWell.setVisible(false);
+            this.marketplaceInstallWell.setVisible(false);
         }
     }
 

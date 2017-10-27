@@ -125,34 +125,34 @@ public class ProfileTabUi extends Composite implements Tab {
                 ProfileTabUi.this.gwtDeviceService.findDeviceConfiguration(token,
                         new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                ProfileTabUi.this.profileDataProvider.getList().clear();
-                                FailureHandler.handle(caught);
-                                ProfileTabUi.this.profileDataProvider.flush();
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        ProfileTabUi.this.profileDataProvider.getList().clear();
+                        FailureHandler.handle(caught);
+                        ProfileTabUi.this.profileDataProvider.flush();
 
-                            }
+                    }
 
-                            @Override
-                            public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-                                String oldGroup = DEV_INFO;
+                    @Override
+                    public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                        String oldGroup = DEV_INFO;
+                        ProfileTabUi.this.profileDataProvider.getList()
+                                .add(new GwtGroupedNVPair(DEV_INFO, DEV_INFO, "  "));
+                        for (GwtGroupedNVPair resultPair : result) {
+                            if (!oldGroup.equals(resultPair.getGroup())) {
                                 ProfileTabUi.this.profileDataProvider.getList()
-                                        .add(new GwtGroupedNVPair(DEV_INFO, DEV_INFO, "  "));
-                                for (GwtGroupedNVPair resultPair : result) {
-                                    if (!oldGroup.equals(resultPair.getGroup())) {
-                                        ProfileTabUi.this.profileDataProvider.getList().add(new GwtGroupedNVPair(
-                                                resultPair.getGroup(), resultPair.getGroup(), "  "));
-                                        oldGroup = resultPair.getGroup();
-                                    }
-                                    ProfileTabUi.this.profileDataProvider.getList().add(resultPair);
-                                }
-                                int size = ProfileTabUi.this.profileDataProvider.getList().size();
-                                ProfileTabUi.this.profileGrid.setVisibleRange(0, size);
-                                ProfileTabUi.this.profileDataProvider.flush();
-                                EntryClassUi.hideWaitModal();
+                                        .add(new GwtGroupedNVPair(resultPair.getGroup(), resultPair.getGroup(), "  "));
+                                oldGroup = resultPair.getGroup();
                             }
-                        });
+                            ProfileTabUi.this.profileDataProvider.getList().add(resultPair);
+                        }
+                        int size = ProfileTabUi.this.profileDataProvider.getList().size();
+                        ProfileTabUi.this.profileGrid.setVisibleRange(0, size);
+                        ProfileTabUi.this.profileDataProvider.flush();
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
             }
 
         });

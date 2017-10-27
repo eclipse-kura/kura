@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -52,7 +52,7 @@ public class ServerCertsTabUi extends Composite implements Tab {
 
     private static final Messages MSGS = GWT.create(Messages.class);
 
-    private final static String SERVLET_URL = "/" + GWT.getModuleName() + "/file/certificate";
+    private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/certificate";
 
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtCertificatesServiceAsync gwtCertificatesService = GWT.create(GwtCertificatesService.class);
@@ -103,10 +103,11 @@ public class ServerCertsTabUi extends Composite implements Tab {
     public boolean isValid() {
         boolean validAlias = isAliasValid();
         boolean validAppCert = isServerCertValid();
+        boolean result = false;
         if (validAlias && validAppCert) {
-            return true;
+            result = true;
         }
-        return false;
+        return result;
     }
 
     @Override
@@ -146,21 +147,21 @@ public class ServerCertsTabUi extends Composite implements Tab {
                                 ServerCertsTabUi.this.certificateInput.getValue(),
                                 ServerCertsTabUi.this.storageAliasInput.getValue(), new AsyncCallback<Integer>() {
 
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        FailureHandler.handle(caught);
-                                        EntryClassUi.hideWaitModal();
-                                    }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                FailureHandler.handle(caught);
+                                EntryClassUi.hideWaitModal();
+                            }
 
-                                    @Override
-                                    public void onSuccess(Integer certsStored) {
-                                        reset();
-                                        setDirty(false);
-                                        ServerCertsTabUi.this.apply.setEnabled(false);
-                                        ServerCertsTabUi.this.reset.setEnabled(false);
-                                        EntryClassUi.hideWaitModal();
-                                    }
-                                });
+                            @Override
+                            public void onSuccess(Integer certsStored) {
+                                reset();
+                                setDirty(false);
+                                ServerCertsTabUi.this.apply.setEnabled(false);
+                                ServerCertsTabUi.this.reset.setEnabled(false);
+                                EntryClassUi.hideWaitModal();
+                            }
+                        });
                     }
                 });
             }

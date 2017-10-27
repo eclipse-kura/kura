@@ -73,28 +73,28 @@ public class BundlesTabUi extends Composite implements Tab {
     private final ListDataProvider<GwtGroupedNVPair> bundlesDataProvider = new ListDataProvider<GwtGroupedNVPair>();
     private final SingleSelectionModel<GwtGroupedNVPair> selectionModel = new SingleSelectionModel<GwtGroupedNVPair>();
 
-    private GwtDeviceServiceAsync deviceService = GWT.create(GwtDeviceService.class);
-    private GwtSecurityTokenServiceAsync securityTokenService = GWT.create(GwtSecurityTokenService.class);
+    private final GwtDeviceServiceAsync deviceService = GWT.create(GwtDeviceService.class);
+    private final GwtSecurityTokenServiceAsync securityTokenService = GWT.create(GwtSecurityTokenService.class);
 
     public BundlesTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
         loadBundlesTable(this.bundlesGrid, this.bundlesDataProvider);
 
-        bundlesRefresh.setText("Refresh");
-        bundleStart.setText("Start Bundle");
-        bundleStop.setText("Stop Bundle");
+        this.bundlesRefresh.setText("Refresh");
+        this.bundleStart.setText("Start Bundle");
+        this.bundleStop.setText("Stop Bundle");
 
         updateButtons();
 
-        bundlesGrid.setSelectionModel(selectionModel);
-        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        this.bundlesGrid.setSelectionModel(this.selectionModel);
+        this.selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 updateButtons();
             }
         });
-        bundlesRefresh.addClickHandler(new ClickHandler() {
+        this.bundlesRefresh.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -102,7 +102,7 @@ public class BundlesTabUi extends Composite implements Tab {
 
             }
         });
-        bundleStart.addClickHandler(new ClickHandler() {
+        this.bundleStart.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -110,7 +110,7 @@ public class BundlesTabUi extends Composite implements Tab {
 
             }
         });
-        bundleStop.addClickHandler(new ClickHandler() {
+        this.bundleStop.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -139,10 +139,10 @@ public class BundlesTabUi extends Composite implements Tab {
     }
 
     private void updateButtons() {
-        GwtGroupedNVPair selected = selectionModel.getSelectedObject();
+        GwtGroupedNVPair selected = this.selectionModel.getSelectedObject();
 
-        bundleStart.setEnabled(false);
-        bundleStop.setEnabled(false);
+        this.bundleStart.setEnabled(false);
+        this.bundleStop.setEnabled(false);
 
         String status;
 
@@ -152,18 +152,19 @@ public class BundlesTabUi extends Composite implements Tab {
 
         boolean isActive = "bndActive".equals(status);
 
-        bundleStart.setEnabled(!isActive);
-        bundleStop.setEnabled(isActive);
+        this.bundleStart.setEnabled(!isActive);
+        this.bundleStop.setEnabled(isActive);
     }
 
     private void startSelectedBundle() {
         EntryClassUi.showWaitModal();
 
-        securityTokenService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.securityTokenService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                deviceService.startBundle(token, selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
+                BundlesTabUi.this.deviceService.startBundle(token,
+                        BundlesTabUi.this.selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -190,7 +191,7 @@ public class BundlesTabUi extends Composite implements Tab {
 
     private void stopSelectedBundle() {
         EntryClassUi.showWaitModal();
-        securityTokenService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.securityTokenService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -200,7 +201,8 @@ public class BundlesTabUi extends Composite implements Tab {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                deviceService.stopBundle(token, selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
+                BundlesTabUi.this.deviceService.stopBundle(token,
+                        BundlesTabUi.this.selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable caught) {

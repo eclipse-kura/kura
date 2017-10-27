@@ -281,10 +281,10 @@ public class EntryClassUi extends Composite {
 
         this.footerRight.setText(gwtSession.getKuraVersion());
 
-        footerCenterRow.setVisible(false);
+        this.footerCenterRow.setVisible(false);
         if (gwtSession.isDevelopMode()) {
             this.footerCenter.setText(MSGS.developmentMode());
-            footerCenterRow.setVisible(true);
+            this.footerCenterRow.setVisible(true);
         }
     }
 
@@ -612,25 +612,25 @@ public class EntryClassUi extends Composite {
                 EntryClassUi.this.gwtComponentService.findComponentConfigurations(token, SERVICES_FILTER,
                         new AsyncCallback<List<GwtConfigComponent>>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                    }
 
-                            @Override
-                            public void onSuccess(List<GwtConfigComponent> result) {
-                                sortConfigurationsByName(result);
-                                EntryClassUi.this.servicesMenu.clear();
-                                for (GwtConfigComponent pair : result) {
-                                    if (!pair.isWireComponent()) {
-                                        EntryClassUi.this.servicesMenu
-                                                .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
-                                    }
-                                }
-                                filterAvailableServices(EntryClassUi.this.textSearch.getValue());
+                    @Override
+                    public void onSuccess(List<GwtConfigComponent> result) {
+                        sortConfigurationsByName(result);
+                        EntryClassUi.this.servicesMenu.clear();
+                        for (GwtConfigComponent pair : result) {
+                            if (!pair.isWireComponent()) {
+                                EntryClassUi.this.servicesMenu
+                                        .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
                             }
-                        });
+                        }
+                        filterAvailableServices(EntryClassUi.this.textSearch.getValue());
+                    }
+                });
             }
         });
     }
@@ -659,22 +659,22 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.gwtComponentService.findFactoryComponents(token,
                                 new AsyncCallback<List<String>>() {
 
-                                    @Override
-                                    public void onFailure(Throwable ex) {
-                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                                    }
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                FailureHandler.handle(ex, EntryClassUi.class.getName());
+                            }
 
-                                    @Override
-                                    public void onSuccess(final List<String> result) {
-                                        EntryClassUi.this.factoriesList.clear();
-                                        EntryClassUi.this.factoriesList.addItem(SELECT_COMPONENT);
-                                        for (final String servicePid : result) {
-                                            EntryClassUi.this.factoriesList.addItem(servicePid);
-                                        }
-                                        EntryClassUi.this.newFactoryComponentModal.show();
-                                    }
-                                });
+                            @Override
+                            public void onSuccess(final List<String> result) {
+                                EntryClassUi.this.factoriesList.clear();
+                                EntryClassUi.this.factoriesList.addItem(SELECT_COMPONENT);
+                                for (final String servicePid : result) {
+                                    EntryClassUi.this.factoriesList.addItem(servicePid);
+                                }
+                                EntryClassUi.this.newFactoryComponentModal.show();
+                            }
+                        });
                     }
                 });
             }
@@ -714,17 +714,17 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.gwtComponentService.createFactoryComponent(token, factoryPid, pid,
                                 new AsyncCallback<Void>() {
 
-                                    @Override
-                                    public void onFailure(Throwable ex) {
-                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                                    }
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                FailureHandler.handle(ex, EntryClassUi.class.getName());
+                            }
 
-                                    @Override
-                                    public void onSuccess(Void result) {
-                                        fetchAvailableServices();
-                                    }
-                                });
+                            @Override
+                            public void onSuccess(Void result) {
+                                fetchAvailableServices();
+                            }
+                        });
                     }
                 });
             }

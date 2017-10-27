@@ -67,41 +67,112 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
 
-    private final ListDataProvider<GwtFirewallPortForwardEntry> portForwardDataProvider = new ListDataProvider<GwtFirewallPortForwardEntry>();
-    final SingleSelectionModel<GwtFirewallPortForwardEntry> selectionModel = new SingleSelectionModel<GwtFirewallPortForwardEntry>();
+    private final ListDataProvider<GwtFirewallPortForwardEntry> portForwardDataProvider = new ListDataProvider<>();
+    final SingleSelectionModel<GwtFirewallPortForwardEntry> selectionModel = new SingleSelectionModel<>();
 
     private GwtFirewallPortForwardEntry newPortForwardEntry;
     private GwtFirewallPortForwardEntry editPortForwardEntry;
 
-    private boolean m_dirty;
+    private boolean dirty;
 
     @UiField
     ButtonBar buttonBar;
     @UiField
     Alert notification;
     @UiField
-    CellTable<GwtFirewallPortForwardEntry> portForwardGrid = new CellTable<GwtFirewallPortForwardEntry>();
+    CellTable<GwtFirewallPortForwardEntry> portForwardGrid = new CellTable<>();
 
     @UiField
     AlertDialog alertDialog;
 
     @UiField
     Modal portForwardingForm;
+
     @UiField
-    FormLabel labelInput, labelOutput, labelLan, labelProtocol, labelExternal, labelInternal, labelEnable,
-            labelPermitttedNw, labelPermitttedMac, labelSource;
+    FormLabel labelInput;
     @UiField
-    FormGroup groupInput, groupOutput, groupLan, groupExternal, groupInternal, groupPermittedNw, groupPermittedMac,
-            groupSource;
+    FormLabel labelOutput;
     @UiField
-    Tooltip tooltipInput, tooltipOutput, tooltipLan, tooltipProtocol, tooltipExternal, tooltipInternal, tooltipEnable,
-            tooltipPermittedNw, tooltipPermittedMac, tooltipSource;
+    FormLabel labelLan;
     @UiField
-    TextBox input, output, lan, external, internal, permittedNw, permittedMac, source;
+    FormLabel labelProtocol;
     @UiField
-    ListBox protocol, enable;
+    FormLabel labelExternal;
     @UiField
-    Button submit, cancel;
+    FormLabel labelInternal;
+    @UiField
+    FormLabel labelEnable;
+    @UiField
+    FormLabel labelPermitttedNw;
+    @UiField
+    FormLabel labelPermitttedMac;
+    @UiField
+    FormLabel labelSource;
+
+    @UiField
+    FormGroup groupInput;
+    @UiField
+    FormGroup groupOutput;
+    @UiField
+    FormGroup groupLan;
+    @UiField
+    FormGroup groupExternal;
+    @UiField
+    FormGroup groupInternal;
+    @UiField
+    FormGroup groupPermittedNw;
+    @UiField
+    FormGroup groupPermittedMac;
+    @UiField
+    FormGroup groupSource;
+
+    @UiField
+    Tooltip tooltipInput;
+    @UiField
+    Tooltip tooltipOutput;
+    @UiField
+    Tooltip tooltipLan;
+    @UiField
+    Tooltip tooltipProtocol;
+    @UiField
+    Tooltip tooltipExternal;
+    @UiField
+    Tooltip tooltipInternal;
+    @UiField
+    Tooltip tooltipEnable;
+    @UiField
+    Tooltip tooltipPermittedNw;
+    @UiField
+    Tooltip tooltipPermittedMac;
+    @UiField
+    Tooltip tooltipSource;
+
+    @UiField
+    TextBox input;
+    @UiField
+    TextBox output;
+    @UiField
+    TextBox lan;
+    @UiField
+    TextBox external;
+    @UiField
+    TextBox internal;
+    @UiField
+    TextBox permittedNw;
+    @UiField
+    TextBox permittedMac;
+    @UiField
+    TextBox source;
+
+    @UiField
+    ListBox protocol;
+    @UiField
+    ListBox enable;
+
+    @UiField
+    Button submit;
+    @UiField
+    Button cancel;
 
     private HandlerRegistration modalHideHandlerRegistration;
 
@@ -135,23 +206,23 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 PortForwardingTabUi.this.gwtNetworkService.findDeviceFirewallPortForwards(token,
                         new AsyncCallback<List<GwtFirewallPortForwardEntry>>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
 
-                            @Override
-                            public void onSuccess(List<GwtFirewallPortForwardEntry> result) {
-                                for (GwtFirewallPortForwardEntry pair : result) {
-                                    PortForwardingTabUi.this.portForwardDataProvider.getList().add(pair);
-                                }
-                                refreshTable();
+                    @Override
+                    public void onSuccess(List<GwtFirewallPortForwardEntry> result) {
+                        for (GwtFirewallPortForwardEntry pair : result) {
+                            PortForwardingTabUi.this.portForwardDataProvider.getList().add(pair);
+                        }
+                        refreshTable();
 
-                                PortForwardingTabUi.this.buttonBar.setDirty(false);
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
+                        PortForwardingTabUi.this.buttonBar.setDirty(false);
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
             }
 
         });
@@ -159,12 +230,12 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
 
     @Override
     public boolean isDirty() {
-        return this.m_dirty;
+        return this.dirty;
     }
 
     @Override
     public void setDirty(boolean b) {
-        this.m_dirty = b;
+        this.dirty = b;
     }
 
     @Override
@@ -341,7 +412,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
     public void onApply() {
         List<GwtFirewallPortForwardEntry> intermediateList = PortForwardingTabUi.this.portForwardDataProvider.getList();
 
-        final List<GwtFirewallPortForwardEntry> updatedPortForwardConf = new ArrayList<GwtFirewallPortForwardEntry>();
+        final List<GwtFirewallPortForwardEntry> updatedPortForwardConf = new ArrayList<>();
         for (GwtFirewallPortForwardEntry entry : intermediateList) {
             updatedPortForwardConf.add(entry);
         }
@@ -360,20 +431,20 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 PortForwardingTabUi.this.gwtNetworkService.updateDeviceFirewallPortForwards(token,
                         updatedPortForwardConf, new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                FailureHandler.handle(ex);
-                                EntryClassUi.hideWaitModal();
-                            }
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex);
+                        EntryClassUi.hideWaitModal();
+                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                PortForwardingTabUi.this.buttonBar.setDirty(false);
-                                EntryClassUi.hideWaitModal();
+                    @Override
+                    public void onSuccess(Void result) {
+                        PortForwardingTabUi.this.buttonBar.setDirty(false);
+                        EntryClassUi.hideWaitModal();
 
-                                setDirty(false);
-                            }
-                        });
+                        setDirty(false);
+                    }
+                });
             }
         });
 
@@ -774,16 +845,13 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                     String permittedNetwork = entry.getPermittedNetwork() != null ? entry.getPermittedNetwork()
                             : "0.0.0.0/0";
                     String newPermittedNetwork = portForwardEntry.getPermittedNetwork() != null
-                            ? portForwardEntry.getPermittedNetwork()
-                            : "0.0.0.0/0";
+                            ? portForwardEntry.getPermittedNetwork() : "0.0.0.0/0";
                     String permittedMAC = entry.getPermittedMAC() != null ? entry.getPermittedMAC().toUpperCase() : "";
                     String newPermittedMAC = portForwardEntry.getPermittedMAC() != null
-                            ? portForwardEntry.getPermittedMAC().toUpperCase()
-                            : "";
+                            ? portForwardEntry.getPermittedMAC().toUpperCase() : "";
                     String sourcePortRange = entry.getSourcePortRange() != null ? entry.getSourcePortRange() : "";
                     String newSourcePortRange = portForwardEntry.getSourcePortRange() != null
-                            ? portForwardEntry.getSourcePortRange()
-                            : "";
+                            ? portForwardEntry.getSourcePortRange() : "";
 
                     if (permittedNetwork.equals(newPermittedNetwork) && permittedMAC.equals(newPermittedMAC)
                             && sourcePortRange.equals(newSourcePortRange)) {

@@ -36,32 +36,34 @@ public class AlertDialog extends Composite {
     private Listener listener;
 
     @UiField
-    Button yes, no;
+    Button yes;
+    @UiField
+    Button no;
     @UiField
     ModalFooter alertFooter;
     @UiField
     Span alertBody;
 
-    private Modal modal;
+    private final Modal modal;
 
     public AlertDialog() {
-        modal = (Modal) uiBinder.createAndBindUi(this);
-        initWidget(modal);
+        this.modal = (Modal) uiBinder.createAndBindUi(this);
+        initWidget(this.modal);
 
         this.modal.setHideOtherModals(false);
 
-        modal.setTitle(MSGS.confirm());
-        yes.setText(MSGS.yesButton());
-        no.setText(MSGS.noButton());
+        this.modal.setTitle(MSGS.confirm());
+        this.yes.setText(MSGS.yesButton());
+        this.no.setText(MSGS.noButton());
 
         this.yes.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (listener != null) {
-                    listener.onConfirm();
+                if (AlertDialog.this.listener != null) {
+                    AlertDialog.this.listener.onConfirm();
                 }
-                modal.hide();
+                AlertDialog.this.modal.hide();
             }
         });
 
@@ -69,7 +71,7 @@ public class AlertDialog extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                modal.hide();
+                AlertDialog.this.modal.hide();
             }
         });
     }
@@ -80,8 +82,8 @@ public class AlertDialog extends Composite {
     }
 
     public void show(String message, Listener listener) {
-        this.setAlertText(message);
-        this.setListener(listener);
+        setAlertText(message);
+        setListener(listener);
         this.modal.show();
     }
 

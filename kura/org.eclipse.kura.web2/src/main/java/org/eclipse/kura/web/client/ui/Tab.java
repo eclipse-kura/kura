@@ -24,7 +24,7 @@ public interface Tab {
 
     public class RefreshHandler implements ClickHandler {
 
-        private Tab target;
+        private final Tab target;
         private boolean initialized = false;
 
         public RefreshHandler(Tab target) {
@@ -38,6 +38,5 @@ public interface Tab {
                 this.initialized = true;
             }
         }
-
     }
 }

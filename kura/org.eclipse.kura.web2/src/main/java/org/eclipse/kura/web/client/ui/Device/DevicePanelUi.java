@@ -63,8 +63,8 @@ public class DevicePanelUi extends Composite {
     }
 
     public void initDevicePanel() {
-        profilePanel.refresh();
-        commandPanel.setSession(this.session);
+        this.profilePanel.refresh();
+        this.commandPanel.setSession(this.session);
     }
 
     public void setSession(GwtSession currentSession) {

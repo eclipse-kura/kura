@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -95,35 +95,90 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     NetworkTabsUi tabs;
 
     @UiField
-    FormGroup groupIp, groupSubnet, groupGateway, groupDns;
+    FormGroup groupIp;
     @UiField
-    FormLabel labelStatus, labelConfigure, labelIp, labelSubnet, labelGateway, labelDns, labelSearch;
+    FormGroup groupSubnet;
     @UiField
-    HelpBlock helpIp, helpSubnet, helpGateway, helpDns;
+    FormGroup groupGateway;
     @UiField
-    TextBox ip, subnet, gateway, dns, search;
+    FormGroup groupDns;
+
     @UiField
-    ListBox status, configure;
+    FormLabel labelStatus;
+    @UiField
+    FormLabel labelConfigure;
+    @UiField
+    FormLabel labelIp;
+    @UiField
+    FormLabel labelSubnet;
+    @UiField
+    FormLabel labelGateway;
+    @UiField
+    FormLabel labelDns;
+    @UiField
+    FormLabel labelSearch;
+
+    @UiField
+    HelpBlock helpIp;
+    @UiField
+    HelpBlock helpSubnet;
+    @UiField
+    HelpBlock helpGateway;
+    @UiField
+    HelpBlock helpDns;
+
+    @UiField
+    TextBox ip;
+    @UiField
+    TextBox subnet;
+    @UiField
+    TextBox gateway;
+    @UiField
+    TextBox dns;
+    @UiField
+    TextBox search;
+
+    @UiField
+    ListBox status;
+    @UiField
+    ListBox configure;
+
     @UiField
     Button renew;
+
     @UiField
     PanelHeader helpTitle;
+
     @UiField
     ScrollPanel helpText;
+
     @UiField
     Form form;
+
     @UiField
     FormControlStatic dnsRead;
 
     @UiField
     Modal wanModal;
+
     @UiField
     Alert multipleWanWarn;
+
     @UiField
     Text multipleWanWarnText;
 
     @UiField
-    HelpButton statusHelp, configureHelp, ipHelp, subnetHelp, gatewayHelp, dnsHelp;
+    HelpButton statusHelp;
+    @UiField
+    HelpButton configureHelp;
+    @UiField
+    HelpButton ipHelp;
+    @UiField
+    HelpButton subnetHelp;
+    @UiField
+    HelpButton gatewayHelp;
+    @UiField
+    HelpButton dnsHelp;
 
     public TabTcpIpUi(GwtSession currentSession, NetworkTabsUi netTabs) {
         initWidget(uiBinder.createAndBindUi(this));

@@ -67,10 +67,10 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
 
-    private final ListDataProvider<GwtFirewallNatEntry> natDataProvider = new ListDataProvider<GwtFirewallNatEntry>();
-    final SingleSelectionModel<GwtFirewallNatEntry> selectionModel = new SingleSelectionModel<GwtFirewallNatEntry>();
+    private final ListDataProvider<GwtFirewallNatEntry> natDataProvider = new ListDataProvider<>();
+    final SingleSelectionModel<GwtFirewallNatEntry> selectionModel = new SingleSelectionModel<>();
 
-    private boolean m_dirty;
+    private boolean dirty;
 
     private GwtFirewallNatEntry newNatEntry;
     private GwtFirewallNatEntry editNatEntry;
@@ -80,22 +80,69 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     @UiField
     Alert notification;
     @UiField
-    CellTable<GwtFirewallNatEntry> natGrid = new CellTable<GwtFirewallNatEntry>();
+    CellTable<GwtFirewallNatEntry> natGrid = new CellTable<>();
 
     @UiField
     Modal natForm;
+
     @UiField
-    FormGroup groupInput, groupOutput, groupProtocol, groupSource, groupDestination, groupEnable;
+    FormGroup groupInput;
     @UiField
-    FormLabel labelInput, labelOutput, labelProtocol, labelSource, labelDestination, labelEnable;
+    FormGroup groupOutput;
     @UiField
-    Tooltip tooltipInput, tooltipOutput, tooltipProtocol, tooltipSource, tooltipDestination, tooltipEnable;
+    FormGroup groupProtocol;
     @UiField
-    TextBox input, output, source, destination;
+    FormGroup groupSource;
     @UiField
-    ListBox protocol, enable;
+    FormGroup groupDestination;
     @UiField
-    Button submit, cancel;
+    FormGroup groupEnable;
+
+    @UiField
+    FormLabel labelInput;
+    @UiField
+    FormLabel labelOutput;
+    @UiField
+    FormLabel labelProtocol;
+    @UiField
+    FormLabel labelSource;
+    @UiField
+    FormLabel labelDestination;
+    @UiField
+    FormLabel labelEnable;
+
+    @UiField
+    Tooltip tooltipInput;
+    @UiField
+    Tooltip tooltipOutput;
+    @UiField
+    Tooltip tooltipProtocol;
+    @UiField
+    Tooltip tooltipSource;
+    @UiField
+    Tooltip tooltipDestination;
+    @UiField
+    Tooltip tooltipEnable;
+
+    @UiField
+    TextBox input;
+    @UiField
+    TextBox output;
+    @UiField
+    TextBox source;
+    @UiField
+    TextBox destination;
+    
+    @UiField
+    ListBox protocol;
+    @UiField
+    ListBox enable;
+    
+    @UiField
+    Button submit;
+    @UiField
+    Button cancel;
+    
     @UiField
     AlertDialog alertDialog;
 
@@ -130,40 +177,39 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 NatTabUi.this.gwtNetworkService.findDeviceFirewallNATs(token,
                         new AsyncCallback<List<GwtFirewallNatEntry>>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
 
-                            @Override
-                            public void onSuccess(List<GwtFirewallNatEntry> result) {
-                                for (GwtFirewallNatEntry pair : result) {
-                                    NatTabUi.this.natDataProvider.getList().add(pair);
-                                }
-                                refreshTable();
+                    @Override
+                    public void onSuccess(List<GwtFirewallNatEntry> result) {
+                        for (GwtFirewallNatEntry pair : result) {
+                            NatTabUi.this.natDataProvider.getList().add(pair);
+                        }
+                        refreshTable();
 
-                                NatTabUi.this.buttonBar.setDirty(false);
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
+                        NatTabUi.this.buttonBar.setDirty(false);
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
             }
         });
     }
 
     @Override
     public boolean isDirty() {
-        return this.m_dirty;
+        return this.dirty;
     }
 
     @Override
     public void setDirty(boolean b) {
-        this.m_dirty = b;
+        this.dirty = b;
     }
 
     @Override
     public boolean isValid() {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -299,19 +345,19 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 NatTabUi.this.gwtNetworkService.updateDeviceFirewallNATs(token, updatedNatConf,
                         new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                setDirty(false);
-                                NatTabUi.this.buttonBar.setDirty(false);
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
+                    @Override
+                    public void onSuccess(Void result) {
+                        setDirty(false);
+                        NatTabUi.this.buttonBar.setDirty(false);
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
             }
         });
 
@@ -386,16 +432,17 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         if (selection == null) {
             return;
         }
-        alertDialog.show(MSGS.firewallNatDeleteConfirmation(selection.getInInterface()), new AlertDialog.Listener() {
+        this.alertDialog.show(MSGS.firewallNatDeleteConfirmation(selection.getInInterface()),
+                new AlertDialog.Listener() {
 
-            @Override
-            public void onConfirm() {
-                NatTabUi.this.natDataProvider.getList().remove(selection);
-                refreshTable();
-                NatTabUi.this.buttonBar.setDirty(true);
-                setDirty(true);
-            }
-        });
+                    @Override
+                    public void onConfirm() {
+                        NatTabUi.this.natDataProvider.getList().remove(selection);
+                        refreshTable();
+                        NatTabUi.this.buttonBar.setDirty(true);
+                        setDirty(true);
+                    }
+                });
     }
 
     private void initModal() {
@@ -598,11 +645,9 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 String destinationNetwork = entry.getDestinationNetwork() != null ? entry.getDestinationNetwork()
                         : "0.0.0.0/0";
                 String newSourceNetwork = firewallNatEntry.getSourceNetwork() != null
-                        ? firewallNatEntry.getSourceNetwork()
-                        : "0.0.0.0/0";
+                        ? firewallNatEntry.getSourceNetwork() : "0.0.0.0/0";
                 String newDestinationNetwork = firewallNatEntry.getDestinationNetwork() != null
-                        ? firewallNatEntry.getDestinationNetwork()
-                        : "0.0.0.0/0";
+                        ? firewallNatEntry.getDestinationNetwork() : "0.0.0.0/0";
 
                 if (entry.getInInterface().equals(firewallNatEntry.getInInterface())
                         && entry.getOutInterface().equals(firewallNatEntry.getOutInterface())

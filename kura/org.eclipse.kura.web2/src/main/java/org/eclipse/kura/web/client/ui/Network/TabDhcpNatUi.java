@@ -68,6 +68,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
 
     @UiField
     Form form;
+
     @UiField
     FormLabel labelRouter;
     @UiField
@@ -82,8 +83,10 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     FormLabel labelMax;
     @UiField
     FormLabel labelPass;
+
     @UiField
     ListBox router;
+
     @UiField
     TextBox begin;
     @UiField
@@ -94,10 +97,12 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     TextBox defaultL;
     @UiField
     TextBox max;
+
     @UiField
     InlineRadio radio1;
     @UiField
     InlineRadio radio2;
+
     @UiField
     FormGroup groupRouter;
     @UiField
@@ -110,15 +115,30 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     FormGroup groupDefaultL;
     @UiField
     FormGroup groupMax;
+
     @UiField
     HelpBlock helpRouter;
+
     @UiField
     PanelHeader helpTitle;
+
     @UiField
     ScrollPanel helpText;
 
     @UiField
-    HelpButton routerHelp, beginHelp, endHelp, subnetHelp, defaultLHelp, maxHelp, passHelp;
+    HelpButton routerHelp;
+    @UiField
+    HelpButton beginHelp;
+    @UiField
+    HelpButton endHelp;
+    @UiField
+    HelpButton subnetHelp;
+    @UiField
+    HelpButton defaultLHelp;
+    @UiField
+    HelpButton maxHelp;
+    @UiField
+    HelpButton passHelp;
 
     public TabDhcpNatUi(GwtSession currentSession, TabTcpIpUi tcp, TabWirelessUi wireless) {
         initWidget(uiBinder.createAndBindUi(this));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -67,32 +67,47 @@ public class SnapshotsTabUi extends Composite implements Tab {
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtSnapshotServiceAsync gwtSnapshotService = GWT.create(GwtSnapshotService.class);
 
-    private final static String SERVLET_URL = "/" + GWT.getModuleName() + "/file/configuration/snapshot";
+    private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/configuration/snapshot";
 
     @UiField
     Modal uploadModal;
+    
     @UiField
     FormPanel snapshotsForm;
+    
     @UiField
-    Button uploadCancel, uploadUpload;
+    Button uploadCancel;
+    @UiField
+    Button uploadUpload;
 
     @UiField
-    Button refresh, download, rollback, upload;
+    Button refresh;
+    @UiField
+    Button download;
+    @UiField
+    Button rollback;
+    @UiField
+    Button upload;
+    
     @UiField
     Alert notification;
+    
     @UiField
     FileUpload filePath;
+    
     @UiField
     Hidden xsrfTokenField;
+    
     @UiField
-    CellTable<GwtSnapshot> snapshotsGrid = new CellTable<GwtSnapshot>();
+    CellTable<GwtSnapshot> snapshotsGrid = new CellTable<>();
+
+    GwtSnapshot selected;
+    final SingleSelectionModel<GwtSnapshot> selectionModel = new SingleSelectionModel<>();
 
     private Element downloadIframe;
 
-    private final ListDataProvider<GwtSnapshot> snapshotsDataProvider = new ListDataProvider<GwtSnapshot>();
-    final SingleSelectionModel<GwtSnapshot> selectionModel = new SingleSelectionModel<GwtSnapshot>();
+    private final ListDataProvider<GwtSnapshot> snapshotsDataProvider = new ListDataProvider<>();
 
-    GwtSnapshot selected;
 
     public SnapshotsTabUi() {
         logger.log(Level.FINER, "Initiating SnapshotsTabUI...");

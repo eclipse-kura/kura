@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -41,22 +41,39 @@ public class SettingsPanelUi extends Composite {
     interface SettingsPanelUiUiBinder extends UiBinder<Widget, SettingsPanelUi> {
     }
 
+    GwtSession session;
+
     @UiField
     SnapshotsTabUi snapshotsPanel;
+
     @UiField
     ApplicationCertsTabUi appCertPanel;
+
     @UiField
     SslTabUi sslConfigPanel;
+
     @UiField
     ServerCertsTabUi serverCertPanel;
+
     @UiField
     DeviceCertsTabUi deviceCertPanel;
+
     @UiField
     SecurityTabUi securityPanel;
 
-    GwtSession Session;
     @UiField
-    TabListItem snapshots, appCert, sslConfig, serverCert, deviceCert, security;
+    TabListItem snapshots;
+    @UiField
+    TabListItem appCert;
+    @UiField
+    TabListItem sslConfig;
+    @UiField
+    TabListItem serverCert;
+    @UiField
+    TabListItem deviceCert;
+    @UiField
+    TabListItem security;
+
     @UiField
     HTMLPanel settingsIntro;
 
@@ -94,33 +111,33 @@ public class SettingsPanelUi extends Composite {
     }
 
     public void load() {
-        if (!snapshotsPanel.isDirty()) {
-            snapshotsPanel.refresh();
+        if (!this.snapshotsPanel.isDirty()) {
+            this.snapshotsPanel.refresh();
         }
     }
 
     public void setSession(GwtSession currentSession) {
-        this.Session = currentSession;
+        this.session = currentSession;
     }
 
     public boolean isDirty() {
-        boolean snapshotsDirty = snapshotsPanel.isDirty();
-        boolean appCertDirty = appCertPanel.isDirty();
-        boolean sslConfigDirty = sslConfigPanel.isDirty();
-        boolean serverCertDirty = serverCertPanel.isDirty();
-        boolean deviceCertDirty = deviceCertPanel.isDirty();
-        boolean securityDirty = securityPanel.isDirty();
+        boolean snapshotsDirty = this.snapshotsPanel.isDirty();
+        boolean appCertDirty = this.appCertPanel.isDirty();
+        boolean sslConfigDirty = this.sslConfigPanel.isDirty();
+        boolean serverCertDirty = this.serverCertPanel.isDirty();
+        boolean deviceCertDirty = this.deviceCertPanel.isDirty();
+        boolean securityDirty = this.securityPanel.isDirty();
 
         return snapshotsDirty || appCertDirty || sslConfigDirty || serverCertDirty || deviceCertDirty || securityDirty;
     }
 
     public void setDirty(boolean b) {
 
-        snapshotsPanel.setDirty(b);
-        appCertPanel.setDirty(b);
-        sslConfigPanel.setDirty(b);
-        serverCertPanel.setDirty(b);
-        deviceCertPanel.setDirty(b);
-        securityPanel.setDirty(b);
+        this.snapshotsPanel.setDirty(b);
+        this.appCertPanel.setDirty(b);
+        this.sslConfigPanel.setDirty(b);
+        this.serverCertPanel.setDirty(b);
+        this.deviceCertPanel.setDirty(b);
+        this.securityPanel.setDirty(b);
     }
 }

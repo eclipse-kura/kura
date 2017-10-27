@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -126,8 +126,6 @@ public class SslTabUi extends Composite implements Tab {
         initButtonBar();
         initForm();
 
-        // loadData();
-
         setDirty(false);
         this.apply.setEnabled(false);
         this.reset.setEnabled(false);
@@ -150,11 +148,8 @@ public class SslTabUi extends Composite implements Tab {
 
     @Override
     public void refresh() {
-        // if (isDirty()) { //necessary due to the fact that if the loadData is enabled in the constructor, we get an
-        // XSRF error. If setDirty is set to true, it causes a problem to switch tab.
         setDirty(false);
         loadData();
-        // }
     }
 
     private void initButtonBar() {

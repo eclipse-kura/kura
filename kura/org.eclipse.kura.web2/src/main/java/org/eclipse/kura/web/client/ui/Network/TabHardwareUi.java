@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,13 +32,53 @@ public class TabHardwareUi extends Composite implements NetworkTab {
 
     private static final Messages MSGS = GWT.create(Messages.class);
     GwtSession session;
-    GwtNetInterfaceConfig SelectednetIfConfig;
+    GwtNetInterfaceConfig selectedNetIfConfig;
 
     @UiField
-    FormLabel labelState, labelName, labelType, labelHardware, labelSerial, labelDriver, labelVersion, labelFirmware,
-            labelMtu, labelUsb, labelRssi;
+    FormLabel labelState;
     @UiField
-    FormControlStatic state, name, type, hardware, serial, driver, version, firmware, mtu, usb, rssi;
+    FormLabel labelName;
+    @UiField
+    FormLabel labelType;
+    @UiField
+    FormLabel labelHardware;
+    @UiField
+    FormLabel labelSerial;
+    @UiField
+    FormLabel labelDriver;
+    @UiField
+    FormLabel labelVersion;
+    @UiField
+    FormLabel labelFirmware;
+    @UiField
+    FormLabel labelMtu;
+    @UiField
+    FormLabel labelUsb;
+    @UiField
+    FormLabel labelRssi;
+
+    @UiField
+    FormControlStatic state;
+    @UiField
+    FormControlStatic name;
+    @UiField
+    FormControlStatic type;
+    @UiField
+    FormControlStatic hardware;
+    @UiField
+    FormControlStatic serial;
+    @UiField
+    FormControlStatic driver;
+    @UiField
+    FormControlStatic version;
+    @UiField
+    FormControlStatic firmware;
+    @UiField
+    FormControlStatic mtu;
+    @UiField
+    FormControlStatic usb;
+    @UiField
+    FormControlStatic rssi;
 
     public TabHardwareUi(GwtSession currentSession) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -76,12 +116,12 @@ public class TabHardwareUi extends Composite implements NetworkTab {
 
     @Override
     public void setNetInterface(GwtNetInterfaceConfig config) {
-        this.SelectednetIfConfig = config;
+        this.selectedNetIfConfig = config;
     }
 
     @Override
     public void refresh() {
-        if (this.SelectednetIfConfig != null) {
+        if (this.selectedNetIfConfig != null) {
             loadData();
         } else {
             reset();
@@ -91,17 +131,17 @@ public class TabHardwareUi extends Composite implements NetworkTab {
     /********* Private Methods ********/
 
     private void loadData() {
-        this.state.setText(this.SelectednetIfConfig.getHwState());
-        this.name.setText(this.SelectednetIfConfig.getHwName());
-        this.type.setText(this.SelectednetIfConfig.getHwType());
-        this.hardware.setText(this.SelectednetIfConfig.getHwAddress());
-        this.serial.setText(this.SelectednetIfConfig.getHwSerial());
-        this.driver.setText(this.SelectednetIfConfig.getHwDriver());
-        this.version.setText(this.SelectednetIfConfig.getHwDriverVersion());
-        this.firmware.setText(this.SelectednetIfConfig.getHwFirmware());
-        this.mtu.setText(String.valueOf(this.SelectednetIfConfig.getHwMTU()));
-        this.usb.setText(this.SelectednetIfConfig.getHwUsbDevice());
-        this.rssi.setText(this.SelectednetIfConfig.getHwRssi());
+        this.state.setText(this.selectedNetIfConfig.getHwState());
+        this.name.setText(this.selectedNetIfConfig.getHwName());
+        this.type.setText(this.selectedNetIfConfig.getHwType());
+        this.hardware.setText(this.selectedNetIfConfig.getHwAddress());
+        this.serial.setText(this.selectedNetIfConfig.getHwSerial());
+        this.driver.setText(this.selectedNetIfConfig.getHwDriver());
+        this.version.setText(this.selectedNetIfConfig.getHwDriverVersion());
+        this.firmware.setText(this.selectedNetIfConfig.getHwFirmware());
+        this.mtu.setText(String.valueOf(this.selectedNetIfConfig.getHwMTU()));
+        this.usb.setText(this.selectedNetIfConfig.getHwUsbDevice());
+        this.rssi.setText(this.selectedNetIfConfig.getHwRssi());
     }
 
     private void reset() {

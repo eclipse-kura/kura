@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -42,7 +42,11 @@ public class FirewallPanelUi extends Composite {
     @UiField
     HTMLPanel firewallIntro;
     @UiField
-    TabListItem openPorts, portForwarding, ipForwarding;
+    TabListItem openPorts;
+    @UiField
+    TabListItem portForwarding;
+    @UiField
+    TabListItem ipForwarding;
 
     public FirewallPanelUi() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -51,22 +55,22 @@ public class FirewallPanelUi extends Composite {
         this.portForwarding.setText(MSGS.firewallPortForwarding());
         this.ipForwarding.setText(MSGS.firewallNat());
 
-        this.openPorts.addClickHandler(new Tab.RefreshHandler(openPortsPanel));
-        this.portForwarding.addClickHandler(new Tab.RefreshHandler(portForwardingPanel));
-        this.ipForwarding.addClickHandler(new Tab.RefreshHandler(ipForwardingPanel));
+        this.openPorts.addClickHandler(new Tab.RefreshHandler(this.openPortsPanel));
+        this.portForwarding.addClickHandler(new Tab.RefreshHandler(this.portForwardingPanel));
+        this.ipForwarding.addClickHandler(new Tab.RefreshHandler(this.ipForwardingPanel));
     }
 
     public void initFirewallPanel() {
-        openPortsPanel.refresh();
+        this.openPortsPanel.refresh();
     }
 
     public boolean isDirty() {
-        return openPortsPanel.isDirty() || portForwardingPanel.isDirty() || ipForwardingPanel.isDirty();
+        return this.openPortsPanel.isDirty() || this.portForwardingPanel.isDirty() || this.ipForwardingPanel.isDirty();
     }
 
     public void setDirty(boolean b) {
-        openPortsPanel.setDirty(b);
-        portForwardingPanel.setDirty(b);
-        ipForwardingPanel.setDirty(b);
+        this.openPortsPanel.setDirty(b);
+        this.portForwardingPanel.setDirty(b);
+        this.ipForwardingPanel.setDirty(b);
     }
 }

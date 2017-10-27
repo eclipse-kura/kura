@@ -68,12 +68,14 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
     interface OpenPortsTabUiUiBinder extends UiBinder<Widget, OpenPortsTabUi> {
     }
 
-    private final ListDataProvider<GwtFirewallOpenPortEntry> openPortsDataProvider = new ListDataProvider<GwtFirewallOpenPortEntry>();
-    final SingleSelectionModel<GwtFirewallOpenPortEntry> selectionModel = new SingleSelectionModel<GwtFirewallOpenPortEntry>();
+    private final ListDataProvider<GwtFirewallOpenPortEntry> openPortsDataProvider = new ListDataProvider<>();
+    final SingleSelectionModel<GwtFirewallOpenPortEntry> selectionModel = new SingleSelectionModel<>();
 
-    private boolean m_dirty;
+    private boolean dirty;
 
-    GwtFirewallOpenPortEntry editOpenPortEntry, newOpenPortEntry, openPortEntry;
+    GwtFirewallOpenPortEntry editOpenPortEntry;
+    GwtFirewallOpenPortEntry newOpenPortEntry;
+    GwtFirewallOpenPortEntry openPortEntry;
 
     @UiField
     ButtonBar buttonBar;
@@ -85,17 +87,58 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
 
     @UiField
     Modal openPortsForm;
+
     @UiField
-    FormGroup groupPort, groupPermittedNw, groupPermittedI, groupUnpermittedI, groupPermittedMac, groupSource;
+    FormGroup groupPort;
     @UiField
-    FormLabel labelPort, labelProtocol, labelPermitttedNw, labelPermitttedI, labelUnPermitttedI, labelPermitttedMac,
-            labelsource;
+    FormGroup groupPermittedNw;
     @UiField
-    TextBox port, permittedNw, permittedI, unpermittedI, permittedMac, source;
+    FormGroup groupPermittedI;
     @UiField
-    Tooltip tooltipPermittedI, tooltipUnpermittedI;
+    FormGroup groupUnpermittedI;
     @UiField
-    Button submit, cancel;
+    FormGroup groupPermittedMac;
+    @UiField
+    FormGroup groupSource;
+
+    @UiField
+    FormLabel labelPort;
+    @UiField
+    FormLabel labelProtocol;
+    @UiField
+    FormLabel labelPermitttedNw;
+    @UiField
+    FormLabel labelPermitttedI;
+    @UiField
+    FormLabel labelUnPermitttedI;
+    @UiField
+    FormLabel labelPermitttedMac;
+    @UiField
+    FormLabel labelsource;
+
+    @UiField
+    TextBox port;
+    @UiField
+    TextBox permittedNw;
+    @UiField
+    TextBox permittedI;
+    @UiField
+    TextBox unpermittedI;
+    @UiField
+    TextBox permittedMac;
+    @UiField
+    TextBox source;
+
+    @UiField
+    Tooltip tooltipPermittedI;
+    @UiField
+    Tooltip tooltipUnpermittedI;
+
+    @UiField
+    Button submit;
+    @UiField
+    Button cancel;
+
     @UiField
     ListBox protocol;
 
@@ -134,24 +177,23 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                 OpenPortsTabUi.this.gwtNetworkService.findDeviceFirewallOpenPorts(token,
                         new AsyncCallback<List<GwtFirewallOpenPortEntry>>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught,
-                                        OpenPortsTabUi.this.gwtNetworkService.getClass().getSimpleName());
-                            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught, OpenPortsTabUi.this.gwtNetworkService.getClass().getSimpleName());
+                    }
 
-                            @Override
-                            public void onSuccess(List<GwtFirewallOpenPortEntry> result) {
-                                for (GwtFirewallOpenPortEntry pair : result) {
-                                    OpenPortsTabUi.this.openPortsDataProvider.getList().add(pair);
-                                }
-                                refreshTable();
-                                setVisibility();
-                                OpenPortsTabUi.this.buttonBar.setDirty(false);
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
+                    @Override
+                    public void onSuccess(List<GwtFirewallOpenPortEntry> result) {
+                        for (GwtFirewallOpenPortEntry pair : result) {
+                            OpenPortsTabUi.this.openPortsDataProvider.getList().add(pair);
+                        }
+                        refreshTable();
+                        setVisibility();
+                        OpenPortsTabUi.this.buttonBar.setDirty(false);
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
             }
 
         });
@@ -159,12 +201,12 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
 
     @Override
     public boolean isDirty() {
-        return this.m_dirty;
+        return this.dirty;
     }
 
     @Override
     public void setDirty(boolean b) {
-        this.m_dirty = b;
+        this.dirty = b;
     }
 
     @Override
@@ -307,20 +349,19 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                 OpenPortsTabUi.this.gwtNetworkService.updateDeviceFirewallOpenPorts(token, updatedOpenPortConf,
                         new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught,
-                                        OpenPortsTabUi.this.gwtNetworkService.getClass().getSimpleName());
-                            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught, OpenPortsTabUi.this.gwtNetworkService.getClass().getSimpleName());
+                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                OpenPortsTabUi.this.buttonBar.setDirty(false);
-                                EntryClassUi.hideWaitModal();
-                                setDirty(false);
-                            }
-                        });
+                    @Override
+                    public void onSuccess(Void result) {
+                        OpenPortsTabUi.this.buttonBar.setDirty(false);
+                        EntryClassUi.hideWaitModal();
+                        setDirty(false);
+                    }
+                });
             }
         });
 
@@ -391,7 +432,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                         OpenPortsTabUi.this.openPortsDataProvider.flush();
                     }
                     refreshTable();
-                }  // end !=null
+                }     // end !=null
             }// end onHide
         });
         final AlertDialog.Listener listener = new AlertDialog.Listener() {

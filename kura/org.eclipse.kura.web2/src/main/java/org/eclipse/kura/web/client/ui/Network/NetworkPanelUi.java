@@ -35,11 +35,6 @@ public class NetworkPanelUi extends Composite {
     private static final Messages MSGS = GWT.create(Messages.class);
 
     GwtSession session;
-    private NetworkInterfacesTableUi table;
-    private NetworkButtonBarUi buttons;
-    private NetworkTabsUi tabs;
-
-    private boolean isInitialized;
 
     @UiField
     HTMLPanel networkIntro;
@@ -49,6 +44,10 @@ public class NetworkPanelUi extends Composite {
     PanelBody tabsPanel;
     @UiField
     Container buttonBar;
+
+    private NetworkTabsUi tabs;
+
+    private boolean isInitialized;
 
     public NetworkPanelUi() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -61,11 +60,11 @@ public class NetworkPanelUi extends Composite {
             this.tabs = new NetworkTabsUi(this.session);
             this.tabsPanel.add(this.tabs);
 
-            this.table = new NetworkInterfacesTableUi(this.session, this.tabs);
-            this.interfacesTable.add(this.table);
+            NetworkInterfacesTableUi table = new NetworkInterfacesTableUi(this.session, this.tabs);
+            this.interfacesTable.add(table);
 
-            this.buttons = new NetworkButtonBarUi(this.session, this.tabs, this.table);
-            this.buttonBar.add(this.buttons);
+            NetworkButtonBarUi buttons = new NetworkButtonBarUi(this.session, this.tabs, table);
+            this.buttonBar.add(buttons);
 
             this.tabs.setDirty(false);
             this.isInitialized = true;

@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ *******************************************************************************/
 package org.eclipse.kura.web.client.ui.Network;
 
 import org.eclipse.kura.web.client.messages.Messages;
@@ -33,8 +42,6 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
 
     private static final Messages MSGS = GWT.create(Messages.class);
 
-    // private static final Logger logger = Logger.getLogger(TabModemGpsUi.class.getSimpleName());
-
     GwtSession session;
     boolean dirty;
     GwtModemInterfaceConfig selectedModemIfConfig;
@@ -42,14 +49,21 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
 
     @UiField
     FormLabel labelGps;
+
     @UiField
-    InlineRadio radio1, radio2;
+    InlineRadio radio1;
+    @UiField
+    InlineRadio radio2;
+
     @UiField
     PanelHeader helpTitle;
+
     @UiField
     ScrollPanel helpText;
+
     @UiField
     FieldSet field;
+
     @UiField
     HelpButton gpsHelp;
 
@@ -58,7 +72,7 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
         this.session = currentSession;
         initForm();
 
-        gpsHelp.setHelpText(MSGS.netModemToolTipEnableGps());
+        this.gpsHelp.setHelpText(MSGS.netModemToolTipEnableGps());
     }
 
     @Override

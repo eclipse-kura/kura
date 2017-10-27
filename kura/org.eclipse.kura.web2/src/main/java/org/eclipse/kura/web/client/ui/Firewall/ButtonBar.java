@@ -33,7 +33,15 @@ public class ButtonBar extends Composite {
     private Listener listener;
 
     @UiField
-    Button apply, reset, create, edit, delete;
+    Button apply;
+    @UiField
+    Button reset;
+    @UiField
+    Button create;
+    @UiField
+    Button edit;
+    @UiField
+    Button delete;
 
     public ButtonBar() {
         initWidget(uiBinder.createAndBindUi(this));

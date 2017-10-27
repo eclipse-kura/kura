@@ -15,5 +15,5 @@
       <provide interface="org.eclipse.kura.ble.eddystone.BluetoothLeEddystoneService"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.ble.eddystone.BluetoothLeEddystoneService"/>
-   <reference bind="setBluetoothLeBeaconManager" cardinality="1..1" interface="org.eclipse.kura.bluetooth.le.beacon.BluetoothLeBeaconManager" name="BluetoothLeBeaconManager" policy="static" unbind="unsetBluetoothLeBeaconManger"/>
+   <reference bind="setBluetoothLeBeaconManager" cardinality="1..1" interface="org.eclipse.kura.bluetooth.le.beacon.BluetoothLeBeaconManager" name="BluetoothLeBeaconManager" policy="static" unbind="unsetBluetoothLeBeaconManager"/>
 </scr:component>

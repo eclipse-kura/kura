@@ -152,6 +152,7 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
         <module>org.eclipse.kura.linux.gpio.test</module>
         <module>org.eclipse.kura.linux.net.test</module>
         <module>org.eclipse.kura.linux.position.test</module>
+        <module>org.eclipse.kura.linux.usb.test</module>
         <module>org.eclipse.kura.linux.watchdog.test</module>
         <module>org.eclipse.kura.net.admin.test</module>
         <module>org.eclipse.kura.protocol.modbus.test</module>

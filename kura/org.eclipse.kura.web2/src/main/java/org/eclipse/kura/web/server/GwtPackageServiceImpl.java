@@ -19,8 +19,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -278,7 +276,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 
             try {
                 logger.info("Sending successful install feedback to Eclipse Marketplace...");
-                String feedbackUrl = descriptor.getUrl();
+                String feedbackUrl = this.descriptor.getUrl();
                 feedbackUrl += feedbackUrl.endsWith("/") ? "success" : "/success";
                 connection = (HttpURLConnection) new URL(feedbackUrl).openConnection();
                 connection.setRequestMethod("GET");
@@ -303,18 +301,18 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
         @Override
         public void handleEvent(Event event) {
             final String eventUrl = (String) event.getProperty(DeploymentAgentService.EVENT_PACKAGE_URL);
-            final String dpUrl = descriptor.getDpUrl();
-            if (eventUrl != null && eventUrl.equals(descriptor.getDpUrl())) {
+            final String dpUrl = this.descriptor.getDpUrl();
+            if (eventUrl != null && eventUrl.equals(this.descriptor.getDpUrl())) {
                 try {
                     Boolean successful = (Boolean) event.getProperty(DeploymentAgentService.EVENT_SUCCESSFUL);
                     if (successful != null && successful) {
                         logger.info("Installing deployment package from Eclipse Marketplace, URL {}...success", dpUrl);
-                        ForkJoinPool.commonPool().execute(ForkJoinTask.adapt(this::sendSuccessFeedbackToMarketplace));
+                        sendSuccessFeedbackToMarketplace();
                     } else {
                         logger.info("Installing deployment package from Eclipse Marketplace, URL {}...failure", dpUrl);
                     }
                 } finally {
-                    registration.unregister();
+                    this.registration.unregister();
                 }
             }
 

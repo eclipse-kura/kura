@@ -2,12 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.wire.script.filter.provider.test
 Bundle-SymbolicName: org.eclipse.kura.wire.script.filter.provider.test;singleton:=true
-Bundle-Version: 3.1.0.qualifier
+Bundle-Version: 3.2.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Fragment-Host: org.eclipse.kura.wire.script.filter.provider
-Import-Package: org.eclipse.kura;version="[1.0.0, 2.0.0)",
+Import-Package: org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.core.testutil;version="1.0.0",
  org.junit;version="4.12.0",
  org.junit.runners;version="4.12.0",

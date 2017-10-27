@@ -896,8 +896,8 @@ var kuraWires = (function() {
 	
 	DragHandler.prototype.toLocalCoords = function (clientX, clientY) {
 		var offset = $('#wires-graph').offset()
-		clientX -= offset.left
-		clientY -= offset.top
+		clientX -= offset.left - $(window).scrollLeft()
+		clientY -= offset.top - $(window).scrollTop()
 		return clientToLocal(clientX, clientY)
 	}
 	

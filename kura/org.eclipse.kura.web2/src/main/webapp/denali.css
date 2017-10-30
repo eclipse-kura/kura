@@ -97,7 +97,6 @@ body {
 .main-content .col-xs-12, .main-content .col-md-12 {
 		padding-left: 0.1cm !important;
 	padding-right: 0.1cm !important;
-	margin: 0.1cm !important;
 }
 
 .center-panel .panel {
@@ -162,7 +161,7 @@ table {
 	background: none !important;
 	font-weight: 500;
     line-height: 1.1;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .btn-group {
@@ -180,19 +179,29 @@ table {
 	border: none;
 }
 
-.status-well, .device-well, .connections-well {
+.status-well, .connections-well {
 	background-color: white !important;
 	border: none !important;
 }
 
 .bundles-well {
+	border: none !important;
+	border-bottom: solid 1px #e7e7e7 !important;
+    border-right: solid 1px #e7e7e7 !important;
+    border-left: solid 1px #e7e7e7 !important;
 	padding-top: 0 !important;
 	padding-bottom: 0 !important;
+	-webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    
 }
 
-.command-panel {
-	background-color: rgb(242,242,242);
-    border: solid 1px #e7e7e7 !important;
+.bundles-well table {
+	border: 1px solid #ddd !important;
+}
+
+.device-well .container-fluid {
+	padding-top: 0.4cm;
 }
 
 .container-fluid {
@@ -209,6 +218,11 @@ table {
     font-size: 14px !important;
     color: white !important;
     pointer-events: none !important;
+}
+
+.network-panel .navbar {
+    background-color: inherit !important;
+    border: none !important;
 }
 
 /**********************
@@ -515,7 +529,6 @@ Footer START
 
 .footer {
 	background-color: rgb(242, 242, 242);
-	height: 2.1cm;
 	z-index: 1;
 	position: absolute;
 	bottom: 0;
@@ -598,6 +611,10 @@ Help panel START
 	float: right;
     margin-right: 6%;
     padding: 0.1cm !important;
+}
+
+.help-block:empty {
+	display: none;
 }
 
 /**********************
@@ -906,7 +923,7 @@ img.x-tree3-node-icon {
 
 div.copyright:after {
 	content:
-		' Eurotech and others. Made available under the terms of the Eclipse Public License v1.0';
+		' Eurotech and others. EPL v1.0';
 }
 
 div.headerLogo { 

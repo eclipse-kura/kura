@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2017 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -25,7 +25,7 @@
     }
     
     .center-panel {
-    	font-size: 11px;
+    	font-size: 12px;
     	font-weight: normal;
     }
     
@@ -35,6 +35,14 @@
     
     .help {
     	height: 300px;
+    }
+    
+    .help-header {
+    	font-size: 14px;
+    }
+    
+    .help-body {
+    	width: 275px;
     }
     
     .scrollable {
@@ -213,13 +221,16 @@
         </b:Column>
 
         <b:Column size="MD_5" addStyleNames="{style.center-panel}" visibleOn="MD_LG">
-                <b:Row>
+            <b:Column size="MD_12">
+                <b:Row addStyleNames="affix" b:id="help">
                     <b:Panel>
-                        <b:PanelHeader ui:field="helpTitle" />
-                        <b:PanelBody addStyleNames="{style.help}"
-                            ui:field="helpText" />
+                        <b:PanelHeader addStyleNames="{style.help-header}" ui:field="helpTitle" />
+                        <b:PanelBody addStyleNames="{style.help-body}">
+                            <g:ScrollPanel addStyleNames="{style.help}" ui:field="helpText" />
+                        </b:PanelBody>
                     </b:Panel>
                 </b:Row>
+            </b:Column>
         </b:Column>
         </b:Row>
 
@@ -245,8 +256,5 @@
                 </b:Panel>
             </b:ModalBody>
         </b:Modal>
-
-
-
     </b:Container>
 </ui:UiBinder> 

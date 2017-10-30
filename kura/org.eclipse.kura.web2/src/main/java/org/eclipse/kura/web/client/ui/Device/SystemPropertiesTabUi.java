@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -35,7 +36,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 
-public class SystemPropertiesTabUi extends Composite {
+public class SystemPropertiesTabUi extends Composite implements Tab {
 
     private static SystemPropertiesTabUiUiBinder uiBinder = GWT.create(SystemPropertiesTabUiUiBinder.class);
 
@@ -95,7 +96,22 @@ public class SystemPropertiesTabUi extends Composite {
         dataProvider.addDataDisplay(grid);
     }
 
-    public void loadSystemPropertiesData() {
+    @Override
+    public void setDirty(boolean flag) {
+    }
+
+    @Override
+    public boolean isDirty() {
+        return true;
+    }
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
+    public void refresh() {
         this.systemPropertiesDataProvider.getList().clear();
 
         EntryClassUi.showWaitModal();
@@ -136,4 +152,5 @@ public class SystemPropertiesTabUi extends Composite {
 
         });
     }
+
 }

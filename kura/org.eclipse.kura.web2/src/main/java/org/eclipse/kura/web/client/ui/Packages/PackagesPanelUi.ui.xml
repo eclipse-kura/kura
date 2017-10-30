@@ -28,24 +28,24 @@
     	font-size: 11px;
     	font-weight: normal;
     }
+    
+    .upload-label {
+    font-weight: initial;
+    }
     </ui:style>
 
 
     <b:Container fluid="true" addStyleNames="packages-panel">
-		<!-- <b:Column size="MD_12"> height: 100vh; -->
         <b:Row>
-            <b:Panel>
-                <b:ButtonGroup size="SMALL">
-                    <b:Button ui:field="packagesRefresh" addStyleNames="fa fa-refresh"></b:Button>
-                    <b:Button ui:field="packagesInstall" addStyleNames="fa fa-plus"></b:Button>
-                    <b:Button ui:field="packagesUninstall" addStyleNames="fa fa-minus"></b:Button>
-                </b:ButtonGroup>
-            </b:Panel>
+            <g:HTMLPanel ui:field="packagesIntro">
+            </g:HTMLPanel>
         </b:Row>
 
         <b:Row>
             <b:Well size="SMALL" ui:field="marketplaceInstallWell">
-                <b:Heading size="H5" text="Install from Eclipse Marketplace&trade;" />
+                <g:HTMLPanel>
+                    <h5>Install from <a href="https://marketplace.eclipse.org/taxonomy/term/4397%2C4396/title" target="_blank">Eclipse Marketplace&trade;</a></h5>
+                </g:HTMLPanel>
                 <b:HelpBlock
                     text="In order to install a deployment package from Eclipse Marketplace drag and drop here the Install button available in the software description page." />
             </b:Well>
@@ -53,6 +53,11 @@
 
         <b:Row>
             <b:Well size="SMALL">
+                 <b:ButtonGroup size="SMALL">
+                    <b:Button ui:field="packagesInstall" addStyleNames="fa fa-plus"></b:Button>
+                    <b:Button ui:field="packagesUninstall" addStyleNames="fa fa-minus"></b:Button>
+                    <b:Button ui:field="packagesRefresh" addStyleNames="fa fa-refresh"></b:Button>
+                </b:ButtonGroup>
                 <gwt:CellTable bordered="true" condensed="true" striped="true" hover="true" width="100%"
                     height="100%" ui:field="packagesGrid" addStyleNames="{style.center-panel}" />
                 <b:Alert type="WARNING" ui:field="notification" />
@@ -60,7 +65,7 @@
         </b:Row>
 
 		<!-- MODAL -->
-        <b:Modal title="Upload" closable="true" fade="true" b:id="uploadModal" ui:field="uploadModal">
+        <b:Modal title="Install/Upgrade Package" closable="true" fade="true" b:id="uploadModal" ui:field="uploadModal">
             <b:ModalBody>
                 <b:Well>
                     <b:Container fluid="true">
@@ -74,13 +79,13 @@
                             <b:TabPane fade="true" in="true" active="true" b:id="tab1">
                                 <g:FormPanel ui:field="packagesFormFile">
                                     <b:FieldSet>
-                                        <b:FormLabel>Select the deployment package file:</b:FormLabel>
+                                        <b:FormLabel addStyleNames="{style.upload-label}">Select the deployment package file:</b:FormLabel>
                                         <b:Well>
                                             <g:FileUpload ui:field="filePath"></g:FileUpload>
                                         </b:Well>
                                         <b:ButtonGroup pull="RIGHT">
-                                            <b:Button ui:field="fileCancel">Cancel</b:Button>
                                             <b:Button ui:field="fileSubmit">Submit</b:Button>
+                                            <b:Button ui:field="fileCancel">Cancel</b:Button>
                                         </b:ButtonGroup>
                                         <g:Hidden ui:field="xsrfTokenFieldFile"></g:Hidden>
                                     </b:FieldSet>
@@ -90,11 +95,11 @@
                             <b:TabPane fade="true" b:id="tab2">
                                 <g:FormPanel ui:field="packagesFormUrl">
                                     <b:FieldSet>
-                                        <b:FormLabel for="formUrl">Enter the URL of the deployment package:</b:FormLabel>
+                                        <b:FormLabel addStyleNames="{style.upload-label}" for="formUrl">Enter the URL of the deployment package:</b:FormLabel>
                                         <b:TextBox b:id="formUrl" ui:field="formUrl" />
                                         <b:ButtonGroup pull="RIGHT">
-                                            <b:Button ui:field="urlCancel">Cancel</b:Button>
                                             <b:Button ui:field="urlSubmit">Submit</b:Button>
+                                            <b:Button ui:field="urlCancel">Cancel</b:Button>
                                         </b:ButtonGroup>
                                         <g:Hidden ui:field="xsrfTokenFieldUrl"></g:Hidden>
                                     </b:FieldSet>

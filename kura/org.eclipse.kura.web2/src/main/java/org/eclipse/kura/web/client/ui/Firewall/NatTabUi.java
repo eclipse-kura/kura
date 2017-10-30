@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -35,13 +35,10 @@ import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
-import org.gwtbootstrap3.client.ui.ModalBody;
-import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.Tooltip;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
-import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -56,8 +53,9 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
-public class NatTabUi extends Composite implements Tab {
+public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
     private static NatTabUiUiBinder uiBinder = GWT.create(NatTabUiUiBinder.class);
 
@@ -69,39 +67,92 @@ public class NatTabUi extends Composite implements Tab {
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
 
-    private final ListDataProvider<GwtFirewallNatEntry> natDataProvider = new ListDataProvider<GwtFirewallNatEntry>();
-    final SingleSelectionModel<GwtFirewallNatEntry> selectionModel = new SingleSelectionModel<GwtFirewallNatEntry>();
+    private final ListDataProvider<GwtFirewallNatEntry> natDataProvider = new ListDataProvider<>();
+    final SingleSelectionModel<GwtFirewallNatEntry> selectionModel = new SingleSelectionModel<>();
 
-    private boolean m_dirty;
+    private boolean dirty;
 
     private GwtFirewallNatEntry newNatEntry;
     private GwtFirewallNatEntry editNatEntry;
 
     @UiField
-    Button apply, create, edit, delete;
+    ButtonBar buttonBar;
     @UiField
     Alert notification;
     @UiField
-    CellTable<GwtFirewallNatEntry> natGrid = new CellTable<GwtFirewallNatEntry>();
+    CellTable<GwtFirewallNatEntry> natGrid = new CellTable<>();
 
     @UiField
     Modal natForm;
+
     @UiField
-    FormGroup groupInput, groupOutput, groupProtocol, groupSource, groupDestination, groupEnable;
+    FormGroup groupInput;
     @UiField
-    FormLabel labelInput, labelOutput, labelProtocol, labelSource, labelDestination, labelEnable;
+    FormGroup groupOutput;
     @UiField
-    Tooltip tooltipInput, tooltipOutput, tooltipProtocol, tooltipSource, tooltipDestination, tooltipEnable;
+    FormGroup groupProtocol;
     @UiField
-    TextBox input, output, source, destination;
+    FormGroup groupSource;
     @UiField
-    ListBox protocol, enable;
+    FormGroup groupDestination;
     @UiField
-    Button submit, cancel;
+    FormGroup groupEnable;
+
+    @UiField
+    FormLabel labelInput;
+    @UiField
+    FormLabel labelOutput;
+    @UiField
+    FormLabel labelProtocol;
+    @UiField
+    FormLabel labelSource;
+    @UiField
+    FormLabel labelDestination;
+    @UiField
+    FormLabel labelEnable;
+
+    @UiField
+    Tooltip tooltipInput;
+    @UiField
+    Tooltip tooltipOutput;
+    @UiField
+    Tooltip tooltipProtocol;
+    @UiField
+    Tooltip tooltipSource;
+    @UiField
+    Tooltip tooltipDestination;
+    @UiField
+    Tooltip tooltipEnable;
+
+    @UiField
+    TextBox input;
+    @UiField
+    TextBox output;
+    @UiField
+    TextBox source;
+    @UiField
+    TextBox destination;
+    
+    @UiField
+    ListBox protocol;
+    @UiField
+    ListBox enable;
+    
+    @UiField
+    Button submit;
+    @UiField
+    Button cancel;
+    
+    @UiField
+    AlertDialog alertDialog;
+
+    private HandlerRegistration modalHideHandlerRegistration;
 
     public NatTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
-        initButtons();
+
+        this.buttonBar.setListener(this);
+
         initTable();
         initModal();
     }
@@ -139,7 +190,7 @@ public class NatTabUi extends Composite implements Tab {
                         }
                         refreshTable();
 
-                        NatTabUi.this.apply.setEnabled(false);
+                        NatTabUi.this.buttonBar.setDirty(false);
                         EntryClassUi.hideWaitModal();
                     }
                 });
@@ -149,17 +200,16 @@ public class NatTabUi extends Composite implements Tab {
 
     @Override
     public boolean isDirty() {
-        return this.m_dirty;
+        return this.dirty;
     }
 
     @Override
     public void setDirty(boolean b) {
-        this.m_dirty = b;
+        this.dirty = b;
     }
 
     @Override
     public boolean isValid() {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -272,75 +322,87 @@ public class NatTabUi extends Composite implements Tab {
         this.natGrid.redraw();
     }
 
-    // Initialize tab buttons
-    private void initButtons() {
-        initApplyButton();
+    @Override
+    public void onApply() {
+        List<GwtFirewallNatEntry> intermediateList = NatTabUi.this.natDataProvider.getList();
 
-        initCreateButton();
+        final List<GwtFirewallNatEntry> updatedNatConf = new ArrayList<GwtFirewallNatEntry>();
+        for (GwtFirewallNatEntry entry : intermediateList) {
+            updatedNatConf.add(entry);
+        }
 
-        initEditButton();
-
-        initDeleteButton();
-    }
-
-    private void initDeleteButton() {
-        this.delete.setText(MSGS.deleteButton());
-        this.delete.addClickHandler(new ClickHandler() {
+        EntryClassUi.showWaitModal();
+        NatTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
-            public void onClick(ClickEvent event) {
-                final GwtFirewallNatEntry selection = NatTabUi.this.selectionModel.getSelectedObject();
-                if (selection != null) { // TODO: this part should be structured the same as the other firewall tabs
-                    final Modal confirm = new Modal();
-                    ModalBody confirmBody = new ModalBody();
-                    ModalFooter confirmFooter = new ModalFooter();
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
 
-                    confirm.setTitle(MSGS.confirm());
-                    confirmBody.add(new Span(MSGS.firewallNatDeleteConfirmation(selection.getInInterface())));
-                    Button yes = new Button(MSGS.yesButton(), new ClickHandler() {
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                NatTabUi.this.gwtNetworkService.updateDeviceFirewallNATs(token, updatedNatConf,
+                        new AsyncCallback<Void>() {
 
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            NatTabUi.this.natDataProvider.getList().remove(selection);
-                            refreshTable();
-                            NatTabUi.this.apply.setEnabled(true);
-                            confirm.hide();
-                            setDirty(true);
-                        }
-                    });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught);
+                    }
 
-                    Button no = new Button(MSGS.noButton(), new ClickHandler() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        setDirty(false);
+                        NatTabUi.this.buttonBar.setDirty(false);
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
+            }
+        });
 
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            confirm.hide();
-                        }
-                    });
-                    confirmFooter.add(no);
-                    confirmFooter.add(yes);
+    }
 
-                    confirm.add(confirmBody);
-                    confirm.add(confirmFooter);
-                    confirm.show();
-                    no.setFocus(true);
-                }
+    @Override
+    public void onCancel() {
+        NatTabUi.this.alertDialog.show(MSGS.deviceConfigDirty(), new AlertDialog.Listener() {
+
+            @Override
+            public void onConfirm() {
+                NatTabUi.this.refresh();
             }
         });
     }
 
-    private void initEditButton() {
-        this.edit.setText(MSGS.editButton());
-        this.edit.addClickHandler(new ClickHandler() {
+    @Override
+    public void onCreate() {
+
+        replaceModalHideHandler(new ModalHideHandler() {
 
             @Override
-            public void onClick(ClickEvent event) {
-                GwtFirewallNatEntry selection = NatTabUi.this.selectionModel.getSelectedObject();
-                if (selection != null) {
-                    showModal(selection);
+            public void onHide(ModalHideEvent evt) {
+                if (NatTabUi.this.newNatEntry != null && !duplicateEntry(NatTabUi.this.newNatEntry)) {
+                    NatTabUi.this.natDataProvider.getList().add(NatTabUi.this.newNatEntry);
+                    refreshTable();
+                    NatTabUi.this.buttonBar.setDirty(true);
+                    NatTabUi.this.newNatEntry = null;
                 }
             }
         });
-        this.natForm.addHideHandler(new ModalHideHandler() {
+        showModal(null);
+
+    }
+
+    @Override
+    public void onEdit() {
+
+        GwtFirewallNatEntry selection = NatTabUi.this.selectionModel.getSelectedObject();
+
+        if (selection == null) {
+            return;
+        }
+
+        replaceModalHideHandler(new ModalHideHandler() {
 
             @Override
             public void onHide(ModalHideEvent evt) {
@@ -350,86 +412,37 @@ public class NatTabUi extends Composite implements Tab {
                     if (!duplicateEntry(NatTabUi.this.editNatEntry)) {
                         NatTabUi.this.natDataProvider.getList().add(NatTabUi.this.editNatEntry);
                         NatTabUi.this.natDataProvider.flush();
-                        NatTabUi.this.apply.setEnabled(true);
+                        NatTabUi.this.buttonBar.setDirty(true);
                         NatTabUi.this.editNatEntry = null;
-                    } else {	// end duplicate
+                    } else {    // end duplicate
                         NatTabUi.this.natDataProvider.getList().add(oldEntry);
                         NatTabUi.this.natDataProvider.flush();
                     }
                 }
             }
         });
+        showModal(selection);
+
     }
 
-    private void initCreateButton() {
-        this.create.setText(MSGS.newButton());
-        this.create.addClickHandler(new ClickHandler() {
+    @Override
+    public void onDelete() {
 
-            @Override
-            public void onClick(ClickEvent event) {
-                showModal(null);
-            }
-        });
-        this.natForm.addHideHandler(new ModalHideHandler() {
+        final GwtFirewallNatEntry selection = NatTabUi.this.selectionModel.getSelectedObject();
+        if (selection == null) {
+            return;
+        }
+        this.alertDialog.show(MSGS.firewallNatDeleteConfirmation(selection.getInInterface()),
+                new AlertDialog.Listener() {
 
-            @Override
-            public void onHide(ModalHideEvent evt) {
-                if (NatTabUi.this.newNatEntry != null && !duplicateEntry(NatTabUi.this.newNatEntry)) {
-                    NatTabUi.this.natDataProvider.getList().add(NatTabUi.this.newNatEntry);
-                    refreshTable();
-                    NatTabUi.this.apply.setEnabled(true);
-                    NatTabUi.this.newNatEntry = null;
-                }
-            }
-        });
-    }
-
-    private void initApplyButton() {
-        this.apply.setText(MSGS.firewallApply());
-        this.apply.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                List<GwtFirewallNatEntry> intermediateList = NatTabUi.this.natDataProvider.getList();
-                ArrayList<GwtFirewallNatEntry> tempList = new ArrayList<GwtFirewallNatEntry>();
-                final List<GwtFirewallNatEntry> updatedNatConf = tempList;
-                for (GwtFirewallNatEntry entry : intermediateList) {
-                    tempList.add(entry);
-                }
-
-                if (updatedNatConf != null) {
-                    EntryClassUi.showWaitModal();
-                    NatTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                        @Override
-                        public void onFailure(Throwable ex) {
-                            EntryClassUi.hideWaitModal();
-                            FailureHandler.handle(ex);
-                        }
-
-                        @Override
-                        public void onSuccess(GwtXSRFToken token) {
-                            NatTabUi.this.gwtNetworkService.updateDeviceFirewallNATs(token, updatedNatConf,
-                                    new AsyncCallback<Void>() {
-
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    EntryClassUi.hideWaitModal();
-                                    FailureHandler.handle(caught);
-                                }
-
-                                @Override
-                                public void onSuccess(Void result) {
-                                    setDirty(false);
-                                    NatTabUi.this.apply.setEnabled(false);
-                                    EntryClassUi.hideWaitModal();
-                                }
-                            });
-                        }
-                    });
-                }
-            }
-        });
+                    @Override
+                    public void onConfirm() {
+                        NatTabUi.this.natDataProvider.getList().remove(selection);
+                        refreshTable();
+                        NatTabUi.this.buttonBar.setDirty(true);
+                        setDirty(true);
+                    }
+                });
     }
 
     private void initModal() {
@@ -657,5 +670,12 @@ public class NatTabUi extends Composite implements Tab {
         if (this.output.getText() == null || "".equals(this.output.getText().trim())) {
             this.groupOutput.setValidationState(ValidationState.ERROR);
         }
+    }
+
+    private void replaceModalHideHandler(ModalHideHandler hideHandler) {
+        if (this.modalHideHandlerRegistration != null) {
+            this.modalHideHandlerRegistration.removeHandler();
+        }
+        this.modalHideHandlerRegistration = this.natForm.addHideHandler(hideHandler);
     }
 }

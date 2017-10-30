@@ -54,7 +54,6 @@ import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
-import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
@@ -85,6 +84,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -181,6 +181,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     FormLabel labelPing;
     @UiField
     FormLabel labelIgnore;
+
     @UiField
     InlineRadio radio1;
     @UiField
@@ -189,6 +190,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     InlineRadio radio3;
     @UiField
     InlineRadio radio4;
+
     @UiField
     ListBox wireless;
     @UiField
@@ -201,26 +203,33 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     ListBox group;
     @UiField
     ListBox bgscan;
+
     @UiField
     TextBox ssid;
     @UiField
     TextBox shortI;
     @UiField
     TextBox longI;
+
     @UiField
     Input password;
     @UiField
     Input verify;
+
     @UiField
     TextBox rssi;
+
     @UiField
     PanelHeader helpTitle;
+
     @UiField
-    PanelBody helpText;
+    ScrollPanel helpText;
+
     @UiField
     Button buttonSsid;
     @UiField
     Button buttonPassword;
+
     @UiField
     FormGroup groupVerify;
     @UiField
@@ -233,30 +242,37 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     FormGroup groupShortI;
     @UiField
     FormGroup groupLongI;
+
     @UiField
     HelpBlock helpWireless;
     @UiField
     HelpBlock helpPassword;
     @UiField
     HelpBlock helpVerify;
+
     @UiField
     Modal ssidModal;
+
     @UiField
     PanelHeader ssidTitle;
+
     @UiField
     CellTable<GwtWifiHotspotEntry> ssidGrid = new CellTable<>();
+
     @UiField
     Alert searching;
     @UiField
     Alert noSsid;
     @UiField
     Alert scanFail;
+
     @UiField
     Text searchingText;
     @UiField
     Text noSsidText;
     @UiField
     Text scanFailText;
+
     @UiField
     HelpButton wirelessHelp;
     @UiField
@@ -681,7 +697,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
             @Override
             public String getHelpText() {
-                if (wireless.getSelectedItemText().equals(MessageUtils.get(NET_WIFI_WIRELESS_MODE_STATION))) {
+                if (TabWirelessUi.this.wireless.getSelectedItemText()
+                        .equals(MessageUtils.get(NET_WIFI_WIRELESS_MODE_STATION))) {
                     return MSGS.netWifiToolTipWirelessModeStation();
                 } else {
                     return MSGS.netWifiToolTipWirelessModeAccessPoint();
@@ -747,7 +764,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 TabWirelessUi.this.netTabs.adjustInterfaceTabs();
                 setPasswordValidation();
                 update();
-                wirelessHelp.updateHelpText();
+                TabWirelessUi.this.wirelessHelp.updateHelpText();
             }
 
         });

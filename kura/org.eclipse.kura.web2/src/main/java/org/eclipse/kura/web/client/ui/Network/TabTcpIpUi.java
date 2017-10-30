@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -41,7 +41,6 @@ import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.HelpBlock;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
-import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
@@ -63,6 +62,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class TabTcpIpUi extends Composite implements NetworkTab {
@@ -95,36 +95,91 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     NetworkTabsUi tabs;
 
     @UiField
-    FormGroup groupIp, groupSubnet, groupGateway, groupDns;
+    FormGroup groupIp;
     @UiField
-    FormLabel labelStatus, labelConfigure, labelIp, labelSubnet, labelGateway, labelDns, labelSearch;
+    FormGroup groupSubnet;
     @UiField
-    HelpBlock helpIp, helpSubnet, helpGateway, helpDns;
+    FormGroup groupGateway;
     @UiField
-    TextBox ip, subnet, gateway, dns, search;
+    FormGroup groupDns;
+
     @UiField
-    ListBox status, configure;
+    FormLabel labelStatus;
+    @UiField
+    FormLabel labelConfigure;
+    @UiField
+    FormLabel labelIp;
+    @UiField
+    FormLabel labelSubnet;
+    @UiField
+    FormLabel labelGateway;
+    @UiField
+    FormLabel labelDns;
+    @UiField
+    FormLabel labelSearch;
+
+    @UiField
+    HelpBlock helpIp;
+    @UiField
+    HelpBlock helpSubnet;
+    @UiField
+    HelpBlock helpGateway;
+    @UiField
+    HelpBlock helpDns;
+
+    @UiField
+    TextBox ip;
+    @UiField
+    TextBox subnet;
+    @UiField
+    TextBox gateway;
+    @UiField
+    TextBox dns;
+    @UiField
+    TextBox search;
+
+    @UiField
+    ListBox status;
+    @UiField
+    ListBox configure;
+
     @UiField
     Button renew;
+
     @UiField
     PanelHeader helpTitle;
+
     @UiField
-    PanelBody helpText;
+    ScrollPanel helpText;
+
     @UiField
     Form form;
+
     @UiField
     FormControlStatic dnsRead;
 
     @UiField
     Modal wanModal;
+
     @UiField
     Alert multipleWanWarn;
+
     @UiField
     Text multipleWanWarnText;
 
     @UiField
-    HelpButton statusHelp, configureHelp, ipHelp, subnetHelp, gatewayHelp, dnsHelp;
-    
+    HelpButton statusHelp;
+    @UiField
+    HelpButton configureHelp;
+    @UiField
+    HelpButton ipHelp;
+    @UiField
+    HelpButton subnetHelp;
+    @UiField
+    HelpButton gatewayHelp;
+    @UiField
+    HelpButton dnsHelp;
+
     public TabTcpIpUi(GwtSession currentSession, NetworkTabsUi netTabs) {
         initWidget(uiBinder.createAndBindUi(this));
         this.session = currentSession;
@@ -134,7 +189,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
         this.dnsRead.setVisible(false);
 
         initModal();
-        
+
         initHelpButtons();
     }
 
@@ -292,16 +347,16 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     }
 
     // ---------------Private Methods------------
-    
+
     private void initHelpButtons() {
-    	this.statusHelp.setHelpText(MSGS.netIPv4ModemToolTipStatus());
-    	this.configureHelp.setHelpText(MSGS.netIPv4ToolTipConfigure());
-    	this.ipHelp.setHelpText(MSGS.netIPv4ToolTipAddress());
-    	this.subnetHelp.setHelpText(MSGS.netIPv4ToolTipSubnetMask());
-    	this.gatewayHelp.setHelpText(MSGS.netIPv4ToolTipGateway());
-    	this.dnsHelp.setHelpText(MSGS.netIPv4ToolTipDns());
+        this.statusHelp.setHelpText(MSGS.netIPv4ModemToolTipStatus());
+        this.configureHelp.setHelpText(MSGS.netIPv4ToolTipConfigure());
+        this.ipHelp.setHelpText(MSGS.netIPv4ToolTipAddress());
+        this.subnetHelp.setHelpText(MSGS.netIPv4ToolTipSubnetMask());
+        this.gatewayHelp.setHelpText(MSGS.netIPv4ToolTipGateway());
+        this.dnsHelp.setHelpText(MSGS.netIPv4ToolTipDns());
     }
-    
+
     private void initForm() {
 
         // Labels
@@ -563,40 +618,40 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             @Override
             public void onChange(ChangeEvent event) {
                 setDirty(true);
-                
+
                 if (TabTcpIpUi.this.dns.getText().trim().length() == 0) {
-        			TabTcpIpUi.this.groupDns.setValidationState(ValidationState.NONE);
-        			TabTcpIpUi.this.helpDns.setText("");
-            		return;
-        		}
-        
-        		String regex = "[\\s,;\\n\\t]+";
-        		String[] aDnsServers = TabTcpIpUi.this.dns.getText().trim().split(regex);
-        		boolean validDnsList = true;
-        		for (String dnsEntry : aDnsServers) {
-        			if ((dnsEntry.length() > 0) && !dnsEntry.matches(FieldType.IPv4_ADDRESS.getRegex())) {
-        				validDnsList = false;
-        				break;
-        			}
-        		}
-        		if (!validDnsList) {
-        			TabTcpIpUi.this.groupDns.setValidationState(ValidationState.ERROR);
-                    TabTcpIpUi.this.helpDns.setText(MSGS.netIPv4InvalidAddress());
-        		} else {
-        			TabTcpIpUi.this.groupDns.setValidationState(ValidationState.NONE);
+                    TabTcpIpUi.this.groupDns.setValidationState(ValidationState.NONE);
                     TabTcpIpUi.this.helpDns.setText("");
-        		}
-                
-        		/*
-                if (!TabTcpIpUi.this.dns.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
-                        && TabTcpIpUi.this.dns.getText().trim().length() > 0) {
+                    return;
+                }
+
+                String regex = "[\\s,;\\n\\t]+";
+                String[] aDnsServers = TabTcpIpUi.this.dns.getText().trim().split(regex);
+                boolean validDnsList = true;
+                for (String dnsEntry : aDnsServers) {
+                    if (dnsEntry.length() > 0 && !dnsEntry.matches(FieldType.IPv4_ADDRESS.getRegex())) {
+                        validDnsList = false;
+                        break;
+                    }
+                }
+                if (!validDnsList) {
                     TabTcpIpUi.this.groupDns.setValidationState(ValidationState.ERROR);
                     TabTcpIpUi.this.helpDns.setText(MSGS.netIPv4InvalidAddress());
                 } else {
                     TabTcpIpUi.this.groupDns.setValidationState(ValidationState.NONE);
                     TabTcpIpUi.this.helpDns.setText("");
                 }
-                */
+
+                /*
+                 * if (!TabTcpIpUi.this.dns.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
+                 * && TabTcpIpUi.this.dns.getText().trim().length() > 0) {
+                 * TabTcpIpUi.this.groupDns.setValidationState(ValidationState.ERROR);
+                 * TabTcpIpUi.this.helpDns.setText(MSGS.netIPv4InvalidAddress());
+                 * } else {
+                 * TabTcpIpUi.this.groupDns.setValidationState(ValidationState.NONE);
+                 * TabTcpIpUi.this.helpDns.setText("");
+                 * }
+                 */
             }
         });
 
@@ -749,16 +804,16 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                     this.gateway.setEnabled(false);
                     this.renew.setEnabled(true);
                     if (this.status.getSelectedValue().equals(IPV4_STATUS_WAN_MESSAGE)) {
-                    	this.dns.setEnabled(true);
-                    	this.search.setEnabled(true);
+                        this.dns.setEnabled(true);
+                        this.search.setEnabled(true);
                     } else {
-                    	this.dns.setEnabled(false);
-                    	this.search.setEnabled(false);
+                        this.dns.setEnabled(false);
+                        this.search.setEnabled(false);
                     }
                 } else {
                     this.ip.setEnabled(true);
                     this.subnet.setEnabled(true);
-                    //this.gateway.setEnabled(true);
+                    // this.gateway.setEnabled(true);
 
                     if (this.status.getSelectedValue().equals(IPV4_STATUS_WAN_MESSAGE)) {
                         this.gateway.setEnabled(true);
@@ -773,9 +828,9 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                     this.renew.setEnabled(false);
                 }
                 /*
-                this.dns.setEnabled(true);
-                this.search.setEnabled(true);
-				*/
+                 * this.dns.setEnabled(true);
+                 * this.search.setEnabled(true);
+                 */
             }
         }
 

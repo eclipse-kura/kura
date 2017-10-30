@@ -24,16 +24,16 @@
     }
     
     .center-panel {
-    	font-size: 0.6 em;
+    	font-size: 12px;
     	font-weight: normal;
     }
     </ui:style>
 
     <g:ScrollPanel addStyleNames="{style.center-panel}">
         <b:Container fluid="true">
-            <b:Column size="MD_12">
+            <b:Column size="MD_7">
                 <b:Row addStyleNames="{style.center-panel}">
-                    <b:Form type="HORIZONTAL">
+                    <b:Form>
                         <b:FieldSet>
                             <b:FormGroup>
                                 <b:FormLabel for="state"

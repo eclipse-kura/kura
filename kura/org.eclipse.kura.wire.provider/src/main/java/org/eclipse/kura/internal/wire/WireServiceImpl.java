@@ -341,10 +341,7 @@ public final class WireServiceImpl implements SelfConfiguringComponent, WireServ
         requireNonNull(properties, message.propertiesNonNull());
         logger.debug(message.exectractingProp());
         // clear the configurations first
-        if (this.wireServiceOptions != null) {
-            final List<WireConfiguration> list = this.wireServiceOptions.getWireConfigurations();
-            list.clear();
-        }
+        this.wireConfigs.clear();
         this.wireServiceOptions = WireServiceOptions.getInstance(properties);
         this.properties = properties;
         for (final WireConfiguration conf : this.wireServiceOptions.getWireConfigurations()) {

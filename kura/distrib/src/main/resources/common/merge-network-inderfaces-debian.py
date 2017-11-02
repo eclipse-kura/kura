@@ -137,7 +137,7 @@ def parseIfaceConfigFile(fileContent):
 		iface.setBroadcast(tokens[1])
 	    elif fileContent[i].startswith("gateway"):
 		tokens = fileContent[i].split(" ")
-		iface.setgateway(tokens[1])
+		iface.setGateway(tokens[1])
 	    else:
 		if not fileContent[i].startswith("#"):
 		    iface.addCommand(fileContent[i]) 
@@ -164,7 +164,7 @@ def createNetIfaceConfigFile(filename, ifaces):
 	elif  iface.getName().startswith("w"):
 	    f.write("# Wireless interface - {}\n".format(iface.getName()))
 	f.write(iface.toString())
-    f.close
+    f.close()
 
 def displayInterfaces(ifaces):
     for iface in ifaces:

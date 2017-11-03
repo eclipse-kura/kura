@@ -357,12 +357,12 @@ public class EntryClassUi extends Composite {
                         }
                         EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.deviceScanner);
                         EntryClassUi.this.contentPanel.setVisible(true);
-                        EntryClassUi.this.contentPanelHeader.setText("Test");
+                        EntryClassUi.this.contentPanelHeader.setText("Device Scanner");
                         EntryClassUi.this.contentPanelBody.clear();
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.deviceScannerBinder);
                         EntryClassUi.this.deviceScannerBinder.setSession(EntryClassUi.this.currentSession);
                         EntryClassUi.this.deviceScannerBinder.setParent(instanceReference);
-                        // EntryClassUi.this.testBinder.loadStatusData();
+                        EntryClassUi.this.deviceScannerBinder.loadDeviceScannerData();
                     }
                 });
 

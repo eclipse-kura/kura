@@ -72,7 +72,7 @@ public class DeviceScannerPanelUi extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 deviceScannerGrid.redraw();
-                loadTestData();
+                loadDeviceScannerData();
             }
         });
 
@@ -119,7 +119,7 @@ public class DeviceScannerPanelUi extends Composite {
         this.deviceScannerWell.add(this.deviceScannerGrid);
     }
 
-    public void loadTestData() {
+    public void loadDeviceScannerData() {
         List<GwtDeviceScanner> listTest = new ArrayList<GwtDeviceScanner>();
         listTest.add(new GwtDeviceScanner("test1", "test1", "test1", "test1"));
         listTest.add(new GwtDeviceScanner("test2", "test2", "test2", "test1"));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+clea * Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,6 +32,7 @@ import org.eclipse.kura.web.client.ui.Packages.PackagesPanelUi;
 import org.eclipse.kura.web.client.ui.Settings.SettingsPanelUi;
 import org.eclipse.kura.web.client.ui.Status.StatusPanelUi;
 import org.eclipse.kura.web.client.ui.drivers.assets.DriversAndAssetsUi;
+import org.eclipse.kura.web.client.ui.test.TestPanelUi;
 import org.eclipse.kura.web.client.ui.wires.WiresPanelUi;
 import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
@@ -112,6 +113,8 @@ public class EntryClassUi extends Composite {
     @UiField
     AnchorListItem network;
     @UiField
+    AnchorListItem test;
+    @UiField
     AnchorListItem firewall;
     @UiField
     AnchorListItem packages;
@@ -179,6 +182,7 @@ public class EntryClassUi extends Composite {
     private static PopupPanel waitModal;
 
     private final StatusPanelUi statusBinder = GWT.create(StatusPanelUi.class);
+    private final TestPanelUi testBinder = GWT.create(TestPanelUi.class);
     private final DevicePanelUi deviceBinder = GWT.create(DevicePanelUi.class);
     private final PackagesPanelUi packagesBinder = GWT.create(PackagesPanelUi.class);
     private final SettingsPanelUi settingsBinder = GWT.create(SettingsPanelUi.class);
@@ -190,7 +194,6 @@ public class EntryClassUi extends Composite {
 
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-
 
     private final KeyUpHandler searchBoxChangeHandler = new KeyUpHandler() {
 
@@ -227,7 +230,7 @@ public class EntryClassUi extends Composite {
         this.footerLeft.setText(MSGS.copyright(String.valueOf(year)));
         this.footerLeft.setStyleName("copyright");
         this.contentPanel.setVisible(false);
-        
+
         // Add handler for sidenav show/hide button
         this.sidenavButton.addClickHandler(new ClickHandler() {
 
@@ -257,7 +260,7 @@ public class EntryClassUi extends Composite {
         });
 
         showSidenav();
-        
+
         initServicesTree();
     }
 
@@ -305,8 +308,8 @@ public class EntryClassUi extends Composite {
     public void initSystemPanel(GwtSession gwtSession, boolean connectionStatus) {
         final EntryClassUi instanceReference = this;
         if (!gwtSession.isNetAdminAvailable()) {
-            this.network.setVisible(false);
-            this.firewall.setVisible(false);
+            // this.network.setVisible(false);
+            // this.firewall.setVisible(false);
         }
 
         // Status Panel
@@ -331,6 +334,35 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.statusBinder.setSession(EntryClassUi.this.currentSession);
                         EntryClassUi.this.statusBinder.setParent(instanceReference);
                         EntryClassUi.this.statusBinder.loadStatusData();
+                    }
+                });
+
+                renderDirtyConfigModal(b);
+            }
+        });
+
+        // Test Panel
+        updateConnectionStatusImage(connectionStatus);
+        this.test.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                Button b = new Button(MSGS.yesButton(), new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        forceTabsCleaning();
+                        if (EntryClassUi.this.modal != null) {
+                            EntryClassUi.this.modal.hide();
+                        }
+                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.test);
+                        EntryClassUi.this.contentPanel.setVisible(true);
+                        EntryClassUi.this.contentPanelHeader.setText("Test");
+                        EntryClassUi.this.contentPanelBody.clear();
+                        EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.testBinder);
+                        EntryClassUi.this.testBinder.setSession(EntryClassUi.this.currentSession);
+                        EntryClassUi.this.testBinder.setParent(instanceReference);
+                        // EntryClassUi.this.testBinder.loadStatusData();
                     }
                 });
 
@@ -523,8 +555,8 @@ public class EntryClassUi extends Composite {
                 renderDirtyConfigModal(b);
             }
         });
-        
-     // Drivers and Twins services Panel
+
+        // Drivers and Twins services Panel
         this.driversAndAssetsServices.addClickHandler(new ClickHandler() {
 
             @Override
@@ -627,25 +659,25 @@ public class EntryClassUi extends Composite {
                 EntryClassUi.this.gwtComponentService.findComponentConfigurations(token, SERVICES_FILTER,
                         new AsyncCallback<List<GwtConfigComponent>>() {
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        logger.log(Level.SEVERE, ex.getMessage(), ex);
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(List<GwtConfigComponent> result) {
-                        sortConfigurationsByName(result);
-                        EntryClassUi.this.servicesMenu.clear();
-                        for (GwtConfigComponent pair : result) {
-                            if (!pair.isWireComponent()) {
-                                EntryClassUi.this.servicesMenu
-                                        .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                FailureHandler.handle(ex, EntryClassUi.class.getName());
                             }
-                        }
-                        filterAvailableServices(EntryClassUi.this.textSearch.getValue());
-                    }
-                });
+
+                            @Override
+                            public void onSuccess(List<GwtConfigComponent> result) {
+                                sortConfigurationsByName(result);
+                                EntryClassUi.this.servicesMenu.clear();
+                                for (GwtConfigComponent pair : result) {
+                                    if (!pair.isWireComponent()) {
+                                        EntryClassUi.this.servicesMenu
+                                                .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
+                                    }
+                                }
+                                filterAvailableServices(EntryClassUi.this.textSearch.getValue());
+                            }
+                        });
             }
         });
     }
@@ -674,22 +706,22 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.gwtComponentService.findFactoryComponents(token,
                                 new AsyncCallback<List<String>>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
+                                    @Override
+                                    public void onFailure(Throwable ex) {
+                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                    }
 
-                            @Override
-                            public void onSuccess(final List<String> result) {
-                                EntryClassUi.this.factoriesList.clear();
-                                EntryClassUi.this.factoriesList.addItem(SELECT_COMPONENT);
-                                for (final String servicePid : result) {
-                                    EntryClassUi.this.factoriesList.addItem(servicePid);
-                                }
-                                EntryClassUi.this.newFactoryComponentModal.show();
-                            }
-                        });
+                                    @Override
+                                    public void onSuccess(final List<String> result) {
+                                        EntryClassUi.this.factoriesList.clear();
+                                        EntryClassUi.this.factoriesList.addItem(SELECT_COMPONENT);
+                                        for (final String servicePid : result) {
+                                            EntryClassUi.this.factoriesList.addItem(servicePid);
+                                        }
+                                        EntryClassUi.this.newFactoryComponentModal.show();
+                                    }
+                                });
                     }
                 });
             }
@@ -729,17 +761,17 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.gwtComponentService.createFactoryComponent(token, factoryPid, pid,
                                 new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
+                                    @Override
+                                    public void onFailure(Throwable ex) {
+                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                fetchAvailableServices();
-                            }
-                        });
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        fetchAvailableServices();
+                                    }
+                                });
                     }
                 });
             }
@@ -875,7 +907,7 @@ public class EntryClassUi extends Composite {
             return false;
         }
     }
-    
+
     public boolean isDriversAndTwinsDirty() {
         if (this.driversAndTwinsBinder.isVisible()) {
             return this.driversAndTwinsBinder.isDirty();

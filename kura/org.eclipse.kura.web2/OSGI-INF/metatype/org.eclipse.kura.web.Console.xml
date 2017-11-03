@@ -24,7 +24,7 @@
         	type="String"
         	cardinality="0"
         	required="true"
-        	default="admin"
+        	default="airsense"
         	description="Device's web username.">
         </AD>
         
@@ -33,7 +33,7 @@
         	type="Password"
         	cardinality="0"
         	required="true"
-        	default="admin"
+        	default="airsense"
         	description="Device's web console password. A non empty value should be set.">
         </AD>
 

@@ -115,6 +115,9 @@
                                     <b:NavPills stacked="true">
                                         <b:TabListItem text="Status" icon="EXCLAMATION" iconFixedWidth="true"
                                             ui:field="status" />
+                                            
+                                        <b:TabListItem text="Test" icon="EXCLAMATION" iconFixedWidth="true"
+                                            ui:field="test" />
 
                                         <b:AnchorListItem text="Device" icon="HDD_O" iconFixedWidth="true"
                                             ui:field="device" />

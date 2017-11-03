@@ -58,7 +58,6 @@ import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkAdminService;
-import org.eclipse.kura.net.admin.event.FirewallConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.monitor.WifiInterfaceState;
 import org.eclipse.kura.net.admin.visitor.linux.WpaSupplicantConfigWriter;
@@ -97,10 +96,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     private Object wifiClientMonitorServiceLock;
 
     private boolean pendingNetworkConfigurationChange = false;
-    private boolean pendingFirewallConfigurationChange = false;
 
     private static final String[] EVENT_TOPICS = new String[] {
-            NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC, };
+            NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC };
 
     private ComponentContext context;
 
@@ -1168,20 +1166,20 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     public void setFirewallOpenPortConfiguration(
             List<FirewallOpenPortConfigIP<? extends IPAddress>> firewallConfiguration) throws KuraException {
         this.firewallConfigurationService.setFirewallOpenPortConfiguration(firewallConfiguration);
-        submitFirewallConfiguration();
+        this.configurationService.snapshot();
     }
 
     @Override
     public void setFirewallPortForwardingConfiguration(
             List<FirewallPortForwardConfigIP<? extends IPAddress>> firewallConfiguration) throws KuraException {
         this.firewallConfigurationService.setFirewallPortForwardingConfiguration(firewallConfiguration);
-        submitFirewallConfiguration();
+        this.configurationService.snapshot();
     }
 
     @Override
     public void setFirewallNatConfiguration(List<FirewallNatConfig> natConfigs) throws KuraException {
         this.firewallConfigurationService.setFirewallNatConfiguration(natConfigs);
-        submitFirewallConfiguration();
+        this.configurationService.snapshot();
     }
 
     @Override
@@ -1396,8 +1394,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         String topic = event.getTopic();
         if (topic.equals(NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC)) {
             this.pendingNetworkConfigurationChange = false;
-        } else if (topic.equals(FirewallConfigurationChangeEvent.FIREWALL_EVENT_CONFIG_CHANGE_TOPIC)) {
-            this.pendingFirewallConfigurationChange = false;
         }
     }
 
@@ -1520,29 +1516,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         if (this.pendingNetworkConfigurationChange) {
             logger.warn("Did not receive a network configuration change event");
             this.pendingNetworkConfigurationChange = false;
-        }
-    }
-
-    private void submitFirewallConfiguration() throws KuraException {
-        short timeout = 30000;		// in milliseconds
-        final short sleep = 500;
-
-        this.pendingFirewallConfigurationChange = true; // it will be set to false in handleEvent()
-
-        this.configurationService.snapshot();
-
-        while (this.pendingFirewallConfigurationChange && timeout > 0) {
-            timeout -= sleep;
-            try {
-                Thread.sleep(sleep);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-
-        if (this.pendingFirewallConfigurationChange) {
-            logger.warn("Did not receive a firewall configuration change event");
-            this.pendingFirewallConfigurationChange = false;
         }
     }
 

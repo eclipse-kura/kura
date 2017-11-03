@@ -36,9 +36,9 @@ import com.google.gwt.user.client.ui.Widget;
 public class TestPanelUi extends Composite {
 
     private static final Logger logger = Logger.getLogger(TestPanelUi.class.getSimpleName());
-    private static StatusPanelUiUiBinder uiBinder = GWT.create(StatusPanelUiUiBinder.class);
+    private static TestPanelUiUiBinder uiBinder = GWT.create(TestPanelUiUiBinder.class);
 
-    interface StatusPanelUiUiBinder extends UiBinder<Widget, TestPanelUi> {
+    interface TestPanelUiUiBinder extends UiBinder<Widget, TestPanelUi> {
     }
 
     private static final Messages MSG = GWT.create(Messages.class);

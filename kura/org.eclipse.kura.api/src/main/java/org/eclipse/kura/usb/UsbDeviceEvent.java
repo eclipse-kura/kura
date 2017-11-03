@@ -45,4 +45,11 @@ public interface UsbDeviceEvent {
 
     /** Name of the property to access the USB device path **/
     public static final String USB_EVENT_DEVICE_PATH_PROPERTY = "usb.device.path";
+
+    /**
+     * Name of the property to access the USB device type
+     * 
+     * @since 1.4
+     **/
+    public static final String USB_EVENT_DEVICE_TYPE_PROPERTY = "usb.device.type";
 }

@@ -28,6 +28,7 @@ import org.eclipse.kura.usb.UsbDevice;
 import org.eclipse.kura.usb.UsbDeviceAddedEvent;
 import org.eclipse.kura.usb.UsbDeviceEvent;
 import org.eclipse.kura.usb.UsbDeviceRemovedEvent;
+import org.eclipse.kura.usb.UsbDeviceType;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.eclipse.kura.usb.UsbService;
 import org.eclipse.kura.usb.UsbTtyDevice;
@@ -108,7 +109,7 @@ public class UsbServiceImpl implements UsbService, LinuxUdevListener {
     @Override
     public synchronized void attached(UsbDevice device) {
         s_logger.debug("firing UsbDeviceAddedEvent for: {}", device);
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, Object> map = new HashMap<>();
         map.put(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY, device.getUsbPort());
         map.put(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY, device.getVendorId());
         map.put(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY, device.getProductId());
@@ -119,10 +120,13 @@ public class UsbServiceImpl implements UsbService, LinuxUdevListener {
 
         if (device instanceof UsbBlockDevice) {
             map.put(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY, ((UsbBlockDevice) device).getDeviceNode());
+            map.put(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY, UsbDeviceType.USB_BLOCK_DEVICE);
         } else if (device instanceof UsbNetDevice) {
             map.put(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY, ((UsbNetDevice) device).getInterfaceName());
+            map.put(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY, UsbDeviceType.USB_NET_DEVICE);
         } else if (device instanceof UsbTtyDevice) {
             map.put(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY, ((UsbTtyDevice) device).getDeviceNode());
+            map.put(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY, UsbDeviceType.USB_TTY_DEVICE);
         }
 
         this.m_eventAdmin.postEvent(new UsbDeviceAddedEvent(map));
@@ -131,7 +135,7 @@ public class UsbServiceImpl implements UsbService, LinuxUdevListener {
     @Override
     public synchronized void detached(UsbDevice device) {
         s_logger.debug("firing UsbDeviceRemovedEvent for: {}", device);
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, Object> map = new HashMap<>();
         map.put(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY, device.getUsbPort());
         map.put(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY, device.getVendorId());
         map.put(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY, device.getProductId());
@@ -142,10 +146,13 @@ public class UsbServiceImpl implements UsbService, LinuxUdevListener {
 
         if (device instanceof UsbBlockDevice) {
             map.put(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY, ((UsbBlockDevice) device).getDeviceNode());
+            map.put(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY, UsbDeviceType.USB_BLOCK_DEVICE);
         } else if (device instanceof UsbNetDevice) {
             map.put(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY, ((UsbNetDevice) device).getInterfaceName());
+            map.put(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY, UsbDeviceType.USB_NET_DEVICE);
         } else if (device instanceof UsbTtyDevice) {
             map.put(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY, ((UsbTtyDevice) device).getDeviceNode());
+            map.put(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY, UsbDeviceType.USB_TTY_DEVICE);
         }
 
         this.m_eventAdmin.postEvent(new UsbDeviceRemovedEvent(map));

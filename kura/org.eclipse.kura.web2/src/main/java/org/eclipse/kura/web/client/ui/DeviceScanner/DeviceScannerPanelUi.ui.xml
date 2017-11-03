@@ -30,14 +30,14 @@
 			<b:Row>
 				<b:Panel>
 					<b:ButtonGroup size="SMALL">
-						<b:Button ui:field="testRefresh" addStyleNames="fa fa-refresh"></b:Button>
+						<b:Button ui:field="deviceScannerRefresh" addStyleNames="fa fa-refresh"></b:Button>
 					</b:ButtonGroup>
 				</b:Panel>
 			</b:Row>
 			<b:Row>
-				<b:Well addStyleNames="{style.center-panel} status-well" ui:field="testWell">
+				<b:Well addStyleNames="{style.center-panel} status-well" ui:field="deviceScannerWell">
 					<gwt:CellTable bordered="true" condensed="true"
-						striped="true" hover="true" height="100%" width="100%" ui:field="testGrid" />						
+						striped="true" hover="true" height="100%" width="100%" ui:field="deviceScannerGrid" />						
 				</b:Well>
 			</b:Row>
 		</b:Column>

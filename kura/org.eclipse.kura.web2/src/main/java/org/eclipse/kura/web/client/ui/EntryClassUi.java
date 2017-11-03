@@ -26,13 +26,13 @@ import java.util.logging.Logger;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.CloudServices.CloudServicesUi;
 import org.eclipse.kura.web.client.ui.Device.DevicePanelUi;
+import org.eclipse.kura.web.client.ui.DeviceScanner.DeviceScannerPanelUi;
 import org.eclipse.kura.web.client.ui.Firewall.FirewallPanelUi;
 import org.eclipse.kura.web.client.ui.Network.NetworkPanelUi;
 import org.eclipse.kura.web.client.ui.Packages.PackagesPanelUi;
 import org.eclipse.kura.web.client.ui.Settings.SettingsPanelUi;
 import org.eclipse.kura.web.client.ui.Status.StatusPanelUi;
 import org.eclipse.kura.web.client.ui.drivers.assets.DriversAndAssetsUi;
-import org.eclipse.kura.web.client.ui.test.TestPanelUi;
 import org.eclipse.kura.web.client.ui.wires.WiresPanelUi;
 import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
@@ -113,7 +113,7 @@ public class EntryClassUi extends Composite {
     @UiField
     AnchorListItem network;
     @UiField
-    AnchorListItem test;
+    AnchorListItem deviceScanner;
     @UiField
     AnchorListItem firewall;
     @UiField
@@ -182,7 +182,7 @@ public class EntryClassUi extends Composite {
     private static PopupPanel waitModal;
 
     private final StatusPanelUi statusBinder = GWT.create(StatusPanelUi.class);
-    private final TestPanelUi testBinder = GWT.create(TestPanelUi.class);
+    private final DeviceScannerPanelUi deviceScannerBinder = GWT.create(DeviceScannerPanelUi.class);
     private final DevicePanelUi deviceBinder = GWT.create(DevicePanelUi.class);
     private final PackagesPanelUi packagesBinder = GWT.create(PackagesPanelUi.class);
     private final SettingsPanelUi settingsBinder = GWT.create(SettingsPanelUi.class);
@@ -308,8 +308,8 @@ public class EntryClassUi extends Composite {
     public void initSystemPanel(GwtSession gwtSession, boolean connectionStatus) {
         final EntryClassUi instanceReference = this;
         if (!gwtSession.isNetAdminAvailable()) {
-            // this.network.setVisible(false);
-            // this.firewall.setVisible(false);
+            this.network.setVisible(false);
+            this.firewall.setVisible(false);
         }
 
         // Status Panel
@@ -343,7 +343,7 @@ public class EntryClassUi extends Composite {
 
         // Test Panel
         updateConnectionStatusImage(connectionStatus);
-        this.test.addClickHandler(new ClickHandler() {
+        this.deviceScanner.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -355,13 +355,13 @@ public class EntryClassUi extends Composite {
                         if (EntryClassUi.this.modal != null) {
                             EntryClassUi.this.modal.hide();
                         }
-                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.test);
+                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.deviceScanner);
                         EntryClassUi.this.contentPanel.setVisible(true);
                         EntryClassUi.this.contentPanelHeader.setText("Test");
                         EntryClassUi.this.contentPanelBody.clear();
-                        EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.testBinder);
-                        EntryClassUi.this.testBinder.setSession(EntryClassUi.this.currentSession);
-                        EntryClassUi.this.testBinder.setParent(instanceReference);
+                        EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.deviceScannerBinder);
+                        EntryClassUi.this.deviceScannerBinder.setSession(EntryClassUi.this.currentSession);
+                        EntryClassUi.this.deviceScannerBinder.setParent(instanceReference);
                         // EntryClassUi.this.testBinder.loadStatusData();
                     }
                 });

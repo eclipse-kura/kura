@@ -54,7 +54,6 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.net.NetInterfaceStatus;
-import org.eclipse.kura.net.admin.event.FirewallConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.dhcp.DhcpServerCfg;
 import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
@@ -1581,29 +1580,6 @@ public class NetworkAdminServiceImplTest {
 
             assertEquals(i, result);
         }
-    }
-
-    @Test(timeout = 2500)
-    public void testSubmitFirewallConfiguration() throws Throwable {
-        // this is to test that submitFirewallConfiguration works with handleEvent and that timeout won't happen
-
-        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
-
-        ConfigurationService csMock = mock(ConfigurationService.class);
-        svc.setConfigurationService(csMock);
-
-        new Thread(() -> {
-            try {
-                Thread.sleep(600);
-            } catch (InterruptedException e) {
-            }
-
-            svc.handleEvent(new FirewallConfigurationChangeEvent(null));
-        }).start();
-
-        TestUtil.invokePrivate(svc, "submitFirewallConfiguration");
-
-        verify(csMock, times(1)).snapshot();
     }
 
     @Test

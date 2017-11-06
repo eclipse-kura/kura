@@ -37,6 +37,7 @@ import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.type.TypedValue;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -62,9 +63,13 @@ public class AssetRestService {
     @RolesAllowed("assets")
     @Produces(MediaType.APPLICATION_JSON)
     public List<String> listAssetPids() throws InvalidSyntaxException {
-        return FrameworkUtil.getBundle(AssetRestService.class).getBundleContext()
-                .getServiceReferences(Asset.class, null).stream()
+        return getAssetServiceReferences().stream()
                 .map(reference -> (String) reference.getProperty("kura.service.pid")).collect(Collectors.toList());
+    }
+
+    protected Collection<ServiceReference<Asset>> getAssetServiceReferences() throws InvalidSyntaxException {
+        return FrameworkUtil.getBundle(AssetRestService.class).getBundleContext()
+                .getServiceReferences(Asset.class, null);
     }
 
     @GET

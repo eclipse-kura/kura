@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -42,7 +42,7 @@ public class ConfigurationUpgrade {
     private static final String REFERENCE_TARGET_VALUE_FORMAT = "(" + ConfigurationService.KURA_SERVICE_PID + "=%s)";
 
     public static XmlComponentConfigurations upgrade(XmlComponentConfigurations xmlConfigs) {
-        List<ComponentConfigurationImpl> result = new ArrayList<ComponentConfigurationImpl>();
+        List<ComponentConfiguration> result = new ArrayList<ComponentConfiguration>();
 
         for (ComponentConfiguration config : xmlConfigs.getConfigurations()) {
             String pid = config.getPid();

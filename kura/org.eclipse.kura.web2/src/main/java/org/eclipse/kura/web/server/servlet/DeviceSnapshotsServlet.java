@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -67,7 +67,7 @@ public class DeviceSnapshotsServlet extends HttpServlet {
                 List<ComponentConfiguration> configs = cs.getSnapshot(sid);
 
                 // build a list of configuration which can be marshalled in XML
-                List<ComponentConfigurationImpl> configImpls = new ArrayList<ComponentConfigurationImpl>();
+                List<ComponentConfiguration> configImpls = new ArrayList<ComponentConfiguration>();
                 for (ComponentConfiguration config : configs) {
                     configImpls.add((ComponentConfigurationImpl) config);
                 }

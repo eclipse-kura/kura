@@ -510,8 +510,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         Set<String> snapshotPids = new HashSet<String>();
         boolean snapshotOnConfirmation = false;
         List<Throwable> causes = new ArrayList<Throwable>();
-        List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
-        for (ComponentConfigurationImpl config : configs) {
+        List<ComponentConfiguration> configs = xmlConfigs.getConfigurations();
+        for (ComponentConfiguration config : configs) {
             if (config != null) {
                 try {
                     rollbackConfigurationInternal(config.getPid(), config.getConfigurationProperties(),
@@ -581,12 +581,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         XmlComponentConfigurations xmlConfigs = loadEncryptedSnapshotFileContent(sid);
         if (xmlConfigs != null) {
-            List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
-            for (ComponentConfigurationImpl config : configs) {
+            List<ComponentConfiguration> configs = xmlConfigs.getConfigurations();
+            for (ComponentConfiguration config : configs) {
                 if (config != null) {
                     try {
-                        decryptConfigurationProperties(
-                                config.getConfigurationProperties());
+                        decryptConfigurationProperties(config.getConfigurationProperties());
                     } catch (Throwable t) {
                         logger.warn("Error during snapshot password decryption");
                     }
@@ -920,13 +919,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         return password;
     }
 
-    private void encryptConfigs(List<? extends ComponentConfiguration> configs) {
-        if (configs == null) {
-            return;
-        }
-
-        for (ComponentConfiguration config : configs) {
-            if (config instanceof ComponentConfigurationImpl) {
+    private void encryptConfigs(List<ComponentConfiguration> configs) {
+        if (configs != null) {
+            for (ComponentConfiguration config : configs) {
                 encryptConfigurationProperties(config.getConfigurationProperties());
             }
         }
@@ -990,7 +985,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                     fr.close();
                 }
             }
-            List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
+            List<ComponentConfiguration> configs = xmlConfigs.getConfigurations();
             encryptConfigs(configs);
 
             // Writes an encrypted snapshot with encrypted passwords.
@@ -998,18 +993,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
     }
 
-    private synchronized long saveSnapshot(List<? extends ComponentConfiguration> configs) throws KuraException {
-
-        List<ComponentConfigurationImpl> configImpls = new ArrayList<ComponentConfigurationImpl>();
-        for (ComponentConfiguration config : configs) {
-            if (config instanceof ComponentConfigurationImpl) {
-                configImpls.add((ComponentConfigurationImpl) config);
-            }
-        }
-
+    private synchronized long saveSnapshot(List<ComponentConfiguration> configs) throws KuraException {
         // Build the XML structure
         XmlComponentConfigurations conf = new XmlComponentConfigurations();
-        conf.setConfigurations(configImpls);
+        conf.setConfigurations(configs);
 
         // Write it to disk: marshall
         long sid = new Date().getTime();
@@ -1275,7 +1262,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private void loadLatestSnapshotInConfigAdmin() throws KuraException {
         //
         // save away initial configuration
-        List<ComponentConfigurationImpl> configs = loadLatestSnapshotConfigurations();
+        List<ComponentConfiguration> configs = loadLatestSnapshotConfigurations();
         if (configs == null) {
             return;
         }
@@ -1319,7 +1306,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
     }
 
-    private List<ComponentConfigurationImpl> loadLatestSnapshotConfigurations() throws KuraException {
+    private List<ComponentConfiguration> loadLatestSnapshotConfigurations() throws KuraException {
         //
         // Get the latest snapshot file to use as initialization
         Set<Long> snapshotIDs = getSnapshots();
@@ -1334,7 +1321,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // Unmarshall
         logger.info("Loading init configurations from: {}...", lastestID);
 
-        List<ComponentConfigurationImpl> configs = null;
+        List<ComponentConfiguration> configs = null;
         try {
             XmlComponentConfigurations xmlConfigs = loadEncryptedSnapshotFileContent(lastestID);
             if (xmlConfigs != null) {
@@ -1620,9 +1607,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         // complete the returned configurations adding the snapshot configurations
         // of those components not yet in the list.
-        List<ComponentConfigurationImpl> snapshotConfigs = loadLatestSnapshotConfigurations();
+        List<ComponentConfiguration> snapshotConfigs = loadLatestSnapshotConfigurations();
         if (snapshotConfigs != null) {
-            for (ComponentConfigurationImpl snapshotConfig : snapshotConfigs) {
+            for (ComponentConfiguration snapshotConfig : snapshotConfigs) {
                 boolean found = false;
                 for (ComponentConfiguration config : result) {
                     if (config.getPid().equals(snapshotConfig.getPid())) {

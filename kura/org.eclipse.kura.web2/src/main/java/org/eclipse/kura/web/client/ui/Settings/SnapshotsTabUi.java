@@ -43,6 +43,7 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -71,10 +72,10 @@ public class SnapshotsTabUi extends Composite implements Tab {
 
     @UiField
     Modal uploadModal;
-    
+
     @UiField
     FormPanel snapshotsForm;
-    
+
     @UiField
     Button uploadCancel;
     @UiField
@@ -88,16 +89,16 @@ public class SnapshotsTabUi extends Composite implements Tab {
     Button rollback;
     @UiField
     Button upload;
-    
+
     @UiField
     Alert notification;
-    
+
     @UiField
     FileUpload filePath;
-    
+
     @UiField
     Hidden xsrfTokenField;
-    
+
     @UiField
     CellTable<GwtSnapshot> snapshotsGrid = new CellTable<>();
 
@@ -107,7 +108,6 @@ public class SnapshotsTabUi extends Composite implements Tab {
     private Element downloadIframe;
 
     private final ListDataProvider<GwtSnapshot> snapshotsDataProvider = new ListDataProvider<>();
-
 
     public SnapshotsTabUi() {
         logger.log(Level.FINER, "Initiating SnapshotsTabUI...");
@@ -129,7 +129,7 @@ public class SnapshotsTabUi extends Composite implements Tab {
                 EntryClassUi.hideWaitModal();
                 if (htmlResponse == null || htmlResponse.isEmpty()) {
                     logger.log(Level.FINER, MSGS.information() + ": " + MSGS.fileUploadSuccess());
-                    refresh();
+                    Window.Location.reload();
                 } else {
                     logger.log(Level.SEVERE, MSGS.information() + ": " + MSGS.fileUploadFailure());
                     FailureHandler.handle(new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR));
@@ -358,8 +358,7 @@ public class SnapshotsTabUi extends Composite implements Tab {
 
                                         @Override
                                         public void onSuccess(Void result) {
-                                            EntryClassUi.hideWaitModal();
-                                            refresh();
+                                            Window.Location.reload();
                                         }
                                     });
                         }

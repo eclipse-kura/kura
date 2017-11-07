@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
@@ -507,18 +508,46 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // restore configuration
         logger.info("Rolling back to snapshot {}...", id);
 
-        Set<String> snapshotPids = new HashSet<String>();
+        Set<String> snapshotPids = new HashSet<>();
         boolean snapshotOnConfirmation = false;
-        List<Throwable> causes = new ArrayList<Throwable>();
+        List<Throwable> causes = new ArrayList<>();
         List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
+
+        // remove all existing factory configurations
+        for (String pid : new ArrayList<>(this.factoryPidByPid.keySet())) {
+            try {
+                deleteFactoryConfiguration(pid, false);
+            } catch (Exception e) {
+                logger.warn("Failed to remove factory configuration for pid: " + pid, e);
+                causes.add(e);
+            }
+        }
+
+        // create all factory configurations in snapshot
+        final Stream<ComponentConfigurationImpl> factoryConfigurationsInSnapshot = configs.stream()
+                .filter(config -> config.getPid() != null
+                        && config.getConfigurationProperties().containsKey(ConfigurationAdmin.SERVICE_FACTORYPID));
+
+        factoryConfigurationsInSnapshot.forEach(config -> {
+            final String pid = config.getPid();
+            final Map<String, Object> properties = config.getConfigurationProperties();
+            final String factoryPid = properties.get(ConfigurationAdmin.SERVICE_FACTORYPID).toString();
+            try {
+                createFactoryConfiguration(factoryPid, pid, properties, false);
+            } catch (Exception e) {
+                logger.warn("Error during rollback for component " + pid, e);
+                causes.add(e);
+            }
+        });
+
         for (ComponentConfigurationImpl config : configs) {
             if (config != null) {
                 try {
                     rollbackConfigurationInternal(config.getPid(), config.getConfigurationProperties(),
                             snapshotOnConfirmation);
-                } catch (Throwable t) {
-                    logger.warn("Error during rollback for component " + config.getPid(), t);
-                    causes.add(t);
+                } catch (Exception e) {
+                    logger.warn("Error during rollback for component " + config.getPid(), e);
+                    causes.add(e);
                 }
                 // Track the pid of the component
                 snapshotPids.add(config.getPid());
@@ -528,34 +557,19 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // rollback to the default configuration for those configurable
         // components
         // whose configuration is not present in the snapshot
-        Set<String> pids = new HashSet<String>(this.allActivatedPids);
-        pids.removeAll(this.activatedSelfConfigComponents);
+        Set<String> pids = new HashSet<>(this.allActivatedPids);
         pids.removeAll(snapshotPids);
 
         for (String pid : pids) {
             logger.info("Rolling back to default configuration for component pid: '{}'", pid);
             try {
-                ServiceReference<?>[] refs = this.ctx.getBundleContext().getServiceReferences((String) null, null);
-                if (refs != null) {
-                    for (ServiceReference<?> ref : refs) {
-                        String ppid = (String) ref.getProperty(Constants.SERVICE_PID);
-                        if (pid.equals(ppid)) {
-                            Bundle bundle = ref.getBundle();
-                            try {
-                                OCD ocd = ComponentUtil.readObjectClassDefinition(bundle, pid);
-                                Map<String, Object> defaults = getDefaultProperties(ocd);
-                                rollbackConfigurationInternal(pid, defaults, snapshotOnConfirmation);
-                            } catch (Throwable t) {
-                                logger.warn("Error during rollback for component " + pid, t);
-                                causes.add(t);
-                            }
-                        }
-                    }
-                }
-            } catch (InvalidSyntaxException e) {
+                rollbackConfigurationInternal(pid, Collections.emptyMap(), snapshotOnConfirmation);
+            } catch (Exception e) {
                 logger.warn("Error during rollback for component " + pid, e);
+                causes.add(e);
             }
         }
+
         if (!causes.isEmpty()) {
             throw new KuraPartialSuccessException("Rollback", causes);
         }
@@ -585,8 +599,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             for (ComponentConfigurationImpl config : configs) {
                 if (config != null) {
                     try {
-                        decryptConfigurationProperties(
-                                config.getConfigurationProperties());
+                        decryptConfigurationProperties(config.getConfigurationProperties());
                     } catch (Throwable t) {
                         logger.warn("Error during snapshot password decryption");
                     }
@@ -1480,6 +1493,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         mergeWithDefaults(registerdOCD, mergedProperties);
 
         mergedProperties.putAll(properties);
+
+        if (!mergedProperties.containsKey(ConfigurationService.KURA_SERVICE_PID)) {
+            mergedProperties.put(ConfigurationService.KURA_SERVICE_PID, pid);
+        }
+
         try {
             updateComponentConfiguration(pid, mergedProperties, snapshotOnConfirmation);
             logger.info("Updating Configuration of ConfigurableComponent {} ... Done.", pid);

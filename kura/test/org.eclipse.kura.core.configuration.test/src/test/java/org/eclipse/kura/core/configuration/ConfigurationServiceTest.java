@@ -182,6 +182,7 @@ public class ConfigurationServiceTest {
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
             // test that protected component registration was called with the proper parameters
+            @Override
             synchronized void registerComponentConfiguration(String pid1, String servicePid, String factoryPid1) {
                 assertEquals("PIDs match", pid, pid1);
                 assertEquals("Service PIDs match", caPid, servicePid);
@@ -242,6 +243,7 @@ public class ConfigurationServiceTest {
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
+            @Override
             synchronized void registerComponentConfiguration(String pid1, String servicePid, String factoryPid1) {
                 // skip this method call
             }
@@ -298,6 +300,7 @@ public class ConfigurationServiceTest {
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
             // test that protected component registration was called with the proper parameters
+            @Override
             synchronized void registerComponentConfiguration(String pid1, String servicePid, String factoryPid1) {
                 // skip this method call
             }
@@ -665,6 +668,7 @@ public class ConfigurationServiceTest {
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
+            @Override
             Map<String, Object> getDefaultProperties(OCD ocd) throws KuraException {
                 return props;
             }
@@ -952,6 +956,7 @@ public class ConfigurationServiceTest {
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
+            @Override
             public synchronized void updateConfiguration(String pidToUpdate,
                     java.util.Map<String, Object> propertiesToUpdate, boolean takeSnapshot) throws KuraException {
 
@@ -2855,6 +2860,15 @@ public class ConfigurationServiceTest {
         Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         allPids.add(pid);
 
+        Map<String, String> factoryPidByPid = new HashMap<>(); // will cause exception in deleteFactoryConfiguration
+        factoryPidByPid.put("key", null);
+        TestUtil.setFieldValue(cs, "factoryPidByPid", factoryPidByPid);
+
+        Map<String, Tocd> ocds = new HashMap<>(); // for getRegisteredOCD in rollbackConfigurationInternal
+        Tocd ocd = new Tocd();
+        ocds.put(pid, ocd);
+        TestUtil.setFieldValue(cs, "ocds", ocds);
+
         ComponentContext componentCtxMock = mock(ComponentContext.class);
         TestUtil.setFieldValue(cs, "ctx", componentCtxMock);
 
@@ -2881,8 +2895,6 @@ public class ConfigurationServiceTest {
         }
 
         verify(cryptoServiceMock, times(1)).decryptAes("test".toCharArray());
-        // verify(cryptoServiceMock, times(1)).encryptAes((char[]) anyObject());
-        // verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
 
         File[] files = d1.listFiles();
 

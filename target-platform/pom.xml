@@ -2,91 +2,114 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.eclipse.kura</groupId>
-	<artifactId>target-platform</artifactId>
-	<version>3.1.0-SNAPSHOT</version>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.eclipse.kura</groupId>
+    <artifactId>target-platform</artifactId>
+    <version>3.2.0-SNAPSHOT</version>
 
-	<packaging>pom</packaging>
+    <packaging>pom</packaging>
 
-	<modules>
-		<module>org.eclipse.kura.camel.sun.misc</module>
-		<module>org.eclipse.kura.sun.misc</module>
-		<module>com.codeminders.hidapi-parent</module>
-		<module>org.usb4java</module>
-		<module>usb4java-javax</module>
-		<module>org.eclipse.soda.dk.comm-parent</module>
-		<!--<module>org.eclipse.kura.windows.system</module>
-		<module>org.eclipse.kura.windows.service</module>
-		<module>org.eclipse.kura.windows.launcher</module>-->
-		<module>jdk.dio-parent</module>
-		<module>com.gwt.user</module>
-                <module>moquette-broker</module>
-		<module>p2-repo-common</module>
-		<module>p2-repo-equinox_3.11.1</module>
-		<module>p2-repo-test-deps</module>
-	</modules>
+    <modules>
+        <module>org.apache.activemq.artemis</module>
+        <module>org.eclipse.kura.camel.sun.misc</module>
+        <module>org.eclipse.kura.sun.misc</module>
+        <module>com.codeminders.hidapi-parent</module>
+        <module>org.usb4java</module>
+        <module>usb4java-javax</module>
+        <module>org.moka7</module>
+        <module>org.eclipse.soda.dk.comm-parent</module>
+        <module>jdk.dio-parent</module>
+        <module>com.gwt.user</module>
+        <module>tinyb-parent</module>
+        <module>moquette-broker</module>
+        <module>p2-repo-common</module>
+        <module>p2-repo-equinox_3.11.1</module>
+        <module>p2-repo-test-deps</module>
+    </modules>
 
-	<repositories>
-		<repository>
-			<id>kura_addons</id>
-			<name>Kura Addons Maven Repository</name>
-			<url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</url>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>Eclipse Paho Repo</id>
-			<url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
-		</repository>
-		<repository>
-			<id>Kura Releases</id>
-			<name>Kura Repository - Releases</name>
-			<url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
-		</repository>
-		<repository>
-			<id>Kura Snapshots</id>
-			<name>Kura Repository - Snapshots</name>
-			<url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
-		</repository>
-	</repositories>
+    <repositories>
+        <repository>
+            <id>kura_addons</id>
+            <name>Kura Addons Maven Repository</name>
+            <url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>Eclipse Paho Repo</id>
+            <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
+        </repository>
+        <repository>
+            <id>Kura Releases</id>
+            <name>Kura Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+        <repository>
+            <id>Kura Snapshots</id>
+            <name>Kura Repository - Snapshots</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+        </repository>
+    </repositories>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+    <distributionManagement>
+        <repository>
+            <id>repo.eclipse.org</id>
+            <name>Kura Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>repo.eclipse.org</id>
+            <name>Kura Repository - Snapshots</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<version>3.3</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.8.1</version>
-				<configuration>
-				</configuration>
-			</plugin>
-			<plugin>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <check.plugins.exist.remote>true</check.plugins.exist.remote>
+    </properties>
+    
+    <profiles>
+        <profile>
+            <id>skip-exists-plugin</id>
+            <properties>
+            	<check.plugins.exist.remote>false</check.plugins.exist.remote>
+            </properties>
+        </profile>
+    </profiles>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.3</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.1</version>
+                <configuration>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>2.17</version>
                 <dependencies>
-        			<dependency>
-            			<groupId>org.slf4j</groupId>
-            			<artifactId>jcl-over-slf4j</artifactId>
-            			<version>1.7.5</version>
-        			</dependency>
-        			<dependency>
-            			<groupId>org.slf4j</groupId>
-            			<artifactId>slf4j-jdk14</artifactId>
-            			<version>1.7.5</version>
-        			</dependency>
-    			</dependencies>
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>jcl-over-slf4j</artifactId>
+                        <version>1.7.5</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-jdk14</artifactId>
+                        <version>1.7.5</version>
+                    </dependency>
+                </dependencies>
                 <executions>
                     <execution>
                         <id>checkstyle-validation</id>
@@ -104,8 +127,24 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.honton.chas</groupId>
+                <artifactId>exists-maven-plugin</artifactId>
+                <version>0.0.3</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>remote</goal>
+                        </goals>
+                        <configuration>
+                            <skipIfSnapshot>true</skipIfSnapshot>
+                            <failIfExists>${check.plugins.exist.remote}</failIfExists>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
-        
+
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -242,21 +281,7 @@
                         </lifecycleMappingMetadata>
                     </configuration>
                 </plugin>
-			</plugins>
-		</pluginManagement>
-		
-	</build>
-	
-	<distributionManagement>
-		<repository>
-			<id>repo.eclipse.org</id>
-			<name>Kura Repository - Releases</name>
-			<url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>repo.eclipse.org</id>
-			<name>Kura Repository - Snapshots</name>
-			<url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

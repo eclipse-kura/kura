@@ -230,10 +230,8 @@ public class BluetoothUtil {
                 proc = BluetoothProcessUtil.exec(commandKill);
             }
 
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             s_logger.error("Error executing command: {}", commandPidOf, e);
-        } catch (InterruptedException e) {
-            s_logger.warn("Error executing command: {}", commandPidOf, e);
         } finally {
             if (proc != null) {
                 proc.destroy();

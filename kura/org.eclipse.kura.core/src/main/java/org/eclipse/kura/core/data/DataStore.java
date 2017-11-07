@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,7 +14,7 @@ package org.eclipse.kura.core.data;
 import java.util.List;
 
 import org.eclipse.kura.KuraStoreException;
-import org.eclipse.kura.db.DbService;
+import org.eclipse.kura.db.H2DbService;
 
 /**
  * DataStore implementation have the responsibility of doing the bookkeeping of
@@ -25,7 +25,7 @@ import org.eclipse.kura.db.DbService;
  */
 public interface DataStore {
 
-    public void start(DbService dbService, int houseKeeperInterval, int purgeAge, int capacity)
+    public void start(H2DbService dbService, int houseKeeperInterval, int purgeAge, int capacity)
             throws KuraStoreException;
 
     public void update(int houseKeeperInterval, int purgeAge, int capacity);
@@ -151,21 +151,6 @@ public interface DataStore {
      * @throws KuraStoreException
      */
     public void deleteStaleMessages(int purgeAge) throws KuraStoreException;
-
-    /**
-     * Defragments the store.
-     * 
-     * @throws KuraStoreException
-     *             TODO
-     */
-    public void defrag() throws KuraStoreException;
-
-    /**
-     * Performs a checkpoint of the store.
-     * 
-     * @throws KuraStoreException
-     */
-    public void checkpoint() throws KuraStoreException;
 
     /**
      * Checks and attempts to repair the store.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,21 +17,21 @@ package org.eclipse.kura.linux.position;
  */
 public class NMEAParser {
 
-    private int m_fixQuality;
-    private String m_timeNmea;
-    private String m_dateNmea;
-    private double m_longNmea;
-    private double m_latNmea;
-    private double m_speedNmea;
-    private double m_altNmea;
-    private double m_trackNmea;
-    private double m_DOPNmea;
-    private double m_PDOPNmea;
-    private double m_HDOPNmea;
-    private double m_VDOPNmea;
-    private int m_3DfixNmea;
-    private int m_nrSatellites;
-    private static boolean m_validPosition;
+    private int fixQuality;
+    private String timeNmea;
+    private String dateNmea;
+    private double longNmea;
+    private double latNmea;
+    private double speedNmea;
+    private double altNmea;
+    private double trackNmea;
+    private double dopNmea;
+    private double pdopNmea;
+    private double hdopNmea;
+    private double vdopNmea;
+    private int fix3DNmea;
+    private int nrSatellites;
+    private static boolean validPosition;
 
     /**
      * Fill the fields of GPS position depending of the type of the sentence
@@ -60,253 +60,243 @@ public class NMEAParser {
 
         if (tokens[0].endsWith("GGA")) {
             if (tokens.length > 9) {
-                m_validPosition = true;
+                validPosition = true;
                 if (!tokens[1].isEmpty()) {
-                    this.m_timeNmea = tokens[1];
+                    this.timeNmea = tokens[1];
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
                 if (!tokens[2].isEmpty()) {
-                    this.m_latNmea = convertPositionlat(tokens[2], tokens[3]);
+                    this.latNmea = convertPositionlat(tokens[2], tokens[3]);
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
                 if (!tokens[4].isEmpty()) {
-                    this.m_longNmea = convertPositionlon(tokens[4], tokens[5]);
+                    this.longNmea = convertPositionlon(tokens[4], tokens[5]);
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
                 if (!tokens[6].isEmpty()) {
-                    this.m_fixQuality = Integer.parseInt(tokens[6]);
-                    if (this.m_fixQuality == 0) {
-                        m_validPosition = false;
+                    this.fixQuality = Integer.parseInt(tokens[6]);
+                    if (this.fixQuality == 0) {
+                        validPosition = false;
                     }
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
                 if (!tokens[7].isEmpty()) {
-                    this.m_nrSatellites = Integer.parseInt(tokens[7]);
+                    this.nrSatellites = Integer.parseInt(tokens[7]);
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
                 if (!tokens[8].isEmpty()) {
-                    this.m_DOPNmea = Double.parseDouble(tokens[8]);
+                    this.dopNmea = Double.parseDouble(tokens[8]);
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
                 if (!tokens[9].isEmpty()) {
-                    this.m_altNmea = Double.parseDouble(tokens[9]);
+                    this.altNmea = Double.parseDouble(tokens[9]);
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
             } else {
-                m_validPosition = false;
+                validPosition = false;
             }
         } else if (tokens[0].endsWith("GLL")) {
             if (tokens.length > 5) {
-                m_validPosition = true;
+                validPosition = true;
                 if (!tokens[1].isEmpty()) {
-                    this.m_latNmea = convertPositionlat(tokens[1], tokens[2]);
+                    this.latNmea = convertPositionlat(tokens[1], tokens[2]);
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
                 if (!tokens[3].isEmpty()) {
-                    this.m_longNmea = convertPositionlon(tokens[3], tokens[4]);
+                    this.longNmea = convertPositionlon(tokens[3], tokens[4]);
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
                 if (!tokens[5].isEmpty()) {
-                    this.m_timeNmea = tokens[5];
+                    this.timeNmea = tokens[5];
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
                 if (!tokens[6].isEmpty()) { // check validity
                     if (!new String("A").equals(tokens[6])) {
-                        m_validPosition = false;
+                        validPosition = false;
                     }
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
             } else {
-                m_validPosition = false;
+                validPosition = false;
             }
         } else if (tokens[0].endsWith("RMC")) {
             if (tokens.length > 8) {
-                m_validPosition = true;
+                validPosition = true;
                 if (!tokens[1].isEmpty()) {
-                    this.m_timeNmea = tokens[1];
+                    this.timeNmea = tokens[1];
                 }
                 if (!tokens[2].isEmpty()) { // check validity
                     if (!new String("A").equals(tokens[2])) {
-                        m_validPosition = false;
+                        validPosition = false;
                     }
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
                 if (!tokens[3].isEmpty()) {
-                    this.m_latNmea = convertPositionlat(tokens[3], tokens[4]);
+                    this.latNmea = convertPositionlat(tokens[3], tokens[4]);
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
                 if (!tokens[5].isEmpty()) {
-                    this.m_longNmea = convertPositionlon(tokens[5], tokens[6]);
+                    this.longNmea = convertPositionlon(tokens[5], tokens[6]);
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
                 if (!tokens[7].isEmpty()) {
-                    this.m_speedNmea = Double.parseDouble(tokens[7]) / 1.94384449; // conversion speed in knots to m/s :
-                                                                                   // 1
+                    // conversion speed in knots to m/s : 1 m/s = 1.94384449 knots
+                    this.speedNmea = Double.parseDouble(tokens[7]) / 1.94384449;
                 }
-                // m/s = 1.94384449 knots
                 if (!tokens[8].isEmpty()) {
-                    this.m_trackNmea = Double.parseDouble(tokens[8]);
+                    this.trackNmea = Double.parseDouble(tokens[8]);
                 }
                 if (!tokens[9].isEmpty()) {
-                    this.m_dateNmea = tokens[9];
+                    this.dateNmea = tokens[9];
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
             } else {
-                m_validPosition = false;
+                validPosition = false;
             }
         } else if (tokens[0].endsWith("GSA")) {
             if (tokens.length > 5) {
-                m_validPosition = true;
+                validPosition = true;
                 if (!tokens[2].isEmpty()) {
-                    this.m_3DfixNmea = Integer.parseInt(tokens[2]);
-                    if (this.m_3DfixNmea == 1) {
-                        m_validPosition = false;
+                    this.fix3DNmea = Integer.parseInt(tokens[2]);
+                    if (this.fix3DNmea == 1) {
+                        validPosition = false;
                     }
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
                 int index = tokens.length - 3;
                 if (!tokens[index].isEmpty()) {
-                    this.m_PDOPNmea = Double.parseDouble(tokens[index]);
+                    this.pdopNmea = Double.parseDouble(tokens[index]);
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
                 if (!tokens[index + 1].isEmpty()) {
-                    this.m_HDOPNmea = Double.parseDouble(tokens[index + 1]);
+                    this.hdopNmea = Double.parseDouble(tokens[index + 1]);
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
                 if (!tokens[index + 2].isEmpty()) {
-                    this.m_VDOPNmea = Double.parseDouble(tokens[index + 2]);
+                    this.vdopNmea = Double.parseDouble(tokens[index + 2]);
                 } else {
-                    m_validPosition = false;
+                    validPosition = false;
                 }
             } else {
-                m_validPosition = false;
+                validPosition = false;
             }
         } else if (tokens[0].endsWith("VTG")) {
             if (tokens.length > 7 && !tokens[7].isEmpty()) {
-                this.m_speedNmea = Double.parseDouble(tokens[7]) * 0.277777778; // conversion km/h in m/s : 1 km/h ->
-                // 0,277777778 m/s;
+                // conversion km/h in m/s : 1 km/h -> 0,277777778 m/s;
+                this.speedNmea = Double.parseDouble(tokens[7]) * 0.277777778;
             }
         }
     }
 
-    double convertPositionlat(String pos, String direction) {
-        double floatLatDegrees = 0;
-        double floatLatMinutes = 0;
-        String s;
-
+    /**
+     * @param pos
+     *            DDD?MM?.dddd
+     * @param direction
+     *            N/S, E/W
+     * @param degChars
+     *            number of characters representing degrees
+     * @return
+     */
+    private double convertPosition(String pos, String direction, int degChars) {
         if (pos.length() < 6) {
             return 0;
         }
 
-        // This copies the arrays to temporary arrays
-        s = pos.substring(0, 2);
-        floatLatDegrees = Double.parseDouble(s);
-        s = pos.substring(2);
-        floatLatMinutes = Double.parseDouble(s);
-        floatLatDegrees = floatLatDegrees + floatLatMinutes / 60;
-        if (direction.contains("S")) {
-            floatLatDegrees = floatLatDegrees * -1;
+        String s = pos.substring(0, degChars);
+        double deg = Double.parseDouble(s);
+        s = pos.substring(degChars);
+        double min = Double.parseDouble(s);
+        deg = deg + min / 60;
+        if (direction.contains("S") || direction.contains("W")) {
+            deg = -deg;
         }
-        return floatLatDegrees;
+        return deg;
+    }
+
+    double convertPositionlat(String pos, String direction) {
+        return convertPosition(pos, direction, 2);
     }
 
     double convertPositionlon(String pos, String direction) {
-        double floatLonDegrees = 0;
-        double floatLonMinutes = 0;
-        String s;
-
-        if (pos.length() < 6) {
-            return 0;
-        }
-
-        // This copies the arrays to temporary arrays
-        s = pos.substring(0, 3);
-        floatLonDegrees = Double.parseDouble(s);
-        s = pos.substring(3);
-        floatLonMinutes = Double.parseDouble(s);
-        floatLonDegrees = floatLonDegrees + floatLonMinutes / 60;
-        if (direction.contains("W")) {
-            floatLonDegrees = floatLonDegrees * -1;
-        }
-        return floatLonDegrees;
+        return convertPosition(pos, direction, 3);
     }
 
-    public String get_timeNmea() {
-        return this.m_timeNmea;
+    public String getTimeNmea() {
+        return this.timeNmea;
     }
 
-    public int get_fixQuality() {
-        return this.m_fixQuality;
+    public int getFixQuality() {
+        return this.fixQuality;
     }
 
-    public String get_dateNmea() {
-        return this.m_dateNmea;
+    public String getDateNmea() {
+        return this.dateNmea;
     }
 
-    public double get_longNmea() {
-        return this.m_longNmea;
+    public double getLongNmea() {
+        return this.longNmea;
     }
 
-    public double get_latNmea() {
-        return this.m_latNmea;
+    public double getLatNmea() {
+        return this.latNmea;
     }
 
-    public double get_speedNmea() {
-        return this.m_speedNmea;
+    public double getSpeedNmea() {
+        return this.speedNmea;
     }
 
-    public double get_altNmea() {
-        return this.m_altNmea;
+    public double getAltNmea() {
+        return this.altNmea;
     }
 
-    public double get_trackNmea() {
-        return this.m_trackNmea;
+    public double getTrackNmea() {
+        return this.trackNmea;
     }
 
-    public double get_DOPNmea() {
-        return this.m_DOPNmea;
+    public double getDOPNmea() {
+        return this.dopNmea;
     }
 
-    public double get_PDOPNmea() {
-        return this.m_PDOPNmea;
+    public double getPDOPNmea() {
+        return this.pdopNmea;
     }
 
-    public double get_HDOPNmea() {
-        return this.m_HDOPNmea;
+    public double getHDOPNmea() {
+        return this.hdopNmea;
     }
 
-    public double get_VDOPNmea() {
-        return this.m_VDOPNmea;
+    public double getVDOPNmea() {
+        return this.vdopNmea;
     }
 
-    public int get_3DfixNmea() {
-        return this.m_3DfixNmea;
+    public int getFix3DNmea() {
+        return this.fix3DNmea;
     }
 
-    public int get_nrSatellites() {
-        return this.m_nrSatellites;
+    public int getNrSatellites() {
+        return this.nrSatellites;
     }
 
-    public boolean is_validPosition() {
-        return m_validPosition;
+    public boolean isValidPosition() {
+        return validPosition;
     }
 
 }

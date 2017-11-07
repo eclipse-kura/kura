@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
@@ -35,6 +36,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -42,20 +44,22 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class BundlesTabUi extends Composite {
+public class BundlesTabUi extends Composite implements Tab {
 
     private static BundlesTabUiUiBinder uiBinder = GWT.create(BundlesTabUiUiBinder.class);
 
     interface BundlesTabUiUiBinder extends UiBinder<Widget, BundlesTabUi> {
     }
 
-    private boolean isRequestRunning = false;
-
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final ValidationMessages msgs = GWT.create(ValidationMessages.class);
+    private static final String ROW_HEADER_STYLE = "rowHeader";
+    private static final String STATUS_TABLE_ROW_STYLE = "status-table-row";
 
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
+
+    private boolean isRequestRunning = false;
 
     @UiField
     Button bundlesRefresh;
@@ -69,36 +73,36 @@ public class BundlesTabUi extends Composite {
     private final ListDataProvider<GwtGroupedNVPair> bundlesDataProvider = new ListDataProvider<GwtGroupedNVPair>();
     private final SingleSelectionModel<GwtGroupedNVPair> selectionModel = new SingleSelectionModel<GwtGroupedNVPair>();
 
-    private GwtDeviceServiceAsync deviceService = GWT.create(GwtDeviceService.class);
-    private GwtSecurityTokenServiceAsync securityTokenService = GWT.create(GwtSecurityTokenService.class);
+    private final GwtDeviceServiceAsync deviceService = GWT.create(GwtDeviceService.class);
+    private final GwtSecurityTokenServiceAsync securityTokenService = GWT.create(GwtSecurityTokenService.class);
 
     public BundlesTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
         loadBundlesTable(this.bundlesGrid, this.bundlesDataProvider);
 
-        bundlesRefresh.setText("Refresh");
-        bundleStart.setText("Start Bundle");
-        bundleStop.setText("Stop Bundle");
+        this.bundlesRefresh.setText("Refresh");
+        this.bundleStart.setText("Start Bundle");
+        this.bundleStop.setText("Stop Bundle");
 
         updateButtons();
 
-        bundlesGrid.setSelectionModel(selectionModel);
-        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        this.bundlesGrid.setSelectionModel(this.selectionModel);
+        this.selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 updateButtons();
             }
         });
-        bundlesRefresh.addClickHandler(new ClickHandler() {
+        this.bundlesRefresh.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                loadBundlesData();
+                refresh();
 
             }
         });
-        bundleStart.addClickHandler(new ClickHandler() {
+        this.bundleStart.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -106,7 +110,7 @@ public class BundlesTabUi extends Composite {
 
             }
         });
-        bundleStop.addClickHandler(new ClickHandler() {
+        this.bundleStop.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -121,7 +125,7 @@ public class BundlesTabUi extends Composite {
             @Override
             public void handleEvent(GwtEventInfo eventInfo) {
                 if (BundlesTabUi.this.isVisible() && BundlesTabUi.this.isAttached()) {
-                    loadBundlesData();
+                    refresh();
                 }
             }
         };
@@ -135,10 +139,10 @@ public class BundlesTabUi extends Composite {
     }
 
     private void updateButtons() {
-        GwtGroupedNVPair selected = selectionModel.getSelectedObject();
+        GwtGroupedNVPair selected = this.selectionModel.getSelectedObject();
 
-        bundleStart.setEnabled(false);
-        bundleStop.setEnabled(false);
+        this.bundleStart.setEnabled(false);
+        this.bundleStop.setEnabled(false);
 
         String status;
 
@@ -148,18 +152,19 @@ public class BundlesTabUi extends Composite {
 
         boolean isActive = "bndActive".equals(status);
 
-        bundleStart.setEnabled(!isActive);
-        bundleStop.setEnabled(isActive);
+        this.bundleStart.setEnabled(!isActive);
+        this.bundleStop.setEnabled(isActive);
     }
 
     private void startSelectedBundle() {
         EntryClassUi.showWaitModal();
 
-        securityTokenService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.securityTokenService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                deviceService.startBundle(token, selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
+                BundlesTabUi.this.deviceService.startBundle(token,
+                        BundlesTabUi.this.selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -186,7 +191,7 @@ public class BundlesTabUi extends Composite {
 
     private void stopSelectedBundle() {
         EntryClassUi.showWaitModal();
-        securityTokenService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.securityTokenService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -196,7 +201,8 @@ public class BundlesTabUi extends Composite {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                deviceService.stopBundle(token, selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
+                BundlesTabUi.this.deviceService.stopBundle(token,
+                        BundlesTabUi.this.selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -215,7 +221,6 @@ public class BundlesTabUi extends Composite {
     }
 
     private void loadBundlesTable(CellTable<GwtGroupedNVPair> bundlesGrid2,
-
             ListDataProvider<GwtGroupedNVPair> dataProvider) {
 
         TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
@@ -225,8 +230,10 @@ public class BundlesTabUi extends Composite {
                 return object.getId();
             }
         };
-        col1.setCellStyleNames("status-table-row");
-        bundlesGrid2.addColumn(col1, MSGS.deviceBndId());
+        col1.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
+        TextHeader id = new TextHeader(MSGS.deviceBndId());
+        id.setHeaderStyleNames(ROW_HEADER_STYLE);
+        bundlesGrid2.addColumn(col1, id);
 
         TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
 
@@ -235,8 +242,10 @@ public class BundlesTabUi extends Composite {
                 return object.getName();
             }
         };
-        col2.setCellStyleNames("status-table-row");
-        bundlesGrid2.addColumn(col2, MSGS.deviceBndName());
+        col2.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
+        TextHeader name = new TextHeader(MSGS.deviceBndName());
+        name.setHeaderStyleNames(ROW_HEADER_STYLE);
+        bundlesGrid2.addColumn(col2, name);
 
         TextColumn<GwtGroupedNVPair> col3 = new TextColumn<GwtGroupedNVPair>() {
 
@@ -245,8 +254,10 @@ public class BundlesTabUi extends Composite {
                 return msgs.getString(object.getStatus());
             }
         };
-        col3.setCellStyleNames("status-table-row");
-        bundlesGrid2.addColumn(col3, MSGS.deviceBndState());
+        col3.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
+        TextHeader state = new TextHeader(MSGS.deviceBndState());
+        state.setHeaderStyleNames(ROW_HEADER_STYLE);
+        bundlesGrid2.addColumn(col3, state);
 
         TextColumn<GwtGroupedNVPair> col4 = new TextColumn<GwtGroupedNVPair>() {
 
@@ -255,14 +266,30 @@ public class BundlesTabUi extends Composite {
                 return object.getVersion();
             }
         };
-        col4.setCellStyleNames("status-table-row");
-        bundlesGrid2.addColumn(col4, MSGS.deviceBndVersion());
+        col4.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
+        TextHeader version = new TextHeader(MSGS.deviceBndVersion());
+        version.setHeaderStyleNames(ROW_HEADER_STYLE);
+        bundlesGrid2.addColumn(col4, version);
 
         dataProvider.addDataDisplay(bundlesGrid2);
     }
 
-    public void loadBundlesData() {
+    @Override
+    public void setDirty(boolean flag) {
+    }
 
+    @Override
+    public boolean isDirty() {
+        return true;
+    }
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
+    public void refresh() {
         if (this.isRequestRunning) {
             return;
         }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,35 +22,35 @@ import org.slf4j.LoggerFactory;
 
 public class FilterForwardChainRule {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(FilterForwardChainRule.class);
+    private static final Logger logger = LoggerFactory.getLogger(FilterForwardChainRule.class);
 
-    private String m_rule;
-    private String m_inputInterface;
-    private String m_outputInterface;
-    private String m_state;
-    private String m_srcNetwork;
-    private short m_srcMask;
-    private String m_dstNetwork;
-    private short m_dstMask;
-    private String m_protocol;
-    private String m_permittedMacAddress;
-    private int m_srcPortFirst;
-    private int m_srcPortLast;
-    private int m_dstPort;
+    private String rule;
+    private String inputInterface;
+    private String outputInterface;
+    private String state;
+    private String srcNetwork;
+    private short srcMask;
+    private String dstNetwork;
+    private short dstMask;
+    private String protocol;
+    private String permittedMacAddress;
+    private int srcPortFirst;
+    private int srcPortLast;
+    private int dstPort;
 
     public FilterForwardChainRule(String inputInterface, String outputInterface, String srcNetwork, short srcMask,
             String dstNetwork, short dstMask, String protocol, String permittedMacAddress, int srcPortFirst,
             int srcPortLast) {
-        this.m_inputInterface = inputInterface;
-        this.m_outputInterface = outputInterface;
-        this.m_srcNetwork = srcNetwork;
-        this.m_srcMask = srcMask;
-        this.m_dstNetwork = dstNetwork;
-        this.m_dstMask = dstMask;
-        this.m_protocol = protocol;
-        this.m_permittedMacAddress = permittedMacAddress;
-        this.m_srcPortFirst = srcPortFirst;
-        this.m_srcPortLast = srcPortLast;
+        this.inputInterface = inputInterface;
+        this.outputInterface = outputInterface;
+        this.srcNetwork = srcNetwork;
+        this.srcMask = srcMask;
+        this.dstNetwork = dstNetwork;
+        this.dstMask = dstMask;
+        this.protocol = protocol;
+        this.permittedMacAddress = permittedMacAddress;
+        this.srcPortFirst = srcPortFirst;
+        this.srcPortLast = srcPortLast;
     }
 
     public FilterForwardChainRule(String rule) throws KuraException {
@@ -58,22 +58,22 @@ public class FilterForwardChainRule {
             String[] aRuleTokens = rule.split(" ");
             for (int i = 0; i < aRuleTokens.length; i++) {
                 if ("-i".equals(aRuleTokens[i])) {
-                    this.m_inputInterface = aRuleTokens[++i];
+                    this.inputInterface = aRuleTokens[++i];
                 } else if ("-o".equals(aRuleTokens[i])) {
-                    this.m_outputInterface = aRuleTokens[++i];
+                    this.outputInterface = aRuleTokens[++i];
                 } else if ("--state".equals(aRuleTokens[i])) {
-                    this.m_state = aRuleTokens[++i];
+                    this.state = aRuleTokens[++i];
                 } else if ("-p".equals(aRuleTokens[i])) {
-                    this.m_protocol = aRuleTokens[++i];
+                    this.protocol = aRuleTokens[++i];
                 } else if ("-s".equals(aRuleTokens[i])) {
-                    this.m_srcNetwork = aRuleTokens[i + 1].split("/")[0];
-                    this.m_srcMask = Short.parseShort(aRuleTokens[++i].split("/")[1]);
+                    this.srcNetwork = aRuleTokens[i + 1].split("/")[0];
+                    this.srcMask = Short.parseShort(aRuleTokens[++i].split("/")[1]);
                 } else if ("-d".equals(aRuleTokens[i])) {
-                    this.m_dstNetwork = aRuleTokens[i + 1].split("/")[0];
-                    this.m_dstMask = Short.parseShort(aRuleTokens[++i].split("/")[1]);
+                    this.dstNetwork = aRuleTokens[i + 1].split("/")[0];
+                    this.dstMask = Short.parseShort(aRuleTokens[++i].split("/")[1]);
                 }
             }
-            this.m_rule = new StringBuilder("iptables ").append(rule).toString();
+            this.rule = new StringBuilder("iptables ").append(rule).toString();
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
@@ -82,49 +82,49 @@ public class FilterForwardChainRule {
     public List<String> toStrings() {
         List<String> ret = new ArrayList<String>();
         StringBuilder sb = new StringBuilder("-A FORWARD");
-        if (this.m_srcNetwork != null) {
+        if (this.srcNetwork != null) {
             sb.append(" -s ") //
-                    .append(this.m_srcNetwork) //
+                    .append(this.srcNetwork) //
                     .append('/') //
-                    .append(this.m_srcMask);
+                    .append(this.srcMask);
         }
-        if (this.m_dstNetwork != null) {
+        if (this.dstNetwork != null) {
             sb.append(" -d ") //
-                    .append(this.m_dstNetwork) //
+                    .append(this.dstNetwork) //
                     .append('/') //
-                    .append(this.m_dstMask);
+                    .append(this.dstMask);
         }
-        sb.append(" -i ").append(this.m_inputInterface);
-        sb.append(" -o ").append(this.m_outputInterface);
-        if (this.m_protocol != null) {
-            sb.append(" -p ").append(this.m_protocol);
-            sb.append(" -m ").append(this.m_protocol);
+        sb.append(" -i ").append(this.inputInterface);
+        sb.append(" -o ").append(this.outputInterface);
+        if (this.protocol != null) {
+            sb.append(" -p ").append(this.protocol);
+            sb.append(" -m ").append(this.protocol);
         }
-        if (this.m_permittedMacAddress != null) {
-            sb.append(" -m mac --mac-source ").append(this.m_permittedMacAddress);
+        if (this.permittedMacAddress != null) {
+            sb.append(" -m mac --mac-source ").append(this.permittedMacAddress);
         }
-        if (this.m_srcPortFirst > 0 && this.m_srcPortLast >= this.m_srcPortFirst) {
+        if (this.srcPortFirst > 0 && this.srcPortLast >= this.srcPortFirst) {
             sb.append(" --sport ") //
-                    .append(this.m_srcPortFirst) //
+                    .append(this.srcPortFirst) //
                     .append(':') //
-                    .append(this.m_srcPortLast);
+                    .append(this.srcPortLast);
         }
-        if (this.m_dstPort > 0) {
-            sb.append(" --dport ").append(this.m_dstPort);
+        if (this.dstPort > 0) {
+            sb.append(" --dport ").append(this.dstPort);
         }
         sb.append(" -j ACCEPT");
         ret.add(sb.toString());
         sb = new StringBuilder("-A FORWARD");
-        if (this.m_dstNetwork != null) {
+        if (this.dstNetwork != null) {
             sb.append(" -s ") //
-                    .append(this.m_dstNetwork) //
+                    .append(this.dstNetwork) //
                     .append('/') //
-                    .append(this.m_dstMask);
+                    .append(this.dstMask);
         }
-        sb.append(" -i ").append(this.m_outputInterface);
-        sb.append(" -o ").append(this.m_inputInterface);
-        if (this.m_protocol != null) {
-            sb.append(" -p ").append(this.m_protocol);
+        sb.append(" -i ").append(this.outputInterface);
+        sb.append(" -o ").append(this.inputInterface);
+        if (this.protocol != null) {
+            sb.append(" -p ").append(this.protocol);
         }
         sb.append(" -m state --state RELATED,ESTABLISHED -j ACCEPT");
         ret.add(sb.toString());
@@ -135,51 +135,51 @@ public class FilterForwardChainRule {
     public int hashCode() {
         final int prime = 71;
         int result = 1;
-        result = prime * result + (this.m_rule == null ? 0 : this.m_rule.hashCode());
-        result = prime * result + (this.m_inputInterface == null ? 0 : this.m_inputInterface.hashCode());
-        result = prime * result + (this.m_outputInterface == null ? 0 : this.m_outputInterface.hashCode());
-        result = prime * result + (this.m_state == null ? 0 : this.m_state.hashCode());
-        result = prime * result + (this.m_srcNetwork == null ? 0 : this.m_srcNetwork.hashCode());
-        result = prime * result + this.m_srcMask;
-        result = prime * result + (this.m_dstNetwork == null ? 0 : this.m_dstNetwork.hashCode());
-        result = prime * result + this.m_dstMask;
-        result = prime * result + (this.m_protocol == null ? 0 : this.m_protocol.hashCode());
+        result = prime * result + (this.rule == null ? 0 : this.rule.hashCode());
+        result = prime * result + (this.inputInterface == null ? 0 : this.inputInterface.hashCode());
+        result = prime * result + (this.outputInterface == null ? 0 : this.outputInterface.hashCode());
+        result = prime * result + (this.state == null ? 0 : this.state.hashCode());
+        result = prime * result + (this.srcNetwork == null ? 0 : this.srcNetwork.hashCode());
+        result = prime * result + this.srcMask;
+        result = prime * result + (this.dstNetwork == null ? 0 : this.dstNetwork.hashCode());
+        result = prime * result + this.dstMask;
+        result = prime * result + (this.protocol == null ? 0 : this.protocol.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object o) {
-        FilterForwardChainRule other = null;
+        FilterForwardChainRule other;
         if (o instanceof FilterForwardChainRule) {
             other = (FilterForwardChainRule) o;
         } else if (o instanceof String) {
             try {
                 other = new FilterForwardChainRule((String) o);
             } catch (KuraException e) {
-                s_logger.error("equals() :: failed to parse FilterForwardChainRule - {}", e);
+                logger.error("equals() :: failed to parse FilterForwardChainRule ", e);
                 return false;
             }
         } else {
             return false;
         }
 
-        if (!compareObjects(this.m_rule, other.m_rule)) {
+        if (!compareObjects(this.rule, other.rule)) {
             return false;
-        } else if (!compareObjects(this.m_inputInterface, other.m_inputInterface)) {
+        } else if (!compareObjects(this.inputInterface, other.inputInterface)) {
             return false;
-        } else if (!compareObjects(this.m_outputInterface, other.m_outputInterface)) {
+        } else if (!compareObjects(this.outputInterface, other.outputInterface)) {
             return false;
-        } else if (!compareObjects(this.m_state, other.m_state)) {
+        } else if (!compareObjects(this.state, other.state)) {
             return false;
-        } else if (!compareObjects(this.m_srcNetwork, other.m_srcNetwork)) {
+        } else if (!compareObjects(this.srcNetwork, other.srcNetwork)) {
             return false;
-        } else if (this.m_srcMask != other.m_srcMask) {
+        } else if (this.srcMask != other.srcMask) {
             return false;
-        } else if (!compareObjects(this.m_dstNetwork, other.m_dstNetwork)) {
+        } else if (!compareObjects(this.dstNetwork, other.dstNetwork)) {
             return false;
-        } else if (this.m_dstMask != other.m_dstMask) {
+        } else if (this.dstMask != other.dstMask) {
             return false;
-        } else if (!compareObjects(this.m_protocol, other.m_protocol)) {
+        } else if (!compareObjects(this.protocol, other.protocol)) {
             return false;
         }
         return true;
@@ -196,38 +196,38 @@ public class FilterForwardChainRule {
 
     @Override
     public String toString() {
-        return this.m_rule;
+        return this.rule;
     }
 
     public String getInputInterface() {
-        return this.m_inputInterface;
+        return this.inputInterface;
     }
 
     public String getOutputInterface() {
-        return this.m_outputInterface;
+        return this.outputInterface;
     }
 
     public String getState() {
-        return this.m_state;
+        return this.state;
     }
 
     public String getSrcNetwork() {
-        return this.m_srcNetwork;
+        return this.srcNetwork;
     }
 
     public short getSrcMask() {
-        return this.m_srcMask;
+        return this.srcMask;
     }
 
     public String getDstNetwork() {
-        return this.m_dstNetwork;
+        return this.dstNetwork;
     }
 
     public short getDstMask() {
-        return this.m_dstMask;
+        return this.dstMask;
     }
 
     public String getProtocol() {
-        return this.m_protocol;
+        return this.protocol;
     }
 }

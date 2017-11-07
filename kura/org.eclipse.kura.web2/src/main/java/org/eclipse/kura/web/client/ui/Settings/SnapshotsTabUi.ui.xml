@@ -30,14 +30,14 @@
                 <b:Panel>
                     <b:NavPills justified="true">
                         <b:ButtonGroup size="SMALL">
-                            <b:Button ui:field="refresh"
-                                addStyleNames="fa fa-refresh"></b:Button>
                             <b:Button ui:field="download"
                                 addStyleNames="fa fa-download"></b:Button>
                             <b:Button ui:field="rollback"
                                 addStyleNames="fa fa-reply"></b:Button>
                             <b:Button ui:field="upload"
                                 addStyleNames="fa fa-share"></b:Button>
+                            <b:Button ui:field="refresh"
+                                addStyleNames="fa fa-refresh"></b:Button>
                         </b:ButtonGroup>
                     </b:NavPills>
                 </b:Panel>

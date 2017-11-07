@@ -25,4 +25,6 @@ else
     echo "0" > $ipforward_file
 fi
 # source a custom firewall script
-source /etc/init.d/firewall_cust 2> /dev/null
+if [ -f /etc/init.d/firewall_cust ]; then
+    source /etc/init.d/firewall_cust 2> /dev/null
+fi

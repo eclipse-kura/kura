@@ -1,11 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+-->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.example.beacon.scanner.BeaconScannerExample"
-         name="Beacon Scanner" 
+         name="Beacon Scanner"
          description="Beacon Scanning Example.">
-         
+
          <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/beacon_scanner.png" size="32"/>
-         
+
          <AD id="enableScanning"
             name="enableScanning"
             type="Boolean"
@@ -13,7 +23,7 @@
             required="true"
             default="false"
             description="Enable Beacon scanning."/>
-            
+
          <AD id="topicPrefix"
             name="topicPrefix"
             type="String"
@@ -21,7 +31,7 @@
             required="true"
             default="beacons"
             description="Prefix for discovered items' topic"/>
-            
+
         <AD id="iname"
             name="iname"
             type="String"
@@ -29,7 +39,7 @@
             required="true"
             default="hci0"
             description="Name of bluetooth adapter."/>
-            
+
         <AD id="rate_limit"
             name="rate_limit"
             type="Integer"
@@ -43,9 +53,9 @@
             type="String"
             cardinality="0"
             required="true"
-            default="0000"
+            default="004c"
             description="Hexadecimal string representing the company code."/>
-                                
+
     </OCD>
 
     <Designate pid="org.eclipse.kura.example.beacon.scanner.BeaconScannerExample">

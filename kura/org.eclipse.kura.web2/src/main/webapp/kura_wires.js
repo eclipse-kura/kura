@@ -1,28 +1,21 @@
 /*******************************************************************************
  * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
- *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
+ * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
- * Contributors:
- * 	Eurotech
- * 	Amit Kumar Mondal
+ * Contributors: Eurotech Amit Kumar Mondal
  * 
- *******************************************************************************/
+ ******************************************************************************/
 var kuraWires = (function() {
 	var client = {}; // Holds accessible elements of JS library
 	var clientConfig = {}; // Configuration passed from Kura OSGi
 	// framework on save
-	var graph, paper; // JointJS objects
+	var graph, paper, viewport; // JointJS objects
 	var initialized = false;
-	var xPos = 10;
-	var yPos = 10;
 	var currentZoomLevel = 1.0;
-	var paperScaleMax = 1.5;
-	var paperScaleMin = .5;
-	var paperScaling = .2;
 	var selectedElement;
 	var oldCellView;
 	var elementsContainerTemp = [];
@@ -32,6 +25,8 @@ var kuraWires = (function() {
 	var isComponentDeleted;
 	var eventSource;
 	var selectionRefreshPending = false;
+	var blinkEnabled = true
+	var blinkEnableTimeout = null
 
 	/*
 	 * / Public functions
@@ -43,38 +38,43 @@ var kuraWires = (function() {
 		setup();
 		regiterFormInputFieldValidation();
 	};
-	
+
 	client.unload = function() {
-		if(typeof(EventSource) !== "undefined") {
+		if (typeof (EventSource) !== "undefined") {
 			eventSource.close();
 			eventSource = null;
 			var xmlHttp = new XMLHttpRequest();
-		    xmlHttp.open("GET", "/sse?session="
-					+ eventSourceSessionId + "&logout=" + eventSourceSessionId, true);
-		    xmlHttp.send(null);
+			xmlHttp.open("GET", "/sse?session=" + eventSourceSessionId
+					+ "&logout=" + eventSourceSessionId, true);
+			xmlHttp.send(null);
 		}
 	};
 
 	function generateId() {
 		return new Date().getTime()
 	}
-	
+
 	client.selectionCompleted = function() {
 		selectionRefreshPending = false;
 	}
 
-	$(document).ready(function() {
-		$(window).bind("beforeunload", function() {
-			if(typeof(EventSource) !== "undefined") {
-				eventSource.close();
-				eventSource = null;
-				var xmlHttp = new XMLHttpRequest();
-				xmlHttp.open("GET", "/sse?session=" + eventSourceSessionId + "&logout=" + eventSourceSessionId, true);
-				xmlHttp.send(null);
-			}
-		});
-	});
-	
+	$(document).ready(
+			function() {
+				$(window).bind(
+						"beforeunload",
+						function() {
+							if (typeof (EventSource) !== "undefined") {
+								eventSource.close();
+								eventSource = null;
+								var xmlHttp = new XMLHttpRequest();
+								xmlHttp.open("GET", "/sse?session="
+										+ eventSourceSessionId + "&logout="
+										+ eventSourceSessionId, true);
+								xmlHttp.send(null);
+							}
+						});
+			});
+
 	client.resetDeleteComponentState = function() {
 		isComponentDeleted = false;
 	};
@@ -103,9 +103,10 @@ var kuraWires = (function() {
 	 * Interaction with OSGi Event Admin through Server Sent Events
 	 */
 	function sse() {
-		if(typeof(EventSource) !== "undefined" && eventSource == null) {
+		if (typeof (EventSource) !== "undefined" && eventSource == null) {
 			eventSourceSessionId = generateId();
-			eventSource = new EventSource("/sse?session=" + eventSourceSessionId);
+			eventSource = new EventSource("/sse?session="
+					+ eventSourceSessionId);
 			eventSource.onmessage = function(event) {
 				_.each(graph.getElements(), function(c) {
 					if (c.attributes.label === event.data) {
@@ -163,14 +164,16 @@ var kuraWires = (function() {
 		// GWT entry point to be called
 		// Instantiate JointJS graph and paper
 		if (!initialized) {
+			$("#btn-select-asset-cancel").on("click", cancelCreateNewComponent);
 			$("#btn-create-comp-cancel").on("click", cancelCreateNewComponent);
 			$("#btn-save-graph").on("click", saveConfig);
 			$("#btn-delete-comp").on("click", deleteComponent);
 			$("#btn-delete-graph-confirm").on("click", deleteGraph);
 			$("#btn-zoom-in").on("click", zoomInPaper);
 			$("#btn-zoom-out").on("click", zoomOutPaper);
-
+			$("#btn-zoom-fit").on("click", function () { fitContent(true) })
 			initialized = true;
+			
 			elementsContainerTemp = [];
 
 			// Set up custom elements
@@ -178,11 +181,11 @@ var kuraWires = (function() {
 
 			// Setup graph and paper
 			graph = new joint.dia.Graph;
-
+			
 			paper = new joint.dia.Paper({
 				el : $('#wires-graph'),
 				width : '100%',
-				height : 400,
+				height : '100%',
 				model : graph,
 				gridSize : 20,
 				snapLinks : true,
@@ -190,10 +193,6 @@ var kuraWires = (function() {
 				defaultLink : new joint.shapes.customLink.Element,
 				multiLinks : false,
 				markAvailable : true,
-				restrictTranslate : function(elementView) {
-					var parentId = elementView.model.get('parent');
-					return parentId && this.model.getCell(parentId).getBBox();
-				},
 				interactive : {
 					vertexAdd : false
 				},
@@ -209,9 +208,9 @@ var kuraWires = (function() {
 					// Prevent linking to input ports.
 					return magnetT && magnetT.getAttribute('type') === 'input';
 				}
-			});
+			});	
 		}
-
+			
 		graph.off('remove', removeCellFunc);
 		// Load a graph if it exists
 		loadExistingWireGraph();
@@ -240,6 +239,8 @@ var kuraWires = (function() {
 
 		graph.on('remove', removeCellFunc);
 
+		viewport = V(paper.viewport)
+		
 		paper.on('cell:pointerdown', function(cellView, evt, x, y) {
 			var pid = cellView.model.attributes.label;
 			var factoryPid = cellView.model.attributes.factoryPid;
@@ -266,6 +267,7 @@ var kuraWires = (function() {
 		});
 		
 		paper.on('blank:pointerdown', function(cellView, evt, x, y) {
+			client.scroller.begin()
 			jsniUpdateSelection("", "");
 			selectedElement = "";
 			if (oldCellView != null) {
@@ -279,8 +281,17 @@ var kuraWires = (function() {
 			evt.stopPropagation();
 			evt.preventDefault();
 		});
+		
+		client.dragHandler = new DragHandler() 
+		
+		client.scroller = new Scroller()
+		client.scroller.onMove(function (dx, dy) {
+				viewport.translate(dx, dy)
+		})
+		
+		fitContent()
 	}
-
+	
 	function loadExistingWireGraph() {
 		if (!$.isEmptyObject(clientConfig.wireComponentsJson)) {
 			graph.clear();
@@ -325,9 +336,10 @@ var kuraWires = (function() {
 				return obj["loc"];
 			}
 		}
-		return xPos + "," + yPos;
+		var coords = getNewComponentCoords()
+		return coords.x + "," + coords.y;
 	}
-
+	
 	function createLinkBetween(emitterPid, receiverPid) {
 		var _elements = graph.getElements();
 		var emitter = null, receiver = null;
@@ -352,22 +364,30 @@ var kuraWires = (function() {
 			graph.addCell(link);
 		}
 	}
-
+	
 	function zoomInPaper() {
-		if (currentZoomLevel <= paperScaleMax) {
-			currentZoomLevel = currentZoomLevel + paperScaling;
-			paper.scale(currentZoomLevel);
-		}
+		scale(1.2)
 	}
 
 	function zoomOutPaper() {
-		if (currentZoomLevel >= paperScaleMin) {
-			currentZoomLevel = currentZoomLevel - paperScaling;
-			paper.scale(currentZoomLevel);
-		}
+		scale(0.8)
 	}
-
+	
+	function scale(factor) {
+		var translation = viewport.translate()
+		var cx = $("#wires-graph").width()/2
+		var cy = $("#wires-graph").height()/2
+		var tx = cx*(1-factor)+translation.tx*factor
+		var ty = cy*(1-factor)+translation.ty*factor
+		transformTransition(tx, ty, currentZoomLevel*factor, 0.25)
+	}
+	
 	function fireTransition(t) {
+		
+		if (!blinkEnabled) {
+			return
+		}
+		
 		var inbound = graph.getConnectedLinks(t, {
 			inbound : false
 		});
@@ -395,55 +415,24 @@ var kuraWires = (function() {
 					return l.get('target').id === p.id;
 				});
 
+				var timingFunc = function (t) {
+					return t < 0.5 ? t : 1-t
+				}
+				
+				if (link.getTransitions().length) {
+					return
+				}
+				
 				link.transition('attrs/.connection/stroke', '#F39C12', {
 					duration : 400,
-					timingFunction : function(t) {
-						return t;
-					},
-					valueFunction : function(a, b) {
-
-						var ca = parseInt(a.slice(1), 16);
-						var cb = parseInt(b.slice(1), 16);
-						var ra = ca & 0x0000ff;
-						var rd = (cb & 0x0000ff) - ra;
-						var ga = ca & 0x00ff00;
-						var gd = (cb & 0x00ff00) - ga;
-						var ba = ca & 0xff0000;
-						var bd = (cb & 0xff0000) - ba;
-
-						return function(t) {
-
-							var scale = t < .5 ? t * 2 : 1 - (2 * (t - .5));
-							var r = (ra + rd * scale) & 0x000000ff;
-							var g = (ga + gd * scale) & 0x0000ff00;
-							var b = (ba + bd * scale) & 0x00ff0000;
-
-							var result = '#'
-									+ (1 << 24 | r | g | b).toString(16).slice(
-											1);
-							if (t === 0) {
-								result = '#4b4f6a';
-							}
-							return result;
-						};
-					}
+					timingFunction : timingFunc,
+					valueFunction : joint.util.interpolate.hexColor
 				});
 
 				link.transition('attrs/.connection/stroke-width', 8, {
 					duration : 400,
-					timingFunction : joint.util.timing.linear,
-					valueFunction : function(a, b) {
-						var d = b - a;
-						return function(t) {
-							var scale = t < .5 ? t * 2 : 1 - (2 * (t - .5));
-							if (t === 0) {
-								result = 4;
-							} else {
-								result = a + d * scale;
-							}
-							return result;
-						};
-					}
+					timingFunction : timingFunc,
+					valueFunction : joint.util.interpolate.number
 				});
 			});
 		}
@@ -463,7 +452,7 @@ var kuraWires = (function() {
 		// PID with the new element then it would show an error modal
 		var isFoundExistingElementWithSamePid;
 		_.each(elementsContainerTemp, function(c) {
-			if (c.toUpperCase() === comp.name.toUpperCase()) {
+			if (c.toUpperCase() === comp.name) {
 				isFoundExistingElementWithSamePid = true;
 			}
 		});
@@ -494,7 +483,7 @@ var kuraWires = (function() {
 				}),
 			}
 		};
-
+		
 		var rect = new joint.shapes.devs.Atomic({
 			position : {
 				x : comp.x,
@@ -563,12 +552,10 @@ var kuraWires = (function() {
 			}
 		});
 
-		xPos = xPos + 212;
-		if (xPos > 500) {
-			xPos = 300;
-			yPos = 300;
+		if (moveToFreeSpot(rect)) {
+			centerOnComponent(rect)
 		}
-		
+
 		if (flag) {
 			selectedElement = rect;
 			jsniUpdateSelection(comp.name, comp.fPid);
@@ -744,6 +731,9 @@ var kuraWires = (function() {
 			cType = "consumer";
 		}
 		if (name !== '') {
+			
+			var coords = getNewComponentCoords()
+			
 			if (fPid === "org.eclipse.kura.wire.WireAsset") {
 				if (driverPid === "--- Select Driver ---") {
 					return;
@@ -754,8 +744,8 @@ var kuraWires = (function() {
 					name : name,
 					driver : driverPid,
 					type : cType,
-					x : xPos,
-					y : yPos
+					x : coords.x,
+					y : coords.y
 				}
 			} else {
 				newComp = {
@@ -763,8 +753,8 @@ var kuraWires = (function() {
 					pid : "none",
 					name : name,
 					type : cType,
-					x : xPos,
-					y : yPos
+					x : coords.x,
+					y : coords.y
 				}
 			}
 			jsniMakeUiDirty();
@@ -773,13 +763,56 @@ var kuraWires = (function() {
 			// Create the new component and store information in array
 			createComponent(newComp, true);
 			$("#componentName").val('');
-			$("#driverPids").val('--- Select Driver ---');
 			$("#factoryPid").val('');
-			$("#asset-comp-modal").modal('hide');
+			$("#generic-comp-modal").modal('hide');
 		}
 	}
-	
+
 	client.createNewComponent = createNewComponent;
+
+	function createNewAssetComponent(assetPid, driverPid) {
+		var newComp;
+
+		name = assetPid;
+
+		// validate all the existing elements' PIDs with the new element PID. If
+		// any of the existing element already has a PID which matches with the
+		// PID with the new element then it would show an error modal
+		var isFoundExistingElementWithSamePid;
+		_.each(graph.getElements(), function(c) {
+			if (c.attributes.pid === name) {
+				isFoundExistingElementWithSamePid = true;
+			}
+		});
+
+		if (isFoundExistingElementWithSamePid) {
+			jsniShowDuplicatePidModal(name);
+			return;
+		}
+
+		cType = "both";
+		
+		var coords = getNewComponentCoords()
+
+		newComp = {
+			fPid : "org.eclipse.kura.wire.WireAsset",
+			pid : "none",
+			name : name,
+			driver : driverPid,
+			type : cType,
+			x : coords.x,
+			y : coords.y
+		}
+
+		jsniMakeUiDirty();
+		jsniDeactivateNavPils();
+		toggleDeleteGraphButton(false);
+		// Create the new component and store information in array
+		createComponent(newComp, true);
+		$("#select-asset-modal").modal('hide');
+	}
+
+	client.createNewAssetComponent = createNewAssetComponent;
 
 	/*
 	 * / Setup Custom Elements
@@ -815,7 +848,223 @@ var kuraWires = (function() {
 			}, joint.dia.Link.prototype.defaults)
 		});
 	}
+	
+	var Scroller = function () {
+		this.last = null;
+		this.onMouseMove = this.onMouseMove.bind(this)
+		this.onMouseUp = this.onMouseUp.bind(this)
+	}
+	
+	Scroller.prototype.onMouseMove = function (e) {
+		var x = e.clientX
+		var y = e.clientY
+		if (!this.last) {
+			this.last = {x: x, y: y}
+			return
+		}
+		var dx = x - this.last.x;
+		var dy = y - this.last.y;
+		
+		this.last.x = x
+		this.last.y = y
+		
+		if (this.callback) {
+			this.callback(dx, dy)
+		}
+	}
+	
+	Scroller.prototype.onMouseUp = function () {
+		document.removeEventListener('mousemove', this.onMouseMove)
+		document.removeEventListener('mouseup', this.onMouseUp)
+		this.last = null
+		enableBlinking()
+	}
+	
+	Scroller.prototype.begin = function () {
+		document.addEventListener('mousemove', this.onMouseMove)
+		document.addEventListener('mouseup', this.onMouseUp)
+		disableBlinking()
+	}
+	
+	Scroller.prototype.onMove = function (callback) {
+		this.callback = callback
+	}
+	
+	var DragHandler = function () {
+		this.dropCoords = null
+	}
+	
+	DragHandler.prototype.toLocalCoords = function (clientX, clientY) {
+		var offset = $('#wires-graph').offset()
+		clientX -= offset.left - $(window).scrollLeft()
+		clientY -= offset.top - $(window).scrollTop()
+		return clientToLocal(clientX, clientY)
+	}
+	
+	DragHandler.prototype.onDrag = function (clientX, clientY) {
+		if (this.rect == null) {
+			this.initTempElement()
+		}
+		var pos = this.toLocalCoords(clientX, clientY)
+		this.rect.position(pos.x, pos.y)
+	}
+	
+	DragHandler.prototype.onDrop = function (clientX, clientY, factoryPid) {
+		var pos = this.toLocalCoords(clientX, clientY)
+		this.dropCoords = pos
+	}
+	
+	DragHandler.prototype.abort = function () {
+		this.dropCoords = null;
+		if (this.rect) {
+			graph.removeCells([ this.rect ])
+			this.rect = null
+		}
+	}
+	
+	DragHandler.prototype.hasDropCoords = function () {
+		return this.dropCoords != null
+	}
+	
+	DragHandler.prototype.getDropCoords = function () {
+		var temp = this.dropCoords
+		this.abort();
+		return temp
+	}
+	
+	DragHandler.prototype.initTempElement = function () {
+		this.rect = new joint.shapes.devs.Atomic({
+			position : {
+				x : 0,
+				y : 0
+			}
+		});
 
+		graph.addCells([ this.rect ]);
+		
+		this.rect.attr({
+			'.label' : {
+				text : "",
+			},
+			'.body' : {
+				'rx' : 6,
+				'ry' : 6,
+				'class': 'body temporary'
+			}
+		});
+	}
+	
+	function disableBlinking() {
+		blinkEnabled = false
+		if (blinkEnableTimeout) {
+			clearTimeout(blinkEnableTimeout)
+			blinkEnableTimeout = null
+		}
+	}
+	
+	function enableBlinking() {
+		if (!blinkEnabled && !blinkEnableTimeout) {
+			blinkEnableTimeout = setTimeout(function () {
+				blinkEnabled = true
+				blinkEnableTimeout = null
+			}, 1000)
+		} 
+	}
+	
+	function moveToFreeSpot(comp) {
+		var moved = false
+		while (graph.findModelsUnderElement(comp).length) {
+			moved = true
+			comp.translate(100, 0)
+		}
+		return moved
+	}
+	
+	function getNewComponentCoords() {
+		if (client.dragHandler.hasDropCoords()) {
+			return client.dragHandler.getDropCoords()
+		} else {
+			var cx = $('#wires-graph').width() / 2
+			var cy = $('#wires-graph').height() / 2
+			return clientToLocal(cx, cy)
+		}
+	}
+	
+	function centerOnComponent(comp) {
+		var pos = comp.get('position')
+		var scale = currentZoomLevel < 1 ? 1 : currentZoomLevel
+		centerOnLocalPoint(pos.x, pos.y, scale, transformTransition)
+	}
+	
+	function fitContent(transition) {
+		var bbox = getLocalContentBBox()
+		var cx = bbox.x + bbox.width/2
+		var cy = bbox.y + bbox.height/2
+		var vw = $('#wires-graph').width()
+		var vh = $('#wires-graph').height()
+		var factor = Math.min(vw/bbox.width, vh/bbox.height)
+		if (factor > 1) {
+			factor = 1
+		}
+		centerOnLocalPoint(cx, cy, factor, transition ? transformTransition : transform, 0.5)
+	}
+	
+	function clientToLocal(clientX, clientY) {
+		var translation = viewport.translate()
+		var x = (clientX-translation.tx)/currentZoomLevel
+		var y = (clientY-translation.ty)/currentZoomLevel
+		return {x: x, y: y}
+	}
+	
+	var transitionRunning = false
+	
+	function transformTransition(translationx, translationy, scale, durationSeconds) {
+		if (transitionRunning) {
+			return
+		}
+		transitionRunning = true
+		var initialTranslation = viewport.translate()
+		var initialScale = currentZoomLevel
+		var start = null
+		disableBlinking()
+		var step = function (timestamp) {
+			start = start || timestamp
+			var alpha = Math.min((timestamp-start)/durationSeconds/1000, 1)
+			var calpha = 1-alpha
+			var translationX = initialTranslation.tx*calpha+translationx*alpha
+			var translationY = initialTranslation.ty*calpha+translationy*alpha
+			var currentScale = initialScale*calpha+scale*alpha
+			transform(translationX, translationY, currentScale)
+			if (alpha < 1) {
+				window.requestAnimationFrame(step)
+			} else {
+				transitionRunning = false
+				enableBlinking()
+			}
+		}
+		window.requestAnimationFrame(step)
+	}
+	
+	var transform = function (translationX, translationY, scale) {
+		viewport.translate(translationX, translationY, {absolute: true})
+		viewport.scale(scale)
+		currentZoomLevel = scale
+	}
+	
+	function getLocalContentBBox() {
+		var bbox = paper.getContentBBox() // this is in client coordinates
+		var tl = clientToLocal(bbox.x, bbox.y)
+		var br = clientToLocal(bbox.x + bbox.width, bbox.y + bbox.height)
+		return { x: tl.x, y: tl.y, width: br.x-tl.x, height: br.y-tl.y }
+	}
+	
+	function centerOnLocalPoint(cx, cy, scale, transformFunc, transitionSpeed) {
+		var transitionSpeed = transitionSpeed || 0.5
+		var vw = $('#wires-graph').width()
+		var vh = $('#wires-graph').height()
+		transformFunc(vw/2-scale*cx, vh/2-scale*cy, scale, transitionSpeed)
+	}
+	
 	return client;
 
 }());

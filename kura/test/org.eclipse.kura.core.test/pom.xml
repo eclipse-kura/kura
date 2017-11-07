@@ -19,15 +19,15 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>test</artifactId>
-        <version>3.1.0-SNAPSHOT</version>
+        <version>3.2.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.eclipse.kura.core.test</artifactId>
     <packaging>eclipse-test-plugin</packaging>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.2.0-SNAPSHOT</version>
 
     <properties>
-		<kura.basedir>${project.basedir}/../..</kura.basedir>
+        <kura.basedir>${project.basedir}/../..</kura.basedir>
         <moquette.path>${project.basedir}/src/main/resources/moquette</moquette.path>
         <moquette.vm.args>
             -server -XX:+HeapDumpOnOutOfMemoryError -Djava.awt.headless=true
@@ -220,7 +220,7 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.hsqldb.hsqldb</id>
+                            <id>org.h2</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -261,6 +261,11 @@
                         </bundle>
                         <bundle>
                             <id>org.eclipse.kura.emulator.net</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.emulator.watchdog</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -430,7 +435,7 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.hsqldb.hsqldb</artifactId>
+                            <artifactId>org.h2</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -485,6 +490,11 @@
                         <extraRequirements>
                             <requirement>
                                 <type>eclipse-plugin</type>
+                                <id>org.hamcrest</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
                                 <id>org.eclipse.kura.api</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
@@ -496,6 +506,11 @@
                             <requirement>
                                 <type>eclipse-plugin</type>
                                 <id>org.eclipse.kura.emulator.net</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.emulator.watchdog</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                             <requirement>

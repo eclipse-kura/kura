@@ -24,6 +24,7 @@
       <provide interface="org.osgi.service.wireadmin.Consumer"/>      
    </service>
    <property name="service.pid" value="org.eclipse.kura.wire.DbWireRecordFilter"/>
+   <property name="kura.ui.service.hide" type="Boolean" value="true"/>
    <reference name="DbService" 
               bind="bindDbService" 
               unbind="unbindDbService"

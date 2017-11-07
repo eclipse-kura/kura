@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -38,7 +38,6 @@ import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.Tooltip;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
-import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -55,8 +54,9 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
-public class OpenPortsTabUi extends Composite implements Tab {
+public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener {
 
     private static OpenPortsTabUiUiBinder uiBinder = GWT.create(OpenPortsTabUiUiBinder.class);
 
@@ -68,51 +68,92 @@ public class OpenPortsTabUi extends Composite implements Tab {
     interface OpenPortsTabUiUiBinder extends UiBinder<Widget, OpenPortsTabUi> {
     }
 
-    private final ListDataProvider<GwtFirewallOpenPortEntry> openPortsDataProvider = new ListDataProvider<GwtFirewallOpenPortEntry>();
-    final SingleSelectionModel<GwtFirewallOpenPortEntry> selectionModel = new SingleSelectionModel<GwtFirewallOpenPortEntry>();
+    private final ListDataProvider<GwtFirewallOpenPortEntry> openPortsDataProvider = new ListDataProvider<>();
+    final SingleSelectionModel<GwtFirewallOpenPortEntry> selectionModel = new SingleSelectionModel<>();
 
-    private boolean m_dirty;
+    private boolean dirty;
 
-    GwtFirewallOpenPortEntry editOpenPortEntry, newOpenPortEntry, openPortEntry;
+    GwtFirewallOpenPortEntry editOpenPortEntry;
+    GwtFirewallOpenPortEntry newOpenPortEntry;
+    GwtFirewallOpenPortEntry openPortEntry;
 
     @UiField
-    Button apply, create, edit, delete;
+    ButtonBar buttonBar;
     @UiField
     Alert notification;
 
     @UiField
-    Modal openPortsForm, alert;
+    AlertDialog alertDialog;
+
     @UiField
-    FormGroup groupPort, groupPermittedNw, groupPermittedI, groupUnpermittedI, groupPermittedMac, groupSource;
+    Modal openPortsForm;
+
     @UiField
-    FormLabel labelPort, labelProtocol, labelPermitttedNw, labelPermitttedI, labelUnPermitttedI, labelPermitttedMac,
-            labelsource;
+    FormGroup groupPort;
     @UiField
-    TextBox port, permittedNw, permittedI, unpermittedI, permittedMac, source;
+    FormGroup groupPermittedNw;
     @UiField
-    Tooltip tooltipPermittedI, tooltipUnpermittedI;
+    FormGroup groupPermittedI;
     @UiField
-    Button submit, cancel, yes, no;
+    FormGroup groupUnpermittedI;
+    @UiField
+    FormGroup groupPermittedMac;
+    @UiField
+    FormGroup groupSource;
+
+    @UiField
+    FormLabel labelPort;
+    @UiField
+    FormLabel labelProtocol;
+    @UiField
+    FormLabel labelPermitttedNw;
+    @UiField
+    FormLabel labelPermitttedI;
+    @UiField
+    FormLabel labelUnPermitttedI;
+    @UiField
+    FormLabel labelPermitttedMac;
+    @UiField
+    FormLabel labelsource;
+
+    @UiField
+    TextBox port;
+    @UiField
+    TextBox permittedNw;
+    @UiField
+    TextBox permittedI;
+    @UiField
+    TextBox unpermittedI;
+    @UiField
+    TextBox permittedMac;
+    @UiField
+    TextBox source;
+
+    @UiField
+    Tooltip tooltipPermittedI;
+    @UiField
+    Tooltip tooltipUnpermittedI;
+
+    @UiField
+    Button submit;
+    @UiField
+    Button cancel;
+
     @UiField
     ListBox protocol;
 
-    @UiField
-    Span alertBody;
+    private HandlerRegistration modalHideHandlerRegistration;
 
     @UiField
     CellTable<GwtFirewallOpenPortEntry> openPortsGrid = new CellTable<GwtFirewallOpenPortEntry>();
 
     public OpenPortsTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
-        this.apply.setText(MSGS.firewallApply());
-        this.create.setText(MSGS.newButton());
-        this.edit.setText(MSGS.editButton());
-        this.delete.setText(MSGS.deleteButton());
         this.openPortsGrid.setSelectionModel(this.selectionModel);
 
-        initButtons();
         initTable();
         initModal();
+        this.buttonBar.setListener(this);
     }
 
     //
@@ -149,7 +190,7 @@ public class OpenPortsTabUi extends Composite implements Tab {
                         }
                         refreshTable();
                         setVisibility();
-                        OpenPortsTabUi.this.apply.setEnabled(false);
+                        OpenPortsTabUi.this.buttonBar.setDirty(false);
                         EntryClassUi.hideWaitModal();
                     }
                 });
@@ -160,12 +201,12 @@ public class OpenPortsTabUi extends Composite implements Tab {
 
     @Override
     public boolean isDirty() {
-        return this.m_dirty;
+        return this.dirty;
     }
 
     @Override
     public void setDirty(boolean b) {
-        this.m_dirty = b;
+        this.dirty = b;
     }
 
     @Override
@@ -286,75 +327,60 @@ public class OpenPortsTabUi extends Composite implements Tab {
         this.openPortsGrid.redraw();
     }
 
-    // Initialize tab buttons
-    private void initButtons() {
-        initApplyButton();
+    @Override
+    public void onApply() {
+        List<GwtFirewallOpenPortEntry> intermediateList = OpenPortsTabUi.this.openPortsDataProvider.getList();
+        final List<GwtFirewallOpenPortEntry> updatedOpenPortConf = new ArrayList<GwtFirewallOpenPortEntry>();
+        for (GwtFirewallOpenPortEntry entry : intermediateList) {
+            updatedOpenPortConf.add(entry);
+        }
 
-        initCreateButton();
-
-        initEditButton();
-
-        initDeleteButton();
-    }
-
-    private void initApplyButton() {
-        this.apply.addClickHandler(new ClickHandler() {
+        EntryClassUi.showWaitModal();
+        OpenPortsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
-            public void onClick(ClickEvent event) {
-                List<GwtFirewallOpenPortEntry> intermediateList = OpenPortsTabUi.this.openPortsDataProvider.getList();
-                ArrayList<GwtFirewallOpenPortEntry> tempList = new ArrayList<GwtFirewallOpenPortEntry>();
-                final List<GwtFirewallOpenPortEntry> updatedOpenPortConf = tempList;
-                for (GwtFirewallOpenPortEntry entry : intermediateList) {
-                    tempList.add(entry);
-                }
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex, OpenPortsTabUi.this.gwtXSRFService.getClass().getName());
+            }
 
-                if (updatedOpenPortConf != null) {
-                    EntryClassUi.showWaitModal();
-                    OpenPortsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                OpenPortsTabUi.this.gwtNetworkService.updateDeviceFirewallOpenPorts(token, updatedOpenPortConf,
+                        new AsyncCallback<Void>() {
 
-                        @Override
-                        public void onFailure(Throwable ex) {
-                            EntryClassUi.hideWaitModal();
-                            FailureHandler.handle(ex, OpenPortsTabUi.this.gwtXSRFService.getClass().getName());
-                        }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(caught, OpenPortsTabUi.this.gwtNetworkService.getClass().getSimpleName());
+                    }
 
-                        @Override
-                        public void onSuccess(GwtXSRFToken token) {
-                            OpenPortsTabUi.this.gwtNetworkService.updateDeviceFirewallOpenPorts(token,
-                                    updatedOpenPortConf, new AsyncCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        OpenPortsTabUi.this.buttonBar.setDirty(false);
+                        EntryClassUi.hideWaitModal();
+                        setDirty(false);
+                    }
+                });
+            }
+        });
 
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    EntryClassUi.hideWaitModal();
-                                    FailureHandler.handle(caught,
-                                            OpenPortsTabUi.this.gwtNetworkService.getClass().getSimpleName());
-                                }
+    }
 
-                                @Override
-                                public void onSuccess(Void result) {
-                                    OpenPortsTabUi.this.apply.setEnabled(false);
-                                    EntryClassUi.hideWaitModal();
-                                    setDirty(false);
-                                }
-                            });
-                        }
-                    });
-                }
+    @Override
+    public void onCancel() {
+        OpenPortsTabUi.this.alertDialog.show(MSGS.deviceConfigDirty(), new AlertDialog.Listener() {
+
+            @Override
+            public void onConfirm() {
+                OpenPortsTabUi.this.refresh();
             }
         });
     }
 
-    private void initCreateButton() {
-        this.create.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                showModal(null);
-            }
-        });
-        // TODO add warnings for port 80 and 22
-        this.openPortsForm.addHideHandler(new ModalHideHandler() {
+    @Override
+    public void onCreate() {
+        replaceModalHideHandler(new ModalHideHandler() {
 
             @Override
             public void onHide(ModalHideEvent evt) {
@@ -364,7 +390,7 @@ public class OpenPortsTabUi extends Composite implements Tab {
                         OpenPortsTabUi.this.openPortsDataProvider.getList().add(OpenPortsTabUi.this.newOpenPortEntry);
                         refreshTable();
                         setVisibility();
-                        OpenPortsTabUi.this.apply.setEnabled(true);
+                        OpenPortsTabUi.this.buttonBar.setDirty(true);
                     } else {
                         // Growl.growl(MSGS.firewallOpenPortFormError()
                         // + ": ",
@@ -373,66 +399,18 @@ public class OpenPortsTabUi extends Composite implements Tab {
                 }
             }
         });
+        showModal(null);
     }
 
-    private void initEditButton() {
-        this.edit.addClickHandler(new ClickHandler() {
+    @Override
+    public void onEdit() {
+        GwtFirewallOpenPortEntry selection = OpenPortsTabUi.this.selectionModel.getSelectedObject();
 
-            @Override
-            public void onClick(ClickEvent event) {
-                GwtFirewallOpenPortEntry selection = OpenPortsTabUi.this.selectionModel.getSelectedObject();
-                if (selection != null) {
-                    if (selection.getPortRange().equals("22")) {
-                        // show warning
-                        OpenPortsTabUi.this.alertBody.setText(MSGS.firewallOpenPorts22());
-                        OpenPortsTabUi.this.yes.setText(MSGS.yesButton());
-                        OpenPortsTabUi.this.no.setText(MSGS.noButton());
-                        OpenPortsTabUi.this.no.addClickHandler(new ClickHandler() {
+        if (selection == null) {
+            return;
+        }
 
-                            @Override
-                            public void onClick(ClickEvent event) {
-                                OpenPortsTabUi.this.alert.hide();
-                            }
-                        });
-                        OpenPortsTabUi.this.yes.addClickHandler(new ClickHandler() {
-
-                            @Override
-                            public void onClick(ClickEvent event) {
-                                showModal(OpenPortsTabUi.this.selectionModel.getSelectedObject());
-                                OpenPortsTabUi.this.alert.hide();
-                            }
-                        });
-                        OpenPortsTabUi.this.alert.show();
-
-                    } else if (selection.getPortRange().equals("80")) {
-                        // show warning
-                        OpenPortsTabUi.this.alertBody.setText(MSGS.firewallOpenPorts80());
-                        OpenPortsTabUi.this.yes.setText(MSGS.yesButton());
-                        OpenPortsTabUi.this.no.setText(MSGS.noButton());
-                        OpenPortsTabUi.this.no.addClickHandler(new ClickHandler() {
-
-                            @Override
-                            public void onClick(ClickEvent event) {
-                                OpenPortsTabUi.this.alert.hide();
-                            }
-                        });
-                        OpenPortsTabUi.this.yes.addClickHandler(new ClickHandler() {
-
-                            @Override
-                            public void onClick(ClickEvent event) {
-                                showModal(OpenPortsTabUi.this.selectionModel.getSelectedObject());
-                                OpenPortsTabUi.this.alert.hide();
-                            }
-                        });
-                        OpenPortsTabUi.this.alert.show();
-
-                    } else {
-                        showModal(selection);
-                    }
-                }
-            }
-        });
-        this.openPortsForm.addHideHandler(new ModalHideHandler() {
+        replaceModalHideHandler(new ModalHideHandler() {
 
             @Override
             public void onHide(ModalHideEvent evt) {
@@ -446,56 +424,56 @@ public class OpenPortsTabUi extends Composite implements Tab {
                     if (!duplicateEntry(OpenPortsTabUi.this.editOpenPortEntry)) {
                         OpenPortsTabUi.this.openPortsDataProvider.getList().add(OpenPortsTabUi.this.editOpenPortEntry);
                         OpenPortsTabUi.this.openPortsDataProvider.flush();
-                        OpenPortsTabUi.this.apply.setEnabled(true);
+                        OpenPortsTabUi.this.buttonBar.setDirty(true);
                         OpenPortsTabUi.this.editOpenPortEntry = null;
                         setVisibility();
-                    } else {	// end duplicate
+                    } else {    // end duplicate
                         OpenPortsTabUi.this.openPortsDataProvider.getList().add(oldEntry);
                         OpenPortsTabUi.this.openPortsDataProvider.flush();
                     }
                     refreshTable();
-                }  // end !=null
+                }     // end !=null
             }// end onHide
         });
+        final AlertDialog.Listener listener = new AlertDialog.Listener() {
+
+            @Override
+            public void onConfirm() {
+                showModal(OpenPortsTabUi.this.selectionModel.getSelectedObject());
+            }
+        };
+        if (selection.getPortRange().equals("22")) {
+            // show warning
+            OpenPortsTabUi.this.alertDialog.show(MSGS.firewallOpenPorts22(), listener);
+        } else if (selection.getPortRange().equals("80")) {
+            // show warning
+            OpenPortsTabUi.this.alertDialog.show(MSGS.firewallOpenPorts80(), listener);
+        } else {
+            showModal(selection);
+        }
+
     }
 
-    private void initDeleteButton() {
-        this.delete.addClickHandler(new ClickHandler() {
+    @Override
+    public void onDelete() {
+        GwtFirewallOpenPortEntry selection = OpenPortsTabUi.this.selectionModel.getSelectedObject();
+        if (selection != null) {
+            OpenPortsTabUi.this.alertDialog.show(
+                    MSGS.firewallOpenPortDeleteConfirmation(String.valueOf(selection.getPortRange())),
+                    new AlertDialog.Listener() {
 
-            @Override
-            public void onClick(ClickEvent event) {
-                GwtFirewallOpenPortEntry selection = OpenPortsTabUi.this.selectionModel.getSelectedObject();
-                if (selection != null) {
-                    OpenPortsTabUi.this.alert.setTitle(MSGS.confirm());
-                    OpenPortsTabUi.this.alertBody
-                            .setText(MSGS.firewallOpenPortDeleteConfirmation(String.valueOf(selection.getPortRange())));
-                    OpenPortsTabUi.this.alert.show();
-                }
-            }
-        });
-        this.yes.setText(MSGS.yesButton());
-        this.no.setText(MSGS.noButton());
-        this.no.addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onConfirm() {
+                            OpenPortsTabUi.this.openPortsDataProvider.getList()
+                                    .remove(OpenPortsTabUi.this.selectionModel.getSelectedObject());
+                            refreshTable();
+                            OpenPortsTabUi.this.buttonBar.setDirty(true);
+                            setVisibility();
 
-            @Override
-            public void onClick(ClickEvent event) {
-                OpenPortsTabUi.this.alert.hide();
-            }
-        });
-        this.yes.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                OpenPortsTabUi.this.alert.hide();
-                OpenPortsTabUi.this.openPortsDataProvider.getList()
-                        .remove(OpenPortsTabUi.this.selectionModel.getSelectedObject());
-                refreshTable();
-                OpenPortsTabUi.this.apply.setEnabled(true);
-                setVisibility();
-
-                setDirty(true);
-            }
-        });
+                            setDirty(true);
+                        }
+                    });
+        }
     }
 
     private void initModal() {
@@ -785,5 +763,12 @@ public class OpenPortsTabUi extends Composite implements Tab {
             this.openPortsGrid.setVisible(true);
             this.notification.setVisible(false);
         }
+    }
+
+    private void replaceModalHideHandler(ModalHideHandler hideHandler) {
+        if (this.modalHideHandlerRegistration != null) {
+            this.modalHideHandlerRegistration.removeHandler();
+        }
+        this.modalHideHandlerRegistration = this.openPortsForm.addHideHandler(hideHandler);
     }
 }

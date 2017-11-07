@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2017 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,13 +15,14 @@ package org.eclipse.kura.example.gpio;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.gpio.GPIOService;
@@ -31,32 +32,39 @@ import org.eclipse.kura.gpio.KuraGPIOMode;
 import org.eclipse.kura.gpio.KuraGPIOPin;
 import org.eclipse.kura.gpio.KuraGPIOTrigger;
 import org.eclipse.kura.gpio.KuraUnavailableDeviceException;
-import org.eclipse.kura.gpio.PinStatusListener;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GpioComponent implements ConfigurableComponent {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(GpioComponent.class);
+    private static final Logger logger = LoggerFactory.getLogger(GpioComponent.class);
 
     // Cloud Application identifier
     private static final String APP_ID = "GPIO_COMPONENT";
 
     // Property Names
+    private static final String PROP_NAME_INPUT_READ_MODE = "gpio.input.read.mode";
+
     private static final String PROP_NAME_GPIO_PINS = "gpio.pins";
     private static final String PROP_NAME_GPIO_DIRECTIONS = "gpio.directions";
     private static final String PROP_NAME_GPIO_MODES = "gpio.modes";
     private static final String PROP_NAME_GPIO_TRIGGERS = "gpio.triggers";
 
-    private GPIOService m_GPIOService;
+    private static final String INPUT_READ_MODE_PIN_STATUS_LISTENER = "PIN_STATUS_LISTENER";
+    private static final String INPUT_READ_MODE_POLLING = "POLLING";
 
-    private Map<String, Object> m_properties;
+    private GPIOService gpioService;
 
-    private static ArrayList<KuraGPIOPin> m_pins = new ArrayList<KuraGPIOPin>();
+    private Map<String, Object> properties = new HashMap<String, Object>();
 
-    private ScheduledFuture<?> m_blinker = null;
-    private final ScheduledExecutorService m_blinker_executor;
+    private List<KuraGPIOPin> acquiredOutputPins = new ArrayList<KuraGPIOPin>();
+    private List<KuraGPIOPin> acquiredInputPins = new ArrayList<KuraGPIOPin>();
+
+    private ScheduledFuture<?> blinkTask = null;
+    private ScheduledFuture<?> pollTask = null;
+
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     // ----------------------------------------------------------------
     //
@@ -64,54 +72,34 @@ public class GpioComponent implements ConfigurableComponent {
     //
     // ----------------------------------------------------------------
 
-    public GpioComponent() {
-        super();
-        this.m_blinker_executor = Executors.newSingleThreadScheduledExecutor();
-    }
-
     public void setGPIOService(GPIOService gpioService) {
-        this.m_GPIOService = gpioService;
+        this.gpioService = gpioService;
     }
 
     public void unsetGPIOService(GPIOService gpioService) {
-        this.m_GPIOService = null;
+        this.gpioService = null;
     }
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        s_logger.debug("Activating {}", APP_ID);
-        this.m_properties = new HashMap<String, Object>();
+        logger.debug("Activating {}", APP_ID);
 
         doUpdate(properties);
 
-        s_logger.info("Activating {}... Done.", APP_ID);
+        logger.info("Activating {}... Done.", APP_ID);
 
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        s_logger.debug("Deactivating {}", APP_ID);
+        logger.debug("Deactivating {}", APP_ID);
 
-        if (this.m_blinker != null) {
-            this.m_blinker.cancel(true);
-        }
+        stopTasks();
+        releasePins();
 
-        Iterator<KuraGPIOPin> pins_it = m_pins.iterator();
-        while (pins_it.hasNext()) {
-            try {
-                KuraGPIOPin p = pins_it.next();
-                s_logger.warn("Closing GPIO pin {}", p);
-                p.close();
-            } catch (IOException e) {
-                s_logger.warn("Cannot close pin!");
-            }
-        }
+        this.executor.shutdownNow();
     }
 
     public void updated(Map<String, Object> properties) {
-        s_logger.info("updated...");
-
-        if (this.m_blinker != null) {
-            this.m_blinker.cancel(true);
-        }
+        logger.info("updated...");
 
         doUpdate(properties);
     }
@@ -130,86 +118,134 @@ public class GpioComponent implements ConfigurableComponent {
         // s_logger.info("Update - " + s + ": " + properties.get(s));
         // }
 
-        this.m_properties.clear();
-        this.m_properties.putAll(properties);
+        this.properties.clear();
+        this.properties.putAll(properties);
 
-        Iterator<KuraGPIOPin> pins_it = m_pins.iterator();
-        while (pins_it.hasNext()) {
-            try {
-                KuraGPIOPin p = pins_it.next();
-                s_logger.warn("Closing GPIO pin {}", p);
-                p.close();
-            } catch (IOException e) {
-                s_logger.warn("Cannot close pin!");
+        stopTasks();
+        releasePins();
+
+        acquirePins();
+
+        if (!acquiredOutputPins.isEmpty()) {
+            submitBlinkTask(2000, acquiredOutputPins);
+        }
+
+        if (!acquiredInputPins.isEmpty()) {
+            String inputReadMode = (String) properties.get(PROP_NAME_INPUT_READ_MODE);
+
+            if (INPUT_READ_MODE_PIN_STATUS_LISTENER.equals(inputReadMode)) {
+                attachPinListeners(acquiredInputPins);
+            } else if (INPUT_READ_MODE_POLLING.equals(inputReadMode)) {
+                submitPollTask(500, acquiredInputPins);
             }
         }
 
-        m_pins.clear();
+    }
 
-        Integer[] pins = (Integer[]) properties.get(PROP_NAME_GPIO_PINS);
-        Integer[] directions = (Integer[]) properties.get(PROP_NAME_GPIO_DIRECTIONS);
-        Integer[] modes = (Integer[]) properties.get(PROP_NAME_GPIO_MODES);
-        Integer[] triggers = (Integer[]) properties.get(PROP_NAME_GPIO_TRIGGERS);
-        s_logger.info("______________________________");
-        s_logger.info("Available GPIOs on the system:");
-        Map<Integer, String> gpios = this.m_GPIOService.getAvailablePins();
+    private void acquirePins() {
+        Integer[] pins = (Integer[]) this.properties.get(PROP_NAME_GPIO_PINS);
+        Integer[] directions = (Integer[]) this.properties.get(PROP_NAME_GPIO_DIRECTIONS);
+        Integer[] modes = (Integer[]) this.properties.get(PROP_NAME_GPIO_MODES);
+        Integer[] triggers = (Integer[]) this.properties.get(PROP_NAME_GPIO_TRIGGERS);
+        logger.info("______________________________");
+        logger.info("Available GPIOs on the system:");
+        Map<Integer, String> gpios = this.gpioService.getAvailablePins();
         for (Entry<Integer, String> e : gpios.entrySet()) {
-            s_logger.info("#{} - [{}]", e.getKey(), e.getValue());
+            logger.info("#{} - [{}]", e.getKey(), e.getValue());
         }
-        s_logger.info("______________________________");
+        logger.info("______________________________");
         for (int i = 0; i < pins.length; i++) {
             try {
-                final int pinNum = pins[i];
-                s_logger.info("Acquiring GPIO pin {} with params:", pins[i]);
-                s_logger.info("   Direction....: {}", directions[i]);
-                s_logger.info("   Mode.........: {}", modes[i]);
-                s_logger.info("   Trigger......: {}", triggers[i]);
-                KuraGPIOPin p = this.m_GPIOService.getPinByTerminal(pins[i], getPinDirection(directions[i]),
+                logger.info("Acquiring GPIO pin {} with params:", pins[i]);
+                logger.info("   Direction....: {}", directions[i]);
+                logger.info("   Mode.........: {}", modes[i]);
+                logger.info("   Trigger......: {}", triggers[i]);
+                KuraGPIOPin p = this.gpioService.getPinByTerminal(pins[i], getPinDirection(directions[i]),
                         getPinMode(modes[i]), getPinTrigger(triggers[i]));
                 p.open();
-                s_logger.info("GPIO pin {} acquired", pins[i]);
-                m_pins.add(p);
+                logger.info("GPIO pin {} acquired", pins[i]);
                 if (p.getDirection() == KuraGPIODirection.OUTPUT) {
-                    final int final_index = i;
-                    this.m_blinker = this.m_blinker_executor.scheduleAtFixedRate(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            try {
-                                boolean value = !m_pins.get(final_index).getValue();
-                                s_logger.info("Setting GPIO pin {} to {}", m_pins.get(final_index), value);
-                                m_pins.get(final_index).setValue(value);
-                                // s_logger.info("Trigger = "+m_pins.get(final_index).getTrigger());
-                            } catch (KuraUnavailableDeviceException e) {
-                                s_logger.warn("GPIO pin {} is not available for export.", final_index);
-                            } catch (KuraClosedDeviceException e) {
-                                s_logger.warn("GPIO pin {} has been closed.", final_index);
-                            } catch (IOException e) {
-                                s_logger.error("I/O Error occurred!");
-                                e.printStackTrace();
-                            }
-                        }
-                    }, 0, 2, TimeUnit.SECONDS);
+                    acquiredOutputPins.add(p);
                 } else {
-                    s_logger.info("Attaching Pin Listener to GPIO pin {}", pins[i]);
-                    PinStatusListener listener = new PinStatusListener() {
-
-                        private final int pinNumber = pinNum;
-
-                        @Override
-                        public void pinStatusChange(boolean value) {
-                            s_logger.info("Pin status for GPIO pin {} changed to {}", this.pinNumber, value);
-                        }
-                    };
-                    p.addPinStatusListener(listener);
+                    acquiredInputPins.add(p);
                 }
             } catch (IOException e) {
-                s_logger.error("I/O Error occurred!");
+                logger.error("I/O Error occurred!");
                 e.printStackTrace();
             } catch (Exception e) {
-                s_logger.error(e.getLocalizedMessage());
+                logger.error("got errror", e);
             }
         }
+    }
+
+    private void submitBlinkTask(long delayMs, final List<KuraGPIOPin> outputPins) {
+        this.blinkTask = this.executor.scheduleWithFixedDelay(() -> {
+            for (KuraGPIOPin outputPin : outputPins) {
+                try {
+                    boolean value = !outputPin.getValue();
+                    logger.info("Setting GPIO pin {} to {}", outputPin, value);
+                    outputPin.setValue(value);
+                } catch (KuraUnavailableDeviceException | KuraClosedDeviceException | IOException e) {
+                    logException(outputPin, e);
+                }
+            }
+        }, 0, delayMs, TimeUnit.MILLISECONDS);
+    }
+
+    private void submitPollTask(long delayMs, final List<KuraGPIOPin> inputPins) {
+        this.pollTask = this.executor.scheduleWithFixedDelay(() -> {
+            for (KuraGPIOPin inputPin : inputPins) {
+                try {
+                    logger.info("input pin {} value {}", inputPin, inputPin.getValue());
+                } catch (KuraUnavailableDeviceException | KuraClosedDeviceException | IOException e) {
+                    logException(inputPin, e);
+                }
+            }
+        }, 0, delayMs, TimeUnit.MILLISECONDS);
+    }
+
+    private void attachPinListeners(final List<KuraGPIOPin> inputPins) {
+        for (final KuraGPIOPin pin : inputPins) {
+            logger.info("Attaching Pin Listener to GPIO pin {}", pin);
+            try {
+                pin.addPinStatusListener(
+                        value -> logger.info("Pin status for GPIO pin {} changed to {}", pin, value));
+            } catch (Exception e) {
+                logException(pin, e);
+            }
+        }
+    }
+
+    private void logException(KuraGPIOPin pin, Exception e) {
+        if (e instanceof KuraUnavailableDeviceException) {
+            logger.warn("GPIO pin {} is not available for export.", pin);
+        } else if (e instanceof KuraClosedDeviceException) {
+            logger.warn("GPIO pin {} has been closed.", pin);
+        } else {
+            logger.error("I/O Error occurred!", e);
+        }
+    }
+
+    private void stopTasks() {
+        if (this.blinkTask != null) {
+            this.blinkTask.cancel(true);
+        }
+        if (this.pollTask != null) {
+            this.pollTask.cancel(true);
+        }
+    }
+
+    private void releasePins() {
+        Stream.concat(acquiredInputPins.stream(), acquiredOutputPins.stream()).forEach(pin -> {
+            try {
+                logger.warn("Closing GPIO pin {}", pin);
+                pin.close();
+            } catch (IOException e) {
+                logger.warn("Cannot close pin!");
+            }
+        });
+        acquiredInputPins.clear();
+        acquiredOutputPins.clear();
     }
 
     private KuraGPIODirection getPinDirection(int direction) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2017 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class SupportedUsbModems {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(SupportedUsbModems.class);
+    private static final Logger logger = LoggerFactory.getLogger(SupportedUsbModems.class);
 
     private static class LsusbEntry {
 
@@ -53,8 +53,8 @@ public class SupportedUsbModems {
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder("USB Modem :-> ");
-            sb.append("Bus ").append(this.bus).append(" Device ").append(this.device).append(" ID ")
-                    .append(this.vendor).append(':').append(this.product);
+            sb.append("Bus ").append(this.bus).append(" Device ").append(this.device).append(" ID ").append(this.vendor)
+                    .append(':').append(this.product);
             if (this.description != null) {
                 sb.append(" - ").append(this.description);
             }
@@ -67,26 +67,36 @@ public class SupportedUsbModems {
         try {
             lsusbEntries = getLsusbInfo();
         } catch (IOException e) {
-            s_logger.error("failed to obtain lsusb information", e);
+            logger.error("failed to obtain lsusb information", e);
         }
         for (SupportedUsbModemInfo modem : SupportedUsbModemInfo.values()) {
             try {
                 if (isAttached(modem.getVendorId(), modem.getProductId(), lsusbEntries)) {
                     // modprobe driver
-                    s_logger.info("The {}:{} USB modem device is attached", modem.getVendorId(), modem.getProductId());
+                    logger.info("The {}:{} USB modem device is attached", modem.getVendorId(), modem.getProductId());
                     List<? extends UsbModemDriver> drivers = modem.getDeviceDrivers();
                     for (UsbModemDriver driver : drivers) {
                         driver.install();
                     }
                 }
             } catch (Exception e) {
-                s_logger.error("Failed to attach modem", e);
+                logger.error("Failed to attach modem", e);
             }
         }
     }
-    
-    private SupportedUsbModems() {
-    	
+
+    public static SupportedUsbModemInfo getModem(String vendorId, String productId) {
+        if (vendorId == null || productId == null) {
+            return null;
+        }
+
+        for (SupportedUsbModemInfo modem : SupportedUsbModemInfo.values()) {
+            if (vendorId.equals(modem.getVendorId()) && productId.equals(modem.getProductId())) {
+                return modem;
+            }
+        }
+
+        return null;
     }
 
     public static SupportedUsbModemInfo getModem(String vendorId, String productId, String productName) {
@@ -109,22 +119,22 @@ public class SupportedUsbModems {
     }
 
     public static boolean isAttached(String vendor, String product) throws IOException {
-    	boolean retVal = false;
-    	if (vendor == null || product == null) {
-    		return retVal;
-    	}
-		List<LsusbEntry> lsusbEntries = getLsusbInfo();
-		if (lsusbEntries != null && !lsusbEntries.isEmpty()) {
-			for (LsusbEntry lsusbEntry : lsusbEntries) {
-				if (vendor.equals(lsusbEntry.vendor) && product.equals(lsusbEntry.product)) {
-					retVal = true;
-					break;
-				}
-			}
-		}	
-    	return retVal;
+        boolean retVal = false;
+        if (vendor == null || product == null) {
+            return retVal;
+        }
+        List<LsusbEntry> lsusbEntries = getLsusbInfo();
+        if (lsusbEntries != null && !lsusbEntries.isEmpty()) {
+            for (LsusbEntry lsusbEntry : lsusbEntries) {
+                if (vendor.equals(lsusbEntry.vendor) && product.equals(lsusbEntry.product)) {
+                    retVal = true;
+                    break;
+                }
+            }
+        }
+        return retVal;
     }
-    
+
     private static boolean isAttached(String vendor, String product, List<LsusbEntry> lsusbEntries) throws IOException {
         boolean attached = false;
         if (lsusbEntries == null || lsusbEntries.isEmpty()) {
@@ -133,7 +143,7 @@ public class SupportedUsbModems {
             for (LsusbEntry lsusbEntry : lsusbEntries) {
                 if (vendor != null && product != null && vendor.equals(lsusbEntry.vendor)
                         && product.equals(lsusbEntry.product)) {
-                    s_logger.info("The 'lsusb' command detected {}", lsusbEntry);
+                    logger.info("The 'lsusb' command detected {}", lsusbEntry);
                     attached = true;
                     break;
                 }
@@ -141,7 +151,7 @@ public class SupportedUsbModems {
         }
         return attached;
     }
-    
+
     /**
      * Execute command and return splitted lines
      *
@@ -159,13 +169,13 @@ public class SupportedUsbModems {
 
         int rc = executor.execute(CommandLine.parse(command));
 
-        s_logger.debug("Called {} - rc = {}", command, rc);
+        logger.debug("Called {} - rc = {}", command, rc);
 
         return IOUtils.readLines(new ByteArrayInputStream(out.toByteArray()));
     }
 
     private static List<LsusbEntry> getLsusbInfo() throws IOException {
-        final List<LsusbEntry> lsusbEntries = new ArrayList<LsusbEntry>();
+        final List<LsusbEntry> lsusbEntries = new ArrayList<>();
 
         for (final String line : execute("lsusb")) {
             LsusbEntry lsusbEntry = getLsusbEntry(line);

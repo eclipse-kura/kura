@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2017 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -16,7 +16,8 @@
 
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
     xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
-    xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
+    xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
+    xmlns:firewall="urn:import:org.eclipse.kura.web.client.ui.Firewall">
 
     <ui:style>
     .important {
@@ -33,23 +34,29 @@
             <g:HTMLPanel ui:field="firewallIntro" addStyleNames="firewall-panel">
             </g:HTMLPanel>
         </b:Row>
+        
         <b:Row>
-
-            <b:Navbar>
-                <b:NavbarNav>
-                    <b:AnchorListItem text="Open Ports"
-                        ui:field="openPorts" />
-                    <b:AnchorListItem text="Port Forwarding"
-                        ui:field="portForwarding" />
-                    <b:AnchorListItem text="IP Forwarding/Masquerading"
+            <b:Well size="SMALL">
+                <b:NavTabs>
+                    <b:TabListItem dataTarget="#openPortsPanel" text="Open Ports"
+                        ui:field="openPorts" active="true"/>
+                    <b:TabListItem dataTarget="#portForwardingPanel" text="Port Forwarding"
+                        ui:field="portForwarding"/>
+                    <b:TabListItem dataTarget="#ipForwardingPanel" text="IP Forwarding/Masquerading"
                         ui:field="ipForwarding" />
-                </b:NavbarNav>
-            </b:Navbar>
-        </b:Row>
-
-        <b:Row>
-            <b:Well addStyleNames="{style.center-panel}"
-                ui:field="content" />
+                </b:NavTabs>
+                <b:TabContent>
+                    <b:TabPane b:id="openPortsPanel" active="true">
+                        <firewall:OpenPortsTabUi ui:field="openPortsPanel"></firewall:OpenPortsTabUi>
+                    </b:TabPane>
+                    <b:TabPane b:id="portForwardingPanel">
+                        <firewall:PortForwardingTabUi ui:field="portForwardingPanel"></firewall:PortForwardingTabUi>
+                    </b:TabPane>
+                    <b:TabPane b:id="ipForwardingPanel">
+                        <firewall:NatTabUi ui:field="ipForwardingPanel"></firewall:NatTabUi>
+                    </b:TabPane>
+                </b:TabContent>
+            </b:Well>
         </b:Row>
 
     </b:Container>

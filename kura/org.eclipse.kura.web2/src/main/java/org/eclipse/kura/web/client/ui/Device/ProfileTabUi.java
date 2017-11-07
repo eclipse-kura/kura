@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 import org.eclipse.kura.web.client.messages.ValidationMessages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -34,7 +35,9 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 
-public class ProfileTabUi extends Composite {
+public class ProfileTabUi extends Composite implements Tab {
+
+    private static final String DEV_INFO = "devInfo";
 
     private static ProfileTabUiUiBinder uiBinder = GWT.create(ProfileTabUiUiBinder.class);
 
@@ -47,8 +50,8 @@ public class ProfileTabUi extends Composite {
     private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 
     @UiField
-    CellTable<GwtGroupedNVPair> profileGrid = new CellTable<GwtGroupedNVPair>();
-    private final ListDataProvider<GwtGroupedNVPair> profileDataProvider = new ListDataProvider<GwtGroupedNVPair>();
+    CellTable<GwtGroupedNVPair> profileGrid = new CellTable<>();
+    private final ListDataProvider<GwtGroupedNVPair> profileDataProvider = new ListDataProvider<>();
 
     public ProfileTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -90,7 +93,22 @@ public class ProfileTabUi extends Composite {
         dataProvider.addDataDisplay(profileGrid2);
     }
 
-    public void loadProfileData() {
+    @Override
+    public void setDirty(boolean flag) {
+    }
+
+    @Override
+    public boolean isDirty() {
+        return true;
+    }
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
+    public void refresh() {
         this.profileDataProvider.getList().clear();
 
         EntryClassUi.showWaitModal();
@@ -118,9 +136,9 @@ public class ProfileTabUi extends Composite {
 
                     @Override
                     public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-                        String oldGroup = "devInfo";
+                        String oldGroup = DEV_INFO;
                         ProfileTabUi.this.profileDataProvider.getList()
-                                .add(new GwtGroupedNVPair("devInfo", "devInfo", "  "));
+                                .add(new GwtGroupedNVPair(DEV_INFO, DEV_INFO, "  "));
                         for (GwtGroupedNVPair resultPair : result) {
                             if (!oldGroup.equals(resultPair.getGroup())) {
                                 ProfileTabUi.this.profileDataProvider.getList()

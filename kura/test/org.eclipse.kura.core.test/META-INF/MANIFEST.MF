@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.core.test
 Bundle-SymbolicName: org.eclipse.kura.core.test;singleton:=true
-Bundle-Version: 3.1.0.qualifier
+Bundle-Version: 3.2.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: javax.comm,
- javax.xml.parsers, 
+ javax.xml.parsers,
  javax.xml.stream,
  junit.framework,
  org.eclipse.kura.cloud;version="[1.0,2.0)",
@@ -18,8 +18,13 @@ Import-Package: javax.comm,
  org.eclipse.kura.core.deployment.download;version="[1.0,2.0)",
  org.eclipse.kura.core.deployment.install;version="[1.0,2.0)",
  org.eclipse.kura.core.deployment.xml;version="[1.0,2.0)",
+ org.eclipse.kura.core.testutil;version="1.0.0",
  org.eclipse.kura.message;version="[1.0,2.0)",
+ org.eclipse.kura.watchdog;version="[1.0,2.0)",
  org.junit,
+ org.mockito;version="1.10.19",
+ org.mockito.invocation;version="1.10.19",
+ org.mockito.stubbing;version="1.10.19",
  org.osgi.framework,
  org.osgi.service.cm,
  org.osgi.service.component,

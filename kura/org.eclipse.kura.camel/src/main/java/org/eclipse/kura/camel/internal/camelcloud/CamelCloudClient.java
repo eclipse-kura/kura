@@ -130,10 +130,10 @@ public class CamelCloudClient implements CloudClient {
     }
 
     @Override
-    public int publish(String s, byte[] bytes, int i, boolean b, int i1) throws KuraException {
+    public int publish(String topic, byte[] payload, int qos, boolean retain, int priority) throws KuraException {
         KuraPayload kuraPayload = new KuraPayload();
-        kuraPayload.setBody(bytes);
-        return publish(s, kuraPayload, i, b);
+        kuraPayload.setBody(payload);
+        return publish(topic, kuraPayload, qos, retain, priority);
     }
 
     @Override
@@ -141,7 +141,7 @@ public class CamelCloudClient implements CloudClient {
             throws KuraException {
         KuraPayload kuraPayload = new KuraPayload();
         kuraPayload.setBody(payload);
-        return publish(deviceId, appTopic, payload, qos, retain, 5);
+        return publish(deviceId, appTopic, kuraPayload, qos, retain, priority);
     }
 
     @Override
@@ -157,11 +157,11 @@ public class CamelCloudClient implements CloudClient {
     }
 
     @Override
-    public int controlPublish(String deviceId, String topic, byte[] payload, int qos, boolean b, int priority)
+    public int controlPublish(String deviceId, String topic, byte[] payload, int qos, boolean retain, int priority)
             throws KuraException {
         KuraPayload kuraPayload = new KuraPayload();
         kuraPayload.setBody(payload);
-        return doPublish(true, deviceId, topic, kuraPayload, qos, b, priority);
+        return doPublish(true, deviceId, topic, kuraPayload, qos, retain, priority);
     }
 
     @Override

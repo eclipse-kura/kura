@@ -30,8 +30,6 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
 
     private static final long serialVersionUID = -8826193840033103296L;
 
-    static final String PLACEHOLDER = "Placeholder";
-
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // Cache the current thread

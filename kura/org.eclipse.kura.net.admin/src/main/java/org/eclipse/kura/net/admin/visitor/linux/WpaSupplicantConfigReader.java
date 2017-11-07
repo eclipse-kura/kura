@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -43,16 +43,16 @@ import org.slf4j.LoggerFactory;
 
 public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(WpaSupplicantConfigReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(WpaSupplicantConfigReader.class);
 
-    private static WpaSupplicantConfigReader s_instance;
+    private static WpaSupplicantConfigReader instance;
 
     public static WpaSupplicantConfigReader getInstance() {
-        if (s_instance == null) {
-            s_instance = new WpaSupplicantConfigReader();
+        if (instance == null) {
+            instance = new WpaSupplicantConfigReader();
         }
 
-        return s_instance;
+        return instance;
     }
 
     @Override
@@ -69,12 +69,12 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 
     private void getConfig(WifiInterfaceConfigImpl wifiInterfaceConfig) throws KuraException {
         String interfaceName = wifiInterfaceConfig.getName();
-        s_logger.debug("Getting wpa_supplicant config for {}", interfaceName);
+        logger.debug("Getting wpa_supplicant config for {}", interfaceName);
 
         List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = wifiInterfaceConfig.getNetInterfaceAddresses();
 
-        if (wifiInterfaceAddressConfigs == null || wifiInterfaceAddressConfigs.size() == 0) {
-            wifiInterfaceAddressConfigs = new ArrayList<WifiInterfaceAddressConfig>();
+        if (wifiInterfaceAddressConfigs == null || wifiInterfaceAddressConfigs.isEmpty()) {
+            wifiInterfaceAddressConfigs = new ArrayList<>();
             wifiInterfaceAddressConfigs.add(new WifiInterfaceAddressConfigImpl());
             wifiInterfaceConfig.setNetInterfaceAddresses(wifiInterfaceAddressConfigs);
         }
@@ -84,30 +84,23 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
                 List<NetConfig> netConfigs = wifiInterfaceAddressConfig.getConfigs();
 
                 if (netConfigs == null) {
-                    netConfigs = new ArrayList<NetConfig>();
+                    netConfigs = new ArrayList<>();
                     ((WifiInterfaceAddressConfigImpl) wifiInterfaceAddressConfig).setNetConfigs(netConfigs);
                 }
 
                 // Get infrastructure config
                 netConfigs.add(getWifiClientConfig(interfaceName, WifiMode.INFRA));
-
-                /*
-                 * // Get adhoc config
-                 * WifiConfig adhocConfig = new WifiConfig();
-                 * setWifiClientConfig(adhocConfig, interfaceName, WifiMode.ADHOC);
-                 * netConfigs.add(adhocConfig);
-                 */
             }
         }
     }
 
-    private static WifiConfig getWifiClientConfig(String ifaceName, WifiMode wifiMode) throws KuraException {
+    private WifiConfig getWifiClientConfig(String ifaceName, WifiMode wifiMode) throws KuraException {
 
         WifiConfig wifiConfig = new WifiConfig();
 
         String ssid = "";
         WifiSecurity wifiSecurity = WifiSecurity.NONE;
-        String password = "";
+        String pass = "";
         int[] channels = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
         WifiBgscan bgscan = new WifiBgscan("");
         WifiCiphers pairwiseCiphers = null;
@@ -117,53 +110,24 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
         Properties props = parseConfigFile(ifaceName);
 
         if (props == null) {
-            s_logger.warn("WPA in client mode is not configured");
+            logger.warn("WPA in client mode is not configured");
         } else {
             ssid = props.getProperty("ssid");
             if (ssid == null) {
-                s_logger.warn("WPA in client mode is not configured");
+                logger.warn("WPA in client mode is not configured");
             } else {
-                s_logger.debug("curent wpa_supplicant.conf: ssid={}", ssid);
+                logger.debug("current wpa_supplicant.conf: ssid={}", ssid);
 
                 // wifi mode
                 int currentMode = props.getProperty("mode") != null ? Integer.parseInt(props.getProperty("mode"))
                         : WpaSupplicantUtil.MODE_INFRA;
-                s_logger.debug("current wpa_supplicant.conf: mode={}", currentMode);
+                logger.debug("current wpa_supplicant.conf: mode={}", currentMode);
 
                 switch (wifiMode) {
                 case INFRA:
-                    String scan_freq = props.getProperty("scan_freq");
-                    if (scan_freq != null) {
-                        s_logger.debug("current wpa_supplicant.conf: scan_freq={}", scan_freq);
-                        String[] saScanFreq = scan_freq.split(" ");
-                        channels = new int[saScanFreq.length];
-                        for (int i = 0; i < channels.length; i++) {
-                            try {
-                                channels[i] = WpaSupplicantUtil.convFrequencyToChannel(Integer.parseInt(saScanFreq[i]));
-                            } catch (NumberFormatException e) {
-                            }
-                        }
-                    }
+                    channels = getChannels(channels, props);
                     break;
-                /*
-                 * case ADHOC:
-                 * channels = new int [1];
-                 * String frequency = props.getProperty("frequency");
-                 * s_logger.debug("current wpa_supplicant.conf: frequency=" + frequency);
-                 * int freq = 2412;
-                 * if (frequency != null) {
-                 * try {
-                 * freq = Integer.parseInt(frequency);
-                 * } catch (NumberFormatException e) {
-                 * }
-                 * }
-                 * channels[0] = WpaSupplicantUtil.convFrequencyToChannel(freq);
-                 * wifiDriver = KuranetConfig.getProperty(adhocDriverKey.toString());
-                 * if(wifiDriver == null) {
-                 * wifiDriver = KuranetConfig.getProperty(infraDriverKey.toString());
-                 * }
-                 * break;
-                 */
+
                 case MASTER:
                     throw KuraException
                             .internalError("failed to get wpa_supplicant configuration: MASTER mode is invalid");
@@ -174,67 +138,32 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 
                 String proto = props.getProperty("proto");
                 if (proto != null) {
-                    s_logger.debug("current wpa_supplicant.conf: proto={}", proto);
+                    logger.debug("current wpa_supplicant.conf: proto={}", proto);
                 }
 
-                String pairwise = props.getProperty("pairwise");
-                if (pairwise != null) {
-                    s_logger.debug("current wpa_supplicant.conf: pairwise={}", pairwise);
-                    if (pairwise.contains(WifiCiphers.toString(WifiCiphers.CCMP_TKIP))) {
-                        pairwiseCiphers = WifiCiphers.CCMP_TKIP;
-                    } else if (pairwise.contains(WifiCiphers.toString(WifiCiphers.TKIP))) {
-                        pairwiseCiphers = WifiCiphers.TKIP;
-                    } else if (pairwise.contains(WifiCiphers.toString(WifiCiphers.CCMP))) {
-                        pairwiseCiphers = WifiCiphers.CCMP;
-                    }
-                }
-
-                String group = props.getProperty("group");
-                if (group != null) {
-                    s_logger.debug("current wpa_supplicant.conf: group={}", group);
-                    if (group.contains(WifiCiphers.toString(WifiCiphers.CCMP_TKIP))) {
-                        groupCiphers = WifiCiphers.CCMP_TKIP;
-                    } else if (group.contains(WifiCiphers.toString(WifiCiphers.TKIP))) {
-                        groupCiphers = WifiCiphers.TKIP;
-                    } else if (group.contains(WifiCiphers.toString(WifiCiphers.CCMP))) {
-                        groupCiphers = WifiCiphers.CCMP;
-                    }
-                }
+                pairwiseCiphers = getCipher(props, "pairwise");
+                groupCiphers = getCipher(props, "group");
 
                 // security
                 String keyMgmt = props.getProperty("key_mgmt");
-                s_logger.debug("current wpa_supplicant.conf: key_mgmt={}", keyMgmt);
-                if (keyMgmt != null && keyMgmt.equalsIgnoreCase("WPA-PSK")) {
-                    password = props.getProperty("psk");
-                    if (proto != null) {
-                        if (proto.trim().equals("WPA")) {
-                            wifiSecurity = WifiSecurity.SECURITY_WPA;
-                        } else if (proto.trim().equals("RSN")) {
-                            wifiSecurity = WifiSecurity.SECURITY_WPA2;
-                        } else if (proto.trim().equals("WPA RSN")) {
-                            wifiSecurity = WifiSecurity.SECURITY_WPA_WPA2;
-                        }
-                    } else {
-                        wifiSecurity = WifiSecurity.SECURITY_WPA2;
-                    }
+                logger.debug("current wpa_supplicant.conf: key_mgmt={}", keyMgmt);
+                if (keyMgmt != null && "WPA-PSK".equalsIgnoreCase(keyMgmt)) {
+                    pass = props.getProperty("psk");
+                    wifiSecurity = getSecurityFromProto(proto);
                 } else {
-                    password = props.getProperty("wep_key0");
-                    if (password != null) {
-                        wifiSecurity = WifiSecurity.SECURITY_WEP;
-                    } else {
-                        wifiSecurity = WifiSecurity.SECURITY_NONE;
-                    }
+                    pass = props.getProperty("wep_key0");
+                    wifiSecurity = (pass != null) ? WifiSecurity.SECURITY_WEP : WifiSecurity.SECURITY_NONE;
 
                     pairwiseCiphers = null;
                     groupCiphers = null;
                 }
-                if (password == null) {
-                    password = "";
+                if (pass == null) {
+                    pass = "";
                 }
 
                 String sBgscan = props.getProperty("bgscan");
                 if (sBgscan != null) {
-                    s_logger.debug("current wpa_supplicant.conf: bgscan={}", sBgscan);
+                    logger.debug("current wpa_supplicant.conf: bgscan={}", sBgscan);
                     bgscan = new WifiBgscan(sBgscan);
                 }
             }
@@ -244,7 +173,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
         wifiConfig.setMode(wifiMode);
         wifiConfig.setSSID(ssid);
         wifiConfig.setSecurity(wifiSecurity);
-        wifiConfig.setPasskey(password);
+        wifiConfig.setPasskey(pass);
         wifiConfig.setHardwareMode("");
         wifiConfig.setPairwiseCiphers(pairwiseCiphers);
         wifiConfig.setGroupCiphers(groupCiphers);
@@ -256,7 +185,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
         boolean pingAP = false;
         StringBuilder key = new StringBuilder().append("net.interface.").append(ifaceName)
                 .append(".config.wifi.infra.pingAccessPoint");
-        String statusString = KuranetConfig.getProperty(key.toString());
+        String statusString = getKuranetProperty(key.toString());
         if (statusString != null && !statusString.isEmpty()) {
             pingAP = Boolean.parseBoolean(statusString);
         }
@@ -264,7 +193,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 
         boolean ignoreSSID = false;
         key = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.wifi.infra.ignoreSSID");
-        statusString = KuranetConfig.getProperty(key.toString());
+        statusString = getKuranetProperty(key.toString());
         if (statusString != null && !statusString.isEmpty()) {
             ignoreSSID = Boolean.parseBoolean(statusString);
         }
@@ -272,9 +201,7 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
 
         StringBuilder infraDriverKey = new StringBuilder("net.interface.").append(ifaceName)
                 .append(".config.wifi.infra.driver");
-        // StringBuilder adhocDriverKey = new
-        // StringBuilder("net.interface.").append(ifaceName).append(".config.wifi.adhoc.driver");
-        String wifiDriver = KuranetConfig.getProperty(infraDriverKey.toString());
+        String wifiDriver = getKuranetProperty(infraDriverKey.toString());
         if (wifiDriver == null || wifiDriver.isEmpty()) {
             wifiDriver = "nl80211";
         }
@@ -283,13 +210,76 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
         return wifiConfig;
     }
 
-    private static Properties parseConfigFile(String ifaceName) throws KuraException {
+    protected WifiSecurity getSecurityFromProto(String proto) {
+        WifiSecurity wifiSecurity = WifiSecurity.NONE;
+
+        if (proto != null) {
+            proto = proto.trim();
+
+            if ("WPA".equals(proto)) {
+                wifiSecurity = WifiSecurity.SECURITY_WPA;
+            } else if ("RSN".equals(proto)) {
+                wifiSecurity = WifiSecurity.SECURITY_WPA2;
+            } else if ("WPA RSN".equals(proto)) {
+                wifiSecurity = WifiSecurity.SECURITY_WPA_WPA2;
+            }
+        } else {
+            wifiSecurity = WifiSecurity.SECURITY_WPA2;
+        }
+
+        return wifiSecurity;
+    }
+
+    protected WifiCiphers getCipher(Properties props, String key) {
+        WifiCiphers cipher = null;
+
+        String val = props.getProperty(key);
+        if (val != null) {
+            logger.debug("current wpa_supplicant.conf: {}={}", key, val);
+
+            if (val.contains(WifiCiphers.toString(WifiCiphers.CCMP_TKIP))) {
+                cipher = WifiCiphers.CCMP_TKIP;
+            } else if (val.contains(WifiCiphers.toString(WifiCiphers.TKIP))) {
+                cipher = WifiCiphers.TKIP;
+            } else if (val.contains(WifiCiphers.toString(WifiCiphers.CCMP))) {
+                cipher = WifiCiphers.CCMP;
+            }
+        }
+
+        return cipher;
+    }
+
+    protected int[] getChannels(int[] defaultChannels, Properties props) {
+        int[] channels = defaultChannels;
+
+        String scanFreq = props.getProperty("scan_freq");
+        if (scanFreq != null) {
+            logger.debug("current wpa_supplicant.conf: scan_freq={}", scanFreq);
+            String[] saScanFreq = scanFreq.split(" ");
+            channels = new int[saScanFreq.length];
+            for (int i = 0; i < channels.length; i++) {
+                try {
+                    channels[i] = WpaSupplicantUtil.convFrequencyToChannel(Integer.parseInt(saScanFreq[i]));
+                } catch (NumberFormatException e) {
+                    // don't worry
+                }
+            }
+        }
+
+        return channels;
+    }
+
+    protected String getKuranetProperty(String key) {
+        return KuranetConfig.getProperty(key);
+    }
+
+    private Properties parseConfigFile(String ifaceName) throws KuraException {
 
         Properties props = null;
 
         BufferedReader br = null;
         try {
-            File wpaConfigFile = new File(WpaSupplicantManager.getWpaSupplicantConfigFilename(ifaceName));
+            File wpaConfigFile = new File(getWpaSupplicantConfigFilename(ifaceName));
             if (wpaConfigFile.exists()) {
 
                 // Read into a string
@@ -330,11 +320,15 @@ public class WpaSupplicantConfigReader implements NetworkConfigurationVisitor {
                 try {
                     br.close();
                 } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
+                    logger.error("I/O Exception while closing BufferedReader!");
                 }
             }
         }
 
         return props;
+    }
+
+    protected String getWpaSupplicantConfigFilename(String ifaceName) {
+        return WpaSupplicantManager.getWpaSupplicantConfigFilename(ifaceName);
     }
 }

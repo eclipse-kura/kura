@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2017 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" activate="activate" configuration-policy="require" deactivate="deactivate" modified="updated" name="org.eclipse.kura.core.db.H2DbService">
+   <implementation class="org.eclipse.kura.core.db.H2DbServiceImpl"/>
+   <service>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+      <provide interface="org.eclipse.kura.db.H2DbService"/>
+   </service>
+   <property name="service.pid" value="org.eclipse.kura.core.db.H2DbService"/>
+   <reference bind="setCryptoService" cardinality="1..1" interface="org.eclipse.kura.crypto.CryptoService" name="CryptoService" policy="static" unbind="unsetCryptoService"/>
+</scr:component>

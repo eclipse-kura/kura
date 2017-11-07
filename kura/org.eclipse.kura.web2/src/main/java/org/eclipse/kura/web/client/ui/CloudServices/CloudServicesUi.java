@@ -37,12 +37,13 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class CloudServicesUi extends Composite {
 
     private static final Logger logger = Logger.getLogger(CloudServicesUi.class.getSimpleName());
-    private static final Messages MSG = GWT.create(Messages.class);
+    private static final Messages MSGS = GWT.create(Messages.class);
 
     private static CloudServicesUiUiBinder uiBinder = GWT.create(CloudServicesUiUiBinder.class);
     private static CloudInstancesUi cloudInstancesBinder;
@@ -55,6 +56,8 @@ public class CloudServicesUi extends Composite {
     }
 
     @UiField
+    HTMLPanel cloudServicesIntro;
+    @UiField
     Panel cloudInstancesPanel;
     @UiField
     Panel cloudConfigurationsPanel;
@@ -64,6 +67,8 @@ public class CloudServicesUi extends Composite {
     public CloudServicesUi() {
         logger.log(Level.FINER, "Initializing StatusPanelUi...");
         initWidget(uiBinder.createAndBindUi(this));
+
+        this.cloudServicesIntro.add(new Span("<p>" + MSGS.cloudServicesTabIntro() + "</p>"));
 
         cloudInstancesBinder = new CloudInstancesUi(this);
         this.cloudInstancesPanel.add(cloudInstancesBinder);
@@ -88,7 +93,6 @@ public class CloudServicesUi extends Composite {
 
     public void refresh() {
         cloudInstancesBinder.loadData();
-        // setVisibility();
     }
 
     protected void refreshInternal() {
@@ -115,7 +119,7 @@ public class CloudServicesUi extends Composite {
             cloudServiceConfigurationsBinder.setVisibility(false);
             this.cloudConfigurationsPanel.setVisible(false);
             this.notification.setVisible(true);
-            this.notification.setText(MSG.noConnectionsAvailable());
+            this.notification.setText(MSGS.noConnectionsAvailable());
         } else {
             cloudInstancesBinder.setVisibility(true);
             cloudServiceConfigurationsBinder.setVisibility(true);
@@ -153,17 +157,17 @@ public class CloudServicesUi extends Composite {
         final Modal modal = new Modal();
 
         ModalHeader header = new ModalHeader();
-        header.setTitle(MSG.confirm());
+        header.setTitle(MSGS.confirm());
         modal.add(header);
 
         ModalBody body = new ModalBody();
-        body.add(new Span(MSG.deviceConfigDirty()));
+        body.add(new Span(MSGS.deviceConfigDirty()));
         modal.add(body);
 
         ModalFooter footer = new ModalFooter();
         ButtonGroup group = new ButtonGroup();
         Button yes = new Button();
-        yes.setText(MSG.yesButton());
+        yes.setText(MSGS.yesButton());
         yes.addClickHandler(new ClickHandler() {
 
             @Override
@@ -184,7 +188,7 @@ public class CloudServicesUi extends Composite {
             }
         });
         Button no = new Button();
-        no.setText(MSG.noButton());
+        no.setText(MSGS.noButton());
         no.addClickHandler(new ClickHandler() {
 
             @Override

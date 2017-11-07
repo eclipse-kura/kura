@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -68,38 +68,154 @@ public class TabModemUi extends Composite implements NetworkTab {
     private final TabTcpIpUi tcpTab;
     private boolean dirty;
     private GwtModemInterfaceConfig selectedNetIfConfig;
-    private final Map<String, String> defaultDialString = new HashMap<String, String>();
+    private final Map<String, String> defaultDialString = new HashMap<>();
     private String dialString;
 
     @UiField
-    FormGroup groupReset, groupMaxfail, groupIdle, groupInterval, groupFailure, groupNumber, groupDial, groupApn;
+    FormGroup groupReset;
     @UiField
-    FormLabel labelModel, labelNetwork, labelService, labelModem, labelNumber, labelDial, labelApn, labelAuth,
-            labelUsername, labelPassword, labelReset, labelPersist, labelMaxfail, labelIdle, labelActive, labelInterval,
-            labelFailure;
+    FormGroup groupMaxfail;
     @UiField
-    HelpBlock helpReset, helpMaxfail, helpIdle, helpInterval, helpFailure, helpNumber;
+    FormGroup groupIdle;
+    @UiField
+    FormGroup groupInterval;
+    @UiField
+    FormGroup groupFailure;
+    @UiField
+    FormGroup groupNumber;
+    @UiField
+    FormGroup groupDial;
+    @UiField
+    FormGroup groupApn;
 
     @UiField
-    ListBox network, auth;
+    FormLabel labelModel;
     @UiField
-    TextBox modem, number, dial, apn, username, reset, maxfail, idle, active, interval, failure;
+    FormLabel labelNetwork;
     @UiField
-    FormControlStatic model, service;
+    FormLabel labelService;
+    @UiField
+    FormLabel labelModem;
+    @UiField
+    FormLabel labelNumber;
+    @UiField
+    FormLabel labelDial;
+    @UiField
+    FormLabel labelApn;
+    @UiField
+    FormLabel labelAuth;
+    @UiField
+    FormLabel labelUsername;
+    @UiField
+    FormLabel labelPassword;
+    @UiField
+    FormLabel labelReset;
+    @UiField
+    FormLabel labelPersist;
+    @UiField
+    FormLabel labelMaxfail;
+    @UiField
+    FormLabel labelIdle;
+    @UiField
+    FormLabel labelActive;
+    @UiField
+    FormLabel labelInterval;
+    @UiField
+    FormLabel labelFailure;
+
+    @UiField
+    HelpBlock helpReset;
+    @UiField
+    HelpBlock helpMaxfail;
+    @UiField
+    HelpBlock helpIdle;
+    @UiField
+    HelpBlock helpInterval;
+    @UiField
+    HelpBlock helpFailure;
+    @UiField
+    HelpBlock helpNumber;
+
+    @UiField
+    ListBox network;
+    @UiField
+    ListBox auth;
+
+    @UiField
+    TextBox modem;
+    @UiField
+    TextBox number;
+    @UiField
+    TextBox dial;
+    @UiField
+    TextBox apn;
+    @UiField
+    TextBox username;
+    @UiField
+    TextBox reset;
+    @UiField
+    TextBox maxfail;
+    @UiField
+    TextBox idle;
+    @UiField
+    TextBox active;
+    @UiField
+    TextBox interval;
+    @UiField
+    TextBox failure;
+
+    @UiField
+    FormControlStatic model;
+    @UiField
+    FormControlStatic service;
+
     @UiField
     Input password;
+
     @UiField
-    InlineRadio radio1, radio2;
+    InlineRadio radio1;
+    @UiField
+    InlineRadio radio2;
+
     @UiField
     PanelHeader helpTitle;
+
     @UiField
     ScrollPanel helpText;
+
     @UiField
     FieldSet field;
 
     @UiField
-    HelpButton networkHelp, modemHelp, numberHelp, dialHelp, apnHelp, authHelp, usernameHelp, passwordHelp, resetHelp,
-            persistHelp, maxfailHelp, idleHelp, activeHelp, intervalHelp, failureHelp;
+    HelpButton networkHelp;
+    @UiField
+    HelpButton modemHelp;
+    @UiField
+    HelpButton numberHelp;
+    @UiField
+    HelpButton dialHelp;
+    @UiField
+    HelpButton apnHelp;
+    @UiField
+    HelpButton authHelp;
+    @UiField
+    HelpButton usernameHelp;
+    @UiField
+    HelpButton passwordHelp;
+    @UiField
+    HelpButton resetHelp;
+    @UiField
+    HelpButton persistHelp;
+    @UiField
+    HelpButton maxfailHelp;
+    @UiField
+    HelpButton idleHelp;
+    @UiField
+    HelpButton activeHelp;
+    @UiField
+    HelpButton intervalHelp;
+    @UiField
+    HelpButton failureHelp;
 
     public TabModemUi(GwtSession currentSession, TabTcpIpUi tcp) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -254,10 +370,10 @@ public class TabModemUi extends Composite implements NetworkTab {
 
             @Override
             public String getHelpText() {
-                if ("".equals(dialString)) {
+                if ("".equals(TabModemUi.this.dialString)) {
                     return MSGS.netModemToolTipDialStringDefault();
                 } else {
-                    return MSGS.netModemToolTipDialString(dial.getText());
+                    return MSGS.netModemToolTipDialString(TabModemUi.this.dial.getText());
                 }
             }
         });

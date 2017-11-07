@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,7 +27,6 @@ import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.HelpBlock;
 import org.gwtbootstrap3.client.ui.InlineRadio;
 import org.gwtbootstrap3.client.ui.ListBox;
-import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
@@ -45,6 +44,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class TabDhcpNatUi extends Composite implements NetworkTab {
@@ -68,6 +68,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
 
     @UiField
     Form form;
+
     @UiField
     FormLabel labelRouter;
     @UiField
@@ -82,8 +83,10 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     FormLabel labelMax;
     @UiField
     FormLabel labelPass;
+
     @UiField
     ListBox router;
+
     @UiField
     TextBox begin;
     @UiField
@@ -94,10 +97,12 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     TextBox defaultL;
     @UiField
     TextBox max;
+
     @UiField
     InlineRadio radio1;
     @UiField
     InlineRadio radio2;
+
     @UiField
     FormGroup groupRouter;
     @UiField
@@ -110,15 +115,30 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     FormGroup groupDefaultL;
     @UiField
     FormGroup groupMax;
-    @UiField
-    HelpBlock helpRouter;
-    @UiField
-    PanelHeader helpTitle;
-    @UiField
-    PanelBody helpText;
 
     @UiField
-    HelpButton routerHelp, beginHelp, endHelp, subnetHelp, defaultLHelp, maxHelp, passHelp;
+    HelpBlock helpRouter;
+
+    @UiField
+    PanelHeader helpTitle;
+
+    @UiField
+    ScrollPanel helpText;
+
+    @UiField
+    HelpButton routerHelp;
+    @UiField
+    HelpButton beginHelp;
+    @UiField
+    HelpButton endHelp;
+    @UiField
+    HelpButton subnetHelp;
+    @UiField
+    HelpButton defaultLHelp;
+    @UiField
+    HelpButton maxHelp;
+    @UiField
+    HelpButton passHelp;
 
     public TabDhcpNatUi(GwtSession currentSession, TabTcpIpUi tcp, TabWirelessUi wireless) {
         initWidget(uiBinder.createAndBindUi(this));

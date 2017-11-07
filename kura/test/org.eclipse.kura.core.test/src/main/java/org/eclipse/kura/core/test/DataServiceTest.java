@@ -63,29 +63,6 @@ public class DataServiceTest implements DataServiceListener {
     static final String MSG_TOPIC2 = "#account-name/#client-id/" + MSG_SEMATIC_TOPIC2;
     static final String MSG_PAYLOAD = "Lorem ipsum dolor sit amet";
 
-    // JUnit 3 and is called before every test
-    // public void setUp() {
-    // System.err.println("JUnit 3 setUp");
-    // // Wait for OSGi dependencies
-    // try {
-    // s_dependencyLatch.await(5, TimeUnit.SECONDS);
-    // } catch (InterruptedException e) {
-    // fail("OSGi dependencies unfulfilled");
-    // }
-    // }
-
-    // JUnit 4 and is called before every test
-    // @Before
-    // public void setUpBefore() {
-    // System.err.println("@Before (JUnit4) setUpBefore");
-    // // Wait for OSGi dependencies
-    // try {
-    // s_dependencyLatch.await(5, TimeUnit.SECONDS);
-    // } catch (InterruptedException e) {
-    // fail("OSGi dependencies unfulfilled");
-    // }
-    // }
-
     // JUnit 4 and is called once
     @BeforeClass
     public static void setUpBeforeClass() {

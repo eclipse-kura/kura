@@ -19,6 +19,7 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.watchdog.WatchdogService;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -43,6 +44,7 @@ public class AllCoreTests {
     private static ConfigurationService s_configService;
     private static DataService s_dataService;
     private static SystemService s_sysService;
+    
 
     public void setConfigService(ConfigurationService configService) {
         s_configService = configService;
@@ -122,6 +124,7 @@ public class AllCoreTests {
                     .getComponentConfiguration("org.eclipse.kura.data.DataService");
             Map<String, Object> dataProps = dataConfig.getConfigurationProperties();
             dataProps.put("connect.auto-on-startup", false);
+            dataProps.put("enable.rate.limit", false);
             s_configService.updateConfiguration("org.eclipse.kura.data.DataService", dataProps);
 
             // waiting for the configuration to be applied

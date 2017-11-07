@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,7 @@
 package org.eclipse.kura.linux.net.util;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -38,100 +39,102 @@ import org.slf4j.LoggerFactory;
 
 public class iwlistScanTool implements IScanTool {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(iwlistScanTool.class);
+    private static final Logger logger = LoggerFactory.getLogger(iwlistScanTool.class);
 
     private static final String SCAN_THREAD_NAME = "iwlistScanThread";
 
-    private static final Object s_lock = new Object();
-    private String m_ifaceName;
-    private ExecutorService m_executor;
-    private static Future<?> s_task;
-
-    private int m_timeout;
+    private static final Object lock = new Object();
+    private String ifaceName;
+    private int timeout;
 
     // FIXME:MC Is this process always closed?
-    private SafeProcess m_process;
-    private boolean m_status;
-    private String m_errmsg;
+    private SafeProcess process;
+    private boolean status;
+    private String errmsg;
 
     protected iwlistScanTool() {
-        this.m_timeout = 20;
+        this.timeout = 20;
     }
 
     protected iwlistScanTool(String ifaceName) {
         this();
-        this.m_ifaceName = ifaceName;
-        this.m_errmsg = "";
-        this.m_status = false;
+        this.ifaceName = ifaceName;
+        this.errmsg = "";
+        this.status = false;
     }
 
     protected iwlistScanTool(String ifaceName, int tout) {
         this(ifaceName);
-        this.m_timeout = tout;
+        this.timeout = tout;
     }
 
     @Override
     public List<WifiAccessPoint> scan() throws KuraException {
 
         StringBuilder sb = new StringBuilder();
-        sb.append("ifconfig ").append(this.m_ifaceName).append(" up");
+        sb.append("ifconfig ").append(this.ifaceName).append(" up");
+        SafeProcess proc = null;
         try {
-            SafeProcess process = ProcessUtil.exec(sb.toString());
-            process.waitFor();
+            proc = ProcessUtil.exec(sb.toString());
+            proc.waitFor();
         } catch (Exception e) {
-            s_logger.error("failed to execute the {} command - {}", sb.toString(), e);
+            logger.error("failed to execute the {} command ", sb.toString(), e);
+        } finally {
+            if (proc != null) {
+                proc.destroy();
+            }
         }
 
-        List<WifiAccessPoint> wifiAccessPoints = new ArrayList<WifiAccessPoint>();
-        synchronized (s_lock) {
+        List<WifiAccessPoint> wifiAccessPoints = new ArrayList<>();
+        synchronized (lock) {
             long timerStart = System.currentTimeMillis();
 
-            this.m_executor = Executors.newSingleThreadExecutor();
-            s_task = this.m_executor.submit(new Runnable() {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Future<?> task = executor.submit(new Runnable() {
 
                 @Override
                 public void run() {
                     Thread.currentThread().setName(SCAN_THREAD_NAME);
                     int stat = -1;
-                    iwlistScanTool.this.m_process = null;
+                    iwlistScanTool.this.process = null;
                     StringBuilder sb = new StringBuilder();
-                    sb.append("iwlist ").append(iwlistScanTool.this.m_ifaceName).append(" scanning");
-                    s_logger.info("scan() :: executing: " + sb.toString());
-                    iwlistScanTool.this.m_status = false;
+                    sb.append("iwlist ").append(iwlistScanTool.this.ifaceName).append(" scanning");
+                    logger.info("scan() :: executing: {}", sb.toString());
+                    iwlistScanTool.this.status = false;
                     try {
-                        iwlistScanTool.this.m_process = ProcessUtil.exec(sb.toString());
-                        stat = iwlistScanTool.this.m_process.waitFor();
-                        s_logger.info("scan() :: " + sb.toString() + " command returns status=" + stat + " - process="
-                                + iwlistScanTool.this.m_process);
+                        iwlistScanTool.this.process = ProcessUtil.exec(sb.toString());
+                        stat = iwlistScanTool.this.process.waitFor();
+                        logger.info("scan() :: " + sb.toString() + " command returns status=" + stat + " - process="
+                                + iwlistScanTool.this.process);
                         if (stat == 0) {
-                            iwlistScanTool.this.m_status = true;
+                            iwlistScanTool.this.status = true;
                         } else {
-                            s_logger.error("scan() :: failed to execute " + sb.toString() + " error code is " + stat);
+                            logger.error("scan() :: failed to execute {} error code is {}", sb.toString(), stat);
                         }
                     } catch (Exception e) {
-                        iwlistScanTool.this.m_errmsg = "exception executing scan command";
-                        s_logger.error("failed to execute the {} command - {}", sb.toString(), e);
+                        iwlistScanTool.this.errmsg = "exception executing scan command";
+                        logger.error("failed to execute the {} command ", sb.toString(), e);
                     }
                 }
             });
 
-            while (!s_task.isDone()) {
-                if (System.currentTimeMillis() > timerStart + this.m_timeout * 1000) {
-                    s_logger.warn("scan() :: scan timeout");
+            while (!task.isDone()) {
+                if (System.currentTimeMillis() > timerStart + this.timeout * 1000) {
+                    logger.warn("scan() :: scan timeout");
                     sb = new StringBuilder();
-                    sb.append("iwlist ").append(this.m_ifaceName).append(" scanning");
+                    sb.append("iwlist ").append(this.ifaceName).append(" scanning");
                     try {
                         int pid = LinuxProcessUtil.getPid(sb.toString());
                         if (pid >= 0) {
-                            s_logger.warn("scan() :: scan timeout :: killing pid {}", pid);
+                            logger.warn("scan() :: scan timeout :: killing pid {}", pid);
                             LinuxProcessUtil.kill(pid);
                         }
                     } catch (Exception e) {
-                        s_logger.error("failed to get pid of the {} process - {}", sb.toString(), e);
+                        logger.error("failed to get pid of the {} process ", sb.toString(), e);
                     }
-                    s_task.cancel(true);
-                    s_task = null;
-                    this.m_errmsg = "timeout executing scan command";
+                    task.cancel(true);
+                    task = null;
+                    this.errmsg = "timeout executing scan command";
                     break;
                 }
                 try {
@@ -140,44 +143,42 @@ public class iwlistScanTool implements IScanTool {
                 }
             }
 
-            if (this.m_status == false || this.m_process == null) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, this.m_errmsg);
+            if (!this.status || this.process == null) {
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, this.errmsg);
             }
 
-            s_logger.info("scan() :: the 'iw scan' command executed successfully, parsing output ...");
+            logger.info("scan() :: the 'iw scan' command executed successfully, parsing output ...");
             try {
                 wifiAccessPoints = parse();
             } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "error parsing scan results");
+                throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e, "error parsing scan results");
             } finally {
-                s_logger.info("scan() :: destroing scan proccess ...");
-                if (this.m_process != null) {
-                    ProcessUtil.destroy(this.m_process);
+                logger.info("scan() :: destroing scan proccess ...");
+                if (this.process != null) {
+                    ProcessUtil.destroy(this.process);
                 }
-                this.m_process = null;
+                this.process = null;
 
-                s_logger.info("scan() :: Terminating {} ...", SCAN_THREAD_NAME);
-                this.m_executor.shutdownNow();
+                logger.info("scan() :: Terminating {} ...", SCAN_THREAD_NAME);
+                executor.shutdownNow();
                 try {
-                    this.m_executor.awaitTermination(2, TimeUnit.SECONDS);
+                    executor.awaitTermination(2, TimeUnit.SECONDS);
                 } catch (InterruptedException e) {
-                    s_logger.warn("Interrupted " + e);
+                    logger.warn("Interrupted " + e);
                 }
-                s_logger.info("scan() :: 'iw scan' thread terminated? - {}", this.m_executor.isTerminated());
-                this.m_executor = null;
+                logger.info("scan() :: 'iw scan' thread terminated? - {}", executor.isTerminated());
+                executor = null;
             }
         }
         return wifiAccessPoints;
     }
 
-    private List<WifiAccessPoint> parse() throws Exception {
+    private List<WifiAccessPoint> parse() throws KuraException {
 
-        List<WifiAccessPoint> wifiAccessPoints = new ArrayList<WifiAccessPoint>();
+        List<WifiAccessPoint> wifiAccessPoints = new ArrayList<>();
 
         // get the output
-        BufferedReader br = new BufferedReader(new InputStreamReader(this.m_process.getInputStream()));
         String line = null;
-
         String ssid = null;
         List<Long> bitrate = null;
         long frequency = -1;
@@ -186,189 +187,95 @@ public class iwlistScanTool implements IScanTool {
         EnumSet<WifiSecurity> rsnSecurity = null;
         int strength = -1;
         EnumSet<WifiSecurity> wpaSecurity = null;
-
-        while ((line = br.readLine()) != null) {
-            line = line.trim();
-            if (line.startsWith("Cell")) {
-                // new AP
-                if (ssid != null) {
-                    WifiAccessPointImpl wifiAccessPoint = new WifiAccessPointImpl(ssid);
-                    wifiAccessPoint.setBitrate(bitrate);
-                    wifiAccessPoint.setFrequency(frequency);
-                    wifiAccessPoint.setHardwareAddress(hardwareAddress);
-                    wifiAccessPoint.setMode(mode);
-                    wifiAccessPoint.setRsnSecurity(rsnSecurity);
-                    wifiAccessPoint.setStrength(strength);
-                    wifiAccessPoint.setWpaSecurity(wpaSecurity);
-                    wifiAccessPoints.add(wifiAccessPoint);
-                }
-
-                // reset
-                ssid = null;
-                bitrate = null;
-                frequency = -1;
-                hardwareAddress = null;
-                mode = null;
-                rsnSecurity = null;
-                strength = -1;
-                wpaSecurity = null;
-
-                // parse out the MAC
-                StringTokenizer st = new StringTokenizer(line, " ");
-                st.nextToken(); // eat Cell
-                st.nextToken(); // eat Cell #
-                st.nextToken(); // eat '-'
-                st.nextToken(); // eat 'Address:'
-                String macAddressString = st.nextToken();
-                if (macAddressString != null) {
-                    hardwareAddress = NetworkUtil.macToBytes(macAddressString);
-                }
-            } else if (line.startsWith("ESSID:")) {
-                ssid = line.substring("ESSID:".length() + 1, line.length() - 1);
-            } else if (line.startsWith("Quality=")) {
-                StringTokenizer st = new StringTokenizer(line, " ");
-                st.nextToken(); // eat 'Quality='
-                st.nextToken(); // eat 'Signal'
-                String signalLevel = st.nextToken();
-                if (signalLevel != null) {
-                    signalLevel = signalLevel.substring(signalLevel.indexOf('=') + 1);
-                    if (signalLevel.contains("/")) {
-                        // Could also be of format 39/100
-                        final String[] parts = signalLevel.split("/");
-                        strength = (int) Float.parseFloat(parts[0]);
-                        strength = SignalStrengthConversion.getRssi(strength);
-                    } else {
-                        strength = (int) Float.parseFloat(signalLevel);
-                    }
-                    strength = Math.abs(strength);
-                }
-
-            } else if (line.startsWith("Mode:")) {
-                line = line.substring("Mode:".length());
-                if (line.equals("Master")) {
-                    mode = WifiMode.MASTER;
-                }
-            } else if (line.startsWith("Frequency:")) {
-                line = line.substring("Frequency:".length(), line.indexOf(' '));
-                frequency = (long) (Float.parseFloat(line) * 1000);
-            } else if (line.startsWith("Bit Rates:")) {
-                if (bitrate == null) {
-                    bitrate = new ArrayList<Long>();
-                }
-                line = line.substring("Bit Rates:".length());
-                String[] bitRates = line.split(";");
-                for (String rate : bitRates) {
-                    if (rate != null) {
-                        rate = rate.trim();
-                        if (rate.length() > 0) {
-                            rate = rate.substring(0, rate.indexOf(' '));
-                            bitrate.add((long) (Float.parseFloat(rate) * 1000000));
-                        }
-                    }
-                }
-            } else if (line.contains("IE: IEEE 802.11i/WPA2")) {
-                rsnSecurity = EnumSet.noneOf(WifiSecurity.class);
-                boolean foundGroup = false;
-                boolean foundPairwise = false;
-                boolean foundAuthSuites = false;
-                while ((line = br.readLine()) != null) {
-                    line = line.trim();
-                    if (line.contains("Group Cipher")) {
-                        foundGroup = true;
-                        if (line.contains("CCMP")) {
-                            rsnSecurity.add(WifiSecurity.GROUP_CCMP);
-                        }
-                        if (line.contains("TKIP")) {
-                            rsnSecurity.add(WifiSecurity.GROUP_TKIP);
-                        }
-                        if (line.contains("WEP104")) {
-                            rsnSecurity.add(WifiSecurity.GROUP_WEP104);
-                        }
-                        if (line.contains("WEP40")) {
-                            rsnSecurity.add(WifiSecurity.GROUP_WEP40);
-                        }
-                    } else if (line.contains("Pairwise Ciphers")) {
-                        foundPairwise = true;
-                        if (line.contains("CCMP")) {
-                            rsnSecurity.add(WifiSecurity.PAIR_CCMP);
-                        }
-                        if (line.contains("TKIP")) {
-                            rsnSecurity.add(WifiSecurity.PAIR_TKIP);
-                        }
-                        if (line.contains("WEP104")) {
-                            rsnSecurity.add(WifiSecurity.PAIR_WEP104);
-                        }
-                        if (line.contains("WEP40")) {
-                            rsnSecurity.add(WifiSecurity.PAIR_WEP40);
-                        }
-                    } else if (line.contains("Authentication Suites")) {
-                        foundAuthSuites = true;
-                        if (line.contains("802_1X")) {
-                            rsnSecurity.add(WifiSecurity.KEY_MGMT_802_1X);
-                        }
-                        if (line.contains("PSK")) {
-                            rsnSecurity.add(WifiSecurity.KEY_MGMT_PSK);
-                        }
-                    } else {
-                        s_logger.debug("Ignoring line in RSN: {}", line);
+        try (InputStreamReader isr = new InputStreamReader(this.process.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.startsWith("Cell")) {
+                    // new AP
+                    if (ssid != null) {
+                        WifiAccessPointImpl wifiAccessPoint = new WifiAccessPointImpl(ssid);
+                        wifiAccessPoint.setBitrate(bitrate);
+                        wifiAccessPoint.setFrequency(frequency);
+                        wifiAccessPoint.setHardwareAddress(hardwareAddress);
+                        wifiAccessPoint.setMode(mode);
+                        wifiAccessPoint.setRsnSecurity(rsnSecurity);
+                        wifiAccessPoint.setStrength(strength);
+                        wifiAccessPoint.setWpaSecurity(wpaSecurity);
+                        wifiAccessPoints.add(wifiAccessPoint);
                     }
 
-                    if (foundGroup && foundPairwise && foundAuthSuites) {
-                        break;
+                    // reset
+                    ssid = null;
+                    bitrate = null;
+                    frequency = -1;
+                    hardwareAddress = null;
+                    mode = null;
+                    rsnSecurity = null;
+                    strength = -1;
+                    wpaSecurity = null;
+
+                    // parse out the MAC
+                    StringTokenizer st = new StringTokenizer(line, " ");
+                    st.nextToken(); // eat Cell
+                    st.nextToken(); // eat Cell #
+                    st.nextToken(); // eat '-'
+                    st.nextToken(); // eat 'Address:'
+                    String macAddressString = st.nextToken();
+                    if (macAddressString != null) {
+                        hardwareAddress = NetworkUtil.macToBytes(macAddressString);
                     }
-                }
-            } else if (line.contains("IE: WPA Version")) {
-                wpaSecurity = EnumSet.noneOf(WifiSecurity.class);
-                boolean foundGroup = false;
-                boolean foundPairwise = false;
-                boolean foundAuthSuites = false;
-                while ((line = br.readLine()) != null) {
-                    line = line.trim();
-                    if (line.contains("Group Cipher")) {
-                        foundGroup = true;
-                        if (line.contains("CCMP")) {
-                            wpaSecurity.add(WifiSecurity.GROUP_CCMP);
+                } else if (line.startsWith("ESSID:")) {
+                    ssid = line.substring("ESSID:".length() + 1, line.length() - 1);
+                } else if (line.startsWith("Quality=")) {
+                    StringTokenizer st = new StringTokenizer(line, " ");
+                    st.nextToken(); // eat 'Quality='
+                    st.nextToken(); // eat 'Signal'
+                    String signalLevel = st.nextToken();
+                    if (signalLevel != null) {
+                        signalLevel = signalLevel.substring(signalLevel.indexOf('=') + 1);
+                        if (signalLevel.contains("/")) {
+                            // Could also be of format 39/100
+                            final String[] parts = signalLevel.split("/");
+                            strength = (int) Float.parseFloat(parts[0]);
+                            strength = SignalStrengthConversion.getRssi(strength);
+                        } else {
+                            strength = (int) Float.parseFloat(signalLevel);
                         }
-                        if (line.contains("TKIP")) {
-                            wpaSecurity.add(WifiSecurity.GROUP_TKIP);
-                        }
-                        if (line.contains("WEP104")) {
-                            wpaSecurity.add(WifiSecurity.GROUP_WEP104);
-                        }
-                        if (line.contains("WEP40")) {
-                            wpaSecurity.add(WifiSecurity.GROUP_WEP40);
-                        }
-                    } else if (line.contains("Pairwise Ciphers")) {
-                        foundPairwise = true;
-                        if (line.contains("CCMP")) {
-                            wpaSecurity.add(WifiSecurity.PAIR_CCMP);
-                        }
-                        if (line.contains("TKIP")) {
-                            wpaSecurity.add(WifiSecurity.PAIR_TKIP);
-                        }
-                        if (line.contains("WEP104")) {
-                            wpaSecurity.add(WifiSecurity.PAIR_WEP104);
-                        }
-                        if (line.contains("WEP40")) {
-                            wpaSecurity.add(WifiSecurity.PAIR_WEP40);
-                        }
-                    } else if (line.contains("Authentication Suites")) {
-                        foundAuthSuites = true;
-                        if (line.contains("802_1X")) {
-                            wpaSecurity.add(WifiSecurity.KEY_MGMT_802_1X);
-                        }
-                        if (line.contains("PSK")) {
-                            wpaSecurity.add(WifiSecurity.KEY_MGMT_PSK);
-                        }
-                    } else {
-                        s_logger.debug("Ignoring line in WPA: {}", line);
+                        strength = Math.abs(strength);
                     }
 
-                    if (foundGroup && foundPairwise && foundAuthSuites) {
-                        break;
+                } else if (line.startsWith("Mode:")) {
+                    line = line.substring("Mode:".length());
+                    if ("Master".equals(line)) {
+                        mode = WifiMode.MASTER;
                     }
+                } else if (line.startsWith("Frequency:")) {
+                    line = line.substring("Frequency:".length(), line.indexOf(' '));
+                    frequency = (long) (Float.parseFloat(line) * 1000);
+                } else if (line.startsWith("Bit Rates:")) {
+                    if (bitrate == null) {
+                        bitrate = new ArrayList<>();
+                    }
+                    line = line.substring("Bit Rates:".length());
+                    String[] bitRates = line.split(";");
+                    for (String rate : bitRates) {
+                        if (rate != null) {
+                            rate = rate.trim();
+                            if (rate.length() > 0) {
+                                rate = rate.substring(0, rate.indexOf(' '));
+                                bitrate.add((long) (Float.parseFloat(rate) * 1000000));
+                            }
+                        }
+                    }
+                } else if (line.contains("IE: IEEE 802.11i/WPA2")) {
+                    rsnSecurity = setWifiSecurity(br);
+                } else if (line.contains("IE: WPA Version")) {
+                    wpaSecurity = setWifiSecurity(br);
                 }
             }
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
         }
 
         // store the last one
@@ -383,8 +290,69 @@ public class iwlistScanTool implements IScanTool {
             wifiAccessPoint.setWpaSecurity(wpaSecurity);
             wifiAccessPoints.add(wifiAccessPoint);
         }
-        br.close();
         return wifiAccessPoints;
     }
 
+    private EnumSet<WifiSecurity> setWifiSecurity(BufferedReader br) throws IOException {
+        EnumSet<WifiSecurity> wifiWpaSecurity = EnumSet.noneOf(WifiSecurity.class);
+        boolean foundGroup = false;
+        boolean foundPairwise = false;
+        boolean foundAuthSuites = false;
+        String line;
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (line.contains("Group Cipher")) {
+                foundGroup = true;
+                setGroupCiphers(line, wifiWpaSecurity);
+            } else if (line.contains("Pairwise Ciphers")) {
+                foundPairwise = true;
+                setPairwiseCiphers(line, wifiWpaSecurity);
+            } else if (line.contains("Authentication Suites")) {
+                foundAuthSuites = true;
+                if (line.contains("802_1X")) {
+                    wifiWpaSecurity.add(WifiSecurity.KEY_MGMT_802_1X);
+                }
+                if (line.contains("PSK")) {
+                    wifiWpaSecurity.add(WifiSecurity.KEY_MGMT_PSK);
+                }
+            } else {
+                logger.debug("Ignoring line in WPA/RSN: {}", line);
+            }
+
+            if (foundGroup && foundPairwise && foundAuthSuites) {
+                break;
+            }
+        }
+        return wifiWpaSecurity;
+    }
+
+    private void setGroupCiphers(String line, EnumSet<WifiSecurity> wifiWpaSecurity) {
+        if (line.contains("CCMP")) {
+            wifiWpaSecurity.add(WifiSecurity.GROUP_CCMP);
+        }
+        if (line.contains("TKIP")) {
+            wifiWpaSecurity.add(WifiSecurity.GROUP_TKIP);
+        }
+        if (line.contains("WEP104")) {
+            wifiWpaSecurity.add(WifiSecurity.GROUP_WEP104);
+        }
+        if (line.contains("WEP40")) {
+            wifiWpaSecurity.add(WifiSecurity.GROUP_WEP40);
+        }
+    }
+
+    private void setPairwiseCiphers(String line, EnumSet<WifiSecurity> wifiWpaSecurity) {
+        if (line.contains("CCMP")) {
+            wifiWpaSecurity.add(WifiSecurity.PAIR_CCMP);
+        }
+        if (line.contains("TKIP")) {
+            wifiWpaSecurity.add(WifiSecurity.PAIR_TKIP);
+        }
+        if (line.contains("WEP104")) {
+            wifiWpaSecurity.add(WifiSecurity.PAIR_WEP104);
+        }
+        if (line.contains("WEP40")) {
+            wifiWpaSecurity.add(WifiSecurity.PAIR_WEP40);
+        }
+    }
 }

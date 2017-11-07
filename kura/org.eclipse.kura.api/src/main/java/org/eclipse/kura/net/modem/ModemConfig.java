@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -187,6 +187,7 @@ public class ModemConfig implements NetConfig {
      * Reports password.
      *
      * @return password as {@link Password}
+     * @since 1.3
      */
     public Password getPasswordAsPassword() {
         return this.password;
@@ -207,6 +208,7 @@ public class ModemConfig implements NetConfig {
      *
      * @param password
      *            - password as {@link Password}
+     * @since 1.3
      */
     public void setPassword(Password password) {
         this.password = password;
@@ -638,7 +640,7 @@ public class ModemConfig implements NetConfig {
         }
 
         if (this.ipAddress != null) {
-            if (!this.ipAddress.equals(otherConfig)) {
+            if (!this.ipAddress.equals(otherConfig.ipAddress)) {
                 return false;
             }
         } else {

@@ -32,6 +32,7 @@ import org.eclipse.kura.core.deployment.progress.ProgressEvent;
 import org.eclipse.kura.core.deployment.progress.ProgressListener;
 import org.eclipse.kura.core.deployment.util.FileUtilities;
 import org.eclipse.kura.core.deployment.util.HashUtil;
+import org.eclipse.kura.deployment.hook.DeploymentHook;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.slf4j.Logger;
@@ -124,7 +125,18 @@ public class DownloadImpl implements ProgressListener {
         } catch (Exception e) {
             s_logger.info("Download exception", e);
             downloadSuccess = false;
-            downloadFailedAsync(downloadIndex);
+            downloadFailedAsync(downloadIndex, null);
+        }
+
+        final DeploymentHook hook = this.options.getDeploymentHook();
+
+        if (hook != null) {
+            try {
+                hook.postDownload(this.options.getHookRequestContext(), this.options.getHookProperties());
+            } catch (Exception e) {
+                s_logger.warn("DeploymentHook cancelled operation at postDownload phase");
+                throw e;
+            }
         }
 
         if (downloadSuccess && dpFile != null && this.options.isInstall()) {
@@ -247,14 +259,17 @@ public class DownloadImpl implements ProgressListener {
         this.callback.publishMessage(this.options, notify, RESOURCE_DOWNLOAD);
     }
 
-    private void downloadFailedAsync(int downloadIndex) {
+    private void downloadFailedAsync(int downloadIndex, Exception e) {
         KuraNotifyPayload notify = new KuraNotifyPayload(this.options.getClientId());
         notify.setTimestamp(new Date());
         notify.setTransferSize(0);
         notify.setTransferProgress(0);
         notify.setTransferStatus(DOWNLOAD_STATUS.FAILED.getStatusString());
         notify.setJobId(this.options.getJobId());
-        notify.setErrorMessage("Error during download process and verification!"); // message to get cause
+        notify.setErrorMessage(e == null ? "Error during download process and verification!" : e.getMessage()); // message
+                                                                                                                // to
+                                                                                                                // get
+                                                                                                                // cause
         notify.setTransferIndex(downloadIndex);
 
         this.callback.publishMessage(this.options, notify, RESOURCE_DOWNLOAD);

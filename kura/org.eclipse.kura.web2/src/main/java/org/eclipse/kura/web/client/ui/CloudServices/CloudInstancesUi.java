@@ -61,7 +61,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class CloudInstancesUi extends Composite {
 
     private static CloudConnectionsUiUiBinder uiBinder = GWT.create(CloudConnectionsUiUiBinder.class);
-    private static final Messages MSG = GWT.create(Messages.class);
+    private static final Messages MSGS = GWT.create(Messages.class);
 
     private final SingleSelectionModel<GwtCloudConnectionEntry> selectionModel = new SingleSelectionModel<GwtCloudConnectionEntry>();
     private final ListDataProvider<GwtCloudConnectionEntry> cloudServicesDataProvider = new ListDataProvider<GwtCloudConnectionEntry>();
@@ -97,7 +97,7 @@ public class CloudInstancesUi extends Composite {
     @UiField
     FlowPanel cloudServiceFlowPanel;
     @UiField
-    CellTable<GwtCloudConnectionEntry> connectionsGrid = new CellTable<GwtCloudConnectionEntry>();
+    CellTable<GwtCloudConnectionEntry> connectionsGrid = new CellTable<>();
 
     TextBox cloudServicePid;
 
@@ -106,11 +106,11 @@ public class CloudInstancesUi extends Composite {
         this.cloudServicesUi = cloudServicesUi;
 
         // Set text for buttons
-        this.connectionRefresh.setText(MSG.refresh());
-        this.newConnection.setText(MSG.newButton());
-        this.deleteConnection.setText(MSG.deleteButton());
-        this.statusConnect.setText(MSG.connectButton());
-        this.statusDisconnect.setText(MSG.disconnectButton());
+        this.connectionRefresh.setText(MSGS.refresh());
+        this.newConnection.setText(MSGS.newButton());
+        this.deleteConnection.setText(MSGS.deleteButton());
+        this.statusConnect.setText(MSGS.connectButton());
+        this.statusDisconnect.setText(MSGS.disconnectButton());
         this.connectionsGrid.setSelectionModel(this.selectionModel);
         this.cloudServicePid = new TextBox();
 
@@ -243,18 +243,18 @@ public class CloudInstancesUi extends Composite {
                 public String getValue(GwtCloudConnectionEntry object) {
                     switch (object.getState()) {
                     case UNREGISTERED:
-                        return MSG.unregistered();
+                        return MSGS.unregistered();
                     case CONNECTED:
-                        return MSG.connected();
+                        return MSGS.connected();
                     case DISCONNECTED:
-                        return MSG.disconnected();
+                        return MSGS.disconnected();
                     default:
                         return object.getState().toString();
                     }
                 }
             };
             col.setCellStyleNames("status-table-row");
-            this.connectionsGrid.addColumn(col, MSG.netIPv4Status());
+            this.connectionsGrid.addColumn(col, MSGS.netIPv4Status());
         }
 
         {
@@ -270,7 +270,7 @@ public class CloudInstancesUi extends Composite {
                 }
             };
             col.setCellStyleNames("status-table-row");
-            this.connectionsGrid.addColumn(col, MSG.connectionCloudFactoryLabel());
+            this.connectionsGrid.addColumn(col, MSGS.connectionCloudFactoryLabel());
         }
 
         {
@@ -286,7 +286,7 @@ public class CloudInstancesUi extends Composite {
                 }
             };
             col.setCellStyleNames("status-table-row");
-            this.connectionsGrid.addColumn(col, MSG.connectionCloudServiceLabel());
+            this.connectionsGrid.addColumn(col, MSGS.connectionCloudServiceLabel());
         }
 
         this.cloudServicesDataProvider.addDataDisplay(this.connectionsGrid);
@@ -342,7 +342,6 @@ public class CloudInstancesUi extends Composite {
 
     private void showNewConnectionModal() {
         EntryClassUi.showWaitModal();
-        // cloudServicePid = new TextBox();
         this.cloudServicePid.clear();
         this.cloudFactoriesPids.clear();
 
@@ -464,15 +463,15 @@ public class CloudInstancesUi extends Composite {
         final Modal modal = new Modal();
 
         ModalHeader header = new ModalHeader();
-        header.setTitle(MSG.warning());
+        header.setTitle(MSGS.warning());
         modal.add(header);
 
         ModalBody body = new ModalBody();
-        body.add(new Span(MSG.cloudServiceDeleteConfirmation()));
+        body.add(new Span(MSGS.cloudServiceDeleteConfirmation()));
         modal.add(body);
 
         ModalFooter footer = new ModalFooter();
-        Button yes = new Button(MSG.yesButton(), new ClickHandler() {
+        Button yes = new Button(MSGS.yesButton(), new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -483,7 +482,7 @@ public class CloudInstancesUi extends Composite {
                 modal.hide();
             }
         });
-        Button no = new Button(MSG.noButton(), new ClickHandler() {
+        Button no = new Button(MSGS.noButton(), new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -512,7 +511,7 @@ public class CloudInstancesUi extends Composite {
                 CloudInstancesUi.this.cloudServicePid = new TextBox();
                 CloudInstancesUi.this.cloudServicePid.setAutoComplete(false);
                 if (result != null) {
-                    CloudInstancesUi.this.cloudServicePid.setPlaceholder(MSG.exampleGiven() + " " + result);
+                    CloudInstancesUi.this.cloudServicePid.setPlaceholder(MSGS.exampleGiven() + " " + result);
                 }
                 getCloudServicePidRegex(factoryPid);
 

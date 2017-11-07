@@ -45,6 +45,10 @@ public interface SystemService {
 
     public static final String KEY_KURA_NAME = "kura.name";
     public static final String KEY_KURA_VERSION = "kura.version";
+    /**
+     * @since 1.3
+     */
+    public static final String KEY_KURA_MARKETPLACE_COMPATIBILITY_VERSION = "kura.marketplace.compatibility.version";
     public static final String KEY_DEVICE_NAME = "kura.device.name";
     public static final String KEY_PLATFORM = "kura.platform";
     public static final String KEY_MODEL_ID = "kura.model.id";
@@ -57,8 +61,8 @@ public interface SystemService {
     public static final String KEY_KURA_HOME_DIR = "kura.home";
     public static final String KEY_KURA_PLUGINS_DIR = "kura.plugins";
     /**
-	 * @since 1.2
-	 */
+     * @since 1.2
+     */
     public static final String KEY_KURA_PACKAGES_DIR = "kura.packages";
     public static final String KEY_KURA_DATA_DIR = "kura.data";
     public static final String KEY_KURA_TMP_DIR = "kura.tmp";
@@ -88,14 +92,53 @@ public interface SystemService {
     public static final String KEY_FILE_SEP = "file.separator";
     public static final String CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE = "console.device.management.service.ignore";
 
+    /**
+     * @deprecated
+     */
+    @Deprecated
     public static final String DB_URL_PROPNAME = "db.service.hsqldb.url";
-    public static final String DB_CACHE_ROWS_PROPNAME = "db.service.hsqldb.cache_rows";
-    public static final String DB_LOB_FILE_PROPNAME = "db.service.hsqldb.lob_file_scale";
-    public static final String DB_DEFRAG_LIMIT_PROPNAME = "db.service.hsqldb.defrag_limit";
-    public static final String DB_LOG_DATA_PROPNAME = "db.service.hsqldb.log_data";
-    public static final String DB_LOG_SIZE_PROPNAME = "db.service.hsqldb.log_size";
-    public static final String DB_NIO_PROPNAME = "db.service.hsqldb.nio_data_file";
+
+    /**
+     * @deprecated
+     */
+    @Deprecated
     public static final String DB_WRITE_DELAY_MILLIES_PROPNAME = "db.service.hsqldb.write_delay_millis";
+
+    /**
+     * @deprecated
+     */
+    @Deprecated
+    public static final String DB_LOG_DATA_PROPNAME = "db.service.hsqldb.log_data";
+
+    /**
+     * @deprecated
+     */
+    @Deprecated
+    public static final String DB_CACHE_ROWS_PROPNAME = "db.service.hsqldb.cache_rows";
+
+    /**
+     * @deprecated
+     */
+    @Deprecated
+    public static final String DB_LOB_FILE_PROPNAME = "db.service.hsqldb.lob_file_scale";
+
+    /**
+     * @deprecated
+     */
+    @Deprecated
+    public static final String DB_DEFRAG_LIMIT_PROPNAME = "db.service.hsqldb.defrag_limit";
+
+    /**
+     * @deprecated
+     */
+    @Deprecated
+    public static final String DB_LOG_SIZE_PROPNAME = "db.service.hsqldb.log_size";
+
+    /**
+     * @deprecated
+     */
+    @Deprecated
+    public static final String DB_NIO_PROPNAME = "db.service.hsqldb.nio_data_file";
 
     /**
      * Gets the primary MAC address of the system
@@ -274,6 +317,19 @@ public interface SystemService {
      * @return The Kura version string as denoted in kura.version property of the kura.properties file.
      */
     public String getKuraVersion();
+
+    /**
+     * Gets the Eclipse Marketplace compatibility product version for this unit.
+     *
+     * The marketplace compatibility product version is defined in the {@code kura.marketplace.compatibility.version}
+     * property of the kura.properties file located in the ${BASE_DIR}/${KURA_SYMLINK}/kura directory.
+     * If the variable {@code kura.marketplace.compatibility.version} cannot be located, it defaults to the value
+     * specified by {@link #getKuraVersion()}.
+     * 
+     * @since 1.3
+     * @return The marketplace compatibility Kura version string.
+     */
+    public String getKuraMarketplaceCompatibilityVersion();
 
     /**
      * Gets the location where the Kura root directory is stored in the filesystem.

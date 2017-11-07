@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2017 Eurotech and/or its affiliates
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Amit Kumar Mondal (admin@amitinside.com)
+      Eurotech
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.driver.s7plc" 
+         name="S7PlcDriver" 
+         description="S7PLC Driver">
+
+        <AD id="host.ip"
+            name="host.ip"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="0"
+            description="S7 PLC Host IP Address">
+        </AD>
+        
+        <AD id="rack"
+            name="rack"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="0"
+            description="S7 PLC Rack">
+        </AD>
+        
+        <AD id="slot"
+            name="slot"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="2"
+            description="S7 PLC Slot">
+        </AD>
+        
+        <AD id="authenticate"
+            name="authenticate"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="If set to true the driver will send to the PLC the session password provided in the configuration.">
+        </AD>
+        
+        <AD id="password"
+            name="password"
+            type="Password"
+            cardinality="0"
+            required="false"
+            default=""
+            description="The session password.">
+        </AD>
+        
+        <AD id="read.minimum.gap.size"
+            name="read.minimum.gap.size"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="0"
+            description="Defines the minimum gap size for read requests in bytes, if set to a non zero value the driver will aggregate read requests for non consecutive addresses if their distance is lesser than this parameter.">
+        </AD>
+
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.driver.s7plc" factoryPid="org.eclipse.kura.driver.s7plc">
+        <Object ocdref="org.eclipse.kura.driver.s7plc"/>
+    </Designate>
+</MetaData>

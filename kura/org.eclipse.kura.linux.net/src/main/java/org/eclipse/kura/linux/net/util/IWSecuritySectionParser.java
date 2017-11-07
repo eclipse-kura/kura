@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
+
 package org.eclipse.kura.linux.net.util;
 
 import java.util.EnumSet;
@@ -11,13 +23,13 @@ import org.slf4j.LoggerFactory;
  */
 class IWSecuritySectionParser {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(IWSecuritySectionParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(IWSecuritySectionParser.class);
 
     private boolean foundGroup = false;
     private boolean foundPairwise = false;
     private boolean foundAuthSuites = false;
 
-    private final EnumSet<WifiSecurity> security = EnumSet.noneOf(WifiSecurity.class);;
+    private final EnumSet<WifiSecurity> security = EnumSet.noneOf(WifiSecurity.class);
 
     public EnumSet<WifiSecurity> getWifiSecurityFlags() {
         return this.security;
@@ -66,7 +78,7 @@ class IWSecuritySectionParser {
                 this.security.add(WifiSecurity.KEY_MGMT_PSK);
             }
         } else {
-            s_logger.debug("Ignoring line in section: {}", line);
+            logger.debug("Ignoring line in section: {}", line);
         }
 
         return this.foundGroup && this.foundPairwise && this.foundAuthSuites;

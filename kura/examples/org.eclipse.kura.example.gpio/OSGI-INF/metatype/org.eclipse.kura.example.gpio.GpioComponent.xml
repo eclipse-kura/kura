@@ -21,6 +21,17 @@
         <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/applications-other.png" size="32"/>
         -->
         
+        <AD id="gpio.input.read.mode"  
+            name="gpio.input.read.mode"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="PIN_STATUS_LISTENER"
+            description="Specifies how input pin value is obtained. If set to PIN_STATUS_LISTENER, the pin value will be printed on the log on change, if set to POLLING, the pin value will be readed and printed on the log periodically.">
+            <Option label="PIN_STATUS_LISTENER" value="PIN_STATUS_LISTENER"/>
+            <Option label="POLLING" value="POLLING"/>
+        </AD>
+        
         <AD id="gpio.pins"  
             name="gpio.pins"
             type="Integer"
@@ -28,7 +39,7 @@
             required="false"
             default="1"
             min="0"
-            max="255"
+            max="1255"
             description="List of GPIO pins"/>
         
         <AD id="gpio.directions"

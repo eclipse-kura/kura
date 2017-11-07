@@ -49,40 +49,40 @@ import org.slf4j.LoggerFactory;
 
 public class PositionServiceImpl implements PositionService, ConfigurableComponent, EventHandler {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(PositionServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(PositionServiceImpl.class);
 
     private final static long THREAD_TERMINATION_TOUT = 1; // in seconds
 
     private static Future<?> monitorTask;
     private static boolean stopThread;
 
-    private Map<String, Object> m_properties;
-    private Map<String, Object> m_positionServiceProperties;
-    private ConnectionFactory m_connectionFactory;
-    private Map<String, PositionListener> m_positionListeners;
-    private GpsDevice m_gpsDevice;
-    private ExecutorService m_executor;
-    private EventAdmin m_eventAdmin;
-    private UsbService m_usbService;
+    private Map<String, Object> properties;
+    private Map<String, Object> positionServiceProperties;
+    private ConnectionFactory connectionFactory;
+    private Map<String, PositionListener> positionListeners;
+    private GpsDevice gpsDevice;
+    private ExecutorService executor;
+    private EventAdmin eventAdmin;
+    private UsbService usbService;
 
     private final int pollInterval = 500;	// milliseconds
-    private boolean m_configured;
-    private boolean m_useGpsd = false;
-    private boolean m_configEnabled;
-    private boolean m_isRunning;
-    private boolean m_hasLock;
+    private boolean configured;
+    private boolean useGpsd = false;
+    private boolean configEnabled;
+    private boolean isRunning;
+    private boolean hasLock;
 
     // to avoid NPE don't return a null pointer
-    private Position m_defaultPosition = null;
-    private NmeaPosition m_defaultNmeaPosition = null;
+    private Position defaultPosition = null;
+    private NmeaPosition defaultNmeaPosition = null;
 
     // add gpsd variables
-    private Position m_GpsdPosition = null;
-    private NmeaPosition m_GpsdNmeaPosition = null;
-    private final String m_GpsdTimeNmea = "";
-    private final String m_GpsdDateNmea = "";
-    private final String m_GpsdLastSentence = "";
-    private final boolean m_GpsdIsValidPosition = false;
+    private Position gpsdPosition = null;
+    private NmeaPosition gpsdNmeaPosition = null;
+    private final String gpsdTimeNmea = "";
+    private final String gpsdDateNmea = "";
+    private final String gpsdLastSentence = "";
+    private final boolean gpsdIsValidPosition = false;
 
     // ----------------------------------------------------------------
     //
@@ -91,27 +91,27 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
     // ----------------------------------------------------------------
 
     public void setConnectionFactory(ConnectionFactory connectionFactory) {
-        this.m_connectionFactory = connectionFactory;
+        this.connectionFactory = connectionFactory;
     }
 
     public void unsetConnectionFactory(ConnectionFactory connectionFactory) {
-        this.m_connectionFactory = null;
+        this.connectionFactory = null;
     }
 
     public void setEventAdmin(EventAdmin eventAdmin) {
-        this.m_eventAdmin = eventAdmin;
+        this.eventAdmin = eventAdmin;
     }
 
     public void unsetEventAdmin(EventAdmin eventAdmin) {
-        this.m_eventAdmin = null;
+        this.eventAdmin = null;
     }
 
     public void setUsbService(UsbService usbService) {
-        this.m_usbService = usbService;
+        this.usbService = usbService;
     }
 
     public void unsetUsbService(UsbService usbService) {
-        this.m_usbService = null;
+        this.usbService = null;
     }
 
     // ----------------------------------------------------------------
@@ -121,18 +121,18 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
     // ----------------------------------------------------------------
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        s_logger.debug("Activating...");
+        logger.debug("Activating...");
 
-        this.m_configured = false;
-        this.m_configEnabled = false;
-        this.m_isRunning = false;
-        this.m_hasLock = false;
-        this.m_useGpsd = false;
+        this.configured = false;
+        this.configEnabled = false;
+        this.isRunning = false;
+        this.hasLock = false;
+        this.useGpsd = false;
         initializeDefaultPosition(0, 0, 0);
 
-        this.m_executor = Executors.newSingleThreadExecutor();
-        this.m_properties = new HashMap<String, Object>();
-        this.m_positionServiceProperties = new HashMap<String, Object>();
+        this.executor = Executors.newSingleThreadExecutor();
+        this.properties = new HashMap<String, Object>();
+        this.positionServiceProperties = new HashMap<String, Object>();
 
         // install event listener for serial ports
         Dictionary<String, String[]> props = new Hashtable<String, String[]>();
@@ -145,33 +145,33 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
         componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, props);
 
         updated(properties);
-        s_logger.info("Activating... Done.");
+        logger.info("Activating... Done.");
     }
 
     protected void deactivate(ComponentContext componentContext) {
         stop();
-        if (this.m_executor != null) {
-            s_logger.debug("Terminating PositionServiceImpl Thread ...");
-            this.m_executor.shutdownNow();
+        if (this.executor != null) {
+            logger.debug("Terminating PositionServiceImpl Thread ...");
+            this.executor.shutdownNow();
             try {
-                this.m_executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+                this.executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
-                s_logger.warn("Interrupted", e);
+                logger.warn("Interrupted", e);
             }
-            s_logger.info("PositionServiceImpl Thread terminated? - {}", this.m_executor.isTerminated());
-            this.m_executor = null;
+            logger.info("PositionServiceImpl Thread terminated? - {}", this.executor.isTerminated());
+            this.executor = null;
         }
 
-        this.m_properties = null;
-        this.m_positionServiceProperties = null;
-        s_logger.info("Deactivating... Done.");
+        this.properties = null;
+        this.positionServiceProperties = null;
+        logger.info("Deactivating... Done.");
     }
 
     public void updated(Map<String, Object> properties) {
 
-        s_logger.debug("Updating...");
-        if (this.m_gpsDevice != null) {
-            Properties currentConfigProps = this.m_gpsDevice.getConnectConfig();
+        logger.debug("Updating...");
+        if (this.gpsDevice != null) {
+            Properties currentConfigProps = this.gpsDevice.getConnectConfig();
             Properties serialProperties = getSerialConnectionProperties(properties);
             if (currentConfigProps != null && serialProperties != null) {
                 if (currentConfigProps.getProperty("port").equals(serialProperties.getProperty("port"))
@@ -181,43 +181,43 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
                                 .equals(serialProperties.getProperty("bitsPerWord"))
                         && currentConfigProps.getProperty("parity").equals(serialProperties.getProperty("parity"))) {
 
-                    s_logger.debug("configureGpsDevice() :: same configuration, no need ot reconfigure GPS device");
+                    logger.debug("configureGpsDevice() :: same configuration, no need ot reconfigure GPS device");
                     return;
                 }
             }
         }
 
-        if (this.m_isRunning) {
+        if (this.isRunning) {
             stop();
         }
 
         if (!properties.containsKey("modem")) {
-            this.m_positionServiceProperties.putAll(properties);
+            this.positionServiceProperties.putAll(properties);
         }
-        this.m_properties.putAll(properties);
+        this.properties.putAll(properties);
 
-        this.m_configured = false;
-        this.m_configEnabled = false;
-        this.m_isRunning = false;
-        this.m_hasLock = false;
+        this.configured = false;
+        this.configEnabled = false;
+        this.isRunning = false;
+        this.hasLock = false;
         // m_useGpsd = (Boolean)m_properties.get("useGpsd");
 
         try {
-            if ((Boolean) this.m_properties.get("enabled") && (Boolean) this.m_properties.get("static")) {
-                if (m_gpsDevice != null) {
-                    m_gpsDevice = null;
+            if ((Boolean) this.properties.get("enabled") && (Boolean) this.properties.get("static")) {
+                if (gpsDevice != null) {
+                    gpsDevice = null;
                 }
-                initializeDefaultPosition((Double) this.m_properties.get("latitude"),
-                        (Double) this.m_properties.get("longitude"), (Double) this.m_properties.get("altitude"));
-                this.m_eventAdmin.postEvent(new PositionLockedEvent(new HashMap<String, Object>()));
+                initializeDefaultPosition((Double) this.properties.get("latitude"),
+                        (Double) this.properties.get("longitude"), (Double) this.properties.get("altitude"));
+                this.eventAdmin.postEvent(new PositionLockedEvent(new HashMap<String, Object>()));
             } else {
                 configureGpsDevice();
                 start();
             }
         } catch (Exception e) {
-            s_logger.error("Error starting PositionService background operations.", e);
+            logger.error("Error starting PositionService background operations.", e);
         }
-        s_logger.info("Updating... Done.");
+        logger.info("Updating... Done.");
     }
 
     // ----------------------------------------------------------------
@@ -228,37 +228,37 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 
     @Override
     public Position getPosition() {
-        if (this.m_useGpsd) {
-            return this.m_GpsdPosition;
-        } else if (this.m_gpsDevice != null) {
-            return this.m_gpsDevice.getPosition();
+        if (this.useGpsd) {
+            return this.gpsdPosition;
+        } else if (this.gpsDevice != null) {
+            return this.gpsDevice.getPosition();
         } else {
-            return this.m_defaultPosition;
+            return this.defaultPosition;
         }
     }
 
     @Override
     public NmeaPosition getNmeaPosition() {
-        if (this.m_useGpsd) {
-            return this.m_GpsdNmeaPosition;
-        } else if (this.m_gpsDevice != null) {
-            return this.m_gpsDevice.getNmeaPosition();
+        if (this.useGpsd) {
+            return this.gpsdNmeaPosition;
+        } else if (this.gpsDevice != null) {
+            return this.gpsDevice.getNmeaPosition();
         } else {
-            return this.m_defaultNmeaPosition;
+            return this.defaultNmeaPosition;
         }
     }
 
     @Override
     public boolean isLocked() {
-        return this.m_hasLock;
+        return this.hasLock;
     }
 
     @Override
     public String getNmeaTime() {
-        if (this.m_useGpsd) {
-            return this.m_GpsdTimeNmea;
-        } else if (this.m_gpsDevice != null) {
-            return this.m_gpsDevice.getTimeNmea();
+        if (this.useGpsd) {
+            return this.gpsdTimeNmea;
+        } else if (this.gpsDevice != null) {
+            return this.gpsDevice.getTimeNmea();
         } else {
             return null;
         }
@@ -266,10 +266,10 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 
     @Override
     public String getNmeaDate() {
-        if (this.m_useGpsd) {
-            return this.m_GpsdDateNmea;
-        } else if (this.m_gpsDevice != null) {
-            return this.m_gpsDevice.getDateNmea();
+        if (this.useGpsd) {
+            return this.gpsdDateNmea;
+        } else if (this.gpsDevice != null) {
+            return this.gpsDevice.getDateNmea();
         } else {
             return null;
         }
@@ -277,31 +277,31 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 
     @Override
     public void registerListener(String listenerId, PositionListener positionListener) {
-        if (this.m_positionListeners == null) {
-            this.m_positionListeners = new HashMap<String, PositionListener>();
+        if (this.positionListeners == null) {
+            this.positionListeners = new HashMap<String, PositionListener>();
         }
-        this.m_positionListeners.put(listenerId, positionListener);
-        if (this.m_gpsDevice != null) {
-            this.m_gpsDevice.setListeners(this.m_positionListeners.values());
+        this.positionListeners.put(listenerId, positionListener);
+        if (this.gpsDevice != null) {
+            this.gpsDevice.setListeners(this.positionListeners.values());
         }
     }
 
     @Override
     public void unregisterListener(String listenerId) {
-        if (this.m_positionListeners != null && this.m_positionListeners.containsKey(listenerId)) {
-            this.m_positionListeners.remove(listenerId);
-            if (this.m_gpsDevice != null) {
-                this.m_gpsDevice.setListeners(this.m_positionListeners.values());
+        if (this.positionListeners != null && this.positionListeners.containsKey(listenerId)) {
+            this.positionListeners.remove(listenerId);
+            if (this.gpsDevice != null) {
+                this.gpsDevice.setListeners(this.positionListeners.values());
             }
         }
     }
 
     @Override
     public String getLastSentence() {
-        if (this.m_useGpsd) {
-            return this.m_GpsdLastSentence;
-        } else if (this.m_gpsDevice != null) {
-            return this.m_gpsDevice.getLastSentence();
+        if (this.useGpsd) {
+            return this.gpsdLastSentence;
+        } else if (this.gpsDevice != null) {
+            return this.gpsDevice.getLastSentence();
         } else {
             return null;
         }
@@ -309,14 +309,14 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 
     @Override
     public void handleEvent(Event event) {
-        if (!this.m_useGpsd) {
+        if (!this.useGpsd) {
             if (UsbDeviceAddedEvent.USB_EVENT_DEVICE_ADDED_TOPIC.contains(event.getTopic())) {
                 if (serialPortExists()) {
-                    s_logger.debug("GPS connected");
+                    logger.debug("GPS connected");
 
                     // we already have properties - just do it
                     try {
-                        if (!this.m_isRunning) {
+                        if (!this.isRunning) {
                             configureGpsDevice();
                             start();
                         }
@@ -326,32 +326,32 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
                 }
             } else if (UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC.contains(event.getTopic())) {
                 if (!serialPortExists()) {
-                    s_logger.debug("GPS disconnected");
+                    logger.debug("GPS disconnected");
                     stop();
                 }
             } else if (ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC.contains(event.getTopic())) {
 
-                s_logger.debug("ModemGpsEnabledEvent");
+                logger.debug("ModemGpsEnabledEvent");
 
-                this.m_properties.put("port", event.getProperty(ModemGpsEnabledEvent.Port));
-                this.m_properties.put("baudRate", event.getProperty(ModemGpsEnabledEvent.BaudRate));
-                this.m_properties.put("bitsPerWord", event.getProperty(ModemGpsEnabledEvent.DataBits));
-                this.m_properties.put("stopBits", event.getProperty(ModemGpsEnabledEvent.StopBits));
-                this.m_properties.put("parity", event.getProperty(ModemGpsEnabledEvent.Parity));
-                this.m_properties.put("modem", "true");
-                updated(this.m_properties);
+                this.properties.put("port", event.getProperty(ModemGpsEnabledEvent.Port));
+                this.properties.put("baudRate", event.getProperty(ModemGpsEnabledEvent.BaudRate));
+                this.properties.put("bitsPerWord", event.getProperty(ModemGpsEnabledEvent.DataBits));
+                this.properties.put("stopBits", event.getProperty(ModemGpsEnabledEvent.StopBits));
+                this.properties.put("parity", event.getProperty(ModemGpsEnabledEvent.Parity));
+                this.properties.put("modem", "true");
+                updated(this.properties);
             } else if (ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC.contains(event.getTopic())) {
-                s_logger.debug("ModemGpsDisabledEvent");
-                updated(this.m_positionServiceProperties);
+                logger.debug("ModemGpsDisabledEvent");
+                updated(this.positionServiceProperties);
             }
         }
     }
 
     private void start() {
-        s_logger.debug("PositionService configured and starting");
+        logger.debug("PositionService configured and starting");
         stopThread = false;
         if (monitorTask == null) {
-            monitorTask = this.m_executor.submit(new Runnable() {
+            monitorTask = this.executor.submit(new Runnable() {
 
                 @Override
                 public void run() {
@@ -370,24 +370,24 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
             });
         }
 
-        this.m_isRunning = true;
+        this.isRunning = true;
     }
 
     private void stop() {
-        s_logger.debug("PositionService stopping");
+        logger.debug("PositionService stopping");
         if (monitorTask != null && !monitorTask.isDone()) {
             stopThread = true;
             monitorTask.cancel(true);
             monitorTask = null;
         }
-        if (this.m_gpsDevice != null) {
-            this.m_gpsDevice.disconnect();
+        if (this.gpsDevice != null) {
+            this.gpsDevice.disconnect();
         }
 
-        this.m_configured = false;
-        this.m_configEnabled = false;
-        this.m_isRunning = false;
-        this.m_hasLock = false;
+        this.configured = false;
+        this.configEnabled = false;
+        this.isRunning = false;
+        this.hasLock = false;
     }
 
     private void initializeDefaultPosition(double lat, double lon, double alt) {
@@ -410,40 +410,40 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
         double l_VDOP = 0;
         int l_3Dfix = 0;
 
-        this.m_defaultPosition = new Position(l_latitude, l_longitude, l_altitude, l_speed, l_track);
-        this.m_defaultNmeaPosition = new NmeaPosition(l_latitudeNmea, l_longitudeNmea, l_altitudeNmea, l_speedNmea,
+        this.defaultPosition = new Position(l_latitude, l_longitude, l_altitude, l_speed, l_track);
+        this.defaultNmeaPosition = new NmeaPosition(l_latitudeNmea, l_longitudeNmea, l_altitudeNmea, l_speedNmea,
                 l_trackNmea, l_fixQuality, l_nrSatellites, l_DOP, l_PDOP, l_HDOP, l_VDOP, l_3Dfix);
 
-        this.m_GpsdPosition = new Position(l_latitude, l_longitude, l_altitude, l_speed, l_track);
-        this.m_GpsdNmeaPosition = new NmeaPosition(l_latitudeNmea, l_longitudeNmea, l_altitudeNmea, l_speedNmea,
+        this.gpsdPosition = new Position(l_latitude, l_longitude, l_altitude, l_speed, l_track);
+        this.gpsdNmeaPosition = new NmeaPosition(l_latitudeNmea, l_longitudeNmea, l_altitudeNmea, l_speedNmea,
                 l_trackNmea, l_fixQuality, l_nrSatellites, l_DOP, l_PDOP, l_HDOP, l_VDOP, l_3Dfix);
     }
 
     private void performPoll() {
-        if (this.m_configEnabled && this.m_configured) {
+        if (this.configEnabled && this.configured) {
             boolean isValidPosition;
-            if (this.m_useGpsd) {
-                isValidPosition = this.m_GpsdIsValidPosition;
+            if (this.useGpsd) {
+                isValidPosition = this.gpsdIsValidPosition;
             } else {
-                isValidPosition = this.m_gpsDevice.isValidPosition();
+                isValidPosition = this.gpsDevice.isValidPosition();
             }
             if (isValidPosition) {
-                if (!this.m_hasLock) {
-                    this.m_hasLock = true;
-                    this.m_eventAdmin.postEvent(new PositionLockedEvent(new HashMap<String, Object>()));
-                    s_logger.info("The Position is valid");
-                    if (!this.m_useGpsd) {
-                        s_logger.info(this.m_gpsDevice.getLastSentence());
-                        s_logger.info(this.m_gpsDevice.toString());
+                if (!this.hasLock) {
+                    this.hasLock = true;
+                    this.eventAdmin.postEvent(new PositionLockedEvent(new HashMap<String, Object>()));
+                    logger.info("The Position is valid");
+                    if (!this.useGpsd) {
+                        logger.info(this.gpsDevice.getLastSentence());
+                        logger.info(this.gpsDevice.toString());
                     }
                 }
             } else {
-                if (this.m_hasLock) {
-                    this.m_hasLock = false;
-                    this.m_eventAdmin.postEvent(new PositionLostEvent(new HashMap<String, Object>()));
-                    s_logger.info("The Position is not valid");
-                    if (!this.m_useGpsd) {
-                        s_logger.info(this.m_gpsDevice.getLastSentence());
+                if (this.hasLock) {
+                    this.hasLock = false;
+                    this.eventAdmin.postEvent(new PositionLostEvent(new HashMap<String, Object>()));
+                    logger.info("The Position is not valid");
+                    if (!this.useGpsd) {
+                        logger.info(this.gpsDevice.getLastSentence());
                     }
                 }
             }
@@ -452,32 +452,32 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 
     private void configureGpsDevice() throws Exception {
 
-        Properties serialProperties = getSerialConnectionProperties(this.m_properties);
+        Properties serialProperties = getSerialConnectionProperties(this.properties);
         if (serialProperties == null) {
             return;
         }
 
-        if (this.m_gpsDevice != null) {
-            s_logger.info("configureGpsDevice() :: disconnecting GPS device ...");
-            this.m_gpsDevice.disconnect();
-            this.m_gpsDevice = null;
+        if (this.gpsDevice != null) {
+            logger.info("configureGpsDevice() :: disconnecting GPS device ...");
+            this.gpsDevice.disconnect();
+            this.gpsDevice = null;
         }
 
         if (!serialPortExists()) {
-            s_logger.warn("GPS device is not present - waiting for it to be ready");
+            logger.warn("GPS device is not present - waiting for it to be ready");
             return;
         }
 
         try {
             if (serialProperties != null) {
-                s_logger.debug("Connecting to serial port: {}", serialProperties.getProperty("port"));
+                logger.debug("Connecting to serial port: {}", serialProperties.getProperty("port"));
 
                 // configure connection & protocol
                 GpsDevice gpsDevice = new GpsDevice();
-                gpsDevice.configureConnection(this.m_connectionFactory, serialProperties);
+                gpsDevice.configureConnection(this.connectionFactory, serialProperties);
                 gpsDevice.configureProtocol(getProtocolProperties());
-                this.m_gpsDevice = gpsDevice;
-                this.m_configured = true;
+                this.gpsDevice = gpsDevice;
+                this.configured = true;
             }
         } catch (Exception e) {
             throw e;
@@ -486,9 +486,9 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
 
     private boolean serialPortExists() {
         String portName;
-        if (this.m_properties != null) {
-            if (this.m_properties.get("port") != null) {
-                portName = (String) this.m_properties.get("port");
+        if (this.properties != null) {
+            if (this.properties.get("port") != null) {
+                portName = (String) this.properties.get("port");
 
                 if (portName != null) {
                     if (portName.contains("/dev/") || portName.contains("COM")) {
@@ -497,7 +497,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
                             return true;
                         }
                     } else {
-                        List<UsbTtyDevice> utd = this.m_usbService.getUsbTtyDevices();
+                        List<UsbTtyDevice> utd = this.usbService.getUsbTtyDevices();
                         if (utd != null) {
                             for (UsbTtyDevice u : utd) {
                                 if (portName.equals(u.getUsbPort())) {
@@ -523,18 +523,18 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
             int parity = -1;
 
             if (props.get("enabled") != null) {
-                this.m_configEnabled = (Boolean) props.get("enabled");
-                if (!this.m_configEnabled) {
+                this.configEnabled = (Boolean) props.get("enabled");
+                if (!this.configEnabled) {
                     return null;
                 }
             } else {
-                this.m_configEnabled = false;
+                this.configEnabled = false;
                 return null;
             }
 
             portName = (String) props.get("port");
             if (portName != null && !portName.contains("/dev/") && !portName.contains("COM")) {
-                List<UsbTtyDevice> utds = this.m_usbService.getUsbTtyDevices();
+                List<UsbTtyDevice> utds = this.usbService.getUsbTtyDevices();
                 for (UsbTtyDevice utd : utds) {
                     if (utd.getUsbPort().equals(portName)) {
                         portName = utd.getDeviceNode();
@@ -564,11 +564,11 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
             prop.setProperty("parity", Integer.toString(parity));
             prop.setProperty("bitsPerWord", Integer.toString(bitsPerWord));
 
-            s_logger.debug("port name: {}", portName);
-            s_logger.debug("baud rate {}", baudRate);
-            s_logger.debug("stop bits {}", stopBits);
-            s_logger.debug("parity {}", parity);
-            s_logger.debug("bits per word {}", bitsPerWord);
+            logger.debug("port name: {}", portName);
+            logger.debug("baud rate {}", baudRate);
+            logger.debug("stop bits {}", stopBits);
+            logger.debug("parity {}", parity);
+            logger.debug("bits per word {}", bitsPerWord);
             return prop;
         } else {
             return null;

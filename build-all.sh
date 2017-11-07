@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# Copyright (c) 2016 Red Hat and others
+# Copyright (c) 2016, 2017 Red Hat and others
 #
 #  All rights reserved. This program and the accompanying materials
 #  are made available under the terms of the Eclipse Public License v1.0
@@ -9,7 +9,8 @@
 #  http://www.eclipse.org/legal/epl-v10.html
 #
 #  Contributors:
-#     Red Hat - Initial API and implementation
+#     Red Hat
+#     Eurotech
 #
 
 # activate batch mode by default
@@ -21,8 +22,9 @@ MAVEN_PROPS="-B"
 [ -z "$RUN_TESTS" ] && MAVEN_PROPS="$MAVEN_PROPS -Dmaven.test.skip=true"
 
 mvn "$@" -f target-platform/pom.xml clean install $MAVEN_PROPS &&
-mvn "$@" -f kura/manifest_pom.xml clean install $MAVEN_PROPS &&
-mvn "$@" -f kura/pom_pom.xml clean install $MAVEN_PROPS -Pweb &&
-mvn "$@" -f kura/maven-central clean install $MAVEN_PROPS -Pweb &&
+mvn "$@" -f kura/pom.xml clean install $MAVEN_PROPS &&
+mvn "$@" -f kura/examples/pom.xml clean install $MAVEN_PROPS &&
+mvn "$@" -f kura/distrib/pom.xml clean install $MAVEN_PROPS &&
+mvn "$@" -f kura/maven-central clean install $MAVEN_PROPS &&
 mvn "$@" -f karaf/pom.xml clean install $MAVEN_PROPS
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -28,12 +29,13 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 
-public class ThreadsTabUi extends Composite {
+public class ThreadsTabUi extends Composite implements Tab {
 
     private static ThreadsTabUiUiBinder uiBinder = GWT.create(ThreadsTabUiUiBinder.class);
 
@@ -46,13 +48,13 @@ public class ThreadsTabUi extends Composite {
     private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 
     @UiField
-    CellTable<GwtGroupedNVPair> threadsGrid = new CellTable<GwtGroupedNVPair>();
-    private final ListDataProvider<GwtGroupedNVPair> threadsDataProvider = new ListDataProvider<GwtGroupedNVPair>();
+    CellTable<GwtGroupedNVPair> threadsGrid = new CellTable<>();
+    private final ListDataProvider<GwtGroupedNVPair> threadsDataProvider = new ListDataProvider<>();
 
     public ThreadsTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
+
         loadProfileTable(this.threadsGrid, this.threadsDataProvider);
-        // loadThreadsData();
     }
 
     private void loadProfileTable(CellTable<GwtGroupedNVPair> threadsGrid2,
@@ -67,7 +69,9 @@ public class ThreadsTabUi extends Composite {
             }
         };
         col1.setCellStyleNames("status-table-row");
-        threadsGrid2.addColumn(col1, MSGS.deviceThreadName());
+        TextHeader name = new TextHeader(MSGS.deviceThreadName());
+        name.setHeaderStyleNames("rowHeader");
+        threadsGrid2.addColumn(col1, name);
 
         TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
 
@@ -77,12 +81,29 @@ public class ThreadsTabUi extends Composite {
             }
         };
         col2.setCellStyleNames("status-table-row");
-        threadsGrid2.addColumn(col2, MSGS.deviceThreadInfo());
+        TextHeader info = new TextHeader(MSGS.deviceThreadInfo());
+        info.setHeaderStyleNames("rowHeader");
+        threadsGrid2.addColumn(col2, info);
 
         dataProvider.addDataDisplay(threadsGrid2);
     }
 
-    public void loadThreadsData() {
+    @Override
+    public void setDirty(boolean flag) {
+    }
+
+    @Override
+    public boolean isDirty() {
+        return true;
+    }
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
+    public void refresh() {
         this.threadsDataProvider.getList().clear();
 
         EntryClassUi.showWaitModal();

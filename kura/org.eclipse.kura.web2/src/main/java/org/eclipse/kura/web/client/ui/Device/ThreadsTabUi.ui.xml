@@ -26,7 +26,8 @@
     	height: 572px;
     }
     </ui:style>
-    <gwt:CellTable bordered="true" condensed="true"
-        striped="true" hover="true" height="100%" width="100%" ui:field="threadsGrid" />
-
+    <b:Container fluid="true">
+        <gwt:CellTable bordered="true" condensed="true"
+            striped="true" hover="true" height="100%" width="100%" ui:field="threadsGrid" />
+    </b:Container>
 </ui:UiBinder> 

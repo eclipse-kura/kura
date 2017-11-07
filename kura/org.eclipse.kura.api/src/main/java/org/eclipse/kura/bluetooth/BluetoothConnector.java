@@ -62,6 +62,7 @@ public interface BluetoothConnector extends ConnectorService {
      * @throws SecurityException
      *             If a requested protocol handler is not permitted.
      */
+    @Deprecated
     @Override
     public Connection open(String name) throws IOException;
 
@@ -85,6 +86,7 @@ public interface BluetoothConnector extends ConnectorService {
      * @throws SecurityException
      *             If a requested protocol handler is not permitted.
      */
+    @Deprecated
     @Override
     public Connection open(String name, int mode) throws IOException;
 
@@ -110,6 +112,7 @@ public interface BluetoothConnector extends ConnectorService {
      * @throws SecurityException
      *             If a requested protocol handler is not permitted.
      */
+    @Deprecated
     @Override
     public Connection open(String name, int mode, boolean timeouts) throws IOException;
 
@@ -129,6 +132,7 @@ public interface BluetoothConnector extends ConnectorService {
      * @throws SecurityException
      *             If access to the requested stream is not permitted.
      */
+    @Deprecated
     @Override
     public DataInputStream openDataInputStream(String name) throws IOException;
 
@@ -148,6 +152,7 @@ public interface BluetoothConnector extends ConnectorService {
      * @throws SecurityException
      *             If access to the requested stream is not permitted.
      */
+    @Deprecated
     @Override
     public DataOutputStream openDataOutputStream(String name) throws IOException;
 
@@ -167,6 +172,7 @@ public interface BluetoothConnector extends ConnectorService {
      * @throws SecurityException
      *             If access to the requested stream is not permitted.
      */
+    @Deprecated
     @Override
     public InputStream openInputStream(String name) throws IOException;
 
@@ -186,6 +192,7 @@ public interface BluetoothConnector extends ConnectorService {
      * @throws SecurityException
      *             If access to the requested stream is not permitted.
      */
+    @Deprecated
     @Override
     public OutputStream openOutputStream(String name) throws IOException;
 

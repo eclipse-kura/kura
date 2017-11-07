@@ -12,6 +12,36 @@
     <groupId>org.eclipse.kura.karaf.targets</groupId>
     <artifactId>targets</artifactId>
     <packaging>pom</packaging>
+    
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>
+        <repository>
+            <id>kura_addons</id>
+            <url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>kura</id>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>repo.eclipse.org</id>
+            <name>Eclipse Kura Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+    </repositories>
 
     <modules>
         <module>docker-emulator-fedora</module>
@@ -121,9 +151,6 @@
                     </bootFeatures>
                     <installedFeatures>
                         <feature>wrapper</feature>
-                        <feature>kura-example-publisher</feature>
-                        <feature>kura-example-camel-aggregation</feature>
-                        <feature>kura-example-camel-quickstart</feature>
                     </installedFeatures>
 
                     <javase>1.8</javase>
@@ -138,7 +165,6 @@
     </build>
 
     <profiles>
-
         <profile>
             <id>prepare-distribution</id>
             <activation>
@@ -177,7 +203,6 @@
                 </plugins>
             </build>
         </profile>
-
         <profile>
             <id>rpm</id>
             <activation>
@@ -275,13 +300,6 @@
                                         <directories>false</directories>
                                     </collect>
                                 </entry>
-                                
-                                <!-- workaround for issue #321 -->
-                                <entry>
-                                    <name>/lib64/libudev.so.0</name>
-                                    <linkTo>/lib64/libudev.so.1</linkTo>
-                                </entry>
-                                
                             </entries>
                             
                             <skipSigning>true</skipSigning>
@@ -298,7 +316,6 @@
                 </plugins>
             </build>
         </profile>
-
         <profile>
             <id>systemd</id>
             <activation>
@@ -326,7 +343,6 @@
                 </plugins>
             </build>
         </profile>
-        
         <profile>
             <id>raspberry-pi-2</id>
             <activation>
@@ -354,7 +370,6 @@
                 </plugins>
             </build>
         </profile>
-
         <profile>
             <id>base</id>
             <activation>
@@ -379,7 +394,6 @@
                             </execution>
                         </executions>
                     </plugin>
-
                     <plugin>
                         <groupId>org.polago.maven.plugins</groupId>
                         <artifactId>merge-properties-maven-plugin</artifactId>
@@ -414,10 +428,8 @@
                             </execution>
                         </executions>
                     </plugin>
-
                 </plugins>
             </build>
         </profile>
     </profiles>
-
 </project>

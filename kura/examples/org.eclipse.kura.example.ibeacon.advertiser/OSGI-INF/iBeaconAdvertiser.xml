@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2017 Eurotech and/or its affiliates and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.example.ibeacon.advertiser.IBeaconAdvertiser">
+   <implementation class="org.eclipse.kura.example.ibeacon.advertiser.IBeaconAdvertiser"/>
+   <service>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+   </service>
+   <property name="service.pid" value="org.eclipse.kura.example.ibeacon.advertiser.IBeaconAdvertiser"/>
+    <reference bind="setBluetoothLeService" 
+              cardinality="1..1" 
+              interface="org.eclipse.kura.bluetooth.le.BluetoothLeService" 
+              name="BluetoothLeService" 
+              policy="static" 
+              unbind="unsetBluetoothLeService"/>
+    <reference bind="setBluetoothLeIBeaconService" cardinality="1..1" interface="org.eclipse.kura.ble.ibeacon.BluetoothLeIBeaconService" name="BluetoothLeIBeaconService" policy="static" unbind="unsetBluetoothLeIBeaconService"/>
+</scr:component>

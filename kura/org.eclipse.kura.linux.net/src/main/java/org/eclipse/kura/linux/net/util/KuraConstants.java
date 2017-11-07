@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and others
+ * Copyright (c) 2011, 2017 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,29 +24,30 @@ public enum KuraConstants {
     ReliaGATE_50_21_Ubuntu("ubuntu", "14.04", "reliagate-50-21"),
     Reliagate_10_11("yocto", "1.2.1", "reliagate-10-11"),
     Reliagate_20_25("yocto", "1.2.1", "reliagate-20-25"),
+    BoltGATE_20_25("yocto", "1.2.1", "boltgate-20-25"),
     Reliagate_20_26("rhel", "7.3", "reliagate-20-26"),
     Fedora_Pi("fedora", "2x", "raspberry-pi");
 
-    private String m_imageName;
-    private String m_imageVersion;
-    private String m_targetName;
+    private String imageName;
+    private String imageVersion;
+    private String targetName;
 
     private KuraConstants(String imageName, String imageVersion, String targetName) {
-        this.m_imageName = imageName;
-        this.m_imageVersion = imageVersion;
-        this.m_targetName = targetName;
+        this.imageName = imageName;
+        this.imageVersion = imageVersion;
+        this.targetName = targetName;
     }
 
     public String getImageName() {
-        return this.m_imageName;
+        return this.imageName;
     }
 
     public String getImageVersion() {
-        return this.m_imageVersion;
+        return this.imageVersion;
     }
 
     public String getTargetName() {
-        return this.m_targetName;
+        return this.targetName;
     }
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,6 +18,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ public class PppAuthSecrets {
 
     private static final Logger s_logger = LoggerFactory.getLogger(PppAuthSecrets.class);
 
-    private final String m_secretsFilename;
+    private final String secretsFilename;
 
     private final ArrayList<String> providers;
     private final ArrayList<String> clients;
@@ -57,7 +58,7 @@ public class PppAuthSecrets {
      */
     public PppAuthSecrets(String secretsFilename) {
 
-        this.m_secretsFilename = secretsFilename;
+        this.secretsFilename = secretsFilename;
 
         this.providers = new ArrayList<String>();
         this.clients = new ArrayList<String>();
@@ -67,13 +68,13 @@ public class PppAuthSecrets {
 
         BufferedReader br = null;
         try {
-            File secretsFile = new File(this.m_secretsFilename);
+            File secretsFile = new File(this.secretsFilename);
 
             if (secretsFile.exists()) {
                 String currentLine = null;
                 StringTokenizer st = null;
 
-                br = new BufferedReader(new FileReader(this.m_secretsFilename));
+                br = new BufferedReader(new FileReader(this.secretsFilename));
 
                 while ((currentLine = br.readLine()) != null) {
                     currentLine = currentLine.trim();
@@ -89,15 +90,15 @@ public class PppAuthSecrets {
                 }
 
                 for (int i = 0; i < this.providers.size(); ++i) {
-                    s_logger.debug(this.clients.get(i) + "\t");
-                    s_logger.debug(this.servers.get(i) + "\t");
-                    s_logger.debug(this.secrets.get(i) + "\t");
-                    s_logger.debug(this.ipAddresses.get(i) + "\t");
-                    s_logger.debug(this.providers.get(i) + "\n");
+                    s_logger.debug(this.clients.get(i));
+                    s_logger.debug(this.servers.get(i));
+                    s_logger.debug(this.secrets.get(i));
+                    s_logger.debug(this.ipAddresses.get(i));
+                    s_logger.debug(this.providers.get(i));
                 }
             } else {
                 // Create an empty file
-                s_logger.info("File does not exist - creating " + this.m_secretsFilename);
+                s_logger.info("File does not exist - creating {}", this.secretsFilename);
                 writeToFile();
             }
         } catch (Exception e) {
@@ -137,17 +138,14 @@ public class PppAuthSecrets {
         for (int i = 0; i < this.providers.size(); ++i) {
             if (this.providers.get(i).compareTo(provider) == 0) {
                 // found a provider match so replace the variables
-                this.clients.remove(i);
-                this.clients.add(i, client);
 
-                this.servers.remove(i);
-                this.servers.add(i, server);
+                this.clients.set(i, client);
 
-                this.secrets.remove(i);
-                this.secrets.add(i, secret);
+                this.servers.set(i, server);
 
-                this.ipAddresses.remove(i);
-                this.ipAddresses.add(i, ipAddress);
+                this.secrets.set(i, secret);
+
+                this.ipAddresses.set(i, ipAddress);
 
                 addNewEntry = false;
                 break;
@@ -173,16 +171,16 @@ public class PppAuthSecrets {
      */
     private void writeToFile() throws Exception {
         String authType = "";
-        if (this.m_secretsFilename.indexOf("chap") >= 0) {
+        if (this.secretsFilename.indexOf("chap") >= 0) {
             authType = "CHAP";
-        } else if (this.m_secretsFilename.indexOf("pap") >= 0) {
+        } else if (this.secretsFilename.indexOf("pap") >= 0) {
             authType = "PAP";
         }
 
         PrintWriter pw = null;
         FileOutputStream fos = null;
         try {
-            fos = new FileOutputStream(this.m_secretsFilename);
+            fos = new FileOutputStream(this.secretsFilename);
             pw = new PrintWriter(fos);
 
             pw.write("#Secrets for authentication using " + authType + "\n");
@@ -231,61 +229,30 @@ public class PppAuthSecrets {
      *             for indexing problems
      */
     public void removeEntry(String type, String value) throws Exception {
-        if (type.compareTo("provider") == 0) {
-            for (int i = 0; i < this.providers.size(); ++i) {
-                if (this.providers.get(i).compareTo(value) == 0) {
-                    try {
-                        this.removeEntry(i);
-                    } catch (Exception e) {
-                        throw e;
-                    }
-                }
-            }
-        } else if (type.compareTo("client") == 0) {
-            for (int i = 0; i < this.clients.size(); ++i) {
-                if (this.clients.get(i).compareTo(value) == 0) {
-                    try {
-                        this.removeEntry(i);
-                    } catch (Exception e) {
-                        throw e;
-                    }
-                }
-            }
-        } else if (type.compareTo("server") == 0) {
-            for (int i = 0; i < this.servers.size(); ++i) {
-                if (this.servers.get(i).compareTo(value) == 0) {
-                    try {
-                        this.removeEntry(i);
-                    } catch (Exception e) {
-                        throw e;
-                    }
-                }
-            }
-        } else if (type.compareTo("secret") == 0) {
-            for (int i = 0; i < this.secrets.size(); ++i) {
-                if (this.secrets.get(i).compareTo(value) == 0) {
-                    try {
-                        this.removeEntry(i);
-                    } catch (Exception e) {
-                        throw e;
-                    }
-                }
-            }
-        } else if (type.compareTo("ipAddress") == 0) {
-            for (int i = 0; i < this.ipAddresses.size(); ++i) {
-                if (this.ipAddresses.get(i).compareTo(value) == 0) {
-                    try {
-                        this.removeEntry(i);
-                    } catch (Exception e) {
-                        throw e;
-                    }
-                }
-            }
+        if ("provider".equals(type)) {
+            checkAndRemove(this.providers, value);
+        } else if ("client".equals(type)) {
+            checkAndRemove(this.clients, value);
+        } else if ("server".equals(type)) {
+            checkAndRemove(this.servers, value);
+        } else if ("secret".equals(type)) {
+            checkAndRemove(this.secrets, value);
+        } else if ("ipAddress".equals(type)) {
+            checkAndRemove(this.ipAddresses, value);
         } else {
             // unaccepted type
         }
 
         writeToFile();
+    }
+
+    private void checkAndRemove(List<String> list, String value) throws Exception {
+        for (int i = 0; i < list.size(); ++i) {
+            if (list.get(i).compareTo(value) == 0) {
+                removeEntry(i);
+                i--;
+            }
+        }
     }
 
     /**

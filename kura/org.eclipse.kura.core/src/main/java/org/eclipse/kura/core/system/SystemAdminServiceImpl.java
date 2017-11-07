@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,7 +15,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -27,7 +26,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SystemAdminServiceImpl implements SystemAdminService {
+public class SystemAdminServiceImpl extends SuperSystemService implements SystemAdminService {
 
     private static final Logger s_logger = LoggerFactory.getLogger(SystemAdminServiceImpl.class);
 
@@ -210,49 +209,5 @@ public class SystemAdminServiceImpl implements SystemAdminService {
 
     private String getOsName() {
         return System.getProperty("os.name");
-    }
-
-    private String runSystemCommand(String command) {
-        return this.runSystemCommand(command.split("\\s+"));
-    }
-
-    private String runSystemCommand(String[] commands) {
-        SafeProcess proc = null;
-        StringBuffer response = new StringBuffer();
-        BufferedReader br = null;
-        try {
-            proc = ProcessUtil.exec(commands);
-            proc.waitFor();
-            br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            String line = null;
-            String newLine = "";
-            while ((line = br.readLine()) != null) {
-                response.append(newLine);
-                response.append(line);
-                newLine = "\n";
-            }
-        } catch (Exception e) {
-            StringBuilder command = new StringBuilder();
-            String delim = "";
-            for (String command2 : commands) {
-                command.append(delim);
-                command.append(command2);
-                delim = " ";
-            }
-            s_logger.error("failed to run commands " + command.toString(), e);
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
-        }
-
-        return response.toString();
     }
 }

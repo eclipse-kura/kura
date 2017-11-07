@@ -55,7 +55,7 @@ import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SystemServiceImpl implements SystemService {
+public class SystemServiceImpl extends SuperSystemService implements SystemService {
 
     private static final Logger logger = LoggerFactory.getLogger(SystemServiceImpl.class);
 
@@ -172,6 +172,11 @@ public class SystemServiceImpl implements SystemService {
 
             } else {
                 logger.error("Could not located kura.properties with kura.home "); // +kuraHome
+            }
+
+            // Try to reload kuraHome with the value set in kura.properties file.
+            if (kuraHome == null) {
+                kuraHome = kuraDefaults.getProperty(KEY_KURA_HOME_DIR);
             }
 
             // load custom kura properties
@@ -816,6 +821,16 @@ public class SystemServiceImpl implements SystemService {
     }
 
     @Override
+    public String getKuraMarketplaceCompatibilityVersion() {
+        String marketplaceCompatibilityVersion = (String) this.kuraProperties
+                .getProperty(KEY_KURA_MARKETPLACE_COMPATIBILITY_VERSION);
+        if (marketplaceCompatibilityVersion == null) {
+            marketplaceCompatibilityVersion = getKuraVersion();
+        }
+        return marketplaceCompatibilityVersion.replaceAll("KURA[-_ ]", "").replaceAll("[-_]", ".");
+    }
+
+    @Override
     public String getKuraHome() {
         return this.kuraProperties.getProperty(KEY_KURA_HOME_DIR);
     }
@@ -907,22 +922,22 @@ public class SystemServiceImpl implements SystemService {
         if (OS_LINUX.equals(getOsName())) {
             if ("2.6.34.9-WR4.2.0.0_standard".equals(getOsVersion())
                     || "2.6.34.12-WR4.3.0.0_standard".equals(getOsVersion())) {
-                biosVersion = runSystemInfoCommand("eth_vers_bios");
+                biosVersion = runSystemCommand("eth_vers_bios");
             } else {
-                String biosTmp = runSystemInfoCommand("dmidecode -s bios-version");
+                String biosTmp = runSystemCommand("dmidecode -s bios-version");
                 if (biosTmp.length() > 0 && !biosTmp.contains("Permission denied")) {
                     biosVersion = biosTmp;
                 }
             }
         } else if (OS_MAC_OSX.equals(getOsName())) {
             String[] cmds = { "/bin/sh", "-c", "system_profiler SPHardwareDataType | grep 'Boot ROM'" };
-            String biosTmp = runSystemInfoCommand(cmds);
+            String biosTmp = runSystemCommand(cmds);
             if (biosTmp.contains(": ")) {
                 biosVersion = biosTmp.split(":\\s+")[1];
             }
         } else if (getOsName().contains("Windows")) {
             String[] cmds = { "wmic", "bios", "get", "smbiosbiosversion" };
-            String biosTmp = runSystemInfoCommand(cmds);
+            String biosTmp = runSystemCommand(cmds);
             if (biosTmp.contains("SMBIOSBIOSVersion")) {
                 biosVersion = biosTmp.split("SMBIOSBIOSVersion\\s+")[1];
                 biosVersion = biosVersion.trim();
@@ -941,12 +956,12 @@ public class SystemServiceImpl implements SystemService {
 
         String deviceName = UNKNOWN;
         if (OS_MAC_OSX.equals(getOsName())) {
-            String displayTmp = runSystemInfoCommand("scutil --get ComputerName");
+            String displayTmp = runSystemCommand("scutil --get ComputerName");
             if (displayTmp.length() > 0) {
                 deviceName = displayTmp;
             }
         } else if (OS_LINUX.equals(getOsName()) || OS_CLOUDBEES.equals(getOsName())) {
-            String displayTmp = runSystemInfoCommand("hostname");
+            String displayTmp = runSystemCommand("hostname");
             if (displayTmp.length() > 0) {
                 deviceName = displayTmp;
             }
@@ -966,9 +981,9 @@ public class SystemServiceImpl implements SystemService {
         if (OS_LINUX.equals(getOsName()) && getOsVersion() != null) {
             if (getOsVersion().startsWith("2.6.34.9-WR4.2.0.0_standard")
                     || getOsVersion().startsWith("2.6.34.12-WR4.3.0.0_standard")) {
-                fwVersion = runSystemInfoCommand("eth_vers_cpld") + " " + runSystemInfoCommand("eth_vers_uctl");
+                fwVersion = runSystemCommand("eth_vers_cpld") + " " + runSystemCommand("eth_vers_uctl");
             } else if (getOsVersion().startsWith("3.0.35-12.09.01+yocto")) {
-                fwVersion = runSystemInfoCommand("eth_vers_avr");
+                fwVersion = runSystemCommand("eth_vers_avr");
             }
         }
         return fwVersion;
@@ -984,12 +999,12 @@ public class SystemServiceImpl implements SystemService {
         String modelId = UNKNOWN;
 
         if (OS_MAC_OSX.equals(getOsName())) {
-            String modelTmp = runSystemInfoCommand("sysctl -b hw.model");
+            String modelTmp = runSystemCommand("sysctl -b hw.model");
             if (modelTmp.length() > 0) {
                 modelId = modelTmp;
             }
         } else if (OS_LINUX.equals(getOsName())) {
-            String modelTmp = runSystemInfoCommand("dmidecode -t system");
+            String modelTmp = runSystemCommand("dmidecode -t system");
             if (modelTmp.contains("Version: ")) {
                 modelId = modelTmp.split("Version:\\s+")[1].split("\n")[0];
             }
@@ -1009,12 +1024,12 @@ public class SystemServiceImpl implements SystemService {
 
         if (OS_MAC_OSX.equals(getOsName())) {
             String[] cmds = { "/bin/sh", "-c", "system_profiler SPHardwareDataType | grep 'Model Name'" };
-            String modelTmp = runSystemInfoCommand(cmds);
+            String modelTmp = runSystemCommand(cmds);
             if (modelTmp.contains(": ")) {
                 modelName = modelTmp.split(":\\s+")[1];
             }
         } else if (OS_LINUX.equals(getOsName())) {
-            String modelTmp = runSystemInfoCommand("dmidecode -t system");
+            String modelTmp = runSystemCommand("dmidecode -t system");
             if (modelTmp.contains("Product Name: ")) {
                 modelName = modelTmp.split("Product Name:\\s+")[1].split("\n")[0];
             }
@@ -1035,7 +1050,7 @@ public class SystemServiceImpl implements SystemService {
         if (OS_LINUX.equals(getOsName())) {
             if ("2.6.34.9-WR4.2.0.0_standard".equals(getOsVersion())
                     || "2.6.34.12-WR4.3.0.0_standard".equals(getOsVersion())) {
-                partNumber = runSystemInfoCommand("eth_partno_bsp") + " " + runSystemInfoCommand("eth_partno_epr");
+                partNumber = runSystemCommand("eth_partno_bsp") + " " + runSystemCommand("eth_partno_epr");
             }
         }
 
@@ -1053,12 +1068,12 @@ public class SystemServiceImpl implements SystemService {
 
         if (OS_MAC_OSX.equals(getOsName())) {
             String[] cmds = { "/bin/sh", "-c", "system_profiler SPHardwareDataType | grep 'Serial Number'" };
-            String serialTmp = runSystemInfoCommand(cmds);
+            String serialTmp = runSystemCommand(cmds);
             if (serialTmp.contains(": ")) {
                 serialNum = serialTmp.split(":\\s+")[1];
             }
         } else if (OS_LINUX.equals(getOsName())) {
-            String serialTmp = runSystemInfoCommand("dmidecode -t system");
+            String serialTmp = runSystemCommand("dmidecode -t system");
             if (serialTmp.contains("Serial Number: ")) {
                 serialNum = serialTmp.split("Serial Number:\\s+")[1].split("\n")[0];
             }
@@ -1117,49 +1132,6 @@ public class SystemServiceImpl implements SystemService {
     // Private Methods
     //
     // ----------------------------------------------------------------
-
-    private String runSystemInfoCommand(String command) {
-        return runSystemInfoCommand(command.split("\\s+"));
-    }
-
-    private static String runSystemInfoCommand(String[] commands) {
-        StringBuffer response = new StringBuffer();
-        SafeProcess proc = null;
-        BufferedReader br = null;
-        try {
-            proc = ProcessUtil.exec(commands);
-            proc.waitFor();
-            br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            String line = null;
-            String newLine = "";
-            while ((line = br.readLine()) != null) {
-                response.append(newLine);
-                response.append(line);
-                newLine = "\n";
-            }
-        } catch (Exception e) {
-            StringBuilder command = new StringBuilder();
-            String delim = "";
-            for (String command2 : commands) {
-                command.append(delim);
-                command.append(command2);
-                delim = " ";
-            }
-            logger.error("failed to run commands {}", command.toString(), e);
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ex) {
-                    logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
-            if (proc != null) {
-                ProcessUtil.destroy(proc);
-            }
-        }
-        return response.toString();
-    }
 
     private static void createDirIfNotExists(String fileName) {
         // Make sure the configuration directory exists - create it if not

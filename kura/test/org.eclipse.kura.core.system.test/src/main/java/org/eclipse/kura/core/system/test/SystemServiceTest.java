@@ -12,6 +12,7 @@
 package org.eclipse.kura.core.system.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -21,16 +22,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.core.util.ProcessUtil;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 
 public class SystemServiceTest {
 
@@ -70,7 +73,6 @@ public class SystemServiceTest {
     public void testGetPrimaryMacAddress() {
 
         String actual = systemService.getPrimaryMacAddress();
-        System.out.println("MAC: " + actual);
 
         if (actual != null && !actual.isEmpty()) {
             Pattern regex = Pattern.compile("[0-9a-fA-F:]{12}");
@@ -299,8 +301,32 @@ public class SystemServiceTest {
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
-    public void getModelName() {
-        assertNotNull(systemService.getModelName());
+    public void getModelName() throws NoSuchFieldException {
+        // remove the default value so that the command is run
+        Properties def = (Properties) TestUtil.getFieldValue(systemService.getProperties(), "defaults");
+        def.remove(SystemService.KEY_MODEL_NAME);
+
+        String modelName = systemService.getModelName();
+
+        assertNotNull(modelName);
+
+        String osName = systemService.getOsName();
+        if (!osName.contains("indows")) {
+            if ("Linux".equals(osName)) {
+                try {
+                    ProcessUtil.exec("dmidecode");
+
+                    // note: this assert works locally and on travis, but not on hudson
+                    // assertNotEquals("UNKNOWN", modelName);
+
+                    assertNotEquals("DevModelName", modelName);
+                } catch (IOException e) {
+                    assertEquals("UNKNOWN", modelName);
+                }
+            }
+        } else {
+            assertEquals("UNKNOWN", modelName);
+        }
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
@@ -311,7 +337,31 @@ public class SystemServiceTest {
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
-    public void getSerialNumber() {
-        assertNotNull(systemService.getSerialNumber());
+    public void getSerialNumber() throws NoSuchFieldException {
+        // remove the default value so that the command is run
+        Properties def = (Properties) TestUtil.getFieldValue(systemService.getProperties(), "defaults");
+        def.remove(SystemService.KEY_SERIAL_NUM);
+
+        String serialNumber = systemService.getSerialNumber();
+
+        assertNotNull(serialNumber);
+
+        String osName = systemService.getOsName();
+        if (!osName.contains("indows")) {
+            if ("Linux".equals(osName)) {
+                try {
+                    ProcessUtil.exec("dmidecode");
+
+                    // note: this assert works locally and on travis, but not on hudson
+                    // assertNotEquals("UNKNOWN", serialNumber);
+
+                    assertNotEquals("DevSerialNumber", serialNumber);
+                } catch (IOException e) {
+                    assertEquals("UNKNOWN", serialNumber);
+                }
+            }
+        } else {
+            assertEquals("UNKNOWN", serialNumber);
+        }
     }
 }

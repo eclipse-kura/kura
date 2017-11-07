@@ -16,7 +16,6 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -203,9 +202,8 @@ public class CloudConfigurationHandler extends Cloudlet {
             for (ComponentConfigurationImpl config : configs) {
                 if (config != null) {
                     try {
-                        Map<String, Object> decryptedProperties = ((ConfigurationServiceImpl) this.m_configurationService)
-                                .decryptPasswords(config);
-                        config.setProperties(decryptedProperties);
+                        ((ConfigurationServiceImpl) this.m_configurationService)
+                                .decryptConfigurationProperties(config.getConfigurationProperties());
                     } catch (Throwable t) {
                         s_logger.warn("Error during snapshot password decryption");
                     }

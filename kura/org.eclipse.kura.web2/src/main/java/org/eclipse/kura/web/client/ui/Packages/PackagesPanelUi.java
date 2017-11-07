@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.messages.ValidationMessages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.DropSupport;
 import org.eclipse.kura.web.client.util.DropSupport.DropEvent;
@@ -24,6 +25,7 @@ import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
 import org.eclipse.kura.web.shared.model.GwtDeploymentPackage;
 import org.eclipse.kura.web.shared.model.GwtEventInfo;
+import org.eclipse.kura.web.shared.model.GwtMarketplacePackageDescriptor;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtPackageService;
@@ -39,18 +41,13 @@ import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.Well;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
+import org.gwtbootstrap3.client.ui.html.Paragraph;
 import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -63,6 +60,7 @@ import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -80,7 +78,9 @@ public class PackagesPanelUi extends Composite {
     private final GwtPackageServiceAsync gwtPackageService = GWT.create(GwtPackageService.class);
 
     private static final String SERVLET_URL = "/" + GWT.getModuleName() + "/file/deploy";
+
     private static final Messages MSGS = GWT.create(Messages.class);
+    private static final ValidationMessages VMSGS = GWT.create(ValidationMessages.class);
 
     private boolean isRefreshPending;
     private EntryClassUi entryClassUi;
@@ -96,36 +96,87 @@ public class PackagesPanelUi extends Composite {
 
     @UiField
     Modal uploadModal;
+
     @UiField
-    FormPanel packagesFormFile, packagesFormUrl;
+    FormPanel packagesFormFile;
     @UiField
-    Button fileCancel, fileSubmit, urlCancel, urlSubmit;
+    FormPanel packagesFormUrl;
+
+    @UiField
+    Button fileCancel;
+    @UiField
+    Button fileSubmit;
+    @UiField
+    Button urlCancel;
+    @UiField
+    Button urlSubmit;
+    @UiField
+    Button packagesRefresh;
+    @UiField
+    Button packagesInstall;
+    @UiField
+    Button packagesUninstall;
+
     @UiField
     TabListItem fileLabel;
 
     @UiField
     Alert notification;
+
     @UiField
     Modal uploadErrorModal;
+
     @UiField
     Text uploadErrorText;
-    @UiField
-    Button packagesRefresh, packagesInstall, packagesUninstall;
+
     @UiField
     CellTable<GwtDeploymentPackage> packagesGrid = new CellTable<>(10);
+
     @UiField
     FileUpload filePath;
+
     @UiField
     TextBox formUrl;
+
     @UiField
-    Hidden xsrfTokenFieldFile, xsrfTokenFieldUrl;
+    Hidden xsrfTokenFieldFile;
+    @UiField
+    Hidden xsrfTokenFieldUrl;
+
     @UiField
     Well marketplaceInstallWell;
+
+    @UiField
+    Modal versionCheckModal;
+
+    @UiField
+    Paragraph versionMismatchErrorText;
+    @UiField
+    Paragraph maxKuraVersionLabel;
+    @UiField
+    Paragraph minKuraVersionLabel;
+    @UiField
+    Paragraph currentKuraVersionLabel;
+
+    @UiField
+    Button btnCancelMarketplaceInstall;
+    @UiField
+    Button btnConfirmMarketplaceInstall;
+
+    @UiField
+    HTMLPanel packagesIntro;
+
+    private GwtMarketplacePackageDescriptor marketplaceDescriptor;
 
     public PackagesPanelUi() {
 
         // TODO - ServiceTree
         initWidget(uiBinder.createAndBindUi(this));
+
+        Paragraph description = new Paragraph();
+        description.setText(MSGS.packagesIntro());
+        this.packagesIntro.add(description);
+
         this.packagesGrid.setSelectionModel(this.selectionModel);
         initTable();
 
@@ -133,7 +184,8 @@ public class PackagesPanelUi extends Composite {
 
         initModalHandlers();
 
-        initModal();
+        initUploadErrorModal();
+        initMarketplaceVersionCheckModal();
 
         initDragDrop();
 
@@ -228,7 +280,7 @@ public class PackagesPanelUi extends Composite {
                     modal.add(modalBody);
                     modal.add(modalFooter);
                     modal.show();
-                }    // end if null
+                }       // end if null
             }// end on click
         });
     }
@@ -298,6 +350,17 @@ public class PackagesPanelUi extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 PackagesPanelUi.this.uploadModal.hide();
+            }
+        });
+
+        this.btnConfirmMarketplaceInstall.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (PackagesPanelUi.this.marketplaceDescriptor != null) {
+                    installMarketplaceDp(PackagesPanelUi.this.marketplaceDescriptor);
+                    PackagesPanelUi.this.marketplaceDescriptor = null;
+                }
             }
         });
     }
@@ -428,17 +491,17 @@ public class PackagesPanelUi extends Composite {
     }
 
     private void loadPackagesData() {
-        if (isRefreshPending) {
+        if (this.isRefreshPending) {
             return;
         }
-        isRefreshPending = true;
+        this.isRefreshPending = true;
         EntryClassUi.showWaitModal();
         this.packagesDataProvider.getList().clear();
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onFailure(Throwable ex) {
-                isRefreshPending = false;
+                PackagesPanelUi.this.isRefreshPending = false;
                 EntryClassUi.hideWaitModal();
                 FailureHandler.handle(ex);
             }
@@ -450,7 +513,7 @@ public class PackagesPanelUi extends Composite {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        isRefreshPending = false;
+                        PackagesPanelUi.this.isRefreshPending = false;
                         EntryClassUi.hideWaitModal();
                         GwtDeploymentPackage pkg = new GwtDeploymentPackage();
                         pkg.setName("Unavailable! Please click refresh");
@@ -461,7 +524,7 @@ public class PackagesPanelUi extends Composite {
 
                     @Override
                     public void onSuccess(List<GwtDeploymentPackage> result) {
-                        isRefreshPending = false;
+                        PackagesPanelUi.this.isRefreshPending = false;
                         EntryClassUi.hideWaitModal();
                         for (GwtDeploymentPackage pair : result) {
                             PackagesPanelUi.this.packagesDataProvider.getList().add(pair);
@@ -487,16 +550,26 @@ public class PackagesPanelUi extends Composite {
         });
     }
 
-    private void initModal() {
+    private void initUploadErrorModal() {
         this.uploadErrorModal.setTitle(MSGS.warning());
         this.uploadErrorText.setText(MSGS.missingFileUpload());
+    }
+
+    private void initMarketplaceVersionCheckModal() {
+        this.versionCheckModal.setTitle(VMSGS.marketplaceInstallDpVersionMismatch());
+        this.versionMismatchErrorText.setText(VMSGS.marketplaceInstallDpVersionDoesNotMatch());
+        this.currentKuraVersionLabel.setText(VMSGS.marketplaceInstallCurrentKuraVersion());
+        this.minKuraVersionLabel.setText(VMSGS.marketplaceInstallMinKuraVersion());
+        this.maxKuraVersionLabel.setText(VMSGS.marketplaceInstallMaxKuraVersion());
+
+        this.btnCancelMarketplaceInstall.setText(VMSGS.marketplaceInstallDpVersionMismatchCancel());
+        this.btnConfirmMarketplaceInstall.setText(VMSGS.marketplaceInstallDpVersionMismatchInstall());
     }
 
     private void eclipseMarketplaceInstall(String url) {
 
         // Construct the REST URL for Eclipse Marketplace
-        String appId = url.split("=")[1];
-        final String empApi = "http://marketplace.eclipse.org/node/" + appId + "/api/p";
+        final String nodeId = url.split("=")[1];
 
         // Generate security token
         EntryClassUi.showWaitModal();
@@ -511,7 +584,8 @@ public class PackagesPanelUi extends Composite {
             @Override
             public void onSuccess(GwtXSRFToken token) {
                 // Retrieve the URL of the DP via the Eclipse Marketplace API
-                gwtPackageService.getMarketplaceUri(token, empApi, new AsyncCallback<String>() {
+                PackagesPanelUi.this.gwtPackageService.getMarketplacePackageDescriptor(token, nodeId,
+                        new AsyncCallback<GwtMarketplacePackageDescriptor>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -521,8 +595,13 @@ public class PackagesPanelUi extends Composite {
                     }
 
                     @Override
-                    public void onSuccess(String result) {
-                        installMarketplaceDp(result);
+                    public void onSuccess(GwtMarketplacePackageDescriptor descriptor) {
+                        if (!descriptor.isCompatible()) {
+                            EntryClassUi.hideWaitModal();
+                            showVersionMismatchDialog(descriptor);
+                        } else {
+                            installMarketplaceDp(descriptor);
+                        }
                     }
                 });
 
@@ -530,9 +609,7 @@ public class PackagesPanelUi extends Composite {
         });
     }
 
-    private void installMarketplaceDp(final String uri) {
-        String url = "/" + GWT.getModuleName() + "/file/deploy/url";
-        final RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, URL.encode(url));
+    private void installMarketplaceDp(final GwtMarketplacePackageDescriptor descriptor) {
 
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
@@ -544,30 +621,20 @@ public class PackagesPanelUi extends Composite {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("xsrfToken=" + token.getToken());
-                sb.append("&packageUrl=" + uri);
+                PackagesPanelUi.this.gwtPackageService.installPackageFromMarketplace(token, descriptor,
+                        new AsyncCallback<Void>() {
 
-                builder.setHeader("Content-type", "application/x-www-form-urlencoded");
-                try {
-                    builder.sendRequest(sb.toString(), new RequestCallback() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        EntryClassUi.hideWaitModal();
+                    }
 
-                        @Override
-                        public void onResponseReceived(Request request, Response response) {
-                            logger.info(response.getText());
-                        }
-
-                        @Override
-                        public void onError(Request request, Throwable ex) {
-                            logger.log(Level.SEVERE, ex.getMessage(), ex);
-                            FailureHandler.handle(ex, EntryClassUi.class.getName());
-                        }
-
-                    });
-                } catch (RequestException e) {
-                    logger.log(Level.SEVERE, e.getMessage(), e);
-                    FailureHandler.handle(e, EntryClassUi.class.getName());
-                }
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                    }
+                });
             }
         });
     }
@@ -577,7 +644,7 @@ public class PackagesPanelUi extends Composite {
     }
 
     private void initDragDrop() {
-        DropSupport drop = DropSupport.addIfSupported(marketplaceInstallWell);
+        DropSupport drop = DropSupport.addIfSupported(this.marketplaceInstallWell);
         if (drop != null) {
             drop.setListener(new DropSupport.Listener() {
 
@@ -595,9 +662,36 @@ public class PackagesPanelUi extends Composite {
                 public boolean onDragOver(DropEvent event) {
                     return true;
                 }
+
+                @Override
+                public void onDragLeave(DropEvent event) {
+                }
             });
         } else {
-            marketplaceInstallWell.setVisible(false);
+            this.marketplaceInstallWell.setVisible(false);
         }
     }
+
+    private void showVersionMismatchDialog(GwtMarketplacePackageDescriptor descriptor) {
+
+        this.marketplaceDescriptor = descriptor;
+
+        String minKuraVersion = descriptor.getMinKuraVersion();
+        String maxKuraVersion = descriptor.getMaxKuraVersion();
+
+        if (minKuraVersion == null || minKuraVersion.isEmpty()) {
+            minKuraVersion = "unspecified";
+        }
+        if (maxKuraVersion == null || maxKuraVersion.isEmpty()) {
+            maxKuraVersion = "unspecified";
+        }
+
+        this.currentKuraVersionLabel
+                .setText(VMSGS.marketplaceInstallCurrentKuraVersion() + " " + descriptor.getCurrentKuraVersion());
+        this.minKuraVersionLabel.setText(VMSGS.marketplaceInstallMinKuraVersion() + " " + minKuraVersion);
+        this.maxKuraVersionLabel.setText(VMSGS.marketplaceInstallMaxKuraVersion() + " " + maxKuraVersion);
+        this.versionCheckModal.show();
+
+    }
+
 }

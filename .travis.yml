@@ -5,6 +5,11 @@ sudo: false
 jdk:
   - oraclejdk8
 
+cache:
+  directories:
+  - $HOME/.m2
+  - kura/target-definition
+
 before_script:
   - echo ==== Setting up toolchain.xml ====
   - ls /usr/lib/jvm
@@ -15,9 +20,29 @@ before_script:
   - cd maven ; tar --strip-components 1 -xzf ../maven.tar.gz ; cd ..
   - chmod a+x maven/bin/mvn
   - export M2_HOME=$PWD/maven
-  - export PATH=$PWD/maven/bin:${PATH}
+  - export PATH=${M2_HOME}/maven/bin:${PATH}
   - hash -r
 
-script: RUN_TESTS=true ./build-all.sh -Pbree
+addons:
+  apt:
+    packages:
+      - dos2unix
+      - oracle-java8-installer
 
-
+jobs:
+  include:
+    - stage: Main-build
+      script:
+        - rm -rf $HOME/.m2/repository/org/eclipse
+        - $M2_HOME/bin/mvn -B -f target-platform/pom.xml clean install
+        - $M2_HOME/bin/mvn -B -f kura/pom.xml clean install -DskipTests
+    - stage: distrib-examples-tests-karaf
+      script: $M2_HOME/bin/mvn -f kura/distrib/pom.xml clean install
+    - # stage name not required, will continue to use the previous
+      script:
+      - $M2_HOME/bin/mvn -f kura/org.eclipse.kura-p2/pom.xml clean install 
+      - $M2_HOME/bin/mvn -f kura/examples/pom.xml clean install
+    - # stage name not required, will continue to use the previous 
+      script: $M2_HOME/bin/mvn -f kura/test/pom.xml clean install
+    - # stage name not required, will continue to use the previous
+      script: $M2_HOME/bin/mvn -f karaf/pom.xml clean install

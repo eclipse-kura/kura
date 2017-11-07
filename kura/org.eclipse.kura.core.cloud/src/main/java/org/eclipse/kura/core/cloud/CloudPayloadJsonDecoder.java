@@ -76,7 +76,7 @@ public class CloudPayloadJsonDecoder {
                 } else if (METRICS.value().equalsIgnoreCase(name) && value.isObject()) {
                     decodeMetric(payload, value.asObject());
                 } else {
-                    throw new IllegalArgumentException("Unrecognized value");
+                    throw new IllegalArgumentException(String.format("Unrecognized value: %s", name));
                 }
             }
         } catch (Exception e) {
@@ -127,11 +127,12 @@ public class CloudPayloadJsonDecoder {
             } else if (STATUS.value().equalsIgnoreCase(name) && value.isNumber()) {
                 position.setStatus(value.asInt());
             } else {
-                throw new IllegalArgumentException("Cannot parse position!");
+                throw new IllegalArgumentException(String.format("Cannot parse position: %s.", name));
             }
         }
     }
 
+    // FIXME doesn't properly decode characters, ints, floats and byte arrays - the supported format has no metadata
     private static void decodeMetric(KuraPayload payload, JsonObject metricsObject) {
         if (metricsObject == null) {
             throw new IllegalArgumentException("Cannot parse metric object!");
@@ -153,7 +154,7 @@ public class CloudPayloadJsonDecoder {
             } else if (value.isString()) {
                 javaValue = value.asString();
             } else {
-                throw new IllegalArgumentException("Unparsable metric");
+                throw new IllegalArgumentException(String.format("Unparsable metric %s", name));
             }
             payload.addMetric(name, javaValue);
         }

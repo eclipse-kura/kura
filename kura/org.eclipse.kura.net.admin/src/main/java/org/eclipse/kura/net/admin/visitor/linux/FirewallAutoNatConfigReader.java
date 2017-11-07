@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -35,16 +35,16 @@ import org.slf4j.LoggerFactory;
 
 public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(FirewallAutoNatConfigReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(FirewallAutoNatConfigReader.class);
 
-    private static FirewallAutoNatConfigReader s_instance;
+    private static FirewallAutoNatConfigReader instance;
 
     public static FirewallAutoNatConfigReader getInstance() {
 
-        if (s_instance == null) {
-            s_instance = new FirewallAutoNatConfigReader();
+        if (instance == null) {
+            instance = new FirewallAutoNatConfigReader();
         }
-        return s_instance;
+        return instance;
     }
 
     @Override
@@ -52,8 +52,18 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
                 .getNetInterfaceConfigs();
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-            getConfig(netInterfaceConfig, KuranetConfig.getProperties());
+            getConfig(netInterfaceConfig, getKuranetProperties());
         }
+    }
+
+    protected Set<NATRule> getAutoNatRules() throws KuraException {
+        LinuxFirewall firewall = LinuxFirewall.getInstance();
+        Set<NATRule> natRules = firewall.getAutoNatRules();
+        return natRules;
+    }
+
+    protected Properties getKuranetProperties() {
+        return KuranetConfig.getProperties();
     }
 
     private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
@@ -63,111 +73,102 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
 
         NetInterfaceType type = netInterfaceConfig.getType();
         if (type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI) {
-            s_logger.debug("Getting NAT config for {}", interfaceName);
+            logger.debug("Getting NAT config for {}", interfaceName);
             if (kuraProps != null) {
-                s_logger.debug("Getting NAT config from kuraProps");
-                boolean natEnabled = false;
-                boolean useMasquerade = false;
-                String prop = null;
-                String srcIface = null;
-                String dstIface = null;
-                StringBuilder sb = new StringBuilder().append("net.interface.").append(interfaceName)
-                        .append(".config.nat.enabled");
-                if ((prop = kuraProps.getProperty(sb.toString())) != null) {
-                    natEnabled = Boolean.parseBoolean(prop);
-                }
-
-                sb = new StringBuilder().append("net.interface.").append(interfaceName)
-                        .append(".config.nat.masquerade");
-                if ((prop = kuraProps.getProperty(sb.toString())) != null) {
-                    useMasquerade = Boolean.parseBoolean(prop);
-                }
-
-                sb = new StringBuilder().append("net.interface.").append(interfaceName)
-                        .append(".config.nat.src.interface");
-                if ((prop = kuraProps.getProperty(sb.toString())) != null) {
-                    srcIface = prop;
-                }
-
-                sb = new StringBuilder().append("net.interface.").append(interfaceName)
-                        .append(".config.nat.dst.interface");
-                if ((prop = kuraProps.getProperty(sb.toString())) != null) {
-                    dstIface = prop;
-                }
-
-                if (natEnabled) {
-                    FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(srcIface, dstIface, useMasquerade);
-
-                    List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
-                            .getNetInterfaceAddresses();
-
-                    if (netInterfaceAddressConfigs == null) {
-                        throw KuraException
-                                .internalError("NetInterfaceAddress list is null for interface " + interfaceName);
-                    } else if (netInterfaceAddressConfigs.size() == 0) {
-                        throw KuraException
-                                .internalError("NetInterfaceAddress list is empty for interface " + interfaceName);
-                    }
-
-                    for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-                        List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-
-                        if (netConfigs == null) {
-                            netConfigs = new ArrayList<NetConfig>();
-                            if (netInterfaceAddressConfig instanceof NetInterfaceAddressConfigImpl) {
-                                ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
-                            } else if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
-                                ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
-                            }
-                        }
-
-                        netConfigs.add(natConfig);
-                    }
-                }
+                getRulesFromConfig(netInterfaceConfig, kuraProps, interfaceName);
             } else {
-                // get it from the firewall file if possible
-                LinuxFirewall firewall = LinuxFirewall.getInstance();
-                Set<NATRule> natRules = firewall.getAutoNatRules();
-                if (natRules != null && !natRules.isEmpty()) {
-                    Iterator<NATRule> it = natRules.iterator();
-                    while (it.hasNext()) {
-                        NATRule rule = it.next();
-                        if (rule.getSourceInterface().equals(interfaceName)) {
-                            s_logger.debug("found NAT rule: {}", rule);
+                getRulesFromFile(netInterfaceConfig, interfaceName);
+            }
+        }
+    }
 
-                            // this is the one we care about
-                            FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(rule.getSourceInterface(),
-                                    rule.getDestinationInterface(), rule.isMasquerade());
+    private void getRulesFromConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
+            Properties kuraProps, String interfaceName) throws KuraException {
 
-                            List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
-                                    .getNetInterfaceAddresses();
+        logger.debug("Getting NAT config from kuraProps");
 
-                            if (netInterfaceAddressConfigs == null) {
-                                throw KuraException.internalError(
-                                        "NetInterfaceAddress list is null for interface " + interfaceName);
-                            } else if (netInterfaceAddressConfigs.size() == 0) {
-                                throw KuraException.internalError(
-                                        "NetInterfaceAddress list is empty for interface " + interfaceName);
-                            }
+        boolean natEnabled = false;
+        boolean useMasquerade = false;
+        String srcIface = null;
+        String dstIface = null;
+        String prop;
+        StringBuilder sb = new StringBuilder().append("net.interface.").append(interfaceName)
+                .append(".config.nat.enabled");
+        if ((prop = kuraProps.getProperty(sb.toString())) != null) {
+            natEnabled = Boolean.parseBoolean(prop);
+        }
 
-                            for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-                                List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
+        sb = new StringBuilder().append("net.interface.").append(interfaceName)
+                .append(".config.nat.masquerade");
+        if ((prop = kuraProps.getProperty(sb.toString())) != null) {
+            useMasquerade = Boolean.parseBoolean(prop);
+        }
 
-                                if (netConfigs == null) {
-                                    netConfigs = new ArrayList<NetConfig>();
-                                    if (netInterfaceAddressConfig instanceof NetInterfaceAddressConfigImpl) {
-                                        ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig)
-                                                .setNetConfigs(netConfigs);
-                                    } else if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
-                                        ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig)
-                                                .setNetConfigs(netConfigs);
-                                    }
-                                }
+        sb = new StringBuilder().append("net.interface.").append(interfaceName)
+                .append(".config.nat.src.interface");
+        if ((prop = kuraProps.getProperty(sb.toString())) != null) {
+            srcIface = prop;
+        }
 
-                                netConfigs.add(natConfig);
-                            }
-                        }
-                    }
+        sb = new StringBuilder().append("net.interface.").append(interfaceName)
+                .append(".config.nat.dst.interface");
+        if ((prop = kuraProps.getProperty(sb.toString())) != null) {
+            dstIface = prop;
+        }
+
+        if (natEnabled) {
+            addNatConfig(netInterfaceConfig, interfaceName, srcIface, dstIface, useMasquerade);
+        }
+    }
+
+    private void addNatConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
+            String interfaceName, String srcIface, String dstIface, boolean useMasquerade) throws KuraException {
+
+        FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(srcIface, dstIface, useMasquerade);
+
+        List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
+                .getNetInterfaceAddresses();
+
+        if (netInterfaceAddressConfigs == null) {
+            throw KuraException
+                    .internalError("NetInterfaceAddress list is null for interface " + interfaceName);
+        } else if (netInterfaceAddressConfigs.isEmpty()) {
+            throw KuraException
+                    .internalError("NetInterfaceAddress list is empty for interface " + interfaceName);
+        }
+
+        for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
+            List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
+
+            if (netConfigs == null) {
+                netConfigs = new ArrayList<>();
+                if (netInterfaceAddressConfig instanceof NetInterfaceAddressConfigImpl) {
+                    ((NetInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
+                } else if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
+                    ((WifiInterfaceAddressConfigImpl) netInterfaceAddressConfig).setNetConfigs(netConfigs);
+                }
+            }
+
+            netConfigs.add(natConfig);
+        }
+    }
+
+    private void getRulesFromFile(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
+            String interfaceName) throws KuraException {
+
+        // get it from the firewall file if possible
+        logger.debug("Getting NAT config from the firewall file");
+
+        Set<NATRule> natRules = getAutoNatRules();
+        if (natRules != null && !natRules.isEmpty()) {
+            Iterator<NATRule> it = natRules.iterator();
+            while (it.hasNext()) {
+                NATRule rule = it.next();
+                if (rule.getSourceInterface().equals(interfaceName)) {
+                    logger.debug("found NAT rule: {}", rule);
+
+                    addNatConfig(netInterfaceConfig, interfaceName, rule.getSourceInterface(),
+                            rule.getDestinationInterface(), rule.isMasquerade());
                 }
             }
         }

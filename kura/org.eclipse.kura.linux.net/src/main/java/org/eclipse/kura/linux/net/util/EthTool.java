@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,7 +12,6 @@
 package org.eclipse.kura.linux.net.util;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -30,11 +29,11 @@ import org.slf4j.LoggerFactory;
  */
 public class EthTool implements LinkTool {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);
 
     private static final String LINK_DETECTED = "Link detected:";
-    private static final String DUPLEX = "Duplex:";
-    private static final String SPEED = "Speed:";
+    private static final String LINK_DUPLEX = "Duplex:";
+    private static final String LINK_SPEED = "Speed:";
 
     private String ifaceName = null;
     private boolean linkDetected = false;
@@ -59,51 +58,52 @@ public class EthTool implements LinkTool {
     @Override
     public boolean get() throws KuraException {
         SafeProcess proc = null;
-        BufferedReader br = null;
         boolean result = false;
         try {
             proc = ProcessUtil.exec("ethtool " + this.ifaceName);
             result = proc.waitFor() == 0 ? true : false;
-            br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            String line = null;
-            int ind = -1;
-            while ((line = br.readLine()) != null) {
-                if ((ind = line.indexOf(LINK_DETECTED)) >= 0) {
-                    s_logger.trace("Link detected from: {}", line);
-                    line = line.substring(ind + LINK_DETECTED.length()).trim();
-                    this.linkDetected = line.compareTo("yes") == 0 ? true : false;
-                } else if ((ind = line.indexOf(DUPLEX)) >= 0) {
-                    this.duplex = line.substring(ind + DUPLEX.length()).trim();
-                } else if ((ind = line.indexOf(SPEED)) >= 0) {
-                    line = line.substring(ind + SPEED.length()).trim();
-                    if (line.compareTo("10Mb/s") == 0) {
-                        this.speed = 10000000;
-                    } else if (line.compareTo("100Mb/s") == 0) {
-                        this.speed = 100000000;
-                    } else if (line.compareTo("1000Mb/s") == 0) {
-                        this.speed = 1000000000;
-                    }
-                }
-            }
-        } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        } catch (InterruptedException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            parse(proc);
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
         } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
-
             if (proc != null) {
                 ProcessUtil.destroy(proc);
             }
         }
 
         return result;
+    }
+
+    private void parse(SafeProcess proc) throws KuraException {
+        try (InputStreamReader isr = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(isr)) {
+            String line = null;
+            int ind = -1;
+            while ((line = br.readLine()) != null) {
+                if ((ind = line.indexOf(LINK_DETECTED)) >= 0) {
+                    logger.trace("Link detected from: {}", line);
+                    line = line.substring(ind + LINK_DETECTED.length()).trim();
+                    this.linkDetected = line.compareTo("yes") == 0 ? true : false;
+                } else if ((ind = line.indexOf(LINK_DUPLEX)) >= 0) {
+                    this.duplex = line.substring(ind + LINK_DUPLEX.length()).trim();
+                } else if ((ind = line.indexOf(LINK_SPEED)) >= 0) {
+                    line = line.substring(ind + LINK_SPEED.length()).trim();
+                    setSpeed(line);
+                }
+            }
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
+        }
+    }
+
+    private void setSpeed(String line) {
+        if (line.compareTo("10Mb/s") == 0) {
+            this.speed = 10000000;
+        } else if (line.compareTo("100Mb/s") == 0) {
+            this.speed = 100000000;
+        } else if (line.compareTo("1000Mb/s") == 0) {
+            this.speed = 1000000000;
+        }
     }
 
     /*

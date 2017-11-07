@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: H2 Database Wire Components Provider
+Bundle-SymbolicName: org.eclipse.kura.wire.h2db.component.provider;singleton:=true
+Bundle-Version: 1.0.100.qualifier
+Bundle-Vendor: Eclipse Kura
+Bundle-License: Eclipse Public License v1.0
+Bundle-Category: Kura Wires
+Import-Package: org.eclipse.kura;version="[1.2,2.0)",
+ org.eclipse.kura.configuration;version="[1.1,1.2)",
+ org.eclipse.kura.db;version="[1.1,2.0)",
+ org.eclipse.kura.localization;version="1.0.0",
+ org.eclipse.kura.localization.resources;version="1.1.0",
+ org.eclipse.kura.type;version="[1.0,2.0)",
+ org.eclipse.kura.util.collection;version="[1.0,2.0)",
+ org.eclipse.kura.wire;version="[1.0,1.1)",
+ org.osgi.framework;version="[1.7.0,2.0.0)",
+ org.osgi.service.component;version="1.2.0",
+ org.osgi.service.wireadmin;version="1.0.1",
+ org.osgi.util.tracker;version="1.5.1",
+ org.slf4j;version="1.6.4"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Service-Component: OSGI-INF/*.xml
+Export-Package: org.eclipse.kura.internal.wire.h2db.filter,
+ org.eclipse.kura.internal.wire.h2db.store

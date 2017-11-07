@@ -1,0 +1,2 @@
+Moka7 starting from 1.0.2 is released under dual license : LGPL3 and EPL 1.0
+The EPL and the GPL are not compatible, so you have to choose in advance which take before you import the library into your project.

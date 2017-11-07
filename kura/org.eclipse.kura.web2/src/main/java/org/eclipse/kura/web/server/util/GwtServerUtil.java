@@ -1,13 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2016 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.web.server.util;
+
+import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,12 +17,16 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.service.GwtWireService;
@@ -39,23 +45,25 @@ import org.w3c.dom.NodeList;
  */
 public final class GwtServerUtil {
 
+    public static final String PASSWORD_PLACEHOLDER = "Placeholder";
+
     /** The Constant to check if configuration policy is set to require. */
-    private static final String PATTERN_CONFIGURATION_REQUIRE = "configuration-policy=\"require\"";
-    
+    public static final String PATTERN_CONFIGURATION_REQUIRE = "configuration-policy=\"require\"";
+
     /** The Constant to check if the provided interface is a configurable component. */
-    private static final String PATTERN_SERVICE_PROVIDE_CONFIGURABLE_COMP = "provide interface=\"org.eclipse.kura.configuration.ConfigurableComponent\"";
-    
+    public static final String PATTERN_SERVICE_PROVIDE_CONFIGURABLE_COMP = "provide interface=\"org.eclipse.kura.configuration.ConfigurableComponent\"";
+
     /** The Constant to check if provided interface is Wire Emitter. */
-    private static final String PATTERN_SERVICE_PROVIDE_EMITTER = "provide interface=\"org.eclipse.kura.wire.WireEmitter\"";
-    
+    public static final String PATTERN_SERVICE_PROVIDE_EMITTER = "provide interface=\"org.eclipse.kura.wire.WireEmitter\"";
+
     /** The Constant to check if provided interface is Wire Receiver. */
-    private static final String PATTERN_SERVICE_PROVIDE_RECEIVER = "provide interface=\"org.eclipse.kura.wire.WireReceiver\"";
-    
+    public static final String PATTERN_SERVICE_PROVIDE_RECEIVER = "provide interface=\"org.eclipse.kura.wire.WireReceiver\"";
+
     /** The Constant to check if the provided interface is a self configuring component. */
-    private static final String PATTERN_SERVICE_PROVIDE_SELF_CONFIGURING_COMP = "provide interface=\"org.eclipse.kura.configuration.SelfConfiguringComponent\"";
+    public static final String PATTERN_SERVICE_PROVIDE_SELF_CONFIGURING_COMP = "provide interface=\"org.eclipse.kura.configuration.SelfConfiguringComponent\"";
 
     /** The Logger instance. */
-    private static final Logger s_logger = LoggerFactory.getLogger(GwtServerUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(GwtServerUtil.class);
 
     /**
      * Fills the provided lists with the proper factory IDs of the available
@@ -109,14 +117,14 @@ public final class GwtServerUtil {
                             }
                         }
                     } catch (final Exception ex) {
-                        s_logger.error("Error while reading Component Definition file {}", entry.getPath());
+                        logger.error("Error while reading Component Definition file {}", entry.getPath());
                     } finally {
                         try {
                             if (reader != null) {
                                 reader.close();
                             }
                         } catch (final IOException e) {
-                            s_logger.error("Error closing File Reader!" + e);
+                            logger.error("Error closing File Reader!" + e);
                         }
                     }
                 }
@@ -124,19 +132,14 @@ public final class GwtServerUtil {
         }
     }
 
-    /**
-     * Gets the object value.
-     *
-     * @param gwtConfigParam
-     *            the gwt config param
-     * @param strValue
-     *            the str value
-     * @return the object value
-     */
-    public static Object getObjectValue(final GwtConfigParameter gwtConfigParam, final String strValue) {
+    public static Object getObjectValue(GwtConfigParameter param) {
         Object objValue = null;
-        if (strValue != null) {
-            final GwtConfigParameterType gwtType = gwtConfigParam.getType();
+        GwtConfigParameterType gwtType = param.getType();
+        final String strValue = param.getValue();
+
+        if (gwtType == GwtConfigParameterType.STRING) {
+            objValue = strValue;
+        } else if (strValue != null && !strValue.trim().isEmpty()) {
             switch (gwtType) {
             case LONG:
                 objValue = Long.parseLong(strValue);
@@ -156,42 +159,28 @@ public final class GwtServerUtil {
             case BYTE:
                 objValue = Byte.parseByte(strValue);
                 break;
-
             case BOOLEAN:
                 objValue = Boolean.parseBoolean(strValue);
                 break;
-
             case PASSWORD:
                 objValue = new Password(strValue);
                 break;
-
             case CHAR:
                 objValue = Character.valueOf(strValue.charAt(0));
                 break;
-
-            case STRING:
-                objValue = strValue;
+            default:
                 break;
             }
         }
         return objValue;
     }
 
-    /**
-     * Gets the object value.
-     *
-     * @param gwtConfigParam
-     *            the gwt config param
-     * @param defaultValues
-     *            the default values
-     * @return the object value
-     */
-    public static Object[] getObjectValue(final GwtConfigParameter gwtConfigParam, final String[] defaultValues) {
-        final List<Object> values = new ArrayList<Object>();
-        final GwtConfigParameterType type = gwtConfigParam.getType();
+    public static Object[] getObjectValues(GwtConfigParameter param, String[] defaultValues) {
+        final List<Object> values = new ArrayList<>();
+        final GwtConfigParameterType type = param.getType();
         switch (type) {
         case BOOLEAN:
-            for (final String value : defaultValues) {
+            for (String value : defaultValues) {
                 if (!value.trim().isEmpty()) {
                     values.add(Boolean.valueOf(value));
                 }
@@ -199,7 +188,7 @@ public final class GwtServerUtil {
             return values.toArray(new Boolean[] {});
 
         case BYTE:
-            for (final String value : defaultValues) {
+            for (String value : defaultValues) {
                 if (!value.trim().isEmpty()) {
                     values.add(Byte.valueOf(value));
                 }
@@ -207,7 +196,7 @@ public final class GwtServerUtil {
             return values.toArray(new Byte[] {});
 
         case CHAR:
-            for (final String value : defaultValues) {
+            for (String value : defaultValues) {
                 if (!value.trim().isEmpty()) {
                     values.add(new Character(value.charAt(0)));
                 }
@@ -215,7 +204,7 @@ public final class GwtServerUtil {
             return values.toArray(new Character[] {});
 
         case DOUBLE:
-            for (final String value : defaultValues) {
+            for (String value : defaultValues) {
                 if (!value.trim().isEmpty()) {
                     values.add(Double.valueOf(value));
                 }
@@ -223,7 +212,7 @@ public final class GwtServerUtil {
             return values.toArray(new Double[] {});
 
         case FLOAT:
-            for (final String value : defaultValues) {
+            for (String value : defaultValues) {
                 if (!value.trim().isEmpty()) {
                     values.add(Float.valueOf(value));
                 }
@@ -231,7 +220,7 @@ public final class GwtServerUtil {
             return values.toArray(new Float[] {});
 
         case INTEGER:
-            for (final String value : defaultValues) {
+            for (String value : defaultValues) {
                 if (!value.trim().isEmpty()) {
                     values.add(Integer.valueOf(value));
                 }
@@ -239,7 +228,7 @@ public final class GwtServerUtil {
             return values.toArray(new Integer[] {});
 
         case LONG:
-            for (final String value : defaultValues) {
+            for (String value : defaultValues) {
                 if (!value.trim().isEmpty()) {
                     values.add(Long.valueOf(value));
                 }
@@ -247,7 +236,7 @@ public final class GwtServerUtil {
             return values.toArray(new Long[] {});
 
         case SHORT:
-            for (final String value : defaultValues) {
+            for (String value : defaultValues) {
                 if (!value.trim().isEmpty()) {
                     values.add(Short.valueOf(value));
                 }
@@ -255,7 +244,7 @@ public final class GwtServerUtil {
             return values.toArray(new Short[] {});
 
         case PASSWORD:
-            for (final String value : defaultValues) {
+            for (String value : defaultValues) {
                 if (!value.trim().isEmpty()) {
                     values.add(new Password(value));
                 }
@@ -263,15 +252,44 @@ public final class GwtServerUtil {
             return values.toArray(new Password[] {});
 
         case STRING:
-            for (final String value : defaultValues) {
+            for (String value : defaultValues) {
                 if (!value.trim().isEmpty()) {
                     values.add(value);
                 }
             }
             return values.toArray(new String[] {});
+        default:
+            return null;
         }
+    }
 
-        return null;
+    public static Object getUserDefinedObject(GwtConfigParameter param, Object currentObjValue) {
+        Object objValue;
+
+        final int cardinality = param.getCardinality();
+        if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
+            String strValue = param.getValue();
+
+            if (currentObjValue instanceof Password && PASSWORD_PLACEHOLDER.equals(strValue)) {
+                objValue = currentObjValue;
+            } else {
+                objValue = getObjectValue(param);
+            }
+        } else {
+            String[] strValues = param.getValues();
+
+            if (currentObjValue instanceof Password[]) {
+                Password[] currentPasswordValue = (Password[]) currentObjValue;
+                for (int i = 0; i < strValues.length; i++) {
+                    if (PASSWORD_PLACEHOLDER.equals(strValues[i])) {
+                        strValues[i] = new String(currentPasswordValue[i].getPassword());
+                    }
+                }
+            }
+
+            objValue = getObjectValues(param, strValues);
+        }
+        return objValue;
     }
 
     /**
@@ -300,6 +318,32 @@ public final class GwtServerUtil {
      */
     private GwtServerUtil() {
         // No need to instantiate
+    }
+
+    public static Map<String, Object> fillPropertiesFromConfiguration(final GwtConfigComponent config,
+            final ComponentConfiguration currentCC) {
+        // Build the new properties
+        final Map<String, Object> properties = new HashMap<>();
+        final ComponentConfiguration backupCC = currentCC;
+        if (backupCC == null) {
+            properties.putAll(config.getProperties());
+            for (final GwtConfigParameter gwtConfigParam : config.getParameters()) {
+                properties.put(gwtConfigParam.getId(), getUserDefinedObject(gwtConfigParam, null));
+            }
+        } else {
+            final Map<String, Object> backupConfigProp = backupCC.getConfigurationProperties();
+            for (final GwtConfigParameter gwtConfigParam : config.getParameters()) {
+                final Map<String, Object> currentConfigProp = currentCC.getConfigurationProperties();
+                properties.put(gwtConfigParam.getId(),
+                        getUserDefinedObject(gwtConfigParam, currentConfigProp.get(gwtConfigParam.getName())));
+            }
+
+            // Force kura.service.pid into properties, if originally present
+            if (backupConfigProp.get(KURA_SERVICE_PID) != null) {
+                properties.put(KURA_SERVICE_PID, backupConfigProp.get(KURA_SERVICE_PID));
+            }
+        }
+        return properties;
     }
 
 }

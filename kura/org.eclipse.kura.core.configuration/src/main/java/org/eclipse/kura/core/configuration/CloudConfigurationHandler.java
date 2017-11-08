@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -198,8 +198,8 @@ public class CloudConfigurationHandler extends Cloudlet {
             //
             // marshall the response
 
-            List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
-            for (ComponentConfigurationImpl config : configs) {
+            List<ComponentConfiguration> configs = xmlConfigs.getConfigurations();
+            for (ComponentConfiguration config : configs) {
                 if (config != null) {
                     try {
                         ((ConfigurationServiceImpl) this.m_configurationService)
@@ -251,7 +251,7 @@ public class CloudConfigurationHandler extends Cloudlet {
 
         //
         // get current configuration with descriptors
-        List<ComponentConfigurationImpl> configs = new ArrayList<ComponentConfigurationImpl>();
+        List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
         try {
 
             if (pid == null) {
@@ -294,14 +294,14 @@ public class CloudConfigurationHandler extends Cloudlet {
                                 cc.getPid(), cc.getDefinition().getId());
                         continue;
                     }
-                    configs.add((ComponentConfigurationImpl) cc);
+                    configs.add(cc);
                 }
             } else {
 
                 // the configuration for a specific component has been requested.
                 ComponentConfiguration cc = this.m_configurationService.getComponentConfiguration(pid);
                 if (cc != null) {
-                    configs.add((ComponentConfigurationImpl) cc);
+                    configs.add(cc);
                 }
             }
         } catch (KuraException e) {
@@ -459,8 +459,9 @@ class UpdateConfigurationsCallable implements Callable<Void> {
         //
         // update the configuration
         try {
-            List<ComponentConfigurationImpl> configImpls = this.m_xmlConfigurations != null
-                    ? this.m_xmlConfigurations.getConfigurations() : null;
+            List<ComponentConfiguration> configImpls = this.m_xmlConfigurations != null
+                    ? this.m_xmlConfigurations.getConfigurations()
+                    : null;
             if (configImpls == null) {
                 return null;
             }

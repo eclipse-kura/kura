@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -35,50 +35,50 @@ import org.w3c.dom.NodeList;
 
 public class XmlJavaMetadataMapper implements XmlJavaDataMapper {
 
-    private final static String METADATA_LOCALIZATION = "localization";
+    private static final String METADATA_LOCALIZATION = "localization";
 
     private static final String METADATA_OCD = "OCD";
-    private final static String METADATA_OCD_NAME = "name";
-    private final static String METADATA_OCD_ID = "id";
-    private final static String METADATA_OCD_DESCRIPTION = "description";
+    private static final String METADATA_OCD_NAME = "name";
+    private static final String METADATA_OCD_ID = "id";
+    private static final String METADATA_OCD_DESCRIPTION = "description";
 
-    private final static String METADATA_ICON = "Icon";
-    private final static String METADATA_ICON_RESOURCE = "resource";
-    private final static String METADATA_ICON_SIZE = "size";
+    private static final String METADATA_ICON = "Icon";
+    private static final String METADATA_ICON_RESOURCE = "resource";
+    private static final String METADATA_ICON_SIZE = "size";
 
-    private final static String METADATA_AD = "AD";
-    private final static String METADATA_AD_ID = "id";
-    private final static String METADATA_AD_NAME = "name";
-    private final static String METADATA_AD_TYPE = "type";
-    private final static String METADATA_AD_CARDINALITY = "cardinality";
-    private final static String METADATA_AD_REQUIRED = "required";
-    private final static String METADATA_AD_DEFAULT = "default";
-    private final static String METADATA_AD_DESCRIPTION = "description";
-    private final static String METADATA_AD_MIN = "min";
-    private final static String METADATA_AD_MAX = "max";
+    private static final String METADATA_AD = "AD";
+    private static final String METADATA_AD_ID = "id";
+    private static final String METADATA_AD_NAME = "name";
+    private static final String METADATA_AD_TYPE = "type";
+    private static final String METADATA_AD_CARDINALITY = "cardinality";
+    private static final String METADATA_AD_REQUIRED = "required";
+    private static final String METADATA_AD_DEFAULT = "default";
+    private static final String METADATA_AD_DESCRIPTION = "description";
+    private static final String METADATA_AD_MIN = "min";
+    private static final String METADATA_AD_MAX = "max";
 
-    private final static String METADATA_AD_OPTION = "Option";
-    private final static String METADATA_AD_OPTION_LABEL = "label";
-    private final static String METADATA_AD_OPTION_VALUE = "value";
+    private static final String METADATA_AD_OPTION = "Option";
+    private static final String METADATA_AD_OPTION_LABEL = "label";
+    private static final String METADATA_AD_OPTION_VALUE = "value";
 
-    private final static String METADATA_DESIGNATE_OBJECT = "Object";
-    private final static String METADATA_DESIGNATE_PID = "pid";
-    private final static String METADATA_DESIGNATE_FACTORY_PID = "factoryPid";
-    private final static String METADATA_DESIGNATE_BUNDLE = "bundle";
-    private final static String METADATA_DESIGNATE_OPTIONAL = "optional";
-    private final static String METADATA_DESIGNATE_MERGE = "merge";
+    private static final String METADATA_DESIGNATE_OBJECT = "Object";
+    private static final String METADATA_DESIGNATE_PID = "pid";
+    private static final String METADATA_DESIGNATE_FACTORY_PID = "factoryPid";
+    private static final String METADATA_DESIGNATE_BUNDLE = "bundle";
+    private static final String METADATA_DESIGNATE_OPTIONAL = "optional";
+    private static final String METADATA_DESIGNATE_MERGE = "merge";
 
-    private final static String METADATA_DESIGNATE_OBJECT_ATTRIBUTE = "Attribute";
-    private final static String METADATA_DESIGNATE_OBJECT_OCDREF = "ocdref";
+    private static final String METADATA_DESIGNATE_OBJECT_ATTRIBUTE = "Attribute";
+    private static final String METADATA_DESIGNATE_OBJECT_OCDREF = "ocdref";
 
-    private Document mashallDoc = null;
+    private Document marshallDoc = null;
 
     //
     // Public methods
     //
     @Override
     public Element marshal(Document doc, Object o) throws Exception {
-        this.mashallDoc = doc;
+        this.marshallDoc = doc;
         if (o instanceof Tocd) {
             Tocd configOCD = (Tocd) o;
 
@@ -90,29 +90,29 @@ public class XmlJavaMetadataMapper implements XmlJavaDataMapper {
             configOCD.getAny();
             configOCD.getOtherAttributes();
 
-            Element ocd = this.mashallDoc.createElement(OCD_NAMESPACE + ":" + METADATA_OCD);
+            Element ocd = this.marshallDoc.createElement(OCD_NAMESPACE + ":" + METADATA_OCD);
 
             if (ocdName != null && !ocdName.trim().isEmpty()) {
-                Attr ocdAttrName = this.mashallDoc.createAttribute(METADATA_OCD_NAME);
+                Attr ocdAttrName = this.marshallDoc.createAttribute(METADATA_OCD_NAME);
                 ocdAttrName.setNodeValue(ocdName);
                 ocd.setAttributeNode(ocdAttrName);
             }
 
             if (ocdDescription != null && !ocdDescription.trim().isEmpty()) {
-                Attr ocdAttrDescription = this.mashallDoc.createAttribute(METADATA_OCD_DESCRIPTION);
+                Attr ocdAttrDescription = this.marshallDoc.createAttribute(METADATA_OCD_DESCRIPTION);
                 ocdAttrDescription.setNodeValue(ocdDescription);
                 ocd.setAttributeNode(ocdAttrDescription);
             }
 
             if (ocdID != null && !ocdID.trim().isEmpty()) {
-                Attr ocdAttrId = this.mashallDoc.createAttribute(METADATA_OCD_ID);
+                Attr ocdAttrId = this.marshallDoc.createAttribute(METADATA_OCD_ID);
                 ocdAttrId.setNodeValue(ocdID);
                 ocd.setAttributeNode(ocdAttrId);
             }
 
             if (ocdADs != null) {
                 for (AD ocdAD : ocdADs) {
-                    Element ad = this.mashallDoc.createElement(OCD_NAMESPACE + ":" + METADATA_AD);
+                    Element ad = this.marshallDoc.createElement(OCD_NAMESPACE + ":" + METADATA_AD);
                     marshallAD(ocdAD, ad);
                     ocd.appendChild(ad);
                 }
@@ -120,7 +120,7 @@ public class XmlJavaMetadataMapper implements XmlJavaDataMapper {
 
             if (ocdIcons != null) {
                 for (Icon ocdIcon : ocdIcons) {
-                    Element icon = this.mashallDoc.createElement(OCD_NAMESPACE + ":" + METADATA_ICON);
+                    Element icon = this.marshallDoc.createElement(OCD_NAMESPACE + ":" + METADATA_ICON);
                     marshallIcon(ocdIcon, icon);
                     ocd.appendChild(icon);
                 }
@@ -161,12 +161,12 @@ public class XmlJavaMetadataMapper implements XmlJavaDataMapper {
         BigInteger iconSize = ocdIcon.getSize();
 
         if (iconResource != null && !iconResource.trim().isEmpty()) {
-            Attr attrResource = this.mashallDoc.createAttribute(METADATA_ICON_RESOURCE);
+            Attr attrResource = this.marshallDoc.createAttribute(METADATA_ICON_RESOURCE);
             attrResource.setNodeValue(iconResource);
             icon.setAttributeNode(attrResource);
         }
         if (iconSize != null) {
-            Attr attrSize = this.mashallDoc.createAttribute(METADATA_ICON_SIZE);
+            Attr attrSize = this.marshallDoc.createAttribute(METADATA_ICON_SIZE);
             attrSize.setNodeValue(iconSize.toString());
             icon.setAttributeNode(attrSize);
         }
@@ -185,54 +185,54 @@ public class XmlJavaMetadataMapper implements XmlJavaDataMapper {
         List<Option> adOptions = ocdAD.getOption();
 
         if (adName != null) {
-            Attr attrName = this.mashallDoc.createAttribute(METADATA_AD_NAME);
+            Attr attrName = this.marshallDoc.createAttribute(METADATA_AD_NAME);
             attrName.setNodeValue(adName);
             ad.setAttributeNode(attrName);
         }
         if (adId != null) {
-            Attr attrId = this.mashallDoc.createAttribute(METADATA_AD_ID);
+            Attr attrId = this.marshallDoc.createAttribute(METADATA_AD_ID);
             attrId.setNodeValue(adId);
             ad.setAttributeNode(attrId);
         }
         if (adType != null) {
-            Attr attrType = this.mashallDoc.createAttribute(METADATA_AD_TYPE);
+            Attr attrType = this.marshallDoc.createAttribute(METADATA_AD_TYPE);
             attrType.setNodeValue(adType.value());
             ad.setAttributeNode(attrType);
         }
         if (adCardinality != null) {
-            Attr attrCardinality = this.mashallDoc.createAttribute(METADATA_AD_CARDINALITY);
+            Attr attrCardinality = this.marshallDoc.createAttribute(METADATA_AD_CARDINALITY);
             attrCardinality.setNodeValue(adCardinality.toString());
             ad.setAttributeNode(attrCardinality);
         }
         if (adRequired != null) {
-            Attr attrRequired = this.mashallDoc.createAttribute(METADATA_AD_REQUIRED);
+            Attr attrRequired = this.marshallDoc.createAttribute(METADATA_AD_REQUIRED);
             attrRequired.setNodeValue(adRequired.toString());
             ad.setAttributeNode(attrRequired);
         }
         if (adDefault != null) {
-            Attr attrDefault = this.mashallDoc.createAttribute(METADATA_AD_DEFAULT);
+            Attr attrDefault = this.marshallDoc.createAttribute(METADATA_AD_DEFAULT);
             attrDefault.setNodeValue(adDefault);
             ad.setAttributeNode(attrDefault);
         }
         if (adDescription != null) {
-            Attr attrDescription = this.mashallDoc.createAttribute(METADATA_AD_DESCRIPTION);
+            Attr attrDescription = this.marshallDoc.createAttribute(METADATA_AD_DESCRIPTION);
             attrDescription.setNodeValue(adDescription);
             ad.setAttributeNode(attrDescription);
         }
         if (adMin != null) {
-            Attr attrMin = this.mashallDoc.createAttribute(METADATA_AD_MIN);
+            Attr attrMin = this.marshallDoc.createAttribute(METADATA_AD_MIN);
             attrMin.setNodeValue(adMin);
             ad.setAttributeNode(attrMin);
         }
         if (adMax != null) {
-            Attr attrMax = this.mashallDoc.createAttribute(METADATA_AD_MAX);
+            Attr attrMax = this.marshallDoc.createAttribute(METADATA_AD_MAX);
             attrMax.setNodeValue(adMax);
             ad.setAttributeNode(attrMax);
         }
 
         if (adOptions != null) {
             for (Option adOption : adOptions) {
-                Element option = this.mashallDoc.createElement(OCD_NAMESPACE + ":" + METADATA_AD_OPTION);
+                Element option = this.marshallDoc.createElement(OCD_NAMESPACE + ":" + METADATA_AD_OPTION);
                 marshallOption(adOption, option);
                 ad.appendChild(option);
             }
@@ -244,12 +244,12 @@ public class XmlJavaMetadataMapper implements XmlJavaDataMapper {
         String value = adOption.getValue();
 
         if (!label.trim().isEmpty()) {
-            Attr attrLabel = this.mashallDoc.createAttribute(METADATA_AD_OPTION_LABEL);
+            Attr attrLabel = this.marshallDoc.createAttribute(METADATA_AD_OPTION_LABEL);
             attrLabel.setNodeValue(label);
             option.setAttributeNode(attrLabel);
         }
         if (!value.trim().isEmpty()) {
-            Attr attrValue = this.mashallDoc.createAttribute(METADATA_AD_OPTION_VALUE);
+            Attr attrValue = this.marshallDoc.createAttribute(METADATA_AD_OPTION_VALUE);
             attrValue.setNodeValue(value);
             option.setAttributeNode(attrValue);
         }

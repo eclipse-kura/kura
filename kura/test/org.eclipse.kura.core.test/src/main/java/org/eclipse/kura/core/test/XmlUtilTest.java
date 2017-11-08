@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,11 +14,11 @@ package org.eclipse.kura.core.test;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
@@ -358,8 +358,9 @@ public class XmlUtilTest extends TestCase {
         componentConfigurationImpl.setProperties(sampleMap);
 
         XmlComponentConfigurations xmlComponentConfigurations = new XmlComponentConfigurations();
-        xmlComponentConfigurations.setConfigurations(
-                new ArrayList<ComponentConfigurationImpl>(Arrays.asList(componentConfigurationImpl)));
+        List<ComponentConfiguration> configs = new ArrayList<>();
+        configs.add(componentConfigurationImpl);
+        xmlComponentConfigurations.setConfigurations(configs);
 
         return xmlComponentConfigurations;
     }

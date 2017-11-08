@@ -80,6 +80,7 @@ import org.eclipse.kura.usb.UsbDevice;
 import org.eclipse.kura.usb.UsbDeviceAddedEvent;
 import org.eclipse.kura.usb.UsbDeviceEvent;
 import org.eclipse.kura.usb.UsbDeviceRemovedEvent;
+import org.eclipse.kura.usb.UsbDeviceType;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.eclipse.kura.usb.UsbService;
@@ -625,6 +626,11 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             if (event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY) == null) {
                 return;
             }
+            if (event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY) == null
+                    || ((UsbDeviceType) event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY))
+                            .equals(UsbDeviceType.USB_NET_DEVICE)) {
+                return;
+            }
 
             // do we care?
             final SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem(
@@ -651,26 +657,24 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
                 boolean createNewUsbModemDevice = false;
                 if (usbModem == null) {
+                    logger.debug("handleEvent() :: Modem not found. Create one");
                     createNewUsbModemDevice = true;
                 } else if (modemInfo.getNumTtyDevs() > 0 && modemInfo.getNumBlockDevs() > 0) {
                     if (usbModem.getTtyDevs().size() >= modemInfo.getNumTtyDevs()
                             && usbModem.getBlockDevs().size() >= modemInfo.getNumBlockDevs()) {
+                        logger.debug("handleEvent() :: Found modem with too many resources: {}. Create a new one",
+                                usbModem);
                         createNewUsbModemDevice = true;
                     }
                 } else if (modemInfo.getNumTtyDevs() > 0 && usbModem.getTtyDevs().size() >= modemInfo.getNumTtyDevs()
                         || modemInfo.getNumBlockDevs() > 0
                                 && usbModem.getBlockDevs().size() >= modemInfo.getNumBlockDevs()) {
+                    logger.debug("handleEvent() :: Found modem with too many resources: {}. Create a new one",
+                            usbModem);
                     createNewUsbModemDevice = true;
                 }
 
                 if (createNewUsbModemDevice) {
-                    if (usbModem == null) {
-                        logger.debug("handleEvent() :: Modem not found. Create one");
-                    } else {
-                        logger.debug("handleEvent() :: Found modem with too many resources: {}. Create a new one",
-                                usbModem);
-                    }
-
                     usbModem = new UsbModemDevice(
                             (String) event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY),
                             (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY),
@@ -681,11 +685,13 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                 }
 
                 String resource = (String) event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY);
-
-                logger.debug("handleEvent() :: Adding resource: {} for: {}", resource, usbModem.getUsbPort());
-                if (resource.contains("tty")) {
+                UsbDeviceType usbDeviceType = (UsbDeviceType) event
+                        .getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY);
+                logger.debug("handleEvent() :: Found resource: {} of type {} for: {}", resource, usbDeviceType,
+                        usbModem.getUsbPort());
+                if (usbDeviceType.equals(UsbDeviceType.USB_TTY_DEVICE)) {
                     usbModem.addTtyDev(resource);
-                } else {
+                } else if (usbDeviceType.equals(UsbDeviceType.USB_BLOCK_DEVICE)) {
                     usbModem.addBlockDev(resource);
                 }
 

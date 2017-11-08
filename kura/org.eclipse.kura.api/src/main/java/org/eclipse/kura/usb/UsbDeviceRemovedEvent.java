@@ -102,4 +102,14 @@ public class UsbDeviceRemovedEvent extends Event implements UsbDeviceEvent {
     public String getUsbDevicePath() {
         return (String) getProperty(USB_EVENT_DEVICE_PATH_PROPERTY);
     }
+
+    /**
+     * Returns the USB device type.
+     *
+     * @return UsbDeviceType or null if the property is not set
+     * @since 1.4
+     */
+    public UsbDeviceType getUsbDeviceType() {
+        return (UsbDeviceType) getProperty(USB_EVENT_DEVICE_TYPE_PROPERTY);
+    }
 }

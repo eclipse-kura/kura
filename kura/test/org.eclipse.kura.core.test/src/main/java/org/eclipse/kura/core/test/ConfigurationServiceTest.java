@@ -27,6 +27,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudCallService;
 import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.CloudConfigurationHandler;
@@ -300,7 +301,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         XmlComponentConfigurations xmlConfigs = XmlUtil.unmarshal(sr, XmlComponentConfigurations.class);
 
         System.err.println("Checking current configuration");
-        List<ComponentConfigurationImpl> configs = xmlConfigs.getConfigurations();
+        List<ComponentConfiguration> configs = xmlConfigs.getConfigurations();
         assertDefaultValues(configs.get(0).getConfigurationProperties());
 
         // take a snapshot
@@ -335,7 +336,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         ccnew.setProperties(propsnew);
 
         XmlComponentConfigurations newConfigs = new XmlComponentConfigurations();
-        List<ComponentConfigurationImpl> newccs = new ArrayList<ComponentConfigurationImpl>();
+        List<ComponentConfiguration> newccs = new ArrayList<ComponentConfiguration>();
         newccs.add(ccnew);
         newConfigs.setConfigurations(newccs);
 
@@ -383,7 +384,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
             s_logger.info("ERROR: xmlConfigs is null");
         }
         assertNotNull(xmlConfigs);
-        ComponentConfigurationImpl ccmod = xmlConfigs.getConfigurations().get(0);
+        ComponentConfiguration ccmod = xmlConfigs.getConfigurations().get(0);
         s_logger.info("Checking these are equal: " + ccmod.getConfigurationProperties().get("prop.string") + " AND "
                 + "modified_value");
         assertEquals("modified_value", ccmod.getConfigurationProperties().get("prop.string"));

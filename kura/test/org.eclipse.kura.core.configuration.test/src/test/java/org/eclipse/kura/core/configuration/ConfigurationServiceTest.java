@@ -1234,7 +1234,7 @@ public class ConfigurationServiceTest {
             @Override
             XmlComponentConfigurations loadEncryptedSnapshotFileContent(long snapshotID) throws KuraException {
                 XmlComponentConfigurations cfgs = new XmlComponentConfigurations();
-                List<ComponentConfigurationImpl> configurations = new ArrayList<ComponentConfigurationImpl>();
+                List<ComponentConfiguration> configurations = new ArrayList<ComponentConfiguration>();
                 cfgs.setConfigurations(configurations);
 
                 configurations.add(null);
@@ -1281,7 +1281,7 @@ public class ConfigurationServiceTest {
             @Override
             XmlComponentConfigurations loadEncryptedSnapshotFileContent(long snapshotID) throws KuraException {
                 XmlComponentConfigurations cfgs = new XmlComponentConfigurations();
-                List<ComponentConfigurationImpl> configurations = new ArrayList<ComponentConfigurationImpl>();
+                List<ComponentConfiguration> configurations = new ArrayList<ComponentConfiguration>();
                 cfgs.setConfigurations(configurations);
 
                 configurations.add(null);
@@ -1420,7 +1420,7 @@ public class ConfigurationServiceTest {
         assertNotNull("configurations list is returned", configurations.getConfigurations());
         assertEquals("configurations list is not empty", 1, configurations.getConfigurations().size());
 
-        ComponentConfigurationImpl cfg1 = configurations.getConfigurations().get(0);
+        ComponentConfiguration cfg1 = configurations.getConfigurations().get(0);
         assertEquals("correct snapshot", "123", cfg1.getPid());
         assertNotNull("configuration properties map is returned", cfg1.getConfigurationProperties());
         assertEquals("configuration properties map is not empty", 1, cfg1.getConfigurationProperties().size());
@@ -1512,7 +1512,7 @@ public class ConfigurationServiceTest {
         snapshotList.add(1234L);
 
         final XmlComponentConfigurations xmlComponentConfigurations = new XmlComponentConfigurations();
-        List<ComponentConfigurationImpl> configurations = new ArrayList<ComponentConfigurationImpl>();
+        List<ComponentConfiguration> configurations = new ArrayList<ComponentConfiguration>();
         xmlComponentConfigurations.setConfigurations(configurations);
 
         final boolean[] calls = { false, false };
@@ -1553,7 +1553,7 @@ public class ConfigurationServiceTest {
         snapshotList.add(1234L);
 
         final XmlComponentConfigurations xmlComponentConfigurations = new XmlComponentConfigurations();
-        List<ComponentConfigurationImpl> configurations = new ArrayList<ComponentConfigurationImpl>();
+        List<ComponentConfiguration> configurations = new ArrayList<ComponentConfiguration>();
         xmlComponentConfigurations.setConfigurations(configurations);
 
         final String dir = "snapDir";
@@ -1747,7 +1747,7 @@ public class ConfigurationServiceTest {
     private XmlComponentConfigurations prepareSnapshot() {
         XmlComponentConfigurations cfgs = new XmlComponentConfigurations();
 
-        List<ComponentConfigurationImpl> cfglist = new ArrayList<ComponentConfigurationImpl>();
+        List<ComponentConfiguration> cfglist = new ArrayList<ComponentConfiguration>();
         ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
         cfg.setPid("123");
         Map<String, Object> props = new HashMap<String, Object>();
@@ -2118,7 +2118,7 @@ public class ConfigurationServiceTest {
         when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(1);
 
         XmlComponentConfigurations snapshot = prepareSnapshot();
-        List<ComponentConfigurationImpl> configs = snapshot.getConfigurations();
+        List<ComponentConfiguration> configs = snapshot.getConfigurations();
 
         Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
 
@@ -2181,7 +2181,7 @@ public class ConfigurationServiceTest {
         when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(1);
 
         XmlComponentConfigurations snapshot = prepareSnapshot();
-        List<ComponentConfigurationImpl> configs = snapshot.getConfigurations();
+        List<ComponentConfiguration> configs = snapshot.getConfigurations();
 
         Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
 
@@ -2245,7 +2245,7 @@ public class ConfigurationServiceTest {
         when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(1);
 
         XmlComponentConfigurations snapshot = prepareSnapshot();
-        List<ComponentConfigurationImpl> configs = snapshot.getConfigurations();
+        List<ComponentConfiguration> configs = snapshot.getConfigurations();
 
         Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
 

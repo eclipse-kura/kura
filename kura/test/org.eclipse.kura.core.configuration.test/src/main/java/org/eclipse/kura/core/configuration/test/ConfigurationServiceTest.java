@@ -58,12 +58,8 @@ import org.mockito.stubbing.Answer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ConfigurationServiceTest {
-
-    private static final Logger logger = LoggerFactory.getLogger(ConfigurationServiceTest.class);
 
     private static final String DATA_SERVICE_FACTORY_PID = "org.eclipse.kura.data.DataService";
     private static final String TEST_COMPONENT_PID = "org.eclipse.kura.core.configuration.test.CfgSvcTestComponent";
@@ -196,7 +192,6 @@ public class ConfigurationServiceTest {
             @Override
             public char[] answer(InvocationOnMock invocation) throws Throwable {
                 Object[] args = invocation.getArguments();
-                String arg0 = new String((char[]) args[0]);
                 validator.validateDecryptArgs(args);
                 return validator.getDecrypted().toCharArray();
             }
@@ -647,7 +642,7 @@ public class ConfigurationServiceTest {
     private static String loadConfigsXml(String pid) throws Exception, IOException {
         XmlComponentConfigurations cfgs = new XmlComponentConfigurations();
 
-        List<ComponentConfigurationImpl> cfglist = new ArrayList<ComponentConfigurationImpl>();
+        List<ComponentConfiguration> cfglist = new ArrayList<ComponentConfiguration>();
         ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
         cfg.setPid(pid);
         Map<String, Object> props = new HashMap<String, Object>();
@@ -839,7 +834,7 @@ public class ConfigurationServiceTest {
     public void testEncryptSnapshots() throws Exception {
         XmlComponentConfigurations cfgs = new XmlComponentConfigurations();
 
-        List<ComponentConfigurationImpl> cfglist = new ArrayList<ComponentConfigurationImpl>();
+        List<ComponentConfiguration> cfglist = new ArrayList<ComponentConfiguration>();
         ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
         cfg.setPid("123");
         Map<String, Object> props = new HashMap<String, Object>();
@@ -944,7 +939,7 @@ class MultiStepCSValidator implements CSValidator {
         if (configs == null) { // first pass
             assertTrue("At least one configuration expected", configurations.getConfigurations().size() >= 1);
             boolean found = false;
-            for (ComponentConfigurationImpl cfg : configurations.getConfigurations()) {
+            for (ComponentConfiguration cfg : configurations.getConfigurations()) {
                 if (pid.compareTo(cfg.getPid()) == 0) {
                     assertEquals(factoryPid, cfg.getConfigurationProperties().get("service.factoryPid"));
                     found = true;

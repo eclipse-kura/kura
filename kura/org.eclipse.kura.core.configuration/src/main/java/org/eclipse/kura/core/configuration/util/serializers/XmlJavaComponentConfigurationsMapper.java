@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,13 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.XmlConfigPropertiesAdapted;
 import org.eclipse.kura.core.configuration.XmlConfigPropertiesAdapter;
 import org.eclipse.kura.core.configuration.XmlConfigPropertyAdapted;
 import org.eclipse.kura.core.configuration.XmlConfigPropertyAdapted.ConfigPropertyType;
-import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -33,22 +34,22 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
     private static final String CONFIGURATIONS = "configurations";
     private static final String PROPERTIES = "properties";
 
-    private final static String CONFIGURATION_PID = "pid";
+    private static final String CONFIGURATION_PID = "pid";
 
     private static final String CONFIGURATIONS_CONFIGURATION = "configuration";
-    private final static String CONFIGURATIONS_CONFIGURATION_PROPERTY = "property";
-    private final static String CONFIGURATIONS_CONFIGURATION_PROPERTY_NAME = "name";
-    private final static String CONFIGURATIONS_CONFIGURATION_PROPERTY_ARRAY = "array";
-    private final static String CONFIGURATIONS_CONFIGURATION_PROPERTY_ENCRYPTED = "encrypted";
-    private final static String CONFIGURATIONS_CONFIGURATION_PROPERTY_TYPE = "type";
-    private final static String CONFIGURATIONS_CONFIGURATION_PROPERTY_VALUE = "value";
+    private static final String CONFIGURATIONS_CONFIGURATION_PROPERTY = "property";
+    private static final String CONFIGURATIONS_CONFIGURATION_PROPERTY_NAME = "name";
+    private static final String CONFIGURATIONS_CONFIGURATION_PROPERTY_ARRAY = "array";
+    private static final String CONFIGURATIONS_CONFIGURATION_PROPERTY_ENCRYPTED = "encrypted";
+    private static final String CONFIGURATIONS_CONFIGURATION_PROPERTY_TYPE = "type";
+    private static final String CONFIGURATIONS_CONFIGURATION_PROPERTY_VALUE = "value";
 
-    private Document mashallDoc = null;
-    private Document unmashallDoc = null;
+    private Document marshallDoc = null;
+    private Document unmarshallDoc = null;
 
     @Override
     public Element marshal(Document doc, Object object) throws Exception {
-        this.mashallDoc = doc;
+        this.marshallDoc = doc;
         Element configurations = doc.createElement(ESF_NAMESPACE + ":" + CONFIGURATIONS);
         configurations.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:esf", "http://eurotech.com/esf/2.0");
         configurations.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:ocd",
@@ -56,10 +57,10 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
         doc.appendChild(configurations);
 
         XmlComponentConfigurations xmlCompConfig = (XmlComponentConfigurations) object;
-        List<ComponentConfigurationImpl> configsList = xmlCompConfig.getConfigurations();
+        List<ComponentConfiguration> configs = xmlCompConfig.getConfigurations();
 
-        if (configsList != null) {
-            for (ComponentConfigurationImpl config : configsList) {
+        if (configs != null) {
+            for (ComponentConfiguration config : configs) {
                 Element configuration = marshallConfiguration(config);
                 configurations.appendChild(configuration);
             }
@@ -70,18 +71,18 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T unmarshal(Document doc) throws Exception {
-        this.unmashallDoc = doc;
+        this.unmarshallDoc = doc;
         XmlComponentConfigurations xcc = new XmlComponentConfigurations();
 
         // Get all configurations
-        NodeList configurationList = this.unmashallDoc
+        NodeList configurationList = this.unmarshallDoc
                 .getElementsByTagName(ESF_NAMESPACE + ":" + CONFIGURATIONS_CONFIGURATION);
 
-        List<ComponentConfigurationImpl> compConfList = new ArrayList<ComponentConfigurationImpl>();
+        List<ComponentConfiguration> compConfList = new ArrayList<ComponentConfiguration>();
         // Iterate through all the configuration elements inside configurations tag
         for (int configIndex = 0; configIndex < configurationList.getLength(); configIndex++) {
             Element configuration = (Element) configurationList.item(configIndex);
-            ComponentConfigurationImpl cci = parseConfiguration(configuration);
+            ComponentConfiguration cci = parseConfiguration(configuration);
             compConfList.add(cci);
         }
         xcc.setConfigurations(compConfList);
@@ -91,28 +92,28 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
     //
     // Marshaller's private methods
     //
-    private Element marshallConfiguration(ComponentConfigurationImpl config) throws Exception {
+    private Element marshallConfiguration(ComponentConfiguration config) throws Exception {
         // get ComponentConfigurationImpl Object data
         String configPid = config.getPid();
         Map<String, Object> configProperty = config.getConfigurationProperties();
-        Tocd configOCD = config.getDefinition();
+        OCD configOCD = config.getDefinition();
 
         // create configuration element
-        Element configurationElement = this.mashallDoc
+        Element configurationElement = this.marshallDoc
                 .createElement(ESF_NAMESPACE + ":" + CONFIGURATIONS_CONFIGURATION);
-        Attr propertiesAttribute = this.mashallDoc.createAttribute(CONFIGURATION_PID);
+        Attr propertiesAttribute = this.marshallDoc.createAttribute(CONFIGURATION_PID);
         propertiesAttribute.setNodeValue(configPid);
         configurationElement.setAttributeNode(propertiesAttribute);
 
         // Add OCD node and marshall definitions
         if (configOCD != null) {
-            Element ocd = new XmlJavaMetadataMapper().marshal(this.mashallDoc, configOCD);
+            Element ocd = new XmlJavaMetadataMapper().marshal(this.marshallDoc, configOCD);
             configurationElement.appendChild(ocd);
         }
 
         // Add properties Node and marshall properties
         if (configProperty != null) {
-            Element properties = this.mashallDoc.createElement(ESF_NAMESPACE + ":" + PROPERTIES);
+            Element properties = this.marshallDoc.createElement(ESF_NAMESPACE + ":" + PROPERTIES);
             marshallProperties(configProperty, properties);
             configurationElement.appendChild(properties);
         }
@@ -141,27 +142,27 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
         String[] values = propertyObj.getValues();
 
         if (values != null) {
-            Element property = this.mashallDoc
+            Element property = this.marshallDoc
                     .createElement(ESF_NAMESPACE + ":" + CONFIGURATIONS_CONFIGURATION_PROPERTY);
-            Attr attName = this.mashallDoc.createAttribute(CONFIGURATIONS_CONFIGURATION_PROPERTY_NAME);
+            Attr attName = this.marshallDoc.createAttribute(CONFIGURATIONS_CONFIGURATION_PROPERTY_NAME);
             attName.setNodeValue(name);
             property.setAttributeNode(attName);
 
-            Attr attArray = this.mashallDoc.createAttribute(CONFIGURATIONS_CONFIGURATION_PROPERTY_ARRAY);
+            Attr attArray = this.marshallDoc.createAttribute(CONFIGURATIONS_CONFIGURATION_PROPERTY_ARRAY);
             attArray.setNodeValue(array.toString());
             property.setAttributeNode(attArray);
 
-            Attr attEncrypted = this.mashallDoc.createAttribute(CONFIGURATIONS_CONFIGURATION_PROPERTY_ENCRYPTED);
+            Attr attEncrypted = this.marshallDoc.createAttribute(CONFIGURATIONS_CONFIGURATION_PROPERTY_ENCRYPTED);
             attEncrypted.setNodeValue(encrypted.toString());
             property.setAttributeNode(attEncrypted);
 
-            Attr attType = this.mashallDoc.createAttribute(CONFIGURATIONS_CONFIGURATION_PROPERTY_TYPE);
+            Attr attType = this.marshallDoc.createAttribute(CONFIGURATIONS_CONFIGURATION_PROPERTY_TYPE);
 
             attType.setNodeValue(getStringValue(cpt));
             property.setAttributeNode(attType);
 
             for (String value : values) {
-                Element valueElem = this.mashallDoc
+                Element valueElem = this.marshallDoc
                         .createElement(ESF_NAMESPACE + ":" + CONFIGURATIONS_CONFIGURATION_PROPERTY_VALUE);
                 valueElem.setTextContent(value);
                 property.appendChild(valueElem);
@@ -202,7 +203,7 @@ public class XmlJavaComponentConfigurationsMapper implements XmlJavaDataMapper {
     //
     // Unmarshaller's private methods
     //
-    private ComponentConfigurationImpl parseConfiguration(Element configuration) throws Exception {
+    private ComponentConfiguration parseConfiguration(Element configuration) throws Exception {
         XmlConfigPropertiesAdapter xmlPropAdapter = new XmlConfigPropertiesAdapter();
 
         // get configuration's properties

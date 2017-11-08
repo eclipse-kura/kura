@@ -19,7 +19,9 @@ import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.clock.ClockEvent;
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.core.util.SafeProcess;
 import org.junit.Test;
 import org.osgi.service.event.EventAdmin;
 
@@ -151,7 +154,7 @@ public class ClockServiceImplTest {
     }
 
     @Test
-    public void testClockUpdate() throws Throwable {
+    public void testClockUpdateBasic() throws Throwable {
         // test the service's onClockUpdate(), without performing the actual updates
 
         ClockServiceImpl svc = new ClockServiceImpl();
@@ -177,6 +180,87 @@ public class ClockServiceImplTest {
         assumeTrue("Only run this test as root", "root".equals(System.getProperty("user.name")));
 
         ClockServiceImpl svc = new ClockServiceImpl();
+
+        EventAdmin eaMock = mock(EventAdmin.class);
+        svc.setEventAdmin(eaMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("enabled", true);
+        properties.put("clock.set.hwclock", true);
+        TestUtil.setFieldValue(svc, "properties", properties);
+
+        svc.onClockUpdate(1);
+
+        verify(eaMock, times(1)).postEvent(isA(ClockEvent.class)); // sys clock updated successfully
+    }
+
+    @Test
+    public void testClockUpdateExceptions() throws Throwable {
+        // test the service's onClockUpdate() with clock update exceptions; test of proper logging, mostly
+
+        ClockServiceImpl svc = new ClockServiceImpl() {
+
+            @Override
+            protected SafeProcess exec(String command) throws IOException {
+                throw new IOException("test");
+            }
+        };
+
+        EventAdmin eaMock = mock(EventAdmin.class);
+        svc.setEventAdmin(eaMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("enabled", true);
+        properties.put("clock.set.hwclock", true);
+        TestUtil.setFieldValue(svc, "properties", properties);
+
+        svc.onClockUpdate(1);
+
+        verify(eaMock, times(0)).postEvent(isA(ClockEvent.class)); // sys clock not updated
+    }
+
+    @Test
+    public void testClockUpdateErrors() throws Throwable {
+        // test the service's onClockUpdate() with clock update failures; test of proper logging, mostly
+
+        ClockServiceImpl svc = new ClockServiceImpl() {
+
+            @Override
+            protected SafeProcess exec(String command) throws IOException {
+                SafeProcess processMock = mock(SafeProcess.class);
+                when(processMock.exitValue()).thenReturn(1);
+
+                return processMock;
+            }
+        };
+
+        EventAdmin eaMock = mock(EventAdmin.class);
+        svc.setEventAdmin(eaMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("enabled", true);
+        properties.put("clock.set.hwclock", true);
+        TestUtil.setFieldValue(svc, "properties", properties);
+
+        svc.onClockUpdate(1);
+
+        verify(eaMock, times(0)).postEvent(isA(ClockEvent.class)); // sys clock not updated
+    }
+
+    @Test
+    public void testClockUpdate() throws Throwable {
+        // test the service's onClockUpdate()
+
+        ClockServiceImpl svc = new ClockServiceImpl() {
+
+            @Override
+            protected SafeProcess exec(String command) throws IOException {
+                SafeProcess processMock = mock(SafeProcess.class);
+                when(processMock.exitValue()).thenReturn(0);
+
+                return processMock;
+            }
+        };
 
         EventAdmin eaMock = mock(EventAdmin.class);
         svc.setEventAdmin(eaMock);

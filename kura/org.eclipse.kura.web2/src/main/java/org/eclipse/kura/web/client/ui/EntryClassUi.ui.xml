@@ -103,7 +103,7 @@
             </b:Row>
             <b:Row addStyleNames='main-container'>
 			<!-- ROW#2 content -->
-                <b:Column ui:field="sidenav" size="MD_2" addStyleNames="center-panel z-depth-1 sidenav">
+                <b:Column ui:field="sidenav" size="MD_2" addStyleNames="center-panel z-depth-1 sidenav sidenav-hidden">
                     <b:Row>
                         <b:Column size="MD_12" addStyleNames="{style.system-list}">
                             <b:Panel>

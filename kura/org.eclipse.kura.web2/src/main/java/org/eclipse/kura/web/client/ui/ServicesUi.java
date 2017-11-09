@@ -211,7 +211,7 @@ public class ServicesUi extends AbstractServicesUi {
                     ServicesUi.this.apply.setEnabled(false);
                     ServicesUi.this.reset.setEnabled(false);
                     setDirty(false);
-                    ServicesUi.this.entryClass.fetchAvailableServices();
+                    ServicesUi.this.entryClass.fetchAvailableServices(null);
                 }
             });
             group.add(yes);
@@ -250,7 +250,7 @@ public class ServicesUi extends AbstractServicesUi {
                             ServicesUi.this.apply.setEnabled(false);
                             ServicesUi.this.reset.setEnabled(false);
                             setDirty(false);
-                            ServicesUi.this.entryClass.fetchAvailableServices();
+                            ServicesUi.this.entryClass.fetchAvailableServices(null);
                             EntryClassUi.hideWaitModal();
                         }
                     });
@@ -378,7 +378,7 @@ public class ServicesUi extends AbstractServicesUi {
                                         ServicesUi.this.reset.setEnabled(false);
                                         setDirty(false);
                                         ServicesUi.this.originalConfig = ServicesUi.this.configurableComponent;
-                                        ServicesUi.this.entryClass.fetchAvailableServices();
+                                        ServicesUi.this.entryClass.fetchAvailableServices(null);
                                         EntryClassUi.hideWaitModal();
                                     }
                                 });

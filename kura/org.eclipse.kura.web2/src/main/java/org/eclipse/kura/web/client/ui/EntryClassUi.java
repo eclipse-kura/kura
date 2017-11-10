@@ -308,8 +308,8 @@ public class EntryClassUi extends Composite {
     public void initSystemPanel(GwtSession gwtSession, boolean connectionStatus) {
         final EntryClassUi instanceReference = this;
         if (!gwtSession.isNetAdminAvailable()) {
-            this.network.setVisible(false);
-            this.firewall.setVisible(false);
+            // this.network.setVisible(false);
+            // this.firewall.setVisible(false);
         }
 
         // Status Panel
@@ -362,7 +362,7 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.deviceScannerBinder);
                         EntryClassUi.this.deviceScannerBinder.setSession(EntryClassUi.this.currentSession);
                         EntryClassUi.this.deviceScannerBinder.setParent(instanceReference);
-                        EntryClassUi.this.deviceScannerBinder.loadDeviceScannerData();
+                        // EntryClassUi.this.deviceScannerBinder.loadDeviceScannerTable();
                     }
                 });
 

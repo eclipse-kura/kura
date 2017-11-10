@@ -30,6 +30,7 @@ import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtDeviceScannerModel;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
@@ -109,6 +110,20 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
         return new ArrayList<GwtGroupedNVPair>(pairs);
+    }
+
+    @Override
+    public ArrayList<GwtDeviceScannerModel> findDeviceScanner(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        List<GwtDeviceScannerModel> pairs = new ArrayList<GwtDeviceScannerModel>();
+        try {
+            pairs.add(new GwtDeviceScannerModel("test1", "test1", (short) 1, (short) 2));
+            pairs.add(new GwtDeviceScannerModel("test2", "test2", (short) 2, (short) 2));
+            pairs.add(new GwtDeviceScannerModel("test3", "test3", (short) 3, (short) 4));
+        } catch (Exception e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+        return new ArrayList<GwtDeviceScannerModel>(pairs);
     }
 
     @SuppressWarnings("unchecked")

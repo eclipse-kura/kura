@@ -20,10 +20,14 @@ import java.util.List;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
+import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
 import org.eclipse.kura.command.PasswordCommandService;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
@@ -45,6 +49,9 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     private static final Logger s_logger = LoggerFactory.getLogger(GwtDeviceServiceImpl.class);
 
     private static final String UNKNOWN = "UNKNOWN";
+
+    private BluetoothLeAdapter bluetoothLeAdapter;
+    private BluetoothLeOptions options;
 
     private static final long serialVersionUID = -4176701819112753800L;
 
@@ -112,14 +119,45 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         return new ArrayList<GwtGroupedNVPair>(pairs);
     }
 
+    private List<GwtDeviceScannerModel> filterDevices(List<BluetoothLeDevice> devices) {
+        // Scan for TI SensorTag
+        // int i = 0;
+        List<GwtDeviceScannerModel> listGwtDeviceScanner = new ArrayList<>();
+        for (BluetoothLeDevice bluetoothLeDevice : devices) {
+            listGwtDeviceScanner.add(new GwtDeviceScannerModel(bluetoothLeDevice.getAddress(),
+                    bluetoothLeDevice.getName(), bluetoothLeDevice.getTxPower(), bluetoothLeDevice.getRSSI()));
+        }
+        return listGwtDeviceScanner;
+    }
+
+    public List<GwtDeviceScannerModel> performScan() {
+        List<GwtDeviceScannerModel> listGwtDeviceScanner = new ArrayList<>();
+        // Scan for devices
+        if (this.bluetoothLeAdapter.isDiscovering()) {
+            try {
+                this.bluetoothLeAdapter.stopDiscovery();
+            } catch (KuraException e) {
+                // logger.error(DISCOVERY_STOP_EX, e);
+            }
+        }
+        Future<List<BluetoothLeDevice>> future = this.bluetoothLeAdapter.findDevices(this.options.getScantime());
+        try {
+            listGwtDeviceScanner.addAll(filterDevices(future.get()));
+        } catch (InterruptedException | ExecutionException e) {
+            // logger.error("Scan for devices failed", e);
+        }
+        return listGwtDeviceScanner;
+    }
+
     @Override
     public ArrayList<GwtDeviceScannerModel> findDeviceScanner(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         List<GwtDeviceScannerModel> pairs = new ArrayList<GwtDeviceScannerModel>();
         try {
-            pairs.add(new GwtDeviceScannerModel("test1", "test1", (short) 1, (short) 2));
-            pairs.add(new GwtDeviceScannerModel("test2", "test2", (short) 2, (short) 2));
-            pairs.add(new GwtDeviceScannerModel("test3", "test3", (short) 3, (short) 4));
+            // pairs.add(new GwtDeviceScannerModel("test1", "test1", (short) 1, (short) 2));
+            // pairs.add(new GwtDeviceScannerModel("test2", "test2", (short) 2, (short) 2));
+            // pairs.add(new GwtDeviceScannerModel("test3", "test3", (short) 3, (short) 4));
+            pairs.addAll(performScan());
         } catch (Exception e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }

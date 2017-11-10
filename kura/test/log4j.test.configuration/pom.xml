@@ -19,12 +19,12 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>test</artifactId>
-		<version>3.1.0</version>
+		<version>3.1.1</version>
 		<relativePath>..</relativePath>
 	</parent>
 
 	<artifactId>log4j.test.configuration</artifactId>
-	<version>1.0.100-SNAPSHOT</version>
+	<version>1.0.101-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>

@@ -18,11 +18,11 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>3.1.0</version>
+		<version>3.1.1</version>
 	</parent>
 
 	<artifactId>org.eclipse.kura.driver.helper.provider</artifactId>
-	<version>1.0.100</version>
+	<version>1.0.101-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 	
 	<properties>

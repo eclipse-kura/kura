@@ -16,7 +16,7 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>test</artifactId>
-        <version>3.1.0</version>
+        <version>3.1.1</version>
     </parent>
 
     <artifactId>org.eclipse.kura.linux.watchdog.test</artifactId>

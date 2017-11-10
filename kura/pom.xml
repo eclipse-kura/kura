@@ -122,6 +122,7 @@
         <kura.skip.can>true</kura.skip.can>
         
         <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
+        <check.plugins.exist.remote>true</check.plugins.exist.remote>
     </properties>
 
     <distributionManagement>
@@ -259,6 +260,12 @@
             <modules>
                 <module>org.eclipse.kura.web2</module>
             </modules>
+        </profile>
+        <profile>
+            <id>skip-exists-plugin</id>
+            <properties>
+            	<check.plugins.exist.remote>false</check.plugins.exist.remote>
+            </properties>
         </profile>
     </profiles>
 
@@ -578,7 +585,7 @@
                         </goals>
                         <configuration>
                             <skipIfSnapshot>true</skipIfSnapshot>
-                            <failIfExists>true</failIfExists>
+                            <failIfExists>${check.plugins.exist.remote}</failIfExists>
                         </configuration>
                     </execution>
                 </executions>

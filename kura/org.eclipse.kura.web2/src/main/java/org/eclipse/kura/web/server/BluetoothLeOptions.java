@@ -11,7 +11,6 @@ package org.eclipse.kura.web.server;
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-
 import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
@@ -35,7 +34,7 @@ public class BluetoothLeOptions {
     private static final String PROPERTY_TOPIC_NAME = "publishTopic";
     private static final String PROPERTY_INAME_NAME = "iname";
 
-    private static final boolean PROPERTY_SCAN_DEFAULT = false;
+    private static final boolean PROPERTY_SCAN_DEFAULT = true;
     private static final int PROPERTY_SCANTIME_DEFAULT = 5;
     private static final int PROPERTY_PERIOD_DEFAULT = 120;
     private static final boolean PROPERTY_TEMP_DEFAULT = false;

@@ -15,8 +15,10 @@ package org.eclipse.kura.web.server;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -30,6 +32,7 @@ import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtDeviceScannerModel;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
@@ -46,6 +49,8 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     private static final String UNKNOWN = "UNKNOWN";
 
     private static final long serialVersionUID = -4176701819112753800L;
+
+    private BluetoothLe bluetoothLe;
 
     @Override
     public ArrayList<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException {
@@ -109,6 +114,38 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
         return new ArrayList<GwtGroupedNVPair>(pairs);
+    }
+
+    @Override
+    public ArrayList<GwtDeviceScannerModel> findDeviceScanner(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        List<GwtDeviceScannerModel> pairs = new ArrayList<GwtDeviceScannerModel>();
+        Map<String, Object> properties = new HashMap();
+        try {
+            properties.put("scan_enable", true);
+            properties.put("scan_time", 30);
+            properties.put("period", 120);
+            properties.put("enableTermometer", false);
+            properties.put("enableAccelerometer", false);
+            properties.put("enableHygrometer", false);
+            properties.put("enableMagnetometer", false);
+            properties.put("enableBarometer", false);
+            properties.put("enableGyroscope", false);
+            properties.put("enableLuxometer", false);
+            properties.put("enableButtons", false);
+            properties.put("switchOnRedLed", false);
+            properties.put("switchOnGreenLed", false);
+            properties.put("switchOnBuzzer", false);
+            properties.put("publishTopic", "data");
+            properties.put("iname", "hci0");
+            bluetoothLe.activate(properties);
+            pairs.add(new GwtDeviceScannerModel("test1", "test1", (short) 1, (short) 2));
+            pairs.add(new GwtDeviceScannerModel("test2", "test2", (short) 2, (short) 2));
+            pairs.add(new GwtDeviceScannerModel("test3", "test3", (short) 3, (short) 4));
+        } catch (Exception e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+        return new ArrayList<GwtDeviceScannerModel>(pairs);
     }
 
     @SuppressWarnings("unchecked")

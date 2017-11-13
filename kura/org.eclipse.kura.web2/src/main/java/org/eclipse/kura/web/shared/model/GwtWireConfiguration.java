@@ -39,5 +39,4 @@ public final class GwtWireConfiguration extends GwtBaseModel implements Serializ
     public void setReceiverPid(final String receiverPid) {
         this.receiverPid = receiverPid;
     }
-
 }

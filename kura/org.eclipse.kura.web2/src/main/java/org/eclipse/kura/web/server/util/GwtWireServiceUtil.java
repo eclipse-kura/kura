@@ -12,7 +12,9 @@ package org.eclipse.kura.web.server.util;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -169,6 +171,21 @@ public final class GwtWireServiceUtil {
         return list;
     }
 
+    public static Map<String, WireComponentDescriptor> getWireComponentsFromJson(final JsonObject jWireGraph) {
+        Map<String, WireComponentDescriptor> result = new HashMap<>();
+        int lenght = jWireGraph.size() - 1;
+        for (int i = 0; i < lenght; i++) {
+            final JsonObject jsonObject = jWireGraph.get(String.valueOf(i)).asObject();
+            final String pid = jsonObject.getString("pid", null);
+            final String factoryPid = jsonObject.getString("fpid", null);
+            final String driverPid = jsonObject.getString("driver", null);
+            if (pid != null && factoryPid != null) {
+                result.put(pid, new WireComponentDescriptor(pid, factoryPid, driverPid));
+            }
+        }
+        return result;
+    }
+
     /**
      * Gets the wire components JSON.
      *
@@ -255,6 +272,9 @@ public final class GwtWireServiceUtil {
             final JsonObject jsonObject = json.get(String.valueOf(i)).asObject();
             final String emitter = jsonObject.getString("producer", null);
             final String receiver = jsonObject.getString("consumer", null);
+            if (emitter == null || receiver == null) {
+                continue;
+            }
             final GwtWireConfiguration configuration = new GwtWireConfiguration();
             configuration.setEmitterPid(emitter);
             configuration.setReceiverPid(receiver);
@@ -280,6 +300,31 @@ public final class GwtWireServiceUtil {
         }
         wireConfigs.add("length", String.valueOf(i));
         return wireConfigs.toString();
+    }
+
+    public static class WireComponentDescriptor {
+
+        private String pid;
+        private String factoryPid;
+        private String driverPid;
+
+        public WireComponentDescriptor(String pid, String factoryPid, String driverPid) {
+            this.pid = pid;
+            this.factoryPid = factoryPid;
+            this.driverPid = driverPid;
+        }
+
+        public String getPid() {
+            return pid;
+        }
+
+        public String getFactoryPid() {
+            return factoryPid;
+        }
+
+        public String getDriverPid() {
+            return driverPid;
+        }
     }
 
 }

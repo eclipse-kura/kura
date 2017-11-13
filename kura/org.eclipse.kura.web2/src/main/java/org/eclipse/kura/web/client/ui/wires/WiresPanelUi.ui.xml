@@ -92,7 +92,7 @@
             </b:Panel>
         </b:Row>
 
-        <b:Modal closable="true" dataKeyboard="true" b:id="select-asset-modal" ui:field="selectAssetModal">
+        <b:Modal closable="false" dataKeyboard="true" b:id="select-asset-modal" ui:field="selectAssetModal">
             <b:ModalBody>
                 <g:HTMLPanel ui:field="selectAssetModalIntro" />
                 <b:Form type="HORIZONTAL">
@@ -112,7 +112,7 @@
             </b:ModalFooter>
         </b:Modal>
 
-        <b:Modal closable="true" hideOtherModals="true" dataKeyboard="true" b:id="select-driver-modal" ui:field="selectDriverModal">
+        <b:Modal closable="false" hideOtherModals="true" dataKeyboard="true" b:id="select-driver-modal" ui:field="selectDriverModal">
             <b:ModalBody>
                 <g:HTMLPanel ui:field="selectDriverModalIntro" />
                 <b:Form type="HORIZONTAL">
@@ -131,7 +131,7 @@
             </b:ModalFooter>
         </b:Modal>
 
-        <b:Modal closable="true" hideOtherModals="true" dataKeyboard="true" b:id="new-asset-modal" ui:field="newAssetModal">
+        <b:Modal closable="false" hideOtherModals="true" dataKeyboard="true" b:id="new-asset-modal" ui:field="newAssetModal">
             <b:ModalBody>
                 <g:HTMLPanel ui:field="newAssetModalIntro" />
                 <b:Form type="HORIZONTAL">
@@ -155,7 +155,7 @@
             </b:ModalFooter>
         </b:Modal>
 
-        <b:Modal closable="true" hideOtherModals="true" dataKeyboard="true" b:id="new-driver-modal" ui:field="newDriverModal">
+        <b:Modal closable="false" hideOtherModals="true" dataKeyboard="true" b:id="new-driver-modal" ui:field="newDriverModal">
             <b:ModalBody>
                 <g:HTMLPanel ui:field="newDriverModalIntro" />
                 <b:Form type="HORIZONTAL">
@@ -179,7 +179,7 @@
         </b:Modal>
 
 
-        <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="generic-comp-modal"
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="generic-comp-modal"
             ui:field="genericCompModal">
             <b:ModalHeader ui:field="newAssetModalHeader" />
             <b:ModalBody addStyleNames="{style.asset-comp-modal-body}">
@@ -201,7 +201,7 @@
             </b:ModalFooter>
         </b:Modal>
 
-        <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="asset-comp-delete-modal"
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="asset-comp-delete-modal"
             ui:field="deleteCompModal">
             <b:ModalHeader ui:field="deleteCompModalHeader" />
             <b:ModalBody ui:field="deleteCompModalBody" />
@@ -210,7 +210,7 @@
                 <b:Button addStyleNames="fa fa-check" type="PRIMARY" b:id="btn-delete-comp" ui:field="btnDeleteCompModalYes" />
             </b:ModalFooter>
         </b:Modal>
-        <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="asset-comp-save-modal"
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="asset-comp-save-modal"
             ui:field="saveGraphModal">
             <b:ModalHeader ui:field="saveGraphModalHeader" />
             <b:ModalBody ui:field="saveGraphModalBody" />
@@ -219,7 +219,7 @@
                 <b:Button addStyleNames="fa fa-check" type="PRIMARY" b:id="btn-save-graph" ui:field="btnSaveGraphModalYes" />
             </b:ModalFooter>
         </b:Modal>
-        <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="delete-graph-modal"
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="delete-graph-modal"
             ui:field="deleteGraphModal">
             <b:ModalHeader ui:field="deleteGraphModalHeader" />
             <b:ModalBody ui:field="deleteGraphModalBody" />
@@ -228,7 +228,7 @@
                 <b:Button addStyleNames="fa fa-check" type="PRIMARY" b:id="btn-delete-graph-confirm" ui:field="btnDeleteGraphModalYes" />
             </b:ModalFooter>
         </b:Modal>
-        <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="error-pid-modal"
+        <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="error-pid-modal"
             ui:field="errorModal">
             <b:ModalHeader addStyleNames="{style.asset-comp-modal-header}">
             </b:ModalHeader>

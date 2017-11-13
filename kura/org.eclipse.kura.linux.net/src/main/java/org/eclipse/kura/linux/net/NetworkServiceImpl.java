@@ -622,7 +622,8 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             if (event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) == null) {
                 return;
             }
-            if (event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY) == null) {
+            if (event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY) == null
+                    || ((String) event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY)).startsWith("usb")) {
                 return;
             }
 

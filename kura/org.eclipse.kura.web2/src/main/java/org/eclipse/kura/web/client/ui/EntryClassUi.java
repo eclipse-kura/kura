@@ -240,8 +240,6 @@ public class EntryClassUi extends Composite {
             }
         });
 
-        showSidenav();
-
         initServicesTree();
     }
 
@@ -308,14 +306,7 @@ public class EntryClassUi extends Composite {
                         if (EntryClassUi.this.modal != null) {
                             EntryClassUi.this.modal.hide();
                         }
-                        EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.status);
-                        EntryClassUi.this.contentPanel.setVisible(true);
-                        EntryClassUi.this.contentPanelHeader.setText("Status");
-                        EntryClassUi.this.contentPanelBody.clear();
-                        EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.statusBinder);
-                        EntryClassUi.this.statusBinder.setSession(EntryClassUi.this.currentSession);
-                        EntryClassUi.this.statusBinder.setParent(instanceReference);
-                        EntryClassUi.this.statusBinder.loadStatusData();
+                        EntryClassUi.this.showStatusPanel();
                     }
                 });
 
@@ -598,7 +589,7 @@ public class EntryClassUi extends Composite {
         });
     }
 
-    public void fetchAvailableServices() {
+    public void fetchAvailableServices(final AsyncCallback<Void> callback) {
         // (Re)Fetch Available Services
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
@@ -612,25 +603,31 @@ public class EntryClassUi extends Composite {
                 EntryClassUi.this.gwtComponentService.findComponentConfigurations(token, SERVICES_FILTER,
                         new AsyncCallback<List<GwtConfigComponent>>() {
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        logger.log(Level.SEVERE, ex.getMessage(), ex);
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(List<GwtConfigComponent> result) {
-                        sortConfigurationsByName(result);
-                        EntryClassUi.this.servicesMenu.clear();
-                        for (GwtConfigComponent pair : result) {
-                            if (!pair.isWireComponent()) {
-                                EntryClassUi.this.servicesMenu
-                                        .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                if (callback != null) {
+                                    callback.onFailure(ex);
+                                }
                             }
-                        }
-                        filterAvailableServices(EntryClassUi.this.textSearch.getValue());
-                    }
-                });
+
+                            @Override
+                            public void onSuccess(List<GwtConfigComponent> result) {
+                                sortConfigurationsByName(result);
+                                EntryClassUi.this.servicesMenu.clear();
+                                for (GwtConfigComponent pair : result) {
+                                    if (!pair.isWireComponent()) {
+                                        EntryClassUi.this.servicesMenu
+                                                .add(new ServicesAnchorListItem(pair, EntryClassUi.this.ui));
+                                    }
+                                }
+                                filterAvailableServices(EntryClassUi.this.textSearch.getValue());
+                                if (callback != null) {
+                                    callback.onSuccess(null);
+                                }
+                            }
+                        });
             }
         });
     }
@@ -659,22 +656,22 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.gwtComponentService.findFactoryComponents(token,
                                 new AsyncCallback<List<String>>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
+                                    @Override
+                                    public void onFailure(Throwable ex) {
+                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                    }
 
-                            @Override
-                            public void onSuccess(final List<String> result) {
-                                EntryClassUi.this.factoriesList.clear();
-                                EntryClassUi.this.factoriesList.addItem(SELECT_COMPONENT);
-                                for (final String servicePid : result) {
-                                    EntryClassUi.this.factoriesList.addItem(servicePid);
-                                }
-                                EntryClassUi.this.newFactoryComponentModal.show();
-                            }
-                        });
+                                    @Override
+                                    public void onSuccess(final List<String> result) {
+                                        EntryClassUi.this.factoriesList.clear();
+                                        EntryClassUi.this.factoriesList.addItem(SELECT_COMPONENT);
+                                        for (final String servicePid : result) {
+                                            EntryClassUi.this.factoriesList.addItem(servicePid);
+                                        }
+                                        EntryClassUi.this.newFactoryComponentModal.show();
+                                    }
+                                });
                     }
                 });
             }
@@ -714,17 +711,17 @@ public class EntryClassUi extends Composite {
                         EntryClassUi.this.gwtComponentService.createFactoryComponent(token, factoryPid, pid,
                                 new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
+                                    @Override
+                                    public void onFailure(Throwable ex) {
+                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                fetchAvailableServices();
-                            }
-                        });
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        fetchAvailableServices(null);
+                                    }
+                                });
                     }
                 });
             }
@@ -911,5 +908,31 @@ public class EntryClassUi extends Composite {
 
     void setSelected(GwtConfigComponent selected) {
         this.selected = selected;
+    }
+
+    public void init() {
+        fetchAvailableServices(new AsyncCallback<Void>() {
+
+            @Override
+            public void onSuccess(Void result) {
+                EntryClassUi.this.showStatusPanel();
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                EntryClassUi.this.showStatusPanel();
+            }
+        });
+    }
+
+    private void showStatusPanel() {
+        this.setSelectedAnchorListItem(this.status);
+        this.contentPanel.setVisible(true);
+        this.contentPanelHeader.setText("Status");
+        this.contentPanelBody.clear();
+        this.contentPanelBody.add(EntryClassUi.this.statusBinder);
+        this.statusBinder.setSession(EntryClassUi.this.currentSession);
+        this.statusBinder.setParent(this);
+        this.statusBinder.loadStatusData();
     }
 }

@@ -128,7 +128,7 @@ public class denali implements EntryPoint {
                                 denali.this.binder.setFooter(gwtSession);
                                 denali.this.binder.initSystemPanel(gwtSession, denali.this.connected);
                                 denali.this.binder.setSession(gwtSession);
-                                denali.this.binder.fetchAvailableServices();
+                                denali.this.binder.init();
                             }
 
                             @Override
@@ -140,7 +140,7 @@ public class denali implements EntryPoint {
                                 denali.this.binder.setFooter(gwtSession);
                                 denali.this.binder.initSystemPanel(gwtSession, denali.this.connected);
                                 denali.this.binder.setSession(gwtSession);
-                                denali.this.binder.fetchAvailableServices();
+                                denali.this.binder.init();
                             }
                         });
                     }

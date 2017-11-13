@@ -14,6 +14,7 @@ package org.eclipse.kura.web.server;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -34,7 +35,6 @@ import org.eclipse.kura.bluetooth.le.BluetoothLeService;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.message.KuraPayload;
-import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +73,29 @@ public class BluetoothLe {
         this.bluetoothLeService = null;
     }
 
+    public BluetoothLe() {
+
+        Map<String, Object> properties = new HashMap();
+
+        properties.put("scan_enable", true);
+        properties.put("scan_time", 5);
+        properties.put("period", 120);
+        properties.put("enableTermometer", false);
+        properties.put("enableAccelerometer", false);
+        properties.put("enableHygrometer", false);
+        properties.put("enableMagnetometer", false);
+        properties.put("enableBarometer", false);
+        properties.put("enableGyroscope", false);
+        properties.put("enableLuxometer", false);
+        properties.put("enableButtons", false);
+        properties.put("switchOnRedLed", false);
+        properties.put("switchOnGreenLed", false);
+        properties.put("switchOnBuzzer", false);
+        properties.put("publishTopic", "data");
+        properties.put("iname", "hci0");
+        this.activate(properties);
+    }
+
     // --------------------------------------------------------------------
     //
     // Activation APIs
@@ -80,14 +103,14 @@ public class BluetoothLe {
     // --------------------------------------------------------------------
     public void activate(Map<String, Object> properties) {
         logger.info("Activating BluetoothLe example...");
-
-        try {
-            this.cloudClient = this.cloudService.newCloudClient(APP_ID);
-        } catch (KuraException e) {
-            logger.error("Error starting component", e);
-            throw new ComponentException(e);
-        }
-
+        /*
+         * try {
+         * this.cloudClient = this.cloudService.newCloudClient(APP_ID);
+         * } catch (KuraException e) {
+         * logger.error("Error starting component", e);
+         * throw new ComponentException(e);
+         * }
+         */
         this.tiSensorTagList = new CopyOnWriteArrayList<>(new ArrayList<>());
         doUpdate(properties);
         logger.debug("Updating Bluetooth Service... Done.");
@@ -154,7 +177,6 @@ public class BluetoothLe {
         if (this.options.isEnableScan()) {
             // re-create the workercle
             this.worker = Executors.newSingleThreadScheduledExecutor();
-
             // Get Bluetooth adapter and ensure it is enabled
             this.bluetoothLeAdapter = this.bluetoothLeService.getAdapter(this.options.getIname());
             if (this.bluetoothLeAdapter != null) {
@@ -164,11 +186,11 @@ public class BluetoothLe {
                     this.bluetoothLeAdapter.setPowered(true);
                 }
                 logger.info("Bluetooth adapter address => {}", this.bluetoothLeAdapter.getAddress());
-
                 this.handle = this.worker.scheduleAtFixedRate(this::performScan, 0, this.options.getPeriod(),
                         TimeUnit.SECONDS);
             } else {
                 logger.info("Bluetooth adapter {} not found.", this.options.getIname());
+
             }
         }
     }
@@ -237,7 +259,8 @@ public class BluetoothLe {
         // Scan for TI SensorTag
         for (BluetoothLeDevice bluetoothLeDevice : devices) {
             logger.info("Address {} Name {}", bluetoothLeDevice.getAddress(), bluetoothLeDevice.getName());
-
+            System.out.println(bluetoothLeDevice.getAddress());
+            System.out.println(bluetoothLeDevice.getName());
             if (bluetoothLeDevice.getName().contains("SensorTag")
                     && !isSensorTagInList(bluetoothLeDevice.getAddress())) {
                 this.tiSensorTagList.add(new TiSensorTag(bluetoothLeDevice));
@@ -456,5 +479,4 @@ public class BluetoothLe {
             logger.error(INTERRUPTED_EX, e);
         }
     }
-
 }

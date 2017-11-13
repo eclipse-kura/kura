@@ -17,3 +17,4 @@ Import-Package: org.apache.commons.io;version="[2.4,3.0)",
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
+Export-Package: org.eclipse.kura.internal.ble

@@ -117,22 +117,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.honton.chas</groupId>
-                <artifactId>exists-maven-plugin</artifactId>
-                <version>0.0.3</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>remote</goal>
-                        </goals>
-                        <configuration>
-                            <skipIfSnapshot>true</skipIfSnapshot>
-                            <failIfExists>true</failIfExists>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
 
         <pluginManagement>
@@ -274,4 +258,31 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.honton.chas</groupId>
+                        <artifactId>exists-maven-plugin</artifactId>
+                        <version>0.0.3</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>remote</goal>
+                                </goals>
+                                <configuration>
+                                    <skipIfSnapshot>true</skipIfSnapshot>
+                                    <failIfExists>true</failIfExists>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

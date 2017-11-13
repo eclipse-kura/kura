@@ -23,6 +23,7 @@ public enum KuraConstants {
     BeagleBone("debian", "1.0.0", "beaglebone"),
     ReliaGATE_50_21_Ubuntu("ubuntu", "14.04", "reliagate-50-21"),
     Reliagate_10_11("yocto", "1.2.1", "reliagate-10-11"),
+    Reliagate_10_12("yocto", "1.2.1", "reliagate-10-12"),
     Reliagate_20_25("yocto", "1.2.1", "reliagate-20-25"),
     BoltGATE_20_25("yocto", "1.2.1", "boltgate-20-25"),
     Reliagate_20_26("rhel", "7.3", "reliagate-20-26"),

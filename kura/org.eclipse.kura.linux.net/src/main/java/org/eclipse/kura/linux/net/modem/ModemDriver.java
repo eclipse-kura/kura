@@ -39,6 +39,7 @@ public class ModemDriver {
 
     private static final String GPIO_INDEX_60 = "60";
     private static final String GPIO_INDEX_65 = "65";
+    private static final String GPIO_INDEX_73 = "73";
 
     private static final String RELIAGATE_10_20_GPIO_PATH = "/sys/class/gpio/usb-rear-pwr/value";
     private static final String RELIAGATE_50_21_GPIO_11_0_CMD = "/usr/sbin/vector-j21-gpio 11 0";
@@ -85,6 +86,27 @@ public class ModemDriver {
                 }
             } catch (IOException e) {
                 logger.warn(FAILED_INITIALIZE_GPIO_MSG, gpioIndex, e);
+            }
+        } else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_12.getTargetName())) {
+            String gpio60Path = BASE_GPIO_PATH + GPIO_INDEX_60;
+            String gpio60DirectionPath = gpio60Path + GPIO_DIRECTION_SUFFIX_PATH;
+            try {
+                exportGpio(GPIO_INDEX_60, gpio60Path); // Prepare gpios
+                if (!GPIO_DIRECTION.equals(getGpioDirection(gpio60DirectionPath))) {
+                    setGpioDirection(gpio60DirectionPath, GPIO_DIRECTION);
+                }
+            } catch (IOException e) {
+                logger.warn(FAILED_INITIALIZE_GPIO_MSG, GPIO_INDEX_60, e);
+            }
+            String gpio73Path = BASE_GPIO_PATH + GPIO_INDEX_73;
+            String gpio73DirectionPath = gpio73Path + GPIO_DIRECTION_SUFFIX_PATH;
+            try {
+                exportGpio(GPIO_INDEX_73, gpio73Path); // Prepare gpios
+                if (!GPIO_DIRECTION.equals(getGpioDirection(gpio73DirectionPath))) {
+                    setGpioDirection(gpio73DirectionPath, GPIO_DIRECTION);
+                }
+            } catch (IOException e) {
+                logger.warn(FAILED_INITIALIZE_GPIO_MSG, GPIO_INDEX_73, e);
             }
         } else if (TARGET_NAME.equals(KuraConstants.Reliagate_20_25.getTargetName())) {
             baseGpio = -1;
@@ -133,15 +155,14 @@ public class ModemDriver {
             }
             logger.info("turnModemOff() :: turning modem OFF ... attempts left: {}", remainingAttempts);
             if (TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
-                String gpioIndex = GPIO_INDEX_65;
-                String gpioPath = BASE_GPIO_PATH + gpioIndex;
-                String gpioValuePath = gpioPath + GPIO_VALUE_SUFFIX_PATH;
-                toggleGpio(gpioValuePath);
+                invertGpioValue(BASE_GPIO_PATH + GPIO_INDEX_65 + GPIO_VALUE_SUFFIX_PATH);
             } else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
-                String gpioIndex = GPIO_INDEX_60;
-                String gpioPath = BASE_GPIO_PATH + gpioIndex;
-                String gpioValuePath = gpioPath + GPIO_VALUE_SUFFIX_PATH;
-                invertGpioValue(gpioValuePath);
+                invertGpioValue(BASE_GPIO_PATH + GPIO_INDEX_60 + GPIO_VALUE_SUFFIX_PATH);
+            } else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_12.getTargetName())) {
+                invertGpioValue(BASE_GPIO_PATH + GPIO_INDEX_60 + GPIO_VALUE_SUFFIX_PATH);
+                sleep(4000);
+                invertGpioValue(BASE_GPIO_PATH + GPIO_INDEX_60 + GPIO_VALUE_SUFFIX_PATH);
+                invertGpioValue(BASE_GPIO_PATH + GPIO_INDEX_73 + GPIO_VALUE_SUFFIX_PATH);
             } else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_20.getTargetName())) {
                 disable1020Gpio();
             } else if (TARGET_NAME.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getTargetName())) {
@@ -220,16 +241,15 @@ public class ModemDriver {
             }
             logger.info("turnModemOn() :: turning modem ON ... attempts left: {}", remainingAttempts);
             if (TARGET_NAME.equals(KuraConstants.Mini_Gateway.getTargetName())) {
-                String gpioIndex = GPIO_INDEX_65;
-                String gpioPath = BASE_GPIO_PATH + gpioIndex;
-                String gpioValuePath = gpioPath + GPIO_VALUE_SUFFIX_PATH;
-                toggleGpio(gpioValuePath);
+                invertGpioValue(BASE_GPIO_PATH + GPIO_INDEX_65 + GPIO_VALUE_SUFFIX_PATH);
             } else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_11.getTargetName())) {
-                String gpioIndex = GPIO_INDEX_60;
-                String gpioPath = BASE_GPIO_PATH + gpioIndex;
-                String gpioValuePath = gpioPath + GPIO_VALUE_SUFFIX_PATH;
-                invertGpioValue(gpioValuePath);
+                invertGpioValue(BASE_GPIO_PATH + GPIO_INDEX_60 + GPIO_VALUE_SUFFIX_PATH);
                 sleep(5000);
+            } else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_12.getTargetName())) {
+                invertGpioValue(BASE_GPIO_PATH + GPIO_INDEX_60 + GPIO_VALUE_SUFFIX_PATH);
+                sleep(10000);
+                invertGpioValue(BASE_GPIO_PATH + GPIO_INDEX_60 + GPIO_VALUE_SUFFIX_PATH);
+                invertGpioValue(BASE_GPIO_PATH + GPIO_INDEX_73 + GPIO_VALUE_SUFFIX_PATH);
             } else if (TARGET_NAME.equals(KuraConstants.Reliagate_10_20.getTargetName())) {
                 enable1020Gpio();
             } else if (TARGET_NAME.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getTargetName())) {

@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.DropSupport;
 import org.eclipse.kura.web.client.util.DropSupport.DropEvent;
@@ -75,6 +76,8 @@ public class WiresPanelUi extends Composite {
 
     @UiField
     Button btnSave;
+    @UiField
+    Button btnReset;
     @UiField
     Button btnZoomIn;
     @UiField
@@ -224,6 +227,9 @@ public class WiresPanelUi extends Composite {
     Button newDriverCancel;
     @UiField
     Button newDriverOk;
+
+    @UiField
+    AlertDialog refreshAlert;
 
     static final String WIRE_ASSET = "WireAsset";
 
@@ -649,6 +655,21 @@ public class WiresPanelUi extends Composite {
             }
         });
 
+        this.btnReset.setText(MSGS.reset());
+        this.btnReset.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(final ClickEvent event) {
+                WiresPanelUi.this.refreshAlert.show(MSGS.deviceConfigDirty(), new AlertDialog.Listener() {
+
+                    @Override
+                    public void onConfirm() {
+                        WiresPanelUi.this.load();
+                    }
+                });
+            }
+        });
+
         this.btnDelete.setText(MSGS.wiresDeleteComponent());
         this.btnDelete.addClickHandler(new ClickHandler() {
 
@@ -748,14 +769,6 @@ public class WiresPanelUi extends Composite {
 
     private void initErrorModal() {
         this.errorModalClose.setText(MSGS.closeButton());
-    }
-
-    public void clearUnsavedPanelChanges() {
-        this.btnSave.setEnabled(false);
-        this.btnSave.setText(MSGS.apply());
-        this.isDirty = false;
-        this.configs.clear();
-        resetDeleteComponentState();
     }
 
     public boolean isDirty() {
@@ -868,7 +881,7 @@ public class WiresPanelUi extends Composite {
         obj.put("wireConfigsJson", JSONParser.parseStrict(this.wireConfigsJson));
 
         wiresOpen(obj.toString());
-        this.btnSave.setEnabled(false);
+        resetUiState();
     }
 
     public void render(final GwtConfigComponent item, String pid) {
@@ -935,12 +948,12 @@ public class WiresPanelUi extends Composite {
 
     public void setDirty(final boolean flag) {
         if (flag) {
-            this.btnSave.setEnabled(true);
             this.btnSave.setText(MSGS.apply() + " *");
         } else {
-            this.btnSave.setEnabled(false);
             this.btnSave.setText(MSGS.apply());
         }
+        this.btnSave.setEnabled(flag);
+        this.btnReset.setEnabled(flag);
         this.isDirty = flag;
     }
 
@@ -1228,15 +1241,7 @@ public class WiresPanelUi extends Composite {
                             @Override
                             public void onSuccess(final Void result) {
                                 EntryClassUi.hideWaitModal();
-                                setDirty(false);
-                                if (WiresPanelUi.this.configs != null && !WiresPanelUi.this.configs.isEmpty()) {
-                                    WiresPanelUi.this.configs.clear();
-                                }
-                                if (WiresPanelUi.this.propertiesUis != null
-                                        && !WiresPanelUi.this.propertiesUis.isEmpty()) {
-                                    WiresPanelUi.this.propertiesUis.clear();
-                                }
-                                deselectComponent();
+                                resetUiState();
                             }
                         });
             }
@@ -1250,11 +1255,6 @@ public class WiresPanelUi extends Composite {
         WiresPanelUi.configurationRow.setVisible(false);
         this.currentSelection = null;
     }
-
-    public native void resetDeleteComponentState()
-    /*-{
-    	parent.window.kuraWires.resetDeleteComponentState();
-    }-*/;
 
     public native void wiresOpen(String obj)
     /*-{
@@ -1313,5 +1313,16 @@ public class WiresPanelUi extends Composite {
         for (final String fPid : both) {
             this.wireComponentsMenu.add(new WireComponentsAnchorListItem(fPid, true, true, this));
         }
+    }
+
+    private void resetUiState() {
+        setDirty(false);
+        if (WiresPanelUi.this.configs != null && !WiresPanelUi.this.configs.isEmpty()) {
+            WiresPanelUi.this.configs.clear();
+        }
+        if (WiresPanelUi.this.propertiesUis != null && !WiresPanelUi.this.propertiesUis.isEmpty()) {
+            WiresPanelUi.this.propertiesUis.clear();
+        }
+        deselectComponent();
     }
 }

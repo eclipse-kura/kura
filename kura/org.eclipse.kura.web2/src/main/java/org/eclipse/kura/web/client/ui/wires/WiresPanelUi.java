@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.wires;
 
-import static org.eclipse.kura.web.shared.service.GwtWireService.DELETED_WIRE_COMPONENT;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -1103,9 +1101,6 @@ public class WiresPanelUi extends Composite {
         if ("".equals(factoryPid)) {
             this.btnDelete.setEnabled(false);
             configurationRow.setVisible(false);
-            if (!"".equals(pid)) {
-                updateDeletedWireComponent(pid);
-            }
             return;
         }
         // enable delete instance button
@@ -1160,46 +1155,6 @@ public class WiresPanelUi extends Composite {
                 }
             });
         }
-    }
-
-    private void updateDeletedWireComponent(final String pid) {
-        if (this.configs.containsKey(pid)) {
-            this.configs.remove(pid);
-        }
-        EntryClassUi.showWaitModal();
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(final Throwable ex) {
-                EntryClassUi.hideWaitModal();
-                FailureHandler.handle(ex);
-            }
-
-            @Override
-            public void onSuccess(final GwtXSRFToken token) {
-                gwtComponentService.findComponentConfiguration(token, pid,
-                        new AsyncCallback<List<GwtConfigComponent>>() {
-
-                            @Override
-                            public void onFailure(final Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
-
-                            @Override
-                            public void onSuccess(final List<GwtConfigComponent> components) {
-                                if (!components.isEmpty()) {
-                                    final GwtConfigComponent component = components.get(0);
-                                    Map<String, Object> props = new HashMap<>();
-                                    props.put(DELETED_WIRE_COMPONENT, true);
-                                    updateConfiguration(component.getComponentId(), props);
-                                }
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
-            }
-
-        });
     }
 
     private static void updateConfiguration(final String pid, final Map<String, Object> properties) {

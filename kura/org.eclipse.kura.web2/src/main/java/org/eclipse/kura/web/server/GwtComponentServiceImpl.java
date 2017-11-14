@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
-import static org.eclipse.kura.web.shared.service.GwtWireService.DELETED_WIRE_COMPONENT;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -268,10 +266,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         try {
             ComponentConfiguration conf = cs.getComponentConfiguration(pid);
             boolean checkIfWireComponentIsDeleted = false;
-            if (conf != null) {
-                checkIfWireComponentIsDeleted = conf.getConfigurationProperties().containsKey(DELETED_WIRE_COMPONENT);
-            }
-            if (conf == null || checkIfWireComponentIsDeleted) {
+            if (conf == null) {
                 conf = cs.getDefaultComponentConfiguration(factoryPid);
                 if (conf != null) {
                     conf.getConfigurationProperties().put(ConfigurationAdmin.SERVICE_FACTORYPID, factoryPid);

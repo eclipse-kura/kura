@@ -18,11 +18,9 @@ var kuraWires = (function() {
 	var currentZoomLevel = 1.0;
 	var selectedElement;
 	var oldCellView;
-	var elementsContainerTemp = [];
 	var eventSourceSessionId; // Server Sent Events Session ID
 	// used to disallow adding new instance to the Wire
 	// Graph if any instance is recently deleted.
-	var isComponentDeleted;
 	var eventSource;
 	var selectionRefreshPending = false;
 	var blinkEnabled = true
@@ -32,7 +30,6 @@ var kuraWires = (function() {
 	 * / Public functions
 	 */
 	client.render = function(obj) {
-		elementsContainerTemp = [];
 		clientConfig = JSON.parse(obj);
 		sse();
 		setup();
@@ -74,10 +71,6 @@ var kuraWires = (function() {
 							}
 						});
 			});
-
-	client.resetDeleteComponentState = function() {
-		isComponentDeleted = false;
-	};
 
 	client.getDriver = function(assetPid) {
 		var _elements = graph.getElements();
@@ -173,8 +166,6 @@ var kuraWires = (function() {
 			$("#btn-zoom-out").on("click", zoomOutPaper);
 			$("#btn-zoom-fit").on("click", function () { fitContent(true) })
 			initialized = true;
-			
-			elementsContainerTemp = [];
 
 			// Set up custom elements
 			setupElements();
@@ -447,23 +438,6 @@ var kuraWires = (function() {
 			comp.name = comp.pid;
 		}
 
-		// validate all the existing elements' PIDs with the new element PID. If
-		// any of the existing element already has a PID which matches with the
-		// PID with the new element then it would show an error modal
-		var isFoundExistingElementWithSamePid;
-		_.each(elementsContainerTemp, function(c) {
-			if (c.toUpperCase() === comp.name) {
-				isFoundExistingElementWithSamePid = true;
-			}
-		});
-
-		if (isFoundExistingElementWithSamePid) {
-			jsniShowDuplicatePidModal(name);
-			return;
-		}
-
-		elementsContainerTemp.push(comp.name);
-
 		// Setup allowed ports based on type
 		if (comp.type === 'both') {
 			inputPorts = [ '' ];
@@ -571,8 +545,6 @@ var kuraWires = (function() {
 		newConfig = {
 			wiregraph : graphToSave
 		}
-		elementsContainerTemp = [];
-		isComponentDeleted = false;
 		if (!checkForCycleExistence()) {
 			jsniUpdateWireConfig(JSON.stringify(newConfig));
 		}
@@ -663,15 +635,6 @@ var kuraWires = (function() {
 		if (selectedElement !== ""
 				&& selectedElement.attributes.type === 'devs.Atomic') {
 			selectedElement.remove();
-			var pid = selectedElement.attributes.label;
-			var i = elementsContainerTemp.indexOf(pid);
-			if (i != -1) {
-				elementsContainerTemp.splice(i, 1);
-			}
-			jsniUpdateSelection(pid, "");
-			if (clientConfig.wireComponentsJson.length !== "0") {
-				isComponentDeleted = true;
-			}
 		}
 	}
 
@@ -716,7 +679,7 @@ var kuraWires = (function() {
 				isFoundExistingElementWithSamePid = true;
 			}
 		});
-
+		
 		if (isFoundExistingElementWithSamePid) {
 			jsniShowDuplicatePidModal(name);
 			return;

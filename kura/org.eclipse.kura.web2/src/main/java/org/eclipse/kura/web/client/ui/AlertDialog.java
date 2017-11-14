@@ -8,7 +8,7 @@
  *
  *******************************************************************************/
 
-package org.eclipse.kura.web.client.ui.Firewall;
+package org.eclipse.kura.web.client.ui;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.gwtbootstrap3.client.ui.Button;

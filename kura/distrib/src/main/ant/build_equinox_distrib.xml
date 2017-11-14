@@ -130,7 +130,7 @@
 
 		<!-- Miscellaneous bundles config -->
 		<antcall target="misc-config" />
-		
+
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant target-->
 		<available file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" property="is.web2.jar.available" />
 		<antcall target="web2-config" />
@@ -346,15 +346,7 @@ fi]]>
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/${build.name}/iptables.init"
                         prefix="${build.output.name}/install" />
-			<zipfileset file="src/main/resources/common/monit.init.wrl"
-                        prefix="${build.output.name}/install" />
-			<zipfileset file="src/main/resources/common/monit.init.yocto"
-                        prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/monit.init.raspbian"
-                        prefix="${build.output.name}/install" />
-			<zipfileset file="src/main/resources/common/monitrc.wrl"
-                        prefix="${build.output.name}/install" />
-			<zipfileset file="src/main/resources/common/monitrc.yocto"
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/monitrc.raspbian"
                         prefix="${build.output.name}/install" />
@@ -409,8 +401,6 @@ fi]]>
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/network.interfaces.raspbian"
                         prefix="${build.output.name}/install" />
-			<zipfileset file="src/main/resources/common/network.interfaces.intel.edison"
-                        prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/ifdown-local"
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/ifup-local"
@@ -418,11 +408,6 @@ fi]]>
 			<zipfileset file="src/main/resources/common/ifup-local.debian"
                         prefix="${build.output.name}/install" />
 			<zipfileset file="src/main/resources/common/ifup-local.raspbian"
-                        prefix="${build.output.name}/install" />
-
-			<zipfileset file="src/main/resources/common/ip-down.local"
-                        prefix="${build.output.name}/install" />
-			<zipfileset file="src/main/resources/common/ip-up.local"
                         prefix="${build.output.name}/install" />
 
 			<zipfileset file="${project.build.directory}/${build.output.name}/selinuxKura.pp"
@@ -546,7 +531,7 @@ fi]]>
 		<antcall target="deployment-hooks-jar" />
 
 		<antcall target="wires-jar" />
-		
+
 		<antcall target="misc-jar" />
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
@@ -1595,7 +1580,7 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 		<copy file="${project.build.directory}/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar"
             todir="${build.install.dir.kura}/kura/plugins" />
 	</target>
-	
+
 	<target name="misc-config">
 			<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 				<entry key="osgi.bundles" operation="+"

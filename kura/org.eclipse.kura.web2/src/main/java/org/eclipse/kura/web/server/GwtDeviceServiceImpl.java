@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.bluetooth.le.BluetoothLeService;
 import org.eclipse.kura.command.PasswordCommandService;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
@@ -116,16 +117,17 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public ArrayList<GwtDeviceScannerModel> findDeviceScanner(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         List<GwtDeviceScannerModel> pairs = new ArrayList<GwtDeviceScannerModel>();
-        try {
-            new BluetoothLe();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
+        BluetoothLeService bluetoothLeService = ServiceLocator.getInstance().getService(BluetoothLeService.class);
+        BluetoothLe ble = new BluetoothLe(bluetoothLeService);
 
-            pairs.add(new GwtDeviceScannerModel("test1", "test1", (short) 1, (short) 2));
-            pairs.add(new GwtDeviceScannerModel("test2", "test2", (short) 2, (short) 2));
-            pairs.add(new GwtDeviceScannerModel("test3", "test3", (short) 3, (short) 4));
+        try {
+            if (ble.listDevice.isEmpty()) {
+                pairs.add(new GwtDeviceScannerModel("test1", "test1", (short) 1, (short) 2));
+                pairs.add(new GwtDeviceScannerModel("test2", "test2", (short) 2, (short) 2));
+                pairs.add(new GwtDeviceScannerModel("test3", "test3", (short) 3, (short) 4));
+            } else {
+                pairs.addAll(ble.listDevice);
+            }
         } catch (Exception e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }

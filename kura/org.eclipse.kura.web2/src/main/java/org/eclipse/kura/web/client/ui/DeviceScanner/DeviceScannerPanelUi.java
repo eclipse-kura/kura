@@ -37,6 +37,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -166,7 +167,7 @@ public class DeviceScannerPanelUi extends Composite {
                                 DeviceScannerPanelUi.this.profileDataProvider.getList().clear();
                                 FailureHandler.handle(caught);
                                 DeviceScannerPanelUi.this.profileDataProvider.flush();
-
+                                Window.alert("Error");
                             }
 
                             @Override
@@ -174,7 +175,7 @@ public class DeviceScannerPanelUi extends Composite {
                                 // String oldGroup = DEV_INFO;
                                 // DeviceScannerPanelUi.this.profileDataProvider.getList()
                                 // .add(new GwtGroupedNVPair(DEV_INFO, DEV_INFO, " "));
-
+                                EntryClassUi.hideWaitModal();
                                 for (GwtDeviceScannerModel resultPair : result) {
 
                                     /*
@@ -192,8 +193,6 @@ public class DeviceScannerPanelUi extends Composite {
                                 int size = DeviceScannerPanelUi.this.profileDataProvider.getList().size();
                                 DeviceScannerPanelUi.this.deviceScannerGrid.setVisibleRange(0, size);
                                 DeviceScannerPanelUi.this.profileDataProvider.flush();
-                                EntryClassUi.hideWaitModal();
-
                             }
                         });
             }

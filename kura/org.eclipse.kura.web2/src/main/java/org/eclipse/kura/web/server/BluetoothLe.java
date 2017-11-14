@@ -32,9 +32,8 @@ import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattCharacteristic;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattService;
 import org.eclipse.kura.bluetooth.le.BluetoothLeService;
-import org.eclipse.kura.cloud.CloudClient;
-import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.web.shared.model.GwtDeviceScannerModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,23 +46,24 @@ public class BluetoothLe {
     private static final String INTERRUPTED_EX = "Interrupted Exception";
     private static final String DISCOVERY_STOP_EX = "Failed to stop discovery";
 
-    private CloudService cloudService;
-    private CloudClient cloudClient;
+    // private CloudService cloudService;
+    // private CloudClient cloudClient;
     private List<TiSensorTag> tiSensorTagList;
     private BluetoothLeService bluetoothLeService;
     private BluetoothLeAdapter bluetoothLeAdapter;
     private ScheduledExecutorService worker;
     private ScheduledFuture<?> handle;
-
     private BluetoothLeOptions options;
 
-    public void setCloudService(CloudService cloudService) {
-        this.cloudService = cloudService;
-    }
+    public static List<GwtDeviceScannerModel> listDevice = new ArrayList<GwtDeviceScannerModel>();
 
-    public void unsetCloudService(CloudService cloudService) {
-        this.cloudService = null;
-    }
+    // public void setCloudService(CloudService cloudService) {
+    // this.cloudService = cloudService;
+    // }
+    //
+    // public void unsetCloudService(CloudService cloudService) {
+    // this.cloudService = null;
+    // }
 
     public void setBluetoothLeService(BluetoothLeService bluetoothLeService) {
         this.bluetoothLeService = bluetoothLeService;
@@ -73,8 +73,8 @@ public class BluetoothLe {
         this.bluetoothLeService = null;
     }
 
-    public BluetoothLe() {
-
+    public BluetoothLe(BluetoothLeService bluetoothLeService) {
+        this.setBluetoothLeService(bluetoothLeService);
         Map<String, Object> properties = new HashMap();
 
         properties.put("scan_enable", true);
@@ -94,6 +94,11 @@ public class BluetoothLe {
         properties.put("publishTopic", "data");
         properties.put("iname", "hci0");
         this.activate(properties);
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     // --------------------------------------------------------------------
@@ -103,14 +108,13 @@ public class BluetoothLe {
     // --------------------------------------------------------------------
     public void activate(Map<String, Object> properties) {
         logger.info("Activating BluetoothLe example...");
-        /*
-         * try {
-         * this.cloudClient = this.cloudService.newCloudClient(APP_ID);
-         * } catch (KuraException e) {
-         * logger.error("Error starting component", e);
-         * throw new ComponentException(e);
-         * }
-         */
+
+        // try {
+        // this.cloudClient = this.cloudService.newCloudClient(APP_ID);
+        // } catch (KuraException e) {
+        // logger.error("Error starting component", e);
+        // throw new ComponentException(e);
+        // }
         this.tiSensorTagList = new CopyOnWriteArrayList<>(new ArrayList<>());
         doUpdate(properties);
         logger.debug("Updating Bluetooth Service... Done.");
@@ -122,9 +126,9 @@ public class BluetoothLe {
 
         // Releasing the CloudApplicationClient
         logger.info("Releasing CloudApplicationClient for {}...", APP_ID);
-        if (this.cloudClient != null) {
-            this.cloudClient.release();
-        }
+        // if (this.cloudClient != null) {
+        // this.cloudClient.release();
+        // }
 
         logger.debug("Deactivating BluetoothLe... Done.");
     }
@@ -223,11 +227,11 @@ public class BluetoothLe {
         KuraPayload payload = new KuraPayload();
         payload.setTimestamp(new Date());
         payload.addMetric("key", key);
-        try {
-            this.cloudClient.publish(this.options.getTopic() + "/" + address + "/keys", payload, 0, false);
-        } catch (Exception e) {
-            logger.error("Can't publish message for buttons", e);
-        }
+        // try {
+        // this.cloudClient.publish(this.options.getTopic() + "/" + address + "/keys", payload, 0, false);
+        // } catch (Exception e) {
+        // logger.error("Can't publish message for buttons", e);
+        // }
 
     }
 
@@ -259,8 +263,8 @@ public class BluetoothLe {
         // Scan for TI SensorTag
         for (BluetoothLeDevice bluetoothLeDevice : devices) {
             logger.info("Address {} Name {}", bluetoothLeDevice.getAddress(), bluetoothLeDevice.getName());
-            System.out.println(bluetoothLeDevice.getAddress());
-            System.out.println(bluetoothLeDevice.getName());
+            this.listDevice.add(new GwtDeviceScannerModel(bluetoothLeDevice.getAddress(), bluetoothLeDevice.getName(),
+                    bluetoothLeDevice.getTxPower(), bluetoothLeDevice.getRSSI()));
             if (bluetoothLeDevice.getName().contains("SensorTag")
                     && !isSensorTagInList(bluetoothLeDevice.getAddress())) {
                 this.tiSensorTagList.add(new TiSensorTag(bluetoothLeDevice));
@@ -348,13 +352,13 @@ public class BluetoothLe {
 
                 // Publish only if there are metrics to be published!
                 if (!payload.metricNames().isEmpty()) {
-                    try {
-                        this.cloudClient.publish(
-                                this.options.getTopic() + "/" + myTiSensorTag.getBluetoothLeDevice().getAddress(),
-                                payload, 0, false);
-                    } catch (KuraException e) {
-                        logger.error("Publish message failed", e);
-                    }
+                    // try {
+                    // this.cloudClient.publish(
+                    // this.options.getTopic() + "/" + myTiSensorTag.getBluetoothLeDevice().getAddress(),
+                    // payload, 0, false);
+                    // } catch (KuraException e) {
+                    // logger.error("Publish message failed", e);
+                    // }
                 }
 
             } else {

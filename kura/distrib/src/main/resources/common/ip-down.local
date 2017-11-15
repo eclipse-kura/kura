@@ -1,3 +1,0 @@
-#!/bin/sh
-FILENAME="/tmp/.kura/coninfo-"$PPP_IFACE
-rm -f $FILENAME

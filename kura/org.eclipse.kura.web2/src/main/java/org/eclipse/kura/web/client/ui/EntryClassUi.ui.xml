@@ -215,9 +215,10 @@
                             <b:Row addStyleNames='content-wrapper'>
                                 <b:Column size="MD_10">
                                     <b:Panel ui:field="contentPanel" addStyleNames="content-panel">
-                                        <b:PanelHeader>
-                                            <b:Heading ui:field="contentPanelHeader" size="H3" />
-                                        </b:PanelHeader>
+                                        <b:PanelHeader ui:field="contentPanelHeader" addStyleNames="{style.content-panel-header}" />
+                                        <b:Row>
+                                             <g:Label ui:field="serviceDescription" />
+                                        </b:Row>
                                         <b:PanelBody ui:field="contentPanelBody" addStyleNames="{style.content-panel-body}">
                                         </b:PanelBody>
                                     </b:Panel>

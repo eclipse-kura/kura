@@ -47,7 +47,6 @@ import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Column;
 import org.gwtbootstrap3.client.ui.FormLabel;
-import org.gwtbootstrap3.client.ui.Heading;
 import org.gwtbootstrap3.client.ui.Icon;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
@@ -57,6 +56,7 @@ import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.NavPills;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
+import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.Row;
 import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TextBox;
@@ -102,7 +102,7 @@ public class EntryClassUi extends Composite {
     @UiField
     Strong errorAlertText;
     @UiField
-    Heading contentPanelHeader;
+    PanelHeader contentPanelHeader;
     @UiField
     PanelBody contentPanelBody;
     @UiField
@@ -161,6 +161,8 @@ public class EntryClassUi extends Composite {
     Column sidenav;
     @UiField
     Panel sidenavOverlay;
+    @UiField
+    Label serviceDescription;
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final Logger logger = Logger.getLogger(EntryClassUi.class.getSimpleName());
@@ -737,7 +739,7 @@ public class EntryClassUi extends Composite {
 
     private void setHeader(final String title, final String subTitle) {
         this.contentPanelHeader.setText(title);
-        this.contentPanelHeader.setSubText(subTitle != null ? subTitle : "");
+        this.serviceDescription.setText(subTitle != null ? subTitle : "");
     }
 
     public void render(GwtConfigComponent item) {

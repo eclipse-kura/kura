@@ -15,6 +15,7 @@ package org.eclipse.kura.web.server;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -52,7 +53,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     @Override
     public ArrayList<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-        List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
+        ArrayList<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
         SystemAdminService systemAdminService = ServiceLocator.getInstance().getService(SystemAdminService.class);
@@ -114,24 +115,17 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     }
 
     @Override
-    public ArrayList<GwtDeviceScannerModel> findDeviceScanner(GwtXSRFToken xsrfToken) throws GwtKuraException {
+    public HashSet<GwtDeviceScannerModel> findDeviceScanner(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-        List<GwtDeviceScannerModel> pairs = new ArrayList<GwtDeviceScannerModel>();
+        HashSet<GwtDeviceScannerModel> pairs = new HashSet<GwtDeviceScannerModel>();
         BluetoothLeService bluetoothLeService = ServiceLocator.getInstance().getService(BluetoothLeService.class);
         BluetoothLe ble = new BluetoothLe(bluetoothLeService);
-
         try {
-            if (ble.listDevice.isEmpty()) {
-                pairs.add(new GwtDeviceScannerModel("test1", "test1", (short) 1, (short) 2));
-                pairs.add(new GwtDeviceScannerModel("test2", "test2", (short) 2, (short) 2));
-                pairs.add(new GwtDeviceScannerModel("test3", "test3", (short) 3, (short) 4));
-            } else {
-                pairs.addAll(ble.listDevice);
-            }
+            pairs.addAll(ble.listDevice);
         } catch (Exception e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
-        return new ArrayList<GwtDeviceScannerModel>(pairs);
+        return new HashSet<GwtDeviceScannerModel>(pairs);
     }
 
     @SuppressWarnings("unchecked")

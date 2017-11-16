@@ -8,22 +8,22 @@ public class GwtDeviceScannerModel implements Serializable {
     private String macAddr;
     private String deviceName;
     private short RSSI;
-    private short timeStamp;
+    private String timeStamp;
 
     public GwtDeviceScannerModel() {
         super();
     }
 
-    public GwtDeviceScannerModel(String macAddr, String deviceName, short rSSI, short timeStamp) {
+    public String getMacAddr() {
+        return macAddr;
+    }
+
+    public GwtDeviceScannerModel(String macAddr, String deviceName, short rSSI, String timeStamp) {
         super();
         this.macAddr = macAddr;
         this.deviceName = deviceName;
         this.RSSI = rSSI;
         this.timeStamp = timeStamp;
-    }
-
-    public String getMacAddr() {
-        return macAddr;
     }
 
     public void setMacAddr(String macAddr) {
@@ -46,12 +46,16 @@ public class GwtDeviceScannerModel implements Serializable {
         RSSI = rSSI;
     }
 
-    public short getTimeStamp() {
+    public String getTimeStamp() {
         return timeStamp;
     }
 
-    public void setTimeStamp(short timeStamp) {
+    public void setTimeStamp(String timeStamp) {
         this.timeStamp = timeStamp;
+    }
+
+    public static long getSerialversionuid() {
+        return serialVersionUID;
     }
 
 }

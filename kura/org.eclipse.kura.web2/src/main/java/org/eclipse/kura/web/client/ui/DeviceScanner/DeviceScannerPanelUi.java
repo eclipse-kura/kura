@@ -11,8 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.DeviceScanner;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,6 +71,7 @@ public class DeviceScannerPanelUi extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         // Set text for buttons
         this.deviceScannerRefresh.setText(MSG.refresh());
+        this.deviceScannerGrid.getEmptyTableWidget();
         loadDeviceScannerTable(this.deviceScannerGrid, this.profileDataProvider);
     }
 
@@ -119,7 +119,7 @@ public class DeviceScannerPanelUi extends Composite {
 
             @Override
             public String getValue(GwtDeviceScannerModel gwtDeviceScannerModel) {
-                return gwtDeviceScannerModel.getDeviceName();
+                return String.valueOf(gwtDeviceScannerModel.getTimeStamp());
             }
         };
         timeStamp.setCellStyleNames("status-table-row");
@@ -129,11 +129,12 @@ public class DeviceScannerPanelUi extends Composite {
 
             @Override
             public String getValue(GwtDeviceScannerModel gwtDeviceScannerModel) {
-                return gwtDeviceScannerModel.getDeviceName();
+                return String.valueOf(gwtDeviceScannerModel.getRSSI());
             }
         };
         rss.setCellStyleNames("status-table-row");
-        this.deviceScannerGrid.addColumn(rss, "RSS");
+        this.deviceScannerGrid.addColumn(rss, "RSSI");
+
         this.deviceScannerWell.add(this.deviceScannerGrid);
         dataProvider.addDataDisplay(profileGrid2);
     }
@@ -143,8 +144,9 @@ public class DeviceScannerPanelUi extends Composite {
     }
 
     private void loadDeviceScannerData() throws GwtKuraException {
+
+        EntryClassUi.showWaitModal();
         this.profileDataProvider.getList().clear();
-        // EntryClassUi.showWaitModal();
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
@@ -155,9 +157,9 @@ public class DeviceScannerPanelUi extends Composite {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                List<GwtDeviceScannerModel> listTest = new ArrayList<GwtDeviceScannerModel>();
+                HashSet<GwtDeviceScannerModel> listTest = new HashSet<GwtDeviceScannerModel>();
                 DeviceScannerPanelUi.this.gwtDeviceService.findDeviceScanner(token,
-                        new AsyncCallback<ArrayList<GwtDeviceScannerModel>>() {
+                        new AsyncCallback<HashSet<GwtDeviceScannerModel>>() {
 
                             private Object deviceScannerGrid;
 
@@ -167,28 +169,18 @@ public class DeviceScannerPanelUi extends Composite {
                                 DeviceScannerPanelUi.this.profileDataProvider.getList().clear();
                                 FailureHandler.handle(caught);
                                 DeviceScannerPanelUi.this.profileDataProvider.flush();
-                                Window.alert("Error");
                             }
 
                             @Override
-                            public void onSuccess(ArrayList<GwtDeviceScannerModel> result) {
-                                // String oldGroup = DEV_INFO;
-                                // DeviceScannerPanelUi.this.profileDataProvider.getList()
-                                // .add(new GwtGroupedNVPair(DEV_INFO, DEV_INFO, " "));
+                            public void onSuccess(HashSet<GwtDeviceScannerModel> result) {
                                 EntryClassUi.hideWaitModal();
-                                for (GwtDeviceScannerModel resultPair : result) {
-
-                                    /*
-                                     * if (!oldGroup.equals(resultPair.getGroup())) {
-                                     * DeviceScannerPanelUi.this.profileDataProvider.getList()
-                                     * .add(new GwtGroupedNVPair(resultPair.getGroup(), resultPair.getGroup(),
-                                     * "  "));
-                                     * oldGroup = resultPair.getGroup();
-                                     * }
-                                     */
-
-                                    // Window.alert(resultPair.getDeviceName());
-                                    DeviceScannerPanelUi.this.profileDataProvider.getList().add(resultPair);
+                                DeviceScannerPanelUi.this.profileDataProvider.getList().clear();
+                                if (result.isEmpty()) {
+                                    Window.alert("Device scanner failed !");
+                                } else {
+                                    for (GwtDeviceScannerModel resultPair : result) {
+                                        DeviceScannerPanelUi.this.profileDataProvider.getList().add(resultPair);
+                                    }
                                 }
                                 int size = DeviceScannerPanelUi.this.profileDataProvider.getList().size();
                                 DeviceScannerPanelUi.this.deviceScannerGrid.setVisibleRange(0, size);

@@ -15,6 +15,7 @@ package org.eclipse.kura.web.server;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -55,7 +56,7 @@ public class BluetoothLe {
     private ScheduledFuture<?> handle;
     private BluetoothLeOptions options;
 
-    public static List<GwtDeviceScannerModel> listDevice = new ArrayList<GwtDeviceScannerModel>();
+    public HashSet<GwtDeviceScannerModel> listDevice = new HashSet<GwtDeviceScannerModel>();
 
     // public void setCloudService(CloudService cloudService) {
     // this.cloudService = cloudService;
@@ -125,7 +126,7 @@ public class BluetoothLe {
         doDeactivate();
 
         // Releasing the CloudApplicationClient
-        logger.info("Releasing CloudApplicationClient for {}...", APP_ID);
+        // logger.info("Releasing CloudApplicationClient for {}...", APP_ID);
         // if (this.cloudClient != null) {
         // this.cloudClient.release();
         // }
@@ -262,9 +263,10 @@ public class BluetoothLe {
     private void filterDevices(List<BluetoothLeDevice> devices) {
         // Scan for TI SensorTag
         for (BluetoothLeDevice bluetoothLeDevice : devices) {
-            logger.info("Address {} Name {}", bluetoothLeDevice.getAddress(), bluetoothLeDevice.getName());
+            logger.info("Address {} Name {} txPower {} RSSI {}", bluetoothLeDevice.getAddress(),
+                    bluetoothLeDevice.getName(), bluetoothLeDevice.getTxPower(), bluetoothLeDevice.getRSSI());
             this.listDevice.add(new GwtDeviceScannerModel(bluetoothLeDevice.getAddress(), bluetoothLeDevice.getName(),
-                    bluetoothLeDevice.getTxPower(), bluetoothLeDevice.getRSSI()));
+                    bluetoothLeDevice.getTxPower(), String.valueOf(new Date())));
             if (bluetoothLeDevice.getName().contains("SensorTag")
                     && !isSensorTagInList(bluetoothLeDevice.getAddress())) {
                 this.tiSensorTagList.add(new TiSensorTag(bluetoothLeDevice));

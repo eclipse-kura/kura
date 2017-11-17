@@ -85,7 +85,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * </ul>
  * Both properties are stored in snapshots to recreate the component instances and restore their configuration
  * at every framework restart.
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType
@@ -153,6 +153,27 @@ public interface ConfigurationService {
      * @since 1.0.8
      */
     public void deleteFactoryConfiguration(String pid, boolean takeSnapshot) throws KuraException;
+
+    /**
+     *
+     * @return
+     * @since 1.4
+     */
+    public List<ComponentConfiguration> getFactoryComponentOCDs();
+
+    /**
+     *
+     * @return
+     * @since 1.4
+     */
+    public ComponentConfiguration getFactoryComponentOCD(String factoryPid);
+
+    /**
+     *
+     * @return
+     * @since 1.4
+     */
+    public List<ComponentConfiguration> getServiceProviderOCDs(Class<?>... clazzes);
 
     /**
      * Return the PIDs for all the services that

@@ -1681,4 +1681,22 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
         return value.toString();
     }
+
+    @Override
+    public List<ComponentConfiguration> getFactoryComponentOCDs() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ComponentConfiguration getFactoryComponentOCD(String factoryPid) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<ComponentConfiguration> getServiceProviderOCDs(Class<?>... clazzes) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

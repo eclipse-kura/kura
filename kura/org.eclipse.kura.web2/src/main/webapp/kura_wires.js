@@ -273,7 +273,7 @@ var kuraWires = (function() {
 			evt.preventDefault();
 		});
 		
-		client.dragHandler = new DragHandler() 
+		client.dragHandler = new DragHandler(paper.options.gridSize) 
 		
 		client.scroller = new Scroller()
 		client.scroller.onMove(function (dx, dy) {
@@ -853,28 +853,62 @@ var kuraWires = (function() {
 		this.callback = callback
 	}
 	
-	var DragHandler = function () {
+	var DragHandler = function (gridSize) {
+		this.dndHelper = DropSupport.addIfSupported(document.getElementById('composer'))
 		this.dropCoords = null
+		this.gridSize = gridSize
+		var self = this
+		if (this.dndHelper) {
+			this.dndHelper.dragOverHandler = function (event) {
+				self.movePreview(event.clientX, event.clientY)
+				return true
+			}
+			this.dndHelper.dragExitHandler = function (event) {
+				self.abort()
+			}
+			this.dndHelper.dropHandler = function(event) { 
+				var factoryPid = DragHandler.getFactoryPidFromDropUrl(event.dataTransfer.getData('text'))
+				if (!factoryPid) {
+					return false
+				}
+				self.onDrop(event.clientX, event.clientY, factoryPid)
+				return true
+			}
+		}
 	}
+	
+	DragHandler.getFactoryPidFromDropUrl = function (dropUrl) {
+        if (!dropUrl) {
+            return null
+        }
+        if (!dropUrl.startsWith('factory://')) {
+            return null
+        }
+        return dropUrl.substring('factory://'.length, dropUrl.length);
+    }
 	
 	DragHandler.prototype.toLocalCoords = function (clientX, clientY) {
 		var offset = $('#wires-graph').offset()
 		clientX -= offset.left - $(window).scrollLeft()
 		clientY -= offset.top - $(window).scrollTop()
-		return clientToLocal(clientX, clientY)
+		return clampToGrid(clientToLocal(clientX, clientY), this.gridSize)
 	}
 	
-	DragHandler.prototype.onDrag = function (clientX, clientY) {
+	DragHandler.prototype.movePreview = function (clientX, clientY) {
 		if (this.rect == null) {
 			this.initTempElement()
 		}
 		var pos = this.toLocalCoords(clientX, clientY)
-		this.rect.position(pos.x, pos.y)
+		var oldPos = this.rect.position()
+		if (pos.x != oldPos.x || pos.y != oldPos.y) {
+			this.rect.position(pos.x, pos.y)
+		}
 	}
 	
 	DragHandler.prototype.onDrop = function (clientX, clientY, factoryPid) {
 		var pos = this.toLocalCoords(clientX, clientY)
 		this.dropCoords = pos
+		jsniShowComponentCreationDialog(factoryPid)
 	}
 	
 	DragHandler.prototype.abort = function () {
@@ -949,7 +983,7 @@ var kuraWires = (function() {
 		} else {
 			var cx = $('#wires-graph').width() / 2
 			var cy = $('#wires-graph').height() / 2
-			return clientToLocal(cx, cy)
+			return clampToGrid(clientToLocal(cx, cy), paper.options.gridSize)
 		}
 	}
 	
@@ -977,6 +1011,12 @@ var kuraWires = (function() {
 		var x = (clientX-translation.tx)/currentZoomLevel
 		var y = (clientY-translation.ty)/currentZoomLevel
 		return {x: x, y: y}
+	}
+	
+	function clampToGrid(pos, gridSize) {
+		pos.x = Math.floor(pos.x/gridSize)*gridSize
+		pos.y = Math.floor(pos.y/gridSize)*gridSize
+		return pos
 	}
 	
 	var transitionRunning = false

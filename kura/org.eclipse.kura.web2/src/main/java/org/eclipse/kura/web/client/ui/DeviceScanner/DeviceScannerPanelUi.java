@@ -27,6 +27,7 @@ import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.Well;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 
@@ -39,6 +40,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 
@@ -63,15 +65,26 @@ public class DeviceScannerPanelUi extends Composite {
     @UiField
     Button deviceScannerRefresh;
     @UiField
+    TextBox formPeriod = new TextBox();
+    @UiField
+    TextBox formMaxScan = new TextBox();
+    @UiField
+    ListBox formAdapter;
+
+    @UiField
     CellTable<GwtDeviceScannerModel> deviceScannerGrid = new CellTable<GwtDeviceScannerModel>();
     private final ListDataProvider<GwtDeviceScannerModel> profileDataProvider = new ListDataProvider<>();
 
     public DeviceScannerPanelUi() {
-        logger.log(Level.FINER, "Initializing TestPanelUi...");
+        logger.log(Level.FINER, "Initializing DeviceScannerPanelUi...");
         initWidget(uiBinder.createAndBindUi(this));
         // Set text for buttons
         this.deviceScannerRefresh.setText(MSG.refresh());
         this.deviceScannerGrid.getEmptyTableWidget();
+
+        // Set List Box for buttons
+        this.formAdapter.addItem("hci0");
+        this.formAdapter.addItem("ttycmx");
         loadDeviceScannerTable(this.deviceScannerGrid, this.profileDataProvider);
     }
 
@@ -159,6 +172,9 @@ public class DeviceScannerPanelUi extends Composite {
             public void onSuccess(GwtXSRFToken token) {
                 HashSet<GwtDeviceScannerModel> listTest = new HashSet<GwtDeviceScannerModel>();
                 DeviceScannerPanelUi.this.gwtDeviceService.findDeviceScanner(token,
+                        DeviceScannerPanelUi.this.formPeriod.getValue(),
+                        DeviceScannerPanelUi.this.formMaxScan.getValue(),
+                        DeviceScannerPanelUi.this.formAdapter.getSelectedValue(),
                         new AsyncCallback<HashSet<GwtDeviceScannerModel>>() {
 
                             private Object deviceScannerGrid;

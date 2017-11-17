@@ -19,27 +19,54 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
 	<ui:style>
-	.important { }
-	
-	.center-panel { height: 100%; padding: 0px; border: none; }
-
+        
+        .center-panel {
+            font-size: 11px;
+            font-weight: normal;
+        }
+        
+        .padding {
+            margin-bottom: 50px;
+        }
 	</ui:style>
 	
 	<b:Container fluid="true">
-		<b:Column size="MD12">
-			<b:Row>
-				<b:Panel>
-					<b:ButtonGroup size="SMALL">
-						<b:Button ui:field="deviceScannerRefresh" addStyleNames="fa fa-refresh"></b:Button>
-					</b:ButtonGroup>
-				</b:Panel>
-			</b:Row>
-			<b:Row>
-				<b:Well addStyleNames="{style.center-panel} status-well" ui:field="deviceScannerWell">
-					<gwt:CellTable bordered="true" condensed="true"
-						striped="true" hover="true" height="100%" width="100%" ui:field="deviceScannerGrid" />						
-				</b:Well>
-			</b:Row>
-		</b:Column>
+        <b:Row>
+            <b:FormGroup>
+                <b:FormLabel for="LabelListConfig" ></b:FormLabel>
+            </b:FormGroup>
+        </b:Row>
+        <b:Row>
+            <b:Well addStyleNames="{style.center-panel} bundles-well" >
+                <b:Column size="MD_7">
+                    <b:FormLabel for="Configuration Scan" ></b:FormLabel>
+                    <b:FormGroup>
+                        <b:FormLabel for="formPeriod" >Period</b:FormLabel>
+                        <b:TextBox b:id="formPeriod" ui:field="formPeriod" />
+                    </b:FormGroup>
+                    <b:FormGroup>
+                        <b:FormLabel for="formMaxScan">Max Scan</b:FormLabel>
+                        <b:TextBox b:id="formMaxScan" ui:field="formMaxScan" />
+                    </b:FormGroup>
+                    <b:FormGroup>
+                        <b:FormLabel for="formAdapter">Adapter</b:FormLabel>
+                        <b:ListBox b:id="formAdapter" ui:field="formAdapter" />
+                    </b:FormGroup>
+                    <b:FormGroup>
+                        <b:Button ui:field="deviceScannerRefresh" addStyleNames="fa fa-refresh"></b:Button>
+                    </b:FormGroup>
+                </b:Column>
+                 <b:Column size="MD_5" >
+                    <b:FormLabel for="help" ></b:FormLabel>
+                </b:Column>
+            </b:Well >
+        </b:Row>
+        <b:Row>     
+			<b:Well addStyleNames="bundles-well" ui:field="deviceScannerWell">
+                <b:FormLabel for="LabelTableConfig" ></b:FormLabel>
+				<gwt:CellTable bordered="true" condensed="true"
+					striped="true" hover="true" height="100%" width="100%" ui:field="deviceScannerGrid" />						
+			</b:Well>
+        </b:Row>
 	</b:Container>
 </ui:UiBinder> 

@@ -27,7 +27,8 @@ public interface GwtDeviceService extends RemoteService {
 
     public ArrayList<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
-    public HashSet<GwtDeviceScannerModel> findDeviceScanner(GwtXSRFToken xsrfToken) throws GwtKuraException;
+    public HashSet<GwtDeviceScannerModel> findDeviceScanner(GwtXSRFToken xsrfToken, String periode, String maxScan,
+            String Adaptor) throws GwtKuraException;
 
     public ArrayList<GwtGroupedNVPair> findBundles(GwtXSRFToken xsrfToken) throws GwtKuraException;
 

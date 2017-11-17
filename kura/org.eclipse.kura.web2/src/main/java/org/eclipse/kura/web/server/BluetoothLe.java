@@ -42,7 +42,7 @@ public class BluetoothLe {
 
     private static final Logger logger = LoggerFactory.getLogger(BluetoothLe.class);
 
-    private static final String APP_ID = "BLE_APP_V2";
+    // private static final String APP_ID = "BLE_APP_V2";
 
     private static final String INTERRUPTED_EX = "Interrupted Exception";
     private static final String DISCOVERY_STOP_EX = "Failed to stop discovery";
@@ -74,13 +74,12 @@ public class BluetoothLe {
         this.bluetoothLeService = null;
     }
 
-    public BluetoothLe(BluetoothLeService bluetoothLeService) {
+    public BluetoothLe(BluetoothLeService bluetoothLeService, String period, String maxScan, String adaptor) {
         this.setBluetoothLeService(bluetoothLeService);
         Map<String, Object> properties = new HashMap();
-
         properties.put("scan_enable", true);
-        properties.put("scan_time", 5);
-        properties.put("period", 120);
+        properties.put("scan_time", maxScan);
+        properties.put("period", period);
         properties.put("enableTermometer", false);
         properties.put("enableAccelerometer", false);
         properties.put("enableHygrometer", false);
@@ -93,7 +92,7 @@ public class BluetoothLe {
         properties.put("switchOnGreenLed", false);
         properties.put("switchOnBuzzer", false);
         properties.put("publishTopic", "data");
-        properties.put("iname", "hci0");
+        properties.put("iname", adaptor);
         this.activate(properties);
         try {
             TimeUnit.SECONDS.sleep(10);

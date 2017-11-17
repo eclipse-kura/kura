@@ -32,12 +32,7 @@
               bind="setEventAdminService" 
               unbind="unsetEventAdminService"
               interface="org.osgi.service.event.EventAdmin"/>
-  	<reference bind="setBluetoothLeService" 
-              cardinality="1..1" 
-              interface="org.eclipse.kura.bluetooth.le.BluetoothLeService" 
-              name="BluetoothLeService" 
-              policy="static" 
-              unbind="unsetBluetoothLeService"/>
+   
    <property name="app.root" type="String" value="/kura"/>
    <property name="service.pid" type="String" value="org.eclipse.kura.web.Console"/>
    <service>

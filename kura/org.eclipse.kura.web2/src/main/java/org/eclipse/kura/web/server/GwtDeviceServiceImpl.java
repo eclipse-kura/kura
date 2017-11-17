@@ -115,11 +115,12 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     }
 
     @Override
-    public HashSet<GwtDeviceScannerModel> findDeviceScanner(GwtXSRFToken xsrfToken) throws GwtKuraException {
+    public HashSet<GwtDeviceScannerModel> findDeviceScanner(GwtXSRFToken xsrfToken, String period, String maxScan,
+            String adaptor) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         HashSet<GwtDeviceScannerModel> pairs = new HashSet<GwtDeviceScannerModel>();
         BluetoothLeService bluetoothLeService = ServiceLocator.getInstance().getService(BluetoothLeService.class);
-        BluetoothLe ble = new BluetoothLe(bluetoothLeService);
+        BluetoothLe ble = new BluetoothLe(bluetoothLeService, period, maxScan, adaptor);
         try {
             pairs.addAll(ble.listDevice);
         } catch (Exception e) {

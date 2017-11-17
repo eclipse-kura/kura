@@ -45,7 +45,6 @@
                 <g:ScrollPanel addStyleNames="{style.center-panel}">
                     <b:Form ui:field="form">
                         <b:FieldSet>
-
                             <b:FormGroup ui:field="groupRouter">
                                 <b:FormLabel for="router"
                                     ui:field="labelRouter" />
@@ -136,7 +135,6 @@
                 </b:Row>
             </b:Column>
         </b:Column>
-
 
     </b:Container>
 </ui:UiBinder> 

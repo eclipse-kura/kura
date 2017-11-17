@@ -5,7 +5,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Eurotech
  *     Red Hat Inc
@@ -17,8 +17,10 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 import static org.eclipse.kura.driver.Driver.DRIVER_PID_PROPERTY_NAME;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.kura.driver.Driver;
+import org.eclipse.kura.driver.DriverDescriptor;
 import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.AssetMessages;
@@ -89,6 +91,18 @@ public final class DriverServiceImpl implements DriverService {
             ServiceUtil.ungetServiceReferences(context, refs);
         }
         return drivers;
+    }
+
+    @Override
+    public Optional<DriverDescriptor> getDriverDescriptor(String driverPid) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<DriverDescriptor> listDriverDescriptors() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

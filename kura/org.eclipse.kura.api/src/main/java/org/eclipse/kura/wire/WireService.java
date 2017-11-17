@@ -26,6 +26,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * @since 1.2
  */
 @ProviderType
+@Deprecated
 public interface WireService {
 
     /**

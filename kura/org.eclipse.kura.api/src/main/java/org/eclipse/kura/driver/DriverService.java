@@ -14,6 +14,7 @@
 package org.eclipse.kura.driver;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -54,9 +55,31 @@ public interface DriverService {
     /**
      * Returns the list containing all the available driver instances
      *
-     * @return the list of drivers available in service registry or empty list
-     *         if no drivers are available
+     * @return the list of drivers available in service registry or empty list if no
+     *         drivers are available
      */
     public List<Driver> listDrivers();
+
+    /**
+     * Returns the {@link DriverDescriptor} corresponding to the Driver instance
+     * identified by the provided Driver {@code kura.service.pid}.
+     *
+     * @param driverPid
+     *            the Driver {@code kura.service.pid} that identifies a Driver
+     *            Instance
+     * @return the {@link DriverDescriptor} corresponding to the provided method
+     *         argument. Or an empty Optional is the provided argument is not a Driver {@code kura.service.pid}
+     * @since 1.4
+     */
+    Optional<DriverDescriptor> getDriverDescriptor(String driverPid);
+
+    /**
+     * Returns a list of {@link DriverDescriptor} objects that correspond to the
+     * entire list of Driver Instances in the Framework.
+     *
+     * @return a list of {@link DriverDescriptor}
+     * @since 1.4
+     */
+    List<DriverDescriptor> listDriverDescriptors();
 
 }

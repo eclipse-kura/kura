@@ -11,7 +11,6 @@
  *  Amit Kumar Mondal
  *
  *******************************************************************************/
-
 package org.eclipse.kura.wire;
 
 import static java.util.Objects.requireNonNull;
@@ -42,14 +41,11 @@ import org.osgi.service.wireadmin.WireAdmin;
 @ProviderType
 public class WireConfiguration {
 
-    /** The Wire Emitter PID. */
     private final String emitterPid;
 
-    /** The Filter. */
     @Nullable
     private String filter;
 
-    /** The Wire Receiver PID. */
     private final String receiverPid;
 
     /** The actual {@link WireAdmin}'s {@link Wire}. */

@@ -29,6 +29,10 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
 
     private BluetoothManager bluetoothManager;
 
+    public BluetoothLeServiceImpl() {
+
+    }
+
     protected void activate(ComponentContext context) {
         logger.info("Activating Bluetooth Le Service...");
         if (!startBluetoothSystemd() && !startBluetoothInitd()) {

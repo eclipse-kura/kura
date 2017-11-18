@@ -15,6 +15,7 @@ package org.eclipse.kura.web.server;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -24,12 +25,14 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.bluetooth.le.BluetoothLeService;
 import org.eclipse.kura.command.PasswordCommandService;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtDeviceScannerModel;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
@@ -50,7 +53,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     @Override
     public ArrayList<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-        List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
+        ArrayList<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
         SystemAdminService systemAdminService = ServiceLocator.getInstance().getService(SystemAdminService.class);
@@ -109,6 +112,21 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
         return new ArrayList<GwtGroupedNVPair>(pairs);
+    }
+
+    @Override
+    public HashSet<GwtDeviceScannerModel> findDeviceScanner(GwtXSRFToken xsrfToken, String period, String maxScan,
+            String adaptor) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        HashSet<GwtDeviceScannerModel> pairs = new HashSet<GwtDeviceScannerModel>();
+        BluetoothLeService bluetoothLeService = ServiceLocator.getInstance().getService(BluetoothLeService.class);
+        BluetoothLe ble = new BluetoothLe(bluetoothLeService, period, maxScan, adaptor);
+        try {
+            pairs.addAll(ble.listDevice);
+        } catch (Exception e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+        return new HashSet<GwtDeviceScannerModel>(pairs);
     }
 
     @SuppressWarnings("unchecked")

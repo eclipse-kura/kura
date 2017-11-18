@@ -49,6 +49,7 @@ public class denali implements EntryPoint {
     private final GwtStatusServiceAsync gwtStatusService = GWT.create(GwtStatusService.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
+    // private final GwtDeviceScannerAsync gwtDeviceScanner = GWT.create(GwtDeviceScanner.class);
     private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
 
     private final EntryClassUi binder = GWT.create(EntryClassUi.class);
@@ -97,106 +98,114 @@ public class denali implements EntryPoint {
                 denali.this.gwtDeviceService.findSystemProperties(token,
                         new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
 
-                    @Override
-                    public void onSuccess(ArrayList<GwtGroupedNVPair> results) {
-
-                        final GwtSession gwtSession = new GwtSession();
-
-                        if (results != null) {
-                            List<GwtGroupedNVPair> pairs = results;
-                            if (pairs != null) {
-                                for (GwtGroupedNVPair pair : pairs) {
-                                    String name = pair.getName();
-                                    if ("kura.have.net.admin".equals(name)) {
-                                        Boolean value = Boolean.valueOf(pair.getValue());
-                                        gwtSession.setNetAdminAvailable(value);
-                                    }
-                                    if ("kura.version".equals(name)) {
-                                        gwtSession.setKuraVersion(pair.getValue());
-                                    }
-                                    if ("kura.os.version".equals(name)) {
-                                        gwtSession.setOsVersion(pair.getValue());
-                                    }
-                                }
-                            }
-                        }
-
-                        denali.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
                             @Override
-                            public void onFailure(Throwable ex) {
-                                FailureHandler.handle(ex);
-                            }
+                            public void onSuccess(ArrayList<GwtGroupedNVPair> results) {
 
-                            @Override
-                            public void onSuccess(GwtXSRFToken token) {
-                                denali.this.gwtStatusService.getDeviceConfig(token, gwtSession.isNetAdminAvailable(),
-                                        new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+                                final GwtSession gwtSession = new GwtSession();
 
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-
-                                        FailureHandler.handle(caught);
-                                    }
-
-                                    @Override
-                                    public void onSuccess(ArrayList<GwtGroupedNVPair> pairs) {
-                                        denali.this.connected = false;
-                                        Iterator<GwtGroupedNVPair> it = pairs.iterator();
-                                        while (it.hasNext()) {
-                                            GwtGroupedNVPair connectionName = it.next();
-                                            if ("Connection Name".equals(connectionName.getName())
-                                                    && connectionName.getValue().endsWith("CloudService")
-                                                    && it.hasNext()) {
-                                                // based on the assumption that in the ArrayList, "Service Status"
-                                                // immediately follows "Connection Name"
-                                                GwtGroupedNVPair connectionStatus = it.next();
-
-                                                if ("Service Status".equals(connectionStatus.getName())
-                                                        && "CONNECTED".equals(connectionStatus.getValue())) {
-                                                    denali.this.connected = true;
-                                                    break;
-                                                }
+                                if (results != null) {
+                                    List<GwtGroupedNVPair> pairs = results;
+                                    if (pairs != null) {
+                                        for (GwtGroupedNVPair pair : pairs) {
+                                            String name = pair.getName();
+                                            if ("kura.have.net.admin".equals(name)) {
+                                                Boolean value = Boolean.valueOf(pair.getValue());
+                                                gwtSession.setNetAdminAvailable(value);
+                                            }
+                                            if ("kura.version".equals(name)) {
+                                                gwtSession.setKuraVersion(pair.getValue());
+                                            }
+                                            if ("kura.os.version".equals(name)) {
+                                                gwtSession.setOsVersion(pair.getValue());
                                             }
                                         }
+                                    }
+                                }
 
-                                        denali.this.gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
+                                denali.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-                                            @Override
-                                            public void onFailure(Throwable caught) {
-                                                FailureHandler.handle(caught, denali.class.getSimpleName());
-                                                denali.this.binder.setFooter(gwtSession);
-                                                denali.this.binder.initSystemPanel(gwtSession, denali.this.connected);
-                                                denali.this.binder.setSession(gwtSession);
-                                                denali.this.binder.fetchAvailableServices();
-                                            }
+                                    @Override
+                                    public void onFailure(Throwable ex) {
+                                        FailureHandler.handle(ex);
+                                    }
 
-                                            @Override
-                                            public void onSuccess(Boolean result) {
-                                                if (result) {
-                                                    denali.this.isDevelopMode = true;
-                                                    gwtSession.setDevelopMode(true);
-                                                }
-                                                denali.this.binder.setFooter(gwtSession);
-                                                denali.this.binder.initSystemPanel(gwtSession, denali.this.connected);
-                                                denali.this.binder.setSession(gwtSession);
-                                                denali.this.binder.fetchAvailableServices();
-                                            }
-                                        });
+                                    @Override
+                                    public void onSuccess(GwtXSRFToken token) {
+                                        denali.this.gwtStatusService.getDeviceConfig(token,
+                                                gwtSession.isNetAdminAvailable(),
+                                                new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+
+                                                    @Override
+                                                    public void onFailure(Throwable caught) {
+
+                                                        FailureHandler.handle(caught);
+                                                    }
+
+                                                    @Override
+                                                    public void onSuccess(ArrayList<GwtGroupedNVPair> pairs) {
+                                                        denali.this.connected = false;
+                                                        Iterator<GwtGroupedNVPair> it = pairs.iterator();
+                                                        while (it.hasNext()) {
+                                                            GwtGroupedNVPair connectionName = it.next();
+                                                            if ("Connection Name".equals(connectionName.getName())
+                                                                    && connectionName.getValue()
+                                                                            .endsWith("CloudService")
+                                                                    && it.hasNext()) {
+                                                                // based on the assumption that in the ArrayList,
+                                                                // "Service Status"
+                                                                // immediately follows "Connection Name"
+                                                                GwtGroupedNVPair connectionStatus = it.next();
+
+                                                                if ("Service Status".equals(connectionStatus.getName())
+                                                                        && "CONNECTED"
+                                                                                .equals(connectionStatus.getValue())) {
+                                                                    denali.this.connected = true;
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+
+                                                        denali.this.gwtSecurityService
+                                                                .isDebugMode(new AsyncCallback<Boolean>() {
+
+                                                                    @Override
+                                                                    public void onFailure(Throwable caught) {
+                                                                        FailureHandler.handle(caught,
+                                                                                denali.class.getSimpleName());
+                                                                        denali.this.binder.setFooter(gwtSession);
+                                                                        denali.this.binder.initSystemPanel(gwtSession,
+                                                                                denali.this.connected);
+                                                                        denali.this.binder.setSession(gwtSession);
+                                                                        denali.this.binder.fetchAvailableServices();
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onSuccess(Boolean result) {
+                                                                        if (result) {
+                                                                            denali.this.isDevelopMode = true;
+                                                                            gwtSession.setDevelopMode(true);
+                                                                        }
+                                                                        denali.this.binder.setFooter(gwtSession);
+                                                                        denali.this.binder.initSystemPanel(gwtSession,
+                                                                                denali.this.connected);
+                                                                        denali.this.binder.setSession(gwtSession);
+                                                                        denali.this.binder.fetchAvailableServices();
+                                                                    }
+                                                                });
+                                                    }
+                                                });
                                     }
                                 });
                             }
-                        });
-                    }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        FailureHandler.handle(caught, denali.class.getSimpleName());
-                        denali.this.binder.setFooter(new GwtSession());
-                        denali.this.binder.initSystemPanel(new GwtSession(), denali.this.connected);
-                        denali.this.binder.setSession(new GwtSession());
-                    }
-                });
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                FailureHandler.handle(caught, denali.class.getSimpleName());
+                                denali.this.binder.setFooter(new GwtSession());
+                                denali.this.binder.initSystemPanel(new GwtSession(), denali.this.connected);
+                                denali.this.binder.setSession(new GwtSession());
+                            }
+                        });
             }
         });
     }

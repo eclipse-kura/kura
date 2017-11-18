@@ -32,6 +32,7 @@
               bind="setEventAdminService" 
               unbind="unsetEventAdminService"
               interface="org.osgi.service.event.EventAdmin"/>
+   
    <property name="app.root" type="String" value="/kura"/>
    <property name="service.pid" type="String" value="org.eclipse.kura.web.Console"/>
    <service>

@@ -12,8 +12,10 @@
 package org.eclipse.kura.web.shared.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtDeviceScannerModel;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
@@ -24,6 +26,9 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface GwtDeviceService extends RemoteService {
 
     public ArrayList<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    public HashSet<GwtDeviceScannerModel> findDeviceScanner(GwtXSRFToken xsrfToken, String periode, String maxScan,
+            String Adaptor) throws GwtKuraException;
 
     public ArrayList<GwtGroupedNVPair> findBundles(GwtXSRFToken xsrfToken) throws GwtKuraException;
 

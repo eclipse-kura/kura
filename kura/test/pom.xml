@@ -142,6 +142,7 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
         <module>org.eclipse.kura.core.util.test</module>
         <module>org.eclipse.kura.deployment.agent.test</module>
         <module>org.eclipse.kura.driver.block.test</module>
+        <module>org.eclipse.kura.driver.helper.test</module>
         <module>org.eclipse.kura.emulator.position.test</module>
         <module>org.eclipse.kura.emulator.watchdog.test</module>
         <module>org.eclipse.kura.internal.asset.cloudlet.test</module>

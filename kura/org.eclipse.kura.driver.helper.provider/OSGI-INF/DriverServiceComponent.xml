@@ -11,10 +11,7 @@
      	Eurotech
      	Amit Kumar Mondal
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
-    name="org.eclipse.kura.driver.DriverService" 
-    enabled="true" 
-    immediate="true">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" enabled="true" immediate="true" name="org.eclipse.kura.driver.DriverService">
    <implementation class="org.eclipse.kura.internal.driver.DriverServiceImpl"/>
    <property name="service.pid" value="org.eclipse.kura.driver.DriverService"/>
    <service>

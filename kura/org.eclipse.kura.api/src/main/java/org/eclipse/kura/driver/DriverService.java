@@ -69,6 +69,8 @@ public interface DriverService {
      *            Instance
      * @return the {@link DriverDescriptor} corresponding to the provided method
      *         argument. Or an empty Optional is the provided argument is not a Driver {@code kura.service.pid}
+     * @throws NullPointerException
+     *             if the provided driver PID is null
      * @since 1.4
      */
     Optional<DriverDescriptor> getDriverDescriptor(String driverPid);

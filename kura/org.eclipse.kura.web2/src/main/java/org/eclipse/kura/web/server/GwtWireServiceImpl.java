@@ -36,6 +36,7 @@ import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
+import org.eclipse.kura.driver.DriverDescriptor;
 import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
@@ -133,13 +134,15 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
     @Override
     public List<String> getDriverInstances(final GwtXSRFToken xsrfToken) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
-        final Collection<ServiceReference<Driver>> refs = ServiceLocator.getInstance()
-                .getServiceReferences(Driver.class, null);
-        final List<String> drivers = new ArrayList<>();
-        for (final ServiceReference<Driver> ref : refs) {
-            drivers.add(String.valueOf(ref.getProperty(KURA_SERVICE_PID)));
+        final DriverService driverService = ServiceLocator.getInstance().getService(DriverService.class);
+        List<DriverDescriptor> drivers = driverService.listDriverDescriptors();
+        
+        List<String> driverPids = new ArrayList<>();
+        for(DriverDescriptor driverDescriptor : drivers) {
+            driverPids.add(driverDescriptor.getPid());
         }
-        return drivers;
+        
+        return driverPids;
     }
 
     @Override
@@ -186,43 +189,46 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             throws GwtKuraException {
         final DriverService driverService = ServiceLocator.getInstance().getService(DriverService.class);
 
-        final Driver d = driverService.getDriver(driverPid);
-        final ChannelDescriptor cd = d.getChannelDescriptor();
-        try {
-            @SuppressWarnings("unchecked")
-            final List<AD> params = (List<AD>) cd.getDescriptor();
-
-            final GwtConfigComponent gwtConfig = new GwtConfigComponent();
-            gwtConfig.setComponentId(driverPid);
-
-            final List<GwtConfigParameter> gwtParams = new ArrayList<>();
-            gwtConfig.setParameters(gwtParams);
-            for (final AD ad : params) {
-                final GwtConfigParameter gwtParam = new GwtConfigParameter();
-                gwtParam.setId(ad.getId());
-                gwtParam.setName(ad.getName());
-                gwtParam.setDescription(ad.getDescription());
-                gwtParam.setType(GwtConfigParameterType.valueOf(ad.getType().name()));
-                gwtParam.setRequired(ad.isRequired());
-                gwtParam.setCardinality(ad.getCardinality());
-                if (ad.getOption() != null && !ad.getOption().isEmpty()) {
-                    final Map<String, String> options = new HashMap<>();
-                    for (final Option option : ad.getOption()) {
-                        options.put(option.getLabel(), option.getValue());
-                    }
-                    gwtParam.setOptions(options);
-                }
-                gwtParam.setMin(ad.getMin());
-                gwtParam.setMax(ad.getMax());
-                gwtParam.setDefault(ad.getDefault());
-
-                gwtParams.add(gwtParam);
-            }
-            return gwtConfig;
-        } catch (final Exception ex) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, ex);
+        Optional<DriverDescriptor> driverDescriptorOptional = driverService.getDriverDescriptor(driverPid);
+        
+        if(driverDescriptorOptional.isPresent()) {
+            DriverDescriptor driverDescriptor = driverDescriptorOptional.get();
+            return getGwtConfigComponent(driverDescriptor);
+        } else {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
         }
+    }
 
+    private GwtConfigComponent getGwtConfigComponent(DriverDescriptor driverDescriptor) {
+        @SuppressWarnings("unchecked")
+        final List<AD> params = (List<AD>) driverDescriptor.getChannelDescriptor();
+        final GwtConfigComponent gwtConfig = new GwtConfigComponent();
+        gwtConfig.setComponentId(driverDescriptor.getPid());
+
+        final List<GwtConfigParameter> gwtParams = new ArrayList<>();
+        gwtConfig.setParameters(gwtParams);
+        for (final AD ad : params) {
+            final GwtConfigParameter gwtParam = new GwtConfigParameter();
+            gwtParam.setId(ad.getId());
+            gwtParam.setName(ad.getName());
+            gwtParam.setDescription(ad.getDescription());
+            gwtParam.setType(GwtConfigParameterType.valueOf(ad.getType().name()));
+            gwtParam.setRequired(ad.isRequired());
+            gwtParam.setCardinality(ad.getCardinality());
+            if (ad.getOption() != null && !ad.getOption().isEmpty()) {
+                final Map<String, String> options = new HashMap<>();
+                for (final Option option : ad.getOption()) {
+                    options.put(option.getLabel(), option.getValue());
+                }
+                gwtParam.setOptions(options);
+            }
+            gwtParam.setMin(ad.getMin());
+            gwtParam.setMax(ad.getMax());
+            gwtParam.setDefault(ad.getDefault());
+
+            gwtParams.add(gwtParam);
+        }
+        return gwtConfig;
     }
 
     private String getChannelName(String propertyKey) {
@@ -514,5 +520,4 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             throw new GwtKuraException("Failed to update wire configuration");
         }
     }
-
 }

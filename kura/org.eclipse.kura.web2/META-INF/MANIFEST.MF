@@ -72,4 +72,6 @@ Import-Package: com.eclipsesource.json;version="0.9.4",
  org.slf4j;version="1.6.4",
  org.w3c.dom,
  org.xml.sax
-Require-Bundle: com.gwt.user;bundle-version="[1.0.1,2.0.0)"
+Require-Bundle: com.gwt.user;bundle-version="[1.0.1,2.0.0)",
+ ublox;bundle-version="1.0.0"
+

@@ -121,10 +121,19 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         HashSet<GwtDeviceScannerModel> pairs = new HashSet<GwtDeviceScannerModel>();
         BluetoothLeService bluetoothLeService = ServiceLocator.getInstance().getService(BluetoothLeService.class);
         BluetoothLe ble = new BluetoothLe(bluetoothLeService, period, maxScan, adaptor);
-        try {
-            pairs.addAll(ble.listDevice);
-        } catch (Exception e) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        Ublox ublox = new Ublox(Integer.parseInt(maxScan));
+        if (adaptor != "ublox") {
+            try {
+                pairs.addAll(ble.listDevice);
+            } catch (Exception e) {
+                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+            }
+        } else {
+            try {
+                pairs.addAll(ublox.listDevice);
+            } catch (Exception e) {
+                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+            }
         }
         return new HashSet<GwtDeviceScannerModel>(pairs);
     }

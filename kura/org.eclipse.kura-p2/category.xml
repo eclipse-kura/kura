@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE xml>
 <site>
    <feature url="features/org.eclipse.kura.api.feature_0.0.0.qualifier.jar" id="org.eclipse.kura.api.feature" version="0.0.0">
       <category name="org.eclipse.kura.api"/>

@@ -84,7 +84,7 @@ public class DeviceScannerPanelUi extends Composite {
 
         // Set List Box for buttons
         this.formAdapter.addItem("hci0");
-        this.formAdapter.addItem("ttycmx");
+        this.formAdapter.addItem("ublox");
         loadDeviceScannerTable(this.deviceScannerGrid, this.profileDataProvider);
     }
 

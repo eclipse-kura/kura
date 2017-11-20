@@ -78,7 +78,6 @@
         <module>org.eclipse.kura.wire.component.provider</module>
         <module>org.eclipse.kura.wire.helper.provider</module>
         <module>org.eclipse.kura.wire.provider</module>
-
         <module>org.eclipse.kura.rest.provider</module>
         <module>org.eclipse.kura.rest.asset.provider</module>
 

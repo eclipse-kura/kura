@@ -13,47 +13,46 @@
 
 -->
 
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<modelVersion>4.0.0</modelVersion>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
 
-        <parent>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>kura</artifactId>
-                <version>3.1.0-SNAPSHOT</version>
-        </parent>
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>kura</artifactId>
+        <version>3.1.0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>target-definition</artifactId>
-	<packaging>pom</packaging>
-	<name>Kura Target Definition</name>
+    <artifactId>target-definition</artifactId>
+    <packaging>pom</packaging>
+    <name>Kura Target Definition</name>
 
-	<properties>
-		<kura.basedir>${project.basedir}/..</kura.basedir>
-	</properties>
+    <properties>
+        <kura.basedir>${project.basedir}/..</kura.basedir>
+    </properties>
 
-	<build>
-		<plugins>
-                        <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-                                <artifactId>maven-antrun-plugin</artifactId>
-                                <executions>
-                                        <execution>
-                                                <id>initialize</id>
-                                                <phase>package</phase>
-                                                <goals>
-                                                        <goal>run</goal>
-                                                </goals>
-                                                <configuration>
-                                                        <tasks>
-                                                                <echo file="${project.basedir}/../distrib/build.properties" append="false">
-                                                                        kura.build.version=${kura.build.version}
-                                                                </echo>
-                                                        </tasks>
-                                                </configuration>
-                                        </execution>
-                                </executions>
-                        </plugin>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>initialize</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <echo file="${project.basedir}/../distrib/build.properties" append="false">
+                                    kura.build.version=${kura.build.version}
+                                </echo>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 <!--
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -79,12 +78,12 @@
 				</executions>
 			</plugin>
 -->
-			<plugin>
-	        <groupId>org.apache.maven.plugins</groupId>
-	        <artifactId>maven-site-plugin</artifactId>
-	        <version>3.3</version>
-	      </plugin>
-		</plugins>
-	</build>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.3</version>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

@@ -177,6 +177,11 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.wire.component.provider</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
                     </bundleStartLevel>
                     <dependencies>
                         <dependency>
@@ -310,6 +315,11 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
                             <requirement>
                                 <type>eclipse-plugin</type>
                                 <id>org.eclipse.kura.emulator.net</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.wire.component.provider</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                         </extraRequirements>

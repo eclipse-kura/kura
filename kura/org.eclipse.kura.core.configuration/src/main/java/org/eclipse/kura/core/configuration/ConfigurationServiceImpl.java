@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Dictionary;
@@ -29,15 +30,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.felix.scr.Component;
+import org.apache.felix.scr.ScrService;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraPartialSuccessException;
@@ -130,6 +135,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private ConfigurationAdmin configurationAdmin;
     private SystemService systemService;
     private CryptoService cryptoService;
+    private ScrService scrService;
 
     // contains all the PIDs (aka kura.service.pid) - both of configurable and self configuring components
     private final Set<String> allActivatedPids;
@@ -188,6 +194,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     public void unsetCryptoService(CryptoService cryptoService) {
         this.cryptoService = null;
+    }
+
+    public void setScrService(ScrService scrService) {
+        this.scrService = scrService;
+    }
+
+    public void unsetScrService(ScrService scrService) {
+        this.scrService = null;
     }
 
     public ConfigurationServiceImpl() {
@@ -1684,19 +1698,50 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public List<ComponentConfiguration> getFactoryComponentOCDs() {
-        // TODO Auto-generated method stub
-        return null;
+        return this.factoryPids.stream().map(pid -> new ComponentConfigurationImpl(pid, this.ocds.get(pid), null))
+                .collect(Collectors.toList());
+    }
+
+    private ComponentConfiguration getComponentDefinition(String pid) {
+        return new ComponentConfigurationImpl(pid, this.ocds.get(pid), null);
     }
 
     @Override
     public ComponentConfiguration getFactoryComponentOCD(String factoryPid) {
-        // TODO Auto-generated method stub
-        return null;
+        if (!this.factoryPids.contains(factoryPid)) {
+            return null;
+        }
+        return getComponentDefinition(factoryPid);
+    }
+
+    private static boolean implementsAnyService(Component component, String[] classes) {
+        final String[] services = component.getServices();
+        if (services == null) {
+            return false;
+        }
+        for (String className : classes) {
+            for (String s : services) {
+                if (s.equals(className)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
-    public List<ComponentConfiguration> getServiceProviderOCDs(Class<?>... clazzes) {
-        // TODO Auto-generated method stub
-        return null;
+    public List<ComponentConfiguration> getServiceProviderOCDs(String... classNames) {
+        return Arrays.stream(this.scrService.getComponents())
+                .filter(component -> implementsAnyService(component, classNames)).map(Component::getName)
+                .map(this::getComponentDefinition).filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ComponentConfiguration> getServiceProviderOCDs(Class<?>... classes) {
+        final String[] classNames = new String[classes.length];
+        for (int i = 0; i < classes.length; i++) {
+            classNames[i] = classes[i].getName();
+        }
+        return getServiceProviderOCDs(classNames);
     }
 }

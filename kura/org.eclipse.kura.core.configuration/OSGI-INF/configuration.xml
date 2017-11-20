@@ -41,5 +41,11 @@
               bind="setCryptoService" 
               unbind="unsetCryptoService"
               cardinality="1..1" 
-              policy="static"/>   
+              policy="static"/>
+   <reference bind="setScrService" 
+              cardinality="1..1"
+              interface="org.apache.felix.scr.ScrService"
+              name="ScrService"
+              policy="static"
+              unbind="unsetScrService"/>
 </scr:component>

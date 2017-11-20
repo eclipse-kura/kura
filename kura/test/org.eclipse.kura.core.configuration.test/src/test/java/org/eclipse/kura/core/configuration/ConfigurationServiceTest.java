@@ -41,6 +41,8 @@ import java.util.TreeSet;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.felix.scr.Component;
+import org.apache.felix.scr.ScrService;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraPartialSuccessException;
@@ -634,7 +636,6 @@ public class ConfigurationServiceTest {
         String marshal = XmlUtil.marshal(configs);
 
         XmlComponentConfigurations unmarshal = XmlUtil.unmarshal(marshal, XmlComponentConfigurations.class);
-
 
         String marshal2 = XmlUtil.marshal(unmarshal);
 
@@ -1247,7 +1248,7 @@ public class ConfigurationServiceTest {
             }
 
             @Override
-            void decryptConfigurationProperties(Map<String,Object> configProps) {
+            void decryptConfigurationProperties(Map<String, Object> configProps) {
                 calls[1] = true;
 
                 throw new RuntimeException("test");
@@ -3002,5 +3003,166 @@ public class ConfigurationServiceTest {
         fr.close();
 
         assertEquals(expect, new String(chars));
+    }
+
+    private Component createMockComponent(final String pid, final String... implementedServices) {
+        final Component result = mock(Component.class);
+        when(result.getName()).thenReturn(pid);
+        when(result.getServices()).thenReturn(implementedServices);
+        return result;
+    }
+
+    private Map<String, Tocd> getOcdsMap(List<String> registeredFactories, List<Tocd> registeredOcds) {
+        final Map<String, Tocd> result = new HashMap<>();
+        for (int i = 0; i < registeredFactories.size(); i++) {
+            result.put(registeredFactories.get(i), registeredOcds.get(i));
+        }
+        return result;
+    }
+
+    private ConfigurationService createMockConfigurationServiceForOCDTests(List<String> registeredFactories,
+            List<Tocd> registeredOcds, List<Component> registeredComponents) throws NoSuchFieldException {
+
+        assertEquals(registeredFactories.size(), registeredOcds.size());
+        ScrService scrService = new ScrService() {
+
+            @Override
+            public Component[] getComponents(Bundle bundle) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public Component[] getComponents(String componentName) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public Component[] getComponents() {
+                return registeredComponents.toArray(new Component[registeredComponents.size()]);
+            }
+
+            @Override
+            public Component getComponent(long componentId) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+        };
+
+        final ConfigurationServiceImpl result = new ConfigurationServiceImpl();
+        result.setScrService(scrService);
+        TestUtil.setFieldValue(result, "factoryPids", new HashSet<>(registeredFactories));
+        TestUtil.setFieldValue(result, "ocds", getOcdsMap(registeredFactories, registeredOcds));
+
+        return result;
+    }
+
+    private boolean isOCDFor(ComponentConfiguration config, String factoryPid, Tocd ocd) {
+        return config.getPid().equals(factoryPid) && config.getDefinition() == ocd;
+    }
+
+    @Test
+    public void testShouldReturnEmptyFactoryOCDList() throws NoSuchFieldException {
+        final ConfigurationService configurationService = createMockConfigurationServiceForOCDTests(Arrays.asList(),
+                Arrays.asList(), Arrays.asList());
+        final List<ComponentConfiguration> configs = configurationService.getFactoryComponentOCDs();
+        assertTrue(configs.isEmpty());
+    }
+
+    @Test
+    public void testGetShouldFactoryOCDList() throws NoSuchFieldException {
+        final Tocd ocd1 = mock(Tocd.class);
+        final Tocd ocd2 = mock(Tocd.class);
+        final Tocd ocd3 = mock(Tocd.class);
+        final ConfigurationService configurationService = createMockConfigurationServiceForOCDTests(
+                Arrays.asList("foo", "bar", "baz"), Arrays.asList(ocd1, ocd2, ocd3), Arrays.asList());
+        final List<ComponentConfiguration> configs = configurationService.getFactoryComponentOCDs();
+        assertEquals(3, configs.size());
+        assertTrue(configs.stream().filter(config -> isOCDFor(config, "foo", ocd1)).findAny().isPresent());
+        assertTrue(configs.stream().filter(config -> isOCDFor(config, "bar", ocd2)).findAny().isPresent());
+        assertTrue(configs.stream().filter(config -> isOCDFor(config, "baz", ocd3)).findAny().isPresent());
+    }
+
+    @Test
+    public void testShouldReturnNullFactoryOCD() throws NoSuchFieldException {
+        final ConfigurationService configurationService = createMockConfigurationServiceForOCDTests(Arrays.asList(),
+                Arrays.asList(), Arrays.asList());
+        assertNull(configurationService.getFactoryComponentOCD("bar"));
+        assertNull(configurationService.getFactoryComponentOCD(null));
+    }
+
+    @Test
+    public void testShouldGetSingleFactoryOCD() throws NoSuchFieldException {
+        final Tocd ocd1 = mock(Tocd.class);
+        final Tocd ocd2 = mock(Tocd.class);
+        final Tocd ocd3 = mock(Tocd.class);
+        final ConfigurationService configurationService = createMockConfigurationServiceForOCDTests(
+                Arrays.asList("foo", "bar", "baz"), Arrays.asList(ocd1, ocd2, ocd3), Arrays.asList());
+        assertTrue(isOCDFor(configurationService.getFactoryComponentOCD("foo"), "foo", ocd1));
+        assertTrue(isOCDFor(configurationService.getFactoryComponentOCD("bar"), "bar", ocd2));
+        assertTrue(isOCDFor(configurationService.getFactoryComponentOCD("baz"), "baz", ocd3));
+        assertNull(configurationService.getFactoryComponentOCD("nonExisting"));
+        assertNull(configurationService.getFactoryComponentOCD(null));
+    }
+
+    @Test
+    public void testShouldReturnEmptyFactoryOCDListForServiceProvider() throws NoSuchFieldException {
+        final ConfigurationService configurationService = createMockConfigurationServiceForOCDTests(Arrays.asList(),
+                Arrays.asList(), Arrays.asList());
+        assertTrue(configurationService.getServiceProviderOCDs(new Class<?>[0]).isEmpty());
+        assertTrue(configurationService.getServiceProviderOCDs(String.class).isEmpty());
+    }
+
+    @Test
+    public void testShouldReturnFactoryOCDListForServiceProvider() throws NoSuchFieldException {
+        final Tocd fooOcd = mock(Tocd.class);
+        final Tocd barOcd = mock(Tocd.class);
+        final Tocd bazOcd = mock(Tocd.class);
+        final Tocd otherOcd = mock(Tocd.class);
+
+        final Component comp1 = createMockComponent("foo", "java.lang.String", "java.lang.Integer");
+        final Component comp2 = createMockComponent("bar", "java.lang.Double", "java.lang.Long");
+        final Component comp3 = createMockComponent("baz", "java.lang.Double", "java.lang.Integer");
+        final Component comp4 = createMockComponent("other");
+
+        final ConfigurationService configurationService = createMockConfigurationServiceForOCDTests(
+                Arrays.asList("foo", "bar", "baz", "other"), Arrays.asList(fooOcd, barOcd, bazOcd, otherOcd),
+                Arrays.asList(comp1, comp2, comp3, comp4));
+
+        assertTrue(configurationService.getServiceProviderOCDs(new Class<?>[0]).isEmpty());
+
+        final List<ComponentConfiguration> implementingString = configurationService
+                .getServiceProviderOCDs(String.class);
+        assertEquals(1, implementingString.size());
+        assertTrue(implementingString.stream().filter(config -> isOCDFor(config, "foo", fooOcd)).findAny().isPresent());
+
+        final List<ComponentConfiguration> implementingStringOrInteger = configurationService
+                .getServiceProviderOCDs(String.class, Integer.class);
+        assertEquals(2, implementingStringOrInteger.size());
+        assertTrue(implementingStringOrInteger.stream().filter(config -> isOCDFor(config, "foo", fooOcd)).findAny()
+                .isPresent());
+        assertTrue(implementingStringOrInteger.stream().filter(config -> isOCDFor(config, "baz", bazOcd)).findAny()
+                .isPresent());
+
+        final List<ComponentConfiguration> implementingLongOrBoolean = configurationService
+                .getServiceProviderOCDs(Long.class, Boolean.class);
+        assertEquals(1, implementingLongOrBoolean.size());
+        assertTrue(implementingLongOrBoolean.stream().filter(config -> isOCDFor(config, "bar", barOcd)).findAny()
+                .isPresent());
+
+        final List<ComponentConfiguration> implementingBoolean = configurationService
+                .getServiceProviderOCDs(Boolean.class);
+        assertTrue(implementingBoolean.isEmpty());
+
+        final List<ComponentConfiguration> implementingLong = configurationService.getServiceProviderOCDs(Long.class);
+        assertEquals(1, implementingLong.size());
+        assertTrue(implementingLong.stream().filter(config -> isOCDFor(config, "bar", barOcd)).findAny().isPresent());
+
+        final List<ComponentConfiguration> implementingDouble = configurationService
+                .getServiceProviderOCDs(Double.class);
+        assertEquals(2, implementingDouble.size());
+        assertTrue(implementingDouble.stream().filter(config -> isOCDFor(config, "bar", barOcd)).findAny().isPresent());
+        assertTrue(implementingDouble.stream().filter(config -> isOCDFor(config, "baz", bazOcd)).findAny().isPresent());
     }
 }

@@ -876,6 +876,38 @@ public class ConfigurationServiceTest {
         assertTrue("Snapshot should be encrypted", s.startsWith("encrypted"));
     }
 
+    private void assertContainsWireComponentsDefinitions(List<ComponentConfiguration> configs, boolean includesAsset) {
+        final String[] PIDS = { "org.eclipse.kura.wire.CloudPublisher", "org.eclipse.kura.wire.CloudSubscriber",
+                "org.eclipse.kura.wire.DbWireRecordFilter", "org.eclipse.kura.wire.DbWireRecordStore",
+                "org.eclipse.kura.wire.Fifo", "org.eclipse.kura.wire.Logger", "org.eclipse.kura.wire.RegexFilter",
+                "org.eclipse.kura.wire.Timer" };
+        for (final String pid : PIDS) {
+            assertTrue(configs.stream()
+                    .filter(config -> config.getPid().equals(pid) && config.getDefinition().getId().equals(pid))
+                    .findAny().isPresent());
+        }
+        boolean wireAssetFound = configs.stream().filter(
+                config -> config.getPid().equals("org.eclipse.kura.wire.WireAsset") && config.getDefinition() == null)
+                .findAny().isPresent();
+        assertEquals(includesAsset, wireAssetFound);
+    }
+
+    @Test
+    public void testShouldGetFactoryComponentDefinitions() {
+        List<ComponentConfiguration> configs = configurationService.getFactoryComponentOCDs();
+        assertFalse(configs.isEmpty());
+        assertContainsWireComponentsDefinitions(configs, false);
+    }
+
+    @Test
+    public void testShouldGetServiceProviderDefinitions() {
+        List<ComponentConfiguration> configs = configurationService.getServiceProviderOCDs(
+                "org.eclipse.kura.wire.WireEmitter", "org.eclipse.kura.wire.WireReceiver",
+                "org.eclipse.kura.wire.WireComponent");
+        assertFalse(configs.isEmpty());
+        assertContainsWireComponentsDefinitions(configs, true);
+    }
+
     // a unit test, just to see it working
     @Test
     public void testUpdateConfigurationsListOfComponentConfigurationBoolean()

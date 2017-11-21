@@ -174,7 +174,8 @@ public class DeviceScannerPanelUi extends Composite {
                 DeviceScannerPanelUi.this.gwtDeviceService.findDeviceScanner(token,
                         DeviceScannerPanelUi.this.formPeriod.getValue(),
                         DeviceScannerPanelUi.this.formMaxScan.getValue(),
-                        DeviceScannerPanelUi.this.formAdapter.getSelectedValue(),
+                        DeviceScannerPanelUi.this.formAdapter.getSelectedItemText(),
+
                         new AsyncCallback<HashSet<GwtDeviceScannerModel>>() {
 
                             private Object deviceScannerGrid;

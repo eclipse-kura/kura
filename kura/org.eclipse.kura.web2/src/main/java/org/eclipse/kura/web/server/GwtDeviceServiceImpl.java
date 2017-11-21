@@ -120,21 +120,27 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         checkXSRFToken(xsrfToken);
         HashSet<GwtDeviceScannerModel> pairs = new HashSet<GwtDeviceScannerModel>();
         BluetoothLeService bluetoothLeService = ServiceLocator.getInstance().getService(BluetoothLeService.class);
-        BluetoothLe ble = new BluetoothLe(bluetoothLeService, period, maxScan, adaptor);
+        // BluetoothLe ble = new BluetoothLe(bluetoothLeService, period, maxScan, adaptor);
         Ublox ublox = new Ublox(Integer.parseInt(maxScan));
-        if (adaptor != "ublox") {
-            try {
-                pairs.addAll(ble.listDevice);
-            } catch (Exception e) {
-                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-            }
-        } else {
-            try {
-                pairs.addAll(ublox.listDevice);
-            } catch (Exception e) {
-                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-            }
+        // if (!adaptor.equals("ublox")) {
+        // try {
+        // pairs.addAll(ble.listDevice);
+        // } catch (Exception e) {
+        // throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        // }
+        // } else {
+        // try {
+        // pairs.addAll(ublox.listDevice);
+        // } catch (Exception e) {
+        // throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        // }
+        // }
+        try {
+            pairs.addAll(ublox.listDevice);
+        } catch (Exception e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
+
         return new HashSet<GwtDeviceScannerModel>(pairs);
     }
 

@@ -13,8 +13,6 @@ package org.eclipse.kura.usb;
 
 import java.util.List;
 
-import javax.usb.UsbServices;
-
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 

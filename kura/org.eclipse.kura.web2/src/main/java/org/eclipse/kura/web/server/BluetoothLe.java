@@ -1,4 +1,3 @@
-package org.eclipse.kura.web.server;
 
 /*******************************************************************************
  * Copyright (c) 2017 Eurotech and/or its affiliates
@@ -11,6 +10,8 @@ package org.eclipse.kura.web.server;
  * Contributors:
  *     Eurotech
  *******************************************************************************/
+
+package org.eclipse.kura.web.server;
 
 import java.util.ArrayList;
 import java.util.Date;

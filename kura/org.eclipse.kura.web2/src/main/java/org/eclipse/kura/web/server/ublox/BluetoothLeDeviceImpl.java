@@ -21,7 +21,7 @@ public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
     private boolean connect = false;
     private boolean getListServices = false;
     private static UUID s_uuid;
-    private BluetoothAtCommand at = new BluetoothAtCommand();
+    private static BluetoothAtCommand at = new BluetoothAtCommand();
 
     public BluetoothLeDeviceImpl() {
 

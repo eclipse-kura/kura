@@ -12,10 +12,10 @@ import java.util.Map;
 
 public class BluetoothLeScanListenerImpl implements BluetoothLeScanListener {
 
-    private BluetoothAtCommand at = new BluetoothAtCommand();
-    private BluetoothLeAdapterImpl adap = new BluetoothLeAdapterImpl();
+    private static BluetoothAtCommand at = new BluetoothAtCommand();
+    private static BluetoothLeAdapterImpl adap = new BluetoothLeAdapterImpl();
     private final Map<String, BluetoothLeDeviceImpl> m_devices;
-    private long scan_timeout = 60 * 1000; // 60 seconds
+    private static long scan_timeout = 60 * 1000; // 60 seconds
     private String scan_end = "";
 
     // private List<BluetoothLeDevice> m_scanResult;

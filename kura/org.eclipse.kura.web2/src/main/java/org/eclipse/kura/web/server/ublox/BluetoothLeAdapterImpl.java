@@ -8,12 +8,9 @@ package org.eclipse.kura.web.server.ublox;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
-
 public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
 
-    private final Logger logger = Logger.getLogger(BluetoothLeAdapterImpl.class);
-    private BluetoothAtCommand at = new BluetoothAtCommand();
+    private static BluetoothAtCommand at = new BluetoothAtCommand();
     private String bd_addr;     // mac address of device
     private String name_adapter; // name of the adapter
     private String interface_name = new String("/dev/ttymxc2");
@@ -115,7 +112,6 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
      * Map list
      */
     public Map<String, BluetoothLeDeviceImpl> findDevice(long timeout) {
-        logger.info("En cours de scan...");
         setScanTimeOut(timeout);
         scanRunning = true;
         setDiscoverable(true);
@@ -123,13 +119,12 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
         scanRunning = false;
 
         // UBloxCommand.getListScan().getScanningEnd();
-
-        for (BluetoothLeDeviceImpl device : UBloxCommand.getListScan().getMapScan().values()) {
-            System.out.println(device.getAddress() + "," + device.getName() + "," + device.getRSSI() + ","
-                    + device.getTimeStamp());
-            logger.info(device.getAddress());
-        }
-
+        /*
+         * for (BluetoothLeDeviceImpl device :
+         * UBloxCommand.gestListScan().getMapScan().values()) {
+         * System.out.println(device.getAddress() + "," + device.getName() + "," +
+         * device.getRSSI() + "," + device.getTimeStamp()); }
+         */
         return UBloxCommand.getListScan().getMapScan();
     }
 

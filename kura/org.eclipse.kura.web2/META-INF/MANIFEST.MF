@@ -78,4 +78,5 @@ Require-Bundle: com.gwt.user;bundle-version="[1.0.1,2.0.0)"
 Export-Package: org.eclipse.kura.web.shared.model
 Bundle-ClassPath: .,
  target/asg.cliche-110413.jar,
- target/purejavacomm.jar
+ target/purejavacomm.jar,
+ target/jna-4.0.0.jar

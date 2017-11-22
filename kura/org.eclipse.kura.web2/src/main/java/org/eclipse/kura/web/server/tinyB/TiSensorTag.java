@@ -1,4 +1,4 @@
-package org.eclipse.kura.web.server;
+package org.eclipse.kura.web.server.tinyB;
 
 /*******************************************************************************
  * Copyright (c) 2017 Eurotech and/or its affiliates

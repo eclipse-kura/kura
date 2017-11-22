@@ -41,11 +41,11 @@
                 <b:Column size="MD_7">
                     <b:FormLabel for="Configuration Scan" ></b:FormLabel>
                     <b:FormGroup>
-                        <b:FormLabel for="formPeriod" >Period</b:FormLabel>
-                        <b:TextBox b:id="formPeriod" ui:field="formPeriod" />
+                        <b:FormLabel for="formPeriod" >Period (second)</b:FormLabel>
+                        <b:TextBox b:id="formPeriod" ui:field="formPeriod"/>
                     </b:FormGroup>
                     <b:FormGroup>
-                        <b:FormLabel for="formMaxScan">Max Scan</b:FormLabel>
+                        <b:FormLabel for="formMaxScan">Max Scan (second)</b:FormLabel>
                         <b:TextBox b:id="formMaxScan" ui:field="formMaxScan" />
                     </b:FormGroup>
                     <b:FormGroup>

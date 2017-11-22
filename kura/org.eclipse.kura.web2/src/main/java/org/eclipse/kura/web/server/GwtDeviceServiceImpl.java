@@ -29,6 +29,8 @@ import org.eclipse.kura.bluetooth.le.BluetoothLeService;
 import org.eclipse.kura.command.PasswordCommandService;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.web.server.tinyB.BluetoothLe;
+import org.eclipse.kura.web.server.ublox.Ublox;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -117,30 +119,26 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     @Override
     public HashSet<GwtDeviceScannerModel> findDeviceScanner(GwtXSRFToken xsrfToken, String period, String maxScan,
             String adaptor) throws GwtKuraException {
+
         checkXSRFToken(xsrfToken);
         HashSet<GwtDeviceScannerModel> pairs = new HashSet<GwtDeviceScannerModel>();
         BluetoothLeService bluetoothLeService = ServiceLocator.getInstance().getService(BluetoothLeService.class);
-        // BluetoothLe ble = new BluetoothLe(bluetoothLeService, period, maxScan, adaptor);
-        Ublox ublox = new Ublox(Integer.parseInt(maxScan));
-        // if (!adaptor.equals("ublox")) {
-        // try {
-        // pairs.addAll(ble.listDevice);
-        // } catch (Exception e) {
-        // throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        // }
-        // } else {
-        // try {
-        // pairs.addAll(ublox.listDevice);
-        // } catch (Exception e) {
-        // throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        // }
-        // }
-        try {
-            pairs.addAll(ublox.listDevice);
-        } catch (Exception e) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        }
 
+        if (!adaptor.equals("ublox")) {
+            BluetoothLe ble = new BluetoothLe(bluetoothLeService, period, maxScan, adaptor);
+            try {
+                pairs.addAll(ble.listDevice);
+            } catch (Exception e) {
+                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+            }
+        } else {
+            Ublox ublox = new Ublox(Integer.parseInt(maxScan));
+            try {
+                pairs.addAll(ublox.listDevice);
+            } catch (Exception e) {
+                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+            }
+        }
         return new HashSet<GwtDeviceScannerModel>(pairs);
     }
 

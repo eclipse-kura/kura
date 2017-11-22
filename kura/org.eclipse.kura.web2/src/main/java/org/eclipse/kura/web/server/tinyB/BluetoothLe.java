@@ -11,7 +11,7 @@
  *     Eurotech
  *******************************************************************************/
 
-package org.eclipse.kura.web.server;
+package org.eclipse.kura.web.server.tinyB;
 
 import java.util.ArrayList;
 import java.util.Date;

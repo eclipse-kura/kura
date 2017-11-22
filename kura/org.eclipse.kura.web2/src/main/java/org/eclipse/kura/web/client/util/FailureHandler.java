@@ -39,6 +39,17 @@ public class FailureHandler {
         printMessage(caught, name);
     }
 
+    public static void handle(String caught) {
+        printMessage("");
+    }
+
+    // add methode
+    private static void printMessage(String error) {
+        StringBuilder errorMessageBuilder = new StringBuilder();
+        errorMessageBuilder.append(error);
+    }
+
+    // add methode
     public static void handle(Throwable caught) {
         printMessage(caught, "");
     }

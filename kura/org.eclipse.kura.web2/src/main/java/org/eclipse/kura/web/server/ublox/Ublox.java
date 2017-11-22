@@ -1,12 +1,10 @@
-package org.eclipse.kura.web.server;
+package org.eclipse.kura.web.server.ublox;
 
 import java.util.Date;
 import java.util.HashSet;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
-import org.eclipse.kura.web.server.ublox.BluetoothAtCommand;
-import org.eclipse.kura.web.server.ublox.BluetoothLeAdapterImpl;
-import org.eclipse.kura.web.server.ublox.BluetoothLeDeviceImpl;
 import org.eclipse.kura.web.shared.model.GwtDeviceScannerModel;
 
 import asg.cliche.Command;
@@ -23,12 +21,16 @@ public class Ublox {
 
     public Ublox(int maxScan) {
         activate();
-        scan(12000);
+        scan(maxScan);
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public String activate() {
         at.connectSerialPort();
-        System.out.println("helloWolrd2!");
         return "connecting";
     }
 
@@ -49,12 +51,15 @@ public class Ublox {
         return "Disconnecting";
     }
 
-    // @Command(description = "Scan for bluetooth devices")
     public String scan(long time) {
-
+        String name = "INKNOW";
         for (BluetoothLeDeviceImpl device : adap.findDevice(time).values()) {
-            this.listDevice.add(new GwtDeviceScannerModel(device.getAddress(), device.getName(), device.getRSSI(),
-                    String.valueOf(new Date())));
+            if (!device.getName().equals(""))
+                name = device.getName();
+            else
+                name = "INKNOW";
+            this.listDevice.add(
+                    new GwtDeviceScannerModel(device.getAddress(), name, device.getRSSI(), String.valueOf(new Date())));
         }
         return "Scanning";
     }

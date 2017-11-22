@@ -37,7 +37,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
@@ -81,10 +80,12 @@ public class DeviceScannerPanelUi extends Composite {
         // Set text for buttons
         this.deviceScannerRefresh.setText(MSG.refresh());
         this.deviceScannerGrid.getEmptyTableWidget();
-
         // Set List Box for buttons
         this.formAdapter.addItem("hci0");
         this.formAdapter.addItem("ublox");
+        if (this.formAdapter.isItemSelected(1)) {
+            this.formPeriod.setEnabled(false);
+        }
         loadDeviceScannerTable(this.deviceScannerGrid, this.profileDataProvider);
     }
 
@@ -193,7 +194,8 @@ public class DeviceScannerPanelUi extends Composite {
                                 EntryClassUi.hideWaitModal();
                                 DeviceScannerPanelUi.this.profileDataProvider.getList().clear();
                                 if (result.isEmpty()) {
-                                    Window.alert("Device scanner failed !");
+                                    // Window.alert("Device scanner failed !");
+                                    FailureHandler.handle("Device scanner failed !");
                                 } else {
                                     for (GwtDeviceScannerModel resultPair : result) {
                                         DeviceScannerPanelUi.this.profileDataProvider.getList().add(resultPair);

@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.wire.graph;
 
+import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -31,20 +32,27 @@ public interface WireGraphService {
      * @param graphConfiguration
      *            A {@link WireGraphConfiguration} object that represents an updated
      *            status of the Wire Graph
+     * @throws {@link
+     *             KuraException} if the update operation fails
      */
-    public void update(WireGraphConfiguration graphConfiguration);
+    public void update(WireGraphConfiguration graphConfiguration) throws KuraException;
 
     /**
      * This method allows to delete the current Wire Graph.
+     * 
+     * @throws {@link
+     *             KuraException} if the delete operation fails
      */
-    public void delete();
+    public void delete() throws KuraException;
 
     /**
      * This method returns the current Wire Graph configuration.
      * 
      * @return a {@link WireGraphConfiguration} object that represents the current
      *         configuration of the Wire Graph
+     * @throws {@link
+     *             KuraException} if the get operation fails
      */
-    public WireGraphConfiguration get();
+    public WireGraphConfiguration get() throws KuraException;
 
 }

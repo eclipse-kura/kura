@@ -34,8 +34,6 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Option;
-import org.eclipse.kura.driver.ChannelDescriptor;
-import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.DriverDescriptor;
 import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.util.service.ServiceUtil;
@@ -60,6 +58,9 @@ import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireService;
+import org.eclipse.kura.wire.graph.WireComponentConfiguration;
+import org.eclipse.kura.wire.graph.WireGraphConfiguration;
+import org.eclipse.kura.wire.graph.WireGraphService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -136,12 +137,12 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         this.checkXSRFToken(xsrfToken);
         final DriverService driverService = ServiceLocator.getInstance().getService(DriverService.class);
         List<DriverDescriptor> drivers = driverService.listDriverDescriptors();
-        
+
         List<String> driverPids = new ArrayList<>();
-        for(DriverDescriptor driverDescriptor : drivers) {
+        for (DriverDescriptor driverDescriptor : drivers) {
             driverPids.add(driverDescriptor.getPid());
         }
-        
+
         return driverPids;
     }
 
@@ -190,8 +191,8 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         final DriverService driverService = ServiceLocator.getInstance().getService(DriverService.class);
 
         Optional<DriverDescriptor> driverDescriptorOptional = driverService.getDriverDescriptor(driverPid);
-        
-        if(driverDescriptorOptional.isPresent()) {
+
+        if (driverDescriptorOptional.isPresent()) {
             DriverDescriptor driverDescriptor = driverDescriptorOptional.get();
             return getGwtConfigComponent(driverDescriptor);
         } else {
@@ -271,10 +272,19 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
     }
 
     private GwtWiresConfiguration getWiresConfigurationInternal() throws GwtKuraException {
-        final ConfigurationService configService = ServiceLocator.getInstance().getService(ConfigurationService.class);
-        final WireService wireService = ServiceLocator.getInstance().getService(WireService.class);
+        final WireGraphService wireGraphService = ServiceLocator.getInstance().getService(WireGraphService.class);
 
-        final Set<WireConfiguration> wireConfigurations = wireService.getWireConfigurations();
+        WireGraphConfiguration wireGraphConfiguration = null;
+        Set<WireConfiguration> wireConfigurations = new HashSet<>();
+        List<WireComponentConfiguration> wireComponentConfigurations = new ArrayList<>();
+        try {
+            wireGraphConfiguration = wireGraphService.get();
+            wireConfigurations = new HashSet<>(wireGraphConfiguration.getWireConfigurations());
+            wireComponentConfigurations = wireGraphConfiguration.getWireComponentConfigurations();
+        } catch (KuraException e) {
+
+        }
+
         final List<String> wireEmitterFactoryPids = new ArrayList<>();
         final List<String> wireReceiverFactoryPids = new ArrayList<>();
         final List<String> wireComponents = new ArrayList<>();
@@ -282,16 +292,6 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         Set<String> wireComponentsPids = new HashSet<>();
 
         GwtServerUtil.fillFactoriesLists(wireEmitterFactoryPids, wireReceiverFactoryPids);
-
-        String sGraph = null;
-        // Get Graph JSON from WireService
-        try {
-            final Map<String, Object> wsProps = configService.getComponentConfiguration(WIRE_SERVICE_PID)
-                    .getConfigurationProperties();
-            sGraph = (String) wsProps.get(GRAPH);
-        } catch (final KuraException exception) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, exception);
-        }
 
         // create the JSON for the Wires Configuration
         final JsonObject wireConfig = Json.object();
@@ -309,16 +309,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             wireConfig.add(String.valueOf(++i), wireConf);
         }
 
-        if (sGraph != null) {
-            JsonObject jsonWireComponents = Json.parse(sGraph).asObject();
-            int size = jsonWireComponents.size();
-            for (int compIndex = 0; compIndex < size; compIndex++) {
-                final JsonObject jsonWireComp = jsonWireComponents.get(String.valueOf(compIndex)).asObject();
-                String pid = jsonWireComp.getString("pid", null);
-                if (pid != null) {
-                    wireComponentsPids.add(pid);
-                }
-            }
+        for (WireComponentConfiguration wireComponentConfiguration : wireComponentConfigurations) {
+            ComponentConfiguration config = wireComponentConfiguration.getConfiguration();
+            wireComponentsPids.add(config.getPid());
         }
 
         final List<GwtWireComponentConfiguration> configs = new ArrayList<>();
@@ -349,7 +342,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         configuration.getWireComponents().addAll(wireComponents);
         configuration.getWireComponentPids().addAll(wireComponentsPids);
         configuration.setWiresConfigurationJson(wireConfig.toString());
-        configuration.setGraph(sGraph == null ? "{}" : sGraph);
+        // configuration.setGraph(sGraph == null ? "{}" : sGraph);
         configuration.setWireComponentsJson(GwtWireServiceUtil.getWireComponentsJson(configs));
         configuration.setWireConfigurationsJson(GwtWireServiceUtil.getWireConfigurationsJson(wires));
 
@@ -357,8 +350,8 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
     }
 
     private boolean equals(WireConfiguration wire, GwtWireConfiguration gwtWire) {
-        return (wire.getEmitterPid().equals(gwtWire.getEmitterPid())
-                && wire.getReceiverPid().equals(gwtWire.getReceiverPid()));
+        return wire.getEmitterPid().equals(gwtWire.getEmitterPid())
+                && wire.getReceiverPid().equals(gwtWire.getReceiverPid());
     }
 
     private void createNewWireComponent(ConfigurationService configurationService, WireComponentDescriptor desc,
@@ -403,7 +396,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         for (WireConfiguration existingWire : existingWires) {
             if (!wiresInReceivedConfig.stream().filter(receivedWire -> equals(existingWire, receivedWire)).findFirst()
                     .isPresent()) {
-                logger.info("Deleting Wire: Emitter PID -> {}  | Receiver PID -> {}", existingWire.getEmitterPid(),
+                logger.info("Deleting Wire: Emitter PID -> {} | Receiver PID -> {}", existingWire.getEmitterPid(),
                         existingWire.getReceiverPid());
                 wireService.deleteWireConfiguration(existingWire);
             }

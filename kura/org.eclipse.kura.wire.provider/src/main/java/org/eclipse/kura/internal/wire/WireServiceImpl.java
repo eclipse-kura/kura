@@ -16,9 +16,9 @@ package org.eclipse.kura.internal.wire;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
+import static org.osgi.service.cm.ConfigurationAdmin.SERVICE_FACTORYPID;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_CONSUMER_PID;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_PRODUCER_PID;
-import static org.osgi.service.cm.ConfigurationAdmin.SERVICE_FACTORYPID;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -438,28 +438,31 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
         String oldJson = (String) this.properties.get(NEW_WIRE_GRAPH_PROPERTY);
         WireGraphConfiguration oldGraphConfig = this.jsonEncoderDecoder.fromJson(oldJson);
 
-        
         List<WireComponentConfiguration> oldWireComponentConfigurations = oldGraphConfig
                 .getWireComponentConfigurations();
-        List<WireComponentConfiguration> newWireComponentConfigurations = new ArrayList<>(graphConfiguration
-                .getWireComponentConfigurations());
-        
+        List<WireComponentConfiguration> newWireComponentConfigurations = new ArrayList<>(
+                graphConfiguration.getWireComponentConfigurations());
+
         // Evaluate deletable components
-        List<ComponentConfiguration> componentsToDelete = getComponentsToDelete(oldWireComponentConfigurations, newWireComponentConfigurations);
+        List<ComponentConfiguration> componentsToDelete = getComponentsToDelete(oldWireComponentConfigurations,
+                newWireComponentConfigurations);
         for (ComponentConfiguration componentToDelete : componentsToDelete) {
             this.configurationService.deleteFactoryConfiguration(componentToDelete.getPid(), false);
         }
 
         // create new components
-        List<ComponentConfiguration> componentsToCreate = getComponentsToCreate(oldWireComponentConfigurations, newWireComponentConfigurations);
+        List<ComponentConfiguration> componentsToCreate = getComponentsToCreate(oldWireComponentConfigurations,
+                newWireComponentConfigurations);
         for (ComponentConfiguration componentToCreate : componentsToCreate) {
-            Map<String,Object> componentProps = componentToCreate.getConfigurationProperties();
+            Map<String, Object> componentProps = componentToCreate.getConfigurationProperties();
             String factoryPid = (String) componentProps.get(SERVICE_FACTORYPID);
-            this.configurationService.createFactoryConfiguration(factoryPid, componentToCreate.getPid(), componentProps, false);
+            this.configurationService.createFactoryConfiguration(factoryPid, componentToCreate.getPid(), componentProps,
+                    false);
         }
 
         // Evaluate updatable components
-        List<ComponentConfiguration> componentsToUpdate = getComponentsToUpdate(newWireComponentConfigurations, componentsToCreate);
+        List<ComponentConfiguration> componentsToUpdate = getComponentsToUpdate(newWireComponentConfigurations,
+                componentsToCreate);
         for (ComponentConfiguration componentToUpdate : componentsToUpdate) {
             componentConfigurations.add(componentToUpdate);
         }
@@ -474,9 +477,10 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
         this.configurationService.updateConfigurations(componentConfigurations, true);
     }
 
-    private List<ComponentConfiguration> getComponentsToUpdate(List<WireComponentConfiguration> newWireComponentConfigurations, List<ComponentConfiguration> newComponents) {
+    private List<ComponentConfiguration> getComponentsToUpdate(
+            List<WireComponentConfiguration> newWireComponentConfigurations,
+            List<ComponentConfiguration> newComponents) {
         List<ComponentConfiguration> componentsToUpdate = new ArrayList<>();
-        
 
         for (WireComponentConfiguration newWireComponentConfiguration : newWireComponentConfigurations) {
             ComponentConfiguration newComponentConfig = newWireComponentConfiguration.getConfiguration();
@@ -484,12 +488,13 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
                 componentsToUpdate.add(newComponentConfig);
             }
         }
-        
+
         componentsToUpdate.removeAll(newComponents);
         return componentsToUpdate;
     }
 
-    private List<ComponentConfiguration> getComponentsToCreate(List<WireComponentConfiguration> oldWireComponentConfigurations,
+    private List<ComponentConfiguration> getComponentsToCreate(
+            List<WireComponentConfiguration> oldWireComponentConfigurations,
             List<WireComponentConfiguration> newWireComponentConfigurations) {
         // TODO: test if it makes sense to fill the list with all the new and remove as far as a matching old is found;
         List<ComponentConfiguration> componentsToCreate = new ArrayList<>();
@@ -518,7 +523,8 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
         return componentsToCreate;
     }
 
-    private List<ComponentConfiguration> getComponentsToDelete(List<WireComponentConfiguration> oldWireComponentConfigurations,
+    private List<ComponentConfiguration> getComponentsToDelete(
+            List<WireComponentConfiguration> oldWireComponentConfigurations,
             List<WireComponentConfiguration> newWireComponentConfigurations) {
         List<ComponentConfiguration> componentsToDelete = new ArrayList<>();
 
@@ -547,7 +553,38 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
 
     @Override
     public void delete() throws KuraException {
+        // Delete all existing wires
+        try {
+            deleteAllWires();
+        } catch (InvalidSyntaxException e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR); // TODO: change with something more
+                                                                            // meaningful
+        }
 
+        String oldJson = (String) this.properties.get(NEW_WIRE_GRAPH_PROPERTY);
+        WireGraphConfiguration oldGraphConfig = this.jsonEncoderDecoder.fromJson(oldJson);
+
+        List<WireComponentConfiguration> oldWireComponentConfigurations = oldGraphConfig
+                .getWireComponentConfigurations();
+        List<WireComponentConfiguration> newWireComponentConfigurations = new ArrayList<>();
+
+        // Evaluate deletable components
+        List<ComponentConfiguration> componentsToDelete = getComponentsToDelete(oldWireComponentConfigurations,
+                newWireComponentConfigurations);
+        for (ComponentConfiguration componentToDelete : componentsToDelete) {
+            this.configurationService.deleteFactoryConfiguration(componentToDelete.getPid(), false);
+        }
+
+        WireGraphConfiguration newWireGraphConfiguration = new WireGraphConfiguration(new ArrayList<>(),
+                new ArrayList<>());
+
+        String jsonConfig = this.jsonEncoderDecoder.toJson(newWireGraphConfiguration).toString();
+        ComponentConfiguration wireServiceComponentConfig = this.configurationService
+                .getComponentConfiguration(CONF_PID);
+        wireServiceComponentConfig.getConfigurationProperties().put(NEW_WIRE_GRAPH_PROPERTY, jsonConfig);
+
+        this.configurationService.updateConfiguration(CONF_PID, wireServiceComponentConfig.getConfigurationProperties(),
+                true);
     }
 
     @Override
@@ -582,7 +619,6 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
 
         return new WireGraphConfiguration(completeWireComponentConfigurations,
                 wireGraphConfiguration.getWireConfigurations());
-
     }
 
 }

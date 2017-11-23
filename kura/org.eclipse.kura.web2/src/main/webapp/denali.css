@@ -777,6 +777,7 @@ img.x-tree3-node-icon {
 
 .devs.Atomic .body.temporary {
 	opacity: 0.5;
+	pointer-events: none;
 }
 
 .devs.Atomic .label {

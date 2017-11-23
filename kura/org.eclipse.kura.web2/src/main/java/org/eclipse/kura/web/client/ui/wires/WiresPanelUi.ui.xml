@@ -57,8 +57,8 @@
                         </b:ButtonToolBar>
                     </b:Panel>
                 </b:Row>
-                <b:Row>
-                    <b:Column size="MD_12,XS_12" b:id="wires-graph" addStyleNames="composer" ui:field="composer">
+                <b:Row ui:field="composer" b:id="composer">
+                    <b:Column size="MD_12,XS_12" b:id="wires-graph" addStyleNames="composer">
                     <b:Panel b:id="wires-overlay-buttons" addStyleNames="btn-group-vertical">
                             <b:Button icon="SEARCH_PLUS" b:id="btn-zoom-in" ui:field="btnZoomIn" />
                             <b:Button icon="SEARCH_MINUS" b:id="btn-zoom-out" ui:field="btnZoomOut" />

@@ -664,7 +664,7 @@ public class PackagesPanelUi extends Composite {
                 }
 
                 @Override
-                public void onDragLeave(DropEvent event) {
+                public void onDragExit(DropEvent event) {
                 }
             });
         } else {

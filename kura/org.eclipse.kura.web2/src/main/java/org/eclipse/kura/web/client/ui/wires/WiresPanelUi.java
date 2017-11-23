@@ -25,8 +25,6 @@ import java.util.logging.Logger;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
-import org.eclipse.kura.web.client.util.DropSupport;
-import org.eclipse.kura.web.client.util.DropSupport.DropEvent;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
@@ -285,7 +283,6 @@ public class WiresPanelUi extends Composite {
         initSaveModal();
         initGraphDeleteModal();
         initErrorModal();
-        initDragDrop();
         initSelectAssetModal();
         initSelectDriverModal();
         initNewAssetModal();
@@ -297,50 +294,7 @@ public class WiresPanelUi extends Composite {
         exportJSNIshowCycleExistenceError();
         exportJSNImakeUiDirty();
         exportJSNIDeactivateNavPils();
-    }
-
-    private String getFactoryPidFromDropUrl(String dropUrl) {
-        if (dropUrl == null || dropUrl.isEmpty()) {
-            return null;
-        }
-        if (!dropUrl.startsWith(FACTORY_PID_DROP_PREFIX)) {
-            return null;
-        }
-        return dropUrl.substring(FACTORY_PID_DROP_PREFIX.length());
-    }
-
-    private void initDragDrop() {
-        DropSupport drop = DropSupport.addIfSupported(this.composer);
-
-        if (drop != null) {
-            drop.setListener(new DropSupport.Listener() {
-
-                @Override
-                public boolean onDrop(DropEvent event) {
-                    WiresPanelUi.this.onDrop(event.getClientX(), event.getClientY(),
-                            getFactoryPidFromDropUrl(event.getAsText()));
-                    final String factoryPid = getFactoryPidFromDropUrl(event.getAsText());
-                    if (factoryPid != null) {
-                        showComponentCreationDialog(factoryPid);
-                    } else {
-                        cancelDrag();
-                    }
-                    return true;
-                }
-
-                @Override
-                public boolean onDragOver(DropEvent event) {
-                    WiresPanelUi.this.onDrag(event.getClientX(), event.getClientY());
-                    return true;
-                }
-
-                @Override
-                public void onDragLeave(DropEvent event) {
-                    WiresPanelUi.this.cancelDrag();
-                }
-
-            });
-        }
+        exportJSNIShowComponentCreationDialog();
     }
 
     private void initSelectAssetModal() {
@@ -1065,14 +1019,12 @@ public class WiresPanelUi extends Composite {
     	}
     }-*/;
 
-    private native void onDrag(double clientX, double clientY)
+    private native void exportJSNIShowComponentCreationDialog()
     /*-{
-    parent.window.kuraWires.dragHandler.onDrag(clientX, clientY)
-    }-*/;
-
-    private native void onDrop(double clientX, double clientY, String factoryPid)
-    /*-{
-    parent.window.kuraWires.dragHandler.onDrop(clientX, clientY, factoryPid)
+    var self = this
+    parent.window.jsniShowComponentCreationDialog = function (pid) {
+        self.@org.eclipse.kura.web.client.ui.wires.WiresPanelUi::showComponentCreationDialog(Ljava/lang/String;)(pid)
+    }
     }-*/;
 
     private native void cancelDrag()

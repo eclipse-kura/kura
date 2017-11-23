@@ -45,6 +45,7 @@ import org.osgi.service.wireadmin.WireAdmin;
 
 public class WireServiceImplTest {
 
+    private static final String WIRE_SERVICE_PID = "org.eclipse.kura.wire.WireService";
     private static final String DEFAULT_GRAPH = "{\"components\":[],\"wires\":[]}";
     private static final String SIMPLE_GRAPH = "{\"components\":[{\"pid\":\"emitterPid\",\"inputPortCount\":0,\"outputPortCount\":1,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":15},\"inputPortNames\":{},\"outputPortNames\":{}}},{\"pid\":\"receiverPid\",\"inputPortCount\":1,\"outputPortCount\":0,\"renderingProperties\":{\"position\":{\"x\":100,\"y\":150},\"inputPortNames\":{},\"outputPortNames\":{}}}],\"wires\":[{\"emitter\":\"emitterPid\",\"receiver\":\"receiverPid\"}]}";
 
@@ -145,9 +146,8 @@ public class WireServiceImplTest {
         WireGraphConfiguration wireGraphConfiguration = new WireGraphConfiguration(wireComponentConfigurations,
                 wireConfigurations);
 
-        String wireServicePid = "org.eclipse.kura.wire.WireService";
-        when(configurationService.getComponentConfiguration(wireServicePid))
-                .thenReturn(new ComponentConfigurationImpl(wireServicePid, null, new HashMap<>()));
+        when(configurationService.getComponentConfiguration(WIRE_SERVICE_PID))
+                .thenReturn(new ComponentConfigurationImpl(WIRE_SERVICE_PID, null, new HashMap<>()));
 
         final ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
 
@@ -167,7 +167,7 @@ public class WireServiceImplTest {
         verify(configurationService, times(1)).updateConfigurations(Matchers.anyList(), eq(true));
 
         for (ComponentConfiguration componentConfiguration : arguments) {
-            if (componentConfiguration.getPid().equals(wireServicePid)) {
+            if (componentConfiguration.getPid().equals(WIRE_SERVICE_PID)) {
                 String persistenceJson = (String) componentConfiguration.getConfigurationProperties().get("WireGraph");
                 assertEquals(SIMPLE_GRAPH, persistenceJson);
             }
@@ -183,8 +183,7 @@ public class WireServiceImplTest {
         TestUtil.setFieldValue(wireGraphService, "configurationService", configurationService);
 
         Map<String, Object> properties = new HashMap<>();
-        String pid = "org.eclipse.kura.wire.WireService";
-        properties.put("kura.service.pid", pid);
+        properties.put("kura.service.pid", WIRE_SERVICE_PID);
         properties.put("WireGraph", SIMPLE_GRAPH);
         TestUtil.setFieldValue(wireGraphService, "properties", properties);
 
@@ -206,6 +205,36 @@ public class WireServiceImplTest {
         assertEquals(2, wireGraphConfiguration.getWireComponentConfigurations().size());
         assertEquals(1, wireGraphConfiguration.getWireConfigurations().size());
     }
+    
+    @Test
+    public void testDeleteWireGraph() throws NoSuchFieldException, InvalidSyntaxException, KuraException {
+        
+        ConfigurationService configurationService = mock(ConfigurationService.class);
+        WireAdmin wireAdmin = mock(WireAdmin.class);
+        when(wireAdmin.getWires(null)).thenReturn(new Wire[0]);
+        when(configurationService.getComponentConfiguration(WIRE_SERVICE_PID)).thenReturn(new ComponentConfigurationImpl(WIRE_SERVICE_PID, null, new HashMap<>()));
+
+        WireGraphService wireGraphService = new WireServiceImpl();
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("WireGraph", SIMPLE_GRAPH);
+
+        TestUtil.setFieldValue(wireGraphService, "configurationService", configurationService);
+        TestUtil.setFieldValue(wireGraphService, "wireAdmin", wireAdmin);
+        TestUtil.setFieldValue(wireGraphService, "properties", properties);
+        
+        wireGraphService.delete();
+        
+        final ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
+        verify(configurationService).updateConfiguration(eq(WIRE_SERVICE_PID), captor.capture(), eq(true));
+
+        Map<String,Object> arguments = captor.getValue();
+
+        assertNotNull(arguments);
+
+        assertEquals(1, arguments.size());
+        assertEquals("{\"components\":[],\"wires\":[]}", arguments.get("WireGraph"));
+    }
 
     private ComponentConfiguration createEmitterComponentConfiguration() {
         Map<String, Object> emitterProperties = new HashMap<>();
@@ -217,10 +246,9 @@ public class WireServiceImplTest {
 
     private ComponentConfiguration createWireServiceComponentConfiguration() {
         Map<String, Object> properties = new HashMap<>();
-        String pid = "org.eclipse.kura.wire.WireService";
-        properties.put("kura.service.pid", pid);
+        properties.put("kura.service.pid", WIRE_SERVICE_PID);
         properties.put("WireGraph", SIMPLE_GRAPH);
-        return new ComponentConfigurationImpl(pid, null, properties);
+        return new ComponentConfigurationImpl(WIRE_SERVICE_PID, null, properties);
     }
 
     private WireComponentConfiguration createEmitterWireComponentConfiguration() {

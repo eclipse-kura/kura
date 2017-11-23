@@ -23,7 +23,6 @@ import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_PRODUCER_PID;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -80,14 +79,11 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
 
     private volatile WireHelperService wireHelperService;
 
-    private final JsonEncoderDecoder jsonEncoderDecoder;
-
     private ConfigurationService configurationService;
 
     public WireServiceImpl() {
         final Set<WireConfiguration> set = CollectionUtil.newHashSet();
         this.wireConfigs = Collections.synchronizedSet(set);
-        this.jsonEncoderDecoder = new JsonEncoderDecoder();
     }
 
     /**
@@ -292,7 +288,7 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, message.componentsNotApplicable());
             }
             conf = new WireConfiguration(emitterPid, receiverPid);
-            
+
         }
         if (conf != null) {
             WireGraphConfiguration wireGraphConfiguration = get();
@@ -340,7 +336,7 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
     @Override
     public void deleteWireConfiguration(final WireConfiguration wireConfiguration) {
         requireNonNull(wireConfiguration, message.wireConfigurationNonNull());
-        
+
         try {
             WireGraphConfiguration wireGraphConfiguration = get();
             List<WireConfiguration> wireConfigurations = wireGraphConfiguration.getWireConfigurations();
@@ -384,7 +380,7 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
 
         String jsonWireGraph = (String) this.properties.get(NEW_WIRE_GRAPH_PROPERTY);
 
-        WireGraphConfiguration wireGraphConfiguration = this.jsonEncoderDecoder.fromJson(jsonWireGraph);
+        WireGraphConfiguration wireGraphConfiguration = JsonEncoderDecoder.fromJson(jsonWireGraph);
 
         for (final WireConfiguration conf : wireGraphConfiguration.getWireConfigurations()) {
             this.wireConfigs.add(conf);
@@ -404,7 +400,7 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
         List<ComponentConfiguration> componentConfigurations = new ArrayList<>();
 
         String oldJson = (String) this.properties.get(NEW_WIRE_GRAPH_PROPERTY);
-        WireGraphConfiguration oldGraphConfig = this.jsonEncoderDecoder.fromJson(oldJson);
+        WireGraphConfiguration oldGraphConfig = JsonEncoderDecoder.fromJson(oldJson);
 
         List<WireComponentConfiguration> oldWireComponentConfigurations = oldGraphConfig
                 .getWireComponentConfigurations();
@@ -435,7 +431,7 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
             componentConfigurations.add(componentToUpdate);
         }
 
-        String jsonConfig = this.jsonEncoderDecoder.toJson(graphConfiguration).toString();
+        String jsonConfig = JsonEncoderDecoder.toJson(graphConfiguration).toString();
         ComponentConfiguration wireServiceComponentConfig = this.configurationService
                 .getComponentConfiguration(CONF_PID);
         wireServiceComponentConfig.getConfigurationProperties().put(NEW_WIRE_GRAPH_PROPERTY, jsonConfig);
@@ -470,14 +466,23 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
         for (WireComponentConfiguration newWireComponentConfiguration : newWireComponentConfigurations) {
             ComponentConfiguration newComponentConfig = newWireComponentConfiguration.getConfiguration();
             String newPid = newComponentConfig.getPid();
+            Map<String, Object> newProps = newComponentConfig.getConfigurationProperties();
+            String newFactoryPid = null;
+            if (newProps != null) {
+                newFactoryPid = (String) newComponentConfig.getConfigurationProperties().get(SERVICE_FACTORYPID);
+            }
 
             boolean found = false;
             for (WireComponentConfiguration oldWireComponentConfiguration : oldWireComponentConfigurations) {
                 ComponentConfiguration oldComponentConfig = oldWireComponentConfiguration.getConfiguration();
                 String oldPid = oldComponentConfig.getPid();
+                Map<String, Object> oldProps = oldComponentConfig.getConfigurationProperties();
+                String oldFactoryPid = null;
+                if (oldProps != null) {
+                    oldFactoryPid = (String) oldComponentConfig.getConfigurationProperties().get(SERVICE_FACTORYPID);
+                }
 
-                if (oldPid.equals(newPid)) {
-                    // manage the case the component has the same pid but different factory.pid
+                if (oldPid.equals(newPid) && (newFactoryPid == null || oldFactoryPid.equals(newFactoryPid))) {
                     found = true;
                     break;
                 }
@@ -499,13 +504,24 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
         for (WireComponentConfiguration oldWireComponentConfiguration : oldWireComponentConfigurations) {
             ComponentConfiguration oldComponentConfig = oldWireComponentConfiguration.getConfiguration();
             String oldPid = oldComponentConfig.getPid();
+            Map<String, Object> oldProps = oldComponentConfig.getConfigurationProperties();
+            String oldFactoryPid = null;
+            if (oldProps != null) {
+                oldFactoryPid = (String) oldComponentConfig.getConfigurationProperties().get(SERVICE_FACTORYPID);
+            }
 
             boolean found = false;
             for (WireComponentConfiguration newWireComponentConfiguration : newWireComponentConfigurations) {
                 ComponentConfiguration newComponentConfig = newWireComponentConfiguration.getConfiguration();
                 String newPid = newComponentConfig.getPid();
+                Map<String, Object> newProps = newComponentConfig.getConfigurationProperties();
+                String newFactoryPid = null;
+                if (newProps != null) {
+                    newFactoryPid = (String) newComponentConfig.getConfigurationProperties().get(SERVICE_FACTORYPID);
+                }
 
-                if (oldPid.equals(newPid)) {
+                // TODO: check better the conditions for this test
+                if (oldPid.equals(newPid) && (newFactoryPid == null || oldFactoryPid.equals(newFactoryPid))) {
                     found = true;
                     break;
                 }
@@ -522,7 +538,7 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
     @Override
     public void delete() throws KuraException {
         String oldJson = (String) this.properties.get(NEW_WIRE_GRAPH_PROPERTY);
-        WireGraphConfiguration oldGraphConfig = this.jsonEncoderDecoder.fromJson(oldJson);
+        WireGraphConfiguration oldGraphConfig = JsonEncoderDecoder.fromJson(oldJson);
 
         List<WireComponentConfiguration> oldWireComponentConfigurations = oldGraphConfig
                 .getWireComponentConfigurations();
@@ -538,7 +554,7 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
         WireGraphConfiguration newWireGraphConfiguration = new WireGraphConfiguration(new ArrayList<>(),
                 new ArrayList<>());
 
-        String jsonConfig = this.jsonEncoderDecoder.toJson(newWireGraphConfiguration).toString();
+        String jsonConfig = JsonEncoderDecoder.toJson(newWireGraphConfiguration).toString();
         ComponentConfiguration wireServiceComponentConfig = this.configurationService
                 .getComponentConfiguration(CONF_PID);
         wireServiceComponentConfig.getConfigurationProperties().put(NEW_WIRE_GRAPH_PROPERTY, jsonConfig);
@@ -554,7 +570,7 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
         List<ComponentConfiguration> configServiceComponentConfigurations = this.configurationService
                 .getComponentConfigurations();
 
-        WireGraphConfiguration wireGraphConfiguration = this.jsonEncoderDecoder.fromJson(jsonString);
+        WireGraphConfiguration wireGraphConfiguration = JsonEncoderDecoder.fromJson(jsonString);
 
         List<WireComponentConfiguration> wireComponentConfigurations = wireGraphConfiguration
                 .getWireComponentConfigurations();

@@ -23,7 +23,6 @@ import org.eclipse.kura.internal.wire.JsonEncoderDecoder;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.eclipsesource.json.Json;
@@ -140,14 +139,142 @@ public class JsonEncoderDecoderTest {
     public void testDecodeDefaultJson() {
         JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
         String defaultJson = "{\"components\":[],\"wires\":[]}";
-        
-        WireGraphConfiguration wireGraphConfiguration = jsonEncoderDecoder.fromJson(defaultJson);
+
+        WireGraphConfiguration wireGraphConfiguration = JsonEncoderDecoder.fromJson(defaultJson);
         assertNotNull(wireGraphConfiguration);
-        
+
         assertEquals(0, wireGraphConfiguration.getWireComponentConfigurations().size());
         assertEquals(0, wireGraphConfiguration.getWireConfigurations().size());
     }
-    
+
+    @Test
+    public void testDecodeWrongJson() {
+        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        String defaultJson = "{\"components\":{},\"wires\":{}}";
+
+        WireGraphConfiguration wireGraphConfiguration = JsonEncoderDecoder.fromJson(defaultJson);
+        assertNotNull(wireGraphConfiguration);
+
+        assertEquals(0, wireGraphConfiguration.getWireComponentConfigurations().size());
+        assertEquals(0, wireGraphConfiguration.getWireConfigurations().size());
+    }
+
+    @Test
+    public void testDecodeWireConfigurationEmitterReceiverNotStrings() throws Throwable {
+        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+
+        JsonArray wireConfigArray = new JsonArray();
+        JsonObject wire = new JsonObject();
+        wire.add("emitter", 3);
+        wire.add("receiver", 2);
+        wireConfigArray.add(wire);
+
+        List<WireConfiguration> result = (List<WireConfiguration>) TestUtil.invokePrivate(jsonEncoderDecoder,
+                "decodeWireConfiguration", wireConfigArray);
+
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testDecodeWireConfigurationReceiverNotString() throws Throwable {
+        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+
+        JsonArray wireConfigArray = new JsonArray();
+        JsonObject wire = new JsonObject();
+        wire.add("emitter", "test");
+        wire.add("receiver", 2);
+        wireConfigArray.add(wire);
+
+        List<WireConfiguration> result = (List<WireConfiguration>) TestUtil.invokePrivate(jsonEncoderDecoder,
+                "decodeWireConfiguration", wireConfigArray);
+
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testDecodeWireComponentConfigurationWrongArray() throws Throwable {
+        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+
+        JsonArray wireComponentConfiguration = new JsonArray();
+        JsonObject compProps = new JsonObject();
+        compProps.add("inputPortCount", "test");
+        compProps.add("outputPortCount", "test2");
+        compProps.add("renderingProperties", 2);
+        compProps.add("pid", 2);
+        wireComponentConfiguration.add(compProps);
+
+        List<WireComponentConfiguration> result = (List<WireComponentConfiguration>) TestUtil
+                .invokePrivate(jsonEncoderDecoder, "decodeWireComponentConfiguration", wireComponentConfiguration);
+
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testParseOutputPortNamesValueNotString() throws Throwable {
+        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+
+        JsonObject ports = new JsonObject();
+        ports.add("outputPort1", "CorrectName");
+        ports.add("outputPort2", 3);
+
+        Map<String, Object> result = (Map<String, Object>) TestUtil.invokePrivate(jsonEncoderDecoder,
+                "parseOutputPortNames", ports);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("CorrectName", result.get("outputPortNames.outputPort1"));
+    }
+
+    @Test
+    public void testParseInputPortNamesValueNotString() throws Throwable {
+        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+
+        JsonObject ports = new JsonObject();
+        ports.add("inputPort1", "CorrectName");
+        ports.add("inputPort2", 3);
+
+        Map<String, Object> result = (Map<String, Object>) TestUtil.invokePrivate(jsonEncoderDecoder,
+                "parseInputPortNames", ports);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("CorrectName", result.get("inputPortNames.inputPort1"));
+    }
+
+    @Test
+    public void testParseRenderingPropertiesWrongInput() throws Throwable {
+        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+
+        JsonObject renderProps = new JsonObject();
+        renderProps.add("position", 1);
+        renderProps.add("inputPortNames", 3);
+        renderProps.add("outputPortNames", "test");
+
+        Map<String, Object> result = (Map<String, Object>) TestUtil.invokePrivate(jsonEncoderDecoder,
+                "parseRenderingProperties", renderProps);
+
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testParsePosition() throws Throwable {
+        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+
+        JsonObject renderProps = new JsonObject();
+        renderProps.add("x", "1");
+        renderProps.add("y", "3");
+
+        Map<String, Object> result = (Map<String, Object>) TestUtil.invokePrivate(jsonEncoderDecoder, "parsePosition",
+                renderProps);
+
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
     @Test
     public void testWireSerializationSingleArc() throws Throwable {
         WireConfiguration wireConfig = new WireConfiguration("emitterPid", "receiverPid");

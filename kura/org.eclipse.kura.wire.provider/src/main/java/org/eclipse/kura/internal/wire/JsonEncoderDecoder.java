@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ *
+ *   All rights reserved. This program and the accompanying materials
+ *   are made available under the terms of the Eclipse Public License v1.0
+ *   which accompanies this distribution, and is available at
+ *   http://www.eclipse.org/legal/epl-v10.html
+ ******************************************************************************/
 package org.eclipse.kura.internal.wire;
 
 import java.util.ArrayList;
@@ -19,20 +27,35 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
 public class JsonEncoderDecoder {
-    
-    public JsonObject toJson(WireGraphConfiguration graphConfiguration) {
+
+    /**
+     * Converts to JSON format a {@link WireGraphConfiguration}
+     *
+     * @param graphConfiguration
+     *            the Wire Graph representation that needs to be converted to JSON before persistence.
+     * @return a {@link JsonObject} representing the input conversion.
+     */
+    public static JsonObject toJson(WireGraphConfiguration graphConfiguration) {
         JsonArray wireConfigurationJson = encodeWireConfigurationList(graphConfiguration.getWireConfigurations());
         JsonArray wireComponentConfigurationJson = encodeWireComponentConfigurationList(
                 graphConfiguration.getWireComponentConfigurations());
-        
+
         JsonObject wireGraphConfiguration = new JsonObject();
         wireGraphConfiguration.add("components", wireComponentConfigurationJson);
         wireGraphConfiguration.add("wires", wireConfigurationJson);
-        
+
         return wireGraphConfiguration;
     }
-    
-    public WireGraphConfiguration fromJson(String jsonString) {
+
+    /**
+     * Converts the JSON string to a corresponding {@link WireGraphConfiguration} that represents the configuration of
+     * the desired Wire Graph.
+     *
+     * @param jsonString
+     *            a {@link String} representing the JSON of the Wire Graph
+     * @return a {@link WireGraphConfiguration} that corresponds to the String passed as input.
+     */
+    public static WireGraphConfiguration fromJson(String jsonString) {
 
         List<WireComponentConfiguration> wireCompConfigList = new ArrayList<>();
         List<WireConfiguration> wireConfigList = new ArrayList<>();
@@ -42,18 +65,16 @@ public class JsonEncoderDecoder {
         for (JsonObject.Member member : json) {
             String name = member.getName();
             JsonValue value = member.getValue();
-            if ("wires".equalsIgnoreCase(name) && member.getValue().isArray()) {
+            if ("wires".equalsIgnoreCase(name) && value.isArray()) {
                 wireConfigList = decodeWireConfiguration(value.asArray());
-            } else if ("components".equalsIgnoreCase(name) && member.getValue().isArray()) {
+            } else if ("components".equalsIgnoreCase(name) && value.isArray()) {
                 wireCompConfigList = decodeWireComponentConfiguration(value.asArray());
             }
         }
         return new WireGraphConfiguration(wireCompConfigList, wireConfigList);
     }
 
-    
-    
-    private List<WireConfiguration> decodeWireConfiguration(JsonArray array) {
+    private static List<WireConfiguration> decodeWireConfiguration(JsonArray array) {
         List<WireConfiguration> wireConfigurationList = new ArrayList<>();
 
         Iterator<JsonValue> jsonIterator = array.iterator();
@@ -73,20 +94,22 @@ public class JsonEncoderDecoder {
 
             }
 
-            WireConfiguration wireConfiguration = new WireConfiguration(emitterPid, receiverPid);
-            wireConfigurationList.add(wireConfiguration);
+            if (emitterPid != null && receiverPid != null) {
+                WireConfiguration wireConfiguration = new WireConfiguration(emitterPid, receiverPid);
+                wireConfigurationList.add(wireConfiguration);
+            }
         }
 
         return wireConfigurationList;
     }
-    
-    private List<WireComponentConfiguration> decodeWireComponentConfiguration(JsonArray array) {
+
+    private static List<WireComponentConfiguration> decodeWireComponentConfiguration(JsonArray array) {
         List<WireComponentConfiguration> wireComponentConfigurationList = new ArrayList<>();
 
         Iterator<JsonValue> jsonIterator = array.iterator();
         while (jsonIterator.hasNext()) {
             Map<String, Object> properties = new HashMap<>();
-            String componentPid= null;
+            String componentPid = null;
             JsonObject jsonWireComponentConfiguration = jsonIterator.next().asObject();
 
             for (JsonObject.Member member : jsonWireComponentConfiguration) {
@@ -103,16 +126,20 @@ public class JsonEncoderDecoder {
                     componentPid = value.asString();
                 }
             }
-            ComponentConfiguration componentConfiguration = new ComponentConfigurationImpl(componentPid, null, null);
+            if (componentPid != null) {
+                ComponentConfiguration componentConfiguration = new ComponentConfigurationImpl(componentPid, null,
+                        null);
 
-            WireComponentConfiguration wireComponentConfiguration = new WireComponentConfiguration(componentConfiguration, properties);
-            wireComponentConfigurationList.add(wireComponentConfiguration);
+                WireComponentConfiguration wireComponentConfiguration = new WireComponentConfiguration(
+                        componentConfiguration, properties);
+                wireComponentConfigurationList.add(wireComponentConfiguration);
+            }
         }
 
         return wireComponentConfigurationList;
     }
 
-    private Map<String, Object> parseRenderingProperties(JsonObject jsonRenderingProps) {
+    private static Map<String, Object> parseRenderingProperties(JsonObject jsonRenderingProps) {
         Map<String, Object> renderingProps = new HashMap<>();
 
         for (JsonObject.Member member : jsonRenderingProps) {
@@ -133,7 +160,7 @@ public class JsonEncoderDecoder {
         return renderingProps;
     }
 
-    private Map<String, Object> parseInputPortNames(JsonObject jsonInputPortNames) {
+    private static Map<String, Object> parseInputPortNames(JsonObject jsonInputPortNames) {
         Map<String, Object> inputPortNamesMap = new HashMap<>();
 
         for (JsonObject.Member member : jsonInputPortNames) {
@@ -147,7 +174,7 @@ public class JsonEncoderDecoder {
         return inputPortNamesMap;
     }
 
-    private Map<String, Object> parseOutputPortNames(JsonObject jsonOutputPortNames) {
+    private static Map<String, Object> parseOutputPortNames(JsonObject jsonOutputPortNames) {
         Map<String, Object> outputPortNamesMap = new HashMap<>();
 
         for (JsonObject.Member member : jsonOutputPortNames) {
@@ -161,7 +188,7 @@ public class JsonEncoderDecoder {
         return outputPortNamesMap;
     }
 
-    private Map<String, Object> parsePosition(JsonObject jsonPositionPros) {
+    private static Map<String, Object> parsePosition(JsonObject jsonPositionPros) {
         Map<String, Object> positionMap = new HashMap<>();
 
         for (JsonObject.Member member : jsonPositionPros) {
@@ -177,14 +204,14 @@ public class JsonEncoderDecoder {
         return positionMap;
     }
 
-    private JsonObject encodeWireConfiguration(WireConfiguration wireConfig) {
+    private static JsonObject encodeWireConfiguration(WireConfiguration wireConfig) {
         JsonObject result = new JsonObject();
         result.add("emitter", wireConfig.getEmitterPid());
         result.add("receiver", wireConfig.getReceiverPid());
         return result;
     }
 
-    private JsonArray encodeWireConfigurationList(List<WireConfiguration> wireConfigurations) {
+    private static JsonArray encodeWireConfigurationList(List<WireConfiguration> wireConfigurations) {
         JsonArray value = new JsonArray();
         for (WireConfiguration wireConfiguration : wireConfigurations) {
             value.add(encodeWireConfiguration(wireConfiguration));
@@ -193,7 +220,7 @@ public class JsonEncoderDecoder {
         return value;
     }
 
-    private JsonArray encodeWireComponentConfigurationList(
+    private static JsonArray encodeWireComponentConfigurationList(
             List<WireComponentConfiguration> wireComponentConfigurations) {
 
         JsonArray value = new JsonArray();
@@ -205,7 +232,7 @@ public class JsonEncoderDecoder {
         return value;
     }
 
-    private JsonObject encodeComponentProperties(String pid, Map<String, Object> componentProperties) {
+    private static JsonObject encodeComponentProperties(String pid, Map<String, Object> componentProperties) {
         JsonObject result = new JsonObject();
 
         JsonObject resultElems = new JsonObject();
@@ -227,7 +254,7 @@ public class JsonEncoderDecoder {
         return result;
     }
 
-    private JsonObject encodePosition(Map<String, Object> componentProperties) {
+    private static JsonObject encodePosition(Map<String, Object> componentProperties) {
         JsonObject positionElems = new JsonObject();
         positionElems.add("x", (float) componentProperties.get("position.x"));
         positionElems.add("y", (float) componentProperties.get("position.y"));
@@ -235,7 +262,7 @@ public class JsonEncoderDecoder {
         return positionElems;
     }
 
-    private JsonObject encodeInputPortNames(Map<String, Object> componentProperties) {
+    private static JsonObject encodeInputPortNames(Map<String, Object> componentProperties) {
 
         JsonObject inputPortElems = new JsonObject();
         for (Entry<String, Object> mapEntry : componentProperties.entrySet()) {
@@ -248,7 +275,7 @@ public class JsonEncoderDecoder {
         return inputPortElems;
     }
 
-    private JsonObject encodeOutputPortNames(Map<String, Object> componentProperties) {
+    private static JsonObject encodeOutputPortNames(Map<String, Object> componentProperties) {
 
         JsonObject outputPortElems = new JsonObject();
         for (Entry<String, Object> mapEntry : componentProperties.entrySet()) {

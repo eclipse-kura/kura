@@ -399,8 +399,7 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
     public void update(WireGraphConfiguration graphConfiguration) throws KuraException {
         List<ComponentConfiguration> componentConfigurations = new ArrayList<>();
 
-        String oldJson = (String) this.properties.get(NEW_WIRE_GRAPH_PROPERTY);
-        WireGraphConfiguration oldGraphConfig = JsonEncoderDecoder.fromJson(oldJson);
+        WireGraphConfiguration oldGraphConfig = get();
 
         List<WireComponentConfiguration> oldWireComponentConfigurations = oldGraphConfig
                 .getWireComponentConfigurations();

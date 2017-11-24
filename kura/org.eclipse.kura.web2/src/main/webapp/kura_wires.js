@@ -1006,7 +1006,7 @@ var kuraWires = (function() {
 		centerOnLocalPoint(cx, cy, factor, transition ? transformTransition : transform, 0.5)
 	}
 	
-	function clientToLocal(clientX, clientY) {
+	function clientToLocal(clientX, clientY) {f
 		var translation = viewport.translate()
 		var x = (clientX-translation.tx)/currentZoomLevel
 		var y = (clientY-translation.ty)/currentZoomLevel

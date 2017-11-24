@@ -21,8 +21,9 @@ public final class GwtWireConfiguration extends GwtBaseModel implements Serializ
     private static final long serialVersionUID = 3573302888192836657L;
 
     private String emitterPid;
-
     private String receiverPid;
+    private int emitterPort;
+    private int receiverPort;
 
     public String getEmitterPid() {
         return this.emitterPid;
@@ -39,4 +40,21 @@ public final class GwtWireConfiguration extends GwtBaseModel implements Serializ
     public void setReceiverPid(final String receiverPid) {
         this.receiverPid = receiverPid;
     }
+
+    public int getEmitterPort() {
+        return emitterPort;
+    }
+
+    public void setEmitterPort(int emitterPort) {
+        this.emitterPort = emitterPort;
+    }
+
+    public int getReceiverPort() {
+        return receiverPort;
+    }
+
+    public void setReceiverPort(int receiverPort) {
+        this.receiverPort = receiverPort;
+    }
+
 }

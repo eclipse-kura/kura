@@ -1698,12 +1698,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public List<ComponentConfiguration> getFactoryComponentOCDs() {
-        return this.factoryPids.stream().map(pid -> new ComponentConfigurationImpl(pid, this.ocds.get(pid), null))
+        return this.factoryPids.stream()
+                .map(pid -> new ComponentConfigurationImpl(pid, this.ocds.get(pid), new HashMap<>()))
                 .collect(Collectors.toList());
     }
 
     private ComponentConfiguration getComponentDefinition(String pid) {
-        return new ComponentConfigurationImpl(pid, this.ocds.get(pid), null);
+        return new ComponentConfigurationImpl(pid, this.ocds.get(pid), new HashMap<>());
     }
 
     @Override

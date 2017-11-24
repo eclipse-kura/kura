@@ -226,8 +226,9 @@ public abstract class AbstractServicesUi extends Composite {
 
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                setDirty(true);
-                textBox.validate(true);
+                if (textBox.validate(true)) {
+                    setDirty(true);
+                }
             }
         });
     }
@@ -335,11 +336,10 @@ public abstract class AbstractServicesUi extends Composite {
         }
 
         input.addValidator(new Validator() {
-            
+
             @Override
             public List<EditorError> validate(Editor editor, Object value) {
-                setDirty(true);
-                
+
                 List<EditorError> result = new ArrayList<>();
                 if ((input.getText() == null || "".equals(input.getText().trim())) && param.isRequired()) {
                     // null in required field
@@ -349,10 +349,13 @@ public abstract class AbstractServicesUi extends Composite {
                     param.setValue(input.getText());
                     AbstractServicesUi.this.valid.put(param.getName(), true);
                 }
-                
+
+                if (result.isEmpty()) {
+                    setDirty(true);
+                }
                 return result;
             }
-            
+
             @Override
             public int getPriority() {
                 return 0;
@@ -363,8 +366,9 @@ public abstract class AbstractServicesUi extends Composite {
 
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                setDirty(true);
-                input.validate(true);
+                if (input.validate(true)) {
+                    setDirty(true);
+                }
             }
         });
 
@@ -416,22 +420,22 @@ public abstract class AbstractServicesUi extends Composite {
 
             @Override
             public void onValueChange(ValueChangeEvent event) {
-                setDirty(true);
                 InlineRadio box = (InlineRadio) event.getSource();
                 if (box.getValue()) {
                     param.setValue(String.valueOf(true));
                 }
+                setDirty(true);
             }
         });
         radioFalse.addValueChangeHandler(new ValueChangeHandler() {
 
             @Override
             public void onValueChange(ValueChangeEvent event) {
-                setDirty(true);
                 InlineRadio box = (InlineRadio) event.getSource();
                 if (box.getValue()) {
                     param.setValue(String.valueOf(false));
                 }
+                setDirty(true);
             }
         });
 
@@ -462,20 +466,21 @@ public abstract class AbstractServicesUi extends Composite {
         int i = 0;
         Map<String, String> oMap = param.getOptions();
 
-        ArrayList<Entry<String, String>> sortedOptions = new ArrayList<Entry<String, String>>(oMap.entrySet());
+        ArrayList<Entry<String, String>> sortedOptions = new ArrayList<>(oMap.entrySet());
         Collections.sort(sortedOptions, DROPDOWN_LABEL_COMPARATOR);
+
+        final String selection = param.getValue() != null ? param.getValue() : param.getDefault();
 
         for (Entry<String, String> current : sortedOptions) {
             String label = current.getKey();
             String value = current.getValue();
+
             listBox.addItem(label, value);
-            if (param.getDefault() != null && value.equals(param.getDefault())) {
+
+            if (value.equals(selection)) {
                 listBox.setSelectedIndex(i);
             }
 
-            if (param.getValue() != null && value.equals(param.getValue())) {
-                listBox.setSelectedIndex(i);
-            }
             i++;
         }
 
@@ -483,9 +488,9 @@ public abstract class AbstractServicesUi extends Composite {
 
             @Override
             public void onChange(ChangeEvent event) {
-                setDirty(true);
                 ListBox box = (ListBox) event.getSource();
                 param.setValue(box.getSelectedValue());
+                setDirty(true);
             }
         });
 

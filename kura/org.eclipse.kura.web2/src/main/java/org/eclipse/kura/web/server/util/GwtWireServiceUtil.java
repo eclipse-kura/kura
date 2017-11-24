@@ -20,7 +20,6 @@ import java.util.Set;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.web.shared.GwtKuraException;
-import org.eclipse.kura.web.shared.model.GwtWireComponentConfiguration;
 import org.eclipse.kura.web.shared.model.GwtWireConfiguration;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireConfiguration;
@@ -184,25 +183,6 @@ public final class GwtWireServiceUtil {
             }
         }
         return result;
-    }
-
-    /**
-     * Gets the wire components JSON.
-     *
-     * @param list
-     *            the list containing the Wire Component Configuration
-     * @return the wire components JSON
-     */
-    public static String getWireComponentsJson(final List<GwtWireComponentConfiguration> list) {
-        final JsonObject wireCompConfig = Json.object();
-        int i = 0;
-        for (final GwtWireComponentConfiguration wcConf : list) {
-            final JsonObject wireConf = Json.object().add("fPid", wcConf.getFactoryPid()).add("pid", wcConf.getPid())
-                    .add("name", wcConf.getPid()).add("type", wcConf.getType()).add("driver", wcConf.getDriverPid());
-            wireCompConfig.add(String.valueOf(i++), wireConf);
-        }
-        wireCompConfig.add("length", String.valueOf(i));
-        return wireCompConfig.toString();
     }
 
     /**

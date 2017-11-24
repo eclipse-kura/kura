@@ -74,7 +74,7 @@ public final class BaseChannelDescriptor implements ChannelDescriptor {
 
         final Tad name = new Tad();
         name.setId(NAME.value());
-        name.setName(NAME.value());
+        name.setName(NAME.value().substring(1));
         name.setType(Tscalar.STRING);
         name.setDefault(s_message.string());
         name.setDescription(s_message.channelNameDesc());
@@ -84,12 +84,12 @@ public final class BaseChannelDescriptor implements ChannelDescriptor {
         this.defaultElements.add(name);
 
         final Tad type = new Tad();
-        type.setName(TYPE.value());
+        type.setName(TYPE.value().substring(1));
         type.setId(TYPE.value());
         type.setDescription(s_message.type());
         type.setType(Tscalar.STRING);
         type.setRequired(true);
-        type.setDefault(s_message.string());
+        type.setDefault(s_message.read());
 
         final Toption oRead = new Toption();
         oRead.setValue(s_message.read());
@@ -109,7 +109,7 @@ public final class BaseChannelDescriptor implements ChannelDescriptor {
         this.defaultElements.add(type);
 
         final Tad valueType = new Tad();
-        valueType.setName(VALUE_TYPE.value());
+        valueType.setName(VALUE_TYPE.value().substring(1));
         valueType.setId(VALUE_TYPE.value());
         valueType.setDescription(s_message.typeChannel());
         valueType.setType(Tscalar.STRING);
@@ -145,11 +145,6 @@ public final class BaseChannelDescriptor implements ChannelDescriptor {
         oByteArray.setValue(s_message.byteArray());
         oByteArray.setLabel(s_message.byteArray());
         valueType.getOption().add(oByteArray);
-
-        final Toption oShort = new Toption();
-        oShort.setValue(s_message.shortStr());
-        oShort.setLabel(s_message.shortStr());
-        valueType.getOption().add(oShort);
 
         final Toption oString = new Toption();
         oString.setValue(s_message.string());

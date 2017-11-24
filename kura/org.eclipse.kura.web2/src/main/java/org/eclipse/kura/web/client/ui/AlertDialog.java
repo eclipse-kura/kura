@@ -87,6 +87,11 @@ public class AlertDialog extends Composite {
         this.modal.show();
     }
 
+    public void show(String title, String message, Listener listener) {
+        setTitle(title);
+        show(message, listener);
+    }
+
     public void setAlertText(String message) {
         this.alertBody.setText(message);
     }

@@ -11,8 +11,6 @@ package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;
 
-import org.eclipse.kura.annotation.Nullable;
-
 /**
  * The Class GwtWireComponentConfiguration represents a POJO for every Wire
  * Component present in the system
@@ -22,49 +20,50 @@ public final class GwtWireComponentConfiguration extends GwtBaseModel implements
     /** Serial Version */
     private static final long serialVersionUID = 50782654510063453L;
 
-    /** Driver Associated to it */
-    @Nullable
-    private String driverPid;
+    private GwtConfigComponent configuration;
+    private int inputPortCount;
+    private int outputPortCount;
+    private double positionX;
+    private double positionY;
 
-    /** Factory PID */
-    private String factoryPid;
-
-    /** The PID of the Wire Component */
-    private String pid;
-
-    /** The Wire Component Type */
-    private String type;
-
-    public String getDriverPid() {
-        return this.driverPid;
+    public GwtConfigComponent getConfiguration() {
+        return configuration;
     }
 
-    public String getFactoryPid() {
-        return this.factoryPid;
+    public void setConfiguration(GwtConfigComponent configuration) {
+        this.configuration = configuration;
     }
 
-    public String getPid() {
-        return this.pid;
+    public int getInputPortCount() {
+        return inputPortCount;
     }
 
-    public String getType() {
-        return this.type;
+    public void setInputPortCount(int inputPortCount) {
+        this.inputPortCount = inputPortCount;
     }
 
-    public void setDriverPid(final String driverPid) {
-        this.driverPid = driverPid;
+    public int getOutputPortCount() {
+        return outputPortCount;
     }
 
-    public void setFactoryPid(final String factoryPid) {
-        this.factoryPid = factoryPid;
+    public void setOutputPortCount(int outputPortCount) {
+        this.outputPortCount = outputPortCount;
     }
 
-    public void setPid(final String pid) {
-        this.pid = pid;
+    public double getPositionX() {
+        return positionX;
     }
 
-    public void setType(final String type) {
-        this.type = type;
+    public void setPositionX(double positionX) {
+        this.positionX = positionX;
+    }
+
+    public double getPositionY() {
+        return positionY;
+    }
+
+    public void setPositionY(double positionY) {
+        this.positionY = positionY;
     }
 
 }

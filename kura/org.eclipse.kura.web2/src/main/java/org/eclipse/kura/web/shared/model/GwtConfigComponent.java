@@ -25,6 +25,14 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
         this.m_parameters = new ArrayList<GwtConfigParameter>();
     }
 
+    public GwtConfigComponent(GwtConfigComponent other) {
+        this();
+        data.putAll(other.data);
+        for (GwtConfigParameter parameter : other.m_parameters) {
+            this.m_parameters.add(new GwtConfigParameter(parameter));
+        }
+    }
+
     public String getComponentDescription() {
         return this.get("componentDescription");
     }
@@ -103,4 +111,5 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
     public void setWireComponent(final boolean isWireComponent) {
         this.set("isWireComponent", isWireComponent);
     }
+
 }

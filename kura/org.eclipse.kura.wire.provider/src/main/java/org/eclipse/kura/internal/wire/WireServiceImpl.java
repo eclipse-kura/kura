@@ -327,7 +327,13 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
 
     private synchronized void deleteAllWires() throws InvalidSyntaxException {
 
-        for (Wire w : this.wireAdmin.getWires(null)) {
+        final Wire[] wires = this.wireAdmin.getWires(null);
+
+        if (wires == null) {
+            return;
+        }
+
+        for (Wire w : wires) {
             this.wireAdmin.deleteWire(w);
         }
     }

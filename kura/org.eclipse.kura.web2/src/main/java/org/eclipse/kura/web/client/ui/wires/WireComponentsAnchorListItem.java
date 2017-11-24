@@ -25,14 +25,15 @@ public class WireComponentsAnchorListItem extends AnchorListItem {
 
     private final boolean isEmitter;
     private final boolean isReceiver;
+    private Listener listener;
 
-    public WireComponentsAnchorListItem(final String factoryPid, final boolean isEmitter, final boolean isReceiver,
-            final WiresPanelUi parent) {
+    public WireComponentsAnchorListItem(final String label, final String factoryPid, final boolean isEmitter,
+            final boolean isReceiver) {
         super();
         this.isEmitter = isEmitter;
         this.isReceiver = isReceiver;
         super.setIcon(getFactoryIcon());
-        super.setText(WiresPanelUi.getFormattedPid(factoryPid));
+        super.setText(label);
 
         DragSupport drag = DragSupport.addIfSupported(this);
 
@@ -50,8 +51,9 @@ public class WireComponentsAnchorListItem extends AnchorListItem {
 
             @Override
             public void onClick(final ClickEvent event) {
-                parent.showComponentCreationDialog(factoryPid);
-                WireComponentsAnchorListItem.this.setActive(true);
+                if (listener != null) {
+                    listener.onClick(factoryPid);
+                }
             }
         });
     }
@@ -64,5 +66,14 @@ public class WireComponentsAnchorListItem extends AnchorListItem {
             return IconType.LONG_ARROW_LEFT;
         }
         return IconType.LONG_ARROW_RIGHT;
+    }
+
+    public void setListener(Listener listener) {
+        this.listener = listener;
+    }
+
+    public interface Listener {
+
+        public void onClick(String factoryPid);
     }
 }

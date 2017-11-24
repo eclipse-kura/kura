@@ -25,41 +25,37 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 
-public class GenericWireComponentUi extends AbstractServicesUi {
+public class GenericWireComponentUi extends AbstractServicesUi implements HasConfiguration {
 
     interface GenericWireComponentUiUiBinder extends UiBinder<Widget, GenericWireComponentUi> {
     }
 
     private static GenericWireComponentUiUiBinder uiBinder = GWT.create(GenericWireComponentUiUiBinder.class);
 
-    private final GwtConfigComponent originalConfig;
-    private final WiresPanelUi parent;
-
     private boolean dirty;
 
     private boolean initialized;
 
+    private ConfigurationChangeListener listener;
+
     @UiField
     FieldSet fields;
 
-    public GenericWireComponentUi(final GwtConfigComponent addedItem, final WiresPanelUi parent) {
+    public GenericWireComponentUi(final GwtConfigComponent originalConfig) {
         initWidget(uiBinder.createAndBindUi(this));
         this.initialized = false;
-        this.originalConfig = addedItem;
-        this.parent = parent;
-        restoreConfiguration(this.originalConfig);
+        restoreConfiguration(originalConfig);
         this.fields.clear();
 
         renderForm();
-
         setDirty(false);
     }
 
     @Override
     public void setDirty(final boolean flag) {
         this.dirty = flag;
-        if (this.dirty && this.initialized) {
-            this.parent.setDirty(true);
+        if (this.dirty && this.initialized && listener != null) {
+            listener.onConfigurationChanged(this);
         }
     }
 
@@ -111,6 +107,10 @@ public class GenericWireComponentUi extends AbstractServicesUi {
         this.fields.add(formGroup);
     }
 
+    public void setListener(ConfigurationChangeListener listener) {
+        this.listener = listener;
+    }
+
     protected GwtConfigComponent getUpdatedConfiguration() {
         Iterator<Widget> it = this.fields.iterator();
         while (it.hasNext()) {
@@ -121,5 +121,10 @@ public class GenericWireComponentUi extends AbstractServicesUi {
             }
         }
         return this.configurableComponent;
+    }
+
+    @Override
+    public GwtConfigComponent getConfiguration() {
+        return this.getUpdatedConfiguration();
     }
 }

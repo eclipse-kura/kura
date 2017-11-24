@@ -14,12 +14,12 @@
 package org.eclipse.kura.web.shared.service;
 
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtChannelInfo;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
-import org.eclipse.kura.web.shared.model.GwtWiresConfiguration;
+import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
+import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -85,29 +85,18 @@ public interface GwtWireService extends RemoteService {
             GwtConfigComponent asset) throws GwtKuraException;
 
     /**
-     * Returns the {@link GwtWiresConfiguration} instance associated.
+     * Returns the {@link GwtWireGraphConfiguration} instance associated.
      *
      * @param xsrfToken
      *            the XSRF token
-     * @return the {@link GwtWiresConfiguration} instance
+     * @return the {@link GwtWireGraphConfiguration} instance
      * @throws GwtKuraException
      *             if the associated instance is not retrieved
      */
-    public GwtWiresConfiguration getWiresConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
+    public GwtWireGraphConfiguration getWiresConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
-    /**
-     * Updates the {@link GwtWiresConfiguration} instance with the provided
-     * configuration.
-     *
-     * @param xsrfToken
-     *            the XSRF token
-     * @param newJsonConfiguration
-     *            the new configuration to update
-     * @param configurations
-     *            the configurations
-     * @throws GwtKuraException
-     *             if the associated instance is not updated
-     */
-    public void updateWireConfiguration(GwtXSRFToken xsrfToken, String newJsonConfiguration,
-            Map<String, GwtConfigComponent> configurations) throws GwtKuraException;
+    public void updateWireConfiguration(GwtXSRFToken xsrfToken, GwtWireGraphConfiguration configurations)
+            throws GwtKuraException;
+
+    public GwtWireComposerStaticInfo getWireComposerStaticInfo(GwtXSRFToken xsrfToken) throws GwtKuraException;
 }

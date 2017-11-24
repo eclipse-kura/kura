@@ -19,7 +19,7 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
-import org.eclipse.kura.web.shared.model.GwtWiresConfiguration;
+import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtAssetService;
 import org.eclipse.kura.web.shared.service.GwtAssetServiceAsync;
@@ -401,30 +401,31 @@ public class DriversAndAssetsUi extends Composite {
 
                             @Override
                             public void onSuccess(GwtXSRFToken token) {
-                                gwtWireService.getWiresConfiguration(token, new AsyncCallback<GwtWiresConfiguration>() {
+                                gwtWireService.getWiresConfiguration(token,
+                                        new AsyncCallback<GwtWireGraphConfiguration>() {
 
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        EntryClassUi.hideWaitModal();
-                                        FailureHandler.handle(caught);
-                                    }
-
-                                    @Override
-                                    public void onSuccess(GwtWiresConfiguration gwtWiresConfiguration) {
-                                        DriversAndAssetsUi.this.deleteAssetPid.clear();
-                                        List<String> composerWireComponentPids = gwtWiresConfiguration
-                                                .getWireComponentPids();
-
-                                        for (String assetPid : assetPids) {
-                                            if (!composerWireComponentPids.contains(assetPid)) {
-                                                DriversAndAssetsUi.this.deleteAssetPid.addItem(assetPid);
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                EntryClassUi.hideWaitModal();
+                                                FailureHandler.handle(caught);
                                             }
-                                        }
 
-                                        EntryClassUi.hideWaitModal();
-                                        DriversAndAssetsUi.this.deleteAssetModal.show();
-                                    }
-                                });
+                                            @Override
+                                            public void onSuccess(GwtWireGraphConfiguration gwtWiresConfiguration) {
+                                                // DriversAndAssetsUi.this.deleteAssetPid.clear();
+                                                // List<String> composerWireComponentPids = gwtWiresConfiguration
+                                                // .getWireComponentPids();
+                                                //
+                                                // for (String assetPid : assetPids) {
+                                                // if (!composerWireComponentPids.contains(assetPid)) {
+                                                // DriversAndAssetsUi.this.deleteAssetPid.addItem(assetPid);
+                                                // }
+                                                // }
+                                                //
+                                                // EntryClassUi.hideWaitModal();
+                                                // DriversAndAssetsUi.this.deleteAssetModal.show();
+                                            }
+                                        });
                             }
                         });
                     }
@@ -461,20 +462,20 @@ public class DriversAndAssetsUi extends Composite {
                             gwtComponentService.createFactoryComponent(token, factoryPid, pid,
                                     new AsyncCallback<Void>() {
 
-                                @Override
-                                public void onFailure(Throwable ex) {
-                                    logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                    FailureHandler.handle(ex, EntryClassUi.class.getName());
-                                }
+                                        @Override
+                                        public void onFailure(Throwable ex) {
+                                            logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                            FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                        }
 
-                                @Override
-                                public void onSuccess(Void result) {
-                                    DriversAndAssetsUi.this.newDriverModal.hide();
-                                    DriversAndAssetsUi.this.deleteDriverButton.setEnabled(true);
-                                    DriversAndAssetsUi.this.newAssetButton.setEnabled(true);
-                                    refresh();
-                                }
-                            });
+                                        @Override
+                                        public void onSuccess(Void result) {
+                                            DriversAndAssetsUi.this.newDriverModal.hide();
+                                            DriversAndAssetsUi.this.deleteDriverButton.setEnabled(true);
+                                            DriversAndAssetsUi.this.newAssetButton.setEnabled(true);
+                                            refresh();
+                                        }
+                                    });
                         }
                     });
                 }
@@ -512,19 +513,19 @@ public class DriversAndAssetsUi extends Composite {
                                     DriversAndAssetsUi.this.assetName.getValue(), twinConfig,
                                     new AsyncCallback<Void>() {
 
-                                @Override
-                                public void onFailure(Throwable ex) {
-                                    logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                    FailureHandler.handle(ex, EntryClassUi.class.getName());
-                                }
+                                        @Override
+                                        public void onFailure(Throwable ex) {
+                                            logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                            FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                        }
 
-                                @Override
-                                public void onSuccess(Void result) {
-                                    DriversAndAssetsUi.this.newAssetModal.hide();
-                                    DriversAndAssetsUi.this.deleteAssetButton.setEnabled(true);
-                                    refresh();
-                                }
-                            });
+                                        @Override
+                                        public void onSuccess(Void result) {
+                                            DriversAndAssetsUi.this.newAssetModal.hide();
+                                            DriversAndAssetsUi.this.deleteAssetButton.setEnabled(true);
+                                            refresh();
+                                        }
+                                    });
                         }
                     });
                 }
@@ -556,18 +557,18 @@ public class DriversAndAssetsUi extends Composite {
                                 DriversAndAssetsUi.this.deleteDriverInstancesList.getSelectedValue(), true,
                                 new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
+                                    @Override
+                                    public void onFailure(Throwable ex) {
+                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                DriversAndAssetsUi.this.deleteDriverModal.hide();
-                                refresh();
-                            }
-                        });
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        DriversAndAssetsUi.this.deleteDriverModal.hide();
+                                        refresh();
+                                    }
+                                });
                     }
                 });
             }
@@ -599,18 +600,18 @@ public class DriversAndAssetsUi extends Composite {
                                 DriversAndAssetsUi.this.deleteAssetPid.getSelectedValue(), true,
                                 new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
+                                    @Override
+                                    public void onFailure(Throwable ex) {
+                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
+                                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                DriversAndAssetsUi.this.deleteAssetModal.hide();
-                                refresh();
-                            }
-                        });
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        DriversAndAssetsUi.this.deleteAssetModal.hide();
+                                        refresh();
+                                    }
+                                });
                     }
                 });
             }

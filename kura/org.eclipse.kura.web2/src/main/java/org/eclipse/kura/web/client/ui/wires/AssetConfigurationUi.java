@@ -149,7 +149,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
 
         this.nonValidatedCells = new HashSet<>();
         AssetConfigurationUi.this.channelTitle.setText(MSGS.channelTableTitle(
-                assetModel.getConfiguration().get(AssetConstants.ASSET_DRIVER_PROP.value()).toString()));
+                assetModel.getConfiguration().getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value())));
 
         this.btnDownload.addClickHandler(new ClickHandler() {
 

@@ -334,10 +334,9 @@ public final class GwtServerUtil {
     public static Map<String, Object> fillPropertiesFromConfiguration(final GwtConfigComponent config,
             final ComponentConfiguration currentCC) {
         // Build the new properties
-        final Map<String, Object> properties = new HashMap<>();
+        final Map<String, Object> properties = new HashMap<>(config.getProperties());
         final ComponentConfiguration backupCC = currentCC;
         if (backupCC == null) {
-            properties.putAll(config.getProperties());
             for (final GwtConfigParameter gwtConfigParam : config.getParameters()) {
                 properties.put(gwtConfigParam.getId(), getUserDefinedObject(gwtConfigParam, null));
             }

@@ -179,7 +179,7 @@ public class WiresPanelUi extends Composite implements WireComposer.Listener, Co
 
                             @Override
                             public void onSuccess(Void result) {
-                                log("success");
+                                setDirty(false);
                             }
                         });
                     }
@@ -388,7 +388,7 @@ public class WiresPanelUi extends Composite implements WireComposer.Listener, Co
 
     private WireComponent createAsset(String pid, String driverPid) {
         final HasConfiguration assetConfig = configurations.createConfiguration(pid, WIRE_ASSET_PID);
-        assetConfig.getConfiguration().getProperties().put(AssetConstants.ASSET_DRIVER_PROP.value(), driverPid);
+        assetConfig.getConfiguration().getParameter(AssetConstants.ASSET_DRIVER_PROP.value()).setValue(driverPid);
         return descriptors.createNewComponent(pid, WIRE_ASSET_PID);
     }
 

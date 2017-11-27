@@ -13,11 +13,10 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
-import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
-import static org.osgi.service.cm.ConfigurationAdmin.SERVICE_FACTORYPID;
+import static org.eclipse.kura.asset.provider.AssetConstants.ASSET_DESC_PROP;
+import static org.eclipse.kura.asset.provider.AssetConstants.ASSET_DRIVER_PROP;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -49,16 +48,10 @@ import org.eclipse.kura.web.shared.model.GwtWireConfiguration;
 import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtWireService;
-import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireConfiguration;
-import org.eclipse.kura.wire.WireEmitter;
-import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphService;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,47 +60,8 @@ import org.slf4j.LoggerFactory;
  */
 public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implements GwtWireService {
 
-    private static final int TIMEOUT = 60;
-    private static final String CONSUMER = "consumer";
-    private static final String GRAPH = "wiregraph";
-    private static final String PRODUCER = "producer";
     private static final Logger logger = LoggerFactory.getLogger(GwtWireServiceImpl.class);
     private static final long serialVersionUID = -6577843865830245755L;
-    private static final String WIRE_SERVICE_PID = "org.eclipse.kura.wire.WireService";
-
-    /**
-     * Returns the formatted component string required for JS
-     *
-     * @param pid
-     *            the PID to parse
-     * @return the formatted string
-     * @throws GwtKuraException
-     */
-    private static String getComponentString(final String pid) throws GwtKuraException {
-        final StringBuilder result = new StringBuilder();
-
-        final BundleContext ctx = FrameworkUtil.getBundle(GwtWireServiceImpl.class).getBundleContext();
-        final Collection<ServiceReference<WireComponent>> refs = ServiceLocator.getInstance()
-                .getServiceReferences(WireComponent.class, null);
-        for (final ServiceReference<WireComponent> ref : refs) {
-            if (ref.getProperty(KURA_SERVICE_PID).equals(pid)) {
-                final String fPid = (String) ref.getProperty(SERVICE_FACTORYPID);
-                final WireComponent comp = ctx.getService(ref);
-                String compType;
-                if (comp instanceof WireEmitter && comp instanceof WireReceiver) {
-                    compType = "both";
-                } else if (comp instanceof WireEmitter) {
-                    compType = PRODUCER;
-                } else {
-                    compType = CONSUMER;
-                }
-                result.append(fPid).append("|").append(pid).append("|").append(pid).append("|").append(compType);
-                return result.toString();
-            }
-        }
-        logger.error("Could not find WireComponent for pid {}", pid);
-        throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
-    }
 
     private GwtChannelInfo getChannelFromProperties(final String channelName, final GwtConfigComponent descriptor,
             final GwtConfigComponent asset) {
@@ -356,6 +310,29 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         });
     }
 
+    @Deprecated
+    private GwtConfigComponent getWireAssetDefinition() { // TODO provide a metatype for WireAsset
+        final GwtConfigComponent result = new GwtConfigComponent();
+        result.setComponentId("org.eclipse.kura.wire.WireAsset");
+
+        final GwtConfigParameter assetDesc = new GwtConfigParameter();
+        assetDesc.setId(ASSET_DESC_PROP.value());
+        assetDesc.setName(ASSET_DESC_PROP.value());
+        assetDesc.setCardinality(0);
+        assetDesc.setType(GwtConfigParameterType.STRING);
+
+        final GwtConfigParameter driverPid = new GwtConfigParameter();
+        driverPid.setId(ASSET_DRIVER_PROP.value());
+        driverPid.setName(ASSET_DRIVER_PROP.value());
+        driverPid.setCardinality(0);
+        driverPid.setType(GwtConfigParameterType.STRING);
+
+        result.getParameters().add(assetDesc);
+        result.getParameters().add(driverPid);
+
+        return result;
+    }
+
     private void fillWireComponentDefinitions(List<GwtWireComponentDescriptor> resultDescriptors,
             List<GwtConfigComponent> resultDefinitions) throws GwtKuraException {
         ServiceLocator.applyToServiceOptionally(ConfigurationService.class, configurationService -> {
@@ -387,6 +364,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             }
             resultDescriptors.addAll(descriptors.values());
             resultDefinitions.addAll(definitions.values());
+            resultDefinitions.add(getWireAssetDefinition());
             return (Void) null;
         });
     }

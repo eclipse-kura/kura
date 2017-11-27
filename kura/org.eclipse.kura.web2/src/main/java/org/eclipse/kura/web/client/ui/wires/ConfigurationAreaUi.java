@@ -51,7 +51,7 @@ public class ConfigurationAreaUi extends Composite {
 
         if (this.assetWireComponentUi != null) {
             final GwtConfigComponent configuration = assetWireComponentUi.getConfiguration();
-            final String driverPid = configuration.get(AssetConstants.ASSET_DRIVER_PROP.value()).toString();
+            final String driverPid = configuration.getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value());
 
             this.tab1Pane.add(ConfigurationAreaUi.this.assetWireComponentUi);
             this.tab1NavTab.setText(WiresPanelUi.getFormattedPid(configuration.getFactoryId()) + " - "
@@ -85,11 +85,7 @@ public class ConfigurationAreaUi extends Composite {
 
     private void createNewUi(HasConfiguration hasConfiguration, Configurations configurations) {
         final GwtConfigComponent configuration = hasConfiguration.getConfiguration();
-        final Object driverPidRaw = configuration.get(AssetConstants.ASSET_DRIVER_PROP.value());
-        String driverPid = null;
-        if (driverPidRaw != null) {
-            driverPid = (String) driverPidRaw;
-        }
+        final String driverPid = configuration.getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value());
 
         if (driverPid != null) {
             final HasConfiguration driverConfiguration = configurations.getConfiguration(driverPid);

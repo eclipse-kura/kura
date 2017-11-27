@@ -322,6 +322,7 @@ public class WiresDialogs extends Composite {
                     }
                     genericCompModal.hide();
                 }
+                componentName.clear();
             }
         });
         this.btnComponentModalNo.addClickHandler(new ClickHandler() {

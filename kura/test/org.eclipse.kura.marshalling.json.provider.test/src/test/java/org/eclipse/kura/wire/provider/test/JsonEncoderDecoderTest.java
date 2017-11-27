@@ -19,7 +19,7 @@ import java.util.Map;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
-import org.eclipse.kura.internal.wire.JsonEncoderDecoder;
+import org.eclipse.kura.internal.marshalling.json.JsonMarshallingImpl;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
@@ -33,7 +33,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testDecodeWireConfigurationEmptyArray() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         @SuppressWarnings("unchecked")
         List<WireConfiguration> wireConfigList = (List<WireConfiguration>) TestUtil.invokePrivate(jsonEncoderDecoder,
@@ -45,7 +45,7 @@ public class JsonEncoderDecoderTest {
     @Test
     public void testDecodeWireConfigurationSingleWire() throws Throwable {
 
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         JsonArray array = new JsonArray();
         JsonObject wire = new JsonObject();
@@ -66,7 +66,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testDecodeWireComponentConfigurationEmptyArray() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         @SuppressWarnings("unchecked")
         List<WireComponentConfiguration> wireComponentConfigurationList = (List<WireComponentConfiguration>) TestUtil
@@ -77,7 +77,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testDecodeWireComponentConfigurationSingleComponent() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
         String json = "[{\n" + "        \"pid\": \"foo\",\n" + "        \"inputPortCount\": 0,\n"
                 + "        \"outputPortCount\": 5,\n" + "        \"renderingProperties\": {\n"
                 + "            \"position\": {\n" + "                \"x\": 10,\n" + "                \"y\": 100\n"
@@ -110,7 +110,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testDecodeWireComponentConfigurationTwoComponents() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
         String json = "[{\n" + "        \"pid\": \"foo\",\n" + "        \"inputPortCount\": 0,\n"
                 + "        \"outputPortCount\": 5,\n" + "        \"renderingProperties\": {\n"
                 + "            \"position\": {\n" + "                \"x\": 10,\n" + "                \"y\": 100\n"
@@ -136,11 +136,11 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testDecodeDefaultJson() {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+    public void testDecodeDefaultJson() throws Exception {
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
         String defaultJson = "{\"components\":[],\"wires\":[]}";
 
-        WireGraphConfiguration wireGraphConfiguration = JsonEncoderDecoder.fromJson(defaultJson);
+        WireGraphConfiguration wireGraphConfiguration = jsonEncoderDecoder.unmarshal(defaultJson, WireGraphConfiguration.class);
         assertNotNull(wireGraphConfiguration);
 
         assertEquals(0, wireGraphConfiguration.getWireComponentConfigurations().size());
@@ -148,11 +148,11 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testDecodeWrongJson() {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+    public void testDecodeWrongJson() throws Exception {
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
         String defaultJson = "{\"components\":{},\"wires\":{}}";
 
-        WireGraphConfiguration wireGraphConfiguration = JsonEncoderDecoder.fromJson(defaultJson);
+        WireGraphConfiguration wireGraphConfiguration = jsonEncoderDecoder.unmarshal(defaultJson, WireGraphConfiguration.class);
         assertNotNull(wireGraphConfiguration);
 
         assertEquals(0, wireGraphConfiguration.getWireComponentConfigurations().size());
@@ -161,7 +161,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testDecodeWireConfigurationEmitterReceiverNotStrings() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         JsonArray wireConfigArray = new JsonArray();
         JsonObject wire = new JsonObject();
@@ -178,7 +178,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testDecodeWireConfigurationReceiverNotString() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         JsonArray wireConfigArray = new JsonArray();
         JsonObject wire = new JsonObject();
@@ -195,7 +195,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testDecodeWireComponentConfigurationWrongArray() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         JsonArray wireComponentConfiguration = new JsonArray();
         JsonObject compProps = new JsonObject();
@@ -214,7 +214,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testParseOutputPortNamesValueNotString() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         JsonObject ports = new JsonObject();
         ports.add("outputPort1", "CorrectName");
@@ -230,7 +230,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testParseInputPortNamesValueNotString() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         JsonObject ports = new JsonObject();
         ports.add("inputPort1", "CorrectName");
@@ -246,7 +246,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testParseRenderingPropertiesWrongInput() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         JsonObject renderProps = new JsonObject();
         renderProps.add("position", 1);
@@ -262,7 +262,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testParsePosition() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         JsonObject renderProps = new JsonObject();
         renderProps.add("x", "1");
@@ -279,7 +279,7 @@ public class JsonEncoderDecoderTest {
     public void testWireSerializationSingleArc() throws Throwable {
         WireConfiguration wireConfig = new WireConfiguration("emitterPid", "receiverPid");
 
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
         JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "encodeWireConfiguration",
                 wireConfig);
         assertNotNull(result);
@@ -290,7 +290,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testWireSerializationWireConfigListEmpty() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         List<WireConfiguration> emptyWireConfig = new ArrayList<>();
         JsonArray result = (JsonArray) TestUtil.invokePrivate(jsonEncoderDecoder, "encodeWireConfigurationList",
@@ -304,7 +304,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testWireSerializationWireConfigListOneElement() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         List<WireConfiguration> wireConfigList = new ArrayList<>();
         WireConfiguration wireConfig = new WireConfiguration("emitterPid", "receiverPid");
@@ -321,7 +321,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testWireSerializationWireConfigListMoreElements() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         List<WireConfiguration> wireConfigList = new ArrayList<>();
         WireConfiguration wireConfig = new WireConfiguration("emitterPid", "receiverPid");
@@ -340,7 +340,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testSerializationPosition() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         Map<String, Object> positionMap = new HashMap<>();
         positionMap.put("position.x", 10f);
@@ -356,7 +356,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testSerializationInputPortNames() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         Map<String, Object> inputMap = new HashMap<>();
         inputMap.put("inputPortNames.0", "resetPort");
@@ -371,7 +371,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testSerializationOutputPortNames() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         Map<String, Object> inputMap = new HashMap<>();
         inputMap.put("outputPortNames.3", "then");
@@ -386,7 +386,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testEncodeComponentProperties() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         Map<String, Object> inputMap = new HashMap<>();
         inputMap.put("inputPortNames.0", "resetPort");
@@ -407,7 +407,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testEncodeWireComponentConfigurationList() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         Map<String, Object> inputMap = new HashMap<>();
         inputMap.put("inputPortNames.0", "resetPort");
@@ -428,7 +428,7 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testEncodeWireGraphConfiguration() throws Throwable {
-        JsonEncoderDecoder jsonEncoderDecoder = new JsonEncoderDecoder();
+        JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         Map<String, Object> inputMap = new HashMap<>();
         inputMap.put("inputPortNames.0", "resetPort");
@@ -456,7 +456,7 @@ public class JsonEncoderDecoderTest {
         WireGraphConfiguration wireGraphConfiguration = new WireGraphConfiguration(wireComponentConfigurations,
                 wireConfigurations);
 
-        JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "toJson", wireGraphConfiguration);
+        JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "marshalWireGraphConfiguration", wireGraphConfiguration);
 
         assertNotNull(result);
 

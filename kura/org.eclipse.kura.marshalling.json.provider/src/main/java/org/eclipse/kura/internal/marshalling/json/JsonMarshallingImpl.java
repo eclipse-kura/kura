@@ -6,7 +6,7 @@
  *   which accompanies this distribution, and is available at
  *   http://www.eclipse.org/legal/epl-v10.html
  ******************************************************************************/
-package org.eclipse.kura.internal.wire;
+package org.eclipse.kura.internal.marshalling.json;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,8 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
+import org.eclipse.kura.marshalling.Marshalling;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
@@ -26,16 +29,27 @@ import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
-public class JsonEncoderDecoder {
+public class JsonMarshallingImpl implements Marshalling {
 
-    /**
-     * Converts to JSON format a {@link WireGraphConfiguration}
-     *
-     * @param graphConfiguration
-     *            the Wire Graph representation that needs to be converted to JSON before persistence.
-     * @return a {@link JsonObject} representing the input conversion.
-     */
-    public static JsonObject toJson(WireGraphConfiguration graphConfiguration) {
+    @Override
+    public String marshal(Object object) throws KuraException {
+        if (object instanceof WireGraphConfiguration) {
+            JsonObject result = marshalWireGraphConfiguration((WireGraphConfiguration) object);
+            return result.toString();
+        }
+        throw new KuraException(KuraErrorCode.INVALID_PARAMETER);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T unmarshal(String s, Class<T> clazz) throws Exception {
+        if (clazz.equals(WireGraphConfiguration.class)) {
+            return (T) unmarshalToWireGraphConfiguration(s);
+        }
+        throw new KuraException(KuraErrorCode.INVALID_PARAMETER);
+    }
+
+    private JsonObject marshalWireGraphConfiguration(WireGraphConfiguration graphConfiguration) {
         JsonArray wireConfigurationJson = encodeWireConfigurationList(graphConfiguration.getWireConfigurations());
         JsonArray wireComponentConfigurationJson = encodeWireComponentConfigurationList(
                 graphConfiguration.getWireComponentConfigurations());
@@ -47,15 +61,7 @@ public class JsonEncoderDecoder {
         return wireGraphConfiguration;
     }
 
-    /**
-     * Converts the JSON string to a corresponding {@link WireGraphConfiguration} that represents the configuration of
-     * the desired Wire Graph.
-     *
-     * @param jsonString
-     *            a {@link String} representing the JSON of the Wire Graph
-     * @return a {@link WireGraphConfiguration} that corresponds to the String passed as input.
-     */
-    public static WireGraphConfiguration fromJson(String jsonString) {
+    public WireGraphConfiguration unmarshalToWireGraphConfiguration(String jsonString) {
 
         List<WireComponentConfiguration> wireCompConfigList = new ArrayList<>();
         List<WireConfiguration> wireConfigList = new ArrayList<>();

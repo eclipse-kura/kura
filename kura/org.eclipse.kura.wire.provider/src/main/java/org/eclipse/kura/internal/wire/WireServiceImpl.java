@@ -16,6 +16,8 @@ package org.eclipse.kura.internal.wire;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 import static org.osgi.service.cm.ConfigurationAdmin.SERVICE_FACTORYPID;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_CONSUMER_PID;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_PRODUCER_PID;
@@ -25,6 +27,7 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -36,26 +39,30 @@ import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
+import org.eclipse.kura.marshalling.Marshalling;
 import org.eclipse.kura.util.collection.CollectionUtil;
-import org.eclipse.kura.wire.WireComponent;
+import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireService;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphService;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.osgi.service.wireadmin.WireAdmin;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The Class {@link WireServiceImpl} implements {@link WireService}
+ * The Class {@link WireServiceImpl} implements {@link WireService} and {@link WireGraphService}
  */
-public final class WireServiceImpl implements ConfigurableComponent, WireService, WireGraphService {
+public class WireServiceImpl implements ConfigurableComponent, WireService, WireGraphService {
+
+    private static final String WIRE_ASSET_FACTORY_PID = "org.eclipse.kura.wire.WireAsset";
 
     private static final String NEW_WIRE_GRAPH_PROPERTY = "WireGraph";
 
@@ -66,20 +73,19 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
 
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
+    private static final int TIMEOUT = 60;
+
     /** The service component properties. */
     private Map<String, Object> properties;
 
     private volatile WireAdmin wireAdmin;
-
-    private ServiceTracker<WireComponent, WireComponent> wireComponentServiceTracker;
-
-    private WireComponentTrackerCustomizer wireComponentTrackerCustomizer;
 
     private final Set<WireConfiguration> wireConfigs;
 
     private volatile WireHelperService wireHelperService;
 
     private ConfigurationService configurationService;
+    private BundleContext bundleContext;
 
     public WireServiceImpl() {
         final Set<WireConfiguration> set = CollectionUtil.newHashSet();
@@ -142,36 +148,15 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
         this.configurationService = null;
     }
 
-    /**
-     * OSGi service component callback while activation
-     *
-     * @param componentContext
-     *            the component context
-     * @param properties
-     *            the service properties
-     */
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug(message.activatingWireService());
+        this.bundleContext = componentContext.getBundleContext();
         extractProperties(properties);
-        try {
-            this.wireComponentTrackerCustomizer = new WireComponentTrackerCustomizer(
-                    componentContext.getBundleContext(), this);
-            this.wireComponentServiceTracker = new ServiceTracker<>(componentContext.getBundleContext(),
-                    WireComponent.class, this.wireComponentTrackerCustomizer);
-            this.wireComponentServiceTracker.open();
-        } catch (final InvalidSyntaxException exception) {
-            logger.error(message.error(), exception);
-        }
+
         createWires();
         logger.debug(message.activatingWireServiceDone());
     }
 
-    /**
-     * OSGi service component callback while updating
-     *
-     * @param properties
-     *            the configuration properties
-     */
     public void updated(final Map<String, Object> properties) {
         logger.debug(message.updatingWireService() + properties);
         extractProperties(properties);
@@ -184,15 +169,10 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
         logger.debug(message.updatingWireServiceDone());
     }
 
-    /**
-     * OSGi service component callback while deactivation
-     *
-     * @param componentContext
-     *            the component context
-     */
     protected void deactivate(final ComponentContext componentContext) {
         logger.debug(message.deactivatingWireService());
-        this.wireComponentServiceTracker.close();
+        this.bundleContext = null;
+
         try {
             deleteAllWires();
         } catch (InvalidSyntaxException e) {
@@ -201,72 +181,37 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
         logger.debug(message.deactivatingWireServiceDone());
     }
 
-    /**
-     * Checks for existence of {@link WireAdmin}'s {@link Wire} instance between the
-     * provided Emitter Service PID and Receiver Service PID
-     *
-     * @param emitterServicePid
-     *            Wire Emitter Service PID {@code service.pid}
-     * @param receiverServicePid
-     *            Wire Receiver Service PID {@code service.pid}
-     * @return true if exists, otherwise false
-     * @throws InvalidSyntaxException
-     *             If the {@link Wire} filter has an invalid LDAP syntax ({@code null} accepted}
-     * @throws NullPointerException
-     *             if any of the provided arguments is null
-     */
-    private boolean checkWireExistence(final String emitterServicePid, final String receiverServicePid)
-            throws InvalidSyntaxException {
-        requireNonNull(emitterServicePid, message.emitterServicePidNonNull());
-        requireNonNull(receiverServicePid, message.receiverServicePidNonNull());
-
-        boolean found = false;
-        final Wire[] wires = this.wireAdmin.getWires(null);
-        if (nonNull(wires)) {
-            for (final Wire w : wires) {
-                final Dictionary<?, ?> props = w.getProperties();
-                if (props.get(WIREADMIN_PRODUCER_PID).equals(emitterServicePid)
-                        && props.get(WIREADMIN_CONSUMER_PID).equals(receiverServicePid)) {
-                    found = true;
-                    break;
-                }
-            }
-        }
-        return found;
-    }
-
-    /**
-     * Creates the {@link WireAdmin}'s {@link Wire} instance between the provided
-     * Emitter PID and Receiver PID and sets the created {@link Wire} instance to the
-     * provided {@link WireConfiguration} instance
-     *
-     * @param conf
-     *            the {@link WireConfiguration} instance
-     * @param emitterPid
-     *            Wire Emitter PID
-     * @param receiverPid
-     *            Wire Receiver PID
-     * @throws NullPointerException
-     *             if any of the arguments is null
-     */
     private void createConfiguration(final WireConfiguration conf, final String emitterPid, final String receiverPid) {
         requireNonNull(conf, message.wireConfigurationNonNull());
         requireNonNull(emitterPid, message.emitterPidNonNull());
         requireNonNull(receiverPid, message.receiverPidNonNull());
 
-        final String emitterServicePid = this.wireHelperService.getServicePid(emitterPid);
-        final String receiverServicePid = this.wireHelperService.getServicePid(receiverPid);
-        if (nonNull(emitterServicePid) && nonNull(receiverServicePid) && isNull(conf.getWire())) {
-            try {
-                final boolean found = checkWireExistence(emitterServicePid, receiverServicePid);
-                if (!found) {
+        try {
+            logger.info(message.creatingWire(emitterPid, receiverPid));
+            final String emitterFilter = "(" + KURA_SERVICE_PID + "=" + emitterPid + ")";
+            final String receiverFilter = "(" + KURA_SERVICE_PID + "=" + receiverPid + ")";
+
+            final Optional<Object> emitter = waitForService(emitterFilter);
+            final Optional<Object> receiver = waitForService(receiverFilter);
+
+            if (emitter.isPresent() && receiver.isPresent()) {
+                final String emitterServicePid = this.wireHelperService.getServicePid(emitterPid);
+                final String receiverServicePid = this.wireHelperService.getServicePid(receiverPid);
+                if (nonNull(emitterServicePid) && nonNull(receiverServicePid) && isNull(conf.getWire())) {
                     final Wire wire = this.wireAdmin.createWire(emitterServicePid, receiverServicePid, null);
                     conf.setWire(wire);
+                    logger.info(message.creatingWiresDone());
                 }
-            } catch (final InvalidSyntaxException e) {
-                logger.error(message.errorCreatingWires(), e);
             }
+
+        } catch (final InvalidSyntaxException | InterruptedException e) {
+            logger.error(message.errorCreatingWires(), e);
         }
+    }
+
+    protected Optional<Object> waitForService(final String emitterFilter)
+            throws InterruptedException, InvalidSyntaxException {
+        return ServiceUtil.waitForService(emitterFilter, TIMEOUT, SECONDS);
     }
 
     /** {@inheritDoc} */
@@ -313,15 +258,7 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
         for (final WireConfiguration wireConfig : cloned) {
             final String emitterPid = wireConfig.getEmitterPid();
             final String receiverPid = wireConfig.getReceiverPid();
-
-            final boolean emitterFound = this.wireComponentTrackerCustomizer.getWireEmitters().contains(emitterPid);
-            final boolean receiverFound = this.wireComponentTrackerCustomizer.getWireReceivers().contains(receiverPid);
-
-            if (emitterFound && receiverFound) {
-                logger.info(message.creatingWire(emitterPid, receiverPid));
-                createConfiguration(wireConfig, emitterPid, receiverPid);
-                logger.info(message.creatingWiresDone());
-            }
+            createConfiguration(wireConfig, emitterPid, receiverPid);
         }
     }
 
@@ -369,14 +306,6 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
         logger.info(message.removingWiresDone());
     }
 
-    /**
-     * Retrieves the properties required for Wire Service
-     *
-     * @param properties
-     *            the provided properties to parse
-     * @throws NullPointerException
-     *             if argument is null
-     */
     private void extractProperties(final Map<String, Object> properties) {
         requireNonNull(properties, message.propertiesNonNull());
         logger.debug(message.exectractingProp());
@@ -386,12 +315,10 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
 
         String jsonWireGraph = (String) this.properties.get(NEW_WIRE_GRAPH_PROPERTY);
 
-        WireGraphConfiguration wireGraphConfiguration = JsonEncoderDecoder.fromJson(jsonWireGraph);
-
+        WireGraphConfiguration wireGraphConfiguration = unmarshalJson(jsonWireGraph);
         for (final WireConfiguration conf : wireGraphConfiguration.getWireConfigurations()) {
             this.wireConfigs.add(conf);
         }
-
         logger.debug(message.exectractingPropDone());
     }
 
@@ -436,7 +363,7 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
             componentConfigurations.add(componentToUpdate);
         }
 
-        String jsonConfig = JsonEncoderDecoder.toJson(graphConfiguration).toString();
+        String jsonConfig = marshalJson(graphConfiguration);
         ComponentConfiguration wireServiceComponentConfig = this.configurationService
                 .getComponentConfiguration(CONF_PID);
         wireServiceComponentConfig.getConfigurationProperties().put(NEW_WIRE_GRAPH_PROPERTY, jsonConfig);
@@ -487,7 +414,8 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
                     oldFactoryPid = (String) oldComponentConfig.getConfigurationProperties().get(SERVICE_FACTORYPID);
                 }
 
-                if (oldPid.equals(newPid) && (newFactoryPid == null || oldFactoryPid.equals(newFactoryPid))) {
+                if (oldPid.equals(newPid) && (newFactoryPid == null || newFactoryPid.equals(oldFactoryPid))
+                        && !WIRE_ASSET_FACTORY_PID.equals(newFactoryPid)) {
                     found = true;
                     break;
                 }
@@ -526,7 +454,8 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
                 }
 
                 // TODO: check better the conditions for this test
-                if (oldPid.equals(newPid) && (newFactoryPid == null || oldFactoryPid.equals(newFactoryPid))) {
+                if (oldPid.equals(newPid) && (newFactoryPid == null || newFactoryPid.equals(oldFactoryPid))
+                        && !WIRE_ASSET_FACTORY_PID.equals(newFactoryPid)) {
                     found = true;
                     break;
                 }
@@ -543,7 +472,7 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
     @Override
     public void delete() throws KuraException {
         String oldJson = (String) this.properties.get(NEW_WIRE_GRAPH_PROPERTY);
-        WireGraphConfiguration oldGraphConfig = JsonEncoderDecoder.fromJson(oldJson);
+        WireGraphConfiguration oldGraphConfig = unmarshalJson(oldJson);
 
         List<WireComponentConfiguration> oldWireComponentConfigurations = oldGraphConfig
                 .getWireComponentConfigurations();
@@ -559,7 +488,7 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
         WireGraphConfiguration newWireGraphConfiguration = new WireGraphConfiguration(new ArrayList<>(),
                 new ArrayList<>());
 
-        String jsonConfig = JsonEncoderDecoder.toJson(newWireGraphConfiguration).toString();
+        String jsonConfig = marshalJson(newWireGraphConfiguration);
         ComponentConfiguration wireServiceComponentConfig = this.configurationService
                 .getComponentConfiguration(CONF_PID);
         wireServiceComponentConfig.getConfigurationProperties().put(NEW_WIRE_GRAPH_PROPERTY, jsonConfig);
@@ -575,7 +504,7 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
         List<ComponentConfiguration> configServiceComponentConfigurations = this.configurationService
                 .getComponentConfigurations();
 
-        WireGraphConfiguration wireGraphConfiguration = JsonEncoderDecoder.fromJson(jsonString);
+        WireGraphConfiguration wireGraphConfiguration = unmarshalJson(jsonString);
 
         List<WireComponentConfiguration> wireComponentConfigurations = wireGraphConfiguration
                 .getWireComponentConfigurations();
@@ -600,6 +529,47 @@ public final class WireServiceImpl implements ConfigurableComponent, WireService
 
         return new WireGraphConfiguration(completeWireComponentConfigurations,
                 wireGraphConfiguration.getWireConfigurations());
+    }
+
+    private ServiceReference<Marshalling>[] getJsonMarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.marshalling.json.provider");
+        return ServiceUtil.getServiceReferences(this.bundleContext, Marshalling.class, filterString);
+    }
+
+    private void ungetMarshallersServiceReferences(final ServiceReference<Marshalling>[] refs) {
+        ServiceUtil.ungetServiceReferences(this.bundleContext, refs);
+    }
+
+    protected WireGraphConfiguration unmarshalJson(String jsonWireGraph) {
+        WireGraphConfiguration result = new WireGraphConfiguration(new ArrayList<>(), new ArrayList<>());
+        ServiceReference<Marshalling>[] jsonMarshallerSRs = getJsonMarshallers();
+        try {
+            for (final ServiceReference<Marshalling> jsonMarshallerSR : jsonMarshallerSRs) {
+                Marshalling jsonMarshaller = this.bundleContext.getService(jsonMarshallerSR);
+                result = jsonMarshaller.unmarshal(jsonWireGraph, WireGraphConfiguration.class);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to extract persisted configuration.");
+        } finally {
+            ungetMarshallersServiceReferences(jsonMarshallerSRs);
+        }
+        return result;
+    }
+
+    protected String marshalJson(WireGraphConfiguration wireGraphConfiguration) {
+        String result = null;
+        ServiceReference<Marshalling>[] jsonMarshallerSRs = getJsonMarshallers();
+        try {
+            for (final ServiceReference<Marshalling> jsonMarshallerSR : jsonMarshallerSRs) {
+                Marshalling jsonMarshaller = this.bundleContext.getService(jsonMarshallerSR);
+                result = jsonMarshaller.marshal(wireGraphConfiguration);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to marshal Wire Graph configuration.");
+        } finally {
+            ungetMarshallersServiceReferences(jsonMarshallerSRs);
+        }
+        return result;
     }
 
 }

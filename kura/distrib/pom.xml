@@ -462,6 +462,11 @@
                                     <artifactId>org.eclipse.kura.misc.cloudcat</artifactId>
                                     <version>${org.eclipse.kura.misc.cloudcat.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.marshalling.json.provider</artifactId>
+                                    <version>${org.eclipse.kura.marshalling.json.provider.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -656,6 +661,8 @@
                                     tofile="target/plugins/org.eclipse.kura.hook.file.move.provider_${org.eclipse.kura.hook.file.move.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.misc.cloudcat.jar"
                                     tofile="target/plugins/org.eclipse.kura.misc.cloudcat_${org.eclipse.kura.misc.cloudcat.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.marshalling.json.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.marshalling.json.provider_${org.eclipse.kura.marshalling.json.provider.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>

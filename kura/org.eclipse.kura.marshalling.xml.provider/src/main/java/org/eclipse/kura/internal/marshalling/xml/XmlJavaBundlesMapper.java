@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.core.deployment.util;
+package org.eclipse.kura.internal.marshalling.xml;
 
 import org.eclipse.kura.core.deployment.xml.XmlBundle;
 import org.eclipse.kura.core.deployment.xml.XmlBundles;

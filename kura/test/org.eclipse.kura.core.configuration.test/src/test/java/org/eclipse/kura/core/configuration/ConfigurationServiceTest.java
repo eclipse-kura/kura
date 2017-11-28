@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -39,6 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.felix.scr.Component;
@@ -51,11 +51,13 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
-import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.internal.marshalling.xml.XmlMarshallerImpl;
 import org.eclipse.kura.system.SystemService;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -239,7 +241,7 @@ public class ConfigurationServiceTest {
 
         final String factoryPid = "fpid";
         final String pid = "mypid";
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         final boolean takeSnapshot = false;
         final String caPid = "caPid";
 
@@ -280,11 +282,11 @@ public class ConfigurationServiceTest {
 
                 return null;
             }
-        }).when(cfgMock2).update((Dictionary<String, Object>) Mockito.anyObject());
+        }).when(cfgMock2).update((Dictionary<String, Object>) Matchers.anyObject());
 
         cs.createFactoryConfiguration(factoryPid, pid, properties, takeSnapshot);
 
-        verify(cfgMock2, Mockito.times(1)).update((Dictionary<String, Object>) Mockito.anyObject());
+        verify(cfgMock2, Mockito.times(1)).update((Dictionary<String, Object>) Matchers.anyObject());
     }
 
     @Test
@@ -562,7 +564,7 @@ public class ConfigurationServiceTest {
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
         ComponentConfigurationImpl config = new ComponentConfigurationImpl();
-        Map<String, Object> props = new HashMap<String, Object>();
+        Map<String, Object> props = new HashMap<>();
         config.setProperties(props);
         String passStr = "passval1";
         Password pass = new Password(passStr);
@@ -596,7 +598,7 @@ public class ConfigurationServiceTest {
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
         ComponentConfigurationImpl config = new ComponentConfigurationImpl();
-        Map<String, Object> props = new HashMap<String, Object>();
+        Map<String, Object> props = new HashMap<>();
         config.setProperties(props);
         Password pass = new Password("passval1");
         String passKey = "pass1";
@@ -606,13 +608,13 @@ public class ConfigurationServiceTest {
         cs.setCryptoService(cryptoServiceMock);
 
         KuraException exc = new KuraException(KuraErrorCode.STORE_ERROR);
-        when(cryptoServiceMock.decryptAes((char[]) Mockito.anyObject())).thenThrow(exc);
+        when(cryptoServiceMock.decryptAes((char[]) Matchers.anyObject())).thenThrow(exc);
 
         assertEquals("config size before decryption", 1, props.size());
 
         cs.decryptConfigurationProperties(config.getConfigurationProperties());
 
-        verify(cryptoServiceMock, times(1)).decryptAes((char[]) Mockito.anyObject());
+        verify(cryptoServiceMock, times(1)).decryptAes((char[]) Matchers.anyObject());
 
         assertEquals("config size after decryption", 1, props.size());
     }
@@ -630,26 +632,13 @@ public class ConfigurationServiceTest {
     }
 
     @Test
-    public void testBla() throws Exception {
-        XmlComponentConfigurations configs = new XmlComponentConfigurations();
-
-        String marshal = XmlUtil.marshal(configs);
-
-        XmlComponentConfigurations unmarshal = XmlUtil.unmarshal(marshal, XmlComponentConfigurations.class);
-
-        String marshal2 = XmlUtil.marshal(unmarshal);
-
-        assertEquals(marshal, marshal2);
-    }
-
-    @Test
     public void testMergeWithDefaultsEmpty() throws KuraException {
         // empty input
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
         OCD ocd = new Tocd();
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
 
         boolean merged = cs.mergeWithDefaults(ocd, properties);
 
@@ -661,7 +650,7 @@ public class ConfigurationServiceTest {
     public void testMergeWithDefaults() throws KuraException {
         // a few default values, a few overrides, one ovelap
 
-        final Map<String, Object> props = new HashMap<String, Object>();
+        final Map<String, Object> props = new HashMap<>();
         String prop1Key = "prop1";
         String prop1DefValue = "prop1DefValue";
         props.put(prop1Key, prop1DefValue);
@@ -676,7 +665,7 @@ public class ConfigurationServiceTest {
         };
 
         Tocd ocd = new Tocd();
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         String prop1Value = "value1";
         properties.put(prop1Key, prop1Value);
         properties.put("key2", "value2");
@@ -703,11 +692,11 @@ public class ConfigurationServiceTest {
 
         String pid = null;
 
-        when(allPidsMock.contains(Mockito.anyObject())).thenThrow(new RuntimeException());
+        when(allPidsMock.contains(Matchers.anyObject())).thenThrow(new RuntimeException());
 
         cs.registerSelfConfiguringComponent(pid, pid);
 
-        verify(allPidsMock, times(0)).contains(Mockito.anyObject());
+        verify(allPidsMock, times(0)).contains(Matchers.anyObject());
     }
 
     @Test
@@ -779,11 +768,11 @@ public class ConfigurationServiceTest {
 
         String pid = null;
 
-        when(allPidsMock.contains(Mockito.anyObject())).thenThrow(new RuntimeException());
+        when(allPidsMock.contains(Matchers.anyObject())).thenThrow(new RuntimeException());
 
         cs.unregisterComponentConfiguration(pid);
 
-        verify(allPidsMock, times(0)).contains(Mockito.anyObject());
+        verify(allPidsMock, times(0)).contains(Matchers.anyObject());
     }
 
     @Test
@@ -843,7 +832,7 @@ public class ConfigurationServiceTest {
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
-        List<? extends ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
+        List<? extends ComponentConfiguration> configs = new ArrayList<>();
 
         TestUtil.invokePrivate(cs, "encryptConfigs", configs);
 
@@ -865,10 +854,10 @@ public class ConfigurationServiceTest {
         when(cryptoServiceMock.encryptAes("pass".toCharArray()))
                 .thenThrow(new KuraException(KuraErrorCode.ENCODE_ERROR));
 
-        List<ComponentConfigurationImpl> configs = new ArrayList<ComponentConfigurationImpl>();
+        List<ComponentConfigurationImpl> configs = new ArrayList<>();
 
         ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
-        Map<String, Object> props = new HashMap<String, Object>();
+        Map<String, Object> props = new HashMap<>();
         props.put("key1", new Password("pass"));
         cfg.setProperties(props);
 
@@ -896,10 +885,10 @@ public class ConfigurationServiceTest {
         // so that encryption is attempted at all
         when(cryptoServiceMock.encryptAes("pass".toCharArray())).thenReturn("encrypted".toCharArray());
 
-        List<ComponentConfigurationImpl> configs = new ArrayList<ComponentConfigurationImpl>();
+        List<ComponentConfigurationImpl> configs = new ArrayList<>();
 
         ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
-        Map<String, Object> props = new HashMap<String, Object>();
+        Map<String, Object> props = new HashMap<>();
         props.put("key1", new Password("pass"));
         cfg.setProperties(props);
 
@@ -926,10 +915,10 @@ public class ConfigurationServiceTest {
         // decryption succeeds this time
         when(cryptoServiceMock.decryptAes("pass".toCharArray())).thenReturn("pass".toCharArray());
 
-        List<ComponentConfigurationImpl> configs = new ArrayList<ComponentConfigurationImpl>();
+        List<ComponentConfigurationImpl> configs = new ArrayList<>();
 
         ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
-        Map<String, Object> props = new HashMap<String, Object>();
+        Map<String, Object> props = new HashMap<>();
         props.put("key1", new Password("pass"));
         cfg.setProperties(props);
 
@@ -938,7 +927,7 @@ public class ConfigurationServiceTest {
         TestUtil.invokePrivate(cs, "encryptConfigs", configs);
 
         verify(cryptoServiceMock, times(1)).decryptAes("pass".toCharArray());
-        verify(cryptoServiceMock, times(0)).encryptAes((char[]) Mockito.anyObject());
+        verify(cryptoServiceMock, times(0)).encryptAes((char[]) Matchers.anyObject());
 
         assertEquals("property remains", 1, props.size());
         assertTrue("key still exists", props.containsKey("key1"));
@@ -951,7 +940,7 @@ public class ConfigurationServiceTest {
         // test delegation
 
         final String pid = "pid";
-        final Map<String, Object> properties = new HashMap<String, Object>();
+        final Map<String, Object> properties = new HashMap<>();
 
         final boolean[] calls = { false };
 
@@ -978,7 +967,7 @@ public class ConfigurationServiceTest {
         // test delegation
 
         final String pid = "pid";
-        final Map<String, Object> propertiesToUpdate = new HashMap<String, Object>();
+        final Map<String, Object> propertiesToUpdate = new HashMap<>();
 
         final boolean[] calls = { false };
 
@@ -1010,7 +999,7 @@ public class ConfigurationServiceTest {
     public void testUpdateConfigurationsListOfComponentConfiguration() throws KuraException {
         // test delegation
 
-        final List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
+        final List<ComponentConfiguration> configs = new ArrayList<>();
 
         final boolean[] calls = { false };
 
@@ -1040,10 +1029,10 @@ public class ConfigurationServiceTest {
         // made - stop with usage of allActivatedPids in getComponentConfigurationsInternal
 
         boolean takeSnapshot = false;
-        final List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
+        final List<ComponentConfiguration> configs = new ArrayList<>();
         configs.add(null);
         ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
-        Map<String, Object> props = new HashMap<String, Object>();
+        Map<String, Object> props = new HashMap<>();
         cfg.setProperties(props);
         props.put("pass", new Password("pass"));
         configs.add(cfg);
@@ -1235,7 +1224,7 @@ public class ConfigurationServiceTest {
             @Override
             XmlComponentConfigurations loadEncryptedSnapshotFileContent(long snapshotID) throws KuraException {
                 XmlComponentConfigurations cfgs = new XmlComponentConfigurations();
-                List<ComponentConfiguration> configurations = new ArrayList<ComponentConfiguration>();
+                List<ComponentConfiguration> configurations = new ArrayList<>();
                 cfgs.setConfigurations(configurations);
 
                 configurations.add(null);
@@ -1282,7 +1271,7 @@ public class ConfigurationServiceTest {
             @Override
             XmlComponentConfigurations loadEncryptedSnapshotFileContent(long snapshotID) throws KuraException {
                 XmlComponentConfigurations cfgs = new XmlComponentConfigurations();
-                List<ComponentConfiguration> configurations = new ArrayList<ComponentConfiguration>();
+                List<ComponentConfiguration> configurations = new ArrayList<>();
                 cfgs.setConfigurations(configurations);
 
                 configurations.add(null);
@@ -1381,7 +1370,28 @@ public class ConfigurationServiceTest {
 
         String decrypted = prepareSnapshotXML();
 
-        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
+            protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
+                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+                try {
+                    return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+                } catch (XMLStreamException e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                } catch (FactoryConfigurationError e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                }
+            }
+            
+            protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
+                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+                try {
+                    return xmlMarshaller.marshal(xmlComponentConfigurations);
+                } catch (KuraException e) {
+                    
+                }
+                return null;
+            }
+        };
 
         long snapshotID = 123;
 
@@ -1451,7 +1461,7 @@ public class ConfigurationServiceTest {
     public void testLoadLatestSnapshotConfigurationsEmptySnapshots() throws Throwable {
         // test empty snapshot pids list
 
-        final Set<Long> snapshotList = new TreeSet<Long>();
+        final Set<Long> snapshotList = new TreeSet<>();
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
@@ -1471,7 +1481,7 @@ public class ConfigurationServiceTest {
     public void testLoadLatestSnapshotConfigurationsNullXML() throws Throwable {
         // test no XML being returned
 
-        final Set<Long> snapshotList = new TreeSet<Long>();
+        final Set<Long> snapshotList = new TreeSet<>();
         snapshotList.add(123L);
         snapshotList.add(1234L);
 
@@ -1508,12 +1518,12 @@ public class ConfigurationServiceTest {
     public void testLoadLatestSnapshotConfigurationsXmlLoads() throws Throwable {
         // test scenario where XML is actually loaded from encrypted file
 
-        final Set<Long> snapshotList = new TreeSet<Long>();
+        final Set<Long> snapshotList = new TreeSet<>();
         snapshotList.add(123L);
         snapshotList.add(1234L);
 
         final XmlComponentConfigurations xmlComponentConfigurations = new XmlComponentConfigurations();
-        List<ComponentConfiguration> configurations = new ArrayList<ComponentConfiguration>();
+        List<ComponentConfiguration> configurations = new ArrayList<>();
         xmlComponentConfigurations.setConfigurations(configurations);
 
         final boolean[] calls = { false, false };
@@ -1549,12 +1559,12 @@ public class ConfigurationServiceTest {
     public void testLoadLatestSnapshotConfigurationsRecursiveAfterEncryption() throws Throwable {
         // test scenario where latest snapshot is not encrypted and all snapshots are encrypted before being loaded
 
-        final Set<Long> snapshotList = new TreeSet<Long>();
+        final Set<Long> snapshotList = new TreeSet<>();
         snapshotList.add(123L);
         snapshotList.add(1234L);
 
         final XmlComponentConfigurations xmlComponentConfigurations = new XmlComponentConfigurations();
-        List<ComponentConfiguration> configurations = new ArrayList<ComponentConfiguration>();
+        List<ComponentConfiguration> configurations = new ArrayList<>();
         xmlComponentConfigurations.setConfigurations(configurations);
 
         final String dir = "snapDir";
@@ -1603,7 +1613,7 @@ public class ConfigurationServiceTest {
     public void testEncryptPlainSnapshotsNoFile() throws Throwable {
         // snapshot file doesn't exist
 
-        final Set<Long> snapshotList = new TreeSet<Long>();
+        final Set<Long> snapshotList = new TreeSet<>();
         snapshotList.add(234L);
 
         final String dir = "snapshotDirEPSNF";
@@ -1630,56 +1640,10 @@ public class ConfigurationServiceTest {
     }
 
     @Test
-    public void testEncryptPlainSnapshotsEmptyFile() throws Throwable {
-        // snapshot file is empty
-
-        final Set<Long> snapshotList = new TreeSet<Long>();
-        snapshotList.add(123L);
-
-        String cfgxml = "";
-
-        final String dir = "snapshotDirEPSEF";
-        File d1 = new File(dir);
-        d1.mkdirs();
-        d1.deleteOnExit();
-
-        File f1 = new File(dir, "snapshot_123.xml");
-        f1.createNewFile();
-        f1.deleteOnExit();
-
-        FileWriter fw = new FileWriter(f1);
-        fw.append(cfgxml);
-        fw.close();
-
-        ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
-
-            @Override
-            public Set<Long> getSnapshots() throws KuraException {
-                return snapshotList;
-            }
-
-            @Override
-            String getSnapshotsDirectory() {
-                return dir;
-            }
-        };
-
-        try {
-            TestUtil.invokePrivate(cs, "encryptPlainSnapshots");
-        } catch (Exception e) {
-            // exception is caught in the only consumer of this method
-            assertTrue("exception...", e instanceof XMLStreamException);
-        }
-
-        f1.delete();
-        d1.delete();
-    }
-
-    @Test
     public void testEncryptPlainSnapshots() throws Throwable {
         // test that everything works
 
-        final Set<Long> snapshotList = new TreeSet<Long>();
+        final Set<Long> snapshotList = new TreeSet<>();
         snapshotList.add(223L);
 
         // prepare a valid snapshot_123.xml
@@ -1709,6 +1673,27 @@ public class ConfigurationServiceTest {
             String getSnapshotsDirectory() {
                 return dir;
             }
+            
+            protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
+                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+                try {
+                    return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+                } catch (XMLStreamException e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                } catch (FactoryConfigurationError e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                }
+            }
+            
+            protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
+                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+                try {
+                    return xmlMarshaller.marshal(xmlComponentConfigurations);
+                } catch (KuraException e) {
+                    
+                }
+                return null;
+            }
         };
 
         CryptoService cryptoServiceMock = mock(CryptoService.class);
@@ -1716,11 +1701,14 @@ public class ConfigurationServiceTest {
 
         String encCfg = "encrypted";
         char[] encrypted = encCfg.toCharArray();
-        when(cryptoServiceMock.encryptAes((char[]) Mockito.anyObject())).thenReturn(encrypted);
+        when(cryptoServiceMock.encryptAes((char[]) Matchers.anyObject())).thenReturn(encrypted);
+        
+        BundleContext bundleContext = mock(BundleContext.class);
+        TestUtil.setFieldValue(cs, "bundleContext", bundleContext);
 
         TestUtil.invokePrivate(cs, "encryptPlainSnapshots");
 
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Mockito.anyObject());
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Matchers.anyObject());
 
         FileReader fr = new FileReader(f1);
         char[] chars = new char[encCfg.length()];
@@ -1737,21 +1725,17 @@ public class ConfigurationServiceTest {
     private String prepareSnapshotXML() throws Exception {
         XmlComponentConfigurations cfgs = prepareSnapshot();
 
-        StringWriter w = new StringWriter();
-        XmlUtil.marshal(cfgs, w);
-        String cfgxml = w.toString();
-        w.close();
-
-        return cfgxml;
+        XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+        return xmlMarshaller.marshal(cfgs);
     }
 
     private XmlComponentConfigurations prepareSnapshot() {
         XmlComponentConfigurations cfgs = new XmlComponentConfigurations();
 
-        List<ComponentConfiguration> cfglist = new ArrayList<ComponentConfiguration>();
+        List<ComponentConfiguration> cfglist = new ArrayList<>();
         ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
         cfg.setPid("123");
-        Map<String, Object> props = new HashMap<String, Object>();
+        Map<String, Object> props = new HashMap<>();
         props.put("pass", "pass");
         cfg.setProperties(props);
         Tocd definition = new Tocd();
@@ -1787,6 +1771,27 @@ public class ConfigurationServiceTest {
             String getSnapshotsDirectory() {
                 return dir;
             }
+            
+            protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
+                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+                try {
+                    return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+                } catch (XMLStreamException e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                } catch (FactoryConfigurationError e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                }
+            }
+            
+            protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
+                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+                try {
+                    return xmlMarshaller.marshal(xmlComponentConfigurations);
+                } catch (KuraException e) {
+                    
+                }
+                return null;
+            }
         };
 
         CryptoService cryptoServiceMock = mock(CryptoService.class);
@@ -1794,7 +1799,7 @@ public class ConfigurationServiceTest {
 
         String encCfg = "encrypted";
         char[] encrypted = encCfg.toCharArray();
-        when(cryptoServiceMock.encryptAes((char[]) Mockito.anyObject())).thenReturn(encrypted);
+        when(cryptoServiceMock.encryptAes((char[]) Matchers.anyObject())).thenReturn(encrypted);
 
         try {
             TestUtil.invokePrivate(cs, "writeSnapshot", sid, cfg);
@@ -1803,7 +1808,7 @@ public class ConfigurationServiceTest {
             assertEquals("Error code.", KuraErrorCode.INTERNAL_ERROR, e.getCode());
         }
 
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Mockito.anyObject());
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Matchers.anyObject());
 
         d1.delete();
         d2.delete();
@@ -1829,6 +1834,27 @@ public class ConfigurationServiceTest {
             String getSnapshotsDirectory() {
                 return dir;
             }
+            
+            protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
+                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+                try {
+                    return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+                } catch (XMLStreamException e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                } catch (FactoryConfigurationError e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                }
+            }
+            
+            protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
+                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+                try {
+                    return xmlMarshaller.marshal(xmlComponentConfigurations);
+                } catch (KuraException e) {
+                    
+                }
+                return null;
+            }
         };
 
         CryptoService cryptoServiceMock = mock(CryptoService.class);
@@ -1836,11 +1862,14 @@ public class ConfigurationServiceTest {
 
         String encCfg = "encrypted";
         char[] encrypted = encCfg.toCharArray();
-        when(cryptoServiceMock.encryptAes((char[]) Mockito.anyObject())).thenReturn(encrypted);
+        when(cryptoServiceMock.encryptAes((char[]) Matchers.anyObject())).thenReturn(encrypted);
 
+        BundleContext bundleContext = mock(BundleContext.class);
+        TestUtil.setFieldValue(cs, "bundleContext", bundleContext);
+        
         TestUtil.invokePrivate(cs, "writeSnapshot", sid, cfg);
 
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Mockito.anyObject());
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Matchers.anyObject());
 
         File f1 = new File(d1, "snapshot_" + sid + ".xml");
         f1.deleteOnExit();
@@ -2104,6 +2133,27 @@ public class ConfigurationServiceTest {
             String getSnapshotsDirectory() {
                 return dir;
             }
+            
+            protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
+                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+                try {
+                    return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+                } catch (XMLStreamException e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                } catch (FactoryConfigurationError e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                }
+            }
+            
+            protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
+                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+                try {
+                    return xmlMarshaller.marshal(xmlComponentConfigurations);
+                } catch (KuraException e) {
+                    
+                }
+                return null;
+            }
         };
 
         CryptoService cryptoServiceMock = mock(CryptoService.class);
@@ -2111,7 +2161,7 @@ public class ConfigurationServiceTest {
 
         String encCfg = "encrypted";
         char[] encrypted = encCfg.toCharArray();
-        when(cryptoServiceMock.encryptAes((char[]) Mockito.anyObject())).thenReturn(encrypted);
+        when(cryptoServiceMock.encryptAes((char[]) Matchers.anyObject())).thenReturn(encrypted);
 
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
@@ -2123,7 +2173,7 @@ public class ConfigurationServiceTest {
 
         Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
 
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Mockito.anyObject());
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Matchers.anyObject());
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
 
         assertNotNull(sid);
@@ -2151,7 +2201,7 @@ public class ConfigurationServiceTest {
         d1.mkdirs();
         d1.deleteOnExit();
 
-        final Set<Long> snapshotList = new TreeSet<Long>();
+        final Set<Long> snapshotList = new TreeSet<>();
         snapshotList.add(123L);
         long lastSid = System.currentTimeMillis() + 1000;
         snapshotList.add(lastSid);
@@ -2167,6 +2217,27 @@ public class ConfigurationServiceTest {
             String getSnapshotsDirectory() {
                 return dir;
             }
+            
+            protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
+                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+                try {
+                    return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+                } catch (XMLStreamException e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                } catch (FactoryConfigurationError e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                }
+            }
+            
+            protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
+                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+                try {
+                    return xmlMarshaller.marshal(xmlComponentConfigurations);
+                } catch (KuraException e) {
+                    
+                }
+                return null;
+            }
         };
 
         CryptoService cryptoServiceMock = mock(CryptoService.class);
@@ -2174,7 +2245,7 @@ public class ConfigurationServiceTest {
 
         String encCfg = "encrypted";
         char[] encrypted = encCfg.toCharArray();
-        when(cryptoServiceMock.encryptAes((char[]) Mockito.anyObject())).thenReturn(encrypted);
+        when(cryptoServiceMock.encryptAes((char[]) Matchers.anyObject())).thenReturn(encrypted);
 
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
@@ -2183,10 +2254,13 @@ public class ConfigurationServiceTest {
 
         XmlComponentConfigurations snapshot = prepareSnapshot();
         List<ComponentConfiguration> configs = snapshot.getConfigurations();
+        
+        BundleContext bundleContext = mock(BundleContext.class);
+        TestUtil.setFieldValue(cs, "bundleContext", bundleContext);
 
         Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
 
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Mockito.anyObject());
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Matchers.anyObject());
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
 
         assertNotNull(sid);
@@ -2215,7 +2289,7 @@ public class ConfigurationServiceTest {
         d1.mkdirs();
         d1.deleteOnExit();
 
-        final Set<Long> snapshotList = new TreeSet<Long>();
+        final Set<Long> snapshotList = new TreeSet<>();
         snapshotList.add(123L);
         long lastSid = 1234;
         snapshotList.add(lastSid);
@@ -2231,6 +2305,27 @@ public class ConfigurationServiceTest {
             String getSnapshotsDirectory() {
                 return dir;
             }
+            
+            protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
+                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+                try {
+                    return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+                } catch (XMLStreamException e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                } catch (FactoryConfigurationError e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                }
+            }
+            
+            protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
+                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+                try {
+                    return xmlMarshaller.marshal(xmlComponentConfigurations);
+                } catch (KuraException e) {
+                    
+                }
+                return null;
+            }
         };
 
         CryptoService cryptoServiceMock = mock(CryptoService.class);
@@ -2238,7 +2333,7 @@ public class ConfigurationServiceTest {
 
         String encCfg = "encrypted";
         char[] encrypted = encCfg.toCharArray();
-        when(cryptoServiceMock.encryptAes((char[]) Mockito.anyObject())).thenReturn(encrypted);
+        when(cryptoServiceMock.encryptAes((char[]) Matchers.anyObject())).thenReturn(encrypted);
 
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
@@ -2250,7 +2345,7 @@ public class ConfigurationServiceTest {
 
         Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
 
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Mockito.anyObject());
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Matchers.anyObject());
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
 
         assertNotNull(sid);
@@ -2380,7 +2475,7 @@ public class ConfigurationServiceTest {
         String caPid = pid;
         when(configAdminMock.getConfiguration(caPid, "?")).thenReturn(cfgMock);
 
-        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        Dictionary<String, Object> props = new Hashtable<>();
         props.put(ConfigurationService.KURA_SERVICE_PID, spid);
         props.put("test", "test");
         when(cfgMock.getProperties()).thenReturn(props);
@@ -2624,7 +2719,7 @@ public class ConfigurationServiceTest {
         // test rollback with no available shapshots - failure
 
         final boolean[] calls = { false };
-        final Set<Long> pids = new HashSet<Long>();
+        final Set<Long> pids = new HashSet<>();
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
@@ -2652,7 +2747,7 @@ public class ConfigurationServiceTest {
         // test rollback with one available shapshot - failure
 
         final boolean[] calls = { false };
-        final Set<Long> pids = new HashSet<Long>();
+        final Set<Long> pids = new HashSet<>();
         pids.add(123L);
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
@@ -2681,7 +2776,7 @@ public class ConfigurationServiceTest {
         // test rollback with 2 pids - OK
         final boolean[] calls = { false };
         final long pid = 123;
-        final Set<Long> pids = new HashSet<Long>();
+        final Set<Long> pids = new HashSet<>();
         pids.add(pid);
         pids.add(124L);
 
@@ -2711,7 +2806,7 @@ public class ConfigurationServiceTest {
 
         final boolean[] calls = { false };
         final long pid = 123;
-        final Set<Long> pids = new HashSet<Long>();
+        final Set<Long> pids = new HashSet<>();
         pids.add(121L);
         pids.add(122L);
         pids.add(pid);
@@ -2830,6 +2925,27 @@ public class ConfigurationServiceTest {
             String getSnapshotsDirectory() {
                 return dir;
             }
+            
+            protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
+                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+                try {
+                    return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+                } catch (XMLStreamException e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                } catch (FactoryConfigurationError e) {
+                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
+                }
+            }
+            
+            protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
+                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+                try {
+                    return xmlMarshaller.marshal(xmlComponentConfigurations);
+                } catch (KuraException e) {
+                    
+                }
+                return null;
+            }
         };
 
         File d1 = new File(dir);
@@ -2886,7 +3002,7 @@ public class ConfigurationServiceTest {
         Bundle bundleMock = mock(Bundle.class);
         when(svcRefMock.getBundle()).thenReturn(bundleMock);
 
-        when(bundleMock.getResource(Mockito.anyString())).thenThrow(new NullPointerException("test"));
+        when(bundleMock.getResource(Matchers.anyString())).thenThrow(new NullPointerException("test"));
 
         try {
             cs.rollback(id);
@@ -2971,7 +3087,7 @@ public class ConfigurationServiceTest {
         Bundle bundleMock = mock(Bundle.class);
         when(svcRefMock.getBundle()).thenReturn(bundleMock);
 
-        when(bundleMock.getResource(Mockito.anyString())).thenReturn(null);
+        when(bundleMock.getResource(Matchers.anyString())).thenReturn(null);
 
         cs.rollback(id);
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.core.deployment.util;
+package org.eclipse.kura.internal.marshalling.xml;
 
 import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
 import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;

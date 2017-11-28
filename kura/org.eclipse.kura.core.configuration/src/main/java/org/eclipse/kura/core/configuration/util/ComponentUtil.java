@@ -25,6 +25,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.metatype.AD;
@@ -32,12 +33,16 @@ import org.eclipse.kura.configuration.metatype.Designate;
 import org.eclipse.kura.configuration.metatype.MetaData;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Scalar;
+import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.metatype.Tmetadata;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.marshalling.Marshalling;
+import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.metatype.MetaTypeInformation;
@@ -52,7 +57,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ComponentUtil {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(ComponentUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(ComponentUtil.class);
 
     /**
      * Returns a Map with all the MetaType Object Class Definitions contained in the bundle.
@@ -85,7 +90,7 @@ public class ComponentUtil {
                             }
                         } catch (Exception e) {
                             // ignore: Metadata for the specified pid is not found
-                            s_logger.warn("Error loading Metadata for pid " + pid, e);
+                            logger.warn("Error loading Metadata for pid " + pid, e);
                         }
                     }
                 }
@@ -150,7 +155,7 @@ public class ComponentUtil {
                         }
                     } catch (Exception e) {
                         // ignore: OCD for the specified pid is not found
-                        s_logger.warn("Error loading OCD for pid " + pid, e);
+                        logger.warn("Error loading OCD for pid " + pid, e);
                     }
                 }
             }
@@ -211,7 +216,7 @@ public class ComponentUtil {
         String metatypeXmlName = sbMetatypeXmlName.toString();
         String metatypeXml = IOUtil.readResource(bundle, metatypeXmlName);
         if (metatypeXml != null) {
-            metaData = XmlUtil.unmarshal(metatypeXml, Tmetadata.class);
+            metaData = unmarshalXml(metatypeXml,Tmetadata.class);
         }
         return metaData;
     }
@@ -235,11 +240,11 @@ public class ComponentUtil {
         OCD ocd = null;
         String metatypeXml = IOUtil.readResource(resourceUrl);
         if (metatypeXml != null) {
-            MetaData metaData = XmlUtil.unmarshal(metatypeXml, MetaData.class);
-            if (metaData.getOCD() != null && metaData.getOCD().size() > 0) {
+            MetaData metaData = unmarshalXml(metatypeXml, MetaData.class);
+            if (metaData.getOCD() != null && !metaData.getOCD().isEmpty()) {
                 ocd = metaData.getOCD().get(0);
             } else {
-                s_logger.warn("Cannot find OCD for component with url: {}", resourceUrl.toString());
+                logger.warn("Cannot find OCD for component with url: {}", resourceUrl.toString());
             }
         }
         return ocd;
@@ -268,11 +273,11 @@ public class ComponentUtil {
         String metatypeXmlName = sbMetatypeXmlName.toString();
         String metatypeXml = IOUtil.readResource(metatypeXmlName);
         if (metatypeXml != null) {
-            Tmetadata metaData = XmlUtil.unmarshal(metatypeXml, Tmetadata.class);
+            Tmetadata metaData = unmarshalXml(metatypeXml, Tmetadata.class);
             if (metaData.getOCD() != null && metaData.getOCD().size() > 0) {
                 ocd = (Tocd) metaData.getOCD().get(0);
             } else {
-                s_logger.warn("Cannot find OCD for component with pid: {}", pid);
+                logger.warn("Cannot find OCD for component with pid: {}", pid);
             }
         }
         return ocd;
@@ -302,7 +307,7 @@ public class ComponentUtil {
         String metatypeXmlName = sbMetatypeXmlName.toString();
         String metatypeXml = IOUtil.readResource(bundle, metatypeXmlName);
         if (metatypeXml != null) {
-            Tmetadata metaData = XmlUtil.unmarshal(metatypeXml, Tmetadata.class);
+            Tmetadata metaData = unmarshalXml(metatypeXml, Tmetadata.class);
             if (metaData.getOCD() != null && metaData.getOCD().size() > 0) {
                 ocd = (Tocd) metaData.getOCD().get(0);
             }
@@ -314,7 +319,7 @@ public class ComponentUtil {
         //
         // reconcile by looping through the ocd properties
         Map<String, Object> defaults = null;
-        defaults = new HashMap<String, Object>();
+        defaults = new HashMap<>();
         if (ocd != null) {
 
             List<AD> attrDefs = ocd.getAD();
@@ -363,13 +368,13 @@ public class ComponentUtil {
                 return objectValues[0];
             }
         } else {
-            s_logger.warn("Unknown type for attribute {}", attrDef.getId());
+            logger.warn("Unknown type for attribute {}", attrDef.getId());
         }
         return objectValues;
     }
 
     private static Object[] getObjectValue(Scalar type, String[] defaultValues, ComponentContext ctx) {
-        List<Object> values = new ArrayList<Object>();
+        List<Object> values = new ArrayList<>();
         switch (type) {
         case BOOLEAN:
             for (String value : defaultValues) {
@@ -436,5 +441,49 @@ public class ComponentUtil {
         }
 
         return null;
+    }
+    
+    private static ServiceReference<Marshalling>[] getXmlMarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.marshalling.xml.provider");
+        return ServiceUtil.getServiceReferences(FrameworkUtil.getBundle(ComponentUtil.class).getBundleContext(), Marshalling.class, filterString);
+    }
+
+    private static void ungetMarshallersServiceReferences(final ServiceReference<Marshalling>[] refs) {
+        ServiceUtil.ungetServiceReferences(FrameworkUtil.getBundle(ComponentUtil.class).getBundleContext(), refs);
+    }
+
+    protected static <T> T unmarshalXml(String xmlString, Class<T> destinationClass) throws KuraException {
+        T result = null;
+        ServiceReference<Marshalling>[] marshallerSRs = getXmlMarshallers();
+        try {
+            for (final ServiceReference<Marshalling> marshallerSR : marshallerSRs) {
+                Marshalling marshaller = FrameworkUtil.getBundle(ComponentUtil.class).getBundleContext().getService(marshallerSR);
+                result = marshaller.unmarshal(xmlString, destinationClass);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to extract persisted configuration.");
+        } finally {
+            ungetMarshallersServiceReferences(marshallerSRs);
+        }
+        if (result == null) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+        }
+        return result;
+    }
+
+    protected static String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
+        String result = null;
+        ServiceReference<Marshalling>[] marshallerSRs = getXmlMarshallers();
+        try {
+            for (final ServiceReference<Marshalling> marshallerSR : marshallerSRs) {
+                Marshalling marshaller = FrameworkUtil.getBundle(ComponentUtil.class).getBundleContext().getService(marshallerSR);
+                result = marshaller.marshal(xmlComponentConfigurations);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to marshal configuration.");
+        } finally {
+            ungetMarshallersServiceReferences(marshallerSRs);
+        }
+        return result;
     }
 }

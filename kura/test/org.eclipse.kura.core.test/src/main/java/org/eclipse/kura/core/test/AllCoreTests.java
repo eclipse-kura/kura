@@ -33,7 +33,7 @@ import io.moquette.server.Server;
 @RunWith(Suite.class)
 @SuiteClasses({ DataServiceTest.class, CloudDeploymentHandlerTest.class, CloudServiceTest.class, CommURITest.class,
         ComponentConfigurationImplTest.class, ConfigurationServiceTest.class, NetUtilTest.class,
-        NetworkServiceTest.class, SystemAdminServiceTest.class, XmlUtilTest.class })
+        NetworkServiceTest.class, SystemAdminServiceTest.class })
 public class AllCoreTests {
 
     private static final Logger s_logger = LoggerFactory.getLogger(AllCoreTests.class);
@@ -146,7 +146,7 @@ public class AllCoreTests {
     @AfterClass
     public static void tearDownClass() throws Exception {
         s_logger.info("tearDownClass...");
-        if (s_dataService.isConnected()) {
+        if (s_dataService != null && s_dataService.isConnected()) {
             s_dataService.disconnect(0);
         }
     }

@@ -38,9 +38,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLStreamException;
-
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
 import org.eclipse.kura.KuraErrorCode;
@@ -59,9 +56,10 @@ import org.eclipse.kura.core.configuration.upgrade.ConfigurationUpgrade;
 import org.eclipse.kura.core.configuration.util.CollectionsUtil;
 import org.eclipse.kura.core.configuration.util.ComponentUtil;
 import org.eclipse.kura.core.configuration.util.StringUtil;
-import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.marshalling.Marshalling;
 import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -123,6 +121,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     };
 
     private ComponentContext ctx;
+    private BundleContext bundleContext;
 
     private ServiceTracker<ConfigurableComponent, ConfigurableComponent> serviceTracker1;
     private ServiceTracker<SelfConfiguringComponent, SelfConfiguringComponent> serviceTracker2;
@@ -205,13 +204,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     public ConfigurationServiceImpl() {
-        this.allActivatedPids = new HashSet<String>();
-        this.activatedSelfConfigComponents = new HashSet<String>();
-        this.pendingDeletePids = new HashSet<String>();
-        this.ocds = new HashMap<String, Tocd>();
-        this.factoryPids = new HashSet<String>();
-        this.factoryPidByPid = new HashMap<String, String>();
-        this.servicePidByPid = new HashMap<String, String>();
+        this.allActivatedPids = new HashSet<>();
+        this.activatedSelfConfigComponents = new HashSet<>();
+        this.pendingDeletePids = new HashSet<>();
+        this.ocds = new HashMap<>();
+        this.factoryPids = new HashSet<>();
+        this.factoryPidByPid = new HashMap<>();
+        this.servicePidByPid = new HashMap<>();
     }
 
     // ----------------------------------------------------------------
@@ -225,6 +224,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         // save the bundle context
         this.ctx = componentContext;
+        this.bundleContext = componentContext.getBundleContext();
 
         // Load the latest snapshot and push it to ConfigurationAdmin
         try {
@@ -1004,7 +1004,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 while ((line = br.readLine()) != null) {
                     entireFile.append(line);
                 }                    // end while
-                xmlConfigs = XmlUtil.unmarshal(entireFile.toString(), XmlComponentConfigurations.class);
+                xmlConfigs = unmarshalXml(entireFile.toString());
             } finally {
                 if (br != null) {
                     br.close();
@@ -1060,7 +1060,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // Marshall the configuration into an XML
         String xmlResult;
         try {
-            xmlResult = XmlUtil.marshal(conf);
+            xmlResult = marshalXml(conf);
             if (xmlResult.trim().isEmpty()) {
                 throw new KuraException(KuraErrorCode.INVALID_PARAMETER, conf);
             }
@@ -1317,7 +1317,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                             Configuration cfg = this.configurationAdmin.getConfiguration(config.getPid(), "?");
 
                             // set kura.service.pid if missing
-                            Map<String, Object> newProperties = new HashMap<String, Object>(props);
+                            Map<String, Object> newProperties = new HashMap<>(props);
                             if (!newProperties.containsKey(ConfigurationService.KURA_SERVICE_PID)) {
                                 newProperties.put(ConfigurationService.KURA_SERVICE_PID, config.getPid());
                             }
@@ -1412,15 +1412,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         String decryptedContent = new String(decryptAes);
 
         XmlComponentConfigurations xmlConfigs = null;
+
         try {
-            xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
-        } catch (XMLStreamException e) {
-            logger.warn("Error parsing xml", e);
-        } catch (FactoryConfigurationError e) { // FIXME: is this really needed?
+            xmlConfigs = unmarshalXml(decryptedContent);
+        } catch (KuraException e) {
             logger.warn("Error parsing xml", e);
         }
 
-        return ConfigurationUpgrade.upgrade(xmlConfigs);
+        return ConfigurationUpgrade.upgrade(xmlConfigs, bundleContext);
     }
 
     private void updateConfigurationInternal(String pid, Map<String, Object> properties, boolean snapshotOnConfirmation)
@@ -1744,5 +1743,49 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             classNames[i] = classes[i].getName();
         }
         return getServiceProviderOCDs(classNames);
+    }
+
+    private ServiceReference<Marshalling>[] getXmlMarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.marshalling.xml.provider");
+        return ServiceUtil.getServiceReferences(this.bundleContext, Marshalling.class, filterString);
+    }
+
+    private void ungetMarshallersServiceReferences(final ServiceReference<Marshalling>[] refs) {
+        ServiceUtil.ungetServiceReferences(this.bundleContext, refs);
+    }
+
+    protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
+        XmlComponentConfigurations result = null;
+        ServiceReference<Marshalling>[] marshallerSRs = getXmlMarshallers();
+        try {
+            for (final ServiceReference<Marshalling> marshallerSR : marshallerSRs) {
+                Marshalling marshaller = this.bundleContext.getService(marshallerSR);
+                result = marshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to extract persisted configuration.");
+        } finally {
+            ungetMarshallersServiceReferences(marshallerSRs);
+        }
+        if (result == null) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+        }
+        return result;
+    }
+
+    protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
+        String result = null;
+        ServiceReference<Marshalling>[] marshallerSRs = getXmlMarshallers();
+        try {
+            for (final ServiceReference<Marshalling> marshallerSR : marshallerSRs) {
+                Marshalling marshaller = this.bundleContext.getService(marshallerSR);
+                result = marshaller.marshal(xmlComponentConfigurations);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to marshal configuration.");
+        } finally {
+            ungetMarshallersServiceReferences(marshallerSRs);
+        }
+        return result;
     }
 }

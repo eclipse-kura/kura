@@ -89,6 +89,7 @@
 
         <module>org.eclipse.kura.misc.cloudcat</module>
         <module>org.eclipse.kura.marshalling.json.provider</module>
+        <module>org.eclipse.kura.marshalling.xml.provider</module>
 
         <module>features</module>
         <module>emulator</module>

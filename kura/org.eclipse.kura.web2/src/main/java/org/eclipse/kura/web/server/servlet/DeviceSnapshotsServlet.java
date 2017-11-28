@@ -23,12 +23,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
-import org.eclipse.kura.core.configuration.util.XmlUtil;
+import org.eclipse.kura.marshalling.Marshalling;
+import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +38,7 @@ public class DeviceSnapshotsServlet extends HttpServlet {
 
     private static final long serialVersionUID = -2533869595709953567L;
 
-    private static Logger s_logger = LoggerFactory.getLogger(DeviceSnapshotsServlet.class);
+    private static Logger logger = LoggerFactory.getLogger(DeviceSnapshotsServlet.class);
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -67,24 +69,54 @@ public class DeviceSnapshotsServlet extends HttpServlet {
                 List<ComponentConfiguration> configs = cs.getSnapshot(sid);
 
                 // build a list of configuration which can be marshalled in XML
-                List<ComponentConfiguration> configImpls = new ArrayList<ComponentConfiguration>();
+                List<ComponentConfiguration> configImpls = new ArrayList<>();
                 for (ComponentConfiguration config : configs) {
-                    configImpls.add((ComponentConfigurationImpl) config);
+                    configImpls.add(config);
                 }
                 XmlComponentConfigurations xmlConfigs = new XmlComponentConfigurations();
                 xmlConfigs.setConfigurations(configImpls);
 
                 //
                 // marshall the response and write it
-                XmlUtil.marshal(xmlConfigs, writer);
+                String result = marshalXml(xmlConfigs);
+                writer.write(result);
             }
         } catch (Exception e) {
-            s_logger.error("Error creating Excel export", e);
+            logger.error("Error creating Excel export", e);
             throw new ServletException(e);
         } finally {
             if (writer != null) {
                 writer.close();
             }
         }
+    }
+
+    private ServiceReference<Marshalling>[] getXmlMarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.marshalling.xml.provider");
+        return ServiceUtil.getServiceReferences(
+                FrameworkUtil.getBundle(DeviceSnapshotsServlet.class).getBundleContext(), Marshalling.class,
+                filterString);
+    }
+
+    private void ungetMarshallersServiceReferences(final ServiceReference<Marshalling>[] refs) {
+        ServiceUtil.ungetServiceReferences(FrameworkUtil.getBundle(DeviceSnapshotsServlet.class).getBundleContext(),
+                refs);
+    }
+
+    protected String marshalXml(Object object) {
+        String result = null;
+        ServiceReference<Marshalling>[] marshallerSRs = getXmlMarshallers();
+        try {
+            for (final ServiceReference<Marshalling> marshallerSR : marshallerSRs) {
+                Marshalling marshaller = FrameworkUtil.getBundle(DeviceSnapshotsServlet.class).getBundleContext()
+                        .getService(marshallerSR);
+                result = marshaller.marshal(object);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to marshal configuration.");
+        } finally {
+            ungetMarshallersServiceReferences(marshallerSRs);
+        }
+        return result;
     }
 }

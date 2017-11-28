@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -26,18 +25,25 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
+import org.eclipse.kura.marshalling.Marshalling;
+import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
 public class ConfigurationUpgrade {
+
+    private static final Logger logger = LoggerFactory.getLogger(ConfigurationUpgrade.class);
 
     private static final String KURA_CLOUD_SERVICE_FACTORY_PID = "kura.cloud.service.factory.pid";
     private static final String FACTORY_PID = "org.eclipse.kura.core.cloud.factory.DefaultCloudServiceFactory";
@@ -60,7 +66,8 @@ public class ConfigurationUpgrade {
     private static final String SEPARATOR = ".";
     private static final String PATTERN = "%s.";
 
-    public static XmlComponentConfigurations upgrade(XmlComponentConfigurations xmlConfigs) {
+    public static XmlComponentConfigurations upgrade(XmlComponentConfigurations xmlConfigs,
+            BundleContext bundleContext) {
         List<ComponentConfiguration> result = new ArrayList<>();
 
         for (ComponentConfiguration config : xmlConfigs.getConfigurations()) {
@@ -83,7 +90,7 @@ public class ConfigurationUpgrade {
                 props.put(ConfigurationAdmin.SERVICE_FACTORYPID, DATA_TRANSPORT_SERVICE_FACTORY_PID);
                 props.put(KURA_CLOUD_SERVICE_FACTORY_PID, FACTORY_PID);
             } else if (WIRE_SERVICE_PID.equals(pid)) {
-                Map<String, Object> convertedProps = new HashMap<>(convertToNewWiresJsonFormat(props));
+                Map<String, Object> convertedProps = new HashMap<>(convertToNewWiresJsonFormat(props, bundleContext));
                 props.clear();
                 props.putAll(convertedProps);
             }
@@ -94,7 +101,8 @@ public class ConfigurationUpgrade {
         return xmlConfigurations;
     }
 
-    private static Map<String, Object> convertToNewWiresJsonFormat(Map<String, Object> oldProperties) {
+    private static Map<String, Object> convertToNewWiresJsonFormat(Map<String, Object> oldProperties,
+            BundleContext bundleContext) {
 
         String oldWireGraph = (String) oldProperties.get("wiregraph");
         if (oldWireGraph != null) {
@@ -103,7 +111,7 @@ public class ConfigurationUpgrade {
             List<WireConfiguration> wireConfigurations = getInstance(oldProperties);
             WireGraphConfiguration wireGraphConfiguration = new WireGraphConfiguration(wireComponentConfigurations,
                     wireConfigurations);
-            String newJson = toJson(wireGraphConfiguration).toString();
+            String newJson = marshalJson(bundleContext, wireGraphConfiguration);
 
             Map<String, Object> convertedProps = new HashMap<>();
             convertedProps.put(NEW_WIRE_GRAPH_PROPERTY, newJson);
@@ -197,101 +205,29 @@ public class ConfigurationUpgrade {
         return wireConfs;
     }
 
-    // TODO:remove this code
-
-    public static JsonObject toJson(WireGraphConfiguration graphConfiguration) {
-        JsonArray wireConfigurationJson = encodeWireConfigurationList(graphConfiguration.getWireConfigurations());
-        JsonArray wireComponentConfigurationJson = encodeWireComponentConfigurationList(
-                graphConfiguration.getWireComponentConfigurations());
-
-        JsonObject wireGraphConfiguration = new JsonObject();
-        wireGraphConfiguration.add("components", wireComponentConfigurationJson);
-        wireGraphConfiguration.add("wires", wireConfigurationJson);
-
-        return wireGraphConfiguration;
+    private static ServiceReference<Marshalling>[] getJsonMarshallers(BundleContext bundleContext) {
+        String filterString = String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.marshalling.json.provider");
+        return ServiceUtil.getServiceReferences(bundleContext, Marshalling.class, filterString);
     }
 
-    private static JsonArray encodeWireConfigurationList(List<WireConfiguration> wireConfigurations) {
-        JsonArray value = new JsonArray();
-        for (WireConfiguration wireConfiguration : wireConfigurations) {
-            value.add(encodeWireConfiguration(wireConfiguration));
-        }
-
-        return value;
+    private static void ungetMarshallersServiceReferences(BundleContext bundleContext,
+            final ServiceReference<Marshalling>[] refs) {
+        ServiceUtil.ungetServiceReferences(bundleContext, refs);
     }
 
-    private static JsonArray encodeWireComponentConfigurationList(
-            List<WireComponentConfiguration> wireComponentConfigurations) {
-
-        JsonArray value = new JsonArray();
-        for (WireComponentConfiguration wireComponentConfiguration : wireComponentConfigurations) {
-            String pid = wireComponentConfiguration.getConfiguration().getPid();
-            value.add(encodeComponentProperties(pid, wireComponentConfiguration.getProperties()));
-        }
-
-        return value;
-    }
-
-    private static JsonObject encodeWireConfiguration(WireConfiguration wireConfig) {
-        JsonObject result = new JsonObject();
-        result.add("emitter", wireConfig.getEmitterPid());
-        result.add("receiver", wireConfig.getReceiverPid());
-        return result;
-    }
-
-    private static JsonObject encodeComponentProperties(String pid, Map<String, Object> componentProperties) {
-        JsonObject result = new JsonObject();
-
-        JsonObject resultElems = new JsonObject();
-
-        JsonObject position = encodePosition(componentProperties);
-        resultElems.add("position", position);
-
-        JsonObject inputPortNames = encodeInputPortNames(componentProperties);
-        resultElems.add("inputPortNames", inputPortNames);
-
-        JsonObject outputPortNames = encodeOutputPortNames(componentProperties);
-        resultElems.add("outputPortNames", outputPortNames);
-
-        result.add("pid", pid);
-        result.add("inputPortCount", (int) componentProperties.get("inputPortCount"));
-        result.add("outputPortCount", (int) componentProperties.get("outputPortCount"));
-        result.add("renderingProperties", resultElems);
-
-        return result;
-    }
-
-    private static JsonObject encodePosition(Map<String, Object> componentProperties) {
-        JsonObject positionElems = new JsonObject();
-        positionElems.add("x", (float) componentProperties.get("position.x"));
-        positionElems.add("y", (float) componentProperties.get("position.y"));
-
-        return positionElems;
-    }
-
-    private static JsonObject encodeInputPortNames(Map<String, Object> componentProperties) {
-
-        JsonObject inputPortElems = new JsonObject();
-        for (Entry<String, Object> mapEntry : componentProperties.entrySet()) {
-            if (mapEntry.getKey().startsWith("inputPortNames")) {
-                String portNumber = mapEntry.getKey().split("\\.")[1];
-                inputPortElems.add(portNumber, (String) mapEntry.getValue());
+    private static String marshalJson(BundleContext bundleContext, WireGraphConfiguration wireGraphConfiguration) {
+        String result = null;
+        ServiceReference<Marshalling>[] jsonMarshallerSRs = getJsonMarshallers(bundleContext);
+        try {
+            for (final ServiceReference<Marshalling> jsonMarshallerSR : jsonMarshallerSRs) {
+                Marshalling jsonMarshaller = bundleContext.getService(jsonMarshallerSR);
+                result = jsonMarshaller.marshal(wireGraphConfiguration);
             }
+        } catch (Exception e) {
+            logger.warn("Failed to marshal Wire Graph configuration.");
+        } finally {
+            ungetMarshallersServiceReferences(bundleContext, jsonMarshallerSRs);
         }
-
-        return inputPortElems;
-    }
-
-    private static JsonObject encodeOutputPortNames(Map<String, Object> componentProperties) {
-
-        JsonObject outputPortElems = new JsonObject();
-        for (Entry<String, Object> mapEntry : componentProperties.entrySet()) {
-            if (mapEntry.getKey().startsWith("outputPortNames")) {
-                String portNumber = mapEntry.getKey().split("\\.")[1];
-                outputPortElems.add(portNumber, (String) mapEntry.getValue());
-            }
-        }
-
-        return outputPortElems;
+        return result;
     }
 }

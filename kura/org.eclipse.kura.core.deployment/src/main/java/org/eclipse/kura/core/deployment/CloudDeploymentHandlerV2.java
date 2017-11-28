@@ -43,18 +43,20 @@ import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
 import org.eclipse.kura.core.deployment.xml.XmlBundles;
 import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
 import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
-import org.eclipse.kura.core.deployment.xml.XmlUtil;
 import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.deployment.hook.DeploymentHook;
+import org.eclipse.kura.marshalling.Marshalling;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.deploymentadmin.BundleInfo;
@@ -166,7 +168,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
     private Future<?> downloaderFuture;
     private Future<?> installerFuture;
 
-    private BundleContext m_bundleContext;
+    private BundleContext bundleContext;
 
     private DataTransportService dataTransportService;
 
@@ -242,7 +244,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
         super.activate(componentContext);
         updated(properties);
 
-        this.m_bundleContext = componentContext.getBundleContext();
+        this.bundleContext = componentContext.getBundleContext();
 
         this.dpaConfPath = System.getProperty(DPA_CONF_PATH_PROPNAME);
         if (this.dpaConfPath == null || this.dpaConfPath.isEmpty()) {
@@ -293,7 +295,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
             this.installerFuture.cancel(true);
         }
 
-        this.m_bundleContext = null;
+        this.bundleContext = null;
     }
 
     // ----------------------------------------------------------------
@@ -795,7 +797,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
 
                 logger.info("Executing command {}", start ? RESOURCE_START : RESOURCE_STOP);
 
-                Bundle bundle = this.m_bundleContext.getBundle(id);
+                Bundle bundle = this.bundleContext.getBundle(id);
                 if (bundle == null) {
                     logger.error("Bundle ID {} not found", id);
                     response.setResponseCode(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
@@ -871,7 +873,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
         xdps.setDeploymentPackages(axdp);
 
         try {
-            String s = XmlUtil.marshal(xdps);
+            String s = marshalXml(xdps);
             response.setTimestamp(new Date());
             response.setBody(s.getBytes("UTF-8"));
         } catch (Exception e) {
@@ -880,7 +882,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
     }
 
     private void doGetBundles(KuraResponsePayload response) {
-        Bundle[] bundles = this.m_bundleContext.getBundles();
+        Bundle[] bundles = this.bundleContext.getBundles();
         XmlBundles xmlBundles = new XmlBundles();
         XmlBundle[] axb = new XmlBundle[bundles.length];
 
@@ -930,7 +932,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
         xmlBundles.setBundles(axb);
 
         try {
-            String s = XmlUtil.marshal(xmlBundles);
+            String s = marshalXml(xmlBundles);
             response.setTimestamp(new Date());
             response.setBody(s.getBytes("UTF-8"));
         } catch (Exception e) {
@@ -953,6 +955,31 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
             logger.info("Install exception");
             installImplementation.installFailedAsync(options, dpFile.getName(), e);
         }
+    }
+
+    private ServiceReference<Marshalling>[] getXmlMarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.marshalling.xml.provider");
+        return ServiceUtil.getServiceReferences(this.bundleContext, Marshalling.class, filterString);
+    }
+
+    private void ungetMarshallersServiceReferences(final ServiceReference<Marshalling>[] refs) {
+        ServiceUtil.ungetServiceReferences(this.bundleContext, refs);
+    }
+
+    private String marshalXml(Object object) {
+        String result = null;
+        ServiceReference<Marshalling>[] marshallerSRs = getXmlMarshallers();
+        try {
+            for (final ServiceReference<Marshalling> marshallerSR : marshallerSRs) {
+                Marshalling marshaller = this.bundleContext.getService(marshallerSR);
+                result = marshaller.marshal(object);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to marshal configuration.");
+        } finally {
+            ungetMarshallersServiceReferences(marshallerSRs);
+        }
+        return result;
     }
 
 }

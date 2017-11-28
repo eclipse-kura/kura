@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,14 +44,13 @@ import org.eclipse.kura.core.configuration.ConfigurationServiceImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.test.ConfigurationServiceTest.CSValidator;
-import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.system.SystemService;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.osgi.framework.BundleContext;
@@ -68,7 +66,7 @@ public class ConfigurationServiceTest {
 
     private static CountDownLatch dependencyLatch = new CountDownLatch(2);
 
-    private static ConfigurationService configurationService;
+    static ConfigurationService configurationService;
     private static SystemService systemService;
 
     private int kuraSnapshotsCount = 10;
@@ -109,14 +107,14 @@ public class ConfigurationServiceTest {
     @Before
     public void setup() throws KuraException {
         if (systemService != null) {
-            kuraSnapshotsCount = systemService.getKuraSnapshotsCount();
-            kuraSnapshotsDir = systemService.getKuraSnapshotsDirectory();
+            this.kuraSnapshotsCount = systemService.getKuraSnapshotsCount();
+            this.kuraSnapshotsDir = systemService.getKuraSnapshotsDirectory();
         }
 
         resetMocks();
 
         // remove all other snapshots
-        File dir = new File(kuraSnapshotsDir);
+        File dir = new File(this.kuraSnapshotsDir);
         dir.mkdirs();
         File[] snapshots = dir.listFiles();
         if (snapshots != null) {
@@ -177,7 +175,7 @@ public class ConfigurationServiceTest {
     private static void resetMocks(final CSValidator validator) throws KuraException {
         reset(csMock);
 
-        when(csMock.encryptAes((char[]) Mockito.anyObject())).thenAnswer(new Answer<char[]>() {
+        when(csMock.encryptAes((char[]) Matchers.anyObject())).thenAnswer(new Answer<char[]>() {
 
             @Override
             public char[] answer(InvocationOnMock invocation) throws Throwable {
@@ -187,7 +185,7 @@ public class ConfigurationServiceTest {
             }
 
         });
-        when(csMock.decryptAes((char[]) Mockito.anyObject())).thenAnswer(new Answer<char[]>() {
+        when(csMock.decryptAes((char[]) Matchers.anyObject())).thenAnswer(new Answer<char[]>() {
 
             @Override
             public char[] answer(InvocationOnMock invocation) throws Throwable {
@@ -289,7 +287,7 @@ public class ConfigurationServiceTest {
 
         final String factoryPid = TEST_COMPONENT_FPID;
         final String pid = "cfcmp_pid_" + System.currentTimeMillis();
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("key", "value");
         final boolean takeSnapshot = true;
 
@@ -303,7 +301,7 @@ public class ConfigurationServiceTest {
 
         Set<Long> snapshotsAfter = configurationService.getSnapshots();
 
-        int expectedSize = Math.min(kuraSnapshotsCount, snapshots.size() + 1);
+        int expectedSize = Math.min(this.kuraSnapshotsCount, snapshots.size() + 1);
         assertEquals("One more snapshot expected", expectedSize, snapshotsAfter.size());
 
         // verify that the new snapshot contains our new property
@@ -375,7 +373,7 @@ public class ConfigurationServiceTest {
         configurationService.createFactoryConfiguration(factoryPid, servicePid, null, takeSnapshot);
         Set<Long> snapshotsAfter = configurationService.getSnapshots();
 
-        int expectedSize = Math.min(kuraSnapshotsCount, snapshotsBefore.size() + 1);
+        int expectedSize = Math.min(this.kuraSnapshotsCount, snapshotsBefore.size() + 1);
         assertEquals("One more configuration expected", expectedSize, snapshotsAfter.size());
         snapshotsAfter.removeAll(snapshotsBefore);
         long sid = snapshotsAfter.iterator().next().longValue();
@@ -603,7 +601,7 @@ public class ConfigurationServiceTest {
         Map<String, Object> configurationProperties = config.getConfigurationProperties();
         Object val = configurationProperties.get(TEST_COMPONENT_PROPERTY_TEST);
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
 
         configurationService.updateConfiguration(pid, properties);
 
@@ -619,7 +617,7 @@ public class ConfigurationServiceTest {
         Set<Long> snapshots = configurationService.getSnapshots();
         int size1 = snapshots.size();
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         String prop = "some unknown property";
         properties.put(prop, 123);
         properties.put(TEST_COMPONENT_PROPERTY_TEST, 10);
@@ -642,10 +640,10 @@ public class ConfigurationServiceTest {
     private static String loadConfigsXml(String pid) throws Exception, IOException {
         XmlComponentConfigurations cfgs = new XmlComponentConfigurations();
 
-        List<ComponentConfiguration> cfglist = new ArrayList<ComponentConfiguration>();
+        List<ComponentConfiguration> cfglist = new ArrayList<>();
         ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
         cfg.setPid(pid);
-        Map<String, Object> props = new HashMap<String, Object>();
+        Map<String, Object> props = new HashMap<>();
         props.put("pass", "pass");
         cfg.setProperties(props);
         Tocd definition = new Tocd();
@@ -654,11 +652,13 @@ public class ConfigurationServiceTest {
         cfglist.add(cfg);
         cfgs.setConfigurations(cfglist);
 
-        StringWriter w = new StringWriter();
-        XmlUtil.marshal(cfgs, w);
-        String cfgxml = w.toString();
-        w.close();
-
+        String cfgxml = null;
+        try {
+            cfgxml = (String) TestUtil.invokePrivate(configurationService, "marshalXml", cfgs);
+        } catch (Throwable e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return cfgxml;
     }
 
@@ -667,7 +667,7 @@ public class ConfigurationServiceTest {
         // try it with a registered component and an existing PID with invalid properties
         String pid = TEST_COMPONENT_PID;
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         String prop = "some unknown property";
         properties.put(prop, 123);
         properties.put(TEST_COMPONENT_PROPERTY_TEST, 1234);
@@ -690,7 +690,7 @@ public class ConfigurationServiceTest {
         Set<Long> snapshots = configurationService.getSnapshots();
         int size1 = snapshots.size();
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put(TEST_COMPONENT_PROPERTY_TEST, 10);
 
         configurationService.updateConfiguration(pid, properties, takeSnapshot);
@@ -710,12 +710,12 @@ public class ConfigurationServiceTest {
         Set<Long> snapshots = configurationService.getSnapshots();
         int size1 = snapshots.size();
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         String prop = "some property";
         properties.put(prop, 123);
         properties.put(TEST_COMPONENT_PROPERTY_TEST, 5);
 
-        List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
+        List<ComponentConfiguration> configs = new ArrayList<>();
         ComponentConfiguration config = new ComponentConfigurationImpl(pid, null, properties);
         configs.add(config);
 
@@ -755,7 +755,7 @@ public class ConfigurationServiceTest {
     @Test
     public void testRollbackEmpty() throws KuraException {
         // remove all other snapshots
-        File dir = new File(kuraSnapshotsDir);
+        File dir = new File(this.kuraSnapshotsDir);
         File[] snapshots = dir.listFiles();
         for (File f : snapshots) {
             f.delete();
@@ -834,10 +834,10 @@ public class ConfigurationServiceTest {
     public void testEncryptSnapshots() throws Exception {
         XmlComponentConfigurations cfgs = new XmlComponentConfigurations();
 
-        List<ComponentConfiguration> cfglist = new ArrayList<ComponentConfiguration>();
+        List<ComponentConfiguration> cfglist = new ArrayList<>();
         ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
         cfg.setPid("123");
-        Map<String, Object> props = new HashMap<String, Object>();
+        Map<String, Object> props = new HashMap<>();
         props.put("pass", "pass");
         cfg.setProperties(props);
         Tocd definition = new Tocd();
@@ -846,12 +846,15 @@ public class ConfigurationServiceTest {
         cfglist.add(cfg);
         cfgs.setConfigurations(cfglist);
 
-        StringWriter w = new StringWriter();
-        XmlUtil.marshal(cfgs, w);
-        String cfgxml = w.toString();
-        w.close();
+        String cfgxml = null;
+        try {
+            cfgxml = (String) TestUtil.invokePrivate(configurationService, "marshalXml", cfgs);
+        } catch (Throwable e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
-        File f1 = new File(kuraSnapshotsDir, "snapshot_123456.xml");
+        File f1 = new File(this.kuraSnapshotsDir, "snapshot_123456.xml");
         f1.createNewFile();
         f1.deleteOnExit();
 
@@ -916,10 +919,10 @@ public class ConfigurationServiceTest {
         // made - stop with usage of allActivatedPids in getComponentConfigurationsInternal
 
         boolean takeSnapshot = false;
-        final List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
+        final List<ComponentConfiguration> configs = new ArrayList<>();
         configs.add(null);
         ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
-        Map<String, Object> props = new HashMap<String, Object>();
+        Map<String, Object> props = new HashMap<>();
         cfg.setProperties(props);
         props.put("pass", new Password("pass"));
         configs.add(cfg);
@@ -961,25 +964,26 @@ class MultiStepCSValidator implements CSValidator {
 
     @Override
     public boolean validateEncryptArgs(Object[] args) {
-        String arg0 = new String(((char[]) args[0]));
+        String arg0 = new String((char[]) args[0]);
         XmlComponentConfigurations configurations = null;
         try {
-            configurations = XmlUtil.unmarshal(arg0, XmlComponentConfigurations.class);
-        } catch (Exception e) {
+            configurations = (XmlComponentConfigurations) TestUtil
+                    .invokePrivate(ConfigurationServiceTest.configurationService, "unmarshalXml", arg0);
+        } catch (Throwable e) {
         }
 
-        if (configs == null) { // first pass
+        if (this.configs == null) { // first pass
             assertTrue("At least one configuration expected", configurations.getConfigurations().size() >= 1);
             boolean found = false;
             for (ComponentConfiguration cfg : configurations.getConfigurations()) {
-                if (pid.compareTo(cfg.getPid()) == 0) {
-                    assertEquals(factoryPid, cfg.getConfigurationProperties().get("service.factoryPid"));
+                if (this.pid.compareTo(cfg.getPid()) == 0) {
+                    assertEquals(this.factoryPid, cfg.getConfigurationProperties().get("service.factoryPid"));
                     found = true;
                 }
             }
             assertTrue("Our configuration should be found.", found);
         }
-        configs = configurations;
+        this.configs = configurations;
 
         return true;
     }
@@ -1001,12 +1005,15 @@ class MultiStepCSValidator implements CSValidator {
 
     @Override
     public String getDecrypted() {
-        if (configs != null) {
+        if (this.configs != null) {
             try {
-                StringWriter w = new StringWriter();
-                XmlUtil.marshal(configs, w);
-                String cfgxml = w.toString();
-                w.close();
+                String cfgxml = null;
+                try {
+                    cfgxml = (String) TestUtil.invokePrivate(ConfigurationServiceTest.configurationService,
+                            "marshalXml", this.configs);
+                } catch (Throwable e) {
+
+                }
 
                 return cfgxml;
             } catch (Exception e) {

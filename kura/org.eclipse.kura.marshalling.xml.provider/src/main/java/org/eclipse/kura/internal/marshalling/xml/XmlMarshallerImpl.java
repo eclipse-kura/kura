@@ -1,15 +1,4 @@
-/*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
- *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     Eurotech
- *******************************************************************************/
-package org.eclipse.kura.core.configuration.util;
+package org.eclipse.kura.internal.marshalling.xml;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -29,29 +18,31 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
-import org.eclipse.kura.core.configuration.util.serializers.XmlJavaComponentConfigurationsMapper;
-import org.eclipse.kura.core.configuration.util.serializers.XmlJavaMetadataMapper;
-import org.eclipse.kura.core.configuration.util.serializers.XmlJavaSnapshotIdResultMapper;
+import org.eclipse.kura.core.deployment.xml.XmlBundles;
+import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
+import org.eclipse.kura.marshalling.Marshalling;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-public class XmlUtil {
-
-    private static final Logger s_logger = LoggerFactory.getLogger(XmlUtil.class);
-
-    //
-    // Public methods
-    //
+public class XmlMarshallerImpl implements Marshalling {
+    private static final Logger logger = LoggerFactory.getLogger(XmlMarshallerImpl.class);
 
     // Marshalling
-    public static String marshal(Object object) throws Exception {
+    @Override
+    public String marshal(Object object) throws KuraException {
         StringWriter sw = new StringWriter();
-        marshal(object, sw);
+        try {
+            marshal(object, sw);
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR);
+        }
         return sw.toString();
     }
 
@@ -77,6 +68,38 @@ public class XmlUtil {
 
             } else if (object instanceof XmlComponentConfigurations) {
                 new XmlJavaComponentConfigurationsMapper().marshal(doc, object);
+            } else if (object instanceof XmlDeploymentPackages) {
+                // Expected resulting xml:
+                // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                // <packages>
+                // <package>
+                // <name>org.eclipse.kura.demo.heater</name>
+                // <version>1.2.0.qualifier</version>
+                // <bundles>
+                // <bundle>
+                // <name>org.eclipse.kura.demo.heater</name>
+                // <version>1.0.1</version>
+                // </bundle>
+                // </bundles>
+                // </package>
+                // </packages>
+
+                new XmlJavaPackagesMapper().marshal(doc, object);
+
+            } else if (object instanceof XmlBundles) {
+                // Expected resulting xml:
+                // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                // <bundles>
+                // <bundle>
+                // <name>org.eclipse.osgi</name>
+                // <version>3.8.1.v20120830-144521</version>
+                // <id>0</id>
+                // <state>ACTIVE</state>
+                // </bundle>
+                // </bundles>
+
+                new XmlJavaBundlesMapper().marshal(doc, object);
+
             }
 
             // write the content into xml file
@@ -89,17 +112,17 @@ public class XmlUtil {
             StreamResult result = new StreamResult(w); // System.out
             transformer.transform(source, result);
         } catch (ParserConfigurationException pce) {
-            s_logger.warn("Parser Exception", pce);
+            logger.warn("Parser Exception", pce);
         } catch (TransformerException tfe) {
-            s_logger.warn("Transformer Exception", tfe);
+            logger.warn("Transformer Exception", tfe);
         }
     }
 
     // un-marshalling
-    public static <T> T unmarshal(String s, Class<T> clazz) throws XMLStreamException, FactoryConfigurationError {
+    @Override
+    public <T> T unmarshal(String s, Class<T> clazz) throws XMLStreamException, FactoryConfigurationError {
         StringReader sr = new StringReader(s);
-        T result = unmarshal(sr, clazz);
-        return result;
+        return unmarshal(sr, clazz);
     }
 
     public static <T> T unmarshal(Reader r, Class<T> clazz) throws XMLStreamException, FactoryConfigurationError {
@@ -108,15 +131,14 @@ public class XmlUtil {
 
         try {
             factory = DocumentBuilderFactory.newInstance();
-            // factory.setValidating(true);
             parser = factory.newDocumentBuilder();
         } catch (FactoryConfigurationError fce) {
             // The implementation is not available or cannot be instantiated
-            s_logger.error("Parser Factory configuration Error");
+            logger.error("Parser Factory configuration Error");
             throw fce;
         } catch (ParserConfigurationException pce) {
             // the parser cannot be created with the specified configuration
-            s_logger.error("Parser configuration exception");
+            logger.error("Parser configuration exception");
             throw new FactoryConfigurationError(pce);
         }
 
@@ -147,4 +169,5 @@ public class XmlUtil {
             return new XmlJavaMetadataMapper().unmarshal(doc);
         }
     }
+
 }

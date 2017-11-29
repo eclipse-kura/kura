@@ -28,7 +28,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.kura.web.client.configuration.HasConfiguration;
 import org.eclipse.kura.web.client.ui.AbstractServicesUi;
+import org.eclipse.kura.web.client.ui.ConfigurableComponentUi;
 import org.eclipse.kura.web.client.ui.wires.AssetModel.ChannelModel;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
@@ -128,13 +130,11 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     private boolean dirty;
 
     private AssetModel model;
-    private GenericWireComponentUi driverConfigurationUi;
+    private ConfigurableComponentUi driverConfigurationUi;
 
-    private boolean nonValidated;
+    private HasConfiguration.Listener listener;
 
-    private ConfigurationChangeListener listener;
-
-    public AssetConfigurationUi(final AssetModel assetModel, final GenericWireComponentUi driverConfigurationUi) {
+    public AssetConfigurationUi(final AssetModel assetModel, final ConfigurableComponentUi driverConfigurationUi) {
         initWidget(uiBinder.createAndBindUi(this));
         this.model = assetModel;
         this.fields.clear();
@@ -185,15 +185,6 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     }
 
     @Override
-    public boolean isDirty() {
-        return this.dirty;
-    }
-
-    public boolean isNonValidated() {
-        return this.nonValidated;
-    }
-
-    @Override
     public void renderForm() {
         this.fields.clear();
 
@@ -238,18 +229,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     @Override
     public void setDirty(final boolean flag) {
         this.dirty = flag;
-        if (this.dirty && this.listener != null && !this.nonValidated) {
-            this.listener.onConfigurationChanged(this);
-        }
-    }
-
-    public void setNonValidated(final boolean flag) {
-        this.nonValidated = flag;
-        if (flag) {
-            // TODO fix this
-        } else if (this.nonValidatedCells.isEmpty()) {
-            // TODO fix this
-        }
+        notifyListener();
     }
 
     @Override
@@ -320,14 +300,13 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
                         viewData = ((ValidationInputCell) cell).getViewData(object);
                         viewData.setInvalid(true);
                         AssetConfigurationUi.this.nonValidatedCells.add(object.getChannelName());
-                        AssetConfigurationUi.this.setNonValidated(true);
                         // We only modified the cell, so do a local redraw.
                         AssetConfigurationUi.this.channelTable.redraw();
                         return;
                     }
                     AssetConfigurationUi.this.nonValidatedCells.remove(object.getChannelName());
-                    AssetConfigurationUi.this.setNonValidated(false);
                     AssetConfigurationUi.this.setDirty(true);
+                    AssetConfigurationUi.this.notifyListener();
                     AssetConfigurationUi.this.channelTable.redraw();
                     object.setValue(param.getId(), value);
                 }
@@ -483,11 +462,21 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         return result;
     }
 
-    public void setListener(ConfigurationChangeListener listener) {
+    public void setListener(HasConfiguration.Listener listener) {
         this.listener = listener;
+        listener.onConfigurationChanged(this);
     }
 
-    public GenericWireComponentUi getDriverConfigurationUi() {
+    private void notifyListener() {
+        if (listener == null) {
+            return;
+        }
+        if (this.isValid()) {
+            listener.onConfigurationChanged(this);
+        }
+    }
+
+    public ConfigurableComponentUi getDriverConfigurationUi() {
         return this.driverConfigurationUi;
     }
 
@@ -496,4 +485,18 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         return model.getConfiguration();
     }
 
+    @Override
+    public boolean isDirty() {
+        return this.dirty;
+    }
+
+    @Override
+    public boolean isValid() {
+        return nonValidatedCells.isEmpty();
+    }
+
+    @Override
+    public void clearDirtyState() {
+        this.dirty = false;
+    }
 }

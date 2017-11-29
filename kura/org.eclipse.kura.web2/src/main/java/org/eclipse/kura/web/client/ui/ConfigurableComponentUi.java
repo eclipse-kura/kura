@@ -10,11 +10,11 @@
  *  Eurotech
  *
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.wires;
+package org.eclipse.kura.web.client.ui;
 
 import java.util.Iterator;
 
-import org.eclipse.kura.web.client.ui.AbstractServicesUi;
+import org.eclipse.kura.web.client.configuration.HasConfiguration;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.gwtbootstrap3.client.ui.FieldSet;
@@ -25,25 +25,22 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 
-public class GenericWireComponentUi extends AbstractServicesUi implements HasConfiguration {
+public class ConfigurableComponentUi extends AbstractServicesUi implements HasConfiguration {
 
-    interface GenericWireComponentUiUiBinder extends UiBinder<Widget, GenericWireComponentUi> {
+    interface GenericWireComponentUiUiBinder extends UiBinder<Widget, ConfigurableComponentUi> {
     }
 
     private static GenericWireComponentUiUiBinder uiBinder = GWT.create(GenericWireComponentUiUiBinder.class);
 
     private boolean dirty;
 
-    private boolean initialized;
-
-    private ConfigurationChangeListener listener;
+    private HasConfiguration.Listener listener;
 
     @UiField
     FieldSet fields;
 
-    public GenericWireComponentUi(final GwtConfigComponent originalConfig) {
+    public ConfigurableComponentUi(final GwtConfigComponent originalConfig) {
         initWidget(uiBinder.createAndBindUi(this));
-        this.initialized = false;
         restoreConfiguration(originalConfig);
         this.fields.clear();
 
@@ -54,14 +51,7 @@ public class GenericWireComponentUi extends AbstractServicesUi implements HasCon
     @Override
     public void setDirty(final boolean flag) {
         this.dirty = flag;
-        if (this.dirty && this.initialized && listener != null) {
-            listener.onConfigurationChanged(this);
-        }
-    }
-
-    @Override
-    public boolean isDirty() {
-        return this.dirty;
+        notifyListener();
     }
 
     @Override
@@ -80,7 +70,6 @@ public class GenericWireComponentUi extends AbstractServicesUi implements HasCon
                 renderMultiFieldConfigParameter(param);
             }
         }
-        this.initialized = true;
     }
 
     @Override
@@ -107,8 +96,9 @@ public class GenericWireComponentUi extends AbstractServicesUi implements HasCon
         this.fields.add(formGroup);
     }
 
-    public void setListener(ConfigurationChangeListener listener) {
+    public void setListener(HasConfiguration.Listener listener) {
         this.listener = listener;
+        listener.onConfigurationChanged(this);
     }
 
     protected GwtConfigComponent getUpdatedConfiguration() {
@@ -123,8 +113,34 @@ public class GenericWireComponentUi extends AbstractServicesUi implements HasCon
         return this.configurableComponent;
     }
 
+    private void notifyListener() {
+        if (listener == null) {
+            return;
+        }
+        if (this.isValid()) {
+            listener.onConfigurationChanged(this);
+        }
+    }
+
     @Override
     public GwtConfigComponent getConfiguration() {
-        return this.getUpdatedConfiguration();
+        final GwtConfigComponent result = this.getUpdatedConfiguration();
+        result.getProperties().putAll(this.configurableComponent.getProperties());
+        return result;
+    }
+
+    @Override
+    public void clearDirtyState() {
+        this.dirty = false;
+    }
+
+    @Override
+    public boolean isValid() {
+        return super.isValid();
+    }
+
+    @Override
+    public boolean isDirty() {
+        return this.dirty;
     }
 }

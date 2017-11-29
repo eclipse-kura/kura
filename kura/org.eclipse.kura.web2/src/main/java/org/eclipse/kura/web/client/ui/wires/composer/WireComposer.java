@@ -14,18 +14,21 @@ public final class WireComposer extends JavaScriptObject {
     /*-{
         var self = new parent.window.WireComposer(target)
         self.dispatchWireCreated = function (wire) {
+            this.isDirty = true
             if (!this.listener) {
                 return
             }
             this.listener.@org.eclipse.kura.web.client.ui.wires.composer.WireComposer$Listener::onWireCreated(Lorg/eclipse/kura/web/client/ui/wires/composer/Wire;)(wire)
         }
         self.dispatchWireChanged = function (wire) {
+            this.isDirty = true
             if (!this.listener) {
                 return
             }
             this.listener.@org.eclipse.kura.web.client.ui.wires.composer.WireComposer$Listener::onWireChanged(Lorg/eclipse/kura/web/client/ui/wires/composer/Wire;)(wire)
         }
         self.dispatchWireDeleted = function (wire) {
+            this.isDirty = true
             if (!this.listener) {
                 return
             }
@@ -44,18 +47,21 @@ public final class WireComposer extends JavaScriptObject {
             this.listener.@org.eclipse.kura.web.client.ui.wires.composer.WireComposer$Listener::onWireComponentDeselected(Lorg/eclipse/kura/web/client/ui/wires/composer/WireComponent;)(component)
         }
         self.dispatchWireComponentCreated = function (component) {
+            this.isDirty = true
             if (!this.listener) {
                 return
             }
             this.listener.@org.eclipse.kura.web.client.ui.wires.composer.WireComposer$Listener::onWireComponentCreated(Lorg/eclipse/kura/web/client/ui/wires/composer/WireComponent;)(component)
         }
         self.dispatchWireComponentChanged = function (component) {
+            this.isDirty = true
             if (!this.listener) {
                 return
             }
             this.listener.@org.eclipse.kura.web.client.ui.wires.composer.WireComposer$Listener::onWireComponentChanged(Lorg/eclipse/kura/web/client/ui/wires/composer/WireComponent;)(component)
         }
         self.dispatchWireComponentDeleted = function (component) {
+            this.isDirty = true
             if (!this.listener) {
                 return
             }
@@ -80,6 +86,11 @@ public final class WireComposer extends JavaScriptObject {
         return this.getSelectedWireComponent()
     }-*/;
 
+    public native void deselectWireCompoent()
+    /*-{
+        return this.deselectWireComponent()
+    }-*/;
+
     public native void deleteWireComponent(WireComponent component)
     /*-{
         this.deleteWireComponent(component)
@@ -88,6 +99,17 @@ public final class WireComposer extends JavaScriptObject {
     public native void addWire(Wire wire)
     /*-{
         this.addWire(wire)
+    }-*/;
+
+    public native WireComponent getWireComponent(String pid)
+    /*-{
+        var result = null
+        this.forEachWireComponent(function (component) {
+            if (pid === component.pid) {
+                result = component
+            }
+        })
+        return result
     }-*/;
 
     public native List<WireComponent> getWireComponents()
@@ -131,6 +153,16 @@ public final class WireComposer extends JavaScriptObject {
     public native void clear()
     /*-{
         this.clear()
+    }-*/;
+
+    public native boolean isDirty()
+    /*-{
+        return this.isDirty
+    }-*/;
+
+    public native void clearDirtyState()
+    /*-{
+        this.isDirty = false;
     }-*/;
 
     public native void fitContent(boolean transition)

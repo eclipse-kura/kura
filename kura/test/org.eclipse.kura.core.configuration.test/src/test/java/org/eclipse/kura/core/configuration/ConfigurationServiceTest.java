@@ -365,10 +365,8 @@ public class ConfigurationServiceTest {
 
         try {
             cs.deleteFactoryConfiguration(pid, takeSnapshot);
-
-            fail("Nonexisting parameter - exception expected.");
         } catch (KuraException e) {
-            assertTrue(e.getMessage().contains("INVALID_PARAMETER"));
+            fail("Exception not expected.");
         }
     }
 

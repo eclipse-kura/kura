@@ -913,7 +913,7 @@ public class EntryClassUi extends Composite {
             this.cloudServicesBinder.setDirty(false);
         }
         if (this.wires.isVisible()) {
-            this.wiresBinder.setDirty(false);
+            this.wiresBinder.clearDirtyState();
             this.wiresBinder.unload();
         }
     }

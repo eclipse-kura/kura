@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.wires;
 
+import org.eclipse.kura.web.client.configuration.Configurations;
+import org.eclipse.kura.web.client.configuration.HasConfiguration;
+import org.eclipse.kura.web.client.ui.ConfigurableComponentUi;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.gwtbootstrap3.client.ui.TabListItem;
@@ -30,7 +33,7 @@ public class ConfigurationAreaUi extends Composite {
     interface ConfigurationAreaUiUiBinder extends UiBinder<Widget, ConfigurationAreaUi> {
     }
 
-    private GenericWireComponentUi genericWireComponentUi;
+    private ConfigurableComponentUi genericWireComponentUi;
     private AssetConfigurationUi assetWireComponentUi;
 
     @UiField
@@ -50,24 +53,17 @@ public class ConfigurationAreaUi extends Composite {
         }
 
         if (this.assetWireComponentUi != null) {
-            final GwtConfigComponent configuration = assetWireComponentUi.getConfiguration();
-            final String driverPid = configuration.getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value());
-
             this.tab1Pane.add(ConfigurationAreaUi.this.assetWireComponentUi);
-            this.tab1NavTab.setText(WiresPanelUi.getFormattedPid(configuration.getFactoryId()) + " - "
-                    + configuration.getComponentId());
+            this.tab1NavTab.setText(ConfigurationAreaUi.this.assetWireComponentUi.getTitle());
 
             ConfigurationAreaUi.this.tab2NavTab.setVisible(true);
-            ConfigurationAreaUi.this.tab2NavTab.setText("Driver - " + driverPid);
+            ConfigurationAreaUi.this.tab2NavTab.setText(ConfigurationAreaUi.this.genericWireComponentUi.getTitle());
             ConfigurationAreaUi.this.tab2Pane.add(ConfigurationAreaUi.this.genericWireComponentUi);
 
         } else {
-            final GwtConfigComponent configuration = genericWireComponentUi.getConfiguration();
             this.tab2NavTab.setVisible(false);
-            this.genericWireComponentUi = new GenericWireComponentUi(configuration);
             this.tab1Pane.add(this.genericWireComponentUi);
-            this.tab1NavTab.setText(WiresPanelUi.getFormattedPid(configuration.getFactoryId()) + " - "
-                    + configuration.getComponentId());
+            this.tab1NavTab.setText(this.genericWireComponentUi.getTitle());
         }
     }
 
@@ -76,8 +72,8 @@ public class ConfigurationAreaUi extends Composite {
             this.assetWireComponentUi = (AssetConfigurationUi) hasConfiguration;
             this.genericWireComponentUi = this.assetWireComponentUi.getDriverConfigurationUi();
             return true;
-        } else if (hasConfiguration instanceof GenericWireComponentUi) {
-            this.genericWireComponentUi = (GenericWireComponentUi) hasConfiguration;
+        } else if (hasConfiguration instanceof ConfigurableComponentUi) {
+            this.genericWireComponentUi = (ConfigurableComponentUi) hasConfiguration;
             return true;
         }
         return false;
@@ -90,44 +86,30 @@ public class ConfigurationAreaUi extends Composite {
         if (driverPid != null) {
             final HasConfiguration driverConfiguration = configurations.getConfiguration(driverPid);
 
-            if (driverConfiguration instanceof GenericWireComponentUi) {
-                this.genericWireComponentUi = (GenericWireComponentUi) driverConfiguration;
+            if (driverConfiguration instanceof ConfigurableComponentUi) {
+                this.genericWireComponentUi = (ConfigurableComponentUi) driverConfiguration;
             } else {
-                this.genericWireComponentUi = new GenericWireComponentUi(driverConfiguration.getConfiguration());
+                this.genericWireComponentUi = new ConfigurableComponentUi(driverConfiguration.getConfiguration());
+                this.genericWireComponentUi.setTitle("Driver - " + driverPid);
+                this.genericWireComponentUi.renderForm();
             }
 
-            final AssetModel assetModel = new LegacyAssetModel(hasConfiguration.getConfiguration(),
+            final AssetModel assetModel = new AssetModelImpl(hasConfiguration.getConfiguration(),
                     configurations.getChannelDescriptor(driverPid), configurations.getBaseChannelDescriptor());
 
             this.assetWireComponentUi = new AssetConfigurationUi(assetModel, this.genericWireComponentUi);
-        } else {
-            this.genericWireComponentUi = new GenericWireComponentUi(hasConfiguration.getConfiguration());
-        }
-    }
-
-    public void setDirty(boolean dirty) {
-        if (this.assetWireComponentUi != null) {
-            this.assetWireComponentUi.setDirty(dirty);
-        }
-        this.genericWireComponentUi.setDirty(dirty);
-    }
-
-    public boolean isDirty() {
-        if (this.assetWireComponentUi != null) {
-            return this.assetWireComponentUi.isDirty() || this.genericWireComponentUi.isDirty();
-        } else {
-            return this.genericWireComponentUi.isDirty();
-        }
-    }
-
-    public void render() {
-        if (this.assetWireComponentUi != null) {
+            this.assetWireComponentUi.setTitle(WiresPanelUi.getFormattedPid(configuration.getFactoryId()) + " - "
+                    + configuration.getComponentId());
             this.assetWireComponentUi.renderForm();
+        } else {
+            this.genericWireComponentUi = new ConfigurableComponentUi(hasConfiguration.getConfiguration());
+            this.genericWireComponentUi.setTitle(WiresPanelUi.getFormattedPid(configuration.getFactoryId()) + " - "
+                    + configuration.getComponentId());
+            this.genericWireComponentUi.renderForm();
         }
-        this.genericWireComponentUi.renderForm();
     }
 
-    public void setListener(ConfigurationChangeListener listener) {
+    public void setListener(HasConfiguration.Listener listener) {
         if (this.assetWireComponentUi != null) {
             this.assetWireComponentUi.setListener(listener);
         }

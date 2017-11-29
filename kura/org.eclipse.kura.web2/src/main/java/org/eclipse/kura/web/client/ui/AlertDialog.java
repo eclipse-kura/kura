@@ -11,10 +11,12 @@
 package org.eclipse.kura.web.client.ui;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.html.Span;
+import org.gwtbootstrap3.client.ui.html.Strong;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -42,7 +44,11 @@ public class AlertDialog extends Composite {
     @UiField
     ModalFooter alertFooter;
     @UiField
-    Span alertBody;
+    Span messageText;
+    @UiField
+    Alert alertBody;
+    @UiField
+    Strong alertText;
 
     private final Modal modal;
 
@@ -81,19 +87,35 @@ public class AlertDialog extends Composite {
         this.alertFooter.setVisible(listener != null);
     }
 
-    public void show(String message, Listener listener) {
-        setAlertText(message);
+    public void show(String title, String message, Severity severity, Listener listener) {
+        setAlertText(message, severity);
+        setTitle(title);
         setListener(listener);
         this.modal.show();
     }
 
-    public void show(String title, String message, Listener listener) {
-        setTitle(title);
-        show(message, listener);
+    public void show(String message, Listener listener) {
+        show(MSGS.confirm(), message, Severity.INFO, listener);
     }
 
-    public void setAlertText(String message) {
-        this.alertBody.setText(message);
+    public void show(String message, Severity severity, Listener listener) {
+        show(severity == Severity.INFO ? MSGS.confirm() : MSGS.warning(), message, severity, listener);
+    }
+
+    public void show(String title, String message, Listener listener) {
+        show(title, message, Severity.INFO, listener);
+    }
+
+    public void setAlertText(String message, Severity severity) {
+        if (severity == Severity.INFO) {
+            this.messageText.setText(message);
+            this.messageText.setVisible(true);
+            this.alertBody.setVisible(false);
+        } else {
+            this.alertText.setText(message);
+            this.alertBody.setVisible(true);
+            this.messageText.setVisible(false);
+        }
     }
 
     @Override
@@ -107,4 +129,8 @@ public class AlertDialog extends Composite {
 
     }
 
+    public enum Severity {
+        INFO,
+        ALERT
+    }
 }

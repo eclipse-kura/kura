@@ -21,19 +21,20 @@ public final class GwtWireGraphConfiguration extends GwtBaseModel implements Ser
     /** Serial Version */
     private static final long serialVersionUID = 50782654510063453L;
 
+    private List<String> allActivePids;
     private List<GwtWireComponentConfiguration> wireComponentConfigurations;
-    private List<GwtConfigComponent> driverConfigurations;
+    private List<GwtConfigComponent> additionalConfigurations;
     private List<GwtWireConfiguration> wires;
 
     public GwtWireGraphConfiguration() {
     }
 
-    public List<GwtConfigComponent> getDriverConfigurations() {
-        return driverConfigurations;
+    public List<GwtConfigComponent> getAdditionalConfigurations() {
+        return additionalConfigurations;
     }
 
-    public void setDriverConfigurations(List<GwtConfigComponent> driverConfigurations) {
-        this.driverConfigurations = driverConfigurations;
+    public void setAdditionalConfigurations(List<GwtConfigComponent> additionalConfigurations) {
+        this.additionalConfigurations = additionalConfigurations;
     }
 
     public List<GwtWireConfiguration> getWires() {
@@ -50,6 +51,14 @@ public final class GwtWireGraphConfiguration extends GwtBaseModel implements Ser
 
     public void setWireComponentConfigurations(List<GwtWireComponentConfiguration> wireComponentConfigurations) {
         this.wireComponentConfigurations = wireComponentConfigurations;
+    }
+
+    public List<String> getAllActivePids() {
+        return allActivePids;
+    }
+
+    public void setAllActivePids(List<String> allActivePids) {
+        this.allActivePids = allActivePids;
     }
 
 }

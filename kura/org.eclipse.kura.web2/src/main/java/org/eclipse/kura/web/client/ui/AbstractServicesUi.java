@@ -344,10 +344,10 @@ public abstract class AbstractServicesUi extends Composite {
                 if ((input.getText() == null || "".equals(input.getText().trim())) && param.isRequired()) {
                     // null in required field
                     result.add(new BasicEditorError(input, input.getText(), MSGS.formRequiredParameter()));
-                    AbstractServicesUi.this.valid.put(param.getName(), false);
+                    AbstractServicesUi.this.valid.put(param.getId(), false);
                 } else {
                     param.setValue(input.getText());
-                    AbstractServicesUi.this.valid.put(param.getName(), true);
+                    AbstractServicesUi.this.valid.put(param.getId(), true);
                 }
 
                 if (result.isEmpty()) {
@@ -502,7 +502,7 @@ public abstract class AbstractServicesUi extends Composite {
         group.setValidationState(ValidationState.NONE);
         final List<EditorError> editorErrors = new ArrayList<>();
         final String text = box.getText();
-        this.valid.put(param.getName(), true);
+        this.valid.put(param.getId(), true);
         validate(param, text, new ValidationErrorConsumer() {
 
             @Override

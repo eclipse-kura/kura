@@ -12,7 +12,7 @@ import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 
-public class LegacyAssetModel implements AssetModel {
+public class AssetModelImpl implements AssetModel {
 
     private GwtConfigComponent assetConfiguration;
     private GwtConfigComponent channelDescriptor;
@@ -21,7 +21,7 @@ public class LegacyAssetModel implements AssetModel {
     private Map<String, Integer> paramIndexes = new HashMap<>();
     private List<ChannelModel> channelModels = new ArrayList<>();
 
-    public LegacyAssetModel(GwtConfigComponent assetConfiguration, GwtConfigComponent channelDescriptor,
+    public AssetModelImpl(GwtConfigComponent assetConfiguration, GwtConfigComponent channelDescriptor,
             GwtConfigComponent baseChannelDescriptor) {
         this.assetConfiguration = assetConfiguration;
 

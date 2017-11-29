@@ -80,6 +80,13 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
         return false;
     }
 
+    public boolean isDriver() {
+        if (this.get("isDriver") != null) {
+            return this.get("isDriver");
+        }
+        return false;
+    }
+
     public void setComponentDescription(final String componentDescription) {
         this.set("componentDescription", componentDescription);
     }
@@ -108,8 +115,12 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
         this.m_parameters = parameters;
     }
 
-    public void setWireComponent(final boolean isWireComponent) {
+    public void setIsWireComponent(final boolean isWireComponent) {
         this.set("isWireComponent", isWireComponent);
+    }
+
+    public void setIsDriver(final boolean isDriver) {
+        this.set("isDriver", isDriver);
     }
 
     public String getParameterValue(String id) {

@@ -7,8 +7,6 @@ public final class GwtWireComposerStaticInfo extends GwtBaseModel implements Ser
 
     private static final long serialVersionUID = -2068309846272914698L;
 
-    private List<String> driverFacrtoryPids;
-
     private List<GwtConfigComponent> componentDefinitions;
 
     private List<GwtWireComponentDescriptor> wireComponentDescriptors;
@@ -48,13 +46,4 @@ public final class GwtWireComposerStaticInfo extends GwtBaseModel implements Ser
     public void setBaseChannelDescriptor(GwtConfigComponent baseChannelDescriptor) {
         this.baseChannelDescriptor = baseChannelDescriptor;
     }
-
-    public List<String> getDriverFacrtoryPids() {
-        return driverFacrtoryPids;
-    }
-
-    public void setDriverFacrtoryPids(List<String> driverFacrtoryPids) {
-        this.driverFacrtoryPids = driverFacrtoryPids;
-    }
-
 }

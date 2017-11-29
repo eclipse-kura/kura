@@ -1,10 +1,15 @@
 package org.eclipse.kura.web.client.ui.wires;
 
+import java.util.List;
+
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
 import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtComponentService;
+import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtWireService;
@@ -15,6 +20,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public final class WiresRPC {
 
+    private static final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
     private static final GwtWireServiceAsync gwtWireService = GWT.create(GwtWireService.class);
     private static final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
@@ -82,7 +88,7 @@ public final class WiresRPC {
     }
 
     public static void updateWiresConfiguration(final GwtWireGraphConfiguration wireGraph,
-            final Callback<Void> callback) {
+            final List<GwtConfigComponent> additionalConfigs, final Callback<Void> callback) {
         EntryClassUi.showWaitModal();
         gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
@@ -94,7 +100,7 @@ public final class WiresRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtWireService.updateWireConfiguration(result, wireGraph, new AsyncCallback<Void>() {
+                gwtWireService.updateWireConfiguration(result, wireGraph, additionalConfigs, new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -106,6 +112,62 @@ public final class WiresRPC {
                     public void onSuccess(Void result) {
                         EntryClassUi.hideWaitModal();
                         callback.onSuccess(null);
+                    }
+                });
+            }
+        });
+    }
+
+    public static void createNewDriver(final String factoryPid, final String pid,
+            final Callback<GwtConfigComponent> callback) {
+        EntryClassUi.showWaitModal();
+        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken result) {
+                gwtComponentService.createFactoryComponent(result, factoryPid, pid, new AsyncCallback<Void>() {
+
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        EntryClassUi.hideWaitModal();
+                        FailureHandler.handle(ex);
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(ex);
+                            }
+
+                            @Override
+                            public void onSuccess(GwtXSRFToken result) {
+                                gwtWireService.getGwtChannelDescriptor(result, pid,
+                                        new AsyncCallback<GwtConfigComponent>() {
+
+                                            @Override
+                                            public void onFailure(Throwable ex) {
+                                                EntryClassUi.hideWaitModal();
+                                                FailureHandler.handle(ex);
+                                            }
+
+                                            @Override
+                                            public void onSuccess(GwtConfigComponent result) {
+                                                EntryClassUi.hideWaitModal();
+                                                callback.onSuccess(result);
+                                            }
+                                        });
+                            }
+                        });
                     }
                 });
             }

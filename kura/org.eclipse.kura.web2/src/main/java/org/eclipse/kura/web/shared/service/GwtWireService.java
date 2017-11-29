@@ -95,8 +95,8 @@ public interface GwtWireService extends RemoteService {
      */
     public GwtWireGraphConfiguration getWiresConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
-    public void updateWireConfiguration(GwtXSRFToken xsrfToken, GwtWireGraphConfiguration configurations)
-            throws GwtKuraException;
+    public void updateWireConfiguration(GwtXSRFToken xsrfToken, GwtWireGraphConfiguration configurations,
+            List<GwtConfigComponent> additionalConfigs) throws GwtKuraException;
 
     public GwtWireComposerStaticInfo getWireComposerStaticInfo(GwtXSRFToken xsrfToken) throws GwtKuraException;
 }

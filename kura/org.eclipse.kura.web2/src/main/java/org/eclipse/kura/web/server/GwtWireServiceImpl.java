@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,6 +53,7 @@ import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphService;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -210,13 +212,6 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         return result;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public GwtWireGraphConfiguration getWiresConfiguration(final GwtXSRFToken xsrfToken) throws GwtKuraException {
-        this.checkXSRFToken(xsrfToken);
-        return getWiresConfigurationInternal();
-    }
-
     private void fillGwtRenderingProperties(GwtWireComponentConfiguration component,
             Map<String, Object> renderingProperties) {
         component.setInputPortCount((Integer) renderingProperties.get("inputPortCount"));
@@ -225,18 +220,45 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         component.setPositionY((Float) renderingProperties.get("position.y"));
     }
 
-    private GwtWireGraphConfiguration getWiresConfigurationInternal() throws GwtKuraException {
+    private List<GwtConfigComponent> getAdditionalConfigurations(List<ComponentConfiguration> configurations,
+            Set<String> wireComponentsInGraph, Set<String> driverPids) {
+        final List<GwtConfigComponent> result = new ArrayList<>();
+
+        for (ComponentConfiguration config : configurations) {
+            final String pid = config.getPid();
+            final Object factoryPid = config.getConfigurationProperties().get(ConfigurationAdmin.SERVICE_FACTORYPID);
+            final boolean isDriver = driverPids.contains(pid);
+            final boolean isAssetNotInGraph = factoryPid != null && "org.eclipse.kura.wire.WireAsset".equals(factoryPid)
+                    && !wireComponentsInGraph.contains(pid);
+            if (isDriver || isAssetNotInGraph) {
+                final GwtConfigComponent gwtConfig = GwtServerUtil.toGwtConfigComponent(config);
+                gwtConfig.setIsDriver(isDriver);
+                result.add(gwtConfig);
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public GwtWireGraphConfiguration getWiresConfiguration(final GwtXSRFToken xsrfToken) throws GwtKuraException {
+        this.checkXSRFToken(xsrfToken);
         final GwtWireGraphConfiguration result = new GwtWireGraphConfiguration();
 
         final WireGraphConfiguration wireGraphConfiguration = ServiceLocator
                 .applyToServiceOptionally(WireGraphService.class, WireGraphService::get);
 
+        final Set<String> wireComponentsInGraph = new HashSet<>();
+
         result.setWireComponentConfigurations(
                 wireGraphConfiguration.getWireComponentConfigurations().stream().map(config -> {
-                    final GwtWireComponentConfiguration gwtConfig = new GwtWireComponentConfiguration();
-                    gwtConfig.setConfiguration(GwtServerUtil.toGwtConfigComponent(config.getConfiguration()));
-                    fillGwtRenderingProperties(gwtConfig, config.getProperties());
-                    return gwtConfig;
+                    final GwtWireComponentConfiguration gwtWireComponentConfig = new GwtWireComponentConfiguration();
+                    final GwtConfigComponent gwtConfig = GwtServerUtil.toGwtConfigComponent(config.getConfiguration());
+                    gwtConfig.setIsWireComponent(true);
+                    gwtWireComponentConfig.setConfiguration(gwtConfig);
+                    fillGwtRenderingProperties(gwtWireComponentConfig, config.getProperties());
+                    wireComponentsInGraph.add(gwtConfig.getComponentId());
+                    return gwtWireComponentConfig;
                 }).collect(Collectors.toList()));
 
         result.setWires(wireGraphConfiguration.getWireConfigurations().stream().map(config -> {
@@ -246,14 +268,17 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             return gwtConfig;
         }).collect(Collectors.toList()));
 
-        final List<String> driverPids = ServiceLocator.applyToServiceOptionally(DriverService.class,
-                driverService -> driverService.listDriverDescriptors().stream().map(DriverDescriptor::getPid)
-                        .collect(Collectors.toList()));
+        final List<ComponentConfiguration> componentConfigurations = ServiceLocator
+                .applyToServiceOptionally(ConfigurationService.class, ConfigurationService::getComponentConfigurations);
 
-        result.setDriverConfigurations(ServiceLocator.applyToServiceOptionally(ConfigurationService.class,
-                configService -> configService.getComponentConfigurations().stream()
-                        .filter(config -> driverPids.contains(config.getPid())).map(GwtServerUtil::toGwtConfigComponent)
-                        .collect(Collectors.toList())));
+        final Set<String> driverPids = ServiceLocator.applyToServiceOptionally(DriverService.class,
+                driverService -> driverService.listDriverDescriptors().stream().map(DriverDescriptor::getPid)
+                        .collect(Collectors.toSet()));
+
+        result.setAllActivePids(componentConfigurations.stream().map(ComponentConfiguration::getPid)
+                .filter(Objects::nonNull).collect(Collectors.toList()));
+        result.setAdditionalConfigurations(
+                getAdditionalConfigurations(componentConfigurations, wireComponentsInGraph, driverPids));
 
         return result;
     }
@@ -272,18 +297,20 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 
     /** {@inheritDoc} */
     @Override
-    public void updateWireConfiguration(final GwtXSRFToken xsrfToken, GwtWireGraphConfiguration gwtConfigurations)
-            throws GwtKuraException {
+    public void updateWireConfiguration(final GwtXSRFToken xsrfToken, GwtWireGraphConfiguration gwtConfigurations,
+            List<GwtConfigComponent> additionalGwtConfigs) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
 
-        final Set<String> wireComponentPids = gwtConfigurations.getWireComponentConfigurations().stream()
+        final Set<String> receivedConfigurationPids = gwtConfigurations.getWireComponentConfigurations().stream()
                 .map(config -> config.getConfiguration().getComponentId()).collect(Collectors.toSet());
+
+        additionalGwtConfigs.stream().map(GwtConfigComponent::getComponentId).forEach(receivedConfigurationPids::add);
 
         final Map<String, ComponentConfiguration> originalConfigs = new HashMap<>();
 
         ServiceLocator.applyToServiceOptionally(ConfigurationService.class, configurationService -> {
             configurationService.getComponentConfigurations().stream()
-                    .filter(config -> wireComponentPids.contains(config.getPid()))
+                    .filter(config -> receivedConfigurationPids.contains(config.getPid()))
                     .forEach(config -> originalConfigs.put(config.getPid(), config));
             return (Void) null;
         });
@@ -303,6 +330,21 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         final List<WireConfiguration> wireConfigurations = gwtConfigurations.getWires().stream()
                 .map(gwtWire -> new WireConfiguration(gwtWire.getEmitterPid(), gwtWire.getReceiverPid()))
                 .collect(Collectors.toList());
+
+        final List<ComponentConfiguration> additionalConfigs = additionalGwtConfigs.stream().map(gwtConfig -> {
+            final ComponentConfiguration originalConfig = originalConfigs.get(gwtConfig.getComponentId());
+            if (originalConfig == null) {
+                return null;
+            }
+            return GwtServerUtil.fromGwtConfigComponent(gwtConfig, originalConfig);
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+
+        if (!additionalConfigs.isEmpty()) {
+            ServiceLocator.applyToServiceOptionally(ConfigurationService.class, configurationService -> {
+                configurationService.updateConfigurations(additionalConfigs);
+                return (Void) null;
+            });
+        }
 
         ServiceLocator.applyToServiceOptionally(WireGraphService.class, wireGraphService -> {
             wireGraphService.update(new WireGraphConfiguration(wireComponentConfigurations, wireConfigurations));
@@ -345,6 +387,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                 descriptors.put(receiver.getPid(), new GwtWireComponentDescriptor(receiver.getPid(), 1, 1, 0, 0));
                 final GwtConfigComponent definition = GwtServerUtil.toGwtConfigComponent(receiver);
                 if (definition != null) {
+                    definition.setIsWireComponent(true);
                     definitions.put(receiver.getPid(), definition);
                 }
             }
@@ -358,6 +401,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                     descriptors.put(emitter.getPid(), new GwtWireComponentDescriptor(emitter.getPid(), 0, 0, 1, 1));
                     final GwtConfigComponent definition = GwtServerUtil.toGwtConfigComponent(emitter);
                     if (definition != null) {
+                        definition.setIsWireComponent(true);
                         definitions.put(emitter.getPid(), definition);
                     }
                 }
@@ -376,6 +420,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                     .getServiceProviderOCDs("org.eclipse.kura.driver.Driver")) {
                 final GwtConfigComponent descriptor = GwtServerUtil.toGwtConfigComponent(config);
                 if (descriptor != null) {
+                    descriptor.setIsDriver(true);
                     resultDefinitions.add(descriptor);
                 }
             }
@@ -386,17 +431,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
     private void fillDriverDescriptors(List<GwtConfigComponent> resultDescriptors) throws GwtKuraException {
 
         ServiceLocator.applyToServiceOptionally(DriverService.class, driverService -> {
-            final Map<String, GwtConfigComponent> driverDescriptors = new HashMap<>();
 
-            for (DriverDescriptor desc : driverService.listDriverDescriptors()) {
-                final String factoryPid = desc.getFactoryPid();
-                final GwtConfigComponent descriptor = GwtServerUtil.toGwtConfigComponent(desc);
-                if (descriptor != null && !driverDescriptors.containsKey(factoryPid)) {
-                    driverDescriptors.put(factoryPid, descriptor);
-                }
-            }
-
-            resultDescriptors.addAll(driverDescriptors.values());
+            driverService.listDriverDescriptors().stream().map(GwtServerUtil::toGwtConfigComponent)
+                    .filter(Objects::nonNull).forEach(resultDescriptors::add);
             return (Void) null;
         });
     }

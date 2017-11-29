@@ -98,19 +98,5 @@
 
         <wires:WiresDialogs ui:field="dialogs"></wires:WiresDialogs>
         <kura:AlertDialog ui:field="confirmDialog"></kura:AlertDialog>
-
-        <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="error-pid-modal"
-            ui:field="errorModal">
-            <b:ModalHeader addStyleNames="{style.asset-comp-modal-header}">
-            </b:ModalHeader>
-            <b:ModalBody>
-                <b:Alert type="DANGER">
-                    <b.html:Strong ui:field="errorAlertText" />
-                </b:Alert>
-            </b:ModalBody>
-            <b:ModalFooter>
-                <b:Button icon="REMOVE" type="PRIMARY" dataDismiss="MODAL" text="{msgs.closeButton}" />
-            </b:ModalFooter>
-        </b:Modal>
     </b:Container>
 </ui:UiBinder> 

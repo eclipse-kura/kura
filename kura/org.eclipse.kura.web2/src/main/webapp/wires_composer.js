@@ -41,6 +41,7 @@ var WireComposer = function (element) {
 	this.currentZoomLevel = 1;
 	this.transitionRunning = false;
 	this.selectedComponent = null;
+	this.isDirty = false
 	
 	this.graph = new joint.dia.Graph;
 	this.element = element;
@@ -75,6 +76,9 @@ var WireComposer = function (element) {
 		if (cell.attributes.wireComponent) {
 			console.log('wire component deleted:')
 			console.log(cell.attributes.wireComponent)
+			if (self.selectedComponent === cell.attributes.wireComponent) {
+				self.deselectWireComponent()
+			}
 			self.dispatchWireComponentDeleted(cell.attributes.wireComponent)
 		} else if (cell.attributes.wire) {
 			console.log('wire deleted:')
@@ -137,9 +141,35 @@ var WireComposer = function (element) {
 	this.paper.on('blank:pointerdown', function(cellView, evt, x, y) {
 		self.disableBlinking()
 		self.scroller.begin()
-		if (self.selectedComponent) {
-			self.dispatchWireComponentDeselected(self.selectedComponent)
-			self.selectedComponent = null
+		self.deselectWireComponent()
+	});
+	
+	var portHighlighter = V('circle', {
+		'r' : 14,
+		'stroke' : '#ff7e5d',
+		'stroke-width' : '6px',
+		'fill' : 'transparent',
+		'pointer-events' : 'none'
+	});
+
+	this.paper.off('cell:highlight cell:unhighlight').on({
+		'cell:highlight' : function(cellView, el, opt) {
+			var bbox = V(el).bbox(false, self.paper.viewport);
+
+			if (opt.connecting) {
+				portHighlighter.attr(bbox);
+				portHighlighter.translate(bbox.x + 10, bbox.y + 10, {
+					absolute : true
+				});
+				self.viewport.append(portHighlighter);
+			}
+		},
+
+		'cell:unhighlight' : function(cellView, el, opt) {
+
+			if (opt.connecting) {
+				portHighlighter.remove();
+			}
 		}
 	});
 
@@ -206,6 +236,13 @@ WireComposer.prototype.addWireComponent = function (component) {
 
 WireComposer.prototype.getSelectedWireComponent = function () {
 	return this.selectedComponent
+}
+
+WireComposer.prototype.deselectWireComponent = function () {
+	if (this.selectedComponent) {
+		this.dispatchWireComponentDeselected(self.selectedComponent)
+		this.selectedComponent = null
+	}
 }
 
 WireComposer.prototype.deleteWireComponent = function (component) {

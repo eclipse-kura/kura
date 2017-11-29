@@ -457,8 +457,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (pid == null) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "pid cannot be null");
         } else if (this.factoryPidByPid.get(pid) == null) {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
-                    "pid " + pid + " is not a factory component instance");
+            return;
         }
 
         try {
@@ -1703,7 +1702,17 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     private ComponentConfiguration getComponentDefinition(String pid) {
-        return new ComponentConfigurationImpl(pid, this.ocds.get(pid), new HashMap<>());
+        final Tocd ocd = this.ocds.get(pid);
+        Map<String, Object> defaultProperties = null;
+        if (ocd != null) {
+            try {
+                defaultProperties = ComponentUtil.getDefaultProperties(ocd, this.ctx);
+            } catch (Exception e) {
+                logger.warn("Failed to get default properties for component: {}", pid, e);
+            }
+        }
+        return new ComponentConfigurationImpl(pid, ocd,
+                defaultProperties != null ? defaultProperties : new HashMap<>());
     }
 
     @Override

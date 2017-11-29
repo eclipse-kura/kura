@@ -434,6 +434,19 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
             List<WireComponentConfiguration> newWireComponentConfigurations) {
         List<ComponentConfiguration> componentsToDelete = new ArrayList<>();
 
+        for (WireComponentConfiguration newWireComponentConfiguration : newWireComponentConfigurations) {
+            ComponentConfiguration newComponentConfig = newWireComponentConfiguration.getConfiguration();
+            Map<String, Object> newProps = newComponentConfig.getConfigurationProperties();
+            String newFactoryPid = null;
+            if (newProps != null) {
+                newFactoryPid = (String) newComponentConfig.getConfigurationProperties().get(SERVICE_FACTORYPID);
+            }
+
+            if (WIRE_ASSET_FACTORY_PID.equals(newFactoryPid)) {
+                componentsToDelete.add(newComponentConfig);
+            }
+        }
+
         for (WireComponentConfiguration oldWireComponentConfiguration : oldWireComponentConfigurations) {
             ComponentConfiguration oldComponentConfig = oldWireComponentConfiguration.getConfiguration();
             String oldPid = oldComponentConfig.getPid();
@@ -454,8 +467,8 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
                 }
 
                 // TODO: check better the conditions for this test
-                if (oldPid.equals(newPid) && (newFactoryPid == null || newFactoryPid.equals(oldFactoryPid))
-                        && !WIRE_ASSET_FACTORY_PID.equals(newFactoryPid)) {
+                if (oldPid.equals(newPid) && (newFactoryPid == null || newFactoryPid.equals(oldFactoryPid)
+                        || WIRE_ASSET_FACTORY_PID.equals(newFactoryPid))) {
                     found = true;
                     break;
                 }

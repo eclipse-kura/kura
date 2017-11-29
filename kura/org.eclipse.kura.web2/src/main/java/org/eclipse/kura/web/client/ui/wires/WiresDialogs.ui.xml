@@ -72,7 +72,7 @@
                                 autoComplete="false" />
                         </b:FormGroup>
                         <b:FormGroup>
-                            <b:FormLabel for="newAssetDriverInstance" ui:field="newAssetDriverInstanceLabel" text="{msgs.driverName}}"/>
+                            <b:FormLabel for="newAssetDriverInstance" ui:field="newAssetDriverInstanceLabel" text="{msgs.driverName}"/>
                             <b:TextBox ui:field="newAssetDriverInstance" b:id="newAssetDriverInstance"
                                 allowBlank="false" autoComplete="false" />
                         </b:FormGroup>

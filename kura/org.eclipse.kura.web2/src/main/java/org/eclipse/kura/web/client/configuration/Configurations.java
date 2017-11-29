@@ -1,16 +1,20 @@
-package org.eclipse.kura.web.client.ui.wires;
+package org.eclipse.kura.web.client.configuration;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 
 public class Configurations {
 
+    private final Set<String> allActivePids = new HashSet<String>();
     private final Map<String, GwtConfigComponent> componentDefinitions = new HashMap<>();
     private final Map<String, HasConfiguration> currentConfigurations = new HashMap<>();
     private final Map<String, GwtConfigComponent> channelDescriptors = new HashMap<>();
@@ -38,7 +42,6 @@ public class Configurations {
             log(param.getName());
             log(param.getDefault());
             log(param.getValue());
-            param.setValue(param.getDefault());
         }
         return cloned;
     }
@@ -56,6 +59,7 @@ public class Configurations {
         }
         final HasConfiguration result = new ConfigurationWrapper(newConfiguration);
         this.currentConfigurations.put(pid, result);
+        this.allActivePids.add(pid);
         return result;
     }
 
@@ -73,14 +77,8 @@ public class Configurations {
         }
     }
 
-    public List<HasConfiguration> getModifiedConfigurations() {
-        final ArrayList<HasConfiguration> result = new ArrayList<>();
-        for (Entry<String, HasConfiguration> config : this.currentConfigurations.entrySet()) {
-            if (!(config.getValue() instanceof ConfigurationWrapper)) {
-                result.add(config.getValue());
-            }
-        }
-        return result;
+    public Collection<HasConfiguration> getConfigurations() {
+        return currentConfigurations.values();
     }
 
     public void clear() {
@@ -96,20 +94,7 @@ public class Configurations {
 
     public void deleteConfiguration(String pid) {
         this.currentConfigurations.remove(pid);
-    }
-
-    private class ConfigurationWrapper implements HasConfiguration {
-
-        private GwtConfigComponent configuration;
-
-        public ConfigurationWrapper(GwtConfigComponent configuration) {
-            this.configuration = configuration;
-        }
-
-        @Override
-        public GwtConfigComponent getConfiguration() {
-            return configuration;
-        }
+        this.allActivePids.remove(pid);
     }
 
     public void setChannelDescriptiors(List<GwtConfigComponent> descriptors) {
@@ -131,4 +116,109 @@ public class Configurations {
         this.baseChannelDescriptor = baseChannelDescriptor;
     }
 
+    public boolean isValid() {
+        for (Entry<String, HasConfiguration> entry : this.currentConfigurations.entrySet()) {
+            if (!entry.getValue().isValid()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public List<String> getInvalidConfigurationPids() {
+        final List<String> result = new ArrayList<String>();
+        for (Entry<String, HasConfiguration> entry : this.currentConfigurations.entrySet()) {
+            if (!entry.getValue().isValid()) {
+                result.add(entry.getKey());
+            }
+        }
+        return result;
+    }
+
+    public boolean isDirty() {
+        for (Entry<String, HasConfiguration> entry : this.currentConfigurations.entrySet()) {
+            if (entry.getValue().isDirty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void clearDirtyState() {
+        for (Entry<String, HasConfiguration> entry : this.currentConfigurations.entrySet()) {
+            entry.getValue().clearDirtyState();
+        }
+    }
+
+    public List<String> getDriverFactoryPids() {
+        final ArrayList<String> result = new ArrayList<>();
+        for (Entry<String, GwtConfigComponent> entry : this.componentDefinitions.entrySet()) {
+            if (entry.getValue().isDriver()) {
+                result.add(entry.getKey());
+            }
+        }
+        return result;
+    }
+
+    public List<String> getDriverPids() {
+        final ArrayList<String> result = new ArrayList<>();
+        for (Entry<String, HasConfiguration> entry : this.currentConfigurations.entrySet()) {
+            if (entry.getValue().getConfiguration().isDriver()) {
+                result.add(entry.getKey());
+            }
+        }
+        return result;
+    }
+
+    public List<String> getFactoryInstancesPids(String factoryPid) {
+        final ArrayList<String> result = new ArrayList<>();
+        for (Entry<String, HasConfiguration> entry : this.currentConfigurations.entrySet()) {
+            final GwtConfigComponent config = entry.getValue().getConfiguration();
+            if (factoryPid.equals(config.getFactoryId())) {
+                result.add(entry.getKey());
+            }
+        }
+        return result;
+    }
+
+    public void setChannelDescriptor(String pid, GwtConfigComponent descriptor) {
+        this.channelDescriptors.put(pid, descriptor);
+    }
+
+    public void setAllActivePids(Collection<String> allActivePids) {
+        this.allActivePids.clear();
+        this.allActivePids.addAll(allActivePids);
+    }
+
+    private class ConfigurationWrapper implements HasConfiguration {
+
+        private GwtConfigComponent configuration;
+
+        public ConfigurationWrapper(GwtConfigComponent configuration) {
+            this.configuration = configuration;
+        }
+
+        @Override
+        public GwtConfigComponent getConfiguration() {
+            return configuration;
+        }
+
+        @Override
+        public void clearDirtyState() {
+        }
+
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
+        @Override
+        public boolean isDirty() {
+            return false;
+        }
+    }
+
+    public boolean isPidExisting(String pid) {
+        return currentConfigurations.containsKey(pid) || allActivePids.contains(pid);
+    }
 }

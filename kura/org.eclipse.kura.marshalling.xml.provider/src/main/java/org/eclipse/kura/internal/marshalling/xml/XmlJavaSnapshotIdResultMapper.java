@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2017 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,13 +25,8 @@ public class XmlJavaSnapshotIdResultMapper implements XmlJavaDataMapper {
     @Override
     public Element marshal(Document doc, Object object) {
         Element snapshotIDs = doc.createElement(ESF_NAMESPACE + ":" + SNAPSHOT_IDS);
-        snapshotIDs.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:esf", "http://eurotech.com/esf/2.0"); // TODO:
- // add
- // xml
- // schema
- // to
- // EUROTECH
- // site
+        snapshotIDs.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:esf", "http://eurotech.com/esf/2.0"); 
+        // TODO: add xml schema to EUROTECH site
         snapshotIDs.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:ocd",
                 "http://www.osgi.org/xmlns/metatype/v1.2.0");
         doc.appendChild(snapshotIDs);
@@ -52,8 +47,7 @@ public class XmlJavaSnapshotIdResultMapper implements XmlJavaDataMapper {
 
     @Override
     public <T> T unmarshal(Document doc) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new IllegalArgumentException();
     }
 
 }

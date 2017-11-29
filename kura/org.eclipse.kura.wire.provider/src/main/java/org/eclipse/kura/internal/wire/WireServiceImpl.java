@@ -76,8 +76,6 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
 
     private static final ExecutorService processExecutor = Executors.newSingleThreadExecutor();
 
-    private static final int TIMEOUT = 60;
-
     /** The service component properties. */
     private Map<String, Object> properties;
 

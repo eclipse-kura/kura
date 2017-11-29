@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.internal.marshalling.xml;
 
 import java.io.IOException;
@@ -10,7 +21,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -20,8 +30,10 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.metatype.MetaData;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
+import org.eclipse.kura.core.configuration.metatype.Tmetadata;
 import org.eclipse.kura.core.deployment.xml.XmlBundles;
 import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
 import org.eclipse.kura.marshalling.Marshalling;
@@ -32,6 +44,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class XmlMarshallerImpl implements Marshalling {
+
     private static final Logger logger = LoggerFactory.getLogger(XmlMarshallerImpl.class);
 
     // Marshalling
@@ -120,12 +133,12 @@ public class XmlMarshallerImpl implements Marshalling {
 
     // un-marshalling
     @Override
-    public <T> T unmarshal(String s, Class<T> clazz) throws XMLStreamException, FactoryConfigurationError {
+    public <T> T unmarshal(String s, Class<T> clazz) throws KuraException {
         StringReader sr = new StringReader(s);
         return unmarshal(sr, clazz);
     }
 
-    public static <T> T unmarshal(Reader r, Class<T> clazz) throws XMLStreamException, FactoryConfigurationError {
+    public static <T> T unmarshal(Reader r, Class<T> clazz) throws KuraException {
         DocumentBuilderFactory factory = null;
         DocumentBuilder parser = null;
 
@@ -148,12 +161,8 @@ public class XmlMarshallerImpl implements Marshalling {
             InputSource is = new InputSource(r);
             doc = parser.parse(is);
             doc.getDocumentElement().normalize();
-        } catch (SAXException se) {
-            throw new XMLStreamException(se.getMessage());
-        } catch (IOException ioe) {
-            throw new XMLStreamException(ioe.getMessage());
-        } catch (IllegalArgumentException iae) {
-            throw new XMLStreamException(iae.getMessage());
+        } catch (SAXException | IOException | IllegalArgumentException se) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, se);
         }
 
         // identify the correct parser that has to execute
@@ -162,12 +171,13 @@ public class XmlMarshallerImpl implements Marshalling {
                 // Snapshot parser
                 return new XmlJavaComponentConfigurationsMapper().unmarshal(doc);
             } catch (Exception e) {
-                throw new XMLStreamException(e.getMessage());
+                throw new KuraException(KuraErrorCode.DECODER_ERROR, e);
             }
-        } else {
+        } else if (clazz.equals(MetaData.class) || clazz.equals(Tmetadata.class)) {
             // MetaData parser
             return new XmlJavaMetadataMapper().unmarshal(doc);
+        } else {
+            throw new IllegalArgumentException("Class not supported!");
         }
     }
-
 }

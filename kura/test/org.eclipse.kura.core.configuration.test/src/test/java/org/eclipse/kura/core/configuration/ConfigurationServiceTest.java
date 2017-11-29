@@ -1369,23 +1369,20 @@ public class ConfigurationServiceTest {
         String decrypted = prepareSnapshotXML();
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
+
             protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
                 XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
-                try {
-                    return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
-                } catch (XMLStreamException e) {
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
-                } catch (FactoryConfigurationError e) {
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
-                }
+
+                return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+
             }
-            
+
             protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
                 XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
                 try {
                     return xmlMarshaller.marshal(xmlComponentConfigurations);
                 } catch (KuraException e) {
-                    
+
                 }
                 return null;
             }
@@ -1671,24 +1668,19 @@ public class ConfigurationServiceTest {
             String getSnapshotsDirectory() {
                 return dir;
             }
-            
+
             protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
                 XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
-                try {
-                    return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
-                } catch (XMLStreamException e) {
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
-                } catch (FactoryConfigurationError e) {
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
-                }
+
+                return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
             }
-            
+
             protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
                 XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
                 try {
                     return xmlMarshaller.marshal(xmlComponentConfigurations);
                 } catch (KuraException e) {
-                    
+
                 }
                 return null;
             }
@@ -1700,7 +1692,7 @@ public class ConfigurationServiceTest {
         String encCfg = "encrypted";
         char[] encrypted = encCfg.toCharArray();
         when(cryptoServiceMock.encryptAes((char[]) Matchers.anyObject())).thenReturn(encrypted);
-        
+
         BundleContext bundleContext = mock(BundleContext.class);
         TestUtil.setFieldValue(cs, "bundleContext", bundleContext);
 
@@ -1769,24 +1761,19 @@ public class ConfigurationServiceTest {
             String getSnapshotsDirectory() {
                 return dir;
             }
-            
+
             protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
                 XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
-                try {
-                    return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
-                } catch (XMLStreamException e) {
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
-                } catch (FactoryConfigurationError e) {
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
-                }
+
+                return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
             }
-            
+
             protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
                 XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
                 try {
                     return xmlMarshaller.marshal(xmlComponentConfigurations);
                 } catch (KuraException e) {
-                    
+
                 }
                 return null;
             }
@@ -1832,24 +1819,19 @@ public class ConfigurationServiceTest {
             String getSnapshotsDirectory() {
                 return dir;
             }
-            
+
             protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
                 XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
-                try {
-                    return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
-                } catch (XMLStreamException e) {
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
-                } catch (FactoryConfigurationError e) {
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
-                }
+
+                return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
             }
-            
+
             protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
                 XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
                 try {
                     return xmlMarshaller.marshal(xmlComponentConfigurations);
                 } catch (KuraException e) {
-                    
+
                 }
                 return null;
             }
@@ -1864,7 +1846,7 @@ public class ConfigurationServiceTest {
 
         BundleContext bundleContext = mock(BundleContext.class);
         TestUtil.setFieldValue(cs, "bundleContext", bundleContext);
-        
+
         TestUtil.invokePrivate(cs, "writeSnapshot", sid, cfg);
 
         verify(cryptoServiceMock, times(1)).encryptAes((char[]) Matchers.anyObject());
@@ -2131,24 +2113,19 @@ public class ConfigurationServiceTest {
             String getSnapshotsDirectory() {
                 return dir;
             }
-            
+
             protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
                 XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
-                try {
-                    return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
-                } catch (XMLStreamException e) {
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
-                } catch (FactoryConfigurationError e) {
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
-                }
+
+                return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
             }
-            
+
             protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
                 XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
                 try {
                     return xmlMarshaller.marshal(xmlComponentConfigurations);
                 } catch (KuraException e) {
-                    
+
                 }
                 return null;
             }
@@ -2215,24 +2192,19 @@ public class ConfigurationServiceTest {
             String getSnapshotsDirectory() {
                 return dir;
             }
-            
+
             protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
                 XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
-                try {
-                    return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
-                } catch (XMLStreamException e) {
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
-                } catch (FactoryConfigurationError e) {
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
-                }
+
+                return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
             }
-            
+
             protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
                 XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
                 try {
                     return xmlMarshaller.marshal(xmlComponentConfigurations);
                 } catch (KuraException e) {
-                    
+
                 }
                 return null;
             }
@@ -2252,7 +2224,7 @@ public class ConfigurationServiceTest {
 
         XmlComponentConfigurations snapshot = prepareSnapshot();
         List<ComponentConfiguration> configs = snapshot.getConfigurations();
-        
+
         BundleContext bundleContext = mock(BundleContext.class);
         TestUtil.setFieldValue(cs, "bundleContext", bundleContext);
 
@@ -2303,24 +2275,19 @@ public class ConfigurationServiceTest {
             String getSnapshotsDirectory() {
                 return dir;
             }
-            
+
             protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
                 XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
-                try {
-                    return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
-                } catch (XMLStreamException e) {
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
-                } catch (FactoryConfigurationError e) {
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
-                }
+
+                return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
             }
-            
+
             protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
                 XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
                 try {
                     return xmlMarshaller.marshal(xmlComponentConfigurations);
                 } catch (KuraException e) {
-                    
+
                 }
                 return null;
             }
@@ -2923,24 +2890,19 @@ public class ConfigurationServiceTest {
             String getSnapshotsDirectory() {
                 return dir;
             }
-            
+
             protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
                 XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
-                try {
-                    return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
-                } catch (XMLStreamException e) {
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
-                } catch (FactoryConfigurationError e) {
-                    throw new KuraException(KuraErrorCode.DECODER_ERROR);
-                }
+
+                return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
             }
-            
+
             protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
                 XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
                 try {
                     return xmlMarshaller.marshal(xmlComponentConfigurations);
                 } catch (KuraException e) {
-                    
+
                 }
                 return null;
             }

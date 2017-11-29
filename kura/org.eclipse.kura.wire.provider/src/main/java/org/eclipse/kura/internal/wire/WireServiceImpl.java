@@ -16,8 +16,6 @@ package org.eclipse.kura.internal.wire;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 import static org.osgi.service.cm.ConfigurationAdmin.SERVICE_FACTORYPID;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_CONSUMER_PID;
 import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_PRODUCER_PID;
@@ -27,8 +25,9 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -42,6 +41,7 @@ import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.marshalling.Marshalling;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.util.service.ServiceUtil;
+import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireService;
@@ -54,6 +54,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.osgi.service.wireadmin.WireAdmin;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,12 +74,18 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
 
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
+    private static final ExecutorService processExecutor = Executors.newSingleThreadExecutor();
+
     private static final int TIMEOUT = 60;
 
     /** The service component properties. */
     private Map<String, Object> properties;
 
     private volatile WireAdmin wireAdmin;
+
+    private ServiceTracker<WireComponent, WireComponent> wireComponentServiceTracker;
+
+    private WireComponentTrackerCustomizer wireComponentTrackerCustomizer;
 
     private final Set<WireConfiguration> wireConfigs;
 
@@ -153,6 +160,11 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
         this.bundleContext = componentContext.getBundleContext();
         extractProperties(properties);
 
+        this.wireComponentTrackerCustomizer = new WireComponentTrackerCustomizer(this.bundleContext, this);
+        this.wireComponentServiceTracker = new ServiceTracker<>(this.bundleContext, WireComponent.class,
+                this.wireComponentTrackerCustomizer);
+        this.wireComponentServiceTracker.open();
+
         createWires();
         logger.debug(message.activatingWireServiceDone());
     }
@@ -172,46 +184,59 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     protected void deactivate(final ComponentContext componentContext) {
         logger.debug(message.deactivatingWireService());
         this.bundleContext = null;
+        this.wireComponentServiceTracker.close();
 
         try {
             deleteAllWires();
         } catch (InvalidSyntaxException e) {
             logger.warn("Error deleting all wires.");
         }
+
+        processExecutor.shutdownNow();
         logger.debug(message.deactivatingWireServiceDone());
     }
 
-    private void createConfiguration(final WireConfiguration conf, final String emitterPid, final String receiverPid) {
+    private boolean checkWireExistence(final String emitterServicePid, final String receiverServicePid)
+            throws InvalidSyntaxException {
+        requireNonNull(emitterServicePid, message.emitterServicePidNonNull());
+        requireNonNull(receiverServicePid, message.receiverServicePidNonNull());
+
+        boolean found = false;
+        final Wire[] wires = this.wireAdmin.getWires(null);
+        if (nonNull(wires)) {
+            for (final Wire w : wires) {
+                final Dictionary<?, ?> props = w.getProperties();
+                if (props.get(WIREADMIN_PRODUCER_PID).equals(emitterServicePid)
+                        && props.get(WIREADMIN_CONSUMER_PID).equals(receiverServicePid)) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        return found;
+    }
+
+    private void createConfiguration(final WireConfiguration conf) {
         requireNonNull(conf, message.wireConfigurationNonNull());
-        requireNonNull(emitterPid, message.emitterPidNonNull());
-        requireNonNull(receiverPid, message.receiverPidNonNull());
 
+        String emitterPid = conf.getEmitterPid();
+        String receiverPid = conf.getReceiverPid();
         try {
-            logger.info(message.creatingWire(emitterPid, receiverPid));
-            final String emitterFilter = "(" + KURA_SERVICE_PID + "=" + emitterPid + ")";
-            final String receiverFilter = "(" + KURA_SERVICE_PID + "=" + receiverPid + ")";
-
-            final Optional<Object> emitter = waitForService(emitterFilter);
-            final Optional<Object> receiver = waitForService(receiverFilter);
-
-            if (emitter.isPresent() && receiver.isPresent()) {
-                final String emitterServicePid = this.wireHelperService.getServicePid(emitterPid);
-                final String receiverServicePid = this.wireHelperService.getServicePid(receiverPid);
-                if (nonNull(emitterServicePid) && nonNull(receiverServicePid) && isNull(conf.getWire())) {
+            final String emitterServicePid = this.wireHelperService.getServicePid(emitterPid);
+            final String receiverServicePid = this.wireHelperService.getServicePid(receiverPid);
+            if (nonNull(emitterServicePid) && nonNull(receiverServicePid) && isNull(conf.getWire())) {
+                final boolean found = checkWireExistence(emitterServicePid, receiverServicePid);
+                if (!found) {
+                    logger.info(message.creatingWire(emitterPid, receiverPid));
                     final Wire wire = this.wireAdmin.createWire(emitterServicePid, receiverServicePid, null);
                     conf.setWire(wire);
                     logger.info(message.creatingWiresDone());
                 }
             }
 
-        } catch (final InvalidSyntaxException | InterruptedException e) {
+        } catch (final InvalidSyntaxException e) {
             logger.error(message.errorCreatingWires(), e);
         }
-    }
-
-    protected Optional<Object> waitForService(final String emitterFilter)
-            throws InterruptedException, InvalidSyntaxException {
-        return ServiceUtil.waitForService(emitterFilter, TIMEOUT, SECONDS);
     }
 
     /** {@inheritDoc} */
@@ -247,19 +272,23 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     /**
      * Create the wires based on the provided wire configurations
      */
-    synchronized void createWires() {
-        logger.debug(message.creatingWires());
-        final List<WireConfiguration> cloned = CollectionUtil.newArrayList();
-        for (final WireConfiguration wc : this.wireConfigs) {
-            final WireConfiguration wireConf = new WireConfiguration(wc.getEmitterPid(), wc.getReceiverPid());
-            wireConf.setFilter(wc.getFilter());
-            cloned.add(wireConf);
-        }
-        for (final WireConfiguration wireConfig : cloned) {
-            final String emitterPid = wireConfig.getEmitterPid();
-            final String receiverPid = wireConfig.getReceiverPid();
-            createConfiguration(wireConfig, emitterPid, receiverPid);
-        }
+    void createWires() {
+        processExecutor.execute(new Runnable() {
+
+            @Override
+            public void run() {
+                logger.debug(message.creatingWires());
+                final List<WireConfiguration> cloned = CollectionUtil.newArrayList();
+                for (final WireConfiguration wc : WireServiceImpl.this.wireConfigs) {
+                    final WireConfiguration wireConf = new WireConfiguration(wc.getEmitterPid(), wc.getReceiverPid());
+                    wireConf.setFilter(wc.getFilter());
+                    cloned.add(wireConf);
+                }
+                for (final WireConfiguration wireConfig : cloned) {
+                    createConfiguration(wireConfig);
+                }
+            }
+        });
     }
 
     private synchronized void deleteAllWires() throws InvalidSyntaxException {

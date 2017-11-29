@@ -42,11 +42,11 @@ public class JsonMarshallingImpl implements Marshalling {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T unmarshal(String s, Class<T> clazz) throws Exception {
+    public <T> T unmarshal(String s, Class<T> clazz) throws KuraException {
         if (clazz.equals(WireGraphConfiguration.class)) {
             return (T) unmarshalToWireGraphConfiguration(s);
         }
-        throw new KuraException(KuraErrorCode.INVALID_PARAMETER);
+        throw new IllegalArgumentException("Invalid parameter!");
     }
 
     private JsonObject marshalWireGraphConfiguration(WireGraphConfiguration graphConfiguration) {

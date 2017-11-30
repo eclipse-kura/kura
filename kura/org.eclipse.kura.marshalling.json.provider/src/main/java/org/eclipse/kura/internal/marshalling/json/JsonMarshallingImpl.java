@@ -31,6 +31,18 @@ import com.eclipsesource.json.JsonValue;
 
 public class JsonMarshallingImpl implements Marshalling {
 
+    private static final String RENDERING_PROPERTIES_KEY = "renderingProperties";
+    private static final String OUTPUT_PORT_COUNT_KEY = "outputPortCount";
+    private static final String INPUT_PORT_COUNT_KEY = "inputPortCount";
+    private static final String PID_KEY = "pid";
+    private static final String OUTPUT_PORT_NAMES_KEY = "outputPortNames";
+    private static final String INPUT_PORT_NAMES_KEY = "inputPortNames";
+    private static final String POSITION_KEY = "position";
+    private static final String RECEIVER_KEY = "receiver";
+    private static final String EMITTER_KEY = "emitter";
+    private static final String WIRES_KEY = "wires";
+    private static final String COMPONENTS_KEY = "components";
+
     @Override
     public String marshal(Object object) throws KuraException {
         if (object instanceof WireGraphConfiguration) {
@@ -38,6 +50,102 @@ public class JsonMarshallingImpl implements Marshalling {
             return result.toString();
         }
         throw new KuraException(KuraErrorCode.INVALID_PARAMETER);
+    }
+
+    private JsonObject marshalWireGraphConfiguration(WireGraphConfiguration graphConfiguration) {
+        JsonArray wireConfigurationJson = marshalWireConfigurationList(graphConfiguration.getWireConfigurations());
+        JsonArray wireComponentConfigurationJson = marshalWireComponentConfigurationList(
+                graphConfiguration.getWireComponentConfigurations());
+
+        JsonObject wireGraphConfiguration = new JsonObject();
+        wireGraphConfiguration.add(COMPONENTS_KEY, wireComponentConfigurationJson);
+        wireGraphConfiguration.add(WIRES_KEY, wireConfigurationJson);
+
+        return wireGraphConfiguration;
+    }
+
+    private static JsonObject marshalWireConfiguration(WireConfiguration wireConfig) {
+        JsonObject result = new JsonObject();
+        result.add(EMITTER_KEY, wireConfig.getEmitterPid());
+        result.add(RECEIVER_KEY, wireConfig.getReceiverPid());
+        return result;
+    }
+
+    private static JsonArray marshalWireConfigurationList(List<WireConfiguration> wireConfigurations) {
+        JsonArray value = new JsonArray();
+        for (WireConfiguration wireConfiguration : wireConfigurations) {
+            value.add(marshalWireConfiguration(wireConfiguration));
+        }
+
+        return value;
+    }
+
+    private static JsonArray marshalWireComponentConfigurationList(
+            List<WireComponentConfiguration> wireComponentConfigurations) {
+
+        JsonArray value = new JsonArray();
+        for (WireComponentConfiguration wireComponentConfiguration : wireComponentConfigurations) {
+            String pid = wireComponentConfiguration.getConfiguration().getPid();
+            value.add(marshalComponentProperties(pid, wireComponentConfiguration.getProperties()));
+        }
+
+        return value;
+    }
+
+    private static JsonObject marshalComponentProperties(String pid, Map<String, Object> componentProperties) {
+        JsonObject result = new JsonObject();
+
+        JsonObject resultElems = new JsonObject();
+
+        JsonObject position = marshalPosition(componentProperties);
+        resultElems.add(POSITION_KEY, position);
+
+        JsonObject inputPortNames = marshalInputPortNames(componentProperties);
+        resultElems.add(INPUT_PORT_NAMES_KEY, inputPortNames);
+
+        JsonObject outputPortNames = marshalOutputPortNames(componentProperties);
+        resultElems.add(OUTPUT_PORT_NAMES_KEY, outputPortNames);
+
+        result.add(PID_KEY, pid);
+        result.add(INPUT_PORT_COUNT_KEY, (int) componentProperties.get(INPUT_PORT_COUNT_KEY));
+        result.add(OUTPUT_PORT_COUNT_KEY, (int) componentProperties.get(OUTPUT_PORT_COUNT_KEY));
+        result.add(RENDERING_PROPERTIES_KEY, resultElems);
+
+        return result;
+    }
+
+    private static JsonObject marshalPosition(Map<String, Object> componentProperties) {
+        JsonObject positionElems = new JsonObject();
+        positionElems.add("x", (float) componentProperties.get("position.x"));
+        positionElems.add("y", (float) componentProperties.get("position.y"));
+
+        return positionElems;
+    }
+
+    private static JsonObject marshalInputPortNames(Map<String, Object> componentProperties) {
+
+        JsonObject inputPortElems = new JsonObject();
+        for (Entry<String, Object> mapEntry : componentProperties.entrySet()) {
+            if (mapEntry.getKey().startsWith(INPUT_PORT_NAMES_KEY)) {
+                String portNumber = mapEntry.getKey().split("\\.")[1];
+                inputPortElems.add(portNumber, (String) mapEntry.getValue());
+            }
+        }
+
+        return inputPortElems;
+    }
+
+    private static JsonObject marshalOutputPortNames(Map<String, Object> componentProperties) {
+
+        JsonObject outputPortElems = new JsonObject();
+        for (Entry<String, Object> mapEntry : componentProperties.entrySet()) {
+            if (mapEntry.getKey().startsWith(OUTPUT_PORT_NAMES_KEY)) {
+                String portNumber = mapEntry.getKey().split("\\.")[1];
+                outputPortElems.add(portNumber, (String) mapEntry.getValue());
+            }
+        }
+
+        return outputPortElems;
     }
 
     @SuppressWarnings("unchecked")
@@ -49,19 +157,7 @@ public class JsonMarshallingImpl implements Marshalling {
         throw new IllegalArgumentException("Invalid parameter!");
     }
 
-    private JsonObject marshalWireGraphConfiguration(WireGraphConfiguration graphConfiguration) {
-        JsonArray wireConfigurationJson = encodeWireConfigurationList(graphConfiguration.getWireConfigurations());
-        JsonArray wireComponentConfigurationJson = encodeWireComponentConfigurationList(
-                graphConfiguration.getWireComponentConfigurations());
-
-        JsonObject wireGraphConfiguration = new JsonObject();
-        wireGraphConfiguration.add("components", wireComponentConfigurationJson);
-        wireGraphConfiguration.add("wires", wireConfigurationJson);
-
-        return wireGraphConfiguration;
-    }
-
-    public WireGraphConfiguration unmarshalToWireGraphConfiguration(String jsonString) {
+    private WireGraphConfiguration unmarshalToWireGraphConfiguration(String jsonString) {
 
         List<WireComponentConfiguration> wireCompConfigList = new ArrayList<>();
         List<WireConfiguration> wireConfigList = new ArrayList<>();
@@ -71,16 +167,16 @@ public class JsonMarshallingImpl implements Marshalling {
         for (JsonObject.Member member : json) {
             String name = member.getName();
             JsonValue value = member.getValue();
-            if ("wires".equalsIgnoreCase(name) && value.isArray()) {
-                wireConfigList = decodeWireConfiguration(value.asArray());
-            } else if ("components".equalsIgnoreCase(name) && value.isArray()) {
-                wireCompConfigList = decodeWireComponentConfiguration(value.asArray());
+            if (WIRES_KEY.equalsIgnoreCase(name) && value.isArray()) {
+                wireConfigList = unmarshalWireConfiguration(value.asArray());
+            } else if (COMPONENTS_KEY.equalsIgnoreCase(name) && value.isArray()) {
+                wireCompConfigList = unmarshalWireComponentConfiguration(value.asArray());
             }
         }
         return new WireGraphConfiguration(wireCompConfigList, wireConfigList);
     }
 
-    private static List<WireConfiguration> decodeWireConfiguration(JsonArray array) {
+    private static List<WireConfiguration> unmarshalWireConfiguration(JsonArray array) {
         List<WireConfiguration> wireConfigurationList = new ArrayList<>();
 
         Iterator<JsonValue> jsonIterator = array.iterator();
@@ -92,9 +188,9 @@ public class JsonMarshallingImpl implements Marshalling {
             for (JsonObject.Member member : jsonWireConfig) {
                 String name = member.getName();
                 JsonValue value = member.getValue();
-                if ("emitter".equalsIgnoreCase(name) && value.isString()) {
+                if (EMITTER_KEY.equalsIgnoreCase(name) && value.isString()) {
                     emitterPid = value.asString();
-                } else if ("receiver".equalsIgnoreCase(name) && value.isString()) {
+                } else if (RECEIVER_KEY.equalsIgnoreCase(name) && value.isString()) {
                     receiverPid = value.asString();
                 }
 
@@ -109,7 +205,7 @@ public class JsonMarshallingImpl implements Marshalling {
         return wireConfigurationList;
     }
 
-    private static List<WireComponentConfiguration> decodeWireComponentConfiguration(JsonArray array) {
+    private static List<WireComponentConfiguration> unmarshalWireComponentConfiguration(JsonArray array) {
         List<WireComponentConfiguration> wireComponentConfigurationList = new ArrayList<>();
 
         Iterator<JsonValue> jsonIterator = array.iterator();
@@ -121,14 +217,14 @@ public class JsonMarshallingImpl implements Marshalling {
             for (JsonObject.Member member : jsonWireComponentConfiguration) {
                 String name = member.getName();
                 JsonValue value = member.getValue();
-                if ("inputPortCount".equalsIgnoreCase(name) && value.isNumber()) {
+                if (INPUT_PORT_COUNT_KEY.equalsIgnoreCase(name) && value.isNumber()) {
                     properties.put(name, value.asInt());
-                } else if ("outputPortCount".equalsIgnoreCase(name) && value.isNumber()) {
+                } else if (OUTPUT_PORT_COUNT_KEY.equalsIgnoreCase(name) && value.isNumber()) {
                     properties.put(name, value.asInt());
-                } else if ("renderingProperties".equalsIgnoreCase(name) && value.isObject()) {
-                    Map<String, Object> renderingProperties = parseRenderingProperties(value.asObject());
+                } else if (RENDERING_PROPERTIES_KEY.equalsIgnoreCase(name) && value.isObject()) {
+                    Map<String, Object> renderingProperties = unmarshalRenderingProperties(value.asObject());
                     properties.putAll(renderingProperties);
-                } else if ("pid".equalsIgnoreCase(name) && value.isString()) {
+                } else if (PID_KEY.equalsIgnoreCase(name) && value.isString()) {
                     componentPid = value.asString();
                 }
             }
@@ -145,20 +241,20 @@ public class JsonMarshallingImpl implements Marshalling {
         return wireComponentConfigurationList;
     }
 
-    private static Map<String, Object> parseRenderingProperties(JsonObject jsonRenderingProps) {
+    private static Map<String, Object> unmarshalRenderingProperties(JsonObject jsonRenderingProps) {
         Map<String, Object> renderingProps = new HashMap<>();
 
         for (JsonObject.Member member : jsonRenderingProps) {
             String name = member.getName();
             JsonValue value = member.getValue();
-            if ("position".equalsIgnoreCase(name) && value.isObject()) {
-                Map<String, Object> positionMap = parsePosition(value.asObject());
+            if (POSITION_KEY.equalsIgnoreCase(name) && value.isObject()) {
+                Map<String, Object> positionMap = unmarshalPosition(value.asObject());
                 renderingProps.putAll(positionMap);
-            } else if ("inputPortNames".equalsIgnoreCase(name) && value.isObject()) {
-                Map<String, Object> inputPortNamesMap = parseInputPortNames(value.asObject());
+            } else if (INPUT_PORT_NAMES_KEY.equalsIgnoreCase(name) && value.isObject()) {
+                Map<String, Object> inputPortNamesMap = unmarshalInputPortNames(value.asObject());
                 renderingProps.putAll(inputPortNamesMap);
-            } else if ("outputPortNames".equalsIgnoreCase(name) && value.isObject()) {
-                Map<String, Object> outputPortNamesMap = parseOutputPortNames(value.asObject());
+            } else if (OUTPUT_PORT_NAMES_KEY.equalsIgnoreCase(name) && value.isObject()) {
+                Map<String, Object> outputPortNamesMap = unmarshalOutputPortNames(value.asObject());
                 renderingProps.putAll(outputPortNamesMap);
             }
         }
@@ -166,35 +262,35 @@ public class JsonMarshallingImpl implements Marshalling {
         return renderingProps;
     }
 
-    private static Map<String, Object> parseInputPortNames(JsonObject jsonInputPortNames) {
+    private static Map<String, Object> unmarshalInputPortNames(JsonObject jsonInputPortNames) {
         Map<String, Object> inputPortNamesMap = new HashMap<>();
 
         for (JsonObject.Member member : jsonInputPortNames) {
             String name = member.getName();
             JsonValue value = member.getValue();
             if (value.isString()) {
-                inputPortNamesMap.put("inputPortNames" + "." + name, value.asString());
+                inputPortNamesMap.put(INPUT_PORT_NAMES_KEY + "." + name, value.asString());
             }
         }
 
         return inputPortNamesMap;
     }
 
-    private static Map<String, Object> parseOutputPortNames(JsonObject jsonOutputPortNames) {
+    private static Map<String, Object> unmarshalOutputPortNames(JsonObject jsonOutputPortNames) {
         Map<String, Object> outputPortNamesMap = new HashMap<>();
 
         for (JsonObject.Member member : jsonOutputPortNames) {
             String name = member.getName();
             JsonValue value = member.getValue();
             if (value.isString()) {
-                outputPortNamesMap.put("outputPortNames" + "." + name, value.asString());
+                outputPortNamesMap.put(OUTPUT_PORT_NAMES_KEY + "." + name, value.asString());
             }
         }
 
         return outputPortNamesMap;
     }
 
-    private static Map<String, Object> parsePosition(JsonObject jsonPositionPros) {
+    private static Map<String, Object> unmarshalPosition(JsonObject jsonPositionPros) {
         Map<String, Object> positionMap = new HashMap<>();
 
         for (JsonObject.Member member : jsonPositionPros) {
@@ -208,89 +304,5 @@ public class JsonMarshallingImpl implements Marshalling {
         }
 
         return positionMap;
-    }
-
-    private static JsonObject encodeWireConfiguration(WireConfiguration wireConfig) {
-        JsonObject result = new JsonObject();
-        result.add("emitter", wireConfig.getEmitterPid());
-        result.add("receiver", wireConfig.getReceiverPid());
-        return result;
-    }
-
-    private static JsonArray encodeWireConfigurationList(List<WireConfiguration> wireConfigurations) {
-        JsonArray value = new JsonArray();
-        for (WireConfiguration wireConfiguration : wireConfigurations) {
-            value.add(encodeWireConfiguration(wireConfiguration));
-        }
-
-        return value;
-    }
-
-    private static JsonArray encodeWireComponentConfigurationList(
-            List<WireComponentConfiguration> wireComponentConfigurations) {
-
-        JsonArray value = new JsonArray();
-        for (WireComponentConfiguration wireComponentConfiguration : wireComponentConfigurations) {
-            String pid = wireComponentConfiguration.getConfiguration().getPid();
-            value.add(encodeComponentProperties(pid, wireComponentConfiguration.getProperties()));
-        }
-
-        return value;
-    }
-
-    private static JsonObject encodeComponentProperties(String pid, Map<String, Object> componentProperties) {
-        JsonObject result = new JsonObject();
-
-        JsonObject resultElems = new JsonObject();
-
-        JsonObject position = encodePosition(componentProperties);
-        resultElems.add("position", position);
-
-        JsonObject inputPortNames = encodeInputPortNames(componentProperties);
-        resultElems.add("inputPortNames", inputPortNames);
-
-        JsonObject outputPortNames = encodeOutputPortNames(componentProperties);
-        resultElems.add("outputPortNames", outputPortNames);
-
-        result.add("pid", pid);
-        result.add("inputPortCount", (int) componentProperties.get("inputPortCount"));
-        result.add("outputPortCount", (int) componentProperties.get("outputPortCount"));
-        result.add("renderingProperties", resultElems);
-
-        return result;
-    }
-
-    private static JsonObject encodePosition(Map<String, Object> componentProperties) {
-        JsonObject positionElems = new JsonObject();
-        positionElems.add("x", (float) componentProperties.get("position.x"));
-        positionElems.add("y", (float) componentProperties.get("position.y"));
-
-        return positionElems;
-    }
-
-    private static JsonObject encodeInputPortNames(Map<String, Object> componentProperties) {
-
-        JsonObject inputPortElems = new JsonObject();
-        for (Entry<String, Object> mapEntry : componentProperties.entrySet()) {
-            if (mapEntry.getKey().startsWith("inputPortNames")) {
-                String portNumber = mapEntry.getKey().split("\\.")[1];
-                inputPortElems.add(portNumber, (String) mapEntry.getValue());
-            }
-        }
-
-        return inputPortElems;
-    }
-
-    private static JsonObject encodeOutputPortNames(Map<String, Object> componentProperties) {
-
-        JsonObject outputPortElems = new JsonObject();
-        for (Entry<String, Object> mapEntry : componentProperties.entrySet()) {
-            if (mapEntry.getKey().startsWith("outputPortNames")) {
-                String portNumber = mapEntry.getKey().split("\\.")[1];
-                outputPortElems.add(portNumber, (String) mapEntry.getValue());
-            }
-        }
-
-        return outputPortElems;
     }
 }

@@ -11,8 +11,6 @@ package org.eclipse.kura.marshalling.xml.provider.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -113,8 +111,7 @@ public class XmlEncoderDecoderTest {
                     false);
 
             // test Reader unmarshalling
-            Reader marshalledStringReader = new StringReader(marshalledString);
-            Object unmarshalledObjectFromStringReader = XmlMarshallerImpl.unmarshal(marshalledStringReader,
+            Object unmarshalledObjectFromStringReader = xmlMarshallerImpl.unmarshal(marshalledString,
                     XmlComponentConfigurations.class);
             Assert.assertTrue(
                     String.format(differentInstanceMessage, XmlComponentConfigurations.class,
@@ -353,73 +350,72 @@ public class XmlEncoderDecoderTest {
         Assert.assertTrue(String.format(propertyValueDiffersMessage, name, source, orignal, unmarshalled),
                 orignal.equals(unmarshalled));
     }
-    
 
-  @Test
-  public void testPropertiesMarshallUnmarshall() throws Exception {
-      XmlMarshallerImpl xmlMarshallerImpl = new XmlMarshallerImpl();
-      
-      String pid = "org.eclipse.kura.cloud.CloudService";
-      Tocd definition = null;
-      Map<String, Object> properties = new HashMap<String, Object>();
-      properties.put("prop.string", new String("prop.value"));
-      properties.put("prop.long", Long.MAX_VALUE);
-      properties.put("prop.double", Double.MAX_VALUE);
-      properties.put("prop.float", Float.MAX_VALUE);
-      properties.put("prop.integer", Integer.MAX_VALUE);
-      properties.put("prop.byte", Byte.MAX_VALUE);
-      properties.put("prop.character", 'a');
-      properties.put("prop.short", Short.MAX_VALUE);
+    @Test
+    public void testPropertiesMarshallUnmarshall() throws Exception {
+        XmlMarshallerImpl xmlMarshallerImpl = new XmlMarshallerImpl();
 
-      XmlComponentConfigurations xcc = new XmlComponentConfigurations();
-      List<ComponentConfiguration> ccis = new ArrayList<ComponentConfiguration>();
-      ComponentConfigurationImpl config = new ComponentConfigurationImpl(pid, definition, properties);
-      ccis.add(config);
-      xcc.setConfigurations(ccis);
+        String pid = "org.eclipse.kura.cloud.CloudService";
+        Tocd definition = null;
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("prop.string", new String("prop.value"));
+        properties.put("prop.long", Long.MAX_VALUE);
+        properties.put("prop.double", Double.MAX_VALUE);
+        properties.put("prop.float", Float.MAX_VALUE);
+        properties.put("prop.integer", Integer.MAX_VALUE);
+        properties.put("prop.byte", Byte.MAX_VALUE);
+        properties.put("prop.character", 'a');
+        properties.put("prop.short", Short.MAX_VALUE);
 
-      String s = xmlMarshallerImpl.marshal(xcc);
-      System.err.println(s);
+        XmlComponentConfigurations xcc = new XmlComponentConfigurations();
+        List<ComponentConfiguration> ccis = new ArrayList<>();
+        ComponentConfigurationImpl config = new ComponentConfigurationImpl(pid, definition, properties);
+        ccis.add(config);
+        xcc.setConfigurations(ccis);
 
-      XmlComponentConfigurations config1 = xmlMarshallerImpl.unmarshal(s, XmlComponentConfigurations.class);
-      String s1 = xmlMarshallerImpl.marshal(config1);
-      System.err.println(s1);
+        String s = xmlMarshallerImpl.marshal(xcc);
+        System.err.println(s);
 
-      Map<String, Object> properties1 = config1.getConfigurations().get(0).getConfigurationProperties();
-      assertEquals(properties, properties1);
-  }
+        XmlComponentConfigurations config1 = xmlMarshallerImpl.unmarshal(s, XmlComponentConfigurations.class);
+        String s1 = xmlMarshallerImpl.marshal(config1);
+        System.err.println(s1);
 
-  @Test
-  public void testOCDMarshallUnmarshall() throws Exception {
-      XmlMarshallerImpl xmlMarshallerImpl = new XmlMarshallerImpl();
-      
-      String pid = "org.eclipse.kura.cloud.CloudService";
+        Map<String, Object> properties1 = config1.getConfigurations().get(0).getConfigurationProperties();
+        assertEquals(properties, properties1);
+    }
 
-      Tocd definition = ComponentUtil.readObjectClassDefinition(pid);
+    @Test
+    public void testOCDMarshallUnmarshall() throws Exception {
+        XmlMarshallerImpl xmlMarshallerImpl = new XmlMarshallerImpl();
 
-      Map<String, Object> properties = new HashMap<String, Object>();
-      properties.put("prop.string", new String("prop.value"));
-      properties.put("prop.long", Long.MAX_VALUE);
-      properties.put("prop.double", Double.MAX_VALUE);
-      properties.put("prop.float", Float.MAX_VALUE);
-      properties.put("prop.integer", Integer.MAX_VALUE);
-      properties.put("prop.byte", Byte.MAX_VALUE);
-      properties.put("prop.character", 'a');
-      properties.put("prop.short", Short.MAX_VALUE);
+        String pid = "org.eclipse.kura.cloud.CloudService";
 
-      XmlComponentConfigurations xcc = new XmlComponentConfigurations();
-      List<ComponentConfiguration> ccis = new ArrayList<ComponentConfiguration>();
-      ComponentConfigurationImpl config = new ComponentConfigurationImpl(pid, definition, properties);
-      ccis.add(config);
-      xcc.setConfigurations(ccis);
+        Tocd definition = ComponentUtil.readObjectClassDefinition(pid);
 
-      String s = xmlMarshallerImpl.marshal(xcc);
-      System.err.println(s);
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("prop.string", new String("prop.value"));
+        properties.put("prop.long", Long.MAX_VALUE);
+        properties.put("prop.double", Double.MAX_VALUE);
+        properties.put("prop.float", Float.MAX_VALUE);
+        properties.put("prop.integer", Integer.MAX_VALUE);
+        properties.put("prop.byte", Byte.MAX_VALUE);
+        properties.put("prop.character", 'a');
+        properties.put("prop.short", Short.MAX_VALUE);
 
-      XmlComponentConfigurations config1 = xmlMarshallerImpl.unmarshal(s, XmlComponentConfigurations.class);
-      String s1 = xmlMarshallerImpl.marshal(config1);
-      System.err.println(s1);
+        XmlComponentConfigurations xcc = new XmlComponentConfigurations();
+        List<ComponentConfiguration> ccis = new ArrayList<>();
+        ComponentConfigurationImpl config = new ComponentConfigurationImpl(pid, definition, properties);
+        ccis.add(config);
+        xcc.setConfigurations(ccis);
 
-      Map<String, Object> properties1 = config1.getConfigurations().get(0).getConfigurationProperties();
-      assertEquals(properties, properties1);
-  }
+        String s = xmlMarshallerImpl.marshal(xcc);
+        System.err.println(s);
+
+        XmlComponentConfigurations config1 = xmlMarshallerImpl.unmarshal(s, XmlComponentConfigurations.class);
+        String s1 = xmlMarshallerImpl.marshal(config1);
+        System.err.println(s1);
+
+        Map<String, Object> properties1 = config1.getConfigurations().get(0).getConfigurationProperties();
+        assertEquals(properties, properties1);
+    }
 }

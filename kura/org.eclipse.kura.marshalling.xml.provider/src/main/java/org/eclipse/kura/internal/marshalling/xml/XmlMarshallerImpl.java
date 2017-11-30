@@ -47,7 +47,6 @@ public class XmlMarshallerImpl implements Marshalling {
 
     private static final Logger logger = LoggerFactory.getLogger(XmlMarshallerImpl.class);
 
-    // Marshalling
     @Override
     public String marshal(Object object) throws KuraException {
         StringWriter sw = new StringWriter();
@@ -59,7 +58,7 @@ public class XmlMarshallerImpl implements Marshalling {
         return sw.toString();
     }
 
-    public static void marshal(Object object, Writer w) throws Exception {
+    private void marshal(Object object, Writer w) throws Exception {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -138,7 +137,7 @@ public class XmlMarshallerImpl implements Marshalling {
         return unmarshal(sr, clazz);
     }
 
-    public static <T> T unmarshal(Reader r, Class<T> clazz) throws KuraException {
+    private <T> T unmarshal(Reader r, Class<T> clazz) throws KuraException {
         DocumentBuilderFactory factory = null;
         DocumentBuilder parser = null;
 

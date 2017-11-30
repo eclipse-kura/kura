@@ -12,12 +12,15 @@
 package org.eclipse.kura.marshalling;
 
 import org.eclipse.kura.KuraException;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This interface exposes the methods for marshalling and unmarshalling content
  *
+ * @noimplement This interface is not intended to be implemented by clients.
  * @since 1.4
  */
+@ProviderType
 public interface Marshalling {
 
     /**

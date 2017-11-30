@@ -32,18 +32,18 @@ import com.eclipsesource.json.JsonObject;
 public class JsonEncoderDecoderTest {
 
     @Test
-    public void testDecodeWireConfigurationEmptyArray() throws Throwable {
+    public void testUnmarshalWireConfigurationEmptyArray() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         @SuppressWarnings("unchecked")
         List<WireConfiguration> wireConfigList = (List<WireConfiguration>) TestUtil.invokePrivate(jsonEncoderDecoder,
-                "decodeWireConfiguration", new JsonArray());
+                "unmarshalWireConfiguration", new JsonArray());
         assertNotNull(wireConfigList);
         assertEquals(0, wireConfigList.size());
     }
 
     @Test
-    public void testDecodeWireConfigurationSingleWire() throws Throwable {
+    public void testUnmarshalWireConfigurationSingleWire() throws Throwable {
 
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
@@ -55,7 +55,7 @@ public class JsonEncoderDecoderTest {
 
         @SuppressWarnings("unchecked")
         List<WireConfiguration> wireConfigList = (List<WireConfiguration>) TestUtil.invokePrivate(jsonEncoderDecoder,
-                "decodeWireConfiguration", array);
+                "unmarshalWireConfiguration", array);
 
         assertNotNull(wireConfigList);
         assertEquals(1, wireConfigList.size());
@@ -65,18 +65,18 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testDecodeWireComponentConfigurationEmptyArray() throws Throwable {
+    public void testUnmarshalWireComponentConfigurationEmptyArray() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         @SuppressWarnings("unchecked")
         List<WireComponentConfiguration> wireComponentConfigurationList = (List<WireComponentConfiguration>) TestUtil
-                .invokePrivate(jsonEncoderDecoder, "decodeWireComponentConfiguration", new JsonArray());
+                .invokePrivate(jsonEncoderDecoder, "unmarshalWireComponentConfiguration", new JsonArray());
         assertNotNull(wireComponentConfigurationList);
         assertEquals(0, wireComponentConfigurationList.size());
     }
 
     @Test
-    public void testDecodeWireComponentConfigurationSingleComponent() throws Throwable {
+    public void testUnmarshalWireComponentConfigurationSingleComponent() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
         String json = "[{\n" + "        \"pid\": \"foo\",\n" + "        \"inputPortCount\": 0,\n"
                 + "        \"outputPortCount\": 5,\n" + "        \"renderingProperties\": {\n"
@@ -91,7 +91,7 @@ public class JsonEncoderDecoderTest {
         JsonArray jsonArray = Json.parse(json).asArray();
         @SuppressWarnings("unchecked")
         List<WireComponentConfiguration> wireComponentConfigurationList = (List<WireComponentConfiguration>) TestUtil
-                .invokePrivate(jsonEncoderDecoder, "decodeWireComponentConfiguration", jsonArray);
+                .invokePrivate(jsonEncoderDecoder, "unmarshalWireComponentConfiguration", jsonArray);
         assertNotNull(wireComponentConfigurationList);
         assertEquals(1, wireComponentConfigurationList.size());
 
@@ -109,7 +109,7 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testDecodeWireComponentConfigurationTwoComponents() throws Throwable {
+    public void testUnmarshalWireComponentConfigurationTwoComponents() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
         String json = "[{\n" + "        \"pid\": \"foo\",\n" + "        \"inputPortCount\": 0,\n"
                 + "        \"outputPortCount\": 5,\n" + "        \"renderingProperties\": {\n"
@@ -130,13 +130,13 @@ public class JsonEncoderDecoderTest {
         JsonArray jsonArray = Json.parse(json).asArray();
         @SuppressWarnings("unchecked")
         List<WireComponentConfiguration> wireComponentConfigurationList = (List<WireComponentConfiguration>) TestUtil
-                .invokePrivate(jsonEncoderDecoder, "decodeWireComponentConfiguration", jsonArray);
+                .invokePrivate(jsonEncoderDecoder, "unmarshalWireComponentConfiguration", jsonArray);
         assertNotNull(wireComponentConfigurationList);
         assertEquals(2, wireComponentConfigurationList.size());
     }
 
     @Test
-    public void testDecodeDefaultJson() throws Exception {
+    public void testUnmarshalDefaultJson() throws Exception {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
         String defaultJson = "{\"components\":[],\"wires\":[]}";
 
@@ -148,7 +148,7 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testDecodeWrongJson() throws Exception {
+    public void testUnmarshalWrongJson() throws Exception {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
         String defaultJson = "{\"components\":{},\"wires\":{}}";
 
@@ -160,7 +160,7 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testDecodeWireConfigurationEmitterReceiverNotStrings() throws Throwable {
+    public void testUnmarshalWireConfigurationEmitterReceiverNotStrings() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         JsonArray wireConfigArray = new JsonArray();
@@ -170,14 +170,14 @@ public class JsonEncoderDecoderTest {
         wireConfigArray.add(wire);
 
         List<WireConfiguration> result = (List<WireConfiguration>) TestUtil.invokePrivate(jsonEncoderDecoder,
-                "decodeWireConfiguration", wireConfigArray);
+                "unmarshalWireConfiguration", wireConfigArray);
 
         assertNotNull(result);
         assertEquals(0, result.size());
     }
 
     @Test
-    public void testDecodeWireConfigurationReceiverNotString() throws Throwable {
+    public void testUnmarshalWireConfigurationReceiverNotString() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         JsonArray wireConfigArray = new JsonArray();
@@ -187,14 +187,14 @@ public class JsonEncoderDecoderTest {
         wireConfigArray.add(wire);
 
         List<WireConfiguration> result = (List<WireConfiguration>) TestUtil.invokePrivate(jsonEncoderDecoder,
-                "decodeWireConfiguration", wireConfigArray);
+                "unmarshalWireConfiguration", wireConfigArray);
 
         assertNotNull(result);
         assertEquals(0, result.size());
     }
 
     @Test
-    public void testDecodeWireComponentConfigurationWrongArray() throws Throwable {
+    public void testUnmarshalWireComponentConfigurationWrongArray() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         JsonArray wireComponentConfiguration = new JsonArray();
@@ -206,14 +206,14 @@ public class JsonEncoderDecoderTest {
         wireComponentConfiguration.add(compProps);
 
         List<WireComponentConfiguration> result = (List<WireComponentConfiguration>) TestUtil
-                .invokePrivate(jsonEncoderDecoder, "decodeWireComponentConfiguration", wireComponentConfiguration);
+                .invokePrivate(jsonEncoderDecoder, "unmarshalWireComponentConfiguration", wireComponentConfiguration);
 
         assertNotNull(result);
         assertEquals(0, result.size());
     }
 
     @Test
-    public void testParseOutputPortNamesValueNotString() throws Throwable {
+    public void testUnmarshalOutputPortNamesValueNotString() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         JsonObject ports = new JsonObject();
@@ -221,7 +221,7 @@ public class JsonEncoderDecoderTest {
         ports.add("outputPort2", 3);
 
         Map<String, Object> result = (Map<String, Object>) TestUtil.invokePrivate(jsonEncoderDecoder,
-                "parseOutputPortNames", ports);
+                "unmarshalOutputPortNames", ports);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -229,7 +229,7 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testParseInputPortNamesValueNotString() throws Throwable {
+    public void testUnmarshalInputPortNamesValueNotString() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         JsonObject ports = new JsonObject();
@@ -237,7 +237,7 @@ public class JsonEncoderDecoderTest {
         ports.add("inputPort2", 3);
 
         Map<String, Object> result = (Map<String, Object>) TestUtil.invokePrivate(jsonEncoderDecoder,
-                "parseInputPortNames", ports);
+                "unmarshalInputPortNames", ports);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -245,7 +245,7 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testParseRenderingPropertiesWrongInput() throws Throwable {
+    public void testUnmarshalRenderingPropertiesWrongInput() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         JsonObject renderProps = new JsonObject();
@@ -254,21 +254,21 @@ public class JsonEncoderDecoderTest {
         renderProps.add("outputPortNames", "test");
 
         Map<String, Object> result = (Map<String, Object>) TestUtil.invokePrivate(jsonEncoderDecoder,
-                "parseRenderingProperties", renderProps);
+                "unmarshalRenderingProperties", renderProps);
 
         assertNotNull(result);
         assertEquals(0, result.size());
     }
 
     @Test
-    public void testParsePosition() throws Throwable {
+    public void testUnmarshalPosition() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         JsonObject renderProps = new JsonObject();
         renderProps.add("x", "1");
         renderProps.add("y", "3");
 
-        Map<String, Object> result = (Map<String, Object>) TestUtil.invokePrivate(jsonEncoderDecoder, "parsePosition",
+        Map<String, Object> result = (Map<String, Object>) TestUtil.invokePrivate(jsonEncoderDecoder, "unmarshalPosition",
                 renderProps);
 
         assertNotNull(result);
@@ -276,11 +276,11 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testWireSerializationSingleArc() throws Throwable {
+    public void testMarshalWireSingleArc() throws Throwable {
         WireConfiguration wireConfig = new WireConfiguration("emitterPid", "receiverPid");
 
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
-        JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "encodeWireConfiguration",
+        JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "marshalWireConfiguration",
                 wireConfig);
         assertNotNull(result);
 
@@ -289,11 +289,11 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testWireSerializationWireConfigListEmpty() throws Throwable {
+    public void testMarshalWireConfigListEmpty() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         List<WireConfiguration> emptyWireConfig = new ArrayList<>();
-        JsonArray result = (JsonArray) TestUtil.invokePrivate(jsonEncoderDecoder, "encodeWireConfigurationList",
+        JsonArray result = (JsonArray) TestUtil.invokePrivate(jsonEncoderDecoder, "marshalWireConfigurationList",
                 emptyWireConfig);
 
         assertNotNull(result);
@@ -303,14 +303,14 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testWireSerializationWireConfigListOneElement() throws Throwable {
+    public void testMarshalWireConfigListOneElement() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         List<WireConfiguration> wireConfigList = new ArrayList<>();
         WireConfiguration wireConfig = new WireConfiguration("emitterPid", "receiverPid");
         wireConfigList.add(wireConfig);
 
-        JsonArray result = (JsonArray) TestUtil.invokePrivate(jsonEncoderDecoder, "encodeWireConfigurationList",
+        JsonArray result = (JsonArray) TestUtil.invokePrivate(jsonEncoderDecoder, "marshalWireConfigurationList",
                 wireConfigList);
 
         assertNotNull(result);
@@ -320,7 +320,7 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testWireSerializationWireConfigListMoreElements() throws Throwable {
+    public void testMarshalWireConfigListMoreElements() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         List<WireConfiguration> wireConfigList = new ArrayList<>();
@@ -329,7 +329,7 @@ public class JsonEncoderDecoderTest {
         wireConfigList.add(wireConfig);
         wireConfigList.add(wireConfig2);
 
-        JsonArray result = (JsonArray) TestUtil.invokePrivate(jsonEncoderDecoder, "encodeWireConfigurationList",
+        JsonArray result = (JsonArray) TestUtil.invokePrivate(jsonEncoderDecoder, "marshalWireConfigurationList",
                 wireConfigList);
 
         assertNotNull(result);
@@ -339,14 +339,14 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testSerializationPosition() throws Throwable {
+    public void testMarshalPosition() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         Map<String, Object> positionMap = new HashMap<>();
         positionMap.put("position.x", 10f);
         positionMap.put("position.y", 100f);
 
-        JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "encodePosition", positionMap);
+        JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "marshalPosition", positionMap);
 
         assertNotNull(result);
 
@@ -355,13 +355,13 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testSerializationInputPortNames() throws Throwable {
+    public void testMarshalInputPortNames() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         Map<String, Object> inputMap = new HashMap<>();
         inputMap.put("inputPortNames.0", "resetPort");
 
-        JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "encodeInputPortNames", inputMap);
+        JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "marshalInputPortNames", inputMap);
 
         assertNotNull(result);
 
@@ -370,13 +370,13 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testSerializationOutputPortNames() throws Throwable {
+    public void testMarshalOutputPortNames() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         Map<String, Object> inputMap = new HashMap<>();
         inputMap.put("outputPortNames.3", "then");
 
-        JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "encodeOutputPortNames", inputMap);
+        JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "marshalOutputPortNames", inputMap);
 
         assertNotNull(result);
 
@@ -385,7 +385,7 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testEncodeComponentProperties() throws Throwable {
+    public void testMarshalComponentProperties() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         Map<String, Object> inputMap = new HashMap<>();
@@ -396,7 +396,7 @@ public class JsonEncoderDecoderTest {
         inputMap.put("inputPortCount", 0);
         inputMap.put("outputPortCount", 5);
 
-        JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "encodeComponentProperties",
+        JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "marshalComponentProperties",
                 "testPid", inputMap);
 
         assertNotNull(result);
@@ -406,7 +406,7 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testEncodeWireComponentConfigurationList() throws Throwable {
+    public void testMarshalWireComponentConfigurationList() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         Map<String, Object> inputMap = new HashMap<>();
@@ -417,7 +417,7 @@ public class JsonEncoderDecoderTest {
         inputMap.put("inputPortCount", 0);
         inputMap.put("outputPortCount", 5);
 
-        JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "encodeComponentProperties",
+        JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "marshalComponentProperties",
                 "testPid", inputMap);
 
         assertNotNull(result);
@@ -427,7 +427,7 @@ public class JsonEncoderDecoderTest {
     }
 
     @Test
-    public void testEncodeWireGraphConfiguration() throws Throwable {
+    public void testMarshalWireGraphConfiguration() throws Throwable {
         JsonMarshallingImpl jsonEncoderDecoder = new JsonMarshallingImpl();
 
         Map<String, Object> inputMap = new HashMap<>();

@@ -25,7 +25,7 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
-import org.eclipse.kura.marshalling.Marshalling;
+import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
@@ -205,22 +205,22 @@ public class ConfigurationUpgrade {
         return wireConfs;
     }
 
-    private static ServiceReference<Marshalling>[] getJsonMarshallers(BundleContext bundleContext) {
+    private static ServiceReference<Marshaller>[] getJsonMarshallers(BundleContext bundleContext) {
         String filterString = String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.marshalling.json.provider");
-        return ServiceUtil.getServiceReferences(bundleContext, Marshalling.class, filterString);
+        return ServiceUtil.getServiceReferences(bundleContext, Marshaller.class, filterString);
     }
 
     private static void ungetMarshallersServiceReferences(BundleContext bundleContext,
-            final ServiceReference<Marshalling>[] refs) {
+            final ServiceReference<Marshaller>[] refs) {
         ServiceUtil.ungetServiceReferences(bundleContext, refs);
     }
 
     private static String marshalJson(BundleContext bundleContext, WireGraphConfiguration wireGraphConfiguration) {
         String result = null;
-        ServiceReference<Marshalling>[] jsonMarshallerSRs = getJsonMarshallers(bundleContext);
+        ServiceReference<Marshaller>[] jsonMarshallerSRs = getJsonMarshallers(bundleContext);
         try {
-            for (final ServiceReference<Marshalling> jsonMarshallerSR : jsonMarshallerSRs) {
-                Marshalling jsonMarshaller = bundleContext.getService(jsonMarshallerSR);
+            for (final ServiceReference<Marshaller> jsonMarshallerSR : jsonMarshallerSRs) {
+                Marshaller jsonMarshaller = bundleContext.getService(jsonMarshallerSR);
                 result = jsonMarshaller.marshal(wireGraphConfiguration);
             }
         } catch (Exception e) {

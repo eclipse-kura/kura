@@ -17,7 +17,7 @@ import org.osgi.annotation.versioning.ProviderType;
 /**
  * The Class DriverDescriptor is responsible for storing the driver instance
  * configuration. This class can then be passed for serialization and is used to
- * map the all the information relative to a driver instance. <br>
+ * map all the information related to a driver instance.<br>
  * <br>
  *
  * @see Driver

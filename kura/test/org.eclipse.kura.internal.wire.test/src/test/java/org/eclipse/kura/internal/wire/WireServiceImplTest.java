@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.kura.KuraException;
@@ -30,7 +29,7 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
-import org.eclipse.kura.internal.marshalling.json.JsonMarshallingImpl;
+import org.eclipse.kura.internal.json.marshaller.unmarshaller.JsonMarshallUnmarshallImpl;
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireHelperService;
@@ -38,7 +37,6 @@ import org.eclipse.kura.wire.WireService;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphService;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
@@ -63,11 +61,11 @@ public class WireServiceImplTest {
         String receiverPid = "receiver";
         WireConfiguration wc = new WireConfiguration(emitterPid, receiverPid);
         wireConfigs.add(wc);
-        
+
         WireHelperService wireHelperService = mock(WireHelperService.class);
         when(wireHelperService.getServicePid(emitterPid)).thenReturn(emitterPid);
         when(wireHelperService.getServicePid(receiverPid)).thenReturn(receiverPid);
-        
+
         WireAdmin wireAdmin = mock(WireAdmin.class);
 
         TestUtil.setFieldValue(wsi, "wireConfigs", wireConfigs);
@@ -109,10 +107,10 @@ public class WireServiceImplTest {
     @Test
     public void testUpdatedCallback() throws NoSuchFieldException {
         WireServiceImpl wsi = new WireServiceImpl();
-        
+
         BundleContext bundleContext = mock(BundleContext.class);
         TestUtil.setFieldValue(wsi, "bundleContext", bundleContext);
-        
+
         WireAdmin wireAdmin = mock(WireAdmin.class);
         TestUtil.setFieldValue(wsi, "wireAdmin", wireAdmin);
 
@@ -390,10 +388,10 @@ public class WireServiceImplTest {
         WireService wireService = new WireServiceImpl() {
 
             @Override
-            protected WireGraphConfiguration unmarshalJson(String jsonWireGraph) {
-                JsonMarshallingImpl jsonMarshaller = new JsonMarshallingImpl();
+            protected <T> T unmarshal(String jsonWireGraph, Class<T> clazz) {
+                JsonMarshallUnmarshallImpl jsonMarshaller = new JsonMarshallUnmarshallImpl();
                 try {
-                    return jsonMarshaller.unmarshal(jsonWireGraph, WireGraphConfiguration.class);
+                    return jsonMarshaller.unmarshal(jsonWireGraph, clazz);
                 } catch (Exception e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -402,19 +400,15 @@ public class WireServiceImplTest {
             }
 
             @Override
-            protected String marshalJson(WireGraphConfiguration wireGraphConfiguration) {
-                JsonMarshallingImpl jsonMarshaller = new JsonMarshallingImpl();
+            protected String marshal(Object object) {
+                JsonMarshallUnmarshallImpl jsonMarshaller = new JsonMarshallUnmarshallImpl();
                 try {
-                    return jsonMarshaller.marshal(wireGraphConfiguration);
+                    return jsonMarshaller.marshal(object);
                 } catch (Exception e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 return null;
-            }
-            
-            protected Optional<Object> waitForService(final String filter){
-                return Optional.of(filter);
             }
         };
         return wireService;

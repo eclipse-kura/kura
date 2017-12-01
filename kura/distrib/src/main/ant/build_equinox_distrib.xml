@@ -1273,9 +1273,9 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	<target name="marshallers-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.marshalling.json.provider_${org.eclipse.kura.marshalling.json.provider.version}.jar@3:start" />
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.json.marshaller.unmarshaller.provider_${org.eclipse.kura.json.marshaller.unmarshaller.provider.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.marshalling.xml.provider_${org.eclipse.kura.marshalling.xml.provider.version}.jar@3:start" />
+				value=", reference:file:${kura.install.dir}/kura/kura/plugins/org.eclipse.kura.xml.marshaller.unmarshaller.provider_${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}.jar@3:start" />
 		</propertyfile>
 	</target>
 
@@ -1329,9 +1329,9 @@ Resource-Processor: org.eclipse.kura.deployment.customizer.upgrade.rp.UpgradeScr
 	
 	<target name="marshallers-jar">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
-			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.marshalling.json.provider_${org.eclipse.kura.marshalling.json.provider.version}.jar"
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.json.marshaller.unmarshaller.provider_${org.eclipse.kura.json.marshaller.unmarshaller.provider.version}.jar"
 				prefix="${build.output.name}/kura/plugins" />
-			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.marshalling.xml.provider_${org.eclipse.kura.marshalling.xml.provider.version}.jar"
+			<zipfileset file="${project.build.directory}/plugins/org.eclipse.kura.xml.marshaller.unmarshaller.provider_${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}.jar"
 				prefix="${build.output.name}/kura/plugins" />
 		</zip>
 	</target>

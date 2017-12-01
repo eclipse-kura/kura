@@ -53,7 +53,7 @@ import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.internal.marshalling.xml.XmlMarshallerImpl;
+import org.eclipse.kura.internal.xml.marshaller.unmarshaller.XmlMarshallUnmarshallImpl;
 import org.eclipse.kura.system.SystemService;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -1370,17 +1370,18 @@ public class ConfigurationServiceTest {
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
-            protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
-                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+            @Override
+            protected <T> T unmarshal(String xmlString, Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
 
-                return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
-
+                return xmlMarshaller.unmarshal(xmlString, clazz);
             }
 
-            protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
-                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+            @Override
+            protected String marshal(Object object) {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
                 try {
-                    return xmlMarshaller.marshal(xmlComponentConfigurations);
+                    return xmlMarshaller.marshal(object);
                 } catch (KuraException e) {
 
                 }
@@ -1669,16 +1670,18 @@ public class ConfigurationServiceTest {
                 return dir;
             }
 
-            protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
-                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+            @Override
+            protected <T> T unmarshal(String xmlString, Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
 
-                return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+                return xmlMarshaller.unmarshal(xmlString, clazz);
             }
 
-            protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
-                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+            @Override
+            protected String marshal(Object object) {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
                 try {
-                    return xmlMarshaller.marshal(xmlComponentConfigurations);
+                    return xmlMarshaller.marshal(object);
                 } catch (KuraException e) {
 
                 }
@@ -1715,7 +1718,7 @@ public class ConfigurationServiceTest {
     private String prepareSnapshotXML() throws Exception {
         XmlComponentConfigurations cfgs = prepareSnapshot();
 
-        XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+        XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
         return xmlMarshaller.marshal(cfgs);
     }
 
@@ -1762,16 +1765,18 @@ public class ConfigurationServiceTest {
                 return dir;
             }
 
-            protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
-                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+            @Override
+            protected <T> T unmarshal(String xmlString, Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
 
-                return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+                return xmlMarshaller.unmarshal(xmlString, clazz);
             }
 
-            protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
-                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+            @Override
+            protected String marshal(Object object) {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
                 try {
-                    return xmlMarshaller.marshal(xmlComponentConfigurations);
+                    return xmlMarshaller.marshal(object);
                 } catch (KuraException e) {
 
                 }
@@ -1819,17 +1824,19 @@ public class ConfigurationServiceTest {
             String getSnapshotsDirectory() {
                 return dir;
             }
+            
+            @Override
+            protected <T> T unmarshal(String xmlString, Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
 
-            protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
-                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
-
-                return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+                return xmlMarshaller.unmarshal(xmlString, clazz);
             }
 
-            protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
-                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+            @Override
+            protected String marshal(Object object) {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
                 try {
-                    return xmlMarshaller.marshal(xmlComponentConfigurations);
+                    return xmlMarshaller.marshal(object);
                 } catch (KuraException e) {
 
                 }
@@ -2114,16 +2121,18 @@ public class ConfigurationServiceTest {
                 return dir;
             }
 
-            protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
-                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+            @Override
+            protected <T> T unmarshal(String xmlString, Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
 
-                return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+                return xmlMarshaller.unmarshal(xmlString, clazz);
             }
 
-            protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
-                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+            @Override
+            protected String marshal(Object object) {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
                 try {
-                    return xmlMarshaller.marshal(xmlComponentConfigurations);
+                    return xmlMarshaller.marshal(object);
                 } catch (KuraException e) {
 
                 }
@@ -2193,16 +2202,18 @@ public class ConfigurationServiceTest {
                 return dir;
             }
 
-            protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
-                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+            @Override
+            protected <T> T unmarshal(String xmlString, Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
 
-                return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+                return xmlMarshaller.unmarshal(xmlString, clazz);
             }
 
-            protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
-                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+            @Override
+            protected String marshal(Object object) {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
                 try {
-                    return xmlMarshaller.marshal(xmlComponentConfigurations);
+                    return xmlMarshaller.marshal(object);
                 } catch (KuraException e) {
 
                 }
@@ -2276,16 +2287,18 @@ public class ConfigurationServiceTest {
                 return dir;
             }
 
-            protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
-                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+            @Override
+            protected <T> T unmarshal(String xmlString, Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
 
-                return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+                return xmlMarshaller.unmarshal(xmlString, clazz);
             }
 
-            protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
-                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+            @Override
+            protected String marshal(Object object) {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
                 try {
-                    return xmlMarshaller.marshal(xmlComponentConfigurations);
+                    return xmlMarshaller.marshal(object);
                 } catch (KuraException e) {
 
                 }
@@ -2891,16 +2904,18 @@ public class ConfigurationServiceTest {
                 return dir;
             }
 
-            protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
-                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+            @Override
+            protected <T> T unmarshal(String xmlString, Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
 
-                return xmlMarshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+                return xmlMarshaller.unmarshal(xmlString, clazz);
             }
 
-            protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
-                XmlMarshallerImpl xmlMarshaller = new XmlMarshallerImpl();
+            @Override
+            protected String marshal(Object object) {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
                 try {
-                    return xmlMarshaller.marshal(xmlComponentConfigurations);
+                    return xmlMarshaller.marshal(object);
                 } catch (KuraException e) {
 
                 }

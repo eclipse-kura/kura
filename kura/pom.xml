@@ -88,8 +88,8 @@
         <module>org.eclipse.kura.rest.asset.provider</module>
 
         <module>org.eclipse.kura.misc.cloudcat</module>
-        <module>org.eclipse.kura.marshalling.json.provider</module>
-        <module>org.eclipse.kura.marshalling.xml.provider</module>
+        <module>org.eclipse.kura.json.marshaller.unmarshaller.provider</module>
+        <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider</module>
 
         <module>features</module>
         <module>emulator</module>

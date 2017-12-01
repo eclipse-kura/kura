@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
-import org.eclipse.kura.marshalling.Marshalling;
+import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -78,7 +78,7 @@ public class DeviceSnapshotsServlet extends HttpServlet {
 
                 //
                 // marshall the response and write it
-                String result = marshalXml(xmlConfigs);
+                String result = marshal(xmlConfigs);
                 writer.write(result);
             }
         } catch (Exception e) {
@@ -91,31 +91,35 @@ public class DeviceSnapshotsServlet extends HttpServlet {
         }
     }
 
-    private ServiceReference<Marshalling>[] getXmlMarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.marshalling.xml.provider");
+    private ServiceReference<Marshaller>[] getXmlMarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))",
+                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
         return ServiceUtil.getServiceReferences(
-                FrameworkUtil.getBundle(DeviceSnapshotsServlet.class).getBundleContext(), Marshalling.class,
+                FrameworkUtil.getBundle(DeviceSnapshotsServlet.class).getBundleContext(), Marshaller.class,
                 filterString);
     }
 
-    private void ungetMarshallersServiceReferences(final ServiceReference<Marshalling>[] refs) {
+    private void ungetServiceReferences(final ServiceReference<?>[] refs) {
         ServiceUtil.ungetServiceReferences(FrameworkUtil.getBundle(DeviceSnapshotsServlet.class).getBundleContext(),
                 refs);
     }
 
-    protected String marshalXml(Object object) {
+    protected String marshal(Object object) {
         String result = null;
-        ServiceReference<Marshalling>[] marshallerSRs = getXmlMarshallers();
+        ServiceReference<Marshaller>[] marshallerSRs = getXmlMarshallers();
         try {
-            for (final ServiceReference<Marshalling> marshallerSR : marshallerSRs) {
-                Marshalling marshaller = FrameworkUtil.getBundle(DeviceSnapshotsServlet.class).getBundleContext()
+            for (final ServiceReference<Marshaller> marshallerSR : marshallerSRs) {
+                Marshaller marshaller = FrameworkUtil.getBundle(DeviceSnapshotsServlet.class).getBundleContext()
                         .getService(marshallerSR);
                 result = marshaller.marshal(object);
+                if (result != null) {
+                    break;
+                }
             }
         } catch (Exception e) {
             logger.warn("Failed to marshal configuration.");
         } finally {
-            ungetMarshallersServiceReferences(marshallerSRs);
+            ungetServiceReferences(marshallerSRs);
         }
         return result;
     }

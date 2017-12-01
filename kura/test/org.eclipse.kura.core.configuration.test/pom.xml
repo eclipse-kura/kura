@@ -182,7 +182,7 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.eclipse.kura.marshalling.xml.provider</id>
+                            <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
                             <level>3</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -333,7 +333,7 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
                             </requirement>
                             <requirement>
                                 <type>eclipse-plugin</type>
-                                <id>org.eclipse.kura.marshalling.xml.provider</id>
+                                <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                         </extraRequirements>

@@ -46,7 +46,7 @@ import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
 import org.eclipse.kura.core.util.ThrowableUtil;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.deployment.hook.DeploymentHook;
-import org.eclipse.kura.marshalling.Marshalling;
+import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -873,7 +873,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
         xdps.setDeploymentPackages(axdp);
 
         try {
-            String s = marshalXml(xdps);
+            String s = marshal(xdps);
             response.setTimestamp(new Date());
             response.setBody(s.getBytes("UTF-8"));
         } catch (Exception e) {
@@ -932,7 +932,7 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
         xmlBundles.setBundles(axb);
 
         try {
-            String s = marshalXml(xmlBundles);
+            String s = marshal(xmlBundles);
             response.setTimestamp(new Date());
             response.setBody(s.getBytes("UTF-8"));
         } catch (Exception e) {
@@ -957,29 +957,32 @@ public class CloudDeploymentHandlerV2 extends Cloudlet implements ConfigurableCo
         }
     }
 
-    private ServiceReference<Marshalling>[] getXmlMarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.marshalling.xml.provider");
-        return ServiceUtil.getServiceReferences(this.bundleContext, Marshalling.class, filterString);
+    private ServiceReference<Marshaller>[] getXmlMarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))",
+                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
+        return ServiceUtil.getServiceReferences(this.bundleContext, Marshaller.class, filterString);
     }
 
-    private void ungetMarshallersServiceReferences(final ServiceReference<Marshalling>[] refs) {
+    private void ungetServiceReferences(final ServiceReference<?>[] refs) {
         ServiceUtil.ungetServiceReferences(this.bundleContext, refs);
     }
 
-    private String marshalXml(Object object) {
+    protected String marshal(Object object) {
         String result = null;
-        ServiceReference<Marshalling>[] marshallerSRs = getXmlMarshallers();
+        ServiceReference<Marshaller>[] marshallerSRs = getXmlMarshallers();
         try {
-            for (final ServiceReference<Marshalling> marshallerSR : marshallerSRs) {
-                Marshalling marshaller = this.bundleContext.getService(marshallerSR);
+            for (final ServiceReference<Marshaller> marshallerSR : marshallerSRs) {
+                Marshaller marshaller = this.bundleContext.getService(marshallerSR);
                 result = marshaller.marshal(object);
+                if (result != null) {
+                    break;
+                }
             }
         } catch (Exception e) {
             logger.warn("Failed to marshal configuration.");
         } finally {
-            ungetMarshallersServiceReferences(marshallerSRs);
+            ungetServiceReferences(marshallerSRs);
         }
         return result;
     }
-
 }

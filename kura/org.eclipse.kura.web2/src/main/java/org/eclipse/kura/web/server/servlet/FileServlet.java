@@ -48,7 +48,8 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
-import org.eclipse.kura.marshalling.Marshalling;
+import org.eclipse.kura.marshalling.Marshaller;
+import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.web.Console;
@@ -404,7 +405,7 @@ public class FileServlet extends HttpServlet {
         String xmlString = new String(data, "UTF-8");
         XmlComponentConfigurations xmlConfigs;
         try {
-            xmlConfigs = unmarshalXml(xmlString, XmlComponentConfigurations.class);
+            xmlConfigs = unmarshal(xmlString, XmlComponentConfigurations.class);
         } catch (Exception e) {
             logger.error("Error unmarshaling device configuration", e);
             throw new ServletException("Error unmarshaling device configuration", e);
@@ -675,29 +676,28 @@ public class FileServlet extends HttpServlet {
         return sizeThreshold;
     }
 
-    private ServiceReference<Marshalling>[] getXmlMarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.marshalling.xml.provider");
-        return ServiceUtil.getServiceReferences(FrameworkUtil.getBundle(FileServlet.class).getBundleContext(),
-                Marshalling.class, filterString);
+    private ServiceReference<Unmarshaller>[] getXmlUnmarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))",
+                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
+        return ServiceUtil.getServiceReferences(FrameworkUtil.getBundle(FileServlet.class).getBundleContext(), Unmarshaller.class, filterString);
     }
 
-    private void ungetMarshallersServiceReferences(final ServiceReference<Marshalling>[] refs) {
+    private void ungetServiceReferences(final ServiceReference<?>[] refs) {
         ServiceUtil.ungetServiceReferences(FrameworkUtil.getBundle(FileServlet.class).getBundleContext(), refs);
     }
 
-    private <T> T unmarshalXml(String xmlString, Class<T> destinationClass) throws KuraException {
+    protected <T> T unmarshal(String xmlString, Class<T> clazz) throws KuraException {
         T result = null;
-        ServiceReference<Marshalling>[] marshallerSRs = getXmlMarshallers();
+        ServiceReference<Unmarshaller>[] unmarshallerSRs = getXmlUnmarshallers();
         try {
-            for (final ServiceReference<Marshalling> marshallerSR : marshallerSRs) {
-                Marshalling marshaller = FrameworkUtil.getBundle(FileServlet.class).getBundleContext()
-                        .getService(marshallerSR);
-                result = marshaller.unmarshal(xmlString, destinationClass);
+            for (final ServiceReference<Unmarshaller> unmarshallerSR : unmarshallerSRs) {
+                Unmarshaller unmarshaller = FrameworkUtil.getBundle(FileServlet.class).getBundleContext().getService(unmarshallerSR);
+                result = unmarshaller.unmarshal(xmlString, clazz);
             }
         } catch (Exception e) {
             logger.warn("Failed to extract persisted configuration.");
         } finally {
-            ungetMarshallersServiceReferences(marshallerSRs);
+            ungetServiceReferences(unmarshallerSRs);
         }
         if (result == null) {
             throw new KuraException(KuraErrorCode.DECODER_ERROR);

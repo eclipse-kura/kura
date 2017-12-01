@@ -33,12 +33,11 @@ import org.eclipse.kura.configuration.metatype.Designate;
 import org.eclipse.kura.configuration.metatype.MetaData;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Scalar;
-import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.metatype.Tmetadata;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.marshalling.Marshalling;
+import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -67,7 +66,7 @@ public class ComponentUtil {
      * @return
      */
     public static Map<String, Tmetadata> getMetadata(BundleContext ctx, Bundle bnd) {
-        final Map<String, Tmetadata> bundleMetadata = new HashMap<String, Tmetadata>();
+        final Map<String, Tmetadata> bundleMetadata = new HashMap<>();
 
         final ServiceReference<MetaTypeService> ref = ctx.getServiceReference(MetaTypeService.class);
         final MetaTypeService metaTypeService = ctx.getService(ref);
@@ -76,7 +75,7 @@ public class ComponentUtil {
             final MetaTypeInformation mti = metaTypeService.getMetaTypeInformation(bnd);
             if (mti != null) {
 
-                final List<String> pids = new ArrayList<String>();
+                final List<String> pids = new ArrayList<>();
                 pids.addAll(Arrays.asList(mti.getPids()));
                 pids.addAll(Arrays.asList(mti.getFactoryPids()));
                 if (pids != null) {
@@ -137,7 +136,7 @@ public class ComponentUtil {
      * @return
      */
     public static Map<String, OCD> getObjectClassDefinition(BundleContext ctx, Bundle bnd) {
-        Map<String, OCD> bundleDefaults = new HashMap<String, OCD>();
+        Map<String, OCD> bundleDefaults = new HashMap<>();
 
         ServiceReference<MetaTypeService> ref = ctx.getServiceReference(MetaTypeService.class);
         MetaTypeService metaTypeService = ctx.getService(ref);
@@ -216,7 +215,7 @@ public class ComponentUtil {
         String metatypeXmlName = sbMetatypeXmlName.toString();
         String metatypeXml = IOUtil.readResource(bundle, metatypeXmlName);
         if (metatypeXml != null) {
-            metaData = unmarshalXml(metatypeXml,Tmetadata.class);
+            metaData = unmarshal(metatypeXml, Tmetadata.class);
         }
         return metaData;
     }
@@ -240,7 +239,7 @@ public class ComponentUtil {
         OCD ocd = null;
         String metatypeXml = IOUtil.readResource(resourceUrl);
         if (metatypeXml != null) {
-            MetaData metaData = unmarshalXml(metatypeXml, MetaData.class);
+            MetaData metaData = unmarshal(metatypeXml, MetaData.class);
             if (metaData.getOCD() != null && !metaData.getOCD().isEmpty()) {
                 ocd = metaData.getOCD().get(0);
             } else {
@@ -273,7 +272,7 @@ public class ComponentUtil {
         String metatypeXmlName = sbMetatypeXmlName.toString();
         String metatypeXml = IOUtil.readResource(metatypeXmlName);
         if (metatypeXml != null) {
-            Tmetadata metaData = unmarshalXml(metatypeXml, Tmetadata.class);
+            Tmetadata metaData = unmarshal(metatypeXml, Tmetadata.class);
             if (metaData.getOCD() != null && metaData.getOCD().size() > 0) {
                 ocd = (Tocd) metaData.getOCD().get(0);
             } else {
@@ -307,7 +306,7 @@ public class ComponentUtil {
         String metatypeXmlName = sbMetatypeXmlName.toString();
         String metatypeXml = IOUtil.readResource(bundle, metatypeXmlName);
         if (metatypeXml != null) {
-            Tmetadata metaData = unmarshalXml(metatypeXml, Tmetadata.class);
+            Tmetadata metaData = unmarshal(metatypeXml, Tmetadata.class);
             if (metaData.getOCD() != null && metaData.getOCD().size() > 0) {
                 ocd = (Tocd) metaData.getOCD().get(0);
             }
@@ -442,47 +441,34 @@ public class ComponentUtil {
 
         return null;
     }
-    
-    private static ServiceReference<Marshalling>[] getXmlMarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.marshalling.xml.provider");
-        return ServiceUtil.getServiceReferences(FrameworkUtil.getBundle(ComponentUtil.class).getBundleContext(), Marshalling.class, filterString);
+
+    private static ServiceReference<Unmarshaller>[] getXmlUnmarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))",
+                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
+        return ServiceUtil.getServiceReferences(FrameworkUtil.getBundle(ComponentUtil.class).getBundleContext(),
+                Unmarshaller.class, filterString);
     }
 
-    private static void ungetMarshallersServiceReferences(final ServiceReference<Marshalling>[] refs) {
+    private static void ungetServiceReferences(final ServiceReference<?>[] refs) {
         ServiceUtil.ungetServiceReferences(FrameworkUtil.getBundle(ComponentUtil.class).getBundleContext(), refs);
     }
 
-    protected static <T> T unmarshalXml(String xmlString, Class<T> destinationClass) throws KuraException {
+    protected static <T> T unmarshal(String string, Class<T> clazz) throws KuraException {
         T result = null;
-        ServiceReference<Marshalling>[] marshallerSRs = getXmlMarshallers();
+        ServiceReference<Unmarshaller>[] unmarshallerSRs = getXmlUnmarshallers();
         try {
-            for (final ServiceReference<Marshalling> marshallerSR : marshallerSRs) {
-                Marshalling marshaller = FrameworkUtil.getBundle(ComponentUtil.class).getBundleContext().getService(marshallerSR);
-                result = marshaller.unmarshal(xmlString, destinationClass);
+            for (final ServiceReference<Unmarshaller> unmarshallerSR : unmarshallerSRs) {
+                Unmarshaller unmarshaller = FrameworkUtil.getBundle(ComponentUtil.class).getBundleContext()
+                        .getService(unmarshallerSR);
+                result = unmarshaller.unmarshal(string, clazz);
             }
         } catch (Exception e) {
             logger.warn("Failed to extract persisted configuration.");
         } finally {
-            ungetMarshallersServiceReferences(marshallerSRs);
+            ungetServiceReferences(unmarshallerSRs);
         }
         if (result == null) {
             throw new KuraException(KuraErrorCode.DECODER_ERROR);
-        }
-        return result;
-    }
-
-    protected static String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
-        String result = null;
-        ServiceReference<Marshalling>[] marshallerSRs = getXmlMarshallers();
-        try {
-            for (final ServiceReference<Marshalling> marshallerSR : marshallerSRs) {
-                Marshalling marshaller = FrameworkUtil.getBundle(ComponentUtil.class).getBundleContext().getService(marshallerSR);
-                result = marshaller.marshal(xmlComponentConfigurations);
-            }
-        } catch (Exception e) {
-            logger.warn("Failed to marshal configuration.");
-        } finally {
-            ungetMarshallersServiceReferences(marshallerSRs);
         }
         return result;
     }

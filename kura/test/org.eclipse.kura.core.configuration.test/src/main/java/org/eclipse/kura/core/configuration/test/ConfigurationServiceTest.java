@@ -652,7 +652,7 @@ public class ConfigurationServiceTest {
 
         String cfgxml = null;
         try {
-            cfgxml = (String) TestUtil.invokePrivate(configurationService, "marshalXml", cfgs);
+            cfgxml = (String) TestUtil.invokePrivate(configurationService, "marshal", cfgs);
         } catch (Throwable e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -846,7 +846,7 @@ public class ConfigurationServiceTest {
 
         String cfgxml = null;
         try {
-            cfgxml = (String) TestUtil.invokePrivate(configurationService, "marshalXml", cfgs);
+            cfgxml = (String) TestUtil.invokePrivate(configurationService, "marshal", cfgs);
         } catch (Throwable e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -966,7 +966,7 @@ class MultiStepCSValidator implements CSValidator {
         XmlComponentConfigurations configurations = null;
         try {
             configurations = (XmlComponentConfigurations) TestUtil
-                    .invokePrivate(ConfigurationServiceTest.configurationService, "unmarshalXml", arg0);
+                    .invokePrivate(ConfigurationServiceTest.configurationService, "unmarshal", arg0, XmlComponentConfigurations.class);
         } catch (Throwable e) {
         }
 
@@ -1008,7 +1008,7 @@ class MultiStepCSValidator implements CSValidator {
                 String cfgxml = null;
                 try {
                     cfgxml = (String) TestUtil.invokePrivate(ConfigurationServiceTest.configurationService,
-                            "marshalXml", this.configs);
+                            "marshal", this.configs);
                 } catch (Throwable e) {
 
                 }

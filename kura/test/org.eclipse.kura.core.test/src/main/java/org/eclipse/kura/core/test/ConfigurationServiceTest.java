@@ -36,7 +36,8 @@ import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
 import org.eclipse.kura.core.test.util.CoreTestXmlUtil;
 import org.eclipse.kura.data.DataService;
-import org.eclipse.kura.marshalling.Marshalling;
+import org.eclipse.kura.marshalling.Marshaller;
+import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.system.SystemService;
@@ -463,27 +464,34 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         assertTrue(Arrays.equals(byteValues, (Byte[]) properties.get("prop.byte.array")));
     }
     
-    private ServiceReference<Marshalling>[] getXmlMarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.marshalling.xml.provider");
-        return ServiceUtil.getServiceReferences(componentContext.getBundleContext(), Marshalling.class, filterString);
+    private ServiceReference<Marshaller>[] getXmlMarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))",
+                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
+        return ServiceUtil.getServiceReferences(componentContext.getBundleContext(), Marshaller.class, filterString);
     }
 
-    private void ungetMarshallersServiceReferences(final ServiceReference<Marshalling>[] refs) {
+    private ServiceReference<Unmarshaller>[] getXmlUnmarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))",
+                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
+        return ServiceUtil.getServiceReferences(componentContext.getBundleContext(), Unmarshaller.class, filterString);
+    }
+
+    private void ungetServiceReferences(final ServiceReference<?>[] refs) {
         ServiceUtil.ungetServiceReferences(componentContext.getBundleContext(), refs);
     }
 
-    protected <T> T unmarshalXml(String xmlString, Class<T> destClass) throws KuraException {
+    private <T> T unmarshalXml(String xmlString, Class<T> clazz) throws KuraException {
         T result = null;
-        ServiceReference<Marshalling>[] marshallerSRs = getXmlMarshallers();
+        ServiceReference<Unmarshaller>[] unmarshallerSRs = getXmlUnmarshallers();
         try {
-            for (final ServiceReference<Marshalling> marshallerSR : marshallerSRs) {
-                Marshalling marshaller = componentContext.getBundleContext().getService(marshallerSR);
-                result = marshaller.unmarshal(xmlString, destClass);
+            for (final ServiceReference<Unmarshaller> unmarshallerSR : unmarshallerSRs) {
+                Unmarshaller unmarshaller = componentContext.getBundleContext().getService(unmarshallerSR);
+                result = unmarshaller.unmarshal(xmlString, clazz);
             }
         } catch (Exception e) {
             s_logger.warn("Failed to extract persisted configuration.");
         } finally {
-            ungetMarshallersServiceReferences(marshallerSRs);
+            ungetServiceReferences(unmarshallerSRs);
         }
         if (result == null) {
             throw new KuraException(KuraErrorCode.DECODER_ERROR);
@@ -491,18 +499,18 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         return result;
     }
 
-    protected String marshalXml(XmlComponentConfigurations xmlComponentConfigurations) {
+    private String marshalXml(Object object) {
         String result = null;
-        ServiceReference<Marshalling>[] marshallerSRs = getXmlMarshallers();
+        ServiceReference<Marshaller>[] marshallerSRs = getXmlMarshallers();
         try {
-            for (final ServiceReference<Marshalling> marshallerSR : marshallerSRs) {
-                Marshalling marshaller = componentContext.getBundleContext().getService(marshallerSR);
-                result = marshaller.marshal(xmlComponentConfigurations);
+            for (final ServiceReference<Marshaller> marshallerSR : marshallerSRs) {
+                Marshaller marshaller = componentContext.getBundleContext().getService(marshallerSR);
+                result = marshaller.marshal(object);
             }
         } catch (Exception e) {
             s_logger.warn("Failed to marshal configuration.");
         } finally {
-            ungetMarshallersServiceReferences(marshallerSRs);
+            ungetServiceReferences(marshallerSRs);
         }
         return result;
     }

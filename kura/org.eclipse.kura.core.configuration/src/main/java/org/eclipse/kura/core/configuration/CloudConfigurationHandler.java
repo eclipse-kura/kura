@@ -27,7 +27,8 @@ import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.marshalling.Marshalling;
+import org.eclipse.kura.marshalling.Marshaller;
+import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -347,7 +348,7 @@ public class CloudConfigurationHandler extends Cloudlet {
             String s = new String(reqPayload.getBody(), "UTF-8");
             logger.info("Received new Configuration");
 
-            xmlConfigs = unmarshalXml(s);
+            xmlConfigs = unmarshal(s, XmlComponentConfigurations.class);
         } catch (Exception e) {
             logger.error("Error unmarshalling the request body: {}", e);
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
@@ -420,7 +421,7 @@ public class CloudConfigurationHandler extends Cloudlet {
         // marshall the response
         String result = null;
         try {
-            result = marshalXml(o);
+            result = marshal(o);
         } catch (Exception e) {
             logger.error("Error marshalling snapshots: {}", e);
             throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_LOADING, e);
@@ -437,27 +438,37 @@ public class CloudConfigurationHandler extends Cloudlet {
         return body;
     }
 
-    private ServiceReference<Marshalling>[] getXmlMarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.marshalling.xml.provider");
-        return ServiceUtil.getServiceReferences(this.bundleContext, Marshalling.class, filterString);
+    private ServiceReference<Marshaller>[] getXmlMarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))",
+                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
+        return ServiceUtil.getServiceReferences(this.bundleContext, Marshaller.class, filterString);
     }
 
-    private void ungetMarshallersServiceReferences(final ServiceReference<Marshalling>[] refs) {
+    private ServiceReference<Unmarshaller>[] getXmlUnmarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))",
+                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
+        return ServiceUtil.getServiceReferences(this.bundleContext, Unmarshaller.class, filterString);
+    }
+
+    private void ungetServiceReferences(final ServiceReference<?>[] refs) {
         ServiceUtil.ungetServiceReferences(this.bundleContext, refs);
     }
 
-    protected XmlComponentConfigurations unmarshalXml(String xmlString) throws KuraException {
-        XmlComponentConfigurations result = null;
-        ServiceReference<Marshalling>[] marshallerSRs = getXmlMarshallers();
+    protected <T> T unmarshal(String xmlString, Class<T> clazz) throws KuraException {
+        T result = null;
+        ServiceReference<Unmarshaller>[] unmarshallerSRs = getXmlUnmarshallers();
         try {
-            for (final ServiceReference<Marshalling> marshallerSR : marshallerSRs) {
-                Marshalling marshaller = this.bundleContext.getService(marshallerSR);
-                result = marshaller.unmarshal(xmlString, XmlComponentConfigurations.class);
+            for (final ServiceReference<Unmarshaller> unmarshallerSR : unmarshallerSRs) {
+                Unmarshaller unmarshaller = this.bundleContext.getService(unmarshallerSR);
+                result = unmarshaller.unmarshal(xmlString, clazz);
+                if (result != null) {
+                    break;
+                }
             }
         } catch (Exception e) {
             logger.warn("Failed to extract persisted configuration.");
         } finally {
-            ungetMarshallersServiceReferences(marshallerSRs);
+            ungetServiceReferences(unmarshallerSRs);
         }
         if (result == null) {
             throw new KuraException(KuraErrorCode.DECODER_ERROR);
@@ -465,18 +476,21 @@ public class CloudConfigurationHandler extends Cloudlet {
         return result;
     }
 
-    protected String marshalXml(Object object) {
+    protected String marshal(Object object) {
         String result = null;
-        ServiceReference<Marshalling>[] marshallerSRs = getXmlMarshallers();
+        ServiceReference<Marshaller>[] marshallerSRs = getXmlMarshallers();
         try {
-            for (final ServiceReference<Marshalling> marshallerSR : marshallerSRs) {
-                Marshalling marshaller = this.bundleContext.getService(marshallerSR);
+            for (final ServiceReference<Marshaller> marshallerSR : marshallerSRs) {
+                Marshaller marshaller = this.bundleContext.getService(marshallerSR);
                 result = marshaller.marshal(object);
+                if (result != null) {
+                    break;
+                }
             }
         } catch (Exception e) {
             logger.warn("Failed to marshal configuration.");
         } finally {
-            ungetMarshallersServiceReferences(marshallerSRs);
+            ungetServiceReferences(marshallerSRs);
         }
         return result;
     }

@@ -38,7 +38,8 @@ import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
-import org.eclipse.kura.marshalling.Marshalling;
+import org.eclipse.kura.marshalling.Marshaller;
+import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.wire.WireComponent;
@@ -342,9 +343,13 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
 
         String jsonWireGraph = (String) this.properties.get(NEW_WIRE_GRAPH_PROPERTY);
 
-        WireGraphConfiguration wireGraphConfiguration = unmarshalJson(jsonWireGraph);
-        for (final WireConfiguration conf : wireGraphConfiguration.getWireConfigurations()) {
-            this.wireConfigs.add(conf);
+        WireGraphConfiguration wireGraphConfiguration;
+        try {
+            wireGraphConfiguration = unmarshal(jsonWireGraph, WireGraphConfiguration.class);
+            for (final WireConfiguration conf : wireGraphConfiguration.getWireConfigurations()) {
+                this.wireConfigs.add(conf);
+            }
+        } catch (KuraException e) {
         }
         logger.debug(message.exectractingPropDone());
     }
@@ -390,7 +395,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
             componentConfigurations.add(componentToUpdate);
         }
 
-        String jsonConfig = marshalJson(graphConfiguration);
+        String jsonConfig = marshal(graphConfiguration);
         ComponentConfiguration wireServiceComponentConfig = this.configurationService
                 .getComponentConfiguration(CONF_PID);
         wireServiceComponentConfig.getConfigurationProperties().put(NEW_WIRE_GRAPH_PROPERTY, jsonConfig);
@@ -512,7 +517,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     @Override
     public void delete() throws KuraException {
         String oldJson = (String) this.properties.get(NEW_WIRE_GRAPH_PROPERTY);
-        WireGraphConfiguration oldGraphConfig = unmarshalJson(oldJson);
+        WireGraphConfiguration oldGraphConfig = unmarshal(oldJson, WireGraphConfiguration.class);
 
         List<WireComponentConfiguration> oldWireComponentConfigurations = oldGraphConfig
                 .getWireComponentConfigurations();
@@ -528,7 +533,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
         WireGraphConfiguration newWireGraphConfiguration = new WireGraphConfiguration(new ArrayList<>(),
                 new ArrayList<>());
 
-        String jsonConfig = marshalJson(newWireGraphConfiguration);
+        String jsonConfig = marshal(newWireGraphConfiguration);
         ComponentConfiguration wireServiceComponentConfig = this.configurationService
                 .getComponentConfiguration(CONF_PID);
         wireServiceComponentConfig.getConfigurationProperties().put(NEW_WIRE_GRAPH_PROPERTY, jsonConfig);
@@ -544,7 +549,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
         List<ComponentConfiguration> configServiceComponentConfigurations = this.configurationService
                 .getComponentConfigurations();
 
-        WireGraphConfiguration wireGraphConfiguration = unmarshalJson(jsonString);
+        WireGraphConfiguration wireGraphConfiguration = unmarshal(jsonString, WireGraphConfiguration.class);
 
         List<WireComponentConfiguration> wireComponentConfigurations = wireGraphConfiguration
                 .getWireComponentConfigurations();
@@ -571,43 +576,59 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
                 wireGraphConfiguration.getWireConfigurations());
     }
 
-    private ServiceReference<Marshalling>[] getJsonMarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))", "org.eclipse.kura.marshalling.json.provider");
-        return ServiceUtil.getServiceReferences(this.bundleContext, Marshalling.class, filterString);
+    private ServiceReference<Marshaller>[] getJsonMarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))",
+                "org.eclipse.kura.json.marshaller.unmarshaller.provider");
+        return ServiceUtil.getServiceReferences(this.bundleContext, Marshaller.class, filterString);
     }
 
-    private void ungetMarshallersServiceReferences(final ServiceReference<Marshalling>[] refs) {
+    private ServiceReference<Unmarshaller>[] getJsonUnmarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))",
+                "org.eclipse.kura.json.marshaller.unmarshaller.provider");
+        return ServiceUtil.getServiceReferences(this.bundleContext, Unmarshaller.class, filterString);
+    }
+
+    private void ungetServiceReferences(final ServiceReference<?>[] refs) {
         ServiceUtil.ungetServiceReferences(this.bundleContext, refs);
     }
 
-    protected WireGraphConfiguration unmarshalJson(String jsonWireGraph) {
-        WireGraphConfiguration result = new WireGraphConfiguration(new ArrayList<>(), new ArrayList<>());
-        ServiceReference<Marshalling>[] jsonMarshallerSRs = getJsonMarshallers();
+    protected <T> T unmarshal(String string, Class<T> clazz) throws KuraException {
+        T result = null;
+        ServiceReference<Unmarshaller>[] unmarshallerSRs = getJsonUnmarshallers();
         try {
-            for (final ServiceReference<Marshalling> jsonMarshallerSR : jsonMarshallerSRs) {
-                Marshalling jsonMarshaller = this.bundleContext.getService(jsonMarshallerSR);
-                result = jsonMarshaller.unmarshal(jsonWireGraph, WireGraphConfiguration.class);
+            for (final ServiceReference<Unmarshaller> unmarshallerSR : unmarshallerSRs) {
+                Unmarshaller unmarshaller = this.bundleContext.getService(unmarshallerSR);
+                result = unmarshaller.unmarshal(string, clazz);
+                if (result != null) {
+                    break;
+                }
             }
         } catch (Exception e) {
             logger.warn("Failed to extract persisted configuration.");
         } finally {
-            ungetMarshallersServiceReferences(jsonMarshallerSRs);
+            ungetServiceReferences(unmarshallerSRs);
+        }
+        if (result == null) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR);
         }
         return result;
     }
 
-    protected String marshalJson(WireGraphConfiguration wireGraphConfiguration) {
+    protected String marshal(Object object) {
         String result = null;
-        ServiceReference<Marshalling>[] jsonMarshallerSRs = getJsonMarshallers();
+        ServiceReference<Marshaller>[] marshallerSRs = getJsonMarshallers();
         try {
-            for (final ServiceReference<Marshalling> jsonMarshallerSR : jsonMarshallerSRs) {
-                Marshalling jsonMarshaller = this.bundleContext.getService(jsonMarshallerSR);
-                result = jsonMarshaller.marshal(wireGraphConfiguration);
+            for (final ServiceReference<Marshaller> marshallerSR : marshallerSRs) {
+                Marshaller marshaller = this.bundleContext.getService(marshallerSR);
+                result = marshaller.marshal(object);
+                if (result != null) {
+                    break;
+                }
             }
         } catch (Exception e) {
-            logger.warn("Failed to marshal Wire Graph configuration.");
+            logger.warn("Failed to marshal configuration.");
         } finally {
-            ungetMarshallersServiceReferences(jsonMarshallerSRs);
+            ungetServiceReferences(marshallerSRs);
         }
         return result;
     }

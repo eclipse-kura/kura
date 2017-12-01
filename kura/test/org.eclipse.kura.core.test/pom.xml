@@ -565,7 +565,7 @@
                             </requirement>
                             <requirement>
                                 <type>eclipse-plugin</type>
-                                <id>org.eclipse.kura.marshalling.xml.provider</id>
+                                <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                         </extraRequirements>

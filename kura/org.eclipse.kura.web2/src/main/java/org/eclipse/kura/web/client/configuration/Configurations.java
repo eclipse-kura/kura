@@ -57,10 +57,20 @@ public class Configurations {
             newConfiguration.setComponentId(pid);
             newConfiguration.setFactoryPid(factoryPid);
         }
-        final HasConfiguration result = new ConfigurationWrapper(newConfiguration);
+        return new ConfigurationWrapper(newConfiguration);
+    }
+
+    public HasConfiguration createAndRegisterConfiguration(String pid, String factoryPid) {
+        final HasConfiguration result = createConfiguration(pid, factoryPid);
         this.currentConfigurations.put(pid, result);
         this.allActivePids.add(pid);
         return result;
+    }
+
+    public void setConfiguration(GwtConfigComponent gwtConfig) {
+        final String pid = gwtConfig.getComponentId();
+        this.allActivePids.add(pid);
+        this.currentConfigurations.put(pid, new ConfigurationWrapper(gwtConfig));
     }
 
     public void setComponentDefinitions(List<GwtConfigComponent> factoryDefinitions) {
@@ -88,7 +98,7 @@ public class Configurations {
         this.baseChannelDescriptor = null;
     }
 
-    public void updateConfiguration(HasConfiguration configuration) {
+    public void setConfiguration(HasConfiguration configuration) {
         this.currentConfigurations.put(configuration.getConfiguration().getComponentId(), configuration);
     }
 
@@ -192,6 +202,7 @@ public class Configurations {
 
     private class ConfigurationWrapper implements HasConfiguration {
 
+        private boolean isDirty;
         private GwtConfigComponent configuration;
 
         public ConfigurationWrapper(GwtConfigComponent configuration) {
@@ -205,6 +216,7 @@ public class Configurations {
 
         @Override
         public void clearDirtyState() {
+            isDirty = false;
         }
 
         @Override
@@ -214,7 +226,16 @@ public class Configurations {
 
         @Override
         public boolean isDirty() {
-            return false;
+            return isDirty;
+        }
+
+        @Override
+        public void markAsDirty() {
+            isDirty = true;
+        }
+
+        @Override
+        public void setListener(Listener listener) {
         }
     }
 

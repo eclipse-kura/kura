@@ -35,10 +35,8 @@ import org.eclipse.kura.driver.DriverDescriptor;
 import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
-import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
-import org.eclipse.kura.web.shared.model.GwtChannelInfo;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
@@ -64,74 +62,6 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 
     private static final Logger logger = LoggerFactory.getLogger(GwtWireServiceImpl.class);
     private static final long serialVersionUID = -6577843865830245755L;
-
-    private GwtChannelInfo getChannelFromProperties(final String channelName, final GwtConfigComponent descriptor,
-            final GwtConfigComponent asset) {
-        final GwtChannelInfo ci = new GwtChannelInfo();
-        String prefix = channelName + AssetConstants.CHANNEL_PROPERTY_SEPARATOR.value();
-        ci.setName(channelName);
-        ci.setType(asset.getParameter(prefix + AssetConstants.TYPE.value()).getValue());
-        ci.setValueType(asset.getParameter(prefix + AssetConstants.VALUE_TYPE.value()).getValue());
-        for (final GwtConfigParameter param : descriptor.getParameters()) {
-            ci.set(param.getName(), asset.getParameter(prefix + param.getName()).getValue());
-        }
-
-        return ci;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public List<String> getDriverInstances(final GwtXSRFToken xsrfToken) throws GwtKuraException {
-        this.checkXSRFToken(xsrfToken);
-        final DriverService driverService = ServiceLocator.getInstance().getService(DriverService.class);
-        List<DriverDescriptor> drivers = driverService.listDriverDescriptors();
-
-        List<String> driverPids = new ArrayList<>();
-        for (DriverDescriptor driverDescriptor : drivers) {
-            driverPids.add(driverDescriptor.getPid());
-        }
-
-        return driverPids;
-    }
-
-    @Override
-    public GwtConfigComponent getGwtBaseChannelDescriptor(final GwtXSRFToken xsrfToken) throws GwtKuraException {
-        final BaseChannelDescriptor bcd = new BaseChannelDescriptor();
-        try {
-            @SuppressWarnings("unchecked")
-            final List<AD> params = (List<AD>) bcd.getDescriptor();
-
-            final GwtConfigComponent gwtConfig = new GwtConfigComponent();
-            gwtConfig.setComponentId("BaseChannelDescriptor");
-
-            final List<GwtConfigParameter> gwtParams = new ArrayList<>();
-            gwtConfig.setParameters(gwtParams);
-            for (final AD ad : params) {
-                final GwtConfigParameter gwtParam = new GwtConfigParameter();
-                gwtParam.setId(ad.getId());
-                gwtParam.setName(ad.getName());
-                gwtParam.setDescription(ad.getDescription());
-                gwtParam.setType(GwtConfigParameterType.valueOf(ad.getType().name()));
-                gwtParam.setRequired(ad.isRequired());
-                gwtParam.setCardinality(ad.getCardinality());
-                if (ad.getOption() != null && !ad.getOption().isEmpty()) {
-                    final Map<String, String> options = new HashMap<>();
-                    for (final Option option : ad.getOption()) {
-                        options.put(option.getLabel(), option.getValue());
-                    }
-                    gwtParam.setOptions(options);
-                }
-                gwtParam.setMin(ad.getMin());
-                gwtParam.setMax(ad.getMax());
-                gwtParam.setDefault(ad.getDefault());
-
-                gwtParams.add(gwtParam);
-            }
-            return gwtConfig;
-        } catch (final Exception ex) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, ex);
-        }
-    }
 
     @Override
     public GwtConfigComponent getGwtChannelDescriptor(final GwtXSRFToken xsrfToken, final String driverPid)
@@ -178,38 +108,6 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
             gwtParams.add(gwtParam);
         }
         return gwtConfig;
-    }
-
-    private String getChannelName(String propertyKey) {
-        int pos = propertyKey.indexOf(AssetConstants.CHANNEL_PROPERTY_SEPARATOR.value());
-        if (pos <= 0) {
-            return null;
-        }
-        return propertyKey.substring(0, pos);
-    }
-
-    @Override
-    public List<GwtChannelInfo> getGwtChannels(final GwtXSRFToken xsrfToken, final GwtConfigComponent descriptor,
-            final GwtConfigComponent asset) throws GwtKuraException {
-
-        final List<GwtChannelInfo> result = new ArrayList<>();
-
-        final Set<String> channelNames = new HashSet<>();
-
-        for (final GwtConfigParameter param : asset.getParameters()) {
-            String channelName = getChannelName(param.getName());
-
-            if (channelName != null) {
-                channelNames.add(channelName);
-            }
-        }
-
-        for (final String channelName : channelNames) {
-            final GwtChannelInfo ci = getChannelFromProperties(channelName, descriptor, asset);
-            result.add(ci);
-        }
-
-        return result;
     }
 
     private void fillGwtRenderingProperties(GwtWireComponentConfiguration component,

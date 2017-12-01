@@ -868,7 +868,7 @@ public class EntryClassUi extends Composite {
             this.settingsBinder.setDirty(false);
         }
         if (this.driversAndTwinsBinder.isVisible()) {
-            this.driversAndTwinsBinder.setDirty(false);
+            this.driversAndTwinsBinder.clearDirtyState();
         }
     }
 

@@ -1,4 +1,15 @@
-package org.eclipse.kura.web.client.ui.wires;
+/*******************************************************************************
+ * Copyright (c) 2017 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
+package org.eclipse.kura.web.client.ui.drivers.assets;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,7 +77,6 @@ public class AssetModelImpl implements AssetModel {
                 result.add(name);
             }
         }
-        log(result.size());
         this.channelNames = result;
     }
 
@@ -95,7 +105,6 @@ public class AssetModelImpl implements AssetModel {
                 model = new LegacyChannelModel(channelName, i);
                 models.put(channelName, model);
             }
-            log(channelName + " " + propertyName);
             model.parameters[channelIndexes.get(propertyName)] = param;
         }
 
@@ -147,11 +156,6 @@ public class AssetModelImpl implements AssetModel {
         return null;
     }
 
-    private native void log(Object o)
-    /*-{
-        console.log(o)
-     }-*/;
-
     @Override
     public void deleteChannel(String channelName) {
         this.channelNames.remove(channelName);
@@ -190,7 +194,6 @@ public class AssetModelImpl implements AssetModel {
         public void setValue(String id, String value) {
             final Integer index = paramIndexes.get(id);
             if (index == null) {
-                log("set: index is null" + id);
                 return;
             }
             parameters[index].setValue(value);
@@ -200,7 +203,6 @@ public class AssetModelImpl implements AssetModel {
         public String getValue(String id) {
             final Integer index = paramIndexes.get(id);
             if (index == null) {
-                log("get: index is null" + id);
                 return null;
             }
             return parameters[index].getValue();
@@ -222,6 +224,11 @@ public class AssetModelImpl implements AssetModel {
     @Override
     public GwtConfigComponent getConfiguration() {
         return assetConfiguration;
+    }
+
+    @Override
+    public String getAssetPid() {
+        return assetConfiguration.getComponentId();
     }
 
 }

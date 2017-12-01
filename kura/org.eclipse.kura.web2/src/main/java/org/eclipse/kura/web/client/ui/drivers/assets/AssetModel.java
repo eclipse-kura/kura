@@ -1,4 +1,15 @@
-package org.eclipse.kura.web.client.ui.wires;
+/*******************************************************************************
+ * Copyright (c) 2017 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Eurotech
+ *******************************************************************************/
+package org.eclipse.kura.web.client.ui.drivers.assets;
 
 import java.util.List;
 import java.util.Set;
@@ -7,6 +18,8 @@ import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 
 public interface AssetModel {
+
+    public String getAssetPid();
 
     public Set<String> getChannelNames();
 

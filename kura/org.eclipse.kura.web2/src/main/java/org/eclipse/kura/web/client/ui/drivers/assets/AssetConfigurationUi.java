@@ -17,7 +17,7 @@
  * Fields are rendered based on their type (Password(Input), Choice(Dropboxes) etc. with Text fields rendered
  * for both numeric and other textual field with validate() checking if value in numeric fields is numeric
  */
-package org.eclipse.kura.web.client.ui.wires;
+package org.eclipse.kura.web.client.ui.drivers.assets;
 
 import static org.eclipse.kura.web.shared.AssetConstants.CHANNEL_PROPERTY_SEPARATOR;
 
@@ -30,8 +30,9 @@ import java.util.Set;
 
 import org.eclipse.kura.web.client.configuration.HasConfiguration;
 import org.eclipse.kura.web.client.ui.AbstractServicesUi;
-import org.eclipse.kura.web.client.ui.ConfigurableComponentUi;
-import org.eclipse.kura.web.client.ui.wires.AssetModel.ChannelModel;
+import org.eclipse.kura.web.client.ui.drivers.assets.AssetModel.ChannelModel;
+import org.eclipse.kura.web.client.ui.wires.ValidationData;
+import org.eclipse.kura.web.client.ui.wires.ValidationInputCell;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
@@ -130,11 +131,11 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     private boolean dirty;
 
     private AssetModel model;
-    private ConfigurableComponentUi driverConfigurationUi;
+    private Widget associatedView;
 
     private HasConfiguration.Listener listener;
 
-    public AssetConfigurationUi(final AssetModel assetModel, final ConfigurableComponentUi driverConfigurationUi) {
+    public AssetConfigurationUi(final AssetModel assetModel, final Widget associatedView) {
         initWidget(uiBinder.createAndBindUi(this));
         this.model = assetModel;
         this.fields.clear();
@@ -145,11 +146,9 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         this.channelsDataProvider.addDataDisplay(this.channelTable);
         this.channelPanel.setVisible(false);
         this.btnRemove.setEnabled(false);
-        this.driverConfigurationUi = driverConfigurationUi;
+        this.associatedView = associatedView;
 
         this.nonValidatedCells = new HashSet<>();
-        AssetConfigurationUi.this.channelTitle.setText(MSGS.channelTableTitle(
-                assetModel.getConfiguration().getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value())));
 
         this.btnDownload.addClickHandler(new ClickHandler() {
 
@@ -177,10 +176,18 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
             }
         });
 
-        renderForm();
+        setModel(assetModel);
+
         initInvalidDataModal();
         initNewChannelModal();
+    }
 
+    public void setModel(AssetModel model) {
+        this.model = model;
+        AssetConfigurationUi.this.channelTitle.setText(MSGS.channelTableTitle(
+                model.getConfiguration().getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value())));
+        renderForm();
+        channelTable.redraw();
         setDirty(false);
     }
 
@@ -215,7 +222,6 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         }
 
         for (final GwtConfigParameter param : this.model.getChannelDescriptor().getParameters()) {
-            log(param.getId());
             AssetConfigurationUi.this.channelTable.addColumn(
                     getColumnFromParam(param, param.getId().equals(AssetConstants.NAME.value())),
                     new TextHeader(param.getName()));
@@ -228,8 +234,16 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
 
     @Override
     public void setDirty(final boolean flag) {
+        boolean isDirtyStateChanged = flag != this.dirty;
         this.dirty = flag;
-        notifyListener();
+        if (listener != null) {
+            if (isDirtyStateChanged) {
+                listener.onDirtyStateChanged(this);
+            }
+            if (isValid()) {
+                listener.onConfigurationChanged(this);
+            }
+        }
     }
 
     @Override
@@ -270,11 +284,6 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         }
     }
 
-    private native void log(Object o)
-    /*-{
-        console.log(o)
-     }-*/;
-
     private Column<ChannelModel, String> getInputCellColumn(final GwtConfigParameter param, boolean isReadOnly) {
         final String id = param.getId();
         final AbstractCell<String> cell = isReadOnly ? new TextCell() : new ValidationInputCell();
@@ -306,7 +315,6 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
                     }
                     AssetConfigurationUi.this.nonValidatedCells.remove(object.getChannelName());
                     AssetConfigurationUi.this.setDirty(true);
-                    AssetConfigurationUi.this.notifyListener();
                     AssetConfigurationUi.this.channelTable.redraw();
                     object.setValue(param.getId(), value);
                 }
@@ -462,22 +470,14 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         return result;
     }
 
+    @Override
     public void setListener(HasConfiguration.Listener listener) {
         this.listener = listener;
         listener.onConfigurationChanged(this);
     }
 
-    private void notifyListener() {
-        if (listener == null) {
-            return;
-        }
-        if (this.isValid()) {
-            listener.onConfigurationChanged(this);
-        }
-    }
-
-    public ConfigurableComponentUi getDriverConfigurationUi() {
-        return this.driverConfigurationUi;
+    public Widget getAssociatedView() {
+        return this.associatedView;
     }
 
     @Override
@@ -498,5 +498,10 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     @Override
     public void clearDirtyState() {
         this.dirty = false;
+    }
+
+    @Override
+    public void markAsDirty() {
+        setDirty(true);
     }
 }

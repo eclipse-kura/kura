@@ -11,44 +11,33 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.drivers.assets;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.eclipse.kura.web.client.configuration.Configurations;
+import org.eclipse.kura.web.client.configuration.HasConfiguration;
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.ui.EntryClassUi;
-import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.ui.AlertDialog;
+import org.eclipse.kura.web.client.ui.drivers.assets.DriversAndAssetsListUi.DriverAssetInfo;
+import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.eclipse.kura.web.shared.model.GwtWireComponentConfiguration;
+import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
 import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
-import org.eclipse.kura.web.shared.service.GwtAssetService;
-import org.eclipse.kura.web.shared.service.GwtAssetServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtComponentService;
-import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtWireService;
-import org.eclipse.kura.web.shared.service.GwtWireServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.Form;
-import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
-import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.TextBox;
-import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class DriversAndAssetsUi extends Composite {
+public class DriversAndAssetsUi extends Composite implements DriversAndAssetsListUi.Listener {
 
     private static DriversAndAssetsUiUiBinder uiBinder = GWT.create(DriversAndAssetsUiUiBinder.class);
 
@@ -56,44 +45,24 @@ public class DriversAndAssetsUi extends Composite {
     }
 
     private static final Messages MSGS = GWT.create(Messages.class);
-    private static final Logger logger = Logger.getLogger(EntryClassUi.class.getSimpleName());
 
     private static final String SELECT_COMPONENT = MSGS.servicesComponentFactorySelectorIdle();
     private static final String ASSET_FACTORY_PID = "org.eclipse.kura.wire.WireAsset";
 
-    private static final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
-    private static final GwtWireServiceAsync gwtWireService = GWT.create(GwtWireService.class);
-    private static final GwtAssetServiceAsync gwtAssetService = GWT.create(GwtAssetService.class);
-    private static final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-
-    private final DriversAndAssetsListUi driverAndAssetsListUi;
-
     @UiField
-    HTMLPanel driversAndAssetsIntro;
+    DriversAndAssetsListUi driverAndAssetsListUi;
 
     @UiField
     Button newDriverButton;
     @UiField
-    Button deleteDriverButton;
-    @UiField
     Button newAssetButton;
     @UiField
-    Button deleteAssetButton;
-    @UiField
-    Panel driversAndAssetsList;
-    @UiField
-    Panel driversAndAssetsMgmtPanel;
+    Button deleteButton;
 
     @UiField
     Modal newDriverModal;
     @UiField
-    HTMLPanel newDriverModalIntro;
-    @UiField
-    FormLabel newDriverFactoryFormLabel;
-    @UiField
     ListBox driverFactoriesList;
-    @UiField
-    FormLabel driverInstanceNameLabel;
     @UiField
     TextBox driverName;
     @UiField
@@ -104,518 +73,255 @@ public class DriversAndAssetsUi extends Composite {
     @UiField
     Modal newAssetModal;
     @UiField
-    HTMLPanel newAssetModalIntro;
-    @UiField
-    Form newAssetForm;
-    @UiField
-    FormLabel assetInstanceNameLabel;
-    @UiField
     TextBox assetName;
     @UiField
-    FormLabel driverPidLabel;
-    @UiField
-    ListBox driverPid;
+    TextBox driverPid;
     @UiField
     Button buttonNewAssetCancel;
     @UiField
     Button buttonNewAssetApply;
 
     @UiField
-    Modal deleteDriverModal;
-    @UiField
-    HTMLPanel deleteDriverModalIntro;
-    @UiField
-    FormLabel deleteDriverInstanceNameLabel;
-    @UiField
-    ListBox deleteDriverInstancesList;
-    @UiField
-    Button buttonDeleteDriverCancel;
-    @UiField
-    Button buttonDeleteDriverApply;
+    AlertDialog confirmDialog;
 
-    @UiField
-    Modal deleteAssetModal;
-    @UiField
-    HTMLPanel deleteAssetModalIntro;
-    @UiField
-    FormLabel deleteAssetPidLabel;
-    @UiField
-    ListBox deleteAssetPid;
-    @UiField
-    Button buttonDeleteAssetCancel;
-    @UiField
-    Button buttonDeleteAssetApply;
+    private Configurations configurations = new Configurations();
 
     public DriversAndAssetsUi() {
         initWidget(uiBinder.createAndBindUi(this));
 
-        this.driversAndAssetsIntro.add(new Span("<p>" + MSGS.driversAssetsTabIntro() + "</p>"));
-
         initButtonBar();
         initNewDriverModal();
         initNewAssetModal();
-        initDeleteDriverModal();
-        initDeleteAssetModal();
 
-        this.driverAndAssetsListUi = new DriversAndAssetsListUi(this.driversAndAssetsMgmtPanel);
-
-        this.driversAndAssetsList.add(this.driverAndAssetsListUi);
+        this.driverAndAssetsListUi.setConfigurations(configurations);
+        this.driverAndAssetsListUi.setListener(this);
     }
 
     public void refresh() {
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        configurations.clear();
+        DriversAndAssetsRPC.loadStaticInfo(new DriversAndAssetsRPC.Callback<GwtWireComposerStaticInfo>() {
 
             @Override
-            public void onFailure(Throwable ex) {
-                FailureHandler.handle(ex, EntryClassUi.class.getName());
-            }
+            public void onSuccess(GwtWireComposerStaticInfo result) {
+                configurations.setChannelDescriptiors(result.getDriverDescriptors());
+                configurations.setBaseChannelDescriptor(result.getBaseChannelDescriptor());
+                configurations.setComponentDefinitions(result.getComponentDefinitions());
+                DriversAndAssetsRPC
+                        .loadWiresConfiguration(new DriversAndAssetsRPC.Callback<GwtWireGraphConfiguration>() {
 
-            @Override
-            public void onSuccess(GwtXSRFToken token) {
-                gwtWireService.getDriverInstances(token, new AsyncCallback<List<String>>() {
+                            @Override
+                            public void onSuccess(GwtWireGraphConfiguration result) {
+                                final List<GwtConfigComponent> configurationList = new ArrayList<>();
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        logger.log(Level.SEVERE, ex.getMessage(), ex);
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(List<String> result) {
-                        if (result.isEmpty()) {
-                            DriversAndAssetsUi.this.deleteDriverButton.setEnabled(false);
-                            DriversAndAssetsUi.this.newAssetButton.setEnabled(false);
-                            DriversAndAssetsUi.this.deleteAssetButton.setEnabled(false);
-                            DriversAndAssetsUi.this.driverAndAssetsListUi.refresh();
-                        } else {
-                            gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                                @Override
-                                public void onFailure(Throwable ex) {
-                                    EntryClassUi.hideWaitModal();
-                                    FailureHandler.handle(ex);
+                                for (GwtWireComponentConfiguration config : result.getWireComponentConfigurations()) {
+                                    configurationList.add(config.getConfiguration());
                                 }
 
-                                @Override
-                                public void onSuccess(GwtXSRFToken token) {
-                                    gwtAssetService.getAssetInstances(token, new AsyncCallback<List<String>>() {
+                                configurationList.addAll(result.getAdditionalConfigurations());
 
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            EntryClassUi.hideWaitModal();
-                                            FailureHandler.handle(caught);
-                                        }
+                                configurations.setComponentConfigurations(configurationList);
+                                configurations.setAllActivePids(result.getAllActivePids());
 
-                                        @Override
-                                        public void onSuccess(List<String> result) {
-                                            DriversAndAssetsUi.this.deleteDriverButton.setEnabled(true);
-                                            DriversAndAssetsUi.this.newAssetButton.setEnabled(true);
-                                            if (result.isEmpty()) {
-                                                DriversAndAssetsUi.this.deleteAssetButton.setEnabled(false);
-                                            } else {
-                                                DriversAndAssetsUi.this.deleteAssetButton.setEnabled(true);
-                                            }
-                                            DriversAndAssetsUi.this.driverAndAssetsListUi.refresh();
-                                        }
-                                    });
-                                }
-                            });
-                        }
-
-                    }
-                });
+                                init();
+                            }
+                        });
             }
         });
     }
 
-    public boolean isDirty() {
-        return this.driverAndAssetsListUi.isDirty();
+    private void init() {
+        DriversAndAssetsUi.this.driverFactoriesList.clear();
+        DriversAndAssetsUi.this.driverFactoriesList.addItem(SELECT_COMPONENT);
+        for (String driverFactoryPid : configurations.getDriverFactoryPids()) {
+            DriversAndAssetsUi.this.driverFactoriesList.addItem(driverFactoryPid);
+        }
+
+        clearDirtyState();
+        driverAndAssetsListUi.refresh();
     }
 
-    public void setDirty(boolean dirty) {
-        this.driverAndAssetsListUi.setDirty(dirty);
+    public void clearDirtyState() {
+        this.driverAndAssetsListUi.setDirty(false);
+    }
+
+    public boolean isDirty() {
+        return driverAndAssetsListUi.isDirty();
     }
 
     private void initButtonBar() {
-        this.newDriverButton.setText(MSGS.newDriver());
+
         this.newDriverButton.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
                 DriversAndAssetsUi.this.driverName.setValue("");
-                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        gwtComponentService.getDriverFactoriesList(token, new AsyncCallback<List<String>>() {
-
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
-
-                            @Override
-                            public void onSuccess(final List<String> result) {
-                                DriversAndAssetsUi.this.driverFactoriesList.clear();
-                                DriversAndAssetsUi.this.driverFactoriesList.addItem(SELECT_COMPONENT);
-                                for (String driverFactoryPid : result) {
-                                    DriversAndAssetsUi.this.driverFactoriesList.addItem(driverFactoryPid);
-                                }
-                                DriversAndAssetsUi.this.newDriverModal.show();
-                            }
-                        });
-                    }
-                });
+                DriversAndAssetsUi.this.newDriverModal.show();
             }
         });
 
-        this.deleteDriverButton.setText(MSGS.deleteDriver());
-        this.deleteDriverButton.setEnabled(false);
-        this.deleteDriverButton.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                EntryClassUi.showWaitModal();
-                deleteDriverInstance();
-            }
-        });
-
-        this.newAssetButton.setText(MSGS.newAsset());
-        this.newAssetButton.setEnabled(false);
         this.newAssetButton.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                DriversAndAssetsUi.this.assetName.setValue("");
-                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        gwtWireService.getDriverInstances(token, new AsyncCallback<List<String>>() {
-
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
-
-                            @Override
-                            public void onSuccess(List<String> result) {
-                                DriversAndAssetsUi.this.driverPid.clear();
-                                for (String pid : result) {
-                                    DriversAndAssetsUi.this.driverPid.addItem(pid);
-                                }
-                            }
-                        });
-                    }
-                });
+                DriversAndAssetsUi.this.driverPid.setValue(driverAndAssetsListUi.getSelectedItem().getPid());
                 DriversAndAssetsUi.this.newAssetModal.show();
             }
         });
 
-        this.deleteAssetButton.setText(MSGS.deleteAsset());
-        this.deleteAssetButton.setEnabled(false);
-        this.deleteAssetButton.addClickHandler(new ClickHandler() {
+        this.deleteButton.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                EntryClassUi.showWaitModal();
-                deleteAssetInstance();
+                final DriverAssetInfo info = driverAndAssetsListUi.getSelectedItem();
+
+                if (info == null) {
+                    return;
+                }
+
+                if (info.isAsset()) {
+                    deleteAsset(info.getPid());
+                } else {
+                    deleteDriver(info.getPid());
+                }
             }
         });
     }
 
-    private void deleteDriverInstance() {
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+    private void deleteComponent(final String pid) {
+        DriversAndAssetsRPC.deleteFactoryConfiguration(pid, new DriversAndAssetsRPC.Callback<Void>() {
 
             @Override
-            public void onFailure(Throwable ex) {
-                EntryClassUi.hideWaitModal();
-                FailureHandler.handle(ex);
-            }
-
-            @Override
-            public void onSuccess(GwtXSRFToken token) {
-                gwtWireService.getDriverInstances(token, new AsyncCallback<List<String>>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
-                    }
-
-                    @Override
-                    public void onSuccess(List<String> result) {
-                        DriversAndAssetsUi.this.deleteDriverInstancesList.clear();
-                        for (String tempDriverPid : result) {
-                            DriversAndAssetsUi.this.deleteDriverInstancesList.addItem(tempDriverPid);
-                        }
-
-                        EntryClassUi.hideWaitModal();
-                        DriversAndAssetsUi.this.deleteDriverModal.show();
-                    }
-                });
+            public void onSuccess(Void result) {
+                configurations.deleteConfiguration(pid);
+                driverAndAssetsListUi.refresh();
             }
         });
     }
 
-    private void deleteAssetInstance() {
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+    private void deleteDriver(final String pid) {
 
-            @Override
-            public void onFailure(Throwable ex) {
-                EntryClassUi.hideWaitModal();
-                FailureHandler.handle(ex);
+        for (HasConfiguration hasConfiguration : configurations.getConfigurations()) {
+            final GwtConfigComponent gwtConfig = hasConfiguration.getConfiguration();
+            final String driverPid = gwtConfig.getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value());
+            if (pid.equals(driverPid)) {
+                confirmDialog.show(MSGS.driversAssetsDeletingDriverWithAssets(), AlertDialog.Severity.ALERT, null);
+                return;
             }
+        }
+
+        confirmDialog.show(MSGS.driversAssetsConfirmDeleteDriver(), new AlertDialog.Listener() {
 
             @Override
-            public void onSuccess(GwtXSRFToken token) {
-                gwtAssetService.getAssetInstances(token, new AsyncCallback<List<String>>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
-                    }
-
-                    @Override
-                    public void onSuccess(final List<String> assetPids) {
-                        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(ex);
-                            }
-
-                            @Override
-                            public void onSuccess(GwtXSRFToken token) {
-                                gwtWireService.getWiresConfiguration(token,
-                                        new AsyncCallback<GwtWireGraphConfiguration>() {
-
-                                            @Override
-                                            public void onFailure(Throwable caught) {
-                                                EntryClassUi.hideWaitModal();
-                                                FailureHandler.handle(caught);
-                                            }
-
-                                            @Override
-                                            public void onSuccess(GwtWireGraphConfiguration gwtWiresConfiguration) {
-                                                // DriversAndAssetsUi.this.deleteAssetPid.clear();
-                                                // List<String> composerWireComponentPids = gwtWiresConfiguration
-                                                // .getWireComponentPids();
-                                                //
-                                                // for (String assetPid : assetPids) {
-                                                // if (!composerWireComponentPids.contains(assetPid)) {
-                                                // DriversAndAssetsUi.this.deleteAssetPid.addItem(assetPid);
-                                                // }
-                                                // }
-                                                //
-                                                // EntryClassUi.hideWaitModal();
-                                                // DriversAndAssetsUi.this.deleteAssetModal.show();
-                                            }
-                                        });
-                            }
-                        });
-                    }
-                });
+            public void onConfirm() {
+                deleteComponent(pid);
             }
         });
+    }
+
+    private void deleteAsset(final String pid) {
+        final HasConfiguration config = this.configurations.getConfiguration(pid);
+        final GwtConfigComponent gwtConfig = config.getConfiguration();
+
+        if (gwtConfig.isWireComponent()) {
+            confirmDialog.show(MSGS.driversAssetsAssetInComposer(), AlertDialog.Severity.ALERT, null);
+            return;
+        }
+
+        confirmDialog.show(MSGS.driversAssetsConfirmDeleteAsset(), new AlertDialog.Listener() {
+
+            @Override
+            public void onConfirm() {
+                deleteComponent(pid);
+            }
+        });
+    }
+
+    private void createAsset(final String pid, final String driverPid) {
+        final HasConfiguration assetConfig = configurations.createConfiguration(pid, ASSET_FACTORY_PID);
+        assetConfig.getConfiguration().getParameter(AssetConstants.ASSET_DRIVER_PROP.value()).setValue(driverPid);
+        DriversAndAssetsRPC.createFactoryConfiguration(pid, ASSET_FACTORY_PID, assetConfig.getConfiguration(),
+                new DriversAndAssetsRPC.Callback<Void>() {
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        configurations.setConfiguration(assetConfig.getConfiguration());
+                        newAssetModal.hide();
+                        driverAndAssetsListUi.refresh();
+                    }
+                });
     }
 
     private void initNewDriverModal() {
-        this.newDriverModal.setTitle(MSGS.createNewDriverLabel());
-        this.newDriverModalIntro.add(new Span("<p>" + MSGS.createNewDriverIntroLabel() + "</p>"));
-        this.newDriverFactoryFormLabel.setText(MSGS.driverFactory());
-        this.driverInstanceNameLabel.setText(MSGS.driverName());
-        this.buttonNewDriverCancel.setText(MSGS.cancelButton());
-        this.buttonNewDriverApply.setText(MSGS.apply());
-
         this.buttonNewDriverApply.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (DriversAndAssetsUi.this.driverName.validate()) {
-                    gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                        @Override
-                        public void onFailure(Throwable ex) {
-                            FailureHandler.handle(ex, EntryClassUi.class.getName());
-                        }
-
-                        @Override
-                        public void onSuccess(GwtXSRFToken token) {
-                            String factoryPid = DriversAndAssetsUi.this.driverFactoriesList.getSelectedValue();
-                            String pid = DriversAndAssetsUi.this.driverName.getValue();
-
-                            gwtComponentService.createFactoryComponent(token, factoryPid, pid,
-                                    new AsyncCallback<Void>() {
-
-                                        @Override
-                                        public void onFailure(Throwable ex) {
-                                            logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                            FailureHandler.handle(ex, EntryClassUi.class.getName());
-                                        }
-
-                                        @Override
-                                        public void onSuccess(Void result) {
-                                            DriversAndAssetsUi.this.newDriverModal.hide();
-                                            DriversAndAssetsUi.this.deleteDriverButton.setEnabled(true);
-                                            DriversAndAssetsUi.this.newAssetButton.setEnabled(true);
-                                            refresh();
-                                        }
-                                    });
-                        }
-                    });
+                if (!driverName.validate()) {
+                    return;
                 }
+
+                if (driverFactoriesList.getSelectedIndex() == 0) {
+                    confirmDialog.show(MSGS.driversAssetsInvalidDriverFactory(), AlertDialog.Severity.ALERT, null);
+                    return;
+                }
+
+                final String pid = DriversAndAssetsUi.this.driverName.getValue();
+
+                if (configurations.isPidExisting(pid)) {
+                    confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid), AlertDialog.Severity.ALERT, null);
+                    return;
+                }
+
+                final String factoryPid = DriversAndAssetsUi.this.driverFactoriesList.getSelectedValue();
+
+                DriversAndAssetsRPC.createNewDriver(factoryPid, pid,
+                        new DriversAndAssetsRPC.Callback<GwtConfigComponent>() {
+
+                            @Override
+                            public void onSuccess(GwtConfigComponent result) {
+                                configurations.createAndRegisterConfiguration(pid, factoryPid);
+                                configurations.setChannelDescriptor(pid, result);
+                                newDriverModal.hide();
+                                driverAndAssetsListUi.refresh();
+                            }
+                        });
             }
         });
     }
 
     private void initNewAssetModal() {
-        this.newAssetModal.setTitle(MSGS.createNewAssetLabel());
-        this.newAssetModalIntro.add(new Span("<p>" + MSGS.createNewAssetIntroLabel() + "</p>"));
-        this.assetInstanceNameLabel.setText(MSGS.assetName());
-        this.driverPidLabel.setText(MSGS.driverName());
-        this.buttonNewAssetCancel.setText(MSGS.cancelButton());
-        this.buttonNewAssetApply.setText(MSGS.apply());
 
         this.buttonNewAssetApply.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (DriversAndAssetsUi.this.assetName.validate()) {
-                    gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                        @Override
-                        public void onFailure(Throwable ex) {
-                            FailureHandler.handle(ex, EntryClassUi.class.getName());
-                        }
-
-                        @Override
-                        public void onSuccess(GwtXSRFToken token) {
-                            GwtConfigComponent twinConfig = new GwtConfigComponent();
-                            twinConfig.set("asset.desc", "Simple Asset");
-                            twinConfig.set("driver.pid", DriversAndAssetsUi.this.driverPid.getSelectedValue());
-
-                            gwtComponentService.createFactoryComponent(token, ASSET_FACTORY_PID,
-                                    DriversAndAssetsUi.this.assetName.getValue(), twinConfig,
-                                    new AsyncCallback<Void>() {
-
-                                        @Override
-                                        public void onFailure(Throwable ex) {
-                                            logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                            FailureHandler.handle(ex, EntryClassUi.class.getName());
-                                        }
-
-                                        @Override
-                                        public void onSuccess(Void result) {
-                                            DriversAndAssetsUi.this.newAssetModal.hide();
-                                            DriversAndAssetsUi.this.deleteAssetButton.setEnabled(true);
-                                            refresh();
-                                        }
-                                    });
-                        }
-                    });
+                if (!assetName.validate()) {
+                    return;
                 }
+
+                final String pid = assetName.getValue();
+
+                if (configurations.isPidExisting(pid)) {
+                    confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid), AlertDialog.Severity.ALERT, null);
+                    return;
+                }
+
+                final String newDriverPid = driverAndAssetsListUi.getSelectedItem().getPid();
+
+                createAsset(pid, newDriverPid);
             }
         });
     }
 
-    private void initDeleteDriverModal() {
-        this.deleteDriverModal.setTitle(MSGS.deleteDriverLabel());
-        this.deleteDriverModalIntro.add(new Span("<p>" + MSGS.deleteDriverIntroLabel() + "</p>"));
-        this.deleteDriverInstanceNameLabel.setText(MSGS.driverName());
-        this.buttonDeleteDriverCancel.setText(MSGS.cancelButton());
-        this.buttonDeleteDriverApply.setText(MSGS.apply());
-        this.buttonDeleteDriverApply.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-
-                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        gwtComponentService.deleteFactoryConfiguration(token,
-                                DriversAndAssetsUi.this.deleteDriverInstancesList.getSelectedValue(), true,
-                                new AsyncCallback<Void>() {
-
-                                    @Override
-                                    public void onFailure(Throwable ex) {
-                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                                    }
-
-                                    @Override
-                                    public void onSuccess(Void result) {
-                                        DriversAndAssetsUi.this.deleteDriverModal.hide();
-                                        refresh();
-                                    }
-                                });
-                    }
-                });
-            }
-
-        });
+    @Override
+    public void onSelectionChanged(DriverAssetInfo info) {
+        if (info != null) {
+            this.deleteButton.setEnabled(true);
+            this.newAssetButton.setEnabled(!info.isAsset());
+        } else {
+            this.deleteButton.setEnabled(false);
+            this.newAssetButton.setEnabled(false);
+        }
     }
 
-    private void initDeleteAssetModal() {
-        this.deleteAssetModal.setTitle(MSGS.deleteAssetLabel());
-        this.deleteAssetModalIntro.add(new Span("<p>" + MSGS.deleteAssetIntroLabel() + "</p>"));
-        this.deleteAssetPidLabel.setText(MSGS.assetName());
-        this.buttonDeleteAssetCancel.setText(MSGS.cancelButton());
-        this.buttonDeleteAssetApply.setText(MSGS.apply());
-        this.buttonDeleteAssetApply.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-
-                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        gwtComponentService.deleteFactoryConfiguration(token,
-                                DriversAndAssetsUi.this.deleteAssetPid.getSelectedValue(), true,
-                                new AsyncCallback<Void>() {
-
-                                    @Override
-                                    public void onFailure(Throwable ex) {
-                                        logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                                    }
-
-                                    @Override
-                                    public void onSuccess(Void result) {
-                                        DriversAndAssetsUi.this.deleteAssetModal.hide();
-                                        refresh();
-                                    }
-                                });
-                    }
-                });
-            }
-
-        });
-    }
 }

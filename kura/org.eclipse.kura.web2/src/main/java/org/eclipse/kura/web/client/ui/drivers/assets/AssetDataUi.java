@@ -12,50 +12,34 @@
 package org.eclipse.kura.web.client.ui.drivers.assets;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Map;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
+import org.eclipse.kura.web.client.ui.drivers.assets.AssetModel.ChannelModel;
 import org.eclipse.kura.web.client.ui.wires.ValidationInputCell;
-import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.AssetConstants;
-import org.eclipse.kura.web.shared.model.GwtChannelData;
-import org.eclipse.kura.web.shared.model.GwtChannelInfo;
-import org.eclipse.kura.web.shared.model.GwtConfigComponent;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
-import org.eclipse.kura.web.shared.service.GwtAssetService;
-import org.eclipse.kura.web.shared.service.GwtAssetServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtComponentService;
-import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtWireService;
-import org.eclipse.kura.web.shared.service.GwtWireServiceAsync;
+import org.eclipse.kura.web.shared.model.GwtChannelRecord;
 import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.ButtonGroup;
-import org.gwtbootstrap3.client.ui.Modal;
-import org.gwtbootstrap3.client.ui.ModalBody;
-import org.gwtbootstrap3.client.ui.ModalFooter;
-import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
-import org.gwtbootstrap3.client.ui.html.Span;
-import org.gwtbootstrap3.client.ui.html.Text;
 
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DefaultHeaderOrFooterBuilder;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -69,24 +53,16 @@ public class AssetDataUi extends Composite {
     }
 
     protected static final Messages MSGS = GWT.create(Messages.class);
-    private static final Logger errorLogger = Logger.getLogger("ErrorLogger");
 
     private static final int MAXIMUM_PAGE_SIZE = 5;
 
-    private final GwtWireServiceAsync gwtWireService = GWT.create(GwtWireService.class);
-    private final GwtAssetServiceAsync gwtAssetService = GWT.create(GwtAssetService.class);
-    private static final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
-    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private final ListDataProvider<AssetModel.ChannelModel> channelsDataProvider = new ListDataProvider<>();
+    private final SingleSelectionModel<AssetModel.ChannelModel> selectionModel = new SingleSelectionModel<>();
 
-    private final ListDataProvider<GwtChannelData> channelsDataProvider = new ListDataProvider<>();
-    private final SingleSelectionModel<GwtChannelData> selectionModel = new SingleSelectionModel<>();
-
-    private GwtConfigComponent configurableComponent;
-    private GwtConfigComponent driverDescriptor;
+    private AssetModel model;
+    private Map<String, GwtChannelRecord> channelValues = new HashMap<>();
 
     private boolean dirty;
-
-    private Modal modal;
 
     @UiField
     PanelBody configurationPanelBody;
@@ -95,40 +71,39 @@ public class AssetDataUi extends Composite {
     @UiField
     Button refreshData;
     @UiField
-    CellTable<GwtChannelData> assetDataTable;
+    CellTable<AssetModel.ChannelModel> assetDataTable;
     @UiField
     SimplePager channelPager;
-
     @UiField
-    Modal incompleteFieldsModal;
-    @UiField
-    Text incompleteFieldsText;
+    AlertDialog alertDialog;
 
-    public AssetDataUi(GwtConfigComponent addedItem) {
+    public AssetDataUi(AssetModel model) {
         initWidget(uiBinder.createAndBindUi(this));
-        this.configurableComponent = addedItem;
 
         this.channelPager.setPageSize(MAXIMUM_PAGE_SIZE);
         this.channelPager.setDisplay(this.assetDataTable);
         this.assetDataTable.setSelectionModel(this.selectionModel);
         this.channelsDataProvider.addDataDisplay(this.assetDataTable);
 
+        this.model = model;
+
         initButtons();
         initTable();
-        initInvalidDataModal();
+    }
+
+    public void setModel(AssetModel model) {
+        this.model = model;
     }
 
     private void initButtons() {
-        this.applyDataChanges.setText(MSGS.apply());
         this.applyDataChanges.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                apply();
+                write();
             }
         });
 
-        this.refreshData.setText(MSGS.refresh());
         this.refreshData.addClickHandler(new ClickHandler() {
 
             @Override
@@ -140,59 +115,90 @@ public class AssetDataUi extends Composite {
     }
 
     private void initTable() {
-        this.assetDataTable
-                .setHeaderBuilder(new DefaultHeaderOrFooterBuilder<GwtChannelData>(this.assetDataTable, false));
+        this.assetDataTable.setHeaderBuilder(
+                new DefaultHeaderOrFooterBuilder<AssetModel.ChannelModel>(this.assetDataTable, false));
 
-        final Column<GwtChannelData, String> c = new Column<GwtChannelData, String>(new TextCell()) {
+        final Column<AssetModel.ChannelModel, String> c = new Column<AssetModel.ChannelModel, String>(new TextCell()) {
 
             @Override
-            public String getValue(final GwtChannelData object) {
-                return object.getName();
+            public String getValue(final AssetModel.ChannelModel object) {
+                return object.getChannelName();
             }
 
         };
 
         this.assetDataTable.addColumn(c, new TextHeader(MSGS.wiresChannelName()));
 
-        final Column<GwtChannelData, String> c2 = new Column<GwtChannelData, String>(new TextCell()) {
+        final Column<AssetModel.ChannelModel, String> c2 = new Column<AssetModel.ChannelModel, String>(new TextCell()) {
 
             @Override
-            public String getValue(final GwtChannelData object) {
-                return object.getType();
+            public String getValue(final AssetModel.ChannelModel object) {
+                return object.getValue(AssetConstants.TYPE.value());
             }
         };
 
         this.assetDataTable.addColumn(c2, new TextHeader(MSGS.wiresChannelOperation()));
 
-        final Column<GwtChannelData, String> c3 = new Column<GwtChannelData, String>(new TextCell()) {
+        final Column<AssetModel.ChannelModel, String> c3 = new Column<AssetModel.ChannelModel, String>(new TextCell()) {
 
             @Override
-            public String getValue(final GwtChannelData object) {
-                return object.getValueType();
+            public String getValue(final AssetModel.ChannelModel object) {
+                return object.getValue(AssetConstants.VALUE_TYPE.value());
             }
         };
 
         this.assetDataTable.addColumn(c3, new TextHeader(MSGS.wiresChannelValueType()));
 
         final ValidationInputCell cell = new ValidationInputCell();
-        final Column<GwtChannelData, String> c4 = new Column<GwtChannelData, String>(cell) {
+        final Column<AssetModel.ChannelModel, String> c4 = new Column<AssetModel.ChannelModel, String>(cell) {
 
             @Override
-            public String getValue(final GwtChannelData object) {
-                Object result = object.get("value");
-                if (result != null) {
-                    return result.toString();
+            public String getCellStyleNames(Context context, ChannelModel object) {
+                final GwtChannelRecord result = channelValues.get(object.getChannelName());
+                if (result == null) {
+                    return null;
                 }
-                return "";
+                final String value = result.getValue();
+                if (value == null) {
+                    return "asset-read-error";
+                }
+                return null;
+            }
+
+            @Override
+            public void render(Context context, AssetModel.ChannelModel object, SafeHtmlBuilder sb) {
+                if ("READ".equals(object.getValue(AssetConstants.TYPE.value()))) {
+                    sb.appendEscaped(getValue(object));
+                } else {
+                    super.render(context, object, sb);
+                }
+            }
+
+            @Override
+            public String getValue(final AssetModel.ChannelModel object) {
+                final GwtChannelRecord result = channelValues.get(object.getChannelName());
+                if (result == null) {
+                    return "";
+                }
+                final String value = result.getValue();
+                if (value == null) {
+                    return "Read Error!";
+                }
+                return value;
             }
         };
 
-        c4.setFieldUpdater(new FieldUpdater<GwtChannelData, String>() {
+        c4.setFieldUpdater(new FieldUpdater<AssetModel.ChannelModel, String>() {
 
             @Override
-            public void update(final int index, final GwtChannelData object, final String value) {
+            public void update(final int index, final AssetModel.ChannelModel object, final String value) {
                 setDirty(true);
-                object.set("value", value);
+                GwtChannelRecord result = channelValues.get(object.getChannelName());
+                if (result == null) {
+                    result = createWriteRecord(object);
+                    channelValues.put(object.getChannelName(), result);
+                }
+                result.setValue(value);
                 AssetDataUi.this.assetDataTable.redraw();
             }
         });
@@ -200,88 +206,46 @@ public class AssetDataUi extends Composite {
         this.assetDataTable.addColumn(c4, new TextHeader(MSGS.devicePropValue()));
     }
 
-    private void initInvalidDataModal() {
-        this.incompleteFieldsModal.setTitle(MSGS.warning());
-        this.incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
+    private GwtChannelRecord createWriteRecord(AssetModel.ChannelModel channel) {
+        final GwtChannelRecord result = new GwtChannelRecord();
+        result.setName(channel.getChannelName());
+        result.setValueType(channel.getValue(AssetConstants.VALUE_TYPE.value()));
+        return result;
     }
 
-    private void apply() {
+    private void write() {
         if (isDirty()) {
-            // TODO: maybe this can be declared in the xml?
-            this.modal = new Modal();
 
-            ModalHeader header = new ModalHeader();
-            header.setTitle(MSGS.confirm());
-            this.modal.add(header);
-
-            ModalBody body = new ModalBody();
-            body.add(new Span(MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName())));
-            this.modal.add(body);
-
-            ModalFooter footer = new ModalFooter();
-            ButtonGroup group = new ButtonGroup();
-            Button no = new Button();
-            no.setText(MSGS.noButton());
-            no.addStyleName("fa fa-times");
-            no.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    AssetDataUi.this.modal.hide();
+            final ArrayList<GwtChannelRecord> writeRecords = new ArrayList<>();
+            for (AssetModel.ChannelModel channel : model.getChannels()) {
+                if (channel.getValue(AssetConstants.TYPE.value()).contains("WRITE")) {
+                    final GwtChannelRecord record = channelValues.get(channel.getChannelName());
+                    if (record == null) {
+                        continue;
+                    }
+                    writeRecords.add(record);
                 }
-            });
-            group.add(no);
+            }
 
-            Button yes = new Button();
-            yes.setText(MSGS.yesButton());
-            yes.addStyleName("fa fa-check");
-            yes.addClickHandler(new ClickHandler() {
+            if (writeRecords.isEmpty()) {
+                return;
+            }
+
+            alertDialog.show(MSGS.deviceConfigConfirmation(model.getAssetPid()), new AlertDialog.Listener() {
 
                 @Override
-                public void onClick(ClickEvent event) {
-                    EntryClassUi.showWaitModal();
-                    AssetDataUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                        @Override
-                        public void onFailure(Throwable ex) {
-                            EntryClassUi.hideWaitModal();
-                            FailureHandler.handle(ex);
-                        }
-
-                        @Override
-                        public void onSuccess(GwtXSRFToken token) {
-                            final List<GwtChannelData> channelsData = new ArrayList<>(
-                                    AssetDataUi.this.channelsDataProvider.getList());
-                            AssetDataUi.this.gwtAssetService.write(token,
-                                    AssetDataUi.this.configurableComponent.getComponentId(), channelsData,
-                                    new AsyncCallback<Void>() {
-
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    EntryClassUi.hideWaitModal();
-                                    FailureHandler.handle(caught);
-                                    errorLogger.log(
-                                            Level.SEVERE, caught.getLocalizedMessage() != null
-                                                    ? caught.getLocalizedMessage() : caught.getClass().getName(),
-                                            caught);
-                                }
+                public void onConfirm() {
+                    DriversAndAssetsRPC.write(model.getAssetPid(), writeRecords,
+                            new DriversAndAssetsRPC.Callback<Void>() {
 
                                 @Override
                                 public void onSuccess(Void result) {
-                                    EntryClassUi.hideWaitModal();
-                                    AssetDataUi.this.applyDataChanges.setEnabled(false);
-                                    AssetDataUi.this.modal.hide();
+                                    AssetDataUi.this.setDirty(false);
                                 }
+
                             });
-                        }
-                    });
                 }
             });
-            group.add(yes);
-            footer.add(group);
-            this.modal.add(footer);
-            this.modal.show();
-            no.setFocus(true);
         }
     }
 
@@ -297,148 +261,29 @@ public class AssetDataUi extends Composite {
     }
 
     public void renderForm() {
+        AssetDataUi.this.channelsDataProvider.getList().clear();
         EntryClassUi.showWaitModal();
-        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(Throwable ex) {
-                FailureHandler.handle(ex, EntryClassUi.class.getName());
-            }
-
-            @Override
-            public void onSuccess(GwtXSRFToken token) {
-                gwtComponentService.findFilteredComponentConfiguration(token,
-                        AssetDataUi.this.configurableComponent.getComponentId(),
-                        new AsyncCallback<List<GwtConfigComponent>>() {
+        DriversAndAssetsRPC.readAllChannels(model.getAssetPid(),
+                new DriversAndAssetsRPC.Callback<List<GwtChannelRecord>>() {
 
                     @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
+                    public void onSuccess(List<GwtChannelRecord> result) {
+                        channelValues.clear();
 
-                    @Override
-                    public void onSuccess(List<GwtConfigComponent> result) {
-                        for (GwtConfigComponent configuration : result) {
-                            AssetDataUi.this.configurableComponent = configuration;
-                            AssetDataUi.this.gwtXSRFService.generateSecurityToken(new GetAssetDataCallback());
+                        for (GwtChannelRecord channelValue : result) {
+                            channelValues.put(channelValue.getName(), channelValue);
                         }
+
+                        AssetDataUi.this.channelsDataProvider.getList().addAll(model.getChannels());
+                        AssetDataUi.this.channelsDataProvider.refresh();
+
+                        int size = AssetDataUi.this.channelsDataProvider.getList().size();
+                        AssetDataUi.this.assetDataTable.setVisibleRange(0, size);
+                        AssetDataUi.this.assetDataTable.redraw();
+
+                        AssetDataUi.this.applyDataChanges.setEnabled(false);
                     }
                 });
-            }
-        });
     }
 
-    private final class GetAssetDataCallback extends BaseAsyncCallback<GwtXSRFToken> {
-
-        @Override
-        public void onSuccess(GwtXSRFToken result) {
-            AssetDataUi.this.gwtWireService.getGwtBaseChannelDescriptor(result,
-                    new BaseAsyncCallback<GwtConfigComponent>() {
-
-                        @Override
-                        public void onSuccess(GwtConfigComponent result) {
-                            AssetDataUi.this.gwtXSRFService
-                                    .generateSecurityToken(new BaseAsyncCallback<GwtXSRFToken>() {
-
-                                @Override
-                                public void onSuccess(final GwtXSRFToken result) {
-                                    AssetDataUi.this.gwtWireService.getGwtChannelDescriptor(result,
-                                            AssetDataUi.this.configurableComponent
-                                                    .get(AssetConstants.ASSET_DRIVER_PROP.value()).toString(),
-                                            new BaseAsyncCallback<GwtConfigComponent>() {
-
-                                        @Override
-                                        public void onSuccess(final GwtConfigComponent result) {
-                                            AssetDataUi.this.driverDescriptor = result;
-
-                                            AssetDataUi.this.gwtXSRFService
-                                                    .generateSecurityToken(new GetChannelDataCallback());
-                                        }
-                                    });
-                                }
-                            });
-                        }
-
-                    });
-        }
-    }
-
-    private final class GetChannelDataCallback extends BaseAsyncCallback<GwtXSRFToken> {
-
-        @Override
-        public void onSuccess(final GwtXSRFToken token) {
-            AssetDataUi.this.gwtWireService.getGwtChannels(token, AssetDataUi.this.driverDescriptor,
-                    AssetDataUi.this.configurableComponent, new BaseAsyncCallback<List<GwtChannelInfo>>() {
-
-                        @Override
-                        public void onSuccess(List<GwtChannelInfo> result) {
-                            final List<GwtChannelData> channelsData = new ArrayList<>();
-                            for (GwtChannelInfo channelInfo : result) {
-                                GwtChannelData channelData = new GwtChannelData();
-                                channelData.setName(channelInfo.getName());
-                                channelData.setType(channelInfo.getType());
-                                channelData.setValueType(channelInfo.getValueType());
-                                channelData.setProperties(channelInfo.getProperties());
-                                channelData.setValue("Read Error!");
-                                channelData.setUnescaped(true);
-                                channelsData.add(channelData);
-                            }
-                            AssetDataUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                                @Override
-                                public void onFailure(Throwable ex) {
-                                    EntryClassUi.hideWaitModal();
-                                    FailureHandler.handle(ex, EntryClassUi.class.getName());
-                                }
-
-                                @Override
-                                public void onSuccess(GwtXSRFToken token) {
-                                    AssetDataUi.this.gwtAssetService.readAllChannels(token,
-                                            AssetDataUi.this.configurableComponent.getComponentId(),
-                                            new AsyncCallback<List<GwtChannelData>>() {
-
-                                        @Override
-                                        public void onFailure(Throwable ex) {
-                                            EntryClassUi.hideWaitModal();
-                                            FailureHandler.handle(ex, EntryClassUi.class.getName());
-                                        }
-
-                                        @Override
-                                        public void onSuccess(final List<GwtChannelData> result) {
-                                            for (GwtChannelData channelValue : result) {
-                                                for (GwtChannelData channelData : channelsData) {
-                                                    if (channelData.getName().equals(channelValue.getName())) {
-                                                        channelData.setValue(channelValue.getValue());
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                            AssetDataUi.this.channelsDataProvider.getList().clear();
-                                            AssetDataUi.this.channelsDataProvider.getList().addAll(channelsData);
-                                            AssetDataUi.this.channelsDataProvider.refresh();
-
-                                            int size = AssetDataUi.this.channelsDataProvider.getList().size();
-                                            AssetDataUi.this.assetDataTable.setVisibleRange(0, size);
-                                            AssetDataUi.this.assetDataTable.redraw();
-
-                                            AssetDataUi.this.applyDataChanges.setEnabled(false);
-
-                                            EntryClassUi.hideWaitModal();
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
-        }
-    }
-
-    private abstract class BaseAsyncCallback<T> implements AsyncCallback<T> {
-
-        @Override
-        public void onFailure(Throwable caught) {
-            EntryClassUi.hideWaitModal();
-            FailureHandler.handle(caught);
-        }
-    }
 }

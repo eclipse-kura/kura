@@ -409,7 +409,7 @@ public class WiresPanelUi extends Composite
     }
 
     private WireComponent createAsset(String pid, String driverPid) {
-        final HasConfiguration assetConfig = configurations.createConfiguration(pid, WIRE_ASSET_PID);
+        final HasConfiguration assetConfig = configurations.createAndRegisterConfiguration(pid, WIRE_ASSET_PID);
         assetConfig.getConfiguration().getParameter(AssetConstants.ASSET_DRIVER_PROP.value()).setValue(driverPid);
         return descriptors.createNewComponent(pid, WIRE_ASSET_PID);
     }
@@ -523,7 +523,7 @@ public class WiresPanelUi extends Composite
         this.btnGraphDelete.setEnabled(true);
         updateDirtyState();
         if (configurations.getConfiguration(component.getPid()) == null) {
-            configurations.createConfiguration(component.getPid(), component.getFactoryPid());
+            configurations.createAndRegisterConfiguration(component.getPid(), component.getFactoryPid());
         }
         this.dialogs.setAssetPids(getAssetsNotInComposer());
     }
@@ -566,7 +566,7 @@ public class WiresPanelUi extends Composite
     @Override
     public void onConfigurationChanged(HasConfiguration newConfiguration) {
         log("configuration updated");
-        this.configurations.updateConfiguration(newConfiguration);
+        this.configurations.setConfiguration(newConfiguration);
         updateDirtyState();
     }
 
@@ -581,9 +581,13 @@ public class WiresPanelUi extends Composite
 
     @Override
     public void onNewDriverCreated(String pid, String factoryPid, GwtConfigComponent descriptor) {
-        configurations.createConfiguration(pid, factoryPid);
+        configurations.createAndRegisterConfiguration(pid, factoryPid);
         configurations.setChannelDescriptor(pid, descriptor);
         dialogs.setDriverPids(configurations.getDriverPids());
+    }
+
+    @Override
+    public void onDirtyStateChanged(HasConfiguration hasConfiguration) {
     }
 
 }

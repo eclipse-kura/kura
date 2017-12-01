@@ -11,9 +11,13 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.drivers.assets;
 
+import org.eclipse.kura.web.client.configuration.Configurations;
+import org.eclipse.kura.web.client.configuration.HasConfiguration;
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.AlertDialog;
+import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
-import org.gwtbootstrap3.client.ui.PanelHeader;
+import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TabPane;
 
@@ -34,11 +38,8 @@ public class AssetMgmtUi extends Composite {
 
     private static final Messages MSGS = GWT.create(Messages.class);
 
-    private AssetConfigUi assetConfigUi;
+    private AssetConfigurationUi assetConfigUi;
     private AssetDataUi assetDataUi;
-
-    @UiField
-    PanelHeader contentPanelHeader;
 
     @UiField
     TabListItem tab1NavTab;
@@ -48,25 +49,42 @@ public class AssetMgmtUi extends Composite {
     TabPane tab1Pane;
     @UiField
     TabPane tab2Pane;
+    @UiField
+    AlertDialog alertDialog;
 
-    public AssetMgmtUi(final GwtConfigComponent addedItem) {
+    public AssetMgmtUi(final HasConfiguration hasConfiguration, Configurations configurations) {
         initWidget(uiBinder.createAndBindUi(this));
 
-        this.contentPanelHeader.setText(MSGS.assetLabel(addedItem.getComponentName()));
+        final GwtConfigComponent assetConfiguration = hasConfiguration.getConfiguration();
+        final String driverPid = assetConfiguration.getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value());
+        final GwtConfigComponent channelDescriptor = configurations.getChannelDescriptor(driverPid);
 
-        tab1NavTab.setText(MSGS.assetConfig());
-        tab2NavTab.setText(MSGS.assetData());
+        if (channelDescriptor == null) {
+            return;
+        }
 
-        assetConfigUi = new AssetConfigUi(addedItem);
-        tab1Pane.add(assetConfigUi);
+        final AssetModel model = new AssetModelImpl(new GwtConfigComponent(assetConfiguration), channelDescriptor,
+                configurations.getBaseChannelDescriptor());
+        this.assetDataUi = new AssetDataUi(model);
+        this.assetConfigUi = new AssetConfigurationUi(model, assetDataUi);
+        final ConfigurationUiButtons buttonBar = createAssetUiButtonBar(assetConfigUi, configurations);
 
-        assetDataUi = new AssetDataUi(addedItem);
+        final Panel panel = new Panel();
+        panel.add(buttonBar);
+        panel.add(assetConfigUi);
+        tab1Pane.add(panel);
         tab2Pane.add(assetDataUi);
-        
+
         tab2NavTab.addClickHandler(new ClickHandler() {
-            
+
             @Override
             public void onClick(ClickEvent event) {
+                if (assetConfigUi.isDirty()) {
+                    alertDialog.show(MSGS.driversAssetsAssetConfigDirty(), AlertDialog.Severity.ALERT, null);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
                 assetDataUi.renderForm();
             }
         });
@@ -87,6 +105,48 @@ public class AssetMgmtUi extends Composite {
 
     public boolean isDirty() {
         return assetConfigUi.isDirty() || assetDataUi.isDirty();
+    }
+
+    public ConfigurationUiButtons createAssetUiButtonBar(final AssetConfigurationUi assetUi,
+            final Configurations configurations) {
+        final GwtConfigComponent gwtConfig = assetUi.getConfiguration();
+        final ConfigurationUiButtons result = new ConfigurationUiButtons(assetUi);
+        result.setListener(new ConfigurationUiButtons.Listener() {
+
+            @Override
+            public void onReset() {
+                final String driverPid = gwtConfig.getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value());
+                final AssetModel model = new AssetModelImpl(
+                        new GwtConfigComponent(
+                                configurations.getConfiguration(gwtConfig.getComponentId()).getConfiguration()),
+                        configurations.getChannelDescriptor(driverPid), configurations.getBaseChannelDescriptor());
+                assetDataUi.setModel(model);
+                assetUi.setModel(model);
+            }
+
+            @Override
+            public void onApply() {
+                final GwtConfigComponent newConfig = assetUi.getConfiguration();
+                DriversAndAssetsRPC.deleteFactoryConfiguration(newConfig.getComponentId(),
+                        new DriversAndAssetsRPC.Callback<Void>() {
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                DriversAndAssetsRPC.createFactoryConfiguration(newConfig.getComponentId(),
+                                        newConfig.getFactoryId(), newConfig, new DriversAndAssetsRPC.Callback<Void>() {
+
+                                            @Override
+                                            public void onSuccess(Void result) {
+                                                configurations.setConfiguration(new GwtConfigComponent(newConfig));
+                                                assetUi.setDirty(false);
+                                            }
+
+                                        });
+                            }
+                        });
+            }
+        });
+        return result;
     }
 
 }

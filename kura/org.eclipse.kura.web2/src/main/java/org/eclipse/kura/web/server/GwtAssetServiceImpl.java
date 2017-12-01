@@ -18,14 +18,12 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
-import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
@@ -33,11 +31,9 @@ import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.server.util.ServiceLocator.ServiceConsumer;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
-import org.eclipse.kura.web.shared.model.GwtChannelData;
-import org.eclipse.kura.web.shared.model.GwtDriverAssetInfo;
+import org.eclipse.kura.web.shared.model.GwtChannelRecord;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtAssetService;
-import org.osgi.framework.ServiceReference;
 
 public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements GwtAssetService {
 
@@ -47,10 +43,10 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     private static final Encoder BASE64_ENCODER = Base64.getEncoder();
 
     @Override
-    public List<GwtChannelData> read(GwtXSRFToken xsrfToken, String assetPid, final Set<String> channelNames)
+    public List<GwtChannelRecord> read(GwtXSRFToken xsrfToken, String assetPid, final Set<String> channelNames)
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-        List<GwtChannelData> result = new ArrayList<>();
+        List<GwtChannelRecord> result = new ArrayList<>();
         final String filter = format("(%s=%s)", KURA_SERVICE_PID, assetPid);
         ServiceLocator.withAllServices(Asset.class, filter, new ServiceConsumer<Asset>() {
 
@@ -58,7 +54,7 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
             public void consume(final Asset asset) throws Exception {
                 List<ChannelRecord> assetData = asset.read(channelNames);
                 for (ChannelRecord channelRecord : assetData) {
-                    GwtChannelData channelData = new GwtChannelData();
+                    GwtChannelRecord channelData = new GwtChannelRecord();
                     channelData.setName(channelRecord.getChannelName());
                     channelData.setValue(typedValueToString(channelRecord.getValue()));
                     result.add(channelData);
@@ -69,9 +65,9 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     }
 
     @Override
-    public List<GwtChannelData> readAllChannels(GwtXSRFToken xsrfToken, String assetPid) throws GwtKuraException {
+    public List<GwtChannelRecord> readAllChannels(GwtXSRFToken xsrfToken, String assetPid) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-        List<GwtChannelData> result = new ArrayList<>();
+        List<GwtChannelRecord> result = new ArrayList<>();
         final String filter = format("(%s=%s)", KURA_SERVICE_PID, assetPid);
         ServiceLocator.withAllServices(Asset.class, filter, new ServiceConsumer<Asset>() {
 
@@ -79,12 +75,13 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
             public void consume(final Asset asset) throws Exception {
                 List<ChannelRecord> assetData = asset.readAllChannels();
                 for (ChannelRecord channelRecord : assetData) {
+                    GwtChannelRecord channelData = new GwtChannelRecord();
+                    channelData.setName(channelRecord.getChannelName());
+                    channelData.setValueType(channelRecord.getValueType().name());
                     if (ChannelFlag.SUCCESS.equals(channelRecord.getChannelStatus().getChannelFlag())) {
-                        GwtChannelData channelData = new GwtChannelData();
-                        channelData.setName(channelRecord.getChannelName());
                         channelData.setValue(typedValueToString(channelRecord.getValue()));
-                        result.add(channelData);
                     }
+                    result.add(channelData);
                 }
             }
         });
@@ -92,12 +89,12 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     }
 
     @Override
-    public void write(GwtXSRFToken xsrfToken, String assetPid, List<GwtChannelData> gwtChannelRecords)
+    public void write(GwtXSRFToken xsrfToken, String assetPid, List<GwtChannelRecord> gwtChannelRecords)
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         List<ChannelRecord> channelRecords = new ArrayList<>();
 
-        for (GwtChannelData gwtChannelData : gwtChannelRecords) {
+        for (GwtChannelRecord gwtChannelData : gwtChannelRecords) {
             String channelName = gwtChannelData.getName();
             String typedValue = gwtChannelData.getValueType();
             String value = gwtChannelData.getValue();
@@ -144,66 +141,6 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
         }
 
         throw new IllegalArgumentException();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public List<String> getAssetInstances(final GwtXSRFToken xsrfToken) throws GwtKuraException {
-        this.checkXSRFToken(xsrfToken);
-        final Collection<ServiceReference<Asset>> refs = ServiceLocator.getInstance().getServiceReferences(Asset.class,
-                null);
-        final List<String> assets = new ArrayList<>();
-        for (final ServiceReference<Asset> ref : refs) {
-            assets.add(String.valueOf(ref.getProperty(KURA_SERVICE_PID)));
-        }
-        return assets;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public List<String> getAssetInstancesByDriverPid(final String driverPid) throws GwtKuraException {
-        final Collection<ServiceReference<Asset>> refs = ServiceLocator.getInstance().getServiceReferences(Asset.class,
-                null);
-        final List<String> assets = new ArrayList<>();
-        for (final ServiceReference<Asset> ref : refs) {
-            if (driverPid.equals(ref.getProperty("driver.pid"))) {
-                assets.add(String.valueOf(ref.getProperty(KURA_SERVICE_PID)));
-            }
-        }
-        return assets;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public List<GwtDriverAssetInfo> getDriverAssetInstances(final GwtXSRFToken xsrfToken) throws GwtKuraException {
-        this.checkXSRFToken(xsrfToken);
-        List<GwtDriverAssetInfo> driverAssetInfoList = new ArrayList<>();
-
-        final Collection<ServiceReference<Driver>> refs = ServiceLocator.getInstance()
-                .getServiceReferences(Driver.class, null);
-
-        for (final ServiceReference<Driver> driverRef : refs) {
-            String driverPid = String.valueOf(driverRef.getProperty(KURA_SERVICE_PID));
-            GwtDriverAssetInfo driverInfo = new GwtDriverAssetInfo();
-            driverInfo.setInstancePid(driverPid);
-            driverInfo.setType("Driver");
-            driverInfo.setFactoryPid(String.valueOf(driverRef.getProperty("service.factoryPid")));
-            driverAssetInfoList.add(driverInfo);
-
-            final Collection<ServiceReference<Asset>> assetRefs = ServiceLocator.getInstance()
-                    .getServiceReferences(Asset.class, null);
-            for (final ServiceReference<Asset> assetRef : assetRefs) {
-                if (driverPid.equals(assetRef.getProperty("driver.pid"))) {
-                    GwtDriverAssetInfo assetInfo = new GwtDriverAssetInfo();
-                    assetInfo.setInstancePid(String.valueOf("-> " + assetRef.getProperty(KURA_SERVICE_PID)));
-                    assetInfo.setType("Asset");
-                    assetInfo.setFactoryPid(String.valueOf(assetRef.getProperty("service.factoryPid")));
-                    driverAssetInfoList.add(assetInfo);
-                }
-            }
-        }
-
-        return driverAssetInfoList;
     }
 
     private String typedValueToString(TypedValue<?> typedValue) {

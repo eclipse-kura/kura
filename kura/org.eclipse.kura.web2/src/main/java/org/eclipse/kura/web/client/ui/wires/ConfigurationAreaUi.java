@@ -15,6 +15,9 @@ package org.eclipse.kura.web.client.ui.wires;
 import org.eclipse.kura.web.client.configuration.Configurations;
 import org.eclipse.kura.web.client.configuration.HasConfiguration;
 import org.eclipse.kura.web.client.ui.ConfigurableComponentUi;
+import org.eclipse.kura.web.client.ui.drivers.assets.AssetConfigurationUi;
+import org.eclipse.kura.web.client.ui.drivers.assets.AssetModel;
+import org.eclipse.kura.web.client.ui.drivers.assets.AssetModelImpl;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.gwtbootstrap3.client.ui.TabListItem;
@@ -70,7 +73,7 @@ public class ConfigurationAreaUi extends Composite {
     private boolean initFromExistingUi(HasConfiguration hasConfiguration) {
         if (hasConfiguration instanceof AssetConfigurationUi) {
             this.assetWireComponentUi = (AssetConfigurationUi) hasConfiguration;
-            this.genericWireComponentUi = this.assetWireComponentUi.getDriverConfigurationUi();
+            this.genericWireComponentUi = (ConfigurableComponentUi) this.assetWireComponentUi.getAssociatedView();
             return true;
         } else if (hasConfiguration instanceof ConfigurableComponentUi) {
             this.genericWireComponentUi = (ConfigurableComponentUi) hasConfiguration;

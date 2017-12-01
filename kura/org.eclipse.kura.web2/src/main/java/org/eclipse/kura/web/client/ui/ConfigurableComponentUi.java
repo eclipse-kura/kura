@@ -41,6 +41,10 @@ public class ConfigurableComponentUi extends AbstractServicesUi implements HasCo
 
     public ConfigurableComponentUi(final GwtConfigComponent originalConfig) {
         initWidget(uiBinder.createAndBindUi(this));
+        setConfiguration(originalConfig);
+    }
+
+    public void setConfiguration(GwtConfigComponent originalConfig) {
         restoreConfiguration(originalConfig);
         this.fields.clear();
 
@@ -48,10 +52,24 @@ public class ConfigurableComponentUi extends AbstractServicesUi implements HasCo
         setDirty(false);
     }
 
+    private native void log(Object o)
+    /*-{
+        console.log(o)
+    }-*/;
+
     @Override
     public void setDirty(final boolean flag) {
+        boolean isDirtyStateChanged = flag != this.dirty;
         this.dirty = flag;
-        notifyListener();
+        if (listener != null) {
+            log("dirty state changed " + isDirtyStateChanged);
+            if (isDirtyStateChanged) {
+                listener.onDirtyStateChanged(this);
+            }
+            if (isValid()) {
+                listener.onConfigurationChanged(this);
+            }
+        }
     }
 
     @Override
@@ -96,6 +114,7 @@ public class ConfigurableComponentUi extends AbstractServicesUi implements HasCo
         this.fields.add(formGroup);
     }
 
+    @Override
     public void setListener(HasConfiguration.Listener listener) {
         this.listener = listener;
         listener.onConfigurationChanged(this);
@@ -111,15 +130,6 @@ public class ConfigurableComponentUi extends AbstractServicesUi implements HasCo
             }
         }
         return this.configurableComponent;
-    }
-
-    private void notifyListener() {
-        if (listener == null) {
-            return;
-        }
-        if (this.isValid()) {
-            listener.onConfigurationChanged(this);
-        }
     }
 
     @Override
@@ -142,5 +152,10 @@ public class ConfigurableComponentUi extends AbstractServicesUi implements HasCo
     @Override
     public boolean isDirty() {
         return this.dirty;
+    }
+
+    @Override
+    public void markAsDirty() {
+        setDirty(true);
     }
 }

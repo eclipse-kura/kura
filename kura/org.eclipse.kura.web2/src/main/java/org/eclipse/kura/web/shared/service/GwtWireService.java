@@ -16,7 +16,6 @@ package org.eclipse.kura.web.shared.service;
 import java.util.List;
 
 import org.eclipse.kura.web.shared.GwtKuraException;
-import org.eclipse.kura.web.shared.model.GwtChannelInfo;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
 import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
@@ -33,29 +32,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface GwtWireService extends RemoteService {
 
     /**
-     * Retrieves all the registered driver instances.
-     *
-     * @param xsrfToken
-     *            the XSRF token
-     * @return the list of driver instances
-     * @throws GwtKuraException
-     *             if GWT encounters exception while retrieving the driver
-     *             instances
-     */
-    public List<String> getDriverInstances(GwtXSRFToken xsrfToken) throws GwtKuraException;
-
-    /**
-     * Gets the base channel descriptor.
-     *
-     * @param xsrfToken
-     *            the xsrf token
-     * @return the gwt base channel descriptor
-     * @throws GwtKuraException
-     *             the gwt kura exception
-     */
-    public GwtConfigComponent getGwtBaseChannelDescriptor(GwtXSRFToken xsrfToken) throws GwtKuraException;
-
-    /**
      * Gets the channel descriptor.
      *
      * @param xsrfToken
@@ -67,22 +43,6 @@ public interface GwtWireService extends RemoteService {
      *             the gwt kura exception
      */
     public GwtConfigComponent getGwtChannelDescriptor(GwtXSRFToken xsrfToken, String driverPid) throws GwtKuraException;
-
-    /**
-     * Gets the channels.
-     *
-     * @param xsrfToken
-     *            the xsrf token
-     * @param descriptor
-     *            the descriptor
-     * @param asset
-     *            the asset
-     * @return the gwt channels
-     * @throws GwtKuraException
-     *             the gwt kura exception
-     */
-    public List<GwtChannelInfo> getGwtChannels(GwtXSRFToken xsrfToken, GwtConfigComponent descriptor,
-            GwtConfigComponent asset) throws GwtKuraException;
 
     /**
      * Returns the {@link GwtWireGraphConfiguration} instance associated.

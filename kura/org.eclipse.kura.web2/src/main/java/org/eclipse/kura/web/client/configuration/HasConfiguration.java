@@ -12,9 +12,14 @@ public interface HasConfiguration {
 
     public boolean isDirty();
 
+    public void markAsDirty();
+
+    public void setListener(Listener listener);
+
     public interface Listener {
 
         public void onConfigurationChanged(HasConfiguration hasConfiguration);
 
+        public void onDirtyStateChanged(HasConfiguration hasConfiguration);
     }
 }

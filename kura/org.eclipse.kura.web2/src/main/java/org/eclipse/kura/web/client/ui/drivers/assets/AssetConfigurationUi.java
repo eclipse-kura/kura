@@ -24,6 +24,7 @@ import static org.eclipse.kura.web.shared.AssetConstants.CHANNEL_PROPERTY_SEPARA
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -36,7 +37,6 @@ import org.eclipse.kura.web.client.ui.wires.ValidationInputCell;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
-import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.FieldSet;
 import org.gwtbootstrap3.client.ui.FormGroup;
@@ -46,7 +46,6 @@ import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Strong;
-import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -93,15 +92,6 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     Strong channelTitle;
     @UiField
     FieldSet fields;
-
-    @UiField
-    Alert incompleteFields;
-
-    @UiField
-    Modal incompleteFieldsModal;
-
-    @UiField
-    Text incompleteFieldsText;
 
     @UiField
     Modal newChannelModal;
@@ -177,8 +167,6 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         });
 
         setModel(assetModel);
-
-        initInvalidDataModal();
         initNewChannelModal();
     }
 
@@ -195,12 +183,15 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     public void renderForm() {
         this.fields.clear();
 
+        final GwtConfigComponent nonChannelFields = new GwtConfigComponent();
+
         for (final GwtConfigParameter param : this.model.getConfiguration().getParameters()) {
             final String[] tokens = param.getId().split(CHANNEL_PROPERTY_SEPARATOR.value());
             boolean isChannelData = tokens.length == 2;
             final boolean isDriverField = param.getId().equals(AssetConstants.ASSET_DRIVER_PROP.value());
 
             if (!isChannelData && !isDriverField) {
+                nonChannelFields.getParameters().add(param);
                 if (param.getCardinality() == 0 || param.getCardinality() == 1 || param.getCardinality() == -1) {
                     final FormGroup formGroup = new FormGroup();
                     renderConfigParameter(param, true, formGroup);
@@ -210,6 +201,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
             }
         }
 
+        this.configurableComponent = nonChannelFields;
         initTable();
 
     }
@@ -362,11 +354,6 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         return result;
     }
 
-    private void initInvalidDataModal() {
-        this.incompleteFieldsModal.setTitle(MSGS.warning());
-        this.incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
-    }
-
     private void initNewChannelModal() {
         this.newChannelModal.setTitle(MSGS.wiresCreateNewChannel());
         this.newChannelNameLabel.setText(MSGS.wiresCreateNewChannelName());
@@ -480,8 +467,20 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         return this.associatedView;
     }
 
+    protected void updateNonChannelFields() {
+        Iterator<Widget> it = this.fields.iterator();
+        while (it.hasNext()) {
+            Widget w = it.next();
+            if (w instanceof FormGroup) {
+                FormGroup fg = (FormGroup) w;
+                fillUpdatedConfiguration(fg);
+            }
+        }
+    }
+
     @Override
     public GwtConfigComponent getConfiguration() {
+        updateNonChannelFields();
         return model.getConfiguration();
     }
 
@@ -492,7 +491,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
 
     @Override
     public boolean isValid() {
-        return nonValidatedCells.isEmpty();
+        return nonValidatedCells.isEmpty() && super.isValid();
     }
 
     @Override

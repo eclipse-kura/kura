@@ -14,35 +14,11 @@
     xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt" xmlns:cv="urn:import:com.google.gwt.user.cellview.client">
 
     <ui:style>
-    .important {
-    	font-weight: bold;
-    }
-    
-    .column {
-    	border: 1px solid #000000;
-    	text-align: center;
-    }
-    
     .center-panel {
     	height: 100%;
     	padding-top: 20px;
     	padding-left: 5px;
     	border: none;
-    }
-    
-    .top-row-padding {
-    	margin-right: 30px;
-    	margin-top: 20px;
-    	margin-bottom: -10px;
-    }
-    
-    .bottom-row-padding {
-    	margin-top: -10px;
-    	margin-bottom: -30px;
-    }
-    
-    .outer-column {
-    	margin-bottom: -20px;
     }
     
     .channel-name-validation-label {
@@ -53,10 +29,6 @@
     
     .channel-name-form {
     	margin-bottom: 0;
-    }
-    
-    .hidden {
-    	display: none;
     }
     </ui:style>
 
@@ -96,17 +68,6 @@
                     </g:ScrollPanel>
                 </b:Well>
             </b:Row>
-            <b:Modal closable="true" dataKeyboard="true" ui:field="incompleteFieldsModal">
-                <b:ModalBody>
-                    <b:Panel>
-                        <b:PanelBody>
-                            <b:Alert type="WARNING" ui:field="incompleteFields">
-                                <b.html:Text ui:field="incompleteFieldsText" />
-                            </b:Alert>
-                        </b:PanelBody>
-                    </b:Panel>
-                </b:ModalBody>
-            </b:Modal>
             <b:Modal closable="true" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="new-channel-modal"
                 ui:field="newChannelModal">
                 <b:ModalHeader />

@@ -118,7 +118,7 @@ public class ComponentUtil {
      * Returns the Designate for the given pid
      */
     public static OCD getOCD(Tmetadata metadata, String pid) {
-        if (metadata.getOCD() != null && metadata.getOCD().size() > 0) {
+        if (metadata.getOCD() != null && !metadata.getOCD().isEmpty()) {
             for (OCD ocd : metadata.getOCD()) {
                 if (ocd.getId() != null && ocd.getId().equals(pid)) {
                     return ocd;
@@ -273,7 +273,7 @@ public class ComponentUtil {
         String metatypeXml = IOUtil.readResource(metatypeXmlName);
         if (metatypeXml != null) {
             Tmetadata metaData = unmarshal(metatypeXml, Tmetadata.class);
-            if (metaData.getOCD() != null && metaData.getOCD().size() > 0) {
+            if (metaData.getOCD() != null && !metaData.getOCD().isEmpty()) {
                 ocd = (Tocd) metaData.getOCD().get(0);
             } else {
                 logger.warn("Cannot find OCD for component with pid: {}", pid);
@@ -307,7 +307,7 @@ public class ComponentUtil {
         String metatypeXml = IOUtil.readResource(bundle, metatypeXmlName);
         if (metatypeXml != null) {
             Tmetadata metaData = unmarshal(metatypeXml, Tmetadata.class);
-            if (metaData.getOCD() != null && metaData.getOCD().size() > 0) {
+            if (metaData.getOCD() != null && !metaData.getOCD().isEmpty()) {
                 ocd = (Tocd) metaData.getOCD().get(0);
             }
         }

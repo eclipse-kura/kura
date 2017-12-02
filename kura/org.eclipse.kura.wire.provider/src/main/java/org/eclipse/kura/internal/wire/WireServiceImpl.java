@@ -23,6 +23,7 @@ import static org.osgi.service.wireadmin.WireConstants.WIREADMIN_PRODUCER_PID;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -84,19 +85,10 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
 
     private ServiceTracker<WireComponent, WireComponent> wireComponentServiceTracker;
 
-    private WireComponentTrackerCustomizer wireComponentTrackerCustomizer;
-
-    private final Set<WireConfiguration> wireConfigs;
-
     private volatile WireHelperService wireHelperService;
 
     private ConfigurationService configurationService;
     private BundleContext bundleContext;
-
-    public WireServiceImpl() {
-        final Set<WireConfiguration> set = CollectionUtil.newHashSet();
-        this.wireConfigs = Collections.synchronizedSet(set);
-    }
 
     /**
      * Binds the {@link WireAdmin} dependency
@@ -155,33 +147,38 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     }
 
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
-        logger.debug(message.activatingWireService());
+        logger.info(message.activatingWireService());
         this.bundleContext = componentContext.getBundleContext();
-        extractProperties(properties);
+        this.properties = properties;
 
-        this.wireComponentTrackerCustomizer = new WireComponentTrackerCustomizer(this.bundleContext, this);
+        WireComponentTrackerCustomizer wireComponentTrackerCustomizer = new WireComponentTrackerCustomizer(
+                this.bundleContext, this);
         this.wireComponentServiceTracker = new ServiceTracker<>(this.bundleContext, WireComponent.class,
-                this.wireComponentTrackerCustomizer);
-        this.wireComponentServiceTracker.open();
-
+                wireComponentTrackerCustomizer);
         createWires();
-        logger.debug(message.activatingWireServiceDone());
+
+        this.wireComponentServiceTracker.open();
+        logger.info(message.activatingWireServiceDone());
     }
 
     public void updated(final Map<String, Object> properties) {
-        logger.debug(message.updatingWireService() + properties);
-        extractProperties(properties);
+        logger.info(message.updatingWireService() + properties);
+        this.properties = properties;
+
         try {
             deleteAllWires();
         } catch (InvalidSyntaxException e) {
             logger.warn("Error deleting all wires.");
         }
+        
         createWires();
-        logger.debug(message.updatingWireServiceDone());
+
+        this.wireComponentServiceTracker.open();
+        logger.info(message.updatingWireServiceDone());
     }
 
     protected void deactivate(final ComponentContext componentContext) {
-        logger.debug(message.deactivatingWireService());
+        logger.info(message.deactivatingWireService());
         this.bundleContext = null;
         this.wireComponentServiceTracker.close();
 
@@ -192,7 +189,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
         }
 
         processExecutor.shutdownNow();
-        logger.debug(message.deactivatingWireServiceDone());
+        logger.info(message.deactivatingWireServiceDone());
     }
 
     private boolean checkWireExistence(final String emitterServicePid, final String receiverServicePid)
@@ -271,23 +268,18 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     /**
      * Create the wires based on the provided wire configurations
      */
-    void createWires() {
-        processExecutor.execute(new Runnable() {
+    synchronized void createWires() {
 
-            @Override
-            public void run() {
-                logger.debug(message.creatingWires());
-                final List<WireConfiguration> cloned = CollectionUtil.newArrayList();
-                for (final WireConfiguration wc : WireServiceImpl.this.wireConfigs) {
-                    final WireConfiguration wireConf = new WireConfiguration(wc.getEmitterPid(), wc.getReceiverPid());
-                    wireConf.setFilter(wc.getFilter());
-                    cloned.add(wireConf);
-                }
-                for (final WireConfiguration wireConfig : cloned) {
-                    createConfiguration(wireConfig);
-                }
-            }
-        });
+        Set<WireConfiguration> wireConfigurations = getWireConfigurations();
+        final List<WireConfiguration> cloned = CollectionUtil.newArrayList();
+        for (final WireConfiguration wc : wireConfigurations) {
+            final WireConfiguration wireConf = new WireConfiguration(wc.getEmitterPid(), wc.getReceiverPid());
+            wireConf.setFilter(wc.getFilter());
+            cloned.add(wireConf);
+        }
+        for (final WireConfiguration wireConfig : cloned) {
+            createConfiguration(wireConfig);
+        }
     }
 
     private synchronized void deleteAllWires() throws InvalidSyntaxException {
@@ -334,12 +326,12 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
         logger.info(message.removingWiresDone());
     }
 
-    private void extractProperties(final Map<String, Object> properties) {
-        requireNonNull(properties, message.propertiesNonNull());
+    /** {@inheritDoc} */
+    @Override
+    public Set<WireConfiguration> getWireConfigurations() {
         logger.debug(message.exectractingProp());
-        // clear the configurations first
-        this.wireConfigs.clear();
-        this.properties = properties;
+        final Set<WireConfiguration> set = CollectionUtil.newHashSet();
+        Set<WireConfiguration> wireConfigurations = Collections.synchronizedSet(set);
 
         String jsonWireGraph = (String) this.properties.get(NEW_WIRE_GRAPH_PROPERTY);
 
@@ -347,21 +339,18 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
         try {
             wireGraphConfiguration = unmarshal(jsonWireGraph, WireGraphConfiguration.class);
             for (final WireConfiguration conf : wireGraphConfiguration.getWireConfigurations()) {
-                this.wireConfigs.add(conf);
+                wireConfigurations.add(conf);
             }
         } catch (KuraException e) {
         }
         logger.debug(message.exectractingPropDone());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Set<WireConfiguration> getWireConfigurations() {
-        return this.wireConfigs;
+        return wireConfigurations;
     }
 
     @Override
     public void update(WireGraphConfiguration graphConfiguration) throws KuraException {
+        this.wireComponentServiceTracker.close();
+        
         List<ComponentConfiguration> componentConfigurations = new ArrayList<>();
 
         WireGraphConfiguration oldGraphConfig = get();

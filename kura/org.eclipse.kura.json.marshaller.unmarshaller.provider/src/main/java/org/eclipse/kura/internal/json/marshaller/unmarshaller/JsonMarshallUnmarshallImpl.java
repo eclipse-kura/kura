@@ -39,8 +39,10 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
     private static final String OUTPUT_PORT_NAMES_KEY = "outputPortNames";
     private static final String INPUT_PORT_NAMES_KEY = "inputPortNames";
     private static final String POSITION_KEY = "position";
-    private static final String RECEIVER_KEY = "receiver";
-    private static final String EMITTER_KEY = "emitter";
+    private static final String RECEIVER_PID_KEY = "receiver";
+    private static final String RECEIVER_PORT_KEY = "receiverPort";
+    private static final String EMITTER_PID_KEY = "emitter";
+    private static final String EMITTER_PORT_KEY = "emitterPort";
     private static final String WIRES_KEY = "wires";
     private static final String COMPONENTS_KEY = "components";
 
@@ -67,8 +69,10 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
     private static JsonObject marshalWireConfiguration(WireConfiguration wireConfig) {
         JsonObject result = new JsonObject();
-        result.add(EMITTER_KEY, wireConfig.getEmitterPid());
-        result.add(RECEIVER_KEY, wireConfig.getReceiverPid());
+        result.add(EMITTER_PID_KEY, wireConfig.getEmitterPid());
+        result.add(EMITTER_PORT_KEY, wireConfig.getEmitterPort());
+        result.add(RECEIVER_PID_KEY, wireConfig.getReceiverPid());
+        result.add(RECEIVER_PORT_KEY, wireConfig.getReceiverPort());
         return result;
     }
 
@@ -185,20 +189,27 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
             JsonObject jsonWireConfig = jsonIterator.next().asObject();
 
             String emitterPid = null;
+            int emitterPort = 0;
             String receiverPid = null;
+            int receiverPort = 0;
             for (JsonObject.Member member : jsonWireConfig) {
                 String name = member.getName();
                 JsonValue value = member.getValue();
-                if (EMITTER_KEY.equalsIgnoreCase(name) && value.isString()) {
+                if (EMITTER_PID_KEY.equalsIgnoreCase(name) && value.isString()) {
                     emitterPid = value.asString();
-                } else if (RECEIVER_KEY.equalsIgnoreCase(name) && value.isString()) {
+                } else if (RECEIVER_PID_KEY.equalsIgnoreCase(name) && value.isString()) {
                     receiverPid = value.asString();
+                } else if (EMITTER_PORT_KEY.equalsIgnoreCase(name) && value.isNumber()) {
+                    emitterPort = value.asInt();
+                } else if (RECEIVER_PORT_KEY.equalsIgnoreCase(name) && value.isNumber()) {
+                    receiverPort = value.asInt();
                 }
 
             }
 
             if (emitterPid != null && receiverPid != null) {
-                WireConfiguration wireConfiguration = new WireConfiguration(emitterPid, receiverPid);
+                WireConfiguration wireConfiguration = new WireConfiguration(emitterPid, emitterPort, receiverPid,
+                        receiverPort);
                 wireConfigurationList.add(wireConfiguration);
             }
         }

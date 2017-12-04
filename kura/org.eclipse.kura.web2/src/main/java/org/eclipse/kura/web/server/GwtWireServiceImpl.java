@@ -164,7 +164,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         result.setWires(wireGraphConfiguration.getWireConfigurations().stream().map(config -> {
             final GwtWireConfiguration gwtConfig = new GwtWireConfiguration();
             gwtConfig.setEmitterPid(config.getEmitterPid());
+            gwtConfig.setEmitterPort(config.getEmitterPort());
             gwtConfig.setReceiverPid(config.getReceiverPid());
+            gwtConfig.setReceiverPort(config.getReceiverPort());
             return gwtConfig;
         }).collect(Collectors.toList()));
 
@@ -227,8 +229,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                     return new WireComponentConfiguration(config, renderingProperties);
                 }).collect(Collectors.toList());
 
-        final List<WireConfiguration> wireConfigurations = gwtConfigurations.getWires().stream()
-                .map(gwtWire -> new WireConfiguration(gwtWire.getEmitterPid(), gwtWire.getReceiverPid()))
+        final List<WireConfiguration> wireConfigurations = gwtConfigurations
+                .getWires().stream().map(gwtWire -> new WireConfiguration(gwtWire.getEmitterPid(),
+                        gwtWire.getEmitterPort(), gwtWire.getReceiverPid(), gwtWire.getReceiverPort()))
                 .collect(Collectors.toList());
 
         final List<ComponentConfiguration> additionalConfigs = additionalGwtConfigs.stream().map(gwtConfig -> {

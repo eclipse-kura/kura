@@ -43,10 +43,14 @@ public class WireConfiguration {
 
     private final String emitterPid;
 
+    private final int emitterPort;
+
     @Nullable
     private String filter;
 
     private final String receiverPid;
+
+    private final int receiverPort;
 
     /** The actual {@link WireAdmin}'s {@link Wire}. */
     @Nullable
@@ -63,11 +67,27 @@ public class WireConfiguration {
      *             if any of the arguments is null
      */
     public WireConfiguration(final String emitterPid, final String receiverPid) {
+        this(emitterPid, 0, receiverPid, 0);
+    }
+
+    /**
+     * Instantiates a new {@link WireConfiguration}.
+     * 
+     * @param emitterPid the Wire Emitter PID
+     * @param emitterPort the Emitter port number
+     * @param receiverPid the Wire Receiver PID
+     * @param emitterPort the Emitter port number
+     * @since 1.4
+     */
+    public WireConfiguration(final String emitterPid, final int emitterPort, final String receiverPid,
+            final int receiverPort) {
         requireNonNull(emitterPid, "Emitter PID cannot be null");
         requireNonNull(receiverPid, "Receiver PID cannot be null");
 
         this.emitterPid = emitterPid;
+        this.emitterPort = emitterPort;
         this.receiverPid = receiverPid;
+        this.receiverPort = receiverPort;
     }
 
     /**
@@ -79,6 +99,16 @@ public class WireConfiguration {
         return this.emitterPid;
     }
 
+    /**
+     * Gets the Wire Emitter port.
+     *
+     * @return the Wire Emitter port
+     * @since 1.4
+     */
+    public int getEmitterPort() {
+        return this.emitterPort;
+    }
+    
     /**
      * Gets the associated filter.
      *
@@ -95,6 +125,16 @@ public class WireConfiguration {
      */
     public String getReceiverPid() {
         return this.receiverPid;
+    }
+    
+    /**
+     * Gets the Wire Receiver port.
+     *
+     * @return the Wire Receiver port
+     * @since 1.4
+     */
+    public int getReceiverPort() {
+        return this.receiverPort;
     }
 
     /**
@@ -125,7 +165,7 @@ public class WireConfiguration {
     public void setWire(final Wire wire) {
         this.wire = wire;
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public boolean equals(final Object obj) {
@@ -155,17 +195,16 @@ public class WireConfiguration {
         }
         return true;
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result) + ((this.emitterPid == null) ? 0 : this.emitterPid.hashCode());
-        result = (prime * result) + ((this.receiverPid == null) ? 0 : this.receiverPid.hashCode());
+        result = prime * result + (this.emitterPid == null ? 0 : this.emitterPid.hashCode());
+        result = prime * result + (this.receiverPid == null ? 0 : this.receiverPid.hashCode());
         return result;
     }
-
 
     /** {@inheritDoc} */
     @Override

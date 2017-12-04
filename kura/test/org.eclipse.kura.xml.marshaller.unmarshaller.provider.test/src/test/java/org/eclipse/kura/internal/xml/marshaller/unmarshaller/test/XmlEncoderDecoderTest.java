@@ -9,6 +9,7 @@
 package org.eclipse.kura.internal.xml.marshaller.unmarshaller.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.Map;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
+import org.eclipse.kura.core.configuration.ConfigurationServiceImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
 import org.eclipse.kura.core.configuration.metatype.Tad;
@@ -31,10 +33,13 @@ import org.eclipse.kura.core.deployment.xml.XmlBundles;
 import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
 import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
 import org.eclipse.kura.internal.xml.marshaller.unmarshaller.XmlMarshallUnmarshallImpl;
-import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class XmlEncoderDecoderTest {
+    
+    private static final Logger logger = LoggerFactory.getLogger(XmlEncoderDecoderTest.class);
 
     private static final String stringWriter = "String Writer";
     private static final String string = "String";
@@ -56,7 +61,7 @@ public class XmlEncoderDecoderTest {
             String marshalledString = xmlMarshallerImpl.marshal(xmlComponentConfigurations);
             Object unmarshalledObjectFromString = xmlMarshallerImpl.unmarshal(marshalledString,
                     XmlComponentConfigurations.class);
-            Assert.assertTrue(
+            assertTrue(
                     String.format(differentInstanceMessage, XmlComponentConfigurations.class,
                             unmarshalledObjectFromString.getClass()),
                     unmarshalledObjectFromString instanceof XmlComponentConfigurations);
@@ -113,7 +118,7 @@ public class XmlEncoderDecoderTest {
             // test Reader unmarshalling
             Object unmarshalledObjectFromStringReader = xmlMarshallerImpl.unmarshal(marshalledString,
                     XmlComponentConfigurations.class);
-            Assert.assertTrue(
+            assertTrue(
                     String.format(differentInstanceMessage, XmlComponentConfigurations.class,
                             unmarshalledObjectFromStringReader.getClass()),
                     unmarshalledObjectFromStringReader instanceof XmlComponentConfigurations);
@@ -184,8 +189,7 @@ public class XmlEncoderDecoderTest {
             String marshalledString = xmlMarshallerImpl.marshal(xmlSnapshotIdResult);
 
             for (Long value : xmlSnapshotIdResult.getSnapshotIds()) {
-                Assert.assertTrue(String.format(missingItemsMessage, value),
-                        marshalledString.contains(Long.toString(value)));
+                assertTrue(String.format(missingItemsMessage, value), marshalledString.contains(Long.toString(value)));
             }
 
         } catch (Exception e) {
@@ -203,18 +207,17 @@ public class XmlEncoderDecoderTest {
 
             XmlDeploymentPackages xmlDeploymentPackages = getSampleXmlDeploymentPackagesObject();
             String marshalledString = xmlMarshallerImpl.marshal(xmlDeploymentPackages);
-            Assert.assertTrue(
-                    String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getName()),
+            assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getName()),
                     marshalledString.contains(xmlDeploymentPackages.getDeploymentPackages()[0].getName()));
-            Assert.assertTrue(
+            assertTrue(
                     String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getVersion()),
                     marshalledString.contains(xmlDeploymentPackages.getDeploymentPackages()[0].getVersion()));
-            Assert.assertTrue(
+            assertTrue(
                     String.format(missingItemsMessage,
                             xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getName()),
                     marshalledString
                             .contains(xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getName()));
-            Assert.assertTrue(
+            assertTrue(
                     String.format(missingItemsMessage,
                             xmlDeploymentPackages.getDeploymentPackages()[0].getBundleInfos()[0].getVersion()),
                     marshalledString.contains(
@@ -233,13 +236,13 @@ public class XmlEncoderDecoderTest {
 
             XmlBundles xmlBundles = getSampleXmlBundlesObject();
             String marshalledString = xmlMarshallerImpl.marshal(xmlBundles);
-            Assert.assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getId()),
+            assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getId()),
                     marshalledString.contains(Long.toString(xmlBundles.getBundles()[0].getId())));
-            Assert.assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getName()),
+            assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getName()),
                     marshalledString.contains(xmlBundles.getBundles()[0].getName()));
-            Assert.assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getState()),
+            assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getState()),
                     marshalledString.contains(xmlBundles.getBundles()[0].getState()));
-            Assert.assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getVersion()),
+            assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getVersion()),
                     marshalledString.contains(xmlBundles.getBundles()[0].getVersion()));
 
         } catch (Exception e) {
@@ -347,7 +350,7 @@ public class XmlEncoderDecoderTest {
             boolean isStringWriter) {
         String source = isStringWriter ? stringWriter : string;
 
-        Assert.assertTrue(String.format(propertyValueDiffersMessage, name, source, orignal, unmarshalled),
+        assertTrue(String.format(propertyValueDiffersMessage, name, source, orignal, unmarshalled),
                 orignal.equals(unmarshalled));
     }
 
@@ -374,11 +377,11 @@ public class XmlEncoderDecoderTest {
         xcc.setConfigurations(ccis);
 
         String s = xmlMarshallerImpl.marshal(xcc);
-        System.err.println(s);
+        logger.info(s);
 
         XmlComponentConfigurations config1 = xmlMarshallerImpl.unmarshal(s, XmlComponentConfigurations.class);
         String s1 = xmlMarshallerImpl.marshal(config1);
-        System.err.println(s1);
+        logger.info(s1);
 
         Map<String, Object> properties1 = config1.getConfigurations().get(0).getConfigurationProperties();
         assertEquals(properties, properties1);
@@ -409,11 +412,11 @@ public class XmlEncoderDecoderTest {
         xcc.setConfigurations(ccis);
 
         String s = xmlMarshallerImpl.marshal(xcc);
-        System.err.println(s);
+        logger.info(s);
 
         XmlComponentConfigurations config1 = xmlMarshallerImpl.unmarshal(s, XmlComponentConfigurations.class);
         String s1 = xmlMarshallerImpl.marshal(config1);
-        System.err.println(s1);
+        logger.info(s1);
 
         Map<String, Object> properties1 = config1.getConfigurations().get(0).getConfigurationProperties();
         assertEquals(properties, properties1);

@@ -93,6 +93,10 @@ public class DriversAndAssetsListUi extends Composite {
             public void onSelectionChange(SelectionChangeEvent event) {
                 final DriverAssetInfo selectedInstanceEntry = DriversAndAssetsListUi.this.selectionModel
                         .getSelectedObject();
+                
+                if(selectedInstanceEntry == null) {
+                    return;
+                }
 
                 if (listener != null) {
                     listener.onSelectionChanged(selectedInstanceEntry);

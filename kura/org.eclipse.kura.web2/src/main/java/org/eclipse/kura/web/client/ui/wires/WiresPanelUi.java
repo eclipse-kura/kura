@@ -450,12 +450,6 @@ public class WiresPanelUi extends Composite
 
     public void updateDirtyState() {
         final boolean isDirty = isDirty();
-
-        if (isDirty) {
-            this.btnSave.setText(MSGS.apply() + " *");
-        } else {
-            this.btnSave.setText(MSGS.apply());
-        }
         this.btnSave.setEnabled(isDirty);
         this.btnReset.setEnabled(isDirty);
     }

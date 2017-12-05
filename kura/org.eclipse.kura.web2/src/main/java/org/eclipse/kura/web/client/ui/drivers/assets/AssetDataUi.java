@@ -20,7 +20,6 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.drivers.assets.AssetModel.ChannelModel;
-import org.eclipse.kura.web.client.ui.wires.ValidationInputCell;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtChannelRecord;
 import org.gwtbootstrap3.client.ui.Button;
@@ -30,7 +29,10 @@ import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.cell.client.TextInputCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -149,8 +151,15 @@ public class AssetDataUi extends Composite {
 
         this.assetDataTable.addColumn(c3, new TextHeader(MSGS.wiresChannelValueType()));
 
-        final ValidationInputCell cell = new ValidationInputCell();
+        final TextInputCell cell = new TextInputCell();
         final Column<AssetModel.ChannelModel, String> c4 = new Column<AssetModel.ChannelModel, String>(cell) {
+
+            @Override
+            public void onBrowserEvent(Context context, Element elem, ChannelModel object, NativeEvent event) {
+                if (!"READ".equals(object.getValue(AssetConstants.TYPE.value()))) {
+                    super.onBrowserEvent(context, elem, object, event);
+                }
+            }
 
             @Override
             public String getCellStyleNames(Context context, ChannelModel object) {

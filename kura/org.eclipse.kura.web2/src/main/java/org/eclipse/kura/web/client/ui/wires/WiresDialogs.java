@@ -1,15 +1,18 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ *******************************************************************************/
 package org.eclipse.kura.web.client.ui.wires;
 
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
-import org.eclipse.kura.web.shared.service.GwtComponentService;
-import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtWireService;
-import org.eclipse.kura.web.shared.service.GwtWireServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.ListBox;
@@ -31,10 +34,6 @@ public class WiresDialogs extends Composite {
     }
 
     private static final WiresDialogsUiBinder uiBinder = GWT.create(WiresDialogsUiBinder.class);
-
-    private static final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
-    private static final GwtWireServiceAsync gwtWireService = GWT.create(GwtWireService.class);
-    private static final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
     private static final Messages MSGS = GWT.create(Messages.class);
 

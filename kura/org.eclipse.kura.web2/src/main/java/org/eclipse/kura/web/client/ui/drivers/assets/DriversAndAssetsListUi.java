@@ -21,10 +21,6 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.ConfigurableComponentUi;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
-import org.eclipse.kura.web.shared.service.GwtAssetService;
-import org.eclipse.kura.web.shared.service.GwtAssetServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.Well;
@@ -52,9 +48,6 @@ public class DriversAndAssetsListUi extends Composite {
     }
 
     private static final Messages MSGS = GWT.create(Messages.class);
-
-    private static final GwtAssetServiceAsync gwtAssetService = GWT.create(GwtAssetService.class);
-    private static final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
     private final ListDataProvider<DriverAssetInfo> driversAssetsDataProvider = new ListDataProvider<>();
     private final SingleSelectionModel<DriverAssetInfo> selectionModel = new SingleSelectionModel<>();
@@ -93,16 +86,16 @@ public class DriversAndAssetsListUi extends Composite {
             public void onSelectionChange(SelectionChangeEvent event) {
                 final DriverAssetInfo selectedInstanceEntry = DriversAndAssetsListUi.this.selectionModel
                         .getSelectedObject();
-                
-                if(selectedInstanceEntry == null) {
-                    return;
-                }
 
                 if (listener != null) {
                     listener.onSelectionChanged(selectedInstanceEntry);
                 }
 
                 cleanConfigurationArea();
+
+                if (selectedInstanceEntry == null) {
+                    return;
+                }
 
                 HasConfiguration hasConfiguration = configurations.getConfiguration(selectedInstanceEntry.getPid());
 
@@ -252,38 +245,8 @@ public class DriversAndAssetsListUi extends Composite {
         return this.selectionModel.getSelectedObject();
     }
 
-    public static class DriverAssetInfo {
-
-        private String pid;
-        private String factoryPid;
-        private boolean isAsset;
-
-        public DriverAssetInfo(String pid, String factoryPid, boolean isAsset) {
-            this.pid = pid;
-            this.factoryPid = factoryPid;
-            this.isAsset = isAsset;
-        }
-
-        public String getPid() {
-            return pid;
-        }
-
-        public String getFactoryPid() {
-            return factoryPid;
-        }
-
-        public boolean isAsset() {
-            return isAsset;
-        }
-    }
-
     public void setListener(Listener listener) {
         this.listener = listener;
-    }
-
-    public interface Listener {
-
-        public void onSelectionChanged(DriverAssetInfo info);
     }
 
     private ConfigurationUiButtons createDriverConfigButtonBar(final ConfigurableComponentUi driverUi) {
@@ -312,6 +275,36 @@ public class DriversAndAssetsListUi extends Composite {
             }
         });
         return result;
+    }
+
+    public interface Listener {
+
+        public void onSelectionChanged(DriverAssetInfo info);
+    }
+
+    public static class DriverAssetInfo {
+
+        private String pid;
+        private String factoryPid;
+        private boolean isAsset;
+
+        public DriverAssetInfo(String pid, String factoryPid, boolean isAsset) {
+            this.pid = pid;
+            this.factoryPid = factoryPid;
+            this.isAsset = isAsset;
+        }
+
+        public String getPid() {
+            return pid;
+        }
+
+        public String getFactoryPid() {
+            return factoryPid;
+        }
+
+        public boolean isAsset() {
+            return isAsset;
+        }
     }
 
 }

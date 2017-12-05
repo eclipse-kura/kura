@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ *******************************************************************************/
 package org.eclipse.kura.web.client.ui.wires;
 
 import java.util.HashMap;
@@ -14,7 +23,6 @@ public class WireComponentDescriptors {
     public void setDescriptors(List<GwtWireComponentDescriptor> descriptors) {
         this.descriptors.clear();
         for (GwtWireComponentDescriptor desc : descriptors) {
-            log(desc);
             this.descriptors.put(desc.getFactoryPid(), desc);
         }
     }
@@ -27,15 +35,7 @@ public class WireComponentDescriptors {
         return descriptors;
     }
 
-    private native void log(Object o)
-    /*-{
-        console.log(o)
-    }-*/;
-
     public WireComponent createNewComponent(String pid, String factoryPid) {
-        log(pid);
-        log(factoryPid);
-        log(descriptors);
         final GwtWireComponentDescriptor descriptor = descriptors.get(factoryPid);
         if (descriptor == null) {
             return null;

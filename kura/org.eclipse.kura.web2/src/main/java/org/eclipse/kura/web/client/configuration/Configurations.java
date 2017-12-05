@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ *******************************************************************************/
 package org.eclipse.kura.web.client.configuration;
 
 import java.util.ArrayList;
@@ -10,7 +19,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
-import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 
 public class Configurations {
 
@@ -28,21 +36,11 @@ public class Configurations {
         return currentConfigurations.get(pid);
     }
 
-    private native void log(Object o)
-    /*-{
-        console.log(o)
-    }-*/;
-
     private GwtConfigComponent createConfigurationFromDefinition(String pid, String factoryPid,
             GwtConfigComponent definition) {
         final GwtConfigComponent cloned = new GwtConfigComponent(definition);
         cloned.setComponentId(pid);
         cloned.setFactoryPid(factoryPid);
-        for (GwtConfigParameter param : cloned.getParameters()) {
-            log(param.getName());
-            log(param.getDefault());
-            log(param.getValue());
-        }
         return cloned;
     }
 
@@ -200,6 +198,10 @@ public class Configurations {
         this.allActivePids.addAll(allActivePids);
     }
 
+    public boolean isPidExisting(String pid) {
+        return currentConfigurations.containsKey(pid) || allActivePids.contains(pid);
+    }
+
     private class ConfigurationWrapper implements HasConfiguration {
 
         private boolean isDirty;
@@ -237,9 +239,5 @@ public class Configurations {
         @Override
         public void setListener(Listener listener) {
         }
-    }
-
-    public boolean isPidExisting(String pid) {
-        return currentConfigurations.containsKey(pid) || allActivePids.contains(pid);
     }
 }

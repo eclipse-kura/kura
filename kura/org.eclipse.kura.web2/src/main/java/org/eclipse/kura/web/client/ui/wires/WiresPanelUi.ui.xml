@@ -26,14 +26,6 @@
     	height: 60vh;
     }
     
-    .asset-comp-modal-header {
-    	display: none;
-    }
-    
-    .asset-comp-modal-body {
-    	padding-bottom: 40px;
-    }
-    
     .composer-body {
 		padding-left: 0px;
 	}

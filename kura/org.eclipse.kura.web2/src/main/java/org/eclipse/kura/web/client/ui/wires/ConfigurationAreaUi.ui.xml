@@ -19,26 +19,10 @@
     xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
     <ui:style>
-    .important {
-    	font-weight: bold;
-    }
-    
-    .asset-comp-modal-header {
-    	display: none;
-    }
-    
-    .asset-comp-modal-body {
-    	padding-bottom: 40px;
-    }
-    
     .center-panel {
     	height: 100%;
     	padding: 0px;
     	border: none;
-    }
-    
-    .drivers-list {
-    	padding-bottom: 30px;
     }
     </ui:style>
 

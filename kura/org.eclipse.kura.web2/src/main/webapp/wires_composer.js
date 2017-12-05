@@ -62,27 +62,19 @@ var WireComposer = function (element) {
 		}
 		link.attributes.wire = wire
 		if (!link.attributes.wire) {
-			console.log('wire created:')
-			console.log(wire)
 			self.dispatchWireCreated(wire)
 		} else {
-			console.log('wire changed:')
-			console.log(wire)
 			self.dispatchWireChanged(wire)
 		}
 	});
 	
 	this.graph.on('remove', function (cell) {
 		if (cell.attributes.wireComponent) {
-			console.log('wire component deleted:')
-			console.log(cell.attributes.wireComponent)
 			if (self.selectedComponent === cell.attributes.wireComponent) {
 				self.deselectWireComponent()
 			}
 			self.dispatchWireComponentDeleted(cell.attributes.wireComponent)
 		} else if (cell.attributes.wire) {
-			console.log('wire deleted:')
-			console.log(cell.attributes.wire)
 			self.dispatchWireDeleted(cell.attributes.wire)
 		}
 	})

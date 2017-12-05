@@ -33,7 +33,6 @@ import org.eclipse.kura.web.client.ui.wires.composer.WireComponent;
 import org.eclipse.kura.web.client.ui.wires.composer.WireComposer;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
-import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtWireComponentConfiguration;
 import org.eclipse.kura.web.shared.model.GwtWireComponentDescriptor;
 import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
@@ -57,6 +56,16 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class WiresPanelUi extends Composite
         implements WireComposer.Listener, HasConfiguration.Listener, WiresDialogs.Listener {
+
+    private static final WiresPanelUiUiBinder uiBinder = GWT.create(WiresPanelUiUiBinder.class);
+
+    private static final Messages MSGS = GWT.create(Messages.class);
+
+    static final String WIRE_ASSET = "WireAsset";
+    static final String FACTORY_PID_DROP_PREFIX = "factory://";
+    private static final String ASSET_DESCRIPTION_PROP = "asset.desc";
+    private static final String WIRE_ASSET_PID = "org.eclipse.kura.wire.WireAsset";
+    private static final String DRIVER_PID = "driver.pid";
 
     @UiField
     Button btnSave;
@@ -95,21 +104,8 @@ public class WiresPanelUi extends Composite
     @UiField
     AlertDialog confirmDialog;
 
-    static final String WIRE_ASSET = "WireAsset";
-
     interface WiresPanelUiUiBinder extends UiBinder<Widget, WiresPanelUi> {
     }
-
-    private static final WiresPanelUiUiBinder uiBinder = GWT.create(WiresPanelUiUiBinder.class);
-
-    private static final Messages MSGS = GWT.create(Messages.class);
-
-    static final String FACTORY_PID_DROP_PREFIX = "factory://";
-
-    private static final String TEMPORARY_ASSET_REG_EXP = "^[0-9]{14}$";
-    private static final String ASSET_DESCRIPTION_PROP = "asset.desc";
-    private static final String WIRE_ASSET_PID = "org.eclipse.kura.wire.WireAsset";
-    private static final String DRIVER_PID = "driver.pid";
 
     private List<String> components;
     private final Map<String, GwtConfigComponent> configs = new HashMap<>();
@@ -301,16 +297,11 @@ public class WiresPanelUi extends Composite
         }
     }
 
-    private native void log(Object o) /*-{
-                                      console.log(o)
-                                      }-*/;
-
     private void loadStaticInformation(GwtWireComposerStaticInfo staticInfo) {
         this.configurations.setChannelDescriptiors(staticInfo.getDriverDescriptors());
         this.configurations.setBaseChannelDescriptor(staticInfo.getBaseChannelDescriptor());
         this.configurations.setComponentDefinitions(staticInfo.getComponentDefinitions());
         this.descriptors.setDescriptors(staticInfo.getWireComponentDescriptors());
-        log("channel descriptors: " + staticInfo.getDriverDescriptors().toString());
         this.dialogs.setDriverFactoryPids(configurations.getDriverFactoryPids());
         populateComponentsPanel();
     }
@@ -340,7 +331,6 @@ public class WiresPanelUi extends Composite
         final List<GwtWireComponentConfiguration> wireComponentConfigurations = new ArrayList<>();
 
         for (WireComponent component : wireComposer.getWireComponents()) {
-            logConfiguration(configurations.getConfiguration(component.getPid()).getConfiguration());
             wireComponentConfigurations
                     .add(component.toGwt(configurations.getConfiguration(component.getPid()).getConfiguration()));
         }
@@ -485,13 +475,6 @@ public class WiresPanelUi extends Composite
         updateDirtyState();
     }
 
-    private void logConfiguration(GwtConfigComponent config) {
-        for (GwtConfigParameter param : config.getParameters()) {
-            log(param.getId());
-            log(param.getValue());
-        }
-    }
-
     @Override
     public void onWireComponentSelected(WireComponent component) {
         this.btnDelete.setEnabled(true);
@@ -559,7 +542,6 @@ public class WiresPanelUi extends Composite
 
     @Override
     public void onConfigurationChanged(HasConfiguration newConfiguration) {
-        log("configuration updated");
         this.configurations.setConfiguration(newConfiguration);
         updateDirtyState();
     }

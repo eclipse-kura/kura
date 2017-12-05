@@ -209,6 +209,7 @@ public class ModemDriver {
         }
         boolean retVal = true;
         int remainingAttempts = 5;
+        final long turnOnDelay = getTurnOnDelay();
         while (!isOn()) {
             if (remainingAttempts <= 0) {
                 retVal = false;
@@ -274,7 +275,7 @@ public class ModemDriver {
                 break;
             }
             remainingAttempts--;
-            sleep(10000);
+            sleep(turnOnDelay);
         }
 
         logger.info("turnModemOn() :: Modem is ON? - {}", retVal);
@@ -477,6 +478,14 @@ public class ModemDriver {
             return usbModemInfo.getTurnOffDelay();
         }
         return 5000;
+    }
+    
+    private long getTurnOnDelay() {
+        final SupportedUsbModemInfo usbModemInfo = getSupportedUsbModemInfo();
+        if (usbModemInfo != null) {
+            return usbModemInfo.getTurnOnDelay();
+        }
+        return 10000;
     }
 
     private boolean isOn() throws KuraException {

@@ -34,6 +34,12 @@ joint.shapes.customLink.Element = joint.dia.Link.extend({
 		}, joint.dia.Link.prototype.defaults)
 	});
 
+window.requestAnimationFrame = window.requestAnimationFrame || function (callback) { 
+	setTimeout(function () {
+		callback(new Date().getTime())
+	}, 1000/30)
+} 
+
 var WireComposer = function (element) {
 	
 	var self = this
@@ -540,8 +546,8 @@ var DragHandler = function (composer) {
 		this.dndHelper.dragExitHandler = function (event) {
 			self.abort()
 		}
-		this.dndHelper.dropHandler = function(event) { 
-			self.onDrop(event.dataTransfer.getData('text'), event.clientX, event.clientY)
+		this.dndHelper.dropHandler = function(event) {
+			self.onDrop(event.dataTransfer.getData('Text'), event.clientX, event.clientY)
 			return true
 		}
 	}

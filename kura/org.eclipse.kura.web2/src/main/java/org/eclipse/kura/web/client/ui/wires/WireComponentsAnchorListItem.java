@@ -42,7 +42,7 @@ public class WireComponentsAnchorListItem extends AnchorListItem {
 
                 @Override
                 public void onDragStart(DragEvent event) {
-                    event.setData("text/plain", WiresPanelUi.FACTORY_PID_DROP_PREFIX + factoryPid);
+                    event.setTextData(WiresPanelUi.FACTORY_PID_DROP_PREFIX + factoryPid);
                 }
             });
         }

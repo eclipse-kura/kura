@@ -196,7 +196,7 @@
 									<version>${slf4j.jdk14.version}</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>log4j</groupId>
+									<groupId>org.eclipse.kura</groupId>
 									<artifactId>log4j.apache-log4j-extras</artifactId>
 									<version>${log4j.apache-log4j-extras.version}</version>
 								</artifactItem>

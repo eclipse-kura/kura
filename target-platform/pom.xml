@@ -22,7 +22,8 @@
         <module>com.gwt.user</module>
         <module>tinyb-parent</module>
         <module>moquette-broker</module>
-        <module>p2-repo-common</module>
+        <module>apache.log4j.extras</module>
+		<module>p2-repo-common</module>
         <module>p2-repo-equinox_3.11.1</module>
         <module>p2-repo-test-deps</module>
     </modules>

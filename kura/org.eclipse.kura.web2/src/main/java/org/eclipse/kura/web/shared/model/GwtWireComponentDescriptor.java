@@ -20,19 +20,23 @@ public final class GwtWireComponentDescriptor extends GwtBaseModel implements Se
 
     private int minInputPorts;
     private int maxInputPorts;
+    private int defaultInputPorts;
     private int minOutputPorts;
     private int maxOutputPorts;
+    private int defaultOutputPorts;
 
     public GwtWireComponentDescriptor() {
     }
 
-    public GwtWireComponentDescriptor(String factoryPid, int minInputPorts, int maxInputPorts, int minOutputPorts,
-            int maxOutputPorts) {
+    public GwtWireComponentDescriptor(String factoryPid, int minInputPorts, int maxInputPorts, int defaultInputPorts, int minOutputPorts,
+            int maxOutputPorts, int defaultOutputPorts) {
         this.factoryPid = factoryPid;
         this.minInputPorts = minInputPorts;
         this.maxInputPorts = maxInputPorts;
         this.minOutputPorts = minOutputPorts;
         this.maxOutputPorts = maxOutputPorts;
+        this.defaultInputPorts = defaultInputPorts;
+        this.defaultOutputPorts = defaultOutputPorts;
     }
 
     public String getFactoryPid() {
@@ -54,6 +58,14 @@ public final class GwtWireComponentDescriptor extends GwtBaseModel implements Se
     public int getMaxOutputPorts() {
         return maxOutputPorts;
     }
+    
+    public int getDefaultInputPorts() {
+        return defaultInputPorts;
+    }
+
+    public int getDefaultOutputPorts() {
+        return defaultOutputPorts;
+    }
 
     public void setFactoryPid(String factoryPid) {
         this.factoryPid = factoryPid;
@@ -74,5 +86,12 @@ public final class GwtWireComponentDescriptor extends GwtBaseModel implements Se
     public void setMaxOutputPorts(int maxOutputPorts) {
         this.maxOutputPorts = maxOutputPorts;
     }
+    
+    public void setDefaultInputPorts(int defaultInputPorts) {
+        this.defaultInputPorts = defaultInputPorts;
+    }
 
+    public void setDefaultOutputPorts(int defaultOutputPorts) {
+        this.defaultOutputPorts = defaultOutputPorts;
+    }
 }

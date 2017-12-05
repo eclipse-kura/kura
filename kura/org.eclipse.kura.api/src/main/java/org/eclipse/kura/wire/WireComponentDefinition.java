@@ -31,7 +31,7 @@ public class WireComponentDefinition {
     private Map<Integer, String> outputPortNames;
 
     private OCD componentOCD;
-
+    
     public String getFactoryPid() {
         return this.factoryPid;
     }

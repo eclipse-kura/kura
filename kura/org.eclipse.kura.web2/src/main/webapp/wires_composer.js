@@ -196,6 +196,16 @@ WireComposer.prototype.addWireComponent = function (component) {
 	var self = this
 	var position = component.renderingProperties.position
 	
+	var inputPorts = [];
+	for (i = 0; i < component.inputPortCount; i++) { 
+		inputPorts.push("");
+	}
+	
+	var outputPorts = [];
+	for (i = 0; i < component.outputPortCount; i++) { 
+		outputPorts.push("");
+	}
+	
 	if (!position) {
 		position = this.getNewComponentCoords()
 		component.renderingProperties.position = position
@@ -214,8 +224,8 @@ WireComposer.prototype.addWireComponent = function (component) {
 				'ry' : 6
 			}
 		},
-		inPorts : component.inputPortCount > 0 ? [""] : [],
-		outPorts : component.outputPortCount > 0 ? [""] : [],
+		inPorts : inputPorts,
+		outPorts : outputPorts,
 		wireComponent: component
 	})
 

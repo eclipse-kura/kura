@@ -13,6 +13,9 @@
  *******************************************************************************/
 package org.eclipse.kura.wire;
 
+import java.util.List;
+
+import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -99,5 +102,10 @@ public interface WireHelperService {
      *             if the argument is null
      */
     public WireSupport newWireSupport(WireComponent wireComponent);
+    
+    /**
+     * @since 1.4
+     */
+    public List<WireComponentDefinition> getComponentDefinitions() throws KuraException;
 
 }

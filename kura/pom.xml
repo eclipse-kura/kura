@@ -90,6 +90,8 @@
         <module>org.eclipse.kura.misc.cloudcat</module>
         <module>org.eclipse.kura.json.marshaller.unmarshaller.provider</module>
         <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider</module>
+        
+        <module>org.eclipse.kura.wire.component.conditional.provider</module>
 
         <module>features</module>
         <module>emulator</module>

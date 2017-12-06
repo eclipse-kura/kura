@@ -16,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.regex.Matcher;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
@@ -314,7 +315,6 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 
     private String updateWPA(WifiConfig wifiConfig, String fileAsString) throws KuraException {
         String result = fileAsString;
-
         String passKey = new String(wifiConfig.getPasskey().getPassword());
         if (passKey.trim().length() > 0) {
             if (passKey.length() < 8 || passKey.length() > 63) {
@@ -322,7 +322,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
                         "the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: "
                                 + passKey);
             } else {
-                result = result.replaceFirst("KURA_PASSPHRASE", passKey.trim());
+                result = result.replaceFirst("KURA_PASSPHRASE", Matcher.quoteReplacement(passKey.trim()));
             }
         } else {
             throw KuraException.internalError("the passwd can not be null");
@@ -370,7 +370,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         String result;
 
         if (wifiConfig.getSSID() != null) {
-            result = fileAsString.replaceFirst("KURA_ESSID", wifiConfig.getSSID());
+            result = fileAsString.replaceFirst("KURA_ESSID", Matcher.quoteReplacement(wifiConfig.getSSID()));
         } else {
             throw KuraException.internalError("the essid can not be null");
         }

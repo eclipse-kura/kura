@@ -54,7 +54,6 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.net.NetInterfaceStatus;
-import org.eclipse.kura.net.admin.event.FirewallConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.dhcp.DhcpServerCfg;
 import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
@@ -531,8 +530,6 @@ public class NetworkAdminServiceImplTest {
         nasi.setNetworkConfigurationService(networkConfigurationServiceMock);
 
         String interfaceName = "intf";
-        String passkey = "pass";
-
         Map<String, Object> props = new HashMap<>();
         props.put("net.interfaces", "intf");
         props.put("net.interface.intf.type", "ETHERNET");
@@ -753,7 +750,7 @@ public class NetworkAdminServiceImplTest {
         List<NetConfig> netConfigs = new ArrayList<>();
 
         NetConfigIP4 ipConfig = new NetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true);
-        ipConfig.setAddress((IP4Address) IP4Address.parseHostAddress("10.10.10.5"));
+        ipConfig.setAddress((IP4Address) IPAddress.parseHostAddress("10.10.10.5"));
         netConfigs.add(ipConfig);
 
         netInterfaceAddressConfig.setNetConfigs(netConfigs);
@@ -1482,7 +1479,6 @@ public class NetworkAdminServiceImplTest {
 
         String interfaceName = "wlan3";
 
-        List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs;
         NetworkConfigurationService ncsMock = mock(NetworkConfigurationService.class);
         svc.setNetworkConfigurationService(ncsMock);
 
@@ -1581,29 +1577,6 @@ public class NetworkAdminServiceImplTest {
 
             assertEquals(i, result);
         }
-    }
-
-    @Test(timeout = 2500)
-    public void testSubmitFirewallConfiguration() throws Throwable {
-        // this is to test that submitFirewallConfiguration works with handleEvent and that timeout won't happen
-
-        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
-
-        ConfigurationService csMock = mock(ConfigurationService.class);
-        svc.setConfigurationService(csMock);
-
-        new Thread(() -> {
-            try {
-                Thread.sleep(600);
-            } catch (InterruptedException e) {
-            }
-
-            svc.handleEvent(new FirewallConfigurationChangeEvent(null));
-        }).start();
-
-        TestUtil.invokePrivate(svc, "submitFirewallConfiguration");
-
-        verify(csMock, times(1)).snapshot();
     }
 
     @Test

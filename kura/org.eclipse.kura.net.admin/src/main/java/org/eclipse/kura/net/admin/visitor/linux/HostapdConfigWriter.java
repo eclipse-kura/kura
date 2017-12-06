@@ -16,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.regex.Matcher;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
@@ -220,7 +221,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
                         "the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: "
                                 + wifiConfig.getPasskey());
             } else {
-                fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", passKey.trim());
+                fileAsString = fileAsString.replaceFirst("KURA_PASSPHRASE", Matcher.quoteReplacement(passKey.trim()));
             }
         } else {
             throw KuraException.internalError("the passwd can not be null");
@@ -276,7 +277,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
     private String updateSsid(WifiConfig wifiConfig, String fileAsString) throws KuraException {
         if (wifiConfig.getSSID() != null) {
-            fileAsString = fileAsString.replaceFirst("KURA_ESSID", wifiConfig.getSSID());
+            fileAsString = fileAsString.replaceFirst("KURA_ESSID", Matcher.quoteReplacement(wifiConfig.getSSID()));
         } else {
             throw KuraException.internalError("the essid can not be null");
         }

@@ -189,9 +189,9 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
             JsonObject jsonWireConfig = jsonIterator.next().asObject();
 
             String emitterPid = null;
-            int emitterPort = 0;
+            String emitterPort = "in0";
             String receiverPid = null;
-            int receiverPort = 0;
+            String receiverPort = "out0";
             for (JsonObject.Member member : jsonWireConfig) {
                 String name = member.getName();
                 JsonValue value = member.getValue();
@@ -199,10 +199,10 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
                     emitterPid = value.asString();
                 } else if (RECEIVER_PID_KEY.equalsIgnoreCase(name) && value.isString()) {
                     receiverPid = value.asString();
-                } else if (EMITTER_PORT_KEY.equalsIgnoreCase(name) && value.isNumber()) {
-                    emitterPort = value.asInt();
-                } else if (RECEIVER_PORT_KEY.equalsIgnoreCase(name) && value.isNumber()) {
-                    receiverPort = value.asInt();
+                } else if (EMITTER_PORT_KEY.equalsIgnoreCase(name) && value.isString()) {
+                    emitterPort = value.asString();
+                } else if (RECEIVER_PORT_KEY.equalsIgnoreCase(name) && value.isString()) {
+                    receiverPort = value.asString();
                 }
 
             }

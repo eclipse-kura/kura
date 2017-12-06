@@ -27,12 +27,12 @@ public final class Wire extends JavaScriptObject {
         return this.receiverPid
     }-*/;
 
-    public native int getEmitterPort()
+    public native String getEmitterPort()
     /*-{
         return this.emitterPort
     }-*/;
 
-    public native int getReceiverPort()
+    public native String getReceiverPort()
     /*-{
         return this.receiverPort
     }-*/;
@@ -47,12 +47,12 @@ public final class Wire extends JavaScriptObject {
         this.receiverPid = receiverPid
     }-*/;
 
-    public native void setEmitterPort(int emitterPort)
+    public native void setEmitterPort(String emitterPort)
     /*-{
         this.emitterPort = emitterPort
     }-*/;
 
-    public native void setReceiverPort(int receiverPort)
+    public native void setReceiverPort(String receiverPort)
     /*-{
         this.receiverPort = receiverPort
     }-*/;
@@ -62,7 +62,9 @@ public final class Wire extends JavaScriptObject {
         final Wire result = Wire.create();
 
         result.setEmitterPid(config.getEmitterPid());
+        result.setEmitterPort(config.getEmitterPort());
         result.setReceiverPid(config.getReceiverPid());
+        result.setReceiverPort(config.getReceiverPort());
 
         return result;
     }
@@ -71,7 +73,9 @@ public final class Wire extends JavaScriptObject {
         final GwtWireConfiguration result = new GwtWireConfiguration();
 
         result.setEmitterPid(getEmitterPid());
+        result.setEmitterPort(getEmitterPort());
         result.setReceiverPid(getReceiverPid());
+        result.setReceiverPort(getReceiverPort());
 
         return result;
     }

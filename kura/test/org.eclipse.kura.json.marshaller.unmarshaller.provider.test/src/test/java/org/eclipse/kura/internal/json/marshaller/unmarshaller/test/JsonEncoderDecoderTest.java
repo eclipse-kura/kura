@@ -284,7 +284,7 @@ public class JsonEncoderDecoderTest {
                 wireConfig);
         assertNotNull(result);
 
-        String expected = "{\"emitter\":\"emitterPid\",\"emitterPort\":0,\"receiver\":\"receiverPid\",\"receiverPort\":0}";
+        String expected = "{\"emitter\":\"emitterPid\",\"emitterPort\":\"out0\",\"receiver\":\"receiverPid\",\"receiverPort\":\"in0\"}";
         assertEquals(expected, result.toString());
     }
 
@@ -315,7 +315,7 @@ public class JsonEncoderDecoderTest {
 
         assertNotNull(result);
 
-        String expected = "[{\"emitter\":\"emitterPid\",\"emitterPort\":0,\"receiver\":\"receiverPid\",\"receiverPort\":0}]";
+        String expected = "[{\"emitter\":\"emitterPid\",\"emitterPort\":\"out0\",\"receiver\":\"receiverPid\",\"receiverPort\":\"in0\"}]";
         assertEquals(expected, result.toString());
     }
 
@@ -334,7 +334,7 @@ public class JsonEncoderDecoderTest {
 
         assertNotNull(result);
 
-        String expected = "[{\"emitter\":\"emitterPid\",\"emitterPort\":0,\"receiver\":\"receiverPid\",\"receiverPort\":0},{\"emitter\":\"foo\",\"emitterPort\":0,\"receiver\":\"bar\",\"receiverPort\":0}]";
+        String expected = "[{\"emitter\":\"emitterPid\",\"emitterPort\":\"out0\",\"receiver\":\"receiverPid\",\"receiverPort\":\"in0\"},{\"emitter\":\"foo\",\"emitterPort\":\"out0\",\"receiver\":\"bar\",\"receiverPort\":\"in0\"}]";
         assertEquals(expected, result.toString());
     }
 
@@ -460,7 +460,7 @@ public class JsonEncoderDecoderTest {
 
         assertNotNull(result);
 
-        String expected = "{\"components\":[{\"pid\":\"emitterPid\",\"inputPortCount\":0,\"outputPortCount\":5,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":100},\"inputPortNames\":{\"0\":\"resetPort\"},\"outputPortNames\":{\"3\":\"then\"}}},{\"pid\":\"receiverPid\",\"inputPortCount\":0,\"outputPortCount\":5,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":100},\"inputPortNames\":{\"0\":\"resetPort\"},\"outputPortNames\":{\"3\":\"then\"}}}],\"wires\":[{\"emitter\":\"emitterPid\",\"emitterPort\":0,\"receiver\":\"receiverPid\",\"receiverPort\":0}]}";
+        String expected = "{\"components\":[{\"pid\":\"emitterPid\",\"inputPortCount\":0,\"outputPortCount\":5,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":100},\"inputPortNames\":{\"0\":\"resetPort\"},\"outputPortNames\":{\"3\":\"then\"}}},{\"pid\":\"receiverPid\",\"inputPortCount\":0,\"outputPortCount\":5,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":100},\"inputPortNames\":{\"0\":\"resetPort\"},\"outputPortNames\":{\"3\":\"then\"}}}],\"wires\":[{\"emitter\":\"emitterPid\",\"emitterPort\":\"out0\",\"receiver\":\"receiverPid\",\"receiverPort\":\"in0\"}]}";
         assertEquals(expected, result.toString());
     }
 

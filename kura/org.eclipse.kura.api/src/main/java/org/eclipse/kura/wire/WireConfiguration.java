@@ -43,14 +43,14 @@ public class WireConfiguration {
 
     private final String emitterPid;
 
-    private final int emitterPort;
+    private final String emitterPort;
 
     @Nullable
     private String filter;
 
     private final String receiverPid;
 
-    private final int receiverPort;
+    private final String receiverPort;
 
     /** The actual {@link WireAdmin}'s {@link Wire}. */
     @Nullable
@@ -67,7 +67,7 @@ public class WireConfiguration {
      *             if any of the arguments is null
      */
     public WireConfiguration(final String emitterPid, final String receiverPid) {
-        this(emitterPid, 0, receiverPid, 0);
+        this(emitterPid, "out0", receiverPid, "in0");
     }
 
     /**
@@ -79,8 +79,8 @@ public class WireConfiguration {
      * @param emitterPort the Emitter port number
      * @since 1.4
      */
-    public WireConfiguration(final String emitterPid, final int emitterPort, final String receiverPid,
-            final int receiverPort) {
+    public WireConfiguration(final String emitterPid, final String emitterPort, final String receiverPid,
+            final String receiverPort) {
         requireNonNull(emitterPid, "Emitter PID cannot be null");
         requireNonNull(receiverPid, "Receiver PID cannot be null");
 
@@ -105,7 +105,7 @@ public class WireConfiguration {
      * @return the Wire Emitter port
      * @since 1.4
      */
-    public int getEmitterPort() {
+    public String getEmitterPort() {
         return this.emitterPort;
     }
     
@@ -133,7 +133,7 @@ public class WireConfiguration {
      * @return the Wire Receiver port
      * @since 1.4
      */
-    public int getReceiverPort() {
+    public String getReceiverPort() {
         return this.receiverPort;
     }
 

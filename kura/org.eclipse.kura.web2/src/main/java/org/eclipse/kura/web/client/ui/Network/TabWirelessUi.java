@@ -458,7 +458,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         }
 
-        this.ssid.setValue(this.activeConfig.getWirelessSsid());
+        this.ssid.setValue(GwtSafeHtmlUtils.htmlUnescape(this.activeConfig.getWirelessSsid()));
 
         // ------------
 

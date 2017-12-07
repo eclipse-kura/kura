@@ -38,9 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLStreamException;
-
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
 import org.eclipse.kura.KuraErrorCode;
@@ -55,7 +52,6 @@ import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.xml.marshaller.unmarshaller.XmlMarshallUnmarshallImpl;
 import org.eclipse.kura.system.SystemService;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
@@ -1824,7 +1820,7 @@ public class ConfigurationServiceTest {
             String getSnapshotsDirectory() {
                 return dir;
             }
-            
+
             @Override
             protected <T> T unmarshal(String xmlString, Class<T> clazz) throws KuraException {
                 XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
@@ -3115,31 +3111,9 @@ public class ConfigurationServiceTest {
             List<Tocd> registeredOcds, List<Component> registeredComponents) throws NoSuchFieldException {
 
         assertEquals(registeredFactories.size(), registeredOcds.size());
-        ScrService scrService = new ScrService() {
-
-            @Override
-            public Component[] getComponents(Bundle bundle) {
-                // TODO Auto-generated method stub
-                return null;
-            }
-
-            @Override
-            public Component[] getComponents(String componentName) {
-                // TODO Auto-generated method stub
-                return null;
-            }
-
-            @Override
-            public Component[] getComponents() {
-                return registeredComponents.toArray(new Component[registeredComponents.size()]);
-            }
-
-            @Override
-            public Component getComponent(long componentId) {
-                // TODO Auto-generated method stub
-                return null;
-            }
-        };
+        ScrService scrService = mock(ScrService.class);
+        when(scrService.getComponents())
+                .thenReturn(registeredComponents.toArray(new Component[registeredComponents.size()]));
 
         final ConfigurationServiceImpl result = new ConfigurationServiceImpl();
         result.setScrService(scrService);

@@ -10,8 +10,10 @@
  *  Eurotech
  *
  *******************************************************************************/
-package org.eclipse.kura.driver;
+package org.eclipse.kura.driver.descriptor;
 
+import org.eclipse.kura.driver.ChannelDescriptor;
+import org.eclipse.kura.driver.Driver;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**

@@ -12,22 +12,15 @@
 
 package org.eclipse.kura.driver.block.test;
 
-import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.osgi.service.cm.ConfigurationAdmin.SERVICE_FACTORYPID;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.core.testutil.TestUtil;
-import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
-import org.eclipse.kura.driver.DriverDescriptor;
 import org.eclipse.kura.driver.DriverService;
 import org.eclipse.kura.internal.driver.DriverServiceImpl;
 import org.junit.Test;
@@ -63,129 +56,6 @@ public class DriverServiceImplTest {
         assertNotNull(driverList);
         assertEquals(1, driverList.size());
         assertEquals(driverInstance, driverList.get(0));
-    }
-
-    @Test
-    public void testNewDriverDescriptor() throws Throwable {
-        Driver driver = mock(Driver.class);
-
-        AD adVal = mock(AD.class);
-        List<AD> adChannelDescriptor = new ArrayList<>();
-        adChannelDescriptor.add(adVal);
-
-        ChannelDescriptor channelDescriptor = mock(ChannelDescriptor.class);
-
-        when(driver.getChannelDescriptor()).thenReturn(channelDescriptor);
-        when(channelDescriptor.getDescriptor()).thenReturn(adChannelDescriptor);
-
-        String kuraServicePid = "kuraPid";
-        String factoryPid = "factoryPid";
-
-        DriverService driverService = new DriverServiceImpl();
-        DriverDescriptor driverDescriptor = (DriverDescriptor) TestUtil.invokePrivate(driverService,
-                "newDriverDescriptor", kuraServicePid, factoryPid, driver);
-
-        assertEquals(kuraServicePid, driverDescriptor.getPid());
-        assertEquals(factoryPid, driverDescriptor.getFactoryPid());
-        assertEquals(adChannelDescriptor, driverDescriptor.getChannelDescriptor());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testGetDriverDescriptorNullPid() {
-        DriverService driverService = new DriverServiceImpl();
-        driverService.getDriverDescriptor(null);
-    }
-
-    @Test
-    public void testGetDriverDescriptorNotMatchingPid() {
-        DriverService driverService = getDriverServiceImplEmptyDriverServiceReferenceArray();
-
-        Optional<DriverDescriptor> result = driverService.getDriverDescriptor("fakePid");
-
-        assertNotNull(result);
-        assertEquals(false, result.isPresent());
-
-    }
-
-    @Test
-    public void testGetDriverDescriptorMatchingPid() throws NoSuchFieldException {
-        ServiceReference<Driver> driverSr = mock(ServiceReference.class);
-
-        DriverService driverService = getDriverServiceImplOneElementDriverServiceReferenceArray(driverSr);
-
-        BundleContext context = mock(BundleContext.class);
-        TestUtil.setFieldValue(driverService, "bundleContext", context);
-
-        Driver driverInstance = mock(Driver.class);
-        AD adVal = mock(AD.class);
-        List<AD> adChannelDescriptor = new ArrayList<>();
-        adChannelDescriptor.add(adVal);
-
-        ChannelDescriptor channelDescriptor = mock(ChannelDescriptor.class);
-
-        String kuraServicePid = "fakePid";
-        String factoryPid = "factoryPid";
-
-        when(context.getService(driverSr)).thenReturn(driverInstance);
-        when(driverSr.getProperty(SERVICE_FACTORYPID)).thenReturn(factoryPid);
-        when(driverInstance.getChannelDescriptor()).thenReturn(channelDescriptor);
-        when(channelDescriptor.getDescriptor()).thenReturn(adChannelDescriptor);
-
-        Optional<DriverDescriptor> result = driverService.getDriverDescriptor(kuraServicePid);
-
-        assertNotNull(result);
-        assertEquals(true, result.isPresent());
-
-        DriverDescriptor driverDescriptor = result.get();
-        assertEquals(kuraServicePid, driverDescriptor.getPid());
-        assertEquals(factoryPid, driverDescriptor.getFactoryPid());
-        assertEquals(adChannelDescriptor, driverDescriptor.getChannelDescriptor());
-    }
-
-    @Test
-    public void testListDriverDescriptorEmptyDrivers() {
-
-        DriverService driverService = getDriverServiceImplEmptyDriverServiceReferenceArray();
-
-        List<DriverDescriptor> driverList = driverService.listDriverDescriptors();
-        assertNotNull(driverList);
-        assertEquals(0, driverList.size());
-    }
-
-    @Test
-    public void testListDriverDescrptorOneDriver() throws NoSuchFieldException {
-        ServiceReference<Driver> driverSr = mock(ServiceReference.class);
-
-        DriverService driverService = getDriverServiceImplOneElementDriverServiceReferenceArray(driverSr);
-        BundleContext context = mock(BundleContext.class);
-        TestUtil.setFieldValue(driverService, "bundleContext", context);
-
-        Driver driverInstance = mock(Driver.class);
-        AD adVal = mock(AD.class);
-        List<AD> adChannelDescriptor = new ArrayList<>();
-        adChannelDescriptor.add(adVal);
-
-        ChannelDescriptor channelDescriptor = mock(ChannelDescriptor.class);
-
-        String kuraServicePid = "fakePid";
-        String factoryPid = "factoryPid";
-
-        when(context.getService(driverSr)).thenReturn(driverInstance);
-        when(driverSr.getProperty(KURA_SERVICE_PID)).thenReturn(kuraServicePid);
-        when(driverSr.getProperty(SERVICE_FACTORYPID)).thenReturn(factoryPid);
-        when(driverInstance.getChannelDescriptor()).thenReturn(channelDescriptor);
-        when(channelDescriptor.getDescriptor()).thenReturn(adChannelDescriptor);
-
-        when(context.getService(driverSr)).thenReturn(driverInstance);
-
-        List<DriverDescriptor> driverDescriptorList = driverService.listDriverDescriptors();
-        assertNotNull(driverDescriptorList);
-        assertEquals(1, driverDescriptorList.size());
-
-        DriverDescriptor driverDescriptor = driverDescriptorList.get(0);
-        assertEquals(kuraServicePid, driverDescriptor.getPid());
-        assertEquals(factoryPid, driverDescriptor.getFactoryPid());
-        assertEquals(adChannelDescriptor, driverDescriptor.getChannelDescriptor());
     }
 
     private DriverServiceImpl getDriverServiceImplEmptyDriverServiceReferenceArray() {

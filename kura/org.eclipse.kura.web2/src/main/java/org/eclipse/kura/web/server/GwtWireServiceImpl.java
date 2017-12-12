@@ -31,8 +31,8 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Option;
-import org.eclipse.kura.driver.DriverDescriptor;
-import org.eclipse.kura.driver.DriverService;
+import org.eclipse.kura.driver.descriptor.DriverDescriptor;
+import org.eclipse.kura.driver.descriptor.DriverDescriptorService;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
@@ -66,9 +66,10 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
     @Override
     public GwtConfigComponent getGwtChannelDescriptor(final GwtXSRFToken xsrfToken, final String driverPid)
             throws GwtKuraException {
-        final DriverService driverService = ServiceLocator.getInstance().getService(DriverService.class);
+        final DriverDescriptorService driverDescriptorService = ServiceLocator.getInstance()
+                .getService(DriverDescriptorService.class);
 
-        Optional<DriverDescriptor> driverDescriptorOptional = driverService.getDriverDescriptor(driverPid);
+        Optional<DriverDescriptor> driverDescriptorOptional = driverDescriptorService.getDriverDescriptor(driverPid);
 
         if (driverDescriptorOptional.isPresent()) {
             DriverDescriptor driverDescriptor = driverDescriptorOptional.get();
@@ -169,9 +170,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         final List<ComponentConfiguration> componentConfigurations = ServiceLocator
                 .applyToServiceOptionally(ConfigurationService.class, ConfigurationService::getComponentConfigurations);
 
-        final Set<String> driverPids = ServiceLocator.applyToServiceOptionally(DriverService.class,
-                driverService -> driverService.listDriverDescriptors().stream().map(DriverDescriptor::getPid)
-                        .collect(Collectors.toSet()));
+        final Set<String> driverPids = ServiceLocator.applyToServiceOptionally(DriverDescriptorService.class,
+                driverDescriptorService -> driverDescriptorService.listDriverDescriptors().stream()
+                        .map(DriverDescriptor::getPid).collect(Collectors.toSet()));
 
         result.setAllActivePids(componentConfigurations.stream().map(ComponentConfiguration::getPid)
                 .filter(Objects::nonNull).collect(Collectors.toList()));
@@ -328,9 +329,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 
     private void fillDriverDescriptors(List<GwtConfigComponent> resultDescriptors) throws GwtKuraException {
 
-        ServiceLocator.applyToServiceOptionally(DriverService.class, driverService -> {
+        ServiceLocator.applyToServiceOptionally(DriverDescriptorService.class, driverDescriptorService -> {
 
-            driverService.listDriverDescriptors().stream().map(GwtServerUtil::toGwtConfigComponent)
+            driverDescriptorService.listDriverDescriptors().stream().map(GwtServerUtil::toGwtConfigComponent)
                     .filter(Objects::nonNull).forEach(resultDescriptors::add);
             return (Void) null;
         });

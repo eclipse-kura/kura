@@ -14,6 +14,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -24,17 +25,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.status.CloudConnectionStatusEnum;
 import org.eclipse.kura.status.CloudConnectionStatusService;
 import org.eclipse.kura.watchdog.WatchdogService;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
 
@@ -344,6 +350,140 @@ public class DataServiceImplTest {
 
         // future is reset to scheduler result (null)
         assertNull(TestUtil.getFieldValue(svc, "connectionMonitorFuture"));
+    }
+
+    @Test
+    public void testStopStartConnectionMonitorAndConnect() throws NoSuchFieldException, InterruptedException {
+        // stop and start connection monitor task scheduling the executor, wait for it to run a couple of times, then
+        // connect
+
+        DataServiceImpl svc = new DataServiceImpl();
+
+        ScheduledFuture<?> connectionMonitorFutureMock = mock(ScheduledFuture.class);
+        TestUtil.setFieldValue(svc, "connectionMonitorFuture", connectionMonitorFutureMock);
+        when(connectionMonitorFutureMock.isDone()).thenReturn(false).thenReturn(true);
+
+        CloudConnectionStatusService ccssMock = mock(CloudConnectionStatusService.class);
+        svc.setCloudConnectionStatusService(ccssMock);
+
+        WatchdogService wsMock = mock(WatchdogService.class);
+        svc.setWatchdogService(wsMock);
+
+        Object lock = new Object();
+        doAnswer(invocation -> {
+            synchronized (lock) {
+                lock.notifyAll();
+            }
+            return null;
+        }).when(wsMock).unregisterCriticalComponent(svc);
+
+        ScheduledExecutorService cme = Executors.newSingleThreadScheduledExecutor();
+        TestUtil.setFieldValue(svc, "connectionMonitorExecutor", cme);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("connect.auto-on-startup", true);
+        properties.put("connect.retry-interval", 2);
+        DataServiceOptions dataServiceOptions = new DataServiceOptions(properties);
+        TestUtil.setFieldValue(svc, "dataServiceOptions", dataServiceOptions);
+
+        ComponentContext ctxMock = mock(ComponentContext.class);
+        DataServiceListenerS dataServiceListeners = new DataServiceListenerS(ctxMock);
+        TestUtil.setFieldValue(svc, "dataServiceListeners", dataServiceListeners);
+
+        svc.onConnectionLost(new Exception("test"));
+
+        // attach a H2DbService after a while
+        // add also DataTransportService - to report it's not connected
+        Thread.sleep(3000);
+        DataTransportService dtsMock = mock(DataTransportService.class);
+        TestUtil.setFieldValue(svc, "dataTransportService", dtsMock);
+        when(dtsMock.isConnected()).thenReturn(false); // trigger call to connect()
+
+        H2DbService dbMock = mock(H2DbService.class);
+        TestUtil.setFieldValue(svc, "dbService", dbMock);
+
+        synchronized (lock) {
+            lock.wait(20000);
+        }
+
+        verify(wsMock, times(2)).unregisterCriticalComponent(svc);
+    }
+
+    @Test
+    public void testStopStartConnectionMonitorAndFailConnecting()
+            throws NoSuchFieldException, InterruptedException, KuraConnectException {
+        // stop and start connection monitor task scheduling the executor, then try to connect and fail with
+        // authentication exceptions and a few more
+
+        DataServiceImpl svc = new DataServiceImpl();
+
+        ScheduledFuture<?> connectionMonitorFutureMock = mock(ScheduledFuture.class);
+        TestUtil.setFieldValue(svc, "connectionMonitorFuture", connectionMonitorFutureMock);
+        when(connectionMonitorFutureMock.isDone()).thenReturn(false).thenReturn(true);
+
+        CloudConnectionStatusService ccssMock = mock(CloudConnectionStatusService.class);
+        svc.setCloudConnectionStatusService(ccssMock);
+
+        WatchdogService wsMock = mock(WatchdogService.class);
+        svc.setWatchdogService(wsMock);
+
+        AtomicInteger count = new AtomicInteger(0);
+        Object lock = new Object();
+        doAnswer(invocation -> {
+            if (count.incrementAndGet() > 8) { // shouldn't happen
+                synchronized (lock) {
+                    lock.notifyAll();
+                }
+            }
+            return null;
+        }).when(wsMock).checkin(svc);
+
+        ScheduledExecutorService cme = Executors.newSingleThreadScheduledExecutor();
+        TestUtil.setFieldValue(svc, "connectionMonitorExecutor", cme);
+
+        // executor service parameters
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("connect.auto-on-startup", true);
+        properties.put("connect.retry-interval", 1);
+        properties.put("connection.recovery.max.failures", 4);
+        DataServiceOptions dataServiceOptions = new DataServiceOptions(properties);
+        TestUtil.setFieldValue(svc, "dataServiceOptions", dataServiceOptions);
+
+        ComponentContext ctxMock = mock(ComponentContext.class);
+        DataServiceListenerS dataServiceListeners = new DataServiceListenerS(ctxMock);
+        TestUtil.setFieldValue(svc, "dataServiceListeners", dataServiceListeners);
+
+        // without it the connection monitor task will not even try to run
+        H2DbService dbMock = mock(H2DbService.class);
+        TestUtil.setFieldValue(svc, "dbService", dbMock);
+
+        // for connection monitor task to try connecting and fail
+        DataTransportService dtsMock = mock(DataTransportService.class);
+        TestUtil.setFieldValue(svc, "dataTransportService", dtsMock);
+        when(dtsMock.isConnected()).thenReturn(false); // trigger call to connect()
+
+        // for the exception to be verified as non-critical: 1-3: authentication exc., 4.-: ordinary exceptions
+        MqttException cause = new MqttException(MqttException.REASON_CODE_FAILED_AUTHENTICATION);
+        Throwable exc1 = new KuraConnectException(cause, "test");
+        cause = new MqttException(MqttException.REASON_CODE_INVALID_CLIENT_ID);
+        Throwable exc2 = new KuraConnectException(cause, "test");
+        cause = new MqttException(MqttException.REASON_CODE_NOT_AUTHORIZED);
+        Throwable exc3 = new KuraConnectException(cause, "test");
+        cause = new MqttException(MqttException.REASON_CODE_BROKER_UNAVAILABLE);
+        Throwable exc4 = new KuraConnectException(cause, "test");
+        doThrow(exc1).doThrow(exc2).doThrow(exc3).doThrow(exc4)
+                .doThrow(new KuraConnectException("test ordinary exception"))
+                .when(dtsMock).connect();
+
+        svc.onConnectionLost(new Exception("test"));
+
+        // wait long enough for the task can run 7-8 times
+        synchronized (lock) {
+            lock.wait(8000);
+        }
+
+        // initial checkin + 3 * authentication + (other mqtt + 3)
+        assertEquals(8, count.intValue());
     }
 
     @Test

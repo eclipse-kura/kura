@@ -31,7 +31,7 @@ public enum SupportedUsbModemInfo {
             ModemTechnologyType.CDMA), Arrays.asList(new De910ModemDriver()), ""),
     Telit_LE910("LE910", "1bc7", "1201", 5, 0, 2, 3, 1, 5000, 30000, Arrays.asList(ModemTechnologyType.LTE,
             ModemTechnologyType.HSPA, ModemTechnologyType.UMTS), Arrays.asList(new Le910ModemDriver()), ""),
-    Telit_LE910_V2("LE910-V2", "1bc7", "0036", 6, 0, 3, 0, -1, 15000, 10000, Arrays.asList(ModemTechnologyType.LTE,
+    Telit_LE910_V2("LE910-V2", "1bc7", "0036", 6, 0, 3, 0, -1, 5000, 10000, Arrays.asList(ModemTechnologyType.LTE,
             ModemTechnologyType.HSPA,
             ModemTechnologyType.UMTS), Arrays.asList(new UsbModemDriver("cdc_acm", "1bc7", "0036")), ""),
     Telit_CE910_DUAL("CE910-DUAL", "1bc7", "1011", 2, 0, 1, 1, -1, 5000, 10000, Arrays

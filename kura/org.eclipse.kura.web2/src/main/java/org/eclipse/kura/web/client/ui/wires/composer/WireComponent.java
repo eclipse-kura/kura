@@ -12,9 +12,7 @@ public final class WireComponent extends JavaScriptObject {
 
     public static native WireComponent create()
     /*-{
-        return {
-            renderingProperties: {}
-        }
+        return new parent.window.WireComponent()
     }-*/;
 
     public native String getPid()
@@ -65,6 +63,16 @@ public final class WireComponent extends JavaScriptObject {
     public native void setRenderingProperties(WireComponentRenderingProperties properties)
     /*-{
         return this.renderingProperties = properties
+    }-*/;
+
+    public native int getPortIndex(String portName, String direction)
+    /*-{
+        return this.getPortIndex(portName, direction)
+    }-*/;
+
+    public native String getPortName(int portIndex, String direction)
+    /*-{
+        return this.getPortName(portIndex, direction)
     }-*/;
 
     public static WireComponent fromGwt(GwtWireComponentConfiguration config) {

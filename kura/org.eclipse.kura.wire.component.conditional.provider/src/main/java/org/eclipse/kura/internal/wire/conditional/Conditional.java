@@ -17,20 +17,24 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.internal.wire.conditional.LoggingVerbosity.QUIET;
-import static org.eclipse.kura.internal.wire.conditional.LoggingVerbosity.VERBOSE;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
+import org.eclipse.kura.type.StringValue;
 import org.eclipse.kura.type.TypedValue;
+import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
-import org.eclipse.kura.wire.WireSupport;
+import org.eclipse.kura.wire.graph.EmitterPort;
+import org.eclipse.kura.wire.graph.MultiportWireSupport;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.LoggerFactory;
@@ -39,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * The Class Logger is the specific Wire Component to log a list of {@link WireRecord}s
  * as received in {@link WireEnvelope}
  */
-public final class Conditional implements WireReceiver, ConfigurableComponent {
+public final class Conditional implements WireReceiver, WireEmitter, ConfigurableComponent {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Conditional.class);
 
@@ -51,9 +55,12 @@ public final class Conditional implements WireReceiver, ConfigurableComponent {
 
     private volatile WireHelperService wireHelperService;
 
-    private WireSupport wireSupport;
+    private MultiportWireSupport wireSupport;
 
     private Map<String, Object> properties;
+
+    private EmitterPort thenPort;
+    private EmitterPort elsePort;
 
     /**
      * Binds the Wire Helper Service.
@@ -90,7 +97,10 @@ public final class Conditional implements WireReceiver, ConfigurableComponent {
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug(message.activatingLogger());
         this.properties = properties;
-        this.wireSupport = this.wireHelperService.newWireSupport(this);
+        this.wireSupport = (MultiportWireSupport) this.wireHelperService.newWireSupport(this);
+        final List<EmitterPort> emitterPorts = this.wireSupport.getEmitterPorts();
+        this.thenPort = emitterPorts.get(0);
+        this.elsePort = emitterPorts.get(1);
         logger.debug(message.activatingLoggerDone());
     }
 
@@ -122,19 +132,19 @@ public final class Conditional implements WireReceiver, ConfigurableComponent {
     @Override
     public void onWireReceive(final WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
-        logger.info(message.wireEnvelopeReceived(wireEnvelope.getEmitterPid()));
 
-        if (VERBOSE.name().equals(getLoggingLevel())) {
-            logger.info("Record List content: ");
-            for (WireRecord record : wireEnvelope.getRecords()) {
-                logger.info("  Record content: ");
+        final List<WireRecord> thenRecords = new ArrayList<>();
+        final Map<String, TypedValue<?>> thenProperties = new HashMap<>();
+        thenProperties.put("port", new StringValue("then"));
+        thenRecords.add(new WireRecord(thenProperties));
+        // this.thenPort.emit(wireSupport.createWireEnvelope(thenRecords));
 
-                for (Entry<String, TypedValue<?>> entry : record.getProperties().entrySet()) {
-                    logger.info("    {} : {}", entry.getKey(), entry.getValue().getValue());
-                }
-            }
-            logger.info("");
-        }
+        final List<WireRecord> elseRecords = new ArrayList<>();
+        final Map<String, TypedValue<?>> elseProperties = new HashMap<>();
+        elseProperties.put("port", new StringValue("else"));
+        elseRecords.add(new WireRecord(elseProperties));
+        this.elsePort.emit(wireSupport.createWireEnvelope(elseRecords));
+
     }
 
     private String getLoggingLevel() {
@@ -157,5 +167,15 @@ public final class Conditional implements WireReceiver, ConfigurableComponent {
     @Override
     public void updated(final Wire wire, final Object value) {
         this.wireSupport.updated(wire, value);
+    }
+
+    @Override
+    public Object polled(Wire wire) {
+        return this.wireSupport.polled(wire);
+    }
+
+    @Override
+    public void consumersConnected(Wire[] wires) {
+        this.wireSupport.consumersConnected(wires);
     }
 }

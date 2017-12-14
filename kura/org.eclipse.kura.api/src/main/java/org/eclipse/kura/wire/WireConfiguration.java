@@ -11,6 +11,7 @@
  *  Amit Kumar Mondal
  *
  *******************************************************************************/
+
 package org.eclipse.kura.wire;
 
 import static java.util.Objects.requireNonNull;
@@ -41,16 +42,15 @@ import org.osgi.service.wireadmin.WireAdmin;
 @ProviderType
 public class WireConfiguration {
 
+    /** The Wire Emitter PID. */
     private final String emitterPid;
 
-    private final String emitterPort;
-
+    /** The Filter. */
     @Nullable
     private String filter;
 
+    /** The Wire Receiver PID. */
     private final String receiverPid;
-
-    private final String receiverPort;
 
     /** The actual {@link WireAdmin}'s {@link Wire}. */
     @Nullable
@@ -67,27 +67,11 @@ public class WireConfiguration {
      *             if any of the arguments is null
      */
     public WireConfiguration(final String emitterPid, final String receiverPid) {
-        this(emitterPid, "out0", receiverPid, "in0");
-    }
-
-    /**
-     * Instantiates a new {@link WireConfiguration}.
-     * 
-     * @param emitterPid the Wire Emitter PID
-     * @param emitterPort the Emitter port number
-     * @param receiverPid the Wire Receiver PID
-     * @param emitterPort the Emitter port number
-     * @since 1.4
-     */
-    public WireConfiguration(final String emitterPid, final String emitterPort, final String receiverPid,
-            final String receiverPort) {
         requireNonNull(emitterPid, "Emitter PID cannot be null");
         requireNonNull(receiverPid, "Receiver PID cannot be null");
 
         this.emitterPid = emitterPid;
-        this.emitterPort = emitterPort;
         this.receiverPid = receiverPid;
-        this.receiverPort = receiverPort;
     }
 
     /**
@@ -99,16 +83,6 @@ public class WireConfiguration {
         return this.emitterPid;
     }
 
-    /**
-     * Gets the Wire Emitter port.
-     *
-     * @return the Wire Emitter port
-     * @since 1.4
-     */
-    public String getEmitterPort() {
-        return this.emitterPort;
-    }
-    
     /**
      * Gets the associated filter.
      *
@@ -125,16 +99,6 @@ public class WireConfiguration {
      */
     public String getReceiverPid() {
         return this.receiverPid;
-    }
-    
-    /**
-     * Gets the Wire Receiver port.
-     *
-     * @return the Wire Receiver port
-     * @since 1.4
-     */
-    public String getReceiverPort() {
-        return this.receiverPort;
     }
 
     /**
@@ -201,8 +165,8 @@ public class WireConfiguration {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (this.emitterPid == null ? 0 : this.emitterPid.hashCode());
-        result = prime * result + (this.receiverPid == null ? 0 : this.receiverPid.hashCode());
+        result = (prime * result) + ((this.emitterPid == null) ? 0 : this.emitterPid.hashCode());
+        result = (prime * result) + ((this.receiverPid == null) ? 0 : this.receiverPid.hashCode());
         return result;
     }
 

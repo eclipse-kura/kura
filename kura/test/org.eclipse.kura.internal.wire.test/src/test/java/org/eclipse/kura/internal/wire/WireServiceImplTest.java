@@ -31,8 +31,8 @@ import org.eclipse.kura.internal.json.marshaller.unmarshaller.JsonMarshallUnmars
 import org.eclipse.kura.localization.resources.WireMessages;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireConfiguration;
-import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireService;
+import org.eclipse.kura.wire.graph.MultiportWireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphService;
@@ -50,22 +50,22 @@ public class WireServiceImplTest {
     private static final String WIRE_GRAPH_PROPERTY_NAME = "WireGraph";
     private static final String WIRE_SERVICE_PID = "org.eclipse.kura.wire.WireService";
     private static final String DEFAULT_GRAPH = "{\"components\":[],\"wires\":[]}";
-    private static final String SIMPLE_GRAPH = "{\"components\":[{\"pid\":\"emitterPid\",\"inputPortCount\":0,\"outputPortCount\":1,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":15},\"inputPortNames\":{},\"outputPortNames\":{}}},{\"pid\":\"receiverPid\",\"inputPortCount\":1,\"outputPortCount\":0,\"renderingProperties\":{\"position\":{\"x\":100,\"y\":150},\"inputPortNames\":{},\"outputPortNames\":{}}}],\"wires\":[{\"emitter\":\"emitterPid\",\"emitterPort\":\"out0\",\"receiver\":\"receiverPid\",\"receiverPort\":\"in0\"}]}";
+    private static final String SIMPLE_GRAPH = "{\"components\":[{\"pid\":\"emitterPid\",\"inputPortCount\":0,\"outputPortCount\":1,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":15},\"inputPortNames\":{},\"outputPortNames\":{}}},{\"pid\":\"receiverPid\",\"inputPortCount\":1,\"outputPortCount\":0,\"renderingProperties\":{\"position\":{\"x\":100,\"y\":150},\"inputPortNames\":{},\"outputPortNames\":{}}}],\"wires\":[{\"emitter\":\"emitterPid\",\"emitterPort\":0,\"receiver\":\"receiverPid\",\"receiverPort\":0}]}";
     private static final String SIMPLE_GRAPH_NO_ARCS = "{\"components\":[{\"pid\":\"emitterPid\",\"inputPortCount\":0,\"outputPortCount\":1,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":15},\"inputPortNames\":{},\"outputPortNames\":{}}},{\"pid\":\"receiverPid\",\"inputPortCount\":1,\"outputPortCount\":0,\"renderingProperties\":{\"position\":{\"x\":100,\"y\":150},\"inputPortNames\":{},\"outputPortNames\":{}}}],\"wires\":[]}";
 
     @Test
     public void testCreateWiresNoEmitterNoReceiver() throws NoSuchFieldException, InvalidSyntaxException {
-        WireServiceImpl wsi = (WireServiceImpl) getWireServiceImpl();
-
         String emitterPid = "emitterPid";
         String receiverPid = "receiverPid";
-        WireHelperService wireHelperService = mock(WireHelperService.class);
-        when(wireHelperService.getServicePid(emitterPid)).thenReturn(emitterPid);
-        when(wireHelperService.getServicePid(receiverPid)).thenReturn(receiverPid);
+
+        final Map<String, String> servicePidMappings = new HashMap<>();
+        servicePidMappings.put(emitterPid, emitterPid);
+        servicePidMappings.put(receiverPid, receiverPid);
+
+        WireServiceImpl wsi = (WireServiceImpl) getWireServiceImpl(servicePidMappings);
 
         WireAdmin wireAdmin = mock(WireAdmin.class);
 
-        TestUtil.setFieldValue(wsi, "wireHelperService", wireHelperService);
         TestUtil.setFieldValue(wsi, "wireAdmin", wireAdmin);
 
         ServiceTracker<WireComponent, WireComponent> wireComponentServiceTracker = mock(ServiceTracker.class);
@@ -80,7 +80,9 @@ public class WireServiceImplTest {
 
     @Test
     public void testCreateWires() throws NoSuchFieldException, InvalidSyntaxException {
-        WireServiceImpl wsi = (WireServiceImpl) getWireServiceImpl();
+        final Map<String, String> servicePidMappings = mock(Map.class);
+
+        WireServiceImpl wsi = (WireServiceImpl) getWireServiceImpl(servicePidMappings);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(WIRE_GRAPH_PROPERTY_NAME, SIMPLE_GRAPH);
@@ -90,16 +92,14 @@ public class WireServiceImplTest {
         String emitterPid = "emitterPid";
         String receiverPid = "receiverPid";
 
-        WireHelperService whsMock = mock(WireHelperService.class);
         WireAdmin wireAdmin = mock(WireAdmin.class);
 
-        TestUtil.setFieldValue(wsi, "wireHelperService", whsMock);
         TestUtil.setFieldValue(wsi, "wireAdmin", wireAdmin);
 
         wsi.createWires();
 
-        verify(whsMock, times(1)).getServicePid(emitterPid);
-        verify(whsMock, times(1)).getServicePid(receiverPid);
+        verify(servicePidMappings, times(1)).get(emitterPid);
+        verify(servicePidMappings, times(1)).get(receiverPid);
     }
 
     @Test
@@ -130,7 +130,7 @@ public class WireServiceImplTest {
         WireAdmin wireAdmin = mock(WireAdmin.class);
         when(wireAdmin.getWires(null)).thenReturn(new Wire[0]);
 
-        WireGraphService wireGraphService = (WireGraphService) getWireServiceImpl();
+        WireGraphService wireGraphService = (WireGraphService) getWireServiceImpl(new HashMap<>());
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(WIRE_GRAPH_PROPERTY_NAME, DEFAULT_GRAPH);
@@ -150,8 +150,8 @@ public class WireServiceImplTest {
         wireComponentConfigurations.add(emitterWireComponentConfiguration);
         wireComponentConfigurations.add(receiverWireComponentConfiguration);
 
-        WireConfiguration wire = new WireConfiguration("emitterPid", "receiverPid");
-        List<WireConfiguration> wireConfigurations = new ArrayList<>();
+        MultiportWireConfiguration wire = new MultiportWireConfiguration("emitterPid", "receiverPid", 0, 0);
+        List<MultiportWireConfiguration> wireConfigurations = new ArrayList<>();
         wireConfigurations.add(wire);
 
         WireGraphConfiguration wireGraphConfiguration = new WireGraphConfiguration(wireComponentConfigurations,
@@ -194,7 +194,7 @@ public class WireServiceImplTest {
         WireAdmin wireAdmin = mock(WireAdmin.class);
         when(wireAdmin.getWires(null)).thenReturn(new Wire[0]);
 
-        WireGraphService wireGraphService = (WireGraphService) getWireServiceImpl();
+        WireGraphService wireGraphService = (WireGraphService) getWireServiceImpl(new HashMap<>());
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(WIRE_GRAPH_PROPERTY_NAME, SIMPLE_GRAPH);
@@ -209,7 +209,7 @@ public class WireServiceImplTest {
 
         List<WireComponentConfiguration> wireComponentConfigurations = new ArrayList<>();
 
-        List<WireConfiguration> wireConfigurations = new ArrayList<>();
+        List<MultiportWireConfiguration> wireConfigurations = new ArrayList<>();
 
         WireGraphConfiguration wireGraphConfiguration = new WireGraphConfiguration(wireComponentConfigurations,
                 wireConfigurations);
@@ -243,7 +243,7 @@ public class WireServiceImplTest {
         ConfigurationService configurationService = mock(ConfigurationService.class);
         BundleContext bundleContext = mock(BundleContext.class);
 
-        WireGraphService wireGraphService = (WireGraphService) getWireServiceImpl();
+        WireGraphService wireGraphService = (WireGraphService) getWireServiceImpl(new HashMap<>());
 
         TestUtil.setFieldValue(wireGraphService, "configurationService", configurationService);
 
@@ -282,7 +282,7 @@ public class WireServiceImplTest {
         when(configurationService.getComponentConfiguration(WIRE_SERVICE_PID))
                 .thenReturn(new ComponentConfigurationImpl(WIRE_SERVICE_PID, null, new HashMap<>()));
 
-        WireGraphService wireGraphService = (WireGraphService) getWireServiceImpl();
+        WireGraphService wireGraphService = (WireGraphService) getWireServiceImpl(new HashMap<>());
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(WIRE_GRAPH_PROPERTY_NAME, SIMPLE_GRAPH);
@@ -314,7 +314,7 @@ public class WireServiceImplTest {
         when(configurationService.getComponentConfiguration(WIRE_SERVICE_PID))
                 .thenReturn(new ComponentConfigurationImpl(WIRE_SERVICE_PID, null, new HashMap<>()));
 
-        WireService wireService = getWireServiceImpl();
+        WireService wireService = getWireServiceImpl(new HashMap<>());
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(WIRE_GRAPH_PROPERTY_NAME, SIMPLE_GRAPH);
@@ -349,6 +349,7 @@ public class WireServiceImplTest {
 
     @Test
     public void testCreateWireConfiguration() throws InvalidSyntaxException, KuraException, NoSuchFieldException {
+
         ConfigurationService configurationService = mock(ConfigurationService.class);
         WireAdmin wireAdmin = mock(WireAdmin.class);
         BundleContext bundleContext = mock(BundleContext.class);
@@ -357,13 +358,11 @@ public class WireServiceImplTest {
         when(configurationService.getComponentConfiguration(WIRE_SERVICE_PID))
                 .thenReturn(new ComponentConfigurationImpl(WIRE_SERVICE_PID, null, new HashMap<>()));
 
-        WireHelperService wireHelperService = mock(WireHelperService.class);
-        when(wireHelperService.getServicePid("emitterPid")).thenReturn("emitterServicePid");
-        when(wireHelperService.getServicePid("receiverPid")).thenReturn("receiverServicePid");
-        when(wireHelperService.isEmitter("emitterPid")).thenReturn(true);
-        when(wireHelperService.isReceiver("receiverPid")).thenReturn(true);
+        final Map<String, String> servicePidMappings = new HashMap<>();
+        servicePidMappings.put("emitterPid", "emitterServicePid");
+        servicePidMappings.put("receiverPid", "receiverServicePid");
 
-        WireService wireService = getWireServiceImpl();
+        WireService wireService = getWireServiceImpl(servicePidMappings);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(WIRE_GRAPH_PROPERTY_NAME, SIMPLE_GRAPH_NO_ARCS);
@@ -371,7 +370,6 @@ public class WireServiceImplTest {
         TestUtil.setFieldValue(wireService, "configurationService", configurationService);
         TestUtil.setFieldValue(wireService, "wireAdmin", wireAdmin);
         TestUtil.setFieldValue(wireService, "properties", properties);
-        TestUtil.setFieldValue(wireService, "wireHelperService", wireHelperService);
         TestUtil.setFieldValue(wireService, "bundleContext", bundleContext);
 
         ServiceTracker<WireComponent, WireComponent> wireComponentServiceTracker = mock(ServiceTracker.class);
@@ -399,7 +397,7 @@ public class WireServiceImplTest {
         assertEquals(SIMPLE_GRAPH, wireGraphJson);
     }
 
-    private WireService getWireServiceImpl() {
+    private WireService getWireServiceImpl(final Map<String, String> servicePidMappings) {
         WireService wireService = new WireServiceImpl() {
 
             @Override
@@ -424,6 +422,11 @@ public class WireServiceImplTest {
                     e.printStackTrace();
                 }
                 return null;
+            }
+
+            @Override
+            protected String getServicePidByKuraServicePid(String kuraServicePid) {
+                return servicePidMappings.get(kuraServicePid);
             }
         };
         return wireService;

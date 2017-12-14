@@ -27,12 +27,12 @@ public final class Wire extends JavaScriptObject {
         return this.receiverPid
     }-*/;
 
-    public native String getEmitterPort()
+    public native int getEmitterPort()
     /*-{
         return this.emitterPort
     }-*/;
 
-    public native String getReceiverPort()
+    public native int getReceiverPort()
     /*-{
         return this.receiverPort
     }-*/;
@@ -47,12 +47,12 @@ public final class Wire extends JavaScriptObject {
         this.receiverPid = receiverPid
     }-*/;
 
-    public native void setEmitterPort(String emitterPort)
+    public native void setEmitterPort(int emitterPort)
     /*-{
         this.emitterPort = emitterPort
     }-*/;
 
-    public native void setReceiverPort(String receiverPort)
+    public native void setReceiverPort(int receiverPort)
     /*-{
         this.receiverPort = receiverPort
     }-*/;

@@ -13,9 +13,14 @@ BlinkEffect.prototype.setEnabled = function (enabled) {
 				+ this.eventSourceSessionId);
 		var self = this
 		this.eventSource.onmessage = function(event) {
+			var splitted = event.data.split(' ', 2)
+			if (splitted.length !== 2) {
+				return
+			}
 			_.each(self.composer.graph.getElements(), function(c) {
-				if (c.attributes.wireComponent && c.attributes.wireComponent.pid === event.data) {
-					self.fireTransition(c);
+				var wireComponent = c.attributes.wireComponent
+				if (wireComponent && wireComponent.pid === splitted[0]) {
+					self.fireTransition(c, wireComponent.getPortName(splitted[1], 'out'));
 				}
 			});
 		};
@@ -29,63 +34,42 @@ BlinkEffect.prototype.setEnabled = function (enabled) {
 	}
 }
 
-BlinkEffect.prototype.fireTransition  = function(t) {
-		var graph = this.composer.graph
+BlinkEffect.prototype.fireTransition  = function(c, port) {
+	var graph = this.composer.graph
 
-		if (!this.composer.blinkEnabled) {
+	if (!this.composer.blinkEnabled) {
+		return
+	}
+
+	var links = graph.getConnectedLinks(c, {
+		outbound : true
+	});
+
+	links = _.filter(links, function(link) {
+		return link.get('source').port === port
+	})
+	
+	_.each(links, function(link) {
+
+		var timingFunc = function (t) {
+			return t < 0.5 ? t : 1-t
+		}
+	
+		if (link.getTransitions().length) {
 			return
 		}
 		
-		var inbound = graph.getConnectedLinks(t, {
-			inbound : false
-		});
-		var outbound = graph.getConnectedLinks(t, {
-			outbound : true
-		});
-
-		var placesBefore = _.map(inbound, function(link) {
-			return graph.getCell(link.get('source').id);
-		});
-		var placesAfter = _.map(outbound, function(link) {
-			return graph.getCell(link.get('target').id);
+		link.transition('attrs/.connection/stroke', '#F39C12', {
+			duration : 400,
+			timingFunction : timingFunc,
+			valueFunction : joint.util.interpolate.hexColor
 		});
 
-		var isFirable = true;
-		_.each(placesBefore, function(p) {
-			if (p.get('tokens') === 0)
-				isFirable = false;
-		});
-
-		if (isFirable) {
-
-			_.each(placesAfter, function(p) {
-				if (!p) {
-					return
-				}
-				
-				var link = _.find(outbound, function(l) {
-					return l.get('target').id === p.id;
-				});
-
-				var timingFunc = function (t) {
-					return t < 0.5 ? t : 1-t
-				}
-				
-				if (link.getTransitions().length) {
-					return
-				}
-				
-				link.transition('attrs/.connection/stroke', '#F39C12', {
-					duration : 400,
-					timingFunction : timingFunc,
-					valueFunction : joint.util.interpolate.hexColor
-				});
-
-				link.transition('attrs/.connection/stroke-width', 8, {
-					duration : 400,
-					timingFunction : timingFunc,
-					valueFunction : joint.util.interpolate.number
-				});
+		link.transition('attrs/.connection/stroke-width', 8, {
+			duration : 400,
+			timingFunction : timingFunc,
+			valueFunction : joint.util.interpolate.number
 			});
-		}
-	}
+		});
+}
+	

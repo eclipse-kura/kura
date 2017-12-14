@@ -6,11 +6,11 @@
  *   which accompanies this distribution, and is available at
  *   http://www.eclipse.org/legal/epl-v10.html
  ******************************************************************************/
-package org.eclipse.kura.wire;
+package org.eclipse.kura.wire.graph;
 
 import java.util.Map;
 
-import org.eclipse.kura.configuration.metatype.OCD;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 
 /**
  * @since 1.4
@@ -30,8 +30,8 @@ public class WireComponentDefinition {
     private Map<Integer, String> inputPortNames;
     private Map<Integer, String> outputPortNames;
 
-    private OCD componentOCD;
-    
+    private ComponentConfiguration componentOCD;
+
     public String getFactoryPid() {
         return this.factoryPid;
     }
@@ -104,11 +104,11 @@ public class WireComponentDefinition {
         this.outputPortNames = outputPortNames;
     }
 
-    public OCD getComponentOCD() {
+    public ComponentConfiguration getComponentOCD() {
         return this.componentOCD;
     }
 
-    public void setComponentOCD(OCD componentOCD) {
+    public void setComponentOCD(ComponentConfiguration componentOCD) {
         this.componentOCD = componentOCD;
     }
 }

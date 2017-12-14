@@ -40,6 +40,7 @@ import javax.servlet.http.HttpSession;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,7 +137,7 @@ public final class EventHandlerServlet extends HttpServlet {
             this.requests.put(requestId, session);
         }
 
-        final BlockingQueue<String> eventQueue = new LinkedBlockingQueue<>(MAX_SIZE_OF_QUEUE);
+        final BlockingQueue<Event> eventQueue = new LinkedBlockingQueue<>(MAX_SIZE_OF_QUEUE);
         final ServletOutputStream outputStream = response.getOutputStream();
         final PrintStream printStream = new PrintStream(outputStream);
 
@@ -146,12 +147,9 @@ public final class EventHandlerServlet extends HttpServlet {
                 boolean requestExistsAndValid = checkRequestValidity(requestId);
                 // if session exists and valid, remove head element from the queue
                 while (requestExistsAndValid && !printStream.checkError()) {
-                    final String data = eventQueue.poll(2, TimeUnit.SECONDS);
-                    if (isNull(data)) {
-                        printStream.print(":\n\n");
-                    } else {
-                        logger.debug("Sending data for request: {}", requestId);
-                        printStream.printf("data: %s%n%n", data);
+                    final Event data = eventQueue.poll(2, TimeUnit.SECONDS);
+                    if (!isNull(data)) {
+                        printStream.printf("data: %s %s%n%n", data.getProperty("emitter"), data.getProperty("port"));
                     }
                     requestExistsAndValid = checkRequestValidity(requestId);
                 }
@@ -215,7 +213,7 @@ public final class EventHandlerServlet extends HttpServlet {
      * @throws NullPointerException
      *             if any of the provided arguments is null
      */
-    private ServiceRegistration<?> registerEventHandler(final String topic, final BlockingQueue<String> eventQueue,
+    private ServiceRegistration<?> registerEventHandler(final String topic, final BlockingQueue<Event> eventQueue,
             final String requestId, final CompletableFuture<?> future) {
         requireNonNull(topic, "Topic must not be null");
         requireNonNull(eventQueue, "Provided Queue must not be null");
@@ -228,10 +226,9 @@ public final class EventHandlerServlet extends HttpServlet {
         // register the handler as a service instance
         return this.bundleContext.registerService(EventHandler.class, event -> {
             synchronized (EventHandlerServlet.class) {
-                final String eventData = String.valueOf(event.getProperty("emitter"));
 
                 final boolean validRequest = checkRequestValidity(requestId);
-                final boolean consumerAlive = eventQueue.offer(eventData);
+                final boolean consumerAlive = eventQueue.offer(event);
                 if (validRequest && consumerAlive) {
                     return;
                 } else {
@@ -242,7 +239,7 @@ public final class EventHandlerServlet extends HttpServlet {
                     future.cancel(true);
                 }
             }
-        } , props);
+        }, props);
     }
 
     private void cleanRequest(final String requestId) {

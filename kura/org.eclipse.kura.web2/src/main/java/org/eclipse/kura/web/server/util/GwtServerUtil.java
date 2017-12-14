@@ -38,7 +38,7 @@ import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.service.GwtWireService;
-import org.eclipse.kura.wire.WireComponentDefinition;
+import org.eclipse.kura.wire.graph.WireComponentDefinition;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.cm.ConfigurationAdmin;

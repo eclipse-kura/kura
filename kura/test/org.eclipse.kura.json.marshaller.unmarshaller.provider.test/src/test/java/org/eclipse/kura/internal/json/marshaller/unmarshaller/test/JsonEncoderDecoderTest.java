@@ -21,6 +21,7 @@ import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.JsonMarshallUnmarshallImpl;
 import org.eclipse.kura.wire.WireConfiguration;
+import org.eclipse.kura.wire.graph.MultiportWireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
 import org.junit.Test;
@@ -140,7 +141,8 @@ public class JsonEncoderDecoderTest {
         JsonMarshallUnmarshallImpl jsonEncoderDecoder = new JsonMarshallUnmarshallImpl();
         String defaultJson = "{\"components\":[],\"wires\":[]}";
 
-        WireGraphConfiguration wireGraphConfiguration = jsonEncoderDecoder.unmarshal(defaultJson, WireGraphConfiguration.class);
+        WireGraphConfiguration wireGraphConfiguration = jsonEncoderDecoder.unmarshal(defaultJson,
+                WireGraphConfiguration.class);
         assertNotNull(wireGraphConfiguration);
 
         assertEquals(0, wireGraphConfiguration.getWireComponentConfigurations().size());
@@ -152,7 +154,8 @@ public class JsonEncoderDecoderTest {
         JsonMarshallUnmarshallImpl jsonEncoderDecoder = new JsonMarshallUnmarshallImpl();
         String defaultJson = "{\"components\":{},\"wires\":{}}";
 
-        WireGraphConfiguration wireGraphConfiguration = jsonEncoderDecoder.unmarshal(defaultJson, WireGraphConfiguration.class);
+        WireGraphConfiguration wireGraphConfiguration = jsonEncoderDecoder.unmarshal(defaultJson,
+                WireGraphConfiguration.class);
         assertNotNull(wireGraphConfiguration);
 
         assertEquals(0, wireGraphConfiguration.getWireComponentConfigurations().size());
@@ -268,8 +271,8 @@ public class JsonEncoderDecoderTest {
         renderProps.add("x", "1");
         renderProps.add("y", "3");
 
-        Map<String, Object> result = (Map<String, Object>) TestUtil.invokePrivate(jsonEncoderDecoder, "unmarshalPosition",
-                renderProps);
+        Map<String, Object> result = (Map<String, Object>) TestUtil.invokePrivate(jsonEncoderDecoder,
+                "unmarshalPosition", renderProps);
 
         assertNotNull(result);
         assertEquals(0, result.size());
@@ -277,14 +280,14 @@ public class JsonEncoderDecoderTest {
 
     @Test
     public void testMarshalWireSingleArc() throws Throwable {
-        WireConfiguration wireConfig = new WireConfiguration("emitterPid", "receiverPid");
+        MultiportWireConfiguration wireConfig = new MultiportWireConfiguration("emitterPid", "receiverPid", 0, 0);
 
         JsonMarshallUnmarshallImpl jsonEncoderDecoder = new JsonMarshallUnmarshallImpl();
         JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "marshalWireConfiguration",
                 wireConfig);
         assertNotNull(result);
 
-        String expected = "{\"emitter\":\"emitterPid\",\"emitterPort\":\"out0\",\"receiver\":\"receiverPid\",\"receiverPort\":\"in0\"}";
+        String expected = "{\"emitter\":\"emitterPid\",\"emitterPort\":0,\"receiver\":\"receiverPid\",\"receiverPort\":0}";
         assertEquals(expected, result.toString());
     }
 
@@ -306,8 +309,8 @@ public class JsonEncoderDecoderTest {
     public void testMarshalWireConfigListOneElement() throws Throwable {
         JsonMarshallUnmarshallImpl jsonEncoderDecoder = new JsonMarshallUnmarshallImpl();
 
-        List<WireConfiguration> wireConfigList = new ArrayList<>();
-        WireConfiguration wireConfig = new WireConfiguration("emitterPid", "receiverPid");
+        List<MultiportWireConfiguration> wireConfigList = new ArrayList<>();
+        MultiportWireConfiguration wireConfig = new MultiportWireConfiguration("emitterPid", "receiverPid", 0, 0);
         wireConfigList.add(wireConfig);
 
         JsonArray result = (JsonArray) TestUtil.invokePrivate(jsonEncoderDecoder, "marshalWireConfigurationList",
@@ -315,7 +318,7 @@ public class JsonEncoderDecoderTest {
 
         assertNotNull(result);
 
-        String expected = "[{\"emitter\":\"emitterPid\",\"emitterPort\":\"out0\",\"receiver\":\"receiverPid\",\"receiverPort\":\"in0\"}]";
+        String expected = "[{\"emitter\":\"emitterPid\",\"emitterPort\":0,\"receiver\":\"receiverPid\",\"receiverPort\":0}]";
         assertEquals(expected, result.toString());
     }
 
@@ -323,9 +326,9 @@ public class JsonEncoderDecoderTest {
     public void testMarshalWireConfigListMoreElements() throws Throwable {
         JsonMarshallUnmarshallImpl jsonEncoderDecoder = new JsonMarshallUnmarshallImpl();
 
-        List<WireConfiguration> wireConfigList = new ArrayList<>();
-        WireConfiguration wireConfig = new WireConfiguration("emitterPid", "receiverPid");
-        WireConfiguration wireConfig2 = new WireConfiguration("foo", "bar");
+        List<MultiportWireConfiguration> wireConfigList = new ArrayList<>();
+        MultiportWireConfiguration wireConfig = new MultiportWireConfiguration("emitterPid", "receiverPid", 0, 0);
+        MultiportWireConfiguration wireConfig2 = new MultiportWireConfiguration("foo", "bar", 0, 0);
         wireConfigList.add(wireConfig);
         wireConfigList.add(wireConfig2);
 
@@ -334,7 +337,7 @@ public class JsonEncoderDecoderTest {
 
         assertNotNull(result);
 
-        String expected = "[{\"emitter\":\"emitterPid\",\"emitterPort\":\"out0\",\"receiver\":\"receiverPid\",\"receiverPort\":\"in0\"},{\"emitter\":\"foo\",\"emitterPort\":\"out0\",\"receiver\":\"bar\",\"receiverPort\":\"in0\"}]";
+        String expected = "[{\"emitter\":\"emitterPid\",\"emitterPort\":0,\"receiver\":\"receiverPid\",\"receiverPort\":0},{\"emitter\":\"foo\",\"emitterPort\":0,\"receiver\":\"bar\",\"receiverPort\":0}]";
         assertEquals(expected, result.toString());
     }
 
@@ -449,18 +452,20 @@ public class JsonEncoderDecoderTest {
         wireComponentConfigurations.add(emitterWireComponentConfiguration);
         wireComponentConfigurations.add(receiverWireComponentConfiguration);
 
-        List<WireConfiguration> wireConfigurations = new ArrayList<>();
-        WireConfiguration wireConfiguration = new WireConfiguration("emitterPid", "receiverPid");
+        List<MultiportWireConfiguration> wireConfigurations = new ArrayList<>();
+        MultiportWireConfiguration wireConfiguration = new MultiportWireConfiguration("emitterPid", "receiverPid", 0,
+                0);
         wireConfigurations.add(wireConfiguration);
 
         WireGraphConfiguration wireGraphConfiguration = new WireGraphConfiguration(wireComponentConfigurations,
                 wireConfigurations);
 
-        JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "marshalWireGraphConfiguration", wireGraphConfiguration);
+        JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "marshalWireGraphConfiguration",
+                wireGraphConfiguration);
 
         assertNotNull(result);
 
-        String expected = "{\"components\":[{\"pid\":\"emitterPid\",\"inputPortCount\":0,\"outputPortCount\":5,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":100},\"inputPortNames\":{\"0\":\"resetPort\"},\"outputPortNames\":{\"3\":\"then\"}}},{\"pid\":\"receiverPid\",\"inputPortCount\":0,\"outputPortCount\":5,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":100},\"inputPortNames\":{\"0\":\"resetPort\"},\"outputPortNames\":{\"3\":\"then\"}}}],\"wires\":[{\"emitter\":\"emitterPid\",\"emitterPort\":\"out0\",\"receiver\":\"receiverPid\",\"receiverPort\":\"in0\"}]}";
+        String expected = "{\"components\":[{\"pid\":\"emitterPid\",\"inputPortCount\":0,\"outputPortCount\":5,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":100},\"inputPortNames\":{\"0\":\"resetPort\"},\"outputPortNames\":{\"3\":\"then\"}}},{\"pid\":\"receiverPid\",\"inputPortCount\":0,\"outputPortCount\":5,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":100},\"inputPortNames\":{\"0\":\"resetPort\"},\"outputPortNames\":{\"3\":\"then\"}}}],\"wires\":[{\"emitter\":\"emitterPid\",\"emitterPort\":0,\"receiver\":\"receiverPid\",\"receiverPort\":0}]}";
         assertEquals(expected, result.toString());
     }
 

@@ -21,6 +21,8 @@
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
       <provide interface="org.eclipse.kura.wire.WireComponent"/>
       <provide interface="org.osgi.service.wireadmin.Consumer"/>
+      <provide interface="org.eclipse.kura.wire.WireEmitter"/>
+      <provide interface="org.osgi.service.wireadmin.Producer"/>
    </service>
    <reference bind="bindWireHelperService" 
    	          cardinality="1..1" 
@@ -34,4 +36,8 @@
    <property name="output.cardinality.minimum" type="Integer" value="2"/>
    <property name="output.cardinality.maximum" type="Integer" value="2"/>
    <property name="output.cardinality.default" type="Integer" value="2"/>
+   <property name="input.port.names" type="String" value="0=if"/>
+   <property name="output.port.names" type="String">0=then
+1=else
+   </property>
 </scr:component>

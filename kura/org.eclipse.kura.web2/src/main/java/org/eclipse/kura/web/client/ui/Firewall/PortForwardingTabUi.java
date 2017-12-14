@@ -304,22 +304,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         };
         col4.setCellStyleNames("status-table-row");
         this.portForwardGrid.addColumn(col4, MSGS.firewallPortForwardProtocol());
-
+        
         TextColumn<GwtFirewallPortForwardEntry> col5 = new TextColumn<GwtFirewallPortForwardEntry>() {
-
-            @Override
-            public String getValue(GwtFirewallPortForwardEntry object) {
-                if (object.getInPort() != null) {
-                    return String.valueOf(object.getInPort());
-                } else {
-                    return "";
-                }
-            }
-        };
-        col5.setCellStyleNames("status-table-row");
-        this.portForwardGrid.addColumn(col5, MSGS.firewallPortForwardInPort());
-
-        TextColumn<GwtFirewallPortForwardEntry> col6 = new TextColumn<GwtFirewallPortForwardEntry>() {
 
             @Override
             public String getValue(GwtFirewallPortForwardEntry object) {
@@ -330,8 +316,22 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 }
             }
         };
+        col5.setCellStyleNames("status-table-row");
+        this.portForwardGrid.addColumn(col5, MSGS.firewallPortForwardOutPort());
+
+        TextColumn<GwtFirewallPortForwardEntry> col6 = new TextColumn<GwtFirewallPortForwardEntry>() {
+
+            @Override
+            public String getValue(GwtFirewallPortForwardEntry object) {
+                if (object.getInPort() != null) {
+                    return String.valueOf(object.getInPort());
+                } else {
+                    return "";
+                }
+            }
+        };
         col6.setCellStyleNames("status-table-row");
-        this.portForwardGrid.addColumn(col6, MSGS.firewallPortForwardOutPort());
+        this.portForwardGrid.addColumn(col6, MSGS.firewallPortForwardInPort());
 
         TextColumn<GwtFirewallPortForwardEntry> col7 = new TextColumn<GwtFirewallPortForwardEntry>() {
 
@@ -574,11 +574,11 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 portForwardEntry.setProtocol(PortForwardingTabUi.this.protocol.getSelectedItemText());
                 if (PortForwardingTabUi.this.internal.getText() != null
                         && !"".equals(PortForwardingTabUi.this.internal.getText().trim())) {
-                    portForwardEntry.setInPort(Integer.parseInt(PortForwardingTabUi.this.internal.getText()));
+                    portForwardEntry.setOutPort(Integer.parseInt(PortForwardingTabUi.this.internal.getText()));
                 }
                 if (PortForwardingTabUi.this.external.getText() != null
                         && !"".equals(PortForwardingTabUi.this.external.getText().trim())) {
-                    portForwardEntry.setOutPort(Integer.parseInt(PortForwardingTabUi.this.external.getText()));
+                    portForwardEntry.setInPort(Integer.parseInt(PortForwardingTabUi.this.external.getText()));
                 }
                 portForwardEntry.setMasquerade(PortForwardingTabUi.this.enable.getSelectedItemText());
                 if (PortForwardingTabUi.this.permittedNw.getText() != null
@@ -759,8 +759,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
             this.input.setText(existingEntry.getInboundInterface());
             this.output.setText(existingEntry.getOutboundInterface());
             this.lan.setText(existingEntry.getAddress());
-            this.external.setText(String.valueOf(existingEntry.getOutPort()));
-            this.internal.setText(String.valueOf(existingEntry.getInPort()));
+            this.external.setText(String.valueOf(existingEntry.getInPort()));
+            this.internal.setText(String.valueOf(existingEntry.getOutPort()));
             this.permittedNw.setText(existingEntry.getPermittedNetwork());
             this.permittedMac.setText(existingEntry.getPermittedMAC());
             this.source.setText(existingEntry.getSourcePortRange());
@@ -799,8 +799,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         this.tooltipOutput.setTitle(MSGS.firewallPortForwardFormOutboundInterfaceToolTip());
         this.tooltipLan.setTitle(MSGS.firewallPortForwardFormLanAddressToolTip());
         this.tooltipProtocol.setTitle(MSGS.firewallPortForwardFormProtocolToolTip());
-        this.tooltipInternal.setTitle(MSGS.firewallPortForwardFormExternalPortToolTip());
-        this.tooltipExternal.setTitle(MSGS.firewallPortForwardFormInternalPortToolTip());
+        this.tooltipInternal.setTitle(MSGS.firewallPortForwardFormInternalPortToolTip());
+        this.tooltipExternal.setTitle(MSGS.firewallPortForwardFormExternalPortToolTip());
         this.tooltipEnable.setTitle(MSGS.firewallPortForwardFormMasqueradingToolTip());
         this.tooltipPermittedNw.setTitle(MSGS.firewallPortForwardFormPermittedNetworkToolTip());
         this.tooltipPermittedMac.setTitle(MSGS.firewallPortForwardFormPermittedMacAddressToolTip());
@@ -823,8 +823,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         this.labelOutput.setText(MSGS.firewallPortForwardFormOutboundInterface() + "*");
         this.labelLan.setText(MSGS.firewallPortForwardFormAddress() + "*");
         this.labelProtocol.setText(MSGS.firewallPortForwardFormProtocol());
-        this.labelExternal.setText(MSGS.firewallPortForwardFormOutPort());
-        this.labelInternal.setText(MSGS.firewallPortForwardFormInPort());
+        this.labelExternal.setText(MSGS.firewallPortForwardFormInPort());
+        this.labelInternal.setText(MSGS.firewallPortForwardFormOutPort());
         this.labelEnable.setText(MSGS.firewallNatFormMasquerade());
         this.labelPermitttedNw.setText(MSGS.firewallPortForwardFormPermittedNetwork());
         this.labelPermitttedMac.setText(MSGS.firewallPortForwardFormPermittedMac());

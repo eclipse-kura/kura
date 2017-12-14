@@ -75,21 +75,21 @@
                             </b:Tooltip>
                         </b:FormGroup>
 
-                        <b:FormGroup ui:field="groupExternal">
-                            <b:FormLabel for="external"
-                                ui:field="labelExternal"></b:FormLabel>
-                            <b:Tooltip ui:field="tooltipExternal">
-                                <b:TextBox b:id="external"
-                                    ui:field="external" />
-                            </b:Tooltip>
-                        </b:FormGroup>
-
                         <b:FormGroup ui:field="groupInternal">
                             <b:FormLabel for="internal"
                                 ui:field="labelInternal"></b:FormLabel>
                             <b:Tooltip ui:field="tooltipInternal">
                                 <b:TextBox b:id="internal"
                                     ui:field="internal" />
+                            </b:Tooltip>
+                        </b:FormGroup>
+
+                        <b:FormGroup ui:field="groupExternal">
+                            <b:FormLabel for="external"
+                                ui:field="labelExternal"></b:FormLabel>
+                            <b:Tooltip ui:field="tooltipExternal">
+                                <b:TextBox b:id="external"
+                                    ui:field="external" />
                             </b:Tooltip>
                         </b:FormGroup>
 

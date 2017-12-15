@@ -1,3 +1,87 @@
+Eclipse Kura - 3.1.1
+-------------------------------------------------------------------------
+Bug Fixes:
+  * #1823: Failure to submit Wifi configuration when wifi password (PSK) ends with the $.
+  * #1783: Unable to locate source code of apache-log4j-extras-1.1.jar
+  * #1747: Fix build issues introduced with the exists-maven-plugin
+  * #1761: Fix issue with unecessary delays when configuring firewall
+  * #1766: Fix GSM modem detection bug
+  * Minor fixes for typos in BLE services and documentation
+  * Minor fix for success notification with Eclipse Marketplace
+  
+Compatibility:
+  * Eclipse Kura v3.1.1 does not introduce API breakage with previous releases.
+
+Target Environments:
+  * Kura is released as pre-compiled binary installers for the following platforms:
+    * Raspberry Pi based on Raspbian: Raspberry Pi, Raspberry Pi B+, Raspberry Pi 2/3
+    * BeagleBone Black based on Debian
+    * Fedora on ARM (Experimental) 
+    * Intel Edison (Experimental)
+    * APU Debian (Experimental)
+    * ARM_64 Debian (Experimental)
+
+Know Issues :
+  * The implementation of the CryptoService performs encryption using a
+    password that is hardcoded and published.
+  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
+  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
+    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
+    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)
+    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on
+    gatttool and the BLE connection will encounter a failure.
+  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
+    AccessPoint WiFi mode not working for Broadcom chipset.
+  * Hardware watchdog: not implemented on all platforms
+  * Only one WAN interface is currently supported. A warning in displayed
+    in the WEB UI if the user attempts to enable more than one WAN interface
+  * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network
+    interface which happened even if network configuration hasn't been modified.
+  * #1788: Maven Archetype does not work - or can someone show me how to use it?
+  * #1786: Wire publisher do not include a timestamp in the message
+  * #1703: [Kura 3.1.0 QA] Wires page jumping up and down
+  * #1700: [Kura 3.1.0 QA] Rollback doesn't restore deleted services
+  * #1689: Instaling a dp can cause the WebUI to restart
+  * #1663: Authentication Issue with Deploy V2
+  * #1657: Bluetooth notifications do not work
+  * #1644: [Artemis] MQTT clients fail to reconnect after the broker is restarted
+  * #1638: Kura does not support Consistent Network Device Naming
+  * #1572: serial modbus has errors on some hardware
+  * #1533: MqttDataTransport client-id illegal character
+  * #1529: OSGI console is not redirected to Eclipse IDE with Kura 3.0
+  * #1373: [Kura 3.0.0 QA] Configuration service: mixing configurable services with factory components
+  * #1358: [GPS] With a USB GPS device, the position service keeps reporting the old position
+  * #1201: Wifi password incorrectly read from snapshot in Access Point mode
+  * #1197: [Net] Network configuration cannot be restored purely from snapshot
+  * #1195: [Net] Firewall IP Forwarding rules entered in the Web UI lost on reboot
+  * #1193: [Wires] Component avoidance during initial placement
+  * #1161: Incorrectly configuring a component can be irreversable.
+  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
+  * #1092: Possible NPE and non-working check
+  * #1016: ConfigurationServiceImpl creates duplicate instances
+  * #924:  [Kura 2.1.0 QA enh] Non-trimmed values of configuration parameters
+  * #923:  [Kura 2.1.0 QA] eth0 search domain configuration and storage
+  * #890:  [Kura 2.1.0 QA] Snapshot management in web UI
+  * #797:  Design of ServiceUtil is broken
+  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
+  * #654:  Clean up static initialization around "modem" functionality
+  * #651:  Call to "exit()" in native code
+  * #650:  Possible bug in "LinuxUdev.c"
+  * #645:  Clean up internal dependencies in Kura
+  * #547:  [Configuration] Configuration Service may miss configuration-policy=optional components
+  * #522:  [Net] Modem monitor should monitor interfaces, not modems
+  * #520:  [Net] PppFactory is not a factory and its design is wrong
+  * #518:  [Net] Modem monitor concurrency issue with multiple modems
+  * #486:  Build environment broken on Windows
+  * #406:  Replace System.get* with calls to SystemService.getProperties
+  * #362:  Uninstaller leaves most of the files
+  * #348:  WpaSupplicantConfigReader.getWifiClientConfig() should support cases where key_mgmt scheme is not set
+  * #329:  [DEPLOY-V2] Review/refactoring needed
+  * #297:  [Status led] What connection instance controls the status led?
+  * #253:  Check if bundle contexes correctly unget services after invoking getService
+  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
+  
+  
 Eclipse Kura - 3.1.0
 -------------------------------------------------------------------------
 Added Features :

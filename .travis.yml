@@ -9,6 +9,7 @@ cache:
   directories:
   - $HOME/.m2
   - kura/target-definition
+  - target-platform
 
 before_script:
   - echo ==== Setting up toolchain.xml ====

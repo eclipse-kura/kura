@@ -17,6 +17,12 @@ Copyright (c) 2017 Eurotech and/or its affiliates and others
               interface="org.eclipse.kura.configuration.ConfigurationService"
               name="ConfigurationService"
               policy="static"/>
+   <reference bind="bindOcdService"
+              unbind="unbindOcdService"
+              cardinality="1..1"
+              interface="org.eclipse.kura.configuration.metatype.OCDService"
+              name="OCDService"
+              policy="static"/>
    <reference bind="bindSystemService"
               unbind="unbindSystemService"
               cardinality="1..1"

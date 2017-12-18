@@ -39,6 +39,7 @@ import org.eclipse.kura.KuraPartialSuccessException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.ConfigurationServiceImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
@@ -67,6 +68,7 @@ public class ConfigurationServiceTest {
     private static CountDownLatch dependencyLatch = new CountDownLatch(2);
 
     static ConfigurationService configurationService;
+    static OCDService ocdService;
     private static SystemService systemService;
 
     private int kuraSnapshotsCount = 10;
@@ -207,6 +209,19 @@ public class ConfigurationServiceTest {
     protected void unbindConfigService(final ConfigurationService configService) {
         if (configurationService == configService) {
             configurationService = null;
+        }
+    }
+
+    protected void bindOcdService(final OCDService ocdService) {
+        if (ConfigurationServiceTest.ocdService == null) {
+            ConfigurationServiceTest.ocdService = ocdService;
+            dependencyLatch.countDown();
+        }
+    }
+
+    protected void unbindOcdService(final OCDService ocdService) {
+        if (ConfigurationServiceTest.ocdService == ocdService) {
+            ConfigurationServiceTest.ocdService = null;
         }
     }
 
@@ -895,14 +910,14 @@ public class ConfigurationServiceTest {
 
     @Test
     public void testShouldGetFactoryComponentDefinitions() {
-        List<ComponentConfiguration> configs = configurationService.getFactoryComponentOCDs();
+        List<ComponentConfiguration> configs = ocdService.getFactoryComponentOCDs();
         assertFalse(configs.isEmpty());
         assertContainsWireComponentsDefinitions(configs, false);
     }
 
     @Test
     public void testShouldGetServiceProviderDefinitions() {
-        List<ComponentConfiguration> configs = configurationService.getServiceProviderOCDs(
+        List<ComponentConfiguration> configs = ocdService.getServiceProviderOCDs(
                 "org.eclipse.kura.wire.WireEmitter", "org.eclipse.kura.wire.WireReceiver",
                 "org.eclipse.kura.wire.WireComponent");
         assertFalse(configs.isEmpty());
@@ -965,8 +980,8 @@ class MultiStepCSValidator implements CSValidator {
         String arg0 = new String((char[]) args[0]);
         XmlComponentConfigurations configurations = null;
         try {
-            configurations = (XmlComponentConfigurations) TestUtil
-                    .invokePrivate(ConfigurationServiceTest.configurationService, "unmarshal", arg0, XmlComponentConfigurations.class);
+            configurations = (XmlComponentConfigurations) TestUtil.invokePrivate(
+                    ConfigurationServiceTest.configurationService, "unmarshal", arg0, XmlComponentConfigurations.class);
         } catch (Throwable e) {
         }
 
@@ -1007,8 +1022,8 @@ class MultiStepCSValidator implements CSValidator {
             try {
                 String cfgxml = null;
                 try {
-                    cfgxml = (String) TestUtil.invokePrivate(ConfigurationServiceTest.configurationService,
-                            "marshal", this.configs);
+                    cfgxml = (String) TestUtil.invokePrivate(ConfigurationServiceTest.configurationService, "marshal",
+                            this.configs);
                 } catch (Throwable e) {
 
                 }

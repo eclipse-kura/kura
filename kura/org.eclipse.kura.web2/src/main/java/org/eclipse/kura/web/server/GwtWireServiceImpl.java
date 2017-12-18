@@ -30,6 +30,7 @@ import org.eclipse.kura.asset.provider.BaseChannelDescriptor;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.AD;
+import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.driver.descriptor.DriverDescriptor;
 import org.eclipse.kura.driver.descriptor.DriverDescriptorService;
@@ -276,12 +277,12 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 
     private void fillWireComponentDefinitions(List<GwtWireComponentDescriptor> resultDescriptors,
             List<GwtConfigComponent> resultDefinitions) throws GwtKuraException {
-        ServiceLocator.applyToServiceOptionally(ConfigurationService.class, configurationService -> {
+        ServiceLocator.applyToServiceOptionally(OCDService.class, ocdService -> {
 
             final Map<String, GwtWireComponentDescriptor> descriptors = new HashMap<>();
             final Map<String, GwtConfigComponent> definitions = new HashMap<>();
 
-            for (ComponentConfiguration receiver : configurationService
+            for (ComponentConfiguration receiver : ocdService
                     .getServiceProviderOCDs("org.eclipse.kura.wire.WireReceiver")) {
                 descriptors.put(receiver.getPid(), new GwtWireComponentDescriptor(receiver.getPid(), 1, 1, 0, 0));
                 final GwtConfigComponent definition = GwtServerUtil.toGwtConfigComponent(receiver);
@@ -290,7 +291,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
                     definitions.put(receiver.getPid(), definition);
                 }
             }
-            for (ComponentConfiguration emitter : configurationService
+            for (ComponentConfiguration emitter : ocdService
                     .getServiceProviderOCDs("org.eclipse.kura.wire.WireEmitter")) {
                 final GwtWireComponentDescriptor desc = descriptors.get(emitter.getPid());
                 if (desc != null) {
@@ -313,10 +314,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
     }
 
     private void fillDriverDefinitions(List<GwtConfigComponent> resultDefinitions) throws GwtKuraException {
-        ServiceLocator.applyToServiceOptionally(ConfigurationService.class, configurationService -> {
+        ServiceLocator.applyToServiceOptionally(OCDService.class, ocdService -> {
 
-            for (ComponentConfiguration config : configurationService
-                    .getServiceProviderOCDs("org.eclipse.kura.driver.Driver")) {
+            for (ComponentConfiguration config : ocdService.getServiceProviderOCDs("org.eclipse.kura.driver.Driver")) {
                 final GwtConfigComponent descriptor = GwtServerUtil.toGwtConfigComponent(config);
                 if (descriptor != null) {
                     descriptor.setIsDriver(true);

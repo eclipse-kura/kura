@@ -15,6 +15,7 @@ package org.eclipse.kura.wire.graph;
 import java.util.List;
 
 import org.eclipse.kura.wire.WireConfiguration;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The Class represents the entire Wire Graph. It contains both the list of
@@ -27,6 +28,7 @@ import org.eclipse.kura.wire.WireConfiguration;
  * @noextend This class is not intended to be extended by clients.
  * @since 1.4
  */
+@ProviderType
 public class WireGraphConfiguration {
 
     private final List<WireComponentConfiguration> wireComponentConfigurations;

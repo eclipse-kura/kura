@@ -389,7 +389,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
         ChannelRecord record = requestInfo.channelRecord;
         final TypedValue<?> value = record.getValue();
         final VariableNode node = this.client.getAddressSpace().createVariableNode(requestInfo.nodeId);
-        final DataValue newValue = new DataValue(new Variant(value.getValue()));
+        final DataValue newValue = new DataValue(new Variant(value.getValue()), StatusCode.GOOD, null);
         try {
             logger.debug("writing: {} namespace index: {} node id: {}..", value, requestInfo.nodeNamespaceIndex,
                     requestInfo.nodeId);

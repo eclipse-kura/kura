@@ -47,17 +47,18 @@ import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
-import org.eclipse.kura.util.base.TypeUtil;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfig;
 import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfigBuilder;
 import org.eclipse.milo.opcua.sdk.client.api.nodes.VariableNode;
 import org.eclipse.milo.opcua.stack.client.UaTcpStackClient;
+import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription;
 import org.slf4j.Logger;
@@ -271,6 +272,29 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
         return new OpcUaChannelDescriptor();
     }
 
+    private Optional<byte[]> toByteArray(Object containedValue) {
+        if (containedValue instanceof byte[]) {
+            return Optional.of((byte[]) containedValue);
+        } else if (containedValue instanceof ByteString) {
+            return Optional.of(((ByteString) containedValue).bytesOrEmpty());
+        } else if (containedValue instanceof Byte[]) {
+            final Byte[] value = (Byte[]) containedValue;
+            final byte[] result = new byte[value.length];
+            for (int i = 0; i < value.length; i++) {
+                result[i] = value[i];
+            }
+            return Optional.of(result);
+        } else if (containedValue instanceof UByte[]) {
+            final UByte[] value = (UByte[]) containedValue;
+            final byte[] result = new byte[value.length];
+            for (int i = 0; i < value.length; i++) {
+                result[i] = (byte) (value[i].intValue() & 0xff);
+            }
+            return Optional.of(result);
+        }
+        return Optional.empty();
+    }
+
     private Optional<TypedValue<?>> getTypedValue(final DataType expectedValueType, final Object containedValue) {
         try {
             switch (expectedValueType) {
@@ -287,7 +311,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
             case STRING:
                 return Optional.of(TypedValues.newStringValue(containedValue.toString()));
             case BYTE_ARRAY:
-                return Optional.of(TypedValues.newByteArrayValue(TypeUtil.objectToByteArray(containedValue)));
+                return toByteArray(containedValue).map(TypedValues::newByteArrayValue);
             default:
                 return Optional.empty();
             }
@@ -387,11 +411,12 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
 
     private void runWriteRequest(OpcUaRequestInfo requestInfo) {
         ChannelRecord record = requestInfo.channelRecord;
-        final TypedValue<?> value = record.getValue();
-        final VariableNode node = this.client.getAddressSpace().createVariableNode(requestInfo.nodeId);
-        final DataValue newValue = new DataValue(new Variant(value.getValue()), StatusCode.GOOD, null);
         try {
-            logger.debug("writing: {} namespace index: {} node id: {}..", value, requestInfo.nodeNamespaceIndex,
+            final TypedValue<?> value = record.getValue();
+            final VariableNode node = this.client.getAddressSpace().createVariableNode(requestInfo.nodeId);
+            final DataValue newValue = new DataValue(DataTypeMapper.map(value.getValue(), requestInfo.opcuaType),
+                    StatusCode.GOOD, null);
+            logger.debug("writing: {} namespace index: {} node id: {}..", newValue, requestInfo.nodeNamespaceIndex,
                     requestInfo.nodeId);
             checkStatus(runSafe(node.writeValue(newValue)));
             record.setChannelStatus(new ChannelStatus(SUCCESS));
@@ -423,13 +448,15 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
         private final int nodeNamespaceIndex;
         private final NodeId nodeId;
         private final ChannelRecord channelRecord;
+        private final VariableType opcuaType;
 
         public OpcUaRequestInfo(final ChannelRecord channelRecord, final DataType dataType,
-                final int nodeNamespaceIndex, final NodeId nodeId) {
+                final VariableType variableType, final int nodeNamespaceIndex, final NodeId nodeId) {
             this.dataType = dataType;
             this.nodeNamespaceIndex = nodeNamespaceIndex;
             this.nodeId = nodeId;
             this.channelRecord = channelRecord;
+            this.opcuaType = variableType;
         }
 
         private static void fail(final ChannelRecord record, final String message) {
@@ -442,11 +469,19 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
             final int nodeNamespaceIndex;
             final NodeIdType nodeIdType;
             final NodeId nodeId;
+            final VariableType opcuaType;
 
             try {
                 nodeNamespaceIndex = OpcUaChannelDescriptor.getNodeNamespaceIndex(channelConfig);
             } catch (final Exception e) {
                 fail(record, message.errorRetrievingNodeNamespace());
+                return Optional.empty();
+            }
+
+            try {
+                opcuaType = OpcUaChannelDescriptor.getOpcuaType(channelConfig);
+            } catch (final Exception e) {
+                fail(record, message.errorRetrievingOpcuaType());
                 return Optional.empty();
             }
 
@@ -471,7 +506,7 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
                 return Optional.empty();
             }
 
-            return Optional.of(new OpcUaRequestInfo(record, dataType, nodeNamespaceIndex, nodeId));
+            return Optional.of(new OpcUaRequestInfo(record, dataType, opcuaType, nodeNamespaceIndex, nodeId));
         }
     }
 

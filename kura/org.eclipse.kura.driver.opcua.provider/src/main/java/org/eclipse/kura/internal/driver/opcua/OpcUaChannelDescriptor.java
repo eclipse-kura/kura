@@ -40,6 +40,7 @@ public final class OpcUaChannelDescriptor implements ChannelDescriptor {
 
     private static final String NODE_ID = "node.id";
     private static final String NODE_NAMESPACE_INDEX = "node.namespace.index";
+    private static final String OPCUA_TYPE = "opcua.type";
     private static final String NODE_ID_TYPE = "node.id.type";
 
     private static void addOptions(Tad target, Enum<?>[] values) {
@@ -76,13 +77,25 @@ public final class OpcUaChannelDescriptor implements ChannelDescriptor {
 
         elements.add(namespaceIndex);
 
+        final Tad opcuaType = new Tad();
+        opcuaType.setName(OPCUA_TYPE);
+        opcuaType.setId(OPCUA_TYPE);
+        opcuaType.setDescription(OPCUA_TYPE);
+        opcuaType.setType(Tscalar.STRING);
+        opcuaType.setRequired(true);
+        opcuaType.setDefault(VariableType.DEFINED_BY_JAVA_TYPE.name());
+
+        addOptions(opcuaType, VariableType.values());
+
+        elements.add(opcuaType);
+
         final Tad nodeIdType = new Tad();
         nodeIdType.setName(NODE_ID_TYPE);
         nodeIdType.setId(NODE_ID_TYPE);
         nodeIdType.setDescription(NODE_ID_TYPE);
         nodeIdType.setType(Tscalar.STRING);
         nodeIdType.setRequired(true);
-        nodeIdType.setDefault("STRING");
+        nodeIdType.setDefault(NodeIdType.STRING.name());
 
         addOptions(nodeIdType, NodeIdType.values());
 
@@ -96,16 +109,12 @@ public final class OpcUaChannelDescriptor implements ChannelDescriptor {
 
     static NodeIdType getNodeIdType(Map<String, Object> properties) {
         String nodeIdType = (String) properties.get(NODE_ID_TYPE);
-        if (NodeIdType.NUMERIC.name().equals(nodeIdType)) {
-            return NodeIdType.NUMERIC;
-        } else if (NodeIdType.STRING.name().equals(nodeIdType)) {
-            return NodeIdType.STRING;
-        } else if (NodeIdType.GUID.name().equals(nodeIdType)) {
-            return NodeIdType.GUID;
-        } else if (NodeIdType.OPAQUE.name().equals(nodeIdType)) {
-            return NodeIdType.OPAQUE;
-        }
-        throw new IllegalArgumentException();
+        return NodeIdType.valueOf(nodeIdType);
+    }
+
+    static VariableType getOpcuaType(Map<String, Object> properties) {
+        String variableType = (String) properties.get(OPCUA_TYPE);
+        return VariableType.valueOf(variableType);
     }
 
     static NodeId getNodeId(Map<String, Object> properties, int nodeNamespaceIndex, NodeIdType nodeIdType) {

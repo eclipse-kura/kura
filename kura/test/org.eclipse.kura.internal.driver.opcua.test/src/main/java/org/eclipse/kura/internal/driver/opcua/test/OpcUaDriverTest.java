@@ -16,6 +16,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,11 +29,19 @@ import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.Driver.ConnectionException;
+import org.eclipse.kura.internal.driver.opcua.VariableType;
 import org.eclipse.kura.type.DataType;
+import org.eclipse.kura.type.DoubleValue;
+import org.eclipse.kura.type.FloatValue;
 import org.eclipse.kura.type.IntegerValue;
+import org.eclipse.kura.type.LongValue;
+import org.eclipse.kura.type.StringValue;
+import org.eclipse.kura.type.TypedValue;
+import org.eclipse.kura.type.TypedValues;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
 import org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig;
 import org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfigBuilder;
+import org.eclipse.milo.opcua.stack.core.UaException;
 import org.eclipse.milo.opcua.stack.core.application.CertificateManager;
 import org.eclipse.milo.opcua.stack.core.application.CertificateValidator;
 import org.eclipse.milo.opcua.stack.core.application.DefaultCertificateManager;
@@ -58,7 +67,7 @@ public class OpcUaDriverTest {
     private static OpcUaServer server;
 
     @BeforeClass
-    public static void setup() throws KuraException {
+    public static void setup() throws KuraException, UaException {
         startServer();
 
         try {
@@ -69,7 +78,7 @@ public class OpcUaDriverTest {
         }
     }
 
-    private static void startServer() {
+    private static void startServer() throws UaException {
         CertificateManager certificateManager = new DefaultCertificateManager();
         CertificateValidator certificateValidator = new DefaultCertificateValidator(new File("/tmp"));
         List<String> bindAddresses = new ArrayList<>();
@@ -80,6 +89,7 @@ public class OpcUaDriverTest {
                 .setCertificateValidator(certificateValidator)
                 .setUserTokenPolicies(Arrays.asList(OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS)).build();
         server = new OpcUaServer(config);
+        server.getNamespaceManager().registerAndAdd(TestNamespace.NAMESPACE_URI, idx -> new TestNamespace(server, idx));
         server.startup();
 
         server.getServer().addRequestHandler(TestStackRequest.class, service -> {
@@ -176,6 +186,245 @@ public class OpcUaDriverTest {
         driver.write(records);
 
         assertEquals(ChannelFlag.FAILURE, record.getChannelStatus().getChannelFlag()); // read fails - no server config
+    }
+
+    private void assertSuccess(ChannelRecord record) {
+        assertEquals(ChannelFlag.SUCCESS, record.getChannelStatus().getChannelFlag());
+    }
+
+    private ChannelRecord createReadRecord(String nodeId, DataType valueType) {
+        ChannelRecord record = ChannelRecord.createReadRecord("test", valueType);
+        Map<String, Object> channelConfig = new HashMap<>();
+        channelConfig.put("node.namespace.index", "2");
+        channelConfig.put("node.id.type", "STRING");
+        channelConfig.put("opcua.type", VariableType.DEFINED_BY_JAVA_TYPE.name());
+        channelConfig.put("node.id", nodeId);
+        record.setChannelConfig(channelConfig);
+        return record;
+    }
+
+    private ChannelRecord createWriteRecord(String nodeId, TypedValue<?> value, VariableType opcuaType) {
+        ChannelRecord record = ChannelRecord.createWriteRecord("test", value);
+        Map<String, Object> channelConfig = new HashMap<>();
+        channelConfig.put("node.namespace.index", "2");
+        channelConfig.put("node.id.type", "STRING");
+        channelConfig.put("opcua.type", opcuaType.name());
+        channelConfig.put("node.id", nodeId);
+        record.setChannelConfig(channelConfig);
+        return record;
+    }
+
+    private TypedValue<?> adapt(Number number, DataType dataType) {
+        if (dataType == DataType.INTEGER) {
+            return new IntegerValue(number.intValue());
+        } else if (dataType == DataType.LONG) {
+            return new LongValue(number.longValue());
+        } else if (dataType == DataType.FLOAT) {
+            return new FloatValue(number.floatValue());
+        } else if (dataType == DataType.DOUBLE) {
+            return new DoubleValue(number.doubleValue());
+        }
+        throw new IllegalArgumentException();
+    }
+
+    private void testRead(String nodeId, TypedValue<?> expectedValue) throws ConnectionException {
+        final ChannelRecord readRecord = createReadRecord(nodeId, expectedValue.getType());
+        driver.read(Arrays.asList(readRecord));
+        assertSuccess(readRecord);
+        assertEquals(expectedValue, readRecord.getValue());
+    }
+
+    private void testReadWrite(String nodeId, TypedValue<?> value, VariableType opcuaType) throws ConnectionException {
+        final ChannelRecord writeRecord = createWriteRecord(nodeId, value, opcuaType);
+        driver.write(Arrays.asList(writeRecord));
+        assertSuccess(writeRecord);
+        testRead(nodeId, value);
+    }
+
+    private void testRead(String nodeId, Number number, EnumSet<DataType> types) throws ConnectionException {
+        for (DataType type : types) {
+            testRead(nodeId, adapt(number, type));
+        }
+        testRead(nodeId, new StringValue(number.toString()));
+    }
+
+    private void testReadWrite(String nodeId, Number number, EnumSet<DataType> types, VariableType opcuaType)
+            throws ConnectionException {
+        for (DataType type : types) {
+            testReadWrite(nodeId, adapt(number, type), opcuaType);
+        }
+        testReadWrite(nodeId, new StringValue(number.toString()), opcuaType);
+    }
+
+    private void testReadWrite(String nodeId, EnumSet<DataType> types, VariableType opcuaType, Number... values)
+            throws ConnectionException {
+        for (Number number : values) {
+            testReadWrite(nodeId, number, types, opcuaType);
+        }
+    }
+
+    @Test
+    public void testByte() throws ConnectionException {
+        final EnumSet<DataType> applicableTypes = EnumSet.of(DataType.INTEGER, DataType.LONG, DataType.FLOAT,
+                DataType.DOUBLE);
+
+        final String nodeId = "Byte";
+        final VariableType opcuaType = VariableType.BYTE;
+
+        testRead(nodeId, 0, applicableTypes);
+        testReadWrite(nodeId, applicableTypes, opcuaType, 0, 10, 20, 255);
+    }
+
+    @Test
+    public void testUInt16() throws ConnectionException {
+        final EnumSet<DataType> applicableTypes = EnumSet.of(DataType.INTEGER, DataType.LONG, DataType.FLOAT,
+                DataType.DOUBLE);
+
+        final String nodeId = "UInt16";
+        final VariableType opcuaType = VariableType.UINT16;
+
+        testRead(nodeId, 0, applicableTypes);
+        testReadWrite(nodeId, applicableTypes, opcuaType, 0, 10, 20, ((int) Short.MAX_VALUE) * 2 + 1);
+    }
+
+    @Test
+    public void testUInt32() throws ConnectionException {
+        final String nodeId = "UInt32";
+        final VariableType opcuaType = VariableType.UINT32;
+
+        testRead(nodeId, 0, EnumSet.of(DataType.INTEGER, DataType.LONG, DataType.FLOAT, DataType.DOUBLE));
+        testReadWrite(nodeId, EnumSet.of(DataType.INTEGER, DataType.LONG, DataType.FLOAT, DataType.DOUBLE), opcuaType,
+                0, 10, 20, ((int) Short.MAX_VALUE) * 2 + 1);
+        testReadWrite(nodeId, EnumSet.of(DataType.LONG, DataType.DOUBLE), opcuaType,
+                ((long) Integer.MAX_VALUE) * 2 + 1);
+    }
+
+    @Test
+    public void testUInt64() throws ConnectionException {
+        final String nodeId = "UInt64";
+        final VariableType opcuaType = VariableType.UINT64;
+
+        testRead(nodeId, 0, EnumSet.of(DataType.INTEGER, DataType.LONG, DataType.FLOAT, DataType.DOUBLE));
+        testReadWrite(nodeId, EnumSet.of(DataType.INTEGER, DataType.LONG, DataType.FLOAT, DataType.DOUBLE), opcuaType,
+                0, 10, 20, ((int) Short.MAX_VALUE) * 2 + 1);
+        testReadWrite(nodeId, EnumSet.of(DataType.LONG, DataType.DOUBLE), opcuaType,
+                ((long) Integer.MAX_VALUE) * 2 + 1);
+        testReadWrite(nodeId, EnumSet.of(DataType.LONG, DataType.DOUBLE), opcuaType, Long.MAX_VALUE);
+    }
+
+    @Test
+    public void testSByte() throws ConnectionException {
+        final EnumSet<DataType> applicableTypes = EnumSet.of(DataType.INTEGER, DataType.LONG, DataType.FLOAT,
+                DataType.DOUBLE);
+
+        final String nodeId = "SByte";
+        final VariableType opcuaType = VariableType.SBYTE;
+
+        testRead(nodeId, 0, applicableTypes);
+        testReadWrite(nodeId, applicableTypes, opcuaType, 0, 10, 20, 127, -10, -20, -127);
+    }
+
+    @Test
+    public void testInt16() throws ConnectionException {
+        final EnumSet<DataType> applicableTypes = EnumSet.of(DataType.INTEGER, DataType.LONG, DataType.FLOAT,
+                DataType.DOUBLE);
+
+        final String nodeId = "Int16";
+        final VariableType opcuaType = VariableType.INT16;
+
+        testRead(nodeId, 0, applicableTypes);
+        testReadWrite(nodeId, applicableTypes, opcuaType, 0, 10, 20, Short.MAX_VALUE, -10, -20, -Short.MAX_VALUE);
+    }
+
+    @Test
+    public void testInt32() throws ConnectionException {
+        final EnumSet<DataType> applicableTypes = EnumSet.of(DataType.INTEGER, DataType.LONG, DataType.FLOAT,
+                DataType.DOUBLE);
+        final String nodeId = "Int32";
+        final VariableType opcuaType = VariableType.INT32;
+
+        testRead(nodeId, 0, applicableTypes);
+        testReadWrite(nodeId, applicableTypes, opcuaType, 0, 10, 20, Short.MAX_VALUE, Integer.MAX_VALUE, -10, -20,
+                -Short.MAX_VALUE, -Integer.MAX_VALUE);
+    }
+
+    @Test
+    public void testInt64() throws ConnectionException {
+        final String nodeId = "Int64";
+        final VariableType opcuaType = VariableType.INT64;
+
+        testRead(nodeId, 0, EnumSet.of(DataType.INTEGER, DataType.LONG, DataType.FLOAT, DataType.DOUBLE));
+        testReadWrite(nodeId, EnumSet.of(DataType.INTEGER, DataType.LONG, DataType.FLOAT, DataType.DOUBLE), opcuaType,
+                0, 10, 20, Short.MAX_VALUE, Integer.MAX_VALUE, -10, -20, -Short.MAX_VALUE, -Integer.MAX_VALUE);
+        testReadWrite(nodeId, EnumSet.of(DataType.LONG, DataType.DOUBLE), opcuaType, Long.MAX_VALUE, -Long.MAX_VALUE);
+    }
+
+    @Test
+    public void testFloat() throws ConnectionException {
+        final String nodeId = "Float";
+        final VariableType opcuaType = VariableType.FLOAT;
+
+        testRead(nodeId, 0.0f, EnumSet.of(DataType.FLOAT));
+        testReadWrite(nodeId, EnumSet.of(DataType.FLOAT), opcuaType, 0.0f, Float.MIN_VALUE, 2e1f, 2e2f, 2e3f,
+                Float.MAX_VALUE, -Float.MIN_VALUE, -2e1f, -2e2f, -2e3f, -Float.MAX_VALUE);
+    }
+
+    @Test
+    public void testDouble() throws ConnectionException {
+        final String nodeId = "Double";
+        final VariableType opcuaType = VariableType.DOUBLE;
+
+        testRead(nodeId, 0.0d, EnumSet.of(DataType.DOUBLE));
+        testReadWrite(nodeId, EnumSet.of(DataType.DOUBLE), opcuaType, 0.0d, Double.MIN_VALUE, 2e1d, 2e2d, 2e3d,
+                Double.MAX_VALUE, -Double.MIN_VALUE, -2e1d, -2e2d, -2e3d, -Double.MAX_VALUE);
+    }
+
+    @Test
+    public void testBoolean() throws ConnectionException {
+        final String nodeId = "Boolean";
+        final VariableType opcuaType = VariableType.BOOLEAN;
+
+        testRead(nodeId, TypedValues.newBooleanValue(false));
+        testReadWrite(nodeId, TypedValues.newBooleanValue(true), opcuaType);
+    }
+
+    @Test
+    public void testString() throws ConnectionException {
+        final String nodeId = "String";
+        final VariableType opcuaType = VariableType.STRING;
+
+        testRead(nodeId, TypedValues.newStringValue("string value"));
+        testReadWrite(nodeId, TypedValues.newStringValue("other string value"), opcuaType);
+    }
+
+    @Test
+    public void testByteString() throws ConnectionException {
+        final String nodeId = "ByteString";
+        final VariableType opcuaType = VariableType.BYTE_STRING;
+
+        testRead(nodeId, TypedValues.newByteArrayValue(new byte[] { 0x01, 0x02, 0x03, 0x04 }));
+        testReadWrite(nodeId, TypedValues.newByteArrayValue(new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                0x09, (byte) 0xaa, (byte) 0xbb, (byte) 0xcc, (byte) 0xdd, (byte) 0xee, (byte) 0xff }), opcuaType);
+    }
+
+    @Test
+    public void testByteArray() throws ConnectionException {
+        final String nodeId = "ByteArray";
+        final VariableType opcuaType = VariableType.BYTE_ARRAY;
+
+        testRead(nodeId, TypedValues.newByteArrayValue(new byte[] { 0x00, 0x00, 0x00, 0x00 }));
+        testReadWrite(nodeId, TypedValues.newByteArrayValue(new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                0x09, (byte) 0xaa, (byte) 0xbb, (byte) 0xcc, (byte) 0xdd, (byte) 0xee, (byte) 0xff }), opcuaType);
+    }
+
+    @Test
+    public void testSByteArray() throws ConnectionException {
+        final String nodeId = "SByteArray";
+        final VariableType opcuaType = VariableType.SBYTE_ARRAY;
+
+        testRead(nodeId, TypedValues.newByteArrayValue(new byte[] { 0x00, 0x00, 0x00, 0x00 }));
+        testReadWrite(nodeId, TypedValues.newByteArrayValue(new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                0x09, (byte) 0xaa, (byte) 0xbb, (byte) 0xcc, (byte) 0xdd, (byte) 0xee, (byte) 0xff }), opcuaType);
     }
 
     public void bindCfgSvc(ConfigurationService cfgSvc) {

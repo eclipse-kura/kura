@@ -34,14 +34,18 @@ import org.eclipse.kura.core.configuration.CloudConfigurationHandler;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
-import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.core.test.util.CoreTestXmlUtil;
 import org.eclipse.kura.data.DataService;
+import org.eclipse.kura.marshalling.Marshaller;
+import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.test.annotation.TestTarget;
+import org.eclipse.kura.util.service.ServiceUtil;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -297,8 +301,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
 
         // unmarshall the response
         String s = new String(resp.getBody(), "UTF-8");
-        StringReader sr = new StringReader(s);
-        XmlComponentConfigurations xmlConfigs = XmlUtil.unmarshal(sr, XmlComponentConfigurations.class);
+        XmlComponentConfigurations xmlConfigs = unmarshalXml(s, XmlComponentConfigurations.class);
 
         System.err.println("Checking current configuration");
         List<ComponentConfiguration> configs = xmlConfigs.getConfigurations();
@@ -317,7 +320,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
 
         // unmarshall the response
         s = new String(resp.getBody(), "UTF-8");
-        sr = new StringReader(s);
+        StringReader sr = new StringReader(s);
         // XmlSnapshotIdResult snapshotIds = XmlUtil.unmarshal(sr, XmlSnapshotIdResult.class);
         XmlSnapshotIdResult snapshotIds = CoreTestXmlUtil.unmarshal(sr, XmlSnapshotIdResult.class);
 
@@ -340,11 +343,12 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         newccs.add(ccnew);
         newConfigs.setConfigurations(newccs);
 
-        StringWriter sw = new StringWriter();
-        XmlUtil.marshal(newConfigs, sw);
-
+        
+        //TODO: solve this
+        String result = marshalXml(newConfigs);
+        
         KuraPayload payload = new KuraPayload();
-        payload.setBody(sw.toString().getBytes());
+        payload.setBody(result.getBytes());
 
         sb = new StringBuilder(CloudletTopic.Method.PUT.toString()).append("/")
                 .append(CloudConfigurationHandler.RESOURCE_CONFIGURATIONS).append("/").append(pid);
@@ -376,9 +380,8 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         s = new String(resp.getBody(), "UTF-8");
         System.err.println(s);
 
-        sr = new StringReader(s);
-        xmlConfigs = XmlUtil.unmarshal(sr, XmlComponentConfigurations.class);
-
+        xmlConfigs = unmarshalXml(s, XmlComponentConfigurations.class); 
+        
         s_logger.info("validating modified configuration");
         if (xmlConfigs == null) {
             s_logger.info("ERROR: xmlConfigs is null");
@@ -459,5 +462,56 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
 
         Byte[] byteValues = new Byte[] { (byte) 7, (byte) 8, (byte) 9 };
         assertTrue(Arrays.equals(byteValues, (Byte[]) properties.get("prop.byte.array")));
+    }
+    
+    private ServiceReference<Marshaller>[] getXmlMarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))",
+                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
+        return ServiceUtil.getServiceReferences(componentContext.getBundleContext(), Marshaller.class, filterString);
+    }
+
+    private ServiceReference<Unmarshaller>[] getXmlUnmarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))",
+                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
+        return ServiceUtil.getServiceReferences(componentContext.getBundleContext(), Unmarshaller.class, filterString);
+    }
+
+    private void ungetServiceReferences(final ServiceReference<?>[] refs) {
+        ServiceUtil.ungetServiceReferences(componentContext.getBundleContext(), refs);
+    }
+
+    private <T> T unmarshalXml(String xmlString, Class<T> clazz) throws KuraException {
+        T result = null;
+        ServiceReference<Unmarshaller>[] unmarshallerSRs = getXmlUnmarshallers();
+        try {
+            for (final ServiceReference<Unmarshaller> unmarshallerSR : unmarshallerSRs) {
+                Unmarshaller unmarshaller = componentContext.getBundleContext().getService(unmarshallerSR);
+                result = unmarshaller.unmarshal(xmlString, clazz);
+            }
+        } catch (Exception e) {
+            s_logger.warn("Failed to extract persisted configuration.");
+        } finally {
+            ungetServiceReferences(unmarshallerSRs);
+        }
+        if (result == null) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+        }
+        return result;
+    }
+
+    private String marshalXml(Object object) {
+        String result = null;
+        ServiceReference<Marshaller>[] marshallerSRs = getXmlMarshallers();
+        try {
+            for (final ServiceReference<Marshaller> marshallerSR : marshallerSRs) {
+                Marshaller marshaller = componentContext.getBundleContext().getService(marshallerSR);
+                result = marshaller.marshal(object);
+            }
+        } catch (Exception e) {
+            s_logger.warn("Failed to marshal configuration.");
+        } finally {
+            ungetServiceReferences(marshallerSRs);
+        }
+        return result;
     }
 }

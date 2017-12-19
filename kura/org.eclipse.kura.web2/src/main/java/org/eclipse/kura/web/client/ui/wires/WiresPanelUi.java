@@ -14,63 +14,58 @@
 package org.eclipse.kura.web.client.ui.wires;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.eclipse.kura.web.client.configuration.Configurations;
+import org.eclipse.kura.web.client.configuration.HasConfiguration;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
-import org.eclipse.kura.web.client.ui.EntryClassUi;
-import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.ui.wires.composer.BlinkEffect;
+import org.eclipse.kura.web.client.ui.wires.composer.DropEvent;
+import org.eclipse.kura.web.client.ui.wires.composer.Wire;
+import org.eclipse.kura.web.client.ui.wires.composer.WireComponent;
+import org.eclipse.kura.web.client.ui.wires.composer.WireComposer;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
-import org.eclipse.kura.web.shared.model.GwtWiresConfiguration;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
-import org.eclipse.kura.web.shared.service.GwtAssetService;
-import org.eclipse.kura.web.shared.service.GwtAssetServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtComponentService;
-import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtWireService;
-import org.eclipse.kura.web.shared.service.GwtWireServiceAsync;
-import org.gwtbootstrap3.client.ui.AnchorListItem;
+import org.eclipse.kura.web.shared.model.GwtWireComponentConfiguration;
+import org.eclipse.kura.web.shared.model.GwtWireComponentDescriptor;
+import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
+import org.eclipse.kura.web.shared.model.GwtWireConfiguration;
+import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
 import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.FormLabel;
-import org.gwtbootstrap3.client.ui.Heading;
-import org.gwtbootstrap3.client.ui.ListBox;
-import org.gwtbootstrap3.client.ui.Modal;
-import org.gwtbootstrap3.client.ui.ModalBody;
-import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.NavPills;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.Row;
-import org.gwtbootstrap3.client.ui.TextBox;
-import org.gwtbootstrap3.client.ui.html.Span;
-import org.gwtbootstrap3.client.ui.html.Strong;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class WiresPanelUi extends Composite {
+public class WiresPanelUi extends Composite
+        implements WireComposer.Listener, HasConfiguration.Listener, WiresDialogs.Listener {
+
+    private static final WiresPanelUiUiBinder uiBinder = GWT.create(WiresPanelUiUiBinder.class);
+
+    private static final Messages MSGS = GWT.create(Messages.class);
+
+    static final String WIRE_ASSET = "WireAsset";
+    static final String FACTORY_PID_DROP_PREFIX = "factory://";
+    private static final String ASSET_DESCRIPTION_PROP = "asset.desc";
+    private static final String WIRE_ASSET_PID = "org.eclipse.kura.wire.WireAsset";
+    private static final String DRIVER_PID = "driver.pid";
 
     @UiField
     Button btnSave;
@@ -88,63 +83,6 @@ public class WiresPanelUi extends Composite {
     Button btnGraphDelete;
 
     @UiField
-    FormLabel componentNameLabel;
-    @UiField
-    TextBox componentName;
-
-    @UiField
-    Modal genericCompModal;
-    @UiField
-    ModalHeader newAssetModalHeader;
-
-    @UiField
-    Button btnComponentModalYes;
-    @UiField
-    Button btnComponentModalNo;
-
-    @UiField
-    Modal saveGraphModal;
-    @UiField
-    ModalHeader saveGraphModalHeader;
-    @UiField
-    ModalBody saveGraphModalBody;
-    @UiField
-    Button btnSaveGraphModalYes;
-    @UiField
-    Button btnSaveGraphModalNo;
-
-    @UiField
-    Modal deleteGraphModal;
-    @UiField
-    ModalHeader deleteGraphModalHeader;
-    @UiField
-    ModalBody deleteGraphModalBody;
-    @UiField
-    Button btnDeleteGraphModalYes;
-    @UiField
-    Button btnDeleteGraphModalNo;
-
-    @UiField
-    Modal deleteCompModal;
-    @UiField
-    ModalHeader deleteCompModalHeader;
-    @UiField
-    ModalBody deleteCompModalBody;
-    @UiField
-    Button btnDeleteCompModalYes;
-    @UiField
-    Button btnDeleteCompModalNo;
-
-    @UiField
-    Strong errorAlertText;
-    @UiField
-    Modal errorModal;
-    @UiField
-    Button errorModalClose;
-    @UiField
-    TextBox factoryPid;
-
-    @UiField
     Panel propertiesPanel;
     @UiField
     PanelBody propertiesPanelBody;
@@ -152,10 +90,8 @@ public class WiresPanelUi extends Composite {
     PanelHeader propertiesPanelHeader;
 
     @UiField
-    static Row configurationRow;
+    Row configurationRow;
 
-    @UiField
-    Heading wiresComposerTitle;
     @UiField
     NavPills wireComponentsMenu;
 
@@ -163,110 +99,30 @@ public class WiresPanelUi extends Composite {
     Widget composer;
 
     @UiField
-    Modal selectAssetModal;
-    @UiField
-    HTMLPanel selectAssetModalIntro;
-    @UiField
-    FormLabel assetInstanceLabel;
-    @UiField
-    ListBox assetInstance;
-    @UiField
-    Button buttonSelectAssetCancel;
-    @UiField
-    Button buttonNewAsset;
-    @UiField
-    Button buttonSelectAssetOk;
+    WiresDialogs dialogs;
 
     @UiField
-    Modal selectDriverModal;
-    @UiField
-    HTMLPanel selectDriverModalIntro;
-    @UiField
-    FormLabel driverInstanceLabel;
-    @UiField
-    ListBox driverInstance;
-    @UiField
-    Button buttonSelectDriverCancel;
-    @UiField
-    Button buttonNewDriver;
-    @UiField
-    Button buttonSelectDriverOk;
-
-    @UiField
-    Modal newAssetModal;
-    @UiField
-    HTMLPanel newAssetModalIntro;
-    @UiField
-    FormLabel newAssetNameLabel;
-    @UiField
-    TextBox newAssetName;
-    @UiField
-    FormLabel newAssetDriverInstanceLabel;
-    @UiField
-    TextBox newAssetDriverInstance;
-    @UiField
-    Button newAssetCancel;
-    @UiField
-    Button newAssetOk;
-
-    @UiField
-    Modal newDriverModal;
-    @UiField
-    HTMLPanel newDriverModalIntro;
-    @UiField
-    FormLabel newDriverNameLabel;
-    @UiField
-    TextBox newDriverName;
-    @UiField
-    FormLabel newDriverFactoryLabel;
-    @UiField
-    ListBox newDriverFactory;
-    @UiField
-    Button newDriverCancel;
-    @UiField
-    Button newDriverOk;
-
-    @UiField
-    AlertDialog refreshAlert;
-
-    static final String WIRE_ASSET = "WireAsset";
+    AlertDialog confirmDialog;
 
     interface WiresPanelUiUiBinder extends UiBinder<Widget, WiresPanelUi> {
     }
 
-    private static final WiresPanelUiUiBinder uiBinder = GWT.create(WiresPanelUiUiBinder.class);
-
-    private static final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
-    private static final GwtWireServiceAsync gwtWireService = GWT.create(GwtWireService.class);
-    private static final GwtAssetServiceAsync gwtAssetService = GWT.create(GwtAssetService.class);
-    private static final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-
-    private static final Logger logger = Logger.getLogger(WiresPanelUi.class.getSimpleName());
-
-    private static final Messages MSGS = GWT.create(Messages.class);
-
-    static final String FACTORY_PID_DROP_PREFIX = "factory://";
-
-    private static final String TEMPORARY_ASSET_REG_EXP = "^[0-9]{14}$";
-    private static final String ASSET_DESCRIPTION_PROP = "asset.desc";
-    private static final String WIRE_ASSET_PID = "org.eclipse.kura.wire.WireAsset";
-    private static final String SELECT_COMPONENT = MSGS.servicesComponentFactorySelectorIdle();
-
-    private boolean isDirty;
     private List<String> components;
     private final Map<String, GwtConfigComponent> configs = new HashMap<>();
     private final List<String> drivers;
     private final List<String> emitters;
 
     private String graph;
-    private final Map<String, ConfigurationAreaUi> propertiesUis;
     private final List<String> receivers;
     private String wireComponentsConfigJson;
     private String wireConfigsJson;
     private String wires;
-    private GwtConfigComponent currentSelection = null;
 
-    private boolean panelLoaded = false;
+    private WireComposer wireComposer;
+    private BlinkEffect blinkEffect;
+
+    private WireComponentDescriptors descriptors = new WireComponentDescriptors();
+    private Configurations configurations = new Configurations();
 
     public WiresPanelUi() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -274,347 +130,72 @@ public class WiresPanelUi extends Composite {
         this.receivers = new ArrayList<>();
         this.components = new ArrayList<>();
         this.drivers = new ArrayList<>();
-        this.propertiesUis = new HashMap<>();
 
+        this.wireComposer = WireComposer.create(composer.getElement());
+        this.wireComposer.setListener(this);
+
+        this.blinkEffect = BlinkEffect.create(wireComposer);
+
+        this.dialogs.setListener(this);
         initButtons();
-        initComposer();
-        initAssetModal();
-        initComponentDeleteModal();
-        initSaveModal();
-        initGraphDeleteModal();
-        initErrorModal();
-        initSelectAssetModal();
-        initSelectDriverModal();
-        initNewAssetModal();
-        initNewDriverModal();
-
-        exportJSNIUpdateWireConfig();
-        exportJSNIUpdateSelection();
-        exportJSNIShowDuplicatePidModal();
-        exportJSNIshowCycleExistenceError();
-        exportJSNImakeUiDirty();
-        exportJSNIDeactivateNavPils();
-        exportJSNIShowComponentCreationDialog();
-    }
-
-    private void initSelectAssetModal() {
-        this.selectAssetModal.setTitle(MSGS.selectAssetLabel());
-        this.selectAssetModalIntro.add(new Span("<p>" + MSGS.selectAssetIntroLabel() + "</p>"));
-        this.assetInstanceLabel.setText(MSGS.assetName());
-        this.buttonSelectAssetCancel.setText(MSGS.cancelButton());
-
-        this.buttonNewAsset.setText(MSGS.newAsset());
-        this.buttonNewAsset.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                EntryClassUi.showWaitModal();
-
-                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(final Throwable ex) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(ex);
-                    }
-
-                    @Override
-                    public void onSuccess(final GwtXSRFToken token) {
-                        gwtWireService.getDriverInstances(token, new AsyncCallback<List<String>>() {
-
-                            @Override
-                            public void onFailure(final Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
-
-                            @Override
-                            public void onSuccess(final List<String> result) {
-                                if (result.isEmpty()) {
-                                    WiresPanelUi.this.driverInstance.setEnabled(false);
-                                    WiresPanelUi.this.buttonSelectDriverOk.setEnabled(false);
-                                } else {
-                                    WiresPanelUi.this.driverInstance.setEnabled(true);
-                                    WiresPanelUi.this.buttonSelectDriverOk.setEnabled(true);
-                                }
-
-                                WiresPanelUi.this.driverInstance.clear();
-                                for (String driverPid : result) {
-                                    WiresPanelUi.this.driverInstance.addItem(driverPid);
-                                }
-                                EntryClassUi.hideWaitModal();
-
-                                WiresPanelUi.this.selectDriverModal.show();
-                            }
-                        });
-                    }
-                });
-            }
-        });
-
-        this.buttonSelectAssetOk.setText(MSGS.okButton());
-        this.buttonSelectAssetOk.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                String wireAssetPid = WiresPanelUi.this.assetInstance.getSelectedValue();
-                createWireAsset(wireAssetPid);
-            }
-        });
-        this.buttonSelectAssetCancel.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                WiresPanelUi.this.cancelDrag();
-            }
-        });
-    }
-
-    private void initSelectDriverModal() {
-        this.selectDriverModal.setTitle(MSGS.selectDriverLabel());
-        this.selectDriverModalIntro.add(new Span("<p>" + MSGS.selectDriverIntroLabel() + "</p>"));
-        this.driverInstanceLabel.setText(MSGS.driverName());
-        this.buttonSelectDriverCancel.setText(MSGS.cancelButton());
-        this.buttonNewDriver.setText(MSGS.newDriver());
-        this.buttonNewDriver.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                WiresPanelUi.this.newDriverName.setValue("");
-                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex, EntryClassUi.class.getName());
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        gwtComponentService.getDriverFactoriesList(token, new AsyncCallback<List<String>>() {
-
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                FailureHandler.handle(ex, EntryClassUi.class.getName());
-                            }
-
-                            @Override
-                            public void onSuccess(final List<String> result) {
-                                if (result.isEmpty()) {
-                                    WiresPanelUi.this.newDriverFactory.setEnabled(false);
-                                    WiresPanelUi.this.newDriverOk.setEnabled(false);
-                                } else {
-                                    WiresPanelUi.this.newDriverFactory.setEnabled(true);
-                                    WiresPanelUi.this.newDriverOk.setEnabled(true);
-                                }
-
-                                WiresPanelUi.this.newDriverFactory.clear();
-                                for (String driverFactoryPid : result) {
-                                    WiresPanelUi.this.newDriverFactory.addItem(driverFactoryPid);
-                                }
-                                WiresPanelUi.this.newDriverName.setText("");
-                                WiresPanelUi.this.newDriverModal.show();
-                            }
-                        });
-                    }
-                });
-            }
-        });
-
-        this.buttonSelectDriverOk.setText(MSGS.okButton());
-        this.buttonSelectDriverOk.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                String driverPid = WiresPanelUi.this.driverInstance.getSelectedValue();
-                WiresPanelUi.this.newAssetDriverInstance.setText(driverPid);
-                WiresPanelUi.this.newAssetName.setText("");
-                WiresPanelUi.this.newAssetModal.show();
-            }
-        });
-        this.buttonSelectDriverCancel.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                WiresPanelUi.this.cancelDrag();
-            }
-        });
-    }
-
-    private void createWireAsset(final String pid) {
-        EntryClassUi.showWaitModal();
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(final Throwable ex) {
-                EntryClassUi.hideWaitModal();
-                FailureHandler.handle(ex);
-            }
-
-            @Override
-            public void onSuccess(final GwtXSRFToken token) {
-                gwtComponentService.findFilteredComponentConfiguration(token, pid,
-                        new AsyncCallback<List<GwtConfigComponent>>() {
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
-
-                            @Override
-                            public void onSuccess(List<GwtConfigComponent> result) {
-                                EntryClassUi.hideWaitModal();
-
-                                for (GwtConfigComponent componentConfig : result) {
-
-                                    createNewAssetNative(pid,
-                                            (String) componentConfig.getProperties().get("driver.pid"));
-                                }
-                            }
-                        });
-            }
-        });
-    }
-
-    private native void createComponentNative() /*-{
-                                                parent.window.kuraWires.createNewComponent()
-                                                }-*/;
-
-    private native void createNewAssetNative(String assetPid, String driverPid) /*-{
-                                                                                parent.window.kuraWires.createNewAssetComponent(assetPid, driverPid)
-                                                                                }-*/;
-
-    private void createComponent(final String pid) {
-        EntryClassUi.showWaitModal();
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(final Throwable ex) {
-                EntryClassUi.hideWaitModal();
-                FailureHandler.handle(ex);
-            }
-
-            @Override
-            public void onSuccess(final GwtXSRFToken token) {
-                gwtComponentService.findTrackedPids(token, new AsyncCallback<List<String>>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
-                        cancelDrag();
-                    }
-
-                    @Override
-                    public void onSuccess(List<String> result) {
-                        EntryClassUi.hideWaitModal();
-                        if (result.contains(pid)) {
-                            jsniShowDuplicatePidModal(pid);
-                            cancelDrag();
-                        } else {
-                            createComponentNative();
-                        }
-                    }
-                });
-            }
-        });
-    }
-
-    private void initNewAssetModal() {
-        this.newAssetModal.setTitle(MSGS.newAsset());
-        this.newAssetModalIntro.add(new Span("<p>" + MSGS.createNewAssetIntroLabel2() + "</p>"));
-        this.newAssetNameLabel.setText(MSGS.assetName());
-        this.newAssetDriverInstanceLabel.setText(MSGS.driverName());
-        this.newAssetDriverInstance.setReadOnly(true);
-        this.newAssetCancel.setText(MSGS.cancelButton());
-        this.newAssetOk.setText(MSGS.okButton());
-
-        this.newAssetOk.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                String wireAssetPid = WiresPanelUi.this.newAssetName.getText();
-                String driverPid = WiresPanelUi.this.newAssetDriverInstance.getText();
-                createNewAssetNative(wireAssetPid, driverPid);
-                WiresPanelUi.this.newAssetModal.hide();
-                WiresPanelUi.this.cancelDrag();
-            }
-        });
-    }
-
-    private void initNewDriverModal() {
-        this.newDriverModal.setTitle(MSGS.newDriver());
-        this.newDriverModalIntro.add(new Span("<p>" + MSGS.createNewDriverIntroLabel() + "</p>"));
-        this.newDriverNameLabel.setText(MSGS.driverName());
-        this.newDriverFactoryLabel.setText(MSGS.driverFactory());
-        this.newDriverCancel.setText(MSGS.cancelButton());
-
-        this.newDriverOk.setText(MSGS.okButton());
-        this.newDriverOk.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (WiresPanelUi.this.newDriverName.validate()) {
-                    gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                        @Override
-                        public void onFailure(Throwable ex) {
-                            FailureHandler.handle(ex, EntryClassUi.class.getName());
-                        }
-
-                        @Override
-                        public void onSuccess(GwtXSRFToken token) {
-                            final String driverFactoryPid = WiresPanelUi.this.newDriverFactory.getSelectedValue();
-                            final String pid = WiresPanelUi.this.newDriverName.getValue();
-
-                            gwtComponentService.createFactoryComponent(token, driverFactoryPid, pid,
-                                    new AsyncCallback<Void>() {
-
-                                        @Override
-                                        public void onFailure(Throwable ex) {
-                                            logger.log(Level.SEVERE, ex.getMessage(), ex);
-                                            FailureHandler.handle(ex, EntryClassUi.class.getName());
-                                        }
-
-                                        @Override
-                                        public void onSuccess(Void result) {
-                                            WiresPanelUi.this.newDriverModal.hide();
-                                            WiresPanelUi.this.newAssetDriverInstance.setText(pid);
-                                            WiresPanelUi.this.newAssetName.setText("");
-                                            WiresPanelUi.this.newAssetModal.show();
-                                        }
-                                    });
-                        }
-                    });
-                }
-            }
-        });
-        this.newDriverCancel.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                WiresPanelUi.this.cancelDrag();
-            }
-        });
     }
 
     private void initButtons() {
-        this.btnSave.setText(MSGS.apply());
+        this.btnZoomIn.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                WiresPanelUi.this.wireComposer.zoomIn();
+            }
+        });
+        this.btnZoomOut.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                WiresPanelUi.this.wireComposer.zoomOut();
+            }
+        });
+        this.btnZoomFit.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                WiresPanelUi.this.wireComposer.fitContent(true);
+            }
+        });
         this.btnSave.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(final ClickEvent event) {
-                WiresPanelUi.this.saveGraphModal.show();
+                final List<String> invalidConfigurationPids = configurations.getInvalidConfigurationPids();
+                if (!invalidConfigurationPids.isEmpty()) {
+                    confirmDialog.show(
+                            MSGS.wiresConfigurationInvalid(
+                                    invalidConfigurationPids.toString().replaceAll("[\\[\\]]", "")),
+                            AlertDialog.Severity.ALERT, null);
+                    return;
+                }
+                confirmDialog.show(MSGS.wiresSave(), new AlertDialog.Listener() {
+
+                    @Override
+                    public void onConfirm() {
+
+                        WiresRPC.updateWiresConfiguration(getGwtWireGraphConfiguration(),
+                                getModifiedDriverConfigurations(), new WiresRPC.Callback<Void>() {
+
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        clearDirtyState();
+                                    }
+                                });
+                    }
+                });
             }
         });
-
-        this.btnReset.setText(MSGS.reset());
         this.btnReset.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(final ClickEvent event) {
-                WiresPanelUi.this.refreshAlert.show(MSGS.deviceConfigDirty(), new AlertDialog.Listener() {
+                WiresPanelUi.this.confirmDialog.show(MSGS.deviceConfigDirty(), new AlertDialog.Listener() {
 
                     @Override
                     public void onConfirm() {
@@ -623,254 +204,173 @@ public class WiresPanelUi extends Composite {
                 });
             }
         });
-
-        this.btnDelete.setText(MSGS.wiresDeleteComponent());
         this.btnDelete.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(final ClickEvent event) {
-                WiresPanelUi.this.deleteCompModal.show();
+                confirmDialog.show(MSGS.wiresComponentDeleteAlert(), new AlertDialog.Listener() {
+
+                    @Override
+                    public void onConfirm() {
+                        final WireComponent component = wireComposer.getSelectedWireComponent();
+                        if (component != null) {
+                            wireComposer.deleteWireComponent(component);
+                        }
+                    }
+                });
             }
         });
-
-        this.btnGraphDelete.setText(MSGS.wiresDeleteGraph());
         this.btnGraphDelete.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(final ClickEvent event) {
-                WiresPanelUi.this.deleteGraphModal.show();
-            }
-        });
-    }
-
-    private void initComposer() {
-        this.wiresComposerTitle.setText(MSGS.wiresComposerTitle());
-    }
-
-    private void initAssetModal() {
-        this.componentNameLabel.setText(MSGS.wiresComponentName());
-        this.componentName.setPlaceholder(MSGS.wiresComponentNamePlaceholder());
-        this.btnComponentModalYes.setText(MSGS.apply());
-        this.btnComponentModalYes.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                String value = WiresPanelUi.this.componentName.getValue();
-                if (value != null && !value.isEmpty()) {
-                    createComponent(value);
-                }
-            }
-        });
-        this.btnComponentModalNo.setText(MSGS.cancelButton());
-        this.btnComponentModalNo.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                WiresPanelUi.this.cancelDrag();
-            }
-        });
-    }
-
-    private void initComponentDeleteModal() {
-        this.deleteCompModalHeader.setTitle(MSGS.confirm());
-        this.deleteCompModalBody.add(new Span(MSGS.wiresComponentDeleteAlert()));
-        this.btnDeleteCompModalYes.setText(MSGS.apply());
-        this.btnDeleteCompModalNo.setText(MSGS.cancelButton());
-
-        this.btnDeleteCompModalYes.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(final ClickEvent event) {
-                setDirty(true);
-                WiresPanelUi.this.deleteCompModal.hide();
-            }
-        });
-    }
-
-    private void initSaveModal() {
-        this.saveGraphModalHeader.setTitle(MSGS.confirm());
-        this.saveGraphModalBody.add(new Span(MSGS.wiresSave()));
-        this.btnSaveGraphModalYes.setText(MSGS.apply());
-        this.btnSaveGraphModalNo.setText(MSGS.cancelButton());
-
-        this.btnSaveGraphModalYes.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(final ClickEvent event) {
-                for (final Map.Entry<String, ConfigurationAreaUi> entry : WiresPanelUi.this.propertiesUis.entrySet()) {
-                    final ConfigurationAreaUi ui = entry.getValue();
-                    ui.setDirty(false);
-                }
-                WiresPanelUi.this.saveGraphModal.hide();
-            }
-        });
-    }
-
-    private void initGraphDeleteModal() {
-        this.deleteGraphModalHeader.setTitle(MSGS.confirm());
-        this.deleteGraphModalBody.add(new Span(MSGS.wiresGraphDeleteAlert()));
-        this.btnDeleteGraphModalNo.setText(MSGS.cancelButton());
-        this.btnDeleteGraphModalYes.setText(MSGS.apply());
-        this.btnDeleteGraphModalYes.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(final ClickEvent event) {
-                setDirty(true);
-                WiresPanelUi.this.deleteGraphModal.hide();
-            }
-        });
-    }
-
-    private void initErrorModal() {
-        this.errorModalClose.setText(MSGS.closeButton());
-    }
-
-    public boolean isDirty() {
-        return this.isDirty;
-    }
-
-    public void load() {
-
-        EntryClassUi.showWaitModal();
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(final Throwable ex) {
-                EntryClassUi.hideWaitModal();
-                FailureHandler.handle(ex);
-            }
-
-            @Override
-            public void onSuccess(final GwtXSRFToken token) {
-                gwtWireService.getWiresConfiguration(token, new AsyncCallback<GwtWiresConfiguration>() {
+                confirmDialog.show(MSGS.wiresGraphDeleteAlert(), new AlertDialog.Listener() {
 
                     @Override
-                    public void onFailure(final Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
-                    }
-
-                    @Override
-                    public void onSuccess(final GwtWiresConfiguration wiresConfig) {
-
-                        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                            @Override
-                            public void onFailure(final Throwable ex) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(ex);
-                            }
-
-                            @Override
-                            public void onSuccess(final GwtXSRFToken token) {
-                                gwtAssetService.getAssetInstances(token, new AsyncCallback<List<String>>() {
-
-                                    @Override
-                                    public void onFailure(final Throwable caught) {
-                                        EntryClassUi.hideWaitModal();
-                                        FailureHandler.handle(caught);
-                                    }
-
-                                    @Override
-                                    public void onSuccess(final List<String> result) {
-                                        WiresPanelUi.this.assetInstance.clear();
-
-                                        if (result.isEmpty()) {
-                                            WiresPanelUi.this.assetInstance.setEnabled(false);
-                                            WiresPanelUi.this.buttonSelectAssetOk.setEnabled(false);
-                                        } else {
-                                            WiresPanelUi.this.assetInstance.setEnabled(true);
-                                            WiresPanelUi.this.buttonSelectAssetOk.setEnabled(true);
-                                        }
-
-                                        for (String wireAssetPid : result) {
-                                            WiresPanelUi.this.assetInstance.addItem(wireAssetPid);
-                                        }
-
-                                        WiresPanelUi.this.wireComponentsConfigJson = wiresConfig
-                                                .getWireComponentsJson();
-                                        WiresPanelUi.this.wireConfigsJson = wiresConfig.getWireConfigurationsJson();
-                                        WiresPanelUi.this.panelLoaded = true;
-                                        internalLoad(wiresConfig);
-                                        EntryClassUi.hideWaitModal();
-                                    }
-                                });
-                            }
-                        });
+                    public void onConfirm() {
+                        wireComposer.clear();
                     }
                 });
             }
         });
     }
 
-    public void loadGraph() {
-        final JSONObject obj = new JSONObject();
-        final JSONArray emitters = new JSONArray();
-        final JSONArray receivers = new JSONArray();
-        final JSONArray drivers = new JSONArray();
-
-        int i = 0;
-        for (final String emitter : WiresPanelUi.this.emitters) {
-            emitters.set(i, new JSONString(emitter));
-            i++;
-        }
-        i = 0;
-        for (final String receiver : WiresPanelUi.this.receivers) {
-            receivers.set(i, new JSONString(receiver));
-            i++;
-        }
-        i = 0;
-        for (final String driver : WiresPanelUi.this.drivers) {
-            drivers.set(i, new JSONString(driver));
-            i++;
-        }
-
-        obj.put("pFactories", emitters);
-        obj.put("cFactories", receivers);
-        obj.put("drivers", drivers);
-        obj.put("components", createComponentsJson());
-        obj.put("wires", JSONParser.parseStrict(this.wires));
-        obj.put("pGraph", JSONParser.parseStrict(this.graph));
-        obj.put("wireComponentsJson", JSONParser.parseStrict(this.wireComponentsConfigJson));
-        obj.put("wireConfigsJson", JSONParser.parseStrict(this.wireConfigsJson));
-
-        wiresOpen(obj.toString());
-        resetUiState();
+    public boolean isDirty() {
+        return this.configurations.isDirty() || this.wireComposer.isDirty();
     }
 
-    public void render(final GwtConfigComponent item, String pid) {
-        refreshTrackedConfigs();
-        ConfigurationAreaUi configurationAreaUi;
+    public void load() {
 
-        if (item != null) {
-            Window.scrollTo(0, 0);
-            WiresPanelUi.configurationRow.setVisible(false);
-            WiresPanelUi.configurationRow.clear();
+        WiresRPC.loadStaticInfo(new WiresRPC.Callback<GwtWireComposerStaticInfo>() {
 
-            if (!this.propertiesUis.containsKey(pid)) {
-                configurationAreaUi = new ConfigurationAreaUi(item, pid, this);
-                propertiesUis.put(pid, configurationAreaUi);
-            } else {
-                configurationAreaUi = this.propertiesUis.get(pid);
+            @Override
+            public void onSuccess(GwtWireComposerStaticInfo result) {
+                loadStaticInformation(result);
+                WiresRPC.loadWiresConfiguration(new WiresRPC.Callback<GwtWireGraphConfiguration>() {
+
+                    @Override
+                    public void onSuccess(GwtWireGraphConfiguration result) {
+                        loadGraph(result);
+                        dialogs.setDriverPids(configurations.getDriverPids());
+                        dialogs.setAssetPids(getAssetsNotInComposer());
+                        configurations.setAllActivePids(result.getAllActivePids());
+                        blinkEffect.setEnabled(true);
+                        clearDirtyState();
+                    }
+                });
             }
-            if (pid == null) {
-                pid = "";
-            }
+        });
+    }
 
-            configurationAreaUi.render();
-            this.currentSelection = item;
-            WiresPanelUi.configurationRow.add(configurationAreaUi);
-            WiresPanelUi.configurationRow.setVisible(true);
-        } else {
-            deselectComponent();
+    private void populateComponentsPanel() {
+        this.wireComponentsMenu.clear();
+
+        final WireComponentsAnchorListItem.Listener listener = new WireComponentsAnchorListItem.Listener() {
+
+            @Override
+            public void onClick(String factoryPid) {
+                WiresPanelUi.this.showComponentCreationDialog(factoryPid);
+            }
+        };
+
+        final List<GwtWireComponentDescriptor> sortedDescriptors = new ArrayList<>();
+
+        for (Entry<String, GwtWireComponentDescriptor> descriptor : descriptors.getDescriptors().entrySet()) {
+            sortedDescriptors.add(descriptor.getValue());
+        }
+
+        Collections.sort(sortedDescriptors, new Comparator<GwtWireComponentDescriptor>() {
+
+            @Override
+            public int compare(GwtWireComponentDescriptor o1, GwtWireComponentDescriptor o2) {
+                return Integer.compare(o1.getMinInputPorts() * 2 + o1.getMinOutputPorts(),
+                        o2.getMinInputPorts() * 2 + o2.getMinOutputPorts());
+            }
+        });
+
+        for (GwtWireComponentDescriptor descriptor : sortedDescriptors) {
+            final WireComponentsAnchorListItem item = new WireComponentsAnchorListItem(
+                    getFormattedPid(descriptor.getFactoryPid()), descriptor.getFactoryPid(),
+                    descriptor.getMinInputPorts() > 0, descriptor.getMinOutputPorts() > 0);
+            item.setListener(listener);
+            this.wireComponentsMenu.add(item);
         }
     }
 
-    private void refreshTrackedConfigs() {
-        for (Entry<String, ConfigurationAreaUi> entry : this.propertiesUis.entrySet()) {
-            ConfigurationAreaUi trackedConfig = entry.getValue();
-            this.configs.putAll(trackedConfig.getUpdatedConfiguration());
+    private void loadStaticInformation(GwtWireComposerStaticInfo staticInfo) {
+        this.configurations.setChannelDescriptiors(staticInfo.getDriverDescriptors());
+        this.configurations.setBaseChannelDescriptor(staticInfo.getBaseChannelDescriptor());
+        this.configurations.setComponentDefinitions(staticInfo.getComponentDefinitions());
+        this.descriptors.setDescriptors(staticInfo.getWireComponentDescriptors());
+        this.dialogs.setDriverFactoryPids(configurations.getDriverFactoryPids());
+        populateComponentsPanel();
+    }
+
+    private void loadGraph(GwtWireGraphConfiguration configuration) {
+        wireComposer.clear();
+        final List<GwtConfigComponent> configurationList = new ArrayList<>();
+
+        for (GwtWireComponentConfiguration config : configuration.getWireComponentConfigurations()) {
+            configurationList.add(config.getConfiguration());
+            wireComposer.addWireComponent(WireComponent.fromGwt(config));
         }
+
+        for (GwtWireConfiguration config : configuration.getWires()) {
+            wireComposer.addWire(Wire.fromGwt(config));
+        }
+
+        configurationList.addAll(configuration.getAdditionalConfigurations());
+        configurations.setComponentConfigurations(configurationList);
+
+        wireComposer.fitContent(false);
+    }
+
+    private GwtWireGraphConfiguration getGwtWireGraphConfiguration() {
+        final GwtWireGraphConfiguration result = new GwtWireGraphConfiguration();
+
+        final List<GwtWireComponentConfiguration> wireComponentConfigurations = new ArrayList<>();
+
+        for (WireComponent component : wireComposer.getWireComponents()) {
+            wireComponentConfigurations
+                    .add(component.toGwt(configurations.getConfiguration(component.getPid()).getConfiguration()));
+        }
+
+        final List<GwtWireConfiguration> wires = new ArrayList<>();
+
+        for (Wire wire : wireComposer.getWires()) {
+            wires.add(wire.toGwt());
+        }
+
+        result.setWireComponentConfigurations(wireComponentConfigurations);
+        result.setWires(wires);
+
+        return result;
+    }
+
+    private List<GwtConfigComponent> getModifiedDriverConfigurations() {
+        List<GwtConfigComponent> result = new ArrayList<>();
+        for (HasConfiguration config : configurations.getConfigurations()) {
+            if (config.isDirty() && config.isValid()) {
+                final GwtConfigComponent gwtConfig = config.getConfiguration();
+                if (gwtConfig.isDriver()) {
+                    result.add(gwtConfig);
+                }
+            }
+        }
+        return result;
+    }
+
+    public void showConfigurationArea(HasConfiguration configuration) {
+
+        Window.scrollTo(0, 0);
+        this.configurationRow.setVisible(false);
+        this.configurationRow.clear();
+
+        final ConfigurationAreaUi configurationAreaUi = new ConfigurationAreaUi(configuration, this.configurations);
+        configurationAreaUi.setListener(this);
+
+        this.configurationRow.add(configurationAreaUi);
+        this.configurationRow.setVisible(true);
     }
 
     public static String getFormattedPid(final String pid) {
@@ -878,9 +378,7 @@ public class WiresPanelUi extends Composite {
         if (pid.contains(".")) {
             split = pid.split("\\.");
             final String lastString = split[split.length - 1];
-            // if it's a 14 digit long no, it's a temporary instance of Asset
-            // which is handled internally
-            if (lastString.matches(TEMPORARY_ASSET_REG_EXP) || "WireAsset".equalsIgnoreCase(lastString)) {
+            if ("WireAsset".equalsIgnoreCase(lastString)) {
                 return MSGS.wiresComponentAsset();
             } else if ("CloudPublisher".equalsIgnoreCase(lastString)) {
                 return MSGS.wiresComponentPublisher();
@@ -900,381 +398,172 @@ public class WiresPanelUi extends Composite {
         return pid;
     }
 
-    public void setDirty(final boolean flag) {
-        if (flag) {
-            this.btnSave.setText(MSGS.apply() + " *");
-        } else {
-            this.btnSave.setText(MSGS.apply());
-        }
-        this.btnSave.setEnabled(flag);
-        this.btnReset.setEnabled(flag);
-        this.isDirty = flag;
+    private WireComponent createAsset(String pid, String driverPid) {
+        final HasConfiguration assetConfig = configurations.createAndRegisterConfiguration(pid, WIRE_ASSET_PID);
+        assetConfig.getConfiguration().getParameter(AssetConstants.ASSET_DRIVER_PROP.value()).setValue(driverPid);
+        return descriptors.createNewComponent(pid, WIRE_ASSET_PID);
     }
 
-    private void fillProperties(final GwtConfigComponent config, final String pid) {
-        if (config != null && config.getFactoryId() != null && config.getFactoryId().contains(WIRE_ASSET)) {
-            config.getProperties().put(AssetConstants.ASSET_DRIVER_PROP.value(), getDriver(pid));
-        }
-        render(config, pid);
-    }
-
-    private static List<String> getCommonElements(final List<String> firstList, final List<String> secondList) {
-        final List<String> returnedList = new LinkedList<>();
-        for (final String elem : firstList) {
-            if (secondList.contains(elem)) {
-                returnedList.add(elem);
-            }
-        }
-        return returnedList;
-    }
-
-    private void internalLoad(final GwtWiresConfiguration config) {
-        if (this.emitters != null) {
-            this.emitters.clear();
-        }
-        if (this.receivers != null) {
-            this.receivers.clear();
-        }
-        if (this.components != null) {
-            this.components.clear();
-        }
-        if (this.configs != null) {
-            this.configs.clear();
-        }
-
-        for (final String emitter : config.getWireEmitterFactoryPids()) {
-            if (this.emitters != null && !this.emitters.contains(emitter)) {
-                this.emitters.add(emitter);
-            }
-        }
-        for (final String receiver : config.getWireReceiverFactoryPids()) {
-            if (this.receivers != null && !this.receivers.contains(receiver)) {
-                this.receivers.add(receiver);
-            }
-        }
-
-        this.components = config.getWireComponents();
-        this.wires = config.getWiresConfigurationJson();
-        this.graph = config.getGraph();
-        this.wireComponentsConfigJson = config.getWireComponentsJson();
-        this.wireConfigsJson = config.getWireConfigurationsJson();
-
-        this.factoryPid.setVisible(false);
-        this.btnDelete.setEnabled(false);
-        configurationRow.setVisible(false);
-        populateComponentsPanel();
-        loadGraph();
-    }
-
-    // ----------------------------------------------------------------
-    //
-    // JSNI
-    //
-    // ----------------------------------------------------------------
-    private native void exportJSNIDeactivateNavPils()
-    /*-{
-    	var self = this
-    	parent.window.jsniDeactivateNavPils = function() {
-    		self.@org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniDeactivateNavPils()()
-    	}
-    }-*/;
-
-    private native void exportJSNImakeUiDirty()
-    /*-{
-    	var self = this
-    	parent.window.jsniMakeUiDirty = function() {
-    		self.@org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniMakeUiDirty()()
-    	}
-    }-*/;
-
-    private native void exportJSNIshowCycleExistenceError()
-    /*-{
-        var self = this
-    	parent.window.jsniShowCycleExistenceError = function() {
-    	    self.@org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniShowCycleExistenceError()()
-    	}
-    }-*/;
-
-    private native void exportJSNIShowDuplicatePidModal()
-    /*-{
-    	var self = this
-    	parent.window.jsniShowDuplicatePidModal = function(a) {
-    		self.@org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniShowDuplicatePidModal(Ljava/lang/String;)(a)
-    	}
-    }-*/;
-
-    private native void exportJSNIUpdateSelection()
-    /*-{
-    	var self = this
-    	parent.window.jsniUpdateSelection = function(a, b) {
-    		self.@org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniUpdateSelection(Ljava/lang/String;Ljava/lang/String;)(a,b)
-    	}
-    }-*/;
-
-    private native void exportJSNIUpdateWireConfig()
-    /*-{
-    	var self = this
-    	parent.window.jsniUpdateWireConfig = function(a) {
-    		self.@org.eclipse.kura.web.client.ui.wires.WiresPanelUi::jsniUpdateWireConfig(Ljava/lang/String;)(a)
-    	}
-    }-*/;
-
-    private native void exportJSNIShowComponentCreationDialog()
-    /*-{
-    var self = this
-    parent.window.jsniShowComponentCreationDialog = function (pid) {
-        self.@org.eclipse.kura.web.client.ui.wires.WiresPanelUi::showComponentCreationDialog(Ljava/lang/String;)(pid)
-    }
-    }-*/;
-
-    private native void cancelDrag()
-    /*-{
-    parent.window.kuraWires.dragHandler.abort()
-    }-*/;
-
-    public native String getDriver(String assetPid)
-    /*-{
-    	return parent.window.kuraWires.getDriver(assetPid);
-    }-*/;
-
-    public void jsniDeactivateNavPils() {
-        for (int i = 0; i < this.wireComponentsMenu.getWidgetCount(); i++) {
-            final AnchorListItem item = (AnchorListItem) this.wireComponentsMenu.getWidget(i);
-            if (item.isActive()) {
-                item.setActive(false);
-            }
-        }
-        this.componentName.clear();
-    }
-
-    public void jsniMakeUiDirty() {
-        setDirty(true);
-    }
-
-    public void jsniShowCycleExistenceError() {
-        this.errorAlertText.setText(MSGS.wiresCycleDetected());
-        this.errorModal.show();
-    }
-
-    public void jsniShowDuplicatePidModal(final String pid) {
-        this.errorAlertText.setText(MSGS.wiresComponentNameAlreadyUsed(pid));
-        this.errorModal.show();
-        this.genericCompModal.hide();
-    }
-
-    public void jsniUpdateSelection(final String pid, final String factoryPid) {
-        if ("".equals(factoryPid)) {
-            this.btnDelete.setEnabled(false);
-            configurationRow.setVisible(false);
+    public void showComponentCreationDialog(final String factoryPid) {
+        if (descriptors.getDescriptor(factoryPid) == null) {
             return;
         }
-        // enable delete instance button
-        this.btnDelete.setEnabled(true);
-        // Retrieve GwtComponentConfiguration to use for manipulating the
-        // properties. If it is already present in the map, it means the
-        // component has already been accessed by the graph, and its
-        // configuration has already been gathered from the ConfigurationService.
-        final GwtConfigComponent comp = this.configs.get(pid);
-        if (comp != null) {
-            fillProperties(comp, pid);
-            selectionCompleted();
-        } else {
-            // Retrieve GwtComponentConfiguration to use for manipulating the properties.
-            EntryClassUi.showWaitModal();
-            gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                @Override
-                public void onFailure(final Throwable ex) {
-                    EntryClassUi.hideWaitModal();
-                    FailureHandler.handle(ex);
-                }
-
-                @Override
-                public void onSuccess(final GwtXSRFToken token) {
-                    Map<String, Object> temporaryMap = null;
-                    if (WIRE_ASSET_PID.equalsIgnoreCase(factoryPid)) {
-                        temporaryMap = new HashMap<>();
-                        temporaryMap.put(ASSET_DESCRIPTION_PROP, MSGS.wiresSampleAssetName());
-                        temporaryMap.put(AssetConstants.ASSET_DRIVER_PROP.value(), getDriver(pid));
-                    }
-                    gwtComponentService.findWireComponentConfigurationFromPid(token, pid, factoryPid, temporaryMap,
-                            new AsyncCallback<GwtConfigComponent>() {
-
-                                @Override
-                                public void onFailure(final Throwable caught) {
-                                    EntryClassUi.hideWaitModal();
-                                    FailureHandler.handle(caught);
-                                }
-
-                                @Override
-                                public void onSuccess(final GwtConfigComponent result) {
-                                    EntryClassUi.hideWaitModal();
-                                    // Component configuration retrieved
-                                    // from the Configuration Service
-                                    fillProperties(result, pid);
-                                    WiresPanelUi.this.configs.put(pid, result);
-                                    selectionCompleted();
-                                }
-                            });
-
-                }
-            });
-        }
-    }
-
-    private static void updateConfiguration(final String pid, final Map<String, Object> properties) {
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.dialogs.pickComponent(factoryPid, new WiresDialogs.Callback() {
 
             @Override
-            public void onFailure(final Throwable ex) {
-                EntryClassUi.hideWaitModal();
-                FailureHandler.handle(ex);
+            public void onNewComponentCreated(String pid) {
+                wireComposer.addWireComponent(descriptors.createNewComponent(pid, factoryPid));
             }
 
             @Override
-            public void onSuccess(final GwtXSRFToken token) {
-                gwtComponentService.updateProperties(token, pid, properties, new AsyncCallback<Boolean>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
-                    }
-
-                    @Override
-                    public void onSuccess(Boolean result) {
-                        EntryClassUi.hideWaitModal();
-                    }
-                });
-            }
-
-        });
-    }
-
-    public void showComponentCreationDialog(String factoryPid) {
-        if (factoryPid.contains(WiresPanelUi.WIRE_ASSET)) {
-            this.selectAssetModal.show();
-        } else {
-            this.newAssetModalHeader.setTitle(MSGS.wiresComponentNew());
-            this.componentNameLabel.setText(MSGS.wiresComponentName());
-            WiresPanelUi.this.factoryPid.setValue(factoryPid);
-            this.genericCompModal.show();
-        }
-    }
-
-    public int jsniUpdateWireConfig(final String obj) {
-
-        EntryClassUi.showWaitModal();
-        // Create new components
-        // "models" hold all existing components in JointJS graph. If the PID is
-        // "none", then we need to create
-        // component in framework and set PID.
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(final Throwable ex) {
-                EntryClassUi.hideWaitModal();
-                FailureHandler.handle(ex);
+            public void onNewAssetCreated(String pid, String driverPid) {
+                wireComposer.addWireComponent(createAsset(pid, driverPid));
             }
 
             @Override
-            public void onSuccess(final GwtXSRFToken token) {
-                refreshTrackedConfigs();
-
-                gwtWireService.updateWireConfiguration(token, obj, WiresPanelUi.this.configs,
-                        new AsyncCallback<Void>() {
-
-                            @Override
-                            public void onFailure(final Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
-
-                            @Override
-                            public void onSuccess(final Void result) {
-                                EntryClassUi.hideWaitModal();
-                                resetUiState();
-                            }
-                        });
+            public void onCancel() {
             }
         });
-
-        return 0;
     }
 
-    private void deselectComponent() {
-        WiresPanelUi.configurationRow.clear();
-        WiresPanelUi.configurationRow.setVisible(false);
-        this.currentSelection = null;
+    private void hideConfigurationArea() {
+        this.configurationRow.clear();
+        this.configurationRow.setVisible(false);
     }
 
-    public native void wiresOpen(String obj)
-    /*-{
-    	parent.window.kuraWires.render(obj);
-    }-*/;
+    public void clearDirtyState() {
+        this.wireComposer.clearDirtyState();
+        this.configurations.clearDirtyState();
+        updateDirtyState();
+        this.wireComposer.deselectWireCompoent();
+    }
+
+    public void updateDirtyState() {
+        final boolean isDirty = isDirty();
+        this.btnSave.setEnabled(isDirty);
+        this.btnReset.setEnabled(isDirty);
+    }
 
     public void unload() {
-        if (this.panelLoaded) {
-            wiresClose();
-        }
-        this.panelLoaded = false;
+        blinkEffect.setEnabled(false);
     }
 
-    private native void wiresClose()
-    /*-{
-    	parent.window.kuraWires.unload();
-    }-*/;
-
-    private native void selectionCompleted()
-    /*-{
-    	parent.window.kuraWires.selectionCompleted();
-    }-*/;
-
-    private JSONArray createComponentsJson() {
-
-        final JSONArray components = new JSONArray();
-        int i = 0;
-
-        for (final String component : WiresPanelUi.this.components) {
-            final JSONObject compObj = new JSONObject();
-            final String[] tokens = component.split("\\|");
-            compObj.put("fPid", new JSONString(tokens[0]));
-            compObj.put("pid", new JSONString(tokens[1]));
-            compObj.put("name", new JSONString(tokens[2]));
-            compObj.put("type", new JSONString(tokens[3]));
-            components.set(i, compObj);
-            i++;
+    private List<String> getAssetsNotInComposer() {
+        final List<String> assetPids = this.configurations.getFactoryInstancesPids(WIRE_ASSET_PID);
+        final Iterator<String> i = assetPids.iterator();
+        while (i.hasNext()) {
+            final String pid = i.next();
+            if (wireComposer.getWireComponent(pid) != null) {
+                i.remove();
+            }
         }
-
-        return components;
+        return assetPids;
     }
 
-    private void populateComponentsPanel() {
-        final List<String> onlyProducers = new ArrayList<>(this.emitters);
-        final List<String> onlyConsumers = new ArrayList<>(this.receivers);
-        final List<String> both = getCommonElements(this.emitters, this.receivers);
-        onlyProducers.removeAll(both);
-        onlyConsumers.removeAll(both);
-        this.wireComponentsMenu.clear();
-        for (final String fPid : onlyProducers) {
-            this.wireComponentsMenu.add(new WireComponentsAnchorListItem(fPid, true, false, this));
-        }
-        for (final String fPid : onlyConsumers) {
-            this.wireComponentsMenu.add(new WireComponentsAnchorListItem(fPid, false, true, this));
-        }
-        for (final String fPid : both) {
-            this.wireComponentsMenu.add(new WireComponentsAnchorListItem(fPid, true, true, this));
+    @Override
+    public void onWireCreated(Wire wire) {
+        updateDirtyState();
+    }
+
+    @Override
+    public void onWireDeleted(Wire wire) {
+        updateDirtyState();
+    }
+
+    @Override
+    public void onWireChanged(Wire wire) {
+        updateDirtyState();
+    }
+
+    @Override
+    public void onWireComponentSelected(WireComponent component) {
+        this.btnDelete.setEnabled(true);
+        final HasConfiguration configuration = configurations.getConfiguration(component.getPid());
+        if (configuration != null) {
+            showConfigurationArea(configuration);
         }
     }
 
-    private void resetUiState() {
-        setDirty(false);
-        if (WiresPanelUi.this.configs != null && !WiresPanelUi.this.configs.isEmpty()) {
-            WiresPanelUi.this.configs.clear();
-        }
-        if (WiresPanelUi.this.propertiesUis != null && !WiresPanelUi.this.propertiesUis.isEmpty()) {
-            WiresPanelUi.this.propertiesUis.clear();
-        }
-        deselectComponent();
+    @Override
+    public void onWireComponentDeselected(WireComponent component) {
+        this.btnDelete.setEnabled(false);
+        hideConfigurationArea();
     }
+
+    @Override
+    public void onWireComponentChanged(WireComponent component) {
+        updateDirtyState();
+    }
+
+    @Override
+    public void onWireComponentCreated(WireComponent component) {
+        this.btnGraphDelete.setEnabled(true);
+        updateDirtyState();
+        if (configurations.getConfiguration(component.getPid()) == null) {
+            configurations.createAndRegisterConfiguration(component.getPid(), component.getFactoryPid());
+        }
+        this.dialogs.setAssetPids(getAssetsNotInComposer());
+    }
+
+    @Override
+    public void onWireComponentDeleted(WireComponent component) {
+        configurations.deleteConfiguration(component.getPid());
+        updateDirtyState();
+        this.btnGraphDelete.setEnabled(wireComposer.getWireComponentCount() > 0);
+        this.dialogs.setAssetPids(getAssetsNotInComposer());
+    }
+
+    @Override
+    public void onDrop(final DropEvent event) {
+        final String attachment = event.getAttachment();
+        if (attachment == null || !attachment.startsWith(FACTORY_PID_DROP_PREFIX)) {
+            event.cancel();
+            return;
+        }
+        final String factoryPid = attachment.substring(FACTORY_PID_DROP_PREFIX.length());
+        this.dialogs.pickComponent(factoryPid, new WiresDialogs.Callback() {
+
+            @Override
+            public void onNewComponentCreated(String pid) {
+                event.complete(descriptors.createNewComponent(pid, factoryPid));
+            }
+
+            @Override
+            public void onNewAssetCreated(String pid, String driverPid) {
+                event.complete(createAsset(pid, driverPid));
+            }
+
+            @Override
+            public void onCancel() {
+                event.cancel();
+            }
+        });
+    }
+
+    @Override
+    public void onConfigurationChanged(HasConfiguration newConfiguration) {
+        this.configurations.setConfiguration(newConfiguration);
+        updateDirtyState();
+    }
+
+    @Override
+    public boolean onNewPidInserted(String pid) {
+        boolean isPidValid = this.wireComposer.getWireComponent(pid) == null && !this.configurations.isPidExisting(pid);
+        if (!isPidValid) {
+            confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid), AlertDialog.Severity.ALERT, null);
+        }
+        return isPidValid;
+    }
+
+    @Override
+    public void onNewDriverCreated(String pid, String factoryPid, GwtConfigComponent descriptor) {
+        configurations.createAndRegisterConfiguration(pid, factoryPid);
+        configurations.setChannelDescriptor(pid, descriptor);
+        dialogs.setDriverPids(configurations.getDriverPids());
+    }
+
+    @Override
+    public void onDirtyStateChanged(HasConfiguration hasConfiguration) {
+    }
+
 }

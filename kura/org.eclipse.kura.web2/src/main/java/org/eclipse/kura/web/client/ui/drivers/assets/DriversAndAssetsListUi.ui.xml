@@ -17,21 +17,18 @@
     xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html" xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt" xmlns:cv="urn:import:com.google.gwt.user.cellview.client">
 
-    <ui:style>
-    .important {
-    	font-weight: bold;
-    }
-    
-    .driver-tree {
-    	padding-top: 20px;
-    }
-    </ui:style>
+    <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages"></ui:with>
 
-
-    <b:Row>
-        <g:Label ui:field="emptyListLabel" />
-        <gwt:CellTable bordered="true" condensed="true" striped="true" hover="true" height="100%" width="100%"
-            ui:field="driversAssetsListTable" />
-    </b:Row>
+    <b:Panel>
+        <b:Row>
+            <g:Label ui:field="emptyListLabel" />
+            <gwt:CellTable bordered="true" condensed="true" striped="true" hover="true" height="100%" width="100%"
+                ui:field="driversAssetsListTable" />
+        </b:Row>
+        <b:Panel ui:field="configurationArea">
+            <b:PanelHeader ui:field="contentPanelHeader"/>
+            <b:Well size="SMALL" ui:field="driversAndAssetsMgmtPanel" />
+        </b:Panel>
+    </b:Panel>
 
 </ui:UiBinder> 

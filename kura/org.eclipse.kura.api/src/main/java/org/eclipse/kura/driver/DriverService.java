@@ -54,8 +54,8 @@ public interface DriverService {
     /**
      * Returns the list containing all the available driver instances
      *
-     * @return the list of drivers available in service registry or empty list
-     *         if no drivers are available
+     * @return the list of drivers available in service registry or empty list if no
+     *         drivers are available
      */
     public List<Driver> listDrivers();
 

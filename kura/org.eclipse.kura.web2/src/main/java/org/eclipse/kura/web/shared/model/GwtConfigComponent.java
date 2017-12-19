@@ -25,6 +25,14 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
         this.m_parameters = new ArrayList<GwtConfigParameter>();
     }
 
+    public GwtConfigComponent(GwtConfigComponent other) {
+        this();
+        data.putAll(other.data);
+        for (GwtConfigParameter parameter : other.m_parameters) {
+            this.m_parameters.add(new GwtConfigParameter(parameter));
+        }
+    }
+
     public String getComponentDescription() {
         return this.get("componentDescription");
     }
@@ -47,7 +55,7 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
 
     public GwtConfigParameter getParameter(final String id) {
         for (final GwtConfigParameter param : this.m_parameters) {
-            if (param.getId().equals(id)) {
+            if (id.equals(param.getId())) {
                 return param;
             }
         }
@@ -68,6 +76,13 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
     public boolean isWireComponent() {
         if (this.get("isWireComponent") != null) {
             return this.get("isWireComponent");
+        }
+        return false;
+    }
+
+    public boolean isDriver() {
+        if (this.get("isDriver") != null) {
+            return this.get("isDriver");
         }
         return false;
     }
@@ -100,7 +115,21 @@ public class GwtConfigComponent extends KuraBaseModel implements Serializable {
         this.m_parameters = parameters;
     }
 
-    public void setWireComponent(final boolean isWireComponent) {
+    public void setIsWireComponent(final boolean isWireComponent) {
         this.set("isWireComponent", isWireComponent);
     }
+
+    public void setIsDriver(final boolean isDriver) {
+        this.set("isDriver", isDriver);
+    }
+
+    public String getParameterValue(String id) {
+        for (GwtConfigParameter param : this.m_parameters) {
+            if (id.equals(param.getId())) {
+                return param.getValue();
+            }
+        }
+        return null;
+    }
+
 }

@@ -24,9 +24,10 @@ public class DragSupport {
         attachNativeEventHandlers(e);
     }
 
-    private static native boolean isDragSupported(Element element) /*-{
-                                                                    return element['ondragstart'] !== undefined               
-                                                                    }-*/;
+    private static native boolean isDragSupported(Element element)
+    /*-{
+        return element['ondragstart'] !== undefined
+    }-*/;
 
     public static DragSupport addIfSupported(Widget w) {
         Element domElement = w.getElement();
@@ -43,13 +44,14 @@ public class DragSupport {
         listener.onDragStart(new DragEvent(nativeObject));
     }
 
-    private native void attachNativeEventHandlers(Element element) /*-{
-                                                                    element.setAttribute('draggable', 'true') 
-                                                                    var self = this
-                                                                    element.addEventListener('dragstart', function (event) {
-                                                                        self.@org.eclipse.kura.web.client.util.DragSupport::dispatchDragStart(Lcom/google/gwt/core/client/JavaScriptObject;)(event.dataTransfer)
-                                                                    })
-                                                                    }-*/;
+    private native void attachNativeEventHandlers(Element element)
+    /*-{
+        element.setAttribute('draggable', 'true') 
+        var self = this
+        element.addEventListener('dragstart', function (event) {
+        self.@org.eclipse.kura.web.client.util.DragSupport::dispatchDragStart(Lcom/google/gwt/core/client/JavaScriptObject;)(event.dataTransfer)
+        })
+    }-*/;
 
     public interface Listener {
 
@@ -69,12 +71,13 @@ public class DragSupport {
             this.nativeDataTransfer = nativeDataTransfer;
         }
 
-        private native void setDataNative(JavaScriptObject nativeObject, String type, String data) /*-{
-                                                                                                   nativeObject.setData(type, data)
-                                                                                                   }-*/;
+        private native void setDataNative(JavaScriptObject nativeObject, String type, String data)
+        /*-{
+            nativeObject.setData(type, data)
+        }-*/;
 
-        public void setData(String type, String data) {
-            setDataNative(nativeDataTransfer, type, data);
+        public void setTextData(String data) {
+            setDataNative(nativeDataTransfer, "Text", data);
         }
     }
 }

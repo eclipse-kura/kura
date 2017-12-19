@@ -197,8 +197,18 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         try {
             cs.createFactoryConfiguration(factoryPid, pid, properties, true);
+
+            String filterString = "(" + ConfigurationService.KURA_SERVICE_PID + "=" + pid + ")";
+
+            if (!ServiceUtil.waitForService(filterString, SERVICE_WAIT_TIMEOUT, TimeUnit.SECONDS).isPresent()) {
+                throw new GwtKuraException("Created component did not start in " + SERVICE_WAIT_TIMEOUT + " seconds");
+            }
         } catch (KuraException e) {
             throw new GwtKuraException("A component with the same name already exists!");
+        } catch (InterruptedException e) {
+            throw new GwtKuraException("Interrupted while waiting for component creation");
+        } catch (InvalidSyntaxException e) {
+            throw new GwtKuraException("Invalid value for " + ConfigurationService.KURA_SERVICE_PID + ": " + pid);
         }
     }
 
@@ -529,7 +539,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             throws GwtKuraException {
         final GwtConfigComponent gwtConfig = createMetatypeOnlyGwtComponentConfigurationInternal(config);
         if (gwtConfig != null) {
-            gwtConfig.setWireComponent(ServiceLocator.applyToServiceOptionally(WireHelperService.class,
+            gwtConfig.setIsWireComponent(ServiceLocator.applyToServiceOptionally(WireHelperService.class,
                     wireHelperService -> wireHelperService.getServicePid(gwtConfig.getComponentName()) != null));
         }
         return gwtConfig;

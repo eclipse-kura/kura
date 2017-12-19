@@ -12,29 +12,20 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.wires;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.eclipse.kura.web.client.ui.EntryClassUi;
-import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.configuration.Configurations;
+import org.eclipse.kura.web.client.configuration.HasConfiguration;
+import org.eclipse.kura.web.client.ui.ConfigurableComponentUi;
+import org.eclipse.kura.web.client.ui.drivers.assets.AssetConfigurationUi;
+import org.eclipse.kura.web.client.ui.drivers.assets.AssetModel;
+import org.eclipse.kura.web.client.ui.drivers.assets.AssetModelImpl;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
-import org.eclipse.kura.web.shared.service.GwtComponentService;
-import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
-import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TabPane;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -45,18 +36,8 @@ public class ConfigurationAreaUi extends Composite {
     interface ConfigurationAreaUiUiBinder extends UiBinder<Widget, ConfigurationAreaUi> {
     }
 
-    private static final Logger logger = Logger.getLogger(ConfigurationAreaUi.class.getSimpleName());
-
-    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-    private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
-
-    private final boolean isWireAsset;
-    private final GwtConfigComponent configurableComponent;
-    private final String pid;
-
-    private GenericWireComponentUi genericWireComponentUi;
+    private ConfigurableComponentUi genericWireComponentUi;
     private AssetConfigurationUi assetWireComponentUi;
-    private boolean initialized;
 
     @UiField
     TabListItem tab1NavTab;
@@ -67,119 +48,74 @@ public class ConfigurationAreaUi extends Composite {
     @UiField
     TabPane tab2Pane;
 
-    public ConfigurationAreaUi(final GwtConfigComponent addedItem, final String pid, final WiresPanelUi parent) {
+    public ConfigurationAreaUi(HasConfiguration hasConfiguration, Configurations configurations) {
         initWidget(uiBinder.createAndBindUi(this));
-        this.initialized = false;
 
-        this.pid = pid;
-        this.configurableComponent = addedItem;
-        this.isWireAsset = this.configurableComponent.getFactoryId() != null
-                && this.configurableComponent.getFactoryId().contains("WireAsset");
+        if (!initFromExistingUi(hasConfiguration)) {
+            createNewUi(hasConfiguration, configurations);
+        }
 
-        if (this.isWireAsset) {
-            final String driverPid = this.configurableComponent.get(AssetConstants.ASSET_DRIVER_PROP.value())
-                    .toString();
+        if (this.assetWireComponentUi != null) {
+            this.tab1Pane.add(ConfigurationAreaUi.this.assetWireComponentUi);
+            this.tab1NavTab.setText(ConfigurationAreaUi.this.assetWireComponentUi.getTitle());
 
-            this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+            ConfigurationAreaUi.this.tab2NavTab.setVisible(true);
+            ConfigurationAreaUi.this.tab2NavTab.setText(ConfigurationAreaUi.this.genericWireComponentUi.getTitle());
+            ConfigurationAreaUi.this.tab2Pane.add(ConfigurationAreaUi.this.genericWireComponentUi);
 
-                @Override
-                public void onFailure(Throwable ex) {
-                    FailureHandler.handle(ex, EntryClassUi.class.getName());
-                }
-
-                @Override
-                public void onSuccess(GwtXSRFToken token) {
-                    ConfigurationAreaUi.this.gwtComponentService.findFilteredComponentConfiguration(token, driverPid,
-                            new AsyncCallback<List<GwtConfigComponent>>() {
-
-                        @Override
-                        public void onFailure(Throwable ex) {
-                            logger.log(Level.SEVERE, ex.getMessage(), ex);
-                            FailureHandler.handle(ex, EntryClassUi.class.getName());
-                        }
-
-                        @Override
-                        public void onSuccess(List<GwtConfigComponent> result) {
-                            for (GwtConfigComponent pair : result) {
-                                ConfigurationAreaUi.this.genericWireComponentUi = new GenericWireComponentUi(pair,
-                                        parent);
-                            }
-
-                            ConfigurationAreaUi.this.assetWireComponentUi = new AssetConfigurationUi(
-                                    ConfigurationAreaUi.this.configurableComponent, parent);
-                            ConfigurationAreaUi.this.tab1Pane.add(ConfigurationAreaUi.this.assetWireComponentUi);
-                            ConfigurationAreaUi.this.tab1NavTab.setText(WiresPanelUi
-                                    .getFormattedPid(ConfigurationAreaUi.this.configurableComponent.getFactoryId())
-                                    + " - " + ConfigurationAreaUi.this.pid);
-
-                            ConfigurationAreaUi.this.tab2NavTab.setVisible(true);
-                            ConfigurationAreaUi.this.tab2NavTab.setText("Driver - " + driverPid);
-                            ConfigurationAreaUi.this.tab2Pane.add(ConfigurationAreaUi.this.genericWireComponentUi);
-
-                            ConfigurationAreaUi.this.initialized = true;
-                        }
-                    });
-                }
-            });
         } else {
             this.tab2NavTab.setVisible(false);
-            this.genericWireComponentUi = new GenericWireComponentUi(this.configurableComponent, parent);
             this.tab1Pane.add(this.genericWireComponentUi);
-            this.tab1NavTab.setText(
-                    WiresPanelUi.getFormattedPid(this.configurableComponent.getFactoryId()) + " - " + this.pid);
-            ConfigurationAreaUi.this.initialized = true;
+            this.tab1NavTab.setText(this.genericWireComponentUi.getTitle());
         }
     }
 
-    protected Map<String, GwtConfigComponent> getUpdatedConfiguration() {
-        if (!this.initialized) {
-            return Collections.emptyMap();
+    private boolean initFromExistingUi(HasConfiguration hasConfiguration) {
+        if (hasConfiguration instanceof AssetConfigurationUi) {
+            this.assetWireComponentUi = (AssetConfigurationUi) hasConfiguration;
+            this.genericWireComponentUi = (ConfigurableComponentUi) this.assetWireComponentUi.getAssociatedView();
+            return true;
+        } else if (hasConfiguration instanceof ConfigurableComponentUi) {
+            this.genericWireComponentUi = (ConfigurableComponentUi) hasConfiguration;
+            return true;
         }
-        Map<String, GwtConfigComponent> updatedConfigs = new HashMap<>();
-        if (this.isWireAsset) {
-            final String driverPid = this.configurableComponent.get(AssetConstants.ASSET_DRIVER_PROP.value())
-                    .toString();
-            updatedConfigs.put(this.pid, this.assetWireComponentUi.getUpdatedConfiguration());
-            updatedConfigs.put(driverPid, this.genericWireComponentUi.getUpdatedConfiguration());
-        } else {
-            updatedConfigs.put(this.pid, this.genericWireComponentUi.getUpdatedConfiguration());
-        }
-        return updatedConfigs;
+        return false;
     }
 
-    protected void setGenericWireComponentUi(GenericWireComponentUi genericWireComponentUi) {
-        this.genericWireComponentUi = genericWireComponentUi;
-        this.tab2Pane.add(genericWireComponentUi);
-    }
+    private void createNewUi(HasConfiguration hasConfiguration, Configurations configurations) {
+        final GwtConfigComponent configuration = hasConfiguration.getConfiguration();
+        final String driverPid = configuration.getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value());
 
-    public void setDirty(boolean dirty) {
-        if (!this.initialized) {
-            return;
-        }
-        if (this.isWireAsset) {
-            this.assetWireComponentUi.setDirty(dirty);
-        }
-        this.genericWireComponentUi.setDirty(dirty);
-    }
+        if (driverPid != null) {
+            final HasConfiguration driverConfiguration = configurations.getConfiguration(driverPid);
 
-    public boolean isDirty() {
-        if (!this.initialized) {
-            return false;
-        }
-        if (this.isWireAsset) {
-            return this.assetWireComponentUi.isDirty() || this.genericWireComponentUi.isDirty();
-        } else {
-            return this.genericWireComponentUi.isDirty();
-        }
-    }
+            if (driverConfiguration instanceof ConfigurableComponentUi) {
+                this.genericWireComponentUi = (ConfigurableComponentUi) driverConfiguration;
+            } else {
+                this.genericWireComponentUi = new ConfigurableComponentUi(driverConfiguration.getConfiguration());
+                this.genericWireComponentUi.setTitle("Driver - " + driverPid);
+                this.genericWireComponentUi.renderForm();
+            }
 
-    public void render() {
-        if (!this.initialized) {
-            return;
-        }
-        if (this.isWireAsset) {
+            final AssetModel assetModel = new AssetModelImpl(hasConfiguration.getConfiguration(),
+                    configurations.getChannelDescriptor(driverPid), configurations.getBaseChannelDescriptor());
+
+            this.assetWireComponentUi = new AssetConfigurationUi(assetModel, this.genericWireComponentUi);
+            this.assetWireComponentUi.setTitle(WiresPanelUi.getFormattedPid(configuration.getFactoryId()) + " - "
+                    + configuration.getComponentId());
             this.assetWireComponentUi.renderForm();
+        } else {
+            this.genericWireComponentUi = new ConfigurableComponentUi(hasConfiguration.getConfiguration());
+            this.genericWireComponentUi.setTitle(WiresPanelUi.getFormattedPid(configuration.getFactoryId()) + " - "
+                    + configuration.getComponentId());
+            this.genericWireComponentUi.renderForm();
         }
-        this.genericWireComponentUi.renderForm();
+    }
+
+    public void setListener(HasConfiguration.Listener listener) {
+        if (this.assetWireComponentUi != null) {
+            this.assetWireComponentUi.setListener(listener);
+        }
+        this.genericWireComponentUi.setListener(listener);
     }
 }

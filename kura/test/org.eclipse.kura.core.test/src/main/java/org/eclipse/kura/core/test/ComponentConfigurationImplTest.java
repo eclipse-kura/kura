@@ -11,18 +11,7 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.eclipse.kura.configuration.ComponentConfiguration;
-import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
-import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
-import org.eclipse.kura.core.configuration.metatype.Tocd;
-import org.eclipse.kura.core.configuration.util.ComponentUtil;
 import org.eclipse.kura.core.configuration.util.StringUtil;
-import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.Test;
 
@@ -63,71 +52,5 @@ public class ComponentConfigurationImplTest extends TestCase {
         assertEquals("b,c", defaultValues[1]);
         assertEquals(" c\\", defaultValues[2]);
         assertEquals("d", defaultValues[3]);
-    }
-
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
-    @Test
-    public void testPropertiesMarshallUnmarshall() throws Exception {
-        String pid = "org.eclipse.kura.cloud.CloudService";
-        Tocd definition = null;
-        Map<String, Object> properties = new HashMap<String, Object>();
-        properties.put("prop.string", new String("prop.value"));
-        properties.put("prop.long", Long.MAX_VALUE);
-        properties.put("prop.double", Double.MAX_VALUE);
-        properties.put("prop.float", Float.MAX_VALUE);
-        properties.put("prop.integer", Integer.MAX_VALUE);
-        properties.put("prop.byte", Byte.MAX_VALUE);
-        properties.put("prop.character", 'a');
-        properties.put("prop.short", Short.MAX_VALUE);
-
-        XmlComponentConfigurations xcc = new XmlComponentConfigurations();
-        List<ComponentConfiguration> ccis = new ArrayList<ComponentConfiguration>();
-        ComponentConfigurationImpl config = new ComponentConfigurationImpl(pid, definition, properties);
-        ccis.add(config);
-        xcc.setConfigurations(ccis);
-
-        String s = XmlUtil.marshal(xcc);
-        System.err.println(s);
-
-        XmlComponentConfigurations config1 = XmlUtil.unmarshal(s, XmlComponentConfigurations.class);
-        String s1 = XmlUtil.marshal(config1);
-        System.err.println(s1);
-
-        Map<String, Object> properties1 = config1.getConfigurations().get(0).getConfigurationProperties();
-        assertEquals(properties, properties1);
-    }
-
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
-    @Test
-    public void testOCDMarshallUnmarshall() throws Exception {
-        String pid = "org.eclipse.kura.cloud.CloudService";
-
-        Tocd definition = ComponentUtil.readObjectClassDefinition(pid);
-
-        Map<String, Object> properties = new HashMap<String, Object>();
-        properties.put("prop.string", new String("prop.value"));
-        properties.put("prop.long", Long.MAX_VALUE);
-        properties.put("prop.double", Double.MAX_VALUE);
-        properties.put("prop.float", Float.MAX_VALUE);
-        properties.put("prop.integer", Integer.MAX_VALUE);
-        properties.put("prop.byte", Byte.MAX_VALUE);
-        properties.put("prop.character", 'a');
-        properties.put("prop.short", Short.MAX_VALUE);
-
-        XmlComponentConfigurations xcc = new XmlComponentConfigurations();
-        List<ComponentConfiguration> ccis = new ArrayList<ComponentConfiguration>();
-        ComponentConfigurationImpl config = new ComponentConfigurationImpl(pid, definition, properties);
-        ccis.add(config);
-        xcc.setConfigurations(ccis);
-
-        String s = XmlUtil.marshal(xcc);
-        System.err.println(s);
-
-        XmlComponentConfigurations config1 = XmlUtil.unmarshal(s, XmlComponentConfigurations.class);
-        String s1 = XmlUtil.marshal(config1);
-        System.err.println(s1);
-
-        Map<String, Object> properties1 = config1.getConfigurations().get(0).getConfigurationProperties();
-        assertEquals(properties, properties1);
     }
 }

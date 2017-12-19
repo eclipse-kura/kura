@@ -73,7 +73,7 @@ public final class DropSupport extends JavaScriptObject {
 
         public native String getAsText()
         /*-{
-            return this.dataTransfer.getData('text')
+            return this.dataTransfer.getData('Text')
         }-*/;
 
         public native double getClientX()

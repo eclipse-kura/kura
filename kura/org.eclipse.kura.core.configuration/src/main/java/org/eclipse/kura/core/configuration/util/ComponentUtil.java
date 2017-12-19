@@ -25,6 +25,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.metatype.AD;
@@ -36,8 +37,11 @@ import org.eclipse.kura.core.configuration.metatype.Tmetadata;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.marshalling.Unmarshaller;
+import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.metatype.MetaTypeInformation;
@@ -52,7 +56,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ComponentUtil {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(ComponentUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(ComponentUtil.class);
 
     /**
      * Returns a Map with all the MetaType Object Class Definitions contained in the bundle.
@@ -62,7 +66,7 @@ public class ComponentUtil {
      * @return
      */
     public static Map<String, Tmetadata> getMetadata(BundleContext ctx, Bundle bnd) {
-        final Map<String, Tmetadata> bundleMetadata = new HashMap<String, Tmetadata>();
+        final Map<String, Tmetadata> bundleMetadata = new HashMap<>();
 
         final ServiceReference<MetaTypeService> ref = ctx.getServiceReference(MetaTypeService.class);
         final MetaTypeService metaTypeService = ctx.getService(ref);
@@ -71,7 +75,7 @@ public class ComponentUtil {
             final MetaTypeInformation mti = metaTypeService.getMetaTypeInformation(bnd);
             if (mti != null) {
 
-                final List<String> pids = new ArrayList<String>();
+                final List<String> pids = new ArrayList<>();
                 pids.addAll(Arrays.asList(mti.getPids()));
                 pids.addAll(Arrays.asList(mti.getFactoryPids()));
                 if (pids != null) {
@@ -85,7 +89,7 @@ public class ComponentUtil {
                             }
                         } catch (Exception e) {
                             // ignore: Metadata for the specified pid is not found
-                            s_logger.warn("Error loading Metadata for pid " + pid, e);
+                            logger.warn("Error loading Metadata for pid " + pid, e);
                         }
                     }
                 }
@@ -114,7 +118,7 @@ public class ComponentUtil {
      * Returns the Designate for the given pid
      */
     public static OCD getOCD(Tmetadata metadata, String pid) {
-        if (metadata.getOCD() != null && metadata.getOCD().size() > 0) {
+        if (metadata.getOCD() != null && !metadata.getOCD().isEmpty()) {
             for (OCD ocd : metadata.getOCD()) {
                 if (ocd.getId() != null && ocd.getId().equals(pid)) {
                     return ocd;
@@ -132,7 +136,7 @@ public class ComponentUtil {
      * @return
      */
     public static Map<String, OCD> getObjectClassDefinition(BundleContext ctx, Bundle bnd) {
-        Map<String, OCD> bundleDefaults = new HashMap<String, OCD>();
+        Map<String, OCD> bundleDefaults = new HashMap<>();
 
         ServiceReference<MetaTypeService> ref = ctx.getServiceReference(MetaTypeService.class);
         MetaTypeService metaTypeService = ctx.getService(ref);
@@ -150,7 +154,7 @@ public class ComponentUtil {
                         }
                     } catch (Exception e) {
                         // ignore: OCD for the specified pid is not found
-                        s_logger.warn("Error loading OCD for pid " + pid, e);
+                        logger.warn("Error loading OCD for pid " + pid, e);
                     }
                 }
             }
@@ -211,7 +215,7 @@ public class ComponentUtil {
         String metatypeXmlName = sbMetatypeXmlName.toString();
         String metatypeXml = IOUtil.readResource(bundle, metatypeXmlName);
         if (metatypeXml != null) {
-            metaData = XmlUtil.unmarshal(metatypeXml, Tmetadata.class);
+            metaData = unmarshal(metatypeXml, Tmetadata.class);
         }
         return metaData;
     }
@@ -235,11 +239,11 @@ public class ComponentUtil {
         OCD ocd = null;
         String metatypeXml = IOUtil.readResource(resourceUrl);
         if (metatypeXml != null) {
-            MetaData metaData = XmlUtil.unmarshal(metatypeXml, MetaData.class);
-            if (metaData.getOCD() != null && metaData.getOCD().size() > 0) {
+            MetaData metaData = unmarshal(metatypeXml, MetaData.class);
+            if (metaData.getOCD() != null && !metaData.getOCD().isEmpty()) {
                 ocd = metaData.getOCD().get(0);
             } else {
-                s_logger.warn("Cannot find OCD for component with url: {}", resourceUrl.toString());
+                logger.warn("Cannot find OCD for component with url: {}", resourceUrl.toString());
             }
         }
         return ocd;
@@ -268,11 +272,11 @@ public class ComponentUtil {
         String metatypeXmlName = sbMetatypeXmlName.toString();
         String metatypeXml = IOUtil.readResource(metatypeXmlName);
         if (metatypeXml != null) {
-            Tmetadata metaData = XmlUtil.unmarshal(metatypeXml, Tmetadata.class);
-            if (metaData.getOCD() != null && metaData.getOCD().size() > 0) {
+            Tmetadata metaData = unmarshal(metatypeXml, Tmetadata.class);
+            if (metaData.getOCD() != null && !metaData.getOCD().isEmpty()) {
                 ocd = (Tocd) metaData.getOCD().get(0);
             } else {
-                s_logger.warn("Cannot find OCD for component with pid: {}", pid);
+                logger.warn("Cannot find OCD for component with pid: {}", pid);
             }
         }
         return ocd;
@@ -302,8 +306,8 @@ public class ComponentUtil {
         String metatypeXmlName = sbMetatypeXmlName.toString();
         String metatypeXml = IOUtil.readResource(bundle, metatypeXmlName);
         if (metatypeXml != null) {
-            Tmetadata metaData = XmlUtil.unmarshal(metatypeXml, Tmetadata.class);
-            if (metaData.getOCD() != null && metaData.getOCD().size() > 0) {
+            Tmetadata metaData = unmarshal(metatypeXml, Tmetadata.class);
+            if (metaData.getOCD() != null && !metaData.getOCD().isEmpty()) {
                 ocd = (Tocd) metaData.getOCD().get(0);
             }
         }
@@ -314,7 +318,7 @@ public class ComponentUtil {
         //
         // reconcile by looping through the ocd properties
         Map<String, Object> defaults = null;
-        defaults = new HashMap<String, Object>();
+        defaults = new HashMap<>();
         if (ocd != null) {
 
             List<AD> attrDefs = ocd.getAD();
@@ -363,13 +367,13 @@ public class ComponentUtil {
                 return objectValues[0];
             }
         } else {
-            s_logger.warn("Unknown type for attribute {}", attrDef.getId());
+            logger.warn("Unknown type for attribute {}", attrDef.getId());
         }
         return objectValues;
     }
 
     private static Object[] getObjectValue(Scalar type, String[] defaultValues, ComponentContext ctx) {
-        List<Object> values = new ArrayList<Object>();
+        List<Object> values = new ArrayList<>();
         switch (type) {
         case BOOLEAN:
             for (String value : defaultValues) {
@@ -436,5 +440,36 @@ public class ComponentUtil {
         }
 
         return null;
+    }
+
+    private static ServiceReference<Unmarshaller>[] getXmlUnmarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))",
+                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
+        return ServiceUtil.getServiceReferences(FrameworkUtil.getBundle(ComponentUtil.class).getBundleContext(),
+                Unmarshaller.class, filterString);
+    }
+
+    private static void ungetServiceReferences(final ServiceReference<?>[] refs) {
+        ServiceUtil.ungetServiceReferences(FrameworkUtil.getBundle(ComponentUtil.class).getBundleContext(), refs);
+    }
+
+    protected static <T> T unmarshal(String string, Class<T> clazz) throws KuraException {
+        T result = null;
+        ServiceReference<Unmarshaller>[] unmarshallerSRs = getXmlUnmarshallers();
+        try {
+            for (final ServiceReference<Unmarshaller> unmarshallerSR : unmarshallerSRs) {
+                Unmarshaller unmarshaller = FrameworkUtil.getBundle(ComponentUtil.class).getBundleContext()
+                        .getService(unmarshallerSR);
+                result = unmarshaller.unmarshal(string, clazz);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to extract persisted configuration.");
+        } finally {
+            ungetServiceReferences(unmarshallerSRs);
+        }
+        if (result == null) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+        }
+        return result;
     }
 }

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Dictionary;
@@ -29,15 +30,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLStreamException;
-
+import org.apache.felix.scr.Component;
+import org.apache.felix.scr.ScrService;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraPartialSuccessException;
@@ -48,15 +50,18 @@ import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCD;
+import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.configuration.metatype.Scalar;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.upgrade.ConfigurationUpgrade;
 import org.eclipse.kura.core.configuration.util.CollectionsUtil;
 import org.eclipse.kura.core.configuration.util.ComponentUtil;
 import org.eclipse.kura.core.configuration.util.StringUtil;
-import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.marshalling.Marshaller;
+import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -77,7 +82,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of ConfigurationService.
  */
-public class ConfigurationServiceImpl implements ConfigurationService {
+public class ConfigurationServiceImpl implements ConfigurationService, OCDService {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
 
@@ -118,6 +123,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     };
 
     private ComponentContext ctx;
+    private BundleContext bundleContext;
 
     private ServiceTracker<ConfigurableComponent, ConfigurableComponent> serviceTracker1;
     private ServiceTracker<SelfConfiguringComponent, SelfConfiguringComponent> serviceTracker2;
@@ -130,6 +136,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private ConfigurationAdmin configurationAdmin;
     private SystemService systemService;
     private CryptoService cryptoService;
+    private ScrService scrService;
 
     // contains all the PIDs (aka kura.service.pid) - both of configurable and self configuring components
     private final Set<String> allActivatedPids;
@@ -190,14 +197,22 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         this.cryptoService = null;
     }
 
+    public void setScrService(ScrService scrService) {
+        this.scrService = scrService;
+    }
+
+    public void unsetScrService(ScrService scrService) {
+        this.scrService = null;
+    }
+
     public ConfigurationServiceImpl() {
-        this.allActivatedPids = new HashSet<String>();
-        this.activatedSelfConfigComponents = new HashSet<String>();
-        this.pendingDeletePids = new HashSet<String>();
-        this.ocds = new HashMap<String, Tocd>();
-        this.factoryPids = new HashSet<String>();
-        this.factoryPidByPid = new HashMap<String, String>();
-        this.servicePidByPid = new HashMap<String, String>();
+        this.allActivatedPids = new HashSet<>();
+        this.activatedSelfConfigComponents = new HashSet<>();
+        this.pendingDeletePids = new HashSet<>();
+        this.ocds = new HashMap<>();
+        this.factoryPids = new HashSet<>();
+        this.factoryPidByPid = new HashMap<>();
+        this.servicePidByPid = new HashMap<>();
     }
 
     // ----------------------------------------------------------------
@@ -211,6 +226,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         // save the bundle context
         this.ctx = componentContext;
+        this.bundleContext = componentContext.getBundleContext();
 
         // Load the latest snapshot and push it to ConfigurationAdmin
         try {
@@ -351,7 +367,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     public synchronized void updateConfiguration(String pidToUpdate, Map<String, Object> propertiesToUpdate,
             boolean takeSnapshot) throws KuraException { // don't call this method internally
-        List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
+        List<ComponentConfiguration> configs = new ArrayList<>();
         ComponentConfigurationImpl cci = new ComponentConfigurationImpl(pidToUpdate, null, propertiesToUpdate);
         configs.add(cci);
         updateConfigurations(configs, takeSnapshot);
@@ -411,7 +427,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
             logger.info("Updating newly created configuration for pid {}", pid);
 
-            Map<String, Object> mergedProperties = new HashMap<String, Object>();
+            Map<String, Object> mergedProperties = new HashMap<>();
             if (properties != null) {
                 mergedProperties.putAll(properties);
             }
@@ -443,8 +459,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (pid == null) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "pid cannot be null");
         } else if (this.factoryPidByPid.get(pid) == null) {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
-                    "pid " + pid + " is not a factory component instance");
+            return;
         }
 
         try {
@@ -591,7 +606,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public List<ComponentConfiguration> getSnapshot(long sid) throws KuraException {
-        List<ComponentConfiguration> returnConfigs = new ArrayList<ComponentConfiguration>();
+        List<ComponentConfiguration> returnConfigs = new ArrayList<>();
 
         XmlComponentConfigurations xmlConfigs = loadEncryptedSnapshotFileContent(sid);
         if (xmlConfigs != null) {
@@ -761,7 +776,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private synchronized void updateConfigurationsInternal(List<ComponentConfiguration> configsToUpdate,
             boolean takeSnapshot) throws KuraException {
         boolean snapshotOnConfirmation = false;
-        List<Throwable> causes = new ArrayList<Throwable>();
+        List<Throwable> causes = new ArrayList<>();
 
         List<ComponentConfiguration> configs = buildCurrentConfiguration(configsToUpdate);
 
@@ -810,11 +825,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     // returns configurations with encrypted passwords
     private List<ComponentConfiguration> getComponentConfigurationsInternal() throws KuraException {
-        List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
+        List<ComponentConfiguration> configs = new ArrayList<>();
 
         // assemble all the configurations we have
         // clone the list to avoid concurrent modifications
-        List<String> allPids = new ArrayList<String>(this.allActivatedPids);
+        List<String> allPids = new ArrayList<>(this.allActivatedPids);
         for (String pid : allPids) {
             try {
                 ComponentConfiguration cc = getComponentConfigurationInternal(pid);
@@ -849,7 +864,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         Configuration config = this.configurationAdmin.getConfiguration(servicePid, "?");
         if (config != null) {
             // get the properties from ConfigurationAdmin if any are present
-            Map<String, Object> props = new HashMap<String, Object>();
+            Map<String, Object> props = new HashMap<>();
             if (config.getProperties() != null) {
                 props.putAll(CollectionsUtil.dictionaryToMap(config.getProperties(), ocd));
             }
@@ -990,7 +1005,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 while ((line = br.readLine()) != null) {
                     entireFile.append(line);
                 }                    // end while
-                xmlConfigs = XmlUtil.unmarshal(entireFile.toString(), XmlComponentConfigurations.class);
+                xmlConfigs = unmarshal(entireFile.toString(), XmlComponentConfigurations.class);
             } finally {
                 if (br != null) {
                     br.close();
@@ -1046,7 +1061,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         // Marshall the configuration into an XML
         String xmlResult;
         try {
-            xmlResult = XmlUtil.marshal(conf);
+            xmlResult = marshal(conf);
             if (xmlResult.trim().isEmpty()) {
                 throw new KuraException(KuraErrorCode.INVALID_PARAMETER, conf);
             }
@@ -1213,7 +1228,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     private TreeSet<Long> getSnapshotsInternal() {
         // keeps the list of snapshots ordered
-        TreeSet<Long> ids = new TreeSet<Long>();
+        TreeSet<Long> ids = new TreeSet<>();
         String configDir = getSnapshotsDirectory();
         if (configDir != null) {
             File fConfigDir = new File(configDir);
@@ -1303,7 +1318,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                             Configuration cfg = this.configurationAdmin.getConfiguration(config.getPid(), "?");
 
                             // set kura.service.pid if missing
-                            Map<String, Object> newProperties = new HashMap<String, Object>(props);
+                            Map<String, Object> newProperties = new HashMap<>(props);
                             if (!newProperties.containsKey(ConfigurationService.KURA_SERVICE_PID)) {
                                 newProperties.put(ConfigurationService.KURA_SERVICE_PID, config.getPid());
                             }
@@ -1398,15 +1413,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         String decryptedContent = new String(decryptAes);
 
         XmlComponentConfigurations xmlConfigs = null;
+
         try {
-            xmlConfigs = XmlUtil.unmarshal(decryptedContent, XmlComponentConfigurations.class);
-        } catch (XMLStreamException e) {
-            logger.warn("Error parsing xml", e);
-        } catch (FactoryConfigurationError e) { // FIXME: is this really needed?
+            xmlConfigs = unmarshal(decryptedContent, XmlComponentConfigurations.class);
+        } catch (KuraException e) {
             logger.warn("Error parsing xml", e);
         }
 
-        return ConfigurationUpgrade.upgrade(xmlConfigs);
+        return ConfigurationUpgrade.upgrade(xmlConfigs, this.bundleContext);
     }
 
     private void updateConfigurationInternal(String pid, Map<String, Object> properties, boolean snapshotOnConfirmation)
@@ -1429,7 +1443,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             return;
         }
 
-        Map<String, Object> mergedProperties = new HashMap<String, Object>();
+        Map<String, Object> mergedProperties = new HashMap<>();
         mergeWithDefaults(registerdOCD, mergedProperties);
 
         if (!this.activatedSelfConfigComponents.contains(pid)) {
@@ -1477,7 +1491,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             return;
         }
 
-        Map<String, Object> mergedProperties = new HashMap<String, Object>();
+        Map<String, Object> mergedProperties = new HashMap<>();
         mergeWithDefaults(registerdOCD, mergedProperties);
 
         mergedProperties.putAll(properties);
@@ -1539,7 +1553,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (ocd != null) {
 
             // build a map of all the attribute definitions
-            Map<String, AttributeDefinition> attrDefs = new HashMap<String, AttributeDefinition>();
+            Map<String, AttributeDefinition> attrDefs = new HashMap<>();
             AttributeDefinition[] defs = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
             for (AttributeDefinition def : defs) {
                 attrDefs.put(def.getID(), def);
@@ -1595,7 +1609,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     private synchronized List<ComponentConfiguration> buildCurrentConfiguration(
             List<ComponentConfiguration> configsToUpdate) throws KuraException {
-        List<ComponentConfiguration> result = new ArrayList<ComponentConfiguration>();
+        List<ComponentConfiguration> result = new ArrayList<>();
 
         // Merge the current configuration of registered components with the provided configurations.
         // It is assumed that the PIDs in the provided configurations is a subset of the registered PIDs.
@@ -1608,7 +1622,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 if (configsToUpdate != null) {
                     for (ComponentConfiguration configToUpdate : configsToUpdate) {
                         if (configToUpdate.getPid().equals(pid)) {
-                            Map<String, Object> props = new HashMap<String, Object>();
+                            Map<String, Object> props = new HashMap<>();
                             if (currentConfig.getConfigurationProperties() != null) {
                                 props.putAll(currentConfig.getConfigurationProperties());
                             }
@@ -1680,5 +1694,122 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             return (String) value;
         }
         return value.toString();
+    }
+
+    @Override
+    public List<ComponentConfiguration> getFactoryComponentOCDs() {
+        return this.factoryPids.stream()
+                .map(pid -> new ComponentConfigurationImpl(pid, this.ocds.get(pid), new HashMap<>()))
+                .collect(Collectors.toList());
+    }
+
+    private ComponentConfiguration getComponentDefinition(String pid) {
+        final Tocd ocd = this.ocds.get(pid);
+        Map<String, Object> defaultProperties = null;
+        if (ocd != null) {
+            try {
+                defaultProperties = ComponentUtil.getDefaultProperties(ocd, this.ctx);
+            } catch (Exception e) {
+                logger.warn("Failed to get default properties for component: {}", pid, e);
+            }
+        }
+        return new ComponentConfigurationImpl(pid, ocd,
+                defaultProperties != null ? defaultProperties : new HashMap<>());
+    }
+
+    @Override
+    public ComponentConfiguration getFactoryComponentOCD(String factoryPid) {
+        if (!this.factoryPids.contains(factoryPid)) {
+            return null;
+        }
+        return getComponentDefinition(factoryPid);
+    }
+
+    private static boolean implementsAnyService(Component component, String[] classes) {
+        final String[] services = component.getServices();
+        if (services == null) {
+            return false;
+        }
+        for (String className : classes) {
+            for (String s : services) {
+                if (s.equals(className)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public List<ComponentConfiguration> getServiceProviderOCDs(String... classNames) {
+        return Arrays.stream(this.scrService.getComponents())
+                .filter(component -> implementsAnyService(component, classNames)).map(Component::getName)
+                .map(this::getComponentDefinition).filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ComponentConfiguration> getServiceProviderOCDs(Class<?>... classes) {
+        final String[] classNames = new String[classes.length];
+        for (int i = 0; i < classes.length; i++) {
+            classNames[i] = classes[i].getName();
+        }
+        return getServiceProviderOCDs(classNames);
+    }
+
+    private ServiceReference<Marshaller>[] getXmlMarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))",
+                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
+        return ServiceUtil.getServiceReferences(this.bundleContext, Marshaller.class, filterString);
+    }
+
+    private ServiceReference<Unmarshaller>[] getXmlUnmarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))",
+                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
+        return ServiceUtil.getServiceReferences(this.bundleContext, Unmarshaller.class, filterString);
+    }
+
+    private void ungetServiceReferences(final ServiceReference<?>[] refs) {
+        ServiceUtil.ungetServiceReferences(this.bundleContext, refs);
+    }
+
+    protected <T> T unmarshal(String string, Class<T> clazz) throws KuraException {
+        T result = null;
+        ServiceReference<Unmarshaller>[] unmarshallerSRs = getXmlUnmarshallers();
+        try {
+            for (final ServiceReference<Unmarshaller> unmarshallerSR : unmarshallerSRs) {
+                Unmarshaller unmarshaller = this.bundleContext.getService(unmarshallerSR);
+                result = unmarshaller.unmarshal(string, clazz);
+                if (result != null) {
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to extract persisted configuration.");
+        } finally {
+            ungetServiceReferences(unmarshallerSRs);
+        }
+        if (result == null) {
+            throw new KuraException(KuraErrorCode.DECODER_ERROR);
+        }
+        return result;
+    }
+
+    protected String marshal(Object object) {
+        String result = null;
+        ServiceReference<Marshaller>[] marshallerSRs = getXmlMarshallers();
+        try {
+            for (final ServiceReference<Marshaller> marshallerSR : marshallerSRs) {
+                Marshaller marshaller = this.bundleContext.getService(marshallerSR);
+                result = marshaller.marshal(object);
+                if (result != null) {
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to marshal configuration.");
+        } finally {
+            ungetServiceReferences(marshallerSRs);
+        }
+        return result;
     }
 }

@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,19 +39,19 @@ import org.eclipse.kura.KuraPartialSuccessException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.ConfigurationServiceImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.test.ConfigurationServiceTest.CSValidator;
-import org.eclipse.kura.core.configuration.util.XmlUtil;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.system.SystemService;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.osgi.framework.BundleContext;
@@ -68,7 +67,8 @@ public class ConfigurationServiceTest {
 
     private static CountDownLatch dependencyLatch = new CountDownLatch(2);
 
-    private static ConfigurationService configurationService;
+    static ConfigurationService configurationService;
+    static OCDService ocdService;
     private static SystemService systemService;
 
     private int kuraSnapshotsCount = 10;
@@ -109,14 +109,14 @@ public class ConfigurationServiceTest {
     @Before
     public void setup() throws KuraException {
         if (systemService != null) {
-            kuraSnapshotsCount = systemService.getKuraSnapshotsCount();
-            kuraSnapshotsDir = systemService.getKuraSnapshotsDirectory();
+            this.kuraSnapshotsCount = systemService.getKuraSnapshotsCount();
+            this.kuraSnapshotsDir = systemService.getKuraSnapshotsDirectory();
         }
 
         resetMocks();
 
         // remove all other snapshots
-        File dir = new File(kuraSnapshotsDir);
+        File dir = new File(this.kuraSnapshotsDir);
         dir.mkdirs();
         File[] snapshots = dir.listFiles();
         if (snapshots != null) {
@@ -177,7 +177,7 @@ public class ConfigurationServiceTest {
     private static void resetMocks(final CSValidator validator) throws KuraException {
         reset(csMock);
 
-        when(csMock.encryptAes((char[]) Mockito.anyObject())).thenAnswer(new Answer<char[]>() {
+        when(csMock.encryptAes((char[]) Matchers.anyObject())).thenAnswer(new Answer<char[]>() {
 
             @Override
             public char[] answer(InvocationOnMock invocation) throws Throwable {
@@ -187,7 +187,7 @@ public class ConfigurationServiceTest {
             }
 
         });
-        when(csMock.decryptAes((char[]) Mockito.anyObject())).thenAnswer(new Answer<char[]>() {
+        when(csMock.decryptAes((char[]) Matchers.anyObject())).thenAnswer(new Answer<char[]>() {
 
             @Override
             public char[] answer(InvocationOnMock invocation) throws Throwable {
@@ -209,6 +209,19 @@ public class ConfigurationServiceTest {
     protected void unbindConfigService(final ConfigurationService configService) {
         if (configurationService == configService) {
             configurationService = null;
+        }
+    }
+
+    protected void bindOcdService(final OCDService ocdService) {
+        if (ConfigurationServiceTest.ocdService == null) {
+            ConfigurationServiceTest.ocdService = ocdService;
+            dependencyLatch.countDown();
+        }
+    }
+
+    protected void unbindOcdService(final OCDService ocdService) {
+        if (ConfigurationServiceTest.ocdService == ocdService) {
+            ConfigurationServiceTest.ocdService = null;
         }
     }
 
@@ -289,7 +302,7 @@ public class ConfigurationServiceTest {
 
         final String factoryPid = TEST_COMPONENT_FPID;
         final String pid = "cfcmp_pid_" + System.currentTimeMillis();
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("key", "value");
         final boolean takeSnapshot = true;
 
@@ -303,7 +316,7 @@ public class ConfigurationServiceTest {
 
         Set<Long> snapshotsAfter = configurationService.getSnapshots();
 
-        int expectedSize = Math.min(kuraSnapshotsCount, snapshots.size() + 1);
+        int expectedSize = Math.min(this.kuraSnapshotsCount, snapshots.size() + 1);
         assertEquals("One more snapshot expected", expectedSize, snapshotsAfter.size());
 
         // verify that the new snapshot contains our new property
@@ -351,10 +364,8 @@ public class ConfigurationServiceTest {
 
         try {
             configurationService.deleteFactoryConfiguration(pid, takeSnapshot);
-
-            fail("Nonexisting parameter - exception expected.");
         } catch (KuraException e) {
-            assertTrue(e.getMessage().contains("INVALID_PARAMETER"));
+            fail("Exception not expected");
         }
     }
 
@@ -375,7 +386,7 @@ public class ConfigurationServiceTest {
         configurationService.createFactoryConfiguration(factoryPid, servicePid, null, takeSnapshot);
         Set<Long> snapshotsAfter = configurationService.getSnapshots();
 
-        int expectedSize = Math.min(kuraSnapshotsCount, snapshotsBefore.size() + 1);
+        int expectedSize = Math.min(this.kuraSnapshotsCount, snapshotsBefore.size() + 1);
         assertEquals("One more configuration expected", expectedSize, snapshotsAfter.size());
         snapshotsAfter.removeAll(snapshotsBefore);
         long sid = snapshotsAfter.iterator().next().longValue();
@@ -603,7 +614,7 @@ public class ConfigurationServiceTest {
         Map<String, Object> configurationProperties = config.getConfigurationProperties();
         Object val = configurationProperties.get(TEST_COMPONENT_PROPERTY_TEST);
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
 
         configurationService.updateConfiguration(pid, properties);
 
@@ -619,7 +630,7 @@ public class ConfigurationServiceTest {
         Set<Long> snapshots = configurationService.getSnapshots();
         int size1 = snapshots.size();
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         String prop = "some unknown property";
         properties.put(prop, 123);
         properties.put(TEST_COMPONENT_PROPERTY_TEST, 10);
@@ -642,10 +653,10 @@ public class ConfigurationServiceTest {
     private static String loadConfigsXml(String pid) throws Exception, IOException {
         XmlComponentConfigurations cfgs = new XmlComponentConfigurations();
 
-        List<ComponentConfiguration> cfglist = new ArrayList<ComponentConfiguration>();
+        List<ComponentConfiguration> cfglist = new ArrayList<>();
         ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
         cfg.setPid(pid);
-        Map<String, Object> props = new HashMap<String, Object>();
+        Map<String, Object> props = new HashMap<>();
         props.put("pass", "pass");
         cfg.setProperties(props);
         Tocd definition = new Tocd();
@@ -654,11 +665,13 @@ public class ConfigurationServiceTest {
         cfglist.add(cfg);
         cfgs.setConfigurations(cfglist);
 
-        StringWriter w = new StringWriter();
-        XmlUtil.marshal(cfgs, w);
-        String cfgxml = w.toString();
-        w.close();
-
+        String cfgxml = null;
+        try {
+            cfgxml = (String) TestUtil.invokePrivate(configurationService, "marshal", cfgs);
+        } catch (Throwable e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return cfgxml;
     }
 
@@ -667,7 +680,7 @@ public class ConfigurationServiceTest {
         // try it with a registered component and an existing PID with invalid properties
         String pid = TEST_COMPONENT_PID;
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         String prop = "some unknown property";
         properties.put(prop, 123);
         properties.put(TEST_COMPONENT_PROPERTY_TEST, 1234);
@@ -690,7 +703,7 @@ public class ConfigurationServiceTest {
         Set<Long> snapshots = configurationService.getSnapshots();
         int size1 = snapshots.size();
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put(TEST_COMPONENT_PROPERTY_TEST, 10);
 
         configurationService.updateConfiguration(pid, properties, takeSnapshot);
@@ -710,12 +723,12 @@ public class ConfigurationServiceTest {
         Set<Long> snapshots = configurationService.getSnapshots();
         int size1 = snapshots.size();
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         String prop = "some property";
         properties.put(prop, 123);
         properties.put(TEST_COMPONENT_PROPERTY_TEST, 5);
 
-        List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
+        List<ComponentConfiguration> configs = new ArrayList<>();
         ComponentConfiguration config = new ComponentConfigurationImpl(pid, null, properties);
         configs.add(config);
 
@@ -755,7 +768,7 @@ public class ConfigurationServiceTest {
     @Test
     public void testRollbackEmpty() throws KuraException {
         // remove all other snapshots
-        File dir = new File(kuraSnapshotsDir);
+        File dir = new File(this.kuraSnapshotsDir);
         File[] snapshots = dir.listFiles();
         for (File f : snapshots) {
             f.delete();
@@ -834,10 +847,10 @@ public class ConfigurationServiceTest {
     public void testEncryptSnapshots() throws Exception {
         XmlComponentConfigurations cfgs = new XmlComponentConfigurations();
 
-        List<ComponentConfiguration> cfglist = new ArrayList<ComponentConfiguration>();
+        List<ComponentConfiguration> cfglist = new ArrayList<>();
         ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
         cfg.setPid("123");
-        Map<String, Object> props = new HashMap<String, Object>();
+        Map<String, Object> props = new HashMap<>();
         props.put("pass", "pass");
         cfg.setProperties(props);
         Tocd definition = new Tocd();
@@ -846,12 +859,15 @@ public class ConfigurationServiceTest {
         cfglist.add(cfg);
         cfgs.setConfigurations(cfglist);
 
-        StringWriter w = new StringWriter();
-        XmlUtil.marshal(cfgs, w);
-        String cfgxml = w.toString();
-        w.close();
+        String cfgxml = null;
+        try {
+            cfgxml = (String) TestUtil.invokePrivate(configurationService, "marshal", cfgs);
+        } catch (Throwable e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
-        File f1 = new File(kuraSnapshotsDir, "snapshot_123456.xml");
+        File f1 = new File(this.kuraSnapshotsDir, "snapshot_123456.xml");
         f1.createNewFile();
         f1.deleteOnExit();
 
@@ -876,6 +892,38 @@ public class ConfigurationServiceTest {
         assertTrue("Snapshot should be encrypted", s.startsWith("encrypted"));
     }
 
+    private void assertContainsWireComponentsDefinitions(List<ComponentConfiguration> configs, boolean includesAsset) {
+        final String[] PIDS = { "org.eclipse.kura.wire.CloudPublisher", "org.eclipse.kura.wire.CloudSubscriber",
+                "org.eclipse.kura.wire.DbWireRecordFilter", "org.eclipse.kura.wire.DbWireRecordStore",
+                "org.eclipse.kura.wire.Fifo", "org.eclipse.kura.wire.Logger", "org.eclipse.kura.wire.RegexFilter",
+                "org.eclipse.kura.wire.Timer" };
+        for (final String pid : PIDS) {
+            assertTrue(configs.stream()
+                    .filter(config -> config.getPid().equals(pid) && config.getDefinition().getId().equals(pid))
+                    .findAny().isPresent());
+        }
+        boolean wireAssetFound = configs.stream().filter(
+                config -> config.getPid().equals("org.eclipse.kura.wire.WireAsset") && config.getDefinition() == null)
+                .findAny().isPresent();
+        assertEquals(includesAsset, wireAssetFound);
+    }
+
+    @Test
+    public void testShouldGetFactoryComponentDefinitions() {
+        List<ComponentConfiguration> configs = ocdService.getFactoryComponentOCDs();
+        assertFalse(configs.isEmpty());
+        assertContainsWireComponentsDefinitions(configs, false);
+    }
+
+    @Test
+    public void testShouldGetServiceProviderDefinitions() {
+        List<ComponentConfiguration> configs = ocdService.getServiceProviderOCDs(
+                "org.eclipse.kura.wire.WireEmitter", "org.eclipse.kura.wire.WireReceiver",
+                "org.eclipse.kura.wire.WireComponent");
+        assertFalse(configs.isEmpty());
+        assertContainsWireComponentsDefinitions(configs, true);
+    }
+
     // a unit test, just to see it working
     @Test
     public void testUpdateConfigurationsListOfComponentConfigurationBoolean()
@@ -884,10 +932,10 @@ public class ConfigurationServiceTest {
         // made - stop with usage of allActivatedPids in getComponentConfigurationsInternal
 
         boolean takeSnapshot = false;
-        final List<ComponentConfiguration> configs = new ArrayList<ComponentConfiguration>();
+        final List<ComponentConfiguration> configs = new ArrayList<>();
         configs.add(null);
         ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
-        Map<String, Object> props = new HashMap<String, Object>();
+        Map<String, Object> props = new HashMap<>();
         cfg.setProperties(props);
         props.put("pass", new Password("pass"));
         configs.add(cfg);
@@ -929,25 +977,26 @@ class MultiStepCSValidator implements CSValidator {
 
     @Override
     public boolean validateEncryptArgs(Object[] args) {
-        String arg0 = new String(((char[]) args[0]));
+        String arg0 = new String((char[]) args[0]);
         XmlComponentConfigurations configurations = null;
         try {
-            configurations = XmlUtil.unmarshal(arg0, XmlComponentConfigurations.class);
-        } catch (Exception e) {
+            configurations = (XmlComponentConfigurations) TestUtil.invokePrivate(
+                    ConfigurationServiceTest.configurationService, "unmarshal", arg0, XmlComponentConfigurations.class);
+        } catch (Throwable e) {
         }
 
-        if (configs == null) { // first pass
+        if (this.configs == null) { // first pass
             assertTrue("At least one configuration expected", configurations.getConfigurations().size() >= 1);
             boolean found = false;
             for (ComponentConfiguration cfg : configurations.getConfigurations()) {
-                if (pid.compareTo(cfg.getPid()) == 0) {
-                    assertEquals(factoryPid, cfg.getConfigurationProperties().get("service.factoryPid"));
+                if (this.pid.compareTo(cfg.getPid()) == 0) {
+                    assertEquals(this.factoryPid, cfg.getConfigurationProperties().get("service.factoryPid"));
                     found = true;
                 }
             }
             assertTrue("Our configuration should be found.", found);
         }
-        configs = configurations;
+        this.configs = configurations;
 
         return true;
     }
@@ -969,12 +1018,15 @@ class MultiStepCSValidator implements CSValidator {
 
     @Override
     public String getDecrypted() {
-        if (configs != null) {
+        if (this.configs != null) {
             try {
-                StringWriter w = new StringWriter();
-                XmlUtil.marshal(configs, w);
-                String cfgxml = w.toString();
-                w.close();
+                String cfgxml = null;
+                try {
+                    cfgxml = (String) TestUtil.invokePrivate(ConfigurationServiceTest.configurationService, "marshal",
+                            this.configs);
+                } catch (Throwable e) {
+
+                }
 
                 return cfgxml;
             } catch (Exception e) {

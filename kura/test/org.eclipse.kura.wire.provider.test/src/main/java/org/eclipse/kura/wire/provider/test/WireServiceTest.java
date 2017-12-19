@@ -28,6 +28,7 @@ import org.eclipse.kura.test.annotation.TestTarget;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.WireService;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,19 +42,14 @@ public final class WireServiceTest {
     /** A latch to be initialized with the no of OSGi dependencies needed */
     private static CountDownLatch dependencyLatch = new CountDownLatch(2);
 
-    /** The Wire Emitter PID */
     private static final String emitterPid = "org.eclipse.kura.wire.test.emitter";
 
-    /** The Wire Receiver PID */
     private static final String receiverPid = "org.eclipse.kura.wire.test.receiver";
 
-    /** Configuration Service Reference */
     private static ConfigurationService configService;
 
-    /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(WireServiceTest.class);
 
-    /** Configuration Service Reference */
     private static WireService wireService;
 
     /**
@@ -83,24 +79,6 @@ public final class WireServiceTest {
     }
 
     /**
-     * Tests {@link WireService} methods
-     */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
-    @Test
-    public void testCreateDeleteGetWireConfiguration() throws Exception {
-        WireConfiguration configuration = null;
-        configuration = wireService.createWireConfiguration(emitterPid, receiverPid);
-        assertNotNull(configuration);
-        assertNotNull(configuration.getWire());
-        assertEquals(configuration.getEmitterPid(), emitterPid);
-        assertEquals(configuration.getReceiverPid(), receiverPid);
-        final Set<WireConfiguration> configs = wireService.getWireConfigurations();
-        assertEquals(1, configs.size());
-        wireService.deleteWireConfiguration(configuration);
-        assertEquals(0, configs.size());
-    }
-
-    /**
      * Tests the condition in case the emitter PID or receiver PID are not
      * assigned to any available wire component
      */
@@ -108,41 +86,6 @@ public final class WireServiceTest {
     @Test(expected = KuraException.class)
     public void testEmitterReceiverPidNotAvailable() throws KuraException {
         wireService.createWireConfiguration("x", "y");
-    }
-
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
-    @Test
-    public void testGetConfiguration() throws KuraException {
-        // the test assumes that only English localization is provided when the test runs
-
-        wireService.createWireConfiguration(emitterPid, receiverPid);
-
-        ComponentConfiguration config = ((SelfConfiguringComponent) wireService).getConfiguration();
-
-        Map<String, Object> props = config.getConfigurationProperties();
-
-        assertEquals("org.eclipse.kura.wire.WireService", config.getDefinition().getId());
-        assertTrue("Expected WireService for EN or WireMessages.name for other locales",
-                "WireService".equals(config.getDefinition().getName())
-                        || "WireMessages.name".equals(config.getDefinition().getName()));
-        assertTrue("Expected properly-localized description",
-                config.getDefinition().getDescription().contains("Wire Components")
-                        || "WireMessages.description".equals(config.getDefinition().getDescription()));
-        assertTrue("Expected the proper emitter key",
-                props.containsKey("1.emitter") || props.containsKey("1.WireMessages.emitter"));
-        assertTrue("Expected the proper filter key",
-                props.containsKey("1.filter") || props.containsKey("1.WireMessages.filter"));
-        assertTrue("Expected the proper receiver key",
-                props.containsKey("1.receiver") || props.containsKey("1.WireMessages.receiver"));
-        if (props.containsKey("1.emitter")) {
-            assertNull(props.get("1.filter"));
-            assertEquals(emitterPid, props.get("1.emitter"));
-            assertEquals(receiverPid, props.get("1.receiver"));
-        } else {
-            assertNull(props.get("1.WireMessages.filter"));
-            assertEquals(emitterPid, props.get("1.WireMessages.emitter"));
-            assertEquals(receiverPid, props.get("1.WireMessages.receiver"));
-        }
     }
 
     /**

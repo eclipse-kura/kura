@@ -20,7 +20,6 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
     </parent>
 
     <artifactId>org.eclipse.kura.core.configuration.test</artifactId>
-    <version>3.2.0-SNAPSHOT</version>
     <packaging>eclipse-test-plugin</packaging>
 
     <properties>
@@ -46,6 +45,11 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
                         -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
                         -Ddpa.configuration=/tmp/kura/dpa.properties
                         -Dlog4j.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.properties</argLine>
+                    
+                    <!-- This can be uncommented to debug the test in the
+                        event of a failure by telneting to port 5002 and seeing the state of the
+                        OSGi runtime -->
+                    <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
                     <bundleStartLevel>
                         <bundle>
                             <id>org.eclipse.equinox.ds</id>
@@ -174,6 +178,16 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
                         </bundle>
                         <bundle>
                             <id>org.eclipse.kura.emulator.net</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
+                            <level>3</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.eclipse.kura.wire.component.provider</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -310,6 +324,16 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
                             <requirement>
                                 <type>eclipse-plugin</type>
                                 <id>org.eclipse.kura.emulator.net</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.wire.component.provider</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                         </extraRequirements>

@@ -245,6 +245,12 @@ Upload panel END
 /**********************
 Channel Table Validation START
 ***********************/
+
+.asset-read-error, .asset-read-error * {
+	pointer-events: none;
+	color: red !important;
+}
+
 .error-text-box {
 	border: 1px solid red !important;
 	padding-left: 15px !important;

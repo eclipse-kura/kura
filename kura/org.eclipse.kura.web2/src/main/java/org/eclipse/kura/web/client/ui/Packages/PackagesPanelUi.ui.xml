@@ -84,8 +84,8 @@
                                             <g:FileUpload ui:field="filePath"></g:FileUpload>
                                         </b:Well>
                                         <b:ButtonGroup pull="RIGHT">
-                                            <b:Button ui:field="fileSubmit">Submit</b:Button>
                                             <b:Button ui:field="fileCancel">Cancel</b:Button>
+                                            <b:Button ui:field="fileSubmit">Submit</b:Button>
                                         </b:ButtonGroup>
                                         <g:Hidden ui:field="xsrfTokenFieldFile"></g:Hidden>
                                     </b:FieldSet>
@@ -98,8 +98,8 @@
                                         <b:FormLabel addStyleNames="{style.upload-label}" for="formUrl">Enter the URL of the deployment package:</b:FormLabel>
                                         <b:TextBox b:id="formUrl" ui:field="formUrl" />
                                         <b:ButtonGroup pull="RIGHT">
-                                            <b:Button ui:field="urlSubmit">Submit</b:Button>
                                             <b:Button ui:field="urlCancel">Cancel</b:Button>
+                                            <b:Button ui:field="urlSubmit">Submit</b:Button>
                                         </b:ButtonGroup>
                                         <g:Hidden ui:field="xsrfTokenFieldUrl"></g:Hidden>
                                     </b:FieldSet>

@@ -16,6 +16,7 @@ package org.eclipse.kura.wire;
 import java.util.Set;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.wire.graph.WireGraphService;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -24,8 +25,10 @@ import org.osgi.annotation.versioning.ProviderType;
  *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 1.2
+ * @deprecated Use {@link WireGraphService} instead.
  */
 @ProviderType
+@Deprecated
 public interface WireService {
 
     /**

@@ -620,7 +620,7 @@ public class CloudDeploymentHandlerV2Test {
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
         BundleContext ctxMock = mock(BundleContext.class);
-        TestUtil.setFieldValue(handler, "m_bundleContext", ctxMock);
+        TestUtil.setFieldValue(handler, "bundleContext", ctxMock);
 
         when(ctxMock.getBundle(99)).thenReturn(null);
 
@@ -645,7 +645,7 @@ public class CloudDeploymentHandlerV2Test {
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
         BundleContext ctxMock = mock(BundleContext.class);
-        TestUtil.setFieldValue(handler, "m_bundleContext", ctxMock);
+        TestUtil.setFieldValue(handler, "bundleContext", ctxMock);
 
         Bundle bundleMock = mock(Bundle.class);
         when(ctxMock.getBundle(99)).thenReturn(bundleMock);
@@ -675,7 +675,7 @@ public class CloudDeploymentHandlerV2Test {
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
 
         BundleContext ctxMock = mock(BundleContext.class);
-        TestUtil.setFieldValue(handler, "m_bundleContext", ctxMock);
+        TestUtil.setFieldValue(handler, "bundleContext", ctxMock);
 
         Bundle bundleMock = mock(Bundle.class);
         when(ctxMock.getBundle(99)).thenReturn(bundleMock);

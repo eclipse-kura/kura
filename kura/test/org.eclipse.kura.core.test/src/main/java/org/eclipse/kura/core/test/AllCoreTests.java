@@ -19,7 +19,6 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.system.SystemService;
-import org.eclipse.kura.watchdog.WatchdogService;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -33,7 +32,7 @@ import io.moquette.server.Server;
 @RunWith(Suite.class)
 @SuiteClasses({ DataServiceTest.class, CloudDeploymentHandlerTest.class, CloudServiceTest.class, CommURITest.class,
         ComponentConfigurationImplTest.class, ConfigurationServiceTest.class, NetUtilTest.class,
-        NetworkServiceTest.class, SystemAdminServiceTest.class, XmlUtilTest.class })
+        NetworkServiceTest.class, SystemAdminServiceTest.class })
 public class AllCoreTests {
 
     private static final Logger s_logger = LoggerFactory.getLogger(AllCoreTests.class);
@@ -44,7 +43,6 @@ public class AllCoreTests {
     private static ConfigurationService s_configService;
     private static DataService s_dataService;
     private static SystemService s_sysService;
-    
 
     public void setConfigService(ConfigurationService configService) {
         s_configService = configService;
@@ -146,7 +144,7 @@ public class AllCoreTests {
     @AfterClass
     public static void tearDownClass() throws Exception {
         s_logger.info("tearDownClass...");
-        if (s_dataService.isConnected()) {
+        if (s_dataService != null && s_dataService.isConnected()) {
             s_dataService.disconnect(0);
         }
     }

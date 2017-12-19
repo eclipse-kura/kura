@@ -16,6 +16,7 @@
    <implementation class="org.eclipse.kura.core.configuration.ConfigurationServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurationService"/>
+      <provide interface="org.eclipse.kura.configuration.metatype.OCDService"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.configuration.ConfigurationService"/>   
    <reference name="ConfigurationAdmin"
@@ -41,5 +42,11 @@
               bind="setCryptoService" 
               unbind="unsetCryptoService"
               cardinality="1..1" 
-              policy="static"/>   
+              policy="static"/>
+   <reference bind="setScrService" 
+              cardinality="1..1"
+              interface="org.apache.felix.scr.ScrService"
+              name="ScrService"
+              policy="static"
+              unbind="unsetScrService"/>
 </scr:component>

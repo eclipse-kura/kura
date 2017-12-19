@@ -17,12 +17,15 @@
 
     <b:Modal ui:field="alert">
        <b:ModalBody>
-           <b.html:Span ui:field="alertBody" />
+           <b.html:Span ui:field="messageText" />
+           <b:Alert ui:field="alertBody" type="DANGER">
+                    <b.html:Strong ui:field="alertText" />
+           </b:Alert>
        </b:ModalBody>
 
        <b:ModalFooter ui:field="alertFooter">
-            <b:Button ui:field="yes" />
             <b:Button ui:field="no" />
+            <b:Button ui:field="yes" />
        </b:ModalFooter>
     </b:Modal>
 

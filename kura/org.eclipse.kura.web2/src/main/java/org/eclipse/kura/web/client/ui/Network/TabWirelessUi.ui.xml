@@ -235,7 +235,7 @@
         </b:Row>
 
 		<!-- WIFI Networks (SSID) Modal -->
-        <b:Modal closable="true" dataKeyboard="true" ui:field="ssidModal">
+        <b:Modal closable="true" dataKeyboard="true" ui:field="ssidModal" b:id="ssidModal">
             <b:ModalBody>
                 <b:Panel>
                     <b:PanelHeader ui:field="ssidTitle" />

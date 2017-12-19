@@ -20,7 +20,7 @@
     <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages"></ui:with>
 
     <b:Panel>
-        <b:Row>
+        <b:Row b:id="driversAssetsListTable">
             <g:Label ui:field="emptyListLabel" />
             <gwt:CellTable bordered="true" condensed="true" striped="true" hover="true" height="100%" width="100%"
                 ui:field="driversAssetsListTable" />
@@ -30,5 +30,4 @@
             <b:Well size="SMALL" ui:field="driversAndAssetsMgmtPanel" />
         </b:Panel>
     </b:Panel>
-
 </ui:UiBinder> 

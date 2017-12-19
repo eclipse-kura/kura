@@ -115,7 +115,7 @@
                                 <b:PanelHeader>
                                     <b:Heading size="H3" text="System" />
                                 </b:PanelHeader>
-                                <b:PanelBody ui:field='systemPanel'>
+                                <b:PanelBody ui:field='systemPanel' b:id="systemPanel">
                                     <b:NavPills stacked="true">
                                         <b:TabListItem text="Status" icon="EXCLAMATION" iconFixedWidth="true"
                                             ui:field="status" />
@@ -156,19 +156,19 @@
                                         <b:FormGroup addStyleNames="services-form-group">
                                             <b:InputGroup addStyleNames="services-input-group">
                                                 <b:TextBox placeholder="Search" ui:field="textSearch"
-                                                    addStyleNames="services-search" />
+                                                    addStyleNames="services-search" b:id="servicesSearchField"/>
                                                 <b:InputGroupButton addStyleNames="services-add">
                                                     <b:Tooltip title="Create a new Component"
                                                         placement="TOP">
                                                         <b:Button icon="PLUS" size="SMALL" dataTarget="#myModal"
-                                                            dataToggle="MODAL" ui:field="factoriesButton" />
+                                                            dataToggle="MODAL" ui:field="factoriesButton" b:id="servicesSearchButton"/>
                                                     </b:Tooltip>
                                                 </b:InputGroupButton>
                                             </b:InputGroup>
                                         </b:FormGroup>
                                     </b:FieldSet>
                                     <g:ScrollPanel ui:field="servicesPanel">
-                                        <b:NavPills stacked="true" ui:field="servicesMenu" />
+                                        <b:NavPills stacked="true" ui:field="servicesMenu" b:id="servicesMenu"/>
                                     </g:ScrollPanel>
                                 </b:PanelBody>
                             </b:Panel>

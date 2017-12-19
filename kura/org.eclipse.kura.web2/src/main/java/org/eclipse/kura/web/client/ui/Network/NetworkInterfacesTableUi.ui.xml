@@ -28,7 +28,7 @@
     }
     </ui:style>
 
-    <b:Panel addStyleNames="network-interfaces-panel">
+    <b:Panel addStyleNames="network-interfaces-panel" b:id="networkInterfacesTable">
             <b:Alert type="WARNING" ui:field="notification" />
             <gwt:CellTable bordered="true" condensed="true"
                 striped="true" hover="true" height="100%" width="100%"

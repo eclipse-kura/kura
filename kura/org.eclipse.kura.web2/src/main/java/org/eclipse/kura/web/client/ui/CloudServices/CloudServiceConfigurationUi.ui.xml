@@ -44,7 +44,7 @@
 
 	<b:Container fluid="true">
 		<b:Column size="MD11">
-			<b:Row>
+			<b:Row b:id="confirmConnectionEdit">
 				<b:Panel addStyleNames="{style.center-panel}">
 					<b:ButtonGroup size="SMALL">
 						<b:Button ui:field="applyConnectionEdit" addStyleNames="fa fa-check"></b:Button>

@@ -25,7 +25,7 @@
         <b:Row>
             <b.html:Paragraph text="{msgs.driversAssetsTabIntro}" />
         </b:Row>
-        <b:Row>
+        <b:Row b:id="driversAndAssetsIntro">
             <b:ButtonGroup size="SMALL">
                 <b:Button icon="PLUS" ui:field="newDriverButton" text="{msgs.newDriver}" enabled="true" />
                 <b:Button icon="PLUS" ui:field="newAssetButton" text="{msgs.newAsset}" enabled="false" />
@@ -34,7 +34,7 @@
         </b:Row>
         <da:DriversAndAssetsListUi ui:field="driverAndAssetsListUi" />
 
-        <b:Modal closable="true" dataKeyboard="true" ui:field="newDriverModal" title="{msgs.createNewDriverLabel}">
+        <b:Modal closable="true" dataKeyboard="true" ui:field="newDriverModal" title="{msgs.createNewDriverLabel}" b:id="newDriverModal">
             <b:ModalBody>
                 <b.html:Paragraph text="{msgs.createNewDriverIntroLabel}" />
                 <b:Form type="HORIZONTAL">
@@ -60,7 +60,7 @@
             </b:ModalFooter>
         </b:Modal>
 
-        <b:Modal closable="true" dataKeyboard="true" ui:field="newAssetModal" title="{msgs.createNewAssetLabel}">
+        <b:Modal closable="true" dataKeyboard="true" ui:field="newAssetModal" title="{msgs.createNewAssetLabel}" b:id="newAssetModal">
             <b:ModalBody>
                 <b.html:Paragraph text="{msgs.createNewAssetIntroLabel}" />
                 <b:Form type="HORIZONTAL">
@@ -86,6 +86,5 @@
         </b:Modal>
 
         <kura:AlertDialog ui:field="confirmDialog"></kura:AlertDialog>
-
     </b:Container>
 </ui:UiBinder> 

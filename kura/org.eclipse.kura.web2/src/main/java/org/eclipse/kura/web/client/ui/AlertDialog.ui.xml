@@ -15,7 +15,7 @@
     xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
     xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
-    <b:Modal ui:field="alert">
+    <b:Modal ui:field="alert" b:id="alertModalDialog">
        <b:ModalBody>
            <b.html:Span ui:field="messageText" />
            <b:Alert ui:field="alertBody" type="DANGER">
@@ -24,8 +24,8 @@
        </b:ModalBody>
 
        <b:ModalFooter ui:field="alertFooter">
-            <b:Button ui:field="no" />
-            <b:Button ui:field="yes" />
+            <b:Button ui:field="no" b:id="alertNo"/>
+            <b:Button ui:field="yes" b:id="alertYes"/>
        </b:ModalFooter>
     </b:Modal>
 

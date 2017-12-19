@@ -34,17 +34,17 @@
                 <b:ButtonGroup justified="false" size="SMALL">
                     <b:AnchorButton icon="CHECK"
                         iconFixedWidth="true" ui:field="apply"
-                        addStyleNames="{style.button}" />
+                        addStyleNames="{style.button}" b:id="btnNetworkApply"/>
 
                     <b:AnchorButton icon="REFRESH"
                         iconFixedWidth="true" ui:field="refresh"
-                        addStyleNames="{style.button}" />
+                        addStyleNames="{style.button}" b:id="btnNetworkRefresh"/>
 
                 </b:ButtonGroup>
             </b:Row>
         </b:Row>
         <b:Modal closable="true" dataKeyboard="true"
-            ui:field="incompleteFieldsModal">
+            ui:field="incompleteFieldsModal" b:id="incompleteFieldsModal">
             <b:ModalBody>
                 <b:Panel>
                     <b:PanelBody>

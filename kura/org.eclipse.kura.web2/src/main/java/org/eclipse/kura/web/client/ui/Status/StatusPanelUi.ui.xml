@@ -30,11 +30,11 @@
 			<b:Row>
 				<b:Panel>
 					<b:ButtonGroup size="SMALL">
-						<b:Button ui:field="statusRefresh" addStyleNames="fa fa-refresh"></b:Button>
+						<b:Button ui:field="statusRefresh" addStyleNames="fa fa-refresh" b:id="btnRefresh"></b:Button>
 					</b:ButtonGroup>
 				</b:Panel>
 			</b:Row>
-			<b:Row>
+			<b:Row b:id="statusTable">
 				<b:Well addStyleNames="{style.center-panel} status-well" ui:field="statusWell">
 					<gwt:CellTable bordered="true" condensed="true"
 						striped="true" hover="true" height="100%" width="100%" ui:field="statusGrid" />						

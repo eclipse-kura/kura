@@ -172,6 +172,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
             if (isDirty()) {
                 // TODO ask for confirmation first
                 this.modal = new Modal();
+                this.modal.setId("confirmationModal");
 
                 ModalHeader header = new ModalHeader();
                 header.setTitle(MSGS.confirm());

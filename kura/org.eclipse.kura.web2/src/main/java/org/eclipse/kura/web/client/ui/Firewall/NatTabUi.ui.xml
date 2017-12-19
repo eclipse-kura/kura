@@ -26,7 +26,7 @@
 
         <b:Column size="MD_12">
             <firewall:ButtonBar ui:field="buttonBar"></firewall:ButtonBar>
-            <b:Row>
+            <b:Row  b:id="natTable">
                 <b:Alert type="WARNING" ui:field="notification" />
                 <gwt:CellTable bordered="true" condensed="true"
                     striped="true" hover="true" height="100%" width="100%"
@@ -36,7 +36,7 @@
 
 
 		<!--******Modals***** -->
-        <b:Modal ui:field="natForm">
+        <b:Modal ui:field="natForm" b:id="natForm">
             <b:ModalBody>
                 <b:Form>
                     <b:FieldSet>

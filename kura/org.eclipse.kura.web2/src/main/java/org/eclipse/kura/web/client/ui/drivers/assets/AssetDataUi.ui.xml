@@ -17,14 +17,14 @@
 
     <ui:style>
     .center-panel {
-    	height: 100%;
-    	padding-top: 20px;
-    	padding-left: 5px;
-    	border: none;
+        height: 100%;
+        padding-top: 20px;
+        padding-left: 5px;
+        border: none;
     }
     
     .content-panel-body {
-    	padding: 1px;
+        padding: 1px;
     }
     
     </ui:style>
@@ -33,7 +33,7 @@
         <b:Row addStyleNames='content-wrapper'>
             <b:Column size="MD11">
                 <b:Panel ui:field="configurationPanel" addStyleNames="content-panel">
-                    <b:PanelBody ui:field="configurationPanelBody" addStyleNames="{style.content-panel-body}">
+                    <b:PanelBody ui:field="configurationPanelBody" addStyleNames="{style.content-panel-body}" b:id="configurationPanelBody">
                         <b:Panel>
                             <b:ButtonGroup size="SMALL">
                                 <b:Button ui:field="applyDataChanges" icon="DOWNLOAD" text="{msgs.write}"></b:Button>
@@ -47,7 +47,7 @@
                                         <b:Panel ui:field="channelPanel">
                                             <b:PanelHeader>
                                             </b:PanelHeader>
-                                            <b:PanelBody>
+                                            <b:PanelBody b:id="assetDataTable">
                                                 <gwt:CellTable bordered="true" condensed="true" striped="true"
                                                     hover="true" height="100%" width="100%" ui:field="assetDataTable" />
                                             </b:PanelBody>
@@ -67,3 +67,5 @@
         <kura:AlertDialog ui:field="alertDialog"></kura:AlertDialog>
     </b:Container>
 </ui:UiBinder> 
+
+

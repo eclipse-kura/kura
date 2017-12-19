@@ -35,7 +35,7 @@
     <b:Container fluid="true" addStyleNames="{style.center-panel}">
         <b:Row>
             <b:Navbar>
-                <b:NavbarNav ui:field="tabsPanel"
+                <b:NavbarNav ui:field="tabsPanel" b:id="networkNavBar"
                     addStyleNames="{style.center-panel-nav}" />
             </b:Navbar>
         </b:Row>

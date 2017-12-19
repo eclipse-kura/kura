@@ -25,15 +25,15 @@
     <b:Container fluid="true">
         <b:Column size="MD_12">
             <firewall:ButtonBar ui:field="buttonBar"></firewall:ButtonBar>
-            <b:Row>
+            <b:Row b:id="openPortsTable">
                 <b:Alert type="WARNING" ui:field="notification" /> 
                 <gwt:CellTable bordered="true" condensed="true"
                     striped="true" hover="true" height="100%" width="100%"
-                    ui:field="openPortsGrid" />
+                    ui:field="openPortsGrid"/>
             </b:Row>
         </b:Column>
 
-        <b:Modal ui:field="openPortsForm">
+        <b:Modal ui:field="openPortsForm" b:id="openPortsForm">
             <b:ModalBody>
                 <b:Form>
                     <b:FieldSet>

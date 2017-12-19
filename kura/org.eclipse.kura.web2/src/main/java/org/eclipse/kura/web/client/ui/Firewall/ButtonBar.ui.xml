@@ -15,7 +15,7 @@
     xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
     xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
-    <b:Row>
+    <b:Row b:id="buttonBar">
         <b:Panel>
             <b:NavPills justified="true">
                 <b:ButtonGroup size="SMALL">

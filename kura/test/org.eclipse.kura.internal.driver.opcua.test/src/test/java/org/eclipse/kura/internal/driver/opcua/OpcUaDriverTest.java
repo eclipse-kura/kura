@@ -72,8 +72,7 @@ public class OpcUaDriverTest {
         expectedValueType = DataType.INTEGER;
         containedValue = 10;
 
-        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType,
-                containedValue);
+        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType, containedValue);
 
         assertTrue(value.isPresent());
         assertEquals(expectedValueType, value.get().getType());
@@ -82,8 +81,7 @@ public class OpcUaDriverTest {
         expectedValueType = DataType.LONG;
         containedValue = 123456789123456L;
 
-        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType,
-                containedValue);
+        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType, containedValue);
 
         assertTrue(value.isPresent());
         assertEquals(expectedValueType, value.get().getType());
@@ -92,8 +90,7 @@ public class OpcUaDriverTest {
         expectedValueType = DataType.FLOAT;
         containedValue = 12.3f;
 
-        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType,
-                containedValue);
+        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType, containedValue);
 
         assertTrue(value.isPresent());
         assertEquals(expectedValueType, value.get().getType());
@@ -102,8 +99,7 @@ public class OpcUaDriverTest {
         expectedValueType = DataType.DOUBLE;
         containedValue = 123.4;
 
-        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType,
-                containedValue);
+        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType, containedValue);
 
         assertTrue(value.isPresent());
         assertEquals(expectedValueType, value.get().getType());
@@ -112,8 +108,7 @@ public class OpcUaDriverTest {
         expectedValueType = DataType.STRING;
         containedValue = "test";
 
-        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType,
-                containedValue);
+        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType, containedValue);
 
         assertTrue(value.isPresent());
         assertEquals(expectedValueType, value.get().getType());
@@ -122,8 +117,7 @@ public class OpcUaDriverTest {
         expectedValueType = DataType.BYTE_ARRAY;
         containedValue = "test".getBytes("utf8");
 
-        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType,
-                containedValue);
+        value = (Optional<TypedValue<?>>) TestUtil.invokePrivate(svc, methodName, expectedValueType, containedValue);
 
         assertTrue(value.isPresent());
         assertEquals(expectedValueType, value.get().getType());
@@ -174,6 +168,7 @@ public class OpcUaDriverTest {
         Map<String, Object> channelConfig = new HashMap<>();
         channelConfig.put("node.namespace.index", "1");
         channelConfig.put("node.id.type", "NUMERIC");
+        channelConfig.put("opcua.type", "DEFINED_BY_JAVA_TYPE");
         channelConfig.put("node.id", "1");
         record.setChannelConfig(channelConfig);
         records.add(record);
@@ -197,6 +192,7 @@ public class OpcUaDriverTest {
         Map<String, Object> channelConfig = new HashMap<>();
         channelConfig.put("node.namespace.index", "1");
         channelConfig.put("node.id.type", "NUMERIC");
+        channelConfig.put("opcua.type", "DEFINED_BY_JAVA_TYPE");
         channelConfig.put("node.id", "1");
         record.setChannelConfig(channelConfig);
         records.add(record);
@@ -220,6 +216,7 @@ public class OpcUaDriverTest {
         Map<String, Object> channelConfig = new HashMap<>();
         channelConfig.put("node.namespace.index", "1");
         channelConfig.put("node.id.type", "NUMERIC");
+        channelConfig.put("opcua.type", "DEFINED_BY_JAVA_TYPE");
         channelConfig.put("node.id", "1");
         record.setChannelConfig(channelConfig);
         records.add(record);
@@ -276,6 +273,7 @@ public class OpcUaDriverTest {
         ChannelRecord record = ChannelRecord.createReadRecord("ch1", DataType.INTEGER);
         Map<String, Object> channelConfig = new HashMap<>();
         channelConfig.put("node.namespace.index", "1");
+        channelConfig.put("opcua.type", "DEFINED_BY_JAVA_TYPE");
         channelConfig.put("node.id.type", "NUMERIC");
         channelConfig.put("node.id", "1");
         record.setChannelConfig(channelConfig);

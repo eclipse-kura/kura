@@ -2,6 +2,9 @@ package org.eclipse.kura.wire.graph;
 
 import org.eclipse.kura.wire.WireConfiguration;
 
+/**
+ * @since 1.4
+ */
 public class MultiportWireConfiguration extends WireConfiguration {
 
     private int emitterPort;

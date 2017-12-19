@@ -1,5 +1,8 @@
 package org.eclipse.kura.wire.graph;
 
+/**
+ * @since 1.4
+ */
 public final class Constants {
 
     public static final String WIRE_EMITTER_PORT_PROP_NAME = "emitter.port";

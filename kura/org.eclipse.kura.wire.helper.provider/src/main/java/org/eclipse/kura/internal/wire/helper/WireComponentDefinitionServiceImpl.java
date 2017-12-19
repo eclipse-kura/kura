@@ -17,7 +17,7 @@ import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
-import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.wire.graph.WireComponentDefinition;
 import org.eclipse.kura.wire.graph.WireComponentDefinitionService;
 import org.osgi.framework.BundleContext;
@@ -139,11 +139,10 @@ public class WireComponentDefinitionServiceImpl implements WireComponentDefiniti
 
         final BundleContext context = FrameworkUtil.getBundle(WireHelperServiceImpl.class).getBundleContext();
         ServiceReference<ScrService> scrServiceRef = context.getServiceReference(ScrService.class);
-        ServiceReference<ConfigurationService> configServiceRef = context
-                .getServiceReference(ConfigurationService.class);
+        ServiceReference<OCDService> ocdServiceRef = context.getServiceReference(OCDService.class);
 
         try {
-            final ConfigurationService configService = context.getService(configServiceRef);
+            final OCDService ocdService = context.getService(ocdServiceRef);
             final ScrService scrService = context.getService(scrServiceRef);
 
             final String[] services = new String[] { WIRE_COMPONENT, WIRE_RECEIVER, WIRE_EMITTER };
@@ -152,7 +151,7 @@ public class WireComponentDefinitionServiceImpl implements WireComponentDefiniti
                     .filter(component -> implementsAnyService(component, services))
                     .collect(Collectors.toMap(Component::getName, identity(), (first, second) -> second));
 
-            final Map<String, ComponentConfiguration> ocds = configService.getServiceProviderOCDs(services).stream()
+            final Map<String, ComponentConfiguration> ocds = ocdService.getServiceProviderOCDs(services).stream()
                     .collect(Collectors.toMap(ComponentConfiguration::getPid, identity(), (first, second) -> second));
 
             return componentDefinitions.entrySet().stream()
@@ -161,7 +160,7 @@ public class WireComponentDefinitionServiceImpl implements WireComponentDefiniti
 
         } finally {
             context.ungetService(scrServiceRef);
-            context.ungetService(configServiceRef);
+            context.ungetService(ocdServiceRef);
         }
 
     }

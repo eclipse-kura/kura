@@ -14,20 +14,21 @@
 package org.eclipse.kura.internal.wire.conditional;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.internal.wire.conditional.LoggingVerbosity.QUIET;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.script.Bindings;
+import javax.script.CompiledScript;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
-import org.eclipse.kura.type.StringValue;
-import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
@@ -36,6 +37,7 @@ import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.graph.EmitterPort;
 import org.eclipse.kura.wire.graph.MultiportWireSupport;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentException;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.LoggerFactory;
 
@@ -49,18 +51,18 @@ public final class Conditional implements WireReceiver, WireEmitter, Configurabl
 
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
-    private static final String DEFAULT_LOG_LEVEL = QUIET.name();
-
-    private static final String PROP_LOG_LEVEL = "log.verbosity";
-
     private volatile WireHelperService wireHelperService;
 
     private MultiportWireSupport wireSupport;
 
-    private Map<String, Object> properties;
-
     private EmitterPort thenPort;
     private EmitterPort elsePort;
+
+    private static final String LANGUAGE = "javascript";
+    private ScriptEngine scriptEngine;
+    private Bindings bindings;
+
+    private ConditionalOptions conditionalOptions;
 
     /**
      * Binds the Wire Helper Service.
@@ -96,11 +98,23 @@ public final class Conditional implements WireReceiver, WireEmitter, Configurabl
      */
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug(message.activatingLogger());
-        this.properties = properties;
+        this.conditionalOptions = new ConditionalOptions(properties);
+
         this.wireSupport = (MultiportWireSupport) this.wireHelperService.newWireSupport(this);
         final List<EmitterPort> emitterPorts = this.wireSupport.getEmitterPorts();
         this.thenPort = emitterPorts.get(0);
         this.elsePort = emitterPorts.get(1);
+
+        ScriptEngineManager engineManager = new ScriptEngineManager(null);
+        this.scriptEngine = engineManager.getEngineByName(LANGUAGE);
+
+        if (this.scriptEngine == null) {
+            throw new ComponentException("Error Getting Conditional Script Engine");
+        }
+
+        this.bindings = this.scriptEngine.createBindings();
+        this.bindings.put("logger", logger);
+
         logger.debug(message.activatingLoggerDone());
     }
 
@@ -112,7 +126,7 @@ public final class Conditional implements WireReceiver, WireEmitter, Configurabl
      */
     public void updated(final Map<String, Object> properties) {
         logger.debug(message.updatingLogger());
-        this.properties = properties;
+        this.conditionalOptions = new ConditionalOptions(properties);
         logger.debug(message.updatingLoggerDone());
     }
 
@@ -133,27 +147,24 @@ public final class Conditional implements WireReceiver, WireEmitter, Configurabl
     public void onWireReceive(final WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, message.wireEnvelopeNonNull());
 
-        final List<WireRecord> thenRecords = new ArrayList<>();
-        final Map<String, TypedValue<?>> thenProperties = new HashMap<>();
-        thenProperties.put("port", new StringValue("then"));
-        thenRecords.add(new WireRecord(thenProperties));
-        // this.thenPort.emit(wireSupport.createWireEnvelope(thenRecords));
+        ConditionalScriptInterface scriptInterface = new ConditionalScriptInterface(wireEnvelope);
+        this.bindings.put("wire", scriptInterface);
+        Boolean decision;
+        try {
+            CompiledScript compiledBooleanExpression = this.conditionalOptions
+                    .getCompiledBooleanExpression(this.scriptEngine);
+            decision = (Boolean) compiledBooleanExpression.eval(this.bindings);
 
-        final List<WireRecord> elseRecords = new ArrayList<>();
-        final Map<String, TypedValue<?>> elseProperties = new HashMap<>();
-        elseProperties.put("port", new StringValue("else"));
-        elseRecords.add(new WireRecord(elseProperties));
-        this.elsePort.emit(wireSupport.createWireEnvelope(elseRecords));
+            final List<WireRecord> newWireRecords = new ArrayList<>();
+            newWireRecords.addAll(wireEnvelope.getRecords());
+            if (decision) {
+                this.thenPort.emit(this.wireSupport.createWireEnvelope(newWireRecords));
+            } else {
+                this.elsePort.emit(this.wireSupport.createWireEnvelope(newWireRecords));
+            }
+        } catch (ScriptException e) {
 
-    }
-
-    private String getLoggingLevel() {
-        String logLevel = DEFAULT_LOG_LEVEL;
-        final Object configuredLogLevel = this.properties.get(PROP_LOG_LEVEL);
-        if (nonNull(configuredLogLevel) && configuredLogLevel instanceof String) {
-            logLevel = String.valueOf(configuredLogLevel);
         }
-        return logLevel;
     }
 
     /** {@inheritDoc} */

@@ -16,7 +16,7 @@
             name="condition"
             type="String" cardinality="0"
             required="true"
-            default="// e.g. wire.getInputRecord(0\, &quot;TOTAL_COUNT&quot;) &gt; 10;&#10;"
+            default="wire.getInputRecord(0\, &quot;TIMER&quot;) &gt; 10;&#10;"
             description="The boolean expression to be evaluated by this component when a wire envelope is
              received.">
         </AD>

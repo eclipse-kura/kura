@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,7 +8,6 @@
  *
  * Contributors:
  *  Eurotech
- *  Amit Kumar Mondal
  *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.conditional;
@@ -39,17 +38,20 @@ import org.eclipse.kura.wire.graph.MultiportWireSupport;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.wireadmin.Wire;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The Class Logger is the specific Wire Component to log a list of {@link WireRecord}s
- * as received in {@link WireEnvelope}
+ * The Class Conditional is a specific Wire Component to apply a condition
+ * on the received {@link WireEnvelope}
  */
 public final class Conditional implements WireReceiver, WireEmitter, ConfigurableComponent {
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Conditional.class);
+    private static final Logger logger = LoggerFactory.getLogger(Conditional.class);
 
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
+
+    private static final String LANGUAGE = "javascript";
 
     private volatile WireHelperService wireHelperService;
 
@@ -58,44 +60,23 @@ public final class Conditional implements WireReceiver, WireEmitter, Configurabl
     private EmitterPort thenPort;
     private EmitterPort elsePort;
 
-    private static final String LANGUAGE = "javascript";
     private ScriptEngine scriptEngine;
     private Bindings bindings;
 
     private ConditionalOptions conditionalOptions;
 
-    /**
-     * Binds the Wire Helper Service.
-     *
-     * @param wireHelperService
-     *            the new Wire Helper Service
-     */
     public void bindWireHelperService(final WireHelperService wireHelperService) {
         if (isNull(this.wireHelperService)) {
             this.wireHelperService = wireHelperService;
         }
     }
 
-    /**
-     * Unbinds the Wire Helper Service.
-     *
-     * @param wireHelperService
-     *            the new Wire Helper Service
-     */
     public void unbindWireHelperService(final WireHelperService wireHelperService) {
         if (this.wireHelperService == wireHelperService) {
             this.wireHelperService = null;
         }
     }
 
-    /**
-     * OSGi Service Component callback for activation.
-     *
-     * @param componentContext
-     *            the component context
-     * @param properties
-     *            the properties
-     */
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug(message.activatingLogger());
         this.conditionalOptions = new ConditionalOptions(properties);
@@ -118,24 +99,12 @@ public final class Conditional implements WireReceiver, WireEmitter, Configurabl
         logger.debug(message.activatingLoggerDone());
     }
 
-    /**
-     * OSGi Service Component callback for updating.
-     *
-     * @param properties
-     *            the updated properties
-     */
     public void updated(final Map<String, Object> properties) {
         logger.debug(message.updatingLogger());
         this.conditionalOptions = new ConditionalOptions(properties);
         logger.debug(message.updatingLoggerDone());
     }
 
-    /**
-     * OSGi Service Component callback for deactivation.
-     *
-     * @param componentContext
-     *            the component context
-     */
     protected void deactivate(final ComponentContext componentContext) {
         logger.debug(message.deactivatingLogger());
         // remained for debugging purposes
@@ -163,7 +132,7 @@ public final class Conditional implements WireReceiver, WireEmitter, Configurabl
                 this.elsePort.emit(this.wireSupport.createWireEnvelope(newWireRecords));
             }
         } catch (ScriptException e) {
-
+            logger.warn("Exception while performing decision.");
         }
     }
 

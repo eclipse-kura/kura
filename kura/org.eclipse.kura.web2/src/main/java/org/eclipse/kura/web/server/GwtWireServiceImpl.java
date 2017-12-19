@@ -166,7 +166,9 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         result.setWires(wireGraphConfiguration.getWireConfigurations().stream().map(config -> {
             final GwtWireConfiguration gwtConfig = new GwtWireConfiguration();
             gwtConfig.setEmitterPid(config.getEmitterPid());
+            gwtConfig.setEmitterPort(config.getEmitterPort());
             gwtConfig.setReceiverPid(config.getReceiverPid());
+            gwtConfig.setReceiverPort(config.getReceiverPort());
             return gwtConfig;
         }).collect(Collectors.toList()));
 

@@ -57,6 +57,9 @@ public interface OpcUaMessages {
     @En("Error while retrieving value type")
     public String errorRetrievingValueType();
 
+    @En("Error while retrieving OPC UA variable type")
+    public String errorRetrievingOpcuaType();
+
     @En("Error while converting the retrieved value to the defined typed")
     public String errorValueTypeConversion();
 

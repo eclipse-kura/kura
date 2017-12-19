@@ -25,12 +25,12 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.IdType;
 import org.junit.Test;
 
-
 public class OpcUaChannelDescriptorTest {
 
     private static final String NODE_ID = "node.id";
     private static final String NODE_ID_TYPE = "node.id.type";
     private static final String NODE_NAMESPACE_INDEX = "node.namespace.index";
+    private static final String VARIABLE_TYPE = "opcua.type";
 
     @Test
     public void testGetDescriptor() {
@@ -39,12 +39,15 @@ public class OpcUaChannelDescriptorTest {
         List<Tad> description = (List<Tad>) descriptor.getDescriptor();
 
         assertNotNull(description);
-        assertEquals(3, description.size());
+        assertEquals(4, description.size());
 
         assertEquals(NODE_ID, description.get(0).getName());
         assertEquals(NODE_NAMESPACE_INDEX, description.get(1).getName());
-        assertEquals(NODE_ID_TYPE, description.get(2).getName());
-        assertEquals(4, description.get(2).getOption().size());
+        assertEquals(VARIABLE_TYPE, description.get(2).getName());
+        assertEquals(16, description.get(2).getOption().size());
+
+        assertEquals(NODE_ID_TYPE, description.get(3).getName());
+        assertEquals(4, description.get(3).getOption().size());
     }
 
     @Test

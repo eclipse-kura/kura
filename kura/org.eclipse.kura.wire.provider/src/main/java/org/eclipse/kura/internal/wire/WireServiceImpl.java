@@ -186,8 +186,8 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
                     final Dictionary<?, ?> props = w.getProperties();
                     if (emitterServicePid.equals(props.get(WIREADMIN_PRODUCER_PID))
                             && receiverServicePid.equals(props.get(WIREADMIN_CONSUMER_PID))
-                            && emitterPort == (Integer) props.get(Constants.WIRE_EMITTER_PORT_PROP_NAME)
-                            && receiverPort == (Integer) props.get(Constants.WIRE_RECEIVER_PORT_PROP_NAME)) {
+                            && emitterPort == (Integer) props.get(Constants.WIRE_EMITTER_PORT_PROP_NAME.value())
+                            && receiverPort == (Integer) props.get(Constants.WIRE_RECEIVER_PORT_PROP_NAME.value())) {
                         found = true;
                         break;
                     }
@@ -217,8 +217,8 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
                 if (!found) {
                     logger.info(message.creatingWire(emitterPid, receiverPid));
                     final Dictionary<String, Object> properties = new Hashtable<>();
-                    properties.put(Constants.WIRE_EMITTER_PORT_PROP_NAME, emitterPort);
-                    properties.put(Constants.WIRE_RECEIVER_PORT_PROP_NAME, receiverPort);
+                    properties.put(Constants.WIRE_EMITTER_PORT_PROP_NAME.value(), emitterPort);
+                    properties.put(Constants.WIRE_RECEIVER_PORT_PROP_NAME.value(), receiverPort);
                     final Wire wire = this.wireAdmin.createWire(emitterServicePid, receiverServicePid, properties);
                     conf.setWire(wire);
                     logger.info(message.creatingWiresDone());
@@ -349,8 +349,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
     /** {@inheritDoc} */
     @Override
     public Set<WireConfiguration> getWireConfigurations() {
-        return getWireConfigurationsInternal().stream().map(conf -> (MultiportWireConfiguration) conf)
-                .collect(Collectors.toSet());
+        return getWireConfigurationsInternal().stream().map(conf -> conf).collect(Collectors.toSet());
     }
 
     @Override
@@ -381,8 +380,10 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
             final Map<String, Object> wireComponentProps = componentToCreate.getProperties();
             final Map<String, Object> configurationProps = configToCreate.getConfigurationProperties();
             String factoryPid = (String) configurationProps.get(SERVICE_FACTORYPID);
-            configurationProps.put(Constants.RECEIVER_PORT_COUNT_PROP_NAME, wireComponentProps.get("inputPortCount"));
-            configurationProps.put(Constants.EMITTER_PORT_COUNT_PROP_NAME, wireComponentProps.get("outputPortCount"));
+            configurationProps.put(Constants.RECEIVER_PORT_COUNT_PROP_NAME.value(),
+                    wireComponentProps.get("inputPortCount"));
+            configurationProps.put(Constants.EMITTER_PORT_COUNT_PROP_NAME.value(),
+                    wireComponentProps.get("outputPortCount"));
             this.configurationService.createFactoryConfiguration(factoryPid, configToCreate.getPid(),
                     configurationProps, false);
         }
@@ -633,7 +634,7 @@ public class WireServiceImpl implements ConfigurableComponent, WireService, Wire
 
     protected String getServicePidByKuraServicePid(String kuraServicePid) {
         try {
-            return bundleContext.getServiceReferences(WireComponent.class, null).stream()
+            return this.bundleContext.getServiceReferences(WireComponent.class, null).stream()
                     .filter(ref -> kuraServicePid.equals(ref.getProperty(KURA_SERVICE_PID)))
                     .map(ref -> (String) ref.getProperty(SERVICE_PID)).findAny().orElse(null);
         } catch (InvalidSyntaxException e) {

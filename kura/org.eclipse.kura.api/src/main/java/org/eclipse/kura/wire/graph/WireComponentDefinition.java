@@ -11,10 +11,13 @@ package org.eclipse.kura.wire.graph;
 import java.util.Map;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
+ * @noextend This class is not intended to be extended by clients.
  * @since 1.4
  */
+@ProviderType
 public class WireComponentDefinition {
 
     private String factoryPid;

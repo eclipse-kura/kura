@@ -33,8 +33,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The Class WireHelperServiceImpl is the implementation of
@@ -42,7 +40,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class WireHelperServiceImpl implements WireHelperService {
 
-    private static final Logger logger = LoggerFactory.getLogger(WireHelperServiceImpl.class);
     private static final WireMessages wireMessages = LocalizationAdapter.adapt(WireMessages.class);
 
     private volatile EventAdmin eventAdmin;
@@ -168,12 +165,12 @@ public final class WireHelperServiceImpl implements WireHelperService {
         }).map(ref -> {
             final String servicePid = (String) ref.getProperty(SERVICE_PID);
             final String kuraServicePid = (String) ref.getProperty(KURA_SERVICE_PID);
-            int receiverPortCount = getIntOrDefault(ref.getProperty(RECEIVER_PORT_COUNT_PROP_NAME),
+            int receiverPortCount = getIntOrDefault(ref.getProperty(RECEIVER_PORT_COUNT_PROP_NAME.value()),
                     wireComponent instanceof WireReceiver ? 1 : 0);
-            int emitterPortCount = getIntOrDefault(ref.getProperty(EMITTER_PORT_COUNT_PROP_NAME),
+            int emitterPortCount = getIntOrDefault(ref.getProperty(EMITTER_PORT_COUNT_PROP_NAME.value()),
                     wireComponent instanceof WireEmitter ? 1 : 0);
 
-            return new WireSupportImpl(wireComponent, servicePid, kuraServicePid, eventAdmin, receiverPortCount,
+            return new WireSupportImpl(wireComponent, servicePid, kuraServicePid, this.eventAdmin, receiverPortCount,
                     emitterPortCount);
         }).findAny().orElse(null);
     }

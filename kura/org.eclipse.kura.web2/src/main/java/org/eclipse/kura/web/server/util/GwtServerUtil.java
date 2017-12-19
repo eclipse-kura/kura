@@ -38,7 +38,6 @@ import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.service.GwtWireService;
-import org.eclipse.kura.wire.graph.WireComponentDefinition;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -457,46 +456,8 @@ public final class GwtServerUtil {
         }
         return gwtConfig;
     }
-    
-//    public static GwtConfigComponent toGwtConfigComponent(WireComponentDefinition config) {
-//        GwtConfigComponent gwtConfig = null;
-//
-//        OCD ocd = config.getComponentOCD();
-//        if (ocd != null) {
-//
-//            gwtConfig = new GwtConfigComponent();
-//            gwtConfig.setComponentId(config.getPid());
-//
-//            Map<String, Object> props = config.getConfigurationProperties();
-//            if (props != null && props.get(DRIVER_PID) != null) {
-//                gwtConfig.set(DRIVER_PID, props.get(DRIVER_PID));
-//            }
-//
-//            if (props != null && props.get(ConfigurationAdmin.SERVICE_FACTORYPID) != null) {
-//                String pid = stripPidPrefix(config.getPid());
-//                gwtConfig.setComponentName(pid);
-//                gwtConfig.setFactoryComponent(true);
-//                gwtConfig.setFactoryPid(String.valueOf(props.get(ConfigurationAdmin.SERVICE_FACTORYPID)));
-//            } else {
-//                gwtConfig.setComponentName(ocd.getName());
-//                gwtConfig.setFactoryComponent(false);
-//            }
-//
-//            gwtConfig.setComponentDescription(ocd.getDescription());
-//            if (ocd.getIcon() != null && !ocd.getIcon().isEmpty()) {
-//                Icon icon = ocd.getIcon().get(0);
-//                gwtConfig.setComponentIcon(icon.getResource());
-//            }
-//
-//            List<GwtConfigParameter> gwtParams = new ArrayList<>();
-//            gwtConfig.setParameters(gwtParams);
-//
-//            List<GwtConfigParameter> metatypeProps = getADProperties(config);
-//            gwtParams.addAll(metatypeProps);
-//        }
-//        return gwtConfig;
-//    }
 
+    @SuppressWarnings("unchecked")
     public static GwtConfigComponent toGwtConfigComponent(String pid, Object descriptor) {
         final List<Tad> ads = (List<Tad>) descriptor;
 
@@ -549,9 +510,7 @@ public final class GwtServerUtil {
         return currentCC;
     }
 
-    @SuppressWarnings("unchecked")
     public static GwtConfigComponent toGwtConfigComponent(DriverDescriptor descriptor) {
         return toGwtConfigComponent(descriptor.getPid(), descriptor.getChannelDescriptor());
     }
-
 }

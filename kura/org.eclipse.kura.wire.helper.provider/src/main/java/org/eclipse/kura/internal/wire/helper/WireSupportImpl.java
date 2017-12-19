@@ -100,7 +100,7 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
     public synchronized void consumersConnected(final Wire[] wires) {
         for (Wire w : wires) {
             try {
-                final int outputPort = (Integer) w.getProperties().get(WIRE_EMITTER_PORT_PROP_NAME);
+                final int outputPort = (Integer) w.getProperties().get(WIRE_EMITTER_PORT_PROP_NAME.value());
                 ((ReceiverPortImpl) this.emitterPorts.get(outputPort)).connectedWires.add(w);
             } catch (Exception e) {
                 logger.warn("Failed to assign outgoing wire to port", e);
@@ -129,7 +129,7 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
     public void producersConnected(final Wire[] wires) {
         for (Wire w : wires) {
             try {
-                final int receiverPort = (Integer) w.getProperties().get(WIRE_RECEIVER_PORT_PROP_NAME);
+                final int receiverPort = (Integer) w.getProperties().get(WIRE_RECEIVER_PORT_PROP_NAME.value());
                 ((ReceiverPortImpl) this.receiverPorts.get(receiverPort)).connectedWires.add(w);
             } catch (Exception e) {
                 logger.warn("Failed to assign incomimg wire to port", e);

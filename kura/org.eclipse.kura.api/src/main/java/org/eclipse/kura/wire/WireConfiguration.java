@@ -42,17 +42,13 @@ import org.osgi.service.wireadmin.WireAdmin;
 @ProviderType
 public class WireConfiguration {
 
-    /** The Wire Emitter PID. */
     private final String emitterPid;
 
-    /** The Filter. */
     @Nullable
     private String filter;
 
-    /** The Wire Receiver PID. */
     private final String receiverPid;
 
-    /** The actual {@link WireAdmin}'s {@link Wire}. */
     @Nullable
     private Wire wire;
 

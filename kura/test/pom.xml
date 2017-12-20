@@ -160,6 +160,7 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
         <module>org.eclipse.kura.protocol.modbus.test</module>
         <module>org.eclipse.kura.stress.test</module>
         <module>org.eclipse.kura.test</module>
+        <module>org.eclipse.kura.watchdog.criticaltest</module>
         <module>org.eclipse.kura.wire.component.provider.test</module>
         <module>org.eclipse.kura.wire.h2db.component.provider.test</module>
         <module>org.eclipse.kura.wire.provider.test</module>

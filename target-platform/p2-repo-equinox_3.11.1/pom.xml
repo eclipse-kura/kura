@@ -1,52 +1,51 @@
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<modelVersion>4.0.0</modelVersion>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.eclipse.kura</groupId>
-		<artifactId>target-platform</artifactId>
-		<version>3.1.1</version>
-	</parent>
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>target-platform</artifactId>
+        <version>3.1.1</version>
+    </parent>
 
-	<artifactId>p2-repo-equinox_3.11.1</artifactId>
-	<packaging>pom</packaging>
-    
+    <artifactId>p2-repo-equinox_3.11.1</artifactId>
+    <packaging>pom</packaging>
+
     <properties>
         <equinox.download.url>https://s3-us-west-2.amazonaws.com/kura-repo/R-Neon.1-201609071200/equinox-SDK-Neon.1.zip</equinox.download.url>
     </properties>
 
-	<build>
-		<plugins>
-			<plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>properties-maven-plugin</artifactId>
-            <version>1.0-alpha-2</version>
-            <executions>
-               <execution>
-                  <phase>initialize</phase>
-                  <goals>
-                     <goal>read-project-properties</goal>
-                  </goals>
-                  <configuration>
-                     <files>
-                        <file>${basedir}/../config/kura.target-platform.build.properties</file>
-                     </files>
-                  </configuration>
-               </execution>
-            </executions>
-         </plugin>
-			<plugin>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy-bundles-for-publishing</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0-alpha-2</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>${basedir}/../config/kura.target-platform.build.properties</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-bundles-for-publishing</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.dependencymanager</artifactId>
@@ -67,108 +66,197 @@
                                     <artifactId>osgi.cmpn</artifactId>
                                     <version>${osgi.cmpn.version}</version>
                                 </artifactItem>
-							</artifactItems>
-							<stripVersion>true</stripVersion>
-							<outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.eclipse.tycho.extras</groupId>
-				<artifactId>tycho-p2-extras-plugin</artifactId>
-				<version>0.26.0</version>
-				<executions>
-					<execution>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>publish-features-and-bundles</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<compress>false</compress>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.8</version>
+                                <artifactItem>
+                                    <groupId>org.eclipse.jetty</groupId>
+                                    <artifactId>jetty-http</artifactId>
+                                    <version>${org.eclipse.jetty.http.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.jetty</groupId>
+                                    <artifactId>jetty-continuation</artifactId>
+                                    <version>${org.eclipse.jetty.continuation.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.jetty</groupId>
+                                    <artifactId>jetty-io</artifactId>
+                                    <version>${org.eclipse.jetty.io.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.jetty</groupId>
+                                    <artifactId>jetty-security</artifactId>
+                                    <version>${org.eclipse.jetty.security.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.jetty</groupId>
+                                    <artifactId>jetty-server</artifactId>
+                                    <version>${org.eclipse.jetty.server.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.jetty</groupId>
+                                    <artifactId>jetty-servlet</artifactId>
+                                    <version>${org.eclipse.jetty.servlet.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.jetty</groupId>
+                                    <artifactId>jetty-util</artifactId>
+                                    <version>${org.eclipse.jetty.util.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.http.jetty</artifactId>
+                                    <version>${org.eclipse.equinox.http.jetty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.http.registry</artifactId>
+                                    <version>${org.eclipse.equinox.http.registry.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.http.servlet</artifactId>
+                                    <version>${org.eclipse.equinox.http.servlet.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                            <stripVersion>true</stripVersion>
+                            <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho.extras</groupId>
+                <artifactId>tycho-p2-extras-plugin</artifactId>
+                <version>0.26.0</version>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>publish-features-and-bundles</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <compress>false</compress>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
                 <executions>
                     <execution>
                         <id>download-equinox</id>
-                        <phase>generate-resources</phase>
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
                         <configuration>
                             <target>
-                                <mkdir dir="${project.build.directory}/download"/>
+                                <mkdir dir="${project.build.directory}/download" />
                                 <!--
-                                  - direct mirror link: http://www.eclipse.org/downloads/download.php?file=/equinox/drops/R-Neon.1-201609071200/equinox-SDK-Neon.1.zip&amp;r=1 
-                                  -->
-                                <get src="${equinox.download.url}" dest="${project.build.directory}/download/equinox.zip" usetimestamp="true" />
-                                
-                                <delete dir="${project.build.directory}/source/plugins"/>
-                                <mkdir dir="${project.build.directory}/source/plugins"/>
+                                    - direct mirror link: http://www.eclipse.org/downloads/download.php?file=/equinox/drops/R-Neon.1-201609071200/equinox-SDK-Neon.1.zip&amp;r=1
+                                -->
+                                <get src="${equinox.download.url}" dest="${project.build.directory}/download/equinox.zip"
+                                    usetimestamp="true" />
+
+                                <delete dir="${project.build.directory}/source/plugins" />
+                                <mkdir dir="${project.build.directory}/source/plugins" />
                                 <unzip src="${project.build.directory}/download/equinox.zip" dest="${project.build.directory}/source/plugins">
                                     <patternset>
-                                        <exclude name="plugins/org.eclipse.osgi.compatibility.state*.jar"/>
-                                        <exclude name="plugins/org.eclipse.equinox.*servletbridge*.jar"/>
-                                        <exclude name="plugins/org.eclipse.equinox.p2*.jar"/>
-                                        <exclude name="plugins/org.eclipse.equinox.security*.jar"/>
-                                        <exclude name="plugins/org.eclipse.equinox.console.ssh*.jar"/>
-                                        <exclude name="plugins/org.eclipse.equinox.simpleconfig*.jar"/>
-                                        
-                                        <include name="plugins/org.eclipse.equinox.launcher_*.jar"/>
-                                        <include name="plugins/org.eclipse.equinox.launcher.source_*.jar"/>
-                                        <exclude name="plugins/org.eclipse.equinox.launcher.*.jar"/>
-                                        
-                                        <include name="plugins/org.eclipse.core*.jar"/>
-                                        <include name="plugins/org.eclipse.equinox*.jar"/>
-                                        <include name="plugins/org.eclipse.osgi*.jar"/>
-                                        
-                                        <include name="plugins/org.apache.felix*.jar"/>
-                                        
-                                        <include name="plugins/javax*.jar"/>
-                                        
-                                        <include name="plugins/org.eclipse.jetty*.jar"/>
+                                        <exclude name="plugins/org.eclipse.osgi.compatibility.state*.jar" />
+                                        <exclude name="plugins/org.eclipse.equinox.*servletbridge*.jar" />
+                                        <exclude name="plugins/org.eclipse.equinox.p2*.jar" />
+                                        <exclude name="plugins/org.eclipse.equinox.security*.jar" />
+                                        <exclude name="plugins/org.eclipse.equinox.console.ssh*.jar" />
+                                        <exclude name="plugins/org.eclipse.equinox.simpleconfig*.jar" />
+                                        <exclude name="plugins/org.eclipse.equinox.http*.jar" />
+
+                                        <include name="plugins/org.eclipse.equinox.launcher_*.jar" />
+                                        <include name="plugins/org.eclipse.equinox.launcher.source_*.jar" />
+                                        <exclude name="plugins/org.eclipse.equinox.launcher.*.jar" />
+
+                                        <include name="plugins/org.eclipse.core*.jar" />
+                                        <include name="plugins/org.eclipse.equinox*.jar" />
+                                        <include name="plugins/org.eclipse.osgi*.jar" />
+
+                                        <include name="plugins/org.apache.felix*.jar" />
+
+                                        <include name="plugins/javax*.jar" />
                                     </patternset>
-                                    <mapper type="flatten"/>
+                                    <mapper type="flatten" />
                                 </unzip>
                             </target>
                         </configuration>
                     </execution>
-					<execution>
-						<id>install-equinox</id>
-						<phase>install</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<target>
-								<delete dir="../../kura/target-definition/equinox_3.11.1/" />
-								<mkdir dir="../../kura/target-definition/equinox_3.11.1/repository" />
-								<copy todir="../../kura/target-definition/equinox_3.11.1/repository">
-									<fileset dir="${project.build.directory}/repository" />
-								</copy>
-							</target>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.8.1</version>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-	
-	<profiles>
+                    <execution>
+                        <id>rename-maven-deps</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <move file="${project.build.directory}/source/plugins/org.apache.felix.dependencymanager.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.apache.felix.dependencymanager_${org.apache.felix.dependencymanager.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.apache.felix.deploymentadmin.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.apache.felix.deploymentadmin_${org.apache.felix.deploymentadmin.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.knowhowlab.osgi.monitoradmin.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.knowhowlab.osgi.monitoradmin_${org.knowhowlab.osgi.monitoradmin.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/osgi.cmpn.jar"
+                                    tofile="${project.build.directory}/source/plugins/osgi.cmpn_${osgi.cmpn.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-http.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.http_${org.eclipse.jetty.http.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-continuation.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.continuation_${org.eclipse.jetty.continuation.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-io.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.io_${org.eclipse.jetty.io.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-security.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.security_${org.eclipse.jetty.security.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-server.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.server_${org.eclipse.jetty.server.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-servlet.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.servlet_${org.eclipse.jetty.servlet.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-util.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.util_${org.eclipse.jetty.util.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.http.jetty.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.http.jetty_${org.eclipse.equinox.http.jetty.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.http.registry.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.http.registry_${org.eclipse.equinox.http.registry.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.http.servlet.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.http.servlet_${org.eclipse.equinox.http.servlet.version}.jar" />
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>install-equinox</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <delete dir="../../kura/target-definition/equinox_3.11.1/" />
+                                <mkdir dir="../../kura/target-definition/equinox_3.11.1/repository" />
+                                <copy todir="../../kura/target-definition/equinox_3.11.1/repository">
+                                    <fileset dir="${project.build.directory}/repository" />
+                                </copy>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.1</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
         <profile>
             <!-- profile for falling back to non-mirror download links -->
             <id>no-mirror</id>

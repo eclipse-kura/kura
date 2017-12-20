@@ -62,7 +62,7 @@
 		<replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.symlink}" value="${kura.symlink}"/>
 
 
-		<condition property="kura.osgi.repo" value="../target-definition/equinox_3.11.1/repository">
+		<condition property="kura.osgi.repo" value="../../target-platform/p2-repo-equinox_3.11.1/target/source">
 			<or>
 				<not>
 					<isset property="kura.osgi"/>
@@ -649,7 +649,7 @@ fi]]>
         <replace file="${project.build.directory}/${build.output.name}/kura.properties" token="{kura.symlink}" value="${kura.symlink}"/>
 
 
-    	<condition property="kura.osgi.repo" value="../target-definition/equinox_3.11.1/repository">
+    	<condition property="kura.osgi.repo" value="../../target-platform/p2-repo-equinox_3.11.1/target/source">
     		<or>
     			<not>
     				<isset property="kura.osgi"/>

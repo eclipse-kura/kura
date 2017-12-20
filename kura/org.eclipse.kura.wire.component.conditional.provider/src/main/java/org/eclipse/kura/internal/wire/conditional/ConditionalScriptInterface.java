@@ -28,7 +28,7 @@ public class ConditionalScriptInterface {
     }
 
     public Object getInputRecord(int i, String name) {
-        if (i < 0 || i > this.inputRecords.size()) {
+        if (i < 0 || i >= this.inputRecords.size()) {
             return null;
         }
         return this.inputRecords.get(i).getProperties().get(name).getValue();

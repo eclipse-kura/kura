@@ -95,9 +95,25 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
         }
     }
 
+    private void clearReceiverPorts() {
+        for (final ReceiverPort port : this.receiverPorts) {
+            ((ReceiverPortImpl) port).connectedWires.clear();
+        }
+    }
+
+    private void clearEmitterPorts() {
+        for (final EmitterPort port : this.emitterPorts) {
+            ((EmitterPortImpl) port).connectedWires.clear();
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public synchronized void consumersConnected(final Wire[] wires) {
+        clearEmitterPorts();
+        if (wires == null) {
+            return;
+        }
         for (Wire w : wires) {
             try {
                 final int outputPort = (Integer) w.getProperties().get(WIRE_EMITTER_PORT_PROP_NAME.value());
@@ -127,6 +143,10 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
     /** {@inheritDoc} */
     @Override
     public void producersConnected(final Wire[] wires) {
+        clearReceiverPorts();
+        if (wires == null) {
+            return;
+        }
         for (Wire w : wires) {
             try {
                 final int receiverPort = (Integer) w.getProperties().get(WIRE_RECEIVER_PORT_PROP_NAME.value());

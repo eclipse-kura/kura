@@ -14,6 +14,7 @@ package org.eclipse.kura.internal.wire.conditional;
 
 import java.util.List;
 
+import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireRecord;
 
@@ -31,6 +32,10 @@ public class ConditionalScriptInterface {
         if (i < 0 || i >= this.inputRecords.size()) {
             return null;
         }
-        return this.inputRecords.get(i).getProperties().get(name).getValue();
+        final TypedValue<?> typedValue = this.inputRecords.get(i).getProperties().get(name);
+        if (typedValue == null) {
+            return null;
+        }
+        return typedValue.getValue();
     }
 }

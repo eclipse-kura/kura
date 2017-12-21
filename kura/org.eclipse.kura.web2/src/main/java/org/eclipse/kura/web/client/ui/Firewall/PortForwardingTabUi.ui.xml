@@ -25,7 +25,7 @@
     <b:Container fluid="true">
         <b:Column size="MD_12">
             <firewall:ButtonBar ui:field="buttonBar"></firewall:ButtonBar>
-            <b:Row>
+            <b:Row b:id="portForwardingTable">
                 <b:Alert type="WARNING" ui:field="notification" />
                 <gwt:CellTable bordered="true" condensed="true"
                     striped="true" hover="true" height="100%" width="100%"
@@ -33,7 +33,7 @@
             </b:Row>
         </b:Column>
 
-        <b:Modal ui:field="portForwardingForm">
+        <b:Modal ui:field="portForwardingForm" b:id="portForwardingForm">
             <b:ModalBody>
                 <b:Form>
                     <b:FieldSet>

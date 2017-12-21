@@ -44,7 +44,7 @@
 
 	<b:Container fluid="true">
 		<b:Column size="MD10">
-			<b:Row>
+			<b:Row b:id="buttonBar">
 				<b:Panel>
 					<b:ButtonGroup size="SMALL">
 						<b:Button ui:field="newConnection" addStyleNames="fa fa-plus"></b:Button>
@@ -55,13 +55,13 @@
 					</b:ButtonGroup>
 				</b:Panel>
 			</b:Row>
-			<b:Row>
+			<b:Row b:id="connectionsTable">
 				<b:Well addStyleNames="{style.center-panel} connections-well" ui:field="connectionsWell">
 					<gwt:CellTable bordered="true" condensed="true"
 						striped="true" hover="true" height="100%" width="100%" ui:field="connectionsGrid" />
 				</b:Well>
 			</b:Row>
-			<b:Modal ui:field="newConnectionModal">
+			<b:Modal ui:field="newConnectionModal" b:id="newConnectionModal">
 				<b:ModalHeader addStyleNames="{style.asset-comp-modal-header}">
 				</b:ModalHeader>
 				<b:ModalBody addStyleNames="{style.asset-comp-modal-body}">

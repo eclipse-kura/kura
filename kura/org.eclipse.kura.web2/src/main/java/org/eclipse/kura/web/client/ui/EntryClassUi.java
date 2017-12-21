@@ -221,6 +221,7 @@ public class EntryClassUi extends Composite {
         initWaitModal();
         initNewComponentErrorModal();
         initExceptionReportModal();
+        contentPanelHeader.setId("contentPanelHeader");
 
         Date now = new Date();
         @SuppressWarnings("deprecation")
@@ -875,6 +876,7 @@ public class EntryClassUi extends Composite {
     private void initWaitModal() {
         waitModal = new PopupPanel(false, true);
         Icon icon = new Icon();
+        icon.setId("cog");
         icon.setType(IconType.COG);
         icon.setSize(IconSize.TIMES4);
         icon.setSpin(true);

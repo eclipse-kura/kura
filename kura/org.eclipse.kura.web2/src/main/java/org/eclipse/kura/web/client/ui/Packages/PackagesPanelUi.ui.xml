@@ -41,7 +41,7 @@
             </g:HTMLPanel>
         </b:Row>
 
-        <b:Row>
+        <b:Row b:id="marketplaceInstall">
             <b:Well size="SMALL" ui:field="marketplaceInstallWell">
                 <g:HTMLPanel>
                     <h5>Install from <a href="https://marketplace.eclipse.org/taxonomy/term/4397%2C4396/title" target="_blank">Eclipse Marketplace&trade;</a></h5>
@@ -51,7 +51,7 @@
             </b:Well>
         </b:Row>
 
-        <b:Row>
+        <b:Row b:id="packagesTable">
             <b:Well size="SMALL">
                  <b:ButtonGroup size="SMALL">
                     <b:Button ui:field="packagesInstall" addStyleNames="fa fa-plus"></b:Button>
@@ -84,8 +84,8 @@
                                             <g:FileUpload ui:field="filePath"></g:FileUpload>
                                         </b:Well>
                                         <b:ButtonGroup pull="RIGHT">
-                                            <b:Button ui:field="fileCancel">Cancel</b:Button>
-                                            <b:Button ui:field="fileSubmit">Submit</b:Button>
+                                            <b:Button ui:field="fileCancel" b:id="btnCancel1">Cancel</b:Button>
+                                            <b:Button ui:field="fileSubmit" b:id="btnSubmit1">Submit</b:Button>
                                         </b:ButtonGroup>
                                         <g:Hidden ui:field="xsrfTokenFieldFile"></g:Hidden>
                                     </b:FieldSet>
@@ -98,8 +98,8 @@
                                         <b:FormLabel addStyleNames="{style.upload-label}" for="formUrl">Enter the URL of the deployment package:</b:FormLabel>
                                         <b:TextBox b:id="formUrl" ui:field="formUrl" />
                                         <b:ButtonGroup pull="RIGHT">
-                                            <b:Button ui:field="urlCancel">Cancel</b:Button>
-                                            <b:Button ui:field="urlSubmit">Submit</b:Button>
+                                            <b:Button ui:field="urlCancel" b:id="btnCancel2">Cancel</b:Button>
+                                            <b:Button ui:field="urlSubmit" b:id="btnSubmit2">Submit</b:Button>
                                         </b:ButtonGroup>
                                         <g:Hidden ui:field="xsrfTokenFieldUrl"></g:Hidden>
                                     </b:FieldSet>
@@ -112,7 +112,7 @@
             </b:ModalBody>
         </b:Modal>
 
-        <b:Modal closable="true" dataKeyboard="true" ui:field="uploadErrorModal">
+        <b:Modal closable="true" dataKeyboard="true" ui:field="uploadErrorModal" b:id="uploadErrorModal">
             <b:ModalBody>
                 <b:Panel>
                     <b:PanelBody>
@@ -123,15 +123,15 @@
                 </b:Panel>
             </b:ModalBody>
         </b:Modal>
-        <b:Modal closable="true" dataKeyboard="true" ui:field="versionCheckModal">
+        <b:Modal closable="true" dataKeyboard="true" ui:field="versionCheckModal" b:id="versionCheckModal">
             <b:ModalBody>
                 <b:Panel>
                     <b:PanelBody>
                         <b:Well size="SMALL">
-                            <b.html:Paragraph ui:field="versionMismatchErrorText" />
-                            <b.html:Paragraph ui:field="maxKuraVersionLabel" />
-                            <b.html:Paragraph ui:field="minKuraVersionLabel" />
-                            <b.html:Paragraph ui:field="currentKuraVersionLabel" />
+                            <b.html:Paragraph ui:field="versionMismatchErrorText" b:id="versionMismatchErrorText"/>
+                            <b.html:Paragraph ui:field="maxKuraVersionLabel" b:id="maxKuraVersionLabel"/>
+                            <b.html:Paragraph ui:field="minKuraVersionLabel" b:id="minKuraVersionLabel"/>
+                            <b.html:Paragraph ui:field="currentKuraVersionLabel" b:id="currentKuraVersionLabel"/>
                         </b:Well>
                     </b:PanelBody>
                 </b:Panel>

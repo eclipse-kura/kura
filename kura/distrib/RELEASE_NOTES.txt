@@ -1,10 +1,12 @@
 Eclipse Kura - 3.1.1
 -------------------------------------------------------------------------
 Bug Fixes:
+  * #1848: Disabled the kura.primary.network.interface property.
   * #1840: [OPC-UA] Improve type conversions in OPC-UA driver
   * #1836: Jetty security issue
   * #1834: [OPC-UA] The OPC-UA driver should not specify timestamps on write requests
   * #1823: Failure to submit Wifi configuration when wifi password (PSK) ends with the $.
+  * #1818: [Emulator] Changed default file.upload.size.max to -1 in kura.properties
   * #1783: Unable to locate source code of apache-log4j-extras-1.1.jar
   * #1747: Fix build issues introduced with the exists-maven-plugin
   * #1766: Fix GSM modem detection bug

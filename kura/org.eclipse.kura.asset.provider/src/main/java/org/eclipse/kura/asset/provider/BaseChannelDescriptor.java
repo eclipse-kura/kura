@@ -20,12 +20,15 @@ import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_TYPE;
 import java.util.List;
 
 import org.eclipse.kura.asset.AssetConfiguration;
+import org.eclipse.kura.channel.ChannelType;
+import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Toption;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.AssetMessages;
+import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.util.collection.CollectionUtil;
 
 /**
@@ -66,6 +69,17 @@ public final class BaseChannelDescriptor implements ChannelDescriptor {
 
     private final List<Tad> defaultElements;
 
+    private static void addOptions(Tad target, Enum<?>[] values) {
+        final List<Option> options = target.getOption();
+        for (Enum<?> value : values) {
+            final String name = value.name();
+            final Toption option = new Toption();
+            option.setLabel(name);
+            option.setValue(name);
+            options.add(option);
+        }
+    }
+
     /**
      * Instantiates a new base asset channel descriptor.
      */
@@ -89,22 +103,9 @@ public final class BaseChannelDescriptor implements ChannelDescriptor {
         type.setDescription(s_message.type());
         type.setType(Tscalar.STRING);
         type.setRequired(true);
-        type.setDefault(s_message.read());
+        type.setDefault(ChannelType.READ.name());
 
-        final Toption oRead = new Toption();
-        oRead.setValue(s_message.read());
-        oRead.setLabel(s_message.read());
-        type.getOption().add(oRead);
-
-        final Toption oWrite = new Toption();
-        oWrite.setValue(s_message.write());
-        oWrite.setLabel(s_message.write());
-        type.getOption().add(oWrite);
-
-        final Toption oReadWrite = new Toption();
-        oReadWrite.setValue(s_message.readWrite());
-        oReadWrite.setLabel(s_message.readWrite());
-        type.getOption().add(oReadWrite);
+        addOptions(type, ChannelType.values());
 
         this.defaultElements.add(type);
 
@@ -114,42 +115,9 @@ public final class BaseChannelDescriptor implements ChannelDescriptor {
         valueType.setDescription(s_message.typeChannel());
         valueType.setType(Tscalar.STRING);
         valueType.setRequired(true);
-        valueType.setDefault(s_message.string());
+        valueType.setDefault(DataType.INTEGER.name());
 
-        final Toption oBoolean = new Toption();
-        oBoolean.setValue(s_message.booleanString());
-        oBoolean.setLabel(s_message.booleanString());
-        valueType.getOption().add(oBoolean);
-
-        final Toption oByte = new Toption();
-        oByte.setValue(s_message.byteStr());
-        oByte.setLabel(s_message.byteStr());
-        valueType.getOption().add(oByte);
-
-        final Toption oDouble = new Toption();
-        oDouble.setValue(s_message.doubleStr());
-        oDouble.setLabel(s_message.doubleStr());
-        valueType.getOption().add(oDouble);
-
-        final Toption oInteger = new Toption();
-        oInteger.setValue(s_message.integerStr());
-        oInteger.setLabel(s_message.integerStr());
-        valueType.getOption().add(oInteger);
-
-        final Toption oLong = new Toption();
-        oLong.setValue(s_message.longStr());
-        oLong.setLabel(s_message.longStr());
-        valueType.getOption().add(oLong);
-
-        final Toption oByteArray = new Toption();
-        oByteArray.setValue(s_message.byteArray());
-        oByteArray.setLabel(s_message.byteArray());
-        valueType.getOption().add(oByteArray);
-
-        final Toption oString = new Toption();
-        oString.setValue(s_message.string());
-        oString.setLabel(s_message.string());
-        valueType.getOption().add(oString);
+        addOptions(valueType, DataType.values());
 
         this.defaultElements.add(valueType);
     }

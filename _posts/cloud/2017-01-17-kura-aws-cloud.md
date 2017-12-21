@@ -104,7 +104,7 @@ The following steps should be performed on the device, this guide is based on Ku
 
         ![ssl_config]({{ site.baseurl }}/assets/images/aws/ssl_config.png)
 
-        Change the settings in the form to match the screen above, enter `changeit` as **Keystore Password** (or the password defined at step 7).
+        Change the settings in the form to match the screen above, **set Default protocol to TLSv1.2**, enter `changeit` as **Keystore Password** (or the password defined at step 7).
 
     2.  Open the Kura Web Console and enter select the **Settings** entry in the left side menu and then click on **Device SSL Certificate**, you should see this screen:
 

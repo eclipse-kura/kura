@@ -14,19 +14,19 @@
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.ssl.SslManagerService"
-         name="SslManagerService" 
+         name="SslManagerService"
          description="The SslManagerService is responsible to manage the configuration of the SSL connections.">
 
         <Icon resource="SslManagerService" size="32"/>
-        
+
         <AD id="ssl.default.protocol"
             name="ssl.default.protocol"
             type="String"
             cardinality="0"
             required="false"
-            default="TLSv1"
+            default="TLSv1.2"
             description="The protocol to use to initialize the SSLContext. If not specified, TLSv1 will be used."/>
-                        
+
         <AD id="ssl.hostname.verification"
         	name="ssl.hostname.verification"
         	type="Boolean"
@@ -34,23 +34,23 @@
         	required="false"
         	default="true"
         	description="Enable or disable hostname verification." />
-        	        	
+
         <AD id="ssl.default.trustStore"
             name="ssl.default.trustStore"
             type="String"
-            cardinality="0" 
+            cardinality="0"
             required="false"
             default="/opt/eclipse/security/cacerts"
             description="Location of the Java keystore file containing the collection of CA certificates trusted by this application process (trust store). Key store type is expected to be JKS. If not specified or the specified file does not exist, the default Java VM trust store will be used."/>
-            
-        <AD id="ssl.keystore.password"  
+
+        <AD id="ssl.keystore.password"
             name="ssl.keystore.password"
             type="Password"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="changeit" 
+            default="changeit"
             description="Keystore access password."/>
-        
+
         <AD id="ssl.default.cipherSuites"
             name="ssl.default.cipherSuites"
             type="String"
@@ -58,9 +58,9 @@
             required="false"
             default=""
             description="Comma-separated list of allosed ciphers. If not specifed, all Java VM ciphers will be allowed."/>
-            
+
     </OCD>
-    
+
     <Designate pid="org.eclipse.kura.ssl.SslManagerService">
         <Object ocdref="org.eclipse.kura.ssl.SslManagerService"/>
     </Designate>

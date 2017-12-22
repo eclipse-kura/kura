@@ -38,6 +38,8 @@ final class H2DbWireRecordFilterOptions {
 
     private static final String CONF_SQL_VIEW = "sql.view";
 
+    private static final String EMIT_ON_EMPTY_RESULT = "emit.on.empty.result";
+
     private final Map<String, Object> properties;
 
     /**
@@ -86,5 +88,14 @@ final class H2DbWireRecordFilterOptions {
             dbServicePid = pid.toString();
         }
         return dbServicePid;
+    }
+
+    boolean emitOnEmptyResult() {
+        boolean result = true;
+        final Object emitOnEmptyResult = this.properties.get(EMIT_ON_EMPTY_RESULT);
+        if (nonNull(emitOnEmptyResult) && emitOnEmptyResult instanceof Boolean) {
+            result = (Boolean) emitOnEmptyResult;
+        }
+        return result;
     }
 }

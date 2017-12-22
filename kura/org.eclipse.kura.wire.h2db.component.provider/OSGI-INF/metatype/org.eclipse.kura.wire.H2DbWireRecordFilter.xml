@@ -30,7 +30,7 @@
         	type="Integer"
         	cardinality="0"
         	required="true"
-        	default="60"
+        	default="0"
         	min="0"
         	description="This value specifies the cache validity in seconds. When cache expires, it will cause a new read in the database. A database read will be performed for every trigger received if the value is set to 0.">
         </AD>
@@ -42,6 +42,14 @@
             required="true"
             default="org.eclipse.kura.db.H2DbService"
             description="The Kura service pid of the H2 database instance to be used. The pid of the default instance is org.eclipse.kura.db.H2DbService."/>
+            
+        <AD id="emit.on.empty.result"
+            name="emit.on.empty.result"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Defines the behaviour of the component if the result of the performed query is empty. If set to true, an empty envelope will be emitted in this case, if set to false no envelopes will be emitted."/>
 
     </OCD>
     

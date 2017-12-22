@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and others
+ * Copyright (c) 2011, 2018 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,9 +12,10 @@
  *******************************************************************************/
 package org.eclipse.kura.example.gpio;
 
+import static java.util.Objects.nonNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,37 +33,62 @@ import org.eclipse.kura.gpio.KuraGPIOMode;
 import org.eclipse.kura.gpio.KuraGPIOPin;
 import org.eclipse.kura.gpio.KuraGPIOTrigger;
 import org.eclipse.kura.gpio.KuraUnavailableDeviceException;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GpioComponent implements ConfigurableComponent {
+
+    /**
+     * Inner class defined to track the CloudServices as they get added, modified or removed.
+     * Specific methods can refresh the cloudService definition and setup again the Cloud Client.
+     *
+     */
+    private final class GPIOServiceTrackerCustomizer implements ServiceTrackerCustomizer<GPIOService, GPIOService> {
+
+        @Override
+        public GPIOService addingService(final ServiceReference<GPIOService> reference) {
+            GpioComponent.this.gpioService = GpioComponent.this.bundleContext.getService(reference);
+            return GpioComponent.this.gpioService;
+        }
+
+        @Override
+        public void modifiedService(final ServiceReference<GPIOService> reference, final GPIOService service) {
+            GpioComponent.this.gpioService = GpioComponent.this.bundleContext.getService(reference);
+        }
+
+        @Override
+        public void removedService(final ServiceReference<GPIOService> reference, final GPIOService service) {
+            GpioComponent.this.gpioService = null;
+        }
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(GpioComponent.class);
 
     // Cloud Application identifier
     private static final String APP_ID = "GPIO_COMPONENT";
 
-    // Property Names
-    private static final String PROP_NAME_INPUT_READ_MODE = "gpio.input.read.mode";
+    private GpioComponentOptions gpioComponentOptions;
+    private ServiceTrackerCustomizer<GPIOService, GPIOService> gpioServiceTrackerCustomizer;
+    private ServiceTracker<GPIOService, GPIOService> gpioServiceTracker;
 
-    private static final String PROP_NAME_GPIO_PINS = "gpio.pins";
-    private static final String PROP_NAME_GPIO_DIRECTIONS = "gpio.directions";
-    private static final String PROP_NAME_GPIO_MODES = "gpio.modes";
-    private static final String PROP_NAME_GPIO_TRIGGERS = "gpio.triggers";
-
-    private static final String INPUT_READ_MODE_PIN_STATUS_LISTENER = "PIN_STATUS_LISTENER";
-    private static final String INPUT_READ_MODE_POLLING = "POLLING";
-
+    private BundleContext bundleContext;
     private GPIOService gpioService;
 
-    private Map<String, Object> properties = new HashMap<String, Object>();
-
-    private List<KuraGPIOPin> acquiredOutputPins = new ArrayList<KuraGPIOPin>();
-    private List<KuraGPIOPin> acquiredInputPins = new ArrayList<KuraGPIOPin>();
+    private List<KuraGPIOPin> acquiredOutputPins = new ArrayList<>();
+    private List<KuraGPIOPin> acquiredInputPins = new ArrayList<>();
 
     private ScheduledFuture<?> blinkTask = null;
     private ScheduledFuture<?> pollTask = null;
+
+    private boolean value;
 
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
@@ -72,21 +98,19 @@ public class GpioComponent implements ConfigurableComponent {
     //
     // ----------------------------------------------------------------
 
-    public void setGPIOService(GPIOService gpioService) {
-        this.gpioService = gpioService;
-    }
-
-    public void unsetGPIOService(GPIOService gpioService) {
-        this.gpioService = null;
-    }
-
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.debug("Activating {}", APP_ID);
+
+        this.bundleContext = componentContext.getBundleContext();
+
+        this.gpioComponentOptions = new GpioComponentOptions(properties);
+
+        this.gpioServiceTrackerCustomizer = new GPIOServiceTrackerCustomizer();
+        initGPIOServiceTracking();
 
         doUpdate(properties);
 
         logger.info("Activating {}... Done.", APP_ID);
-
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -95,11 +119,22 @@ public class GpioComponent implements ConfigurableComponent {
         stopTasks();
         releasePins();
 
+        if (nonNull(this.gpioServiceTracker)) {
+            this.gpioServiceTracker.close();
+        }
+
         this.executor.shutdownNow();
     }
 
     public void updated(Map<String, Object> properties) {
         logger.info("updated...");
+
+        this.gpioComponentOptions = new GpioComponentOptions(properties);
+
+        if (nonNull(this.gpioServiceTracker)) {
+            this.gpioServiceTracker.close();
+        }
+        initGPIOServiceTracking();
 
         doUpdate(properties);
     }
@@ -114,16 +149,10 @@ public class GpioComponent implements ConfigurableComponent {
      * Called after a new set of properties has been configured on the service
      */
     private void doUpdate(Map<String, Object> properties) {
-        // for (String s : properties.keySet()) {
-        // s_logger.info("Update - " + s + ": " + properties.get(s));
-        // }
-
-        this.properties.clear();
-        this.properties.putAll(properties);
-
         stopTasks();
         releasePins();
 
+        this.value = false;
         acquirePins();
 
         if (!acquiredOutputPins.isEmpty()) {
@@ -131,11 +160,11 @@ public class GpioComponent implements ConfigurableComponent {
         }
 
         if (!acquiredInputPins.isEmpty()) {
-            String inputReadMode = (String) properties.get(PROP_NAME_INPUT_READ_MODE);
+            String inputReadMode = this.gpioComponentOptions.getInputReadMode();
 
-            if (INPUT_READ_MODE_PIN_STATUS_LISTENER.equals(inputReadMode)) {
+            if (GpioComponentOptions.INPUT_READ_MODE_PIN_STATUS_LISTENER.equals(inputReadMode)) {
                 attachPinListeners(acquiredInputPins);
-            } else if (INPUT_READ_MODE_POLLING.equals(inputReadMode)) {
+            } else if (GpioComponentOptions.INPUT_READ_MODE_POLLING.equals(inputReadMode)) {
                 submitPollTask(500, acquiredInputPins);
             }
         }
@@ -143,52 +172,75 @@ public class GpioComponent implements ConfigurableComponent {
     }
 
     private void acquirePins() {
-        Integer[] pins = (Integer[]) this.properties.get(PROP_NAME_GPIO_PINS);
-        Integer[] directions = (Integer[]) this.properties.get(PROP_NAME_GPIO_DIRECTIONS);
-        Integer[] modes = (Integer[]) this.properties.get(PROP_NAME_GPIO_MODES);
-        Integer[] triggers = (Integer[]) this.properties.get(PROP_NAME_GPIO_TRIGGERS);
-        logger.info("______________________________");
-        logger.info("Available GPIOs on the system:");
-        Map<Integer, String> gpios = this.gpioService.getAvailablePins();
-        for (Entry<Integer, String> e : gpios.entrySet()) {
-            logger.info("#{} - [{}]", e.getKey(), e.getValue());
+        if (this.gpioService != null) {
+            logger.info("______________________________");
+            logger.info("Available GPIOs on the system:");
+            Map<Integer, String> gpios = this.gpioService.getAvailablePins();
+            for (Entry<Integer, String> e : gpios.entrySet()) {
+                logger.info("#{} - [{}]", e.getKey(), e.getValue());
+            }
+            logger.info("______________________________");
+            getPins();
         }
-        logger.info("______________________________");
+    }
+
+    private void getPins() {
+        String[] pins = this.gpioComponentOptions.getPins();
+        Integer[] directions = this.gpioComponentOptions.getDirections();
+        Integer[] modes = this.gpioComponentOptions.getModes();
+        Integer[] triggers = this.gpioComponentOptions.getTriggers();
         for (int i = 0; i < pins.length; i++) {
             try {
                 logger.info("Acquiring GPIO pin {} with params:", pins[i]);
                 logger.info("   Direction....: {}", directions[i]);
                 logger.info("   Mode.........: {}", modes[i]);
                 logger.info("   Trigger......: {}", triggers[i]);
-                KuraGPIOPin p = this.gpioService.getPinByTerminal(pins[i], getPinDirection(directions[i]),
-                        getPinMode(modes[i]), getPinTrigger(triggers[i]));
-                p.open();
-                logger.info("GPIO pin {} acquired", pins[i]);
-                if (p.getDirection() == KuraGPIODirection.OUTPUT) {
-                    acquiredOutputPins.add(p);
+                KuraGPIOPin p = getPin(pins[i], getPinDirection(directions[i]), getPinMode(modes[i]),
+                        getPinTrigger(triggers[i]));
+                if (p != null) {
+                    p.open();
+                    logger.info("GPIO pin {} acquired", pins[i]);
+                    if (p.getDirection() == KuraGPIODirection.OUTPUT) {
+                        acquiredOutputPins.add(p);
+                    } else {
+                        acquiredInputPins.add(p);
+                    }
                 } else {
-                    acquiredInputPins.add(p);
+                    logger.info("GPIO pin {} not found", pins[i]);
                 }
             } catch (IOException e) {
-                logger.error("I/O Error occurred!");
-                e.printStackTrace();
+                logger.error("I/O Error occurred!", e);
             } catch (Exception e) {
                 logger.error("got errror", e);
             }
         }
     }
 
+    private KuraGPIOPin getPin(String resource, KuraGPIODirection pinDirection, KuraGPIOMode pinMode,
+            KuraGPIOTrigger pinTrigger) {
+        KuraGPIOPin pin = null;
+        try {
+            int terminal = Integer.parseInt(resource);
+            if (terminal > 0 && terminal < 1255) {
+                pin = this.gpioService.getPinByTerminal(Integer.parseInt(resource), pinDirection, pinMode, pinTrigger);
+            }
+        } catch (NumberFormatException e) {
+            pin = this.gpioService.getPinByName(resource, pinDirection, pinMode, pinTrigger);
+        }
+        return pin;
+    }
+
     private void submitBlinkTask(long delayMs, final List<KuraGPIOPin> outputPins) {
         this.blinkTask = this.executor.scheduleWithFixedDelay(() -> {
             for (KuraGPIOPin outputPin : outputPins) {
                 try {
-                    boolean value = !outputPin.getValue();
-                    logger.info("Setting GPIO pin {} to {}", outputPin, value);
-                    outputPin.setValue(value);
+                    logger.info("Setting GPIO pin {} to {}", outputPin, this.value);
+                    outputPin.setValue(this.value);
                 } catch (KuraUnavailableDeviceException | KuraClosedDeviceException | IOException e) {
                     logException(outputPin, e);
                 }
             }
+            this.value = !this.value;
         }, 0, delayMs, TimeUnit.MILLISECONDS);
     }
 
@@ -208,8 +260,7 @@ public class GpioComponent implements ConfigurableComponent {
         for (final KuraGPIOPin pin : inputPins) {
             logger.info("Attaching Pin Listener to GPIO pin {}", pin);
             try {
-                pin.addPinStatusListener(
-                        value -> logger.info("Pin status for GPIO pin {} changed to {}", pin, value));
+                pin.addPinStatusListener(value -> logger.info("Pin status for GPIO pin {} changed to {}", pin, value));
             } catch (Exception e) {
                 logException(pin, e);
             }
@@ -256,8 +307,9 @@ public class GpioComponent implements ConfigurableComponent {
         case 1:
         case 3:
             return KuraGPIODirection.OUTPUT;
+        default:
+            return KuraGPIODirection.OUTPUT;
         }
-        return KuraGPIODirection.OUTPUT;
     }
 
     private KuraGPIOMode getPinMode(int mode) {
@@ -270,8 +322,9 @@ public class GpioComponent implements ConfigurableComponent {
             return KuraGPIOMode.OUTPUT_OPEN_DRAIN;
         case 4:
             return KuraGPIOMode.OUTPUT_PUSH_PULL;
+        default:
+            return KuraGPIOMode.OUTPUT_OPEN_DRAIN;
         }
-        return KuraGPIOMode.OUTPUT_OPEN_DRAIN;
     }
 
     private KuraGPIOTrigger getPinTrigger(int trigger) {
@@ -287,5 +340,19 @@ public class GpioComponent implements ConfigurableComponent {
         default:
             return KuraGPIOTrigger.NONE;
         }
+    }
+
+    private void initGPIOServiceTracking() {
+        String selectedGPIOServicePid = this.gpioComponentOptions.getGpioServicePid();
+        String filterString = String.format("(&(%s=%s)(kura.service.pid=%s))", Constants.OBJECTCLASS,
+                GPIOService.class.getName(), selectedGPIOServicePid);
+        Filter filter = null;
+        try {
+            filter = this.bundleContext.createFilter(filterString);
+        } catch (InvalidSyntaxException e) {
+            logger.error("Filter setup exception ", e);
+        }
+        this.gpioServiceTracker = new ServiceTracker<>(this.bundleContext, filter, this.gpioServiceTrackerCustomizer);
+        this.gpioServiceTracker.open();
     }
 }

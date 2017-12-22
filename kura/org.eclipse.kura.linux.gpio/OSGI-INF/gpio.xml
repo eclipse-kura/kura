@@ -24,5 +24,6 @@
 		policy="static"
 		bind="setSystemService"
 		unbind="unsetSystemService"
-		interface="org.eclipse.kura.system.SystemService"/>   
+		interface="org.eclipse.kura.system.SystemService"/>
+   <property name="kura.service.pid" type="String" value="org.eclipse.kura.gpio.GPIOService"/>   
 </scr:component>

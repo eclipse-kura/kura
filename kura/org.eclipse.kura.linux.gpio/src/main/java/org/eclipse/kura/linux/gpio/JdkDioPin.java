@@ -69,7 +69,7 @@ public class JdkDioPin implements KuraGPIOPin {
 
             String name = getValueByToken("name", tokens);
             String deviceType = getValueByToken("deviceType", tokens);
-            if ("gpio.GPIOPin".equals(deviceType.trim())) {
+            if (deviceType != null && "gpio.GPIOPin".equals(deviceType.trim())) {
                 KuraGPIODirection d = parseDirection(getValueByToken("direction", tokens));
                 KuraGPIOMode m = parseMode(getValueByToken("mode", tokens));
                 KuraGPIOTrigger t = parseTrigger(getValueByToken("trigger", tokens));

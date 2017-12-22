@@ -266,16 +266,17 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
         } else {
             result = Collections.unmodifiableList(new ArrayList<WireRecord>());
         }
-        this.wireSupport.emit(result);
+
+        if (!result.isEmpty() || options.emitOnEmptyResult()) {
+            this.wireSupport.emit(result);
+        }
     }
 
     private void refreshCachedRecords() {
         try {
             final List<WireRecord> tmpWireRecords = performSQLQuery();
-            if (!tmpWireRecords.isEmpty()) {
-                this.lastRecords = tmpWireRecords;
-                this.lastRefreshedTime = Calendar.getInstance(this.lastRefreshedTime.getTimeZone());
-            }
+            this.lastRecords = tmpWireRecords;
+            this.lastRefreshedTime = Calendar.getInstance(this.lastRefreshedTime.getTimeZone());
         } catch (SQLException e) {
             logger.error(message.errorFiltering(), e);
         }

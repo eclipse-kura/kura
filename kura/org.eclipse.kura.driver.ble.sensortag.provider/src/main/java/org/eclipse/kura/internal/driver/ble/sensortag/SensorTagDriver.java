@@ -160,6 +160,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
     }
 
     private void connect(TiSensorTag sensorTag) {
+        sensorTag.disconnect();
         sensorTag.connect();
         if (sensorTag.isConnected()) {
             sensorTag.enableTermometer();

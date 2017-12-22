@@ -178,6 +178,10 @@ var WireComposer = function (element) {
 	
 	this.viewport = V(this.paper.viewport)
 	
+	V(element)
+		.find('defs')[0]
+		.append(V('<clipPath id="component-clip"><rect x="-10%" y="-10%" width="110%" height="110%"></rect></clipPath>'))
+	
 	this.transform = this.transform.bind(this)
 	this.transformTransition = this.transformTransition.bind(this)
 	
@@ -211,7 +215,8 @@ WireComposer.prototype.addWireComponent = function (component) {
 			},
 			'.body' : {
 				'rx' : 6,
-				'ry' : 6
+				'ry' : 6,
+				'clip-path': 'url(#component-clip)'
 			}
 		},
 		inPorts : component.inputPortCount > 0 ? [""] : [],

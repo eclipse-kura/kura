@@ -1,6 +1,7 @@
 Eclipse Kura - 3.1.1
 -------------------------------------------------------------------------
 Bug Fixes:
+  * #1852: Fix bug on disconnection in BLE SensorTag Driver.
   * #1848: Disabled the kura.primary.network.interface property.
   * #1840: [OPC-UA] Improve type conversions in OPC-UA driver
   * #1836: Jetty security issue
@@ -29,7 +30,6 @@ Target Environments:
 Know Issues :
   * The implementation of the CryptoService performs encryption using a
     password that is hardcoded and published.
-  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
   * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
     "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
     Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)

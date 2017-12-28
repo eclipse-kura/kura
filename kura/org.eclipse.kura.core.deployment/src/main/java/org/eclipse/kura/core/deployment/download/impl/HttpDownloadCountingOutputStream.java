@@ -101,7 +101,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
 
                     testConnectionProtocol(urlConnection);
 
-                    HttpDownloadCountingOutputStream.this.is = localUrl.openStream();
+                    HttpDownloadCountingOutputStream.this.is = urlConnection.getInputStream();
 
                     String s = urlConnection.getHeaderField("Content-Length");
                     s_logger.info("Content-lenght: " + s);

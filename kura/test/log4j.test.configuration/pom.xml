@@ -24,7 +24,7 @@
 	</parent>
 
 	<artifactId>log4j.test.configuration</artifactId>
-	<version>1.0.101-SNAPSHOT</version>
+	<version>1.0.101</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>

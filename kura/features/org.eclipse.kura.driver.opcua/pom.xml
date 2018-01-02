@@ -13,7 +13,7 @@
 
 	<artifactId>org.eclipse.kura.driver.opcua</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<version>1.0.101-SNAPSHOT</version>
+	<version>1.0.101</version>
 
 	<build>
 		<plugins>

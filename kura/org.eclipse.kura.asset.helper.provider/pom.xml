@@ -22,7 +22,7 @@
 	</parent>
 
 	<artifactId>org.eclipse.kura.asset.helper.provider</artifactId>
-	<version>1.0.101-SNAPSHOT</version>
+	<version>1.0.101</version>
 	<packaging>eclipse-plugin</packaging>
 	
 	<properties>

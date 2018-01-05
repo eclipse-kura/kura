@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
 
   All rights reserved. This program and the accompanying materials
   are made available under the terms of the Eclipse Public License v1.0
@@ -146,6 +146,7 @@ Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
         <module>org.eclipse.kura.emulator.position.test</module>
         <module>org.eclipse.kura.emulator.watchdog.test</module>
         <module>org.eclipse.kura.internal.asset.cloudlet.test</module>
+        <module>org.eclipse.kura.internal.ble.test</module>
         <module>org.eclipse.kura.internal.driver.opcua.test</module>
         <module>org.eclipse.kura.internal.driver.s7plc.test</module>
         <module>org.eclipse.kura.internal.wire.test</module>

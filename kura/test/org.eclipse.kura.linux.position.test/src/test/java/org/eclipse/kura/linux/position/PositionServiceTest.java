@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
  *
  *   All rights reserved. This program and the accompanying materials
  *   are made available under the terms of the Eclipse Public License v1.0
@@ -15,7 +15,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -127,76 +126,6 @@ public class PositionServiceTest {
         assertEquals(0.0, ps.getPosition().getAltitude().getValue(), EPS);
 
         ps.deactivate(ctxMock);
-    }
-
-    @Test
-    public void testActivateDeactivate() throws IOException, InterruptedException {
-        PositionServiceImpl ps = new PositionServiceImpl();
-
-        EventAdmin eventAdminMock = mock(EventAdmin.class);
-        ps.setEventAdmin(eventAdminMock);
-
-        UsbService usbServiceMock = mock(UsbService.class);
-        ps.setUsbService(usbServiceMock);
-
-        List<UsbTtyDevice> usbDevices = new ArrayList<UsbTtyDevice>();
-        UsbTtyDevice usbDev = mock(UsbTtyDevice.class);
-        when(usbDev.getUsbPort()).thenReturn("port");
-        when(usbDev.getDeviceNode()).thenReturn("node");
-        usbDevices.add(usbDev);
-        when(usbServiceMock.getUsbTtyDevices()).thenReturn(usbDevices);
-
-        ConnectionFactory connFactoryMock = mock(ConnectionFactory.class);
-        CommConnection connMock = mock(CommConnection.class);
-        when(connFactoryMock.createConnection(anyString(), eq(1), eq(false))).thenReturn(connMock);
-        ps.setConnectionFactory(connFactoryMock);
-
-        BundleContext bundleContextMock = mock(BundleContext.class);
-        when(bundleContextMock.registerService(eq(EventHandler.class.getName()), anyObject(), anyObject()))
-                .thenReturn(null);
-
-        ComponentContext ctxMock = mock(ComponentContext.class);
-        when(ctxMock.getBundleContext()).thenReturn(bundleContextMock);
-
-        String nmeaStr = "$GPGGA,121041.000,4655.3772,N,01513.6390,E,1,06,1.7,478.3,M,44.7,M,,0000*5d\n";
-        InputStream is = new ByteArrayInputStream(nmeaStr.getBytes());
-        when(connMock.openInputStream()).thenReturn(is);
-
-        Map<String, Object> properties = new HashMap<String, Object>();
-        properties.put("enabled", true);
-        properties.put("static", false);
-        properties.put("port", "port");
-        properties.put("baudRate", 9600);
-        properties.put("stopBits", 0);
-        properties.put("parity", 0);
-        properties.put("bitsPerWord", 1);
-
-        final Object o = new Object();
-
-        doAnswer(invocation -> {
-            synchronized (o) {
-                o.notifyAll();
-            }
-
-            return null;
-        }).when(eventAdminMock).postEvent(anyObject());
-
-        ps.activate(ctxMock, properties);
-
-        // it takes some time for the event to be sent...
-        synchronized (o) {
-            o.wait(10000);
-        }
-
-        verify(eventAdminMock, times(1)).postEvent(anyObject());
-
-        assertTrue(ps.isLocked());
-        assertNotNull(ps.getNmeaPosition());
-        assertEquals(46.922953, ps.getNmeaPosition().getLatitude(), 0.000001);
-
-        ps.deactivate(ctxMock);
-
-        assertFalse(ps.isLocked());
     }
 
     @Test

@@ -60,7 +60,7 @@ body {
 	margin-right: 0 !important;
 }
 
-.panel:not(.help-panel):not(.network-interfaces-panel), .panel-header:not(.help-panel) {
+.panel:not(.help-panel):not(.network-interfaces-panel):not(.packages-dropzone-message), .panel-header:not(.help-panel) {
 	border: none !important;
 	border-radius: 0 !important;
 	box-shadow: none !important;
@@ -857,6 +857,51 @@ img.x-tree3-node-icon {
     bottom: 10px !important;
     right: 10px !important;
 }
+
+/**********************
+Packages panel dropzone START
+***********************/
+
+.packages-dropzone.active {
+    display: block;
+}
+
+.packages-dropzone {
+    position: absolute;
+    top: -50px;
+    left: -15px;
+    right: -15px;
+    height: 100vh;
+    background-color: black !important;
+    display: none;
+    opacity: 0.2;
+}
+
+.packages-dropzone-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    background-color:  transparent !important;
+    border-style: solid !important;
+    border: dashed 0.1cm !important;
+    border-color: white !important;
+    font-size: 1cm;
+    padding: 0.5cm;
+    border-radius: 0.4cm !important;
+    color:  white;
+}
+
+.packages-panel {
+    position: absolute;
+    height: 100vh;
+    width: 100%;
+    padding-right: 30px !important;
+}
+
+/**********************
+Packages panel dropzone END
+***********************/
 
 /******************************
 ***

@@ -44,7 +44,7 @@ public class BluetoothLeEddystoneDecoderImpl implements BluetoothLeEddystoneDeco
     }
 
     /**
-     * Parse EIR data from a BLE advertising report, extracting UUID, major and minor number.
+     * Parse EIR data from a BLE advertising report, extracting UID or URL.
      *
      * See Bluetooth Core 4.0; 8 EXTENDED INQUIRY RESPONSE DATA FORMAT
      *
@@ -65,7 +65,7 @@ public class BluetoothLeEddystoneDecoderImpl implements BluetoothLeEddystoneDeco
             if (b[ptr + 1] == UUID_LIST && b[ptr + 2] == EDDYSTONE_UUID[1] && b[ptr + 3] == EDDYSTONE_UUID[0]) {
 
                 BluetoothLeEddystone eddystone = new BluetoothLeEddystone();
-                short txPower = (short) b[ptr + 9];
+                short txPower = b[ptr + 9];
 
                 EddystoneFrameType frameType = EddystoneFrameType.valueOf(b[ptr + 8]);
                 if (frameType.equals(EddystoneFrameType.UID)) {

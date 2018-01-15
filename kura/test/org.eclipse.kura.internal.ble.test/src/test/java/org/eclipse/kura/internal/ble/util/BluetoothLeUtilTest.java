@@ -12,6 +12,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
@@ -19,19 +20,24 @@ import org.junit.Test;
 public class BluetoothLeUtilTest {
 
     @Test(timeout = 1000)
-    public void testKillCmd() throws IOException {
+    public void testKillCmd() throws IOException, InterruptedException {
         assumeTrue("Only run this test on Linux", System.getProperty("os.name").matches("[Ll]inux"));
+        assumeTrue("Sleep exists", new File("/bin/sleep").exists());
+        assumeTrue("Pidof exists", new File("/bin/pidof").exists());
+        assumeTrue("Kill exists", new File("/bin/kill").exists());
 
         String cmd = "sleep";
 
         ProcessBuilder pb = new ProcessBuilder(cmd, "10");
         Process proc = pb.start();
 
-        assertTrue(proc.isAlive());
+        Thread.sleep(100);
+
+        assertTrue("Process should be alive", proc.isAlive());
 
         BluetoothLeUtil.killCmd(cmd, "9");
 
-        assertFalse(proc.isAlive());
+        assertFalse("Process should have been terminated", proc.isAlive());
     }
 
 }

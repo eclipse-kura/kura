@@ -24,6 +24,8 @@ public class CloudClientRelay implements CloudClientListener {
 
     private static final int DFLT_PRIORITY = 5;
 
+    private static final String FORWARDED_MESSAGE_METRIC_NAME = "_fwd";
+
     private final CloudClient thisCloudClient;
     private final CloudClient otherCloudClient;
     private final List<CloudCatSubscription> dataSubscriptions;
@@ -38,9 +40,20 @@ public class CloudClientRelay implements CloudClientListener {
         this.controlSubscriptions = controlSubscriptions;
     }
 
+    private boolean isForwardedMessage(KuraPayload msg) {
+        final Object isForwardedMessage = msg.getMetric(FORWARDED_MESSAGE_METRIC_NAME);
+        return isForwardedMessage != null && isForwardedMessage instanceof Boolean && (Boolean) isForwardedMessage;
+    }
+
     @Override
     public void onControlMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
         try {
+            if (isForwardedMessage(msg)) {
+                logger.debug("Received already forwarded message, discarding");
+                return;
+            }
+
+            msg.addMetric(FORWARDED_MESSAGE_METRIC_NAME, true);
             this.otherCloudClient.controlPublish(appTopic, msg, qos, retain, DFLT_PRIORITY);
         } catch (KuraException e) {
             logger.warn("Failed to relay incoming control message from: {} to: {}", appTopic,
@@ -51,6 +64,12 @@ public class CloudClientRelay implements CloudClientListener {
     @Override
     public void onMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
         try {
+            if (isForwardedMessage(msg)) {
+                logger.debug("Received already forwarded message, discarding");
+                return;
+            }
+
+            msg.addMetric(FORWARDED_MESSAGE_METRIC_NAME, true);
             this.otherCloudClient.publish(appTopic, msg, qos, retain, DFLT_PRIORITY);
         } catch (KuraException e) {
             logger.warn("Failed to relay incoming data message from: {} to: {}", appTopic,

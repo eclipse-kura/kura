@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,7 +11,6 @@ package org.eclipse.kura.internal.ble.beacon;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +66,14 @@ public class BluetoothLeBeaconManagerImpl
         logger.debug("Deactivating Bluetooth Le Beacon Manager...");
     }
 
+    protected BluetoothProcess execBtdump(String interfaceName) throws IOException {
+        return BluetoothLeUtil.btdumpCmd(interfaceName, this);
+    }
+
+    protected BluetoothProcess execHcitool(String interfaceName, String... cmd) throws IOException {
+        return BluetoothLeUtil.hcitoolCmd(interfaceName, cmd, this);
+    }
+
     @Override
     public BluetoothLeBeaconScanner<BluetoothLeBeacon> newBeaconScanner(BluetoothLeAdapter adapter,
             BluetoothLeBeaconDecoder<BluetoothLeBeacon> decoder) {
@@ -110,24 +117,30 @@ public class BluetoothLeBeaconManagerImpl
     }
 
     public void startBeaconAdvertising(String interfaceName) throws KuraBluetoothCommandException {
-        logger.debug("Start Advertising : hcitool -i " + interfaceName + " " + CMD + " " + OGF_CONTROLLER_CMD + " "
-                + OCF_ADVERTISING_ENABLE_CMD + " 01");
-        logger.info("Start Advertising on interface " + interfaceName);
         String[] cmd = { CMD, OGF_CONTROLLER_CMD, OCF_ADVERTISING_ENABLE_CMD, "01" };
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Set Advertising Parameters : hcitool -i {} {}", interfaceName, String.join(" ", cmd));
+        }
+        logger.info("Start Advertising on interface {}", interfaceName);
+
         try {
-            BluetoothLeUtil.hcitoolCmd(interfaceName, cmd, this);
+            execHcitool(interfaceName, cmd);
         } catch (IOException e) {
             throw new KuraBluetoothCommandException(e, "Start bluetooth beacon advertising failed");
         }
     }
 
     public void stopBeaconAdvertising(String interfaceName) throws KuraBluetoothCommandException {
-        logger.debug("Stop Advertising : hcitool -i " + interfaceName + " " + CMD + " " + OGF_CONTROLLER_CMD + " "
-                + OCF_ADVERTISING_ENABLE_CMD + " 00");
-        logger.info("Stop Advertising on interface " + interfaceName);
         String[] cmd = { CMD, OGF_CONTROLLER_CMD, OCF_ADVERTISING_ENABLE_CMD, "00" };
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Set Advertising Parameters : hcitool -i {} {}", interfaceName, String.join(" ", cmd));
+        }
+        logger.info("Stop Advertising on interface {}", interfaceName);
+
         try {
-            BluetoothLeUtil.hcitoolCmd(interfaceName, cmd, this);
+            execHcitool(interfaceName, cmd);
         } catch (IOException e) {
             throw new KuraBluetoothCommandException(e, "Stop bluetooth beacon advertising failed");
         }
@@ -141,14 +154,16 @@ public class BluetoothLeBeaconManagerImpl
         String[] minHex = String.format("%04X", min).split(TWO_CHAR_REGEX);
         String[] maxHex = String.format("%04X", max).split(TWO_CHAR_REGEX);
 
-        logger.debug("Set Advertising Parameters : hcitool -i " + interfaceName + " " + CMD + " " + OGF_CONTROLLER_CMD
-                + " " + OCF_ADVERTISING_PARAM_CMD + " " + minHex[1] + " " + minHex[0] + " " + maxHex[1] + " "
-                + maxHex[0] + " 03 00 00 00 00 00 00 00 00 07 00");
-        logger.info("Set Advertising Parameters on interface " + interfaceName);
         String[] cmd = { CMD, OGF_CONTROLLER_CMD, OCF_ADVERTISING_PARAM_CMD, minHex[1], minHex[0], maxHex[1], maxHex[0],
                 "03", "00", "00", "00", "00", "00", "00", "00", "00", "07", "00" };
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Set Advertising Parameters : hcitool -i {} {}", interfaceName, String.join(" ", cmd));
+        }
+        logger.info("Set Advertising Parameters on interface {}", interfaceName);
+
         try {
-            BluetoothLeUtil.hcitoolCmd(interfaceName, cmd, this);
+            execHcitool(interfaceName, cmd);
         } catch (IOException e) {
             throw new KuraBluetoothCommandException(e, "Update bluetooth beacon advertising interval failed");
         }
@@ -178,11 +193,12 @@ public class BluetoothLeBeaconManagerImpl
             cmd[i + 3] = data[i];
         }
 
-        logger.debug("Set Advertising Data : hcitool -i " + interfaceName + " " + CMD + " " + OGF_CONTROLLER_CMD + " "
-                + OCF_ADVERTISING_DATA_CMD + " " + Arrays.toString(data));
-        logger.info("Set Advertising Data on interface " + interfaceName);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Set Advertising Data : hcitool -i {} {}", interfaceName, String.join(" ", cmd));
+        }
+        logger.info("Set Advertising Data on interface {}", interfaceName);
         try {
-            BluetoothLeUtil.hcitoolCmd(interfaceName, cmd, this);
+            execHcitool(interfaceName, cmd);
         } catch (IOException e) {
             throw new KuraBluetoothCommandException(e, "Update bluetooth beacon advertising data failed");
         }
@@ -207,6 +223,8 @@ public class BluetoothLeBeaconManagerImpl
     private void parseReturnString(String[] lines) throws KuraBluetoothCommandException {
         String lastLine = lines[lines.length - 1];
 
+        String command = lines[0].substring(15, 35);
+
         // The last line of hcitool cmd return contains:
         // the numbers of packets sent (1 byte)
         // the opcode (2 bytes)
@@ -216,42 +234,42 @@ public class BluetoothLeBeaconManagerImpl
 
         switch (exitCode.toLowerCase()) {
         case "00":
-            logger.debug("Command {} Succeeded.", lines[0].substring(15, 35));
+            logger.debug("Command {} Succeeded.", command);
             break;
         case "01":
             // The Unknown HCI Command error code indicates that the Controller does not understand the HCI
             // Command Packet OpCode that the Host sent.
-            logger.debug("Command {} failed. Error: Unknown HCI Command (01)", lines[0].substring(15, 35));
+            logger.debug("Command {} failed. Error: Unknown HCI Command (01)", command);
             throw new KuraBluetoothCommandException(
-                    "Command " + lines[0].substring(15, 35) + " failed. Error: Unknown HCI Command (01)");
+                    "Command " + command + " failed. Error: Unknown HCI Command (01)");
         case "03":
             // The Hardware Failure error code indicates to the Host that something in the Controller has failed
             // in a manner that cannot be described with any other error code.
-            logger.debug("Command {} failed. Error: Hardware Failure (03)", lines[0].substring(15, 35));
+            logger.debug("Command {} failed. Error: Hardware Failure (03)", command);
             throw new KuraBluetoothCommandException(
-                    "Command " + lines[0].substring(15, 35) + " failed. Error: Hardware Failure (03)");
+                    "Command " + command + " failed. Error: Hardware Failure (03)");
         case "0c":
             // The Command Disallowed error code indicates that the command requested cannot be executed because
-            // the Controller is in a state where it cannot process this command at this time.
-            logger.debug("Command {} failed. Error: Command Disallowed (0C)", lines[0].substring(15, 35));
+            // the Controller is in a state where it cannot process this command at this time. This error code is
+            // usually used when a command is run twice, so no exception is to be thrown, here.
+            logger.debug("Command {} failed. Error: Command Disallowed (0C)", command);
             break;
         case "11":
             // The Unsupported Feature Or Parameter Value error code indicates that a feature or parameter value
             // in the HCI command is not supported.
-            logger.debug("Command {} failed. Error: Unsupported Feature or Parameter Value (11)",
-                    lines[0].substring(15, 35));
+            logger.debug("Command {} failed. Error: Unsupported Feature or Parameter Value (11)", command);
             throw new KuraBluetoothCommandException(
-                    "Command " + lines[0].substring(15, 35) + " failed. Unsupported Feature or Parameter Value (11)");
+                    "Command " + command + " failed. Unsupported Feature or Parameter Value (11)");
         case "12":
             // The Invalid HCI Command Parameters error code indicates that at least one of the HCI command
             // parameters is invalid.
-            logger.debug("Command {} failed. Error: Invalid HCI Command Parameters (12)", lines[0].substring(15, 35));
+            logger.debug("Command {} failed. Error: Invalid HCI Command Parameters (12)", command);
             throw new KuraBluetoothCommandException(
-                    "Command " + lines[0].substring(15, 35) + " failed. Error: Invalid HCI Command Parameters (12)");
+                    "Command " + command + " failed. Error: Invalid HCI Command Parameters (12)");
         default:
-            logger.debug("Command {} failed. Error {}", lines[0].substring(15, 35), exitCode);
+            logger.debug("Command {} failed. Error {}", command, exitCode);
             throw new KuraBluetoothCommandException(
-                    "Command " + lines[0].substring(15, 35) + " failed. Error " + exitCode);
+                    "Command " + command + " failed. Error " + exitCode);
         }
     }
 
@@ -277,9 +295,8 @@ public class BluetoothLeBeaconManagerImpl
         if (checkStartScanCondition(interfaceName)) {
             logger.info("Starting bluetooth beacon scan on {}", interfaceName);
             try {
-                this.hcitoolProc = BluetoothLeUtil.hcitoolCmd(interfaceName,
-                        new String[] { "lescan-passive", "--duplicates" }, this);
-                this.dumpProc = BluetoothLeUtil.btdumpCmd(interfaceName, this);
+                this.hcitoolProc = execHcitool(interfaceName, "lescan-passive", "--duplicates");
+                this.dumpProc = execBtdump(interfaceName);
             } catch (IOException e) {
                 throw new KuraBluetoothCommandException(e, "Start bluetooth beacon scan failed");
             }

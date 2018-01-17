@@ -66,7 +66,8 @@ public class BluetoothLeIBeaconDecoderImpl implements BluetoothLeIBeaconDecoder 
             byte dataType = b[ptr + 1];
 
             if (dataType == (byte) 0xFF // Data-Type: Manufacturer-Specific
-                    && Arrays.equals(IBEACON_PREFIX, Arrays.copyOfRange(b, ptr + 2, ptr + 2 + IBEACON_PREFIX.length))) {
+                    && Arrays.equals(IBEACON_PREFIX, Arrays.copyOfRange(b, ptr + 2, ptr + 2 + IBEACON_PREFIX.length))
+                    && ptr > 0) {
 
                 BluetoothLeIBeacon beacon = new BluetoothLeIBeacon();
 

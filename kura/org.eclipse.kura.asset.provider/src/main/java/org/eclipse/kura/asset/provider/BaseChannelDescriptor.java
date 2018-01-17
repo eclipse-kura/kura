@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.kura.asset.provider;
 
+import static org.eclipse.kura.asset.provider.AssetConstants.LISTEN;
 import static org.eclipse.kura.asset.provider.AssetConstants.NAME;
 import static org.eclipse.kura.asset.provider.AssetConstants.TYPE;
 import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_TYPE;
@@ -120,6 +121,16 @@ public final class BaseChannelDescriptor implements ChannelDescriptor {
         addOptions(valueType, DataType.values());
 
         this.defaultElements.add(valueType);
+
+        final Tad listen = new Tad();
+        listen.setName(LISTEN.value().substring(1));
+        listen.setId(LISTEN.value());
+        listen.setDescription(s_message.listen());
+        listen.setType(Tscalar.BOOLEAN);
+        listen.setRequired(true);
+        listen.setDefault("false");
+
+        this.defaultElements.add(listen);
     }
 
     /** {@inheritDoc} */

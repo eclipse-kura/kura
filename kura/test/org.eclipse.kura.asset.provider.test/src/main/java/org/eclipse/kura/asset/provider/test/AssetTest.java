@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -42,6 +42,7 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCD;
+import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.Driver.ConnectionException;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.eclipse.kura.type.DataType;
@@ -126,6 +127,7 @@ public final class AssetTest {
         channels.put("1.CH#name", "sample.channel1.name");
         channels.put("1.CH#+type", "READ");
         channels.put("1.CH#+value.type", "INTEGER");
+        channels.put("1.CH#+listen", true);
         channels.put("1.CH#DRIVER.modbus.register", "sample.channel1.modbus.register");
         channels.put("1.CH#DRIVER.modbus.FC", "sample.channel1.modbus.FC");
         channels.put("2.CH#name", "sample.channel2.name");
@@ -192,6 +194,7 @@ public final class AssetTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testListen() throws KuraException {
+
         AtomicBoolean invoked = new AtomicBoolean(false);
 
         final ChannelListener listener = new ChannelListener() {
@@ -207,6 +210,129 @@ public final class AssetTest {
         asset.registerChannelListener("1.CH", listener);
 
         assertTrue(invoked.get());
+    }
+
+    /**
+     * It should not be possible to attach listeners to non listenable channels.
+     */
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testListenOnNonListenableChannel() {
+        final ChannelListener listener = new ChannelListener() {
+
+            @Override
+            public void onChannelEvent(ChannelEvent event) {
+                fail("channel listener called for non listenable channel");
+            }
+        };
+
+        try {
+            asset.registerChannelListener("2.CH", listener);
+            fail("channel listener attached to non listenable channel");
+        } catch (KuraException e) {
+            assertEquals(KuraErrorCode.OPERATION_NOT_SUPPORTED, e.getCode());
+        }
+    }
+
+    /**
+     * Listeners should be removed from the driver when it is detached from the asset and added when it is attached.
+     */
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testListenerAttachOnDriverChange() throws KuraException {
+        final Driver driver = ((BaseAsset) asset).getDriver();
+
+        final ArrayList<Boolean> attachSequence = new ArrayList<>();
+
+        final ChannelListener listener = new ChannelListener() {
+
+            @Override
+            public void onChannelEvent(ChannelEvent event) {
+                if ("unregister".equals(event.getChannelRecord().getChannelName())) {
+                    attachSequence.add(false);
+                } else {
+                    attachSequence.add(true);
+                }
+            }
+        };
+
+        asset.registerChannelListener("1.CH", listener);
+        assertEquals(Arrays.asList(true), attachSequence);
+
+        ((BaseAsset) asset).unsetDriver();
+        assertEquals(Arrays.asList(true, false), attachSequence);
+
+        ((BaseAsset) asset).setDriver(driver);
+        assertEquals(Arrays.asList(true, false, false, true), attachSequence);
+    }
+
+    /**
+     * It should be possible to add listeners to an asset even if the driver is not attached, the asset should attach
+     * them later on when the driver is tracked
+     */
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testAttachListenerWhitoutDriver() throws KuraException {
+        final Driver driver = ((BaseAsset) asset).getDriver();
+
+        final ArrayList<Boolean> attachSequence = new ArrayList<>();
+
+        final ChannelListener listener = new ChannelListener() {
+
+            @Override
+            public void onChannelEvent(ChannelEvent event) {
+                if ("unregister".equals(event.getChannelRecord().getChannelName())) {
+                    attachSequence.add(false);
+                } else {
+                    attachSequence.add(true);
+                }
+            }
+        };
+
+        ((BaseAsset) asset).unsetDriver();
+
+        asset.registerChannelListener("1.CH", listener);
+        assertEquals(Arrays.asList(), attachSequence);
+
+        asset.registerChannelListener("1.CH", listener);
+        assertEquals(Arrays.asList(), attachSequence);
+
+        ((BaseAsset) asset).setDriver(driver);
+        assertEquals(Arrays.asList(false, true), attachSequence);
+    }
+
+    /**
+     * The same channel listener should not be attached multiple times.
+     */
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testShouldNotReattachSameListener() throws KuraException {
+
+        final ArrayList<Boolean> attachSequence = new ArrayList<>();
+
+        final ChannelListener listener = new ChannelListener() {
+
+            @Override
+            public void onChannelEvent(ChannelEvent event) {
+                if ("unregister".equals(event.getChannelRecord().getChannelName())) {
+                    attachSequence.add(false);
+                } else {
+                    attachSequence.add(true);
+                }
+            }
+        };
+
+        asset.registerChannelListener("1.CH", listener);
+        assertEquals(Arrays.asList(true), attachSequence);
+
+        asset.registerChannelListener("1.CH", listener);
+        assertEquals(Arrays.asList(true), attachSequence);
+
+        asset.registerChannelListener("1.CH", listener);
+        assertEquals(Arrays.asList(true), attachSequence);
+
+        asset.registerChannelListener("1.CH", listener);
+        assertEquals(Arrays.asList(true), attachSequence);
     }
 
     /**
@@ -369,7 +495,7 @@ public final class AssetTest {
 
         List<AD> ads = ocd.getAD();
         assertNotNull(ads);
-        assertEquals(10, ads.size()); // description, driver, 8 from BaseChannelDescriptor and StubChannelDescriptor
+        assertEquals(12, ads.size()); // description, driver, 8 from BaseChannelDescriptor and StubChannelDescriptor
 
         assertEquals("asset.desc", ads.get(0).getId());
         assertEquals("driver.pid", ads.get(1).getId());

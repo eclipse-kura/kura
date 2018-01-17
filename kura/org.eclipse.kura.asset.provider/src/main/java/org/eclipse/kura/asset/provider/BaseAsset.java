@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,21 +16,18 @@ package org.eclipse.kura.asset.provider;
 
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.asset.provider.AssetConstants.ASSET_DESC_PROP;
-import static org.eclipse.kura.asset.provider.AssetConstants.ASSET_DRIVER_PROP;
 import static org.eclipse.kura.channel.ChannelFlag.FAILURE;
 import static org.eclipse.kura.channel.ChannelType.READ;
 import static org.eclipse.kura.channel.ChannelType.READ_WRITE;
 import static org.eclipse.kura.channel.ChannelType.WRITE;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -120,7 +117,7 @@ import org.slf4j.LoggerFactory;
 public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     /** Configuration PID Property. */
-    private static final String CONF_PID = "org.eclipse.kura.asset";
+    protected static final String CONF_PID = "org.eclipse.kura.asset";
 
     private static final Logger logger = LoggerFactory.getLogger(BaseAsset.class);
 
@@ -130,16 +127,13 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     private AssetConfiguration assetConfiguration;
 
     /** Container of channel listeners registered by this Asset. */
-    private final Set<ChannelListener> channelListeners;
+    protected final Set<ChannelListenerRegistration> channelListeners = new HashSet<>();
 
     private AssetOptions assetOptions;
 
     private ComponentContext context;
 
     private volatile Driver driver;
-
-    /** Synchronization Monitor for driver specific operations. */
-    private final Lock monitor;
 
     /** The configurable properties of this service. */
     private Map<String, Object> properties;
@@ -151,14 +145,6 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     private boolean hasReadChannels;
 
     private String kuraServicePid;
-
-    /**
-     * Instantiates a new asset instance.
-     */
-    public BaseAsset() {
-        this.channelListeners = new CopyOnWriteArraySet<>();
-        this.monitor = new ReentrantLock();
-    }
 
     /**
      * OSGi service component callback while activation.
@@ -198,26 +184,15 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      */
     protected void deactivate(final ComponentContext context) {
         logger.debug(message.deactivating());
-        this.monitor.lock();
-        try {
+        synchronized (this) {
             if (this.driver != null) {
-                try {
-                    for (final ChannelListener listener : channelListeners) {
-                        this.driver.unregisterChannelListener(listener);
-                    }
-                } catch (final ConnectionException ce) {
-                    logger.warn(message.errorDriverDisconnection(), ce);
-                }
                 try {
                     this.driver.disconnect();
                 } catch (final ConnectionException e) {
                     logger.error(message.errorDriverDisconnection(), e);
                 }
             }
-        } finally {
-            this.monitor.unlock();
         }
-        this.driver = null;
         if (this.driverServiceTracker != null) {
             this.driverServiceTracker.close();
         }
@@ -298,14 +273,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     public synchronized void setDriver(Driver driver) {
         this.driver = driver;
-        if (preparedRead != null) {
-            try {
-                preparedRead.close();
-            } catch (Exception e) {
-                logger.warn(message.errorClosingPreparingRead(), e);
-            }
-            preparedRead = null;
-        }
+        tryClosePreparedRead();
         if (driver != null) {
             try {
                 updateExistingProperties(driver);
@@ -315,7 +283,14 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             List<ChannelRecord> readRecords = getAllReadRecords();
             hasReadChannels = !readRecords.isEmpty();
             tryPrepareRead(readRecords);
+            tryUpdateChannelListeners();
         }
+    }
+
+    public synchronized void unsetDriver() {
+        tryClosePreparedRead();
+        detachAllListeners();
+        this.driver = null;
     }
 
     public Driver getDriver() {
@@ -329,29 +304,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         requireNonNull(this.properties, message.propertiesNonNull());
         final String componentName = this.properties.get(ConfigurationService.KURA_SERVICE_PID).toString();
 
-        final Tocd mainOcd = new Tocd();
-        mainOcd.setId(getFactoryPid());
-        mainOcd.setName(message.ocdName());
-        mainOcd.setDescription(message.ocdDescription());
-
-        final Tad assetDescriptionAd = new Tad();
-        assetDescriptionAd.setId(ASSET_DESC_PROP.value());
-        assetDescriptionAd.setName(ASSET_DESC_PROP.value());
-        assetDescriptionAd.setCardinality(0);
-        assetDescriptionAd.setType(Tscalar.STRING);
-        assetDescriptionAd.setDescription(message.description());
-        assetDescriptionAd.setRequired(false);
-
-        final Tad driverNameAd = new Tad();
-        driverNameAd.setId(ASSET_DRIVER_PROP.value());
-        driverNameAd.setName(ASSET_DRIVER_PROP.value());
-        driverNameAd.setCardinality(0);
-        driverNameAd.setType(Tscalar.STRING);
-        driverNameAd.setDescription(message.driverName());
-        driverNameAd.setRequired(true);
-
-        mainOcd.addAD(assetDescriptionAd);
-        mainOcd.addAD(driverNameAd);
+        final Tocd mainOcd = getOCD();
 
         final Map<String, Object> props = CollectionUtil.newHashMap();
         for (final Map.Entry<String, Object> entry : this.properties.entrySet()) {
@@ -486,18 +439,17 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
         final List<ChannelRecord> channelRecords;
 
-        this.monitor.lock();
-        try {
-            if (preparedRead != null) {
-                channelRecords = preparedRead.execute();
-            } else {
-                channelRecords = getAllReadRecords();
-                driver.read(channelRecords);
+        synchronized (this) {
+            try {
+                if (preparedRead != null) {
+                    channelRecords = preparedRead.execute();
+                } else {
+                    channelRecords = getAllReadRecords();
+                    driver.read(channelRecords);
+                }
+            } catch (final ConnectionException ce) {
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, ce);
             }
-        } catch (final ConnectionException ce) {
-            throw new KuraException(KuraErrorCode.CONNECTION_FAILED, ce);
-        } finally {
-            this.monitor.unlock();
         }
 
         logger.debug(message.readingChannelsDone());
@@ -534,13 +486,12 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         }
 
         if (!validRecords.isEmpty()) {
-            this.monitor.lock();
-            try {
-                this.driver.read(validRecords);
-            } catch (final ConnectionException ce) {
-                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, ce);
-            } finally {
-                this.monitor.unlock();
+            synchronized (this) {
+                try {
+                    this.driver.read(validRecords);
+                } catch (final ConnectionException ce) {
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, ce);
+                }
             }
         }
         logger.debug(message.readingChannelsDone());
@@ -553,35 +504,34 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     /** {@inheritDoc} */
     @Override
-    public void registerChannelListener(final String channelName, final ChannelListener channelListener)
+    public synchronized void registerChannelListener(final String channelName, final ChannelListener channelListener)
             throws KuraException {
         requireNonNull(channelName, message.channelNameNonNull());
         requireNonNull(channelListener, message.listenerNonNull());
-        requireNonNull(this.driver, message.driverNonNull());
-
-        if (channelListeners.contains(channelListener)) {
-            return;
-        }
 
         logger.debug(message.registeringListener());
         final Map<String, Channel> channels = this.assetConfiguration.getAssetChannels();
 
-        final Channel channel = channels.get(channelName.trim());
+        final Channel channel = channels.get(channelName);
 
         if (channel == null) {
             throw new IllegalArgumentException(message.channelNameNotFound());
         }
 
-        this.monitor.lock();
-        try {
-            this.driver.registerChannelListener(channel.getConfiguration(), channelListener);
-            this.channelListeners.add(channelListener);
-        } catch (final ConnectionException ce) {
-            throw new KuraException(KuraErrorCode.CONNECTION_FAILED, ce);
-        } finally {
-            this.monitor.unlock();
+        final ChannelListenerRegistration reg = new ChannelListenerRegistration(channel.getName(), channelListener);
+
+        if (channelListeners.contains(reg)) {
+            return;
         }
-        logger.debug(message.registeringListenerDone());
+        if (!channel.isListenable()) {
+            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, message.errorChannelNotListenable());
+        }
+
+        this.channelListeners.add(reg);
+
+        if (this.driver != null) {
+            tryAttachListener(channel, reg);
+        }
     }
 
     /**
@@ -611,25 +561,21 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     /** {@inheritDoc} */
     @Override
-    public void unregisterChannelListener(final ChannelListener channelListener) throws KuraException {
+    public synchronized void unregisterChannelListener(final ChannelListener channelListener) throws KuraException {
         requireNonNull(channelListener, message.listenerNonNull());
-        requireNonNull(this.driver, message.driverNonNull());
 
-        logger.debug(message.unregisteringListener());
-        this.monitor.lock();
-        try {
-            if (this.channelListeners.contains(channelListener)) {
-                try {
-                    this.driver.unregisterChannelListener(channelListener);
-                } catch (final ConnectionException ce) {
-                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, ce);
-                }
+        final Iterator<ChannelListenerRegistration> i = this.channelListeners.iterator();
+
+        while (i.hasNext()) {
+            final ChannelListenerRegistration reg = i.next();
+            if (reg.listener != channelListener) {
+                continue;
             }
-        } finally {
-            this.monitor.unlock();
+            if (this.driver != null) {
+                tryDetachListener(reg);
+            }
+            i.remove();
         }
-        this.channelListeners.remove(channelListener);
-        logger.debug(message.unregisteringListenerDone());
     }
 
     private synchronized void tryPrepareRead(List<ChannelRecord> readRecords) {
@@ -674,15 +620,124 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         }
 
         if (!validRecords.isEmpty()) {
-            this.monitor.lock();
-            try {
-                this.driver.write(validRecords);
-            } catch (final ConnectionException ce) {
-                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, ce);
-            } finally {
-                this.monitor.unlock();
+            synchronized (this) {
+                try {
+                    this.driver.write(validRecords);
+                } catch (final ConnectionException ce) {
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, ce);
+                }
             }
         }
         logger.debug(message.writingDone());
+    }
+
+    private void tryClosePreparedRead() {
+        if (preparedRead != null) {
+            try {
+                preparedRead.close();
+            } catch (Exception e) {
+                logger.warn(message.errorClosingPreparingRead(), e);
+            }
+            preparedRead = null;
+        }
+    }
+
+    protected void tryAttachListener(Channel channel, ChannelListenerRegistration registration) {
+        try {
+            logger.debug(message.registeringListener());
+            this.driver.registerChannelListener(channel.getConfiguration(), registration.listener);
+            logger.debug(message.registeringListenerDone());
+        } catch (Exception e) {
+            logger.warn(message.errorRegisteringChannelListener(), e);
+        }
+    }
+
+    protected void tryDetachListener(ChannelListenerRegistration registration) {
+        try {
+            logger.debug(message.unregisteringListener());
+            this.driver.unregisterChannelListener(registration.listener);
+            logger.debug(message.unregisteringListenerDone());
+        } catch (Exception e) {
+            logger.warn(message.errorUnregisteringChannelListener(), e);
+        }
+    }
+
+    protected void detachAllListeners() {
+
+        final Iterator<ChannelListenerRegistration> i = channelListeners.iterator();
+        while (i.hasNext()) {
+            tryDetachListener(i.next());
+        }
+    }
+
+    protected void removeAllListeners() {
+
+        final Iterator<ChannelListenerRegistration> i = channelListeners.iterator();
+        while (i.hasNext()) {
+            tryDetachListener(i.next());
+            i.remove();
+        }
+    }
+
+    protected void tryUpdateChannelListeners() {
+        if (this.driver == null) {
+            return;
+        }
+        if (this.assetConfiguration == null) {
+            return;
+        }
+        detachAllListeners();
+        final Map<String, Channel> channels = this.assetConfiguration.getAssetChannels();
+        final Iterator<ChannelListenerRegistration> i = this.channelListeners.iterator();
+        while (i.hasNext()) {
+            final ChannelListenerRegistration reg = i.next();
+            final Channel channel = channels.get(reg.channelName);
+            if (channel == null || !channel.isListenable()) {
+                i.remove();
+            } else {
+                tryAttachListener(channel, reg);
+            }
+        }
+    }
+
+    protected Tocd getOCD() {
+        return new BaseAssetOCD();
+    }
+
+    protected static class ChannelListenerRegistration {
+
+        private final String channelName;
+        private final ChannelListener listener;
+
+        public ChannelListenerRegistration(String channelName, ChannelListener listener) {
+            this.channelName = channelName;
+            this.listener = listener;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((channelName == null) ? 0 : channelName.hashCode());
+            result = prime * result + ((listener == null) ? 0 : listener.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            ChannelListenerRegistration other = (ChannelListenerRegistration) obj;
+            if (channelName == null) {
+                if (other.channelName != null)
+                    return false;
+            } else if (!channelName.equals(other.channelName))
+                return false;
+            return other.listener == this.listener;
+        }
     }
 }

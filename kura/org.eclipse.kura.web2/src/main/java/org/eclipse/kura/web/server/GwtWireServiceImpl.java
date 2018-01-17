@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,9 +12,6 @@
  *
  *******************************************************************************/
 package org.eclipse.kura.web.server;
-
-import static org.eclipse.kura.asset.provider.AssetConstants.ASSET_DESC_PROP;
-import static org.eclipse.kura.asset.provider.AssetConstants.ASSET_DRIVER_PROP;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,8 +29,10 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.configuration.metatype.Option;
+import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.driver.descriptor.DriverDescriptor;
 import org.eclipse.kura.driver.descriptor.DriverDescriptorService;
+import org.eclipse.kura.internal.wire.asset.WireAssetOCD;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
@@ -61,6 +60,8 @@ import org.slf4j.LoggerFactory;
  */
 public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implements GwtWireService {
 
+    private static final GwtConfigComponent WIRE_ASSET_OCD = GwtServerUtil.toGwtConfigComponent(
+            new ComponentConfigurationImpl("org.eclipse.kura.wire.WireAsset", new WireAssetOCD(), new HashMap<>()));
     private static final Logger logger = LoggerFactory.getLogger(GwtWireServiceImpl.class);
     private static final long serialVersionUID = -6577843865830245755L;
 
@@ -254,25 +255,8 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 
     @Deprecated
     private GwtConfigComponent getWireAssetDefinition() { // TODO provide a metatype for WireAsset
-        final GwtConfigComponent result = new GwtConfigComponent();
-        result.setComponentId("org.eclipse.kura.wire.WireAsset");
 
-        final GwtConfigParameter assetDesc = new GwtConfigParameter();
-        assetDesc.setId(ASSET_DESC_PROP.value());
-        assetDesc.setName(ASSET_DESC_PROP.value());
-        assetDesc.setCardinality(0);
-        assetDesc.setType(GwtConfigParameterType.STRING);
-
-        final GwtConfigParameter driverPid = new GwtConfigParameter();
-        driverPid.setId(ASSET_DRIVER_PROP.value());
-        driverPid.setName(ASSET_DRIVER_PROP.value());
-        driverPid.setCardinality(0);
-        driverPid.setType(GwtConfigParameterType.STRING);
-
-        result.getParameters().add(assetDesc);
-        result.getParameters().add(driverPid);
-
-        return result;
+        return WIRE_ASSET_OCD;
     }
 
     private void fillWireComponentDefinitions(List<GwtWireComponentDescriptor> resultDescriptors,

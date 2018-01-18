@@ -12,11 +12,11 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 import org.eclipse.kura.ble.ibeacon.BluetoothLeIBeacon;
 import org.junit.Test;
-
 
 public class BluetoothLeIBeaconEncoderDecoderImplTest {
 
@@ -42,7 +42,7 @@ public class BluetoothLeIBeaconEncoderDecoderImplTest {
         svc.deactivate(null);
     }
 
-    // @Test
+    @Test
     public void testEncodeDecode() {
         BluetoothLeIBeaconEncoderImpl encoder = new BluetoothLeIBeaconEncoderImpl();
         BluetoothLeIBeaconDecoderImpl decoder = new BluetoothLeIBeaconDecoderImpl();
@@ -55,14 +55,13 @@ public class BluetoothLeIBeaconEncoderDecoderImplTest {
         beacon.setLeLimited(true);
         beacon.setMajor((short) 5);
         beacon.setMinor((short) 2);
-        beacon.setRssi(10);
+        beacon.setRssi(0);
         beacon.setTxPower((short) 50);
         beacon.setUuid(UUID.fromString("11111111-1111-1111-1111-111111111111"));
 
         byte[] encoded = encoder.encode(beacon);
 
-        // this doesn't work, unfortunately
-        BluetoothLeIBeacon decoded = decoder.decode(encoded);
+        BluetoothLeIBeacon decoded = decoder.decode(Arrays.copyOfRange(encoded, 1, encoded.length));
 
         compare(beacon, decoded);
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,7 +14,6 @@ package org.eclipse.kura.web.client.ui;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.LabelComparator;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
@@ -67,7 +67,7 @@ public abstract class AbstractServicesUi extends Composite {
     protected static final Logger errorLogger = Logger.getLogger("ErrorLogger");
 
     protected static final Messages MSGS = GWT.create(Messages.class);
-    private static final DropdownLabelComparator DROPDOWN_LABEL_COMPARATOR = new DropdownLabelComparator();
+    protected static final LabelComparator<String> DROPDOWN_LABEL_COMPARATOR = new LabelComparator<>();
 
     protected GwtConfigComponent configurableComponent;
 
@@ -732,82 +732,6 @@ public abstract class AbstractServicesUi extends Composite {
             }
         }
         return null;
-    }
-
-    private enum ComparatorState {
-        COMPARE_STRING,
-        COMPARE_NUMBER,
-    }
-
-    private static class DropdownLabelComparator implements Comparator<Entry<String, String>> {
-
-        private int getNumberEnd(String s, int index) {
-
-            while (index < s.length()) {
-                if (!Character.isDigit(s.charAt(index))) {
-                    return index;
-                }
-                index++;
-            }
-
-            return index;
-        }
-
-        @Override
-        public int compare(Entry<String, String> e1, Entry<String, String> e2) {
-            String o1 = e1.getKey();
-            String o2 = e2.getKey();
-
-            ComparatorState state = ComparatorState.COMPARE_STRING;
-            int i1 = 0;
-            int i2 = 0;
-
-            while (i1 < o1.length() && i2 < o2.length()) {
-                final char c1 = o1.charAt(i1);
-                final char c2 = o2.charAt(i2);
-
-                if (state == ComparatorState.COMPARE_STRING) {
-
-                    if (Character.isDigit(c1) && Character.isDigit(c2)) {
-                        state = ComparatorState.COMPARE_NUMBER;
-                        continue;
-                    }
-
-                    if (c1 < c2) {
-                        return -1;
-                    }
-                    if (c1 > c2) {
-                        return 1;
-                    }
-
-                    i1++;
-                    i2++;
-
-                } else {
-
-                    final int s1 = i1;
-                    final int s2 = i2;
-
-                    i1 = getNumberEnd(o1, s1);
-                    i2 = getNumberEnd(o2, s2);
-
-                    int n1 = Integer.parseInt(o1.substring(s1, i1));
-                    int n2 = Integer.parseInt(o2.substring(s2, i2));
-
-                    if (n1 < n2) {
-                        return -1;
-                    }
-                    if (n1 > n2) {
-                        return 1;
-                    }
-
-                    state = ComparatorState.COMPARE_STRING;
-                }
-            }
-
-            return 0;
-        }
-
     }
 
     protected interface ValidationErrorConsumer {

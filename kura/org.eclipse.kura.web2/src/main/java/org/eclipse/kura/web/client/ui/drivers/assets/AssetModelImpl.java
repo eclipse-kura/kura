@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,18 +12,23 @@
 package org.eclipse.kura.web.client.ui.drivers.assets;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.kura.web.client.util.LabelComparator;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 
 public class AssetModelImpl implements AssetModel {
+
+    public static final LabelComparator<LegacyChannelModel> CHANNEL_LABEL_COMPARATOR = new LabelComparator<>();
 
     private GwtConfigComponent assetConfiguration;
     private GwtConfigComponent channelDescriptor;
@@ -107,9 +112,15 @@ public class AssetModelImpl implements AssetModel {
             }
             model.parameters[channelIndexes.get(propertyName)] = param;
         }
+        ArrayList<Entry<String, LegacyChannelModel>> sortedModels = new ArrayList<>(models.entrySet());
+        Collections.sort(sortedModels, CHANNEL_LABEL_COMPARATOR);
+        List<LegacyChannelModel> sortedLegacyChannelModels = new ArrayList<>();
+        for (Entry<String, LegacyChannelModel> entry : sortedModels) {
+            sortedLegacyChannelModels.add(entry.getValue());
+        }
 
         this.channelModels.clear();
-        this.channelModels.addAll(models.values());
+        this.channelModels.addAll(sortedLegacyChannelModels);
     }
 
     @Override

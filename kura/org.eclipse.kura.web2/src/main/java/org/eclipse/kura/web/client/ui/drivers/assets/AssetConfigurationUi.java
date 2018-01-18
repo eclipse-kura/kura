@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,6 +22,7 @@ package org.eclipse.kura.web.client.ui.drivers.assets;
 import static org.eclipse.kura.web.shared.AssetConstants.CHANNEL_PROPERTY_SEPARATOR;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -319,11 +320,14 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     private Column<ChannelModel, String> getSelectionInputColumn(final GwtConfigParameter param, boolean isReadOnly) {
         final String id = param.getId();
         final Map<String, String> labelsToValues = param.getOptions();
+        ArrayList<Entry<String, String>> sortedLabelsToValues = new ArrayList<>(labelsToValues.entrySet());
+        Collections.sort(sortedLabelsToValues, DROPDOWN_LABEL_COMPARATOR);
+        final ArrayList<String> labels = new ArrayList<>();
         final Map<String, String> valuesToLabels = new HashMap<>();
-        for (Entry<String, String> entry : labelsToValues.entrySet()) {
+        for (Entry<String, String> entry : sortedLabelsToValues) {
+            labels.add(entry.getKey());
             valuesToLabels.put(entry.getValue(), entry.getKey());
         }
-        final ArrayList<String> labels = new ArrayList<>(labelsToValues.keySet());
         final SelectionCell cell = new SelectionCell(new ArrayList<>(labels));
         final Column<ChannelModel, String> result = new Column<ChannelModel, String>(cell) {
 

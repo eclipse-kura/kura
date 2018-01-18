@@ -17,6 +17,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -310,6 +311,8 @@ public final class CloudPublisher implements WireReceiver, CloudClientListener, 
     private KuraPayload buildKuraPayload(final WireRecord wireRecord) {
         requireNonNull(wireRecord, message.wireRecordNonNull());
         final KuraPayload kuraPayload = new KuraPayload();
+        
+        kuraPayload.setTimestamp(new Date());
 
         for (final Entry<String, TypedValue<?>> entry : wireRecord.getProperties().entrySet()) {
             kuraPayload.addMetric(entry.getKey(), entry.getValue().getValue());

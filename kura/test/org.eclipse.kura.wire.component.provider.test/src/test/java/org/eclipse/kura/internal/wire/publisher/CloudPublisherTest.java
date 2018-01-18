@@ -119,7 +119,7 @@ public class CloudPublisherTest {
                     KuraPayload payload = invocation.getArgumentAt(1, KuraPayload.class);
 
                     assertNull(payload.getBody());
-                    assertNull(payload.getTimestamp());
+                    assertNotNull(payload.getTimestamp());
                     assertNotNull(payload.metrics());
                     assertEquals(2, payload.metrics().size());
                     assertEquals("val", payload.getMetric("key"));

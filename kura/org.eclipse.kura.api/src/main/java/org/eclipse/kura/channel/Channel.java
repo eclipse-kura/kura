@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -48,11 +48,6 @@ public class Channel {
      * The data type of the value as expected from the operation
      */
     private DataType valueType;
-
-    /**
-     * Defines if it is possible to attach a {@code ChannelListener} to this channel
-     */
-    private boolean isListenable;
 
     /**
      * Instantiates a new channel.
@@ -118,17 +113,6 @@ public class Channel {
     }
 
     /**
-     * Returns a boolean indicating if it is possible to attach a {@code ChannelListener} to this channel
-     * 
-     * @since 1.4
-     * @return
-     *         a boolean indicating if it is possible to attach a {@code ChannelListener} to this channel
-     */
-    public boolean isListenable() {
-        return isListenable;
-    }
-
-    /**
      * Sets the name.
      *
      * @param name
@@ -165,17 +149,6 @@ public class Channel {
     public void setValueType(final DataType valueType) {
         requireNonNull(valueType, "Channel value type cannot be null");
         this.valueType = valueType;
-    }
-
-    /**
-     * Can be used to specify if it is possible to attach a {@code ChannelListener} to this {@link Channel}
-     * 
-     * @since 1.4
-     * @param isListenable
-     *            Defines if it is possible to attach a {@code ChannelListener} to this {@link Channel}
-     */
-    public void setListenable(boolean isListenable) {
-        this.isListenable = isListenable;
     }
 
     /** {@inheritDoc} */
@@ -260,5 +233,4 @@ public class Channel {
             return false;
         return true;
     }
-
 }

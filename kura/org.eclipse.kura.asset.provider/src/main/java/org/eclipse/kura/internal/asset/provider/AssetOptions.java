@@ -18,7 +18,6 @@ import static org.eclipse.kura.asset.provider.AssetConstants.ASSET_DESC_PROP;
 import static org.eclipse.kura.asset.provider.AssetConstants.ASSET_DRIVER_PROP;
 import static org.eclipse.kura.asset.provider.AssetConstants.CHANNEL_NAME_PROHIBITED_CHARS;
 import static org.eclipse.kura.asset.provider.AssetConstants.CHANNEL_PROPERTY_SEPARATOR;
-import static org.eclipse.kura.asset.provider.AssetConstants.LISTEN;
 import static org.eclipse.kura.asset.provider.AssetConstants.TYPE;
 import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_TYPE;
 
@@ -157,15 +156,6 @@ public final class AssetOptions {
         return DataType.getDataType(valueTypeProp.toString());
     }
 
-    private boolean isChannelListenable(final Map<String, Object> properties) {
-        try {
-            return Boolean.parseBoolean(properties.get(LISTEN.value()).toString());
-        } catch (Exception e) {
-            logger.warn(message.errorRetrievingListenable());
-            return false;
-        }
-    }
-
     private Channel extractChannel(final String channelName, final Map<String, Object> properties) {
         logger.debug(message.retrievingChannel());
         Channel channel = null;
@@ -180,7 +170,6 @@ public final class AssetOptions {
 
         if (channelType != null && dataType != null) {
             channel = new Channel(channelName, channelType, dataType, channelConfig);
-            channel.setListenable(isChannelListenable(channelConfig));
         }
         logger.debug(message.retrievingChannelDone());
         return channel;

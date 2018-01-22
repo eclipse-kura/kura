@@ -38,6 +38,7 @@ import org.eclipse.kura.channel.ChannelStatus;
 import org.eclipse.kura.channel.ChannelType;
 import org.eclipse.kura.channel.listener.ChannelEvent;
 import org.eclipse.kura.channel.listener.ChannelListener;
+import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
@@ -389,11 +390,33 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         }
     }
 
+    private boolean isListeningChannel(final Map<String, Object> properties) {
+        try {
+            return Boolean.parseBoolean(properties.get(WireAssetConstants.LISTEN_PROP_NAME.value()).toString());
+        } catch (Exception e) {
+            logger.warn(message.errorRetrievingListenable());
+            return false;
+        }
+    }
+
     @Override
     protected void tryUpdateChannelListeners() {
-        getAssetConfiguration().getAssetChannels().entrySet().stream().filter(e -> e.getValue().isListenable())
-                .forEach(e -> channelListeners.add(new ChannelListenerRegistration(e.getValue().getName(), this)));
+        getAssetConfiguration().getAssetChannels().entrySet().stream()
+                .filter(e -> isListeningChannel(e.getValue().getConfiguration()))
+                .map(e -> new ChannelListenerRegistration(e.getKey(), this)).forEach(this.channelListeners::add);
         super.tryUpdateChannelListeners();
+    }
+
+    @Override
+    protected boolean isChannelListenerValid(Channel channel, ChannelListenerRegistration reg) {
+        return super.isChannelListenerValid(channel, reg)
+                && (reg.getChannelListener() != this || isListeningChannel(channel.getConfiguration()));
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected List<Tad> getAssetChannelDescriptor() {
+        return (List<Tad>) WireAssetChannelDescriptor.get().getDescriptor();
     }
 
     @Override

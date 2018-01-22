@@ -127,7 +127,6 @@ public final class AssetTest {
         channels.put("1.CH#name", "sample.channel1.name");
         channels.put("1.CH#+type", "READ");
         channels.put("1.CH#+value.type", "INTEGER");
-        channels.put("1.CH#+listen", true);
         channels.put("1.CH#DRIVER.modbus.register", "sample.channel1.modbus.register");
         channels.put("1.CH#DRIVER.modbus.FC", "sample.channel1.modbus.FC");
         channels.put("2.CH#name", "sample.channel2.name");
@@ -210,28 +209,6 @@ public final class AssetTest {
         asset.registerChannelListener("1.CH", listener);
 
         assertTrue(invoked.get());
-    }
-
-    /**
-     * It should not be possible to attach listeners to non listenable channels.
-     */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
-    @Test
-    public void testListenOnNonListenableChannel() {
-        final ChannelListener listener = new ChannelListener() {
-
-            @Override
-            public void onChannelEvent(ChannelEvent event) {
-                fail("channel listener called for non listenable channel");
-            }
-        };
-
-        try {
-            asset.registerChannelListener("2.CH", listener);
-            fail("channel listener attached to non listenable channel");
-        } catch (KuraException e) {
-            assertEquals(KuraErrorCode.OPERATION_NOT_SUPPORTED, e.getCode());
-        }
     }
 
     /**
@@ -495,7 +472,7 @@ public final class AssetTest {
 
         List<AD> ads = ocd.getAD();
         assertNotNull(ads);
-        assertEquals(12, ads.size()); // description, driver, 8 from BaseChannelDescriptor and StubChannelDescriptor
+        assertEquals(10, ads.size()); // description, driver, 8 from BaseChannelDescriptor and StubChannelDescriptor
 
         assertEquals("asset.desc", ads.get(0).getId());
         assertEquals("driver.pid", ads.get(1).getId());

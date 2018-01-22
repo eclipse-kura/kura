@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.kura.asset.provider;
 
-import static org.eclipse.kura.asset.provider.AssetConstants.LISTEN;
 import static org.eclipse.kura.asset.provider.AssetConstants.NAME;
 import static org.eclipse.kura.asset.provider.AssetConstants.TYPE;
 import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_TYPE;
@@ -64,13 +63,14 @@ import org.eclipse.kura.util.collection.CollectionUtil;
  *
  * @see AssetConfiguration
  */
-public final class BaseChannelDescriptor implements ChannelDescriptor {
+public class BaseChannelDescriptor implements ChannelDescriptor {
 
-    private static final AssetMessages s_message = LocalizationAdapter.adapt(AssetMessages.class);
+    private static final AssetMessages messages = LocalizationAdapter.adapt(AssetMessages.class);
+    private static final BaseChannelDescriptor instance = new BaseChannelDescriptor();
 
-    private final List<Tad> defaultElements;
+    protected final List<Tad> defaultElements;
 
-    private static void addOptions(Tad target, Enum<?>[] values) {
+    protected static void addOptions(Tad target, Enum<?>[] values) {
         final List<Option> options = target.getOption();
         for (Enum<?> value : values) {
             final String name = value.name();
@@ -84,15 +84,15 @@ public final class BaseChannelDescriptor implements ChannelDescriptor {
     /**
      * Instantiates a new base asset channel descriptor.
      */
-    public BaseChannelDescriptor() {
+    protected BaseChannelDescriptor() {
         this.defaultElements = CollectionUtil.newArrayList();
 
         final Tad name = new Tad();
         name.setId(NAME.value());
         name.setName(NAME.value().substring(1));
         name.setType(Tscalar.STRING);
-        name.setDefault(s_message.string());
-        name.setDescription(s_message.channelNameDesc());
+        name.setDefault(messages.string());
+        name.setDescription(messages.channelNameDesc());
         name.setCardinality(0);
         name.setRequired(true);
 
@@ -101,7 +101,7 @@ public final class BaseChannelDescriptor implements ChannelDescriptor {
         final Tad type = new Tad();
         type.setName(TYPE.value().substring(1));
         type.setId(TYPE.value());
-        type.setDescription(s_message.type());
+        type.setDescription(messages.type());
         type.setType(Tscalar.STRING);
         type.setRequired(true);
         type.setDefault(ChannelType.READ.name());
@@ -113,7 +113,7 @@ public final class BaseChannelDescriptor implements ChannelDescriptor {
         final Tad valueType = new Tad();
         valueType.setName(VALUE_TYPE.value().substring(1));
         valueType.setId(VALUE_TYPE.value());
-        valueType.setDescription(s_message.typeChannel());
+        valueType.setDescription(messages.typeChannel());
         valueType.setType(Tscalar.STRING);
         valueType.setRequired(true);
         valueType.setDefault(DataType.INTEGER.name());
@@ -121,21 +121,15 @@ public final class BaseChannelDescriptor implements ChannelDescriptor {
         addOptions(valueType, DataType.values());
 
         this.defaultElements.add(valueType);
-
-        final Tad listen = new Tad();
-        listen.setName(LISTEN.value().substring(1));
-        listen.setId(LISTEN.value());
-        listen.setDescription(s_message.listen());
-        listen.setType(Tscalar.BOOLEAN);
-        listen.setRequired(true);
-        listen.setDefault("false");
-
-        this.defaultElements.add(listen);
     }
 
     /** {@inheritDoc} */
     @Override
     public Object getDescriptor() {
         return this.defaultElements;
+    }
+
+    public static BaseChannelDescriptor get() {
+        return instance;
     }
 }

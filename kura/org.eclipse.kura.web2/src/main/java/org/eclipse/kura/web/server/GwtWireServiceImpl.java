@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.kura.asset.provider.BaseChannelDescriptor;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.AD;
@@ -32,6 +31,7 @@ import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.driver.descriptor.DriverDescriptor;
 import org.eclipse.kura.driver.descriptor.DriverDescriptorService;
+import org.eclipse.kura.internal.wire.asset.WireAssetChannelDescriptor;
 import org.eclipse.kura.internal.wire.asset.WireAssetOCD;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -62,6 +62,10 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
 
     private static final GwtConfigComponent WIRE_ASSET_OCD = GwtServerUtil.toGwtConfigComponent(
             new ComponentConfigurationImpl("org.eclipse.kura.wire.WireAsset", new WireAssetOCD(), new HashMap<>()));
+
+    private static final GwtConfigComponent WIRE_ASSET_CHANNEL_DESCRIPTOR = GwtServerUtil.toGwtConfigComponent(null,
+            WireAssetChannelDescriptor.get().getDescriptor());
+
     private static final Logger logger = LoggerFactory.getLogger(GwtWireServiceImpl.class);
     private static final long serialVersionUID = -6577843865830245755L;
 
@@ -336,8 +340,7 @@ public final class GwtWireServiceImpl extends OsgiRemoteServiceServlet implement
         result.setComponentDefinitions(componentDefinitions);
         result.setWireComponentDescriptors(componentDescriptors);
         result.setDriverDescriptors(driverDescriptors);
-        result.setBaseChannelDescriptor(
-                GwtServerUtil.toGwtConfigComponent(null, new BaseChannelDescriptor().getDescriptor()));
+        result.setBaseChannelDescriptor(WIRE_ASSET_CHANNEL_DESCRIPTOR);
 
         return result;
     }

@@ -287,13 +287,4 @@ public interface AssetMessages {
     @En("Failed to unregister channel listener")
     public String errorUnregisteringChannelListener();
 
-    @En("Attaching ChannelListeners is not allowed for the specified channel")
-    public String errorChannelNotListenable();
-
-    @En("Failed to retreive \"listen\" property from channel configuration")
-    public String errorRetrievingListenable();
-
-    @En("Specifies if it is possible to listen for events on this channel")
-    public String listen();
-
 }

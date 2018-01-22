@@ -14,7 +14,6 @@
  *******************************************************************************/
 package org.eclipse.kura.asset.provider;
 
-import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.channel.ChannelFlag.FAILURE;
 import static org.eclipse.kura.channel.ChannelType.READ;
@@ -28,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -335,26 +335,20 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      * @param driverSpecificChannelConfiguration
      *            the driver specific configuration.
      */
-    @SuppressWarnings("unchecked")
     private void fillDriverSpecificChannelConfiguration(final Tocd mainOcd,
             final List<Tad> driverSpecificChannelConfiguration) {
         if (mainOcd == null || driverSpecificChannelConfiguration == null) {
             return;
         }
 
-        final ChannelDescriptor basicChanneldescriptor = new BaseChannelDescriptor();
-        final Object baseChannelDescriptor = basicChanneldescriptor.getDescriptor();
-        if (nonNull(baseChannelDescriptor) && baseChannelDescriptor instanceof List<?>) {
-            List<Tad> channelConfiguration = (List<Tad>) baseChannelDescriptor;
-            channelConfiguration.addAll(driverSpecificChannelConfiguration);
-            for (final Tad attribute : channelConfiguration) {
-                for (final Entry<String, Channel> entry : this.assetConfiguration.getAssetChannels().entrySet()) {
-                    final String channelName = entry.getKey();
-                    final Tad newAttribute = cloneAd(attribute, channelName);
-                    mainOcd.addAD(newAttribute);
-                }
-            }
-        }
+        Stream.concat(getAssetChannelDescriptor().stream(), driverSpecificChannelConfiguration.stream())
+                .forEach(attribute -> {
+                    for (final Entry<String, Channel> entry : this.assetConfiguration.getAssetChannels().entrySet()) {
+                        final String channelName = entry.getKey();
+                        final Tad newAttribute = cloneAd(attribute, channelName);
+                        mainOcd.addAD(newAttribute);
+                    }
+                });
     }
 
     @SuppressWarnings("unchecked")
@@ -523,9 +517,6 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         if (channelListeners.contains(reg)) {
             return;
         }
-        if (!channel.isListenable()) {
-            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, message.errorChannelNotListenable());
-        }
 
         this.channelListeners.add(reg);
 
@@ -573,8 +564,10 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             }
             if (this.driver != null) {
                 tryDetachListener(reg);
+                i.remove();
+            } else {
+                reg.isValid = false;
             }
-            i.remove();
         }
     }
 
@@ -663,41 +656,38 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     }
 
     protected void detachAllListeners() {
-
         final Iterator<ChannelListenerRegistration> i = channelListeners.iterator();
         while (i.hasNext()) {
             tryDetachListener(i.next());
         }
     }
 
-    protected void removeAllListeners() {
-
-        final Iterator<ChannelListenerRegistration> i = channelListeners.iterator();
-        while (i.hasNext()) {
-            tryDetachListener(i.next());
-            i.remove();
-        }
-    }
-
-    protected void tryUpdateChannelListeners() {
-        if (this.driver == null) {
-            return;
-        }
-        if (this.assetConfiguration == null) {
-            return;
-        }
-        detachAllListeners();
+    protected void cleanupAndReattachListeners() {
         final Map<String, Channel> channels = this.assetConfiguration.getAssetChannels();
         final Iterator<ChannelListenerRegistration> i = this.channelListeners.iterator();
         while (i.hasNext()) {
             final ChannelListenerRegistration reg = i.next();
             final Channel channel = channels.get(reg.channelName);
-            if (channel == null || !channel.isListenable()) {
-                i.remove();
-            } else {
+            if (isChannelListenerValid(channel, reg)) {
                 tryAttachListener(channel, reg);
+            } else {
+                i.remove();
             }
         }
+    }
+
+    protected boolean isChannelListenerValid(final Channel channel, final ChannelListenerRegistration reg) {
+        return channel != null && reg.isValid;
+    }
+
+    protected void tryUpdateChannelListeners() {
+        detachAllListeners();
+        cleanupAndReattachListeners();
+    }
+
+    @SuppressWarnings("unchecked")
+    protected List<Tad> getAssetChannelDescriptor() {
+        return (List<Tad>) BaseChannelDescriptor.get().getDescriptor();
     }
 
     protected Tocd getOCD() {
@@ -708,10 +698,12 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
         private final String channelName;
         private final ChannelListener listener;
+        private boolean isValid;
 
         public ChannelListenerRegistration(String channelName, ChannelListener listener) {
             this.channelName = channelName;
             this.listener = listener;
+            this.isValid = true;
         }
 
         @Override
@@ -721,6 +713,18 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             result = prime * result + ((channelName == null) ? 0 : channelName.hashCode());
             result = prime * result + ((listener == null) ? 0 : listener.hashCode());
             return result;
+        }
+
+        public String getChannelName() {
+            return channelName;
+        }
+
+        public ChannelListener getChannelListener() {
+            return listener;
+        }
+
+        public boolean isValid() {
+            return isValid;
         }
 
         @Override

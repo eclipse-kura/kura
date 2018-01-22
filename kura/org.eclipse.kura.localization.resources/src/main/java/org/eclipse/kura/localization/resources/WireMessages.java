@@ -709,4 +709,10 @@ public interface WireMessages {
 
     @En("Specifies wheter errors should be included or not in the emitted envelope")
     public String emitErrorsDescription();
+
+    @En("Failed to retreive \"listen\" property from channel configuration")
+    public String errorRetrievingListenable();
+
+    @En("Specifies if WireAsset should emit envelopes on Channel change")
+    public String listen();
 }

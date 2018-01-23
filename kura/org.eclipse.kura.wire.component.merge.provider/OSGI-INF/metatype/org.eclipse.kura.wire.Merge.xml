@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2018 Eurotech and/or its affiliates and others
+
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.wire.Merge" 
+         name="Merge" 
+         description="A wire component which logs data as received from upstream connected Wire Components">
+         
+         <AD id="barrier"
+            name="barrier"
+            type="Boolean" cardinality="0"
+            required="true"
+            default="true"
+            description="Specifies if the component should use a barrier for input ports or perform caching of messages">
+        </AD>
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.wire.Merge" factoryPid="org.eclipse.kura.wire.Merge">
+        <Object ocdref="org.eclipse.kura.wire.Merge"/>
+    </Designate>
+</MetaData>

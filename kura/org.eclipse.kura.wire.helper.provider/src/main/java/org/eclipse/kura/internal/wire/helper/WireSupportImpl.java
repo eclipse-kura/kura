@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -19,9 +19,12 @@ import static org.eclipse.kura.wire.graph.Constants.WIRE_RECEIVER_PORT_PROP_NAME
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.eclipse.kura.localization.LocalizationAdapter;
 import org.eclipse.kura.localization.resources.WireMessages;
@@ -61,6 +64,10 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
     private final String kuraServicePid;
 
+    private final Map<Wire, ReceiverPortImpl> receiverPortByWire;
+
+    private final BiConsumer<Wire, WireEnvelope> updateFunc;
+
     WireSupportImpl(final WireComponent wireComponent, final String servicePid, final String kuraServicePid,
             final EventAdmin eventAdmin, int inputPortCount, int outputPortCount) {
         requireNonNull(wireComponent, message.wireSupportedComponentNonNull());
@@ -79,12 +86,16 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
         if (outputPortCount < 0) {
             throw new IllegalArgumentException("Output port count must be greater or equal than zero");
         }
-        if (inputPortCount > 0 && !(wireComponent instanceof WireReceiver)) {
-            throw new IllegalArgumentException("Wire Component has input ports but is not a WireReceiver");
-        }
 
         this.receiverPorts = new ArrayList<>(inputPortCount);
         this.emitterPorts = new ArrayList<>(outputPortCount);
+        this.receiverPortByWire = new HashMap<>();
+
+        if (wireComponent instanceof WireReceiver) {
+            this.updateFunc = this::updatedLegacy;
+        } else {
+            this.updateFunc = this::updatedMultiport;
+        }
 
         for (int i = 0; i < inputPortCount; i++) {
             receiverPorts.add(new ReceiverPortImpl());
@@ -96,6 +107,7 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
     }
 
     private void clearReceiverPorts() {
+        this.receiverPortByWire.clear();
         for (final ReceiverPort port : this.receiverPorts) {
             ((ReceiverPortImpl) port).connectedWires.clear();
         }
@@ -149,8 +161,10 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
         }
         for (Wire w : wires) {
             try {
-                final int receiverPort = (Integer) w.getProperties().get(WIRE_RECEIVER_PORT_PROP_NAME.value());
-                ((ReceiverPortImpl) this.receiverPorts.get(receiverPort)).connectedWires.add(w);
+                final int receiverPortIndex = (Integer) w.getProperties().get(WIRE_RECEIVER_PORT_PROP_NAME.value());
+                final ReceiverPortImpl receiverPort = (ReceiverPortImpl) this.receiverPorts.get(receiverPortIndex);
+                receiverPort.connectedWires.add(w);
+                this.receiverPortByWire.put(w, receiverPort);
             } catch (Exception e) {
                 logger.warn("Failed to assign incomimg wire to port", e);
             }
@@ -160,10 +174,20 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
     /** {@inheritDoc} */
     @Override
     public void updated(final Wire wire, final Object value) {
-        requireNonNull(wire, message.wireNonNull());
-        if (value instanceof WireEnvelope && this.wireComponent instanceof WireReceiver) {
-            ((WireReceiver) this.wireComponent).onWireReceive((WireEnvelope) value);
+        if (wire == null) {
+            logger.warn("{}", message.wireNonNull());
+            return;
         }
+        this.updateFunc.accept(wire, (WireEnvelope) value);
+    }
+
+    private void updatedLegacy(final Wire wire, final WireEnvelope envelope) {
+        ((WireReceiver) this.wireComponent).onWireReceive(envelope);
+    }
+
+    private void updatedMultiport(final Wire wire, final WireEnvelope envelope) {
+        final ReceiverPortImpl receiverPort = this.receiverPortByWire.get(wire);
+        receiverPort.consumer.accept(envelope);
     }
 
     @Override
@@ -200,12 +224,22 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
     private class ReceiverPortImpl implements ReceiverPort {
 
         List<Wire> connectedWires = new CopyOnWriteArrayList<>();
+        Consumer<WireEnvelope> consumer = envelope -> {
+            // do nothing
+        };
 
         @Override
         public List<Wire> listConnectedWires() {
             return Collections.unmodifiableList(connectedWires);
         }
 
+        @Override
+        public void onWireReceive(Consumer<WireEnvelope> consumer) {
+            if (consumer == null) {
+                return;
+            }
+            this.consumer = consumer;
+        }
     }
 
     @Override

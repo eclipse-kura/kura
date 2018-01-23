@@ -10,25 +10,23 @@
  *  Eurotech
  * 
  *******************************************************************************/
+
 package org.eclipse.kura.wire.graph;
+
+import java.util.List;
+import java.util.function.Consumer;
 
 import org.eclipse.kura.wire.WireEnvelope;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * This interface represents an emitter port
+ * Allows to implement an aggregation strategy for a given set of ports. See {@link BarrierAggregatorFactory} and
+ * {@link CachingAggregatorFactory} for examples of possible strategies.
  * 
  * @since 1.4
  */
 @ProviderType
-public interface EmitterPort extends Port {
+public interface PortAggregator {
 
-    /**
-     * This methods is invoked with the {@link WireEnvelope} that has to be sent to the other end of the wire.
-     * 
-     * @param wireEnvelope
-     *            the message that needs to be sent.
-     */
-    public void emit(WireEnvelope wireEnvelope);
-
+    public void onWireReceive(Consumer<List<WireEnvelope>> envelopes);
 }

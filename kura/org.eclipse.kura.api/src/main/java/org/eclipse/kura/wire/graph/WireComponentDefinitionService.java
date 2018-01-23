@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,6 +15,7 @@ package org.eclipse.kura.wire.graph;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This WireComponentDefinitionService allows to fetch the {@link WireComponentDefinition}s of the registered Wire
@@ -22,6 +23,7 @@ import org.eclipse.kura.KuraException;
  *
  * @since 1.4
  */
+@ProviderType
 public interface WireComponentDefinitionService {
 
     /**

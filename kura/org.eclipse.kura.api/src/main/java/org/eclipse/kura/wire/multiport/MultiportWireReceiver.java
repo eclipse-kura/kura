@@ -10,25 +10,22 @@
  *  Eurotech
  * 
  *******************************************************************************/
-package org.eclipse.kura.wire.graph;
 
-import org.eclipse.kura.wire.WireEnvelope;
-import org.osgi.annotation.versioning.ProviderType;
+package org.eclipse.kura.wire.multiport;
+
+import org.eclipse.kura.wire.WireComponent;
+import org.eclipse.kura.wire.WireEmitter;
+import org.osgi.annotation.versioning.ConsumerType;
+import org.osgi.service.wireadmin.Consumer;
 
 /**
- * This interface represents an emitter port
+ * The MultiportWireReceiver interface Represents a wire component which is a data
+ * consumer that can receive produced or emitted values from upstream
+ * {@link WireEmitter}.
  * 
  * @since 1.4
  */
-@ProviderType
-public interface EmitterPort extends Port {
-
-    /**
-     * This methods is invoked with the {@link WireEnvelope} that has to be sent to the other end of the wire.
-     * 
-     * @param wireEnvelope
-     *            the message that needs to be sent.
-     */
-    public void emit(WireEnvelope wireEnvelope);
+@ConsumerType
+public interface MultiportWireReceiver extends Consumer, WireComponent {
 
 }

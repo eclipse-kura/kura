@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,12 +13,14 @@
 package org.eclipse.kura.wire.graph;
 
 import org.eclipse.kura.wire.WireConfiguration;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This POJO is used to represent, in the Wires context, the configuration of a Wire used in a multi-port composer.
  * 
  * @since 1.4
  */
+@ProviderType
 public class MultiportWireConfiguration extends WireConfiguration {
 
     private int emitterPort;

@@ -8,22 +8,23 @@
  *
  * Contributors:
  *  Eurotech
- *
+ * 
  *******************************************************************************/
-package org.eclipse.kura.wire.graph;
 
-import java.util.function.Consumer;
+package org.eclipse.kura.internal.wire.helper;
 
-import org.eclipse.kura.wire.WireEnvelope;
-import org.osgi.annotation.versioning.ProviderType;
+import java.util.List;
 
-/**
- * This interface marks the ports that are receiver ports of the associated Wire Component.
- *
- * @since 1.4
- */
-@ProviderType
-public interface ReceiverPort extends Port {
+import org.eclipse.kura.wire.graph.BarrierAggregatorFactory;
+import org.eclipse.kura.wire.graph.PortAggregator;
+import org.eclipse.kura.wire.graph.ReceiverPort;
 
-    public void onWireReceive(Consumer<WireEnvelope> consumer);
+public class BarrierAggregatorFactoryImpl implements BarrierAggregatorFactory {
+
+    @Override
+    public PortAggregator build(List<ReceiverPort> ports) {
+
+        return new BarrierAggregator(ports);
+    }
+
 }

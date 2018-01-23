@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,7 +14,7 @@ package org.eclipse.kura.wire.graph;
 
 import java.util.List;
 
-import org.osgi.annotation.versioning.ConsumerType;
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.service.wireadmin.Wire;
 
 /**
@@ -22,7 +22,7 @@ import org.osgi.service.wireadmin.Wire;
  * 
  * @since 1.4
  */
-@ConsumerType
+@ProviderType
 public interface Port {
 
     /**

@@ -235,9 +235,7 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
         @Override
         public void onWireReceive(Consumer<WireEnvelope> consumer) {
-            if (consumer == null) {
-                return;
-            }
+            requireNonNull(consumer);
             this.consumer = consumer;
         }
     }

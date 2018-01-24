@@ -1,6 +1,17 @@
+/*******************************************************************************
+ * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ *******************************************************************************/
+
 package org.eclipse.kura.internal.wire.math.singleport;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -26,15 +37,15 @@ public abstract class AbstractSingleportMathComponent
     private WireSupport wireSupport;
     protected AbstractSingleportMathComponentOptions options;
 
-    public void setWireHelperService(final WireHelperService wireHelperService) {
+    public void bindWireHelperService(final WireHelperService wireHelperService) {
         this.wireHelperService = wireHelperService;
     }
 
-    public void unsetWireHelperService(final WireHelperService wireHelperService) {
+    public void unbindWireHelperService(final WireHelperService wireHelperService) {
         this.wireHelperService = null;
     }
 
-    public void activated(final Map<String, Object> properties) {
+    public void activate(final Map<String, Object> properties) {
         this.wireSupport = this.wireHelperService.newWireSupport(this);
         updated(properties);
     }
@@ -44,11 +55,11 @@ public abstract class AbstractSingleportMathComponent
         init();
     }
 
-    public void deactivated() {
-
+    public void deactivate() {
     }
 
-    protected abstract void init();
+    protected void init() {
+    }
 
     protected AbstractSingleportMathComponentOptions getOptions(final Map<String, Object> properties) {
         return new AbstractSingleportMathComponentOptions(properties);
@@ -71,7 +82,7 @@ public abstract class AbstractSingleportMathComponent
 
     @Override
     public void producersConnected(Wire[] wires) {
-        wireSupport.consumersConnected(wires);
+        wireSupport.producersConnected(wires);
     }
 
     @Override
@@ -81,14 +92,25 @@ public abstract class AbstractSingleportMathComponent
             logger.warn("Received empty envelope");
             return;
         }
-        final TypedValue<?> operand = records.get(0).getProperties().get(this.options.getOperandName());
+        final Map<String, TypedValue<?>> properties = records.get(0).getProperties();
+        final TypedValue<?> operand = properties.get(this.options.getOperandName());
         if (operand == null) {
             logger.warn("Missing operand");
             return;
         }
+        if (!(operand.getValue() instanceof Number)) {
+            logger.warn("Not a number: {}", operand);
+            return;
+        }
         final TypedValue<?> result = this.apply(operand);
-        this.wireSupport.emit(Collections
-                .singletonList(new WireRecord(Collections.singletonMap(this.options.getResultName(), result))));
+        if (this.options.shouldEmitReceivedProperties()) {
+            final Map<String, TypedValue<?>> resultProperties = new HashMap<>(properties);
+            resultProperties.put(this.options.getResultName(), result);
+            this.wireSupport.emit(Collections.singletonList(new WireRecord(resultProperties)));
+        } else {
+            this.wireSupport.emit(Collections
+                    .singletonList(new WireRecord(Collections.singletonMap(this.options.getResultName(), result))));
+        }
     }
 
 }

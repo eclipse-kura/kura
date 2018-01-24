@@ -36,6 +36,7 @@ import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
 import org.eclipse.kura.wire.graph.EmitterPort;
 import org.eclipse.kura.wire.graph.MultiportWireSupport;
+import org.eclipse.kura.wire.graph.Port;
 import org.eclipse.kura.wire.graph.ReceiverPort;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -109,13 +110,13 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
     private void clearReceiverPorts() {
         this.receiverPortByWire.clear();
         for (final ReceiverPort port : this.receiverPorts) {
-            ((ReceiverPortImpl) port).connectedWires.clear();
+            ((PortImpl) port).connectedWires.clear();
         }
     }
 
     private void clearEmitterPorts() {
         for (final EmitterPort port : this.emitterPorts) {
-            ((EmitterPortImpl) port).connectedWires.clear();
+            ((PortImpl) port).connectedWires.clear();
         }
     }
 
@@ -129,7 +130,7 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
         for (Wire w : wires) {
             try {
                 final int outputPort = (Integer) w.getProperties().get(WIRE_EMITTER_PORT_PROP_NAME.value());
-                ((ReceiverPortImpl) this.emitterPorts.get(outputPort)).connectedWires.add(w);
+                ((PortImpl) this.emitterPorts.get(outputPort)).connectedWires.add(w);
             } catch (Exception e) {
                 logger.warn("Failed to assign outgoing wire to port", e);
             }
@@ -154,7 +155,7 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
     /** {@inheritDoc} */
     @Override
-    public void producersConnected(final Wire[] wires) {
+    public synchronized void producersConnected(final Wire[] wires) {
         clearReceiverPorts();
         if (wires == null) {
             return;
@@ -200,7 +201,17 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
         return Collections.unmodifiableList(this.receiverPorts);
     }
 
-    private class EmitterPortImpl extends ReceiverPortImpl implements EmitterPort {
+    private abstract class PortImpl implements Port {
+
+        List<Wire> connectedWires = new CopyOnWriteArrayList<>();
+
+        @Override
+        public List<Wire> listConnectedWires() {
+            return Collections.unmodifiableList(connectedWires);
+        }
+    }
+
+    private class EmitterPortImpl extends PortImpl implements EmitterPort {
 
         private Event emitEvent;
 
@@ -221,17 +232,11 @@ final class WireSupportImpl implements WireSupport, MultiportWireSupport {
 
     }
 
-    private class ReceiverPortImpl implements ReceiverPort {
+    private class ReceiverPortImpl extends PortImpl implements ReceiverPort {
 
-        List<Wire> connectedWires = new CopyOnWriteArrayList<>();
         Consumer<WireEnvelope> consumer = envelope -> {
             // do nothing
         };
-
-        @Override
-        public List<Wire> listConnectedWires() {
-            return Collections.unmodifiableList(connectedWires);
-        }
 
         @Override
         public void onWireReceive(Consumer<WireEnvelope> consumer) {

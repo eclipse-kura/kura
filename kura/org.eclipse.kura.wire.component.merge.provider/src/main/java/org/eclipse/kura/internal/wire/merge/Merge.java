@@ -35,10 +35,6 @@ import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * The Class Conditional is a specific Wire Component to apply a condition
- * on the received {@link WireEnvelope}
- */
 public final class Merge implements MultiportWireReceiver, WireEmitter, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(Merge.class);

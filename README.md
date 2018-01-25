@@ -56,9 +56,17 @@ To raise an issue, please report a bug on [GitHub issues](https://github.com/ecl
 The Eclipse Installer based setup works for the main used platforms like Linux, Mac Os and Windows.
 
 
-## Known issues
+## Known Issues
 Currently, the emulator web ui is not properly working on Windows so, with your setup, you will be able to build and deploy you applications, but not be able to use the Eclipse IDE based Kura emulator.
 
 The full build of Kura is only supported for Linux and Mac Os based systems.
 
 Currently the maven build on Windows requires to disable the tests and will fail when it tries to create the installers for the target platforms.
+
+
+## Exists Plugin Failure
+The project's POM files contain a reference to the Maven Exists Plugin.
+This plugin allows to verify the existence of a Bundle in the remote repositories and fails the build process if that happens.
+This helps Kura developers to prevent possible errors when building Kura.
+
+If you want to build Kura and an error due to the Maven Exists Plugin happens, please review your changes. If you still want to rebuild a released Kura (or an already released Bundle of Kura), please invoke the Kura build with the *-Pskip-exists-plugin* profile. 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,7 +32,7 @@ import org.osgi.framework.ServiceReference;
  * The Class AssetServiceImpl is an implementation of the utility API
  * {@link AssetService} to provide useful factory methods for assets
  */
-public final class AssetServiceImpl implements AssetService {
+public class AssetServiceImpl implements AssetService {
 
     private static final AssetMessages message = LocalizationAdapter.adapt(AssetMessages.class);
 
@@ -40,8 +40,8 @@ public final class AssetServiceImpl implements AssetService {
     @Override
     public Asset getAsset(final String assetPid) {
         requireNonNull(assetPid, message.assetPidNonNull());
-        final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-        final ServiceReference<Asset>[] refs = ServiceUtil.getServiceReferences(context, Asset.class, null);
+        final BundleContext context = getBundleContext();
+        final ServiceReference<Asset>[] refs = getAssetServiceReferences(context);
         try {
             for (final ServiceReference<Asset> ref : refs) {
                 if (ref.getProperty(KURA_SERVICE_PID).equals(assetPid)) {
@@ -49,7 +49,7 @@ public final class AssetServiceImpl implements AssetService {
                 }
             }
         } finally {
-            ServiceUtil.ungetServiceReferences(context, refs);
+            ungetServiceReferences(context, refs);
         }
         return null;
     }
@@ -58,8 +58,8 @@ public final class AssetServiceImpl implements AssetService {
     @Override
     public String getAssetPid(final Asset asset) {
         requireNonNull(asset, message.assetNonNull());
-        final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-        final ServiceReference<Asset>[] refs = ServiceUtil.getServiceReferences(context, Asset.class, null);
+        final BundleContext context = getBundleContext();
+        final ServiceReference<Asset>[] refs = getAssetServiceReferences(context);
         try {
             for (final ServiceReference<Asset> ref : refs) {
                 final Asset assetRef = context.getService(ref);
@@ -68,7 +68,7 @@ public final class AssetServiceImpl implements AssetService {
                 }
             }
         } finally {
-            ServiceUtil.ungetServiceReferences(context, refs);
+            ungetServiceReferences(context, refs);
         }
         return null;
     }
@@ -77,16 +77,28 @@ public final class AssetServiceImpl implements AssetService {
     @Override
     public List<Asset> listAssets() {
         final List<Asset> assets = CollectionUtil.newArrayList();
-        final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-        final ServiceReference<Asset>[] refs = ServiceUtil.getServiceReferences(context, Asset.class, null);
+        final BundleContext context = getBundleContext();
+        final ServiceReference<Asset>[] refs = getAssetServiceReferences(context);
         try {
             for (final ServiceReference<Asset> ref : refs) {
                 final Asset assetRef = context.getService(ref);
                 assets.add(assetRef);
             }
         } finally {
-            ServiceUtil.ungetServiceReferences(context, refs);
+            ungetServiceReferences(context, refs);
         }
         return assets;
+    }
+
+    protected ServiceReference<Asset>[] getAssetServiceReferences(final BundleContext context) {
+        return ServiceUtil.getServiceReferences(context, Asset.class, null);
+    }
+
+    protected BundleContext getBundleContext() {
+        return FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+    }
+
+    protected void ungetServiceReferences(final BundleContext context, final ServiceReference<Asset>[] refs) {
+        ServiceUtil.ungetServiceReferences(context, refs);
     }
 }

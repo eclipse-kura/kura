@@ -92,7 +92,7 @@
         <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider</module>
 
         <module>org.eclipse.kura.wire.component.conditional.provider</module>
-        <module>org.eclipse.kura.wire.component.merge.provider</module>
+        <module>org.eclipse.kura.wire.component.join.provider</module>
         <module>org.eclipse.kura.wire.component.math.singleport.provider</module>
         <module>org.eclipse.kura.wire.component.math.multiport.provider</module>
 

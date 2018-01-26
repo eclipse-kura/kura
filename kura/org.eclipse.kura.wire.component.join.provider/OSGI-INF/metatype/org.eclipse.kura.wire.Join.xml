@@ -8,10 +8,10 @@
      http://www.eclipse.org/legal/epl-v10.html
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.wire.Merge" 
-         name="Merge" 
-         description="A wire component which logs data as received from upstream connected Wire Components">
-         
+    <OCD id="org.eclipse.kura.wire.Join"
+         name="Join"
+         description="A wire component merges the properties contained in envelopes received on different ports into a single envelope">
+
          <AD id="barrier"
             name="barrier"
             type="Boolean" cardinality="0"
@@ -20,8 +20,8 @@
             description="Specifies if the component should use a barrier for input ports or perform caching of messages">
         </AD>
     </OCD>
-    
-    <Designate pid="org.eclipse.kura.wire.Merge" factoryPid="org.eclipse.kura.wire.Merge">
-        <Object ocdref="org.eclipse.kura.wire.Merge"/>
+
+    <Designate pid="org.eclipse.kura.wire.Join" factoryPid="org.eclipse.kura.wire.Join">
+        <Object ocdref="org.eclipse.kura.wire.Join"/>
     </Designate>
 </MetaData>

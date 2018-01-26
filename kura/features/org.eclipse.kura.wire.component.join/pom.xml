@@ -22,7 +22,7 @@
         <relativePath>..</relativePath>
     </parent>
 
-    <artifactId>org.eclipse.kura.wire.component.merge</artifactId>
+    <artifactId>org.eclipse.kura.wire.component.join</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>eclipse-feature</packaging>
 

@@ -10,7 +10,7 @@
  *  Eurotech
  *
  *******************************************************************************/
-package org.eclipse.kura.internal.wire.merge;
+package org.eclipse.kura.internal.wire.join;
 
 import static java.util.Objects.requireNonNull;
 
@@ -21,7 +21,7 @@ import org.eclipse.kura.wire.graph.CachingAggregatorFactory;
 import org.eclipse.kura.wire.graph.PortAggregatorFactory;
 import org.osgi.framework.BundleContext;
 
-public class MergeOptions {
+public class JoinComponentOptions {
 
     private static final String BARRIER_MODALITY_PROPERTY_KEY = "barrier";
 
@@ -30,7 +30,7 @@ public class MergeOptions {
     private final Map<String, Object> properties;
     private final BundleContext context;
 
-    MergeOptions(final Map<String, Object> properties, BundleContext context) {
+    JoinComponentOptions(final Map<String, Object> properties, BundleContext context) {
         requireNonNull(properties, "Properties must be not null");
         this.properties = properties;
         this.context = context;

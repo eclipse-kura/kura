@@ -7,15 +7,15 @@
      which accompanies this distribution, and is available at
      http://www.eclipse.org/legal/epl-v10.html
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
-               name="org.eclipse.kura.wire.Merge"
-               activate="activate" 
-               deactivate="deactivate" 
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+               name="org.eclipse.kura.wire.Join"
+               activate="activate"
+               deactivate="deactivate"
                modified="updated"
-               enabled="true" 
-               configuration-policy="require"> 
-   <implementation class="org.eclipse.kura.internal.wire.merge.Merge"/>
-   <property name="service.pid" value="org.eclipse.kura.wire.Merge"/>
+               enabled="true"
+               configuration-policy="require">
+   <implementation class="org.eclipse.kura.internal.wire.join.JoinComponent"/>
+   <property name="service.pid" value="org.eclipse.kura.wire.Join"/>
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
@@ -25,11 +25,11 @@
       <provide interface="org.osgi.service.wireadmin.Producer"/>
       <provide interface="org.eclipse.kura.wire.multiport.MultiportWireReceiver"/>
    </service>
-   <reference bind="bindWireHelperService" 
-   	          cardinality="1..1" 
-   	          interface="org.eclipse.kura.wire.WireHelperService" 
-   	          name="WireHelperService" 
-   	          policy="static" 
+   <reference bind="bindWireHelperService"
+   	          cardinality="1..1"
+   	          interface="org.eclipse.kura.wire.WireHelperService"
+   	          name="WireHelperService"
+   	          policy="static"
    	          unbind="unbindWireHelperService"/>
    <property name="input.cardinality.minimum" type="Integer" value="2"/>
    <property name="input.cardinality.maximum" type="Integer" value="2"/>

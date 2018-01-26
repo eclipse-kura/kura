@@ -11,7 +11,7 @@
          Eurotech
 -->
 <feature
-      id="org.eclipse.kura.wire.component.merge"
+      id="org.eclipse.kura.wire.component.join"
       label="%featureName"
       version="1.0.0.qualifier"
       provider-name="%providerName"
@@ -31,7 +31,7 @@
    </license>
 
    <plugin
-         id="org.eclipse.kura.wire.component.merge.provider"
+         id="org.eclipse.kura.wire.component.join.provider"
          download-size="0"
          install-size="0"
          version="0.0.0"

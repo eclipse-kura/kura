@@ -10,7 +10,7 @@
  *  Eurotech
  *
  *******************************************************************************/
-package org.eclipse.kura.internal.wire.merge;
+package org.eclipse.kura.internal.wire.join;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
@@ -35,9 +35,9 @@ import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class Merge implements MultiportWireReceiver, WireEmitter, ConfigurableComponent {
+public final class JoinComponent implements MultiportWireReceiver, WireEmitter, ConfigurableComponent {
 
-    private static final Logger logger = LoggerFactory.getLogger(Merge.class);
+    private static final Logger logger = LoggerFactory.getLogger(JoinComponent.class);
 
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
@@ -45,7 +45,7 @@ public final class Merge implements MultiportWireReceiver, WireEmitter, Configur
 
     private MultiportWireSupport wireSupport;
     private ComponentContext context;
-    private MergeOptions mergeOptions;
+    private JoinComponentOptions joinComponentOptions;
 
     public void bindWireHelperService(final WireHelperService wireHelperService) {
         if (isNull(this.wireHelperService)) {
@@ -70,9 +70,9 @@ public final class Merge implements MultiportWireReceiver, WireEmitter, Configur
 
     public void updated(final Map<String, Object> properties) {
         logger.debug(message.updatingLogger());
-        this.mergeOptions = new MergeOptions(properties, context.getBundleContext());
+        this.joinComponentOptions = new JoinComponentOptions(properties, context.getBundleContext());
 
-        this.mergeOptions.getPortAggregatorFactory().build(wireSupport.getReceiverPorts())
+        this.joinComponentOptions.getPortAggregatorFactory().build(wireSupport.getReceiverPorts())
                 .onWireReceive(this::onWireReceive);
 
         logger.debug(message.updatingLoggerDone());

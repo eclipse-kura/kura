@@ -56,7 +56,7 @@
         <module>org.eclipse.kura.driver.s7plc</module>
         <module>org.eclipse.kura.driver.ble.sensortag</module>
         <module>org.eclipse.kura.wire.script.filter</module>
-        <module>org.eclipse.kura.wire.component.merge</module>
+        <module>org.eclipse.kura.wire.component.join</module>
         <module>org.eclipse.kura.wire.component.math.singleport</module>
         <module>org.eclipse.kura.wire.component.math.multiport</module>
     </modules>

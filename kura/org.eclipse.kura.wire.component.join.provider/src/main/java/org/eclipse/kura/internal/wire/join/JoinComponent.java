@@ -15,10 +15,13 @@ package org.eclipse.kura.internal.wire.join;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.localization.LocalizationAdapter;
@@ -38,7 +41,6 @@ import org.slf4j.LoggerFactory;
 public final class JoinComponent implements MultiportWireReceiver, WireEmitter, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(JoinComponent.class);
-
     private static final WireMessages message = LocalizationAdapter.adapt(WireMessages.class);
 
     private volatile WireHelperService wireHelperService;
@@ -63,6 +65,7 @@ public final class JoinComponent implements MultiportWireReceiver, WireEmitter, 
         logger.debug(message.activatingLogger());
         this.context = componentContext;
         this.wireSupport = (MultiportWireSupport) this.wireHelperService.newWireSupport(this);
+
         updated(properties);
 
         logger.debug(message.activatingLoggerDone());
@@ -79,14 +82,35 @@ public final class JoinComponent implements MultiportWireReceiver, WireEmitter, 
     }
 
     private void onWireReceive(List<WireEnvelope> envelopes) {
-        final Map<String, TypedValue<?>> result = new HashMap<>();
-        for (WireEnvelope e : envelopes) {
-            if (e == null || e.getRecords().isEmpty()) {
-                continue;
+        final WireEnvelope firstEnvelope = envelopes.get(0);
+        final WireEnvelope secondEnvelope = envelopes.get(1);
+        final List<WireRecord> firstRecords = firstEnvelope != null ? firstEnvelope.getRecords()
+                : Collections.emptyList();
+        final List<WireRecord> secondRecords = firstEnvelope != null ? secondEnvelope.getRecords()
+                : Collections.emptyList();
+        final List<WireRecord> result = new ArrayList<>();
+        forEachPair(firstRecords.iterator(), secondRecords.iterator(), (first, second) -> {
+            if (first == null) {
+                result.add(new WireRecord(second.getProperties()));
+                return;
             }
-            result.putAll(e.getRecords().get(0).getProperties());
+            if (second == null) {
+                result.add(new WireRecord(first.getProperties()));
+                return;
+            }
+            final Map<String, TypedValue<?>> resultProperties = new HashMap<>(first.getProperties());
+            resultProperties.putAll(second.getProperties());
+            result.add(new WireRecord(resultProperties));
+        });
+        this.wireSupport.emit(result);
+    }
+
+    private <T, U> void forEachPair(Iterator<T> first, Iterator<U> second, BiConsumer<T, U> consumer) {
+        while (first.hasNext() || second.hasNext()) {
+            final T firstValue = first.hasNext() ? first.next() : null;
+            final U secondValue = second.hasNext() ? second.next() : null;
+            consumer.accept(firstValue, secondValue);
         }
-        wireSupport.emit(Collections.singletonList(new WireRecord(result)));
     }
 
     protected void deactivate(final ComponentContext componentContext) {

@@ -58,6 +58,7 @@
         <module>org.eclipse.kura.wire.script.filter</module>
         <module>org.eclipse.kura.wire.component.merge</module>
         <module>org.eclipse.kura.wire.component.math.singleport</module>
+        <module>org.eclipse.kura.wire.component.math.multiport</module>
     </modules>
 
     <profiles>

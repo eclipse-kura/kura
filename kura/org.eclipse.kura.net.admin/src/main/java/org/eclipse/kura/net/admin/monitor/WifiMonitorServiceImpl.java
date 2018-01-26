@@ -91,6 +91,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private List<WifiClientMonitorListener> listeners;
     private Set<String> enabledInterfaces;
     private Set<String> disabledInterfaces;
+    private Set<String> unmanagedInterfaces;
     private Map<String, InterfaceState> interfaceStatuses;
     private ExecutorService executor;
     private NetworkConfiguration currentNetworkConfiguration;
@@ -139,6 +140,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         this.first = true;
         this.enabledInterfaces = new HashSet<>();
         this.disabledInterfaces = new HashSet<>();
+        this.unmanagedInterfaces = new HashSet<>();
         this.interfaceStatuses = new HashMap<>();
         this.executor = Executors.newSingleThreadExecutor();
         stopThread = new AtomicBoolean();
@@ -232,8 +234,10 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                     // After calling disableInterface() and refreshing the list of
                     // interface statuses, a call to WifiState.isUp() should return false.
                     for (String interfaceName : interfacesToReconfigure) {
-                        logger.debug("monitor() :: configuration has changed for {} , disabling...", interfaceName);
-                        disableInterface(interfaceName);
+                        if (!this.unmanagedInterfaces.contains(interfaceName)) {
+                            logger.debug("monitor() :: configuration has changed for {} , disabling...", interfaceName);
+                            disableInterface(interfaceName);
+                        }
                     }
                 }
 
@@ -536,32 +540,48 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     }
 
     private boolean isWifiEnabled(WifiInterfaceConfigImpl wifiInterfaceConfig) {
-        WifiMode wifiMode = WifiMode.UNKNOWN;
-        NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
-
-        if (wifiInterfaceConfig != null) {
-            for (WifiInterfaceAddressConfig wifiInterfaceAddressConfig : wifiInterfaceConfig
-                    .getNetInterfaceAddresses()) {
-                wifiMode = wifiInterfaceAddressConfig.getMode();
-
-                for (NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
-                    if (netConfig instanceof NetConfigIP4) {
-                        status = ((NetConfigIP4) netConfig).getStatus();
-                    }
-                }
-            }
-        } else {
-            logger.debug("wifiInterfaceConfig is null");
-        }
+        WifiMode wifiMode = getWifiInterfaceMode(wifiInterfaceConfig);
+        NetInterfaceStatus status = getWifiInterfaceStatus(wifiInterfaceConfig);
 
         boolean statusEnabled = status.equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)
                 || status.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN);
         boolean wifiEnabled = wifiMode.equals(WifiMode.INFRA) || wifiMode.equals(WifiMode.MASTER);
 
-        logger.debug("statusEnabled: {}", statusEnabled);
-        logger.debug("wifiEnabled: {}", wifiEnabled);
+        logger.debug("isWifiEnabled() :: {} interface - status: {}", wifiInterfaceConfig.getName(), statusEnabled);
+        logger.debug("isWifiEnabled() :: {} interface - WiFi Mode: {}", wifiInterfaceConfig.getName(), wifiEnabled);
 
         return statusEnabled && wifiEnabled;
+    }
+
+    private boolean isWifiManaged(WifiInterfaceConfigImpl wifiInterfaceConfig) {
+        NetInterfaceStatus status = getWifiInterfaceStatus(wifiInterfaceConfig);
+        logger.debug("isEthernetManaged() :: {} interface - status: {}", wifiInterfaceConfig.getName(), status);
+        return !status.equals(NetInterfaceStatus.netIPv4StatusUnmanaged);
+    }
+
+    private NetInterfaceStatus getWifiInterfaceStatus(WifiInterfaceConfigImpl wifiInterfaceConfig) {
+        if (wifiInterfaceConfig == null) {
+            logger.debug("wifiInterfaceConfig is null");
+            return NetInterfaceStatus.netIPv4StatusUnknown;
+        }
+        NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
+        for (WifiInterfaceAddressConfig wifiInterfaceAddressConfig : wifiInterfaceConfig.getNetInterfaceAddresses()) {
+            for (NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
+                if (netConfig instanceof NetConfigIP4) {
+                    status = ((NetConfigIP4) netConfig).getStatus();
+                    break;
+                }
+            }
+        }
+        return status;
+    }
+
+    private WifiMode getWifiInterfaceMode(WifiInterfaceConfigImpl wifiInterfaceConfig) {
+        WifiMode wifiMode = WifiMode.UNKNOWN;
+        for (WifiInterfaceAddressConfig wifiInterfaceAddressConfig : wifiInterfaceConfig.getNetInterfaceAddresses()) {
+            wifiMode = wifiInterfaceAddressConfig.getMode();
+        }
+        return wifiMode;
     }
 
     private WifiConfig getWifiConfig(WifiInterfaceConfigImpl wifiInterfaceConfig) {
@@ -659,6 +679,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             logger.info("initializing monitor");
             this.enabledInterfaces.clear();
             this.disabledInterfaces.clear();
+            this.unmanagedInterfaces.clear();
 
             if (networkConfiguration != null) {
                 for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : networkConfiguration
@@ -672,6 +693,9 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                         if (isWifiEnabled((WifiInterfaceConfigImpl) netInterfaceConfig)) {
                             logger.debug("Adding {} to enabledInterfaces", interfaceName);
                             this.enabledInterfaces.add(interfaceName);
+                        } else if (!isWifiManaged((WifiInterfaceConfigImpl) netInterfaceConfig)) {
+                            logger.debug("Adding {} to unmanagedInterfaces", interfaceName);
+                            this.unmanagedInterfaces.add(interfaceName);
                         } else {
                             logger.debug("Adding {} to disabledInterfaces", interfaceName);
                             this.disabledInterfaces.add(interfaceName);
@@ -802,6 +826,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private void updateInterfacesLists(Set<String> reconfiguredInterfaces) {
         Set<String> enabledIfaces = new HashSet<>();
         Set<String> disabledIfaces = new HashSet<>();
+        Set<String> unmanagedIfaces = new HashSet<>();
 
         for (String interfaceName : reconfiguredInterfaces) {
             logger.info("WifiMonitor: configuration for {} has changed", interfaceName);
@@ -818,6 +843,10 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
             if (isWifiEnabled(newConfig) && !enabledIfaces.contains(interfaceName)) {
                 logger.debug("Adding {} to list of enabled interfaces", interfaceName);
                 enabledIfaces.add(interfaceName);
+            } else if (!isWifiManaged(newConfig) && !unmanagedIfaces.contains(interfaceName)) {
+                logger.debug("Removing {} from list of enabled interfaces because it is set not to be managed by Kura",
+                        interfaceName);
+                unmanagedIfaces.add(interfaceName);
             } else if (!disabledIfaces.contains(interfaceName)) {
                 logger.debug("Removing {} from list of enabled interfaces because it is disabled", interfaceName);
                 disabledIfaces.add(interfaceName);
@@ -826,6 +855,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         if (!reconfiguredInterfaces.isEmpty()) {
             this.enabledInterfaces = enabledIfaces;
             this.disabledInterfaces = disabledIfaces;
+            this.unmanagedInterfaces = unmanagedIfaces;
         }
     }
 

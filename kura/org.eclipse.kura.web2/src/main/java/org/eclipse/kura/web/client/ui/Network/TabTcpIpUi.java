@@ -74,6 +74,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     private static final String IPV4_STATUS_WAN_MESSAGE = MessageUtils.get(IPV4_STATUS_WAN);
     private static final String IPV4_STATUS_LAN = GwtNetIfStatus.netIPv4StatusEnabledLAN.name();
     private static final String IPV4_STATUS_LAN_MESSAGE = MessageUtils.get(IPV4_STATUS_LAN);
+    private static final String IPV4_STATUS_UNMANAGED = GwtNetIfStatus.netIPv4StatusUnmanaged.name();
+    private static final String IPV4_STATUS_UNMANAGED_MESSAGE = MessageUtils.get(IPV4_STATUS_UNMANAGED);
     private static final String IPV4_STATUS_DISABLED = GwtNetIfStatus.netIPv4StatusDisabled.name();
     private static final String IPV4_STATUS_DISABLED_MESSAGE = MessageUtils.get(IPV4_STATUS_DISABLED);
 
@@ -229,6 +231,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             if (this.status != null) {
                 this.status.clear();
                 this.status.addItem(MessageUtils.get("netIPv4StatusDisabled"));
+                this.status.addItem(MessageUtils.get("netIPv4StatusUnmanaged"));
                 this.status.addItem(MessageUtils.get("netIPv4StatusEnabledLAN"));
                 this.status.addItem(MessageUtils.get("netIPv4StatusEnabledWAN"));
             }
@@ -240,6 +243,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
         if (this.form != null) {
             if (this.status.getSelectedItemText().equals(MessageUtils.get("netIPv4StatusDisabled"))) {
                 updatedNetIf.setStatus(IPV4_STATUS_DISABLED);
+            } else if (this.status.getSelectedItemText().equals(MessageUtils.get("netIPv4StatusUnmanaged"))) {
+                updatedNetIf.setStatus(IPV4_STATUS_UNMANAGED);
             } else if (this.status.getSelectedItemText().equals(MessageUtils.get("netIPv4StatusEnabledLAN"))) {
                 updatedNetIf.setStatus(IPV4_STATUS_LAN);
             } else {
@@ -349,7 +354,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     // ---------------Private Methods------------
 
     private void initHelpButtons() {
-        this.statusHelp.setHelpText(MSGS.netIPv4ModemToolTipStatus());
+        this.statusHelp.setHelpText(MSGS.netIPv4ToolTipStatus());
         this.configureHelp.setHelpText(MSGS.netIPv4ToolTipConfigure());
         this.ipHelp.setHelpText(MSGS.netIPv4ToolTipAddress());
         this.subnetHelp.setHelpText(MSGS.netIPv4ToolTipSubnetMask());
@@ -377,12 +382,14 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             if (this.status != null) {
                 this.status.clear();
                 this.status.addItem(MessageUtils.get("netIPv4StatusDisabled"));
+                this.status.addItem(MessageUtils.get("netIPv4StatusUnmanaged"));
                 this.status.addItem(MessageUtils.get("netIPv4StatusEnabledWAN"));
             }
         } else {
             if (this.status != null) {
                 this.status.clear();
                 this.status.addItem(MessageUtils.get("netIPv4StatusDisabled"));
+                this.status.addItem(MessageUtils.get("netIPv4StatusUnmanaged"));
                 this.status.addItem(MessageUtils.get("netIPv4StatusEnabledLAN"));
                 this.status.addItem(MessageUtils.get("netIPv4StatusEnabledWAN"));
             }
@@ -397,7 +404,12 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             public void onMouseOver(MouseOverEvent event) {
                 if (TabTcpIpUi.this.status.isEnabled()) {
                     TabTcpIpUi.this.helpText.clear();
-                    TabTcpIpUi.this.helpText.add(new Span(MSGS.netIPv4ModemToolTipStatus()));
+                    if (TabTcpIpUi.this.selectedNetIfConfig != null
+                            && TabTcpIpUi.this.selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
+                        TabTcpIpUi.this.helpText.add(new Span(MSGS.netIPv4ModemToolTipStatus()));
+                    } else {
+                        TabTcpIpUi.this.helpText.add(new Span(MSGS.netIPv4ToolTipStatus()));
+                    }
                 }
             }
         });
@@ -425,26 +437,27 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                     TabTcpIpUi.this.gwtNetworkService
                             .findNetInterfaceConfigurations(new AsyncCallback<List<GwtNetInterfaceConfig>>() {
 
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            EntryClassUi.hideWaitModal();
-                            FailureHandler.handle(caught);
-                        }
-
-                        @Override
-                        public void onSuccess(List<GwtNetInterfaceConfig> result) {
-                            EntryClassUi.hideWaitModal();
-                            for (GwtNetInterfaceConfig config : result) {
-                                if (config.getStatusEnum().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN)
-                                        && !config.getName().equals(TabTcpIpUi.this.selectedNetIfConfig.getName())) {
-                                    logger.log(Level.SEVERE, "Error: Status Invalid");
-                                    TabTcpIpUi.this.wanModal.show();
-                                    break;
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    EntryClassUi.hideWaitModal();
+                                    FailureHandler.handle(caught);
                                 }
-                            }
-                        }
 
-                    });
+                                @Override
+                                public void onSuccess(List<GwtNetInterfaceConfig> result) {
+                                    EntryClassUi.hideWaitModal();
+                                    for (GwtNetInterfaceConfig config : result) {
+                                        if (config.getStatusEnum().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN)
+                                                && !config.getName()
+                                                        .equals(TabTcpIpUi.this.selectedNetIfConfig.getName())) {
+                                            logger.log(Level.SEVERE, "Error: Status Invalid");
+                                            TabTcpIpUi.this.wanModal.show();
+                                            break;
+                                        }
+                                    }
+                                }
+
+                            });
                 }
             }
         });
@@ -676,18 +689,18 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                         TabTcpIpUi.this.gwtNetworkService.renewDhcpLease(token,
                                 TabTcpIpUi.this.selectedNetIfConfig.getName(), new AsyncCallback<Void>() {
 
-                            @Override
-                            public void onFailure(Throwable ex) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(ex);
-                            }
+                                    @Override
+                                    public void onFailure(Throwable ex) {
+                                        EntryClassUi.hideWaitModal();
+                                        FailureHandler.handle(ex);
+                                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                refresh();
-                                EntryClassUi.hideWaitModal();
-                            }
-                        });
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        refresh();
+                                        EntryClassUi.hideWaitModal();
+                                    }
+                                });
                     }
 
                 });
@@ -768,20 +781,23 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     }
 
     private void refreshForm() {
-
         if (this.selectedNetIfConfig != null && this.selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
             this.status.setEnabled(true);
             this.configure.setEnabled(false);
             this.ip.setEnabled(false);
             this.subnet.setEnabled(false);
             this.gateway.setEnabled(false);
-            this.dns.setEnabled(true);
+            if (VMSGS.netIPv4StatusDisabled().equals(this.status.getSelectedValue())
+                    || VMSGS.netIPv4StatusUnmanaged().equals(this.status.getSelectedValue())) {
+                this.dns.setEnabled(false);
+            } else {
+                this.dns.setEnabled(true);
+            }
             this.search.setEnabled(false);
             this.configure.setSelectedIndex(this.configure.getItemText(0).equals(IPV4_MODE_DHCP_MESSAGE) ? 0 : 1);
-
         } else {
-
-            if (VMSGS.netIPv4StatusDisabled().equals(this.status.getSelectedValue())) {
+            if (VMSGS.netIPv4StatusDisabled().equals(this.status.getSelectedValue())
+                    || VMSGS.netIPv4StatusUnmanaged().equals(this.status.getSelectedValue())) {
                 String configureVal = this.configure.getItemText(0);
                 this.configure.setSelectedIndex(configureVal.equals(IPV4_MODE_DHCP_MESSAGE) ? 0 : 1);
                 this.ip.setText("");

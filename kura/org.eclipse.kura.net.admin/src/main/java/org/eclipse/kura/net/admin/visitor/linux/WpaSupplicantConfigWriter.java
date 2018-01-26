@@ -97,8 +97,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
     public void generateTempWpaSupplicantConf() throws KuraException {
 
         try {
-            String fileAsString = readResource(
-                    "/src/main/resources/wifi/wpasupplicant.conf");
+            String fileAsString = readResource("/src/main/resources/wifi/wpasupplicant.conf");
             File outputFile = new File(TMP_WPA_CONFIG_FILE);
             copyFile(fileAsString, outputFile);
         } catch (Exception e) {
@@ -156,9 +155,10 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
                     }
                 }
 
-                if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusDisabled) {
-                    logger.info("Network interface status for " + interfaceName
-                            + " is disabled - not overwriting wpaconfig file");
+                if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusDisabled
+                        || netInterfaceStatus == NetInterfaceStatus.netIPv4StatusUnmanaged) {
+                    logger.info("Network interface status for {} is {} - not overwriting wpaconfig file", interfaceName,
+                            netInterfaceStatus);
                     return;
                 }
 

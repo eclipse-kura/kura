@@ -118,10 +118,11 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
                             }
                         }
 
-                        if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusDisabled) {
+                        if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusDisabled
+                                || netInterfaceStatus == NetInterfaceStatus.netIPv4StatusUnmanaged) {
                             logger.info(
-                                    "Network interface status for {} is disabled - not overwriting hostapd configuration file",
-                                    interfaceName);
+                                    "Network interface status for {} is {} - not overwriting hostapd configuration file",
+                                    interfaceName, netInterfaceStatus);
                             return;
                         }
 

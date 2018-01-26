@@ -230,10 +230,18 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
                 String currentAddress = gwtNetInterfaceConfig.getIpAddress();
                 String currentSubnetMask = gwtNetInterfaceConfig.getSubnetMask();
-                String currentStatus = gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusDisabled
-                        ? "Disabled"
-                        : gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusEnabledLAN ? "LAN"
-                                : "WAN";
+
+                String currentStatus;
+                if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusDisabled) {
+                    currentStatus = "Disabled";
+                } else if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusEnabledLAN) {
+                    currentStatus = "LAN";
+                } else if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusEnabledWAN) {
+                    currentStatus = "WAN";
+                } else {
+                    currentStatus = "Unmanaged";
+                }
+
                 String currentConfigMode = gwtNetInterfaceConfig
                         .getConfigModeEnum() == GwtNetIfConfigMode.netIPv4ConfigModeDHCP ? "DHCP" : "Manual";
                 String currentRouterMode;
@@ -248,7 +256,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 }
 
                 if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.ETHERNET) {
-                    if (currentStatus.equals("Disabled")) {
+                    if (currentStatus.equals("Disabled") || currentStatus.equals("Unmanaged")) {
                         pairs.add(new GwtGroupedNVPair("networkStatusEthernet", gwtNetInterfaceConfig.getName(),
                                 currentStatus));
                     } else {
@@ -268,7 +276,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                     if (gwtActiveWifiConfig != null) {
                         currentWifiSsid = gwtActiveWifiConfig.getWirelessSsid();
                     }
-                    if (currentStatus.equals("Disabled")) {
+                    if (currentStatus.equals("Disabled") || currentStatus.equals("Unmanaged")) {
                         pairs.add(new GwtGroupedNVPair("networkStatusWifi", gwtNetInterfaceConfig.getName(),
                                 currentStatus));
                     } else {
@@ -282,7 +290,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                     String currentModemApn = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getApn();
                     String currentModemPppNum = Integer
                             .toString(((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getPppNum());
-                    if (currentStatus.equals("Disabled")) {
+                    if (currentStatus.equals("Disabled") || currentStatus.equals("Unmanaged")) {
                         pairs.add(new GwtGroupedNVPair("networkStatusModem", gwtNetInterfaceConfig.getName(),
                                 currentStatus));
                     } else {

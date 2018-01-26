@@ -212,6 +212,13 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                     if (isConfigChanged(newNiacs, curNiacs)) {
                         logger.info("Found a new Ethernet network configuration for {}", interfaceName);
 
+                        if (!isEthernetManaged(newInterfaceConfig)) {
+                            logger.info(
+                                    "The {} interface is configured not to be managed by Kura and will not be monitored.",
+                                    interfaceName);
+                            return;
+                        }
+
                         // Disable the interface to be reconfigured below
                         disableInterface(interfaceName);
 
@@ -242,7 +249,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 
                 // Find if DHCP server or DHCP client mode is enabled
                 if (currentInterfaceConfig != null) {
-                    NetInterfaceStatus netInterfaceStatus = getStatus(currentInterfaceConfig);
+                    NetInterfaceStatus netInterfaceStatus = getEthernetInterfaceStatus(currentInterfaceConfig);
 
                     curNiacs = currentInterfaceConfig.getNetInterfaceAddresses();
 
@@ -306,7 +313,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 
                 // Manage the DHCP server and validate routes
                 if (currentInterfaceState != null && currentInterfaceState.isUp() && currentInterfaceState.isLinkUp()) {
-                    NetInterfaceStatus netInterfaceStatus = getStatus(currentInterfaceConfig);
+                    NetInterfaceStatus netInterfaceStatus = getEthernetInterfaceStatus(currentInterfaceConfig);
                     if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
                         // This should be the default gateway - make sure it is
                         boolean found = false;
@@ -393,10 +400,13 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                     for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : newNetworkConfig
                             .getNetInterfaceConfigs()) {
                         if (netInterfaceConfig instanceof EthernetInterfaceConfigImpl) {
-                            logger.debug("Adding new ethernet config for {}", netInterfaceConfig.getName());
+                            logger.debug("handleEvent() :: Adding new ethernet config for {}",
+                                    netInterfaceConfig.getName());
                             EthernetInterfaceConfigImpl newEthernetConfig = (EthernetInterfaceConfigImpl) netInterfaceConfig;
                             this.newNetworkConfiguration.put(netInterfaceConfig.getName(), newEthernetConfig);
-                            if (isEthernetEnabled(newEthernetConfig)) {
+                            if (isEthernetManaged(newEthernetConfig)) {
+                                logger.debug("handleEvent() :: Starting monitor for {} interface",
+                                        netInterfaceConfig.getName());
                                 startMonitor(netInterfaceConfig.getName());
                             }
                         }
@@ -465,14 +475,22 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
         return false;
     }
 
-    // Very the interface is enabled in Denali
+    // Verify if interface is enabled in configuration
     private boolean isEthernetEnabled(EthernetInterfaceConfigImpl ethernetInterfaceConfig) {
-        NetInterfaceStatus status = getStatus(ethernetInterfaceConfig);
+        NetInterfaceStatus status = getEthernetInterfaceStatus(ethernetInterfaceConfig);
+        logger.debug("isEthernetEnabled() :: Status for {} iface is {}", ethernetInterfaceConfig.getName(), status);
         return status.equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)
                 || status.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN);
     }
 
-    private NetInterfaceStatus getStatus(EthernetInterfaceConfigImpl ethernetInterfaceConfig) {
+    // Verify if interface is configured to be managed by Kura
+    private boolean isEthernetManaged(EthernetInterfaceConfigImpl ethernetInterfaceConfig) {
+        NetInterfaceStatus status = getEthernetInterfaceStatus(ethernetInterfaceConfig);
+        logger.debug("isEthernetManaged() :: Status for {} iface is {}", ethernetInterfaceConfig.getName(), status);
+        return !status.equals(NetInterfaceStatus.netIPv4StatusUnmanaged);
+    }
+
+    private NetInterfaceStatus getEthernetInterfaceStatus(EthernetInterfaceConfigImpl ethernetInterfaceConfig) {
         NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
 
         if (ethernetInterfaceConfig != null) {
@@ -483,6 +501,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                         for (NetConfig netConfig : netConfigs) {
                             if (netConfig instanceof NetConfigIP4) {
                                 status = ((NetConfigIP4) netConfig).getStatus();
+                                break;
                             }
                         }
                     }
@@ -496,7 +515,11 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
     // Initialize a monitor thread for each ethernet interface
     private void initializeMonitors() {
         for (String interfaceName : this.networkConfiguration.keySet()) {
-            startMonitor(interfaceName);
+            EthernetInterfaceConfigImpl ifaceConfig = this.networkConfiguration.get(interfaceName);
+            if (isEthernetManaged(ifaceConfig)) {
+                logger.debug("initializeMonitors() :: Starting monitor for {} interface", interfaceName);
+                startMonitor(interfaceName);
+            }
         }
     }
 

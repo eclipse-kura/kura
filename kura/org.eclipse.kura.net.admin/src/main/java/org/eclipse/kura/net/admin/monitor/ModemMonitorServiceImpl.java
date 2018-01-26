@@ -221,7 +221,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         PppFactory.releaseAllPppServices();
         if (task != null && !task.isDone()) {
             stopThread.set(true);
-            monitorNotity();
+            monitorNotify();
             logger.debug("Cancelling ModemMonitor task ...");
             task.cancel(true);
             logger.info("ModemMonitor task cancelled? = {}", task.isDone());
@@ -403,8 +403,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                             logger.info("new configuration for cellular modem on usb port {} netinterface {}", usbPort,
                                     ifaceName);
                             this.networkConfig = newNetworkConfig;
-
-                            if (pppService != null) {
+                            NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(newNetConfigs);
+                            if (pppService != null && netInterfaceStatus != NetInterfaceStatus.netIPv4StatusUnmanaged) {
                                 PppState pppSt = pppService.getPppState();
                                 if (pppSt == PppState.CONNECTED || pppSt == PppState.IN_PROGRESS) {
                                     logger.info("disconnecting " + pppService.getIfaceName());
@@ -433,7 +433,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                                         if (task != null && !task.isCancelled()) {
                                             logger.info("NetworkConfigurationChangeEvent :: Cancelling monitor task");
                                             stopThread.set(true);
-                                            monitorNotity();
+                                            monitorNotify();
                                             task.cancel(true);
                                             task = null;
                                         }
@@ -444,7 +444,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
                                             submitMonitorTask();
                                         } else {
-                                            monitorNotity();
+                                            monitorNotify();
                                         }
                                     } else {
                                         logger.info("NetworkConfigurationChangeEvent :: The {} is provisioned",
@@ -598,6 +598,12 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                 NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(modem.getConfiguration());
                 try {
                     String ifaceName = this.networkService.getModemPppPort(modem.getModemDevice());
+                    if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusUnmanaged) {
+                        logger.warn(
+                                "The {} interface is configured not to be managed by Kura and will not be monitored.",
+                                ifaceName);
+                        continue;
+                    }
                     if (netInterfaceStatus == NetInterfaceStatus.netIPv4StatusEnabledWAN && ifaceName != null) {
                         pppService = PppFactory.obtainPppService(ifaceName, modem.getDataPort());
                         pppSt = pppService.getPppState();
@@ -674,6 +680,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                         }
                         postModemGpsEvent(modem, true);
                     }
+
                 } catch (Exception e) {
                     logger.error("monitor() :: Exception", e);
                     if (pppService != null && pppSt != null) {
@@ -817,7 +824,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                             if (task != null && !task.isCancelled()) {
                                 logger.info("trackModem() :: Cancelling monitor task");
                                 stopThread.set(true);
-                                monitorNotity();
+                                monitorNotify();
                                 task.cancel(true);
                                 task = null;
                             }
@@ -827,7 +834,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
                                 submitMonitorTask();
                             } else {
-                                monitorNotity();
+                                monitorNotify();
                             }
                         } else {
                             logger.info("trackModem() :: The {} is provisioned", modem.getModel());
@@ -925,7 +932,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         }
     }
 
-    private void monitorNotity() {
+    private void monitorNotify() {
         if (stopThread != null) {
             synchronized (stopThread) {
                 stopThread.notifyAll();

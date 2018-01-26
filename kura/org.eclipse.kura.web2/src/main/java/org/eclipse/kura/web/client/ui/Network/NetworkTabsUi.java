@@ -39,6 +39,8 @@ public class NetworkTabsUi extends Composite {
     private static final String WIFI_ACCESS_POINT = GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name();
     private static final String IPV4_STATUS_DISABLED_MESSAGE = MessageUtils
             .get(GwtNetIfStatus.netIPv4StatusDisabled.name());
+    private static final String IPV4_STATUS_UNMANAGED_MESSAGE = MessageUtils
+            .get(GwtNetIfStatus.netIPv4StatusUnmanaged.name());
     private static final String IPV4_STATUS_ENABLED_LAN_MESSAGE = MessageUtils
             .get(GwtNetIfStatus.netIPv4StatusEnabledLAN.name());
 
@@ -236,13 +238,14 @@ public class NetworkTabsUi extends Composite {
             this.dhcpNatTab.setEnabled(false);
         }
 
-        if (netIfStatus.equals(IPV4_STATUS_DISABLED_MESSAGE)) {
+        if (netIfStatus.equals(IPV4_STATUS_DISABLED_MESSAGE) || netIfStatus.equals(IPV4_STATUS_UNMANAGED_MESSAGE)) {
             // disabled - remove tabs
             disableInterfaceTabs();
         }
 
         if (this.netIfConfig instanceof GwtModemInterfaceConfig) {
-            if (((GwtModemInterfaceConfig) this.netIfConfig).isGpsSupported()) {
+            if (((GwtModemInterfaceConfig) this.netIfConfig).isGpsSupported()
+                    && !netIfStatus.equals(IPV4_STATUS_UNMANAGED_MESSAGE)) {
                 this.modemGpsTab.setEnabled(true);
             } else {
                 this.modemGpsTab.setEnabled(false);

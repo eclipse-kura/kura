@@ -79,10 +79,33 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 
         if (!netInterfaceConfigs.isEmpty()) {
             for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-                writeConfig(netInterfaceConfig);
+                if (getInterfaceStatus(netInterfaceConfig) != NetInterfaceStatus.netIPv4StatusUnmanaged) {
+                    writeConfig(netInterfaceConfig);
+                }
                 writeKuraExtendedConfig(netInterfaceConfig);
             }
         }
+    }
+
+    private NetInterfaceStatus getInterfaceStatus(
+            NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
+        if (netInterfaceConfig == null) {
+            return NetInterfaceStatus.netIPv4StatusUnknown;
+        }
+        NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
+        for (NetInterfaceAddressConfig addresses : netInterfaceConfig.getNetInterfaceAddresses()) {
+            if (addresses != null) {
+                List<NetConfig> netConfigs = addresses.getConfigs();
+                if (netConfigs != null) {
+                    for (NetConfig netConfig : netConfigs) {
+                        if (netConfig instanceof NetConfigIP4) {
+                            status = ((NetConfigIP4) netConfig).getStatus();
+                        }
+                    }
+                }
+            }
+        }
+        return status;
     }
 
     private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
@@ -403,8 +426,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
                     logger.info("Not rewriting network interfaces file because it is the same");
                 }
             } catch (IOException e) {
-                logger.error("Failed to rename debian tmp config file {} to {}", tmpFile.getName(), file.getName(),
-                        e);
+                logger.error("Failed to rename debian tmp config file {} to {}", tmpFile.getName(), file.getName(), e);
                 throw KuraException.internalError(e.getMessage());
             }
         }

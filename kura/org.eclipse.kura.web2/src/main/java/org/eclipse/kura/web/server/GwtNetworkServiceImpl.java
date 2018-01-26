@@ -220,6 +220,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                     } else if (((NetConfigIP4) netConfig)
                                             .getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
                                         gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusEnabledWAN.name());
+                                    } else if (((NetConfigIP4) netConfig)
+                                            .getStatus() == NetInterfaceStatus.netIPv4StatusUnmanaged) {
+                                        gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusUnmanaged.name());
                                     } else {
                                         gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusDisabled.name());
                                     }
@@ -473,7 +476,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                         if (wifiClientMonitorService != null) {
                                             if (wifiConfig.getMode().equals(WifiMode.INFRA)) {
                                                 if (gwtNetConfig.getStatus()
-                                                        .equals(GwtNetIfStatus.netIPv4StatusDisabled.name())) {
+                                                        .equals(GwtNetIfStatus.netIPv4StatusDisabled.name())
+                                                        || gwtNetConfig.getStatus()
+                                                                .equals(GwtNetIfStatus.netIPv4StatusUnmanaged.name())) {
                                                     gwtNetConfig.setHwRssi("N/A");
                                                 } else {
                                                     try {
@@ -746,6 +751,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             NetInterfaceStatus netInterfaceStatus = null;
             if (config.getStatus().equals(GwtNetIfStatus.netIPv4StatusDisabled.name())) {
                 netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
+            } else if (config.getStatus().equals(GwtNetIfStatus.netIPv4StatusUnmanaged.name())) {
+                netInterfaceStatus = NetInterfaceStatus.netIPv4StatusUnmanaged;
             } else if (config.getStatus().equals(GwtNetIfStatus.netIPv4StatusEnabledLAN.name())) {
                 netInterfaceStatus = NetInterfaceStatus.netIPv4StatusEnabledLAN;
             } else if (config.getStatus().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN.name())) {

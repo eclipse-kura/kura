@@ -15,8 +15,9 @@ import java.io.Serializable;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public enum GwtNetIfStatus implements Serializable,IsSerializable {
+public enum GwtNetIfStatus implements Serializable, IsSerializable {
     netIPv4StatusDisabled,
+    netIPv4StatusUnmanaged,
     netIPv4StatusEnabledLAN,
     netIPv4StatusEnabledWAN;
 }

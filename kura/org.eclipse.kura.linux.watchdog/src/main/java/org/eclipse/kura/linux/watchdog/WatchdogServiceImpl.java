@@ -179,7 +179,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
             for (CriticalComponentImpl csi : this.criticalComponentList) {
                 if (csi.isTimedOut()) {
                     failure = true;
-                    this.rebootCauseWriter.writeRebootCause("failure in " + csi.getName());
+                    this.rebootCauseWriter.writeRebootCause(csi.getName());
                     logger.warn("Critical service {} failed -> SYSTEM REBOOT", csi.getName());
                     break;
                 }

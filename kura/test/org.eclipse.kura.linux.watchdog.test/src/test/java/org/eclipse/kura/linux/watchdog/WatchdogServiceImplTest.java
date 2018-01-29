@@ -317,7 +317,7 @@ public class WatchdogServiceImplTest {
 
         TestUtil.invokePrivate(svc, "checkCriticalComponents");
 
-        verify(causeWriterMock, times(1)).writeRebootCause("failure in 1");
+        verify(causeWriterMock, times(1)).writeRebootCause("1");
 
         // verify that reboot path was skipped
         assertTrue(watchdogWriter.waitForData(10000));

@@ -52,6 +52,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 
     private static final String WPA_TMP_CONFIG_FILE = "/etc/wpa_supplicant.conf.tmp";
     private static final String TMP_WPA_CONFIG_FILE = "/tmp/wpa_supplicant.conf";
+    private static final String WPA_SUPPLICANT_CONF_RESOURCE = "/src/main/resources/wifi/wpasupplicant.conf"; 
 
     private static final String OS_VERSION = System.getProperty("kura.os.version");
 
@@ -97,7 +98,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
     public void generateTempWpaSupplicantConf() throws KuraException {
 
         try {
-            String fileAsString = readResource("/src/main/resources/wifi/wpasupplicant.conf");
+            String fileAsString = readResource(WPA_SUPPLICANT_CONF_RESOURCE);
             File outputFile = new File(TMP_WPA_CONFIG_FILE);
             copyFile(fileAsString, outputFile);
         } catch (Exception e) {

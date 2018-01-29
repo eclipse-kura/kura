@@ -173,7 +173,8 @@ public class EthernetMonitorServiceImplTest {
         assertEquals(1, newCfgs.size());
 
         Map<String, Future> tasks = (Map<String, Future>) TestUtil.getFieldValue(svc, "tasks");
-        assertNull(tasks);
+        assertNotNull(tasks);
+        assertEquals(0, tasks.size());
     }
 
     @Test

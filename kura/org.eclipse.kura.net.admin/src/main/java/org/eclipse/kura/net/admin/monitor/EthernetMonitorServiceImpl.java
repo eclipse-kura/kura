@@ -491,25 +491,31 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
     }
 
     private NetInterfaceStatus getEthernetInterfaceStatus(EthernetInterfaceConfigImpl ethernetInterfaceConfig) {
+        List<NetConfig> netConfigs = getNetConfigs(ethernetInterfaceConfig);
+        if (netConfigs == null) {
+            return NetInterfaceStatus.netIPv4StatusUnknown;
+        }
         NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
-
-        if (ethernetInterfaceConfig != null) {
-            for (NetInterfaceAddressConfig addresses : ethernetInterfaceConfig.getNetInterfaceAddresses()) {
-                if (addresses != null) {
-                    List<NetConfig> netConfigs = addresses.getConfigs();
-                    if (netConfigs != null) {
-                        for (NetConfig netConfig : netConfigs) {
-                            if (netConfig instanceof NetConfigIP4) {
-                                status = ((NetConfigIP4) netConfig).getStatus();
-                                break;
-                            }
-                        }
-                    }
-                }
+        for (NetConfig netConfig : netConfigs) {
+            if (netConfig instanceof NetConfigIP4) {
+                status = ((NetConfigIP4) netConfig).getStatus();
+                break;
             }
         }
-
         return status;
+    }
+
+    private List<NetConfig> getNetConfigs(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
+
+        List<NetConfig> netConfigs = null;
+        if (netInterfaceConfig != null) {
+            List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
+                    .getNetInterfaceAddresses();
+            for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
+                netConfigs = netInterfaceAddressConfig.getConfigs();
+            }
+        }
+        return netConfigs;
     }
 
     // Initialize a monitor thread for each ethernet interface

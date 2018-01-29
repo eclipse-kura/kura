@@ -483,15 +483,12 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     }
 
     private List<NetConfig> getNetConfigs(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
-
         List<NetConfig> netConfigs = null;
         if (netInterfaceConfig != null) {
             List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
                     .getNetInterfaceAddresses();
-            if (netInterfaceAddressConfigs != null && !netInterfaceAddressConfigs.isEmpty()) {
-                for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-                    netConfigs = netInterfaceAddressConfig.getConfigs();
-                }
+            for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
+                netConfigs = netInterfaceAddressConfig.getConfigs();
             }
         }
         return netConfigs;

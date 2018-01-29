@@ -79,7 +79,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 
         if (!netInterfaceConfigs.isEmpty()) {
             for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-                if (getInterfaceStatus(netInterfaceConfig) != NetInterfaceStatus.netIPv4StatusUnmanaged) {
+                if (isInterfaceManaged(netInterfaceConfig)) {
                     writeConfig(netInterfaceConfig);
                 }
                 writeKuraExtendedConfig(netInterfaceConfig);
@@ -87,25 +87,40 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
         }
     }
 
+    // Verify if interface is configured to be managed by Kura
+    private boolean isInterfaceManaged(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
+        NetInterfaceStatus status = getInterfaceStatus(netInterfaceConfig);
+        logger.debug("isInterfaceManaged() :: Status for {} iface is {}", netInterfaceConfig.getName(), status);
+        return !status.equals(NetInterfaceStatus.netIPv4StatusUnmanaged);
+    }
+
     private NetInterfaceStatus getInterfaceStatus(
             NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
-        if (netInterfaceConfig == null) {
+
+        List<NetConfig> netConfigs = getNetConfigs(netInterfaceConfig);
+        if (netConfigs == null) {
             return NetInterfaceStatus.netIPv4StatusUnknown;
         }
         NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
-        for (NetInterfaceAddressConfig addresses : netInterfaceConfig.getNetInterfaceAddresses()) {
-            if (addresses != null) {
-                List<NetConfig> netConfigs = addresses.getConfigs();
-                if (netConfigs != null) {
-                    for (NetConfig netConfig : netConfigs) {
-                        if (netConfig instanceof NetConfigIP4) {
-                            status = ((NetConfigIP4) netConfig).getStatus();
-                        }
-                    }
-                }
+        for (NetConfig netConfig : netConfigs) {
+            if (netConfig instanceof NetConfigIP4) {
+                status = ((NetConfigIP4) netConfig).getStatus();
+                break;
             }
         }
         return status;
+    }
+
+    private List<NetConfig> getNetConfigs(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
+        List<NetConfig> netConfigs = null;
+        if (netInterfaceConfig != null) {
+            List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
+                    .getNetInterfaceAddresses();
+            for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
+                netConfigs = netInterfaceAddressConfig.getConfigs();
+            }
+        }
+        return netConfigs;
     }
 
     private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)

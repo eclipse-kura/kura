@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and others
+ * Copyright (c) 2011, 2018 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,15 +12,15 @@
  *******************************************************************************/
 package org.eclipse.kura.deployment.agent.impl;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -32,8 +32,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.Version;
 import org.osgi.service.component.ComponentContext;
@@ -100,6 +103,16 @@ public class DeploymentAgent implements DeploymentAgentService {
 
     private int connTimeout;
     private int readTimeout;
+
+    private SslManagerService sslManagerService;
+
+    public void setSslManagerService(SslManagerService sslManagerService) {
+        this.sslManagerService = sslManagerService;
+    }
+
+    public void unsetSslManagerService(SslManagerService sslManagerService) {
+        this.sslManagerService = null;
+    }
 
     protected void activate(ComponentContext componentContext) {
 
@@ -417,8 +430,15 @@ public class DeploymentAgent implements DeploymentAgentService {
     }
 
     private DeploymentPackage installDeploymentPackageInternal(String urlSpec)
-            throws DeploymentException, IOException, URISyntaxException {
+            throws DeploymentException, IOException, GeneralSecurityException {
         URL url = new URL(urlSpec);
+        File dpFile = null;
+        if (!"file".equals(url.getProtocol())) {
+            dpFile = getFileFromRemote(url);
+        } else {
+            dpFile = getFileFromFilesystem(url);
+        }
+
         // Get the file base name from the URL
         String urlPath = url.getPath();
         String[] parts = urlPath.split("/");
@@ -427,22 +447,7 @@ public class DeploymentAgent implements DeploymentAgentService {
         File dpPersistentFile = new File(dpPersistentFilePath);
 
         DeploymentPackage dp = null;
-        File dpFile = null;
-        InputStream dpInputStream = null;
-        BufferedReader br = null;
-        try {
-            // Download the package to a temporary file unless it already resides
-            // on the local filesystem.
-            if (!"file".equals(url.getProtocol())) {
-                dpFile = File.createTempFile("dpa", null);
-                dpFile.deleteOnExit();
-
-                FileUtils.copyURLToFile(url, dpFile, this.connTimeout, this.readTimeout);
-            } else {
-                dpFile = new File(url.getPath());
-            }
-
-            dpInputStream = new FileInputStream(dpFile);
+        try (InputStream dpInputStream = new FileInputStream(dpFile);) {
             dp = this.deploymentAdmin.installDeploymentPackage(dpInputStream);
 
             // Now we need to copy the deployment package file to the Kura
@@ -458,29 +463,37 @@ public class DeploymentAgent implements DeploymentAgentService {
         } catch (IOException e) {
             throw e;
         } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ex) {
-                    logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
-
-            if (dpInputStream != null) {
-                try {
-                    dpInputStream.close();
-                } catch (IOException e) {
-                    logger.warn("Cannot close input stream", e);
-                }
-            }
             // The file from which we have installed the deployment package will be deleted
             // unless it's a persistent deployment package file.
-            if (dpFile != null && !dpFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
+            if (!dpFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
                 dpFile.delete();
             }
         }
 
         return dp;
+    }
+
+    private File getFileFromRemote(URL url) throws GeneralSecurityException, IOException {
+
+        File dpFile = File.createTempFile("dpa", null);
+        dpFile.deleteOnExit();
+
+        URLConnection urlConnection = url.openConnection();
+        urlConnection.setConnectTimeout(this.connTimeout);
+        urlConnection.setReadTimeout(this.readTimeout);
+        if (urlConnection instanceof HttpsURLConnection) {
+            ((HttpsURLConnection) urlConnection).setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());
+        }
+
+        try (InputStream is = urlConnection.getInputStream();) {
+            FileUtils.copyInputStreamToFile(is, dpFile);
+            return dpFile;
+        }
+
+    }
+
+    private File getFileFromFilesystem(URL url) {
+        return new File(url.getPath());
     }
 
     private void addPackageToConfFile(String packageName, String packageUrl) {

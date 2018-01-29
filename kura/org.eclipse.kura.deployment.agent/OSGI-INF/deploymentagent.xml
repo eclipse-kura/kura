@@ -21,4 +21,10 @@
       <provide interface="org.eclipse.kura.deployment.agent.DeploymentAgentService"/>
    </service>
    <reference bind="setSystemService" cardinality="1..1" interface="org.eclipse.kura.system.SystemService" name="SystemService" policy="static" unbind="unsetSystemService"/>
+   <reference name="SslManagerService"
+              policy="static"
+              cardinality="1..1"
+              bind="setSslManagerService"
+              unbind="unsetSslManagerService"
+              interface="org.eclipse.kura.ssl.SslManagerService"/>
 </scr:component>

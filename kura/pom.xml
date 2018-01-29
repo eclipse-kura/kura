@@ -93,8 +93,6 @@
 
         <module>org.eclipse.kura.wire.component.conditional.provider</module>
         <module>org.eclipse.kura.wire.component.join.provider</module>
-        <module>org.eclipse.kura.wire.component.math.singleport.provider</module>
-        <module>org.eclipse.kura.wire.component.math.multiport.provider</module>
 
         <module>features</module>
         <module>emulator</module>

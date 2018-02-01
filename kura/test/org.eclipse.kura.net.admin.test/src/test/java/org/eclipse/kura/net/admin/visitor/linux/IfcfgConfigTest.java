@@ -47,9 +47,9 @@ public class IfcfgConfigTest {
     public static void setupClass() throws NoSuchFieldException {
         String os = "raspbian";
 
-        TestUtil.setFieldValue(IfcfgConfigReader.getInstance(), "OS_VERSION", os);
+        TestUtil.setFieldValue(IfcfgConfigReader.getInstance(), "osVersion", os);
 
-        TestUtil.setFieldValue(IfcfgConfigWriter.getInstance(), "OS_VERSION", os);
+        TestUtil.setFieldValue(IfcfgConfigWriter.getInstance(), "osVersion", os);
     }
 
     @Test

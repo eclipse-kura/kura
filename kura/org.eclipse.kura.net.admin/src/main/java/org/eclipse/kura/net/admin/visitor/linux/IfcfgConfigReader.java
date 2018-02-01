@@ -51,7 +51,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
     private static final String REDHAT_NET_CONFIGURATION_DIRECTORY = "/etc/sysconfig/network-scripts/";
     private static final String DEBIAN_NET_CONFIGURATION_DIRECTORY = "/etc/network/";
 
-    private static String OS_VERSION = System.getProperty("kura.os.version");
+    private static String osVersion = System.getProperty("kura.os.version");
 
     private static IfcfgConfigReader instance;
 
@@ -289,14 +289,14 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
     }
 
     private boolean isDebian() {
-        return OS_VERSION
+        return osVersion
                 .equals(KuraConstants.Mini_Gateway.getImageName() + "_" + KuraConstants.Mini_Gateway.getImageVersion())
-                || OS_VERSION.equals(KuraConstants.Raspberry_Pi.getImageName())
-                || OS_VERSION.equals(KuraConstants.BeagleBone.getImageName())
-                || OS_VERSION.equals(
+                || osVersion.equals(KuraConstants.Raspberry_Pi.getImageName())
+                || osVersion.equals(KuraConstants.BeagleBone.getImageName())
+                || osVersion.equals(
                         KuraConstants.Intel_Edison.getImageName() + "_" + KuraConstants.Intel_Edison.getImageVersion()
                                 + "_" + KuraConstants.Intel_Edison.getTargetName())
-                || OS_VERSION.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
+                || osVersion.equals(KuraConstants.ReliaGATE_50_21_Ubuntu.getImageName() + "_"
                         + KuraConstants.ReliaGATE_50_21_Ubuntu.getImageVersion());
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 
@@ -69,7 +70,6 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
             if (netInterfaceConfig.getType() == NetInterfaceType.WIFI) {
-                // ignore 'mon' interface
                 if (netInterfaceConfig.getName().startsWith("mon.")) {
                     continue;
                 }
@@ -82,8 +82,12 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
 
+        if (netInterfaceConfig == null) {
+            return;
+        }
+
         List<NetConfig> netConfigs = getNetConfigs(netInterfaceConfig);
-        if (netConfigs == null) {
+        if (netConfigs.isEmpty()) {
             return;
         }
         String interfaceName = netInterfaceConfig.getName();
@@ -104,13 +108,11 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         }
     }
 
-    // verify if interface is enabled in configuration
     private boolean isInterfaceEnabled(NetInterfaceStatus status) {
         return status.equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)
                 || status.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN);
     }
 
-    // obtains 'access point' configuration
     private WifiConfig getAccessPointConfig(List<NetConfig> netConfigs) {
         if (netConfigs == null) {
             return null;
@@ -125,7 +127,6 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         return apConfig;
     }
 
-    // obtains status of supplied network interface
     private NetInterfaceStatus getNetInterfaceStatus(List<NetConfig> netConfigs) {
         if (netConfigs == null) {
             return NetInterfaceStatus.netIPv4StatusDisabled;
@@ -142,21 +143,18 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
     private List<NetConfig> getNetConfigs(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
 
-        List<NetConfig> netConfigs = null;
-        if (netInterfaceConfig != null) {
-            List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
-                    .getNetInterfaceAddresses();
-            for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-                netConfigs = netInterfaceAddressConfig.getConfigs();
-            }
+        List<NetConfig> netConfigs = new ArrayList<>();
+
+        List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
+                .getNetInterfaceAddresses();
+        for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
+            netConfigs = netInterfaceAddressConfig.getConfigs();
         }
+
         return netConfigs;
     }
 
-    /*
-     * This method generates hostapd configuration file
-     */
-    private void generateHostapdConf(WifiConfig wifiConfig, String interfaceName) throws Exception {
+    private void generateHostapdConf(WifiConfig wifiConfig, String interfaceName) throws KuraException, IOException {
 
         logger.debug("Generating Hostapd Config");
 
@@ -309,7 +307,6 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             String drv = HostapdManager.getDriver(interfaceName);
             logger.warn("The 'driver' parameter must be set: setting to: {}", drv);
             fileAsString = fileAsString.replaceFirst("KURA_DRIVER", drv);
-            // throw KuraException.internalError("the driver name can not be null");
         }
         return fileAsString;
     }
@@ -412,7 +409,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         }
     }
 
-    private void moveFile(String ifaceName) throws Exception {
+    private void moveFile(String ifaceName) throws KuraException, IOException {
         File tmpFile = getTemporaryFile();
         File file = getFinalFile(ifaceName);
         if (!FileUtils.contentEquals(tmpFile, file)) {

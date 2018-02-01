@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -718,27 +718,31 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
         if (newStatuses != null) {
             // post NetworkStatusChangeEvent on current and new interfaces
-            for (String interfaceName : newStatuses.keySet()) {
+            for (Map.Entry<String,InterfaceState> newStatus : newStatuses.entrySet()) {
+                String interfaceName =  newStatus.getKey();
+                InterfaceState interfaceState = newStatus.getValue();
                 if (oldStatuses != null && oldStatuses.containsKey(interfaceName)) {
-                    if (!newStatuses.get(interfaceName).equals(oldStatuses.get(interfaceName))) {
+                    if (!interfaceState.equals(oldStatuses.get(interfaceName))) {
                         logger.debug("Posting NetworkStatusChangeEvent on interface: {}", interfaceName);
                         this.eventAdmin.postEvent(
-                                new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
+                                new NetworkStatusChangeEvent(interfaceName, interfaceState, null));
                     }
                 } else {
                     logger.debug("Posting NetworkStatusChangeEvent on enabled interface: {}", interfaceName);
                     this.eventAdmin.postEvent(
-                            new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
+                            new NetworkStatusChangeEvent(interfaceName, interfaceState, null));
                 }
             }
 
             // post NetworkStatusChangeEvent on interfaces that are no longer there
             if (oldStatuses != null) {
-                for (String interfaceName : oldStatuses.keySet()) {
+                for (Map.Entry<String,InterfaceState> oldStatus : oldStatuses.entrySet()) {
+                    String interfaceName = oldStatus.getKey();
+                    InterfaceState interfaceState = oldStatus.getValue();
                     if (!newStatuses.containsKey(interfaceName)) {
                         logger.debug("Posting NetworkStatusChangeEvent on disabled interface: {}", interfaceName);
                         this.eventAdmin.postEvent(
-                                new NetworkStatusChangeEvent(interfaceName, oldStatuses.get(interfaceName), null));
+                                new NetworkStatusChangeEvent(interfaceName, interfaceState, null));
                     }
                 }
             }

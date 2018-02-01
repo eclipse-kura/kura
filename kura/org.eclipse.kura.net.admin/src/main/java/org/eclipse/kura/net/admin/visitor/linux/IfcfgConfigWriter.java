@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -55,7 +55,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
 
     private static final String LOCALHOST = "127.0.0.1";
 
-    private static String OS_VERSION = System.getProperty("kura.os.version");
+    private static final String OS_VERSION = System.getProperty("kura.os.version");
 
     private static IfcfgConfigWriter instance;
 
@@ -622,7 +622,7 @@ public class IfcfgConfigWriter implements NetworkConfigurationVisitor {
             netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
         }
 
-        logger.debug("Setting NetInterfaceStatus to " + netInterfaceStatus + " for " + netInterfaceConfig.getName());
+        logger.debug("Setting NetInterfaceStatus to {} for {}", netInterfaceStatus, netInterfaceConfig.getName());
 
         // set it all
         Properties kuraExtendedProps = getInstance().getKuranetProperties();

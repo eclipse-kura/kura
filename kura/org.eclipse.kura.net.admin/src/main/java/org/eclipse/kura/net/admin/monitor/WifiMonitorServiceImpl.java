@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -197,8 +197,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     }
 
     protected RouteService getRouteService() {
-        RouteService rs = RouteServiceImpl.getInstance();
-        return rs;
+        return RouteServiceImpl.getInstance();
     }
 
     protected IScanTool getScanTool(String interfaceName) throws KuraException {
@@ -685,7 +684,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : networkConfiguration
                         .getNetInterfaceConfigs()) {
                     String interfaceName = netInterfaceConfig.getName();
-                    if ((netInterfaceConfig.getType() != NetInterfaceType.WIFI) || interfaceName.startsWith("mon")) {
+                    if (netInterfaceConfig.getType() != NetInterfaceType.WIFI || interfaceName.startsWith("mon")) {
                         // ignore non-wifi or "mon" interfaces
                         continue;
                     }
@@ -737,7 +736,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         Set<String> reconfiguredInterfaces = new HashSet<>();
         for (String interfaceName : this.networkService.getAllNetworkInterfaceNames()) {
             // skip non-wifi interfaces
-            if ((getNetworkType(interfaceName) != NetInterfaceType.WIFI) || interfaceName.startsWith("mon")) {
+            if (getNetworkType(interfaceName) != NetInterfaceType.WIFI || interfaceName.startsWith("mon")) {
                 // ignore non-wifi or "mon" interfaces
                 continue;
             }
@@ -922,11 +921,9 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 logger.trace("getSignalLevel() :: using 'iw dev wlan0 link' command ...");
                 LinkTool linkTool = getLinkTool(interfaceName);
 
-                if (linkTool != null && linkTool.get()) {
-                    if (linkTool.isLinkDetected()) {
-                        rssi = linkTool.getSignal();
-                        logger.debug("getSignalLevel() :: rssi={} (using 'iw dev wlan0 link')", rssi);
-                    }
+                if (linkTool != null && linkTool.get() && linkTool.isLinkDetected()) {
+                    rssi = linkTool.getSignal();
+                    logger.debug("getSignalLevel() :: rssi={} (using 'iw dev wlan0 link')", rssi);
                 }
             }
 

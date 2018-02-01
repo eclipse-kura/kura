@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -75,8 +76,8 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
     private RouteService routeService;
 
     private final Map<String, InterfaceState> interfaceState = new HashMap<>();
-    private final Map<String, EthernetInterfaceConfigImpl> networkConfiguration = new HashMap<>();
-    private final Map<String, EthernetInterfaceConfigImpl> newNetworkConfiguration = new HashMap<>();
+    private final Map<String, NetInterfaceConfig<NetInterfaceAddressConfig>> networkConfiguration = new HashMap<>();
+    private final Map<String, NetInterfaceConfig<NetInterfaceAddressConfig>> newNetworkConfiguration = new HashMap<>();
     private ExecutorService executor;
 
     // ----------------------------------------------------------------
@@ -196,8 +197,8 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                 boolean dhcpServerEnabled = false;
                 boolean postStatusChangeEvent = false;
 
-                EthernetInterfaceConfigImpl currentInterfaceConfig = this.networkConfiguration.get(interfaceName);
-                EthernetInterfaceConfigImpl newInterfaceConfig = this.newNetworkConfiguration.get(interfaceName);
+                NetInterfaceConfig<NetInterfaceAddressConfig> currentInterfaceConfig = this.networkConfiguration.get(interfaceName);
+                NetInterfaceConfig<NetInterfaceAddressConfig> newInterfaceConfig = this.newNetworkConfiguration.get(interfaceName);
 
                 startInterfaceIfDown(interfaceName);
 
@@ -476,7 +477,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
     }
 
     // Verify if interface is enabled in configuration
-    private boolean isEthernetEnabled(EthernetInterfaceConfigImpl ethernetInterfaceConfig) {
+    private boolean isEthernetEnabled(NetInterfaceConfig<NetInterfaceAddressConfig> ethernetInterfaceConfig) {
         NetInterfaceStatus status = getEthernetInterfaceStatus(ethernetInterfaceConfig);
         logger.debug("isEthernetEnabled() :: Status for {} iface is {}", ethernetInterfaceConfig.getName(), status);
         return status.equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)
@@ -484,13 +485,13 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
     }
 
     // Verify if interface is configured to be managed by Kura
-    private boolean isEthernetManaged(EthernetInterfaceConfigImpl ethernetInterfaceConfig) {
+    private boolean isEthernetManaged(NetInterfaceConfig<NetInterfaceAddressConfig> ethernetInterfaceConfig) {
         NetInterfaceStatus status = getEthernetInterfaceStatus(ethernetInterfaceConfig);
         logger.debug("isEthernetManaged() :: Status for {} iface is {}", ethernetInterfaceConfig.getName(), status);
         return !status.equals(NetInterfaceStatus.netIPv4StatusUnmanaged);
     }
 
-    private NetInterfaceStatus getEthernetInterfaceStatus(EthernetInterfaceConfigImpl ethernetInterfaceConfig) {
+    private NetInterfaceStatus getEthernetInterfaceStatus(NetInterfaceConfig<NetInterfaceAddressConfig> ethernetInterfaceConfig) {
         List<NetConfig> netConfigs = getNetConfigs(ethernetInterfaceConfig);
         if (netConfigs == null) {
             return NetInterfaceStatus.netIPv4StatusUnknown;
@@ -520,8 +521,9 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 
     // Initialize a monitor thread for each ethernet interface
     private void initializeMonitors() {
-        for (String interfaceName : this.networkConfiguration.keySet()) {
-            EthernetInterfaceConfigImpl ifaceConfig = this.networkConfiguration.get(interfaceName);
+        for (Entry<String, NetInterfaceConfig<NetInterfaceAddressConfig>> networkConfig : this.networkConfiguration.entrySet()) {
+            String interfaceName = networkConfig.getKey();
+            NetInterfaceConfig<NetInterfaceAddressConfig> ifaceConfig = networkConfig.getValue();
             if (isEthernetManaged(ifaceConfig)) {
                 logger.debug("initializeMonitors() :: Starting monitor for {} interface", interfaceName);
                 startMonitor(interfaceName);
@@ -584,7 +586,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
     }
 
     private void disableInterface(String interfaceName) throws KuraException {
-        netAdminService.disableInterface(interfaceName);
+        this.netAdminService.disableInterface(interfaceName);
         this.netAdminService.manageDhcpServer(interfaceName, false);
     }
 

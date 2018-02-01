@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -43,7 +43,7 @@ public abstract class AbstractNetInterface<T extends NetInterfaceAddress> implem
     protected AbstractNetInterface(String name) {
         super();
         this.name = name;
-        this.interfaceAddresses = new ArrayList<T>();
+        this.interfaceAddresses = new ArrayList<>();
     }
 
     protected AbstractNetInterface(NetInterface<? extends NetInterfaceAddress> other) {
@@ -62,7 +62,7 @@ public abstract class AbstractNetInterface<T extends NetInterfaceAddress> implem
         this.firmwareVersion = other.getFirmwareVersion();
         this.state = other.getState();
         this.autoConnect = other.isAutoConnect();
-        this.interfaceAddresses = new ArrayList<T>();
+        this.interfaceAddresses = new ArrayList<>();
         // note - copying of interfaceAddresses are handled in the subclasses
     }
 
@@ -234,21 +234,21 @@ public abstract class AbstractNetInterface<T extends NetInterfaceAddress> implem
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (autoConnect ? 1231 : 1237);
-        result = prime * result + ((driver == null) ? 0 : driver.hashCode());
-        result = prime * result + ((driverVersion == null) ? 0 : driverVersion.hashCode());
-        result = prime * result + ((firmwareVersion == null) ? 0 : firmwareVersion.hashCode());
-        result = prime * result + Arrays.hashCode(hardwareAddress);
-        result = prime * result + ((interfaceAddresses == null) ? 0 : interfaceAddresses.hashCode());
-        result = prime * result + (loopback ? 1231 : 1237);
-        result = prime * result + mtu;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + (pointToPoint ? 1231 : 1237);
-        result = prime * result + ((state == null) ? 0 : state.hashCode());
-        result = prime * result + (supportsMulticast ? 1231 : 1237);
-        result = prime * result + (up ? 1231 : 1237);
-        result = prime * result + ((usbDevice == null) ? 0 : usbDevice.hashCode());
-        result = prime * result + (virtual ? 1231 : 1237);
+        result = prime * result + (this.autoConnect ? 1231 : 1237);
+        result = prime * result + (this.driver == null ? 0 : this.driver.hashCode());
+        result = prime * result + (this.driverVersion == null ? 0 : this.driverVersion.hashCode());
+        result = prime * result + (this.firmwareVersion == null ? 0 : this.firmwareVersion.hashCode());
+        result = prime * result + Arrays.hashCode(this.hardwareAddress);
+        result = prime * result + (this.interfaceAddresses == null ? 0 : this.interfaceAddresses.hashCode());
+        result = prime * result + (this.loopback ? 1231 : 1237);
+        result = prime * result + this.mtu;
+        result = prime * result + (this.name == null ? 0 : this.name.hashCode());
+        result = prime * result + (this.pointToPoint ? 1231 : 1237);
+        result = prime * result + (this.state == null ? 0 : this.state.hashCode());
+        result = prime * result + (this.supportsMulticast ? 1231 : 1237);
+        result = prime * result + (this.up ? 1231 : 1237);
+        result = prime * result + (this.usbDevice == null ? 0 : this.usbDevice.hashCode());
+        result = prime * result + (this.virtual ? 1231 : 1237);
         return result;
     }
 
@@ -263,74 +263,74 @@ public abstract class AbstractNetInterface<T extends NetInterfaceAddress> implem
         if (!(obj instanceof AbstractNetInterface)) {
             return false;
         }
-        AbstractNetInterface other = (AbstractNetInterface) obj;
-        if (autoConnect != other.autoConnect) {
+        AbstractNetInterface<?> other = (AbstractNetInterface<?>) obj;
+        if (this.autoConnect != other.autoConnect) {
             return false;
         }
-        if (driver == null) {
+        if (this.driver == null) {
             if (other.driver != null) {
                 return false;
             }
-        } else if (!driver.equals(other.driver)) {
+        } else if (!this.driver.equals(other.driver)) {
             return false;
         }
-        if (driverVersion == null) {
+        if (this.driverVersion == null) {
             if (other.driverVersion != null) {
                 return false;
             }
-        } else if (!driverVersion.equals(other.driverVersion)) {
+        } else if (!this.driverVersion.equals(other.driverVersion)) {
             return false;
         }
-        if (firmwareVersion == null) {
+        if (this.firmwareVersion == null) {
             if (other.firmwareVersion != null) {
                 return false;
             }
-        } else if (!firmwareVersion.equals(other.firmwareVersion)) {
+        } else if (!this.firmwareVersion.equals(other.firmwareVersion)) {
             return false;
         }
-        if (!Arrays.equals(hardwareAddress, other.hardwareAddress)) {
+        if (!Arrays.equals(this.hardwareAddress, other.hardwareAddress)) {
             return false;
         }
-        if (interfaceAddresses == null) {
+        if (this.interfaceAddresses == null) {
             if (other.interfaceAddresses != null) {
                 return false;
             }
-        } else if (!interfaceAddresses.equals(other.interfaceAddresses)) {
+        } else if (!this.interfaceAddresses.equals(other.interfaceAddresses)) {
             return false;
         }
-        if (loopback != other.loopback) {
+        if (this.loopback != other.loopback) {
             return false;
         }
-        if (mtu != other.mtu) {
+        if (this.mtu != other.mtu) {
             return false;
         }
-        if (name == null) {
+        if (this.name == null) {
             if (other.name != null) {
                 return false;
             }
-        } else if (!name.equals(other.name)) {
+        } else if (!this.name.equals(other.name)) {
             return false;
         }
-        if (pointToPoint != other.pointToPoint) {
+        if (this.pointToPoint != other.pointToPoint) {
             return false;
         }
-        if (state != other.state) {
+        if (this.state != other.state) {
             return false;
         }
-        if (supportsMulticast != other.supportsMulticast) {
+        if (this.supportsMulticast != other.supportsMulticast) {
             return false;
         }
-        if (up != other.up) {
+        if (this.up != other.up) {
             return false;
         }
-        if (usbDevice == null) {
+        if (this.usbDevice == null) {
             if (other.usbDevice != null) {
                 return false;
             }
-        } else if (!usbDevice.equals(other.usbDevice)) {
+        } else if (!this.usbDevice.equals(other.usbDevice)) {
             return false;
         }
-        if (virtual != other.virtual) {
+        if (this.virtual != other.virtual) {
             return false;
         }
         return true;

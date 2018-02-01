@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -47,9 +47,9 @@ public class TiSensorTag {
     private static final String KEYS = "keys";
     private static final String IO = "io";
 
-    private static final String IO_ERROR_MESSAGE = "Not IO Service on CC2541.";
-    private static final String OPTO_ERROR_MESSAGE = "Not optical sensor on CC2541.";
-    private static final String MOV_ERROR_MESSAGE = "Movement enable failed";
+    private static final String IO_ERROR_MESSAGE = "No IO Service on CC2541.";
+    private static final String OPTO_ERROR_MESSAGE = "No optical sensor on CC2541.";
+    private static final String MOV_ERROR_MESSAGE = "Movement sensor failed to be enabled";
 
     private BluetoothLeDevice device;
     private boolean cc2650;
@@ -796,8 +796,8 @@ public class TiSensorTag {
      */
     public boolean disableBarometer() {
         boolean result = false;
-        // Write "00" to enable pressure sensor
-        byte[] value = { 0x01 };
+        // Write "00" to disable pressure sensor
+        byte[] value = { 0x00 };
         BluetoothLeGattCharacteristic preEnableChar;
         try {
             preEnableChar = this.gattServices.get(PRESSURE).findCharacteristic(TiSensorTagGatt.UUID_PRE_SENSOR_ENABLE);

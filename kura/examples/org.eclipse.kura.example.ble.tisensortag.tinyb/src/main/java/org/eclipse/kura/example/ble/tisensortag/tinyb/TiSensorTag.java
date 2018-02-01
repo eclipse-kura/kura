@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates
+ * Copyright (c) 2017, 2018 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -47,9 +47,9 @@ public class TiSensorTag {
     private static final String KEYS = "keys";
     private static final String IO = "io";
 
-    private static final String IO_ERROR_MESSAGE = "Not IO Service on CC2541.";
-    private static final String OPTO_ERROR_MESSAGE = "Not optical sensor on CC2541.";
-    private static final String MOV_ERROR_MESSAGE = "Movement enable failed";
+    private static final String IO_ERROR_MESSAGE = "No IO Service on CC2541.";
+    private static final String OPTO_ERROR_MESSAGE = "No optical sensor on CC2541.";
+    private static final String MOV_ERROR_MESSAGE = "Movement sensor failed to be enabled";
 
     private BluetoothLeDevice device;
     private boolean cc2650;
@@ -430,7 +430,7 @@ public class TiSensorTag {
      */
     private double[] calculateAcceleration(byte[] valueByte) {
 
-        logger.info("Received accelerometer value: " + byteArrayToHexString(valueByte));
+        logger.info("Received accelerometer value: {}", byteArrayToHexString(valueByte));
 
         double[] acceleration = new double[3];
         if (this.cc2650) {
@@ -444,9 +444,9 @@ public class TiSensorTag {
             acceleration[1] = y / scale;
             acceleration[2] = z / scale * -1;
         } else {
-            int x = unsignedToSigned((int) valueByte[0], 8);
-            int y = unsignedToSigned((int) valueByte[1], 8);
-            int z = unsignedToSigned((int) valueByte[2], 8) * -1;
+            int x = unsignedToSigned(valueByte[0], 8);
+            int y = unsignedToSigned(valueByte[1], 8);
+            int z = unsignedToSigned(valueByte[2], 8) * -1;
 
             acceleration[0] = x / 64.0;
             acceleration[1] = y / 64.0;
@@ -767,8 +767,8 @@ public class TiSensorTag {
      * Disable pressure sensor
      */
     public void disableBarometer() {
-        // Write "00" to enable pressure sensor
-        byte[] value = { 0x01 };
+        // Write "00" to disable pressure sensor
+        byte[] value = { 0x00 };
         BluetoothLeGattCharacteristic preEnableChar;
         try {
             preEnableChar = this.gattServices.get(PRESSURE).findCharacteristic(TiSensorTagGatt.UUID_PRE_SENSOR_ENABLE);
@@ -1314,7 +1314,7 @@ public class TiSensorTag {
             BluetoothLeGattCharacteristic ioValueChar;
             try {
                 ioValueChar = this.gattServices.get(IO).findCharacteristic(TiSensorTagGatt.UUID_IO_SENSOR_VALUE);
-                int status = (int) ioValueChar.readValue()[0] | 0x01;
+                int status = ioValueChar.readValue()[0] | 0x01;
                 byte[] value = { ByteBuffer.allocate(4).putInt(status).array()[3] };
                 ioValueChar.writeValue(value);
             } catch (KuraException e) {
@@ -1334,7 +1334,7 @@ public class TiSensorTag {
             BluetoothLeGattCharacteristic ioValueChar;
             try {
                 ioValueChar = this.gattServices.get(IO).findCharacteristic(TiSensorTagGatt.UUID_IO_SENSOR_VALUE);
-                int status = (int) ioValueChar.readValue()[0] & 0xFE;
+                int status = ioValueChar.readValue()[0] & 0xFE;
                 byte[] value = { ByteBuffer.allocate(4).putInt(status).array()[3] };
                 ioValueChar.writeValue(value);
             } catch (KuraException e) {
@@ -1354,7 +1354,7 @@ public class TiSensorTag {
             BluetoothLeGattCharacteristic ioValueChar;
             try {
                 ioValueChar = this.gattServices.get(IO).findCharacteristic(TiSensorTagGatt.UUID_IO_SENSOR_VALUE);
-                int status = (int) ioValueChar.readValue()[0] | 0x02;
+                int status = ioValueChar.readValue()[0] | 0x02;
                 byte[] value = { ByteBuffer.allocate(4).putInt(status).array()[3] };
                 ioValueChar.writeValue(value);
             } catch (KuraException e) {
@@ -1374,7 +1374,7 @@ public class TiSensorTag {
             BluetoothLeGattCharacteristic ioValueChar;
             try {
                 ioValueChar = this.gattServices.get(IO).findCharacteristic(TiSensorTagGatt.UUID_IO_SENSOR_VALUE);
-                int status = (int) ioValueChar.readValue()[0] & 0xFD;
+                int status = ioValueChar.readValue()[0] & 0xFD;
                 byte[] value = { ByteBuffer.allocate(4).putInt(status).array()[3] };
                 ioValueChar.writeValue(value);
             } catch (KuraException e) {
@@ -1394,7 +1394,7 @@ public class TiSensorTag {
             BluetoothLeGattCharacteristic ioValueChar;
             try {
                 ioValueChar = this.gattServices.get(IO).findCharacteristic(TiSensorTagGatt.UUID_IO_SENSOR_VALUE);
-                int status = (int) ioValueChar.readValue()[0] | 0x04;
+                int status = ioValueChar.readValue()[0] | 0x04;
                 byte[] value = { ByteBuffer.allocate(4).putInt(status).array()[3] };
                 ioValueChar.writeValue(value);
             } catch (KuraException e) {
@@ -1414,7 +1414,7 @@ public class TiSensorTag {
             BluetoothLeGattCharacteristic ioValueChar;
             try {
                 ioValueChar = this.gattServices.get(IO).findCharacteristic(TiSensorTagGatt.UUID_IO_SENSOR_VALUE);
-                int status = (int) ioValueChar.readValue()[0] & 0xFB;
+                int status = ioValueChar.readValue()[0] & 0xFB;
                 byte[] value = { ByteBuffer.allocate(4).putInt(status).array()[3] };
                 ioValueChar.writeValue(value);
             } catch (KuraException e) {

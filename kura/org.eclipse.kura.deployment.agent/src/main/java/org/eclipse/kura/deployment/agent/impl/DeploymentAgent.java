@@ -99,8 +99,6 @@ public class DeploymentAgent implements DeploymentAgentService {
     private String dpaConfPath;
     private String packagesPath;
 
-    private Properties deployedPackages;
-
     private int connTimeout;
     private int readTimeout;
 
@@ -115,8 +113,6 @@ public class DeploymentAgent implements DeploymentAgentService {
     }
 
     protected void activate(ComponentContext componentContext) {
-
-        this.deployedPackages = new Properties();
 
         this.dpaConfPath = System.getProperty(DPA_CONF_PATH_PROPNAME);
         if (this.dpaConfPath == null || this.dpaConfPath.isEmpty()) {
@@ -225,7 +221,6 @@ public class DeploymentAgent implements DeploymentAgentService {
         }
 
         this.dpaConfPath = null;
-        this.deployedPackages = null;
         this.uninstPackageNames = null;
         this.instPackageUrls = null;
     }
@@ -351,7 +346,8 @@ public class DeploymentAgent implements DeploymentAgentService {
                         if (dp != null) {
                             dp.uninstall();
 
-                            String sUrl = this.deployedPackages.getProperty(name);
+                            Properties deployedPackages = readDeployedPackages();
+                            String sUrl = deployedPackages.getProperty(name);
                             File dpFile = new File(new URL(sUrl).getPath());
                             if (!dpFile.delete()) {
                                 logger.warn("Cannot delete file at URL: {}", sUrl);
@@ -408,17 +404,11 @@ public class DeploymentAgent implements DeploymentAgentService {
 
     private void installPackagesFromConfFile() {
 
-        if (this.dpaConfPath != null) {
-            try (FileReader fr = new FileReader(this.dpaConfPath)) {
-                this.deployedPackages.load(fr);
-            } catch (IOException e) {
-                logger.error("Exception loading deployment packages configuration file", e);
-            }
-        }
+        Properties deployedPackages = readDeployedPackages();
 
-        Set<Object> packageNames = this.deployedPackages.keySet();
+        Set<Object> packageNames = deployedPackages.keySet();
         for (Object packageName : packageNames) {
-            String packageUrl = (String) this.deployedPackages.get(packageName);
+            String packageUrl = (String) deployedPackages.get(packageName);
 
             logger.info("Deploying package name {} at URL {}", packageName, packageUrl);
             try {
@@ -427,6 +417,18 @@ public class DeploymentAgent implements DeploymentAgentService {
                 logger.error("Error installing package {}", packageName, e);
             }
         }
+    }
+
+    private Properties readDeployedPackages() {
+        Properties deployedPackages = new Properties();
+        if (this.dpaConfPath != null) {
+            try (FileReader fr = new FileReader(this.dpaConfPath)) {
+                deployedPackages.load(fr);
+            } catch (IOException e) {
+                logger.error("Exception loading deployment packages configuration file", e);
+            }
+        }
+        return deployedPackages;
     }
 
     private DeploymentPackage installDeploymentPackageInternal(String urlSpec)
@@ -497,7 +499,8 @@ public class DeploymentAgent implements DeploymentAgentService {
     }
 
     private void addPackageToConfFile(String packageName, String packageUrl) {
-        this.deployedPackages.setProperty(packageName, packageUrl);
+        Properties deployedPackages = readDeployedPackages();
+        deployedPackages.setProperty(packageName, packageUrl);
 
         if (this.dpaConfPath == null) {
             logger.warn("Configuration file not specified");
@@ -506,7 +509,7 @@ public class DeploymentAgent implements DeploymentAgentService {
 
         try {
             FileOutputStream fos = new FileOutputStream(this.dpaConfPath);
-            this.deployedPackages.store(fos, null);
+            deployedPackages.store(fos, null);
             fos.flush();
             fos.getFD().sync();
             fos.close();
@@ -516,7 +519,8 @@ public class DeploymentAgent implements DeploymentAgentService {
     }
 
     private void removePackageFromConfFile(String packageName) {
-        this.deployedPackages.remove(packageName);
+        Properties deployedPackages = readDeployedPackages();
+        deployedPackages.remove(packageName);
 
         if (this.dpaConfPath == null) {
             logger.warn("Configuration file not specified");
@@ -525,7 +529,7 @@ public class DeploymentAgent implements DeploymentAgentService {
 
         try {
             FileOutputStream fos = new FileOutputStream(this.dpaConfPath);
-            this.deployedPackages.store(fos, null);
+            deployedPackages.store(fos, null);
             fos.flush();
             fos.getFD().sync();
             fos.close();

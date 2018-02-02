@@ -161,8 +161,8 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     @Override
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug(message.activatingWireAsset());
-        super.activate(componentContext, properties);
         this.wireSupport = this.wireHelperService.newWireSupport(this);
+        super.activate(componentContext, properties);
         logger.debug(message.activatingWireAssetDone());
     }
 
